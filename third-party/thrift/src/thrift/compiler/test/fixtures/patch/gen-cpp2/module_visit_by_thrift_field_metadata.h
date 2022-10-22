@@ -141,6 +141,45 @@ struct VisitByFieldId<::test::fixtures::patch::LateDefStruct> {
 };
 
 template <>
+struct VisitByFieldId<::test::fixtures::patch::Recursive> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case -1:
+      return f(0, static_cast<T&&>(t).nodes_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::Recursive");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::patch::Bar> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case -1:
+      return f(0, static_cast<T&&>(t).loop_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::Bar");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::patch::Loop> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case -1:
+      return f(0, static_cast<T&&>(t).bar_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::Loop");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::test::fixtures::patch::MyDataFieldPatchStruct> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
@@ -461,6 +500,117 @@ struct VisitByFieldId<::test::fixtures::patch::LateDefStructPatchStruct> {
       return f(4, static_cast<T&&>(t).patch_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::LateDefStructPatchStruct");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::patch::RecursiveFieldN1PatchStruct> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).assign_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).clear_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::RecursiveFieldN1PatchStruct");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::patch::RecursiveFieldPatchStruct> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case -1:
+      return f(0, static_cast<T&&>(t).nodes_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::RecursiveFieldPatchStruct");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::patch::RecursivePatchStruct> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).assign_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).clear_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).patchPrior_ref());
+    case 5:
+      return f(3, static_cast<T&&>(t).ensure_ref());
+    case 6:
+      return f(4, static_cast<T&&>(t).patch_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::RecursivePatchStruct");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::patch::BarFieldPatchStruct> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case -1:
+      return f(0, static_cast<T&&>(t).loop_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::BarFieldPatchStruct");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::patch::BarPatchStruct> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).assign_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).clear_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).patchPrior_ref());
+    case 5:
+      return f(3, static_cast<T&&>(t).ensure_ref());
+    case 6:
+      return f(4, static_cast<T&&>(t).patch_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::BarPatchStruct");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::patch::LoopFieldPatchStruct> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case -1:
+      return f(0, static_cast<T&&>(t).bar_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::LoopFieldPatchStruct");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::patch::LoopPatchStruct> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).assign_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).clear_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::LoopPatchStruct");
     }
   }
 };

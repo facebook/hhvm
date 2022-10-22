@@ -108,3 +108,36 @@ cdef class __LateDefStruct_FieldsSetter(__StructFieldsSetter):
     @staticmethod
     cdef __LateDefStruct_FieldsSetter _fbthrift_create(_test_fixtures_patch_module_types.cLateDefStruct* struct_cpp_obj)
 
+
+ctypedef void (*__Recursive_FieldsSetterFunc)(__Recursive_FieldsSetter, object) except *
+
+cdef class __Recursive_FieldsSetter(__StructFieldsSetter):
+    cdef _test_fixtures_patch_module_types.cRecursive* _struct_cpp_obj
+    cdef cumap[__cstring_view, __Recursive_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __Recursive_FieldsSetter _fbthrift_create(_test_fixtures_patch_module_types.cRecursive* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+
+
+ctypedef void (*__Bar_FieldsSetterFunc)(__Bar_FieldsSetter, object) except *
+
+cdef class __Bar_FieldsSetter(__StructFieldsSetter):
+    cdef _test_fixtures_patch_module_types.cBar* _struct_cpp_obj
+    cdef cumap[__cstring_view, __Bar_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __Bar_FieldsSetter _fbthrift_create(_test_fixtures_patch_module_types.cBar* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+
+
+ctypedef void (*__Loop_FieldsSetterFunc)(__Loop_FieldsSetter, object) except *
+
+cdef class __Loop_FieldsSetter(__StructFieldsSetter):
+    cdef _test_fixtures_patch_module_types.cLoop* _struct_cpp_obj
+    cdef cumap[__cstring_view, __Loop_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __Loop_FieldsSetter _fbthrift_create(_test_fixtures_patch_module_types.cLoop* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+

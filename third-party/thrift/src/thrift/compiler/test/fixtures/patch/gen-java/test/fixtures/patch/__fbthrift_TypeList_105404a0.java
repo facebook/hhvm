@@ -11,7 +11,7 @@ import com.facebook.thrift.type.TypeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class __fbthrift_TypeList_c6fa3293 implements TypeList {
+public class __fbthrift_TypeList_105404a0 implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
@@ -21,6 +21,9 @@ public class __fbthrift_TypeList_c6fa3293 implements TypeList {
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyUnion", "test.fixtures.patch.MyUnion"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStruct", "test.fixtures.patch.MyStruct"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/LateDefStruct", "test.fixtures.patch.LateDefStruct"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/Recursive", "test.fixtures.patch.Recursive"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/Bar", "test.fixtures.patch.Bar"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/Loop", "test.fixtures.patch.Loop"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyDataFieldPatch", "test.fixtures.patch.MyDataFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyDataPatch", "test.fixtures.patch.MyDataPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/InnerUnionFieldPatch", "test.fixtures.patch.InnerUnionFieldPatch"));
@@ -36,6 +39,13 @@ public class __fbthrift_TypeList_c6fa3293 implements TypeList {
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructPatch", "test.fixtures.patch.MyStructPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/LateDefStructFieldPatch", "test.fixtures.patch.LateDefStructFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/LateDefStructPatch", "test.fixtures.patch.LateDefStructPatch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/RecursiveFieldN1Patch", "test.fixtures.patch.RecursiveFieldN1Patch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/RecursiveFieldPatch", "test.fixtures.patch.RecursiveFieldPatch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/RecursivePatch", "test.fixtures.patch.RecursivePatch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/BarFieldPatch", "test.fixtures.patch.BarFieldPatch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/BarPatch", "test.fixtures.patch.BarPatch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/LoopFieldPatch", "test.fixtures.patch.LoopFieldPatch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/LoopPatch", "test.fixtures.patch.LoopPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyEnum", "test.fixtures.patch.MyEnum"));
   }
 

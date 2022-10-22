@@ -352,6 +352,93 @@
         "is_union" : false,
         "lineno" : 85
       },
+      "Recursive" : {
+        "name" : "Recursive",
+        "fields" : {
+          "nodes" : {
+            "name" : "nodes",
+            "key" : -1,
+            "lineno" : 88,
+            "type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : {
+  "type" : "struct",
+  "name" : "Recursive"
+}
+}
+            ,
+            "structured_annotations": {
+              "patch.AssignOnlyPatch" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "AssignOnlyPatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
+},
+            "value" : {}
+          }
+                }
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 87
+      },
+      "Bar" : {
+        "name" : "Bar",
+        "fields" : {
+          "loop" : {
+            "name" : "loop",
+            "key" : -1,
+            "lineno" : 93,
+            "type" : {
+  "type" : "struct",
+  "name" : "Loop"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 92
+      },
+      "Loop" : {
+        "name" : "Loop",
+        "structured_annotations": {
+          "patch.AssignOnlyPatch" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "AssignOnlyPatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
+},
+        "value" : {}
+      }
+        },
+        "fields" : {
+          "bar" : {
+            "name" : "bar",
+            "key" : -1,
+            "lineno" : 98,
+            "type" : {
+  "type" : "struct",
+  "name" : "Bar"
+}
+            ,
+            "structured_annotations": {
+              "patch.AssignOnlyPatch" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "AssignOnlyPatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
+},
+            "value" : {}
+          }
+                }
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 96
+      },
       "MyDataFieldPatch" : {
         "name" : "MyDataFieldPatch",
         "structured_annotations": {
@@ -1466,6 +1553,308 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 22
+      },
+      "RecursiveFieldN1Patch" : {
+        "name" : "RecursiveFieldN1Patch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::AssignPatchAdapter", "underlyingName": "RecursiveFieldN1PatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "assign" : {
+            "name" : "assign",
+            "docstring" : "Assigns a value. If set, all other operations are ignored.\n",
+            "key" : 1,
+            "lineno" : 88,
+            "required" : "optional",
+            "type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : {
+  "type" : "struct",
+  "name" : "Recursive"
+}
+}
+                  },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clears a value. Applies first.\n",
+            "key" : 2,
+            "lineno" : 88,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 88
+      },
+      "RecursiveFieldPatch" : {
+        "name" : "RecursiveFieldPatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "RecursiveFieldPatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "nodes" : {
+            "name" : "nodes",
+            "key" : -1,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "RecursiveFieldN1Patch"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 22
+      },
+      "RecursivePatch" : {
+        "name" : "RecursivePatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter", "underlyingName": "RecursivePatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "assign" : {
+            "name" : "assign",
+            "docstring" : "Assigns a value. If set, all other operations are ignored.\n",
+            "key" : 1,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "struct",
+  "name" : "Recursive"
+}
+                  },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clears a value. Applies first.\n",
+            "key" : 2,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+                  },
+          "patchPrior" : {
+            "name" : "patchPrior",
+            "docstring" : "Patches any previously set values. Applies second.\n",
+            "key" : 3,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "RecursiveFieldPatch"
+}
+                  },
+          "ensure" : {
+            "name" : "ensure",
+            "docstring" : "Initialize fields, using the given defaults. Applies third.\n",
+            "key" : 5,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "Recursive"
+}
+                  },
+          "patch" : {
+            "name" : "patch",
+            "docstring" : "Patches any set value, including newly set values. Applies last.\n",
+            "key" : 6,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "RecursiveFieldPatch"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 22
+      },
+      "BarFieldPatch" : {
+        "name" : "BarFieldPatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "BarFieldPatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "loop" : {
+            "name" : "loop",
+            "key" : -1,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "LoopPatch"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 22
+      },
+      "BarPatch" : {
+        "name" : "BarPatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter", "underlyingName": "BarPatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "assign" : {
+            "name" : "assign",
+            "docstring" : "Assigns a value. If set, all other operations are ignored.\n",
+            "key" : 1,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "struct",
+  "name" : "Bar"
+}
+                  },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clears a value. Applies first.\n",
+            "key" : 2,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+                  },
+          "patchPrior" : {
+            "name" : "patchPrior",
+            "docstring" : "Patches any previously set values. Applies second.\n",
+            "key" : 3,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "BarFieldPatch"
+}
+                  },
+          "ensure" : {
+            "name" : "ensure",
+            "docstring" : "Initialize fields, using the given defaults. Applies third.\n",
+            "key" : 5,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "Bar"
+}
+                  },
+          "patch" : {
+            "name" : "patch",
+            "docstring" : "Patches any set value, including newly set values. Applies last.\n",
+            "key" : 6,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "BarFieldPatch"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 22
+      },
+      "LoopFieldPatch" : {
+        "name" : "LoopFieldPatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "LoopFieldPatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "bar" : {
+            "name" : "bar",
+            "key" : -1,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "BarPatch"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 23
+      },
+      "LoopPatch" : {
+        "name" : "LoopPatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::AssignPatchAdapter", "underlyingName": "LoopPatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "assign" : {
+            "name" : "assign",
+            "docstring" : "Assigns a value. If set, all other operations are ignored.\n",
+            "key" : 1,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "struct",
+  "name" : "Loop"
+}
+                  },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clears a value. Applies first.\n",
+            "key" : 2,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 23
       }
       },
   "source_path" : "thrift/compiler/test/fixtures/patch/src/module",

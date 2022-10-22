@@ -1953,6 +1953,459 @@ class LateDefStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
 
 /**
  * Original thrift struct:-
+ * Recursive
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/Recursive'))>>
+class Recursive implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    -1 => shape(
+      'var' => 'nodes',
+      'is_terse' => true,
+      'type' => \TType::MAP,
+      'ktype' => \TType::STRING,
+      'vtype' => \TType::STRUCT,
+      'key' => shape(
+        'type' => \TType::STRING,
+      ),
+      'val' => shape(
+        'type' => \TType::STRUCT,
+        'class' => \fixtures\patch\Recursive::class,
+      ),
+      'format' => 'collection',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'nodes' => -1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'nodes' => ?Map<string, \fixtures\patch\Recursive>,
+  );
+
+  const type TShape = shape(
+    'nodes' => dict<string, \fixtures\patch\Recursive::TShape>,
+    ...
+  );
+  const int STRUCTURAL_ID = 6832467362236085104;
+  /**
+   * Original thrift field:-
+   * -1: map<string, struct module.Recursive> nodes
+   */
+  public Map<string, \fixtures\patch\Recursive> $nodes;
+
+  public function __construct(?Map<string, \fixtures\patch\Recursive> $nodes = null)[] {
+    $this->nodes = $nodes ?? Map {};
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'nodes'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Recursive';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->nodes = Map {};
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.Recursive",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => -1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_map" => \tmeta_ThriftMapType::fromShape(
+                    shape(
+                      "keyType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                        )
+                      ),
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                            shape(
+                              "name" => "module.Recursive",
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                                    shape(
+                                      "name" => "module.Recursive",
+                                    )
+                                  ),
+                                )
+                              ),
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "nodes",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+        'nodes' => shape(
+          'field' => dict[
+            '\thrift\op\AssignOnlyPatch' => \thrift\op\AssignOnlyPatch::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      (new Map($shape['nodes']))->map(
+        $val0 ==> \fixtures\patch\Recursive::__fromShape($val0),
+      ),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'nodes' => $this->nodes->map(
+        ($_val0) ==> $_val0->__toShape(),
+      )
+        |> dict($$),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'nodes') !== null) {
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Map<string, \fixtures\patch\Recursive>>($parsed['nodes']);
+      $_container4 = Map {};
+      foreach($_json3 as $_key1 => $_value2) {
+        $_value5 = \fixtures\patch\Recursive::withDefaultValues();
+        $_tmp6 = \json_encode($_value2);
+        $_tmp7 = \fixtures\patch\Recursive::withDefaultValues();
+        $_tmp7->readFromJson($_tmp6);
+        $_value5 = $_tmp7;
+        $_container4[$_key1] = $_value5;
+      }
+      $this->nodes = $_container4;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * Bar
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/Bar'))>>
+class Bar implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    -1 => shape(
+      'var' => 'loop',
+      'is_terse' => true,
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\Loop::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'loop' => -1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'loop' => ?\fixtures\patch\Loop,
+  );
+
+  const type TShape = shape(
+    ?'loop' => ?\fixtures\patch\Loop::TShape,
+    ...
+  );
+  const int STRUCTURAL_ID = 418974100266768802;
+  /**
+   * Original thrift field:-
+   * -1: struct module.Loop loop
+   */
+  public ?\fixtures\patch\Loop $loop;
+
+  public function __construct(?\fixtures\patch\Loop $loop = null)[] {
+    $this->loop = $loop;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'loop'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Bar';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->loop = null;
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.Bar",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => -1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.Loop",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
+                            shape(
+                              "name" => "module.Loop",
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "loop",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+        'loop' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\op\AssignOnlyPatch' => \thrift\op\AssignOnlyPatch::fromShape(
+              shape(
+              )
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'loop') === null ? null : (\fixtures\patch\Loop::__fromShape($shape['loop'])),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'loop' => $this->loop?->__toShape(),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'loop') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\Loop>($parsed['loop']));
+      $_tmp1 = \fixtures\patch\Loop::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->loop = $_tmp1;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * Loop
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/Loop'))>>
+class Loop implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    -1 => shape(
+      'var' => 'bar',
+      'is_terse' => true,
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\Bar::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'bar' => -1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'bar' => ?\fixtures\patch\Bar,
+  );
+
+  const type TShape = shape(
+    ?'bar' => ?\fixtures\patch\Bar::TShape,
+    ...
+  );
+  const int STRUCTURAL_ID = 3942468431999341434;
+  /**
+   * Original thrift field:-
+   * -1: struct module.Bar bar
+   */
+  public ?\fixtures\patch\Bar $bar;
+
+  public function __construct(?\fixtures\patch\Bar $bar = null)[] {
+    $this->bar = $bar;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'bar'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Loop';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->bar = null;
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.Loop",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => -1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.Bar",
+                    )
+                  ),
+                )
+              ),
+              "name" => "bar",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\op\AssignOnlyPatch' => \thrift\op\AssignOnlyPatch::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+        'bar' => shape(
+          'field' => dict[
+            '\thrift\op\AssignOnlyPatch' => \thrift\op\AssignOnlyPatch::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'bar') === null ? null : (\fixtures\patch\Bar::__fromShape($shape['bar'])),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'bar' => $this->bar?->__toShape(),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'bar') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\Bar>($parsed['bar']));
+      $_tmp1 = \fixtures\patch\Bar::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->bar = $_tmp1;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
  * MyDataFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyDataFieldPatch'))>>
@@ -7140,6 +7593,1434 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
       $_tmp7 = \fixtures\patch\LateDefStructFieldPatch::withDefaultValues();
       $_tmp7->readFromJson($_tmp6);
       $this->patch = $_tmp7;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * RecursiveFieldN1Patch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RecursiveFieldN1Patch'))>>
+class RecursiveFieldN1Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'assign',
+      'type' => \TType::MAP,
+      'ktype' => \TType::STRING,
+      'vtype' => \TType::STRUCT,
+      'key' => shape(
+        'type' => \TType::STRING,
+      ),
+      'val' => shape(
+        'type' => \TType::STRUCT,
+        'class' => \fixtures\patch\Recursive::class,
+      ),
+      'format' => 'collection',
+    ),
+    2 => shape(
+      'var' => 'clear',
+      'type' => \TType::BOOL,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'assign' => 1,
+    'clear' => 2,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'assign' => ?Map<string, \fixtures\patch\Recursive>,
+    ?'clear' => ?bool,
+  );
+
+  const type TShape = shape(
+    ?'assign' => ?dict<string, \fixtures\patch\Recursive::TShape>,
+    'clear' => bool,
+    ...
+  );
+  const int STRUCTURAL_ID = 734925607853642499;
+  /**
+   * Assigns a value. If set, all other operations are ignored.
+   * 
+   * Original thrift field:-
+   * 1: map<string, struct module.Recursive> assign
+   */
+  public ?Map<string, \fixtures\patch\Recursive> $assign;
+  /**
+   * Clears a value. Applies first.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+
+  public function __construct(?Map<string, \fixtures\patch\Recursive> $assign = null, ?bool $clear = null)[] {
+    $this->assign = $assign;
+    $this->clear = $clear ?? false;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'RecursiveFieldN1Patch';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.RecursiveFieldN1Patch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_map" => \tmeta_ThriftMapType::fromShape(
+                    shape(
+                      "keyType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                        )
+                      ),
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                            shape(
+                              "name" => "module.Recursive",
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                                    shape(
+                                      "name" => "module.Recursive",
+                                    )
+                                  ),
+                                )
+                              ),
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "assign",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+            "underlyingName" => "RecursiveFieldN1PatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign') === null ? null : ((new Map($shape['assign']))->map(
+        $val0 ==> \fixtures\patch\Recursive::__fromShape($val0),
+      )),
+      $shape['clear'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'assign' => $this->assign?->map(
+        ($_val0) ==> $_val0->__toShape(),
+      )
+        |> $$ === null ? null : dict($$),
+      'clear' => $this->clear,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'assign') !== null) {
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Map<string, \fixtures\patch\Recursive>>($parsed['assign']);
+      $_container4 = Map {};
+      foreach($_json3 as $_key1 => $_value2) {
+        $_value5 = \fixtures\patch\Recursive::withDefaultValues();
+        $_tmp6 = \json_encode($_value2);
+        $_tmp7 = \fixtures\patch\Recursive::withDefaultValues();
+        $_tmp7->readFromJson($_tmp6);
+        $_value5 = $_tmp7;
+        $_container4[$_key1] = $_value5;
+      }
+      $this->assign = $_container4;
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * RecursiveFieldPatch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RecursiveFieldPatch'))>>
+class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    -1 => shape(
+      'var' => 'nodes',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\RecursiveFieldN1Patch::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'nodes' => -1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'nodes' => ?\fixtures\patch\RecursiveFieldN1Patch,
+  );
+
+  const type TShape = shape(
+    ?'nodes' => ?\fixtures\patch\RecursiveFieldN1Patch::TShape,
+    ...
+  );
+  const int STRUCTURAL_ID = 4999973416975335676;
+  /**
+   * Original thrift field:-
+   * -1: struct module.RecursiveFieldN1Patch nodes
+   */
+  public ?\fixtures\patch\RecursiveFieldN1Patch $nodes;
+
+  public function __construct(?\fixtures\patch\RecursiveFieldN1Patch $nodes = null)[] {
+    $this->nodes = $nodes;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'nodes'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'RecursiveFieldPatch';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.RecursiveFieldPatch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => -1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.RecursiveFieldN1Patch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "nodes",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+            "underlyingName" => "RecursiveFieldPatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+        'nodes' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+                "underlyingName" => "RecursiveFieldN1PatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'nodes') === null ? null : (\fixtures\patch\RecursiveFieldN1Patch::__fromShape($shape['nodes'])),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'nodes' => $this->nodes?->__toShape(),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'nodes') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\RecursiveFieldN1Patch>($parsed['nodes']));
+      $_tmp1 = \fixtures\patch\RecursiveFieldN1Patch::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->nodes = $_tmp1;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * RecursivePatch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RecursivePatch'))>>
+class RecursivePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'assign',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\Recursive::class,
+    ),
+    2 => shape(
+      'var' => 'clear',
+      'type' => \TType::BOOL,
+    ),
+    3 => shape(
+      'var' => 'patchPrior',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\RecursiveFieldPatch::class,
+    ),
+    5 => shape(
+      'var' => 'ensure',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\Recursive::class,
+    ),
+    6 => shape(
+      'var' => 'patch',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\RecursiveFieldPatch::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'assign' => 1,
+    'clear' => 2,
+    'patchPrior' => 3,
+    'ensure' => 5,
+    'patch' => 6,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'assign' => ?\fixtures\patch\Recursive,
+    ?'clear' => ?bool,
+    ?'patchPrior' => ?\fixtures\patch\RecursiveFieldPatch,
+    ?'ensure' => ?\fixtures\patch\Recursive,
+    ?'patch' => ?\fixtures\patch\RecursiveFieldPatch,
+  );
+
+  const type TShape = shape(
+    ?'assign' => ?\fixtures\patch\Recursive::TShape,
+    'clear' => bool,
+    ?'patchPrior' => ?\fixtures\patch\RecursiveFieldPatch::TShape,
+    ?'ensure' => ?\fixtures\patch\Recursive::TShape,
+    ?'patch' => ?\fixtures\patch\RecursiveFieldPatch::TShape,
+    ...
+  );
+  const int STRUCTURAL_ID = 2130991928648210432;
+  /**
+   * Assigns a value. If set, all other operations are ignored.
+   * 
+   * Original thrift field:-
+   * 1: struct module.Recursive assign
+   */
+  public ?\fixtures\patch\Recursive $assign;
+  /**
+   * Clears a value. Applies first.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
+   * Patches any previously set values. Applies second.
+   * 
+   * Original thrift field:-
+   * 3: struct module.RecursiveFieldPatch patchPrior
+   */
+  public ?\fixtures\patch\RecursiveFieldPatch $patchPrior;
+  /**
+   * Initialize fields, using the given defaults. Applies third.
+   * 
+   * Original thrift field:-
+   * 5: struct module.Recursive ensure
+   */
+  public ?\fixtures\patch\Recursive $ensure;
+  /**
+   * Patches any set value, including newly set values. Applies last.
+   * 
+   * Original thrift field:-
+   * 6: struct module.RecursiveFieldPatch patch
+   */
+  public ?\fixtures\patch\RecursiveFieldPatch $patch;
+
+  public function __construct(?\fixtures\patch\Recursive $assign = null, ?bool $clear = null, ?\fixtures\patch\RecursiveFieldPatch $patchPrior = null, ?\fixtures\patch\Recursive $ensure = null, ?\fixtures\patch\RecursiveFieldPatch $patch = null)[] {
+    $this->assign = $assign;
+    $this->clear = $clear ?? false;
+    $this->patchPrior = $patchPrior;
+    $this->ensure = $ensure;
+    $this->patch = $patch;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
+      Shapes::idx($shape, 'patchPrior'),
+      Shapes::idx($shape, 'ensure'),
+      Shapes::idx($shape, 'patch'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'RecursivePatch';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.RecursivePatch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.Recursive",
+                    )
+                  ),
+                )
+              ),
+              "name" => "assign",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.RecursiveFieldPatch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "patchPrior",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 5,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.Recursive",
+                    )
+                  ),
+                )
+              ),
+              "name" => "ensure",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 6,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.RecursiveFieldPatch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "patch",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::StructPatchAdapter",
+            "underlyingName" => "RecursivePatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+        'patchPrior' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "underlyingName" => "RecursiveFieldPatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+        'patch' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "underlyingName" => "RecursiveFieldPatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign') === null ? null : (\fixtures\patch\Recursive::__fromShape($shape['assign'])),
+      $shape['clear'],
+      Shapes::idx($shape, 'patchPrior') === null ? null : (\fixtures\patch\RecursiveFieldPatch::__fromShape($shape['patchPrior'])),
+      Shapes::idx($shape, 'ensure') === null ? null : (\fixtures\patch\Recursive::__fromShape($shape['ensure'])),
+      Shapes::idx($shape, 'patch') === null ? null : (\fixtures\patch\RecursiveFieldPatch::__fromShape($shape['patch'])),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'assign' => $this->assign?->__toShape(),
+      'clear' => $this->clear,
+      'patchPrior' => $this->patchPrior?->__toShape(),
+      'ensure' => $this->ensure?->__toShape(),
+      'patch' => $this->patch?->__toShape(),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'assign') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\Recursive>($parsed['assign']));
+      $_tmp1 = \fixtures\patch\Recursive::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->assign = $_tmp1;
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
+    }
+    if (idx($parsed, 'patchPrior') !== null) {
+      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\RecursiveFieldPatch>($parsed['patchPrior']));
+      $_tmp3 = \fixtures\patch\RecursiveFieldPatch::withDefaultValues();
+      $_tmp3->readFromJson($_tmp2);
+      $this->patchPrior = $_tmp3;
+    }
+    if (idx($parsed, 'ensure') !== null) {
+      $_tmp4 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\Recursive>($parsed['ensure']));
+      $_tmp5 = \fixtures\patch\Recursive::withDefaultValues();
+      $_tmp5->readFromJson($_tmp4);
+      $this->ensure = $_tmp5;
+    }
+    if (idx($parsed, 'patch') !== null) {
+      $_tmp6 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\RecursiveFieldPatch>($parsed['patch']));
+      $_tmp7 = \fixtures\patch\RecursiveFieldPatch::withDefaultValues();
+      $_tmp7->readFromJson($_tmp6);
+      $this->patch = $_tmp7;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * BarFieldPatch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/BarFieldPatch'))>>
+class BarFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    -1 => shape(
+      'var' => 'loop',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\LoopPatch::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'loop' => -1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'loop' => ?\fixtures\patch\LoopPatch,
+  );
+
+  const type TShape = shape(
+    ?'loop' => ?\fixtures\patch\LoopPatch::TShape,
+    ...
+  );
+  const int STRUCTURAL_ID = 1773850756587145723;
+  /**
+   * Original thrift field:-
+   * -1: struct module.LoopPatch loop
+   */
+  public ?\fixtures\patch\LoopPatch $loop;
+
+  public function __construct(?\fixtures\patch\LoopPatch $loop = null)[] {
+    $this->loop = $loop;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'loop'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'BarFieldPatch';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.BarFieldPatch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => -1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.LoopPatch",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
+                            shape(
+                              "name" => "module.LoopPatch",
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "loop",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+            "underlyingName" => "BarFieldPatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+        'loop' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+                "underlyingName" => "LoopPatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'loop') === null ? null : (\fixtures\patch\LoopPatch::__fromShape($shape['loop'])),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'loop' => $this->loop?->__toShape(),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'loop') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\LoopPatch>($parsed['loop']));
+      $_tmp1 = \fixtures\patch\LoopPatch::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->loop = $_tmp1;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * BarPatch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/BarPatch'))>>
+class BarPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'assign',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\Bar::class,
+    ),
+    2 => shape(
+      'var' => 'clear',
+      'type' => \TType::BOOL,
+    ),
+    3 => shape(
+      'var' => 'patchPrior',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\BarFieldPatch::class,
+    ),
+    5 => shape(
+      'var' => 'ensure',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\Bar::class,
+    ),
+    6 => shape(
+      'var' => 'patch',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\BarFieldPatch::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'assign' => 1,
+    'clear' => 2,
+    'patchPrior' => 3,
+    'ensure' => 5,
+    'patch' => 6,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'assign' => ?\fixtures\patch\Bar,
+    ?'clear' => ?bool,
+    ?'patchPrior' => ?\fixtures\patch\BarFieldPatch,
+    ?'ensure' => ?\fixtures\patch\Bar,
+    ?'patch' => ?\fixtures\patch\BarFieldPatch,
+  );
+
+  const type TShape = shape(
+    ?'assign' => ?\fixtures\patch\Bar::TShape,
+    'clear' => bool,
+    ?'patchPrior' => ?\fixtures\patch\BarFieldPatch::TShape,
+    ?'ensure' => ?\fixtures\patch\Bar::TShape,
+    ?'patch' => ?\fixtures\patch\BarFieldPatch::TShape,
+    ...
+  );
+  const int STRUCTURAL_ID = 5180874570176193342;
+  /**
+   * Assigns a value. If set, all other operations are ignored.
+   * 
+   * Original thrift field:-
+   * 1: struct module.Bar assign
+   */
+  public ?\fixtures\patch\Bar $assign;
+  /**
+   * Clears a value. Applies first.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
+   * Patches any previously set values. Applies second.
+   * 
+   * Original thrift field:-
+   * 3: struct module.BarFieldPatch patchPrior
+   */
+  public ?\fixtures\patch\BarFieldPatch $patchPrior;
+  /**
+   * Initialize fields, using the given defaults. Applies third.
+   * 
+   * Original thrift field:-
+   * 5: struct module.Bar ensure
+   */
+  public ?\fixtures\patch\Bar $ensure;
+  /**
+   * Patches any set value, including newly set values. Applies last.
+   * 
+   * Original thrift field:-
+   * 6: struct module.BarFieldPatch patch
+   */
+  public ?\fixtures\patch\BarFieldPatch $patch;
+
+  public function __construct(?\fixtures\patch\Bar $assign = null, ?bool $clear = null, ?\fixtures\patch\BarFieldPatch $patchPrior = null, ?\fixtures\patch\Bar $ensure = null, ?\fixtures\patch\BarFieldPatch $patch = null)[] {
+    $this->assign = $assign;
+    $this->clear = $clear ?? false;
+    $this->patchPrior = $patchPrior;
+    $this->ensure = $ensure;
+    $this->patch = $patch;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
+      Shapes::idx($shape, 'patchPrior'),
+      Shapes::idx($shape, 'ensure'),
+      Shapes::idx($shape, 'patch'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'BarPatch';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.BarPatch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.Bar",
+                    )
+                  ),
+                )
+              ),
+              "name" => "assign",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.BarFieldPatch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "patchPrior",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 5,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.Bar",
+                    )
+                  ),
+                )
+              ),
+              "name" => "ensure",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 6,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.BarFieldPatch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "patch",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::StructPatchAdapter",
+            "underlyingName" => "BarPatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+        'patchPrior' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "underlyingName" => "BarFieldPatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+        'patch' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "underlyingName" => "BarFieldPatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign') === null ? null : (\fixtures\patch\Bar::__fromShape($shape['assign'])),
+      $shape['clear'],
+      Shapes::idx($shape, 'patchPrior') === null ? null : (\fixtures\patch\BarFieldPatch::__fromShape($shape['patchPrior'])),
+      Shapes::idx($shape, 'ensure') === null ? null : (\fixtures\patch\Bar::__fromShape($shape['ensure'])),
+      Shapes::idx($shape, 'patch') === null ? null : (\fixtures\patch\BarFieldPatch::__fromShape($shape['patch'])),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'assign' => $this->assign?->__toShape(),
+      'clear' => $this->clear,
+      'patchPrior' => $this->patchPrior?->__toShape(),
+      'ensure' => $this->ensure?->__toShape(),
+      'patch' => $this->patch?->__toShape(),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'assign') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\Bar>($parsed['assign']));
+      $_tmp1 = \fixtures\patch\Bar::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->assign = $_tmp1;
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
+    }
+    if (idx($parsed, 'patchPrior') !== null) {
+      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\BarFieldPatch>($parsed['patchPrior']));
+      $_tmp3 = \fixtures\patch\BarFieldPatch::withDefaultValues();
+      $_tmp3->readFromJson($_tmp2);
+      $this->patchPrior = $_tmp3;
+    }
+    if (idx($parsed, 'ensure') !== null) {
+      $_tmp4 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\Bar>($parsed['ensure']));
+      $_tmp5 = \fixtures\patch\Bar::withDefaultValues();
+      $_tmp5->readFromJson($_tmp4);
+      $this->ensure = $_tmp5;
+    }
+    if (idx($parsed, 'patch') !== null) {
+      $_tmp6 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\BarFieldPatch>($parsed['patch']));
+      $_tmp7 = \fixtures\patch\BarFieldPatch::withDefaultValues();
+      $_tmp7->readFromJson($_tmp6);
+      $this->patch = $_tmp7;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * LoopFieldPatch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/LoopFieldPatch'))>>
+class LoopFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    -1 => shape(
+      'var' => 'bar',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\BarPatch::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'bar' => -1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'bar' => ?\fixtures\patch\BarPatch,
+  );
+
+  const type TShape = shape(
+    ?'bar' => ?\fixtures\patch\BarPatch::TShape,
+    ...
+  );
+  const int STRUCTURAL_ID = 5975782493242643972;
+  /**
+   * Original thrift field:-
+   * -1: struct module.BarPatch bar
+   */
+  public ?\fixtures\patch\BarPatch $bar;
+
+  public function __construct(?\fixtures\patch\BarPatch $bar = null)[] {
+    $this->bar = $bar;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'bar'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'LoopFieldPatch';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.LoopFieldPatch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => -1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.BarPatch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "bar",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+            "underlyingName" => "LoopFieldPatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+        'bar' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::StructPatchAdapter",
+                "underlyingName" => "BarPatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'bar') === null ? null : (\fixtures\patch\BarPatch::__fromShape($shape['bar'])),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'bar' => $this->bar?->__toShape(),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'bar') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\BarPatch>($parsed['bar']));
+      $_tmp1 = \fixtures\patch\BarPatch::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->bar = $_tmp1;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * LoopPatch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/LoopPatch'))>>
+class LoopPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'assign',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\Loop::class,
+    ),
+    2 => shape(
+      'var' => 'clear',
+      'type' => \TType::BOOL,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'assign' => 1,
+    'clear' => 2,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'assign' => ?\fixtures\patch\Loop,
+    ?'clear' => ?bool,
+  );
+
+  const type TShape = shape(
+    ?'assign' => ?\fixtures\patch\Loop::TShape,
+    'clear' => bool,
+    ...
+  );
+  const int STRUCTURAL_ID = 5599644265081798743;
+  /**
+   * Assigns a value. If set, all other operations are ignored.
+   * 
+   * Original thrift field:-
+   * 1: struct module.Loop assign
+   */
+  public ?\fixtures\patch\Loop $assign;
+  /**
+   * Clears a value. Applies first.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+
+  public function __construct(?\fixtures\patch\Loop $assign = null, ?bool $clear = null)[] {
+    $this->assign = $assign;
+    $this->clear = $clear ?? false;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'LoopPatch';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.LoopPatch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.Loop",
+                    )
+                  ),
+                )
+              ),
+              "name" => "assign",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+            "underlyingName" => "LoopPatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+        'assign' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\op\AssignOnlyPatch' => \thrift\op\AssignOnlyPatch::fromShape(
+              shape(
+              )
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign') === null ? null : (\fixtures\patch\Loop::__fromShape($shape['assign'])),
+      $shape['clear'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'assign' => $this->assign?->__toShape(),
+      'clear' => $this->clear,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'assign') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\Loop>($parsed['assign']));
+      $_tmp1 = \fixtures\patch\Loop::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->assign = $_tmp1;
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
     }
   }
 

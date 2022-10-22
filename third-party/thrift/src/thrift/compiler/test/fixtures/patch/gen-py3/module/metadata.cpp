@@ -19,6 +19,9 @@ namespace patch {
   ::apache::thrift::detail::md::StructMetadata<MyUnion>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<LateDefStruct>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<Recursive>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<Bar>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<Loop>::gen(metadata);
   return metadata;
 }
 } // namespace test

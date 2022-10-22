@@ -391,3 +391,82 @@ cdef class __LateDefStruct_FieldsSetter(__StructFieldsSetter):
             raise TypeError(f"invalid field name {name.decode('utf-8')}")
         deref(found).second(self, value)
 
+
+@__cython.auto_pickle(False)
+cdef class __Recursive_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __Recursive_FieldsSetter _fbthrift_create(_test_fixtures_patch_module_types.cRecursive* struct_cpp_obj):
+        cdef __Recursive_FieldsSetter __fbthrift_inst = __Recursive_FieldsSetter.__new__(__Recursive_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        __fbthrift_inst._setters[__cstring_view(<const char*>"nodes")] = __Recursive_FieldsSetter._set_field_0
+        return __fbthrift_inst
+
+    cdef void set_field(__Recursive_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __Recursive_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+    cdef void _set_field_0(self, _fbthrift_value) except *:
+        # for field nodes
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_patch_module_types.cRecursive](deref(self._struct_cpp_obj), 0)
+            return
+        deref(self._struct_cpp_obj).nodes_ref().assign(deref(_test_fixtures_patch_module_types.Map__string_Recursive(_fbthrift_value)._cpp_obj))
+
+
+@__cython.auto_pickle(False)
+cdef class __Bar_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __Bar_FieldsSetter _fbthrift_create(_test_fixtures_patch_module_types.cBar* struct_cpp_obj):
+        cdef __Bar_FieldsSetter __fbthrift_inst = __Bar_FieldsSetter.__new__(__Bar_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        __fbthrift_inst._setters[__cstring_view(<const char*>"loop")] = __Bar_FieldsSetter._set_field_0
+        return __fbthrift_inst
+
+    cdef void set_field(__Bar_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __Bar_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+    cdef void _set_field_0(self, _fbthrift_value) except *:
+        # for field loop
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_patch_module_types.cBar](deref(self._struct_cpp_obj), 0)
+            return
+        if not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.Loop):
+            raise TypeError(f'loop is not a { _test_fixtures_patch_module_types.Loop !r}.')
+        deref(self._struct_cpp_obj).loop_ref().assign(deref((<_test_fixtures_patch_module_types.Loop?> _fbthrift_value)._cpp_obj))
+
+
+@__cython.auto_pickle(False)
+cdef class __Loop_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __Loop_FieldsSetter _fbthrift_create(_test_fixtures_patch_module_types.cLoop* struct_cpp_obj):
+        cdef __Loop_FieldsSetter __fbthrift_inst = __Loop_FieldsSetter.__new__(__Loop_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        __fbthrift_inst._setters[__cstring_view(<const char*>"bar")] = __Loop_FieldsSetter._set_field_0
+        return __fbthrift_inst
+
+    cdef void set_field(__Loop_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __Loop_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+    cdef void _set_field_0(self, _fbthrift_value) except *:
+        # for field bar
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_patch_module_types.cLoop](deref(self._struct_cpp_obj), 0)
+            return
+        if not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.Bar):
+            raise TypeError(f'bar is not a { _test_fixtures_patch_module_types.Bar !r}.')
+        deref(self._struct_cpp_obj).bar_ref().assign(deref((<_test_fixtures_patch_module_types.Bar?> _fbthrift_value)._cpp_obj))
+

@@ -184,6 +184,71 @@ func (p *GeneratePatch) String() string {
   return fmt.Sprintf("GeneratePatch({})")
 }
 
+type AssignOnlyPatch struct {
+}
+
+func NewAssignOnlyPatch() *AssignOnlyPatch {
+  return &AssignOnlyPatch{}
+}
+
+type AssignOnlyPatchBuilder struct {
+  obj *AssignOnlyPatch
+}
+
+func NewAssignOnlyPatchBuilder() *AssignOnlyPatchBuilder{
+  return &AssignOnlyPatchBuilder{
+    obj: NewAssignOnlyPatch(),
+  }
+}
+
+func (p AssignOnlyPatchBuilder) Emit() *AssignOnlyPatch{
+  return &AssignOnlyPatch{
+  }
+}
+
+func (p *AssignOnlyPatch) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    if err := iprot.Skip(fieldTypeId); err != nil {
+      return err
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *AssignOnlyPatch) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("AssignOnlyPatch"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *AssignOnlyPatch) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  return fmt.Sprintf("AssignOnlyPatch({})")
+}
+
 // A patch for a boolean value.
 // 
 // Attributes:

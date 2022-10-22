@@ -181,6 +181,42 @@ cdef extern from "thrift/compiler/test/fixtures/patch/src/gen-cpp2/module_types_
         bint operator>=(cLateDefStruct&)
 
 
+    cdef cppclass cRecursive "::test::fixtures::patch::Recursive":
+        cRecursive() except +
+        cRecursive(const cRecursive&) except +
+        bint operator==(cRecursive&)
+        bint operator!=(cRecursive&)
+        bint operator<(cRecursive&)
+        bint operator>(cRecursive&)
+        bint operator<=(cRecursive&)
+        bint operator>=(cRecursive&)
+        __terse_field_ref[cmap[string,cRecursive]] nodes_ref "nodes_ref" ()
+
+
+    cdef cppclass cBar "::test::fixtures::patch::Bar":
+        cBar() except +
+        cBar(const cBar&) except +
+        bint operator==(cBar&)
+        bint operator!=(cBar&)
+        bint operator<(cBar&)
+        bint operator>(cBar&)
+        bint operator<=(cBar&)
+        bint operator>=(cBar&)
+        __terse_field_ref[cLoop] loop_ref "loop_ref" ()
+
+
+    cdef cppclass cLoop "::test::fixtures::patch::Loop":
+        cLoop() except +
+        cLoop(const cLoop&) except +
+        bint operator==(cLoop&)
+        bint operator!=(cLoop&)
+        bint operator<(cLoop&)
+        bint operator>(cLoop&)
+        bint operator<=(cLoop&)
+        bint operator>=(cLoop&)
+        __terse_field_ref[cBar] bar_ref "bar_ref" ()
+
+
 
 
 cdef class MyData(thrift.py3.types.Struct):
@@ -299,6 +335,39 @@ cdef class LateDefStruct(thrift.py3.types.Struct):
     cdef _fbthrift_create(shared_ptr[cLateDefStruct])
 
 
+
+cdef class Recursive(thrift.py3.types.Struct):
+    cdef shared_ptr[cRecursive] _cpp_obj
+    cdef _fbthrift_types_fields.__Recursive_FieldsSetter _fields_setter
+    cdef inline object nodes_impl(self)
+    cdef Map__string_Recursive __fbthrift_cached_nodes
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cRecursive])
+
+
+
+cdef class Bar(thrift.py3.types.Struct):
+    cdef shared_ptr[cBar] _cpp_obj
+    cdef _fbthrift_types_fields.__Bar_FieldsSetter _fields_setter
+    cdef inline object loop_impl(self)
+    cdef Loop __fbthrift_cached_loop
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cBar])
+
+
+
+cdef class Loop(thrift.py3.types.Struct):
+    cdef shared_ptr[cLoop] _cpp_obj
+    cdef _fbthrift_types_fields.__Loop_FieldsSetter _fields_setter
+    cdef inline object bar_impl(self)
+    cdef Bar __fbthrift_cached_bar
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cLoop])
+
+
 cdef class List__i16(thrift.py3.types.List):
     cdef shared_ptr[vector[cint16_t]] _cpp_obj
     @staticmethod
@@ -319,5 +388,12 @@ cdef class Map__string_string(thrift.py3.types.Map):
     cdef _fbthrift_create(shared_ptr[cmap[string,string]])
     @staticmethod
     cdef shared_ptr[cmap[string,string]] _make_instance(object items) except *
+
+cdef class Map__string_Recursive(thrift.py3.types.Map):
+    cdef shared_ptr[cmap[string,cRecursive]] _cpp_obj
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cmap[string,cRecursive]])
+    @staticmethod
+    cdef shared_ptr[cmap[string,cRecursive]] _make_instance(object items) except *
 
 

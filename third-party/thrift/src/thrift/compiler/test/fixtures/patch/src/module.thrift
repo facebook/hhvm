@@ -83,3 +83,18 @@ struct MyStruct {
 
 // Intentionally defined after MyStruct, so it's patch types are generated after MyStruct's.
 struct LateDefStruct {}
+
+struct Recursive {
+  @patch.AssignOnlyPatch
+  map<string, Recursive> nodes;
+}
+
+struct Bar {
+  Loop loop;
+}
+
+@patch.AssignOnlyPatch
+struct Loop {
+  @patch.AssignOnlyPatch
+  Bar bar;
+}

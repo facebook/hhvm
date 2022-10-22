@@ -589,15 +589,15 @@ public class MyStructFieldN28Patch implements TBase, java.io.Serializable, Clone
         case ASSIGN:
           if (__field.type == TType.LIST) {
             {
-              TList _list13 = iprot.readListBegin();
-              this.assign = new ArrayList<Short>(Math.max(0, _list13.size));
-              for (int _i14 = 0; 
-                   (_list13.size < 0) ? iprot.peekList() : (_i14 < _list13.size); 
-                   ++_i14)
+              TList _list18 = iprot.readListBegin();
+              this.assign = new ArrayList<Short>(Math.max(0, _list18.size));
+              for (int _i19 = 0; 
+                   (_list18.size < 0) ? iprot.peekList() : (_i19 < _list18.size); 
+                   ++_i19)
               {
-                short _elem15;
-                _elem15 = iprot.readI16();
-                this.assign.add(_elem15);
+                short _elem20;
+                _elem20 = iprot.readI16();
+                this.assign.add(_elem20);
               }
               iprot.readListEnd();
             }
@@ -616,18 +616,18 @@ public class MyStructFieldN28Patch implements TBase, java.io.Serializable, Clone
         case PATCH:
           if (__field.type == TType.MAP) {
             {
-              TMap _map16 = iprot.readMapBegin();
-              this.patch = new HashMap<Integer,com.facebook.thrift.op.I16Patch>(Math.max(0, 2*_map16.size));
-              for (int _i17 = 0; 
-                   (_map16.size < 0) ? iprot.peekMap() : (_i17 < _map16.size); 
-                   ++_i17)
+              TMap _map21 = iprot.readMapBegin();
+              this.patch = new HashMap<Integer,com.facebook.thrift.op.I16Patch>(Math.max(0, 2*_map21.size));
+              for (int _i22 = 0; 
+                   (_map21.size < 0) ? iprot.peekMap() : (_i22 < _map21.size); 
+                   ++_i22)
               {
-                int _key18;
-                com.facebook.thrift.op.I16Patch _val19;
-                _key18 = iprot.readI32();
-                _val19 = new com.facebook.thrift.op.I16Patch();
-                _val19.read(iprot);
-                this.patch.put(_key18, _val19);
+                int _key23;
+                com.facebook.thrift.op.I16Patch _val24;
+                _key23 = iprot.readI32();
+                _val24 = new com.facebook.thrift.op.I16Patch();
+                _val24.read(iprot);
+                this.patch.put(_key23, _val24);
               }
               iprot.readMapEnd();
             }
@@ -638,15 +638,15 @@ public class MyStructFieldN28Patch implements TBase, java.io.Serializable, Clone
         case REMOVE:
           if (__field.type == TType.LIST) {
             {
-              TList _list20 = iprot.readListBegin();
-              this.remove = new ArrayList<Short>(Math.max(0, _list20.size));
-              for (int _i21 = 0; 
-                   (_list20.size < 0) ? iprot.peekList() : (_i21 < _list20.size); 
-                   ++_i21)
+              TList _list25 = iprot.readListBegin();
+              this.remove = new ArrayList<Short>(Math.max(0, _list25.size));
+              for (int _i26 = 0; 
+                   (_list25.size < 0) ? iprot.peekList() : (_i26 < _list25.size); 
+                   ++_i26)
               {
-                short _elem22;
-                _elem22 = iprot.readI16();
-                this.remove.add(_elem22);
+                short _elem27;
+                _elem27 = iprot.readI16();
+                this.remove.add(_elem27);
               }
               iprot.readListEnd();
             }
@@ -657,15 +657,15 @@ public class MyStructFieldN28Patch implements TBase, java.io.Serializable, Clone
         case PREPEND:
           if (__field.type == TType.LIST) {
             {
-              TList _list23 = iprot.readListBegin();
-              this.prepend = new ArrayList<Short>(Math.max(0, _list23.size));
-              for (int _i24 = 0; 
-                   (_list23.size < 0) ? iprot.peekList() : (_i24 < _list23.size); 
-                   ++_i24)
+              TList _list28 = iprot.readListBegin();
+              this.prepend = new ArrayList<Short>(Math.max(0, _list28.size));
+              for (int _i29 = 0; 
+                   (_list28.size < 0) ? iprot.peekList() : (_i29 < _list28.size); 
+                   ++_i29)
               {
-                short _elem25;
-                _elem25 = iprot.readI16();
-                this.prepend.add(_elem25);
+                short _elem30;
+                _elem30 = iprot.readI16();
+                this.prepend.add(_elem30);
               }
               iprot.readListEnd();
             }
@@ -676,15 +676,15 @@ public class MyStructFieldN28Patch implements TBase, java.io.Serializable, Clone
         case APPEND:
           if (__field.type == TType.LIST) {
             {
-              TList _list26 = iprot.readListBegin();
-              this.append = new ArrayList<Short>(Math.max(0, _list26.size));
-              for (int _i27 = 0; 
-                   (_list26.size < 0) ? iprot.peekList() : (_i27 < _list26.size); 
-                   ++_i27)
+              TList _list31 = iprot.readListBegin();
+              this.append = new ArrayList<Short>(Math.max(0, _list31.size));
+              for (int _i32 = 0; 
+                   (_list31.size < 0) ? iprot.peekList() : (_i32 < _list31.size); 
+                   ++_i32)
               {
-                short _elem28;
-                _elem28 = iprot.readI16();
-                this.append.add(_elem28);
+                short _elem33;
+                _elem33 = iprot.readI16();
+                this.append.add(_elem33);
               }
               iprot.readListEnd();
             }
@@ -714,8 +714,8 @@ public class MyStructFieldN28Patch implements TBase, java.io.Serializable, Clone
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
         {
           oprot.writeListBegin(new TList(TType.I16, this.assign.size()));
-          for (short _iter29 : this.assign)          {
-            oprot.writeI16(_iter29);
+          for (short _iter34 : this.assign)          {
+            oprot.writeI16(_iter34);
           }
           oprot.writeListEnd();
         }
@@ -729,9 +729,9 @@ public class MyStructFieldN28Patch implements TBase, java.io.Serializable, Clone
       oprot.writeFieldBegin(PATCH_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.I32, TType.STRUCT, this.patch.size()));
-        for (Map.Entry<Integer, com.facebook.thrift.op.I16Patch> _iter30 : this.patch.entrySet())        {
-          oprot.writeI32(_iter30.getKey());
-          _iter30.getValue().write(oprot);
+        for (Map.Entry<Integer, com.facebook.thrift.op.I16Patch> _iter35 : this.patch.entrySet())        {
+          oprot.writeI32(_iter35.getKey());
+          _iter35.getValue().write(oprot);
         }
         oprot.writeMapEnd();
       }
@@ -741,8 +741,8 @@ public class MyStructFieldN28Patch implements TBase, java.io.Serializable, Clone
       oprot.writeFieldBegin(REMOVE_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I16, this.remove.size()));
-        for (short _iter31 : this.remove)        {
-          oprot.writeI16(_iter31);
+        for (short _iter36 : this.remove)        {
+          oprot.writeI16(_iter36);
         }
         oprot.writeListEnd();
       }
@@ -752,8 +752,8 @@ public class MyStructFieldN28Patch implements TBase, java.io.Serializable, Clone
       oprot.writeFieldBegin(PREPEND_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I16, this.prepend.size()));
-        for (short _iter32 : this.prepend)        {
-          oprot.writeI16(_iter32);
+        for (short _iter37 : this.prepend)        {
+          oprot.writeI16(_iter37);
         }
         oprot.writeListEnd();
       }
@@ -763,8 +763,8 @@ public class MyStructFieldN28Patch implements TBase, java.io.Serializable, Clone
       oprot.writeFieldBegin(APPEND_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I16, this.append.size()));
-        for (short _iter33 : this.append)        {
-          oprot.writeI16(_iter33);
+        for (short _iter38 : this.append)        {
+          oprot.writeI16(_iter38);
         }
         oprot.writeListEnd();
       }

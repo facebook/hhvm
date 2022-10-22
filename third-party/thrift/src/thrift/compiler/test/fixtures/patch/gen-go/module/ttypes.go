@@ -2351,6 +2351,401 @@ func (p *LateDefStruct) String() string {
 }
 
 // Attributes:
+//  - Nodes
+type Recursive struct {
+  Nodes map[string]*Recursive
+}
+
+func NewRecursive() *Recursive {
+  return &Recursive{}
+}
+
+
+func (p *Recursive) GetNodes() map[string]*Recursive {
+  return p.Nodes
+}
+type RecursiveBuilder struct {
+  obj *Recursive
+}
+
+func NewRecursiveBuilder() *RecursiveBuilder{
+  return &RecursiveBuilder{
+    obj: NewRecursive(),
+  }
+}
+
+func (p RecursiveBuilder) Emit() *Recursive{
+  return &Recursive{
+    Nodes: p.obj.Nodes,
+  }
+}
+
+func (r *RecursiveBuilder) Nodes(nodes map[string]*Recursive) *RecursiveBuilder {
+  r.obj.Nodes = nodes
+  return r
+}
+
+func (r *Recursive) SetNodes(nodes map[string]*Recursive) *Recursive {
+  r.Nodes = nodes
+  return r
+}
+
+func (p *Recursive) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case -1:
+      if err := p.ReadField_1(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *Recursive)  ReadField_1(iprot thrift.Protocol) error {
+  _, _, size, err := iprot.ReadMapBegin()
+  if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+  }
+  tMap := make(map[string]*Recursive, size)
+  p.Nodes =  tMap
+  for i := 0; i < size; i ++ {
+    var _key7 string
+    if v, err := iprot.ReadString(); err != nil {
+      return thrift.PrependError("error reading field 0: ", err)
+    } else {
+      _key7 = v
+    }
+    _val8 := NewRecursive()
+    if err := _val8.Read(iprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _val8), err)
+    }
+    p.Nodes[_key7] = _val8
+  }
+  if err := iprot.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+  }
+  return nil
+}
+
+func (p *Recursive) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("Recursive"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField_1(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *Recursive) writeField_1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("nodes", thrift.MAP, -1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -1:nodes: ", p), err) }
+  if err := oprot.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(p.Nodes)); err != nil {
+    return thrift.PrependError("error writing map begin: ", err)
+  }
+  for k, v := range p.Nodes {
+    if err := oprot.WriteString(string(k)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err) }
+    if err := v.Write(oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", v), err)
+    }
+  }
+  if err := oprot.WriteMapEnd(); err != nil {
+    return thrift.PrependError("error writing map end: ", err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -1:nodes: ", p), err) }
+  return err
+}
+
+func (p *Recursive) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  nodesVal := fmt.Sprintf("%v", p.Nodes)
+  return fmt.Sprintf("Recursive({Nodes:%s})", nodesVal)
+}
+
+// Attributes:
+//  - Loop
+type Bar struct {
+  Loop *Loop
+}
+
+func NewBar() *Bar {
+  return &Bar{
+    Loop: NewLoop(),
+  }
+}
+
+var Bar_Loop_DEFAULT *Loop
+func (p *Bar) GetLoop() *Loop {
+  if !p.IsSetLoop() {
+    return Bar_Loop_DEFAULT
+  }
+  return p.Loop
+}
+func (p *Bar) IsSetLoop() bool {
+  return p != nil && p.Loop != nil
+}
+
+type BarBuilder struct {
+  obj *Bar
+}
+
+func NewBarBuilder() *BarBuilder{
+  return &BarBuilder{
+    obj: NewBar(),
+  }
+}
+
+func (p BarBuilder) Emit() *Bar{
+  return &Bar{
+    Loop: p.obj.Loop,
+  }
+}
+
+func (b *BarBuilder) Loop(loop *Loop) *BarBuilder {
+  b.obj.Loop = loop
+  return b
+}
+
+func (b *Bar) SetLoop(loop *Loop) *Bar {
+  b.Loop = loop
+  return b
+}
+
+func (p *Bar) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case -1:
+      if err := p.ReadField_1(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *Bar)  ReadField_1(iprot thrift.Protocol) error {
+  p.Loop = NewLoop()
+  if err := p.Loop.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Loop), err)
+  }
+  return nil
+}
+
+func (p *Bar) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("Bar"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField_1(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *Bar) writeField_1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("loop", thrift.STRUCT, -1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -1:loop: ", p), err) }
+  if err := p.Loop.Write(oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Loop), err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -1:loop: ", p), err) }
+  return err
+}
+
+func (p *Bar) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  var loopVal string
+  if p.Loop == nil {
+    loopVal = "<nil>"
+  } else {
+    loopVal = fmt.Sprintf("%v", p.Loop)
+  }
+  return fmt.Sprintf("Bar({Loop:%s})", loopVal)
+}
+
+// Attributes:
+//  - Bar
+type Loop struct {
+  Bar *Bar
+}
+
+func NewLoop() *Loop {
+  return &Loop{
+    Bar: NewBar(),
+  }
+}
+
+var Loop_Bar_DEFAULT *Bar
+func (p *Loop) GetBar() *Bar {
+  if !p.IsSetBar() {
+    return Loop_Bar_DEFAULT
+  }
+  return p.Bar
+}
+func (p *Loop) DefaultGetBar() *Bar {
+  if !p.IsSetBar() {
+    return NewBar()
+  }
+  return p.Bar
+}
+func (p *Loop) IsSetBar() bool {
+  return p != nil && p.Bar != nil
+}
+
+type LoopBuilder struct {
+  obj *Loop
+}
+
+func NewLoopBuilder() *LoopBuilder{
+  return &LoopBuilder{
+    obj: NewLoop(),
+  }
+}
+
+func (p LoopBuilder) Emit() *Loop{
+  return &Loop{
+    Bar: p.obj.Bar,
+  }
+}
+
+func (l *LoopBuilder) Bar(bar *Bar) *LoopBuilder {
+  l.obj.Bar = bar
+  return l
+}
+
+func (l *Loop) SetBar(bar *Bar) *Loop {
+  l.Bar = bar
+  return l
+}
+
+func (p *Loop) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case -1:
+      if err := p.ReadField_1(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *Loop)  ReadField_1(iprot thrift.Protocol) error {
+  p.Bar = NewBar()
+  if err := p.Bar.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Bar), err)
+  }
+  return nil
+}
+
+func (p *Loop) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("Loop"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField_1(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *Loop) writeField_1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("bar", thrift.STRUCT, -1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -1:bar: ", p), err) }
+  if err := p.Bar.Write(oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Bar), err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -1:bar: ", p), err) }
+  return err
+}
+
+func (p *Loop) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  var barVal string
+  if p.Bar == nil {
+    barVal = "<nil>"
+  } else {
+    barVal = fmt.Sprintf("%v", p.Bar)
+  }
+  return fmt.Sprintf("Loop({Bar:%s})", barVal)
+}
+
+// Attributes:
 //  - Data1
 //  - Data2
 type MyDataFieldPatch struct {
@@ -4525,13 +4920,13 @@ func (p *MyStructFieldN28Patch)  ReadField1(iprot thrift.Protocol) error {
   tSlice := make([]int16, 0, size)
   p.Assign =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem7 int16
+    var _elem9 int16
     if v, err := iprot.ReadI16(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem7 = v
+      _elem9 = v
     }
-    p.Assign = append(p.Assign, _elem7)
+    p.Assign = append(p.Assign, _elem9)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -4556,17 +4951,17 @@ func (p *MyStructFieldN28Patch)  ReadField3(iprot thrift.Protocol) error {
   tMap := make(map[int32]*patch1.I16Patch, size)
   p.Patch =  tMap
   for i := 0; i < size; i ++ {
-    var _key8 int32
+    var _key10 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _key8 = v
+      _key10 = v
     }
-    _val9 := patch1.NewI16Patch()
-    if err := _val9.Read(iprot); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _val9), err)
+    _val11 := patch1.NewI16Patch()
+    if err := _val11.Read(iprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _val11), err)
     }
-    p.Patch[_key8] = _val9
+    p.Patch[_key10] = _val11
   }
   if err := iprot.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)
@@ -4582,13 +4977,13 @@ func (p *MyStructFieldN28Patch)  ReadField7(iprot thrift.Protocol) error {
   tSlice := make([]int16, 0, size)
   p.Remove =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem10 int16
+    var _elem12 int16
     if v, err := iprot.ReadI16(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem10 = v
+      _elem12 = v
     }
-    p.Remove = append(p.Remove, _elem10)
+    p.Remove = append(p.Remove, _elem12)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -4604,13 +4999,13 @@ func (p *MyStructFieldN28Patch)  ReadField8(iprot thrift.Protocol) error {
   tSlice := make([]int16, 0, size)
   p.Prepend =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem11 int16
+    var _elem13 int16
     if v, err := iprot.ReadI16(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem11 = v
+      _elem13 = v
     }
-    p.Prepend = append(p.Prepend, _elem11)
+    p.Prepend = append(p.Prepend, _elem13)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -4626,13 +5021,13 @@ func (p *MyStructFieldN28Patch)  ReadField9(iprot thrift.Protocol) error {
   tSlice := make([]int16, 0, size)
   p.Append =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem12 int16
+    var _elem14 int16
     if v, err := iprot.ReadI16(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem12 = v
+      _elem14 = v
     }
-    p.Append = append(p.Append, _elem12)
+    p.Append = append(p.Append, _elem14)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -4924,13 +5319,13 @@ func (p *MyStructFieldN29Patch)  ReadField1(iprot thrift.Protocol) error {
   tSet := make([]string, 0, size)
   p.Assign =  tSet
   for i := 0; i < size; i ++ {
-    var _elem13 string
+    var _elem15 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem13 = v
+      _elem15 = v
     }
-    p.Assign = append(p.Assign, _elem13)
+    p.Assign = append(p.Assign, _elem15)
   }
   if err := iprot.ReadSetEnd(); err != nil {
     return thrift.PrependError("error reading set end: ", err)
@@ -4955,13 +5350,13 @@ func (p *MyStructFieldN29Patch)  ReadField7(iprot thrift.Protocol) error {
   tSet := make([]string, 0, size)
   p.Remove =  tSet
   for i := 0; i < size; i ++ {
-    var _elem14 string
+    var _elem16 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem14 = v
+      _elem16 = v
     }
-    p.Remove = append(p.Remove, _elem14)
+    p.Remove = append(p.Remove, _elem16)
   }
   if err := iprot.ReadSetEnd(); err != nil {
     return thrift.PrependError("error reading set end: ", err)
@@ -4977,13 +5372,13 @@ func (p *MyStructFieldN29Patch)  ReadField8(iprot thrift.Protocol) error {
   tSet := make([]string, 0, size)
   p.Add =  tSet
   for i := 0; i < size; i ++ {
-    var _elem15 string
+    var _elem17 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem15 = v
+      _elem17 = v
     }
-    p.Add = append(p.Add, _elem15)
+    p.Add = append(p.Add, _elem17)
   }
   if err := iprot.ReadSetEnd(); err != nil {
     return thrift.PrependError("error reading set end: ", err)
@@ -5276,19 +5671,19 @@ func (p *MyStructFieldN30Patch)  ReadField1(iprot thrift.Protocol) error {
   tMap := make(map[string]string, size)
   p.Assign =  tMap
   for i := 0; i < size; i ++ {
-    var _key16 string
+    var _key18 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _key16 = v
+      _key18 = v
     }
-    var _val17 string
+    var _val19 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _val17 = v
+      _val19 = v
     }
-    p.Assign[_key16] = _val17
+    p.Assign[_key18] = _val19
   }
   if err := iprot.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)
@@ -5313,19 +5708,19 @@ func (p *MyStructFieldN30Patch)  ReadField5(iprot thrift.Protocol) error {
   tMap := make(map[string]string, size)
   p.Add =  tMap
   for i := 0; i < size; i ++ {
-    var _key18 string
+    var _key20 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _key18 = v
+      _key20 = v
     }
-    var _val19 string
+    var _val21 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _val19 = v
+      _val21 = v
     }
-    p.Add[_key18] = _val19
+    p.Add[_key20] = _val21
   }
   if err := iprot.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)
@@ -5341,13 +5736,13 @@ func (p *MyStructFieldN30Patch)  ReadField7(iprot thrift.Protocol) error {
   tSet := make([]string, 0, size)
   p.Remove =  tSet
   for i := 0; i < size; i ++ {
-    var _elem20 string
+    var _elem22 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem20 = v
+      _elem22 = v
     }
-    p.Remove = append(p.Remove, _elem20)
+    p.Remove = append(p.Remove, _elem22)
   }
   if err := iprot.ReadSetEnd(); err != nil {
     return thrift.PrependError("error reading set end: ", err)
@@ -5363,19 +5758,19 @@ func (p *MyStructFieldN30Patch)  ReadField9(iprot thrift.Protocol) error {
   tMap := make(map[string]string, size)
   p.Put =  tMap
   for i := 0; i < size; i ++ {
-    var _key21 string
+    var _key23 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _key21 = v
+      _key23 = v
     }
-    var _val22 string
+    var _val24 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _val22 = v
+      _val24 = v
     }
-    p.Put[_key21] = _val22
+    p.Put[_key23] = _val24
   }
   if err := iprot.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)
@@ -8175,5 +8570,1469 @@ func (p *LateDefStructPatch) String() string {
     patchVal = fmt.Sprintf("%v", p.Patch)
   }
   return fmt.Sprintf("LateDefStructPatch({Assign:%s Clear:%s PatchPrior:%s Ensure:%s Patch:%s})", assignVal, clearVal, patchPriorVal, ensureVal, patchVal)
+}
+
+// Attributes:
+//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Clear: Clears a value. Applies first.
+type RecursiveFieldN1Patch struct {
+  Assign map[string]*Recursive `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
+  Clear bool `thrift:"clear,2" db:"clear" json:"clear"`
+}
+
+func NewRecursiveFieldN1Patch() *RecursiveFieldN1Patch {
+  return &RecursiveFieldN1Patch{}
+}
+
+var RecursiveFieldN1Patch_Assign_DEFAULT map[string]*Recursive
+
+func (p *RecursiveFieldN1Patch) GetAssign() map[string]*Recursive {
+  return p.Assign
+}
+
+func (p *RecursiveFieldN1Patch) GetClear() bool {
+  return p.Clear
+}
+func (p *RecursiveFieldN1Patch) IsSetAssign() bool {
+  return p != nil && p.Assign != nil
+}
+
+type RecursiveFieldN1PatchBuilder struct {
+  obj *RecursiveFieldN1Patch
+}
+
+func NewRecursiveFieldN1PatchBuilder() *RecursiveFieldN1PatchBuilder{
+  return &RecursiveFieldN1PatchBuilder{
+    obj: NewRecursiveFieldN1Patch(),
+  }
+}
+
+func (p RecursiveFieldN1PatchBuilder) Emit() *RecursiveFieldN1Patch{
+  return &RecursiveFieldN1Patch{
+    Assign: p.obj.Assign,
+    Clear: p.obj.Clear,
+  }
+}
+
+func (r *RecursiveFieldN1PatchBuilder) Assign(assign map[string]*Recursive) *RecursiveFieldN1PatchBuilder {
+  r.obj.Assign = assign
+  return r
+}
+
+func (r *RecursiveFieldN1PatchBuilder) Clear(clear bool) *RecursiveFieldN1PatchBuilder {
+  r.obj.Clear = clear
+  return r
+}
+
+func (r *RecursiveFieldN1Patch) SetAssign(assign map[string]*Recursive) *RecursiveFieldN1Patch {
+  r.Assign = assign
+  return r
+}
+
+func (r *RecursiveFieldN1Patch) SetClear(clear bool) *RecursiveFieldN1Patch {
+  r.Clear = clear
+  return r
+}
+
+func (p *RecursiveFieldN1Patch) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *RecursiveFieldN1Patch)  ReadField1(iprot thrift.Protocol) error {
+  _, _, size, err := iprot.ReadMapBegin()
+  if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+  }
+  tMap := make(map[string]*Recursive, size)
+  p.Assign =  tMap
+  for i := 0; i < size; i ++ {
+    var _key25 string
+    if v, err := iprot.ReadString(); err != nil {
+      return thrift.PrependError("error reading field 0: ", err)
+    } else {
+      _key25 = v
+    }
+    _val26 := NewRecursive()
+    if err := _val26.Read(iprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _val26), err)
+    }
+    p.Assign[_key25] = _val26
+  }
+  if err := iprot.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+  }
+  return nil
+}
+
+func (p *RecursiveFieldN1Patch)  ReadField2(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadBool(); err != nil {
+    return thrift.PrependError("error reading field 2: ", err)
+  } else {
+    p.Clear = v
+  }
+  return nil
+}
+
+func (p *RecursiveFieldN1Patch) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("RecursiveFieldN1Patch"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *RecursiveFieldN1Patch) writeField1(oprot thrift.Protocol) (err error) {
+  if p.IsSetAssign() {
+    if err := oprot.WriteFieldBegin("assign", thrift.MAP, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:assign: ", p), err) }
+    if err := oprot.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(p.Assign)); err != nil {
+      return thrift.PrependError("error writing map begin: ", err)
+    }
+    for k, v := range p.Assign {
+      if err := oprot.WriteString(string(k)); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err) }
+      if err := v.Write(oprot); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", v), err)
+      }
+    }
+    if err := oprot.WriteMapEnd(); err != nil {
+      return thrift.PrependError("error writing map end: ", err)
+    }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:assign: ", p), err) }
+  }
+  return err
+}
+
+func (p *RecursiveFieldN1Patch) writeField2(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("clear", thrift.BOOL, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:clear: ", p), err) }
+  if err := oprot.WriteBool(bool(p.Clear)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.clear (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:clear: ", p), err) }
+  return err
+}
+
+func (p *RecursiveFieldN1Patch) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  assignVal := fmt.Sprintf("%v", p.Assign)
+  clearVal := fmt.Sprintf("%v", p.Clear)
+  return fmt.Sprintf("RecursiveFieldN1Patch({Assign:%s Clear:%s})", assignVal, clearVal)
+}
+
+// Attributes:
+//  - Nodes
+type RecursiveFieldPatch struct {
+  Nodes *RecursiveFieldN1Patch
+}
+
+func NewRecursiveFieldPatch() *RecursiveFieldPatch {
+  return &RecursiveFieldPatch{
+    Nodes: NewRecursiveFieldN1Patch(),
+  }
+}
+
+var RecursiveFieldPatch_Nodes_DEFAULT *RecursiveFieldN1Patch
+func (p *RecursiveFieldPatch) GetNodes() *RecursiveFieldN1Patch {
+  if !p.IsSetNodes() {
+    return RecursiveFieldPatch_Nodes_DEFAULT
+  }
+  return p.Nodes
+}
+func (p *RecursiveFieldPatch) DefaultGetNodes() *RecursiveFieldN1Patch {
+  if !p.IsSetNodes() {
+    return NewRecursiveFieldN1Patch()
+  }
+  return p.Nodes
+}
+func (p *RecursiveFieldPatch) IsSetNodes() bool {
+  return p != nil && p.Nodes != nil
+}
+
+type RecursiveFieldPatchBuilder struct {
+  obj *RecursiveFieldPatch
+}
+
+func NewRecursiveFieldPatchBuilder() *RecursiveFieldPatchBuilder{
+  return &RecursiveFieldPatchBuilder{
+    obj: NewRecursiveFieldPatch(),
+  }
+}
+
+func (p RecursiveFieldPatchBuilder) Emit() *RecursiveFieldPatch{
+  return &RecursiveFieldPatch{
+    Nodes: p.obj.Nodes,
+  }
+}
+
+func (r *RecursiveFieldPatchBuilder) Nodes(nodes *RecursiveFieldN1Patch) *RecursiveFieldPatchBuilder {
+  r.obj.Nodes = nodes
+  return r
+}
+
+func (r *RecursiveFieldPatch) SetNodes(nodes *RecursiveFieldN1Patch) *RecursiveFieldPatch {
+  r.Nodes = nodes
+  return r
+}
+
+func (p *RecursiveFieldPatch) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case -1:
+      if err := p.ReadField_1(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *RecursiveFieldPatch)  ReadField_1(iprot thrift.Protocol) error {
+  p.Nodes = NewRecursiveFieldN1Patch()
+  if err := p.Nodes.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Nodes), err)
+  }
+  return nil
+}
+
+func (p *RecursiveFieldPatch) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("RecursiveFieldPatch"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField_1(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *RecursiveFieldPatch) writeField_1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("nodes", thrift.STRUCT, -1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -1:nodes: ", p), err) }
+  if err := p.Nodes.Write(oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Nodes), err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -1:nodes: ", p), err) }
+  return err
+}
+
+func (p *RecursiveFieldPatch) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  var nodesVal string
+  if p.Nodes == nil {
+    nodesVal = "<nil>"
+  } else {
+    nodesVal = fmt.Sprintf("%v", p.Nodes)
+  }
+  return fmt.Sprintf("RecursiveFieldPatch({Nodes:%s})", nodesVal)
+}
+
+// Attributes:
+//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Clear: Clears a value. Applies first.
+//  - PatchPrior: Patches any previously set values. Applies second.
+//  - Ensure: Initialize fields, using the given defaults. Applies third.
+//  - Patch: Patches any set value, including newly set values. Applies last.
+type RecursivePatch struct {
+  Assign *Recursive `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
+  Clear bool `thrift:"clear,2" db:"clear" json:"clear"`
+  PatchPrior *RecursiveFieldPatch `thrift:"patchPrior,3" db:"patchPrior" json:"patchPrior"`
+  // unused field # 4
+  Ensure *Recursive `thrift:"ensure,5" db:"ensure" json:"ensure"`
+  Patch *RecursiveFieldPatch `thrift:"patch,6" db:"patch" json:"patch"`
+}
+
+func NewRecursivePatch() *RecursivePatch {
+  return &RecursivePatch{
+    PatchPrior: NewRecursiveFieldPatch(),
+    Ensure: NewRecursive(),
+    Patch: NewRecursiveFieldPatch(),
+  }
+}
+
+var RecursivePatch_Assign_DEFAULT *Recursive
+func (p *RecursivePatch) GetAssign() *Recursive {
+  if !p.IsSetAssign() {
+    return RecursivePatch_Assign_DEFAULT
+  }
+  return p.Assign
+}
+func (p *RecursivePatch) DefaultGetAssign() *Recursive {
+  if !p.IsSetAssign() {
+    return NewRecursive()
+  }
+  return p.Assign
+}
+
+func (p *RecursivePatch) GetClear() bool {
+  return p.Clear
+}
+var RecursivePatch_PatchPrior_DEFAULT *RecursiveFieldPatch
+func (p *RecursivePatch) GetPatchPrior() *RecursiveFieldPatch {
+  if !p.IsSetPatchPrior() {
+    return RecursivePatch_PatchPrior_DEFAULT
+  }
+  return p.PatchPrior
+}
+func (p *RecursivePatch) DefaultGetPatchPrior() *RecursiveFieldPatch {
+  if !p.IsSetPatchPrior() {
+    return NewRecursiveFieldPatch()
+  }
+  return p.PatchPrior
+}
+var RecursivePatch_Ensure_DEFAULT *Recursive
+func (p *RecursivePatch) GetEnsure() *Recursive {
+  if !p.IsSetEnsure() {
+    return RecursivePatch_Ensure_DEFAULT
+  }
+  return p.Ensure
+}
+func (p *RecursivePatch) DefaultGetEnsure() *Recursive {
+  if !p.IsSetEnsure() {
+    return NewRecursive()
+  }
+  return p.Ensure
+}
+var RecursivePatch_Patch_DEFAULT *RecursiveFieldPatch
+func (p *RecursivePatch) GetPatch() *RecursiveFieldPatch {
+  if !p.IsSetPatch() {
+    return RecursivePatch_Patch_DEFAULT
+  }
+  return p.Patch
+}
+func (p *RecursivePatch) DefaultGetPatch() *RecursiveFieldPatch {
+  if !p.IsSetPatch() {
+    return NewRecursiveFieldPatch()
+  }
+  return p.Patch
+}
+func (p *RecursivePatch) IsSetAssign() bool {
+  return p != nil && p.Assign != nil
+}
+
+func (p *RecursivePatch) IsSetPatchPrior() bool {
+  return p != nil && p.PatchPrior != nil
+}
+
+func (p *RecursivePatch) IsSetEnsure() bool {
+  return p != nil && p.Ensure != nil
+}
+
+func (p *RecursivePatch) IsSetPatch() bool {
+  return p != nil && p.Patch != nil
+}
+
+type RecursivePatchBuilder struct {
+  obj *RecursivePatch
+}
+
+func NewRecursivePatchBuilder() *RecursivePatchBuilder{
+  return &RecursivePatchBuilder{
+    obj: NewRecursivePatch(),
+  }
+}
+
+func (p RecursivePatchBuilder) Emit() *RecursivePatch{
+  return &RecursivePatch{
+    Assign: p.obj.Assign,
+    Clear: p.obj.Clear,
+    PatchPrior: p.obj.PatchPrior,
+    Ensure: p.obj.Ensure,
+    Patch: p.obj.Patch,
+  }
+}
+
+func (r *RecursivePatchBuilder) Assign(assign *Recursive) *RecursivePatchBuilder {
+  r.obj.Assign = assign
+  return r
+}
+
+func (r *RecursivePatchBuilder) Clear(clear bool) *RecursivePatchBuilder {
+  r.obj.Clear = clear
+  return r
+}
+
+func (r *RecursivePatchBuilder) PatchPrior(patchPrior *RecursiveFieldPatch) *RecursivePatchBuilder {
+  r.obj.PatchPrior = patchPrior
+  return r
+}
+
+func (r *RecursivePatchBuilder) Ensure(ensure *Recursive) *RecursivePatchBuilder {
+  r.obj.Ensure = ensure
+  return r
+}
+
+func (r *RecursivePatchBuilder) Patch(patch *RecursiveFieldPatch) *RecursivePatchBuilder {
+  r.obj.Patch = patch
+  return r
+}
+
+func (r *RecursivePatch) SetAssign(assign *Recursive) *RecursivePatch {
+  r.Assign = assign
+  return r
+}
+
+func (r *RecursivePatch) SetClear(clear bool) *RecursivePatch {
+  r.Clear = clear
+  return r
+}
+
+func (r *RecursivePatch) SetPatchPrior(patchPrior *RecursiveFieldPatch) *RecursivePatch {
+  r.PatchPrior = patchPrior
+  return r
+}
+
+func (r *RecursivePatch) SetEnsure(ensure *Recursive) *RecursivePatch {
+  r.Ensure = ensure
+  return r
+}
+
+func (r *RecursivePatch) SetPatch(patch *RecursiveFieldPatch) *RecursivePatch {
+  r.Patch = patch
+  return r
+}
+
+func (p *RecursivePatch) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    case 3:
+      if err := p.ReadField3(iprot); err != nil {
+        return err
+      }
+    case 5:
+      if err := p.ReadField5(iprot); err != nil {
+        return err
+      }
+    case 6:
+      if err := p.ReadField6(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *RecursivePatch)  ReadField1(iprot thrift.Protocol) error {
+  p.Assign = NewRecursive()
+  if err := p.Assign.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Assign), err)
+  }
+  return nil
+}
+
+func (p *RecursivePatch)  ReadField2(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadBool(); err != nil {
+    return thrift.PrependError("error reading field 2: ", err)
+  } else {
+    p.Clear = v
+  }
+  return nil
+}
+
+func (p *RecursivePatch)  ReadField3(iprot thrift.Protocol) error {
+  p.PatchPrior = NewRecursiveFieldPatch()
+  if err := p.PatchPrior.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.PatchPrior), err)
+  }
+  return nil
+}
+
+func (p *RecursivePatch)  ReadField5(iprot thrift.Protocol) error {
+  p.Ensure = NewRecursive()
+  if err := p.Ensure.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ensure), err)
+  }
+  return nil
+}
+
+func (p *RecursivePatch)  ReadField6(iprot thrift.Protocol) error {
+  p.Patch = NewRecursiveFieldPatch()
+  if err := p.Patch.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Patch), err)
+  }
+  return nil
+}
+
+func (p *RecursivePatch) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("RecursivePatch"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
+  if err := p.writeField3(oprot); err != nil { return err }
+  if err := p.writeField5(oprot); err != nil { return err }
+  if err := p.writeField6(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *RecursivePatch) writeField1(oprot thrift.Protocol) (err error) {
+  if p.IsSetAssign() {
+    if err := oprot.WriteFieldBegin("assign", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:assign: ", p), err) }
+    if err := p.Assign.Write(oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Assign), err)
+    }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:assign: ", p), err) }
+  }
+  return err
+}
+
+func (p *RecursivePatch) writeField2(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("clear", thrift.BOOL, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:clear: ", p), err) }
+  if err := oprot.WriteBool(bool(p.Clear)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.clear (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:clear: ", p), err) }
+  return err
+}
+
+func (p *RecursivePatch) writeField3(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("patchPrior", thrift.STRUCT, 3); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:patchPrior: ", p), err) }
+  if err := p.PatchPrior.Write(oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.PatchPrior), err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:patchPrior: ", p), err) }
+  return err
+}
+
+func (p *RecursivePatch) writeField5(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("ensure", thrift.STRUCT, 5); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 5:ensure: ", p), err) }
+  if err := p.Ensure.Write(oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ensure), err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 5:ensure: ", p), err) }
+  return err
+}
+
+func (p *RecursivePatch) writeField6(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("patch", thrift.STRUCT, 6); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 6:patch: ", p), err) }
+  if err := p.Patch.Write(oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Patch), err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 6:patch: ", p), err) }
+  return err
+}
+
+func (p *RecursivePatch) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  var assignVal string
+  if p.Assign == nil {
+    assignVal = "<nil>"
+  } else {
+    assignVal = fmt.Sprintf("%v", p.Assign)
+  }
+  clearVal := fmt.Sprintf("%v", p.Clear)
+  var patchPriorVal string
+  if p.PatchPrior == nil {
+    patchPriorVal = "<nil>"
+  } else {
+    patchPriorVal = fmt.Sprintf("%v", p.PatchPrior)
+  }
+  var ensureVal string
+  if p.Ensure == nil {
+    ensureVal = "<nil>"
+  } else {
+    ensureVal = fmt.Sprintf("%v", p.Ensure)
+  }
+  var patchVal string
+  if p.Patch == nil {
+    patchVal = "<nil>"
+  } else {
+    patchVal = fmt.Sprintf("%v", p.Patch)
+  }
+  return fmt.Sprintf("RecursivePatch({Assign:%s Clear:%s PatchPrior:%s Ensure:%s Patch:%s})", assignVal, clearVal, patchPriorVal, ensureVal, patchVal)
+}
+
+// Attributes:
+//  - Loop
+type BarFieldPatch struct {
+  Loop *LoopPatch
+}
+
+func NewBarFieldPatch() *BarFieldPatch {
+  return &BarFieldPatch{
+    Loop: NewLoopPatch(),
+  }
+}
+
+var BarFieldPatch_Loop_DEFAULT *LoopPatch
+func (p *BarFieldPatch) GetLoop() *LoopPatch {
+  if !p.IsSetLoop() {
+    return BarFieldPatch_Loop_DEFAULT
+  }
+  return p.Loop
+}
+func (p *BarFieldPatch) IsSetLoop() bool {
+  return p != nil && p.Loop != nil
+}
+
+type BarFieldPatchBuilder struct {
+  obj *BarFieldPatch
+}
+
+func NewBarFieldPatchBuilder() *BarFieldPatchBuilder{
+  return &BarFieldPatchBuilder{
+    obj: NewBarFieldPatch(),
+  }
+}
+
+func (p BarFieldPatchBuilder) Emit() *BarFieldPatch{
+  return &BarFieldPatch{
+    Loop: p.obj.Loop,
+  }
+}
+
+func (b *BarFieldPatchBuilder) Loop(loop *LoopPatch) *BarFieldPatchBuilder {
+  b.obj.Loop = loop
+  return b
+}
+
+func (b *BarFieldPatch) SetLoop(loop *LoopPatch) *BarFieldPatch {
+  b.Loop = loop
+  return b
+}
+
+func (p *BarFieldPatch) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case -1:
+      if err := p.ReadField_1(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *BarFieldPatch)  ReadField_1(iprot thrift.Protocol) error {
+  p.Loop = NewLoopPatch()
+  if err := p.Loop.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Loop), err)
+  }
+  return nil
+}
+
+func (p *BarFieldPatch) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("BarFieldPatch"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField_1(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *BarFieldPatch) writeField_1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("loop", thrift.STRUCT, -1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -1:loop: ", p), err) }
+  if err := p.Loop.Write(oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Loop), err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -1:loop: ", p), err) }
+  return err
+}
+
+func (p *BarFieldPatch) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  var loopVal string
+  if p.Loop == nil {
+    loopVal = "<nil>"
+  } else {
+    loopVal = fmt.Sprintf("%v", p.Loop)
+  }
+  return fmt.Sprintf("BarFieldPatch({Loop:%s})", loopVal)
+}
+
+// Attributes:
+//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Clear: Clears a value. Applies first.
+//  - PatchPrior: Patches any previously set values. Applies second.
+//  - Ensure: Initialize fields, using the given defaults. Applies third.
+//  - Patch: Patches any set value, including newly set values. Applies last.
+type BarPatch struct {
+  Assign *Bar `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
+  Clear bool `thrift:"clear,2" db:"clear" json:"clear"`
+  PatchPrior *BarFieldPatch `thrift:"patchPrior,3" db:"patchPrior" json:"patchPrior"`
+  // unused field # 4
+  Ensure *Bar `thrift:"ensure,5" db:"ensure" json:"ensure"`
+  Patch *BarFieldPatch `thrift:"patch,6" db:"patch" json:"patch"`
+}
+
+func NewBarPatch() *BarPatch {
+  return &BarPatch{
+    PatchPrior: NewBarFieldPatch(),
+    Ensure: NewBar(),
+    Patch: NewBarFieldPatch(),
+  }
+}
+
+var BarPatch_Assign_DEFAULT *Bar
+func (p *BarPatch) GetAssign() *Bar {
+  if !p.IsSetAssign() {
+    return BarPatch_Assign_DEFAULT
+  }
+  return p.Assign
+}
+func (p *BarPatch) DefaultGetAssign() *Bar {
+  if !p.IsSetAssign() {
+    return NewBar()
+  }
+  return p.Assign
+}
+
+func (p *BarPatch) GetClear() bool {
+  return p.Clear
+}
+var BarPatch_PatchPrior_DEFAULT *BarFieldPatch
+func (p *BarPatch) GetPatchPrior() *BarFieldPatch {
+  if !p.IsSetPatchPrior() {
+    return BarPatch_PatchPrior_DEFAULT
+  }
+  return p.PatchPrior
+}
+func (p *BarPatch) DefaultGetPatchPrior() *BarFieldPatch {
+  if !p.IsSetPatchPrior() {
+    return NewBarFieldPatch()
+  }
+  return p.PatchPrior
+}
+var BarPatch_Ensure_DEFAULT *Bar
+func (p *BarPatch) GetEnsure() *Bar {
+  if !p.IsSetEnsure() {
+    return BarPatch_Ensure_DEFAULT
+  }
+  return p.Ensure
+}
+func (p *BarPatch) DefaultGetEnsure() *Bar {
+  if !p.IsSetEnsure() {
+    return NewBar()
+  }
+  return p.Ensure
+}
+var BarPatch_Patch_DEFAULT *BarFieldPatch
+func (p *BarPatch) GetPatch() *BarFieldPatch {
+  if !p.IsSetPatch() {
+    return BarPatch_Patch_DEFAULT
+  }
+  return p.Patch
+}
+func (p *BarPatch) DefaultGetPatch() *BarFieldPatch {
+  if !p.IsSetPatch() {
+    return NewBarFieldPatch()
+  }
+  return p.Patch
+}
+func (p *BarPatch) IsSetAssign() bool {
+  return p != nil && p.Assign != nil
+}
+
+func (p *BarPatch) IsSetPatchPrior() bool {
+  return p != nil && p.PatchPrior != nil
+}
+
+func (p *BarPatch) IsSetEnsure() bool {
+  return p != nil && p.Ensure != nil
+}
+
+func (p *BarPatch) IsSetPatch() bool {
+  return p != nil && p.Patch != nil
+}
+
+type BarPatchBuilder struct {
+  obj *BarPatch
+}
+
+func NewBarPatchBuilder() *BarPatchBuilder{
+  return &BarPatchBuilder{
+    obj: NewBarPatch(),
+  }
+}
+
+func (p BarPatchBuilder) Emit() *BarPatch{
+  return &BarPatch{
+    Assign: p.obj.Assign,
+    Clear: p.obj.Clear,
+    PatchPrior: p.obj.PatchPrior,
+    Ensure: p.obj.Ensure,
+    Patch: p.obj.Patch,
+  }
+}
+
+func (b *BarPatchBuilder) Assign(assign *Bar) *BarPatchBuilder {
+  b.obj.Assign = assign
+  return b
+}
+
+func (b *BarPatchBuilder) Clear(clear bool) *BarPatchBuilder {
+  b.obj.Clear = clear
+  return b
+}
+
+func (b *BarPatchBuilder) PatchPrior(patchPrior *BarFieldPatch) *BarPatchBuilder {
+  b.obj.PatchPrior = patchPrior
+  return b
+}
+
+func (b *BarPatchBuilder) Ensure(ensure *Bar) *BarPatchBuilder {
+  b.obj.Ensure = ensure
+  return b
+}
+
+func (b *BarPatchBuilder) Patch(patch *BarFieldPatch) *BarPatchBuilder {
+  b.obj.Patch = patch
+  return b
+}
+
+func (b *BarPatch) SetAssign(assign *Bar) *BarPatch {
+  b.Assign = assign
+  return b
+}
+
+func (b *BarPatch) SetClear(clear bool) *BarPatch {
+  b.Clear = clear
+  return b
+}
+
+func (b *BarPatch) SetPatchPrior(patchPrior *BarFieldPatch) *BarPatch {
+  b.PatchPrior = patchPrior
+  return b
+}
+
+func (b *BarPatch) SetEnsure(ensure *Bar) *BarPatch {
+  b.Ensure = ensure
+  return b
+}
+
+func (b *BarPatch) SetPatch(patch *BarFieldPatch) *BarPatch {
+  b.Patch = patch
+  return b
+}
+
+func (p *BarPatch) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    case 3:
+      if err := p.ReadField3(iprot); err != nil {
+        return err
+      }
+    case 5:
+      if err := p.ReadField5(iprot); err != nil {
+        return err
+      }
+    case 6:
+      if err := p.ReadField6(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *BarPatch)  ReadField1(iprot thrift.Protocol) error {
+  p.Assign = NewBar()
+  if err := p.Assign.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Assign), err)
+  }
+  return nil
+}
+
+func (p *BarPatch)  ReadField2(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadBool(); err != nil {
+    return thrift.PrependError("error reading field 2: ", err)
+  } else {
+    p.Clear = v
+  }
+  return nil
+}
+
+func (p *BarPatch)  ReadField3(iprot thrift.Protocol) error {
+  p.PatchPrior = NewBarFieldPatch()
+  if err := p.PatchPrior.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.PatchPrior), err)
+  }
+  return nil
+}
+
+func (p *BarPatch)  ReadField5(iprot thrift.Protocol) error {
+  p.Ensure = NewBar()
+  if err := p.Ensure.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Ensure), err)
+  }
+  return nil
+}
+
+func (p *BarPatch)  ReadField6(iprot thrift.Protocol) error {
+  p.Patch = NewBarFieldPatch()
+  if err := p.Patch.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Patch), err)
+  }
+  return nil
+}
+
+func (p *BarPatch) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("BarPatch"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
+  if err := p.writeField3(oprot); err != nil { return err }
+  if err := p.writeField5(oprot); err != nil { return err }
+  if err := p.writeField6(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *BarPatch) writeField1(oprot thrift.Protocol) (err error) {
+  if p.IsSetAssign() {
+    if err := oprot.WriteFieldBegin("assign", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:assign: ", p), err) }
+    if err := p.Assign.Write(oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Assign), err)
+    }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:assign: ", p), err) }
+  }
+  return err
+}
+
+func (p *BarPatch) writeField2(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("clear", thrift.BOOL, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:clear: ", p), err) }
+  if err := oprot.WriteBool(bool(p.Clear)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.clear (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:clear: ", p), err) }
+  return err
+}
+
+func (p *BarPatch) writeField3(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("patchPrior", thrift.STRUCT, 3); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:patchPrior: ", p), err) }
+  if err := p.PatchPrior.Write(oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.PatchPrior), err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:patchPrior: ", p), err) }
+  return err
+}
+
+func (p *BarPatch) writeField5(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("ensure", thrift.STRUCT, 5); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 5:ensure: ", p), err) }
+  if err := p.Ensure.Write(oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Ensure), err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 5:ensure: ", p), err) }
+  return err
+}
+
+func (p *BarPatch) writeField6(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("patch", thrift.STRUCT, 6); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 6:patch: ", p), err) }
+  if err := p.Patch.Write(oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Patch), err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 6:patch: ", p), err) }
+  return err
+}
+
+func (p *BarPatch) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  var assignVal string
+  if p.Assign == nil {
+    assignVal = "<nil>"
+  } else {
+    assignVal = fmt.Sprintf("%v", p.Assign)
+  }
+  clearVal := fmt.Sprintf("%v", p.Clear)
+  var patchPriorVal string
+  if p.PatchPrior == nil {
+    patchPriorVal = "<nil>"
+  } else {
+    patchPriorVal = fmt.Sprintf("%v", p.PatchPrior)
+  }
+  var ensureVal string
+  if p.Ensure == nil {
+    ensureVal = "<nil>"
+  } else {
+    ensureVal = fmt.Sprintf("%v", p.Ensure)
+  }
+  var patchVal string
+  if p.Patch == nil {
+    patchVal = "<nil>"
+  } else {
+    patchVal = fmt.Sprintf("%v", p.Patch)
+  }
+  return fmt.Sprintf("BarPatch({Assign:%s Clear:%s PatchPrior:%s Ensure:%s Patch:%s})", assignVal, clearVal, patchPriorVal, ensureVal, patchVal)
+}
+
+// Attributes:
+//  - Bar
+type LoopFieldPatch struct {
+  Bar *BarPatch
+}
+
+func NewLoopFieldPatch() *LoopFieldPatch {
+  return &LoopFieldPatch{
+    Bar: NewBarPatch(),
+  }
+}
+
+var LoopFieldPatch_Bar_DEFAULT *BarPatch
+func (p *LoopFieldPatch) GetBar() *BarPatch {
+  if !p.IsSetBar() {
+    return LoopFieldPatch_Bar_DEFAULT
+  }
+  return p.Bar
+}
+func (p *LoopFieldPatch) DefaultGetBar() *BarPatch {
+  if !p.IsSetBar() {
+    return NewBarPatch()
+  }
+  return p.Bar
+}
+func (p *LoopFieldPatch) IsSetBar() bool {
+  return p != nil && p.Bar != nil
+}
+
+type LoopFieldPatchBuilder struct {
+  obj *LoopFieldPatch
+}
+
+func NewLoopFieldPatchBuilder() *LoopFieldPatchBuilder{
+  return &LoopFieldPatchBuilder{
+    obj: NewLoopFieldPatch(),
+  }
+}
+
+func (p LoopFieldPatchBuilder) Emit() *LoopFieldPatch{
+  return &LoopFieldPatch{
+    Bar: p.obj.Bar,
+  }
+}
+
+func (l *LoopFieldPatchBuilder) Bar(bar *BarPatch) *LoopFieldPatchBuilder {
+  l.obj.Bar = bar
+  return l
+}
+
+func (l *LoopFieldPatch) SetBar(bar *BarPatch) *LoopFieldPatch {
+  l.Bar = bar
+  return l
+}
+
+func (p *LoopFieldPatch) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case -1:
+      if err := p.ReadField_1(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *LoopFieldPatch)  ReadField_1(iprot thrift.Protocol) error {
+  p.Bar = NewBarPatch()
+  if err := p.Bar.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Bar), err)
+  }
+  return nil
+}
+
+func (p *LoopFieldPatch) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("LoopFieldPatch"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField_1(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *LoopFieldPatch) writeField_1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("bar", thrift.STRUCT, -1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -1:bar: ", p), err) }
+  if err := p.Bar.Write(oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Bar), err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -1:bar: ", p), err) }
+  return err
+}
+
+func (p *LoopFieldPatch) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  var barVal string
+  if p.Bar == nil {
+    barVal = "<nil>"
+  } else {
+    barVal = fmt.Sprintf("%v", p.Bar)
+  }
+  return fmt.Sprintf("LoopFieldPatch({Bar:%s})", barVal)
+}
+
+// Attributes:
+//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Clear: Clears a value. Applies first.
+type LoopPatch struct {
+  Assign *Loop `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
+  Clear bool `thrift:"clear,2" db:"clear" json:"clear"`
+}
+
+func NewLoopPatch() *LoopPatch {
+  return &LoopPatch{}
+}
+
+var LoopPatch_Assign_DEFAULT *Loop
+func (p *LoopPatch) GetAssign() *Loop {
+  if !p.IsSetAssign() {
+    return LoopPatch_Assign_DEFAULT
+  }
+  return p.Assign
+}
+func (p *LoopPatch) DefaultGetAssign() *Loop {
+  if !p.IsSetAssign() {
+    return NewLoop()
+  }
+  return p.Assign
+}
+
+func (p *LoopPatch) GetClear() bool {
+  return p.Clear
+}
+func (p *LoopPatch) IsSetAssign() bool {
+  return p != nil && p.Assign != nil
+}
+
+type LoopPatchBuilder struct {
+  obj *LoopPatch
+}
+
+func NewLoopPatchBuilder() *LoopPatchBuilder{
+  return &LoopPatchBuilder{
+    obj: NewLoopPatch(),
+  }
+}
+
+func (p LoopPatchBuilder) Emit() *LoopPatch{
+  return &LoopPatch{
+    Assign: p.obj.Assign,
+    Clear: p.obj.Clear,
+  }
+}
+
+func (l *LoopPatchBuilder) Assign(assign *Loop) *LoopPatchBuilder {
+  l.obj.Assign = assign
+  return l
+}
+
+func (l *LoopPatchBuilder) Clear(clear bool) *LoopPatchBuilder {
+  l.obj.Clear = clear
+  return l
+}
+
+func (l *LoopPatch) SetAssign(assign *Loop) *LoopPatch {
+  l.Assign = assign
+  return l
+}
+
+func (l *LoopPatch) SetClear(clear bool) *LoopPatch {
+  l.Clear = clear
+  return l
+}
+
+func (p *LoopPatch) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *LoopPatch)  ReadField1(iprot thrift.Protocol) error {
+  p.Assign = NewLoop()
+  if err := p.Assign.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Assign), err)
+  }
+  return nil
+}
+
+func (p *LoopPatch)  ReadField2(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadBool(); err != nil {
+    return thrift.PrependError("error reading field 2: ", err)
+  } else {
+    p.Clear = v
+  }
+  return nil
+}
+
+func (p *LoopPatch) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("LoopPatch"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *LoopPatch) writeField1(oprot thrift.Protocol) (err error) {
+  if p.IsSetAssign() {
+    if err := oprot.WriteFieldBegin("assign", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:assign: ", p), err) }
+    if err := p.Assign.Write(oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Assign), err)
+    }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:assign: ", p), err) }
+  }
+  return err
+}
+
+func (p *LoopPatch) writeField2(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("clear", thrift.BOOL, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:clear: ", p), err) }
+  if err := oprot.WriteBool(bool(p.Clear)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.clear (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:clear: ", p), err) }
+  return err
+}
+
+func (p *LoopPatch) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  var assignVal string
+  if p.Assign == nil {
+    assignVal = "<nil>"
+  } else {
+    assignVal = fmt.Sprintf("%v", p.Assign)
+  }
+  clearVal := fmt.Sprintf("%v", p.Clear)
+  return fmt.Sprintf("LoopPatch({Assign:%s Clear:%s})", assignVal, clearVal)
 }
 

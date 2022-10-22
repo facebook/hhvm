@@ -41,6 +41,10 @@ namespace py thrift.lib.thrift.patch
 @scope.Structured
 struct GeneratePatch {}
 
+@scope.Field
+@scope.Structured
+struct AssignOnlyPatch {}
+
 /** A patch for a boolean value. */
 @cpp.Adapter{
   underlyingName = "BoolPatchStruct",

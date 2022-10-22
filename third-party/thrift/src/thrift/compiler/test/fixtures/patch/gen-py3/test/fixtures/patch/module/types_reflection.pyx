@@ -513,6 +513,81 @@ cdef __StructSpec get_reflection__LateDefStruct():
         },
     )
     return spec
+cdef __StructSpec get_reflection__Recursive():
+    cdef _test_fixtures_patch_module_types.Recursive defaults = _test_fixtures_patch_module_types.Recursive._fbthrift_create(
+        constant_shared_ptr[_test_fixtures_patch_module_types.cRecursive](
+            default_inst[_test_fixtures_patch_module_types.cRecursive]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="Recursive",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=-1,
+            name="nodes",
+            type=_test_fixtures_patch_module_types.Map__string_Recursive,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec
+cdef __StructSpec get_reflection__Bar():
+    cdef _test_fixtures_patch_module_types.Bar defaults = _test_fixtures_patch_module_types.Bar._fbthrift_create(
+        constant_shared_ptr[_test_fixtures_patch_module_types.cBar](
+            default_inst[_test_fixtures_patch_module_types.cBar]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="Bar",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=-1,
+            name="loop",
+            type=_test_fixtures_patch_module_types.Loop,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec
+cdef __StructSpec get_reflection__Loop():
+    cdef _test_fixtures_patch_module_types.Loop defaults = _test_fixtures_patch_module_types.Loop._fbthrift_create(
+        constant_shared_ptr[_test_fixtures_patch_module_types.cLoop](
+            default_inst[_test_fixtures_patch_module_types.cLoop]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="Loop",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=-1,
+            name="bar",
+            type=_test_fixtures_patch_module_types.Bar,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec
 cdef __ListSpec get_reflection__List__i16():
     return __ListSpec._fbthrift_create(
         value=int,
@@ -530,6 +605,14 @@ cdef __MapSpec get_reflection__Map__string_string():
         key=str,
         key_kind=__NumberType.NOT_A_NUMBER,
         value=str,
+        value_kind=__NumberType.NOT_A_NUMBER,
+    )
+
+cdef __MapSpec get_reflection__Map__string_Recursive():
+    return __MapSpec._fbthrift_create(
+        key=str,
+        key_kind=__NumberType.NOT_A_NUMBER,
+        value=_test_fixtures_patch_module_types.Recursive,
         value_kind=__NumberType.NOT_A_NUMBER,
     )
 

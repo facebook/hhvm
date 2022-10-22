@@ -71,3 +71,15 @@ cdef class LateDefStruct_Builder(thrift.py3.builder.StructBuilder):
     pass
 
 
+cdef class Recursive_Builder(thrift.py3.builder.StructBuilder):
+    cdef public dict nodes
+
+
+cdef class Bar_Builder(thrift.py3.builder.StructBuilder):
+    cdef public object loop
+
+
+cdef class Loop_Builder(thrift.py3.builder.StructBuilder):
+    cdef public object bar
+
+

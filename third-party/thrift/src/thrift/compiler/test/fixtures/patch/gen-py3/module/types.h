@@ -168,6 +168,36 @@ void reset_field<::test::fixtures::patch::LateDefStruct>(
 }
 
 template<>
+void reset_field<::test::fixtures::patch::Recursive>(
+    ::test::fixtures::patch::Recursive& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.nodes_ref().copy_from(default_inst<::test::fixtures::patch::Recursive>().nodes_ref());
+      return;
+  }
+}
+
+template<>
+void reset_field<::test::fixtures::patch::Bar>(
+    ::test::fixtures::patch::Bar& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.loop_ref().copy_from(default_inst<::test::fixtures::patch::Bar>().loop_ref());
+      return;
+  }
+}
+
+template<>
+void reset_field<::test::fixtures::patch::Loop>(
+    ::test::fixtures::patch::Loop& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.bar_ref().copy_from(default_inst<::test::fixtures::patch::Loop>().bar_ref());
+      return;
+  }
+}
+
+template<>
 const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::test::fixtures::patch::MyData>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
@@ -210,6 +240,36 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 template<>
 const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::test::fixtures::patch::LateDefStruct>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::test::fixtures::patch::Recursive>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::test::fixtures::patch::Bar>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::test::fixtures::patch::Loop>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

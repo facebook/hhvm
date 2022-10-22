@@ -90,6 +90,17 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/patch_types_custom_protocol.h" name
         bint operator>=(cGeneratePatch&)
 
 
+    cdef cppclass cAssignOnlyPatch "::apache::thrift::op::AssignOnlyPatch":
+        cAssignOnlyPatch() except +
+        cAssignOnlyPatch(const cAssignOnlyPatch&) except +
+        bint operator==(cAssignOnlyPatch&)
+        bint operator!=(cAssignOnlyPatch&)
+        bint operator<(cAssignOnlyPatch&)
+        bint operator>(cAssignOnlyPatch&)
+        bint operator<=(cAssignOnlyPatch&)
+        bint operator>=(cAssignOnlyPatch&)
+
+
 
 
 cdef class GeneratePatch(thrift.py3.types.Struct):
@@ -98,6 +109,15 @@ cdef class GeneratePatch(thrift.py3.types.Struct):
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cGeneratePatch])
+
+
+
+cdef class AssignOnlyPatch(thrift.py3.types.Struct):
+    cdef shared_ptr[cAssignOnlyPatch] _cpp_obj
+    cdef _fbthrift_types_fields.__AssignOnlyPatch_FieldsSetter _fields_setter
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cAssignOnlyPatch])
 
 
 

@@ -66,3 +66,21 @@ cdef class LateDefStruct_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self):
         pass
 
+cdef class Recursive_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _test_fixtures_patch_module_types.Recursive
+
+    def __iter__(self):
+        yield "nodes", self.nodes
+
+cdef class Bar_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _test_fixtures_patch_module_types.Bar
+
+    def __iter__(self):
+        yield "loop", self.loop
+
+cdef class Loop_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _test_fixtures_patch_module_types.Loop
+
+    def __iter__(self):
+        yield "bar", self.bar
+

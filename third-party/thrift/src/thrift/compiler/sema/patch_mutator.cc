@@ -31,6 +31,7 @@ namespace compiler {
 namespace {
 
 constexpr auto kGeneratePatchUri = "facebook.com/thrift/op/GeneratePatch";
+constexpr auto kAssignOnlyPatchUri = "facebook.com/thrift/op/AssignOnlyPatch";
 
 // TODO(afuller): Index all types by uri, and find them that way.
 const char* getPatchTypeName(t_base_type::type base_type) {
@@ -311,13 +312,27 @@ patch_generator& patch_generator::get_for(
   });
 }
 
+const t_const* patch_generator::get_assign_only_annotation_or_null(
+    const t_named& node) {
+  return ctx_.program().inherit_annotation_or_null(node, kAssignOnlyPatchUri);
+}
+
+const t_const& patch_generator::get_field_annotation(
+    const t_const& annot, const t_field& field) {
+  if (auto* field_annot = get_assign_only_annotation_or_null(field)) {
+    return *field_annot;
+  }
+  return annot;
+}
+
 t_struct& patch_generator::add_field_patch(
     const t_const& annot, t_structured& orig) {
   // Resolve (and maybe create) all the field patch types, strictly before
   // creating FieldPatch.
   std::map<t_field_id, t_type_ref> types; // Ordered by field id.
   for (const auto& field : orig.fields()) {
-    if (t_type_ref patch_type = find_patch_type(annot, orig, field)) {
+    if (t_type_ref patch_type =
+            find_patch_type(get_field_annotation(annot, field), orig, field)) {
       types[field.id()] = patch_type;
     } else {
       ctx_.warning(field, "Could not resolve patch type for field.");
@@ -333,10 +348,14 @@ t_struct& patch_generator::add_field_patch(
 }
 
 t_struct& patch_generator::add_union_patch(
-    const t_node& annot, t_union& value_type, t_type_ref patch_type) {
+    const t_const& annot, t_union& value_type, t_type_ref patch_type) {
   PatchGen gen{{annot, gen_suffix_struct(annot, value_type, "Patch")}};
   gen.assign(value_type);
   gen.clearUnion();
+  if (get_assign_only_annotation_or_null(value_type)) {
+    gen.set_adapter("AssignPatchAdapter", program_);
+    return gen;
+  }
   gen.patchPrior(patch_type);
   gen.ensureUnion(value_type);
   gen.patchAfter(patch_type);
@@ -345,10 +364,14 @@ t_struct& patch_generator::add_union_patch(
 }
 
 t_struct& patch_generator::add_struct_patch(
-    const t_node& annot, t_struct& value_type, t_type_ref patch_type) {
+    const t_const& annot, t_struct& value_type, t_type_ref patch_type) {
   PatchGen gen{{annot, gen_suffix_struct(annot, value_type, "Patch")}};
   gen.assign(value_type);
   gen.clear();
+  if (get_assign_only_annotation_or_null(value_type)) {
+    gen.set_adapter("AssignPatchAdapter", program_);
+    return gen;
+  }
   gen.patchPrior(patch_type);
   gen.ensureStruct(value_type);
   gen.patchAfter(patch_type);
@@ -492,6 +515,11 @@ t_struct& patch_generator::gen_patch(
   // All value patches have an assign and clear field.
   gen.assign(type);
   gen.clear();
+
+  if (annot.get_type()->uri() == kAssignOnlyPatchUri) {
+    gen.set_adapter("AssignPatchAdapter", program_);
+    return gen;
+  }
 
   const auto* ttype = type->get_true_type();
   if (auto* list = dynamic_cast<const t_list*>(ttype)) {

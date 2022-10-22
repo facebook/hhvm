@@ -81,3 +81,21 @@ class LateDefStruct_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 
 
+class Recursive_Builder(thrift.py3.builder.StructBuilder):
+    nodes: _typing.Optional[dict]
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
+
+
+class Bar_Builder(thrift.py3.builder.StructBuilder):
+    loop: _typing.Any
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
+
+
+class Loop_Builder(thrift.py3.builder.StructBuilder):
+    bar: _typing.Any
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
+
+

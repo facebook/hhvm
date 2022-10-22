@@ -1138,6 +1138,354 @@ cdef class LateDefStruct(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.LateDefStruct, self)
 @__cython.auto_pickle(False)
+cdef class Recursive(thrift.py3.types.Struct):
+    def __init__(Recursive self, **kwargs):
+        self._cpp_obj = make_shared[cRecursive]()
+        self._fields_setter = _fbthrift_types_fields.__Recursive_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(Recursive self, **kwargs):
+        if not kwargs:
+            return self
+        cdef Recursive __fbthrift_inst = Recursive.__new__(Recursive)
+        __fbthrift_inst._cpp_obj = make_shared[cRecursive](deref(self._cpp_obj))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Recursive_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return thrift.py3.types._IsSet("Recursive", {
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cRecursive] cpp_obj):
+        __fbthrift_inst = <Recursive>Recursive.__new__(Recursive)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline nodes_impl(self):
+
+        if self.__fbthrift_cached_nodes is None:
+            self.__fbthrift_cached_nodes = Map__string_Recursive._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).nodes_ref().ref(), self._cpp_obj))
+        return self.__fbthrift_cached_nodes
+
+    @property
+    def nodes(self):
+        return self.nodes_impl()
+
+
+    def __hash__(Recursive self):
+        return super().__hash__()
+
+    def __repr__(Recursive self):
+        return super().__repr__()
+
+    def __str__(Recursive self):
+        return super().__str__()
+
+
+    def __copy__(Recursive self):
+        cdef shared_ptr[cRecursive] cpp_obj = make_shared[cRecursive](
+            deref(self._cpp_obj)
+        )
+        return Recursive._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cRecursive](
+            self._cpp_obj,
+            (<Recursive>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__Recursive()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cRecursive].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.Recursive"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cRecursive](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 1
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Recursive self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cRecursive](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(Recursive self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cRecursive]()
+        with nogil:
+            needed = serializer.cdeserialize[cRecursive](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "test.fixtures.patch.module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.Recursive, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.Recursive, self)
+@__cython.auto_pickle(False)
+cdef class Bar(thrift.py3.types.Struct):
+    def __init__(Bar self, **kwargs):
+        self._cpp_obj = make_shared[cBar]()
+        self._fields_setter = _fbthrift_types_fields.__Bar_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(Bar self, **kwargs):
+        if not kwargs:
+            return self
+        cdef Bar __fbthrift_inst = Bar.__new__(Bar)
+        __fbthrift_inst._cpp_obj = make_shared[cBar](deref(self._cpp_obj))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Bar_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return thrift.py3.types._IsSet("Bar", {
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cBar] cpp_obj):
+        __fbthrift_inst = <Bar>Bar.__new__(Bar)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline loop_impl(self):
+
+        if self.__fbthrift_cached_loop is None:
+            self.__fbthrift_cached_loop = Loop._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).loop_ref().ref(), self._cpp_obj))
+        return self.__fbthrift_cached_loop
+
+    @property
+    def loop(self):
+        return self.loop_impl()
+
+
+    def __hash__(Bar self):
+        return super().__hash__()
+
+    def __repr__(Bar self):
+        return super().__repr__()
+
+    def __str__(Bar self):
+        return super().__str__()
+
+
+    def __copy__(Bar self):
+        cdef shared_ptr[cBar] cpp_obj = make_shared[cBar](
+            deref(self._cpp_obj)
+        )
+        return Bar._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cBar](
+            self._cpp_obj,
+            (<Bar>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__Bar()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cBar].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.Bar"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cBar](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 1
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Bar self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cBar](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(Bar self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cBar]()
+        with nogil:
+            needed = serializer.cdeserialize[cBar](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "test.fixtures.patch.module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.Bar, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.Bar, self)
+@__cython.auto_pickle(False)
+cdef class Loop(thrift.py3.types.Struct):
+    def __init__(Loop self, **kwargs):
+        self._cpp_obj = make_shared[cLoop]()
+        self._fields_setter = _fbthrift_types_fields.__Loop_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(Loop self, **kwargs):
+        if not kwargs:
+            return self
+        cdef Loop __fbthrift_inst = Loop.__new__(Loop)
+        __fbthrift_inst._cpp_obj = make_shared[cLoop](deref(self._cpp_obj))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__Loop_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return thrift.py3.types._IsSet("Loop", {
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cLoop] cpp_obj):
+        __fbthrift_inst = <Loop>Loop.__new__(Loop)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline bar_impl(self):
+
+        if self.__fbthrift_cached_bar is None:
+            self.__fbthrift_cached_bar = Bar._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).bar_ref().ref(), self._cpp_obj))
+        return self.__fbthrift_cached_bar
+
+    @property
+    def bar(self):
+        return self.bar_impl()
+
+
+    def __hash__(Loop self):
+        return super().__hash__()
+
+    def __repr__(Loop self):
+        return super().__repr__()
+
+    def __str__(Loop self):
+        return super().__str__()
+
+
+    def __copy__(Loop self):
+        cdef shared_ptr[cLoop] cpp_obj = make_shared[cLoop](
+            deref(self._cpp_obj)
+        )
+        return Loop._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cLoop](
+            self._cpp_obj,
+            (<Loop>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__Loop()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cLoop].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.Loop"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cLoop](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 1
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(Loop self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cLoop](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(Loop self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cLoop]()
+        with nogil:
+            needed = serializer.cdeserialize[cLoop](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "test.fixtures.patch.module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.Loop, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.Loop, self)
+@__cython.auto_pickle(False)
 cdef class List__i16(thrift.py3.types.List):
     def __init__(self, items=None):
         if isinstance(items, List__i16):
@@ -1391,4 +1739,99 @@ cdef class Map__string_string(thrift.py3.types.Map):
         return _types_reflection.get_reflection__Map__string_string()
 
 Mapping.register(Map__string_string)
+
+@__cython.auto_pickle(False)
+cdef class Map__string_Recursive(thrift.py3.types.Map):
+    def __init__(self, items=None):
+        if isinstance(items, Map__string_Recursive):
+            self._cpp_obj = (<Map__string_Recursive> items)._cpp_obj
+        else:
+            self._cpp_obj = Map__string_Recursive._make_instance(items)
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cmap[string,cRecursive]] c_items):
+        __fbthrift_inst = <Map__string_Recursive>Map__string_Recursive.__new__(Map__string_Recursive)
+        __fbthrift_inst._cpp_obj = cmove(c_items)
+        return __fbthrift_inst
+
+    def __copy__(Map__string_Recursive self):
+        cdef shared_ptr[cmap[string,cRecursive]] cpp_obj = make_shared[cmap[string,cRecursive]](
+            deref(self._cpp_obj)
+        )
+        return Map__string_Recursive._fbthrift_create(cmove(cpp_obj))
+
+    def __len__(self):
+        return deref(self._cpp_obj).size()
+
+    @staticmethod
+    cdef shared_ptr[cmap[string,cRecursive]] _make_instance(object items) except *:
+        cdef shared_ptr[cmap[string,cRecursive]] c_inst = make_shared[cmap[string,cRecursive]]()
+        if items is not None:
+            for key, item in items.items():
+                if not isinstance(key, str):
+                    raise TypeError(f"{key!r} is not of type str")
+                if not isinstance(item, Recursive):
+                    raise TypeError(f"{item!r} is not of type Recursive")
+
+                deref(c_inst)[key.encode('UTF-8')] = deref((<Recursive>item)._cpp_obj)
+        return c_inst
+
+    cdef _check_key_type(self, key):
+        if not self or key is None:
+            return
+        if isinstance(key, str):
+            return key
+
+    def __getitem__(self, key):
+        err = KeyError(f'{key}')
+        key = self._check_key_type(key)
+        if key is None:
+            raise err
+        cdef string ckey = key.encode('UTF-8')
+        if not __map_contains(self._cpp_obj, ckey):
+            raise err
+        cdef shared_ptr[cRecursive] citem
+        __map_getitem(self._cpp_obj, ckey, citem)
+        return Recursive._fbthrift_create(citem)
+
+    def __iter__(self):
+        if not self:
+            return
+        cdef __map_iter[cmap[string,cRecursive]] itr = __map_iter[cmap[string,cRecursive]](self._cpp_obj)
+        cdef string citem
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextKey(self._cpp_obj, citem)
+            yield bytes(citem).decode('UTF-8')
+
+    def __contains__(self, key):
+        key = self._check_key_type(key)
+        if key is None:
+            return False
+        cdef string ckey = key.encode('UTF-8')
+        return __map_contains(self._cpp_obj, ckey)
+
+    def values(self):
+        if not self:
+            return
+        cdef __map_iter[cmap[string,cRecursive]] itr = __map_iter[cmap[string,cRecursive]](self._cpp_obj)
+        cdef shared_ptr[cRecursive] citem
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextValue(self._cpp_obj, citem)
+            yield Recursive._fbthrift_create(citem)
+
+    def items(self):
+        if not self:
+            return
+        cdef __map_iter[cmap[string,cRecursive]] itr = __map_iter[cmap[string,cRecursive]](self._cpp_obj)
+        cdef string ckey
+        cdef shared_ptr[cRecursive] citem
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextItem(self._cpp_obj, ckey, citem)
+            yield (ckey.data().decode('UTF-8'), Recursive._fbthrift_create(citem))
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__Map__string_Recursive()
+
+Mapping.register(Map__string_Recursive)
 

@@ -21,6 +21,7 @@
 #include <folly/io/Cursor.h>
 #include <folly/lang/Bits.h>
 #include <folly/portability/Builtins.h>
+#include <thrift/lib/cpp2/type/Id.h>
 
 // We need 64-bit for __mm_extra_epi64 and _pext_u64. MSVC support seems to be
 // difficult to detect, so disable the BMI2 and SIMD versions entirely there.
@@ -416,6 +417,16 @@ constexpr inline uint32_t i32ToZigzag(const int32_t n) {
 
 constexpr inline uint64_t i64ToZigzag(const int64_t l) {
   return (static_cast<uint64_t>(l) << 1) ^ static_cast<uint64_t>(l >> 63);
+}
+
+inline uint32_t toI32ZigZagOrdinal(size_t pos) {
+  return apache::thrift::util::i32ToZigzag(
+      static_cast<int32_t>(type::toOrdinal(pos)));
+}
+
+inline size_t fromI32ZigZagOrdinal(uint32_t pos) {
+  return type::toPosition(
+      type::Ordinal(apache::thrift::util::zigzagToI32(pos)));
 }
 
 } // namespace util

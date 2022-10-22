@@ -95,8 +95,7 @@ cdef class SyncClient:
                 response_iobuf = folly.iobuf.from_unique_ptr(cmove(resp.buf.value()))
                 return deserialize(response_cls, response_iobuf, protocol=protocol)
             elif resp.buf.hasError():
-                # TODO: pass a proper RpcOptions value
-                raise create_py_exception(resp.buf.error(), None)
+                raise create_py_exception(resp.buf.error(), rpc_options)
             else:
                 raise ApplicationError(
                     ApplicationErrorType.MISSING_RESULT,

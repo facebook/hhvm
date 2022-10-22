@@ -65,6 +65,8 @@ cdef class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     cdef public list optListVal
     cdef public set optSetVal
     cdef public dict optMapVal
+    cdef public list listMap
+    cdef public dict mapMap
 
 
 cdef class LateDefStruct_Builder(thrift.py3.builder.StructBuilder):

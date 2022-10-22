@@ -499,6 +499,30 @@ cdef __StructSpec get_reflection__MyStruct():
             },
         ),
     )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=-31,
+            name="listMap",
+            type=_test_fixtures_patch_module_types.List__Map__string_i32,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=-32,
+            name="mapMap",
+            type=_test_fixtures_patch_module_types.Map__string_Map__string_i32,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
     return spec
 cdef __StructSpec get_reflection__LateDefStruct():
     cdef _test_fixtures_patch_module_types.LateDefStruct defaults = _test_fixtures_patch_module_types.LateDefStruct._fbthrift_create(
@@ -605,6 +629,28 @@ cdef __MapSpec get_reflection__Map__string_string():
         key=str,
         key_kind=__NumberType.NOT_A_NUMBER,
         value=str,
+        value_kind=__NumberType.NOT_A_NUMBER,
+    )
+
+cdef __MapSpec get_reflection__Map__string_i32():
+    return __MapSpec._fbthrift_create(
+        key=str,
+        key_kind=__NumberType.NOT_A_NUMBER,
+        value=int,
+        value_kind=__NumberType.I32,
+    )
+
+cdef __ListSpec get_reflection__List__Map__string_i32():
+    return __ListSpec._fbthrift_create(
+        value=_test_fixtures_patch_module_types.Map__string_i32,
+        kind=__NumberType.NOT_A_NUMBER,
+    )
+
+cdef __MapSpec get_reflection__Map__string_Map__string_i32():
+    return __MapSpec._fbthrift_create(
+        key=str,
+        key_kind=__NumberType.NOT_A_NUMBER,
+        value=_test_fixtures_patch_module_types.Map__string_i32,
         value_kind=__NumberType.NOT_A_NUMBER,
     )
 

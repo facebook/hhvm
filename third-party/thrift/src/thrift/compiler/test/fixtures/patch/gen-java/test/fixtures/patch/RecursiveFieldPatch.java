@@ -25,7 +25,7 @@ public final class RecursiveFieldPatch implements com.facebook.thrift.payload.Th
 
     @ThriftConstructor
     public RecursiveFieldPatch(
-        @com.facebook.swift.codec.ThriftField(value=-1, name="nodes", isLegacyId=true, requiredness=Requiredness.NONE) final test.fixtures.patch.RecursiveFieldN1Patch nodes
+        @com.facebook.swift.codec.ThriftField(value=-1, name="nodes", isLegacyId=true, requiredness=Requiredness.NONE) final test.fixtures.patch.RecursiveField1Patch nodes
     ) {
         this.nodes = nodes;
     }
@@ -37,15 +37,15 @@ public final class RecursiveFieldPatch implements com.facebook.thrift.payload.Th
     
     public static class Builder {
     
-        private test.fixtures.patch.RecursiveFieldN1Patch nodes = null;
+        private test.fixtures.patch.RecursiveField1Patch nodes = null;
     
         @com.facebook.swift.codec.ThriftField(value=-1, name="nodes", isLegacyId=true, requiredness=Requiredness.NONE)
-        public Builder setNodes(test.fixtures.patch.RecursiveFieldN1Patch nodes) {
+        public Builder setNodes(test.fixtures.patch.RecursiveField1Patch nodes) {
             this.nodes = nodes;
             return this;
         }
     
-        public test.fixtures.patch.RecursiveFieldN1Patch getNodes() { return nodes; }
+        public test.fixtures.patch.RecursiveField1Patch getNodes() { return nodes; }
     
         public Builder() { }
         public Builder(RecursiveFieldPatch other) {
@@ -65,7 +65,7 @@ public final class RecursiveFieldPatch implements com.facebook.thrift.payload.Th
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("RecursiveFieldPatch");
-    private final test.fixtures.patch.RecursiveFieldN1Patch nodes;
+    private final test.fixtures.patch.RecursiveField1Patch nodes;
     public static final int _NODES = -1;
     private static final TField NODES_FIELD_DESC = new TField("nodes", TType.STRUCT, (short)-1);
     static {
@@ -79,7 +79,7 @@ public final class RecursiveFieldPatch implements com.facebook.thrift.payload.Th
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=-1, name="nodes", isLegacyId=true, requiredness=Requiredness.NONE)
-    public test.fixtures.patch.RecursiveFieldN1Patch getNodes() { return nodes; }
+    public test.fixtures.patch.RecursiveField1Patch getNodes() { return nodes; }
     
     @java.lang.Override
     public String toString() {
@@ -126,7 +126,7 @@ public final class RecursiveFieldPatch implements com.facebook.thrift.payload.Th
         switch (__field.id) {
         case _NODES:
           if (__field.type == TType.STRUCT) {
-            test.fixtures.patch.RecursiveFieldN1Patch nodes = test.fixtures.patch.RecursiveFieldN1Patch.read0(oprot);
+            test.fixtures.patch.RecursiveField1Patch nodes = test.fixtures.patch.RecursiveField1Patch.read0(oprot);
             builder.setNodes(nodes);
           } else {
             TProtocolUtil.skip(oprot, __field.type);

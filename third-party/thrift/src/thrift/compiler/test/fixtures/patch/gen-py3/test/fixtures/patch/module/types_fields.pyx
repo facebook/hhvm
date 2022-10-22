@@ -93,6 +93,8 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
         __fbthrift_inst._setters[__cstring_view(<const char*>"optListVal")] = __MyStruct_FieldsSetter._set_field_27
         __fbthrift_inst._setters[__cstring_view(<const char*>"optSetVal")] = __MyStruct_FieldsSetter._set_field_28
         __fbthrift_inst._setters[__cstring_view(<const char*>"optMapVal")] = __MyStruct_FieldsSetter._set_field_29
+        __fbthrift_inst._setters[__cstring_view(<const char*>"listMap")] = __MyStruct_FieldsSetter._set_field_30
+        __fbthrift_inst._setters[__cstring_view(<const char*>"mapMap")] = __MyStruct_FieldsSetter._set_field_31
         return __fbthrift_inst
 
     cdef void set_field(__MyStruct_FieldsSetter self, const char* name, object value) except *:
@@ -373,6 +375,20 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
             __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 29)
             return
         deref(self._struct_cpp_obj).optMapVal_ref().assign(deref(_test_fixtures_patch_module_types.Map__string_string(_fbthrift_value)._cpp_obj))
+
+    cdef void _set_field_30(self, _fbthrift_value) except *:
+        # for field listMap
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 30)
+            return
+        deref(self._struct_cpp_obj).listMap_ref().assign(deref(_test_fixtures_patch_module_types.List__Map__string_i32(_fbthrift_value)._cpp_obj))
+
+    cdef void _set_field_31(self, _fbthrift_value) except *:
+        # for field mapMap
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 31)
+            return
+        deref(self._struct_cpp_obj).mapMap_ref().assign(deref(_test_fixtures_patch_module_types.Map__string_Map__string_i32(_fbthrift_value)._cpp_obj))
 
 
 @__cython.auto_pickle(False)

@@ -168,6 +168,8 @@ cdef extern from "thrift/compiler/test/fixtures/patch/src/gen-cpp2/module_types_
         __optional_field_ref[vector[cint16_t]] optListVal_ref "optListVal_ref" ()
         __optional_field_ref[cset[string]] optSetVal_ref "optSetVal_ref" ()
         __optional_field_ref[cmap[string,string]] optMapVal_ref "optMapVal_ref" ()
+        __terse_field_ref[vector[cmap[string,cint32_t]]] listMap_ref "listMap_ref" ()
+        __terse_field_ref[cmap[string,cmap[string,cint32_t]]] mapMap_ref "mapMap_ref" ()
 
 
     cdef cppclass cLateDefStruct "::test::fixtures::patch::LateDefStruct":
@@ -307,6 +309,8 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline object optListVal_impl(self)
     cdef inline object optSetVal_impl(self)
     cdef inline object optMapVal_impl(self)
+    cdef inline object listMap_impl(self)
+    cdef inline object mapMap_impl(self)
     cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_binaryVal
     cdef object __fbthrift_cached_enumVal
     cdef MyData __fbthrift_cached_structVal
@@ -321,6 +325,8 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef List__i16 __fbthrift_cached_optListVal
     cdef Set__string __fbthrift_cached_optSetVal
     cdef Map__string_string __fbthrift_cached_optMapVal
+    cdef List__Map__string_i32 __fbthrift_cached_listMap
+    cdef Map__string_Map__string_i32 __fbthrift_cached_mapMap
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cMyStruct])
@@ -388,6 +394,27 @@ cdef class Map__string_string(thrift.py3.types.Map):
     cdef _fbthrift_create(shared_ptr[cmap[string,string]])
     @staticmethod
     cdef shared_ptr[cmap[string,string]] _make_instance(object items) except *
+
+cdef class Map__string_i32(thrift.py3.types.Map):
+    cdef shared_ptr[cmap[string,cint32_t]] _cpp_obj
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cmap[string,cint32_t]])
+    @staticmethod
+    cdef shared_ptr[cmap[string,cint32_t]] _make_instance(object items) except *
+
+cdef class List__Map__string_i32(thrift.py3.types.List):
+    cdef shared_ptr[vector[cmap[string,cint32_t]]] _cpp_obj
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[vector[cmap[string,cint32_t]]])
+    @staticmethod
+    cdef shared_ptr[vector[cmap[string,cint32_t]]] _make_instance(object items) except *
+
+cdef class Map__string_Map__string_i32(thrift.py3.types.Map):
+    cdef shared_ptr[cmap[string,cmap[string,cint32_t]]] _cpp_obj
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cmap[string,cmap[string,cint32_t]]])
+    @staticmethod
+    cdef shared_ptr[cmap[string,cmap[string,cint32_t]]] _make_instance(object items) except *
 
 cdef class Map__string_Recursive(thrift.py3.types.Map):
     cdef shared_ptr[cmap[string,cRecursive]] _cpp_obj

@@ -20,12 +20,12 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.MoreObjects.ToStringHelper;
 
 @SwiftGenerated
-@com.facebook.swift.codec.ThriftStruct(value="RecursiveFieldN1Patch", builder=RecursiveFieldN1Patch.Builder.class)
-public final class RecursiveFieldN1Patch implements com.facebook.thrift.payload.ThriftSerializable {
+@com.facebook.swift.codec.ThriftStruct(value="MyStructField10Patch", builder=MyStructField10Patch.Builder.class)
+public final class MyStructField10Patch implements com.facebook.thrift.payload.ThriftSerializable {
 
     @ThriftConstructor
-    public RecursiveFieldN1Patch(
-        @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final Map<String, test.fixtures.patch.Recursive> assign,
+    public MyStructField10Patch(
+        @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.MyEnum assign,
         @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE) final boolean clear
     ) {
         this.assign = assign;
@@ -33,23 +33,23 @@ public final class RecursiveFieldN1Patch implements com.facebook.thrift.payload.
     }
     
     @ThriftConstructor
-    protected RecursiveFieldN1Patch() {
+    protected MyStructField10Patch() {
       this.assign = null;
       this.clear = false;
     }
     
     public static class Builder {
     
-        private Map<String, test.fixtures.patch.Recursive> assign = null;
+        private test.fixtures.patch.MyEnum assign = null;
         private boolean clear = false;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL)
-        public Builder setAssign(Map<String, test.fixtures.patch.Recursive> assign) {
+        public Builder setAssign(test.fixtures.patch.MyEnum assign) {
             this.assign = assign;
             return this;
         }
     
-        public Map<String, test.fixtures.patch.Recursive> getAssign() { return assign; }
+        public test.fixtures.patch.MyEnum getAssign() { return assign; }
     
             @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE)
         public Builder setClear(boolean clear) {
@@ -60,14 +60,14 @@ public final class RecursiveFieldN1Patch implements com.facebook.thrift.payload.
         public boolean isClear() { return clear; }
     
         public Builder() { }
-        public Builder(RecursiveFieldN1Patch other) {
+        public Builder(MyStructField10Patch other) {
             this.assign = other.assign;
             this.clear = other.clear;
         }
     
         @ThriftConstructor
-        public RecursiveFieldN1Patch build() {
-            RecursiveFieldN1Patch result = new RecursiveFieldN1Patch (
+        public MyStructField10Patch build() {
+            MyStructField10Patch result = new MyStructField10Patch (
                 this.assign,
                 this.clear
             );
@@ -78,10 +78,10 @@ public final class RecursiveFieldN1Patch implements com.facebook.thrift.payload.
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
-    private static final TStruct STRUCT_DESC = new TStruct("RecursiveFieldN1Patch");
-    private final Map<String, test.fixtures.patch.Recursive> assign;
+    private static final TStruct STRUCT_DESC = new TStruct("MyStructField10Patch");
+    private final test.fixtures.patch.MyEnum assign;
     public static final int _ASSIGN = 1;
-    private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.MAP, (short)1);
+    private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.I32, (short)1);
         private final boolean clear;
     public static final int _CLEAR = 2;
     private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
@@ -93,13 +93,13 @@ public final class RecursiveFieldN1Patch implements com.facebook.thrift.payload.
       THRIFT_NAMES_TO_IDS.put("clear", 2);
       FIELD_METADATA.put(2, CLEAR_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
-        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/RecursiveFieldN1Patch"), 
-        RecursiveFieldN1Patch.class, RecursiveFieldN1Patch::read0));
+        new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyStructField10Patch"), 
+        MyStructField10Patch.class, MyStructField10Patch::read0));
     }
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL)
-    public Map<String, test.fixtures.patch.Recursive> getAssign() { return assign; }
+    public test.fixtures.patch.MyEnum getAssign() { return assign; }
     
     
     
@@ -123,7 +123,7 @@ public final class RecursiveFieldN1Patch implements com.facebook.thrift.payload.
             return false;
         }
     
-        RecursiveFieldN1Patch other = (RecursiveFieldN1Patch)o;
+        MyStructField10Patch other = (MyStructField10Patch)o;
     
         return
             Objects.equals(assign, other.assign) &&
@@ -140,32 +140,21 @@ public final class RecursiveFieldN1Patch implements com.facebook.thrift.payload.
     }
     
     
-    public static com.facebook.thrift.payload.Reader<RecursiveFieldN1Patch> asReader() {
-      return RecursiveFieldN1Patch::read0;
+    public static com.facebook.thrift.payload.Reader<MyStructField10Patch> asReader() {
+      return MyStructField10Patch::read0;
     }
     
-    public static RecursiveFieldN1Patch read0(TProtocol oprot) throws TException {
+    public static MyStructField10Patch read0(TProtocol oprot) throws TException {
       TField __field;
-      oprot.readStructBegin(RecursiveFieldN1Patch.NAMES_TO_IDS, RecursiveFieldN1Patch.THRIFT_NAMES_TO_IDS, RecursiveFieldN1Patch.FIELD_METADATA);
-      RecursiveFieldN1Patch.Builder builder = new RecursiveFieldN1Patch.Builder();
+      oprot.readStructBegin(MyStructField10Patch.NAMES_TO_IDS, MyStructField10Patch.THRIFT_NAMES_TO_IDS, MyStructField10Patch.FIELD_METADATA);
+      MyStructField10Patch.Builder builder = new MyStructField10Patch.Builder();
       while (true) {
         __field = oprot.readFieldBegin();
         if (__field.type == TType.STOP) { break; }
         switch (__field.id) {
         case _ASSIGN:
-          if (__field.type == TType.MAP) {
-            Map<String, test.fixtures.patch.Recursive> assign;
-            {
-            TMap _map = oprot.readMapBegin();
-            assign = new HashMap<String, test.fixtures.patch.Recursive>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                test.fixtures.patch.Recursive _value1 = test.fixtures.patch.Recursive.read0(oprot);
-                assign.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+          if (__field.type == TType.I32) {
+            test.fixtures.patch.MyEnum assign = test.fixtures.patch.MyEnum.fromInteger(oprot.readI32());
             builder.setAssign(assign);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -193,13 +182,7 @@ public final class RecursiveFieldN1Patch implements com.facebook.thrift.payload.
       oprot.writeStructBegin(STRUCT_DESC);
       if (assign != null) {
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
-        Map<String, test.fixtures.patch.Recursive> _iter0 = assign;
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _iter0.size()));
-        for (Map.Entry<String, test.fixtures.patch.Recursive> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          _iter1.getValue().write0(oprot);
-        }
-        oprot.writeMapEnd();
+        oprot.writeI32(this.assign == null ? 0 : this.assign.getValue());
         oprot.writeFieldEnd();
       }
       oprot.writeFieldBegin(CLEAR_FIELD_DESC);
@@ -209,11 +192,11 @@ public final class RecursiveFieldN1Patch implements com.facebook.thrift.payload.
       oprot.writeStructEnd();
     }
     
-    private static class _RecursiveFieldN1PatchLazy {
-        private static final RecursiveFieldN1Patch _DEFAULT = new RecursiveFieldN1Patch.Builder().build();
+    private static class _MyStructField10PatchLazy {
+        private static final MyStructField10Patch _DEFAULT = new MyStructField10Patch.Builder().build();
     }
     
-    public static RecursiveFieldN1Patch defaultInstance() {
-        return  _RecursiveFieldN1PatchLazy._DEFAULT;
+    public static MyStructField10Patch defaultInstance() {
+        return  _MyStructField10PatchLazy._DEFAULT;
     }
 }

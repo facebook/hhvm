@@ -36,4 +36,10 @@ cdef __SetSpec get_reflection__Set__string()
 
 cdef __MapSpec get_reflection__Map__string_string()
 
+cdef __MapSpec get_reflection__Map__string_i32()
+
+cdef __ListSpec get_reflection__List__Map__string_i32()
+
+cdef __MapSpec get_reflection__Map__string_Map__string_i32()
+
 cdef __MapSpec get_reflection__Map__string_Recursive()

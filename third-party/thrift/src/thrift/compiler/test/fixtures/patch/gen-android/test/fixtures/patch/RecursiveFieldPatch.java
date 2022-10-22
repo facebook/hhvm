@@ -28,11 +28,11 @@ public class RecursiveFieldPatch implements TBase, java.io.Serializable, Cloneab
   private static final TStruct STRUCT_DESC = new TStruct("RecursiveFieldPatch");
   private static final TField NODES_FIELD_DESC = new TField("nodes", TType.STRUCT, (short)-1);
 
-  public final RecursiveFieldN1Patch nodes;
+  public final RecursiveField1Patch nodes;
   public static final int NODES = -1;
 
   public RecursiveFieldPatch(
-      RecursiveFieldN1Patch nodes) {
+      RecursiveField1Patch nodes) {
     this.nodes = nodes;
   }
 
@@ -51,7 +51,7 @@ public class RecursiveFieldPatch implements TBase, java.io.Serializable, Cloneab
     return new RecursiveFieldPatch(this);
   }
 
-  public RecursiveFieldN1Patch getNodes() {
+  public RecursiveField1Patch getNodes() {
     return this.nodes;
   }
 
@@ -86,7 +86,7 @@ public class RecursiveFieldPatch implements TBase, java.io.Serializable, Cloneab
   }
 
   public static RecursiveFieldPatch deserialize(TProtocol iprot) throws TException {
-    RecursiveFieldN1Patch tmp_nodes = null;
+    RecursiveField1Patch tmp_nodes = null;
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -99,7 +99,7 @@ public class RecursiveFieldPatch implements TBase, java.io.Serializable, Cloneab
       {
         case NODES:
           if (__field.type == TType.STRUCT) {
-            tmp_nodes = RecursiveFieldN1Patch.deserialize(iprot);
+            tmp_nodes = RecursiveField1Patch.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }

@@ -72,6 +72,8 @@ class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     optListVal: _typing.Optional[list]
     optSetVal: _typing.Optional[set]
     optMapVal: _typing.Optional[dict]
+    listMap: _typing.Optional[list]
+    mapMap: _typing.Optional[dict]
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 

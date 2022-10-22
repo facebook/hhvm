@@ -24,8 +24,8 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
-public class MyStructFieldN10Patch implements TBase, java.io.Serializable, Cloneable, Comparable<MyStructFieldN10Patch> {
-  private static final TStruct STRUCT_DESC = new TStruct("MyStructFieldN10Patch");
+public class MyStructField10Patch implements TBase, java.io.Serializable, Cloneable, Comparable<MyStructField10Patch> {
+  private static final TStruct STRUCT_DESC = new TStruct("MyStructField10Patch");
   private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.I32, (short)1);
   private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
 
@@ -58,20 +58,20 @@ public class MyStructFieldN10Patch implements TBase, java.io.Serializable, Clone
   }
 
   static {
-    FieldMetaData.addStructMetaDataMap(MyStructFieldN10Patch.class, metaDataMap);
+    FieldMetaData.addStructMetaDataMap(MyStructField10Patch.class, metaDataMap);
   }
 
-  public MyStructFieldN10Patch() {
+  public MyStructField10Patch() {
   }
 
-  public MyStructFieldN10Patch(
+  public MyStructField10Patch(
       boolean clear) {
     this();
     this.clear = clear;
     setClearIsSet(true);
   }
 
-  public MyStructFieldN10Patch(
+  public MyStructField10Patch(
       MyEnum assign,
       boolean clear) {
     this();
@@ -100,8 +100,8 @@ public class MyStructFieldN10Patch implements TBase, java.io.Serializable, Clone
       return this;
     }
 
-    public MyStructFieldN10Patch build() {
-      MyStructFieldN10Patch result = new MyStructFieldN10Patch();
+    public MyStructField10Patch build() {
+      MyStructField10Patch result = new MyStructField10Patch();
       result.setAssign(this.assign);
       if (__optional_isset.get(__CLEAR_ISSET_ID)) {
         result.setClear(this.clear);
@@ -117,7 +117,7 @@ public class MyStructFieldN10Patch implements TBase, java.io.Serializable, Clone
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public MyStructFieldN10Patch(MyStructFieldN10Patch other) {
+  public MyStructField10Patch(MyStructField10Patch other) {
     __isset_bit_vector.clear();
     __isset_bit_vector.or(other.__isset_bit_vector);
     if (other.isSetAssign()) {
@@ -126,8 +126,8 @@ public class MyStructFieldN10Patch implements TBase, java.io.Serializable, Clone
     this.clear = TBaseHelper.deepCopy(other.clear);
   }
 
-  public MyStructFieldN10Patch deepCopy() {
-    return new MyStructFieldN10Patch(this);
+  public MyStructField10Patch deepCopy() {
+    return new MyStructField10Patch(this);
   }
 
   /**
@@ -144,7 +144,7 @@ public class MyStructFieldN10Patch implements TBase, java.io.Serializable, Clone
    * 
    * @see MyEnum
    */
-  public MyStructFieldN10Patch setAssign(MyEnum assign) {
+  public MyStructField10Patch setAssign(MyEnum assign) {
     this.assign = assign;
     return this;
   }
@@ -174,7 +174,7 @@ public class MyStructFieldN10Patch implements TBase, java.io.Serializable, Clone
   /**
    * Clears a value. Applies first.
    */
-  public MyStructFieldN10Patch setClear(boolean clear) {
+  public MyStructField10Patch setClear(boolean clear) {
     this.clear = clear;
     setClearIsSet(true);
     return this;
@@ -235,9 +235,9 @@ public class MyStructFieldN10Patch implements TBase, java.io.Serializable, Clone
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof MyStructFieldN10Patch))
+    if (!(_that instanceof MyStructField10Patch))
       return false;
-    MyStructFieldN10Patch that = (MyStructFieldN10Patch)_that;
+    MyStructField10Patch that = (MyStructField10Patch)_that;
 
     if (!TBaseHelper.equalsNobinary(this.isSetAssign(), that.isSetAssign(), this.assign, that.assign)) { return false; }
 
@@ -252,7 +252,7 @@ public class MyStructFieldN10Patch implements TBase, java.io.Serializable, Clone
   }
 
   @Override
-  public int compareTo(MyStructFieldN10Patch other) {
+  public int compareTo(MyStructField10Patch other) {
     if (other == null) {
       // See java.lang.Comparable docs
       throw new NullPointerException();
@@ -349,7 +349,7 @@ public class MyStructFieldN10Patch implements TBase, java.io.Serializable, Clone
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("MyStructFieldN10Patch");
+    StringBuilder sb = new StringBuilder("MyStructField10Patch");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);

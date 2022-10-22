@@ -24,17 +24,15 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
-public class MyStructFieldN10Patch implements TBase, java.io.Serializable, Cloneable {
-  private static final TStruct STRUCT_DESC = new TStruct("MyStructFieldN10Patch");
-  private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.I32, (short)1);
+public class RecursiveField1Patch implements TBase, java.io.Serializable, Cloneable {
+  private static final TStruct STRUCT_DESC = new TStruct("RecursiveField1Patch");
+  private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.MAP, (short)1);
   private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
 
   /**
    * Assigns a value. If set, all other operations are ignored.
-   * 
-   * @see MyEnum
    */
-  public final MyEnum assign;
+  public final Map<String,Recursive> assign;
   /**
    * Clears a value. Applies first.
    */
@@ -42,8 +40,8 @@ public class MyStructFieldN10Patch implements TBase, java.io.Serializable, Clone
   public static final int ASSIGN = 1;
   public static final int CLEAR = 2;
 
-  public MyStructFieldN10Patch(
-      MyEnum assign,
+  public RecursiveField1Patch(
+      Map<String,Recursive> assign,
       Boolean clear) {
     this.assign = assign;
     this.clear = clear;
@@ -52,7 +50,7 @@ public class MyStructFieldN10Patch implements TBase, java.io.Serializable, Clone
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public MyStructFieldN10Patch(MyStructFieldN10Patch other) {
+  public RecursiveField1Patch(RecursiveField1Patch other) {
     if (other.isSetAssign()) {
       this.assign = TBaseHelper.deepCopy(other.assign);
     } else {
@@ -65,16 +63,14 @@ public class MyStructFieldN10Patch implements TBase, java.io.Serializable, Clone
     }
   }
 
-  public MyStructFieldN10Patch deepCopy() {
-    return new MyStructFieldN10Patch(this);
+  public RecursiveField1Patch deepCopy() {
+    return new RecursiveField1Patch(this);
   }
 
   /**
    * Assigns a value. If set, all other operations are ignored.
-   * 
-   * @see MyEnum
    */
-  public MyEnum getAssign() {
+  public Map<String,Recursive> getAssign() {
     return this.assign;
   }
 
@@ -101,9 +97,9 @@ public class MyStructFieldN10Patch implements TBase, java.io.Serializable, Clone
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof MyStructFieldN10Patch))
+    if (!(_that instanceof RecursiveField1Patch))
       return false;
-    MyStructFieldN10Patch that = (MyStructFieldN10Patch)_that;
+    RecursiveField1Patch that = (RecursiveField1Patch)_that;
 
     if (!TBaseHelper.equalsNobinary(this.isSetAssign(), that.isSetAssign(), this.assign, that.assign)) { return false; }
 
@@ -122,8 +118,8 @@ public class MyStructFieldN10Patch implements TBase, java.io.Serializable, Clone
     throw new TException("unimplemented in android immutable structure");
   }
 
-  public static MyStructFieldN10Patch deserialize(TProtocol iprot) throws TException {
-    MyEnum tmp_assign = null;
+  public static RecursiveField1Patch deserialize(TProtocol iprot) throws TException {
+    Map<String,Recursive> tmp_assign = null;
     Boolean tmp_clear = null;
     TField __field;
     iprot.readStructBegin();
@@ -136,8 +132,22 @@ public class MyStructFieldN10Patch implements TBase, java.io.Serializable, Clone
       switch (__field.id)
       {
         case ASSIGN:
-          if (__field.type == TType.I32) {
-            tmp_assign = MyEnum.findByValue(iprot.readI32());
+          if (__field.type == TType.MAP) {
+            {
+              TMap _map242 = iprot.readMapBegin();
+              tmp_assign = new HashMap<String,Recursive>(Math.max(0, 2*_map242.size));
+              for (int _i243 = 0; 
+                   (_map242.size < 0) ? iprot.peekMap() : (_i243 < _map242.size); 
+                   ++_i243)
+              {
+                String _key244;
+                Recursive _val245;
+                _key244 = iprot.readString();
+                _val245 = Recursive.deserialize(iprot);
+                tmp_assign.put(_key244, _val245);
+              }
+              iprot.readMapEnd();
+            }
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -157,8 +167,8 @@ public class MyStructFieldN10Patch implements TBase, java.io.Serializable, Clone
     }
     iprot.readStructEnd();
 
-    MyStructFieldN10Patch _that;
-    _that = new MyStructFieldN10Patch(
+    RecursiveField1Patch _that;
+    _that = new RecursiveField1Patch(
       tmp_assign
       ,tmp_clear
     );
@@ -173,7 +183,14 @@ public class MyStructFieldN10Patch implements TBase, java.io.Serializable, Clone
     if (this.assign != null) {
       if (isSetAssign()) {
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
-        oprot.writeI32(this.assign == null ? 0 : this.assign.getValue());
+        {
+          oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, this.assign.size()));
+          for (Map.Entry<String, Recursive> _iter246 : this.assign.entrySet())          {
+            oprot.writeString(_iter246.getKey());
+            _iter246.getValue().write(oprot);
+          }
+          oprot.writeMapEnd();
+        }
         oprot.writeFieldEnd();
       }
     }

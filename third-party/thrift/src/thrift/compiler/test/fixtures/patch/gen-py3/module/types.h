@@ -157,6 +157,12 @@ void reset_field<::test::fixtures::patch::MyStruct>(
     case 29:
       obj.optMapVal_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().optMapVal_ref());
       return;
+    case 30:
+      obj.listMap_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().listMap_ref());
+      return;
+    case 31:
+      obj.mapMap_ref().copy_from(default_inst<::test::fixtures::patch::MyStruct>().mapMap_ref());
+      return;
   }
 }
 

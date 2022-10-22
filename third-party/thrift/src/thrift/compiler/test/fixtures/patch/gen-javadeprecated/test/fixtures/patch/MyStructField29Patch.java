@@ -24,8 +24,8 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
-public class MyStructFieldN29Patch implements TBase, java.io.Serializable, Cloneable, Comparable<MyStructFieldN29Patch> {
-  private static final TStruct STRUCT_DESC = new TStruct("MyStructFieldN29Patch");
+public class MyStructField29Patch implements TBase, java.io.Serializable, Cloneable, Comparable<MyStructField29Patch> {
+  private static final TStruct STRUCT_DESC = new TStruct("MyStructField29Patch");
   private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.SET, (short)1);
   private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
   private static final TField REMOVE_FIELD_DESC = new TField("remove", TType.SET, (short)7);
@@ -75,13 +75,13 @@ public class MyStructFieldN29Patch implements TBase, java.io.Serializable, Clone
   }
 
   static {
-    FieldMetaData.addStructMetaDataMap(MyStructFieldN29Patch.class, metaDataMap);
+    FieldMetaData.addStructMetaDataMap(MyStructField29Patch.class, metaDataMap);
   }
 
-  public MyStructFieldN29Patch() {
+  public MyStructField29Patch() {
   }
 
-  public MyStructFieldN29Patch(
+  public MyStructField29Patch(
       boolean clear,
       Set<String> remove,
       Set<String> add) {
@@ -92,7 +92,7 @@ public class MyStructFieldN29Patch implements TBase, java.io.Serializable, Clone
     this.add = add;
   }
 
-  public MyStructFieldN29Patch(
+  public MyStructField29Patch(
       Set<String> assign,
       boolean clear,
       Set<String> remove,
@@ -137,8 +137,8 @@ public class MyStructFieldN29Patch implements TBase, java.io.Serializable, Clone
       return this;
     }
 
-    public MyStructFieldN29Patch build() {
-      MyStructFieldN29Patch result = new MyStructFieldN29Patch();
+    public MyStructField29Patch build() {
+      MyStructField29Patch result = new MyStructField29Patch();
       result.setAssign(this.assign);
       if (__optional_isset.get(__CLEAR_ISSET_ID)) {
         result.setClear(this.clear);
@@ -156,7 +156,7 @@ public class MyStructFieldN29Patch implements TBase, java.io.Serializable, Clone
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public MyStructFieldN29Patch(MyStructFieldN29Patch other) {
+  public MyStructField29Patch(MyStructField29Patch other) {
     __isset_bit_vector.clear();
     __isset_bit_vector.or(other.__isset_bit_vector);
     if (other.isSetAssign()) {
@@ -171,8 +171,8 @@ public class MyStructFieldN29Patch implements TBase, java.io.Serializable, Clone
     }
   }
 
-  public MyStructFieldN29Patch deepCopy() {
-    return new MyStructFieldN29Patch(this);
+  public MyStructField29Patch deepCopy() {
+    return new MyStructField29Patch(this);
   }
 
   /**
@@ -185,7 +185,7 @@ public class MyStructFieldN29Patch implements TBase, java.io.Serializable, Clone
   /**
    * Assigns a value. If set, all other operations are ignored.
    */
-  public MyStructFieldN29Patch setAssign(Set<String> assign) {
+  public MyStructField29Patch setAssign(Set<String> assign) {
     this.assign = assign;
     return this;
   }
@@ -215,7 +215,7 @@ public class MyStructFieldN29Patch implements TBase, java.io.Serializable, Clone
   /**
    * Clears a value. Applies first.
    */
-  public MyStructFieldN29Patch setClear(boolean clear) {
+  public MyStructField29Patch setClear(boolean clear) {
     this.clear = clear;
     setClearIsSet(true);
     return this;
@@ -244,7 +244,7 @@ public class MyStructFieldN29Patch implements TBase, java.io.Serializable, Clone
   /**
    * Removes entries, if present. Applies third.
    */
-  public MyStructFieldN29Patch setRemove(Set<String> remove) {
+  public MyStructField29Patch setRemove(Set<String> remove) {
     this.remove = remove;
     return this;
   }
@@ -274,7 +274,7 @@ public class MyStructFieldN29Patch implements TBase, java.io.Serializable, Clone
   /**
    * Adds entries, if not already present. Applies fourth.
    */
-  public MyStructFieldN29Patch setAdd(Set<String> add) {
+  public MyStructField29Patch setAdd(Set<String> add) {
     this.add = add;
     return this;
   }
@@ -359,9 +359,9 @@ public class MyStructFieldN29Patch implements TBase, java.io.Serializable, Clone
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof MyStructFieldN29Patch))
+    if (!(_that instanceof MyStructField29Patch))
       return false;
-    MyStructFieldN29Patch that = (MyStructFieldN29Patch)_that;
+    MyStructField29Patch that = (MyStructField29Patch)_that;
 
     if (!TBaseHelper.equalsNobinary(this.isSetAssign(), that.isSetAssign(), this.assign, that.assign)) { return false; }
 
@@ -380,7 +380,7 @@ public class MyStructFieldN29Patch implements TBase, java.io.Serializable, Clone
   }
 
   @Override
-  public int compareTo(MyStructFieldN29Patch other) {
+  public int compareTo(MyStructField29Patch other) {
     if (other == null) {
       // See java.lang.Comparable docs
       throw new NullPointerException();
@@ -440,15 +440,15 @@ public class MyStructFieldN29Patch implements TBase, java.io.Serializable, Clone
         case ASSIGN:
           if (__field.type == TType.SET) {
             {
-              TSet _set39 = iprot.readSetBegin();
-              this.assign = new HashSet<String>(Math.max(0, 2*_set39.size));
-              for (int _i40 = 0; 
-                   (_set39.size < 0) ? iprot.peekSet() : (_i40 < _set39.size); 
-                   ++_i40)
+              TSet _set58 = iprot.readSetBegin();
+              this.assign = new HashSet<String>(Math.max(0, 2*_set58.size));
+              for (int _i59 = 0; 
+                   (_set58.size < 0) ? iprot.peekSet() : (_i59 < _set58.size); 
+                   ++_i59)
               {
-                String _elem41;
-                _elem41 = iprot.readString();
-                this.assign.add(_elem41);
+                String _elem60;
+                _elem60 = iprot.readString();
+                this.assign.add(_elem60);
               }
               iprot.readSetEnd();
             }
@@ -467,15 +467,15 @@ public class MyStructFieldN29Patch implements TBase, java.io.Serializable, Clone
         case REMOVE:
           if (__field.type == TType.SET) {
             {
-              TSet _set42 = iprot.readSetBegin();
-              this.remove = new HashSet<String>(Math.max(0, 2*_set42.size));
-              for (int _i43 = 0; 
-                   (_set42.size < 0) ? iprot.peekSet() : (_i43 < _set42.size); 
-                   ++_i43)
+              TSet _set61 = iprot.readSetBegin();
+              this.remove = new HashSet<String>(Math.max(0, 2*_set61.size));
+              for (int _i62 = 0; 
+                   (_set61.size < 0) ? iprot.peekSet() : (_i62 < _set61.size); 
+                   ++_i62)
               {
-                String _elem44;
-                _elem44 = iprot.readString();
-                this.remove.add(_elem44);
+                String _elem63;
+                _elem63 = iprot.readString();
+                this.remove.add(_elem63);
               }
               iprot.readSetEnd();
             }
@@ -486,15 +486,15 @@ public class MyStructFieldN29Patch implements TBase, java.io.Serializable, Clone
         case ADD:
           if (__field.type == TType.SET) {
             {
-              TSet _set45 = iprot.readSetBegin();
-              this.add = new HashSet<String>(Math.max(0, 2*_set45.size));
-              for (int _i46 = 0; 
-                   (_set45.size < 0) ? iprot.peekSet() : (_i46 < _set45.size); 
-                   ++_i46)
+              TSet _set64 = iprot.readSetBegin();
+              this.add = new HashSet<String>(Math.max(0, 2*_set64.size));
+              for (int _i65 = 0; 
+                   (_set64.size < 0) ? iprot.peekSet() : (_i65 < _set64.size); 
+                   ++_i65)
               {
-                String _elem47;
-                _elem47 = iprot.readString();
-                this.add.add(_elem47);
+                String _elem66;
+                _elem66 = iprot.readString();
+                this.add.add(_elem66);
               }
               iprot.readSetEnd();
             }
@@ -524,8 +524,8 @@ public class MyStructFieldN29Patch implements TBase, java.io.Serializable, Clone
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
         {
           oprot.writeSetBegin(new TSet(TType.STRING, this.assign.size()));
-          for (String _iter48 : this.assign)          {
-            oprot.writeString(_iter48);
+          for (String _iter67 : this.assign)          {
+            oprot.writeString(_iter67);
           }
           oprot.writeSetEnd();
         }
@@ -539,8 +539,8 @@ public class MyStructFieldN29Patch implements TBase, java.io.Serializable, Clone
       oprot.writeFieldBegin(REMOVE_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.STRING, this.remove.size()));
-        for (String _iter49 : this.remove)        {
-          oprot.writeString(_iter49);
+        for (String _iter68 : this.remove)        {
+          oprot.writeString(_iter68);
         }
         oprot.writeSetEnd();
       }
@@ -550,8 +550,8 @@ public class MyStructFieldN29Patch implements TBase, java.io.Serializable, Clone
       oprot.writeFieldBegin(ADD_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.STRING, this.add.size()));
-        for (String _iter50 : this.add)        {
-          oprot.writeString(_iter50);
+        for (String _iter69 : this.add)        {
+          oprot.writeString(_iter69);
         }
         oprot.writeSetEnd();
       }
@@ -571,7 +571,7 @@ public class MyStructFieldN29Patch implements TBase, java.io.Serializable, Clone
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("MyStructFieldN29Patch");
+    StringBuilder sb = new StringBuilder("MyStructField29Patch");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);

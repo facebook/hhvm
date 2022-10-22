@@ -28,7 +28,7 @@ public class RecursiveFieldPatch implements TBase, java.io.Serializable, Cloneab
   private static final TStruct STRUCT_DESC = new TStruct("RecursiveFieldPatch");
   private static final TField NODES_FIELD_DESC = new TField("nodes", TType.STRUCT, (short)-1);
 
-  public RecursiveFieldN1Patch nodes;
+  public RecursiveField1Patch nodes;
   public static final int NODES = -1;
 
   // isset id assignments
@@ -38,7 +38,7 @@ public class RecursiveFieldPatch implements TBase, java.io.Serializable, Cloneab
   static {
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
     tmpMetaDataMap.put(NODES, new FieldMetaData("nodes", TFieldRequirementType.DEFAULT, 
-        new StructMetaData(TType.STRUCT, RecursiveFieldN1Patch.class)));
+        new StructMetaData(TType.STRUCT, RecursiveField1Patch.class)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
 
@@ -50,18 +50,18 @@ public class RecursiveFieldPatch implements TBase, java.io.Serializable, Cloneab
   }
 
   public RecursiveFieldPatch(
-      RecursiveFieldN1Patch nodes) {
+      RecursiveField1Patch nodes) {
     this();
     this.nodes = nodes;
   }
 
   public static class Builder {
-    private RecursiveFieldN1Patch nodes;
+    private RecursiveField1Patch nodes;
 
     public Builder() {
     }
 
-    public Builder setNodes(final RecursiveFieldN1Patch nodes) {
+    public Builder setNodes(final RecursiveField1Patch nodes) {
       this.nodes = nodes;
       return this;
     }
@@ -90,11 +90,11 @@ public class RecursiveFieldPatch implements TBase, java.io.Serializable, Cloneab
     return new RecursiveFieldPatch(this);
   }
 
-  public RecursiveFieldN1Patch getNodes() {
+  public RecursiveField1Patch getNodes() {
     return this.nodes;
   }
 
-  public RecursiveFieldPatch setNodes(RecursiveFieldN1Patch nodes) {
+  public RecursiveFieldPatch setNodes(RecursiveField1Patch nodes) {
     this.nodes = nodes;
     return this;
   }
@@ -120,7 +120,7 @@ public class RecursiveFieldPatch implements TBase, java.io.Serializable, Cloneab
       if (__value == null) {
         unsetNodes();
       } else {
-        setNodes((RecursiveFieldN1Patch)__value);
+        setNodes((RecursiveField1Patch)__value);
       }
       break;
 
@@ -172,7 +172,7 @@ public class RecursiveFieldPatch implements TBase, java.io.Serializable, Cloneab
       {
         case NODES:
           if (__field.type == TType.STRUCT) {
-            this.nodes = new RecursiveFieldN1Patch();
+            this.nodes = new RecursiveField1Patch();
             this.nodes.read(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);

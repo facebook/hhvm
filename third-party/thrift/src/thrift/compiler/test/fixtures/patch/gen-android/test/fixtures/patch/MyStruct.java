@@ -56,6 +56,8 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
   private static final TField OPT_LIST_VAL_FIELD_DESC = new TField("optListVal", TType.LIST, (short)-28);
   private static final TField OPT_SET_VAL_FIELD_DESC = new TField("optSetVal", TType.SET, (short)-29);
   private static final TField OPT_MAP_VAL_FIELD_DESC = new TField("optMapVal", TType.MAP, (short)-30);
+  private static final TField LIST_MAP_FIELD_DESC = new TField("listMap", TType.LIST, (short)-31);
+  private static final TField MAP_MAP_FIELD_DESC = new TField("mapMap", TType.MAP, (short)-32);
 
   public final Boolean boolVal;
   public final Byte byteVal;
@@ -95,6 +97,8 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
   public final List<Short> optListVal;
   public final Set<String> optSetVal;
   public final Map<String,String> optMapVal;
+  public final List<Map<String,Integer>> listMap;
+  public final Map<String,Map<String,Integer>> mapMap;
   public static final int BOOLVAL = -1;
   public static final int BYTEVAL = -2;
   public static final int I16VAL = -3;
@@ -125,6 +129,8 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
   public static final int OPTLISTVAL = -28;
   public static final int OPTSETVAL = -29;
   public static final int OPTMAPVAL = -30;
+  public static final int LISTMAP = -31;
+  public static final int MAPMAP = -32;
 
   public MyStruct(
       Boolean boolVal,
@@ -156,7 +162,9 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
       LateDefStruct optLateStructVal,
       List<Short> optListVal,
       Set<String> optSetVal,
-      Map<String,String> optMapVal) {
+      Map<String,String> optMapVal,
+      List<Map<String,Integer>> listMap,
+      Map<String,Map<String,Integer>> mapMap) {
     this.boolVal = boolVal;
     this.byteVal = byteVal;
     this.i16Val = i16Val;
@@ -187,6 +195,8 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
     this.optListVal = optListVal;
     this.optSetVal = optSetVal;
     this.optMapVal = optMapVal;
+    this.listMap = listMap;
+    this.mapMap = mapMap;
   }
 
   /**
@@ -342,6 +352,16 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
       this.optMapVal = TBaseHelper.deepCopy(other.optMapVal);
     } else {
       this.optMapVal = null;
+    }
+    if (other.isSetListMap()) {
+      this.listMap = TBaseHelper.deepCopy(other.listMap);
+    } else {
+      this.listMap = null;
+    }
+    if (other.isSetMapMap()) {
+      this.mapMap = TBaseHelper.deepCopy(other.mapMap);
+    } else {
+      this.mapMap = null;
     }
   }
 
@@ -627,6 +647,24 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
     return this.optMapVal != null;
   }
 
+  public List<Map<String,Integer>> getListMap() {
+    return this.listMap;
+  }
+
+  // Returns true if field listMap is set (has been assigned a value) and false otherwise
+  public boolean isSetListMap() {
+    return this.listMap != null;
+  }
+
+  public Map<String,Map<String,Integer>> getMapMap() {
+    return this.mapMap;
+  }
+
+  // Returns true if field mapMap is set (has been assigned a value) and false otherwise
+  public boolean isSetMapMap() {
+    return this.mapMap != null;
+  }
+
   @Override
   public boolean equals(Object _that) {
     if (_that == null)
@@ -697,12 +735,16 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
 
     if (!TBaseHelper.equalsNobinary(this.isSetOptMapVal(), that.isSetOptMapVal(), this.optMapVal, that.optMapVal)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.isSetListMap(), that.isSetListMap(), this.listMap, that.listMap)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetMapMap(), that.isSetMapMap(), this.mapMap, that.mapMap)) { return false; }
+
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {boolVal, byteVal, i16Val, i32Val, i64Val, floatVal, doubleVal, stringVal, binaryVal, enumVal, structVal, unionVal, lateStructVal, durationVal, timeVal, optBoolVal, optByteVal, optI16Val, optI32Val, optI64Val, optFloatVal, optDoubleVal, optStringVal, optBinaryVal, optEnumVal, optStructVal, optLateStructVal, optListVal, optSetVal, optMapVal});
+    return Arrays.deepHashCode(new Object[] {boolVal, byteVal, i16Val, i32Val, i64Val, floatVal, doubleVal, stringVal, binaryVal, enumVal, structVal, unionVal, lateStructVal, durationVal, timeVal, optBoolVal, optByteVal, optI16Val, optI32Val, optI64Val, optFloatVal, optDoubleVal, optStringVal, optBinaryVal, optEnumVal, optStructVal, optLateStructVal, optListVal, optSetVal, optMapVal, listMap, mapMap});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -741,6 +783,8 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
     List<Short> tmp_optListVal = null;
     Set<String> tmp_optSetVal = null;
     Map<String,String> tmp_optMapVal = null;
+    List<Map<String,Integer>> tmp_listMap = null;
+    Map<String,Map<String,Integer>> tmp_mapMap = null;
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -1000,6 +1044,74 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
+        case LISTMAP:
+          if (__field.type == TType.LIST) {
+            {
+              TList _list10 = iprot.readListBegin();
+              tmp_listMap = new ArrayList<Map<String,Integer>>(Math.max(0, _list10.size));
+              for (int _i11 = 0; 
+                   (_list10.size < 0) ? iprot.peekList() : (_i11 < _list10.size); 
+                   ++_i11)
+              {
+                Map<String,Integer> _elem12;
+                {
+                  TMap _map13 = iprot.readMapBegin();
+                  _elem12 = new HashMap<String,Integer>(Math.max(0, 2*_map13.size));
+                  for (int _i14 = 0; 
+                       (_map13.size < 0) ? iprot.peekMap() : (_i14 < _map13.size); 
+                       ++_i14)
+                  {
+                    String _key15;
+                    Integer _val16;
+                    _key15 = iprot.readString();
+                    _val16 = iprot.readI32();
+                    _elem12.put(_key15, _val16);
+                  }
+                  iprot.readMapEnd();
+                }
+                tmp_listMap.add(_elem12);
+              }
+              iprot.readListEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case MAPMAP:
+          if (__field.type == TType.MAP) {
+            {
+              TMap _map17 = iprot.readMapBegin();
+              tmp_mapMap = new HashMap<String,Map<String,Integer>>(Math.max(0, 2*_map17.size));
+              for (int _i18 = 0; 
+                   (_map17.size < 0) ? iprot.peekMap() : (_i18 < _map17.size); 
+                   ++_i18)
+              {
+                String _key19;
+                Map<String,Integer> _val20;
+                _key19 = iprot.readString();
+                {
+                  TMap _map21 = iprot.readMapBegin();
+                  _val20 = new HashMap<String,Integer>(Math.max(0, 2*_map21.size));
+                  for (int _i22 = 0; 
+                       (_map21.size < 0) ? iprot.peekMap() : (_i22 < _map21.size); 
+                       ++_i22)
+                  {
+                    String _key23;
+                    Integer _val24;
+                    _key23 = iprot.readString();
+                    _val24 = iprot.readI32();
+                    _val20.put(_key23, _val24);
+                  }
+                  iprot.readMapEnd();
+                }
+                tmp_mapMap.put(_key19, _val20);
+              }
+              iprot.readMapEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -1040,6 +1152,8 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
       ,tmp_optListVal
       ,tmp_optSetVal
       ,tmp_optMapVal
+      ,tmp_listMap
+      ,tmp_mapMap
     );
     _that.validate();
     return _that;
@@ -1049,14 +1163,51 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
     validate();
 
     oprot.writeStructBegin(STRUCT_DESC);
+    if (this.mapMap != null) {
+      oprot.writeFieldBegin(MAP_MAP_FIELD_DESC);
+      {
+        oprot.writeMapBegin(new TMap(TType.STRING, TType.MAP, this.mapMap.size()));
+        for (Map.Entry<String, Map<String,Integer>> _iter25 : this.mapMap.entrySet())        {
+          oprot.writeString(_iter25.getKey());
+          {
+            oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter25.getValue().size()));
+            for (Map.Entry<String, Integer> _iter26 : _iter25.getValue().entrySet())            {
+              oprot.writeString(_iter26.getKey());
+              oprot.writeI32(_iter26.getValue());
+            }
+            oprot.writeMapEnd();
+          }
+        }
+        oprot.writeMapEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.listMap != null) {
+      oprot.writeFieldBegin(LIST_MAP_FIELD_DESC);
+      {
+        oprot.writeListBegin(new TList(TType.MAP, this.listMap.size()));
+        for (Map<String,Integer> _iter27 : this.listMap)        {
+          {
+            oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter27.size()));
+            for (Map.Entry<String, Integer> _iter28 : _iter27.entrySet())            {
+              oprot.writeString(_iter28.getKey());
+              oprot.writeI32(_iter28.getValue());
+            }
+            oprot.writeMapEnd();
+          }
+        }
+        oprot.writeListEnd();
+      }
+      oprot.writeFieldEnd();
+    }
     if (this.optMapVal != null) {
       if (isSetOptMapVal()) {
         oprot.writeFieldBegin(OPT_MAP_VAL_FIELD_DESC);
         {
           oprot.writeMapBegin(new TMap(TType.STRING, TType.STRING, this.optMapVal.size()));
-          for (Map.Entry<String, String> _iter10 : this.optMapVal.entrySet())          {
-            oprot.writeString(_iter10.getKey());
-            oprot.writeString(_iter10.getValue());
+          for (Map.Entry<String, String> _iter29 : this.optMapVal.entrySet())          {
+            oprot.writeString(_iter29.getKey());
+            oprot.writeString(_iter29.getValue());
           }
           oprot.writeMapEnd();
         }
@@ -1068,8 +1219,8 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
         oprot.writeFieldBegin(OPT_SET_VAL_FIELD_DESC);
         {
           oprot.writeSetBegin(new TSet(TType.STRING, this.optSetVal.size()));
-          for (String _iter11 : this.optSetVal)          {
-            oprot.writeString(_iter11);
+          for (String _iter30 : this.optSetVal)          {
+            oprot.writeString(_iter30);
           }
           oprot.writeSetEnd();
         }
@@ -1081,8 +1232,8 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
         oprot.writeFieldBegin(OPT_LIST_VAL_FIELD_DESC);
         {
           oprot.writeListBegin(new TList(TType.I16, this.optListVal.size()));
-          for (Short _iter12 : this.optListVal)          {
-            oprot.writeI16(_iter12);
+          for (Short _iter31 : this.optListVal)          {
+            oprot.writeI16(_iter31);
           }
           oprot.writeListEnd();
         }

@@ -176,18 +176,18 @@ public class Recursive implements TBase, java.io.Serializable, Cloneable {
         case NODES:
           if (__field.type == TType.MAP) {
             {
-              TMap _map13 = iprot.readMapBegin();
-              this.nodes = new HashMap<String,Recursive>(Math.max(0, 2*_map13.size));
-              for (int _i14 = 0; 
-                   (_map13.size < 0) ? iprot.peekMap() : (_i14 < _map13.size); 
-                   ++_i14)
+              TMap _map32 = iprot.readMapBegin();
+              this.nodes = new HashMap<String,Recursive>(Math.max(0, 2*_map32.size));
+              for (int _i33 = 0; 
+                   (_map32.size < 0) ? iprot.peekMap() : (_i33 < _map32.size); 
+                   ++_i33)
               {
-                String _key15;
-                Recursive _val16;
-                _key15 = iprot.readString();
-                _val16 = new Recursive();
-                _val16.read(iprot);
-                this.nodes.put(_key15, _val16);
+                String _key34;
+                Recursive _val35;
+                _key34 = iprot.readString();
+                _val35 = new Recursive();
+                _val35.read(iprot);
+                this.nodes.put(_key34, _val35);
               }
               iprot.readMapEnd();
             }
@@ -216,9 +216,9 @@ public class Recursive implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(NODES_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, this.nodes.size()));
-        for (Map.Entry<String, Recursive> _iter17 : this.nodes.entrySet())        {
-          oprot.writeString(_iter17.getKey());
-          _iter17.getValue().write(oprot);
+        for (Map.Entry<String, Recursive> _iter36 : this.nodes.entrySet())        {
+          oprot.writeString(_iter36.getKey());
+          _iter36.getValue().write(oprot);
         }
         oprot.writeMapEnd();
       }

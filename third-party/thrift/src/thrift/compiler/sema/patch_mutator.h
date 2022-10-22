@@ -126,15 +126,20 @@ class patch_generator {
   t_struct& gen_patch(
       const t_const& annot,
       const t_structured& orig,
-      const std::string& suffix,
-      t_type_ref type);
+      const t_field_id& field_id,
+      t_type_ref type,
+      size_t traversal_order = 0);
 
   // Attempts to resolve the associated patch type for the given field.
   //
   // If a shared representation cannot be found, a new one may be generated.
   // Otherwise an empty t_type_ref is returned.
   t_type_ref find_patch_type(
-      const t_const& annot, const t_structured& parent, t_type_ref type);
+      const t_const& annot,
+      const t_structured& parent,
+      t_type_ref type,
+      const t_field_id& field_id,
+      size_t traversal_order = 0);
   t_type_ref find_patch_type(
       const t_const& annot, const t_structured& parent, const t_field& field);
 

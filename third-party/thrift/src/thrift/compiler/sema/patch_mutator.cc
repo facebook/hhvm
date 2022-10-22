@@ -59,11 +59,19 @@ const char* getPatchTypeName(t_base_type::type base_type) {
   }
 }
 
-std::string getFieldPatchSuffix(const t_field& field) {
-  if (field.id() < 0) {
-    return fmt::format("FieldN{}Patch", -field.id());
+std::string getFieldIdPatchSuffix(
+    const t_field_id& field_id, size_t traversal_order) {
+  if (traversal_order == 0) {
+    return fmt::format("Field{}Patch", field_id);
   }
-  return fmt::format("Field{}Patch", field.id());
+  return fmt::format("Field{}Patch{}", field_id, traversal_order);
+}
+
+t_field_id getNormalizedFieldId(const t_field& field) {
+  if (field.id() < 0) {
+    return -field.id();
+  }
+  return field.id();
 }
 
 // A fluent function to set the doc string on a given node.
@@ -380,7 +388,11 @@ t_struct& patch_generator::add_struct_patch(
 }
 
 t_type_ref patch_generator::find_patch_type(
-    const t_const& annot, const t_structured& parent, t_type_ref type) {
+    const t_const& annot,
+    const t_structured& parent,
+    t_type_ref type,
+    const t_field_id& field_id,
+    size_t traversal_order) {
   if (auto custom = find_patch_override(type)) {
     return custom;
   }
@@ -431,20 +443,18 @@ t_type_ref patch_generator::find_patch_type(
     return result;
   }
 
-  return {}; // Not found.
+  return gen_patch(annot, parent, field_id, type, traversal_order);
 }
 
 t_type_ref patch_generator::find_patch_type(
     const t_const& annot, const t_structured& parent, const t_field& field) {
   if (auto custom = find_patch_override(field)) {
     return custom;
-  } else if (auto existing = find_patch_type(annot, parent, field.type())) {
-    return existing;
   }
 
   // Could not resolve a shared patch type, so generate a field specific one.
-  std::string suffix = getFieldPatchSuffix(field);
-  return gen_patch(annot, parent, suffix, field.type());
+  return find_patch_type(
+      annot, parent, field.type(), getNormalizedFieldId(field));
 }
 
 t_type_ref patch_generator::find_patch_override(t_type_ref type) const {
@@ -509,8 +519,10 @@ t_struct& patch_generator::gen_prefix_struct(
 t_struct& patch_generator::gen_patch(
     const t_const& annot,
     const t_structured& orig,
-    const std::string& suffix,
-    t_type_ref type) {
+    const t_field_id& field_id,
+    t_type_ref type,
+    size_t traversal_order) {
+  auto suffix = getFieldIdPatchSuffix(field_id, traversal_order);
   PatchGen gen{{annot, gen_suffix_struct(annot, orig, suffix.c_str())}};
   // All value patches have an assign and clear field.
   gen.assign(type);
@@ -524,16 +536,9 @@ t_struct& patch_generator::gen_patch(
   const auto* ttype = type->get_true_type();
   if (auto* list = dynamic_cast<const t_list*>(ttype)) {
     // TODO(afuller): support 'replace' op.
-    if (auto elem_patch_type =
-            find_patch_type(annot, orig, list->elem_type())) {
-      gen.patchList(inst_map(t_base_type::t_i32(), elem_patch_type));
-    } else {
-      // TODO(afuller): Support containers in lists.
-      ctx_.warning(
-          orig,
-          "Could not find patch type for: ",
-          list->elem_type()->get_full_name());
-    }
+    auto elem_patch_type = find_patch_type(
+        annot, orig, list->elem_type(), field_id, traversal_order + 1);
+    gen.patchList(inst_map(t_base_type::t_i32(), elem_patch_type));
     // TODO(afuller): Support sets for all types in all languages, and switch
     // this to a set instead of a list.
     gen.remove(inst_list(list->elem_type()));
@@ -548,11 +553,11 @@ t_struct& patch_generator::gen_patch(
   } else if (auto* map = dynamic_cast<const t_map*>(ttype)) {
     // TODO(afuller): support 'removeIf' op.
     // TODO(afuller): support 'replace' op.
-    // TODO(afuller): support 'patch' op once map values can be adapted.
-    // auto val_patch_type = find_patch_type(annot, orig, map->val_type());
-    // gen.patchPrior(inst_map(map->key_type(), val_patch_type));
+    auto val_patch_type = find_patch_type(
+        annot, orig, map->val_type(), field_id, traversal_order + 1);
+    gen.patchPrior(inst_map(map->key_type(), val_patch_type));
     gen.addMap(type);
-    // gen.patchAfter(inst_map(map->key_type(), val_patch_type));
+    gen.patchAfter(inst_map(map->key_type(), val_patch_type));
     gen.remove(inst_set(map->key_type()));
     gen.put(type);
     gen.set_adapter("MapPatchAdapter", program_);

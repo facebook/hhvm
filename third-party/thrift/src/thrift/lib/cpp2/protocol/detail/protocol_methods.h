@@ -196,12 +196,12 @@ deserialize_known_length_map(
   typename Map::container_type tmp(map.get_allocator());
   reserve_if_possible(&tmp, map_size);
   {
-    auto& elem0 = emplace_back_default_map(tmp, map);
+    decltype(auto) elem0 = emplace_back_default_map(tmp, map);
     kr(elem0.first);
     mr(elem0.second);
   }
   for (size_t i = 1; i < map_size; ++i) {
-    auto& elem = emplace_back_default_map(tmp, map);
+    decltype(auto) elem = emplace_back_default_map(tmp, map);
     kr(elem.first);
     mr(elem.second);
     sorted = sorted && map.key_comp()(tmp[i - 1].first, elem.first);

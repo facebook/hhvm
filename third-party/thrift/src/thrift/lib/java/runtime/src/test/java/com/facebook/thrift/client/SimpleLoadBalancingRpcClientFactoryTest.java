@@ -38,7 +38,7 @@ public class SimpleLoadBalancingRpcClientFactoryTest {
             });
 
     SimpleLoadBalancingRpcClientFactory factory =
-        new SimpleLoadBalancingRpcClientFactory(mockFactory, 5, new ThriftClientConfig());
+        new SimpleLoadBalancingRpcClientFactory(mockFactory, 5);
     Mono<RpcClient> rpcClient = factory.createRpcClient(address);
 
     Set<RpcClient> clientSet = new HashSet<>();

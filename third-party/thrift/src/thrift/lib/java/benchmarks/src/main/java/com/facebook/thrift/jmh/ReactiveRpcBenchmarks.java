@@ -25,6 +25,7 @@ import com.facebook.thrift.example.ping.PingService;
 import com.facebook.thrift.example.ping.PingServiceReactiveClient;
 import com.facebook.thrift.example.ping.PingServiceRpcServerHandler;
 import com.facebook.thrift.legacy.server.LegacyServerTransportFactory;
+import com.facebook.thrift.util.resources.RpcResources;
 import io.netty.channel.unix.DomainSocketAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -40,6 +41,7 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.infra.Blackhole;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 public class ReactiveRpcBenchmarks {
   @State(Scope.Benchmark)
@@ -50,7 +52,7 @@ public class ReactiveRpcBenchmarks {
     @Param({"TBinary", "TCompact"})
     String protocol;
 
-    @Param({"1", "10"})
+    @Param({"1000", "10000"})
     int count;
 
     @Param({"UDP", "TCP"})
@@ -93,7 +95,6 @@ public class ReactiveRpcBenchmarks {
     private PingService.Reactive createClient(SocketAddress socketAddress) {
       RpcClientFactory clientFactory =
           RpcClientFactory.builder()
-              .setDisableTimeout(true)
               .setThriftClientConfig(
                   new ThriftClientConfig().setDisableSSL(true).setProtocol(protocolId))
               .build();
@@ -106,8 +107,12 @@ public class ReactiveRpcBenchmarks {
     public void benchmark(Input input) throws Exception {
       Object ping =
           Flux.range(0, count)
-              .flatMap(__ -> pingService.ping(new PingRequest.Builder().setRequest("ping").build()))
+              .parallel(128)
+              .runOn(Schedulers.fromExecutor(RpcResources.getEventLoopGroup()))
+              .concatMap(
+                  __ -> pingService.ping(new PingRequest.Builder().setRequest("ping").build()))
               .doOnError(Throwable::printStackTrace)
+              .sequential()
               .blockLast();
 
       input.bh.consume(ping);

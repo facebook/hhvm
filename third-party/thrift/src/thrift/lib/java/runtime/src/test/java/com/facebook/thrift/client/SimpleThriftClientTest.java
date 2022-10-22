@@ -33,7 +33,6 @@ import com.facebook.thrift.util.SPINiftyMetrics;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.airlift.units.Duration;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +43,6 @@ import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
-import reactor.test.StepVerifier;
 
 public class SimpleThriftClientTest {
   private static final Logger LOG = LoggerFactory.getLogger(SimpleThriftClientTest.class);
@@ -361,30 +359,5 @@ public class SimpleThriftClientTest {
             },
             32)
         .blockLast();
-  }
-
-  @Test
-  public void pingTimeoutToInvalidHost() {
-    RpcClientFactory factory =
-        RpcClientFactory.builder()
-            .setDisableLoadBalancing(true)
-            .setDisableStats(true)
-            .setDisableRSocket(false)
-            .setThriftClientConfig(
-                new ThriftClientConfig()
-                    .setDisableSSL(true)
-                    .setConnectTimeout(Duration.succinctDuration(500, TimeUnit.MILLISECONDS))
-                    .setRequestTimeout(Duration.succinctDuration(500, TimeUnit.MILLISECONDS)))
-            .build();
-
-    SocketAddress address = new InetSocketAddress("notahost", 65_000);
-    PingService.Reactive pingService =
-        PingService.Reactive.clientBuilder()
-            .setProtocolId(ProtocolId.BINARY)
-            .build(factory, address);
-    PingRequest pingRequest = new PingRequest.Builder().setRequest("ping").build();
-    StepVerifier.create(pingService.ping(pingRequest))
-        .expectErrorMessage("request timed out after 500 MILLISECONDS for 'client_connection'")
-        .verify();
   }
 }

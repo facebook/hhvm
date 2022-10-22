@@ -44,7 +44,7 @@ public class SimpleLoadBalancingRpcClientMono extends Mono<RpcClient> {
   }
 
   private Mono<RpcClient> select(Context context) {
-    int index;
+    int index = 0;
     if (!context.isEmpty() && context.hasKey(STICKY_HASH_KEY)) {
       Object obj = context.get(STICKY_HASH_KEY);
       index = obj.hashCode() % numOfClient;

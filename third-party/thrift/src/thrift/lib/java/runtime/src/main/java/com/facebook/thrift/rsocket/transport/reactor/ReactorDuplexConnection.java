@@ -22,6 +22,7 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.EventLoop;
 import io.rsocket.frame.FrameLengthCodec;
 import io.rsocket.internal.BaseDuplexConnection;
+import java.time.Duration;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -60,7 +61,14 @@ public class ReactorDuplexConnection extends BaseDuplexConnection {
     if (connection instanceof Mono) {
       return connection.outbound().sendObject(Mono.from(frames).map(this::encode)).then();
     } else {
-      return connection.outbound().send(Flux.from(frames).map(this::encode)).then();
+      return connection
+          .outbound()
+          .sendGroups(
+              Flux.from(frames)
+                  .map(this::encode)
+                  .windowTimeout(
+                      WINDOW_SIZE, Duration.ofMillis(WINDOW_TIMEOUT), eventLoopScheduler, true))
+          .then();
     }
   }
 

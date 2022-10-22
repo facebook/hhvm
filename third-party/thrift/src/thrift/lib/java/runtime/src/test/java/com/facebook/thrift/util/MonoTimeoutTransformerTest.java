@@ -16,8 +16,8 @@
 
 package com.facebook.thrift.util;
 
-import com.facebook.thrift.util.resources.FastThreadLocalThread;
 import com.facebook.thrift.util.resources.RpcResources;
+import io.netty.util.concurrent.FastThreadLocalThread;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -36,7 +36,7 @@ public class MonoTimeoutTransformerTest {
             .ignoreElements()
             .transform(
                 new MonoTimeoutTransformer<>(
-                    RpcResources.getClientOffLoopScheduler(), 1, TimeUnit.DAYS));
+                    RpcResources.getEventLoopGroup().next(), 1, TimeUnit.DAYS));
 
     StepVerifier.create(transform).expectComplete().verify();
   }
@@ -47,7 +47,7 @@ public class MonoTimeoutTransformerTest {
         Mono.never()
             .transform(
                 new MonoTimeoutTransformer<>(
-                    RpcResources.getClientOffLoopScheduler(), 1, TimeUnit.SECONDS));
+                    RpcResources.getEventLoopGroup().next(), 1, TimeUnit.SECONDS));
 
     StepVerifier.create(transform).verifyError(TimeoutException.class);
   }
@@ -58,7 +58,7 @@ public class MonoTimeoutTransformerTest {
         Mono.<String>never()
             .transform(
                 new MonoTimeoutTransformer<>(
-                    RpcResources.getClientOffLoopScheduler(),
+                    RpcResources.getEventLoopGroup().next(),
                     1,
                     TimeUnit.SECONDS,
                     Mono.just("hello")));
@@ -72,7 +72,7 @@ public class MonoTimeoutTransformerTest {
         Mono.<String>never()
             .transform(
                 new MonoTimeoutTransformer<>(
-                    RpcResources.getClientOffLoopScheduler(),
+                    RpcResources.getEventLoopGroup().next(),
                     1,
                     TimeUnit.SECONDS,
                     Mono.just("hello")));
@@ -89,7 +89,7 @@ public class MonoTimeoutTransformerTest {
             .ignoreElements()
             .transform(
                 new MonoTimeoutTransformer<>(
-                    RpcResources.getClientOffLoopScheduler(), 1, TimeUnit.SECONDS));
+                    RpcResources.getEventLoopGroup().next(), 1, TimeUnit.SECONDS));
 
     StepVerifier.create(infinite)
         .verifyErrorSatisfies(
@@ -106,7 +106,7 @@ public class MonoTimeoutTransformerTest {
         Mono.never()
             .transform(
                 new MonoTimeoutTransformer<>(
-                    RpcResources.getClientOffLoopScheduler(), 1, TimeUnit.SECONDS));
+                    RpcResources.getEventLoopGroup().next(), 1, TimeUnit.SECONDS));
 
     StepVerifier.create(never).verifyError();
   }

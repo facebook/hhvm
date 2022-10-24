@@ -57,6 +57,7 @@
 , re2
 , re2c
 , rustChannelOf
+, setup-compiler-cache ? "/nix/var/setup-compiler-cache.sh"
 , stdenv
 , sqlite
 , tbb
@@ -102,27 +103,19 @@ let
     date = "2022-08-11";
     channel = "nightly";
   };
-  inheritedEnvironmentVariables =
-    lib.attrsets.filterAttrs
-      (name: value: value != "")
-      (
-        lib.attrsets.genAttrs
-          [
-            "CMAKE_C_COMPILER_LAUNCHER"
-            "CMAKE_CXX_COMPILER_LAUNCHER"
-            "RUSTC_WRAPPER"
-            "AWS_ACCESS_KEY_ID"
-            "AWS_SECRET_ACCESS_KEY"
-            "AWS_SESSION_TOKEN"
-            "SCCACHE_BUCKET"
-            "SCCACHE_ENDPOINT"
-            "SCCACHE_REGION"
-            "SCCACHE_S3_NO_CREDENTIALS"
-          ]
-          builtins.getEnv
-      );
 in
-stdenv.mkDerivation (inheritedEnvironmentVariables // rec {
+stdenv.mkDerivation rec {
+  # We pass compiler cache settings as a shell script specified by
+  # `setup-compiler-cache`, not as derivation attributes, because we don't want
+  # to change the derivation hash changes due to different AWS_SESSION_TOKEN
+  # values.
+  preConfigure = ''
+    if [[ -f ${lib.strings.escapeShellArg setup-compiler-cache} ]]
+    then
+      . ${lib.strings.escapeShellArg setup-compiler-cache}
+    fi
+  '';
+
   pname = "hhvm";
   version = builtins.foldl' lib.trivial.id makeVersion versionParts;
   src = ./.;
@@ -301,4 +294,3 @@ stdenv.mkDerivation (inheritedEnvironmentVariables // rec {
     }];
   };
 }
-)

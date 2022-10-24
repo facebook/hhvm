@@ -2249,7 +2249,9 @@ void Bar::readNoXfer(Protocol_* iprot) {
 _readField_loop:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::Loop>::readWithContext(*iprot, this->__fbthrift_field_loop, _readState);
+    auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::test::fixtures::patch::Loop>>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::Loop>::readWithContext(*iprot, *ptr, _readState);
+    this->__fbthrift_field_loop = std::move(ptr);
     _readState.afterSubobject(iprot);
     
   }
@@ -2300,9 +2302,14 @@ template <class Protocol_>
 uint32_t Bar::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("Bar");
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::Loop>>(this->__fbthrift_field_loop))) {
+  if (!(this->__fbthrift_field_loop && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::Loop>>(*this->__fbthrift_field_loop))) {
     xfer += prot_->serializedFieldSize("loop", apache::thrift::protocol::T_STRUCT, -1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::Loop>::serializedSize<false>(*prot_, this->__fbthrift_field_loop);
+    if (this->__fbthrift_field_loop) {
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::Loop>::serializedSize<false>(*prot_, *this->__fbthrift_field_loop);
+    } else {
+      xfer += prot_->serializedStructSize("Loop");
+      xfer += prot_->serializedSizeStop();
+    }
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -2312,9 +2319,14 @@ template <class Protocol_>
 uint32_t Bar::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("Bar");
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::Loop>>(this->__fbthrift_field_loop))) {
+  if (!(this->__fbthrift_field_loop && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::Loop>>(*this->__fbthrift_field_loop))) {
     xfer += prot_->serializedFieldSize("loop", apache::thrift::protocol::T_STRUCT, -1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::Loop>::serializedSize<true>(*prot_, this->__fbthrift_field_loop);
+    if (this->__fbthrift_field_loop) {
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::Loop>::serializedSize<true>(*prot_, *this->__fbthrift_field_loop);
+    } else {
+      xfer += prot_->serializedStructSize("Loop");
+      xfer += prot_->serializedSizeStop();
+    }
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -2330,7 +2342,13 @@ uint32_t Bar::write(Protocol_* prot_) const {
     uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, -1, kPrevFieldId>(*prot_, "loop", previousFieldHasValue);
     uint32_t xfer_after_field_begin = xfer;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::Loop>::write(*prot_, this->__fbthrift_field_loop);
+    if (this->__fbthrift_field_loop) {
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::Loop>::write(*prot_, *this->__fbthrift_field_loop);
+    } else {
+      xfer += prot_->writeStructBegin("Loop");
+      xfer += prot_->writeStructEnd();
+      xfer += prot_->writeFieldStop();
+    }
     rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
   }
   xfer += prot_->writeFieldStop();

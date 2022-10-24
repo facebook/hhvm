@@ -2003,42 +2003,47 @@ const folly::StringPiece ForwardUsageStruct::__fbthrift_get_field_name(::apache:
   return apache::thrift::TStructDataStorage<ForwardUsageStruct>::fields_names[folly::to_underlying(ord) - 1];
 }
 
-ForwardUsageStruct::ForwardUsageStruct(const ForwardUsageStruct&) = default;
-ForwardUsageStruct& ForwardUsageStruct::operator=(const ForwardUsageStruct&) = default;
+ForwardUsageStruct::ForwardUsageStruct(const ForwardUsageStruct& srcObj) :
+    __fbthrift_field_foo(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_foo)) {
+}
+
+ForwardUsageStruct& ForwardUsageStruct::operator=(const ForwardUsageStruct& other) {
+  ForwardUsageStruct tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
 ForwardUsageStruct::ForwardUsageStruct(FOLLY_MAYBE_UNUSED ForwardUsageStruct&& other) noexcept :
-    __fbthrift_field_foo(std::move(other.__fbthrift_field_foo)),
-    __isset(other.__isset) {
+    __fbthrift_field_foo(std::move(other.__fbthrift_field_foo)) {
 }
 
 ForwardUsageStruct& ForwardUsageStruct::operator=(FOLLY_MAYBE_UNUSED ForwardUsageStruct&& other) noexcept {
     this->__fbthrift_field_foo = std::move(other.__fbthrift_field_foo);
-    __isset = other.__isset;
     return *this;
 }
 
 
-ForwardUsageStruct::ForwardUsageStruct(apache::thrift::FragileConstructor, ::apache::thrift::fixtures::types::ForwardUsageRoot foo__arg) :
+ForwardUsageStruct::ForwardUsageStruct(apache::thrift::FragileConstructor, ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot> foo__arg) :
     __fbthrift_field_foo(std::move(foo__arg)) {
-  __isset.set(folly::index_constant<0>(), true);
 }
 
 
 void ForwardUsageStruct::__fbthrift_clear() {
   // clear all fields
-  ::apache::thrift::clear(this->__fbthrift_field_foo);
-  __isset = {};
+  this->__fbthrift_field_foo.reset();
 }
 
 void ForwardUsageStruct::__fbthrift_clear_terse_fields() {
 }
 
 bool ForwardUsageStruct::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0));
+  return !(this->__fbthrift_field_foo);
 }
 
 bool ForwardUsageStruct::operator==(FOLLY_MAYBE_UNUSED const ForwardUsageStruct& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.foo_ref() == rhs.foo_ref())) {
+  if ((!::apache::thrift::detail::pointer_equal(lhs.foo_ref(), rhs.foo_ref()))) {
     return false;
   }
   return true;
@@ -2046,25 +2051,16 @@ bool ForwardUsageStruct::operator==(FOLLY_MAYBE_UNUSED const ForwardUsageStruct&
 
 bool ForwardUsageStruct::operator<(FOLLY_MAYBE_UNUSED const ForwardUsageStruct& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.foo_ref() == rhs.foo_ref())) {
-    return lhs.foo_ref() < rhs.foo_ref();
+  if ((!::apache::thrift::detail::pointer_equal(lhs.foo_ref(), rhs.foo_ref()))) {
+    return ::apache::thrift::detail::pointer_less(lhs.foo_ref(), rhs.foo_ref());
   }
   return false;
-}
-
-const ::apache::thrift::fixtures::types::ForwardUsageRoot* ForwardUsageStruct::get_foo() const& {
-  return foo_ref().has_value() ? std::addressof(__fbthrift_field_foo) : nullptr;
-}
-
-::apache::thrift::fixtures::types::ForwardUsageRoot* ForwardUsageStruct::get_foo() & {
-  return foo_ref().has_value() ? std::addressof(__fbthrift_field_foo) : nullptr;
 }
 
 
 void swap(FOLLY_MAYBE_UNUSED ForwardUsageStruct& a, FOLLY_MAYBE_UNUSED ForwardUsageStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_foo, b.__fbthrift_field_foo);
-  swap(a.__isset, b.__isset);
 }
 
 template void ForwardUsageStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2113,42 +2109,47 @@ const folly::StringPiece ForwardUsageByRef::__fbthrift_get_field_name(::apache::
   return apache::thrift::TStructDataStorage<ForwardUsageByRef>::fields_names[folly::to_underlying(ord) - 1];
 }
 
-ForwardUsageByRef::ForwardUsageByRef(const ForwardUsageByRef&) = default;
-ForwardUsageByRef& ForwardUsageByRef::operator=(const ForwardUsageByRef&) = default;
+ForwardUsageByRef::ForwardUsageByRef(const ForwardUsageByRef& srcObj) :
+    __fbthrift_field_foo(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_foo)) {
+}
+
+ForwardUsageByRef& ForwardUsageByRef::operator=(const ForwardUsageByRef& other) {
+  ForwardUsageByRef tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
 ForwardUsageByRef::ForwardUsageByRef(FOLLY_MAYBE_UNUSED ForwardUsageByRef&& other) noexcept :
-    __fbthrift_field_foo(std::move(other.__fbthrift_field_foo)),
-    __isset(other.__isset) {
+    __fbthrift_field_foo(std::move(other.__fbthrift_field_foo)) {
 }
 
 ForwardUsageByRef& ForwardUsageByRef::operator=(FOLLY_MAYBE_UNUSED ForwardUsageByRef&& other) noexcept {
     this->__fbthrift_field_foo = std::move(other.__fbthrift_field_foo);
-    __isset = other.__isset;
     return *this;
 }
 
 
-ForwardUsageByRef::ForwardUsageByRef(apache::thrift::FragileConstructor, ::apache::thrift::fixtures::types::ForwardUsageRoot foo__arg) :
+ForwardUsageByRef::ForwardUsageByRef(apache::thrift::FragileConstructor, ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot> foo__arg) :
     __fbthrift_field_foo(std::move(foo__arg)) {
-  __isset.set(folly::index_constant<0>(), true);
 }
 
 
 void ForwardUsageByRef::__fbthrift_clear() {
   // clear all fields
-  ::apache::thrift::clear(this->__fbthrift_field_foo);
-  __isset = {};
+  this->__fbthrift_field_foo.reset();
 }
 
 void ForwardUsageByRef::__fbthrift_clear_terse_fields() {
 }
 
 bool ForwardUsageByRef::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0));
+  return !(this->__fbthrift_field_foo);
 }
 
 bool ForwardUsageByRef::operator==(FOLLY_MAYBE_UNUSED const ForwardUsageByRef& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.foo_ref() == rhs.foo_ref())) {
+  if ((!::apache::thrift::detail::pointer_equal(lhs.foo_ref(), rhs.foo_ref()))) {
     return false;
   }
   return true;
@@ -2156,25 +2157,16 @@ bool ForwardUsageByRef::operator==(FOLLY_MAYBE_UNUSED const ForwardUsageByRef& r
 
 bool ForwardUsageByRef::operator<(FOLLY_MAYBE_UNUSED const ForwardUsageByRef& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.foo_ref() == rhs.foo_ref())) {
-    return lhs.foo_ref() < rhs.foo_ref();
+  if ((!::apache::thrift::detail::pointer_equal(lhs.foo_ref(), rhs.foo_ref()))) {
+    return ::apache::thrift::detail::pointer_less(lhs.foo_ref(), rhs.foo_ref());
   }
   return false;
-}
-
-const ::apache::thrift::fixtures::types::ForwardUsageRoot* ForwardUsageByRef::get_foo() const& {
-  return foo_ref().has_value() ? std::addressof(__fbthrift_field_foo) : nullptr;
-}
-
-::apache::thrift::fixtures::types::ForwardUsageRoot* ForwardUsageByRef::get_foo() & {
-  return foo_ref().has_value() ? std::addressof(__fbthrift_field_foo) : nullptr;
 }
 
 
 void swap(FOLLY_MAYBE_UNUSED ForwardUsageByRef& a, FOLLY_MAYBE_UNUSED ForwardUsageByRef& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_foo, b.__fbthrift_field_foo);
-  swap(a.__isset, b.__isset);
 }
 
 template void ForwardUsageByRef::readNoXfer<>(apache::thrift::BinaryProtocolReader*);

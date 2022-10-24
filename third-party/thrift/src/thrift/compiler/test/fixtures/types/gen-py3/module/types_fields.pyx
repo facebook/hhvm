@@ -708,7 +708,7 @@ cdef class __ForwardUsageStruct_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _module_types.ForwardUsageRoot):
             raise TypeError(f'foo is not a { _module_types.ForwardUsageRoot !r}.')
-        deref(self._struct_cpp_obj).foo_ref().assign(deref((<_module_types.ForwardUsageRoot?> _fbthrift_value)._cpp_obj))
+        assign_unique_ptr[_module_types.cForwardUsageRoot](deref(self._struct_cpp_obj).foo_ref(), make_unique[_module_types.cForwardUsageRoot](deref((<_module_types.ForwardUsageRoot?>_fbthrift_value)._cpp_obj)))
 
 
 @__cython.auto_pickle(False)
@@ -735,7 +735,7 @@ cdef class __ForwardUsageByRef_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _module_types.ForwardUsageRoot):
             raise TypeError(f'foo is not a { _module_types.ForwardUsageRoot !r}.')
-        deref(self._struct_cpp_obj).foo_ref().assign(deref((<_module_types.ForwardUsageRoot?> _fbthrift_value)._cpp_obj))
+        assign_unique_ptr[_module_types.cForwardUsageRoot](deref(self._struct_cpp_obj).foo_ref(), make_unique[_module_types.cForwardUsageRoot](deref((<_module_types.ForwardUsageRoot?>_fbthrift_value)._cpp_obj)))
 
 
 @__cython.auto_pickle(False)

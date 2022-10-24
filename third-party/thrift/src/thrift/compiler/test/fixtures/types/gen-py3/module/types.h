@@ -310,7 +310,7 @@ void reset_field<::apache::thrift::fixtures::types::ForwardUsageStruct>(
     ::apache::thrift::fixtures::types::ForwardUsageStruct& obj, uint16_t index) {
   switch (index) {
     case 0:
-      obj.foo_ref().copy_from(default_inst<::apache::thrift::fixtures::types::ForwardUsageStruct>().foo_ref());
+      obj.foo_ref().reset();
       return;
   }
 }
@@ -320,7 +320,7 @@ void reset_field<::apache::thrift::fixtures::types::ForwardUsageByRef>(
     ::apache::thrift::fixtures::types::ForwardUsageByRef& obj, uint16_t index) {
   switch (index) {
     case 0:
-      obj.foo_ref().copy_from(default_inst<::apache::thrift::fixtures::types::ForwardUsageByRef>().foo_ref());
+      obj.foo_ref().reset();
       return;
   }
 }

@@ -93,7 +93,7 @@ struct Recursive {
 }
 
 struct Bar {
-  Loop loop;
+  Loop loop (cpp.ref);
 }
 
 @patch.AssignOnlyPatch

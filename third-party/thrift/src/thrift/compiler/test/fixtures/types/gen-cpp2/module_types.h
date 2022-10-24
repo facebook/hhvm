@@ -3659,73 +3659,59 @@ class ForwardUsageStruct final  {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  ForwardUsageStruct(apache::thrift::FragileConstructor, ::apache::thrift::fixtures::types::ForwardUsageRoot foo__arg);
+  ForwardUsageStruct(apache::thrift::FragileConstructor, ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot> foo__arg);
 
   ForwardUsageStruct(ForwardUsageStruct&&) noexcept;
-
   ForwardUsageStruct(const ForwardUsageStruct& src);
 
 
   ForwardUsageStruct& operator=(ForwardUsageStruct&&) noexcept;
   ForwardUsageStruct& operator=(const ForwardUsageStruct& src);
  private:
-  ::apache::thrift::fixtures::types::ForwardUsageRoot __fbthrift_field_foo;
- private:
-  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot> __fbthrift_field_foo;
 
  public:
 
   bool operator==(const ForwardUsageStruct&) const;
   bool operator<(const ForwardUsageStruct&) const;
-
-  template <typename..., typename T = ::apache::thrift::fixtures::types::ForwardUsageRoot>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> foo_ref() const& {
-    return {this->__fbthrift_field_foo, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::apache::thrift::fixtures::types::ForwardUsageRoot>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> foo_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_foo), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::apache::thrift::fixtures::types::ForwardUsageRoot>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> foo_ref() & {
-    return {this->__fbthrift_field_foo, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::apache::thrift::fixtures::types::ForwardUsageRoot>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> foo_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_foo), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::apache::thrift::fixtures::types::ForwardUsageRoot>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> foo() const& {
-    return {this->__fbthrift_field_foo, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::apache::thrift::fixtures::types::ForwardUsageRoot>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> foo() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_foo), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::apache::thrift::fixtures::types::ForwardUsageRoot>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> foo() & {
-    return {this->__fbthrift_field_foo, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::apache::thrift::fixtures::types::ForwardUsageRoot>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> foo() && {
-    return {static_cast<T&&>(this->__fbthrift_field_foo), __isset.at(0), __isset.bit(0)};
-  }
-  const ::apache::thrift::fixtures::types::ForwardUsageRoot* get_foo() const&;
-  ::apache::thrift::fixtures::types::ForwardUsageRoot* get_foo() &;
-  ::apache::thrift::fixtures::types::ForwardUsageRoot* get_foo() && = delete;
-
-  template <typename T_ForwardUsageStruct_foo_struct_setter = ::apache::thrift::fixtures::types::ForwardUsageRoot>
-  [[deprecated("Use `FOO.foo_ref() = BAR;` instead of `FOO.set_foo(BAR);`")]]
-  ::apache::thrift::fixtures::types::ForwardUsageRoot& set_foo(T_ForwardUsageStruct_foo_struct_setter&& foo_) {
-    foo_ref() = std::forward<T_ForwardUsageStruct_foo_struct_setter>(foo_);
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
+  FOLLY_ERASE T& foo_ref() & {
     return __fbthrift_field_foo;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
+  FOLLY_ERASE const T& foo_ref() const& {
+    return __fbthrift_field_foo;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
+  FOLLY_ERASE T&& foo_ref() && {
+    return static_cast<T&&>(__fbthrift_field_foo);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
+  FOLLY_ERASE const T&& foo_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_foo);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
+  FOLLY_ERASE T& foo() & {
+    return __fbthrift_field_foo;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
+  FOLLY_ERASE const T& foo() const& {
+    return __fbthrift_field_foo;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
+  FOLLY_ERASE T&& foo() && {
+    return static_cast<T&&>(__fbthrift_field_foo);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
+  FOLLY_ERASE const T&& foo() const&& {
+    return static_cast<const T&&>(__fbthrift_field_foo);
   }
 
   template <class Protocol_>
@@ -3937,73 +3923,59 @@ class ForwardUsageByRef final  {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  ForwardUsageByRef(apache::thrift::FragileConstructor, ::apache::thrift::fixtures::types::ForwardUsageRoot foo__arg);
+  ForwardUsageByRef(apache::thrift::FragileConstructor, ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot> foo__arg);
 
   ForwardUsageByRef(ForwardUsageByRef&&) noexcept;
-
   ForwardUsageByRef(const ForwardUsageByRef& src);
 
 
   ForwardUsageByRef& operator=(ForwardUsageByRef&&) noexcept;
   ForwardUsageByRef& operator=(const ForwardUsageByRef& src);
  private:
-  ::apache::thrift::fixtures::types::ForwardUsageRoot __fbthrift_field_foo;
- private:
-  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot> __fbthrift_field_foo;
 
  public:
 
   bool operator==(const ForwardUsageByRef&) const;
   bool operator<(const ForwardUsageByRef&) const;
-
-  template <typename..., typename T = ::apache::thrift::fixtures::types::ForwardUsageRoot>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> foo_ref() const& {
-    return {this->__fbthrift_field_foo, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::apache::thrift::fixtures::types::ForwardUsageRoot>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> foo_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_foo), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::apache::thrift::fixtures::types::ForwardUsageRoot>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> foo_ref() & {
-    return {this->__fbthrift_field_foo, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::apache::thrift::fixtures::types::ForwardUsageRoot>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> foo_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_foo), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::apache::thrift::fixtures::types::ForwardUsageRoot>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> foo() const& {
-    return {this->__fbthrift_field_foo, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::apache::thrift::fixtures::types::ForwardUsageRoot>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> foo() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_foo), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::apache::thrift::fixtures::types::ForwardUsageRoot>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> foo() & {
-    return {this->__fbthrift_field_foo, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::apache::thrift::fixtures::types::ForwardUsageRoot>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> foo() && {
-    return {static_cast<T&&>(this->__fbthrift_field_foo), __isset.at(0), __isset.bit(0)};
-  }
-  const ::apache::thrift::fixtures::types::ForwardUsageRoot* get_foo() const&;
-  ::apache::thrift::fixtures::types::ForwardUsageRoot* get_foo() &;
-  ::apache::thrift::fixtures::types::ForwardUsageRoot* get_foo() && = delete;
-
-  template <typename T_ForwardUsageByRef_foo_struct_setter = ::apache::thrift::fixtures::types::ForwardUsageRoot>
-  [[deprecated("Use `FOO.foo_ref() = BAR;` instead of `FOO.set_foo(BAR);`")]]
-  ::apache::thrift::fixtures::types::ForwardUsageRoot& set_foo(T_ForwardUsageByRef_foo_struct_setter&& foo_) {
-    foo_ref() = std::forward<T_ForwardUsageByRef_foo_struct_setter>(foo_);
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
+  FOLLY_ERASE T& foo_ref() & {
     return __fbthrift_field_foo;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
+  FOLLY_ERASE const T& foo_ref() const& {
+    return __fbthrift_field_foo;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
+  FOLLY_ERASE T&& foo_ref() && {
+    return static_cast<T&&>(__fbthrift_field_foo);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
+  FOLLY_ERASE const T&& foo_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_foo);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
+  FOLLY_ERASE T& foo() & {
+    return __fbthrift_field_foo;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
+  FOLLY_ERASE const T& foo() const& {
+    return __fbthrift_field_foo;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
+  FOLLY_ERASE T&& foo() && {
+    return static_cast<T&&>(__fbthrift_field_foo);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>
+  FOLLY_ERASE const T&& foo() const&& {
+    return static_cast<const T&&>(__fbthrift_field_foo);
   }
 
   template <class Protocol_>

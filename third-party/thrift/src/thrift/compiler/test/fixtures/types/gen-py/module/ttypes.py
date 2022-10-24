@@ -3855,6 +3855,9 @@ ForwardUsageStruct.thrift_spec = (
 ForwardUsageStruct.thrift_struct_annotations = {
 }
 ForwardUsageStruct.thrift_field_annotations = {
+  1: {
+    "cpp.ref": "true",
+  },
 }
 
 def ForwardUsageStruct__init__(self, foo=None,):
@@ -3878,6 +3881,9 @@ ForwardUsageByRef.thrift_spec = (
 ForwardUsageByRef.thrift_struct_annotations = {
 }
 ForwardUsageByRef.thrift_field_annotations = {
+  1: {
+    "cpp.ref": "true",
+  },
 }
 
 def ForwardUsageByRef__init__(self, foo=None,):

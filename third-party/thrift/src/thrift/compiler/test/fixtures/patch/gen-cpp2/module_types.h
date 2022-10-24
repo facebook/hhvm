@@ -4237,6 +4237,156 @@ unsigned long Recursive::read(Protocol_* iprot) {
 }
 
 
+class Bar final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const char* __fbthrift_thrift_uri();
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
+
+  template<class T>
+  using __fbthrift_id = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                   void,
+                                                   ::apache::thrift::field_id<-1>>;
+
+  template<class T>
+  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                         void,
+                                                         ::apache::thrift::type::struct_t<::test::fixtures::patch::Loop>>;
+
+  template<class T>
+  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                      void,
+                                                      ::apache::thrift::ident::loop>;
+
+  struct __fbthrift_ordinal_impl {
+#if defined(_MSC_VER) || defined(__clang__)
+    template<class> static constexpr int value = 0;
+    template<> static constexpr int value<::apache::thrift::field_id<-1>> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::loop> = 1;
+#else
+    template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-1>>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::loop>) { return 1; }
+    template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
+#endif
+  };
+
+  struct __fbthrift_ordinal_impl_for_non_unique_type {
+    template<class, class, class> struct Impl { static constexpr int value = 0; };
+    template<class T> struct Impl<::apache::thrift::type::struct_t<::test::fixtures::patch::Loop>, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
+
+    template<class T> static constexpr int value = Impl<T, T, void>::value;
+  };
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::field_ordinal<
+    std::conditional_t<
+        __fbthrift_ordinal_impl::value<T> != 0,
+        __fbthrift_ordinal_impl,
+        __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
+  >;
+
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = Bar;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  Bar() :
+      __fbthrift_field_loop(std::make_unique<::test::fixtures::patch::Loop>()) {
+  }
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  Bar(apache::thrift::FragileConstructor, ::std::unique_ptr<::test::fixtures::patch::Loop> loop__arg);
+
+  Bar(Bar&&) noexcept;
+  Bar(const Bar& src);
+
+
+  Bar& operator=(Bar&&) noexcept;
+  Bar& operator=(const Bar& src);
+ private:
+  ::std::unique_ptr<::test::fixtures::patch::Loop> __fbthrift_field_loop;
+
+ public:
+
+  bool operator==(const Bar&) const;
+  bool operator<(const Bar&) const;
+  template <typename ..., typename T = ::std::unique_ptr<::test::fixtures::patch::Loop>>
+  FOLLY_ERASE T& loop_ref() & {
+    return __fbthrift_field_loop;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::test::fixtures::patch::Loop>>
+  FOLLY_ERASE const T& loop_ref() const& {
+    return __fbthrift_field_loop;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::test::fixtures::patch::Loop>>
+  FOLLY_ERASE T&& loop_ref() && {
+    return static_cast<T&&>(__fbthrift_field_loop);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::test::fixtures::patch::Loop>>
+  FOLLY_ERASE const T&& loop_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_loop);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::test::fixtures::patch::Loop>>
+  FOLLY_ERASE T& loop() & {
+    return __fbthrift_field_loop;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::test::fixtures::patch::Loop>>
+  FOLLY_ERASE const T& loop() const& {
+    return __fbthrift_field_loop;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::test::fixtures::patch::Loop>>
+  FOLLY_ERASE T&& loop() && {
+    return static_cast<T&&>(__fbthrift_field_loop);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::test::fixtures::patch::Loop>>
+  FOLLY_ERASE const T&& loop() const&& {
+    return static_cast<const T&&>(__fbthrift_field_loop);
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<Bar>;
+  friend void swap(Bar& a, Bar& b);
+};
+
+template <class Protocol_>
+unsigned long Bar::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
 class Loop final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -4391,166 +4541,6 @@ class Loop final  {
 
 template <class Protocol_>
 unsigned long Loop::read(Protocol_* iprot) {
-  auto _xferStart = iprot->getCursorPosition();
-  readNoXfer(iprot);
-  return iprot->getCursorPosition() - _xferStart;
-}
-
-
-class Bar final  {
- private:
-  friend struct ::apache::thrift::detail::st::struct_private_access;
-  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
-
-  //  used by a static_assert in the corresponding source
-  static constexpr bool __fbthrift_cpp2_gen_json = false;
-  static const char* __fbthrift_thrift_uri();
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static constexpr std::size_t __fbthrift_field_size_v = 1;
-
-  template<class T>
-  using __fbthrift_id = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                   void,
-                                                   ::apache::thrift::field_id<-1>>;
-
-  template<class T>
-  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                         void,
-                                                         ::apache::thrift::type::struct_t<::test::fixtures::patch::Loop>>;
-
-  template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::loop>;
-
-  struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
-    template<class> static constexpr int value = 0;
-    template<> static constexpr int value<::apache::thrift::field_id<-1>> = 1;
-    template<> static constexpr int value<::apache::thrift::ident::loop> = 1;
-#else
-    template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-1>>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::loop>) { return 1; }
-    template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
-#endif
-  };
-
-  struct __fbthrift_ordinal_impl_for_non_unique_type {
-    template<class, class, class> struct Impl { static constexpr int value = 0; };
-    template<class T> struct Impl<::apache::thrift::type::struct_t<::test::fixtures::patch::Loop>, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
-
-    template<class T> static constexpr int value = Impl<T, T, void>::value;
-  };
-
-  template<class T> using __fbthrift_ordinal = ::apache::thrift::field_ordinal<
-    std::conditional_t<
-        __fbthrift_ordinal_impl::value<T> != 0,
-        __fbthrift_ordinal_impl,
-        __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
-  >;
-
-  void __fbthrift_clear();
-  void __fbthrift_clear_terse_fields();
-  bool __fbthrift_is_empty() const;
-
- public:
-  using __fbthrift_cpp2_type = Bar;
-  static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-
-
- public:
-
-  Bar() {
-  }
-  // FragileConstructor for use in initialization lists only.
-  [[deprecated("This constructor is deprecated")]]
-  Bar(apache::thrift::FragileConstructor, ::test::fixtures::patch::Loop loop__arg);
-
-  Bar(Bar&&) noexcept;
-
-  Bar(const Bar& src);
-
-
-  Bar& operator=(Bar&&) noexcept;
-  Bar& operator=(const Bar& src);
- private:
-  ::test::fixtures::patch::Loop __fbthrift_field_loop;
-
- public:
-
-  bool operator==(const Bar&) const;
-  bool operator<(const Bar&) const;
-
-  template <typename..., typename T = ::test::fixtures::patch::Loop>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> loop_ref() const& {
-    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_loop};
-  }
-
-  template <typename..., typename T = ::test::fixtures::patch::Loop>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> loop_ref() const&& {
-    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_loop)};
-  }
-
-  template <typename..., typename T = ::test::fixtures::patch::Loop>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> loop_ref() & {
-    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_loop};
-  }
-
-  template <typename..., typename T = ::test::fixtures::patch::Loop>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> loop_ref() && {
-    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_loop)};
-  }
-
-  template <typename..., typename T = ::test::fixtures::patch::Loop>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> loop() const& {
-    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_loop};
-  }
-
-  template <typename..., typename T = ::test::fixtures::patch::Loop>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> loop() const&& {
-    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_loop)};
-  }
-
-  template <typename..., typename T = ::test::fixtures::patch::Loop>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> loop() & {
-    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_loop};
-  }
-
-  template <typename..., typename T = ::test::fixtures::patch::Loop>
-  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> loop() && {
-    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_loop)};
-  }
-  const ::test::fixtures::patch::Loop& get_loop() const&;
-  ::test::fixtures::patch::Loop get_loop() &&;
-
-  template <typename T_Bar_loop_struct_setter = ::test::fixtures::patch::Loop>
-  [[deprecated("Use `FOO.loop_ref() = BAR;` instead of `FOO.set_loop(BAR);`")]]
-  ::test::fixtures::patch::Loop& set_loop(T_Bar_loop_struct_setter&& loop_) {
-    loop_ref() = std::forward<T_Bar_loop_struct_setter>(loop_);
-    return __fbthrift_field_loop;
-  }
-
-  template <class Protocol_>
-  unsigned long read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t serializedSize(Protocol_ const* prot_) const;
-  template <class Protocol_>
-  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
-  template <class Protocol_>
-  uint32_t write(Protocol_* prot_) const;
-
- private:
-  template <class Protocol_>
-  void readNoXfer(Protocol_* iprot);
-
-  friend class ::apache::thrift::Cpp2Ops<Bar>;
-  friend void swap(Bar& a, Bar& b);
-};
-
-template <class Protocol_>
-unsigned long Bar::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;

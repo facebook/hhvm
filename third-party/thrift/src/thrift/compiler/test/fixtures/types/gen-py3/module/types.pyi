@@ -646,7 +646,6 @@ class ForwardUsageRoot(thrift.py3.types.Struct, _typing.Hashable):
 
 class ForwardUsageStruct(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
-        foo: bool
         pass
 
     foo: Final[_typing.Optional[ForwardUsageRoot]] = ...
@@ -676,7 +675,6 @@ class ForwardUsageStruct(thrift.py3.types.Struct, _typing.Hashable):
 
 class ForwardUsageByRef(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
-        foo: bool
         pass
 
     foo: Final[_typing.Optional[ForwardUsageRoot]] = ...

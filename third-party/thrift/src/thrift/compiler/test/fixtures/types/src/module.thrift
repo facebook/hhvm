@@ -149,11 +149,11 @@ struct ForwardUsageRoot {
 }
 
 struct ForwardUsageStruct {
-  1: optional ForwardUsageRoot foo;
+  1: optional ForwardUsageRoot foo (cpp.ref = "true");
 }
 
 struct ForwardUsageByRef {
-  1: optional ForwardUsageRoot foo;
+  1: optional ForwardUsageRoot foo (cpp.ref = "true");
 }
 
 struct NoexceptMoveEmpty {}

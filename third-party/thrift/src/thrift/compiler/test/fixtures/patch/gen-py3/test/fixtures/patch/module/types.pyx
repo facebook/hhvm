@@ -1306,7 +1306,9 @@ cdef class Bar(thrift.py3.types.Struct):
     cdef inline loop_impl(self):
 
         if self.__fbthrift_cached_loop is None:
-            self.__fbthrift_cached_loop = Loop._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).loop_ref().ref(), self._cpp_obj))
+            if not deref(self._cpp_obj).loop_ref():
+                return None
+            self.__fbthrift_cached_loop = Loop._fbthrift_create(__reference_shared_ptr(deref(deref(self._cpp_obj).loop_ref()), self._cpp_obj))
         return self.__fbthrift_cached_loop
 
     @property

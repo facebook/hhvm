@@ -1701,7 +1701,7 @@ class CompilerFailureTest(unittest.TestCase):
                 """\
                 include "thrift/annotation/cpp.thrift"
 
-                struct Foo {
+                struct Bar {
                     1: optional Foo field1 (cpp.ref);
 
                     2: optional Foo field2 (cpp2.ref);
@@ -1732,6 +1732,8 @@ class CompilerFailureTest(unittest.TestCase):
                     13: optional Foo field13;
 
                 }
+
+                struct Foo {}
                 """
             ),
         )
@@ -2392,4 +2394,26 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(
             err,
             "[ERROR:foo.thrift:7] Required field is deprecated: `field3`.\n",
+        )
+
+    def test_cycle(self):
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """\
+                struct A {
+                    1: B field;
+                }
+
+                struct B {
+                    1: A field;
+                }
+                """
+            ),
+        )
+        ret, out, err = self.run_thrift("foo.thrift")
+        self.assertEqual(ret, 1)
+        self.assertEqual(
+            err,
+            "[ERROR:foo.thrift:1] Cyclic dependency: A -> B -> A\n",
         )

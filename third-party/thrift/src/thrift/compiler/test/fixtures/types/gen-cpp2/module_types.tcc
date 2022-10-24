@@ -3057,11 +3057,12 @@ void ForwardUsageStruct::readNoXfer(Protocol_* iprot) {
 _readField_foo:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::fixtures::types::ForwardUsageRoot>::readWithContext(*iprot, this->__fbthrift_field_foo, _readState);
+    auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::fixtures::types::ForwardUsageRoot>::readWithContext(*iprot, *ptr, _readState);
+    this->__fbthrift_field_foo = std::move(ptr);
     _readState.afterSubobject(iprot);
     
   }
- this->__isset.set(0, true);
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -3109,9 +3110,9 @@ template <class Protocol_>
 uint32_t ForwardUsageStruct::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("ForwardUsageStruct");
-  if (this->__isset.get(0)) {
+  if (this->__fbthrift_field_foo) {
     xfer += prot_->serializedFieldSize("foo", apache::thrift::protocol::T_STRUCT, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::fixtures::types::ForwardUsageRoot>::serializedSize<false>(*prot_, this->__fbthrift_field_foo);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::fixtures::types::ForwardUsageRoot>::serializedSize<false>(*prot_, *this->__fbthrift_field_foo);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -3121,9 +3122,9 @@ template <class Protocol_>
 uint32_t ForwardUsageStruct::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("ForwardUsageStruct");
-  if (this->__isset.get(0)) {
+  if (this->__fbthrift_field_foo) {
     xfer += prot_->serializedFieldSize("foo", apache::thrift::protocol::T_STRUCT, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::fixtures::types::ForwardUsageRoot>::serializedSize<true>(*prot_, this->__fbthrift_field_foo);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::fixtures::types::ForwardUsageRoot>::serializedSize<true>(*prot_, *this->__fbthrift_field_foo);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -3134,11 +3135,11 @@ uint32_t ForwardUsageStruct::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("ForwardUsageStruct");
   bool previousFieldHasValue = true;
-  if (this->__isset.get(0)) {
+  if (this->__fbthrift_field_foo) {
     constexpr int16_t kPrevFieldId = 0;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 1, kPrevFieldId>(*prot_, "foo", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::fixtures::types::ForwardUsageRoot>::write(*prot_, this->__fbthrift_field_foo);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::fixtures::types::ForwardUsageRoot>::write(*prot_, *this->__fbthrift_field_foo);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -3179,11 +3180,12 @@ void ForwardUsageByRef::readNoXfer(Protocol_* iprot) {
 _readField_foo:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::fixtures::types::ForwardUsageRoot>::readWithContext(*iprot, this->__fbthrift_field_foo, _readState);
+    auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot>>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::fixtures::types::ForwardUsageRoot>::readWithContext(*iprot, *ptr, _readState);
+    this->__fbthrift_field_foo = std::move(ptr);
     _readState.afterSubobject(iprot);
     
   }
- this->__isset.set(0, true);
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -3231,9 +3233,9 @@ template <class Protocol_>
 uint32_t ForwardUsageByRef::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("ForwardUsageByRef");
-  if (this->__isset.get(0)) {
+  if (this->__fbthrift_field_foo) {
     xfer += prot_->serializedFieldSize("foo", apache::thrift::protocol::T_STRUCT, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::fixtures::types::ForwardUsageRoot>::serializedSize<false>(*prot_, this->__fbthrift_field_foo);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::fixtures::types::ForwardUsageRoot>::serializedSize<false>(*prot_, *this->__fbthrift_field_foo);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -3243,9 +3245,9 @@ template <class Protocol_>
 uint32_t ForwardUsageByRef::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("ForwardUsageByRef");
-  if (this->__isset.get(0)) {
+  if (this->__fbthrift_field_foo) {
     xfer += prot_->serializedFieldSize("foo", apache::thrift::protocol::T_STRUCT, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::fixtures::types::ForwardUsageRoot>::serializedSize<true>(*prot_, this->__fbthrift_field_foo);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::fixtures::types::ForwardUsageRoot>::serializedSize<true>(*prot_, *this->__fbthrift_field_foo);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -3256,11 +3258,11 @@ uint32_t ForwardUsageByRef::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("ForwardUsageByRef");
   bool previousFieldHasValue = true;
-  if (this->__isset.get(0)) {
+  if (this->__fbthrift_field_foo) {
     constexpr int16_t kPrevFieldId = 0;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 1, kPrevFieldId>(*prot_, "foo", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::fixtures::types::ForwardUsageRoot>::write(*prot_, this->__fbthrift_field_foo);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::apache::thrift::fixtures::types::ForwardUsageRoot>::write(*prot_, *this->__fbthrift_field_foo);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;

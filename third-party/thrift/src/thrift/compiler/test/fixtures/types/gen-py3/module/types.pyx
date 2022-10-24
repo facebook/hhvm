@@ -2417,7 +2417,6 @@ cdef class ForwardUsageStruct(thrift.py3.types.Struct):
 
     cdef object _fbthrift_isset(self):
         return thrift.py3.types._IsSet("ForwardUsageStruct", {
-          "foo": deref(self._cpp_obj).foo_ref().has_value(),
         })
 
     @staticmethod
@@ -2427,11 +2426,11 @@ cdef class ForwardUsageStruct(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline foo_impl(self):
-        if not deref(self._cpp_obj).foo_ref().has_value():
-            return None
 
         if self.__fbthrift_cached_foo is None:
-            self.__fbthrift_cached_foo = ForwardUsageRoot._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).foo_ref().ref_unchecked(), self._cpp_obj))
+            if not deref(self._cpp_obj).foo_ref():
+                return None
+            self.__fbthrift_cached_foo = ForwardUsageRoot._fbthrift_create(__reference_shared_ptr(deref(deref(self._cpp_obj).foo_ref()), self._cpp_obj))
         return self.__fbthrift_cached_foo
 
     @property
@@ -2536,7 +2535,6 @@ cdef class ForwardUsageByRef(thrift.py3.types.Struct):
 
     cdef object _fbthrift_isset(self):
         return thrift.py3.types._IsSet("ForwardUsageByRef", {
-          "foo": deref(self._cpp_obj).foo_ref().has_value(),
         })
 
     @staticmethod
@@ -2546,11 +2544,11 @@ cdef class ForwardUsageByRef(thrift.py3.types.Struct):
         return __fbthrift_inst
 
     cdef inline foo_impl(self):
-        if not deref(self._cpp_obj).foo_ref().has_value():
-            return None
 
         if self.__fbthrift_cached_foo is None:
-            self.__fbthrift_cached_foo = ForwardUsageRoot._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).foo_ref().ref_unchecked(), self._cpp_obj))
+            if not deref(self._cpp_obj).foo_ref():
+                return None
+            self.__fbthrift_cached_foo = ForwardUsageRoot._fbthrift_create(__reference_shared_ptr(deref(deref(self._cpp_obj).foo_ref()), self._cpp_obj))
         return self.__fbthrift_cached_foo
 
     @property

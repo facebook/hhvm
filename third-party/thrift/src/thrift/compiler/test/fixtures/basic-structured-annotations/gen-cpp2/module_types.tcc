@@ -386,11 +386,12 @@ _readField_name:
 _readField_recurse:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::readWithContext(*iprot, this->__fbthrift_field_recurse, _readState);
+    auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::readWithContext(*iprot, *ptr, _readState);
+    this->__fbthrift_field_recurse = std::move(ptr);
     _readState.afterSubobject(iprot);
     
   }
- this->__isset.set(1, true);
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -406,7 +407,7 @@ _readField_forward:
     _readState.afterSubobject(iprot);
     
   }
- this->__isset.set(2, true);
+ this->__isset.set(1, true);
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -474,9 +475,9 @@ uint32_t structured_annotation_recursive::serializedSize(Protocol_ const* prot_)
     xfer += prot_->serializedFieldSize("name", apache::thrift::protocol::T_STRING, 1);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->__fbthrift_field_name);
   }
-  {
+  if (this->__fbthrift_field_recurse) {
     xfer += prot_->serializedFieldSize("recurse", apache::thrift::protocol::T_STRUCT, 2);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::serializedSize<false>(*prot_, this->__fbthrift_field_recurse);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::serializedSize<false>(*prot_, *this->__fbthrift_field_recurse);
   }
   {
     xfer += prot_->serializedFieldSize("forward", apache::thrift::protocol::T_STRUCT, 3);
@@ -494,9 +495,9 @@ uint32_t structured_annotation_recursive::serializedSizeZC(Protocol_ const* prot
     xfer += prot_->serializedFieldSize("name", apache::thrift::protocol::T_STRING, 1);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->__fbthrift_field_name);
   }
-  {
+  if (this->__fbthrift_field_recurse) {
     xfer += prot_->serializedFieldSize("recurse", apache::thrift::protocol::T_STRUCT, 2);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::serializedSize<true>(*prot_, this->__fbthrift_field_recurse);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::serializedSize<true>(*prot_, *this->__fbthrift_field_recurse);
   }
   {
     xfer += prot_->serializedFieldSize("forward", apache::thrift::protocol::T_STRUCT, 3);
@@ -518,12 +519,14 @@ uint32_t structured_annotation_recursive::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->__fbthrift_field_name);
     xfer += prot_->writeFieldEnd();
   }
-  {
+  if (this->__fbthrift_field_recurse) {
     constexpr int16_t kPrevFieldId = 1;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 2, kPrevFieldId>(*prot_, "recurse", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::write(*prot_, this->__fbthrift_field_recurse);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::write(*prot_, *this->__fbthrift_field_recurse);
     xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   {
     constexpr int16_t kPrevFieldId = 2;

@@ -604,7 +604,7 @@ cdef extern from "thrift/compiler/test/fixtures/types/src/gen-cpp2/module_types_
         bint operator>(cForwardUsageStruct&)
         bint operator<=(cForwardUsageStruct&)
         bint operator>=(cForwardUsageStruct&)
-        __optional_field_ref[cForwardUsageRoot] foo_ref "foo_ref" ()
+        unique_ptr[cForwardUsageRoot] foo_ref "foo_ref" ()
 
 
     cdef cppclass cForwardUsageByRef "::apache::thrift::fixtures::types::ForwardUsageByRef":
@@ -616,7 +616,7 @@ cdef extern from "thrift/compiler/test/fixtures/types/src/gen-cpp2/module_types_
         bint operator>(cForwardUsageByRef&)
         bint operator<=(cForwardUsageByRef&)
         bint operator>=(cForwardUsageByRef&)
-        __optional_field_ref[cForwardUsageRoot] foo_ref "foo_ref" ()
+        unique_ptr[cForwardUsageRoot] foo_ref "foo_ref" ()
 
 
     cdef cppclass cNoexceptMoveEmpty "::apache::thrift::fixtures::types::NoexceptMoveEmpty":

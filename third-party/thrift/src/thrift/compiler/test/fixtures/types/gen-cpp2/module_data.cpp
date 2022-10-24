@@ -468,7 +468,7 @@ THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<:
   "__fbthrift_field_foo",
 }};
 THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::isset_indexes = {{
-  0,
+  -1,
 }};
 
 THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::fields_names = {{
@@ -484,7 +484,7 @@ THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<:
   "__fbthrift_field_foo",
 }};
 THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::isset_indexes = {{
-  0,
+  -1,
 }};
 
 THRIFT_DATA_SECTION const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::NoexceptMoveEmpty>::fields_names = {{

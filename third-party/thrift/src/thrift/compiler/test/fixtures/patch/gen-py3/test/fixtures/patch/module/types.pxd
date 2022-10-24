@@ -204,7 +204,7 @@ cdef extern from "thrift/compiler/test/fixtures/patch/src/gen-cpp2/module_types_
         bint operator>(cBar&)
         bint operator<=(cBar&)
         bint operator>=(cBar&)
-        __terse_field_ref[cLoop] loop_ref "loop_ref" ()
+        unique_ptr[cLoop] loop_ref "loop_ref" ()
 
 
     cdef cppclass cLoop "::test::fixtures::patch::Loop":

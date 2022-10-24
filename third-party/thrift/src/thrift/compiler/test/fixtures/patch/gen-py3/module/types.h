@@ -188,7 +188,7 @@ void reset_field<::test::fixtures::patch::Bar>(
     ::test::fixtures::patch::Bar& obj, uint16_t index) {
   switch (index) {
     case 0:
-      obj.loop_ref().copy_from(default_inst<::test::fixtures::patch::Bar>().loop_ref());
+      obj.loop_ref().reset();
       return;
   }
 }

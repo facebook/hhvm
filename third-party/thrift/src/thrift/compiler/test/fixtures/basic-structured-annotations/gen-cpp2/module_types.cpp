@@ -282,8 +282,20 @@ const folly::StringPiece structured_annotation_recursive::__fbthrift_get_field_n
   return apache::thrift::TStructDataStorage<structured_annotation_recursive>::fields_names[folly::to_underlying(ord) - 1];
 }
 
-structured_annotation_recursive::structured_annotation_recursive(const structured_annotation_recursive&) = default;
-structured_annotation_recursive& structured_annotation_recursive::operator=(const structured_annotation_recursive&) = default;
+structured_annotation_recursive::structured_annotation_recursive(const structured_annotation_recursive& srcObj) :
+    __fbthrift_field_name(srcObj.__fbthrift_field_name),
+    __fbthrift_field_recurse(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_recurse)),
+    __fbthrift_field_forward(srcObj.__fbthrift_field_forward),
+    __isset(srcObj.__isset) {
+}
+
+structured_annotation_recursive& structured_annotation_recursive::operator=(const structured_annotation_recursive& other) {
+  structured_annotation_recursive tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
 structured_annotation_recursive::structured_annotation_recursive(FOLLY_MAYBE_UNUSED structured_annotation_recursive&& other) noexcept :
     __fbthrift_field_name(std::move(other.__fbthrift_field_name)),
     __fbthrift_field_recurse(std::move(other.__fbthrift_field_recurse)),
@@ -300,20 +312,19 @@ structured_annotation_recursive& structured_annotation_recursive::operator=(FOLL
 }
 
 
-structured_annotation_recursive::structured_annotation_recursive(apache::thrift::FragileConstructor, ::std::string name__arg, ::test::fixtures::basic-structured-annotations::structured_annotation_recursive recurse__arg, ::test::fixtures::basic-structured-annotations::structured_annotation_forward forward__arg) :
+structured_annotation_recursive::structured_annotation_recursive(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> recurse__arg, ::test::fixtures::basic-structured-annotations::structured_annotation_forward forward__arg) :
     __fbthrift_field_name(std::move(name__arg)),
     __fbthrift_field_recurse(std::move(recurse__arg)),
     __fbthrift_field_forward(std::move(forward__arg)) {
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
-  __isset.set(folly::index_constant<2>(), true);
 }
 
 
 void structured_annotation_recursive::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  ::apache::thrift::clear(this->__fbthrift_field_recurse);
+  this->__fbthrift_field_recurse.reset();
   ::apache::thrift::clear(this->__fbthrift_field_forward);
   __isset = {};
 }
@@ -330,7 +341,7 @@ bool structured_annotation_recursive::operator==(FOLLY_MAYBE_UNUSED const struct
   if (!(lhs.name_ref() == rhs.name_ref())) {
     return false;
   }
-  if (!(lhs.recurse_ref() == rhs.recurse_ref())) {
+  if ((!::apache::thrift::detail::pointer_equal(lhs.recurse_ref(), rhs.recurse_ref()))) {
     return false;
   }
   if (!(lhs.forward_ref() == rhs.forward_ref())) {
@@ -344,21 +355,13 @@ bool structured_annotation_recursive::operator<(FOLLY_MAYBE_UNUSED const structu
   if (!(lhs.name_ref() == rhs.name_ref())) {
     return lhs.name_ref() < rhs.name_ref();
   }
-  if (!(lhs.recurse_ref() == rhs.recurse_ref())) {
-    return lhs.recurse_ref() < rhs.recurse_ref();
+  if ((!::apache::thrift::detail::pointer_equal(lhs.recurse_ref(), rhs.recurse_ref()))) {
+    return ::apache::thrift::detail::pointer_less(lhs.recurse_ref(), rhs.recurse_ref());
   }
   if (!(lhs.forward_ref() == rhs.forward_ref())) {
     return lhs.forward_ref() < rhs.forward_ref();
   }
   return false;
-}
-
-const ::test::fixtures::basic-structured-annotations::structured_annotation_recursive& structured_annotation_recursive::get_recurse() const& {
-  return __fbthrift_field_recurse;
-}
-
-::test::fixtures::basic-structured-annotations::structured_annotation_recursive structured_annotation_recursive::get_recurse() && {
-  return std::move(__fbthrift_field_recurse);
 }
 
 const ::test::fixtures::basic-structured-annotations::structured_annotation_forward& structured_annotation_recursive::get_forward() const& {

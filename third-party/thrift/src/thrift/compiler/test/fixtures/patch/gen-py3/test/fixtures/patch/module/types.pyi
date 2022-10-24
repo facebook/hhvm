@@ -372,7 +372,7 @@ class Bar(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
 
-    loop: Final[Loop] = ...
+    loop: Final[_typing.Optional[Loop]] = ...
 
     def __init__(
         self, *,

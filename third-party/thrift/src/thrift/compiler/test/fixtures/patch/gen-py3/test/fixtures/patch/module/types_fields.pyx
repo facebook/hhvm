@@ -457,7 +457,7 @@ cdef class __Bar_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.Loop):
             raise TypeError(f'loop is not a { _test_fixtures_patch_module_types.Loop !r}.')
-        deref(self._struct_cpp_obj).loop_ref().assign(deref((<_test_fixtures_patch_module_types.Loop?> _fbthrift_value)._cpp_obj))
+        assign_unique_ptr[_test_fixtures_patch_module_types.cLoop](deref(self._struct_cpp_obj).loop_ref(), make_unique[_test_fixtures_patch_module_types.cLoop](deref((<_test_fixtures_patch_module_types.Loop?>_fbthrift_value)._cpp_obj)))
 
 
 @__cython.auto_pickle(False)

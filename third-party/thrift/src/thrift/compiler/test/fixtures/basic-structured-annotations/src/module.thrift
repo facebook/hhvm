@@ -31,7 +31,7 @@ struct structured_annotation_with_default {
 
 struct structured_annotation_recursive {
   1: string name;
-  2: structured_annotation_recursive recurse;
+  2: optional structured_annotation_recursive recurse (cpp.ref);
   3: structured_annotation_forward forward;
 }
 

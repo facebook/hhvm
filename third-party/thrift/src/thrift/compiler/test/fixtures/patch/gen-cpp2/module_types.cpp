@@ -1250,8 +1250,17 @@ const folly::StringPiece Bar::__fbthrift_get_field_name(::apache::thrift::FieldO
   return apache::thrift::TStructDataStorage<Bar>::fields_names[folly::to_underlying(ord) - 1];
 }
 
-Bar::Bar(const Bar&) = default;
-Bar& Bar::operator=(const Bar&) = default;
+Bar::Bar(const Bar& srcObj) :
+    __fbthrift_field_loop(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_loop)) {
+}
+
+Bar& Bar::operator=(const Bar& other) {
+  Bar tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
 Bar::Bar(FOLLY_MAYBE_UNUSED Bar&& other) noexcept :
     __fbthrift_field_loop(std::move(other.__fbthrift_field_loop)) {
 }
@@ -1262,27 +1271,27 @@ Bar& Bar::operator=(FOLLY_MAYBE_UNUSED Bar&& other) noexcept {
 }
 
 
-Bar::Bar(apache::thrift::FragileConstructor, ::test::fixtures::patch::Loop loop__arg) :
+Bar::Bar(apache::thrift::FragileConstructor, ::std::unique_ptr<::test::fixtures::patch::Loop> loop__arg) :
     __fbthrift_field_loop(std::move(loop__arg)) {
 }
 
 
 void Bar::__fbthrift_clear() {
   // clear all fields
-  ::apache::thrift::clear(this->__fbthrift_field_loop);
+  if (this->__fbthrift_field_loop) ::apache::thrift::clear(*this->__fbthrift_field_loop);
 }
 
 void Bar::__fbthrift_clear_terse_fields() {
-  ::apache::thrift::detail::st::clear_terse_fields(this->__fbthrift_field_loop);
+  if (this->__fbthrift_field_loop) ::apache::thrift::detail::st::clear_terse_fields(*this->__fbthrift_field_loop);
 }
 
 bool Bar::__fbthrift_is_empty() const {
-  return ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::Loop>>(this->__fbthrift_field_loop);
+  return this->__fbthrift_field_loop && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::Loop>>(*this->__fbthrift_field_loop);
 }
 
 bool Bar::operator==(FOLLY_MAYBE_UNUSED const Bar& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.loop_ref() == rhs.loop_ref())) {
+  if ((!::apache::thrift::detail::pointer_equal(lhs.loop_ref(), rhs.loop_ref()))) {
     return false;
   }
   return true;
@@ -1290,18 +1299,10 @@ bool Bar::operator==(FOLLY_MAYBE_UNUSED const Bar& rhs) const {
 
 bool Bar::operator<(FOLLY_MAYBE_UNUSED const Bar& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.loop_ref() == rhs.loop_ref())) {
-    return lhs.loop_ref() < rhs.loop_ref();
+  if ((!::apache::thrift::detail::pointer_equal(lhs.loop_ref(), rhs.loop_ref()))) {
+    return ::apache::thrift::detail::pointer_less(lhs.loop_ref(), rhs.loop_ref());
   }
   return false;
-}
-
-const ::test::fixtures::patch::Loop& Bar::get_loop() const& {
-  return __fbthrift_field_loop;
-}
-
-::test::fixtures::patch::Loop Bar::get_loop() && {
-  return std::move(__fbthrift_field_loop);
 }
 
 

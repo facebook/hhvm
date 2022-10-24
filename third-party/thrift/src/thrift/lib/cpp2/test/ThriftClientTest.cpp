@@ -36,21 +36,7 @@ using namespace apache::thrift::transport;
 
 class ThriftClientTest : public testing::Test {};
 
-class ThriftClientTestWithResourcePools
-    : public testing::Test,
-      public testing::WithParamInterface<bool> {
- public:
-  void SetUp() override {
-    THRIFT_FLAG_SET_MOCK(experimental_use_resource_pools, GetParam());
-  }
-};
-
-TEST_P(ThriftClientTestWithResourcePools, FutureCapturesChannel) {
-  if (GetParam()) {
-    EXPECT_EQ(THRIFT_FLAG(experimental_use_resource_pools), true);
-    // Resource pools path not implemented yet so test would fail
-    return;
-  }
+TEST_F(ThriftClientTest, FutureCapturesChannel) {
   class Handler : public apache::thrift::ServiceHandler<TestService> {
    public:
     Future<unique_ptr<string>> future_sendResponse(int64_t size) override {
@@ -500,16 +486,3 @@ TEST_F(ThriftClientTest, FirstResponseTimeout) {
   evb.terminateLoopSoon();
   t.join();
 }
-
-INSTANTIATE_TEST_CASE_P(
-    ThriftClientTestWithResourcePools,
-    ThriftClientTestWithResourcePools,
-    testing::Values(false, true),
-    [](const testing::TestParamInfo<
-        ThriftClientTestWithResourcePools::ParamType>& info) {
-      if (!info.param) {
-        return "ThreadManager";
-      } else {
-        return "ResourcePools";
-      }
-    });

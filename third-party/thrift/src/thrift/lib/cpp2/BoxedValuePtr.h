@@ -20,14 +20,16 @@
 #include <type_traits>
 
 #include <folly/CPortability.h>
+#include <folly/lang/Ordering.h>
 #include <thrift/lib/cpp2/Thrift.h>
+#include <thrift/lib/cpp2/op/Compare.h>
 #include <thrift/lib/cpp2/type/AlignedPtr.h>
 
 namespace apache {
 namespace thrift {
 namespace detail {
 
-// boxed_value_ptr will soon be replaced with boxed_ptr (defined below).
+// boxed_value_ptr will soon be replaced with boxed_value (defined below).
 template <typename T>
 class boxed_value_ptr {
  public:
@@ -267,6 +269,173 @@ class boxed_ptr {
   }
 
   aligned_pointer_type ptr_;
+};
+
+// 'boxed_value' provides value semantics to the 'boxed_ptr'.
+template <typename T>
+class boxed_value {
+ public:
+  using element_type = T;
+
+  static constexpr boxed_value fromStaticConstant(const T* t) {
+    assert(t != nullptr);
+    return boxed_value{t};
+  }
+
+  FOLLY_ERASE constexpr boxed_value() noexcept = default;
+  FOLLY_ERASE constexpr boxed_value(boxed_value&& other) noexcept = default;
+  FOLLY_ERASE constexpr boxed_value& operator=(boxed_value&& other) noexcept =
+      default;
+  FOLLY_ERASE ~boxed_value() = default;
+  FOLLY_ERASE constexpr boxed_value(const boxed_value& other)
+      : ptr_(other.ptr_.copy()) {}
+  FOLLY_ERASE constexpr boxed_value& operator=(const boxed_value& other) {
+    ptr_ = other.ptr_.copy();
+    return *this;
+  }
+
+  FOLLY_ERASE constexpr explicit boxed_value(std::unique_ptr<T> uptr) noexcept
+      : ptr_(std::move(uptr)) {}
+
+  FOLLY_ERASE constexpr bool has_value() const noexcept {
+    return ptr_ != nullptr;
+  }
+  FOLLY_ERASE constexpr const T& value() const noexcept { return *ptr_; }
+  FOLLY_ERASE constexpr T& mut() & { return ensureMutable(); }
+  FOLLY_ERASE constexpr T&& mut() && { return std::move(ensureMutable()); }
+
+  FOLLY_ERASE constexpr const T& operator*() const noexcept { return value(); }
+  FOLLY_ERASE constexpr const T* operator->() const noexcept {
+    return &value();
+  }
+
+  FOLLY_ERASE constexpr explicit operator bool() const noexcept {
+    return has_value();
+  }
+
+  FOLLY_ERASE constexpr const T& ensure() noexcept {
+    if (!has_value()) {
+      reset(std::make_unique<T>());
+    }
+    return value();
+  }
+
+  FOLLY_ERASE constexpr void reset() noexcept { ptr_.reset(); }
+  FOLLY_ERASE constexpr void reset(std::unique_ptr<T> p) noexcept {
+    ptr_.reset(std::move(p));
+  }
+
+ private:
+  FOLLY_ERASE explicit constexpr boxed_value(const T* p)
+      : ptr_(boxed_ptr<T>::fromStaticConstant(p)) {}
+
+  FOLLY_ERASE constexpr void checkHasValue() {
+    if (ptr_ == nullptr) {
+      folly::throw_exception<std::logic_error>(
+          "Trying to dereference a nullptr.");
+    }
+  }
+
+  FOLLY_ERASE constexpr T& ensureMutable() {
+    checkHasValue();
+    return *ptr_.mut();
+  }
+
+  friend void swap(boxed_value& lhs, boxed_value& rhs) noexcept {
+    using std::swap;
+    swap(lhs.ptr_, rhs.ptr_);
+  }
+
+  // TODO(dokwon): Add std::nullopt_t comparison when we support optional intern
+  // boxed field.
+  folly::ordering compare(const T& rhs) const noexcept {
+    if (has_value()) {
+      return ::apache::thrift::op::compare<T>(value(), rhs);
+    }
+    return folly::ordering::lt;
+  }
+
+  constexpr bool equal(const boxed_value& rhs) const noexcept {
+    // Use pointer comparison for short cut.
+    if (ptr_ == rhs.ptr_) {
+      return true;
+    }
+    if (!rhs.has_value()) {
+      return false;
+    }
+    if (has_value()) {
+      return op::equal<T>(value(), rhs.value());
+    }
+    return rhs.has_value();
+  }
+  folly::ordering compare(const boxed_value& rhs) const noexcept {
+    if (!rhs.has_value()) {
+      return folly::ordering::gt;
+    }
+    if (has_value()) {
+      return ::apache::thrift::op::compare<T>(value(), rhs.value());
+    }
+    return folly::ordering::lt;
+  }
+
+  friend bool operator==(const boxed_value& lhs, const boxed_value& rhs) {
+    return lhs.equal(rhs);
+  }
+  friend bool operator!=(const boxed_value& lhs, const boxed_value& rhs) {
+    return !lhs.equal(rhs);
+  }
+  friend bool operator<(const boxed_value& lhs, const boxed_value& rhs) {
+    return op::detail::is_lt(lhs.compare(rhs));
+  }
+  friend bool operator<=(const boxed_value& lhs, const boxed_value& rhs) {
+    return op::detail::is_lteq(lhs.compare(rhs));
+  }
+  friend bool operator>(const boxed_value& lhs, const boxed_value& rhs) {
+    return op::detail::is_gt(lhs.compare(rhs));
+  }
+  friend bool operator>=(const boxed_value& lhs, const boxed_value& rhs) {
+    return op::detail::is_gteq(lhs.compare(rhs));
+  }
+
+  friend bool operator==(const boxed_value& lhs, const T& rhs) {
+    return op::detail::is_eq(lhs.compare(rhs));
+  }
+  friend bool operator!=(const boxed_value& lhs, const T& rhs) {
+    return op::detail::is_neq(lhs.compare(rhs));
+  }
+  friend bool operator<(const boxed_value& lhs, const T& rhs) {
+    return op::detail::is_lt(lhs.compare(rhs));
+  }
+  friend bool operator<=(const boxed_value& lhs, const T& rhs) {
+    return op::detail::is_lteq(lhs.compare(rhs));
+  }
+  friend bool operator>(const boxed_value& lhs, const T& rhs) {
+    return op::detail::is_gt(lhs.compare(rhs));
+  }
+  friend bool operator>=(const boxed_value& lhs, const T& rhs) {
+    return op::detail::is_gteq(lhs.compare(rhs));
+  }
+
+  friend bool operator==(const T& lhs, const boxed_value& rhs) {
+    return op::detail::is_eq(rhs.compare(lhs));
+  }
+  friend bool operator!=(const T& lhs, const boxed_value& rhs) {
+    return op::detail::is_neq(rhs.compare(lhs));
+  }
+  friend bool operator<(const T& lhs, const boxed_value& rhs) {
+    return op::detail::is_gt(rhs.compare(lhs));
+  }
+  friend bool operator<=(const T& lhs, const boxed_value& rhs) {
+    return op::detail::is_gteq(rhs.compare(lhs));
+  }
+  friend bool operator>(const T& lhs, const boxed_value& rhs) {
+    return op::detail::is_lt(rhs.compare(lhs));
+  }
+  friend bool operator>=(const T& lhs, const boxed_value& rhs) {
+    return op::detail::is_lteq(rhs.compare(lhs));
+  }
+
+  boxed_ptr<T> ptr_;
 };
 
 } // namespace detail

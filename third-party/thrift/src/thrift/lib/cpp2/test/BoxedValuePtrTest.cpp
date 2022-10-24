@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <stdexcept>
 #include <type_traits>
 
 #include <folly/Portability.h>
@@ -23,17 +24,33 @@
 using namespace apache::thrift::detail;
 
 struct TestStruct {
+  using __fbthrift_cpp2_type = TestStruct;
+  static constexpr bool __fbthrift_cpp2_is_union = false;
+
   TestStruct() : a(0) {}
   explicit TestStruct(int val) : a(val) {}
+  void set_a(int b) { a = b; }
   int a;
 };
 
+constexpr bool operator==(const TestStruct& lhs, const TestStruct& rhs) {
+  return lhs.a == rhs.a;
+}
 constexpr bool operator==(const TestStruct& lhs, int rhs) {
   return lhs.a == rhs;
 }
-
 constexpr bool operator==(int lhs, const TestStruct& rhs) {
   return lhs == rhs.a;
+}
+
+constexpr bool operator<(const TestStruct& lhs, const TestStruct& rhs) {
+  return lhs.a < rhs.a;
+}
+constexpr bool operator<(const TestStruct& lhs, int rhs) {
+  return lhs.a < rhs;
+}
+constexpr bool operator<(int lhs, const TestStruct& rhs) {
+  return lhs < rhs.a;
 }
 
 TEST(BoxedValuePtrTest, DefaultConstructor) {
@@ -242,65 +259,256 @@ TEST(BoxedPtrTest, Copy) {
   EXPECT_FALSE(a == c);
 }
 
-// TODO(dokwon): Enable this test for boxed_value.
-// class LifecycleTester {
-//  public:
-//   using __fbthrift_cpp2_type = std::true_type;
+TEST(BoxedValueTest, DefaultConstructor) {
+  boxed_value<TestStruct> a;
+  EXPECT_FALSE(a.has_value());
+}
 
-//   LifecycleTester() : isACopy_(false), hasBeenCopied_(false) {}
-//   explicit LifecycleTester(int) : isACopy_(false), hasBeenCopied_(false) {}
+TEST(BoxedValueTest, FromStaticConstant) {
+  const TestStruct t{5};
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t);
+  EXPECT_EQ(a.value(), 5);
+}
 
-//   // NOLINTNEXTLINE(facebook-hte-NonConstCopyContructor)
-//   LifecycleTester(LifecycleTester& other)
-//       : isACopy_(true), hasBeenCopied_(false) {
-//     other.hasBeenCopied_ = true;
-//   }
+TEST(BoxedValueTest, UniquePtrConstructor) {
+  boxed_value<TestStruct> a{std::make_unique<TestStruct>(5)};
+  EXPECT_EQ(a.value(), 5);
+}
 
-//   LifecycleTester& operator=(LifecycleTester& other) {
-//     LifecycleTester tmp{other};
-//     std::swap(isACopy_, tmp.isACopy_);
-//     std::swap(hasBeenCopied_, tmp.hasBeenCopied_);
-//     other.hasBeenCopied_ = true;
-//     return *this;
-//   }
+TEST(BoxedValueTest, CopyConstructor) {
+  const TestStruct t{5};
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t);
+  boxed_value<TestStruct> b{a};
+  EXPECT_EQ(a.value(), 5);
+  // shallow copy.
+  EXPECT_EQ(&b.value(), &a.value());
 
-//   bool isACopy() const { return isACopy_; }
+  a.mut();
+  boxed_value<TestStruct> c{a};
+  // deep copy.
+  EXPECT_NE(&c.value(), &a.value());
+}
 
-//   bool hasBeenCopied() const { return hasBeenCopied_; }
+TEST(BoxedValueTest, CopyAssignment) {
+  const TestStruct t{5};
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t);
+  boxed_value<TestStruct> b = a;
+  EXPECT_EQ(a.value(), 5);
+  // shallow copy.
+  EXPECT_EQ(&b.value(), &a.value());
 
-//  private:
-//   bool isACopy_;
-//   bool hasBeenCopied_;
-// };
+  a.mut();
+  boxed_value<TestStruct> c = a;
+  // deep copy.
+  EXPECT_NE(&c.value(), &a.value());
+}
 
-// TEST(LifecycleTest, ConstUnownedCopy) {
-//   LifecycleTester lct;
+TEST(BoxedValueTest, MoveConstructor) {
+  const TestStruct t{5};
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t);
+  boxed_value<TestStruct> b(std::move(a));
+  EXPECT_EQ(b.value(), 5);
+}
 
-//   boxed_ptr<LifecycleTester> boxed1 = &lct;
-//   EXPECT_FALSE(boxed1->isACopy());
-//   EXPECT_FALSE(boxed1->hasBeenCopied());
+TEST(BoxedValueTest, MoveAssignment) {
+  const TestStruct t{5};
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t);
+  boxed_value<TestStruct> b;
+  b = std::move(a);
+  EXPECT_EQ(b.value(), 5);
+}
 
-//   boxed_ptr<LifecycleTester> boxed2 = boxed1;
-//   EXPECT_FALSE(boxed1->hasBeenCopied());
-//   EXPECT_FALSE(boxed2->isACopy());
+TEST(BoxedValueTest, Reset) {
+  const TestStruct t{5};
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t);
+  a.reset();
+  EXPECT_FALSE(a.has_value());
 
-//   EXPECT_FALSE(lct.hasBeenCopied());
-//   EXPECT_EQ(boxed1, boxed2);
-// }
+  a.reset(std::make_unique<TestStruct>(6));
+  EXPECT_TRUE(a.has_value());
+  EXPECT_EQ(*a, 6);
+}
 
-// TEST(LifecycleTest, MutOwnedRefCopy) {
-//   LifecycleTester lct;
+TEST(BoxedValueTest, Swap) {
+  const TestStruct t1{5};
+  const TestStruct t2{7};
 
-//   boxed_ptr<LifecycleTester> boxed{&lct};
-//   EXPECT_FALSE(boxed->isACopy());
-//   EXPECT_TRUE(boxed.mut()->isACopy()); // This mutable ref creates a copy.
-//   EXPECT_TRUE(lct.hasBeenCopied());
-// }
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t1);
+  boxed_value<TestStruct> b = boxed_value<TestStruct>::fromStaticConstant(&t2);
 
-// TEST(LifecycleTest, copyOfMutableRefCreatesCopy) {
-//   // Creating the object this way starts with a MutOwned state.
-//   boxed_ptr<LifecycleTester> boxed1{0};
-//   EXPECT_FALSE(boxed1->hasBeenCopied());
-//   auto boxed2 = boxed1;
-//   EXPECT_TRUE(boxed1->hasBeenCopied());
-// }
+  std::swap(a, b);
+  EXPECT_EQ(*a, 7);
+  EXPECT_EQ(*b, 5);
+}
+
+TEST(BoxedValueTest, Mut) {
+  const TestStruct t1{5};
+
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t1);
+  boxed_value<TestStruct> b = boxed_value<TestStruct>::fromStaticConstant(&t1);
+
+  a.mut().set_a(1);
+  std::move(b).mut().set_a(2);
+
+  EXPECT_EQ(a.value(), 1);
+  EXPECT_EQ(b.value(), 2);
+}
+
+TEST(BoxedValueTest, MutFromDefaultConstructed) {
+  boxed_value<TestStruct> a;
+  EXPECT_THROW(a.mut(), std::logic_error);
+  EXPECT_THROW(std::move(a).mut(), std::logic_error);
+}
+
+TEST(BoxedValueTest, Comparison) {
+  const TestStruct t1{1};
+  const TestStruct t2{2};
+
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t1);
+  boxed_value<TestStruct> b = boxed_value<TestStruct>::fromStaticConstant(&t2);
+
+  EXPECT_FALSE(a == b);
+  EXPECT_TRUE(a != b);
+  EXPECT_TRUE(a < b);
+  EXPECT_TRUE(a <= b);
+  EXPECT_FALSE(a > b);
+  EXPECT_FALSE(a >= b);
+
+  EXPECT_FALSE(a == t2);
+  EXPECT_TRUE(a != t2);
+  EXPECT_TRUE(a < t2);
+  EXPECT_TRUE(a <= t2);
+  EXPECT_FALSE(a > t2);
+  EXPECT_FALSE(a >= t2);
+
+  EXPECT_FALSE(t1 == b);
+  EXPECT_TRUE(t1 != b);
+  EXPECT_TRUE(t1 < b);
+  EXPECT_TRUE(t1 <= b);
+  EXPECT_FALSE(t1 > b);
+  EXPECT_FALSE(t1 >= b);
+
+  EXPECT_TRUE(t2 == b);
+  EXPECT_FALSE(t2 != b);
+  EXPECT_FALSE(t2 < b);
+  EXPECT_TRUE(t2 <= b);
+  EXPECT_FALSE(t2 > b);
+  EXPECT_TRUE(t2 >= b);
+}
+
+TEST(BoxedValueTest, ComparisonWithNoValue) {
+  const TestStruct t1{1};
+
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t1);
+  boxed_value<TestStruct> b;
+  boxed_value<TestStruct> c;
+
+  EXPECT_FALSE(a == b);
+  EXPECT_TRUE(a != b);
+  EXPECT_FALSE(a < b);
+  EXPECT_FALSE(a <= b);
+  EXPECT_TRUE(a > b);
+  EXPECT_TRUE(a >= b);
+
+  EXPECT_FALSE(b == t1);
+  EXPECT_TRUE(b != t1);
+  EXPECT_TRUE(b < t1);
+  EXPECT_TRUE(b <= t1);
+  EXPECT_FALSE(b > t1);
+  EXPECT_FALSE(b >= t1);
+
+  EXPECT_FALSE(t1 == b);
+  EXPECT_TRUE(t1 != b);
+  EXPECT_FALSE(t1 < b);
+  EXPECT_FALSE(t1 <= b);
+  EXPECT_TRUE(t1 > b);
+  EXPECT_TRUE(t1 >= b);
+}
+
+TEST(BoxedValueTest, ValueComparison) {
+  const TestStruct t{1};
+
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t);
+  boxed_value<TestStruct> b = boxed_value<TestStruct>::fromStaticConstant(&t);
+  b.mut();
+
+  // 'b' points to shared value; meanwhile, 'c' owns the same value.
+  EXPECT_NE(&a.value(), &b.value());
+  EXPECT_EQ(a, b);
+}
+
+TEST(BoxedValueTest, Ensure) {
+  const TestStruct t{1};
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t);
+  boxed_value<TestStruct> b = boxed_value<TestStruct>::fromStaticConstant(&t);
+  boxed_value<TestStruct> c;
+
+  EXPECT_EQ(&a.value(), &b.value());
+  a.ensure();
+  EXPECT_EQ(&a.value(), &b.value());
+
+  c.ensure();
+  c.mut().set_a(1);
+  EXPECT_EQ(a, c);
+}
+
+class LifecycleTester {
+ public:
+  using __fbthrift_cpp2_type = LifecycleTester;
+
+  LifecycleTester() : isACopy_(false), hasBeenCopied_(false) {}
+  explicit LifecycleTester(int) : isACopy_(false), hasBeenCopied_(false) {}
+
+  // NOLINTNEXTLINE(facebook-hte-NonConstCopyContructor)
+  LifecycleTester(LifecycleTester& other)
+      : isACopy_(true), hasBeenCopied_(false) {
+    other.hasBeenCopied_ = true;
+  }
+
+  LifecycleTester& operator=(LifecycleTester& other) {
+    LifecycleTester tmp{other};
+    std::swap(isACopy_, tmp.isACopy_);
+    std::swap(hasBeenCopied_, tmp.hasBeenCopied_);
+    other.hasBeenCopied_ = true;
+    return *this;
+  }
+
+  bool isACopy() const { return isACopy_; }
+
+  bool hasBeenCopied() const { return hasBeenCopied_; }
+
+ private:
+  bool isACopy_;
+  bool hasBeenCopied_;
+};
+
+TEST(LifecycleTest, ConstUnownedCopy) {
+  const LifecycleTester lct;
+
+  boxed_value<LifecycleTester> boxed1 =
+      boxed_value<LifecycleTester>::fromStaticConstant(&lct);
+  EXPECT_FALSE(boxed1->isACopy());
+  EXPECT_FALSE(boxed1->hasBeenCopied());
+
+  boxed_value<LifecycleTester> boxed2 = boxed1;
+  EXPECT_FALSE(boxed1->hasBeenCopied());
+  EXPECT_FALSE(boxed2->isACopy());
+}
+
+TEST(LifecycleTest, MutOwnedRefCopy) {
+  const LifecycleTester lct;
+
+  boxed_value<LifecycleTester> boxed =
+      boxed_value<LifecycleTester>::fromStaticConstant(&lct);
+  EXPECT_FALSE(boxed->isACopy());
+  EXPECT_TRUE(boxed.mut().isACopy()); // This mutable ref creates a copy.
+}
+
+TEST(LifecycleTest, copyOfMutableRefCreatesCopy) {
+  // Creating the object this way starts with a MutOwned state.
+  boxed_value<LifecycleTester> boxed1;
+  boxed1.ensure();
+  EXPECT_FALSE(boxed1->hasBeenCopied());
+  auto boxed2 = boxed1;
+  EXPECT_TRUE(boxed1->hasBeenCopied());
+}

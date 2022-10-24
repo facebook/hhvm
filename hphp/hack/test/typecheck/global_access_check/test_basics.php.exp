@@ -9,7 +9,7 @@ File "test_basics.php", line 24, characters 5-26:
 File "test_basics.php", line 28, characters 5-25:
 [Test::test_method_call]{Foo::$static_prop}(int) A global variable is definitely written. (Other[11001])
 File "test_basics.php", line 29, characters 5-23:
-[Test::test_method_call]{Foo::$static_prop}(int) A global variable is definitely written. (Other[11001])
+[Test::test_method_call]{Foo::$static_prop}(int)<CounterIncrement> A global variable is definitely written. (Other[11001])
 File "test_basics.php", line 31, characters 5-25:
 [Test::test_method_call]{Foo::$bar}(int) A global variable is definitely written. (Other[11001])
 File "test_basics.php", line 32, characters 5-25:
@@ -21,6 +21,6 @@ File "test_basics.php", line 38, characters 5-18:
 File "test_basics.php", line 39, characters 5-16:
 [Test::test_method_call]{Foo::$bar}(int) A global variable is possibly written via reference. (Other[11002])
 File "test_basics.php", line 42, characters 5-14:
-[Test::test_method_call]{Foo::$bar}(int) A global variable is possibly written via reference. (Other[11002])
+[Test::test_method_call]{Foo::$bar}(int)<CounterIncrement> A global variable is possibly written via reference. (Other[11002])
 File "test_basics.php", line 45, characters 16-17:
 [Test::test_method_call]{Foo::$bar}(Bar) A global variable is possibly written via function call. (Other[11003])

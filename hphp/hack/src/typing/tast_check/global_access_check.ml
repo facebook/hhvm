@@ -690,7 +690,7 @@ let visitor =
                 fun_name
                 e_ty
                 e_global
-                NoPattern
+                CounterIncrement
                 GlobalAccessCheck.DefiniteGlobalWrite
             else if has_global_write_access e then
               raise_global_access_error
@@ -699,7 +699,7 @@ let visitor =
                 fun_name
                 e_ty
                 e_global
-                NoPattern
+                CounterIncrement
                 GlobalAccessCheck.PossibleGlobalWriteViaReference
           | _ -> ())
       | Call (_, _, tpl, _) ->

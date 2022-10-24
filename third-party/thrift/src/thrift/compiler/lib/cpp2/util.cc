@@ -458,6 +458,7 @@ bool field_transitively_refers_to_unique(const t_field* field) {
       return true;
     }
     case gen::cpp::reference_type::boxed:
+    case gen::cpp::reference_type::boxed_intern:
     case gen::cpp::reference_type::shared_const:
     case gen::cpp::reference_type::shared_mutable: {
       return false;
@@ -568,6 +569,7 @@ bool has_ref_annotation(const t_field& field) {
     case gen::cpp::reference_type::shared_mutable:
       return true;
     case gen::cpp::reference_type::none:
+    case gen::cpp::reference_type::boxed_intern:
     case gen::cpp::reference_type::boxed:
       return false;
   }

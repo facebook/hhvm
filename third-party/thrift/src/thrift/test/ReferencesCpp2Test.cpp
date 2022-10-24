@@ -341,11 +341,41 @@ TEST(References, field_ref) {
   EXPECT_FALSE(a.def_field_ref());
 }
 
+TEST(References, intern_box_access) {
+  StructuredAnnotation a, b;
+  EXPECT_EQ(
+      &*std::as_const(a).intern_box_field(),
+      &*std::as_const(b).intern_box_field());
+  EXPECT_NE(&*std::as_const(a).intern_box_field(), &*b.intern_box_field());
+  EXPECT_NE(&*a.intern_box_field(), &*b.intern_box_field());
+
+  // clear sets fill boxed intern field to the shared intrinsic default.
+  apache::thrift::clear(a);
+  apache::thrift::clear(b);
+  EXPECT_EQ(
+      &*std::as_const(a).intern_box_field(),
+      &*std::as_const(b).intern_box_field());
+
+  // reset sets fill boxed intern field to the shared default.
+  b.intern_box_field().reset();
+  // address does not match.
+  EXPECT_NE(
+      &*std::as_const(a).intern_box_field(),
+      &*std::as_const(b).intern_box_field());
+  // value should still be equal.
+  EXPECT_EQ(
+      *std::as_const(a).intern_box_field(),
+      *std::as_const(b).intern_box_field());
+  EXPECT_EQ(
+      std::as_const(a).intern_box_field(), std::as_const(b).intern_box_field());
+}
+
 TEST(References, structured_annotation) {
   StructuredAnnotation a;
   EXPECT_EQ(nullptr, a.opt_unique_field_ref());
   EXPECT_EQ(nullptr, a.opt_shared_field_ref());
   EXPECT_EQ(nullptr, a.opt_shared_mutable_field_ref());
+  EXPECT_FALSE(std::as_const(a).intern_box_field().is_set());
   static_assert(std::is_same_v<
                 decltype(a.opt_unique_field_ref()),
                 std::unique_ptr<PlainStruct>&>);
@@ -355,6 +385,10 @@ TEST(References, structured_annotation) {
   static_assert(std::is_same_v<
                 decltype(a.opt_shared_mutable_field_ref()),
                 std::shared_ptr<PlainStruct>&>);
+  static_assert(std::is_same_v<
+                decltype(std::as_const(a).intern_box_field()),
+                apache::thrift::intern_boxed_field_ref<
+                    const apache::thrift::detail::boxed_value<PlainStruct>&>>);
 
   PlainStruct plain;
   plain.field() = 10;
@@ -363,10 +397,18 @@ TEST(References, structured_annotation) {
   a.opt_shared_field_ref() = std::make_shared<const PlainStruct>(plain);
   plain.field() = 30;
   a.opt_shared_mutable_field_ref() = std::make_shared<PlainStruct>(plain);
+  plain.field() = 40;
+  a.intern_box_field() = plain;
 
   EXPECT_EQ(10, a.opt_unique_field_ref()->field());
   EXPECT_EQ(20, a.opt_shared_field_ref()->field());
   EXPECT_EQ(30, a.opt_shared_mutable_field_ref()->field());
+  EXPECT_EQ(40, a.intern_box_field()->field());
+
+  auto data = CompactSerializer::serialize<std::string>(a);
+  StructuredAnnotation b;
+  CompactSerializer::deserialize(data, b);
+  EXPECT_EQ(a, b);
 }
 
 TEST(References, string_ref) {

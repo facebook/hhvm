@@ -344,6 +344,9 @@ std::string type_resolver::gen_storage_type(
     case reference_type::boxed:
       return detail::gen_template_type(
           "::apache::thrift::detail::boxed_value_ptr", {native_type});
+    case reference_type::boxed_intern:
+      return detail::gen_template_type(
+          "::apache::thrift::detail::boxed_value", {native_type});
     default:
       throw std::runtime_error("unknown cpp ref_type");
   }

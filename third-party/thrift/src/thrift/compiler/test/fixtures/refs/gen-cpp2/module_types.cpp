@@ -1588,7 +1588,7 @@ StructWithInternBox& StructWithInternBox::operator=(FOLLY_MAYBE_UNUSED StructWit
 }
 
 
-StructWithInternBox::StructWithInternBox(apache::thrift::FragileConstructor, ::cpp2::Empty field1__arg, ::cpp2::MyField field2__arg) :
+StructWithInternBox::StructWithInternBox(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::cpp2::Empty> field1__arg, ::apache::thrift::detail::boxed_value<::cpp2::MyField> field2__arg) :
     __fbthrift_field_field1(std::move(field1__arg)),
     __fbthrift_field_field2(std::move(field2__arg)) {
   __isset.set(folly::index_constant<0>(), true);
@@ -1598,7 +1598,7 @@ StructWithInternBox::StructWithInternBox(apache::thrift::FragileConstructor, ::c
 
 void StructWithInternBox::__fbthrift_clear() {
   // clear all fields
-  ::apache::thrift::clear(this->__fbthrift_field_field2);
+  this->__fbthrift_field_field2 = ::apache::thrift::detail::boxed_value<::cpp2::MyField>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::cpp2::MyField>());
   __isset = {};
 }
 
@@ -1629,22 +1629,6 @@ bool StructWithInternBox::operator<(FOLLY_MAYBE_UNUSED const StructWithInternBox
     return lhs.field2_ref() < rhs.field2_ref();
   }
   return false;
-}
-
-const ::cpp2::Empty& StructWithInternBox::get_field1() const& {
-  return __fbthrift_field_field1;
-}
-
-::cpp2::Empty StructWithInternBox::get_field1() && {
-  return std::move(__fbthrift_field_field1);
-}
-
-const ::cpp2::MyField& StructWithInternBox::get_field2() const& {
-  return __fbthrift_field_field2;
-}
-
-::cpp2::MyField StructWithInternBox::get_field2() && {
-  return std::move(__fbthrift_field_field2);
 }
 
 

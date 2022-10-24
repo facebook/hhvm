@@ -770,18 +770,11 @@
   "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
-      },
-          "thrift.Testing" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Testing"
-},
-        "value" : {}
       }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 304
+        "lineno" : 305
       }
       },
   "source_path" : "thrift/annotation/thrift",

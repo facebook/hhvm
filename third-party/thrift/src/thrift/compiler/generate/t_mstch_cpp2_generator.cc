@@ -1238,6 +1238,7 @@ class cpp_mstch_struct : public mstch_struct {
         case gen::cpp::reference_type::shared_mutable: {
           return true;
         }
+        case gen::cpp::reference_type::boxed_intern:
         case gen::cpp::reference_type::boxed:
         case gen::cpp::reference_type::none:
         case gen::cpp::reference_type::unique:
@@ -1650,6 +1651,7 @@ class cpp_mstch_field : public mstch_field {
             {"field:lazy?", &cpp_mstch_field::lazy},
             {"field:lazy_ref?", &cpp_mstch_field::lazy_ref},
             {"field:boxed_ref?", &cpp_mstch_field::boxed_ref},
+            {"field:intern_boxed_ref?", &cpp_mstch_field::intern_boxed_ref},
             {"field:use_field_ref?", &cpp_mstch_field::use_field_ref},
             {"field:field_ref_type", &cpp_mstch_field::field_ref_type},
             {"field:transitively_refers_to_unique?",
@@ -1727,9 +1729,15 @@ class cpp_mstch_field : public mstch_field {
   mstch::node boxed_ref() {
     return gen::cpp::find_ref_type(*field_) == gen::cpp::reference_type::boxed;
   }
+  mstch::node intern_boxed_ref() {
+    return gen::cpp::find_ref_type(*field_) ==
+        gen::cpp::reference_type::boxed_intern;
+  }
   mstch::node use_field_ref() {
-    return !cpp2::is_explicit_ref(field_) ||
-        gen::cpp::find_ref_type(*field_) == gen::cpp::reference_type::boxed;
+    auto ref_type = gen::cpp::find_ref_type(*field_);
+    return ref_type == gen::cpp::reference_type::none ||
+        ref_type == gen::cpp::reference_type::boxed ||
+        ref_type == gen::cpp::reference_type::boxed_intern;
   }
   mstch::node field_ref_type() {
     static const std::string ns = "::apache::thrift::";
@@ -1744,6 +1752,19 @@ class cpp_mstch_field : public mstch_field {
         case t_field::e_req::required:
         default:
           throw std::runtime_error("unsupported boxed field");
+      }
+    }
+
+    if (gen::cpp::find_ref_type(*field_) ==
+        gen::cpp::reference_type::boxed_intern) {
+      switch (field_->get_req()) {
+        case t_field::e_req::opt_in_req_out:
+          return ns + "intern_boxed_field_ref";
+        case t_field::e_req::terse:
+        case t_field::e_req::required:
+        case t_field::e_req::optional:
+        default:
+          throw std::runtime_error("unsupported intern boxed field");
       }
     }
 
@@ -1791,7 +1812,8 @@ class cpp_mstch_field : public mstch_field {
   mstch::node cpp_ref_not_boxed() {
     auto ref_type = gen::cpp::find_ref_type(*field_);
     return ref_type != gen::cpp::reference_type::none &&
-        ref_type != gen::cpp::reference_type::boxed;
+        ref_type != gen::cpp::reference_type::boxed &&
+        ref_type != gen::cpp::reference_type::boxed_intern;
   }
   mstch::node cpp_first_adapter() {
     if (const std::string* adapter =

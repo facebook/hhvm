@@ -128,8 +128,11 @@ inline bool is_ref(const t_field* f) {
 }
 
 inline bool field_has_isset(const t_field* field) {
+  auto ref_type = gen::cpp::find_ref_type(*field);
   return field->get_req() != t_field::e_req::required &&
-      field->get_req() != t_field::e_req::terse && !is_explicit_ref(field);
+      field->get_req() != t_field::e_req::terse &&
+      (ref_type == gen::cpp::reference_type::none ||
+       ref_type == gen::cpp::reference_type::boxed_intern);
 }
 
 inline bool is_lazy(const t_field* field) {

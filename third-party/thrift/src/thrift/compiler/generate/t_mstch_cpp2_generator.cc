@@ -1061,6 +1061,8 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::cpp_underlying_type},
             {"struct:is_directly_adapted?",
              &cpp_mstch_struct::is_directly_adapted},
+            {"struct:dependent_direct_adapter?",
+             &cpp_mstch_struct::dependent_direct_adapter},
             {"struct:cpp_name", &cpp_mstch_struct::cpp_name},
             {"struct:cpp_fullname", &cpp_mstch_struct::cpp_fullname},
             {"struct:cpp_methods", &cpp_mstch_struct::cpp_methods},
@@ -1189,6 +1191,12 @@ class cpp_mstch_struct : public mstch_struct {
   }
   mstch::node is_directly_adapted() {
     return cpp_context_->resolver().is_directly_adapted(*struct_);
+  }
+  mstch::node dependent_direct_adapter() {
+    auto adapter =
+        cpp_context_->resolver().find_nontransitive_adapter(*struct_);
+    return adapter &&
+        !adapter->get_value_from_structured_annotation_or_null("adaptedType");
   }
 
   mstch::node cpp_methods() {

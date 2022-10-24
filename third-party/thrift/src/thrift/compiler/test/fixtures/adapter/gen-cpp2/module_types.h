@@ -585,6 +585,8 @@ class Person2;
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace facebook { namespace thrift { namespace test {
+using IndependentDirectlyAdapted = ::my::Type;
+
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -3271,8 +3273,6 @@ unsigned long IndependentDirectlyAdapted::read(Protocol_* iprot) {
   return iprot->getCursorPosition() - _xferStart;
 }
 } // namespace detail
-
-using IndependentDirectlyAdapted = ::apache::thrift::adapt_detail::adapted_t<::my::Adapter, ::facebook::thrift::test::detail::IndependentDirectlyAdapted>;
 
 
 class StructWithFieldAdapter final  {

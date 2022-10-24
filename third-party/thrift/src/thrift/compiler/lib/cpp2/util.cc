@@ -159,6 +159,17 @@ gen_struct_dependency_graph(
   return edges;
 }
 
+namespace {
+bool has_dependent_adapter(const t_type& node) {
+  if (auto annotation = t_typedef::get_first_structured_annotation_or_null(
+          &node, kCppAdapterUri)) {
+    return !annotation->get_value_from_structured_annotation_or_null(
+        "adaptedType");
+  }
+  return false;
+}
+} // namespace
+
 std::unordered_map<const t_type*, std::vector<const t_type*>>
 gen_adapter_dependency_graph(
     const t_program* program,
@@ -181,8 +192,7 @@ gen_adapter_dependency_graph(
           if (!dynamic_cast<t_typedef const*>(type) &&
               !(dynamic_cast<t_struct const*>(type) &&
                 (include_structs ||
-                 gen::cpp::type_resolver::find_first_adapter(
-                     *type->get_true_type())))) {
+                 has_dependent_adapter(*type->get_true_type())))) {
             return;
           }
         }

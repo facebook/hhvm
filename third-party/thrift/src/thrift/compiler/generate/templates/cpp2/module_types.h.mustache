@@ -61,6 +61,14 @@ APACHE_THRIFT_DEFINE_ACCESSOR(<%field:cpp_name%>);
 <% > module_types_h/hash_and_equal_to%>
 
 <% > common/namespace_cpp2_begin%>
+<%#program:structs%>
+<%#struct:is_directly_adapted?%>
+<%^struct:dependent_direct_adapter?%>
+
+using <%struct:cpp_name%> = <%struct:cpp_underlying_type%>;
+<%/struct:dependent_direct_adapter?%>
+<%/struct:is_directly_adapted?%>
+<%/program:structs%>
 
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
@@ -340,8 +348,10 @@ unsigned long <%struct:cpp_underlying_name%>::read(Protocol_* iprot) {
 } // namespace <%struct:extra_namespace%>
 <%/struct:extra_namespace%>
 <%#struct:is_directly_adapted?%>
+<%#struct:dependent_direct_adapter?%>
 
 using <%struct:cpp_name%> = <%struct:cpp_underlying_type%>;
+<%/struct:dependent_direct_adapter?%>
 <%/struct:is_directly_adapted?%>
 
 <%/is_struct?%>

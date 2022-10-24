@@ -237,7 +237,7 @@ impl MaybeNamingDb {
 
     fn set_db_path(&self, db_path: PathBuf) -> Result<()> {
         let mut lock = self.0.lock();
-        *lock = Some((names::Names::from_file(&db_path)?, db_path));
+        *lock = Some((names::Names::from_file_assume_valid_db(&db_path)?, db_path));
         Ok(())
     }
 

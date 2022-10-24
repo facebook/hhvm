@@ -94,8 +94,6 @@ impl<K: Copy + Hash + Eq, V: Clone> ChangesStore<K, V> {
             for key in keys {
                 if self.contains_key(key)? {
                     store.insert(key, None);
-                } else {
-                    anyhow::bail!("remove_batch: Trying to remove a non-existent value");
                 }
             }
         } else {

@@ -91,6 +91,8 @@ impl FromSql for NameType {
                     Ok(NameType::Class)
                 } else if i == NameType::Typedef as i64 {
                     Ok(NameType::Typedef)
+                } else if i == NameType::Module as i64 {
+                    Ok(NameType::Module)
                 } else {
                     Err(FromSqlError::OutOfRange(i))
                 }

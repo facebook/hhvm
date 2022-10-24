@@ -150,15 +150,34 @@ let compare_decls_and_get_fanout
   let { FileInfo.n_classes; n_funs; n_types; n_consts; n_modules } = all_defs in
   let acc = empty_fanout in
   (* Fetching everything at once is faster *)
-  let old_funs = Decl_heap.Funs.get_old_batch n_funs in
+  let old_funs =
+    match Provider_backend.get () with
+    | Provider_backend.Rust_provider_backend be ->
+      Rust_provider_backend.Decl.get_old_funs_batch be (SSet.elements n_funs)
+    | _ -> Decl_heap.Funs.get_old_batch n_funs
+  in
   let (acc, old_funs_missing) =
     compare_funs_and_get_fanout ctx old_funs acc n_funs
   in
-  let old_types = Decl_heap.Typedefs.get_old_batch n_types in
+  let old_types =
+    match Provider_backend.get () with
+    | Provider_backend.Rust_provider_backend be ->
+      Rust_provider_backend.Decl.get_old_typedefs_batch
+        be
+        (SSet.elements n_types)
+    | _ -> Decl_heap.Typedefs.get_old_batch n_types
+  in
   let (acc, old_types_missing) =
     compare_types_and_get_fanout ctx old_types acc n_types
   in
-  let old_consts = Decl_heap.GConsts.get_old_batch n_consts in
+  let old_consts =
+    match Provider_backend.get () with
+    | Provider_backend.Rust_provider_backend be ->
+      Rust_provider_backend.Decl.get_old_gconsts_batch
+        be
+        (SSet.elements n_consts)
+    | _ -> Decl_heap.GConsts.get_old_batch n_consts
+  in
   let (acc, old_gconsts_missing) =
     compare_gconsts_and_get_fanout ctx old_consts acc n_consts
   in
@@ -172,7 +191,14 @@ let compare_decls_and_get_fanout
       compare_classes_and_get_fanout ctx old_classes new_classes acc n_classes
   in
 
-  let old_modules = Decl_heap.Modules.get_old_batch n_modules in
+  let old_modules =
+    match Provider_backend.get () with
+    | Provider_backend.Rust_provider_backend be ->
+      Rust_provider_backend.Decl.get_old_modules_batch
+        be
+        (SSet.elements n_modules)
+    | _ -> Decl_heap.Modules.get_old_batch n_modules
+  in
   let (acc, old_modules_missing) =
     compare_modules_and_get_fanout ctx old_modules acc n_modules
   in
@@ -327,50 +353,118 @@ let parallel_redecl_compare_and_get_fanout
 (*****************************************************************************)
 (* Code invalidating the heap *)
 (*****************************************************************************)
-let oldify_defs
+let[@warning "-21"] oldify_defs (* -21 for dune stubs *)
     (ctx : Provider_context.t)
     { FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }
     (elems : Decl_class_elements.t SMap.t)
     ~(collect_garbage : bool) : unit =
-  Decl_heap.Funs.oldify_batch n_funs;
-  Decl_class_elements.oldify_all elems;
-  Decl_heap.Classes.oldify_batch n_classes;
-  Shallow_classes_provider.oldify_batch ctx n_classes;
-  Decl_heap.Typedefs.oldify_batch n_types;
-  Decl_heap.GConsts.oldify_batch n_consts;
-  Decl_heap.Modules.oldify_batch n_modules;
-  if collect_garbage then SharedMem.GC.collect `gentle;
-  ()
+  match Provider_backend.get () with
+  | Provider_backend.Rust_provider_backend be ->
+    let open Rust_provider_backend.Decl in
+    oldify_funs_batch be (SSet.elements n_funs);
+    oldify_shallow_classes_batch be (SSet.elements n_classes);
+    oldify_folded_classes_batch be (SSet.elements n_classes);
+    oldify_typedefs_batch be (SSet.elements n_types);
+    oldify_gconsts_batch be (SSet.elements n_consts);
+    oldify_modules_batch be (SSet.elements n_modules);
+    SMap.iter
+      ~f:(fun cls es ->
+        let open Decl_heap in
+        let open Decl_class_elements in
+        oldify_constructors_batch be [cls];
+        oldify_props_batch be (Props.KeySet.elements es.props);
+        oldify_static_props_batch be (StaticProps.KeySet.elements es.sprops);
+        oldify_methods_batch be (Methods.KeySet.elements es.meths);
+        oldify_static_methods_batch be (StaticMethods.KeySet.elements es.smeths);
+        ())
+      elems;
+    ()
+  | _ ->
+    Decl_heap.Funs.oldify_batch n_funs;
+    Decl_class_elements.oldify_all elems;
+    Decl_heap.Classes.oldify_batch n_classes;
+    Shallow_classes_provider.oldify_batch ctx n_classes;
+    Decl_heap.Typedefs.oldify_batch n_types;
+    Decl_heap.GConsts.oldify_batch n_consts;
+    Decl_heap.Modules.oldify_batch n_modules;
+    if collect_garbage then SharedMem.GC.collect `gentle;
+    ()
 
-let remove_old_defs
+let[@warning "-21"] remove_old_defs
     (ctx : Provider_context.t)
     { FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }
     (elems : Decl_class_elements.t SMap.t) : unit =
-  Decl_heap.Funs.remove_old_batch n_funs;
-  Decl_class_elements.remove_old_all elems;
-  Decl_heap.Classes.remove_old_batch n_classes;
-  Shallow_classes_provider.remove_old_batch ctx n_classes;
-  Decl_heap.Typedefs.remove_old_batch n_types;
-  Decl_heap.GConsts.remove_old_batch n_consts;
-  Decl_heap.Modules.remove_old_batch n_modules;
-  SharedMem.GC.collect `gentle;
-  ()
+  match Provider_backend.get () with
+  | Provider_backend.Rust_provider_backend be ->
+    let open Rust_provider_backend.Decl in
+    remove_old_funs_batch be (SSet.elements n_funs);
+    remove_old_shallow_classes_batch be (SSet.elements n_classes);
+    remove_old_folded_classes_batch be (SSet.elements n_classes);
+    remove_old_typedefs_batch be (SSet.elements n_types);
+    remove_old_gconsts_batch be (SSet.elements n_consts);
+    remove_old_modules_batch be (SSet.elements n_modules);
+    SMap.iter
+      ~f:(fun cls es ->
+        let open Decl_heap in
+        let open Decl_class_elements in
+        remove_old_constructors_batch be [cls];
+        remove_old_props_batch be (Props.KeySet.elements es.props);
+        remove_old_static_props_batch be (StaticProps.KeySet.elements es.sprops);
+        remove_old_methods_batch be (Methods.KeySet.elements es.meths);
+        remove_old_static_methods_batch
+          be
+          (StaticMethods.KeySet.elements es.smeths);
+        ())
+      elems;
+    ()
+  | _ ->
+    Decl_heap.Funs.remove_old_batch n_funs;
+    Decl_class_elements.remove_old_all elems;
+    Decl_heap.Classes.remove_old_batch n_classes;
+    Shallow_classes_provider.remove_old_batch ctx n_classes;
+    Decl_heap.Typedefs.remove_old_batch n_types;
+    Decl_heap.GConsts.remove_old_batch n_consts;
+    Decl_heap.Modules.remove_old_batch n_modules;
+    SharedMem.GC.collect `gentle;
+    ()
 
-let remove_defs
+let[@warning "-21"] remove_defs
     (ctx : Provider_context.t)
     { FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }
     (elems : Decl_class_elements.t SMap.t)
     ~(collect_garbage : bool) : unit =
-  Decl_heap.Funs.remove_batch n_funs;
-  Decl_class_elements.remove_all elems;
-  Decl_heap.Classes.remove_batch n_classes;
-  Shallow_classes_provider.remove_batch ctx n_classes;
-  Linearization_provider.remove_batch ctx n_classes;
-  Decl_heap.Typedefs.remove_batch n_types;
-  Decl_heap.GConsts.remove_batch n_consts;
-  Decl_heap.Modules.remove_batch n_modules;
-  if collect_garbage then SharedMem.GC.collect `gentle;
-  ()
+  match Provider_backend.get () with
+  | Provider_backend.Rust_provider_backend be ->
+    let open Rust_provider_backend.Decl in
+    remove_funs_batch be (SSet.elements n_funs);
+    remove_shallow_classes_batch be (SSet.elements n_classes);
+    remove_folded_classes_batch be (SSet.elements n_classes);
+    remove_typedefs_batch be (SSet.elements n_types);
+    remove_gconsts_batch be (SSet.elements n_consts);
+    remove_modules_batch be (SSet.elements n_modules);
+    SMap.iter
+      ~f:(fun cls es ->
+        let open Decl_heap in
+        let open Decl_class_elements in
+        remove_constructors_batch be [cls];
+        remove_props_batch be (Props.KeySet.elements es.props);
+        remove_static_props_batch be (StaticProps.KeySet.elements es.sprops);
+        remove_methods_batch be (Methods.KeySet.elements es.meths);
+        remove_static_methods_batch be (StaticMethods.KeySet.elements es.smeths);
+        ())
+      elems;
+    ()
+  | _ ->
+    Decl_heap.Funs.remove_batch n_funs;
+    Decl_class_elements.remove_all elems;
+    Decl_heap.Classes.remove_batch n_classes;
+    Shallow_classes_provider.remove_batch ctx n_classes;
+    Linearization_provider.remove_batch ctx n_classes;
+    Decl_heap.Typedefs.remove_batch n_types;
+    Decl_heap.GConsts.remove_batch n_consts;
+    Decl_heap.Modules.remove_batch n_modules;
+    if collect_garbage then SharedMem.GC.collect `gentle;
+    ()
 
 let is_dependent_class_of_any ctx classes (c : string) : bool =
   if SSet.mem classes c then

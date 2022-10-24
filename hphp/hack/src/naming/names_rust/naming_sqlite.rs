@@ -29,6 +29,12 @@ impl Names {
         Ok(Self { conn })
     }
 
+    pub fn from_file_assume_valid_db(path: impl AsRef<Path>) -> anyhow::Result<Self> {
+        let path = path.as_ref();
+        let conn = Connection::open(path)?;
+        Ok(Self { conn })
+    }
+
     pub fn new_in_memory() -> anyhow::Result<Self> {
         let mut conn = Connection::open_in_memory()?;
         Self::create_tables(&mut conn)?;

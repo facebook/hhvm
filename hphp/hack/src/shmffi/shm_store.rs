@@ -169,13 +169,19 @@ where
     fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()> {
         let mut cache = self.cache.lock();
         for key in keys {
+            cache.pop(&key);
+
             let hash = self.hash_key(key);
+            let contains = shmffi::with(|segment| segment.table.contains_key(&hash));
+            if !contains {
+                continue;
+            }
+
             let _size = shmffi::with(|segment| {
                 segment
                     .table
                     .inspect_and_remove(&hash, |value| value.unwrap().as_slice().len())
             });
-            cache.pop(&key);
         }
         Ok(())
     }

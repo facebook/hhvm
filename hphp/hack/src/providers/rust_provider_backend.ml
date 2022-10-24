@@ -25,6 +25,26 @@ external push_local_changes_ffi : t -> unit
 external pop_local_changes_ffi : t -> unit
   = "hh_rust_provider_backend_pop_local_changes"
 
+external get_old_funs_batch_ffi :
+  t -> string list -> Shallow_decl_defs.fun_decl option SMap.t
+  = "hh_rust_provider_backend_get_old_funs_batch"
+
+external get_old_shallow_classes_batch_ffi :
+  t -> string list -> Shallow_decl_defs.class_decl option SMap.t
+  = "hh_rust_provider_backend_get_old_shallow_classes_batch"
+
+external get_old_typedefs_batch_ffi :
+  t -> string list -> Shallow_decl_defs.typedef_decl option SMap.t
+  = "hh_rust_provider_backend_get_old_typedefs_batch"
+
+external get_old_gconsts_batch_ffi :
+  t -> string list -> Shallow_decl_defs.const_decl option SMap.t
+  = "hh_rust_provider_backend_get_old_gconsts_batch"
+
+external get_old_modules_batch_ffi :
+  t -> string list -> Shallow_decl_defs.module_decl option SMap.t
+  = "hh_rust_provider_backend_get_old_modules_batch"
+
 module Decl = struct
   module type Store = sig
     type key
@@ -447,6 +467,10 @@ module Decl = struct
     set_decl_store t;
     Funs.oldify_batch t keys
 
+  let get_old_funs_batch t keys =
+    set_decl_store t;
+    get_old_funs_batch_ffi t keys
+
   let remove_old_funs_batch t keys =
     set_decl_store t;
     Funs.remove_old_batch t keys
@@ -455,9 +479,13 @@ module Decl = struct
     set_decl_store t;
     ShallowClasses.remove_batch t keys
 
-  let oldify_classes_batch t keys =
+  let oldify_shallow_classes_batch t keys =
     set_decl_store t;
     ShallowClasses.oldify_batch t keys
+
+  let get_old_shallow_classes_batch t keys =
+    set_decl_store t;
+    get_old_shallow_classes_batch_ffi t keys
 
   let remove_old_shallow_classes_batch t keys =
     set_decl_store t;
@@ -483,6 +511,10 @@ module Decl = struct
     set_decl_store t;
     Typedefs.oldify_batch t keys
 
+  let get_old_typedefs_batch t keys =
+    set_decl_store t;
+    get_old_typedefs_batch_ffi t keys
+
   let remove_old_typedefs_batch t keys =
     set_decl_store t;
     Typedefs.remove_old_batch t keys
@@ -495,6 +527,10 @@ module Decl = struct
     set_decl_store t;
     GConsts.oldify_batch t keys
 
+  let get_old_gconsts_batch t keys =
+    set_decl_store t;
+    get_old_gconsts_batch_ffi t keys
+
   let remove_old_gconsts_batch t keys =
     set_decl_store t;
     GConsts.remove_old_batch t keys
@@ -506,6 +542,10 @@ module Decl = struct
   let oldify_modules_batch t keys =
     set_decl_store t;
     Modules.oldify_batch t keys
+
+  let get_old_modules_batch t keys =
+    set_decl_store t;
+    get_old_modules_batch_ffi t keys
 
   let remove_old_modules_batch t keys =
     set_decl_store t;

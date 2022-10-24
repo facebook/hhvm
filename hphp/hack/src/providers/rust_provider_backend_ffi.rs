@@ -515,6 +515,16 @@ ocaml_ffi! {
             unimplemented!("remove_funs_batch: {UNIMPLEMENTED_MESSAGE}")
         }
     }
+    fn hh_rust_provider_backend_get_old_funs_batch(
+        backend: Backend,
+        names: Vec<pos::FunName>) -> std::collections::BTreeMap<pos::FunName, Option<Arc<decl::FunDecl<BReason>>>> {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.get_old_funs_batch(&names).unwrap()
+        }
+        else {
+            unimplemented!("get_old_funs_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
     fn hh_rust_provider_backend_remove_old_funs_batch(
         backend: Backend,
         names: Vec<pos::FunName>) {
@@ -544,6 +554,16 @@ ocaml_ffi! {
         }
         else {
             unimplemented!("remove_shallow_classes_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_get_old_shallow_classes_batch(
+        backend: Backend,
+        names: Vec<pos::TypeName>) -> std::collections::BTreeMap<pos::TypeName, Option<Arc<decl::ShallowClass<BReason>>>> {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.get_old_shallow_classes_batch(&names).unwrap()
+        }
+        else {
+            unimplemented!("get_old_shallow_classes_batch: {UNIMPLEMENTED_MESSAGE}")
         }
     }
     fn hh_rust_provider_backend_remove_old_shallow_classes_batch(
@@ -577,6 +597,16 @@ ocaml_ffi! {
             unimplemented!("remove_folded_classes_batch: {UNIMPLEMENTED_MESSAGE}")
         }
     }
+    fn hh_rust_provider_backend_get_old_folded_classes_batch(
+        backend: Backend,
+        names: Vec<pos::TypeName>) -> std::collections::BTreeMap<pos::TypeName, Option<Arc<decl::FoldedClass<BReason>>>> {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.get_old_folded_classes_batch(&names).unwrap()
+        }
+        else {
+            unimplemented!("get_old_folded_classes_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
     fn hh_rust_provider_backend_remove_old_folded_classes_batch(
         backend: Backend,
         names: Vec<pos::TypeName>) {
@@ -606,6 +636,16 @@ ocaml_ffi! {
         }
         else {
             unimplemented!("remove_typedefs_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_get_old_typedefs_batch(
+        backend: Backend,
+        names: Vec<pos::TypeName>) -> std::collections::BTreeMap<pos::TypeName, Option<Arc<decl::TypedefDecl<BReason>>>> {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.get_old_typedefs_batch(&names).unwrap()
+        }
+        else {
+            unimplemented!("get_old_typedefs_batch: {UNIMPLEMENTED_MESSAGE}")
         }
     }
     fn hh_rust_provider_backend_remove_old_typedefs_batch(
@@ -639,6 +679,16 @@ ocaml_ffi! {
             unimplemented!("remove_gconsts_batch: {UNIMPLEMENTED_MESSAGE}")
         }
     }
+    fn hh_rust_provider_backend_get_old_gconsts_batch(
+        backend: Backend,
+        names: Vec<pos::ConstName>) -> std::collections::BTreeMap<pos::ConstName, Option<Arc<decl::ConstDecl<BReason>>>> {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.get_old_gconsts_batch(&names).unwrap()
+        }
+        else {
+            unimplemented!("get_old_gconsts_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
     fn hh_rust_provider_backend_remove_old_gconsts_batch(
         backend: Backend,
         names: Vec<pos::ConstName>) {
@@ -668,6 +718,16 @@ ocaml_ffi! {
         }
         else {
             unimplemented!("remove_modules_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_get_old_modules_batch(
+        backend: Backend,
+        names: Vec<pos::ModuleName>) -> std::collections::BTreeMap<pos::ModuleName, Option<Arc<decl::ModuleDecl<BReason>>>> {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.get_old_modules_batch(&names).unwrap()
+        }
+        else {
+            unimplemented!("get_old_modules_batch: {UNIMPLEMENTED_MESSAGE}")
         }
     }
     fn hh_rust_provider_backend_remove_old_modules_batch(
@@ -701,6 +761,7 @@ ocaml_ffi! {
             unimplemented!("remove_props_batch: {UNIMPLEMENTED_MESSAGE}")
         }
     }
+
     fn hh_rust_provider_backend_remove_old_props_batch(
         backend: Backend,
         names: Vec<(pos::TypeName, pos::PropName)>) {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <folly/Traits.h>
 #include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 
 namespace apache {
@@ -21,12 +22,35 @@ namespace thrift {
 namespace frozen {
 namespace detail {
 
+template <typename Container>
+using detect_key_compare = typename Container::key_compare;
+
+template <typename Container>
+constexpr bool isOrderedContainer() {
+  if constexpr (folly::is_detected_v<detect_key_compare, Container>) {
+    return std::is_same_v<
+        typename Container::key_compare,
+        std::less<typename Container::key_type>>;
+  } else {
+    return false;
+  }
+}
+
 /**
  * Layout specialization for unique ordered range types which support
  * binary-search based lookup.
  */
 template <class T, class Item, class KeyExtractor, class Key = T>
 struct SortedTableLayout : public ArrayLayout<T, Item> {
+ private:
+  static bool containerIsSorted(const T& cont) {
+    return std::is_sorted(
+        cont.begin(), cont.end(), [](const Item& a, const Item& b) {
+          return KeyExtractor::getKey(a) < KeyExtractor::getKey(b);
+        });
+  }
+
+ public:
   typedef ArrayLayout<T, Item> Base;
   typedef SortedTableLayout LayoutSelf;
 
@@ -37,24 +61,29 @@ struct SortedTableLayout : public ArrayLayout<T, Item> {
     for (auto it = v.begin(); it != v.end(); ++it) {
       out.insert(out.end(), it.thaw());
     }
+    if constexpr (isOrderedContainer<T>()) {
+      DCHECK(containerIsSorted(out));
+    }
   }
 
   // provide indirect sort table if the collection isn't pre-sorted
   static void maybeIndex(const T& coll, std::vector<const Item*>& index) {
     index.clear();
-    if (std::is_sorted(
-            coll.begin(), coll.end(), [](const Item& a, const Item& b) {
-              return KeyExtractor::getKey(a) < KeyExtractor::getKey(b);
-            })) {
+    if constexpr (isOrderedContainer<T>()) {
+      DCHECK(containerIsSorted(coll));
       return;
+    } else {
+      if (containerIsSorted(coll)) {
+        return;
+      }
+      index.reserve(coll.size());
+      for (decltype(auto) item : coll) {
+        index.push_back(KeyExtractor::getPointer(item));
+      }
+      std::sort(index.begin(), index.end(), [](const Item* pa, const Item* pb) {
+        return KeyExtractor::getKey(*pa) < KeyExtractor::getKey(*pb);
+      });
     }
-    index.reserve(coll.size());
-    for (auto& item : coll) {
-      index.push_back(KeyExtractor::getPointer(item));
-    }
-    std::sort(index.begin(), index.end(), [](const Item* pa, const Item* pb) {
-      return KeyExtractor::getKey(*pa) < KeyExtractor::getKey(*pb);
-    });
   }
 
   static void ensureDistinctKeys(
@@ -79,7 +108,7 @@ struct SortedTableLayout : public ArrayLayout<T, Item> {
     const typename KeyExtractor::KeyType* lastKey = nullptr;
     if (index.empty()) {
       // either the collection was already sorted or it's empty
-      for (auto& item : coll) {
+      for (decltype(auto) item : coll) {
         root.layoutField(write, noField, this->itemField, item);
         write = write(writeStep);
         const typename KeyExtractor::KeyType* itemKey =
@@ -90,16 +119,20 @@ struct SortedTableLayout : public ArrayLayout<T, Item> {
         lastKey = itemKey;
       }
     } else {
-      // collection was non-empty and non-sorted, needs indirection table.
-      for (auto ptr : index) {
-        root.layoutField(write, noField, this->itemField, *ptr);
-        write = write(writeStep);
-        const typename KeyExtractor::KeyType* itemKey =
-            &KeyExtractor::getKey(*ptr);
-        if (lastKey) {
-          ensureDistinctKeys(*lastKey, *itemKey);
+      if constexpr (!isOrderedContainer<T>()) {
+        // collection was non-empty and non-sorted, needs indirection table.
+        for (auto ptr : index) {
+          root.layoutField(write, noField, this->itemField, *ptr);
+          write = write(writeStep);
+          const typename KeyExtractor::KeyType* itemKey =
+              &KeyExtractor::getKey(*ptr);
+          if (lastKey) {
+            ensureDistinctKeys(*lastKey, *itemKey);
+          }
+          lastKey = itemKey;
         }
-        lastKey = itemKey;
+      } else {
+        LOG(FATAL) << "can't happen!";
       }
     }
 
@@ -118,7 +151,7 @@ struct SortedTableLayout : public ArrayLayout<T, Item> {
     FieldPosition noField; // not really used
     if (index.empty()) {
       // either the collection was already sorted or it's empty
-      for (auto& item : coll) {
+      for (decltype(auto) item : coll) {
         root.freezeField(write, this->itemField, item);
         write = write(writeStep);
       }

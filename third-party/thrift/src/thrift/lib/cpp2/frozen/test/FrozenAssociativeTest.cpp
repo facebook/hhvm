@@ -47,13 +47,22 @@ TEST(FrozenPair, Basic) {
   EXPECT_EQ(sp.second, fsp.second());
 }
 
-TEST(FrozenMap, Basic) {
-  auto& map = osquares;
+template <typename Map>
+void checkBasicFrozenMap(const Map& map) {
   auto fmap = freeze(map);
   EXPECT_EQ(map.at(3), fmap.at(3));
   EXPECT_EQ(map.find(3)->second, fmap.find(3)->second());
   EXPECT_TRUE(fmap.count(2));
   EXPECT_FALSE(fmap.count(8));
+}
+
+TEST(FrozenMap, Basic) {
+  checkBasicFrozenMap(osquares);
+}
+
+TEST(FrozenMap, BasicNonDefaultComparison) {
+  std::map<int, int, std::greater<int>> map(osquares.begin(), osquares.end());
+  checkBasicFrozenMap(map);
 }
 
 TEST(FrozenMap, NonSortValue) {

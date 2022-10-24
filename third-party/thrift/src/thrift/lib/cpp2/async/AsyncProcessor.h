@@ -666,13 +666,13 @@ class GeneratedAsyncProcessorBase : public AsyncProcessor {
 
   // TODO(praihan): This function will be removed once we enforce that
   // createMethodMetadata is always implemented correctly.
-  // void processSerializedCompressedRequest(
-  //     ResponseChannelRequest::UniquePtr req,
-  //     SerializedCompressedRequest&& serializedRequest,
-  //     protocol::PROTOCOL_TYPES prot_type,
-  //     Cpp2RequestContext* context,
-  //     folly::EventBase* eb,
-  //     concurrency::ThreadManager* tm) override = 0;
+  void processSerializedCompressedRequest(
+      ResponseChannelRequest::UniquePtr req,
+      SerializedCompressedRequest&& serializedRequest,
+      protocol::PROTOCOL_TYPES prot_type,
+      Cpp2RequestContext* context,
+      folly::EventBase* eb,
+      concurrency::ThreadManager* tm) override = 0;
 
   // Sends an error response if validation fails.
   static bool validateRpcKind(

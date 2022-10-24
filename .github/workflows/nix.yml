@@ -60,7 +60,8 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v1
       with:
         role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
-        role-duration-seconds: ${{ 6 * 60 * 60 }}
+        # 6 hours
+        role-duration-seconds: 21600
         aws-region: us-west-2
     - name: Upload sccache binaries to the binary cache server on S3
       if: steps.configure-aws-credentials.outcome == 'success'

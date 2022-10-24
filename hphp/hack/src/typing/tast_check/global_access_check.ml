@@ -40,8 +40,19 @@ module Hashtbl = Stdlib.Hashtbl
 module Option = Stdlib.Option
 module GlobalAccessCheck = Error_codes.GlobalAccessCheck
 
+(* Recognize common patterns for global access (only writes for now). *)
+type global_access_pattern =
+  | Singleton (* Write to a global variable whose value is null *)
+  | CounterIncrement (* Increase a global variable by 1 or -1 *)
+  | WriteEmptyOrNUll (* Assign null or empty string to a global variable *)
+  | WriteLiteral (* Assign a literal to a global variable *)
+  | WriteGlobalToGlobal (* Assign a global variable to another one *)
+  | NoPattern (* No pattern above is recognized *)
+[@@deriving show { with_path = false }]
+
 (* Raise a global access error if the corresponding write/read mode is enabled. *)
-let raise_global_access_error env pos fun_name data_type global_set error_code =
+let raise_global_access_error
+    env pos fun_name data_type global_set pattern error_code =
   let tcopt = Tast_env.get_tcopt env in
   let (error_message, error_enabled) =
     match error_code with
@@ -70,6 +81,11 @@ let raise_global_access_error env pos fun_name data_type global_set error_code =
         global_set
         ""
     in
+    let pattern_str =
+      match pattern with
+      | NoPattern -> ""
+      | _ as p -> "<" ^ show_global_access_pattern p ^ ">"
+    in
     let message =
       "["
       ^ fun_name
@@ -77,21 +93,35 @@ let raise_global_access_error env pos fun_name data_type global_set error_code =
       ^ global_vars_str
       ^ "}("
       ^ data_type
-      ^ ") A global variable is "
+      ^ ")"
+      ^ pattern_str
+      ^ " A global variable is "
       ^ error_message
     in
     Errors.global_access_error error_code pos message
 
-(* The context maintains a hash table from each global variable to the
-  corresponding references of static variables or memoized functions.
+(* The context maintains:
+  (1) A hash table from local variables to the orresponding references of
+  global variables (i.e. static variables or memoized functions).
   For example, consider the following program:
-  "if (condition) { $a = Foo::$bar } else { $a = memoized_func() }"
-  after the above conditional, $a is a global variable which is a reference to
-  either Foo::$bar or memoized_func, thus the context gets a hash table
-  {"a" => {"Foo::$bar", "\memoized_func"}}. *)
-type ctx = { global_var_refs_tbl: (string, SSet.t) Hashtbl.t ref }
+  "if (condition) { $a = Foo::$bar; } else { $a = memoized_func(); }"
+  after the above code, $a has a reference to either Foo::$bar or memoized_func,
+  thus global_var_refs_tbl is like {"a" => {"Foo::$bar", "\memoized_func"}}.
+  (2) A set of global variables whose values are null, which can be used to
+  identify singletons. For example, consider the following program:
+  "if (Foo::$bar is null) { Foo::$bar = new Bar(); }"
+  inside the true branch, null_global_var_set is {"Foo::$bar"}, and
+  the assignment to Foo::$bar shall be identified as a singleton. *)
+type ctx = {
+  global_var_refs_tbl: (string, SSet.t) Hashtbl.t ref;
+  null_global_var_set: SSet.t ref;
+}
 
-let current_ctx = { global_var_refs_tbl = ref (Hashtbl.create 0) }
+let current_ctx =
+  {
+    global_var_refs_tbl = ref (Hashtbl.create 0);
+    null_global_var_set = ref SSet.empty;
+  }
 
 (* Add the key (a variable name) and the value (a set of references) to the table. *)
 let add_var_refs_to_tbl tbl var refs =
@@ -190,7 +220,9 @@ let rec is_expr_static env (_, _, te) =
   | _ -> false
 
 (* Print out global variables, e.g. Foo::$bar => "Foo::$bar", self::$bar => "Foo::$bar",
-  memoized_func => "\memoized_func", $baz->memoized_method => "Baz::memoized_method".
+  static::$bar => "this::$bar", memoized_func => "\memoized_func", $baz->memoized_method
+  => "Baz->memoized_method", Baz::memoized_method => "Baz::memoized_method",
+  $this->memoized_method => "this->memoized_method".
   Notice that this does not handle arbitrary expressions. *)
 let rec print_global_expr env expr =
   match expr with
@@ -415,24 +447,65 @@ let visitor =
       super#on_fun_def (env, (ctx, fun_name)) f
 
     method! on_fun_ (env, (ctx, fun_name)) f =
-      let ctx_cpy = Hashtbl.copy !(ctx.global_var_refs_tbl) in
+      let global_var_refs_tbl_cpy = Hashtbl.copy !(ctx.global_var_refs_tbl) in
+      let null_global_var_set_cpy = !(ctx.null_global_var_set) in
       super#on_fun_ (env, (ctx, fun_name)) f;
-      ctx.global_var_refs_tbl := ctx_cpy
+      ctx.global_var_refs_tbl := global_var_refs_tbl_cpy;
+      ctx.null_global_var_set := null_global_var_set_cpy
 
     method! on_stmt_ (env, (ctx, fun_name)) s =
       match s with
-      | If (_, b1, b2) ->
-        (* Union the contexts from two branches *)
-        let ctx_cpy =
+      | If ((_, _, cond), b1, b2) ->
+        (* Make a copy of null_global_var_set, and reset afterwards. *)
+        let null_global_var_set_cpy = !(ctx.null_global_var_set) in
+        let ctx_else_branch =
           {
             global_var_refs_tbl = ref (Hashtbl.copy !(ctx.global_var_refs_tbl));
+            null_global_var_set = ref !(ctx.null_global_var_set);
           }
         in
-        super#on_block (env, (ctx_cpy, fun_name)) b1;
-        super#on_block (env, (ctx, fun_name)) b2;
+        let () =
+          match cond with
+          (* For the condition of format "expr is null", "expr === null" or "expr == null",
+             add the global variables in expr to null_global_var_set for the if branch. *)
+          | Is (cond_expr, (_, Hprim Tnull))
+          | Binop (Ast_defs.Eqeqeq, cond_expr, (_, _, Null))
+          | Binop (Ast_defs.Eqeq, cond_expr, (_, _, Null)) ->
+            let nullable_global_vars_opt =
+              get_globals_from_expr env ctx cond_expr ~track_refs:true
+            in
+            (match nullable_global_vars_opt with
+            | Some vars ->
+              ctx.null_global_var_set :=
+                SSet.union !(ctx.null_global_var_set) vars
+            | None -> ())
+          (* For the condition of format "expr is nonnull", "expr !== null" or "expr != null",
+             add the global variables in expr to null_global_var_set for the else branch. *)
+          | Is (cond_expr, (_, Hnonnull))
+          | Binop (Ast_defs.Diff2, cond_expr, (_, _, Null))
+          | Binop (Ast_defs.Diff, cond_expr, (_, _, Null)) ->
+            let nullable_global_vars_opt =
+              get_globals_from_expr
+                env
+                ctx_else_branch
+                cond_expr
+                ~track_refs:true
+            in
+            (match nullable_global_vars_opt with
+            | Some vars ->
+              ctx_else_branch.null_global_var_set :=
+                SSet.union !(ctx_else_branch.null_global_var_set) vars
+            | None -> ())
+          | _ -> ()
+        in
+        (* Check two branches separately, then merge the table of global variables
+           and reset the set of nullable variables. *)
+        super#on_block (env, (ctx, fun_name)) b1;
+        super#on_block (env, (ctx_else_branch, fun_name)) b2;
         merge_var_refs_tbls
           !(ctx.global_var_refs_tbl)
-          !(ctx_cpy.global_var_refs_tbl)
+          !(ctx_else_branch.global_var_refs_tbl);
+        ctx.null_global_var_set := null_global_var_set_cpy
       | Do (b, _)
       | While (_, b)
       | For (_, _, _, b)
@@ -442,6 +515,7 @@ let visitor =
         let ctx_cpy =
           {
             global_var_refs_tbl = ref (Hashtbl.copy !(ctx.global_var_refs_tbl));
+            null_global_var_set = ref !(ctx.null_global_var_set);
           }
         in
         let ctx_len = ref (Hashtbl.length !(ctx.global_var_refs_tbl)) in
@@ -469,6 +543,7 @@ let visitor =
               fun_name
               (Tast_env.print_ty env ty)
               global_set
+              NoPattern
               GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall
           | None -> ())
         | None -> ());
@@ -492,9 +567,23 @@ let visitor =
             fun_name
             re_ty
             re_direct_global
+            NoPattern
             GlobalAccessCheck.DefiniteGlobalRead
         | None -> ());
         (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
+        let pattern =
+          match le_global_opt with
+          | None -> NoPattern
+          | Some le_global ->
+            if
+              SSet.exists
+                (fun v -> SSet.mem v !(ctx.null_global_var_set))
+                le_global
+            then
+              Singleton
+            else
+              NoPattern
+        in
         if is_expr_static env le && Option.is_some le_global_opt then
           raise_global_access_error
             env
@@ -502,6 +591,7 @@ let visitor =
             fun_name
             re_ty
             (Option.get le_global_opt)
+            pattern
             GlobalAccessCheck.DefiniteGlobalWrite
         else
           let re_global_and_mutable_opt =
@@ -518,6 +608,7 @@ let visitor =
                 fun_name
                 re_ty
                 (Option.get le_global_opt)
+                pattern
                 GlobalAccessCheck.PossibleGlobalWriteViaReference
           | false ->
             if
@@ -552,6 +643,7 @@ let visitor =
                 fun_name
                 e_ty
                 e_global
+                NoPattern
                 GlobalAccessCheck.DefiniteGlobalWrite
             else if has_global_write_access e then
               raise_global_access_error
@@ -560,6 +652,7 @@ let visitor =
                 fun_name
                 e_ty
                 e_global
+                NoPattern
                 GlobalAccessCheck.PossibleGlobalWriteViaReference
           | _ -> ())
       | Call (_, _, tpl, _) ->
@@ -579,6 +672,7 @@ let visitor =
                 fun_name
                 (Tast_env.print_ty env ty)
                 (Option.get e_global_opt)
+                NoPattern
                 GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall)
       | New (_, _, el, _, _) ->
         List.iter el ~f:(fun ((ty, pos, _) as expr) ->
@@ -592,6 +686,7 @@ let visitor =
                 fun_name
                 (Tast_env.print_ty env ty)
                 (Option.get e_global_opt)
+                NoPattern
                 GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall)
       | _ -> ());
       super#on_expr (env, (ctx, fun_name)) te

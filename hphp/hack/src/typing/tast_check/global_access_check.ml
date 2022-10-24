@@ -320,13 +320,33 @@ let rec get_globals_from_expr env ctx (_, _, te) ~track_refs =
     merge_opt_sets
       (get_globals_from_expr env ctx e1 ~track_refs)
       (get_globals_from_expr env ctx e2 ~track_refs)
-  | Call (caller, _, _, _) ->
+  | Call (((_, _, func_expr) as caller), _, tpl, _) ->
+    (* First check if the called function is memoized. *)
     let caller_ty = Tast.get_type caller in
     let open Typing_defs in
-    (match get_node caller_ty with
-    | Tfun fty when get_ft_is_memoized fty ->
-      Some (SSet.singleton (print_global_expr env te))
-    | _ -> None)
+    let globals_set_opt =
+      ref
+        (match get_node caller_ty with
+        | Tfun fty when get_ft_is_memoized fty ->
+          Some (SSet.singleton (print_global_expr env te))
+        | _ -> None)
+    in
+    (* For most function calls, we treat them as black boxes and don't expect their return
+       to be global; yet, for some special function (i.e. idx), its return value is assumed
+       to be global if its first parameter is global. *)
+    let () =
+      match func_expr with
+      | Id (_, "\\HH\\idx") ->
+        (match tpl with
+        | (_, para_expr) :: _ ->
+          let global_opt =
+            get_globals_from_expr env ctx para_expr ~track_refs:true
+          in
+          globals_set_opt := merge_opt_sets !globals_set_opt global_opt
+        | [] -> ())
+      | _ -> ()
+    in
+    !globals_set_opt
   | _ -> None
 
 (* Check if type is a collection. *)
@@ -464,40 +484,67 @@ let visitor =
             null_global_var_set = ref !(ctx.null_global_var_set);
           }
         in
-        let () =
+        (* From the condition, we get the expression whose value is null in one brach
+           (true represents the if branch, while false represents the else branch). *)
+        let nullable_expr_in_cond_opt =
           match cond with
           (* For the condition of format "expr is null", "expr === null" or "expr == null",
-             add the global variables in expr to null_global_var_set for the if branch. *)
+             return expr and true (i.e. if branch). *)
           | Is (cond_expr, (_, Hprim Tnull))
           | Binop (Ast_defs.Eqeqeq, cond_expr, (_, _, Null))
           | Binop (Ast_defs.Eqeq, cond_expr, (_, _, Null)) ->
-            let nullable_global_vars_opt =
-              get_globals_from_expr env ctx cond_expr ~track_refs:true
-            in
-            (match nullable_global_vars_opt with
-            | Some vars ->
-              ctx.null_global_var_set :=
-                SSet.union !(ctx.null_global_var_set) vars
-            | None -> ())
+            Some (cond_expr, true)
+          (* For the condition of format "!C\contains_key(expr, $key)" where expr shall be a
+             dictionary, return expr and true (i.e. if branch). *)
+          | Unop
+              ( Ast_defs.Unot,
+                ( _,
+                  _,
+                  Call
+                    ( (_, _, Id (_, "\\HH\\Lib\\C\\contains_key")),
+                      _,
+                      para_list,
+                      _ ) ) ) ->
+            (match para_list with
+            | [] -> None
+            | (_, para_expr) :: _ -> Some (para_expr, true))
           (* For the condition of format "expr is nonnull", "expr !== null" or "expr != null",
-             add the global variables in expr to null_global_var_set for the else branch. *)
+             return expr and false (i.e. else branch). *)
           | Is (cond_expr, (_, Hnonnull))
           | Binop (Ast_defs.Diff2, cond_expr, (_, _, Null))
           | Binop (Ast_defs.Diff, cond_expr, (_, _, Null)) ->
-            let nullable_global_vars_opt =
-              get_globals_from_expr
-                env
-                ctx_else_branch
-                cond_expr
-                ~track_refs:true
-            in
-            (match nullable_global_vars_opt with
-            | Some vars ->
-              ctx_else_branch.null_global_var_set :=
-                SSet.union !(ctx_else_branch.null_global_var_set) vars
-            | None -> ())
-          | _ -> ()
+            Some (cond_expr, false)
+          (* For the condition of format "C\contains_key(expr, $key)" where expr shall be a
+             dictionary, return expr and false (i.e. else branch). *)
+          | Call ((_, _, Id (_, "\\HH\\Lib\\C\\contains_key")), _, para_list, _)
+            ->
+            (match para_list with
+            | [] -> None
+            | (_, para_expr) :: _ -> Some (para_expr, false))
+          | _ -> None
         in
+        let () =
+          match nullable_expr_in_cond_opt with
+          | None -> ()
+          | Some (nullable_expr, if_branch) ->
+            let nullable_global_vars_opt =
+              get_globals_from_expr env ctx nullable_expr ~track_refs:true
+            in
+            (* Add nullable global variables to null_global_var_set of the right branch. *)
+            (match (nullable_global_vars_opt, if_branch) with
+            | (None, _) -> ()
+            | (Some vars, true) ->
+              ctx.null_global_var_set :=
+                SSet.union !(ctx.null_global_var_set) vars
+            | (Some vars, false) ->
+              ctx_else_branch.null_global_var_set :=
+                SSet.union !(ctx_else_branch.null_global_var_set) vars)
+        in
+        (* To do: ideally the condition expression should also be checked.
+           For example, a global read shall be reported if a global varialbe is used;
+           a global write shall be reported if a global variable is passed to a function call
+           (which is very likely to happen) or it is directly mutated inside the condition
+           (which is uncommon but possible). *)
         (* Check two branches separately, then merge the table of global variables
            and reset the set of nullable variables. *)
         super#on_block (env, (ctx, fun_name)) b1;

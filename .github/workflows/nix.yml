@@ -60,6 +60,8 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v1
       with:
         role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
+        # 6 hours
+        role-duration-seconds: 21600
         aws-region: us-west-2
     - name: Sign sccache binaries with a private key downloaded from AWS Secrets Manager
       if: steps.configure-aws-credentials.outcome == 'success'

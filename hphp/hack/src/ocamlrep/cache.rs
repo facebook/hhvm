@@ -14,8 +14,8 @@ use hash::HashMap;
 /// to another. Useful for memoizing conversions between OCaml values and Rust
 /// references.
 pub struct MemoizationCache {
-    /// Maps from input address -> size_in_bytes -> output
-    cache: RefCell<Option<HashMap<usize, HashMap<usize, usize>>>>,
+    /// Maps from input (address,size_in_bytes) -> output
+    cache: RefCell<Option<HashMap<(usize, usize), usize>>>,
 }
 
 impl MemoizationCache {
@@ -50,11 +50,9 @@ impl MemoizationCache {
         if size_in_bytes == 0 {
             return f();
         }
-        let memoized_output = match self.cache.borrow().as_ref().map(|cache| {
-            cache
-                .get(&input)
-                .and_then(|m| m.get(&size_in_bytes).copied())
-        }) {
+        let memoized_output = match (self.cache.borrow().as_ref())
+            .map(|cache| cache.get(&(input, size_in_bytes)).copied())
+        {
             None => return f(),
             Some(output) => output,
         };
@@ -73,8 +71,7 @@ impl MemoizationCache {
                 // `memoized_output`. The only function which can replace the
                 // cache with None is `with_cache`, which would have panicked if
                 // `f` attempted to re-enter it.
-                let by_size = cache.as_mut().unwrap().entry(input).or_default();
-                by_size.insert(size_in_bytes, output);
+                (cache.as_mut().unwrap()).insert((input, size_in_bytes), output);
                 output
             }
         }

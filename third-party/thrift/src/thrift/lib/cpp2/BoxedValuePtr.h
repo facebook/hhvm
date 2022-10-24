@@ -128,40 +128,41 @@ class boxed_value_ptr {
   }
 };
 
+// 'boxed_ptr' provides copy-on-write behavior using 'AlignedPtr' that can tag
+// modes.
+//
+// It currently supports two modes, 'Mode::MutOwned' and 'Mode::ConstUnowned'.
+// 'boxed_ptr' with 'Mode::ConstUnowned' does not own underlying value and needs
+// to copy the underlying value before allowing mutation access. 'boxed_ptr'
+// with 'Mode::MutOwned' owns the underlying value and can mutate the underlying
+// value.
 template <typename T>
 class boxed_ptr {
  public:
-  static_assert(
-      std::is_constructible<T, T&>::value ||
-          std::is_constructible<T, const T&>::value,
-      "Boxed type must be copy constructible");
-
   using element_type = T;
 
+  FOLLY_ERASE static constexpr boxed_ptr fromStaticConstant(const T* t) {
+    assert(t != nullptr);
+    return boxed_ptr{t};
+  }
+
   FOLLY_ERASE constexpr boxed_ptr() noexcept = default;
-
-  FOLLY_ERASE constexpr boxed_ptr(const boxed_ptr& other) {
-    if (other.getMode() == Mode::MutOwned) {
-      ptr_ = other.copy();
-    } else {
-      ptr_ = other.ptr_;
-    }
+  FOLLY_ERASE constexpr boxed_ptr(boxed_ptr&& other) noexcept
+      : ptr_(std::move(other.ptr_)) {
+    other.ptr_.setTag(static_cast<std::uintptr_t>(Mode::ConstUnowned));
   }
-
-  FOLLY_ERASE constexpr boxed_ptr(boxed_ptr&& other) noexcept : boxed_ptr() {
-    std::swap(ptr_, other.ptr_);
+  FOLLY_ERASE constexpr boxed_ptr& operator=(boxed_ptr&& other) noexcept {
+    ptr_ = std::move(other.ptr_);
+    other.ptr_.setTag(static_cast<std::uintptr_t>(Mode::ConstUnowned));
+    return *this;
   }
-
-  FOLLY_ERASE constexpr boxed_ptr(const T* p) noexcept {
-    // The const-ness of the pointer will be tracked using the tag
-    // Mode::ConstUnowned. The only mutable accessor method is
-    // boxed_ptr<T>::mut(), which will copy *p in order to return a
-    // mutable pointer.
-    ptr_.set(
-        const_cast<T*>(p), static_cast<std::uintptr_t>(Mode::ConstUnowned));
-  }
-
+  FOLLY_ERASE constexpr boxed_ptr(const boxed_ptr& other) = delete;
+  FOLLY_ERASE
+  constexpr boxed_ptr& operator=(const boxed_ptr& other) = delete;
   FOLLY_ERASE ~boxed_ptr() noexcept { destroy(); }
+
+  FOLLY_ERASE constexpr explicit boxed_ptr(std::unique_ptr<T> uptr) noexcept
+      : ptr_(uptr.release(), static_cast<std::uintptr_t>(Mode::MutOwned)) {}
 
   FOLLY_ERASE constexpr const T& operator*() const noexcept {
     return *ptr_.get();
@@ -175,35 +176,27 @@ class boxed_ptr {
     return bool(ptr_.get());
   }
 
-  FOLLY_ERASE constexpr boxed_ptr& operator=(boxed_ptr&& other) noexcept {
-    std::swap(ptr_, other.ptr_);
-    return *this;
-  }
-
-  FOLLY_ERASE
-  constexpr boxed_ptr& operator=(const boxed_ptr& other) {
-    boxed_ptr<T> tmp{other};
-    std::swap(ptr_, tmp.ptr_);
-    return *this;
-  }
-
-  FOLLY_ERASE
-  constexpr boxed_ptr& operator=(const T* p) {
-    boxed_ptr<T> tmp{p};
-    std::swap(ptr_, tmp.ptr_);
-    return *this;
-  }
-
-  FOLLY_ERASE constexpr T* mut() noexcept {
+  FOLLY_ERASE constexpr T* mut() {
+    assert(bool(ptr_.get()));
     if (getMode() == Mode::ConstUnowned) {
-      ptr_ = copy();
+      ptr_ = copyPtr();
     }
     return ptr_.get();
   }
 
-  FOLLY_ERASE constexpr void reset(T* p = nullptr) noexcept {
+  FOLLY_ERASE constexpr void reset() { destroy(); }
+  FOLLY_ERASE constexpr void reset(std::unique_ptr<T> p) {
     destroy();
-    ptr_.set(p, static_cast<std::uintptr_t>(Mode::MutOwned));
+    ptr_.set(p.release(), static_cast<std::uintptr_t>(Mode::MutOwned));
+  }
+
+  FOLLY_ERASE constexpr boxed_ptr copy() const {
+    if (getMode() == Mode::ConstUnowned) {
+      return fromStaticConstant(ptr_.get());
+    }
+    boxed_ptr ptr;
+    ptr.ptr_ = copyPtr();
+    return ptr;
   }
 
  private:
@@ -215,6 +208,15 @@ class boxed_ptr {
     MutOwned = 0, // Unique ownership
     ConstUnowned = 1,
   };
+
+  FOLLY_ERASE constexpr explicit boxed_ptr(const T* p) noexcept
+      : ptr_(
+            // The const-ness of the pointer will be tracked using the tag
+            // Mode::ConstUnowned. The only mutable accessor method is
+            // boxed_ptr<T>::mut(), which will copy *p in order to return a
+            // mutable pointer.
+            const_cast<T*>(p),
+            static_cast<std::uintptr_t>(Mode::ConstUnowned)) {}
 
   friend void swap(boxed_ptr& lhs, boxed_ptr& rhs) noexcept {
     using std::swap;
@@ -255,7 +257,7 @@ class boxed_ptr {
     ptr_.clear();
   }
 
-  aligned_pointer_type copy() const {
+  aligned_pointer_type copyPtr() const {
     // This leaves the tag region cleared indicating the new value is
     // Mode::MutOwned.
     aligned_pointer_type ptr =
@@ -265,41 +267,6 @@ class boxed_ptr {
   }
 
   aligned_pointer_type ptr_;
-
- public:
-  // TODO(afuller): This implicitly inplace implicit constructor
-  // should be removed as it lets T intercept any constructor call, which is
-  // extremely bug prone.
-  template <typename... Args, typename = decltype(T(std::declval<Args>()...))>
-  FOLLY_ERASE boxed_ptr(Args&&... args)
-      : ptr_(new T(std::forward<Args>(args)...), Mode::MutOwned) {}
-
-  // TODO(afuller): This implicit creation and value assignment should be
-  // removed as it lets T intercept assignment, which is extremely bug prone.
-  //
-  // TODO(lpe): Replace this with make_boxed<T>.
-  template <typename U>
-  FOLLY_ERASE std::enable_if_t<std::is_assignable<T&, U&&>::value, boxed_ptr&>
-  operator=(U&& value) {
-    if (ptr_.get()) {
-      *ptr_.get() = std::forward<U>(value);
-    } else {
-      ptr_.set(new T(std::forward<U>(value)), Mode::MutOwned);
-    }
-    return *this;
-  }
-
-  // TODO(afuller): This is not a typical smart pointer feature, and
-  // likely should only exist on value-semantic types like std::optional.
-  template <typename... Args>
-  FOLLY_ERASE T& emplace(Args&&... args) {
-    if (ptr_.get()) {
-      *ptr_.get() = T(std::forward<Args>(args)...);
-    } else {
-      ptr_.set(new T(std::forward<Args>(args)...), Mode::MutOwned);
-    }
-    return *ptr_.get();
-  }
 };
 
 } // namespace detail

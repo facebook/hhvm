@@ -61,6 +61,9 @@ jobs:
       with:
         role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
         aws-region: us-west-2
+    - name: Sign sccache binaries with a private key downloaded from AWS Secrets Manager
+      if: steps.configure-aws-credentials.outcome == 'success'
+      run: nix store sign --recursive --key-file <(aws secretsmanager get-secret-value --secret-id hhvm-nix-cache-1 --query SecretString --output text) --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#sccache_pr1086"
     - name: Upload sccache binaries to the binary cache server on S3
       if: steps.configure-aws-credentials.outcome == 'success'
       run: nix copy --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#sccache_pr1086"

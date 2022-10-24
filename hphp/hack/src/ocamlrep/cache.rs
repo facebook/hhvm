@@ -8,14 +8,14 @@
 
 use std::cell::RefCell;
 
-use nohash_hasher::IntMap;
+use hash::HashMap;
 
 /// A simple scoped cache for memoizing conversions from one pointer-sized value
 /// to another. Useful for memoizing conversions between OCaml values and Rust
 /// references.
 pub struct MemoizationCache {
     /// Maps from input address -> size_in_bytes -> output
-    cache: RefCell<Option<IntMap<usize, IntMap<usize, usize>>>>,
+    cache: RefCell<Option<HashMap<usize, HashMap<usize, usize>>>>,
 }
 
 impl MemoizationCache {
@@ -32,7 +32,7 @@ impl MemoizationCache {
         // `self.cache` are in this function and in `memoized`. In both
         // functions, we do not hold a `Ref` or `RefMut` while calling into code
         // which might attempt to re-enter `memoized` or `with_cache`.
-        let prev_value = self.cache.replace(Some(IntMap::default()));
+        let prev_value = self.cache.replace(Some(Default::default()));
         if prev_value.is_some() {
             panic!(
                 "Attempted to re-enter MemoizationCache::with_cache \

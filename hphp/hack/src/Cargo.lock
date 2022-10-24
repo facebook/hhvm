@@ -2821,8 +2821,8 @@ dependencies = [
  "bstr 1.0.1",
  "bumpalo",
  "bytes",
+ "hash",
  "indexmap",
- "nohash-hasher",
  "ocamlrep_derive",
  "serde",
 ]

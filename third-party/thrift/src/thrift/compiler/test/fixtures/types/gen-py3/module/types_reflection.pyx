@@ -764,27 +764,14 @@ cdef __StructSpec get_reflection__ForwardUsageByRef():
         ),
     )
     return spec
-cdef __StructSpec get_reflection__NoexceptMoveEmpty():
-    cdef _module_types.NoexceptMoveEmpty defaults = _module_types.NoexceptMoveEmpty._fbthrift_create(
-        constant_shared_ptr[_module_types.cNoexceptMoveEmpty](
-            default_inst[_module_types.cNoexceptMoveEmpty]()
+cdef __StructSpec get_reflection__IncompleteMap():
+    cdef _module_types.IncompleteMap defaults = _module_types.IncompleteMap._fbthrift_create(
+        constant_shared_ptr[_module_types.cIncompleteMap](
+            default_inst[_module_types.cIncompleteMap]()
         )
     )
     cdef __StructSpec spec = __StructSpec._fbthrift_create(
-        name="NoexceptMoveEmpty",
-        kind=__StructType.STRUCT,
-        annotations={
-        },
-    )
-    return spec
-cdef __StructSpec get_reflection__NoexceptMoveSimpleStruct():
-    cdef _module_types.NoexceptMoveSimpleStruct defaults = _module_types.NoexceptMoveSimpleStruct._fbthrift_create(
-        constant_shared_ptr[_module_types.cNoexceptMoveSimpleStruct](
-            default_inst[_module_types.cNoexceptMoveSimpleStruct]()
-        )
-    )
-    cdef __StructSpec spec = __StructSpec._fbthrift_create(
-        name="NoexceptMoveSimpleStruct",
+        name="IncompleteMap",
         kind=__StructType.STRUCT,
         annotations={
         },
@@ -792,93 +779,8 @@ cdef __StructSpec get_reflection__NoexceptMoveSimpleStruct():
     spec.add_field(
         __FieldSpec._fbthrift_create(
             id=1,
-            name="boolField",
-            type=int,
-            kind=__NumberType.I64,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
-    )
-    return spec
-cdef __StructSpec get_reflection__NoexceptMoveComplexStruct():
-    cdef _module_types.NoexceptMoveComplexStruct defaults = _module_types.NoexceptMoveComplexStruct._fbthrift_create(
-        constant_shared_ptr[_module_types.cNoexceptMoveComplexStruct](
-            default_inst[_module_types.cNoexceptMoveComplexStruct]()
-        )
-    )
-    cdef __StructSpec spec = __StructSpec._fbthrift_create(
-        name="NoexceptMoveComplexStruct",
-        kind=__StructType.STRUCT,
-        annotations={
-        },
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=1,
-            name="MyBoolField",
-            type=bool,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=2,
-            name="MyIntField",
-            type=int,
-            kind=__NumberType.I64,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=defaults.MyIntField,
-            annotations={
-            },
-        ),
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=3,
-            name="MyStringField",
-            type=str,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=defaults.MyStringField,
-            annotations={
-            },
-        ),
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=4,
-            name="MyStringField2",
-            type=str,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=5,
-            name="MyBinaryField",
-            type=bytes,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=6,
-            name="MyBinaryField2",
-            type=bytes,
+            name="field",
+            type=_module_types.Map__i32_IncompleteMapDep,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
             default=None,
@@ -886,69 +788,178 @@ cdef __StructSpec get_reflection__NoexceptMoveComplexStruct():
             },
         ),
     )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=7,
-            name="MyBinaryField3",
-            type=bytes,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.REQUIRED,
-            default=None,
-            annotations={
-            },
-        ),
+    return spec
+cdef __StructSpec get_reflection__IncompleteMapDep():
+    cdef _module_types.IncompleteMapDep defaults = _module_types.IncompleteMapDep._fbthrift_create(
+        constant_shared_ptr[_module_types.cIncompleteMapDep](
+            default_inst[_module_types.cIncompleteMapDep]()
+        )
     )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=8,
-            name="MyBinaryListField4",
-            type=_module_types.List__binary,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=9,
-            name="MyMapEnumAndInt",
-            type=_module_types.Map__MyEnumA_string,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=defaults.MyMapEnumAndInt,
-            annotations={
-            },
-        ),
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="IncompleteMapDep",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
     )
     return spec
-cdef __StructSpec get_reflection__NoExceptMoveUnion():
+cdef __StructSpec get_reflection__CompleteMap():
+    cdef _module_types.CompleteMap defaults = _module_types.CompleteMap._fbthrift_create(
+        constant_shared_ptr[_module_types.cCompleteMap](
+            default_inst[_module_types.cCompleteMap]()
+        )
+    )
     cdef __StructSpec spec = __StructSpec._fbthrift_create(
-        name="NoExceptMoveUnion",
-        kind=__StructType.UNION,
+        name="CompleteMap",
+        kind=__StructType.STRUCT,
         annotations={
         },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
             id=1,
-            name="string_field",
-            type=str,
+            name="field",
+            type=_module_types.std_unordered_map__Map__i32_CompleteMapDep,
             kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
+            qualifier=__Qualifier.OPTIONAL,
             default=None,
             annotations={
             },
         ),
     )
+    return spec
+cdef __StructSpec get_reflection__CompleteMapDep():
+    cdef _module_types.CompleteMapDep defaults = _module_types.CompleteMapDep._fbthrift_create(
+        constant_shared_ptr[_module_types.cCompleteMapDep](
+            default_inst[_module_types.cCompleteMapDep]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="CompleteMapDep",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    return spec
+cdef __StructSpec get_reflection__IncompleteList():
+    cdef _module_types.IncompleteList defaults = _module_types.IncompleteList._fbthrift_create(
+        constant_shared_ptr[_module_types.cIncompleteList](
+            default_inst[_module_types.cIncompleteList]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="IncompleteList",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=2,
-            name="i32_field",
-            type=int,
-            kind=__NumberType.I32,
-            qualifier=__Qualifier.UNQUALIFIED,
+            id=1,
+            name="field",
+            type=_module_types._std_list__List__IncompleteListDep,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.OPTIONAL,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec
+cdef __StructSpec get_reflection__IncompleteListDep():
+    cdef _module_types.IncompleteListDep defaults = _module_types.IncompleteListDep._fbthrift_create(
+        constant_shared_ptr[_module_types.cIncompleteListDep](
+            default_inst[_module_types.cIncompleteListDep]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="IncompleteListDep",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    return spec
+cdef __StructSpec get_reflection__CompleteList():
+    cdef _module_types.CompleteList defaults = _module_types.CompleteList._fbthrift_create(
+        constant_shared_ptr[_module_types.cCompleteList](
+            default_inst[_module_types.cCompleteList]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="CompleteList",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="field",
+            type=_module_types.folly_small_vector__List__CompleteListDep,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.OPTIONAL,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec
+cdef __StructSpec get_reflection__CompleteListDep():
+    cdef _module_types.CompleteListDep defaults = _module_types.CompleteListDep._fbthrift_create(
+        constant_shared_ptr[_module_types.cCompleteListDep](
+            default_inst[_module_types.cCompleteListDep]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="CompleteListDep",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    return spec
+cdef __StructSpec get_reflection__AdaptedList():
+    cdef _module_types.AdaptedList defaults = _module_types.AdaptedList._fbthrift_create(
+        constant_shared_ptr[_module_types.cAdaptedList](
+            default_inst[_module_types.cAdaptedList]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="AdaptedList",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="field",
+            type=_module_types.List__AdaptedListDep,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.OPTIONAL,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec
+cdef __StructSpec get_reflection__DependentAdaptedList():
+    cdef _module_types.DependentAdaptedList defaults = _module_types.DependentAdaptedList._fbthrift_create(
+        constant_shared_ptr[_module_types.cDependentAdaptedList](
+            default_inst[_module_types.cDependentAdaptedList]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="DependentAdaptedList",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="field",
+            type=_module_types.List__DependentAdaptedListDep,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.OPTIONAL,
             default=None,
             annotations={
             },
@@ -1237,18 +1248,44 @@ cdef __ListSpec get_reflection__List__std_unordered_map__Map__i32_string():
         kind=__NumberType.NOT_A_NUMBER,
     )
 
-cdef __ListSpec get_reflection__List__binary():
+cdef __MapSpec get_reflection__Map__i32_IncompleteMapDep():
+    return __MapSpec._fbthrift_create(
+        key=int,
+        key_kind=__NumberType.I32,
+        value=_module_types.IncompleteMapDep,
+        value_kind=__NumberType.NOT_A_NUMBER,
+    )
+
+cdef __MapSpec get_reflection__std_unordered_map__Map__i32_CompleteMapDep():
+    return __MapSpec._fbthrift_create(
+        key=int,
+        key_kind=__NumberType.I32,
+        value=_module_types.CompleteMapDep,
+        value_kind=__NumberType.NOT_A_NUMBER,
+    )
+
+cdef __ListSpec get_reflection___std_list__List__IncompleteListDep():
     return __ListSpec._fbthrift_create(
-        value=bytes,
+        value=_module_types.IncompleteListDep,
         kind=__NumberType.NOT_A_NUMBER,
     )
 
-cdef __MapSpec get_reflection__Map__MyEnumA_string():
-    return __MapSpec._fbthrift_create(
-        key=_module_types.MyEnumA,
-        key_kind=__NumberType.NOT_A_NUMBER,
-        value=str,
-        value_kind=__NumberType.NOT_A_NUMBER,
+cdef __ListSpec get_reflection__folly_small_vector__List__CompleteListDep():
+    return __ListSpec._fbthrift_create(
+        value=_module_types.CompleteListDep,
+        kind=__NumberType.NOT_A_NUMBER,
+    )
+
+cdef __ListSpec get_reflection__List__AdaptedListDep():
+    return __ListSpec._fbthrift_create(
+        value=_module_types.AdaptedListDep,
+        kind=__NumberType.NOT_A_NUMBER,
+    )
+
+cdef __ListSpec get_reflection__List__DependentAdaptedListDep():
+    return __ListSpec._fbthrift_create(
+        value=_module_types.DependentAdaptedListDep,
+        kind=__NumberType.NOT_A_NUMBER,
     )
 
 cdef __SetSpec get_reflection__Set__i32():

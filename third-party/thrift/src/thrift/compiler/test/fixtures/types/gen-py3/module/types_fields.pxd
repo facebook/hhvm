@@ -269,44 +269,110 @@ cdef class __ForwardUsageByRef_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_0(self, _fbthrift_value) except *
 
 
-ctypedef void (*__NoexceptMoveEmpty_FieldsSetterFunc)(__NoexceptMoveEmpty_FieldsSetter, object) except *
+ctypedef void (*__IncompleteMap_FieldsSetterFunc)(__IncompleteMap_FieldsSetter, object) except *
 
-cdef class __NoexceptMoveEmpty_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cNoexceptMoveEmpty* _struct_cpp_obj
-    cdef cumap[__cstring_view, __NoexceptMoveEmpty_FieldsSetterFunc] _setters
-
-    @staticmethod
-    cdef __NoexceptMoveEmpty_FieldsSetter _fbthrift_create(_module_types.cNoexceptMoveEmpty* struct_cpp_obj)
-
-
-ctypedef void (*__NoexceptMoveSimpleStruct_FieldsSetterFunc)(__NoexceptMoveSimpleStruct_FieldsSetter, object) except *
-
-cdef class __NoexceptMoveSimpleStruct_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cNoexceptMoveSimpleStruct* _struct_cpp_obj
-    cdef cumap[__cstring_view, __NoexceptMoveSimpleStruct_FieldsSetterFunc] _setters
+cdef class __IncompleteMap_FieldsSetter(__StructFieldsSetter):
+    cdef _module_types.cIncompleteMap* _struct_cpp_obj
+    cdef cumap[__cstring_view, __IncompleteMap_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __NoexceptMoveSimpleStruct_FieldsSetter _fbthrift_create(_module_types.cNoexceptMoveSimpleStruct* struct_cpp_obj)
+    cdef __IncompleteMap_FieldsSetter _fbthrift_create(_module_types.cIncompleteMap* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 
 
-ctypedef void (*__NoexceptMoveComplexStruct_FieldsSetterFunc)(__NoexceptMoveComplexStruct_FieldsSetter, object) except *
+ctypedef void (*__IncompleteMapDep_FieldsSetterFunc)(__IncompleteMapDep_FieldsSetter, object) except *
 
-cdef class __NoexceptMoveComplexStruct_FieldsSetter(__StructFieldsSetter):
-    cdef _module_types.cNoexceptMoveComplexStruct* _struct_cpp_obj
-    cdef cumap[__cstring_view, __NoexceptMoveComplexStruct_FieldsSetterFunc] _setters
+cdef class __IncompleteMapDep_FieldsSetter(__StructFieldsSetter):
+    cdef _module_types.cIncompleteMapDep* _struct_cpp_obj
+    cdef cumap[__cstring_view, __IncompleteMapDep_FieldsSetterFunc] _setters
 
     @staticmethod
-    cdef __NoexceptMoveComplexStruct_FieldsSetter _fbthrift_create(_module_types.cNoexceptMoveComplexStruct* struct_cpp_obj)
+    cdef __IncompleteMapDep_FieldsSetter _fbthrift_create(_module_types.cIncompleteMapDep* struct_cpp_obj)
+
+
+ctypedef void (*__CompleteMap_FieldsSetterFunc)(__CompleteMap_FieldsSetter, object) except *
+
+cdef class __CompleteMap_FieldsSetter(__StructFieldsSetter):
+    cdef _module_types.cCompleteMap* _struct_cpp_obj
+    cdef cumap[__cstring_view, __CompleteMap_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __CompleteMap_FieldsSetter _fbthrift_create(_module_types.cCompleteMap* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
-    cdef void _set_field_1(self, _fbthrift_value) except *
-    cdef void _set_field_2(self, _fbthrift_value) except *
-    cdef void _set_field_3(self, _fbthrift_value) except *
-    cdef void _set_field_4(self, _fbthrift_value) except *
-    cdef void _set_field_5(self, _fbthrift_value) except *
-    cdef void _set_field_6(self, _fbthrift_value) except *
-    cdef void _set_field_7(self, _fbthrift_value) except *
-    cdef void _set_field_8(self, _fbthrift_value) except *
+
+
+ctypedef void (*__CompleteMapDep_FieldsSetterFunc)(__CompleteMapDep_FieldsSetter, object) except *
+
+cdef class __CompleteMapDep_FieldsSetter(__StructFieldsSetter):
+    cdef _module_types.cCompleteMapDep* _struct_cpp_obj
+    cdef cumap[__cstring_view, __CompleteMapDep_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __CompleteMapDep_FieldsSetter _fbthrift_create(_module_types.cCompleteMapDep* struct_cpp_obj)
+
+
+ctypedef void (*__IncompleteList_FieldsSetterFunc)(__IncompleteList_FieldsSetter, object) except *
+
+cdef class __IncompleteList_FieldsSetter(__StructFieldsSetter):
+    cdef _module_types.cIncompleteList* _struct_cpp_obj
+    cdef cumap[__cstring_view, __IncompleteList_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __IncompleteList_FieldsSetter _fbthrift_create(_module_types.cIncompleteList* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+
+
+ctypedef void (*__IncompleteListDep_FieldsSetterFunc)(__IncompleteListDep_FieldsSetter, object) except *
+
+cdef class __IncompleteListDep_FieldsSetter(__StructFieldsSetter):
+    cdef _module_types.cIncompleteListDep* _struct_cpp_obj
+    cdef cumap[__cstring_view, __IncompleteListDep_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __IncompleteListDep_FieldsSetter _fbthrift_create(_module_types.cIncompleteListDep* struct_cpp_obj)
+
+
+ctypedef void (*__CompleteList_FieldsSetterFunc)(__CompleteList_FieldsSetter, object) except *
+
+cdef class __CompleteList_FieldsSetter(__StructFieldsSetter):
+    cdef _module_types.cCompleteList* _struct_cpp_obj
+    cdef cumap[__cstring_view, __CompleteList_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __CompleteList_FieldsSetter _fbthrift_create(_module_types.cCompleteList* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+
+
+ctypedef void (*__CompleteListDep_FieldsSetterFunc)(__CompleteListDep_FieldsSetter, object) except *
+
+cdef class __CompleteListDep_FieldsSetter(__StructFieldsSetter):
+    cdef _module_types.cCompleteListDep* _struct_cpp_obj
+    cdef cumap[__cstring_view, __CompleteListDep_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __CompleteListDep_FieldsSetter _fbthrift_create(_module_types.cCompleteListDep* struct_cpp_obj)
+
+
+ctypedef void (*__AdaptedList_FieldsSetterFunc)(__AdaptedList_FieldsSetter, object) except *
+
+cdef class __AdaptedList_FieldsSetter(__StructFieldsSetter):
+    cdef _module_types.cAdaptedList* _struct_cpp_obj
+    cdef cumap[__cstring_view, __AdaptedList_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __AdaptedList_FieldsSetter _fbthrift_create(_module_types.cAdaptedList* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+
+
+ctypedef void (*__DependentAdaptedList_FieldsSetterFunc)(__DependentAdaptedList_FieldsSetter, object) except *
+
+cdef class __DependentAdaptedList_FieldsSetter(__StructFieldsSetter):
+    cdef _module_types.cDependentAdaptedList* _struct_cpp_obj
+    cdef cumap[__cstring_view, __DependentAdaptedList_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __DependentAdaptedList_FieldsSetter _fbthrift_create(_module_types.cDependentAdaptedList* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
 
 
 ctypedef void (*__AllocatorAware_FieldsSetterFunc)(__AllocatorAware_FieldsSetter, object) except *

@@ -198,56 +198,6 @@ class MyForwardRefEnum_enum_traits {
   }
 };
 
-class MyEnumA_enum_traits {
- public:
-  using type = ::apache::thrift::fixtures::types::MyEnumA;
-
- private:
-  struct __fbthrift_value_fieldA {
-    using name = __fbthrift_strings_module::__fbthrift_hash_a003c1938a10c7729197e235918bdad7bc795ec24b19f24c66e4f24374526ad8;
-    using value = std::integral_constant<type, type::fieldA>;
-    using annotations = __fbthrift_refl_impl::no_annotations;
-  };
-
-  struct __fbthrift_value_fieldB {
-    using name = __fbthrift_strings_module::__fbthrift_hash_c7e10d053d5c1a0a0743c1dfc0a38c439cd181cc30829f18cc684e286d0baf27;
-    using value = std::integral_constant<type, type::fieldB>;
-    using annotations = __fbthrift_refl_impl::no_annotations;
-  };
-
-  struct __fbthrift_value_fieldC {
-    using name = __fbthrift_strings_module::__fbthrift_hash_7a60aa9f6a5416b61206a441ce84695a835326c0edc0c9b86b92b618f29eb9ed;
-    using value = std::integral_constant<type, type::fieldC>;
-    using annotations = __fbthrift_refl_impl::no_annotations;
-  };
-
-  struct __fbthrift_member {
-    using fieldA = __fbthrift_value_fieldA;
-    using fieldB = __fbthrift_value_fieldB;
-    using fieldC = __fbthrift_value_fieldC;
-  };
-
- public:
-  using name = __fbthrift_strings_module::MyEnumA;
-  using member = __fbthrift_member;
-  using fields = ::fatal::list<
-      member::fieldA,
-      member::fieldB,
-      member::fieldC
-  >;
-
-  using annotations = __fbthrift_refl_impl::no_annotations;
-
-  static char const *to_string(type e, char const *fallback) {
-    switch (e) {
-      case type::fieldA: return "fieldA";
-      case type::fieldB: return "fieldB";
-      case type::fieldC: return "fieldC";
-      default: return fallback;
-    }
-  }
-};
-
 } // __fbthrift_refl
 
 FATAL_REGISTER_ENUM_TRAITS(
@@ -272,14 +222,6 @@ FATAL_REGISTER_ENUM_TRAITS(
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_refl::MyForwardRefEnum_enum_traits::annotations>,
       static_cast<::apache::thrift::legacy_type_id_t>(11057525912578401640ull)
-  >
-);
-FATAL_REGISTER_ENUM_TRAITS(
-  __fbthrift_refl::MyEnumA_enum_traits,
-  ::apache::thrift::detail::type_common_metadata_impl<
-      module_tags::module,
-      ::apache::thrift::reflected_annotations<__fbthrift_refl::MyEnumA_enum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(12764631319602759848ull)
   >
 );
 }}}} // apache::thrift::fixtures::types

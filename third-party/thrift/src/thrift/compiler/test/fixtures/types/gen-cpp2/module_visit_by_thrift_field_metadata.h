@@ -296,69 +296,149 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::ForwardUsageByRef> {
 };
 
 template <>
-struct VisitByFieldId<::apache::thrift::fixtures::types::NoexceptMoveEmpty> {
+struct VisitByFieldId<::apache::thrift::fixtures::types::IncompleteMap> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
     switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::NoexceptMoveEmpty");
+      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::IncompleteMap");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::apache::thrift::fixtures::types::NoexceptMoveSimpleStruct> {
+struct VisitByFieldId<::apache::thrift::fixtures::types::IncompleteMapDep> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
     switch (fieldId) {
-    case 1:
-      return f(0, static_cast<T&&>(t).boolField_ref());
     default:
-      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::NoexceptMoveSimpleStruct");
+      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::IncompleteMapDep");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::apache::thrift::fixtures::types::NoexceptMoveComplexStruct> {
+struct VisitByFieldId<::apache::thrift::fixtures::types::CompleteMap> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
     switch (fieldId) {
     case 1:
-      return f(0, static_cast<T&&>(t).MyBoolField_ref());
-    case 2:
-      return f(1, static_cast<T&&>(t).MyIntField_ref());
-    case 3:
-      return f(2, static_cast<T&&>(t).MyStringField_ref());
-    case 4:
-      return f(3, static_cast<T&&>(t).MyStringField2_ref());
-    case 5:
-      return f(4, static_cast<T&&>(t).MyBinaryField_ref());
-    case 6:
-      return f(5, static_cast<T&&>(t).MyBinaryField2_ref());
-    case 7:
-      return f(6, static_cast<T&&>(t).MyBinaryField3_ref());
-    case 8:
-      return f(7, static_cast<T&&>(t).MyBinaryListField4_ref());
-    case 9:
-      return f(8, static_cast<T&&>(t).MyMapEnumAndInt_ref());
+      return f(0, static_cast<T&&>(t).field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::NoexceptMoveComplexStruct");
+      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::CompleteMap");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::apache::thrift::fixtures::types::NoExceptMoveUnion> {
+struct VisitByFieldId<::apache::thrift::fixtures::types::CompleteMapDep> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    default:
+      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::CompleteMapDep");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::apache::thrift::fixtures::types::IncompleteList> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
     switch (fieldId) {
     case 1:
-      return f(0, static_cast<T&&>(t).string_field_ref());
-    case 2:
-      return f(1, static_cast<T&&>(t).i32_field_ref());
+      return f(0, static_cast<T&&>(t).field_ref());
     default:
-      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::NoExceptMoveUnion");
+      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::IncompleteList");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::apache::thrift::fixtures::types::IncompleteListDep> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    default:
+      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::IncompleteListDep");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::apache::thrift::fixtures::types::CompleteList> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).field_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::CompleteList");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::apache::thrift::fixtures::types::CompleteListDep> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    default:
+      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::CompleteListDep");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::apache::thrift::fixtures::types::AdaptedList> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).field_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::AdaptedList");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::apache::thrift::fixtures::types::detail::AdaptedListDep> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).field_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::detail::AdaptedListDep");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::apache::thrift::fixtures::types::DependentAdaptedList> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).field_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::DependentAdaptedList");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).field_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::detail::DependentAdaptedListDep");
     }
   }
 };

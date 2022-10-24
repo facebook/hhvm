@@ -739,152 +739,221 @@ cdef class __ForwardUsageByRef_FieldsSetter(__StructFieldsSetter):
 
 
 @__cython.auto_pickle(False)
-cdef class __NoexceptMoveEmpty_FieldsSetter(__StructFieldsSetter):
+cdef class __IncompleteMap_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __NoexceptMoveEmpty_FieldsSetter _fbthrift_create(_module_types.cNoexceptMoveEmpty* struct_cpp_obj):
-        cdef __NoexceptMoveEmpty_FieldsSetter __fbthrift_inst = __NoexceptMoveEmpty_FieldsSetter.__new__(__NoexceptMoveEmpty_FieldsSetter)
+    cdef __IncompleteMap_FieldsSetter _fbthrift_create(_module_types.cIncompleteMap* struct_cpp_obj):
+        cdef __IncompleteMap_FieldsSetter __fbthrift_inst = __IncompleteMap_FieldsSetter.__new__(__IncompleteMap_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        __fbthrift_inst._setters[__cstring_view(<const char*>"field")] = __IncompleteMap_FieldsSetter._set_field_0
+        return __fbthrift_inst
+
+    cdef void set_field(__IncompleteMap_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __IncompleteMap_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+    cdef void _set_field_0(self, _fbthrift_value) except *:
+        # for field field
+        if _fbthrift_value is None:
+            __reset_field[_module_types.cIncompleteMap](deref(self._struct_cpp_obj), 0)
+            return
+        deref(self._struct_cpp_obj).field_ref().assign(deref(_module_types.Map__i32_IncompleteMapDep(_fbthrift_value)._cpp_obj))
+
+
+@__cython.auto_pickle(False)
+cdef class __IncompleteMapDep_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __IncompleteMapDep_FieldsSetter _fbthrift_create(_module_types.cIncompleteMapDep* struct_cpp_obj):
+        cdef __IncompleteMapDep_FieldsSetter __fbthrift_inst = __IncompleteMapDep_FieldsSetter.__new__(__IncompleteMapDep_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
         return __fbthrift_inst
 
-    cdef void set_field(__NoexceptMoveEmpty_FieldsSetter self, const char* name, object value) except *:
+    cdef void set_field(__IncompleteMapDep_FieldsSetter self, const char* name, object value) except *:
         cdef __cstring_view cname = __cstring_view(name)
-        cdef cumap[__cstring_view, __NoexceptMoveEmpty_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        cdef cumap[__cstring_view, __IncompleteMapDep_FieldsSetterFunc].iterator found = self._setters.find(cname)
         if found == self._setters.end():
             raise TypeError(f"invalid field name {name.decode('utf-8')}")
         deref(found).second(self, value)
 
 
 @__cython.auto_pickle(False)
-cdef class __NoexceptMoveSimpleStruct_FieldsSetter(__StructFieldsSetter):
+cdef class __CompleteMap_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __NoexceptMoveSimpleStruct_FieldsSetter _fbthrift_create(_module_types.cNoexceptMoveSimpleStruct* struct_cpp_obj):
-        cdef __NoexceptMoveSimpleStruct_FieldsSetter __fbthrift_inst = __NoexceptMoveSimpleStruct_FieldsSetter.__new__(__NoexceptMoveSimpleStruct_FieldsSetter)
+    cdef __CompleteMap_FieldsSetter _fbthrift_create(_module_types.cCompleteMap* struct_cpp_obj):
+        cdef __CompleteMap_FieldsSetter __fbthrift_inst = __CompleteMap_FieldsSetter.__new__(__CompleteMap_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
-        __fbthrift_inst._setters[__cstring_view(<const char*>"boolField")] = __NoexceptMoveSimpleStruct_FieldsSetter._set_field_0
+        __fbthrift_inst._setters[__cstring_view(<const char*>"field")] = __CompleteMap_FieldsSetter._set_field_0
         return __fbthrift_inst
 
-    cdef void set_field(__NoexceptMoveSimpleStruct_FieldsSetter self, const char* name, object value) except *:
+    cdef void set_field(__CompleteMap_FieldsSetter self, const char* name, object value) except *:
         cdef __cstring_view cname = __cstring_view(name)
-        cdef cumap[__cstring_view, __NoexceptMoveSimpleStruct_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        cdef cumap[__cstring_view, __CompleteMap_FieldsSetterFunc].iterator found = self._setters.find(cname)
         if found == self._setters.end():
             raise TypeError(f"invalid field name {name.decode('utf-8')}")
         deref(found).second(self, value)
 
     cdef void _set_field_0(self, _fbthrift_value) except *:
-        # for field boolField
+        # for field field
         if _fbthrift_value is None:
-            __reset_field[_module_types.cNoexceptMoveSimpleStruct](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_types.cCompleteMap](deref(self._struct_cpp_obj), 0)
             return
-        if not isinstance(_fbthrift_value, int):
-            raise TypeError(f'boolField is not a { int !r}.')
-        _fbthrift_value = <cint64_t> _fbthrift_value
-        deref(self._struct_cpp_obj).boolField_ref().assign(_fbthrift_value)
+        deref(self._struct_cpp_obj).field_ref().assign(deref(_module_types.std_unordered_map__Map__i32_CompleteMapDep(_fbthrift_value)._cpp_obj))
 
 
 @__cython.auto_pickle(False)
-cdef class __NoexceptMoveComplexStruct_FieldsSetter(__StructFieldsSetter):
+cdef class __CompleteMapDep_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
-    cdef __NoexceptMoveComplexStruct_FieldsSetter _fbthrift_create(_module_types.cNoexceptMoveComplexStruct* struct_cpp_obj):
-        cdef __NoexceptMoveComplexStruct_FieldsSetter __fbthrift_inst = __NoexceptMoveComplexStruct_FieldsSetter.__new__(__NoexceptMoveComplexStruct_FieldsSetter)
+    cdef __CompleteMapDep_FieldsSetter _fbthrift_create(_module_types.cCompleteMapDep* struct_cpp_obj):
+        cdef __CompleteMapDep_FieldsSetter __fbthrift_inst = __CompleteMapDep_FieldsSetter.__new__(__CompleteMapDep_FieldsSetter)
         __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
-        __fbthrift_inst._setters[__cstring_view(<const char*>"MyBoolField")] = __NoexceptMoveComplexStruct_FieldsSetter._set_field_0
-        __fbthrift_inst._setters[__cstring_view(<const char*>"MyIntField")] = __NoexceptMoveComplexStruct_FieldsSetter._set_field_1
-        __fbthrift_inst._setters[__cstring_view(<const char*>"MyStringField")] = __NoexceptMoveComplexStruct_FieldsSetter._set_field_2
-        __fbthrift_inst._setters[__cstring_view(<const char*>"MyStringField2")] = __NoexceptMoveComplexStruct_FieldsSetter._set_field_3
-        __fbthrift_inst._setters[__cstring_view(<const char*>"MyBinaryField")] = __NoexceptMoveComplexStruct_FieldsSetter._set_field_4
-        __fbthrift_inst._setters[__cstring_view(<const char*>"MyBinaryField2")] = __NoexceptMoveComplexStruct_FieldsSetter._set_field_5
-        __fbthrift_inst._setters[__cstring_view(<const char*>"MyBinaryField3")] = __NoexceptMoveComplexStruct_FieldsSetter._set_field_6
-        __fbthrift_inst._setters[__cstring_view(<const char*>"MyBinaryListField4")] = __NoexceptMoveComplexStruct_FieldsSetter._set_field_7
-        __fbthrift_inst._setters[__cstring_view(<const char*>"MyMapEnumAndInt")] = __NoexceptMoveComplexStruct_FieldsSetter._set_field_8
         return __fbthrift_inst
 
-    cdef void set_field(__NoexceptMoveComplexStruct_FieldsSetter self, const char* name, object value) except *:
+    cdef void set_field(__CompleteMapDep_FieldsSetter self, const char* name, object value) except *:
         cdef __cstring_view cname = __cstring_view(name)
-        cdef cumap[__cstring_view, __NoexceptMoveComplexStruct_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        cdef cumap[__cstring_view, __CompleteMapDep_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+
+@__cython.auto_pickle(False)
+cdef class __IncompleteList_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __IncompleteList_FieldsSetter _fbthrift_create(_module_types.cIncompleteList* struct_cpp_obj):
+        cdef __IncompleteList_FieldsSetter __fbthrift_inst = __IncompleteList_FieldsSetter.__new__(__IncompleteList_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        __fbthrift_inst._setters[__cstring_view(<const char*>"field")] = __IncompleteList_FieldsSetter._set_field_0
+        return __fbthrift_inst
+
+    cdef void set_field(__IncompleteList_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __IncompleteList_FieldsSetterFunc].iterator found = self._setters.find(cname)
         if found == self._setters.end():
             raise TypeError(f"invalid field name {name.decode('utf-8')}")
         deref(found).second(self, value)
 
     cdef void _set_field_0(self, _fbthrift_value) except *:
-        # for field MyBoolField
+        # for field field
         if _fbthrift_value is None:
-            __reset_field[_module_types.cNoexceptMoveComplexStruct](deref(self._struct_cpp_obj), 0)
+            __reset_field[_module_types.cIncompleteList](deref(self._struct_cpp_obj), 0)
             return
-        if not isinstance(_fbthrift_value, bool):
-            raise TypeError(f'MyBoolField is not a { bool !r}.')
-        deref(self._struct_cpp_obj).MyBoolField_ref().assign(_fbthrift_value)
+        deref(self._struct_cpp_obj).field_ref().assign(deref(_module_types._std_list__List__IncompleteListDep(_fbthrift_value)._cpp_obj))
 
-    cdef void _set_field_1(self, _fbthrift_value) except *:
-        # for field MyIntField
-        if _fbthrift_value is None:
-            __reset_field[_module_types.cNoexceptMoveComplexStruct](deref(self._struct_cpp_obj), 1)
-            return
-        if not isinstance(_fbthrift_value, int):
-            raise TypeError(f'MyIntField is not a { int !r}.')
-        _fbthrift_value = <cint64_t> _fbthrift_value
-        deref(self._struct_cpp_obj).MyIntField_ref().assign(_fbthrift_value)
 
-    cdef void _set_field_2(self, _fbthrift_value) except *:
-        # for field MyStringField
-        if _fbthrift_value is None:
-            __reset_field[_module_types.cNoexceptMoveComplexStruct](deref(self._struct_cpp_obj), 2)
-            return
-        if not isinstance(_fbthrift_value, str):
-            raise TypeError(f'MyStringField is not a { str !r}.')
-        deref(self._struct_cpp_obj).MyStringField_ref().assign(cmove(bytes_to_string(_fbthrift_value.encode('utf-8'))))
+@__cython.auto_pickle(False)
+cdef class __IncompleteListDep_FieldsSetter(__StructFieldsSetter):
 
-    cdef void _set_field_3(self, _fbthrift_value) except *:
-        # for field MyStringField2
-        if _fbthrift_value is None:
-            __reset_field[_module_types.cNoexceptMoveComplexStruct](deref(self._struct_cpp_obj), 3)
-            return
-        if not isinstance(_fbthrift_value, str):
-            raise TypeError(f'MyStringField2 is not a { str !r}.')
-        deref(self._struct_cpp_obj).MyStringField2_ref().assign(cmove(bytes_to_string(_fbthrift_value.encode('utf-8'))))
+    @staticmethod
+    cdef __IncompleteListDep_FieldsSetter _fbthrift_create(_module_types.cIncompleteListDep* struct_cpp_obj):
+        cdef __IncompleteListDep_FieldsSetter __fbthrift_inst = __IncompleteListDep_FieldsSetter.__new__(__IncompleteListDep_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        return __fbthrift_inst
 
-    cdef void _set_field_4(self, _fbthrift_value) except *:
-        # for field MyBinaryField
-        if _fbthrift_value is None:
-            __reset_field[_module_types.cNoexceptMoveComplexStruct](deref(self._struct_cpp_obj), 4)
-            return
-        if not isinstance(_fbthrift_value, bytes):
-            raise TypeError(f'MyBinaryField is not a { bytes !r}.')
-        deref(self._struct_cpp_obj).MyBinaryField_ref().assign(cmove(bytes_to_string(_fbthrift_value)))
+    cdef void set_field(__IncompleteListDep_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __IncompleteListDep_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
 
-    cdef void _set_field_5(self, _fbthrift_value) except *:
-        # for field MyBinaryField2
-        if _fbthrift_value is None:
-            __reset_field[_module_types.cNoexceptMoveComplexStruct](deref(self._struct_cpp_obj), 5)
-            return
-        if not isinstance(_fbthrift_value, bytes):
-            raise TypeError(f'MyBinaryField2 is not a { bytes !r}.')
-        deref(self._struct_cpp_obj).MyBinaryField2_ref().assign(cmove(bytes_to_string(_fbthrift_value)))
 
-    cdef void _set_field_6(self, _fbthrift_value) except *:
-        # for field MyBinaryField3
-        if _fbthrift_value is None:
-            __reset_field[_module_types.cNoexceptMoveComplexStruct](deref(self._struct_cpp_obj), 6)
-            return
-        if not isinstance(_fbthrift_value, bytes):
-            raise TypeError(f'MyBinaryField3 is not a { bytes !r}.')
-        deref(self._struct_cpp_obj).MyBinaryField3_ref().assign(cmove(bytes_to_string(_fbthrift_value)))
+@__cython.auto_pickle(False)
+cdef class __CompleteList_FieldsSetter(__StructFieldsSetter):
 
-    cdef void _set_field_7(self, _fbthrift_value) except *:
-        # for field MyBinaryListField4
-        if _fbthrift_value is None:
-            __reset_field[_module_types.cNoexceptMoveComplexStruct](deref(self._struct_cpp_obj), 7)
-            return
-        deref(self._struct_cpp_obj).MyBinaryListField4_ref().assign(deref(_module_types.List__binary(_fbthrift_value)._cpp_obj))
+    @staticmethod
+    cdef __CompleteList_FieldsSetter _fbthrift_create(_module_types.cCompleteList* struct_cpp_obj):
+        cdef __CompleteList_FieldsSetter __fbthrift_inst = __CompleteList_FieldsSetter.__new__(__CompleteList_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        __fbthrift_inst._setters[__cstring_view(<const char*>"field")] = __CompleteList_FieldsSetter._set_field_0
+        return __fbthrift_inst
 
-    cdef void _set_field_8(self, _fbthrift_value) except *:
-        # for field MyMapEnumAndInt
+    cdef void set_field(__CompleteList_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __CompleteList_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+    cdef void _set_field_0(self, _fbthrift_value) except *:
+        # for field field
         if _fbthrift_value is None:
-            __reset_field[_module_types.cNoexceptMoveComplexStruct](deref(self._struct_cpp_obj), 8)
+            __reset_field[_module_types.cCompleteList](deref(self._struct_cpp_obj), 0)
             return
-        deref(self._struct_cpp_obj).MyMapEnumAndInt_ref().assign(deref(_module_types.Map__MyEnumA_string(_fbthrift_value)._cpp_obj))
+        deref(self._struct_cpp_obj).field_ref().assign(deref(_module_types.folly_small_vector__List__CompleteListDep(_fbthrift_value)._cpp_obj))
+
+
+@__cython.auto_pickle(False)
+cdef class __CompleteListDep_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __CompleteListDep_FieldsSetter _fbthrift_create(_module_types.cCompleteListDep* struct_cpp_obj):
+        cdef __CompleteListDep_FieldsSetter __fbthrift_inst = __CompleteListDep_FieldsSetter.__new__(__CompleteListDep_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        return __fbthrift_inst
+
+    cdef void set_field(__CompleteListDep_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __CompleteListDep_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+
+@__cython.auto_pickle(False)
+cdef class __AdaptedList_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __AdaptedList_FieldsSetter _fbthrift_create(_module_types.cAdaptedList* struct_cpp_obj):
+        cdef __AdaptedList_FieldsSetter __fbthrift_inst = __AdaptedList_FieldsSetter.__new__(__AdaptedList_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        __fbthrift_inst._setters[__cstring_view(<const char*>"field")] = __AdaptedList_FieldsSetter._set_field_0
+        return __fbthrift_inst
+
+    cdef void set_field(__AdaptedList_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __AdaptedList_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+    cdef void _set_field_0(self, _fbthrift_value) except *:
+        # for field field
+        if _fbthrift_value is None:
+            __reset_field[_module_types.cAdaptedList](deref(self._struct_cpp_obj), 0)
+            return
+        deref(self._struct_cpp_obj).field_ref().assign(deref(_module_types.List__AdaptedListDep(_fbthrift_value)._cpp_obj))
+
+
+@__cython.auto_pickle(False)
+cdef class __DependentAdaptedList_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __DependentAdaptedList_FieldsSetter _fbthrift_create(_module_types.cDependentAdaptedList* struct_cpp_obj):
+        cdef __DependentAdaptedList_FieldsSetter __fbthrift_inst = __DependentAdaptedList_FieldsSetter.__new__(__DependentAdaptedList_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        __fbthrift_inst._setters[__cstring_view(<const char*>"field")] = __DependentAdaptedList_FieldsSetter._set_field_0
+        return __fbthrift_inst
+
+    cdef void set_field(__DependentAdaptedList_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __DependentAdaptedList_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+    cdef void _set_field_0(self, _fbthrift_value) except *:
+        # for field field
+        if _fbthrift_value is None:
+            __reset_field[_module_types.cDependentAdaptedList](deref(self._struct_cpp_obj), 0)
+            return
+        deref(self._struct_cpp_obj).field_ref().assign(deref(_module_types.List__DependentAdaptedListDep(_fbthrift_value)._cpp_obj))
 
 
 @__cython.auto_pickle(False)

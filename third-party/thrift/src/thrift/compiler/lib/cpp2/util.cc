@@ -83,11 +83,27 @@ bool container_supports_incomplete_params(const t_type& type) {
     return true;
   }
 
-  static const std::unordered_set<std::string> template_exceptions = {
-      "folly::F14NodeMap",
-      "folly::F14VectorMap",
-      "folly::small_vector_map",
-      "folly::sorted_vector_map"};
+  static const std::unordered_set<std::string> template_exceptions = [] {
+    std::unordered_set<std::string> types;
+    for (auto& type : {
+             "folly::F14NodeMap",
+             "folly::F14VectorMap",
+             "folly::small_vector_map",
+             "folly::sorted_vector_map",
+
+             "folly::F14NodeSet",
+             "folly::F14VectorSet",
+             "folly::small_vector_set",
+             "folly::sorted_vector_set",
+
+             "std::forward_list",
+             "std::list",
+         }) {
+      types.insert(type);
+      types.insert(fmt::format("::{}", type));
+    }
+    return types;
+  }();
   auto cpp_template = t_typedef::get_first_annotation_or_null(
       &type,
       {
@@ -141,6 +157,18 @@ gen_struct_dependency_graph(
           if (!cpp2::container_supports_incomplete_params(*map)) {
             add_dependency(map->get_key_type());
             add_dependency(map->get_val_type());
+          }
+        } else if (auto set = dynamic_cast<t_set const*>(t)) {
+          // We don't add non-custom type `std::set` to dependency graph since
+          // all known implementations support incomplete types (though as UB).
+          if (!cpp2::container_supports_incomplete_params(*set)) {
+            add_dependency(set->get_elem_type());
+          }
+        } else if (auto list = dynamic_cast<t_list const*>(t)) {
+          // We don't add non-custom type `std::vector` to dependency graph
+          // since it supports incomplete types (as of C++17).
+          if (!cpp2::container_supports_incomplete_params(*list)) {
+            add_dependency(list->get_elem_type());
           }
         } else {
           add_dependency(t);
@@ -235,6 +263,28 @@ gen_adapter_dependency_graph(
         const auto* type = field->get_type();
         if (dynamic_cast<t_typedef const*>(type)) {
           add_dependency(type, false);
+        } else if (auto map = dynamic_cast<t_map const*>(type)) {
+          // Container depends on typedefs even if it supports incomplete types
+          if (auto* key_type =
+                  dynamic_cast<t_typedef const*>(map->get_key_type())) {
+            add_dependency(key_type, false);
+          }
+          if (auto* val_type =
+                  dynamic_cast<t_typedef const*>(map->get_val_type())) {
+            add_dependency(val_type, false);
+          }
+        } else if (auto set = dynamic_cast<t_set const*>(type)) {
+          // Container depends on typedefs even if it supports incomplete types
+          if (auto* elem_type =
+                  dynamic_cast<t_typedef const*>(set->get_elem_type())) {
+            add_dependency(elem_type, false);
+          }
+        } else if (auto list = dynamic_cast<t_list const*>(type)) {
+          // Container depends on typedefs even if it supports incomplete types
+          if (auto* elem_type =
+                  dynamic_cast<t_typedef const*>(list->get_elem_type())) {
+            add_dependency(elem_type, false);
+          }
         }
         return true;
       });

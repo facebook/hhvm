@@ -50,13 +50,25 @@ cdef __StructSpec get_reflection__ForwardUsageStruct()
 
 cdef __StructSpec get_reflection__ForwardUsageByRef()
 
-cdef __StructSpec get_reflection__NoexceptMoveEmpty()
+cdef __StructSpec get_reflection__IncompleteMap()
 
-cdef __StructSpec get_reflection__NoexceptMoveSimpleStruct()
+cdef __StructSpec get_reflection__IncompleteMapDep()
 
-cdef __StructSpec get_reflection__NoexceptMoveComplexStruct()
+cdef __StructSpec get_reflection__CompleteMap()
 
-cdef __StructSpec get_reflection__NoExceptMoveUnion()
+cdef __StructSpec get_reflection__CompleteMapDep()
+
+cdef __StructSpec get_reflection__IncompleteList()
+
+cdef __StructSpec get_reflection__IncompleteListDep()
+
+cdef __StructSpec get_reflection__CompleteList()
+
+cdef __StructSpec get_reflection__CompleteListDep()
+
+cdef __StructSpec get_reflection__AdaptedList()
+
+cdef __StructSpec get_reflection__DependentAdaptedList()
 
 cdef __StructSpec get_reflection__AllocatorAware()
 
@@ -92,9 +104,17 @@ cdef __MapSpec get_reflection__Map__string_i32()
 
 cdef __ListSpec get_reflection__List__std_unordered_map__Map__i32_string()
 
-cdef __ListSpec get_reflection__List__binary()
+cdef __MapSpec get_reflection__Map__i32_IncompleteMapDep()
 
-cdef __MapSpec get_reflection__Map__MyEnumA_string()
+cdef __MapSpec get_reflection__std_unordered_map__Map__i32_CompleteMapDep()
+
+cdef __ListSpec get_reflection___std_list__List__IncompleteListDep()
+
+cdef __ListSpec get_reflection__folly_small_vector__List__CompleteListDep()
+
+cdef __ListSpec get_reflection__List__AdaptedListDep()
+
+cdef __ListSpec get_reflection__List__DependentAdaptedListDep()
 
 cdef __SetSpec get_reflection__Set__i32()
 

@@ -32,7 +32,7 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'has_bitwise_ops', 'is_unscoped', 'MyForwardRefEnum', 'MyEnumA', 'decorated_struct', 'ContainerStruct', 'CppTypeStruct', 'VirtualStruct', 'MyStructWithForwardRefEnum', 'TrivialNumeric', 'TrivialNestedWithDefault', 'ComplexString', 'ComplexNestedWithDefault', 'MinPadding', 'MinPaddingWithCustomType', 'MyStruct', 'MyDataItem', 'Renaming', 'AnnotatedTypes', 'ForwardUsageRoot', 'ForwardUsageStruct', 'ForwardUsageByRef', 'NoexceptMoveEmpty', 'NoexceptMoveSimpleStruct', 'NoexceptMoveComplexStruct', 'NoExceptMoveUnion', 'AllocatorAware', 'AllocatorAware2', 'TypedefStruct', 'StructWithDoubleUnderscores', 'TBinary', 'IntTypedef', 'UintTypedef']
+__all__ = ['UTF8STRINGS', 'has_bitwise_ops', 'is_unscoped', 'MyForwardRefEnum', 'decorated_struct', 'ContainerStruct', 'CppTypeStruct', 'VirtualStruct', 'MyStructWithForwardRefEnum', 'TrivialNumeric', 'TrivialNestedWithDefault', 'ComplexString', 'ComplexNestedWithDefault', 'MinPadding', 'MinPaddingWithCustomType', 'MyStruct', 'MyDataItem', 'Renaming', 'AnnotatedTypes', 'ForwardUsageRoot', 'ForwardUsageStruct', 'ForwardUsageByRef', 'IncompleteMap', 'IncompleteMapDep', 'CompleteMap', 'CompleteMapDep', 'IncompleteList', 'IncompleteListDep', 'CompleteList', 'CompleteListDep', 'AdaptedList', 'AdaptedListDep', 'DependentAdaptedList', 'DependentAdaptedListDep', 'AllocatorAware', 'AllocatorAware2', 'TypedefStruct', 'StructWithDoubleUnderscores', 'TBinary', 'IntTypedef', 'UintTypedef']
 
 class has_bitwise_ops:
   none = 0
@@ -83,23 +83,6 @@ class MyForwardRefEnum:
   _NAMES_TO_VALUES = {
     "ZERO": 0,
     "NONZERO": 12,
-  }
-
-class MyEnumA:
-  fieldA = 1
-  fieldB = 2
-  fieldC = 4
-
-  _VALUES_TO_NAMES = {
-    1: "fieldA",
-    2: "fieldB",
-    4: "fieldC",
-  }
-
-  _NAMES_TO_VALUES = {
-    "fieldA": 1,
-    "fieldB": 2,
-    "fieldC": 4,
   }
 
 class decorated_struct:
@@ -2301,83 +2284,10 @@ class ForwardUsageByRef:
   def _to_py_deprecated(self):
     return self
 
-class NoexceptMoveEmpty:
-
-  thrift_spec = None
-  thrift_field_annotations = None
-  thrift_struct_annotations = None
-  @staticmethod
-  def isUnion():
-    return False
-
-  def read(self, iprot):
-    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
-      return
-    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
-      return
-    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
-      return
-    oprot.writeStructBegin('NoexceptMoveEmpty')
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def __repr__(self):
-    L = []
-    padding = ' ' * 4
-    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
-
-  def __eq__(self, other):
-    if not isinstance(other, self.__class__):
-      return False
-
-    return self.__dict__ == other.__dict__ 
-
-  def __ne__(self, other):
-    return not (self == other)
-
-  def __dir__(self):
-    return (
-    )
-
-  # Override the __hash__ function for Python3 - t10434117
-  __hash__ = object.__hash__
-
-  def _to_python(self):
-    import importlib
-    import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.NoexceptMoveEmpty, self)
-
-  def _to_py3(self):
-    import importlib
-    import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.NoexceptMoveEmpty, self)
-
-  def _to_py_deprecated(self):
-    return self
-
-class NoexceptMoveSimpleStruct:
+class IncompleteMap:
   """
   Attributes:
-   - boolField
+   - field
   """
 
   thrift_spec = None
@@ -2401,169 +2311,21 @@ class NoexceptMoveSimpleStruct:
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.I64:
-          self.boolField = iprot.readI64()
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
-      return
-    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
-      return
-    oprot.writeStructBegin('NoexceptMoveSimpleStruct')
-    if self.boolField != None:
-      oprot.writeFieldBegin('boolField', TType.I64, 1)
-      oprot.writeI64(self.boolField)
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def __repr__(self):
-    L = []
-    padding = ' ' * 4
-    if self.boolField is not None:
-      value = pprint.pformat(self.boolField, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    boolField=%s' % (value))
-    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
-
-  def __eq__(self, other):
-    if not isinstance(other, self.__class__):
-      return False
-
-    return self.__dict__ == other.__dict__ 
-
-  def __ne__(self, other):
-    return not (self == other)
-
-  def __dir__(self):
-    return (
-      'boolField',
-    )
-
-  # Override the __hash__ function for Python3 - t10434117
-  __hash__ = object.__hash__
-
-  def _to_python(self):
-    import importlib
-    import thrift.python.converter
-    python_types = importlib.import_module("module.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.NoexceptMoveSimpleStruct, self)
-
-  def _to_py3(self):
-    import importlib
-    import thrift.py3.converter
-    py3_types = importlib.import_module("module.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.NoexceptMoveSimpleStruct, self)
-
-  def _to_py_deprecated(self):
-    return self
-
-class NoexceptMoveComplexStruct:
-  """
-  Attributes:
-   - MyBoolField
-   - MyIntField
-   - MyStringField
-   - MyStringField2
-   - MyBinaryField
-   - MyBinaryField2
-   - MyBinaryField3
-   - MyBinaryListField4
-   - MyMapEnumAndInt
-  """
-
-  thrift_spec = None
-  thrift_field_annotations = None
-  thrift_struct_annotations = None
-  __init__ = None
-  @staticmethod
-  def isUnion():
-    return False
-
-  def read(self, iprot):
-    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
-      return
-    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
-        if ftype == TType.BOOL:
-          self.MyBoolField = iprot.readBool()
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.I64:
-          self.MyIntField = iprot.readI64()
-        else:
-          iprot.skip(ftype)
-      elif fid == 3:
-        if ftype == TType.STRING:
-          self.MyStringField = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-        else:
-          iprot.skip(ftype)
-      elif fid == 4:
-        if ftype == TType.STRING:
-          self.MyStringField2 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-        else:
-          iprot.skip(ftype)
-      elif fid == 5:
-        if ftype == TType.STRING:
-          self.MyBinaryField = iprot.readString()
-        else:
-          iprot.skip(ftype)
-      elif fid == 6:
-        if ftype == TType.STRING:
-          self.MyBinaryField2 = iprot.readString()
-        else:
-          iprot.skip(ftype)
-      elif fid == 7:
-        if ftype == TType.STRING:
-          self.MyBinaryField3 = iprot.readString()
-        else:
-          iprot.skip(ftype)
-      elif fid == 8:
-        if ftype == TType.LIST:
-          self.MyBinaryListField4 = []
-          (_etype120, _size117) = iprot.readListBegin()
+        if ftype == TType.MAP:
+          self.field = {}
+          (_ktype118, _vtype119, _size117 ) = iprot.readMapBegin() 
           if _size117 >= 0:
             for _i121 in range(_size117):
-              _elem122 = iprot.readString()
-              self.MyBinaryListField4.append(_elem122)
-          else: 
-            while iprot.peekList():
-              _elem123 = iprot.readString()
-              self.MyBinaryListField4.append(_elem123)
-          iprot.readListEnd()
-        else:
-          iprot.skip(ftype)
-      elif fid == 9:
-        if ftype == TType.MAP:
-          self.MyMapEnumAndInt = {}
-          (_ktype125, _vtype126, _size124 ) = iprot.readMapBegin() 
-          if _size124 >= 0:
-            for _i128 in range(_size124):
-              _key129 = iprot.readI32()
-              _val130 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.MyMapEnumAndInt[_key129] = _val130
+              _key122 = iprot.readI32()
+              _val123 = IncompleteMapDep()
+              _val123.read(iprot)
+              self.field[_key122] = _val123
           else: 
             while iprot.peekMap():
-              _key131 = iprot.readI32()
-              _val132 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.MyMapEnumAndInt[_key131] = _val132
+              _key124 = iprot.readI32()
+              _val125 = IncompleteMapDep()
+              _val125.read(iprot)
+              self.field[_key124] = _val125
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -2579,48 +2341,13 @@ class NoexceptMoveComplexStruct:
     if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
       oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
       return
-    oprot.writeStructBegin('NoexceptMoveComplexStruct')
-    if self.MyBoolField != None:
-      oprot.writeFieldBegin('MyBoolField', TType.BOOL, 1)
-      oprot.writeBool(self.MyBoolField)
-      oprot.writeFieldEnd()
-    if self.MyIntField != None:
-      oprot.writeFieldBegin('MyIntField', TType.I64, 2)
-      oprot.writeI64(self.MyIntField)
-      oprot.writeFieldEnd()
-    if self.MyStringField != None:
-      oprot.writeFieldBegin('MyStringField', TType.STRING, 3)
-      oprot.writeString(self.MyStringField.encode('utf-8')) if UTF8STRINGS and not isinstance(self.MyStringField, bytes) else oprot.writeString(self.MyStringField)
-      oprot.writeFieldEnd()
-    if self.MyStringField2 != None:
-      oprot.writeFieldBegin('MyStringField2', TType.STRING, 4)
-      oprot.writeString(self.MyStringField2.encode('utf-8')) if UTF8STRINGS and not isinstance(self.MyStringField2, bytes) else oprot.writeString(self.MyStringField2)
-      oprot.writeFieldEnd()
-    if self.MyBinaryField != None:
-      oprot.writeFieldBegin('MyBinaryField', TType.STRING, 5)
-      oprot.writeString(self.MyBinaryField)
-      oprot.writeFieldEnd()
-    if self.MyBinaryField2 != None:
-      oprot.writeFieldBegin('MyBinaryField2', TType.STRING, 6)
-      oprot.writeString(self.MyBinaryField2)
-      oprot.writeFieldEnd()
-    if self.MyBinaryField3 != None:
-      oprot.writeFieldBegin('MyBinaryField3', TType.STRING, 7)
-      oprot.writeString(self.MyBinaryField3)
-      oprot.writeFieldEnd()
-    if self.MyBinaryListField4 != None:
-      oprot.writeFieldBegin('MyBinaryListField4', TType.LIST, 8)
-      oprot.writeListBegin(TType.STRING, len(self.MyBinaryListField4))
-      for iter133 in self.MyBinaryListField4:
-        oprot.writeString(iter133)
-      oprot.writeListEnd()
-      oprot.writeFieldEnd()
-    if self.MyMapEnumAndInt != None:
-      oprot.writeFieldBegin('MyMapEnumAndInt', TType.MAP, 9)
-      oprot.writeMapBegin(TType.I32, TType.STRING, len(self.MyMapEnumAndInt))
-      for kiter134,viter135 in self.MyMapEnumAndInt.items():
-        oprot.writeI32(kiter134)
-        oprot.writeString(viter135.encode('utf-8')) if UTF8STRINGS and not isinstance(viter135, bytes) else oprot.writeString(viter135)
+    oprot.writeStructBegin('IncompleteMap')
+    if self.field != None:
+      oprot.writeFieldBegin('field', TType.MAP, 1)
+      oprot.writeMapBegin(TType.I32, TType.STRUCT, len(self.field))
+      for kiter126,viter127 in self.field.items():
+        oprot.writeI32(kiter126)
+        viter127.write(oprot)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -2629,42 +2356,10 @@ class NoexceptMoveComplexStruct:
   def __repr__(self):
     L = []
     padding = ' ' * 4
-    if self.MyBoolField is not None:
-      value = pprint.pformat(self.MyBoolField, indent=0)
+    if self.field is not None:
+      value = pprint.pformat(self.field, indent=0)
       value = padding.join(value.splitlines(True))
-      L.append('    MyBoolField=%s' % (value))
-    if self.MyIntField is not None:
-      value = pprint.pformat(self.MyIntField, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    MyIntField=%s' % (value))
-    if self.MyStringField is not None:
-      value = pprint.pformat(self.MyStringField, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    MyStringField=%s' % (value))
-    if self.MyStringField2 is not None:
-      value = pprint.pformat(self.MyStringField2, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    MyStringField2=%s' % (value))
-    if self.MyBinaryField is not None:
-      value = pprint.pformat(self.MyBinaryField, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    MyBinaryField=%s' % (value))
-    if self.MyBinaryField2 is not None:
-      value = pprint.pformat(self.MyBinaryField2, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    MyBinaryField2=%s' % (value))
-    if self.MyBinaryField3 is not None:
-      value = pprint.pformat(self.MyBinaryField3, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    MyBinaryField3=%s' % (value))
-    if self.MyBinaryListField4 is not None:
-      value = pprint.pformat(self.MyBinaryListField4, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    MyBinaryListField4=%s' % (value))
-    if self.MyMapEnumAndInt is not None:
-      value = pprint.pformat(self.MyMapEnumAndInt, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    MyMapEnumAndInt=%s' % (value))
+      L.append('    field=%s' % (value))
     return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
 
   def __eq__(self, other):
@@ -2678,15 +2373,7 @@ class NoexceptMoveComplexStruct:
 
   def __dir__(self):
     return (
-      'MyBoolField',
-      'MyIntField',
-      'MyStringField',
-      'MyStringField2',
-      'MyBinaryField',
-      'MyBinaryField2',
-      'MyBinaryField3',
-      'MyBinaryListField4',
-      'MyMapEnumAndInt',
+      'field',
     )
 
   # Override the __hash__ function for Python3 - t10434117
@@ -2696,94 +2383,133 @@ class NoexceptMoveComplexStruct:
     import importlib
     import thrift.python.converter
     python_types = importlib.import_module("module.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.NoexceptMoveComplexStruct, self)
+    return thrift.python.converter.to_python_struct(python_types.IncompleteMap, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
     py3_types = importlib.import_module("module.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.NoexceptMoveComplexStruct, self)
+    return thrift.py3.converter.to_py3_struct(py3_types.IncompleteMap, self)
 
   def _to_py_deprecated(self):
     return self
 
-class NoExceptMoveUnion(object):
-  """
-  Attributes:
-   - string_field
-   - i32_field
-  """
+class IncompleteMapDep:
 
   thrift_spec = None
-  __init__ = None
-
-  __EMPTY__ = 0
-  STRING_FIELD = 1
-  I32_FIELD = 2
-  
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
   @staticmethod
   def isUnion():
-    return True
-
-  def get_string_field(self):
-    assert self.field == 1
-    return self.value
-
-  def get_i32_field(self):
-    assert self.field == 2
-    return self.value
-
-  def set_string_field(self, value):
-    self.field = 1
-    self.value = value
-
-  def set_i32_field(self, value):
-    self.field = 2
-    self.value = value
-
-  def getType(self):
-    return self.field
-
-  def __repr__(self):
-    value = pprint.pformat(self.value)
-    member = ''
-    if self.field == 1:
-      padding = ' ' * 13
-      value = padding.join(value.splitlines(True))
-      member = '\n    %s=%s' % ('string_field', value)
-    if self.field == 2:
-      padding = ' ' * 10
-      value = padding.join(value.splitlines(True))
-      member = '\n    %s=%s' % ('i32_field', value)
-    return "%s(%s)" % (self.__class__.__name__, member)
+    return False
 
   def read(self, iprot):
-    self.field = 0
-    self.value = None
     if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, True], utf8strings=UTF8STRINGS, protoid=0)
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
       return
     if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, True], utf8strings=UTF8STRINGS, protoid=2)
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
       return
     iprot.readStructBegin()
     while True:
       (fname, ftype, fid) = iprot.readFieldBegin()
       if ftype == TType.STOP:
         break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
 
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('IncompleteMapDep')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.IncompleteMapDep, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.IncompleteMapDep, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class CompleteMap:
+  """
+  Attributes:
+   - field
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
       if fid == 1:
-        if ftype == TType.STRING:
-          _fbthrift_string_field = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-          assert self.field == 0 and self.value is None
-          self.set_string_field(_fbthrift_string_field)
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.I32:
-          _fbthrift_i32_field = iprot.readI32()
-          assert self.field == 0 and self.value is None
-          self.set_i32_field(_fbthrift_i32_field)
+        if ftype == TType.MAP:
+          self.field = {}
+          (_ktype129, _vtype130, _size128 ) = iprot.readMapBegin() 
+          if _size128 >= 0:
+            for _i132 in range(_size128):
+              _key133 = iprot.readI32()
+              _val134 = CompleteMapDep()
+              _val134.read(iprot)
+              self.field[_key133] = _val134
+          else: 
+            while iprot.peekMap():
+              _key135 = iprot.readI32()
+              _val136 = CompleteMapDep()
+              _val136.read(iprot)
+              self.field[_key135] = _val136
+          iprot.readMapEnd()
         else:
           iprot.skip(ftype)
       else:
@@ -2793,45 +2519,892 @@ class NoExceptMoveUnion(object):
 
   def write(self, oprot):
     if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, True], utf8strings=UTF8STRINGS, protoid=0))
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
       return
     if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, True], utf8strings=UTF8STRINGS, protoid=2))
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
       return
-    oprot.writeUnionBegin('NoExceptMoveUnion')
-    if self.field == 1:
-      oprot.writeFieldBegin('string_field', TType.STRING, 1)
-      string_field = self.value
-      oprot.writeString(string_field.encode('utf-8')) if UTF8STRINGS and not isinstance(string_field, bytes) else oprot.writeString(string_field)
-      oprot.writeFieldEnd()
-    if self.field == 2:
-      oprot.writeFieldBegin('i32_field', TType.I32, 2)
-      i32_field = self.value
-      oprot.writeI32(i32_field)
+    oprot.writeStructBegin('CompleteMap')
+    if self.field != None:
+      oprot.writeFieldBegin('field', TType.MAP, 1)
+      oprot.writeMapBegin(TType.I32, TType.STRUCT, len(self.field))
+      for kiter137,viter138 in self.field.items():
+        oprot.writeI32(kiter137)
+        viter138.write(oprot)
+      oprot.writeMapEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
-    oprot.writeUnionEnd()
-  
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.field is not None:
+      value = pprint.pformat(self.field, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    field=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
   def __eq__(self, other):
     if not isinstance(other, self.__class__):
       return False
 
-    return self.__dict__ == other.__dict__
+    return self.__dict__ == other.__dict__ 
 
   def __ne__(self, other):
     return not (self == other)
+
+  def __dir__(self):
+    return (
+      'field',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
 
   def _to_python(self):
     import importlib
     import thrift.python.converter
     python_types = importlib.import_module("module.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.NoExceptMoveUnion, self)
+    return thrift.python.converter.to_python_struct(python_types.CompleteMap, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
     py3_types = importlib.import_module("module.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.NoExceptMoveUnion, self)
+    return thrift.py3.converter.to_py3_struct(py3_types.CompleteMap, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class CompleteMapDep:
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('CompleteMapDep')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.CompleteMapDep, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.CompleteMapDep, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class IncompleteList:
+  """
+  Attributes:
+   - field
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.LIST:
+          self.field = []
+          (_etype142, _size139) = iprot.readListBegin()
+          if _size139 >= 0:
+            for _i143 in range(_size139):
+              _elem144 = IncompleteListDep()
+              _elem144.read(iprot)
+              self.field.append(_elem144)
+          else: 
+            while iprot.peekList():
+              _elem145 = IncompleteListDep()
+              _elem145.read(iprot)
+              self.field.append(_elem145)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('IncompleteList')
+    if self.field != None:
+      oprot.writeFieldBegin('field', TType.LIST, 1)
+      oprot.writeListBegin(TType.STRUCT, len(self.field))
+      for iter146 in self.field:
+        iter146.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.field is not None:
+      value = pprint.pformat(self.field, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    field=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'field',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.IncompleteList, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.IncompleteList, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class IncompleteListDep:
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('IncompleteListDep')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.IncompleteListDep, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.IncompleteListDep, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class CompleteList:
+  """
+  Attributes:
+   - field
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.LIST:
+          self.field = []
+          (_etype150, _size147) = iprot.readListBegin()
+          if _size147 >= 0:
+            for _i151 in range(_size147):
+              _elem152 = CompleteListDep()
+              _elem152.read(iprot)
+              self.field.append(_elem152)
+          else: 
+            while iprot.peekList():
+              _elem153 = CompleteListDep()
+              _elem153.read(iprot)
+              self.field.append(_elem153)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('CompleteList')
+    if self.field != None:
+      oprot.writeFieldBegin('field', TType.LIST, 1)
+      oprot.writeListBegin(TType.STRUCT, len(self.field))
+      for iter154 in self.field:
+        iter154.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.field is not None:
+      value = pprint.pformat(self.field, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    field=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'field',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.CompleteList, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.CompleteList, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class CompleteListDep:
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('CompleteListDep')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.CompleteListDep, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.CompleteListDep, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class AdaptedList:
+  """
+  Attributes:
+   - field
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.LIST:
+          self.field = []
+          (_etype158, _size155) = iprot.readListBegin()
+          if _size155 >= 0:
+            for _i159 in range(_size155):
+              _elem160 = AdaptedListDep()
+              _elem160.read(iprot)
+              self.field.append(_elem160)
+          else: 
+            while iprot.peekList():
+              _elem161 = AdaptedListDep()
+              _elem161.read(iprot)
+              self.field.append(_elem161)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('AdaptedList')
+    if self.field != None:
+      oprot.writeFieldBegin('field', TType.LIST, 1)
+      oprot.writeListBegin(TType.STRUCT, len(self.field))
+      for iter162 in self.field:
+        iter162.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.field is not None:
+      value = pprint.pformat(self.field, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    field=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'field',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.AdaptedList, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.AdaptedList, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class AdaptedListDep:
+  """
+  Attributes:
+   - field
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.field = AdaptedList()
+          self.field.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('AdaptedListDep')
+    if self.field != None:
+      oprot.writeFieldBegin('field', TType.STRUCT, 1)
+      self.field.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.field is not None:
+      value = pprint.pformat(self.field, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    field=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'field',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.AdaptedListDep, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.AdaptedListDep, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class DependentAdaptedList:
+  """
+  Attributes:
+   - field
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.LIST:
+          self.field = []
+          (_etype166, _size163) = iprot.readListBegin()
+          if _size163 >= 0:
+            for _i167 in range(_size163):
+              _elem168 = DependentAdaptedListDep()
+              _elem168.read(iprot)
+              self.field.append(_elem168)
+          else: 
+            while iprot.peekList():
+              _elem169 = DependentAdaptedListDep()
+              _elem169.read(iprot)
+              self.field.append(_elem169)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('DependentAdaptedList')
+    if self.field != None:
+      oprot.writeFieldBegin('field', TType.LIST, 1)
+      oprot.writeListBegin(TType.STRUCT, len(self.field))
+      for iter170 in self.field:
+        iter170.write(oprot)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.field is not None:
+      value = pprint.pformat(self.field, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    field=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'field',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.DependentAdaptedList, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.DependentAdaptedList, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class DependentAdaptedListDep:
+  """
+  Attributes:
+   - field
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I16:
+          self.field = iprot.readI16()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('DependentAdaptedListDep')
+    if self.field != None:
+      oprot.writeFieldBegin('field', TType.I16, 1)
+      oprot.writeI16(self.field)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.field is not None:
+      value = pprint.pformat(self.field, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    field=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'field',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.DependentAdaptedListDep, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.DependentAdaptedListDep, self)
 
   def _to_py_deprecated(self):
     return self
@@ -2871,47 +3444,47 @@ class AllocatorAware:
       if fid == 1:
         if ftype == TType.LIST:
           self.aa_list = []
-          (_etype139, _size136) = iprot.readListBegin()
-          if _size136 >= 0:
-            for _i140 in range(_size136):
-              _elem141 = iprot.readI32()
-              self.aa_list.append(_elem141)
+          (_etype174, _size171) = iprot.readListBegin()
+          if _size171 >= 0:
+            for _i175 in range(_size171):
+              _elem176 = iprot.readI32()
+              self.aa_list.append(_elem176)
           else: 
             while iprot.peekList():
-              _elem142 = iprot.readI32()
-              self.aa_list.append(_elem142)
+              _elem177 = iprot.readI32()
+              self.aa_list.append(_elem177)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.SET:
           self.aa_set = set()
-          (_etype146, _size143) = iprot.readSetBegin()
-          if _size143 >= 0:
-            for _i147 in range(_size143):
-              _elem148 = iprot.readI32()
-              self.aa_set.add(_elem148)
+          (_etype181, _size178) = iprot.readSetBegin()
+          if _size178 >= 0:
+            for _i182 in range(_size178):
+              _elem183 = iprot.readI32()
+              self.aa_set.add(_elem183)
           else: 
             while iprot.peekSet():
-              _elem149 = iprot.readI32()
-              self.aa_set.add(_elem149)
+              _elem184 = iprot.readI32()
+              self.aa_set.add(_elem184)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.MAP:
           self.aa_map = {}
-          (_ktype151, _vtype152, _size150 ) = iprot.readMapBegin() 
-          if _size150 >= 0:
-            for _i154 in range(_size150):
-              _key155 = iprot.readI32()
-              _val156 = iprot.readI32()
-              self.aa_map[_key155] = _val156
+          (_ktype186, _vtype187, _size185 ) = iprot.readMapBegin() 
+          if _size185 >= 0:
+            for _i189 in range(_size185):
+              _key190 = iprot.readI32()
+              _val191 = iprot.readI32()
+              self.aa_map[_key190] = _val191
           else: 
             while iprot.peekMap():
-              _key157 = iprot.readI32()
-              _val158 = iprot.readI32()
-              self.aa_map[_key157] = _val158
+              _key192 = iprot.readI32()
+              _val193 = iprot.readI32()
+              self.aa_map[_key192] = _val193
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -2951,23 +3524,23 @@ class AllocatorAware:
     if self.aa_list != None:
       oprot.writeFieldBegin('aa_list', TType.LIST, 1)
       oprot.writeListBegin(TType.I32, len(self.aa_list))
-      for iter159 in self.aa_list:
-        oprot.writeI32(iter159)
+      for iter194 in self.aa_list:
+        oprot.writeI32(iter194)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.aa_set != None:
       oprot.writeFieldBegin('aa_set', TType.SET, 2)
       oprot.writeSetBegin(TType.I32, len(self.aa_set))
-      for iter160 in self.aa_set:
-        oprot.writeI32(iter160)
+      for iter195 in self.aa_set:
+        oprot.writeI32(iter195)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.aa_map != None:
       oprot.writeFieldBegin('aa_map', TType.MAP, 3)
       oprot.writeMapBegin(TType.I32, TType.I32, len(self.aa_map))
-      for kiter161,viter162 in self.aa_map.items():
-        oprot.writeI32(kiter161)
-        oprot.writeI32(viter162)
+      for kiter196,viter197 in self.aa_map.items():
+        oprot.writeI32(kiter196)
+        oprot.writeI32(viter197)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.aa_string != None:
@@ -3898,121 +4471,225 @@ def ForwardUsageByRef__setstate__(self, state):
 ForwardUsageByRef.__getstate__ = lambda self: self.__dict__.copy()
 ForwardUsageByRef.__setstate__ = ForwardUsageByRef__setstate__
 
-all_structs.append(NoexceptMoveEmpty)
-NoexceptMoveEmpty.thrift_spec = (
-)
-
-NoexceptMoveEmpty.thrift_struct_annotations = {
-}
-NoexceptMoveEmpty.thrift_field_annotations = {
-}
-
-all_structs.append(NoexceptMoveSimpleStruct)
-NoexceptMoveSimpleStruct.thrift_spec = (
+all_structs.append(IncompleteMap)
+IncompleteMap.thrift_spec = (
   None, # 0
-  (1, TType.I64, 'boolField', None, None, 2, ), # 1
+  (1, TType.MAP, 'field', (TType.I32,None,TType.STRUCT,[IncompleteMapDep, IncompleteMapDep.thrift_spec, False]), None, 1, ), # 1
 )
 
-NoexceptMoveSimpleStruct.thrift_struct_annotations = {
+IncompleteMap.thrift_struct_annotations = {
 }
-NoexceptMoveSimpleStruct.thrift_field_annotations = {
+IncompleteMap.thrift_field_annotations = {
 }
 
-def NoexceptMoveSimpleStruct__init__(self, boolField=None,):
-  self.boolField = boolField
+def IncompleteMap__init__(self, field=None,):
+  self.field = field
 
-NoexceptMoveSimpleStruct.__init__ = NoexceptMoveSimpleStruct__init__
+IncompleteMap.__init__ = IncompleteMap__init__
 
-def NoexceptMoveSimpleStruct__setstate__(self, state):
-  state.setdefault('boolField', None)
+def IncompleteMap__setstate__(self, state):
+  state.setdefault('field', None)
   self.__dict__ = state
 
-NoexceptMoveSimpleStruct.__getstate__ = lambda self: self.__dict__.copy()
-NoexceptMoveSimpleStruct.__setstate__ = NoexceptMoveSimpleStruct__setstate__
+IncompleteMap.__getstate__ = lambda self: self.__dict__.copy()
+IncompleteMap.__setstate__ = IncompleteMap__setstate__
 
-all_structs.append(NoexceptMoveComplexStruct)
-NoexceptMoveComplexStruct.thrift_spec = (
-  None, # 0
-  (1, TType.BOOL, 'MyBoolField', None, None, 2, ), # 1
-  (2, TType.I64, 'MyIntField', None, 12, 2, ), # 2
-  (3, TType.STRING, 'MyStringField', True, "test", 2, ), # 3
-  (4, TType.STRING, 'MyStringField2', True, None, 2, ), # 4
-  (5, TType.STRING, 'MyBinaryField', False, None, 2, ), # 5
-  (6, TType.STRING, 'MyBinaryField2', False, None, 1, ), # 6
-  (7, TType.STRING, 'MyBinaryField3', False, None, 0, ), # 7
-  (8, TType.LIST, 'MyBinaryListField4', (TType.STRING,False), None, 2, ), # 8
-  (9, TType.MAP, 'MyMapEnumAndInt', (TType.I32,MyEnumA,TType.STRING,True), {
-        1 : "fieldA",
-        4 : "fieldC",
-  }, 2, ), # 9
+all_structs.append(IncompleteMapDep)
+IncompleteMapDep.thrift_spec = (
 )
 
-NoexceptMoveComplexStruct.thrift_struct_annotations = {
+IncompleteMapDep.thrift_struct_annotations = {
 }
-NoexceptMoveComplexStruct.thrift_field_annotations = {
+IncompleteMapDep.thrift_field_annotations = {
 }
 
-def NoexceptMoveComplexStruct__init__(self, MyBoolField=None, MyIntField=NoexceptMoveComplexStruct.thrift_spec[2][4], MyStringField=NoexceptMoveComplexStruct.thrift_spec[3][4], MyStringField2=None, MyBinaryField=None, MyBinaryField2=None, MyBinaryField3=None, MyBinaryListField4=None, MyMapEnumAndInt=NoexceptMoveComplexStruct.thrift_spec[9][4],):
-  self.MyBoolField = MyBoolField
-  self.MyIntField = MyIntField
-  self.MyStringField = MyStringField
-  self.MyStringField2 = MyStringField2
-  self.MyBinaryField = MyBinaryField
-  self.MyBinaryField2 = MyBinaryField2
-  self.MyBinaryField3 = MyBinaryField3
-  self.MyBinaryListField4 = MyBinaryListField4
-  if MyMapEnumAndInt is self.thrift_spec[9][4]:
-    MyMapEnumAndInt = {
-        1 : "fieldA",
-        4 : "fieldC",
-  }
-  self.MyMapEnumAndInt = MyMapEnumAndInt
+all_structs.append(CompleteMap)
+CompleteMap.thrift_spec = (
+  None, # 0
+  (1, TType.MAP, 'field', (TType.I32,None,TType.STRUCT,[CompleteMapDep, CompleteMapDep.thrift_spec, False]), None, 1, ), # 1
+)
 
-NoexceptMoveComplexStruct.__init__ = NoexceptMoveComplexStruct__init__
+CompleteMap.thrift_struct_annotations = {
+}
+CompleteMap.thrift_field_annotations = {
+}
 
-def NoexceptMoveComplexStruct__setstate__(self, state):
-  state.setdefault('MyBoolField', None)
-  state.setdefault('MyIntField', 12)
-  state.setdefault('MyStringField', "test")
-  state.setdefault('MyStringField2', None)
-  state.setdefault('MyBinaryField', None)
-  state.setdefault('MyBinaryField2', None)
-  state.setdefault('MyBinaryField3', None)
-  state.setdefault('MyBinaryListField4', None)
-  state.setdefault('MyMapEnumAndInt', {
-        1 : "fieldA",
-        4 : "fieldC",
-  })
+def CompleteMap__init__(self, field=None,):
+  self.field = field
+
+CompleteMap.__init__ = CompleteMap__init__
+
+def CompleteMap__setstate__(self, state):
+  state.setdefault('field', None)
   self.__dict__ = state
 
-NoexceptMoveComplexStruct.__getstate__ = lambda self: self.__dict__.copy()
-NoexceptMoveComplexStruct.__setstate__ = NoexceptMoveComplexStruct__setstate__
+CompleteMap.__getstate__ = lambda self: self.__dict__.copy()
+CompleteMap.__setstate__ = CompleteMap__setstate__
 
-all_structs.append(NoExceptMoveUnion)
-NoExceptMoveUnion.thrift_spec = (
-  None, # 0
-  (1, TType.STRING, 'string_field', True, None, 2, ), # 1
-  (2, TType.I32, 'i32_field', None, None, 2, ), # 2
+all_structs.append(CompleteMapDep)
+CompleteMapDep.thrift_spec = (
 )
 
-NoExceptMoveUnion.thrift_struct_annotations = {
+CompleteMapDep.thrift_struct_annotations = {
 }
-NoExceptMoveUnion.thrift_field_annotations = {
+CompleteMapDep.thrift_field_annotations = {
 }
 
-def NoExceptMoveUnion__init__(self, string_field=None, i32_field=None,):
-  self.field = 0
-  self.value = None
-  if string_field is not None:
-    assert self.field == 0 and self.value is None
-    self.field = 1
-    self.value = string_field
-  if i32_field is not None:
-    assert self.field == 0 and self.value is None
-    self.field = 2
-    self.value = i32_field
+all_structs.append(IncompleteList)
+IncompleteList.thrift_spec = (
+  None, # 0
+  (1, TType.LIST, 'field', (TType.STRUCT,[IncompleteListDep, IncompleteListDep.thrift_spec, False]), None, 1, ), # 1
+)
 
-NoExceptMoveUnion.__init__ = NoExceptMoveUnion__init__
+IncompleteList.thrift_struct_annotations = {
+}
+IncompleteList.thrift_field_annotations = {
+}
+
+def IncompleteList__init__(self, field=None,):
+  self.field = field
+
+IncompleteList.__init__ = IncompleteList__init__
+
+def IncompleteList__setstate__(self, state):
+  state.setdefault('field', None)
+  self.__dict__ = state
+
+IncompleteList.__getstate__ = lambda self: self.__dict__.copy()
+IncompleteList.__setstate__ = IncompleteList__setstate__
+
+all_structs.append(IncompleteListDep)
+IncompleteListDep.thrift_spec = (
+)
+
+IncompleteListDep.thrift_struct_annotations = {
+}
+IncompleteListDep.thrift_field_annotations = {
+}
+
+all_structs.append(CompleteList)
+CompleteList.thrift_spec = (
+  None, # 0
+  (1, TType.LIST, 'field', (TType.STRUCT,[CompleteListDep, CompleteListDep.thrift_spec, False]), None, 1, ), # 1
+)
+
+CompleteList.thrift_struct_annotations = {
+}
+CompleteList.thrift_field_annotations = {
+}
+
+def CompleteList__init__(self, field=None,):
+  self.field = field
+
+CompleteList.__init__ = CompleteList__init__
+
+def CompleteList__setstate__(self, state):
+  state.setdefault('field', None)
+  self.__dict__ = state
+
+CompleteList.__getstate__ = lambda self: self.__dict__.copy()
+CompleteList.__setstate__ = CompleteList__setstate__
+
+all_structs.append(CompleteListDep)
+CompleteListDep.thrift_spec = (
+)
+
+CompleteListDep.thrift_struct_annotations = {
+}
+CompleteListDep.thrift_field_annotations = {
+}
+
+all_structs.append(AdaptedList)
+AdaptedList.thrift_spec = (
+  None, # 0
+  (1, TType.LIST, 'field', (TType.STRUCT,[AdaptedListDep, AdaptedListDep.thrift_spec, False]), None, 1, ), # 1
+)
+
+AdaptedList.thrift_struct_annotations = {
+}
+AdaptedList.thrift_field_annotations = {
+}
+
+def AdaptedList__init__(self, field=None,):
+  self.field = field
+
+AdaptedList.__init__ = AdaptedList__init__
+
+def AdaptedList__setstate__(self, state):
+  state.setdefault('field', None)
+  self.__dict__ = state
+
+AdaptedList.__getstate__ = lambda self: self.__dict__.copy()
+AdaptedList.__setstate__ = AdaptedList__setstate__
+
+all_structs.append(AdaptedListDep)
+AdaptedListDep.thrift_spec = (
+  None, # 0
+  (1, TType.STRUCT, 'field', [AdaptedList, AdaptedList.thrift_spec, False], None, 2, ), # 1
+)
+
+AdaptedListDep.thrift_struct_annotations = {
+}
+AdaptedListDep.thrift_field_annotations = {
+}
+
+def AdaptedListDep__init__(self, field=None,):
+  self.field = field
+
+AdaptedListDep.__init__ = AdaptedListDep__init__
+
+def AdaptedListDep__setstate__(self, state):
+  state.setdefault('field', None)
+  self.__dict__ = state
+
+AdaptedListDep.__getstate__ = lambda self: self.__dict__.copy()
+AdaptedListDep.__setstate__ = AdaptedListDep__setstate__
+
+all_structs.append(DependentAdaptedList)
+DependentAdaptedList.thrift_spec = (
+  None, # 0
+  (1, TType.LIST, 'field', (TType.STRUCT,[DependentAdaptedListDep, DependentAdaptedListDep.thrift_spec, False]), None, 1, ), # 1
+)
+
+DependentAdaptedList.thrift_struct_annotations = {
+}
+DependentAdaptedList.thrift_field_annotations = {
+}
+
+def DependentAdaptedList__init__(self, field=None,):
+  self.field = field
+
+DependentAdaptedList.__init__ = DependentAdaptedList__init__
+
+def DependentAdaptedList__setstate__(self, state):
+  state.setdefault('field', None)
+  self.__dict__ = state
+
+DependentAdaptedList.__getstate__ = lambda self: self.__dict__.copy()
+DependentAdaptedList.__setstate__ = DependentAdaptedList__setstate__
+
+all_structs.append(DependentAdaptedListDep)
+DependentAdaptedListDep.thrift_spec = (
+  None, # 0
+  (1, TType.I16, 'field', None, None, 1, ), # 1
+)
+
+DependentAdaptedListDep.thrift_struct_annotations = {
+}
+DependentAdaptedListDep.thrift_field_annotations = {
+}
+
+def DependentAdaptedListDep__init__(self, field=None,):
+  self.field = field
+
+DependentAdaptedListDep.__init__ = DependentAdaptedListDep__init__
+
+def DependentAdaptedListDep__setstate__(self, state):
+  state.setdefault('field', None)
+  self.__dict__ = state
+
+DependentAdaptedListDep.__getstate__ = lambda self: self.__dict__.copy()
+DependentAdaptedListDep.__setstate__ = DependentAdaptedListDep__setstate__
 
 all_structs.append(AllocatorAware)
 AllocatorAware.thrift_spec = (

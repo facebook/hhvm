@@ -228,95 +228,6 @@ cdef class MyForwardRefEnum(thrift.py3.types.CompiledEnum):
 __SetMetaClass(<PyTypeObject*> MyForwardRefEnum, <PyTypeObject*> __MyForwardRefEnumMeta)
 
 
-cdef __EnumData __MyEnumA_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnumA](), MyEnumA)
-
-
-@__cython.internal
-@__cython.auto_pickle(False)
-cdef class __MyEnumAMeta(thrift.py3.types.EnumMeta):
-    def _fbthrift_get_by_value(cls, int value):
-        return __MyEnumA_enum_data.get_by_value(value)
-
-    def _fbthrift_get_all_names(cls):
-        return __MyEnumA_enum_data.get_all_names()
-
-    def __len__(cls):
-        return __MyEnumA_enum_data.size()
-
-    def __getattribute__(cls, str name not None):
-        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
-            return super().__getattribute__(name)
-        return __MyEnumA_enum_data.get_by_name(name)
-
-
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class MyEnumA(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
-        return __MyEnumA_enum_data.get_by_name(name)
-
-
-    @staticmethod
-    def __get_metadata__():
-        cdef __fbthrift_cThriftMetadata meta
-        EnumMetadata[cMyEnumA].gen(meta)
-        return __MetadataBox.box(cmove(meta))
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "module.MyEnumA"
-
-    def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
-            "module.thrift_types"
-        )
-        return python_types.MyEnumA(self.value)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        return self.value
-
-
-__SetMetaClass(<PyTypeObject*> MyEnumA, <PyTypeObject*> __MyEnumAMeta)
-
-
-
-cdef __UnionTypeEnumData __NoExceptMoveUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
-    __createEnumDataForUnionType[cNoExceptMoveUnion](),
-    __NoExceptMoveUnionType,
-)
-
-
-@__cython.internal
-@__cython.auto_pickle(False)
-cdef class __NoExceptMoveUnion_Union_TypeMeta(thrift.py3.types.EnumMeta):
-    def _fbthrift_get_by_value(cls, int value):
-        return __NoExceptMoveUnion_union_type_enum_data.get_by_value(value)
-
-    def _fbthrift_get_all_names(cls):
-        return __NoExceptMoveUnion_union_type_enum_data.get_all_names()
-
-    def __len__(cls):
-        return __NoExceptMoveUnion_union_type_enum_data.size()
-
-    def __getattribute__(cls, str name not None):
-        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
-            return super().__getattribute__(name)
-        return __NoExceptMoveUnion_union_type_enum_data.get_by_name(name)
-
-
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class __NoExceptMoveUnionType(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
-        return __NoExceptMoveUnion_union_type_enum_data.get_by_name(name)
-
-
-__SetMetaClass(<PyTypeObject*> __NoExceptMoveUnionType, <PyTypeObject*> __NoExceptMoveUnion_Union_TypeMeta)
-
 
 @__cython.auto_pickle(False)
 cdef class decorated_struct(thrift.py3.types.Struct):
@@ -2632,117 +2543,18 @@ cdef class ForwardUsageByRef(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.ForwardUsageByRef, self)
 @__cython.auto_pickle(False)
-cdef class NoexceptMoveEmpty(thrift.py3.types.Struct):
-    def __init__(NoexceptMoveEmpty self, **kwargs):
-        self._cpp_obj = make_shared[cNoexceptMoveEmpty]()
-        self._fields_setter = _fbthrift_types_fields.__NoexceptMoveEmpty_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+cdef class IncompleteMap(thrift.py3.types.Struct):
+    def __init__(IncompleteMap self, **kwargs):
+        self._cpp_obj = make_shared[cIncompleteMap]()
+        self._fields_setter = _fbthrift_types_fields.__IncompleteMap_FieldsSetter._fbthrift_create(self._cpp_obj.get())
         super().__init__(**kwargs)
 
-    def __call__(NoexceptMoveEmpty self, **kwargs):
-        return self
-
-    cdef void _fbthrift_set_field(self, str name, object value) except *:
-        self._fields_setter.set_field(name.encode("utf-8"), value)
-
-    cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("NoexceptMoveEmpty", {
-        })
-
-    @staticmethod
-    cdef _fbthrift_create(shared_ptr[cNoexceptMoveEmpty] cpp_obj):
-        __fbthrift_inst = <NoexceptMoveEmpty>NoexceptMoveEmpty.__new__(NoexceptMoveEmpty)
-        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
-        return __fbthrift_inst
-
-
-    def __hash__(NoexceptMoveEmpty self):
-        return super().__hash__()
-
-    def __repr__(NoexceptMoveEmpty self):
-        return super().__repr__()
-
-    def __str__(NoexceptMoveEmpty self):
-        return super().__str__()
-
-
-    def __copy__(NoexceptMoveEmpty self):
-        cdef shared_ptr[cNoexceptMoveEmpty] cpp_obj = make_shared[cNoexceptMoveEmpty](
-            deref(self._cpp_obj)
-        )
-        return NoexceptMoveEmpty._fbthrift_create(cmove(cpp_obj))
-
-    def __richcmp__(self, other, int op):
-        r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cNoexceptMoveEmpty](
-            self._cpp_obj,
-            (<NoexceptMoveEmpty>other)._cpp_obj,
-            op,
-        ) if r is None else r
-
-    @staticmethod
-    def __get_reflection__():
-        return _types_reflection.get_reflection__NoexceptMoveEmpty()
-
-    @staticmethod
-    def __get_metadata__():
-        cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cNoexceptMoveEmpty].gen(meta)
-        return __MetadataBox.box(cmove(meta))
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "module.NoexceptMoveEmpty"
-
-    @classmethod
-    def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cNoexceptMoveEmpty](idx))
-
-    @classmethod
-    def _fbthrift_get_struct_size(cls):
-        return 0
-
-    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(NoexceptMoveEmpty self, __Protocol proto):
-        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
-        with nogil:
-            data = cmove(serializer.cserialize[cNoexceptMoveEmpty](self._cpp_obj.get(), proto))
-        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
-
-    cdef cuint32_t _fbthrift_deserialize(NoexceptMoveEmpty self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
-        cdef cuint32_t needed
-        self._cpp_obj = make_shared[cNoexceptMoveEmpty]()
-        with nogil:
-            needed = serializer.cdeserialize[cNoexceptMoveEmpty](buf, self._cpp_obj.get(), proto)
-        return needed
-
-    def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
-        )
-        return thrift.python.converter.to_python_struct(python_types.NoexceptMoveEmpty, self)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        import importlib
-        import thrift.util.converter
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.NoexceptMoveEmpty, self)
-@__cython.auto_pickle(False)
-cdef class NoexceptMoveSimpleStruct(thrift.py3.types.Struct):
-    def __init__(NoexceptMoveSimpleStruct self, **kwargs):
-        self._cpp_obj = make_shared[cNoexceptMoveSimpleStruct]()
-        self._fields_setter = _fbthrift_types_fields.__NoexceptMoveSimpleStruct_FieldsSetter._fbthrift_create(self._cpp_obj.get())
-        super().__init__(**kwargs)
-
-    def __call__(NoexceptMoveSimpleStruct self, **kwargs):
+    def __call__(IncompleteMap self, **kwargs):
         if not kwargs:
             return self
-        cdef NoexceptMoveSimpleStruct __fbthrift_inst = NoexceptMoveSimpleStruct.__new__(NoexceptMoveSimpleStruct)
-        __fbthrift_inst._cpp_obj = make_shared[cNoexceptMoveSimpleStruct](deref(self._cpp_obj))
-        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__NoexceptMoveSimpleStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        cdef IncompleteMap __fbthrift_inst = IncompleteMap.__new__(IncompleteMap)
+        __fbthrift_inst._cpp_obj = make_shared[cIncompleteMap](deref(self._cpp_obj))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__IncompleteMap_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
@@ -2751,82 +2563,86 @@ cdef class NoexceptMoveSimpleStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("NoexceptMoveSimpleStruct", {
-          "boolField": deref(self._cpp_obj).boolField_ref().has_value(),
+        return thrift.py3.types._IsSet("IncompleteMap", {
+          "field": deref(self._cpp_obj).field_ref().has_value(),
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cNoexceptMoveSimpleStruct] cpp_obj):
-        __fbthrift_inst = <NoexceptMoveSimpleStruct>NoexceptMoveSimpleStruct.__new__(NoexceptMoveSimpleStruct)
+    cdef _fbthrift_create(shared_ptr[cIncompleteMap] cpp_obj):
+        __fbthrift_inst = <IncompleteMap>IncompleteMap.__new__(IncompleteMap)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
 
-    cdef inline boolField_impl(self):
+    cdef inline field_impl(self):
+        if not deref(self._cpp_obj).field_ref().has_value():
+            return None
 
-        return deref(self._cpp_obj).boolField_ref().value()
+        if self.__fbthrift_cached_field is None:
+            self.__fbthrift_cached_field = Map__i32_IncompleteMapDep._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).field_ref().ref_unchecked(), self._cpp_obj))
+        return self.__fbthrift_cached_field
 
     @property
-    def boolField(self):
-        return self.boolField_impl()
+    def field(self):
+        return self.field_impl()
 
 
-    def __hash__(NoexceptMoveSimpleStruct self):
+    def __hash__(IncompleteMap self):
         return super().__hash__()
 
-    def __repr__(NoexceptMoveSimpleStruct self):
+    def __repr__(IncompleteMap self):
         return super().__repr__()
 
-    def __str__(NoexceptMoveSimpleStruct self):
+    def __str__(IncompleteMap self):
         return super().__str__()
 
 
-    def __copy__(NoexceptMoveSimpleStruct self):
-        cdef shared_ptr[cNoexceptMoveSimpleStruct] cpp_obj = make_shared[cNoexceptMoveSimpleStruct](
+    def __copy__(IncompleteMap self):
+        cdef shared_ptr[cIncompleteMap] cpp_obj = make_shared[cIncompleteMap](
             deref(self._cpp_obj)
         )
-        return NoexceptMoveSimpleStruct._fbthrift_create(cmove(cpp_obj))
+        return IncompleteMap._fbthrift_create(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cNoexceptMoveSimpleStruct](
+        return __richcmp[cIncompleteMap](
             self._cpp_obj,
-            (<NoexceptMoveSimpleStruct>other)._cpp_obj,
+            (<IncompleteMap>other)._cpp_obj,
             op,
         ) if r is None else r
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__NoexceptMoveSimpleStruct()
+        return _types_reflection.get_reflection__IncompleteMap()
 
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cNoexceptMoveSimpleStruct].gen(meta)
+        StructMetadata[cIncompleteMap].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
     def __get_thrift_name__():
-        return "module.NoexceptMoveSimpleStruct"
+        return "module.IncompleteMap"
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cNoexceptMoveSimpleStruct](idx))
+        return __sv_to_str(__get_field_name_by_index[cIncompleteMap](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
         return 1
 
-    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(NoexceptMoveSimpleStruct self, __Protocol proto):
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(IncompleteMap self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cNoexceptMoveSimpleStruct](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cIncompleteMap](self._cpp_obj.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
-    cdef cuint32_t _fbthrift_deserialize(NoexceptMoveSimpleStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+    cdef cuint32_t _fbthrift_deserialize(IncompleteMap self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cNoexceptMoveSimpleStruct]()
+        self._cpp_obj = make_shared[cIncompleteMap]()
         with nogil:
-            needed = serializer.cdeserialize[cNoexceptMoveSimpleStruct](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cIncompleteMap](buf, self._cpp_obj.get(), proto)
         return needed
 
     def _to_python(self):
@@ -2835,7 +2651,7 @@ cdef class NoexceptMoveSimpleStruct(thrift.py3.types.Struct):
         python_types = importlib.import_module(
             "module.thrift_types"
         )
-        return thrift.python.converter.to_python_struct(python_types.NoexceptMoveSimpleStruct, self)
+        return thrift.python.converter.to_python_struct(python_types.IncompleteMap, self)
 
     def _to_py3(self):
         return self
@@ -2844,20 +2660,119 @@ cdef class NoexceptMoveSimpleStruct(thrift.py3.types.Struct):
         import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.NoexceptMoveSimpleStruct, self)
+        return thrift.util.converter.to_py_struct(py_deprecated_types.IncompleteMap, self)
 @__cython.auto_pickle(False)
-cdef class NoexceptMoveComplexStruct(thrift.py3.types.Struct):
-    def __init__(NoexceptMoveComplexStruct self, **kwargs):
-        self._cpp_obj = make_shared[cNoexceptMoveComplexStruct]()
-        self._fields_setter = _fbthrift_types_fields.__NoexceptMoveComplexStruct_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+cdef class IncompleteMapDep(thrift.py3.types.Struct):
+    def __init__(IncompleteMapDep self, **kwargs):
+        self._cpp_obj = make_shared[cIncompleteMapDep]()
+        self._fields_setter = _fbthrift_types_fields.__IncompleteMapDep_FieldsSetter._fbthrift_create(self._cpp_obj.get())
         super().__init__(**kwargs)
 
-    def __call__(NoexceptMoveComplexStruct self, **kwargs):
+    def __call__(IncompleteMapDep self, **kwargs):
+        return self
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return thrift.py3.types._IsSet("IncompleteMapDep", {
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cIncompleteMapDep] cpp_obj):
+        __fbthrift_inst = <IncompleteMapDep>IncompleteMapDep.__new__(IncompleteMapDep)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+
+    def __hash__(IncompleteMapDep self):
+        return super().__hash__()
+
+    def __repr__(IncompleteMapDep self):
+        return super().__repr__()
+
+    def __str__(IncompleteMapDep self):
+        return super().__str__()
+
+
+    def __copy__(IncompleteMapDep self):
+        cdef shared_ptr[cIncompleteMapDep] cpp_obj = make_shared[cIncompleteMapDep](
+            deref(self._cpp_obj)
+        )
+        return IncompleteMapDep._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cIncompleteMapDep](
+            self._cpp_obj,
+            (<IncompleteMapDep>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__IncompleteMapDep()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cIncompleteMapDep].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.IncompleteMapDep"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cIncompleteMapDep](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 0
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(IncompleteMapDep self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cIncompleteMapDep](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(IncompleteMapDep self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cIncompleteMapDep]()
+        with nogil:
+            needed = serializer.cdeserialize[cIncompleteMapDep](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.IncompleteMapDep, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.IncompleteMapDep, self)
+@__cython.auto_pickle(False)
+cdef class CompleteMap(thrift.py3.types.Struct):
+    def __init__(CompleteMap self, **kwargs):
+        self._cpp_obj = make_shared[cCompleteMap]()
+        self._fields_setter = _fbthrift_types_fields.__CompleteMap_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(CompleteMap self, **kwargs):
         if not kwargs:
             return self
-        cdef NoexceptMoveComplexStruct __fbthrift_inst = NoexceptMoveComplexStruct.__new__(NoexceptMoveComplexStruct)
-        __fbthrift_inst._cpp_obj = make_shared[cNoexceptMoveComplexStruct](deref(self._cpp_obj))
-        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__NoexceptMoveComplexStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        cdef CompleteMap __fbthrift_inst = CompleteMap.__new__(CompleteMap)
+        __fbthrift_inst._cpp_obj = make_shared[cCompleteMap](deref(self._cpp_obj))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__CompleteMap_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
         for __fbthrift_name, _fbthrift_value in kwargs.items():
             __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
         return __fbthrift_inst
@@ -2866,160 +2781,88 @@ cdef class NoexceptMoveComplexStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("NoexceptMoveComplexStruct", {
-          "MyBoolField": deref(self._cpp_obj).MyBoolField_ref().has_value(),
-          "MyIntField": deref(self._cpp_obj).MyIntField_ref().has_value(),
-          "MyStringField": deref(self._cpp_obj).MyStringField_ref().has_value(),
-          "MyStringField2": deref(self._cpp_obj).MyStringField2_ref().has_value(),
-          "MyBinaryField": deref(self._cpp_obj).MyBinaryField_ref().has_value(),
-          "MyBinaryField2": deref(self._cpp_obj).MyBinaryField2_ref().has_value(),
-          "MyBinaryField3": deref(self._cpp_obj).MyBinaryField3_ref().has_value(),
-          "MyBinaryListField4": deref(self._cpp_obj).MyBinaryListField4_ref().has_value(),
-          "MyMapEnumAndInt": deref(self._cpp_obj).MyMapEnumAndInt_ref().has_value(),
+        return thrift.py3.types._IsSet("CompleteMap", {
+          "field": deref(self._cpp_obj).field_ref().has_value(),
         })
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cNoexceptMoveComplexStruct] cpp_obj):
-        __fbthrift_inst = <NoexceptMoveComplexStruct>NoexceptMoveComplexStruct.__new__(NoexceptMoveComplexStruct)
+    cdef _fbthrift_create(shared_ptr[cCompleteMap] cpp_obj):
+        __fbthrift_inst = <CompleteMap>CompleteMap.__new__(CompleteMap)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
         return __fbthrift_inst
 
-    cdef inline MyBoolField_impl(self):
-
-        return <pbool> deref(self._cpp_obj).MyBoolField_ref().value()
-
-    @property
-    def MyBoolField(self):
-        return self.MyBoolField_impl()
-
-    cdef inline MyIntField_impl(self):
-
-        return deref(self._cpp_obj).MyIntField_ref().value()
-
-    @property
-    def MyIntField(self):
-        return self.MyIntField_impl()
-
-    cdef inline MyStringField_impl(self):
-
-        return (<bytes>deref(self._cpp_obj).MyStringField_ref().value()).decode('UTF-8')
-
-    @property
-    def MyStringField(self):
-        return self.MyStringField_impl()
-
-    cdef inline MyStringField2_impl(self):
-
-        return (<bytes>deref(self._cpp_obj).MyStringField2_ref().value()).decode('UTF-8')
-
-    @property
-    def MyStringField2(self):
-        return self.MyStringField2_impl()
-
-    cdef inline MyBinaryField_impl(self):
-
-        return deref(self._cpp_obj).MyBinaryField_ref().value()
-
-    @property
-    def MyBinaryField(self):
-        return self.MyBinaryField_impl()
-
-    cdef inline MyBinaryField2_impl(self):
-        if not deref(self._cpp_obj).MyBinaryField2_ref().has_value():
+    cdef inline field_impl(self):
+        if not deref(self._cpp_obj).field_ref().has_value():
             return None
 
-        return deref(self._cpp_obj).MyBinaryField2_ref().value_unchecked()
+        if self.__fbthrift_cached_field is None:
+            self.__fbthrift_cached_field = std_unordered_map__Map__i32_CompleteMapDep._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).field_ref().ref_unchecked(), self._cpp_obj))
+        return self.__fbthrift_cached_field
 
     @property
-    def MyBinaryField2(self):
-        return self.MyBinaryField2_impl()
-
-    cdef inline MyBinaryField3_impl(self):
-
-        return deref(self._cpp_obj).MyBinaryField3_ref().value()
-
-    @property
-    def MyBinaryField3(self):
-        return self.MyBinaryField3_impl()
-
-    cdef inline MyBinaryListField4_impl(self):
-
-        if self.__fbthrift_cached_MyBinaryListField4 is None:
-            self.__fbthrift_cached_MyBinaryListField4 = List__binary._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).MyBinaryListField4_ref().ref(), self._cpp_obj))
-        return self.__fbthrift_cached_MyBinaryListField4
-
-    @property
-    def MyBinaryListField4(self):
-        return self.MyBinaryListField4_impl()
-
-    cdef inline MyMapEnumAndInt_impl(self):
-
-        if self.__fbthrift_cached_MyMapEnumAndInt is None:
-            self.__fbthrift_cached_MyMapEnumAndInt = Map__MyEnumA_string._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).MyMapEnumAndInt_ref().ref(), self._cpp_obj))
-        return self.__fbthrift_cached_MyMapEnumAndInt
-
-    @property
-    def MyMapEnumAndInt(self):
-        return self.MyMapEnumAndInt_impl()
+    def field(self):
+        return self.field_impl()
 
 
-    def __hash__(NoexceptMoveComplexStruct self):
+    def __hash__(CompleteMap self):
         return super().__hash__()
 
-    def __repr__(NoexceptMoveComplexStruct self):
+    def __repr__(CompleteMap self):
         return super().__repr__()
 
-    def __str__(NoexceptMoveComplexStruct self):
+    def __str__(CompleteMap self):
         return super().__str__()
 
 
-    def __copy__(NoexceptMoveComplexStruct self):
-        cdef shared_ptr[cNoexceptMoveComplexStruct] cpp_obj = make_shared[cNoexceptMoveComplexStruct](
+    def __copy__(CompleteMap self):
+        cdef shared_ptr[cCompleteMap] cpp_obj = make_shared[cCompleteMap](
             deref(self._cpp_obj)
         )
-        return NoexceptMoveComplexStruct._fbthrift_create(cmove(cpp_obj))
+        return CompleteMap._fbthrift_create(cmove(cpp_obj))
 
-    def __richcmp__(self, other, int op):
-        r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cNoexceptMoveComplexStruct](
-            self._cpp_obj,
-            (<NoexceptMoveComplexStruct>other)._cpp_obj,
-            op,
-        ) if r is None else r
+    def __eq__(CompleteMap self, other):
+        if not isinstance(other, CompleteMap):
+            return False
+        return deref(self._cpp_obj.get()) == deref((<CompleteMap>other)._cpp_obj.get())
+
+    def __ne__(CompleteMap self, other):
+        if not isinstance(other, CompleteMap):
+            return True
+        return deref(self._cpp_obj) != deref((<CompleteMap>other)._cpp_obj)
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__NoexceptMoveComplexStruct()
+        return _types_reflection.get_reflection__CompleteMap()
 
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cNoexceptMoveComplexStruct].gen(meta)
+        StructMetadata[cCompleteMap].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
     def __get_thrift_name__():
-        return "module.NoexceptMoveComplexStruct"
+        return "module.CompleteMap"
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cNoexceptMoveComplexStruct](idx))
+        return __sv_to_str(__get_field_name_by_index[cCompleteMap](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return 9
+        return 1
 
-    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(NoexceptMoveComplexStruct self, __Protocol proto):
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(CompleteMap self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cNoexceptMoveComplexStruct](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cCompleteMap](self._cpp_obj.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
-    cdef cuint32_t _fbthrift_deserialize(NoexceptMoveComplexStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+    cdef cuint32_t _fbthrift_deserialize(CompleteMap self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cNoexceptMoveComplexStruct]()
+        self._cpp_obj = make_shared[cCompleteMap]()
         with nogil:
-            needed = serializer.cdeserialize[cNoexceptMoveComplexStruct](buf, self._cpp_obj.get(), proto)
+            needed = serializer.cdeserialize[cCompleteMap](buf, self._cpp_obj.get(), proto)
         return needed
 
     def _to_python(self):
@@ -3028,7 +2871,7 @@ cdef class NoexceptMoveComplexStruct(thrift.py3.types.Struct):
         python_types = importlib.import_module(
             "module.thrift_types"
         )
-        return thrift.python.converter.to_python_struct(python_types.NoexceptMoveComplexStruct, self)
+        return thrift.python.converter.to_python_struct(python_types.CompleteMap, self)
 
     def _to_py3(self):
         return self
@@ -3037,149 +2880,88 @@ cdef class NoexceptMoveComplexStruct(thrift.py3.types.Struct):
         import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.NoexceptMoveComplexStruct, self)
-
-
+        return thrift.util.converter.to_py_struct(py_deprecated_types.CompleteMap, self)
 @__cython.auto_pickle(False)
-cdef class NoExceptMoveUnion(thrift.py3.types.Union):
-    Type = __NoExceptMoveUnionType
+cdef class CompleteMapDep(thrift.py3.types.Struct):
+    def __init__(CompleteMapDep self, **kwargs):
+        self._cpp_obj = make_shared[cCompleteMapDep]()
+        self._fields_setter = _fbthrift_types_fields.__CompleteMapDep_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
 
-    def __init__(
-        self, *,
-        str string_field=None,
-        i32_field=None
-    ):
-        if i32_field is not None:
-            if not isinstance(i32_field, int):
-                raise TypeError(f'i32_field is not a { int !r}.')
-            i32_field = <cint32_t> i32_field
+    def __call__(CompleteMapDep self, **kwargs):
+        return self
 
-        self._cpp_obj = __to_shared_ptr(cmove(NoExceptMoveUnion._make_instance(
-          NULL,
-          string_field,
-          i32_field,
-        )))
-        self._load_cache()
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return thrift.py3.types._IsSet("CompleteMapDep", {
+        })
 
     @staticmethod
-    def fromValue(value):
-        if value is None:
-            return NoExceptMoveUnion()
-        if isinstance(value, str):
-            return NoExceptMoveUnion(string_field=value)
-        if isinstance(value, int):
-            if not isinstance(value, pbool):
-                try:
-                    <cint32_t> value
-                    return NoExceptMoveUnion(i32_field=value)
-                except OverflowError:
-                    pass
-        raise ValueError(f"Unable to derive correct union field for value: {value}")
-
-    @staticmethod
-    cdef unique_ptr[cNoExceptMoveUnion] _make_instance(
-        cNoExceptMoveUnion* base_instance,
-        str string_field,
-        object i32_field
-    ) except *:
-        cdef unique_ptr[cNoExceptMoveUnion] c_inst = make_unique[cNoExceptMoveUnion]()
-        cdef bint any_set = False
-        if string_field is not None:
-            if any_set:
-                raise TypeError("At most one field may be set when initializing a union")
-            deref(c_inst).set_string_field(string_field.encode('UTF-8'))
-            any_set = True
-        if i32_field is not None:
-            if any_set:
-                raise TypeError("At most one field may be set when initializing a union")
-            deref(c_inst).set_i32_field(i32_field)
-            any_set = True
-        # in C++ you don't have to call move(), but this doesn't translate
-        # into a C++ return statement, so you do here
-        return cmove(c_inst)
-
-    @staticmethod
-    cdef _fbthrift_create(shared_ptr[cNoExceptMoveUnion] cpp_obj):
-        __fbthrift_inst = <NoExceptMoveUnion>NoExceptMoveUnion.__new__(NoExceptMoveUnion)
+    cdef _fbthrift_create(shared_ptr[cCompleteMapDep] cpp_obj):
+        __fbthrift_inst = <CompleteMapDep>CompleteMapDep.__new__(CompleteMapDep)
         __fbthrift_inst._cpp_obj = cmove(cpp_obj)
-        __fbthrift_inst._load_cache()
         return __fbthrift_inst
 
-    @property
-    def string_field(self):
-        if self.type.value != 1:
-            raise AttributeError(f'Union contains a value of type {self.type.name}, not string_field')
-        return self.value
 
-    @property
-    def i32_field(self):
-        if self.type.value != 2:
-            raise AttributeError(f'Union contains a value of type {self.type.name}, not i32_field')
-        return self.value
+    def __hash__(CompleteMapDep self):
+        return super().__hash__()
+
+    def __repr__(CompleteMapDep self):
+        return super().__repr__()
+
+    def __str__(CompleteMapDep self):
+        return super().__str__()
 
 
-    def __hash__(NoExceptMoveUnion self):
-        return  super().__hash__()
-
-    cdef _load_cache(NoExceptMoveUnion self):
-        self.type = NoExceptMoveUnion.Type(<int>(deref(self._cpp_obj).getType()))
-        cdef int type = self.type.value
-        if type == 0:    # Empty
-            self.value = None
-        elif type == 1:
-            self.value = bytes(deref(self._cpp_obj).get_string_field()).decode('UTF-8')
-        elif type == 2:
-            self.value = deref(self._cpp_obj).get_i32_field()
-
-    def __copy__(NoExceptMoveUnion self):
-        cdef shared_ptr[cNoExceptMoveUnion] cpp_obj = make_shared[cNoExceptMoveUnion](
+    def __copy__(CompleteMapDep self):
+        cdef shared_ptr[cCompleteMapDep] cpp_obj = make_shared[cCompleteMapDep](
             deref(self._cpp_obj)
         )
-        return NoExceptMoveUnion._fbthrift_create(cmove(cpp_obj))
+        return CompleteMapDep._fbthrift_create(cmove(cpp_obj))
 
     def __richcmp__(self, other, int op):
         r = self._fbthrift_cmp_sametype(other, op)
-        return __richcmp[cNoExceptMoveUnion](
+        return __richcmp[cCompleteMapDep](
             self._cpp_obj,
-            (<NoExceptMoveUnion>other)._cpp_obj,
+            (<CompleteMapDep>other)._cpp_obj,
             op,
         ) if r is None else r
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__NoExceptMoveUnion()
+        return _types_reflection.get_reflection__CompleteMapDep()
 
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftMetadata meta
-        StructMetadata[cNoExceptMoveUnion].gen(meta)
+        StructMetadata[cCompleteMapDep].gen(meta)
         return __MetadataBox.box(cmove(meta))
 
     @staticmethod
     def __get_thrift_name__():
-        return "module.NoExceptMoveUnion"
+        return "module.CompleteMapDep"
 
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cNoExceptMoveUnion](idx))
+        return __sv_to_str(__get_field_name_by_index[cCompleteMapDep](idx))
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return 2
+        return 0
 
-    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(NoExceptMoveUnion self, __Protocol proto):
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(CompleteMapDep self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
         with nogil:
-            data = cmove(serializer.cserialize[cNoExceptMoveUnion](self._cpp_obj.get(), proto))
+            data = cmove(serializer.cserialize[cCompleteMapDep](self._cpp_obj.get(), proto))
         return _fbthrift_iobuf.from_unique_ptr(cmove(data))
 
-    cdef cuint32_t _fbthrift_deserialize(NoExceptMoveUnion self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+    cdef cuint32_t _fbthrift_deserialize(CompleteMapDep self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
         cdef cuint32_t needed
-        self._cpp_obj = make_shared[cNoExceptMoveUnion]()
+        self._cpp_obj = make_shared[cCompleteMapDep]()
         with nogil:
-            needed = serializer.cdeserialize[cNoExceptMoveUnion](buf, self._cpp_obj.get(), proto)
-        # force a cache reload since the underlying data's changed
-        self._load_cache()
+            needed = serializer.cdeserialize[cCompleteMapDep](buf, self._cpp_obj.get(), proto)
         return needed
 
     def _to_python(self):
@@ -3188,7 +2970,7 @@ cdef class NoExceptMoveUnion(thrift.py3.types.Union):
         python_types = importlib.import_module(
             "module.thrift_types"
         )
-        return thrift.python.converter.to_python_struct(python_types.NoExceptMoveUnion, self)
+        return thrift.python.converter.to_python_struct(python_types.CompleteMapDep, self)
 
     def _to_py3(self):
         return self
@@ -3197,7 +2979,681 @@ cdef class NoExceptMoveUnion(thrift.py3.types.Union):
         import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
-        return thrift.util.converter.to_py_struct(py_deprecated_types.NoExceptMoveUnion, self)
+        return thrift.util.converter.to_py_struct(py_deprecated_types.CompleteMapDep, self)
+@__cython.auto_pickle(False)
+cdef class IncompleteList(thrift.py3.types.Struct):
+    def __init__(IncompleteList self, **kwargs):
+        self._cpp_obj = make_shared[cIncompleteList]()
+        self._fields_setter = _fbthrift_types_fields.__IncompleteList_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(IncompleteList self, **kwargs):
+        if not kwargs:
+            return self
+        cdef IncompleteList __fbthrift_inst = IncompleteList.__new__(IncompleteList)
+        __fbthrift_inst._cpp_obj = make_shared[cIncompleteList](deref(self._cpp_obj))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__IncompleteList_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return thrift.py3.types._IsSet("IncompleteList", {
+          "field": deref(self._cpp_obj).field_ref().has_value(),
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cIncompleteList] cpp_obj):
+        __fbthrift_inst = <IncompleteList>IncompleteList.__new__(IncompleteList)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline field_impl(self):
+        if not deref(self._cpp_obj).field_ref().has_value():
+            return None
+
+        if self.__fbthrift_cached_field is None:
+            self.__fbthrift_cached_field = _std_list__List__IncompleteListDep._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).field_ref().ref_unchecked(), self._cpp_obj))
+        return self.__fbthrift_cached_field
+
+    @property
+    def field(self):
+        return self.field_impl()
+
+
+    def __hash__(IncompleteList self):
+        return super().__hash__()
+
+    def __repr__(IncompleteList self):
+        return super().__repr__()
+
+    def __str__(IncompleteList self):
+        return super().__str__()
+
+
+    def __copy__(IncompleteList self):
+        cdef shared_ptr[cIncompleteList] cpp_obj = make_shared[cIncompleteList](
+            deref(self._cpp_obj)
+        )
+        return IncompleteList._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cIncompleteList](
+            self._cpp_obj,
+            (<IncompleteList>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__IncompleteList()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cIncompleteList].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.IncompleteList"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cIncompleteList](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 1
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(IncompleteList self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cIncompleteList](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(IncompleteList self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cIncompleteList]()
+        with nogil:
+            needed = serializer.cdeserialize[cIncompleteList](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.IncompleteList, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.IncompleteList, self)
+@__cython.auto_pickle(False)
+cdef class IncompleteListDep(thrift.py3.types.Struct):
+    def __init__(IncompleteListDep self, **kwargs):
+        self._cpp_obj = make_shared[cIncompleteListDep]()
+        self._fields_setter = _fbthrift_types_fields.__IncompleteListDep_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(IncompleteListDep self, **kwargs):
+        return self
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return thrift.py3.types._IsSet("IncompleteListDep", {
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cIncompleteListDep] cpp_obj):
+        __fbthrift_inst = <IncompleteListDep>IncompleteListDep.__new__(IncompleteListDep)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+
+    def __hash__(IncompleteListDep self):
+        return super().__hash__()
+
+    def __repr__(IncompleteListDep self):
+        return super().__repr__()
+
+    def __str__(IncompleteListDep self):
+        return super().__str__()
+
+
+    def __copy__(IncompleteListDep self):
+        cdef shared_ptr[cIncompleteListDep] cpp_obj = make_shared[cIncompleteListDep](
+            deref(self._cpp_obj)
+        )
+        return IncompleteListDep._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cIncompleteListDep](
+            self._cpp_obj,
+            (<IncompleteListDep>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__IncompleteListDep()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cIncompleteListDep].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.IncompleteListDep"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cIncompleteListDep](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 0
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(IncompleteListDep self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cIncompleteListDep](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(IncompleteListDep self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cIncompleteListDep]()
+        with nogil:
+            needed = serializer.cdeserialize[cIncompleteListDep](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.IncompleteListDep, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.IncompleteListDep, self)
+@__cython.auto_pickle(False)
+cdef class CompleteList(thrift.py3.types.Struct):
+    def __init__(CompleteList self, **kwargs):
+        self._cpp_obj = make_shared[cCompleteList]()
+        self._fields_setter = _fbthrift_types_fields.__CompleteList_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(CompleteList self, **kwargs):
+        if not kwargs:
+            return self
+        cdef CompleteList __fbthrift_inst = CompleteList.__new__(CompleteList)
+        __fbthrift_inst._cpp_obj = make_shared[cCompleteList](deref(self._cpp_obj))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__CompleteList_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return thrift.py3.types._IsSet("CompleteList", {
+          "field": deref(self._cpp_obj).field_ref().has_value(),
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cCompleteList] cpp_obj):
+        __fbthrift_inst = <CompleteList>CompleteList.__new__(CompleteList)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline field_impl(self):
+        if not deref(self._cpp_obj).field_ref().has_value():
+            return None
+
+        if self.__fbthrift_cached_field is None:
+            self.__fbthrift_cached_field = folly_small_vector__List__CompleteListDep._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).field_ref().ref_unchecked(), self._cpp_obj))
+        return self.__fbthrift_cached_field
+
+    @property
+    def field(self):
+        return self.field_impl()
+
+
+    def __hash__(CompleteList self):
+        return super().__hash__()
+
+    def __repr__(CompleteList self):
+        return super().__repr__()
+
+    def __str__(CompleteList self):
+        return super().__str__()
+
+
+    def __copy__(CompleteList self):
+        cdef shared_ptr[cCompleteList] cpp_obj = make_shared[cCompleteList](
+            deref(self._cpp_obj)
+        )
+        return CompleteList._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cCompleteList](
+            self._cpp_obj,
+            (<CompleteList>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__CompleteList()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cCompleteList].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.CompleteList"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cCompleteList](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 1
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(CompleteList self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cCompleteList](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(CompleteList self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cCompleteList]()
+        with nogil:
+            needed = serializer.cdeserialize[cCompleteList](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.CompleteList, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.CompleteList, self)
+@__cython.auto_pickle(False)
+cdef class CompleteListDep(thrift.py3.types.Struct):
+    def __init__(CompleteListDep self, **kwargs):
+        self._cpp_obj = make_shared[cCompleteListDep]()
+        self._fields_setter = _fbthrift_types_fields.__CompleteListDep_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(CompleteListDep self, **kwargs):
+        return self
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return thrift.py3.types._IsSet("CompleteListDep", {
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cCompleteListDep] cpp_obj):
+        __fbthrift_inst = <CompleteListDep>CompleteListDep.__new__(CompleteListDep)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+
+    def __hash__(CompleteListDep self):
+        return super().__hash__()
+
+    def __repr__(CompleteListDep self):
+        return super().__repr__()
+
+    def __str__(CompleteListDep self):
+        return super().__str__()
+
+
+    def __copy__(CompleteListDep self):
+        cdef shared_ptr[cCompleteListDep] cpp_obj = make_shared[cCompleteListDep](
+            deref(self._cpp_obj)
+        )
+        return CompleteListDep._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cCompleteListDep](
+            self._cpp_obj,
+            (<CompleteListDep>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__CompleteListDep()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cCompleteListDep].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.CompleteListDep"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cCompleteListDep](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 0
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(CompleteListDep self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cCompleteListDep](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(CompleteListDep self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cCompleteListDep]()
+        with nogil:
+            needed = serializer.cdeserialize[cCompleteListDep](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.CompleteListDep, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.CompleteListDep, self)
+@__cython.auto_pickle(False)
+cdef class AdaptedList(thrift.py3.types.Struct):
+    def __init__(AdaptedList self, **kwargs):
+        self._cpp_obj = make_shared[cAdaptedList]()
+        self._fields_setter = _fbthrift_types_fields.__AdaptedList_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(AdaptedList self, **kwargs):
+        if not kwargs:
+            return self
+        cdef AdaptedList __fbthrift_inst = AdaptedList.__new__(AdaptedList)
+        __fbthrift_inst._cpp_obj = make_shared[cAdaptedList](deref(self._cpp_obj))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__AdaptedList_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return thrift.py3.types._IsSet("AdaptedList", {
+          "field": deref(self._cpp_obj).field_ref().has_value(),
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cAdaptedList] cpp_obj):
+        __fbthrift_inst = <AdaptedList>AdaptedList.__new__(AdaptedList)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline field_impl(self):
+        if not deref(self._cpp_obj).field_ref().has_value():
+            return None
+
+        if self.__fbthrift_cached_field is None:
+            self.__fbthrift_cached_field = List__AdaptedListDep._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).field_ref().ref_unchecked(), self._cpp_obj))
+        return self.__fbthrift_cached_field
+
+    @property
+    def field(self):
+        return self.field_impl()
+
+
+    def __hash__(AdaptedList self):
+        return super().__hash__()
+
+    def __repr__(AdaptedList self):
+        return super().__repr__()
+
+    def __str__(AdaptedList self):
+        return super().__str__()
+
+
+    def __copy__(AdaptedList self):
+        cdef shared_ptr[cAdaptedList] cpp_obj = make_shared[cAdaptedList](
+            deref(self._cpp_obj)
+        )
+        return AdaptedList._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cAdaptedList](
+            self._cpp_obj,
+            (<AdaptedList>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__AdaptedList()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cAdaptedList].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.AdaptedList"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cAdaptedList](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 1
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(AdaptedList self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cAdaptedList](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(AdaptedList self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cAdaptedList]()
+        with nogil:
+            needed = serializer.cdeserialize[cAdaptedList](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.AdaptedList, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedList, self)
+@__cython.auto_pickle(False)
+cdef class DependentAdaptedList(thrift.py3.types.Struct):
+    def __init__(DependentAdaptedList self, **kwargs):
+        self._cpp_obj = make_shared[cDependentAdaptedList]()
+        self._fields_setter = _fbthrift_types_fields.__DependentAdaptedList_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(DependentAdaptedList self, **kwargs):
+        if not kwargs:
+            return self
+        cdef DependentAdaptedList __fbthrift_inst = DependentAdaptedList.__new__(DependentAdaptedList)
+        __fbthrift_inst._cpp_obj = make_shared[cDependentAdaptedList](deref(self._cpp_obj))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__DependentAdaptedList_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return thrift.py3.types._IsSet("DependentAdaptedList", {
+          "field": deref(self._cpp_obj).field_ref().has_value(),
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cDependentAdaptedList] cpp_obj):
+        __fbthrift_inst = <DependentAdaptedList>DependentAdaptedList.__new__(DependentAdaptedList)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline field_impl(self):
+        if not deref(self._cpp_obj).field_ref().has_value():
+            return None
+
+        if self.__fbthrift_cached_field is None:
+            self.__fbthrift_cached_field = List__DependentAdaptedListDep._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).field_ref().ref_unchecked(), self._cpp_obj))
+        return self.__fbthrift_cached_field
+
+    @property
+    def field(self):
+        return self.field_impl()
+
+
+    def __hash__(DependentAdaptedList self):
+        return super().__hash__()
+
+    def __repr__(DependentAdaptedList self):
+        return super().__repr__()
+
+    def __str__(DependentAdaptedList self):
+        return super().__str__()
+
+
+    def __copy__(DependentAdaptedList self):
+        cdef shared_ptr[cDependentAdaptedList] cpp_obj = make_shared[cDependentAdaptedList](
+            deref(self._cpp_obj)
+        )
+        return DependentAdaptedList._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cDependentAdaptedList](
+            self._cpp_obj,
+            (<DependentAdaptedList>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__DependentAdaptedList()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cDependentAdaptedList].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.DependentAdaptedList"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cDependentAdaptedList](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 1
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(DependentAdaptedList self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cDependentAdaptedList](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(DependentAdaptedList self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cDependentAdaptedList]()
+        with nogil:
+            needed = serializer.cdeserialize[cDependentAdaptedList](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.DependentAdaptedList, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.DependentAdaptedList, self)
 @__cython.auto_pickle(False)
 cdef class AllocatorAware(thrift.py3.types.Struct):
     def __init__(AllocatorAware self, **kwargs):
@@ -4837,56 +5293,246 @@ cdef class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
 Sequence.register(List__std_unordered_map__Map__i32_string)
 
 @__cython.auto_pickle(False)
-cdef class List__binary(thrift.py3.types.List):
+cdef class Map__i32_IncompleteMapDep(thrift.py3.types.Map):
     def __init__(self, items=None):
-        if isinstance(items, List__binary):
-            self._cpp_obj = (<List__binary> items)._cpp_obj
+        if isinstance(items, Map__i32_IncompleteMapDep):
+            self._cpp_obj = (<Map__i32_IncompleteMapDep> items)._cpp_obj
         else:
-            self._cpp_obj = List__binary._make_instance(items)
+            self._cpp_obj = Map__i32_IncompleteMapDep._make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[string]] c_items):
-        __fbthrift_inst = <List__binary>List__binary.__new__(List__binary)
+    cdef _fbthrift_create(shared_ptr[cmap[cint32_t,cIncompleteMapDep]] c_items):
+        __fbthrift_inst = <Map__i32_IncompleteMapDep>Map__i32_IncompleteMapDep.__new__(Map__i32_IncompleteMapDep)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
 
-    def __copy__(List__binary self):
-        cdef shared_ptr[vector[string]] cpp_obj = make_shared[vector[string]](
+    def __copy__(Map__i32_IncompleteMapDep self):
+        cdef shared_ptr[cmap[cint32_t,cIncompleteMapDep]] cpp_obj = make_shared[cmap[cint32_t,cIncompleteMapDep]](
             deref(self._cpp_obj)
         )
-        return List__binary._fbthrift_create(cmove(cpp_obj))
+        return Map__i32_IncompleteMapDep._fbthrift_create(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
 
     @staticmethod
-    cdef shared_ptr[vector[string]] _make_instance(object items) except *:
-        cdef shared_ptr[vector[string]] c_inst = make_shared[vector[string]]()
+    cdef shared_ptr[cmap[cint32_t,cIncompleteMapDep]] _make_instance(object items) except *:
+        cdef shared_ptr[cmap[cint32_t,cIncompleteMapDep]] c_inst = make_shared[cmap[cint32_t,cIncompleteMapDep]]()
         if items is not None:
-            if isinstance(items, str):
-                raise TypeError("If you really want to pass a string into a _typing.Sequence[bytes] field, explicitly convert it first.")
+            for key, item in items.items():
+                if not isinstance(key, int):
+                    raise TypeError(f"{key!r} is not of type int")
+                key = <cint32_t> key
+                if not isinstance(item, IncompleteMapDep):
+                    raise TypeError(f"{item!r} is not of type IncompleteMapDep")
+
+                deref(c_inst)[key] = deref((<IncompleteMapDep>item)._cpp_obj)
+        return c_inst
+
+    cdef _check_key_type(self, key):
+        if not self or key is None:
+            return
+        if isinstance(key, int):
+            return key
+
+    def __getitem__(self, key):
+        err = KeyError(f'{key}')
+        key = self._check_key_type(key)
+        if key is None:
+            raise err
+        cdef cint32_t ckey = key
+        if not __map_contains(self._cpp_obj, ckey):
+            raise err
+        cdef shared_ptr[cIncompleteMapDep] citem
+        __map_getitem(self._cpp_obj, ckey, citem)
+        return IncompleteMapDep._fbthrift_create(citem)
+
+    def __iter__(self):
+        if not self:
+            return
+        cdef __map_iter[cmap[cint32_t,cIncompleteMapDep]] itr = __map_iter[cmap[cint32_t,cIncompleteMapDep]](self._cpp_obj)
+        cdef cint32_t citem = 0
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextKey(self._cpp_obj, citem)
+            yield citem
+
+    def __contains__(self, key):
+        key = self._check_key_type(key)
+        if key is None:
+            return False
+        cdef cint32_t ckey = key
+        return __map_contains(self._cpp_obj, ckey)
+
+    def values(self):
+        if not self:
+            return
+        cdef __map_iter[cmap[cint32_t,cIncompleteMapDep]] itr = __map_iter[cmap[cint32_t,cIncompleteMapDep]](self._cpp_obj)
+        cdef shared_ptr[cIncompleteMapDep] citem
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextValue(self._cpp_obj, citem)
+            yield IncompleteMapDep._fbthrift_create(citem)
+
+    def items(self):
+        if not self:
+            return
+        cdef __map_iter[cmap[cint32_t,cIncompleteMapDep]] itr = __map_iter[cmap[cint32_t,cIncompleteMapDep]](self._cpp_obj)
+        cdef cint32_t ckey = 0
+        cdef shared_ptr[cIncompleteMapDep] citem
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextItem(self._cpp_obj, ckey, citem)
+            yield (ckey, IncompleteMapDep._fbthrift_create(citem))
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__Map__i32_IncompleteMapDep()
+
+Mapping.register(Map__i32_IncompleteMapDep)
+
+@__cython.auto_pickle(False)
+cdef class std_unordered_map__Map__i32_CompleteMapDep(thrift.py3.types.Map):
+    def __init__(self, items=None):
+        if isinstance(items, std_unordered_map__Map__i32_CompleteMapDep):
+            self._cpp_obj = (<std_unordered_map__Map__i32_CompleteMapDep> items)._cpp_obj
+        else:
+            self._cpp_obj = std_unordered_map__Map__i32_CompleteMapDep._make_instance(items)
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[std_unordered_map[cint32_t,cCompleteMapDep]] c_items):
+        __fbthrift_inst = <std_unordered_map__Map__i32_CompleteMapDep>std_unordered_map__Map__i32_CompleteMapDep.__new__(std_unordered_map__Map__i32_CompleteMapDep)
+        __fbthrift_inst._cpp_obj = cmove(c_items)
+        return __fbthrift_inst
+
+    def __copy__(std_unordered_map__Map__i32_CompleteMapDep self):
+        cdef shared_ptr[std_unordered_map[cint32_t,cCompleteMapDep]] cpp_obj = make_shared[std_unordered_map[cint32_t,cCompleteMapDep]](
+            deref(self._cpp_obj)
+        )
+        return std_unordered_map__Map__i32_CompleteMapDep._fbthrift_create(cmove(cpp_obj))
+
+    def __len__(self):
+        return deref(self._cpp_obj).size()
+
+    @staticmethod
+    cdef shared_ptr[std_unordered_map[cint32_t,cCompleteMapDep]] _make_instance(object items) except *:
+        cdef shared_ptr[std_unordered_map[cint32_t,cCompleteMapDep]] c_inst = make_shared[std_unordered_map[cint32_t,cCompleteMapDep]]()
+        if items is not None:
+            for key, item in items.items():
+                if not isinstance(key, int):
+                    raise TypeError(f"{key!r} is not of type int")
+                key = <cint32_t> key
+                if not isinstance(item, CompleteMapDep):
+                    raise TypeError(f"{item!r} is not of type CompleteMapDep")
+
+                deref(c_inst)[key] = deref((<CompleteMapDep>item)._cpp_obj)
+        return c_inst
+
+    cdef _check_key_type(self, key):
+        if not self or key is None:
+            return
+        if isinstance(key, int):
+            return key
+
+    def __getitem__(self, key):
+        err = KeyError(f'{key}')
+        key = self._check_key_type(key)
+        if key is None:
+            raise err
+        cdef cint32_t ckey = key
+        if not __map_contains(self._cpp_obj, ckey):
+            raise err
+        cdef shared_ptr[cCompleteMapDep] citem
+        __map_getitem(self._cpp_obj, ckey, citem)
+        return CompleteMapDep._fbthrift_create(citem)
+
+    def __iter__(self):
+        if not self:
+            return
+        cdef __map_iter[std_unordered_map[cint32_t,cCompleteMapDep]] itr = __map_iter[std_unordered_map[cint32_t,cCompleteMapDep]](self._cpp_obj)
+        cdef cint32_t citem = 0
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextKey(self._cpp_obj, citem)
+            yield citem
+
+    def __contains__(self, key):
+        key = self._check_key_type(key)
+        if key is None:
+            return False
+        cdef cint32_t ckey = key
+        return __map_contains(self._cpp_obj, ckey)
+
+    def values(self):
+        if not self:
+            return
+        cdef __map_iter[std_unordered_map[cint32_t,cCompleteMapDep]] itr = __map_iter[std_unordered_map[cint32_t,cCompleteMapDep]](self._cpp_obj)
+        cdef shared_ptr[cCompleteMapDep] citem
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextValue(self._cpp_obj, citem)
+            yield CompleteMapDep._fbthrift_create(citem)
+
+    def items(self):
+        if not self:
+            return
+        cdef __map_iter[std_unordered_map[cint32_t,cCompleteMapDep]] itr = __map_iter[std_unordered_map[cint32_t,cCompleteMapDep]](self._cpp_obj)
+        cdef cint32_t ckey = 0
+        cdef shared_ptr[cCompleteMapDep] citem
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextItem(self._cpp_obj, ckey, citem)
+            yield (ckey, CompleteMapDep._fbthrift_create(citem))
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__std_unordered_map__Map__i32_CompleteMapDep()
+
+Mapping.register(std_unordered_map__Map__i32_CompleteMapDep)
+
+@__cython.auto_pickle(False)
+cdef class _std_list__List__IncompleteListDep(thrift.py3.types.List):
+    def __init__(self, items=None):
+        if isinstance(items, _std_list__List__IncompleteListDep):
+            self._cpp_obj = (<_std_list__List__IncompleteListDep> items)._cpp_obj
+        else:
+            self._cpp_obj = _std_list__List__IncompleteListDep._make_instance(items)
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[_std_list[cIncompleteListDep]] c_items):
+        __fbthrift_inst = <_std_list__List__IncompleteListDep>_std_list__List__IncompleteListDep.__new__(_std_list__List__IncompleteListDep)
+        __fbthrift_inst._cpp_obj = cmove(c_items)
+        return __fbthrift_inst
+
+    def __copy__(_std_list__List__IncompleteListDep self):
+        cdef shared_ptr[_std_list[cIncompleteListDep]] cpp_obj = make_shared[_std_list[cIncompleteListDep]](
+            deref(self._cpp_obj)
+        )
+        return _std_list__List__IncompleteListDep._fbthrift_create(cmove(cpp_obj))
+
+    def __len__(self):
+        return deref(self._cpp_obj).size()
+
+    @staticmethod
+    cdef shared_ptr[_std_list[cIncompleteListDep]] _make_instance(object items) except *:
+        cdef shared_ptr[_std_list[cIncompleteListDep]] c_inst = make_shared[_std_list[cIncompleteListDep]]()
+        if items is not None:
             for item in items:
-                if not isinstance(item, bytes):
-                    raise TypeError(f"{item!r} is not of type bytes")
-                deref(c_inst).push_back(item)
+                if not isinstance(item, IncompleteListDep):
+                    raise TypeError(f"{item!r} is not of type IncompleteListDep")
+                deref(c_inst).push_back(deref((<IncompleteListDep>item)._cpp_obj))
         return c_inst
 
     cdef _get_slice(self, slice index_obj):
         cdef int start, stop, step
         start, stop, step = index_obj.indices(deref(self._cpp_obj).size())
-        return List__binary._fbthrift_create(
-            __list_slice[vector[string]](self._cpp_obj, start, stop, step)
+        return _std_list__List__IncompleteListDep._fbthrift_create(
+            __list_slice[_std_list[cIncompleteListDep]](self._cpp_obj, start, stop, step)
         )
 
     cdef _get_single_item(self, size_t index):
-        cdef string citem
+        cdef shared_ptr[cIncompleteListDep] citem
         __list_getitem(self._cpp_obj, index, citem)
-        return bytes(citem)
+        return IncompleteListDep._fbthrift_create(citem)
 
     cdef _check_item_type(self, item):
         if not self or item is None:
             return
-        if isinstance(item, bytes):
+        if isinstance(item, IncompleteListDep):
             return item
 
     def index(self, item, start=0, stop=None):
@@ -4895,8 +5541,8 @@ cdef class List__binary(thrift.py3.types.List):
         if item is None:
             raise err
         cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
-        cdef string citem = item
-        cdef std_libcpp.optional[size_t] found = __list_index[vector[string]](self._cpp_obj, indices[0], indices[1], citem)
+        cdef cIncompleteListDep citem = deref((<IncompleteListDep>item)._cpp_obj)
+        cdef std_libcpp.optional[size_t] found = __list_index[_std_list[cIncompleteListDep]](self._cpp_obj, indices[0], indices[1], citem)
         if not found.has_value():
             raise err
         return found.value()
@@ -4905,110 +5551,246 @@ cdef class List__binary(thrift.py3.types.List):
         item = self._check_item_type(item)
         if item is None:
             return 0
-        cdef string citem = item
-        return __list_count[vector[string]](self._cpp_obj, citem)
+        cdef cIncompleteListDep citem = deref((<IncompleteListDep>item)._cpp_obj)
+        return __list_count[_std_list[cIncompleteListDep]](self._cpp_obj, citem)
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__List__binary()
+        return _types_reflection.get_reflection___std_list__List__IncompleteListDep()
 
 
-Sequence.register(List__binary)
+Sequence.register(_std_list__List__IncompleteListDep)
 
 @__cython.auto_pickle(False)
-cdef class Map__MyEnumA_string(thrift.py3.types.Map):
+cdef class folly_small_vector__List__CompleteListDep(thrift.py3.types.List):
     def __init__(self, items=None):
-        if isinstance(items, Map__MyEnumA_string):
-            self._cpp_obj = (<Map__MyEnumA_string> items)._cpp_obj
+        if isinstance(items, folly_small_vector__List__CompleteListDep):
+            self._cpp_obj = (<folly_small_vector__List__CompleteListDep> items)._cpp_obj
         else:
-            self._cpp_obj = Map__MyEnumA_string._make_instance(items)
+            self._cpp_obj = folly_small_vector__List__CompleteListDep._make_instance(items)
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cmap[cMyEnumA,string]] c_items):
-        __fbthrift_inst = <Map__MyEnumA_string>Map__MyEnumA_string.__new__(Map__MyEnumA_string)
+    cdef _fbthrift_create(shared_ptr[folly_small_vector[cCompleteListDep]] c_items):
+        __fbthrift_inst = <folly_small_vector__List__CompleteListDep>folly_small_vector__List__CompleteListDep.__new__(folly_small_vector__List__CompleteListDep)
         __fbthrift_inst._cpp_obj = cmove(c_items)
         return __fbthrift_inst
 
-    def __copy__(Map__MyEnumA_string self):
-        cdef shared_ptr[cmap[cMyEnumA,string]] cpp_obj = make_shared[cmap[cMyEnumA,string]](
+    def __copy__(folly_small_vector__List__CompleteListDep self):
+        cdef shared_ptr[folly_small_vector[cCompleteListDep]] cpp_obj = make_shared[folly_small_vector[cCompleteListDep]](
             deref(self._cpp_obj)
         )
-        return Map__MyEnumA_string._fbthrift_create(cmove(cpp_obj))
+        return folly_small_vector__List__CompleteListDep._fbthrift_create(cmove(cpp_obj))
 
     def __len__(self):
         return deref(self._cpp_obj).size()
 
     @staticmethod
-    cdef shared_ptr[cmap[cMyEnumA,string]] _make_instance(object items) except *:
-        cdef shared_ptr[cmap[cMyEnumA,string]] c_inst = make_shared[cmap[cMyEnumA,string]]()
+    cdef shared_ptr[folly_small_vector[cCompleteListDep]] _make_instance(object items) except *:
+        cdef shared_ptr[folly_small_vector[cCompleteListDep]] c_inst = make_shared[folly_small_vector[cCompleteListDep]]()
         if items is not None:
-            for key, item in items.items():
-                if not isinstance(key, MyEnumA):
-                    raise TypeError(f"{key!r} is not of type MyEnumA")
-                if not isinstance(item, str):
-                    raise TypeError(f"{item!r} is not of type str")
-
-                deref(c_inst)[<cMyEnumA><int>key] = item.encode('UTF-8')
+            for item in items:
+                if not isinstance(item, CompleteListDep):
+                    raise TypeError(f"{item!r} is not of type CompleteListDep")
+                deref(c_inst).push_back(deref((<CompleteListDep>item)._cpp_obj))
         return c_inst
 
-    cdef _check_key_type(self, key):
-        if not self or key is None:
-            return
-        if isinstance(key, MyEnumA):
-            return key
+    cdef _get_slice(self, slice index_obj):
+        cdef int start, stop, step
+        start, stop, step = index_obj.indices(deref(self._cpp_obj).size())
+        return folly_small_vector__List__CompleteListDep._fbthrift_create(
+            __list_slice[folly_small_vector[cCompleteListDep]](self._cpp_obj, start, stop, step)
+        )
 
-    def __getitem__(self, key):
-        err = KeyError(f'{key}')
-        key = self._check_key_type(key)
-        if key is None:
+    cdef _get_single_item(self, size_t index):
+        cdef shared_ptr[cCompleteListDep] citem
+        __list_getitem(self._cpp_obj, index, citem)
+        return CompleteListDep._fbthrift_create(citem)
+
+    cdef _check_item_type(self, item):
+        if not self or item is None:
+            return
+        if isinstance(item, CompleteListDep):
+            return item
+
+    def index(self, item, start=0, stop=None):
+        err = ValueError(f'{item} is not in list')
+        item = self._check_item_type(item)
+        if item is None:
             raise err
-        cdef cMyEnumA ckey = <cMyEnumA><int>key
-        if not __map_contains(self._cpp_obj, ckey):
+        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
+        cdef cCompleteListDep citem = deref((<CompleteListDep>item)._cpp_obj)
+        cdef std_libcpp.optional[size_t] found = __list_index[folly_small_vector[cCompleteListDep]](self._cpp_obj, indices[0], indices[1], citem)
+        if not found.has_value():
             raise err
-        cdef string citem
-        __map_getitem(self._cpp_obj, ckey, citem)
-        return bytes(citem).decode('UTF-8')
+        return found.value()
 
-    def __iter__(self):
-        if not self:
-            return
-        cdef __map_iter[cmap[cMyEnumA,string]] itr = __map_iter[cmap[cMyEnumA,string]](self._cpp_obj)
-        cdef cMyEnumA citem
-        for i in range(deref(self._cpp_obj).size()):
-            itr.genNextKey(self._cpp_obj, citem)
-            yield translate_cpp_enum_to_python(MyEnumA, <int> citem)
-
-    def __contains__(self, key):
-        key = self._check_key_type(key)
-        if key is None:
-            return False
-        cdef cMyEnumA ckey = <cMyEnumA><int>key
-        return __map_contains(self._cpp_obj, ckey)
-
-    def values(self):
-        if not self:
-            return
-        cdef __map_iter[cmap[cMyEnumA,string]] itr = __map_iter[cmap[cMyEnumA,string]](self._cpp_obj)
-        cdef string citem
-        for i in range(deref(self._cpp_obj).size()):
-            itr.genNextValue(self._cpp_obj, citem)
-            yield bytes(citem).decode('UTF-8')
-
-    def items(self):
-        if not self:
-            return
-        cdef __map_iter[cmap[cMyEnumA,string]] itr = __map_iter[cmap[cMyEnumA,string]](self._cpp_obj)
-        cdef cMyEnumA ckey
-        cdef string citem
-        for i in range(deref(self._cpp_obj).size()):
-            itr.genNextItem(self._cpp_obj, ckey, citem)
-            yield (translate_cpp_enum_to_python(MyEnumA, <int> ckey), bytes(citem).decode('UTF-8'))
+    def count(self, item):
+        item = self._check_item_type(item)
+        if item is None:
+            return 0
+        cdef cCompleteListDep citem = deref((<CompleteListDep>item)._cpp_obj)
+        return __list_count[folly_small_vector[cCompleteListDep]](self._cpp_obj, citem)
 
     @staticmethod
     def __get_reflection__():
-        return _types_reflection.get_reflection__Map__MyEnumA_string()
+        return _types_reflection.get_reflection__folly_small_vector__List__CompleteListDep()
 
-Mapping.register(Map__MyEnumA_string)
+
+Sequence.register(folly_small_vector__List__CompleteListDep)
+
+@__cython.auto_pickle(False)
+cdef class List__AdaptedListDep(thrift.py3.types.List):
+    def __init__(self, items=None):
+        if isinstance(items, List__AdaptedListDep):
+            self._cpp_obj = (<List__AdaptedListDep> items)._cpp_obj
+        else:
+            self._cpp_obj = List__AdaptedListDep._make_instance(items)
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[vector[cAdaptedListDep]] c_items):
+        __fbthrift_inst = <List__AdaptedListDep>List__AdaptedListDep.__new__(List__AdaptedListDep)
+        __fbthrift_inst._cpp_obj = cmove(c_items)
+        return __fbthrift_inst
+
+    def __copy__(List__AdaptedListDep self):
+        cdef shared_ptr[vector[cAdaptedListDep]] cpp_obj = make_shared[vector[cAdaptedListDep]](
+            deref(self._cpp_obj)
+        )
+        return List__AdaptedListDep._fbthrift_create(cmove(cpp_obj))
+
+    def __len__(self):
+        return deref(self._cpp_obj).size()
+
+    @staticmethod
+    cdef shared_ptr[vector[cAdaptedListDep]] _make_instance(object items) except *:
+        cdef shared_ptr[vector[cAdaptedListDep]] c_inst = make_shared[vector[cAdaptedListDep]]()
+        if items is not None:
+            for item in items:
+                if not isinstance(item, AdaptedListDep):
+                    raise TypeError(f"{item!r} is not of type AdaptedListDep")
+                deref(c_inst).push_back(deref((<AdaptedListDep>item)._cpp_obj))
+        return c_inst
+
+    cdef _get_slice(self, slice index_obj):
+        cdef int start, stop, step
+        start, stop, step = index_obj.indices(deref(self._cpp_obj).size())
+        return List__AdaptedListDep._fbthrift_create(
+            __list_slice[vector[cAdaptedListDep]](self._cpp_obj, start, stop, step)
+        )
+
+    cdef _get_single_item(self, size_t index):
+        cdef shared_ptr[cAdaptedListDep] citem
+        __list_getitem(self._cpp_obj, index, citem)
+        return AdaptedListDep._fbthrift_create(citem)
+
+    cdef _check_item_type(self, item):
+        if not self or item is None:
+            return
+        if isinstance(item, AdaptedListDep):
+            return item
+
+    def index(self, item, start=0, stop=None):
+        err = ValueError(f'{item} is not in list')
+        item = self._check_item_type(item)
+        if item is None:
+            raise err
+        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
+        cdef cAdaptedListDep citem = deref((<AdaptedListDep>item)._cpp_obj)
+        cdef std_libcpp.optional[size_t] found = __list_index[vector[cAdaptedListDep]](self._cpp_obj, indices[0], indices[1], citem)
+        if not found.has_value():
+            raise err
+        return found.value()
+
+    def count(self, item):
+        item = self._check_item_type(item)
+        if item is None:
+            return 0
+        cdef cAdaptedListDep citem = deref((<AdaptedListDep>item)._cpp_obj)
+        return __list_count[vector[cAdaptedListDep]](self._cpp_obj, citem)
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__List__AdaptedListDep()
+
+
+Sequence.register(List__AdaptedListDep)
+
+@__cython.auto_pickle(False)
+cdef class List__DependentAdaptedListDep(thrift.py3.types.List):
+    def __init__(self, items=None):
+        if isinstance(items, List__DependentAdaptedListDep):
+            self._cpp_obj = (<List__DependentAdaptedListDep> items)._cpp_obj
+        else:
+            self._cpp_obj = List__DependentAdaptedListDep._make_instance(items)
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[vector[cDependentAdaptedListDep]] c_items):
+        __fbthrift_inst = <List__DependentAdaptedListDep>List__DependentAdaptedListDep.__new__(List__DependentAdaptedListDep)
+        __fbthrift_inst._cpp_obj = cmove(c_items)
+        return __fbthrift_inst
+
+    def __copy__(List__DependentAdaptedListDep self):
+        cdef shared_ptr[vector[cDependentAdaptedListDep]] cpp_obj = make_shared[vector[cDependentAdaptedListDep]](
+            deref(self._cpp_obj)
+        )
+        return List__DependentAdaptedListDep._fbthrift_create(cmove(cpp_obj))
+
+    def __len__(self):
+        return deref(self._cpp_obj).size()
+
+    @staticmethod
+    cdef shared_ptr[vector[cDependentAdaptedListDep]] _make_instance(object items) except *:
+        cdef shared_ptr[vector[cDependentAdaptedListDep]] c_inst = make_shared[vector[cDependentAdaptedListDep]]()
+        if items is not None:
+            for item in items:
+                if not isinstance(item, DependentAdaptedListDep):
+                    raise TypeError(f"{item!r} is not of type DependentAdaptedListDep")
+                deref(c_inst).push_back(deref((<DependentAdaptedListDep>item)._cpp_obj))
+        return c_inst
+
+    cdef _get_slice(self, slice index_obj):
+        cdef int start, stop, step
+        start, stop, step = index_obj.indices(deref(self._cpp_obj).size())
+        return List__DependentAdaptedListDep._fbthrift_create(
+            __list_slice[vector[cDependentAdaptedListDep]](self._cpp_obj, start, stop, step)
+        )
+
+    cdef _get_single_item(self, size_t index):
+        cdef shared_ptr[cDependentAdaptedListDep] citem
+        __list_getitem(self._cpp_obj, index, citem)
+        return DependentAdaptedListDep._fbthrift_create(citem)
+
+    cdef _check_item_type(self, item):
+        if not self or item is None:
+            return
+        if isinstance(item, DependentAdaptedListDep):
+            return item
+
+    def index(self, item, start=0, stop=None):
+        err = ValueError(f'{item} is not in list')
+        item = self._check_item_type(item)
+        if item is None:
+            raise err
+        cdef (int, int, int) indices = slice(start, stop).indices(deref(self._cpp_obj).size())
+        cdef cDependentAdaptedListDep citem = deref((<DependentAdaptedListDep>item)._cpp_obj)
+        cdef std_libcpp.optional[size_t] found = __list_index[vector[cDependentAdaptedListDep]](self._cpp_obj, indices[0], indices[1], citem)
+        if not found.has_value():
+            raise err
+        return found.value()
+
+    def count(self, item):
+        item = self._check_item_type(item)
+        if item is None:
+            return 0
+        cdef cDependentAdaptedListDep citem = deref((<DependentAdaptedListDep>item)._cpp_obj)
+        return __list_count[vector[cDependentAdaptedListDep]](self._cpp_obj, citem)
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__List__DependentAdaptedListDep()
+
+
+Sequence.register(List__DependentAdaptedListDep)
 
 @__cython.auto_pickle(False)
 cdef class Set__i32(thrift.py3.types.Set):

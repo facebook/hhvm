@@ -51,27 +51,6 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 }
 
 
-template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::apache::thrift::fixtures::types::MyEnumA>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
-
-template<>
-const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
-    ::apache::thrift::fixtures::types::NoExceptMoveUnion::Type>::namesmap() {
-  static const folly::Indestructible<NamesMap> pairs {
-    {
-    }
-  };
-  return *pairs;
-}
-
 
 template<>
 void reset_field<::apache::thrift::fixtures::types::decorated_struct>(
@@ -326,52 +305,89 @@ void reset_field<::apache::thrift::fixtures::types::ForwardUsageByRef>(
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::NoexceptMoveEmpty>(
-    ::apache::thrift::fixtures::types::NoexceptMoveEmpty& obj, uint16_t index) {
-  switch (index) {
-  }
-}
-
-template<>
-void reset_field<::apache::thrift::fixtures::types::NoexceptMoveSimpleStruct>(
-    ::apache::thrift::fixtures::types::NoexceptMoveSimpleStruct& obj, uint16_t index) {
+void reset_field<::apache::thrift::fixtures::types::IncompleteMap>(
+    ::apache::thrift::fixtures::types::IncompleteMap& obj, uint16_t index) {
   switch (index) {
     case 0:
-      obj.boolField_ref().copy_from(default_inst<::apache::thrift::fixtures::types::NoexceptMoveSimpleStruct>().boolField_ref());
+      obj.field_ref().copy_from(default_inst<::apache::thrift::fixtures::types::IncompleteMap>().field_ref());
       return;
   }
 }
 
 template<>
-void reset_field<::apache::thrift::fixtures::types::NoexceptMoveComplexStruct>(
-    ::apache::thrift::fixtures::types::NoexceptMoveComplexStruct& obj, uint16_t index) {
+void reset_field<::apache::thrift::fixtures::types::IncompleteMapDep>(
+    ::apache::thrift::fixtures::types::IncompleteMapDep& obj, uint16_t index) {
+  switch (index) {
+  }
+}
+
+template<>
+void reset_field<::apache::thrift::fixtures::types::CompleteMap>(
+    ::apache::thrift::fixtures::types::CompleteMap& obj, uint16_t index) {
   switch (index) {
     case 0:
-      obj.MyBoolField_ref().copy_from(default_inst<::apache::thrift::fixtures::types::NoexceptMoveComplexStruct>().MyBoolField_ref());
+      obj.field_ref().copy_from(default_inst<::apache::thrift::fixtures::types::CompleteMap>().field_ref());
       return;
-    case 1:
-      obj.MyIntField_ref().copy_from(default_inst<::apache::thrift::fixtures::types::NoexceptMoveComplexStruct>().MyIntField_ref());
+  }
+}
+
+template<>
+void reset_field<::apache::thrift::fixtures::types::CompleteMapDep>(
+    ::apache::thrift::fixtures::types::CompleteMapDep& obj, uint16_t index) {
+  switch (index) {
+  }
+}
+
+template<>
+void reset_field<::apache::thrift::fixtures::types::IncompleteList>(
+    ::apache::thrift::fixtures::types::IncompleteList& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.field_ref().copy_from(default_inst<::apache::thrift::fixtures::types::IncompleteList>().field_ref());
       return;
-    case 2:
-      obj.MyStringField_ref().copy_from(default_inst<::apache::thrift::fixtures::types::NoexceptMoveComplexStruct>().MyStringField_ref());
+  }
+}
+
+template<>
+void reset_field<::apache::thrift::fixtures::types::IncompleteListDep>(
+    ::apache::thrift::fixtures::types::IncompleteListDep& obj, uint16_t index) {
+  switch (index) {
+  }
+}
+
+template<>
+void reset_field<::apache::thrift::fixtures::types::CompleteList>(
+    ::apache::thrift::fixtures::types::CompleteList& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.field_ref().copy_from(default_inst<::apache::thrift::fixtures::types::CompleteList>().field_ref());
       return;
-    case 3:
-      obj.MyStringField2_ref().copy_from(default_inst<::apache::thrift::fixtures::types::NoexceptMoveComplexStruct>().MyStringField2_ref());
+  }
+}
+
+template<>
+void reset_field<::apache::thrift::fixtures::types::CompleteListDep>(
+    ::apache::thrift::fixtures::types::CompleteListDep& obj, uint16_t index) {
+  switch (index) {
+  }
+}
+
+template<>
+void reset_field<::apache::thrift::fixtures::types::AdaptedList>(
+    ::apache::thrift::fixtures::types::AdaptedList& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.field_ref().copy_from(default_inst<::apache::thrift::fixtures::types::AdaptedList>().field_ref());
       return;
-    case 4:
-      obj.MyBinaryField_ref().copy_from(default_inst<::apache::thrift::fixtures::types::NoexceptMoveComplexStruct>().MyBinaryField_ref());
-      return;
-    case 5:
-      obj.MyBinaryField2_ref().copy_from(default_inst<::apache::thrift::fixtures::types::NoexceptMoveComplexStruct>().MyBinaryField2_ref());
-      return;
-    case 6:
-      obj.MyBinaryField3_ref().copy_from(default_inst<::apache::thrift::fixtures::types::NoexceptMoveComplexStruct>().MyBinaryField3_ref());
-      return;
-    case 7:
-      obj.MyBinaryListField4_ref().copy_from(default_inst<::apache::thrift::fixtures::types::NoexceptMoveComplexStruct>().MyBinaryListField4_ref());
-      return;
-    case 8:
-      obj.MyMapEnumAndInt_ref().copy_from(default_inst<::apache::thrift::fixtures::types::NoexceptMoveComplexStruct>().MyMapEnumAndInt_ref());
+  }
+}
+
+template<>
+void reset_field<::apache::thrift::fixtures::types::DependentAdaptedList>(
+    ::apache::thrift::fixtures::types::DependentAdaptedList& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.field_ref().copy_from(default_inst<::apache::thrift::fixtures::types::DependentAdaptedList>().field_ref());
       return;
   }
 }
@@ -622,7 +638,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 
 template<>
 const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::apache::thrift::fixtures::types::NoexceptMoveEmpty>::namesmap() {
+    ::apache::thrift::fixtures::types::IncompleteMap>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }
@@ -632,7 +648,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 
 template<>
 const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::apache::thrift::fixtures::types::NoexceptMoveSimpleStruct>::namesmap() {
+    ::apache::thrift::fixtures::types::IncompleteMapDep>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }
@@ -642,7 +658,7 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 
 template<>
 const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::apache::thrift::fixtures::types::NoexceptMoveComplexStruct>::namesmap() {
+    ::apache::thrift::fixtures::types::CompleteMap>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }
@@ -652,7 +668,67 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 
 template<>
 const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::apache::thrift::fixtures::types::NoExceptMoveUnion>::namesmap() {
+    ::apache::thrift::fixtures::types::CompleteMapDep>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::apache::thrift::fixtures::types::IncompleteList>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::apache::thrift::fixtures::types::IncompleteListDep>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::apache::thrift::fixtures::types::CompleteList>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::apache::thrift::fixtures::types::CompleteListDep>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::apache::thrift::fixtures::types::AdaptedList>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::apache::thrift::fixtures::types::DependentAdaptedList>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

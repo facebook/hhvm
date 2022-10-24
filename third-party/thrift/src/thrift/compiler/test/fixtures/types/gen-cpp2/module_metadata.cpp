@@ -61,18 +61,6 @@ void EnumMetadata<::apache::thrift::fixtures::types::MyForwardRefEnum>::gen(Thri
     enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
-void EnumMetadata<::apache::thrift::fixtures::types::MyEnumA>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.enums()->emplace("module.MyEnumA", ::apache::thrift::metadata::ThriftEnum{});
-  if (!res.second) {
-    return;
-  }
-  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
-  enum_metadata.name() = "module.MyEnumA";
-  using EnumTraits = TEnumTraits<::apache::thrift::fixtures::types::MyEnumA>;
-  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
-    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
-  }
-}
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::apache::thrift::fixtures::types::decorated_struct>::gen(ThriftMetadata& metadata) {
@@ -522,95 +510,241 @@ StructMetadata<::apache::thrift::fixtures::types::ForwardUsageByRef>::gen(Thrift
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::apache::thrift::fixtures::types::NoexceptMoveEmpty>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.NoexceptMoveEmpty", ::apache::thrift::metadata::ThriftStruct{});
+StructMetadata<::apache::thrift::fixtures::types::IncompleteMap>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.IncompleteMap", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_NoexceptMoveEmpty = res.first->second;
-  module_NoexceptMoveEmpty.name() = "module.NoexceptMoveEmpty";
-  module_NoexceptMoveEmpty.is_union() = false;
-  return res.first->second;
-}
-const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::apache::thrift::fixtures::types::NoexceptMoveSimpleStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.NoexceptMoveSimpleStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
-  }
-  ::apache::thrift::metadata::ThriftStruct& module_NoexceptMoveSimpleStruct = res.first->second;
-  module_NoexceptMoveSimpleStruct.name() = "module.NoexceptMoveSimpleStruct";
-  module_NoexceptMoveSimpleStruct.is_union() = false;
+  ::apache::thrift::metadata::ThriftStruct& module_IncompleteMap = res.first->second;
+  module_IncompleteMap.name() = "module.IncompleteMap";
+  module_IncompleteMap.is_union() = false;
   static const auto* const
-  module_NoexceptMoveSimpleStruct_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "boolField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
+  module_IncompleteMap_fields = new std::array<EncodedThriftField, 1>{{
+    {1, "field", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Typedef>("module.IncompleteMapDep", std::make_unique<Struct<::apache::thrift::fixtures::types::IncompleteMapDep>>("module.IncompleteMapDep"), std::vector<ThriftConstStruct>{})), std::vector<ThriftConstStruct>{}},
   }};
-  for (const auto& f : *module_NoexceptMoveSimpleStruct_fields) {
+  for (const auto& f : *module_IncompleteMap_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations() = f.structured_annotations;
-    module_NoexceptMoveSimpleStruct.fields()->push_back(std::move(field));
+    module_IncompleteMap.fields()->push_back(std::move(field));
   }
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::apache::thrift::fixtures::types::NoexceptMoveComplexStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.NoexceptMoveComplexStruct", ::apache::thrift::metadata::ThriftStruct{});
+StructMetadata<::apache::thrift::fixtures::types::IncompleteMapDep>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.IncompleteMapDep", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_NoexceptMoveComplexStruct = res.first->second;
-  module_NoexceptMoveComplexStruct.name() = "module.NoexceptMoveComplexStruct";
-  module_NoexceptMoveComplexStruct.is_union() = false;
+  ::apache::thrift::metadata::ThriftStruct& module_IncompleteMapDep = res.first->second;
+  module_IncompleteMapDep.name() = "module.IncompleteMapDep";
+  module_IncompleteMapDep.is_union() = false;
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::apache::thrift::fixtures::types::CompleteMap>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.CompleteMap", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_CompleteMap = res.first->second;
+  module_CompleteMap.name() = "module.CompleteMap";
+  module_CompleteMap.is_union() = false;
   static const auto* const
-  module_NoexceptMoveComplexStruct_fields = new std::array<EncodedThriftField, 9>{{
-    {1, "MyBoolField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "MyIntField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "MyStringField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {4, "MyStringField2", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {5, "MyBinaryField", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
-    {6, "MyBinaryField2", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
-    {7, "MyBinaryField3", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
-    {8, "MyBinaryListField4", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}},
-    {9, "MyMapEnumAndInt", false, std::make_unique<Map>(std::make_unique<Enum<::apache::thrift::fixtures::types::MyEnumA>>("module.MyEnumA"), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
+  module_CompleteMap_fields = new std::array<EncodedThriftField, 1>{{
+    {1, "field", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Typedef>("module.CompleteMapDep", std::make_unique<Struct<::apache::thrift::fixtures::types::CompleteMapDep>>("module.CompleteMapDep"), std::vector<ThriftConstStruct>{})), std::vector<ThriftConstStruct>{}},
   }};
-  for (const auto& f : *module_NoexceptMoveComplexStruct_fields) {
+  for (const auto& f : *module_CompleteMap_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations() = f.structured_annotations;
-    module_NoexceptMoveComplexStruct.fields()->push_back(std::move(field));
+    module_CompleteMap.fields()->push_back(std::move(field));
   }
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::apache::thrift::fixtures::types::NoExceptMoveUnion>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.NoExceptMoveUnion", ::apache::thrift::metadata::ThriftStruct{});
+StructMetadata<::apache::thrift::fixtures::types::CompleteMapDep>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.CompleteMapDep", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_NoExceptMoveUnion = res.first->second;
-  module_NoExceptMoveUnion.name() = "module.NoExceptMoveUnion";
-  module_NoExceptMoveUnion.is_union() = true;
+  ::apache::thrift::metadata::ThriftStruct& module_CompleteMapDep = res.first->second;
+  module_CompleteMapDep.name() = "module.CompleteMapDep";
+  module_CompleteMapDep.is_union() = false;
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::apache::thrift::fixtures::types::IncompleteList>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.IncompleteList", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_IncompleteList = res.first->second;
+  module_IncompleteList.name() = "module.IncompleteList";
+  module_IncompleteList.is_union() = false;
   static const auto* const
-  module_NoExceptMoveUnion_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "i32_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
+  module_IncompleteList_fields = new std::array<EncodedThriftField, 1>{{
+    {1, "field", true, std::make_unique<List>(std::make_unique<Typedef>("module.IncompleteListDep", std::make_unique<Struct<::apache::thrift::fixtures::types::IncompleteListDep>>("module.IncompleteListDep"), std::vector<ThriftConstStruct>{})), std::vector<ThriftConstStruct>{}},
   }};
-  for (const auto& f : *module_NoExceptMoveUnion_fields) {
+  for (const auto& f : *module_IncompleteList_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations() = f.structured_annotations;
-    module_NoExceptMoveUnion.fields()->push_back(std::move(field));
+    module_IncompleteList.fields()->push_back(std::move(field));
   }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::apache::thrift::fixtures::types::IncompleteListDep>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.IncompleteListDep", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_IncompleteListDep = res.first->second;
+  module_IncompleteListDep.name() = "module.IncompleteListDep";
+  module_IncompleteListDep.is_union() = false;
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::apache::thrift::fixtures::types::CompleteList>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.CompleteList", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_CompleteList = res.first->second;
+  module_CompleteList.name() = "module.CompleteList";
+  module_CompleteList.is_union() = false;
+  static const auto* const
+  module_CompleteList_fields = new std::array<EncodedThriftField, 1>{{
+    {1, "field", true, std::make_unique<List>(std::make_unique<Typedef>("module.CompleteListDep", std::make_unique<Struct<::apache::thrift::fixtures::types::CompleteListDep>>("module.CompleteListDep"), std::vector<ThriftConstStruct>{})), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_CompleteList_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_CompleteList.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::apache::thrift::fixtures::types::CompleteListDep>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.CompleteListDep", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_CompleteListDep = res.first->second;
+  module_CompleteListDep.name() = "module.CompleteListDep";
+  module_CompleteListDep.is_union() = false;
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::apache::thrift::fixtures::types::AdaptedList>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.AdaptedList", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_AdaptedList = res.first->second;
+  module_AdaptedList.name() = "module.AdaptedList";
+  module_AdaptedList.is_union() = false;
+  static const auto* const
+  module_AdaptedList_fields = new std::array<EncodedThriftField, 1>{{
+    {1, "field", true, std::make_unique<List>(std::make_unique<Typedef>("module.AdaptedListDep", std::make_unique<Struct<::apache::thrift::fixtures::types::detail::AdaptedListDep>>("module.AdaptedListDep"), std::vector<ThriftConstStruct>{})), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_AdaptedList_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_AdaptedList.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::apache::thrift::fixtures::types::detail::AdaptedListDep>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.AdaptedListDep", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_AdaptedListDep = res.first->second;
+  module_AdaptedListDep.name() = "module.AdaptedListDep";
+  module_AdaptedListDep.is_union() = false;
+  static const auto* const
+  module_AdaptedListDep_fields = new std::array<EncodedThriftField, 1>{{
+    {1, "field", false, std::make_unique<Struct<::apache::thrift::fixtures::types::AdaptedList>>("module.AdaptedList"), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_AdaptedListDep_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_AdaptedListDep.fields()->push_back(std::move(field));
+  }
+  module_AdaptedListDep.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString(R"(IdentityAdapter<detail::AdaptedListDep>)")}, {"adaptedType", cvString(R"(detail::AdaptedListDep)")}}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::apache::thrift::fixtures::types::DependentAdaptedList>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.DependentAdaptedList", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_DependentAdaptedList = res.first->second;
+  module_DependentAdaptedList.name() = "module.DependentAdaptedList";
+  module_DependentAdaptedList.is_union() = false;
+  static const auto* const
+  module_DependentAdaptedList_fields = new std::array<EncodedThriftField, 1>{{
+    {1, "field", true, std::make_unique<List>(std::make_unique<Typedef>("module.DependentAdaptedListDep", std::make_unique<Struct<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>>("module.DependentAdaptedListDep"), std::vector<ThriftConstStruct>{})), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_DependentAdaptedList_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_DependentAdaptedList.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.DependentAdaptedListDep", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_DependentAdaptedListDep = res.first->second;
+  module_DependentAdaptedListDep.name() = "module.DependentAdaptedListDep";
+  module_DependentAdaptedListDep.is_union() = false;
+  static const auto* const
+  module_DependentAdaptedListDep_fields = new std::array<EncodedThriftField, 1>{{
+    {1, "field", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{*cvStruct("thrift.Box", {}).cv_struct_ref(), }},
+  }};
+  for (const auto& f : *module_DependentAdaptedListDep_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_DependentAdaptedListDep.fields()->push_back(std::move(field));
+  }
+  module_DependentAdaptedListDep.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString(R"(IdentityAdapter<detail::DependentAdaptedListDep>)")}}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

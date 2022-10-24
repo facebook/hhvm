@@ -316,6 +316,120 @@ cdef extern from * nogil:
         bint empty()
 
 cdef extern from * nogil:
+    cdef cppclass std_unordered_map "std::unordered_map"[T, U]:
+        ctypedef T key_type
+        ctypedef U mapped_type
+        ctypedef size_t size_type
+
+        cppclass iterator:
+            cpair[T, U]& operator*()
+            iterator operator++()
+            bint operator==(iterator)
+            bint operator!=(iterator)
+        cppclass reverse_iterator:
+            cpair[T, U]& operator*()
+            iterator operator++()
+            bint operator==(reverse_iterator)
+            bint operator!=(reverse_iterator)
+        cppclass const_iterator(iterator):
+            pass
+        cppclass const_reverse_iterator(reverse_iterator):
+            pass
+
+        std_unordered_map() except +
+        std_unordered_map(std_unordered_map&) except +
+
+        U& operator[](T&)
+        iterator find(const T&)
+        const_iterator const_find "find"(const T&)
+        size_type count(const T&)
+        size_type size()
+        iterator begin()
+        const_iterator const_begin "begin"()
+        iterator end()
+        const_iterator const_end "end"()
+        reverse_iterator rbegin()
+        const_reverse_iterator const_rbegin "rbegin"()
+        reverse_iterator rend()
+        const_reverse_iterator const_rend "rend"()
+        void clear()
+        bint empty()
+
+cdef extern from * nogil:
+    cdef cppclass _std_list "::std::list"[T]:
+        ctypedef T value_type
+        ctypedef size_t size_type
+
+        cppclass iterator:
+            T& operator*()
+            iterator operator++()
+            bint operator==(iterator)
+            bint operator!=(iterator)
+        cppclass reverse_iterator:
+            T& operator*()
+            iterator operator++()
+            bint operator==(reverse_iterator)
+            bint operator!=(reverse_iterator)
+        cppclass const_iterator(iterator):
+            pass
+        cppclass const_reverse_iterator(reverse_iterator):
+            pass
+
+        _std_list() except +
+        _std_list(_std_list&) except +
+
+        T& operator[](size_type)
+        void push_back(T&) except +
+        size_type size()
+        iterator begin()
+        const_iterator const_begin "begin"()
+        iterator end()
+        const_iterator const_end "end"()
+        reverse_iterator rbegin()
+        const_reverse_iterator const_rbegin "rbegin"()
+        reverse_iterator rend()
+        const_reverse_iterator const_rend "rend"()
+        void clear()
+        bint empty()
+
+cdef extern from * nogil:
+    cdef cppclass folly_small_vector "folly::small_vector"[T]:
+        ctypedef T value_type
+        ctypedef size_t size_type
+
+        cppclass iterator:
+            T& operator*()
+            iterator operator++()
+            bint operator==(iterator)
+            bint operator!=(iterator)
+        cppclass reverse_iterator:
+            T& operator*()
+            iterator operator++()
+            bint operator==(reverse_iterator)
+            bint operator!=(reverse_iterator)
+        cppclass const_iterator(iterator):
+            pass
+        cppclass const_reverse_iterator(reverse_iterator):
+            pass
+
+        folly_small_vector() except +
+        folly_small_vector(folly_small_vector&) except +
+
+        T& operator[](size_type)
+        void push_back(T&) except +
+        size_type size()
+        iterator begin()
+        const_iterator const_begin "begin"()
+        iterator end()
+        const_iterator const_end "end"()
+        reverse_iterator rbegin()
+        const_reverse_iterator const_rbegin "rbegin"()
+        reverse_iterator rend()
+        const_reverse_iterator const_rend "rend"()
+        void clear()
+        bint empty()
+
+cdef extern from * nogil:
     cdef cppclass std_list_int32_t "std::list<int32_t>":
         ctypedef cint32_t value_type
         ctypedef size_t size_type
@@ -367,9 +481,6 @@ cdef extern from "thrift/compiler/test/fixtures/types/src/gen-cpp2/module_types.
     cdef cppclass cMyForwardRefEnum "::apache::thrift::fixtures::types::MyForwardRefEnum":
         pass
 
-    cdef cppclass cMyEnumA "::apache::thrift::fixtures::types::MyEnumA":
-        pass
-
 
 
 
@@ -383,10 +494,6 @@ cdef class is_unscoped(thrift.py3.types.CompiledEnum):
 
 
 cdef class MyForwardRefEnum(thrift.py3.types.CompiledEnum):
-    pass
-
-
-cdef class MyEnumA(thrift.py3.types.CompiledEnum):
     pass
 
 cdef extern from "thrift/compiler/test/fixtures/types/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
@@ -619,67 +726,116 @@ cdef extern from "thrift/compiler/test/fixtures/types/src/gen-cpp2/module_types_
         unique_ptr[cForwardUsageRoot] foo_ref "foo_ref" ()
 
 
-    cdef cppclass cNoexceptMoveEmpty "::apache::thrift::fixtures::types::NoexceptMoveEmpty":
-        cNoexceptMoveEmpty() except +
-        cNoexceptMoveEmpty(const cNoexceptMoveEmpty&) except +
-        bint operator==(cNoexceptMoveEmpty&)
-        bint operator!=(cNoexceptMoveEmpty&)
-        bint operator<(cNoexceptMoveEmpty&)
-        bint operator>(cNoexceptMoveEmpty&)
-        bint operator<=(cNoexceptMoveEmpty&)
-        bint operator>=(cNoexceptMoveEmpty&)
+    cdef cppclass cIncompleteMap "::apache::thrift::fixtures::types::IncompleteMap":
+        cIncompleteMap() except +
+        cIncompleteMap(const cIncompleteMap&) except +
+        bint operator==(cIncompleteMap&)
+        bint operator!=(cIncompleteMap&)
+        bint operator<(cIncompleteMap&)
+        bint operator>(cIncompleteMap&)
+        bint operator<=(cIncompleteMap&)
+        bint operator>=(cIncompleteMap&)
+        __optional_field_ref[cmap[cint32_t,cIncompleteMapDep]] field_ref "field_ref" ()
 
 
-    cdef cppclass cNoexceptMoveSimpleStruct "::apache::thrift::fixtures::types::NoexceptMoveSimpleStruct":
-        cNoexceptMoveSimpleStruct() except +
-        cNoexceptMoveSimpleStruct(const cNoexceptMoveSimpleStruct&) except +
-        bint operator==(cNoexceptMoveSimpleStruct&)
-        bint operator!=(cNoexceptMoveSimpleStruct&)
-        bint operator<(cNoexceptMoveSimpleStruct&)
-        bint operator>(cNoexceptMoveSimpleStruct&)
-        bint operator<=(cNoexceptMoveSimpleStruct&)
-        bint operator>=(cNoexceptMoveSimpleStruct&)
-        __field_ref[cint64_t] boolField_ref "boolField_ref" ()
+    cdef cppclass cIncompleteMapDep "::apache::thrift::fixtures::types::IncompleteMapDep":
+        cIncompleteMapDep() except +
+        cIncompleteMapDep(const cIncompleteMapDep&) except +
+        bint operator==(cIncompleteMapDep&)
+        bint operator!=(cIncompleteMapDep&)
+        bint operator<(cIncompleteMapDep&)
+        bint operator>(cIncompleteMapDep&)
+        bint operator<=(cIncompleteMapDep&)
+        bint operator>=(cIncompleteMapDep&)
 
 
-    cdef cppclass cNoexceptMoveComplexStruct "::apache::thrift::fixtures::types::NoexceptMoveComplexStruct":
-        cNoexceptMoveComplexStruct() except +
-        cNoexceptMoveComplexStruct(const cNoexceptMoveComplexStruct&) except +
-        bint operator==(cNoexceptMoveComplexStruct&)
-        bint operator!=(cNoexceptMoveComplexStruct&)
-        bint operator<(cNoexceptMoveComplexStruct&)
-        bint operator>(cNoexceptMoveComplexStruct&)
-        bint operator<=(cNoexceptMoveComplexStruct&)
-        bint operator>=(cNoexceptMoveComplexStruct&)
-        __field_ref[cbool] MyBoolField_ref "MyBoolField_ref" ()
-        __field_ref[cint64_t] MyIntField_ref "MyIntField_ref" ()
-        __field_ref[string] MyStringField_ref "MyStringField_ref" ()
-        __field_ref[string] MyStringField2_ref "MyStringField2_ref" ()
-        __field_ref[string] MyBinaryField_ref "MyBinaryField_ref" ()
-        __optional_field_ref[string] MyBinaryField2_ref "MyBinaryField2_ref" ()
-        __required_field_ref[string] MyBinaryField3_ref "MyBinaryField3_ref" ()
-        __field_ref[vector[string]] MyBinaryListField4_ref "MyBinaryListField4_ref" ()
-        __field_ref[cmap[cMyEnumA,string]] MyMapEnumAndInt_ref "MyMapEnumAndInt_ref" ()
+    cdef cppclass cCompleteMap "::apache::thrift::fixtures::types::CompleteMap":
+        cCompleteMap() except +
+        cCompleteMap(const cCompleteMap&) except +
+        bint operator==(cCompleteMap&)
+        bint operator!=(cCompleteMap&)
+        __optional_field_ref[std_unordered_map[cint32_t,cCompleteMapDep]] field_ref "field_ref" ()
 
-    cdef enum cNoExceptMoveUnion__type "::apache::thrift::fixtures::types::NoExceptMoveUnion::Type":
-        cNoExceptMoveUnion__type___EMPTY__ "::apache::thrift::fixtures::types::NoExceptMoveUnion::Type::__EMPTY__",
-        cNoExceptMoveUnion__type_string_field "::apache::thrift::fixtures::types::NoExceptMoveUnion::Type::string_field",
-        cNoExceptMoveUnion__type_i32_field "::apache::thrift::fixtures::types::NoExceptMoveUnion::Type::i32_field",
 
-    cdef cppclass cNoExceptMoveUnion "::apache::thrift::fixtures::types::NoExceptMoveUnion":
-        cNoExceptMoveUnion() except +
-        cNoExceptMoveUnion(const cNoExceptMoveUnion&) except +
-        bint operator==(cNoExceptMoveUnion&)
-        bint operator!=(cNoExceptMoveUnion&)
-        bint operator<(cNoExceptMoveUnion&)
-        bint operator>(cNoExceptMoveUnion&)
-        bint operator<=(cNoExceptMoveUnion&)
-        bint operator>=(cNoExceptMoveUnion&)
-        cNoExceptMoveUnion__type getType() const
-        const string& get_string_field "get_string_field" () const
-        string& set_string_field "set_string_field" (const string&)
-        const cint32_t& get_i32_field "get_i32_field" () const
-        cint32_t& set_i32_field "set_i32_field" (const cint32_t&)
+    cdef cppclass cCompleteMapDep "::apache::thrift::fixtures::types::CompleteMapDep":
+        cCompleteMapDep() except +
+        cCompleteMapDep(const cCompleteMapDep&) except +
+        bint operator==(cCompleteMapDep&)
+        bint operator!=(cCompleteMapDep&)
+        bint operator<(cCompleteMapDep&)
+        bint operator>(cCompleteMapDep&)
+        bint operator<=(cCompleteMapDep&)
+        bint operator>=(cCompleteMapDep&)
+
+
+    cdef cppclass cIncompleteList "::apache::thrift::fixtures::types::IncompleteList":
+        cIncompleteList() except +
+        cIncompleteList(const cIncompleteList&) except +
+        bint operator==(cIncompleteList&)
+        bint operator!=(cIncompleteList&)
+        bint operator<(cIncompleteList&)
+        bint operator>(cIncompleteList&)
+        bint operator<=(cIncompleteList&)
+        bint operator>=(cIncompleteList&)
+        __optional_field_ref[_std_list[cIncompleteListDep]] field_ref "field_ref" ()
+
+
+    cdef cppclass cIncompleteListDep "::apache::thrift::fixtures::types::IncompleteListDep":
+        cIncompleteListDep() except +
+        cIncompleteListDep(const cIncompleteListDep&) except +
+        bint operator==(cIncompleteListDep&)
+        bint operator!=(cIncompleteListDep&)
+        bint operator<(cIncompleteListDep&)
+        bint operator>(cIncompleteListDep&)
+        bint operator<=(cIncompleteListDep&)
+        bint operator>=(cIncompleteListDep&)
+
+
+    cdef cppclass cCompleteList "::apache::thrift::fixtures::types::CompleteList":
+        cCompleteList() except +
+        cCompleteList(const cCompleteList&) except +
+        bint operator==(cCompleteList&)
+        bint operator!=(cCompleteList&)
+        bint operator<(cCompleteList&)
+        bint operator>(cCompleteList&)
+        bint operator<=(cCompleteList&)
+        bint operator>=(cCompleteList&)
+        __optional_field_ref[folly_small_vector[cCompleteListDep]] field_ref "field_ref" ()
+
+
+    cdef cppclass cCompleteListDep "::apache::thrift::fixtures::types::CompleteListDep":
+        cCompleteListDep() except +
+        cCompleteListDep(const cCompleteListDep&) except +
+        bint operator==(cCompleteListDep&)
+        bint operator!=(cCompleteListDep&)
+        bint operator<(cCompleteListDep&)
+        bint operator>(cCompleteListDep&)
+        bint operator<=(cCompleteListDep&)
+        bint operator>=(cCompleteListDep&)
+
+
+    cdef cppclass cAdaptedList "::apache::thrift::fixtures::types::AdaptedList":
+        cAdaptedList() except +
+        cAdaptedList(const cAdaptedList&) except +
+        bint operator==(cAdaptedList&)
+        bint operator!=(cAdaptedList&)
+        bint operator<(cAdaptedList&)
+        bint operator>(cAdaptedList&)
+        bint operator<=(cAdaptedList&)
+        bint operator>=(cAdaptedList&)
+        __optional_field_ref[vector[cAdaptedListDep]] field_ref "field_ref" ()
+
+
+    cdef cppclass cDependentAdaptedList "::apache::thrift::fixtures::types::DependentAdaptedList":
+        cDependentAdaptedList() except +
+        cDependentAdaptedList(const cDependentAdaptedList&) except +
+        bint operator==(cDependentAdaptedList&)
+        bint operator!=(cDependentAdaptedList&)
+        bint operator<(cDependentAdaptedList&)
+        bint operator>(cDependentAdaptedList&)
+        bint operator<=(cDependentAdaptedList&)
+        bint operator>=(cDependentAdaptedList&)
+        __optional_field_ref[vector[cDependentAdaptedListDep]] field_ref "field_ref" ()
 
 
     cdef cppclass cAllocatorAware "::apache::thrift::fixtures::types::AllocatorAware":
@@ -964,64 +1120,105 @@ cdef class ForwardUsageByRef(thrift.py3.types.Struct):
 
 
 
-cdef class NoexceptMoveEmpty(thrift.py3.types.Struct):
-    cdef shared_ptr[cNoexceptMoveEmpty] _cpp_obj
-    cdef _fbthrift_types_fields.__NoexceptMoveEmpty_FieldsSetter _fields_setter
+cdef class IncompleteMap(thrift.py3.types.Struct):
+    cdef shared_ptr[cIncompleteMap] _cpp_obj
+    cdef _fbthrift_types_fields.__IncompleteMap_FieldsSetter _fields_setter
+    cdef inline object field_impl(self)
+    cdef Map__i32_IncompleteMapDep __fbthrift_cached_field
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cNoexceptMoveEmpty])
+    cdef _fbthrift_create(shared_ptr[cIncompleteMap])
 
 
 
-cdef class NoexceptMoveSimpleStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cNoexceptMoveSimpleStruct] _cpp_obj
-    cdef _fbthrift_types_fields.__NoexceptMoveSimpleStruct_FieldsSetter _fields_setter
-    cdef inline object boolField_impl(self)
-
-    @staticmethod
-    cdef _fbthrift_create(shared_ptr[cNoexceptMoveSimpleStruct])
-
-
-
-cdef class NoexceptMoveComplexStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cNoexceptMoveComplexStruct] _cpp_obj
-    cdef _fbthrift_types_fields.__NoexceptMoveComplexStruct_FieldsSetter _fields_setter
-    cdef inline object MyBoolField_impl(self)
-    cdef inline object MyIntField_impl(self)
-    cdef inline object MyStringField_impl(self)
-    cdef inline object MyStringField2_impl(self)
-    cdef inline object MyBinaryField_impl(self)
-    cdef inline object MyBinaryField2_impl(self)
-    cdef inline object MyBinaryField3_impl(self)
-    cdef inline object MyBinaryListField4_impl(self)
-    cdef inline object MyMapEnumAndInt_impl(self)
-    cdef List__binary __fbthrift_cached_MyBinaryListField4
-    cdef Map__MyEnumA_string __fbthrift_cached_MyMapEnumAndInt
+cdef class IncompleteMapDep(thrift.py3.types.Struct):
+    cdef shared_ptr[cIncompleteMapDep] _cpp_obj
+    cdef _fbthrift_types_fields.__IncompleteMapDep_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cNoexceptMoveComplexStruct])
-
-cdef class __NoExceptMoveUnionType(thrift.py3.types.CompiledEnum):
-    pass
+    cdef _fbthrift_create(shared_ptr[cIncompleteMapDep])
 
 
 
-
-cdef class NoExceptMoveUnion(thrift.py3.types.Union):
-    cdef shared_ptr[cNoExceptMoveUnion] _cpp_obj
-    cdef readonly __NoExceptMoveUnionType type
-    cdef readonly object value
-    cdef _load_cache(NoExceptMoveUnion self)
+cdef class CompleteMap(thrift.py3.types.Struct):
+    cdef shared_ptr[cCompleteMap] _cpp_obj
+    cdef _fbthrift_types_fields.__CompleteMap_FieldsSetter _fields_setter
+    cdef inline object field_impl(self)
+    cdef std_unordered_map__Map__i32_CompleteMapDep __fbthrift_cached_field
 
     @staticmethod
-    cdef unique_ptr[cNoExceptMoveUnion] _make_instance(
-        cNoExceptMoveUnion* base_instance,
-        str string_field,
-        object i32_field
-    ) except *
+    cdef _fbthrift_create(shared_ptr[cCompleteMap])
+
+
+
+cdef class CompleteMapDep(thrift.py3.types.Struct):
+    cdef shared_ptr[cCompleteMapDep] _cpp_obj
+    cdef _fbthrift_types_fields.__CompleteMapDep_FieldsSetter _fields_setter
 
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cNoExceptMoveUnion])
+    cdef _fbthrift_create(shared_ptr[cCompleteMapDep])
+
+
+
+cdef class IncompleteList(thrift.py3.types.Struct):
+    cdef shared_ptr[cIncompleteList] _cpp_obj
+    cdef _fbthrift_types_fields.__IncompleteList_FieldsSetter _fields_setter
+    cdef inline object field_impl(self)
+    cdef _std_list__List__IncompleteListDep __fbthrift_cached_field
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cIncompleteList])
+
+
+
+cdef class IncompleteListDep(thrift.py3.types.Struct):
+    cdef shared_ptr[cIncompleteListDep] _cpp_obj
+    cdef _fbthrift_types_fields.__IncompleteListDep_FieldsSetter _fields_setter
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cIncompleteListDep])
+
+
+
+cdef class CompleteList(thrift.py3.types.Struct):
+    cdef shared_ptr[cCompleteList] _cpp_obj
+    cdef _fbthrift_types_fields.__CompleteList_FieldsSetter _fields_setter
+    cdef inline object field_impl(self)
+    cdef folly_small_vector__List__CompleteListDep __fbthrift_cached_field
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cCompleteList])
+
+
+
+cdef class CompleteListDep(thrift.py3.types.Struct):
+    cdef shared_ptr[cCompleteListDep] _cpp_obj
+    cdef _fbthrift_types_fields.__CompleteListDep_FieldsSetter _fields_setter
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cCompleteListDep])
+
+
+
+cdef class AdaptedList(thrift.py3.types.Struct):
+    cdef shared_ptr[cAdaptedList] _cpp_obj
+    cdef _fbthrift_types_fields.__AdaptedList_FieldsSetter _fields_setter
+    cdef inline object field_impl(self)
+    cdef List__AdaptedListDep __fbthrift_cached_field
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cAdaptedList])
+
+
+
+cdef class DependentAdaptedList(thrift.py3.types.Struct):
+    cdef shared_ptr[cDependentAdaptedList] _cpp_obj
+    cdef _fbthrift_types_fields.__DependentAdaptedList_FieldsSetter _fields_setter
+    cdef inline object field_impl(self)
+    cdef List__DependentAdaptedListDep __fbthrift_cached_field
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cDependentAdaptedList])
 
 
 
@@ -1166,19 +1363,47 @@ cdef class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
     @staticmethod
     cdef shared_ptr[vector[std_unordered_map[cint32_t,string]]] _make_instance(object items) except *
 
-cdef class List__binary(thrift.py3.types.List):
-    cdef shared_ptr[vector[string]] _cpp_obj
+cdef class Map__i32_IncompleteMapDep(thrift.py3.types.Map):
+    cdef shared_ptr[cmap[cint32_t,cIncompleteMapDep]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[vector[string]])
+    cdef _fbthrift_create(shared_ptr[cmap[cint32_t,cIncompleteMapDep]])
     @staticmethod
-    cdef shared_ptr[vector[string]] _make_instance(object items) except *
+    cdef shared_ptr[cmap[cint32_t,cIncompleteMapDep]] _make_instance(object items) except *
 
-cdef class Map__MyEnumA_string(thrift.py3.types.Map):
-    cdef shared_ptr[cmap[cMyEnumA,string]] _cpp_obj
+cdef class std_unordered_map__Map__i32_CompleteMapDep(thrift.py3.types.Map):
+    cdef shared_ptr[std_unordered_map[cint32_t,cCompleteMapDep]] _cpp_obj
     @staticmethod
-    cdef _fbthrift_create(shared_ptr[cmap[cMyEnumA,string]])
+    cdef _fbthrift_create(shared_ptr[std_unordered_map[cint32_t,cCompleteMapDep]])
     @staticmethod
-    cdef shared_ptr[cmap[cMyEnumA,string]] _make_instance(object items) except *
+    cdef shared_ptr[std_unordered_map[cint32_t,cCompleteMapDep]] _make_instance(object items) except *
+
+cdef class _std_list__List__IncompleteListDep(thrift.py3.types.List):
+    cdef shared_ptr[_std_list[cIncompleteListDep]] _cpp_obj
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[_std_list[cIncompleteListDep]])
+    @staticmethod
+    cdef shared_ptr[_std_list[cIncompleteListDep]] _make_instance(object items) except *
+
+cdef class folly_small_vector__List__CompleteListDep(thrift.py3.types.List):
+    cdef shared_ptr[folly_small_vector[cCompleteListDep]] _cpp_obj
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[folly_small_vector[cCompleteListDep]])
+    @staticmethod
+    cdef shared_ptr[folly_small_vector[cCompleteListDep]] _make_instance(object items) except *
+
+cdef class List__AdaptedListDep(thrift.py3.types.List):
+    cdef shared_ptr[vector[cAdaptedListDep]] _cpp_obj
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[vector[cAdaptedListDep]])
+    @staticmethod
+    cdef shared_ptr[vector[cAdaptedListDep]] _make_instance(object items) except *
+
+cdef class List__DependentAdaptedListDep(thrift.py3.types.List):
+    cdef shared_ptr[vector[cDependentAdaptedListDep]] _cpp_obj
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[vector[cDependentAdaptedListDep]])
+    @staticmethod
+    cdef shared_ptr[vector[cDependentAdaptedListDep]] _make_instance(object items) except *
 
 cdef class Set__i32(thrift.py3.types.Set):
     cdef shared_ptr[cset[cint32_t]] _cpp_obj

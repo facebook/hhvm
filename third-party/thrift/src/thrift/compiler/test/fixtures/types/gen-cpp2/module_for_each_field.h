@@ -182,42 +182,94 @@ struct ForEachField<::apache::thrift::fixtures::types::ForwardUsageByRef> {
 };
 
 template <>
-struct ForEachField<::apache::thrift::fixtures::types::NoexceptMoveEmpty> {
+struct ForEachField<::apache::thrift::fixtures::types::IncompleteMap> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).field_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::apache::thrift::fixtures::types::IncompleteMapDep> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
   }
 };
 
 template <>
-struct ForEachField<::apache::thrift::fixtures::types::NoexceptMoveSimpleStruct> {
+struct ForEachField<::apache::thrift::fixtures::types::CompleteMap> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).boolField_ref()...);
+    f(0, static_cast<T&&>(t).field_ref()...);
   }
 };
 
 template <>
-struct ForEachField<::apache::thrift::fixtures::types::NoexceptMoveComplexStruct> {
+struct ForEachField<::apache::thrift::fixtures::types::CompleteMapDep> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).MyBoolField_ref()...);
-    f(1, static_cast<T&&>(t).MyIntField_ref()...);
-    f(2, static_cast<T&&>(t).MyStringField_ref()...);
-    f(3, static_cast<T&&>(t).MyStringField2_ref()...);
-    f(4, static_cast<T&&>(t).MyBinaryField_ref()...);
-    f(5, static_cast<T&&>(t).MyBinaryField2_ref()...);
-    f(6, static_cast<T&&>(t).MyBinaryField3_ref()...);
-    f(7, static_cast<T&&>(t).MyBinaryListField4_ref()...);
-    f(8, static_cast<T&&>(t).MyMapEnumAndInt_ref()...);
   }
 };
 
 template <>
-struct ForEachField<::apache::thrift::fixtures::types::NoExceptMoveUnion> {
+struct ForEachField<::apache::thrift::fixtures::types::IncompleteList> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).string_field_ref()...);
-    f(1, static_cast<T&&>(t).i32_field_ref()...);
+    f(0, static_cast<T&&>(t).field_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::apache::thrift::fixtures::types::IncompleteListDep> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  }
+};
+
+template <>
+struct ForEachField<::apache::thrift::fixtures::types::CompleteList> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).field_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::apache::thrift::fixtures::types::CompleteListDep> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  }
+};
+
+template <>
+struct ForEachField<::apache::thrift::fixtures::types::AdaptedList> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).field_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::apache::thrift::fixtures::types::detail::AdaptedListDep> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).field_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::apache::thrift::fixtures::types::DependentAdaptedList> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).field_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).field_ref()...);
   }
 };
 

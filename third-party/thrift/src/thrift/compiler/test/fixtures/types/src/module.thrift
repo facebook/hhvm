@@ -156,33 +156,48 @@ struct ForwardUsageByRef {
   1: optional ForwardUsageRoot foo (cpp.ref = "true");
 }
 
-struct NoexceptMoveEmpty {}
+struct IncompleteMap {
+  1: optional map<i32, IncompleteMapDep> field;
+}
+struct IncompleteMapDep {}
 
-struct NoexceptMoveSimpleStruct {
-  1: i64 boolField;
+struct CompleteMap {
+  1: optional map<i32, CompleteMapDep> (
+    cpp2.template = "std::unordered_map",
+  ) field;
+}
+struct CompleteMapDep {}
+
+struct IncompleteList {
+  1: optional list<IncompleteListDep> (cpp.template = "::std::list") field;
+}
+struct IncompleteListDep {}
+
+struct CompleteList {
+  1: optional list<CompleteListDep> (
+    cpp2.template = "folly::small_vector",
+  ) field;
+}
+struct CompleteListDep {}
+
+struct AdaptedList {
+  1: optional list<AdaptedListDep> field;
+}
+@cpp.Adapter{
+  name = "IdentityAdapter<detail::AdaptedListDep>",
+  adaptedType = "detail::AdaptedListDep",
+}
+struct AdaptedListDep {
+  1: AdaptedList field;
 }
 
-enum MyEnumA {
-  fieldA = 1,
-  fieldB = 2,
-  fieldC = 4,
+struct DependentAdaptedList {
+  1: optional list<DependentAdaptedListDep> field;
 }
-
-struct NoexceptMoveComplexStruct {
-  1: bool MyBoolField;
-  2: i64 MyIntField = 12;
-  3: string MyStringField = "test";
-  4: string MyStringField2;
-  5: binary MyBinaryField;
-  6: optional binary MyBinaryField2;
-  7: required binary MyBinaryField3;
-  8: list<binary> MyBinaryListField4;
-  9: map<MyEnumA, string> MyMapEnumAndInt = {1: "fieldA", 4: "fieldC"};
-}
-
-union NoExceptMoveUnion {
-  1: string string_field;
-  2: i32 i32_field;
+@cpp.Adapter{name = "IdentityAdapter<detail::DependentAdaptedListDep>"}
+struct DependentAdaptedListDep {
+  @thrift.Box
+  1: optional i16 field;
 }
 
 # Allocator-aware struct with allocator-aware fields

@@ -130,10 +130,10 @@ hackc::ExternalDeclProviderResult HhvmDeclProvider::getDecls(
 
   auto const res = Native::getBuiltinDecls(makeStaticString(sym), kind);
   if (res) {
-    ITRACE(4, "DP {}: found in extensions or systemlib \n", sym);
+    ITRACE(4, "DP {}: found in extensions or systemlib\n", sym);
     return *res;
   }
-  ITRACE(4, "DP {}: symbol not found in native decl registry", sym);
+  ITRACE(4, "DP {}: symbol not found in native decl registry\n", sym);
   m_sawMissing = true;
   return hackc::ExternalDeclProviderResult::missing();
 }

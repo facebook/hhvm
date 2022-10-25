@@ -95,7 +95,7 @@ let fetch_old_decl_hashes_and_blobs ~hhconfig_version ~no_limit ~decl_hashes =
   let decl_fetch_future =
     fetch_async ~hhconfig_version ~destination_path ~no_limit decl_hashes
   in
-  match Future.get ~timeout:120 decl_fetch_future with
+  match Future.get ~timeout:12000 decl_fetch_future with
   | Error e ->
     Hh_logger.log
       "Failed to fetch decl hashes and blobs from remote decl store: %s"

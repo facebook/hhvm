@@ -198,8 +198,8 @@ impl Names {
         Ok(())
     }
 
-    // private helper for `save_file_summary`/`build`
-    fn insert_file_summary(
+    // helper for `save_file_summary`/`build`
+    pub fn insert_file_summary(
         &self,
         path: &RelativePath,
         summary: &crate::FileSummary,

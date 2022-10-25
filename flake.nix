@@ -96,7 +96,7 @@
             '';
 
             postConfigure = ''
-              cat build/CMakeCache.txt
+              cat $cmakeBuildDir/CMakeCache.txt
             '';
 
             postBuild = ''

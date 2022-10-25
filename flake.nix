@@ -44,6 +44,7 @@
         in
         rec {
           packages.sccache_pr1086 = pkgs.sccache.overrideAttrs (finalAttrs: previousAttrs: rec {
+            version = "pr1086";
             src = pkgs.fetchFromGitHub {
               owner = "alessandrod";
               repo = "sccache";

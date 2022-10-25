@@ -53,14 +53,30 @@ class RPCServerConformanceHandler
   // =================== Interactions ===================
   class BasicInteraction : public BasicInteractionIf {
    public:
-    explicit BasicInteraction(int32_t initialSum = 0) : sum_(initialSum) {}
+    BasicInteraction(
+        const RpcTestCase& testCase,
+        ServerTestResult& result,
+        int32_t initialSum = 0)
+        : testCase_(testCase), result_(result), sum_(initialSum) {}
     void init() override {}
     int32_t add(int32_t toAdd) override {
       sum_ += toAdd;
       return sum_;
     }
+    folly::coro::Task<void> co_onTermination() override {
+      switch (testCase_.serverInstruction()->getType()) {
+        case ServerInstruction::interactionTermination:
+          result_.interactionTermination_ref().ensure().terminationReceived() =
+              true;
+          break;
+        default:; // do nothing
+      }
+      co_return;
+    }
 
    private:
+    const RpcTestCase& testCase_;
+    ServerTestResult& result_;
     int32_t sum_;
   };
 

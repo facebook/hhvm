@@ -137,11 +137,14 @@ RPCServerConformanceHandler::createBasicInteraction() {
     case ServerInstruction::interactionPersistsState:
       result_.interactionPersistsState_ref().emplace();
       break;
+    case ServerInstruction::interactionTermination:
+      result_.interactionTermination_ref().emplace();
+      break;
     default:
       throw std::runtime_error(
           "BasicInteraction constructor called unexpectedly");
   }
-  return std::make_unique<BasicInteraction>();
+  return std::make_unique<BasicInteraction>(*testCase_, result_);
 }
 
 apache::thrift::
@@ -156,11 +159,14 @@ apache::thrift::
     case ServerInstruction::interactionPersistsState:
       result_.interactionPersistsState_ref().emplace();
       break;
+    case ServerInstruction::interactionTermination:
+      result_.interactionTermination_ref().emplace();
+      break;
     default:
       throw std::runtime_error(
           "BasicInteraction factory function called unexpectedly");
   }
-  return {std::make_unique<BasicInteraction>(initialSum)};
+  return {std::make_unique<BasicInteraction>(*testCase_, result_, initialSum)};
 }
 
 } // namespace apache::thrift::conformance

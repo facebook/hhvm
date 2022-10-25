@@ -817,6 +817,75 @@ Test createInteractionFactoryFunctionPersistsStateTest() {
   return ret;
 }
 
+Test createInteractionConstructorTerminationTest() {
+  Test ret;
+  ret.name() = "InteractionConstructorTerminationTest";
+  ret.tags()->emplace("spec/protocol/interface/#termination");
+  ret.tags()->emplace("spec/protocol/interface/rocket/#termination");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "InteractionConstructorTerminationTest/Success";
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  rpcTest.clientInstruction_ref()
+      .emplace()
+      .interactionTermination_ref()
+      .emplace();
+
+  rpcTest.clientTestResult_ref()
+      .emplace()
+      .interactionTermination_ref()
+      .emplace();
+
+  rpcTest.serverInstruction_ref()
+      .emplace()
+      .interactionTermination_ref()
+      .emplace();
+
+  rpcTest.serverTestResult_ref()
+      .emplace()
+      .interactionTermination_ref()
+      .emplace()
+      .terminationReceived() = true;
+
+  return ret;
+}
+
+Test createInteractionFactoryFunctionTerminationTest() {
+  Test ret;
+  ret.name() = "InteractionFactoryFunctionTerminationTest";
+  ret.tags()->emplace("spec/protocol/interface/#sink-chunk-timeout");
+  ret.tags()->emplace("spec/protocol/interface/rocket/#termination");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "InteractionFactoryFunctionTerminationTest/Success";
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  rpcTest.clientInstruction_ref()
+      .emplace()
+      .interactionTermination_ref()
+      .emplace()
+      .initialSum() = 10;
+
+  rpcTest.clientTestResult_ref()
+      .emplace()
+      .interactionTermination_ref()
+      .emplace();
+
+  rpcTest.serverInstruction_ref()
+      .emplace()
+      .interactionTermination_ref()
+      .emplace();
+
+  rpcTest.serverTestResult_ref()
+      .emplace()
+      .interactionTermination_ref()
+      .emplace()
+      .terminationReceived() = true;
+
+  return ret;
+}
+
 void addCommonRequestResponseTests(TestSuite& suite) {
   // =================== Request-Response ===================
   suite.tests()->push_back(createRequestResponseBasicTest());
@@ -843,6 +912,8 @@ void addCommonRPCTests(TestSuite& suite) {
   suite.tests()->push_back(createInteractionFactoryFunctionTest());
   suite.tests()->push_back(createInteractionConstructorPersistsStateTest());
   suite.tests()->push_back(createInteractionFactoryFunctionPersistsStateTest());
+  suite.tests()->push_back(createInteractionConstructorTerminationTest());
+  suite.tests()->push_back(createInteractionFactoryFunctionTerminationTest());
 }
 
 } // namespace

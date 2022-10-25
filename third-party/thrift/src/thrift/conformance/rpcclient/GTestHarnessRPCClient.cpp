@@ -168,14 +168,31 @@ class ConformanceVerificationServer
   // =================== Interactions ===================
   class BasicInteraction : public BasicInteractionIf {
    public:
-    explicit BasicInteraction(int32_t initialSum = 0) : sum_(initialSum) {}
+    BasicInteraction(
+        const RpcTestCase& testCase,
+        ServerTestResult& result,
+        int32_t initialSum = 0)
+        : testCase_(testCase), serverResult_(result), sum_(initialSum) {}
     void init() override {}
     int32_t add(int32_t toAdd) override {
       sum_ += toAdd;
       return sum_;
     }
+    folly::coro::Task<void> co_onTermination() override {
+      switch (testCase_.serverInstruction()->getType()) {
+        case ServerInstruction::interactionTermination:
+          serverResult_.interactionTermination_ref()
+              .ensure()
+              .terminationReceived() = true;
+          break;
+        default:; // do nothing
+      }
+      co_return;
+    }
 
    private:
+    const RpcTestCase& testCase_;
+    ServerTestResult& serverResult_;
     int32_t sum_;
   };
 
@@ -189,11 +206,14 @@ class ConformanceVerificationServer
       case ServerInstruction::interactionPersistsState:
         serverResult_.interactionPersistsState_ref().emplace();
         break;
+      case ServerInstruction::interactionTermination:
+        serverResult_.interactionTermination_ref().emplace();
+        break;
       default:
         throw std::runtime_error(
             "BasicInteraction constructor called unexpectedly");
     }
-    return std::make_unique<BasicInteraction>();
+    return std::make_unique<BasicInteraction>(testCase_, serverResult_);
   }
 
   apache::thrift::TileAndResponse<BasicInteractionIf, void>
@@ -206,11 +226,15 @@ class ConformanceVerificationServer
       case ServerInstruction::interactionPersistsState:
         serverResult_.interactionPersistsState_ref().emplace();
         break;
+      case ServerInstruction::interactionTermination:
+        serverResult_.interactionTermination_ref().emplace();
+        break;
       default:
         throw std::runtime_error(
             "BasicInteraction factory function called unexpectedly");
     }
-    return {std::make_unique<BasicInteraction>(initialSum)};
+    return {std::make_unique<BasicInteraction>(
+        testCase_, serverResult_, initialSum)};
   }
 
   folly::SemiFuture<folly::Unit> getTestReceived() {

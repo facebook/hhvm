@@ -303,25 +303,40 @@ InteractionFactoryFunctionClientTestResult runInteractionFactoryFunction(
       }());
 }
 
+template <class InteractionClientInstruction>
+Client<RPCConformanceService>::BasicInteraction createInteraction(
+    RPCConformanceServiceAsyncClient& client,
+    const InteractionClientInstruction& instruction) {
+  if (instruction.initialSum().has_value()) {
+    return folly::coro::blockingWait(
+        client.co_basicInteractionFactoryFunction(*instruction.initialSum()));
+  } else {
+    return client.createBasicInteraction();
+  }
+}
+
 InteractionPersistsStateClientTestResult runInteractionPersistsState(
     RPCConformanceServiceAsyncClient& client,
     const InteractionPersistsStateClientInstruction& instruction) {
   return folly::coro::blockingWait(
       [&]() -> folly::coro::Task<InteractionPersistsStateClientTestResult> {
-        std::optional<Client<RPCConformanceService>::BasicInteraction>
-            interaction;
-        if (instruction.initialSum().has_value()) {
-          interaction.emplace(
-              co_await client.co_basicInteractionFactoryFunction(
-                  *instruction.initialSum()));
-        } else {
-          interaction.emplace(client.createBasicInteraction());
-        }
+        auto interaction = createInteraction(client, instruction);
         InteractionPersistsStateClientTestResult result;
         for (auto& arg : *instruction.valuesToAdd()) {
-          result.responses()->emplace_back(co_await interaction->co_add(arg));
+          result.responses()->emplace_back(co_await interaction.co_add(arg));
         }
         co_return result;
+      }());
+}
+
+InteractionTerminationClientTestResult runInteractionTermination(
+    RPCConformanceServiceAsyncClient& client,
+    const InteractionTerminationClientInstruction& instruction) {
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<InteractionTerminationClientTestResult> {
+        auto interaction = createInteraction(client, instruction);
+        co_await interaction.co_init();
+        co_return InteractionTerminationClientTestResult();
       }());
 }
 
@@ -377,6 +392,10 @@ ClientTestResult runClientSteps(
     case ClientInstruction::Type::interactionPersistsState:
       result.interactionPersistsState_ref() = runInteractionPersistsState(
           client, *clientInstruction.interactionPersistsState_ref());
+      break;
+    case ClientInstruction::Type::interactionTermination:
+      result.interactionTermination_ref() = runInteractionTermination(
+          client, *clientInstruction.interactionTermination_ref());
       break;
     default:
       throw std::runtime_error("Invalid TestCase Type.");

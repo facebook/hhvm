@@ -8,6 +8,7 @@ class Foo {
   public static int $static_prop = 1;
   public static ?Bar $nullable_bar = null;
   <<__LateInit>> public static Bar $bar;
+  public static dict<string, int> $static_dict = dict[];
 }
 
 function call_mixed(mixed $x): mixed {
@@ -40,5 +41,8 @@ class Test {
 
     $b->prop = (int)\microtime(true) + Foo::$static_prop; // WriteNonSensitive, WriteGlobalToGlobal
     $b->prop = (int)\microtime(true) + Foo::$static_prop + (int)call_mixed(0); // NoPattern (call_mixed is unknown)
+
+    Foo::$static_dict = HH\Lib\Dict\merge(Foo::$static_dict, dict["0" => 0]); // WriteLiteral,WriteGlobalToGlobal
+    Foo::$static_dict = HH\Lib\Dict\merge(Foo::$static_dict, dict["0" => (int)call_mixed(0)]); // NoPattern (call_mixed is unknown)
   }
 }

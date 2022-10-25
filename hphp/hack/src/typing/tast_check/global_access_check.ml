@@ -179,6 +179,11 @@ let safe_func_ids = SSet.of_list ["\\microtime"; "\\PHP\\microtime"]
 
 let safe_class_ids = SSet.of_list ["\\Time"]
 
+(* The set of functions whose return value's data sources are
+   the union of the data sources of its parameters. *)
+let src_from_para_func_ids =
+  SSet.of_list ["\\Dict\\merge"; "\\HH\\Lib\\Dict\\merge"]
+
 (* Add the key (a variable name) and the value (a set of data srcs) to the table. *)
 let add_var_data_srcs_to_tbl tbl var srcs =
   let pre_data_src_set =
@@ -460,7 +465,17 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
       | Id (_, (_ as func_id)) ->
         (match SSet.mem func_id safe_func_ids with
         | true -> DataSourceSet.singleton NonSensitive
-        | false -> DataSourceSet.singleton Unknown)
+        | false ->
+          (match SSet.mem func_id src_from_para_func_ids with
+          | true ->
+            List.fold
+              tpl
+              ~init:DataSourceSet.empty
+              ~f:(fun cur_src_set (_, para_expr) ->
+                DataSourceSet.union
+                  cur_src_set
+                  (get_data_srcs_from_expr env ctx para_expr))
+          | false -> DataSourceSet.singleton Unknown))
       | Class_const ((_, _, CI (_, class_name)), _) ->
         (* A static method call is safe if the class name is in "safe_class_ids",
            or it starts with "SV_" (i.e. it's a site var). *)

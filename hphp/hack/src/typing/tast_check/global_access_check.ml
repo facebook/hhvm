@@ -44,16 +44,22 @@ module GlobalAccessCheck = Error_codes.GlobalAccessCheck
 type global_access_pattern =
   | Singleton (* Write to a global variable whose value is null *)
   | CounterIncrement (* Increase a global variable by 1 or -1 *)
-  | WriteEmptyOrNUll (* Assign null or empty string to a global variable *)
+  | WriteEmptyOrNull (* Assign null or empty string to a global variable *)
   | WriteLiteral (* Assign a literal to a global variable *)
   | WriteGlobalToGlobal (* Assign a global variable to another one *)
   | WriteNonSensitive (* Write non-sensitive data to a global variable *)
   | NoPattern (* No pattern above is recognized *)
-[@@deriving show { with_path = false }]
+[@@deriving eq, ord, show { with_path = false }]
+
+module GlobalAccessPatternSet = Caml.Set.Make (struct
+  type t = global_access_pattern
+
+  let compare = compare_global_access_pattern
+end)
 
 (* Raise a global access error if the corresponding write/read mode is enabled. *)
 let raise_global_access_error
-    env pos fun_name data_type global_set pattern error_code =
+    env pos fun_name data_type global_set patterns error_code =
   let tcopt = Tast_env.get_tcopt env in
   let (error_message, error_enabled) =
     match error_code with
@@ -70,22 +76,18 @@ let raise_global_access_error
       ("definitely read.", TypecheckerOptions.global_access_check_on_read tcopt)
   in
   if error_enabled then
-    let global_vars_str =
-      SSet.fold
-        (fun s cur_str ->
-          cur_str
-          ^ (if String.length cur_str > 0 then
-              ","
-            else
-              "")
-          ^ s)
-        global_set
-        ""
+    let global_vars_str = String.concat ~sep:"," (SSet.elements global_set) in
+    let print_pattern p =
+      match p with
+      | NoPattern -> None
+      | _ as p -> Some (show_global_access_pattern p)
     in
-    let pattern_str =
-      match pattern with
-      | NoPattern -> ""
-      | _ as p -> "<" ^ show_global_access_pattern p ^ ">"
+    let patterns_str =
+      String.concat
+        ~sep:","
+        (Caml.List.filter_map
+           print_pattern
+           (GlobalAccessPatternSet.elements patterns))
     in
     let message =
       "["
@@ -95,7 +97,10 @@ let raise_global_access_error
       ^ "}("
       ^ data_type
       ^ ")"
-      ^ pattern_str
+      ^ (if String.length patterns_str > 0 then
+          "<" ^ patterns_str ^ ">"
+        else
+          "")
       ^ " A global variable is "
       ^ error_message
     in
@@ -116,6 +121,33 @@ module DataSourceSet = Caml.Set.Make (struct
 
   let compare = compare_data_source
 end)
+
+(* Given the data sources of written data (i.e. RHS of assignment),
+   return the recognized patterns. Specially, if there is unknown
+   data sources, no pattern is recognized. *)
+let get_patterns_from_written_data_srcs srcs =
+  let is_unknown s =
+    match s with
+    | Unknown -> true
+    | _ -> false
+  in
+  if not (DataSourceSet.exists is_unknown srcs) then
+    let add_src_to_patterns s acc =
+      let p =
+        match s with
+        | GlobalReference _
+        | GlobalValue _ ->
+          WriteGlobalToGlobal
+        | NullOrEmpty -> WriteEmptyOrNull
+        | Literal -> WriteLiteral
+        | NonSensitive -> WriteNonSensitive
+        | Unknown -> NoPattern
+      in
+      GlobalAccessPatternSet.add p acc
+    in
+    DataSourceSet.fold add_src_to_patterns srcs GlobalAccessPatternSet.empty
+  else
+    GlobalAccessPatternSet.empty
 
 (* The context maintains:
   (1) A hash table from local variables to the corresponding data sources.
@@ -141,6 +173,11 @@ let current_ctx =
     var_data_src_tbl = ref (Hashtbl.create 0);
     null_global_var_set = ref SSet.empty;
   }
+
+(* The set of safe/non-sensitive functions or classes *)
+let safe_func_ids = SSet.of_list ["\\microtime"; "\\PHP\\microtime"]
+
+let safe_class_ids = SSet.of_list ["\\Time"]
 
 (* Add the key (a variable name) and the value (a set of data srcs) to the table. *)
 let add_var_data_srcs_to_tbl tbl var srcs =
@@ -420,6 +457,20 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
         (match tpl with
         | (_, para_expr) :: _ -> get_data_srcs_from_expr env ctx para_expr
         | [] -> DataSourceSet.singleton Unknown)
+      | Id (_, (_ as func_id)) ->
+        (match SSet.mem func_id safe_func_ids with
+        | true -> DataSourceSet.singleton NonSensitive
+        | false -> DataSourceSet.singleton Unknown)
+      | Class_const ((_, _, CI (_, class_name)), _) ->
+        (* A static method call is safe if the class name is in "safe_class_ids",
+           or it starts with "SV_" (i.e. it's a site var). *)
+        let is_class_safe =
+          SSet.mem class_name safe_class_ids
+          || Caml.String.starts_with ~prefix:"\\SV_" class_name
+        in
+        (match is_class_safe with
+        | true -> DataSourceSet.singleton NonSensitive
+        | false -> DataSourceSet.singleton Unknown)
       | _ -> DataSourceSet.singleton Unknown))
   | Darray (_, tpl) -> get_data_srcs_of_pair_expr_list tpl
   | Varray (_, el) -> get_data_srcs_of_expr_list el
@@ -654,6 +705,7 @@ let visitor =
       | While (_, b)
       | For (_, _, _, b)
       | Foreach (_, _, b) ->
+        super#on_stmt_ (env, (ctx, fun_name)) s;
         (* Iterate the block and update the set of global varialbes until
            no new global variable is found *)
         let ctx_cpy =
@@ -677,8 +729,7 @@ let visitor =
             ctx_len := new_ctx_tbl_cardinal
           else
             has_context_change := false
-        done;
-        super#on_stmt_ (env, (ctx, fun_name)) s
+        done
       | Return r ->
         (match r with
         | Some ((ty, p, _) as e) ->
@@ -692,7 +743,7 @@ let visitor =
               fun_name
               (Tast_env.print_ty env ty)
               global_set
-              NoPattern
+              (GlobalAccessPatternSet.singleton NoPattern)
               GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall
           | None -> ())
         | None -> ());
@@ -721,7 +772,7 @@ let visitor =
             fun_name
             ty_str
             (SSet.singleton expr_str)
-            NoPattern
+            (GlobalAccessPatternSet.singleton NoPattern)
             GlobalAccessCheck.DefiniteGlobalRead
       | Call (func_expr, _, tpl, _) ->
         (* First check if the called function is memoized. *)
@@ -734,7 +785,7 @@ let visitor =
             fun_name
             func_ty_str
             (SSet.singleton memoized_func_name)
-            NoPattern
+            (GlobalAccessPatternSet.singleton NoPattern)
             GlobalAccessCheck.DefiniteGlobalRead
         | None -> ());
         (* Check if a global variable is used as the parameter. *)
@@ -752,15 +803,14 @@ let visitor =
                 fun_name
                 (Tast_env.print_ty env ty)
                 (Option.get e_global_opt)
-                NoPattern
+                (GlobalAccessPatternSet.singleton NoPattern)
                 GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall);
         super#on_expr (env, (ctx, fun_name)) te
       | Binop (Ast_defs.Eq _, le, re) ->
         let () = self#on_expr (env, (ctx, fun_name)) re in
         let re_ty = Tast_env.print_ty env (Tast.get_type re) in
         let le_global_opt = get_global_vars_from_expr env ctx le in
-        (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
-        let pattern =
+        let le_pattern =
           match le_global_opt with
           | None -> NoPattern
           | Some le_global ->
@@ -774,6 +824,9 @@ let visitor =
               NoPattern
         in
         let re_data_srcs = get_data_srcs_from_expr env ctx re in
+        let re_patterns = get_patterns_from_written_data_srcs re_data_srcs in
+        (* Distinguish directly writing to static variables from writing to a variable
+           that has references to static variables. *)
         (if is_expr_static env le && Option.is_some le_global_opt then
           raise_global_access_error
             env
@@ -781,7 +834,7 @@ let visitor =
             fun_name
             re_ty
             (Option.get le_global_opt)
-            pattern
+            (GlobalAccessPatternSet.add le_pattern re_patterns)
             GlobalAccessCheck.DefiniteGlobalWrite
         else
           let vars_in_le = ref SSet.empty in
@@ -795,7 +848,7 @@ let visitor =
                 fun_name
                 re_ty
                 (Option.get le_global_opt)
-                pattern
+                (GlobalAccessPatternSet.add le_pattern re_patterns)
                 GlobalAccessCheck.PossibleGlobalWriteViaReference;
             SSet.iter
               (fun v ->
@@ -829,7 +882,7 @@ let visitor =
                 fun_name
                 e_ty
                 e_global
-                CounterIncrement
+                (GlobalAccessPatternSet.singleton CounterIncrement)
                 GlobalAccessCheck.DefiniteGlobalWrite
             else if has_global_write_access e then
               raise_global_access_error
@@ -838,7 +891,7 @@ let visitor =
                 fun_name
                 e_ty
                 e_global
-                CounterIncrement
+                (GlobalAccessPatternSet.singleton CounterIncrement)
                 GlobalAccessCheck.PossibleGlobalWriteViaReference
           | _ -> super#on_expr (env, (ctx, fun_name)) e)
       | New (_, _, el, _, _) ->
@@ -853,7 +906,7 @@ let visitor =
                 fun_name
                 (Tast_env.print_ty env ty)
                 (Option.get e_global_opt)
-                NoPattern
+                (GlobalAccessPatternSet.singleton NoPattern)
                 GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall);
         super#on_expr (env, (ctx, fun_name)) te
       | _ -> super#on_expr (env, (ctx, fun_name)) te

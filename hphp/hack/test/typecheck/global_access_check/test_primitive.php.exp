@@ -7,9 +7,9 @@ File "test_primitive.php", line 16, characters 12-31:
 File "test_primitive.php", line 20, characters 5-29:
 [Foo::set_string]{Foo::$static_string}(string) A global variable is definitely written. (Other[11001])
 File "test_primitive.php", line 30, characters 5-24:
-[Test::test_method_call]{Foo::$static_int}(int) A global variable is definitely written. (Other[11001])
+[Test::test_method_call]{Foo::$static_int}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
 File "test_primitive.php", line 31, characters 5-31:
-[Test::test_method_call]{Foo::$static_string}(string) A global variable is definitely written. (Other[11001])
+[Test::test_method_call]{Foo::$static_string}(string)<WriteLiteral> A global variable is definitely written. (Other[11001])
 File "test_primitive.php", line 33, characters 10-25:
 [Test::test_method_call]{Foo::$static_int}(int) A global variable is definitely read. (Other[11004])
 File "test_primitive.php", line 36, characters 10-28:

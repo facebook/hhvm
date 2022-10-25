@@ -7,9 +7,9 @@ File "test_singleton_write_via_ref.php", line 32, characters 10-18:
 File "test_singleton_write_via_ref.php", line 34, characters 7-25:
 [Test::test_method_call]{Foo::$bar}(Baz)<Singleton> A global variable is possibly written via reference. (Other[11002])
 File "test_singleton_write_via_ref.php", line 36, characters 7-25:
-[Test::test_method_call]{Foo::$bar}(int) A global variable is possibly written via reference. (Other[11002])
+[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "test_singleton_write_via_ref.php", line 40, characters 7-25:
-[Test::test_method_call]{Foo::$bar}(int) A global variable is possibly written via reference. (Other[11002])
+[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "test_singleton_write_via_ref.php", line 42, characters 7-25:
 [Test::test_method_call]{Foo::$bar}(Baz)<Singleton> A global variable is possibly written via reference. (Other[11002])
 File "test_singleton_write_via_ref.php", line 45, characters 10-23:
@@ -17,8 +17,8 @@ File "test_singleton_write_via_ref.php", line 45, characters 10-23:
 File "test_singleton_write_via_ref.php", line 47, characters 7-25:
 [Test::test_method_call]{\fun_memoized}(Baz)<Singleton> A global variable is possibly written via reference. (Other[11002])
 File "test_singleton_write_via_ref.php", line 49, characters 7-25:
-[Test::test_method_call]{\fun_memoized}(int) A global variable is possibly written via reference. (Other[11002])
+[Test::test_method_call]{\fun_memoized}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "test_singleton_write_via_ref.php", line 53, characters 7-25:
-[Test::test_method_call]{\fun_memoized}(int) A global variable is possibly written via reference. (Other[11002])
+[Test::test_method_call]{\fun_memoized}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "test_singleton_write_via_ref.php", line 55, characters 7-25:
 [Test::test_method_call]{\fun_memoized}(Baz)<Singleton> A global variable is possibly written via reference. (Other[11002])

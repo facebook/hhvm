@@ -55,13 +55,29 @@ jobs:
           # extra-sandbox-paths does not take effect when sandbox = false, but
           # we will need the setting if we build HHVM in a sandbox in the future
           extra-sandbox-paths = /nix/var/setup-compiler-cache.sh
-    - name: Build sccache
+    - name: Build sccache and create a shell script to set up it
       run: |
         set -ex
         SCCACHE_INSTALL_PATH="$(nix build --print-out-paths --no-link "git+file://$(pwd)?submodules=1&shallow=1#sccache_pr1086")"
-        echo "CMAKE_C_COMPILER_LAUNCHER=$SCCACHE_INSTALL_PATH/bin/sccache" >> "$GITHUB_ENV"
-        echo "CMAKE_CXX_COMPILER_LAUNCHER=$SCCACHE_INSTALL_PATH/bin/sccache" >> "$GITHUB_ENV"
-        echo "RUSTC_WRAPPER=$SCCACHE_INSTALL_PATH/bin/sccache" >> "$GITHUB_ENV"
+
+        printf \
+          '
+            export SCCACHE_BUCKET="hhvm-sccache"
+            export SCCACHE_ENDPOINT="https://hhvm-sccache.s3-accelerate.amazonaws.com"
+            export SCCACHE_REGION="us-west-2"
+
+            export CMAKE_C_COMPILER_LAUNCHER=%q/bin/sccache
+            export CMAKE_CXX_COMPILER_LAUNCHER=%q/bin/sccache
+            export RUSTC_WRAPPER=%q/bin/sccache
+          ' \
+          "$SCCACHE_INSTALL_PATH" \
+          "$SCCACHE_INSTALL_PATH" \
+          "$SCCACHE_INSTALL_PATH" |
+          sudo tee -a /nix/var/setup-compiler-cache.sh
+
+        # Assign the owner for the generated shell script, because it will be
+        # used by the nix builder users. See https://nixos.wiki/wiki/CCache
+        sudo chown --reference=/nix/store /nix/var/setup-compiler-cache.sh
     - name: Assume the AWS role
       continue-on-error: true
       id: configure-aws-credentials
@@ -77,33 +93,21 @@ jobs:
     - name: Upload sccache binaries to the binary cache server on S3
       if: steps.configure-aws-credentials.outcome == 'success'
       run: nix copy --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#sccache_pr1086"
-    - if: steps.configure-aws-credentials.outcome != 'success'
-      run: echo "SCCACHE_S3_NO_CREDENTIALS=1" >> "$GITHUB_ENV"
-    - name: Dump compiler cache related environment variables to a shell script
+    - name: Set up sccache for read-only caching on AWS S3
+      if: steps.configure-aws-credentials.outcome != 'success'
       run: |
-        set -ex
-        for VAR_NAME in \
-          "CMAKE_C_COMPILER_LAUNCHER" \
-          "CMAKE_CXX_COMPILER_LAUNCHER" \
-          "RUSTC_WRAPPER" \
-          "AWS_ACCESS_KEY_ID" \
-          "AWS_SECRET_ACCESS_KEY" \
-          "AWS_SESSION_TOKEN" \
-          "SCCACHE_BUCKET" \
-          "SCCACHE_ENDPOINT" \
-          "SCCACHE_REGION" \
-          "SCCACHE_S3_NO_CREDENTIALS" \
-        do
-          if [[ -v "$VAR_NAME" ]]
-          then
-            printf "export %q=%q\n" "$VAR_NAME" "${!VAR_NAME}"
-          fi
-        done | sudo tee /nix/var/setup-compiler-cache.sh
-        sudo chown --reference=/nix/store /nix/var/setup-compiler-cache.sh
-      env:
-        SCCACHE_BUCKET: hhvm-sccache
-        SCCACHE_ENDPOINT: https://hhvm-sccache.s3-accelerate.amazonaws.com
-        SCCACHE_REGION: us-west-2
+        sudo tee -a /nix/var/setup-compiler-cache.sh <<EOF
+          export SCCACHE_S3_NO_CREDENTIALS=1
+        EOF
+    - name: Set up sccache for read/write caching on AWS S3
+      if: steps.configure-aws-credentials.outcome == 'success'
+      run: |
+        printf '
+          export AWS_ACCESS_KEY_ID=%q
+          export AWS_SECRET_ACCESS_KEY=%q
+          export AWS_SESSION_TOKEN=%q
+        ' "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$AWS_SESSION_TOKEN" |
+        sudo tee -a /nix/var/setup-compiler-cache.sh
     - name: Build and install HHVM
       run: nix profile install --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
     - run: hhvm --version

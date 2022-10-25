@@ -108,11 +108,18 @@ module Program = struct
       ServerArgs.gen_saved_ignore_type_errors genv.options
       && Option.is_some (ServerArgs.save_filename genv.options)
     in
-    exit
-      (if has_errors && not is_saving_state_and_ignoring_errors then
-        1
+    let error_code =
+      if has_errors then
+        if Option.is_some (ServerArgs.write_symbol_info genv.options) then
+          32
+        else if not is_saving_state_and_ignoring_errors then
+          1
+        else
+          0
       else
-        0)
+        0
+    in
+    exit error_code
 
   (* filter and relativize updated file paths *)
   let process_updates genv updates =

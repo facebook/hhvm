@@ -114,6 +114,10 @@ zend/good/ext/intl/tests/locale_lookup_variant2.php
 zend/good/ext/intl/tests/msgfmt_millisecond_dates.php
 zend/good/ext/mbstring/tests/mb_ereg_replace_variation1.php
 
+# TODO(atry) failed in repo mode
+hphp/test/slow/use_function/override.php
+hphp/test/slow/coeffects/closure-inherit-2.php
+
 # TODO(alexeyt) failures not yet categorized
 slow/coeffects/apc_pure.php
 slow/dom_document/clone.php

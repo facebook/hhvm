@@ -133,7 +133,7 @@ void apache::thrift::Client<::cpp2::MyServiceFast>::hasDataByIdImpl(apache::thri
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::MyServiceFast>::hasDataByIdCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::MyServiceFast>::hasDataByIdCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -368,7 +368,7 @@ void apache::thrift::Client<::cpp2::MyServiceFast>::getDataByIdImpl(apache::thri
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::MyServiceFast>::getDataByIdCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::MyServiceFast>::getDataByIdCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -601,7 +601,7 @@ void apache::thrift::Client<::cpp2::MyServiceFast>::putDataByIdImpl(apache::thri
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::MyServiceFast>::putDataByIdCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::MyServiceFast>::putDataByIdCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -835,7 +835,7 @@ void apache::thrift::Client<::cpp2::MyServiceFast>::lobDataByIdImpl(apache::thri
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::MyServiceFast>::lobDataByIdCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::MyServiceFast>::lobDataByIdCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());

@@ -89,6 +89,32 @@ StructMetadata<::test::fixtures::basic-structured-annotations::structured_annota
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.structured_annotation_recursive", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_structured_annotation_recursive = res.first->second;
+  module_structured_annotation_recursive.name() = "module.structured_annotation_recursive";
+  module_structured_annotation_recursive.is_union() = false;
+  static const auto* const
+  module_structured_annotation_recursive_fields = new std::array<EncodedThriftField, 3>{{
+    {1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
+    {2, "recurse", true, std::make_unique<Typedef>("module.structured_annotation_recursive", std::make_unique<Struct<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>("module.structured_annotation_recursive"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
+    {3, "forward", false, std::make_unique<Typedef>("module.structured_annotation_forward", std::make_unique<Struct<::test::fixtures::basic-structured-annotations::structured_annotation_forward>>("module.structured_annotation_forward"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_structured_annotation_recursive_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_structured_annotation_recursive.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.structured_annotation_forward", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
@@ -109,32 +135,6 @@ StructMetadata<::test::fixtures::basic-structured-annotations::structured_annota
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations() = f.structured_annotations;
     module_structured_annotation_forward.fields()->push_back(std::move(field));
-  }
-  return res.first->second;
-}
-const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.structured_annotation_recursive", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
-  }
-  ::apache::thrift::metadata::ThriftStruct& module_structured_annotation_recursive = res.first->second;
-  module_structured_annotation_recursive.name() = "module.structured_annotation_recursive";
-  module_structured_annotation_recursive.is_union() = false;
-  static const auto* const
-  module_structured_annotation_recursive_fields = new std::array<EncodedThriftField, 3>{{
-    {1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "recurse", false, std::make_unique<Typedef>("module.structured_annotation_recursive", std::make_unique<Struct<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>("module.structured_annotation_recursive"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
-    {3, "forward", false, std::make_unique<Typedef>("module.structured_annotation_forward", std::make_unique<Struct<::test::fixtures::basic-structured-annotations::structured_annotation_forward>>("module.structured_annotation_forward"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
-  }};
-  for (const auto& f : *module_structured_annotation_recursive_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
-    module_structured_annotation_recursive.fields()->push_back(std::move(field));
   }
   return res.first->second;
 }

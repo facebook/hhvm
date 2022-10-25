@@ -9,5 +9,4 @@ path = "lint.rs"
 
 [dependencies]
 ocamlrep = { path = "../../ocamlrep" }
-ocamlrep_derive = { path = "../../ocamlrep_derive" }
 oxidized = { path = "../../oxidized" }

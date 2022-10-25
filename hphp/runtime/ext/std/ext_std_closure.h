@@ -108,7 +108,7 @@ struct c_Closure final : ObjectData {
   /*
    * The closure's underlying function.
    */
-  const Func* getInvokeFunc() const { return getVMClass()->getCachedInvoke(); }
+  const Func* getInvokeFunc() const { return getVMClass()->getRegularInvoke(); }
 
   /*
    * The Class scope the closure was defined in.

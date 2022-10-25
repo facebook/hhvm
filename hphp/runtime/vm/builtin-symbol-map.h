@@ -16,13 +16,16 @@
 
 #pragma once
 
-#include "hphp/hack/src/hackc/ffi_bridge/decl_provider.h"
-
 #include "hphp/runtime/base/autoload-map.h"
 
 #include "hphp/util/optional.h"
 
 #include <string>
+
+namespace HPHP::hackc {
+  struct ExternalDeclProviderResult;
+  struct DeclResult;
+}
 
 namespace HPHP::Native {
 
@@ -47,5 +50,7 @@ Optional<hackc::ExternalDeclProviderResult> getBuiltinDecls(
   const StringData* symbol,
   AutoloadMap::KindOf kind
 );
+
+hphp_fast_set<const hackc::DeclResult*> getAllBuiltinDecls();
 
 } // namespace HPHP::Native

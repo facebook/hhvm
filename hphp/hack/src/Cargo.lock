@@ -16,7 +16,6 @@ dependencies = [
  "namespaces_rust",
  "naming_special_names_rust",
  "ocamlrep",
- "ocamlrep_derive",
  "oxidized",
  "parser_core_types",
  "positioned_by_ref_parser",
@@ -113,7 +112,6 @@ dependencies = [
  "arena_trait",
  "bumpalo",
  "ocamlrep",
- "ocamlrep_derive",
  "quickcheck",
  "serde",
 ]
@@ -122,7 +120,7 @@ dependencies = [
 name = "arena_deserializer"
 version = "0.0.0"
 dependencies = [
- "bstr",
+ "bstr 1.0.1",
  "bumpalo",
  "serde",
 ]
@@ -133,7 +131,7 @@ version = "0.0.0"
 dependencies = [
  "arena_deserializer",
  "bincode",
- "bstr",
+ "bstr 1.0.1",
  "bumpalo",
  "oxidized_by_ref",
  "relative_path",
@@ -153,6 +151,36 @@ name = "ascii"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbf56136a5198c7b01a49e3afcbef6cf84597273d298f54432926024107b0109"
+
+[[package]]
+name = "assemble"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "assemble_opcode_macro",
+ "bumpalo",
+ "escaper",
+ "ffi",
+ "hhbc",
+ "hhvm_types_ffi",
+ "log",
+ "naming_special_names_rust",
+ "newtype",
+ "parse_macro",
+ "stack_depth",
+ "strum_macros",
+]
+
+[[package]]
+name = "assemble_opcode_macro"
+version = "0.0.0"
+dependencies = [
+ "hhbc-gen",
+ "itertools 0.10.3",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
 
 [[package]]
 name = "ast_and_decl_parser"
@@ -355,6 +383,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "bstr"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fca0852af221f458706eb0725c03e4ed6c46af9ac98e6a689d5e634215d594dd"
+dependencies = [
+ "memchr",
+ "once_cell",
+ "regex-automata",
+ "serde",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -374,7 +414,7 @@ name = "bytecode_printer"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bstr",
+ "bstr 1.0.1",
  "escaper",
  "ffi",
  "hash",
@@ -573,6 +613,7 @@ dependencies = [
  "aast_parser",
  "anyhow",
  "bc_to_ir",
+ "bstr 1.0.1",
  "bumpalo",
  "bytecode_printer",
  "clap 3.2.17",
@@ -636,7 +677,7 @@ dependencies = [
 name = "config_file"
 version = "0.0.0"
 dependencies = [
- "bstr",
+ "bstr 1.0.1",
  "lazy_static",
  "regex",
  "serde_json",
@@ -661,7 +702,9 @@ dependencies = [
  "encode_unicode",
  "libc",
  "once_cell",
+ "regex",
  "terminal_size",
+ "unicode-width",
  "winapi",
 ]
 
@@ -891,7 +934,7 @@ version = "1.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "00affe7f6ab566df61b4be3ce8cf16bc2576bca0963ceb0955e45d514bf9a279"
 dependencies = [
- "bstr",
+ "bstr 0.2.17",
  "csv-core",
  "itoa 0.4.8",
  "ryu",
@@ -1008,7 +1051,6 @@ name = "decl_parser"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "arena_collections",
  "bumpalo",
  "direct_decl_parser",
  "file_provider",
@@ -1016,7 +1058,6 @@ dependencies = [
  "oxidized",
  "oxidized_by_ref",
  "pos",
- "special_names",
  "ty",
 ]
 
@@ -1089,7 +1130,6 @@ dependencies = [
  "hh_fanout_rust_ffi",
  "ocamlrep",
  "ocamlrep_custom",
- "ocamlrep_derive",
  "once_cell",
  "rpds",
 ]
@@ -1156,7 +1196,7 @@ name = "direct_decl_smart_constructors"
 version = "0.0.0"
 dependencies = [
  "arena_collections",
- "bstr",
+ "bstr 1.0.1",
  "bumpalo",
  "escaper",
  "flatten_smart_constructors",
@@ -1267,7 +1307,7 @@ version = "0.0.0"
 dependencies = [
  "ast_scope",
  "bitflags",
- "bstr",
+ "bstr 1.0.1",
  "bumpalo",
  "constant_folder",
  "core_utils_rust",
@@ -1295,6 +1335,7 @@ dependencies = [
  "regex",
  "scope",
  "serde_json",
+ "stack_depth",
  "stack_limit",
  "statement_state",
 ]
@@ -1356,7 +1397,7 @@ name = "eq_modulo_pos"
 version = "0.0.0"
 dependencies = [
  "arena_collections",
- "bstr",
+ "bstr 1.0.1",
  "eq_modulo_pos_derive",
  "hcons",
  "indexmap",
@@ -1369,6 +1410,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "synstructure",
+]
+
+[[package]]
+name = "erased-serde"
+version = "0.3.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6ca8b296792113e1500fd935ae487be6e00ce318952a6880555554824d6ebf38"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
@@ -1393,7 +1443,7 @@ dependencies = [
 name = "escaper"
 version = "0.0.0"
 dependencies = [
- "bstr",
+ "bstr 1.0.1",
  "bumpalo",
  "pretty_assertions",
 ]
@@ -1445,7 +1495,7 @@ dependencies = [
 name = "ffi"
 version = "0.0.0"
 dependencies = [
- "bstr",
+ "bstr 1.0.1",
  "bumpalo",
  "serde",
  "write_bytes",
@@ -1461,22 +1511,49 @@ dependencies = [
 ]
 
 [[package]]
+name = "file_info"
+version = "0.0.0"
+dependencies = [
+ "arena_deserializer",
+ "arena_trait",
+ "eq_modulo_pos",
+ "naming_types",
+ "no_pos_hash",
+ "ocamlrep",
+ "parser_core_types",
+ "rc_pos",
+ "relative_path",
+ "rusqlite",
+ "serde",
+ "typing_deps_hash",
+]
+
+[[package]]
 name = "file_provider"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bstr",
+ "bstr 1.0.1",
  "pos",
  "tempdir",
+]
+
+[[package]]
+name = "files_to_ignore"
+version = "0.0.0"
+dependencies = [
+ "regex",
 ]
 
 [[package]]
 name = "find_utils"
 version = "0.0.0"
 dependencies = [
- "lazy_static",
+ "anyhow",
+ "files_to_ignore",
+ "jwalk",
  "pretty_assertions",
- "regex",
+ "relative_path",
 ]
 
 [[package]]
@@ -1513,6 +1590,7 @@ dependencies = [
  "datastore",
  "depgraph_api",
  "eq_modulo_pos",
+ "hash",
  "indexmap",
  "itertools 0.10.3",
  "oxidized",
@@ -1599,6 +1677,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "gen_hhi_contents_lib"
+version = "0.0.0"
+
+[[package]]
+name = "generate_hhi_lib"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "ocamlrep",
+ "parser_core_types",
+ "positioned_parser",
+ "relative_path",
+]
+
+[[package]]
 name = "generic-array"
 version = "0.14.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1665,8 +1758,8 @@ version = "0.0.0"
 dependencies = [
  "aast_parser",
  "anyhow",
+ "assemble",
  "bc_to_ir",
- "bstr",
  "bumpalo",
  "byte-unit",
  "bytecode_printer",
@@ -1676,7 +1769,6 @@ dependencies = [
  "decl_provider",
  "direct_decl_parser",
  "env_logger 0.7.1",
- "escaper",
  "facts_rust",
  "ffi",
  "file_provider",
@@ -1750,6 +1842,7 @@ dependencies = [
 name = "hash"
 version = "0.0.0"
 dependencies = [
+ "dashmap",
  "indexmap",
  "rustc-hash",
 ]
@@ -1797,8 +1890,10 @@ dependencies = [
 name = "hdf"
 version = "0.0.0"
 dependencies = [
+ "cc",
  "cxx",
  "cxx-build",
+ "glob",
  "thiserror",
 ]
 
@@ -1865,8 +1960,10 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "derive_more",
+ "file_info",
  "hh_hash",
  "nohash-hasher",
+ "relative_path",
  "rusqlite",
  "serde",
  "serde_json",
@@ -1944,7 +2041,6 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_caml_builtins",
  "ocamlrep_custom",
- "ocamlrep_derive",
  "ocamlrep_ocamlpool",
  "rpds",
 ]
@@ -1962,7 +2058,7 @@ name = "hhbc"
 version = "0.0.0"
 dependencies = [
  "bitflags",
- "bstr",
+ "bstr 1.0.1",
  "bumpalo",
  "emit_opcodes_macro",
  "ffi",
@@ -2004,6 +2100,8 @@ dependencies = [
 name = "hhi"
 version = "0.0.0"
 dependencies = [
+ "gen_hhi_contents_lib",
+ "generate_hhi_lib",
  "structopt",
  "walkdir",
 ]
@@ -2042,6 +2140,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "cxx",
+ "cxx-build",
  "hdf",
  "log",
 ]
@@ -2077,12 +2176,12 @@ dependencies = [
 
 [[package]]
 name = "im"
-version = "14.3.0"
+version = "15.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "696059c87b83c5a258817ecd67c3af915e3ed141891fc35a1e79908801cf0ce7"
+checksum = "d0acd33ff0285af998aaf9b57342af478078f53492322fafc47450e09397e0e9"
 dependencies = [
  "bitmaps",
- "rand_core 0.5.1",
+ "rand_core 0.6.3",
  "rand_xoshiro",
  "rayon",
  "serde",
@@ -2105,15 +2204,16 @@ dependencies = [
 
 [[package]]
 name = "indicatif"
-version = "0.16.2"
+version = "0.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d207dc617c7a380ab07ff572a6e52fa202a2a8f355860ac9c38e23f8196be1b"
+checksum = "bfddc9561e8baf264e0e45e197fd7696320026eb10a8180340debc27b18f535b"
 dependencies = [
  "console",
- "lazy_static",
  "number_prefix",
  "rayon",
- "regex",
+ "tokio",
+ "unicode-segmentation",
+ "unicode-width",
 ]
 
 [[package]]
@@ -2171,7 +2271,7 @@ name = "ir_core"
 version = "0.0.0"
 dependencies = [
  "ascii",
- "bstr",
+ "bstr 1.0.1",
  "ffi",
  "hash",
  "hhbc",
@@ -2198,6 +2298,7 @@ dependencies = [
  "itertools 0.10.3",
  "log",
  "smallvec",
+ "stack_depth",
 ]
 
 [[package]]
@@ -2235,9 +2336,9 @@ checksum = "b71991ff56294aa922b450139ee08b3bfc70982c6b2c7562771375cf73542dd4"
 
 [[package]]
 name = "itoa"
-version = "1.0.1"
+version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1aab8fc367588b89dcee83ab0fd66b72b50b72fa1904d7095045ace2b0c81c35"
+checksum = "4217ad341ebadf8d8e724e264f13e593e0648f5b3e94b3896a5df283be015ecc"
 
 [[package]]
 name = "jobserver"
@@ -2294,9 +2395,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.132"
+version = "0.2.135"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8371e4e5341c3a96db127eb2465ac681ced4c433e01dd0e938adbef26ba93ba5"
+checksum = "68783febc7782c6c5cb401fbda4de5a9898be1762314da0bb2c10ced61f18b0c"
 
 [[package]]
 name = "libsqlite3-sys"
@@ -2334,7 +2435,6 @@ name = "lint_rust"
 version = "0.0.0"
 dependencies = [
  "ocamlrep",
- "ocamlrep_derive",
  "oxidized",
 ]
 
@@ -2361,7 +2461,7 @@ dependencies = [
 name = "lowerer"
 version = "0.0.0"
 dependencies = [
- "bstr",
+ "bstr 1.0.1",
  "bumpalo",
  "escaper",
  "hash",
@@ -2482,7 +2582,6 @@ name = "mode_parser"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "oxidized",
  "parser_core_types",
  "positioned_by_ref_parser",
 ]
@@ -2501,7 +2600,7 @@ dependencies = [
  "futures-util",
  "num_cpus",
  "once_cell",
- "parking_lot 0.12.0",
+ "parking_lot 0.12.1",
  "quanta",
  "scheduled-thread-pool",
  "skeptic",
@@ -2527,13 +2626,16 @@ name = "names"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "bumpalo",
+ "crossbeam",
  "hh24_types",
  "hh_hash",
- "nohash-hasher",
  "oxidized",
  "oxidized_by_ref",
+ "rand 0.8.5",
  "relative_path",
  "rusqlite",
+ "slog",
  "typing_deps_hash",
 ]
 
@@ -2579,6 +2681,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "naming_types"
+version = "0.0.0"
+dependencies = [
+ "arena_deserializer",
+ "arena_trait",
+ "eq_modulo_pos",
+ "no_pos_hash",
+ "ocamlrep",
+ "serde",
+]
+
+[[package]]
 name = "nb"
 version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2619,7 +2733,7 @@ name = "no_pos_hash"
 version = "0.0.0"
 dependencies = [
  "arena_collections",
- "bstr",
+ "bstr 1.0.1",
  "fnv",
  "no_pos_hash_derive",
  "ocamlrep",
@@ -2648,17 +2762,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c349f68f25f596b9f44cf0e7c69752a5c633b0550c3ff849518bfba0233774a"
 dependencies = [
  "memchr",
-]
-
-[[package]]
-name = "num-derive"
-version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "876a53fff98e03a936a674b29568b0e605f06b29372c2489ff4de23f1949743d"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]
@@ -2715,11 +2818,12 @@ dependencies = [
 name = "ocamlrep"
 version = "0.0.0"
 dependencies = [
- "bstr",
+ "bstr 1.0.1",
  "bumpalo",
  "bytes",
+ "hash",
  "indexmap",
- "nohash-hasher",
+ "ocamlrep_derive",
  "serde",
 ]
 
@@ -2757,7 +2861,6 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "ocamlrep",
- "ocamlrep_derive",
 ]
 
 [[package]]
@@ -2779,9 +2882,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.12.0"
+version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7709cef83f0c1f58f666e746a08b21e0085f7440fa6a29cc194d68aac97a4225"
+checksum = "e82dad04139b71a90c080c8463fe0dc7902db5192d939bd0950f074d014339e1"
 
 [[package]]
 name = "oorandom"
@@ -2801,7 +2904,6 @@ name = "operator"
 version = "0.0.0"
 dependencies = [
  "ocamlrep",
- "ocamlrep_derive",
  "parser_core_types",
 ]
 
@@ -2809,7 +2911,7 @@ dependencies = [
 name = "options"
 version = "0.0.0"
 dependencies = [
- "bstr",
+ "bstr 1.0.1",
  "bumpalo",
  "bytecode_printer",
  "hhbc",
@@ -2849,21 +2951,21 @@ dependencies = [
  "arena_deserializer",
  "arena_trait",
  "bitflags",
- "bstr",
+ "bstr 1.0.1",
  "bumpalo",
  "eq_modulo_pos",
+ "file_info",
  "hh_autoimport_rust",
  "itertools 0.10.3",
+ "naming_types",
  "no_pos_hash",
  "ocamlrep",
- "ocamlrep_derive",
  "parser_core_types",
  "pretty_assertions",
+ "rc_pos",
  "relative_path",
- "rusqlite",
  "rust_to_ocaml_attr",
  "serde",
- "static_assertions",
 ]
 
 [[package]]
@@ -2874,14 +2976,13 @@ dependencies = [
  "arena_deserializer",
  "arena_trait",
  "bitflags",
- "bstr",
+ "bstr 1.0.1",
  "bumpalo",
  "eq_modulo_pos",
  "hh_hash",
  "no_pos_hash",
  "ocamlrep",
  "ocamlrep_caml_builtins",
- "ocamlrep_derive",
  "oxidized",
  "pretty_assertions",
  "relative_path",
@@ -2923,9 +3024,9 @@ dependencies = [
 
 [[package]]
 name = "parking_lot"
-version = "0.12.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87f5ec2493a61ac0506c0f4199f99070cbe83857b0337006a30f3e6719b8ef58"
+checksum = "3742b2c103b9f06bc9fff0a37ff4912935851bee6d36f3c02bcc755bcfec228f"
 dependencies = [
  "lock_api",
  "parking_lot_core 0.9.1",
@@ -2959,6 +3060,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "parse_macro"
+version = "0.0.0"
+dependencies = [
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
 name = "parser"
 version = "0.0.0"
 dependencies = [
@@ -2980,7 +3090,6 @@ dependencies = [
  "line_break_map",
  "ocaml_helper",
  "ocamlrep",
- "ocamlrep_derive",
  "relative_path",
  "serde",
 ]
@@ -3063,7 +3172,7 @@ name = "pos"
 version = "0.0.0"
 dependencies = [
  "arena_trait",
- "bstr",
+ "bstr 1.0.1",
  "bumpalo",
  "eq_modulo_pos",
  "hh24_types",
@@ -3071,7 +3180,6 @@ dependencies = [
  "indexmap",
  "intern",
  "ocamlrep",
- "ocamlrep_derive",
  "oxidized",
  "oxidized_by_ref",
  "relative_path",
@@ -3151,7 +3259,6 @@ version = "0.0.0"
 dependencies = [
  "ffi",
  "ir_core",
- "itertools 0.10.3",
 ]
 
 [[package]]
@@ -3159,7 +3266,7 @@ name = "print_expr"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bstr",
+ "bstr 1.0.1",
  "bumpalo",
  "core_utils_rust",
  "emit_type_hint",
@@ -3230,9 +3337,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.39"
+version = "1.0.46"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c54b25569025b7fc9651de43004ae593a75ad88543b17178aa5e1b9c4f15f56f"
+checksum = "94e2ef8dbfc347b10c094890f778ee2e36ca9bb4262e86dc99cd217e35f3470b"
 dependencies = [
  "unicode-ident",
 ]
@@ -3354,12 +3461,6 @@ checksum = "9c33a3c44ca05fa6f1807d8e6743f3824e8509beca625669633be0acbdf509dc"
 
 [[package]]
 name = "rand_core"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90bde5296fc891b0cef12a6d03ddccc162ce7b2aff54160af9338f8d40df6d19"
-
-[[package]]
-name = "rand_core"
 version = "0.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d34f1408f55294453790c48b2f1ebbb1c5b4b7563eb1f418bcfcfdbb06ebb4e7"
@@ -3369,11 +3470,11 @@ dependencies = [
 
 [[package]]
 name = "rand_xoshiro"
-version = "0.4.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a9fcdd2e881d02f1d9390ae47ad8e5696a9e4be7b547a1da2afbc61973217004"
+checksum = "6f97cdb2a36ed4183de61b2f824cc45c9f1037f28afe0a322e9fff4c108b5aaa"
 dependencies = [
- "rand_core 0.5.1",
+ "rand_core 0.6.3",
 ]
 
 [[package]]
@@ -3408,6 +3509,22 @@ dependencies = [
  "crossbeam-utils 0.8.7",
  "lazy_static",
  "num_cpus",
+]
+
+[[package]]
+name = "rc_pos"
+version = "0.0.0"
+dependencies = [
+ "arena_deserializer",
+ "arena_trait",
+ "eq_modulo_pos",
+ "no_pos_hash",
+ "ocamlrep",
+ "parser_core_types",
+ "pretty_assertions",
+ "relative_path",
+ "serde",
+ "static_assertions",
 ]
 
 [[package]]
@@ -3462,7 +3579,6 @@ dependencies = [
  "eq_modulo_pos",
  "no_pos_hash",
  "ocamlrep",
- "ocamlrep_derive",
  "pretty_assertions",
  "serde",
 ]
@@ -3561,7 +3677,6 @@ version = "0.0.0"
 dependencies = [
  "lint_rust",
  "ocamlrep",
- "ocamlrep_derive",
  "oxidized",
  "parser_core_types",
 ]
@@ -3688,7 +3803,7 @@ version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "977a7519bff143a44f842fd07e80ad1329295bd71686457f18e496736f4bf9bf"
 dependencies = [
- "parking_lot 0.12.0",
+ "parking_lot 0.12.1",
 ]
 
 [[package]]
@@ -3725,7 +3840,6 @@ dependencies = [
  "itertools 0.10.3",
  "log",
  "newtype",
- "once_cell",
 ]
 
 [[package]]
@@ -3781,11 +3895,11 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.79"
+version = "1.0.86"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e8d9fa5c3b304765ce1fd9c4c8a3de2c8db365a5b91be52f186efc675681d95"
+checksum = "41feea4228a6f1cd09ec7a3593a682276702cd67b5273544757dae23c096f074"
 dependencies = [
- "itoa 1.0.1",
+ "itoa 1.0.4",
  "ryu",
  "serde",
 ]
@@ -3846,7 +3960,7 @@ dependencies = [
 name = "signed_source"
 version = "0.0.0"
 dependencies = [
- "bstr",
+ "bstr 1.0.1",
  "hex",
  "md-5",
  "once_cell",
@@ -3856,9 +3970,9 @@ dependencies = [
 
 [[package]]
 name = "sized-chunks"
-version = "0.5.3"
+version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d59044ea371ad781ff976f7b06480b9f0180e834eda94114f2afb4afc12b7718"
+checksum = "16d69225bde7a69b235da73377861095455d298f2b970996eec25ddbb42b3d1e"
 dependencies = [
  "bitmaps",
  "typenum",
@@ -3886,6 +4000,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c111b5bd5695e56cffe5129854aa230b39c93a305372fdbb2668ca2394eea9f8"
 
 [[package]]
+name = "slog"
+version = "2.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8347046d4ebd943127157b94d63abb990fcf729dc4e9978927fdf4ac3c998d06"
+dependencies = [
+ "erased-serde",
+]
+
+[[package]]
 name = "smallvec"
 version = "1.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3899,7 +4022,6 @@ name = "smart_constructors"
 version = "0.0.0"
 dependencies = [
  "ocamlrep",
- "ocamlrep_derive",
  "parser_core_types",
 ]
 
@@ -3917,6 +4039,7 @@ dependencies = [
 name = "special_names"
 version = "0.0.0"
 dependencies = [
+ "hash",
  "naming_special_names_rust",
  "once_cell",
  "pos",
@@ -3936,6 +4059,18 @@ name = "stable_deref_trait"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
+
+[[package]]
+name = "stack_depth"
+version = "0.0.0"
+dependencies = [
+ "ffi",
+ "hhbc",
+ "hhbc-gen",
+ "log",
+ "newtype",
+ "thiserror",
+]
 
 [[package]]
 name = "stack_limit"
@@ -4038,9 +4173,9 @@ checksum = "45f6ee7c7b87caf59549e9fe45d6a69c75c8019e79e212a835c5da0e92f0ba08"
 
 [[package]]
 name = "syn"
-version = "1.0.96"
+version = "1.0.102"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0748dd251e24453cb8717f0354206b91557e4ec8703673a4b30208f2abaf1ebf"
+checksum = "3fcd952facd492f9be3ef0d0b7032a6e442ee9b361d4acc2b1d0c4aaa5f613a1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4142,8 +4277,6 @@ dependencies = [
  "itertools 0.10.3",
  "log",
  "newtype",
- "num-derive",
- "num-traits",
  "strum",
  "strum_macros",
 ]
@@ -4207,6 +4340,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "tokio"
+version = "1.21.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a9e03c497dc955702ba729190dc4aac6f2a0ce97f913e5b1b5912fc5039d9099"
+dependencies = [
+ "autocfg",
+ "bytes",
+ "memchr",
+ "pin-project-lite",
+]
+
+[[package]]
 name = "toml"
 version = "0.5.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4230,10 +4375,10 @@ dependencies = [
  "arena_collections",
  "bumpalo",
  "eq_modulo_pos",
+ "hash",
  "hcons",
  "im",
  "ocamlrep",
- "ocamlrep_derive",
  "once_cell",
  "oxidized",
  "oxidized_by_ref",
@@ -4352,7 +4497,6 @@ version = "0.0.0"
 dependencies = [
  "eq_modulo_pos",
  "ocamlrep",
- "ocamlrep_derive",
  "oxidized",
  "pos",
  "serde",
@@ -4409,9 +4553,9 @@ dependencies = [
 
 [[package]]
 name = "version_check"
-version = "0.9.2"
+version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5a972e5669d67ba988ce3dc826706fb0a8b01471c088cb0b6110b805cc36aed"
+checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 
 [[package]]
 name = "void"
@@ -4596,7 +4740,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "write_bytes"
 version = "0.0.0"
 dependencies = [
- "bstr",
+ "bstr 1.0.1",
  "write_bytes-macro",
 ]
 

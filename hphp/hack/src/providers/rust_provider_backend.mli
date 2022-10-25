@@ -39,6 +39,24 @@ module Decl : sig
   val get_folded_class : t -> string -> Decl_defs.decl_class_type option
 
   val declare_folded_class : t -> string -> unit
+
+  val get_old_shallow_classes_batch :
+    t -> string list -> Shallow_decl_defs.class_decl option SMap.t
+
+  val get_old_defs :
+    t ->
+    FileInfo.names ->
+    Shallow_decl_defs.fun_decl option SMap.t
+    * Shallow_decl_defs.typedef_decl option SMap.t
+    * Shallow_decl_defs.const_decl option SMap.t
+    * Shallow_decl_defs.module_decl option SMap.t
+
+  val oldify_defs : t -> FileInfo.names * Decl_class_elements.t SMap.t -> unit
+
+  val remove_defs : t -> FileInfo.names * Decl_class_elements.t SMap.t -> unit
+
+  val remove_old_defs :
+    t -> FileInfo.names * Decl_class_elements.t SMap.t -> unit
 end
 
 module File : sig

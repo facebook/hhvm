@@ -180,6 +180,10 @@ and instantiate_ subst x =
   | Tshape (shape_kind, fdm) ->
     let fdm = ShapeFieldMap.map (instantiate subst) fdm in
     Tshape (shape_kind, fdm)
+  | Tnewtype (name, tyl, ty) ->
+    let tyl = List.map tyl ~f:(instantiate subst) in
+    let ty = instantiate subst ty in
+    Tnewtype (name, tyl, ty)
 
 and instantiate_possibly_enforced_ty subst et =
   { et_type = instantiate subst et.et_type; et_enforced = et.et_enforced }

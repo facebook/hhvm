@@ -89,11 +89,10 @@ function get_implicit_context(string $key)[zoned]: mixed;
 function get_whole_implicit_context()[zoned]: object /* ImplicitContextData */;
 
 /**
- * Sets implicit context $context keyed by $key.
- * Returns the previous implicit context.
+ * Creates implicit context $context keyed by $key.
  */
 <<__Native>>
-function set_implicit_context(
+function create_implicit_context(
   string $key,
   mixed $context,
 )[zoned]: object /* ImplicitContextData */;
@@ -149,9 +148,11 @@ abstract class ImplicitContext {
     this::T $context,
     (function ()[_]: Awaitable<Tout>) $f,
   )[zoned, ctx $f]: Awaitable<Tout> {
-    $prev = ImplicitContext\_Private\set_implicit_context(
-      static::class,
-      $context,
+    $prev = ImplicitContext\_Private\set_implicit_context_by_value(
+      ImplicitContext\_Private\create_implicit_context(
+        static::class,
+        $context,
+      ),
     );
     try {
       $result = $f();
@@ -167,9 +168,11 @@ abstract class ImplicitContext {
     this::T $context,
     (function ()[_]: Tout) $f,
   )[zoned, ctx $f]: Tout {
-    $prev = ImplicitContext\_Private\set_implicit_context(
-      static::class,
-      $context,
+    $prev = ImplicitContext\_Private\set_implicit_context_by_value(
+      ImplicitContext\_Private\create_implicit_context(
+        static::class,
+        $context,
+      ),
     );
     try {
       return $f();

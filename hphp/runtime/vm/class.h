@@ -703,10 +703,11 @@ public:
   const Func* get86linit() const;
 
   /*
-   * Look up a class' cached __invoke function.  We only cache __invoke methods
-   * if they are instance methods or if the class is a static closure.
+   * Look up this class's regular __invoke function. A regular invoke function
+   * is an invoke function that is not static in prologue. Closures' invoke
+   * functions are always regular.
    */
-  const Func* getCachedInvoke() const;
+  const Func* getRegularInvoke() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -758,9 +759,18 @@ public:
   /*
    * Get or set a method by its index in the funcVec, which is allocated
    * contiguously before `this' in memory.
+   *
+   * Requires idx < numMethods().
    */
   Func* getMethod(Slot idx) const;
   void setMethod(Slot idx, Func* func);
+
+  /*
+   * Get a method by its index in the funcVec, or pair of vtable/method indices.
+   * Return nullptr if indices are out of range or no such method exists.
+   */
+  Func* getMethodSafe(Slot idx) const;
+  Func* getIfaceMethodSafe(Slot vtableIdx, Slot methodIdx) const;
 
   /*
    * Look up a method by name.

@@ -8,17 +8,21 @@
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
+#include "jansson.h"
+#include "jansson_private.h"
+#include "utf.h"
+
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "jansson.h"
-#include "jansson_private.h"
-#include "utf.h"
-#include <folly/String.h>
 #include <system_error>
+
+#include <fmt/core.h>
+#include <folly/String.h>
+
 
 #define STREAM_STATE_OK 0
 #define STREAM_STATE_EOF -1
@@ -77,8 +81,8 @@ struct lex_t {
 };
 
 class BumpDepth {
-public:
-  explicit BumpDepth(lex_t* lex): lex_{lex} {
+ public:
+  explicit BumpDepth(lex_t* lex) : lex_{lex} {
     ++lex_->depth;
   }
   ~BumpDepth() {
@@ -90,10 +94,10 @@ public:
   BumpDepth& operator=(const BumpDepth&) = delete;
   BumpDepth& operator=(BumpDepth&&) = delete;
 
-private:
+ private:
   lex_t* lex_;
 };
-}
+} // namespace
 
 inline lex_t* stream_to_lex(stream_t* stream) {
   return reinterpret_cast<lex_t*>(stream);
@@ -635,9 +639,11 @@ static int lex_init(lex_t* lex, get_func get, void* data) {
 
 /*** parser ***/
 
-static std::optional<json_ref> parse_value(lex_t* lex, size_t flags, json_error_t* error);
+static std::optional<json_ref>
+parse_value(lex_t* lex, size_t flags, json_error_t* error);
 
-static std::optional<json_ref> parse_object(lex_t* lex, size_t flags, json_error_t* error) {
+static std::optional<json_ref>
+parse_object(lex_t* lex, size_t flags, json_error_t* error) {
   auto object = json_object();
 
   lex_scan(lex, error);
@@ -693,7 +699,8 @@ static std::optional<json_ref> parse_object(lex_t* lex, size_t flags, json_error
   return object;
 }
 
-static std::optional<json_ref> parse_array(lex_t* lex, size_t flags, json_error_t* error) {
+static std::optional<json_ref>
+parse_array(lex_t* lex, size_t flags, json_error_t* error) {
   std::vector<json_ref> array;
 
   lex_scan(lex, error);
@@ -725,7 +732,8 @@ error:
   return std::nullopt;
 }
 
-static std::optional<json_ref> parse_value(lex_t* lex, size_t flags, json_error_t* error) {
+static std::optional<json_ref>
+parse_value(lex_t* lex, size_t flags, json_error_t* error) {
   switch (lex->token) {
     case TOKEN_STRING:
       return typed_string_to_json(lex->value.string.c_str(), W_STRING_BYTE);
@@ -773,7 +781,8 @@ static std::optional<json_ref> parse_value(lex_t* lex, size_t flags, json_error_
   }
 }
 
-static std::optional<json_ref> parse_json(lex_t* lex, size_t flags, json_error_t* error) {
+static std::optional<json_ref>
+parse_json(lex_t* lex, size_t flags, json_error_t* error) {
   lex_scan(lex, error);
   if (!(flags & JSON_DECODE_ANY)) {
     if (lex->token != '[' && lex->token != '{') {
@@ -819,7 +828,8 @@ static int string_get(void* data) {
   }
 }
 
-std::optional<json_ref> json_loads(const char* string, size_t flags, json_error_t* error) {
+std::optional<json_ref>
+json_loads(const char* string, size_t flags, json_error_t* error) {
   lex_t lex;
   string_data_t stream_data;
 
@@ -881,7 +891,8 @@ std::optional<json_ref> json_loadb(
   return parse_json(&lex, flags, error);
 }
 
-std::optional<json_ref> json_loadf(FILE* input, size_t flags, json_error_t* error) {
+std::optional<json_ref>
+json_loadf(FILE* input, size_t flags, json_error_t* error) {
   lex_t lex;
   const char* source;
 
@@ -904,7 +915,6 @@ std::optional<json_ref> json_loadf(FILE* input, size_t flags, json_error_t* erro
 }
 
 json_ref json_load_file(const char* path, size_t flags) {
-
   if (path == nullptr) {
     throw std::runtime_error("invalid arguments to json_load_file");
   }
@@ -913,9 +923,7 @@ json_ref json_load_file(const char* path, size_t flags) {
   if (!fp) {
     auto err = errno;
     throw std::system_error(
-        err,
-        std::generic_category(),
-        folly::to<std::string>("unable to open ", path));
+        err, std::generic_category(), fmt::format("unable to open {}", path));
   }
 
   json_error_t error;
@@ -925,8 +933,7 @@ json_ref json_load_file(const char* path, size_t flags) {
 
   if (!result) {
     throw std::runtime_error(
-        folly::to<std::string>(
-          "failed to parse json from ", path, ": ", error.text));
+        fmt::format("failed to parse json from {}: {}", path, error.text));
   }
 
   return *result;

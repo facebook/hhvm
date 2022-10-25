@@ -8,7 +8,7 @@ use std::hash::Hash;
 use anyhow::Result;
 
 pub struct NonEvictingStore<K: Hash + Eq, V> {
-    store: dashmap::DashMap<K, V>,
+    store: hash::DashMap<K, V>,
 }
 
 pub struct NonEvictingLocalStore<K: Hash + Eq, V> {
@@ -34,6 +34,10 @@ where
     K: Copy + Send + Sync + Hash + Eq,
     V: Clone + Send + Sync,
 {
+    fn contains_key(&self, key: K) -> Result<bool> {
+        Ok(self.store.contains_key(&key))
+    }
+
     fn get(&self, key: K) -> Result<Option<V>> {
         Ok(self.store.get(&key).map(|x| V::clone(&*x)))
     }
@@ -45,7 +49,11 @@ where
 
     fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()> {
         for key in keys {
-            self.store.remove(&key);
+            if self.get(key)?.is_some() {
+                self.store.remove(&key);
+            } else {
+                anyhow::bail!("remove_batch: Trying to remove a non-existent value");
+            }
         }
         Ok(())
     }

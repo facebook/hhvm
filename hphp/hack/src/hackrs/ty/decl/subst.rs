@@ -4,9 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use eq_modulo_pos::EqModuloPos;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
-use pos::TypeNameIndexMap;
+use hash::IndexMap;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
+use pos::TypeName;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -18,15 +19,15 @@ use crate::reason::Reason;
 #[derive(Debug, Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]
-pub struct Subst<R: Reason>(pub TypeNameIndexMap<Ty<R>>);
+pub struct Subst<R: Reason>(pub IndexMap<TypeName, Ty<R>>);
 
-impl<R: Reason> From<TypeNameIndexMap<Ty<R>>> for Subst<R> {
-    fn from(map: TypeNameIndexMap<Ty<R>>) -> Self {
+impl<R: Reason> From<IndexMap<TypeName, Ty<R>>> for Subst<R> {
+    fn from(map: IndexMap<TypeName, Ty<R>>) -> Self {
         Self(map)
     }
 }
 
-impl<R: Reason> From<Subst<R>> for TypeNameIndexMap<Ty<R>> {
+impl<R: Reason> From<Subst<R>> for IndexMap<TypeName, Ty<R>> {
     fn from(subst: Subst<R>) -> Self {
         subst.0
     }

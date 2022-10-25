@@ -199,6 +199,11 @@ constexpr BaseType toBaseType(protocol::TType type) {
       return BaseType::String;
     case TType::T_VOID:
       return BaseType::Void;
+    case TType::T_STOP:
+    case TType::T_U64:
+      // TODO(dokwon): Consider handling as `BaseType::I64`.
+    case TType::T_UTF16:
+    case TType::T_STREAM:
     default:
       folly::throw_exception<std::invalid_argument>(
           "Unsupported conversion from: " + std::to_string(type));

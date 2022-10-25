@@ -513,23 +513,35 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Space;
           t env kw;
           Space;
+          t env left;
+          space_split ();
           Nest
             [
               Span
                 [
-                  t env left;
                   handle_possible_list
                     env
-                    ~before_each:space_split
+                    ~before_each:(fun _ ->
+                      Concat
+                        [
+                          (if list_length members > 1 then
+                            Newline
+                          else
+                            Space);
+                          SplitWith Cost.Moderate;
+                        ])
                     ~after_each:(fun last ->
                       if last then
-                        Space
+                        if list_length members > 1 then
+                          Newline
+                        else
+                          Space
                       else
                         Nothing)
                     members;
-                  t env right;
                 ];
             ];
+          t env right;
         ]
     | Syntax.TypeInRefinement
         {
@@ -559,7 +571,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           when_present eq space;
           t env eq;
           when_present eq_bound (fun _ ->
-              Concat [Space; SplitWith Cost.Moderate; Nest [t env eq_bound]]);
+              Concat [Space; SplitWith Cost.High; Nest [t env eq_bound]]);
         ]
     | Syntax.Contexts
         {
@@ -2555,7 +2567,80 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           module_membership_declaration_name = name;
           module_membership_declaration_semicolon = semicolon;
         } ->
-      Concat [t env mod_kw; Space; t env name; t env semicolon; Newline])
+      Concat [t env mod_kw; Space; t env name; t env semicolon; Newline]
+    | Syntax.PackageDeclaration
+        {
+          package_declaration_attribute_spec = attr;
+          package_declaration_package_keyword = package_kw;
+          package_declaration_name = name;
+          package_declaration_left_brace = lb;
+          package_declaration_uses = uses;
+          package_declaration_includes = includes;
+          package_declaration_right_brace = rb;
+        } ->
+      Concat
+        [
+          t env attr;
+          when_present attr newline;
+          t env package_kw;
+          Space;
+          t env name;
+          Space;
+          t env lb;
+          Newline;
+          t env uses;
+          when_present uses newline;
+          t env includes;
+          when_present includes newline;
+          t env rb;
+          Newline;
+        ]
+    | Syntax.PackageUses
+        {
+          package_uses_use_keyword = use_kw;
+          package_uses_left_brace = lb;
+          package_uses_uses = uses;
+          package_uses_right_brace = rb;
+        } ->
+      Concat
+        [
+          t env use_kw;
+          Space;
+          t env lb;
+          Newline;
+          WithRule
+            ( Rule.Parental,
+              Nest
+                [handle_possible_list env uses ~after_each:after_each_argument]
+            );
+          t env rb;
+          Newline;
+        ]
+    | Syntax.PackageIncludes
+        {
+          package_includes_include_keyword = include_kw;
+          package_includes_left_brace = lb;
+          package_includes_includes = includes;
+          package_includes_right_brace = rb;
+        } ->
+      Concat
+        [
+          t env include_kw;
+          Space;
+          t env lb;
+          Newline;
+          WithRule
+            ( Rule.Parental,
+              Nest
+                [
+                  handle_possible_list
+                    env
+                    includes
+                    ~after_each:after_each_argument;
+                ] );
+          t env rb;
+          Newline;
+        ])
 
 and when_present node f =
   match Syntax.syntax node with

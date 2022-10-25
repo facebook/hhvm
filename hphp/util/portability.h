@@ -15,9 +15,11 @@
 */
 #pragma once
 
+#if !defined(NO_FOLLY)
 #include <folly/Likely.h> // defining LIKELY/UNLIKELY is part of this header
 #include <folly/Portability.h>
 #include <folly/CPortability.h> // FOLLY_DISABLE_ADDRESS_SANITIZER, FOLLY_EXPORT
+#endif
 
 //////////////////////////////////////////////////////////////////////
 
@@ -50,7 +52,11 @@
 # undef ATTRIBUTE_PRINTF_STRING
 #endif
 
+#ifdef FOLLY_PRINTF_FORMAT
 #define ATTRIBUTE_PRINTF_STRING FOLLY_PRINTF_FORMAT
+#else
+#define ATTRIBUTE_PRINTF_STRING
+#endif
 
 #ifdef _MSC_VER
 #define ATTRIBUTE_PRINTF(a1, a2)
@@ -182,15 +188,6 @@
 # define DECLARE_FRAME_POINTER(fp) ActRec* fp asm("x29")
 #endif
 
-#elif defined(__powerpc64__)
-
-# if defined(__clang__)
-#  error Clang implementation not done for PPC64
-# endif
-# define DECLARE_FRAME_POINTER(fp) \
-  auto const fp = (ActRec*) __builtin_frame_address(0)
-# define FRAME_POINTER_IS_ACCURATE
-
 #else
 
 # error What are the stack and frame pointers called on your architecture?
@@ -204,27 +201,6 @@
   // Unfortunately, we have no way to tell MSVC to do this, so we'll
   // probably have to use a pair of assembly stubs to manage this.
   #define CALLEE_SAVED_BARRIER() always_assert(false);
-#elif defined (__powerpc64__)
- // After gcc 5.4.1 we can't clobber r30 on PPC64 anymore because it's used as
- // PIC register.
- #if __GNUC__ > 5 || (__GNUC__ == 5 && (__GNUC_MINOR__ >= 4) && \
-   (__GNUC_PATCHLEVEL__ >= 1))
-   #define  CALLEE_SAVED_BARRIER()\
-     asm volatile("" : : : "r2", "r14", "r15", "r16", "r17", "r18", "r19",\
-                  "r20", "r21", "r22", "r23", "r24", "r25", "r26", "r27", \
-                  "r28", "r29", "cr2", "cr3", "cr4", "v20", "v21", "v22", \
-                  "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", \
-                  "v31");
- #else
-  // On gcc versions < 5.4.1 we need to include r30 on barrier as it's not
-  // saved by gcc.
-  #define CALLEE_SAVED_BARRIER()\
-    asm volatile("" : : : "r2", "r14", "r15", "r16", "r17", "r18", "r19",\
-                 "r20", "r21", "r22", "r23", "r24", "r25", "r26", "r27", \
-                 "r28", "r29", "r30", "cr2", "cr3", "cr4", "v20", "v21", \
-                 "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", \
-                 "v30", "v31");
- #endif
 #elif defined (__AARCH64EL__)
   #define CALLEE_SAVED_BARRIER()\
     asm volatile("" : : : "x19", "x20", "x21", "x22", "x23", "x24", "x25",\
@@ -285,4 +261,3 @@
 #else
 #define ASM_LOCAL_LABEL(x) ".L" x
 #endif
-

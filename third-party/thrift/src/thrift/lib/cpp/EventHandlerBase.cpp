@@ -121,15 +121,13 @@ RWMutex& TProcessorBase::getRWMutex() {
 
 vector<shared_ptr<TProcessorEventHandlerFactory>>&
 TProcessorBase::getFactories() {
-  static vector<shared_ptr<TProcessorEventHandlerFactory>>* factories =
-      new vector<shared_ptr<TProcessorEventHandlerFactory>>();
-  return *factories;
+  static vector<shared_ptr<TProcessorEventHandlerFactory>> factories;
+  return factories;
 }
 vector<folly::not_null_shared_ptr<TProcessorEventHandler>>&
 TProcessorBase::getHandlers() {
-  static vector<folly::not_null_shared_ptr<TProcessorEventHandler>>* handlers =
-      new vector<folly::not_null_shared_ptr<TProcessorEventHandler>>();
-  return *handlers;
+  static vector<folly::not_null_shared_ptr<TProcessorEventHandler>> handlers;
+  return handlers;
 }
 
 TClientBase::TClientBase() {
@@ -208,15 +206,13 @@ RWMutex& TClientBase::getRWMutex() {
   return *mutex;
 }
 vector<shared_ptr<TProcessorEventHandlerFactory>>& TClientBase::getFactories() {
-  static vector<shared_ptr<TProcessorEventHandlerFactory>>* factories =
-      new vector<shared_ptr<TProcessorEventHandlerFactory>>();
-  return *factories;
+  static vector<shared_ptr<TProcessorEventHandlerFactory>> factories;
+  return factories;
 }
 vector<folly::not_null_shared_ptr<TProcessorEventHandler>>&
 TClientBase::getHandlers() {
-  static vector<folly::not_null_shared_ptr<TProcessorEventHandler>>* handlers =
-      new vector<folly::not_null_shared_ptr<TProcessorEventHandler>>();
-  return *handlers;
+  static vector<folly::not_null_shared_ptr<TProcessorEventHandler>> handlers;
+  return handlers;
 }
 
 } // namespace thrift

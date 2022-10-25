@@ -68,80 +68,6 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::test::fixtures::basic::MyDataItem>::translateFieldName(
-    folly::StringPiece _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic::MyDataItem>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
-namespace test { namespace fixtures { namespace basic {
-
-const char* MyDataItem::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic/MyDataItem";
-}
-
-const folly::StringPiece MyDataItem::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
-  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
-  return apache::thrift::TStructDataStorage<MyDataItem>::fields_names[folly::to_underlying(ord) - 1];
-}
-
-
-MyDataItem::MyDataItem(apache::thrift::FragileConstructor) {}
-
-
-void MyDataItem::__fbthrift_clear() {
-  // clear all fields
-}
-
-void MyDataItem::__fbthrift_clear_terse_fields() {
-}
-
-bool MyDataItem::__fbthrift_is_empty() const {
-  return true;
-}
-
-bool MyDataItem::operator==(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return true;
-}
-
-bool MyDataItem::operator<(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
-}
-
-
-void swap(FOLLY_MAYBE_UNUSED MyDataItem& a, FOLLY_MAYBE_UNUSED MyDataItem& b) {
-  using ::std::swap;
-}
-
-template void MyDataItem::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t MyDataItem::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t MyDataItem::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t MyDataItem::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void MyDataItem::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t MyDataItem::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t MyDataItem::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t MyDataItem::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-
-
-}}} // test::fixtures::basic
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
 void TccStructTraits<::test::fixtures::basic::MyStruct>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
@@ -363,6 +289,80 @@ static_assert(
         ::apache::thrift::type_class::structure,
         ::test::fixtures::basic::MyDataItem>,
     "inconsistent use of json option");
+
+}}} // test::fixtures::basic
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::basic::MyDataItem>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic::MyDataItem>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic {
+
+const char* MyDataItem::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic/MyDataItem";
+}
+
+const folly::StringPiece MyDataItem::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MyDataItem>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+
+MyDataItem::MyDataItem(apache::thrift::FragileConstructor) {}
+
+
+void MyDataItem::__fbthrift_clear() {
+  // clear all fields
+}
+
+void MyDataItem::__fbthrift_clear_terse_fields() {
+}
+
+bool MyDataItem::__fbthrift_is_empty() const {
+  return true;
+}
+
+bool MyDataItem::operator==(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
+}
+
+bool MyDataItem::operator<(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return false;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED MyDataItem& a, FOLLY_MAYBE_UNUSED MyDataItem& b) {
+  using ::std::swap;
+}
+
+template void MyDataItem::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyDataItem::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyDataItem::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyDataItem::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyDataItem::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyDataItem::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyDataItem::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyDataItem::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
 
 }}} // test::fixtures::basic
 

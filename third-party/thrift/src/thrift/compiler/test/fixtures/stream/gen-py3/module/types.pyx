@@ -254,6 +254,103 @@ cdef class FooEx(thrift.py3.exceptions.GeneratedError):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.FooEx, self)
+@__cython.auto_pickle(False)
+cdef class FooEx2(thrift.py3.exceptions.GeneratedError):
+    def __init__(FooEx2 self, *args, **kwargs):
+        self._cpp_obj = make_shared[cFooEx2]()
+        self._fields_setter = _fbthrift_types_fields.__FooEx2_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__( *args, **kwargs)
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return thrift.py3.types._IsSet("FooEx2", {
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cFooEx2] cpp_obj):
+        __fbthrift_inst = <FooEx2>FooEx2.__new__(FooEx2, (<bytes>deref(cpp_obj).what()).decode('utf-8'))
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        _builtins.Exception.__init__(__fbthrift_inst, *(v for _, v in __fbthrift_inst))
+        return __fbthrift_inst
+
+
+    def __hash__(FooEx2 self):
+        return super().__hash__()
+
+    def __repr__(FooEx2 self):
+        return super().__repr__()
+
+    def __str__(FooEx2 self):
+        return super().__str__()
+
+
+    def __copy__(FooEx2 self):
+        cdef shared_ptr[cFooEx2] cpp_obj = make_shared[cFooEx2](
+            deref(self._cpp_obj)
+        )
+        return FooEx2._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cFooEx2](
+            self._cpp_obj,
+            (<FooEx2>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__FooEx2()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        ExceptionMetadata[cFooEx2].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.FooEx2"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cFooEx2](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 0
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(FooEx2 self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cFooEx2](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(FooEx2 self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cFooEx2]()
+        with nogil:
+            needed = serializer.cdeserialize[cFooEx2](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.FooEx2, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.FooEx2, self)
 
 cdef class ClientBufferedStream__i32(ClientBufferedStream):
 

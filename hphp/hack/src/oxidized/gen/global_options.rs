@@ -3,13 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<955fb16eed4d702f3264d0e911f1cf60>>
+// @generated SignedSource<<08f0f6fdfa5ffbb683b821c012de6f01>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -133,8 +133,10 @@ pub struct GlobalOptions {
     pub po_disallow_inst_meth: bool,
     pub tco_use_direct_decl_parser: bool,
     pub tco_ifc_enabled: Vec<String>,
-    pub tco_global_write_check_enabled: Vec<String>,
-    pub tco_global_write_check_functions_enabled: s_set::SSet,
+    pub tco_global_access_check_files_enabled: Vec<String>,
+    pub tco_global_access_check_functions_enabled: s_set::SSet,
+    pub tco_global_access_check_on_write: bool,
+    pub tco_global_access_check_on_read: bool,
     pub po_enable_enum_supertyping: bool,
     pub po_interpret_soft_types_as_like_types: bool,
     pub tco_enable_strict_string_concat_interp: bool,

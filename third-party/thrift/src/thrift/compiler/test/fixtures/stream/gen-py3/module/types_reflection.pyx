@@ -49,3 +49,16 @@ cdef __StructSpec get_reflection__FooEx():
         },
     )
     return spec
+cdef __StructSpec get_reflection__FooEx2():
+    cdef _module_types.FooEx2 defaults = _module_types.FooEx2._fbthrift_create(
+        constant_shared_ptr[_module_types.cFooEx2](
+            default_inst[_module_types.cFooEx2]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="FooEx2",
+        kind=__StructType.EXCEPTION,
+        annotations={
+        },
+    )
+    return spec

@@ -237,6 +237,9 @@ module WithToken (Token : TokenType) = struct
       | ModuleExports _ -> SyntaxKind.ModuleExports
       | ModuleImports _ -> SyntaxKind.ModuleImports
       | ModuleMembershipDeclaration _ -> SyntaxKind.ModuleMembershipDeclaration
+      | PackageDeclaration _ -> SyntaxKind.PackageDeclaration
+      | PackageUses _ -> SyntaxKind.PackageUses
+      | PackageIncludes _ -> SyntaxKind.PackageIncludes
 
     let kind node = to_kind (syntax node)
 
@@ -636,6 +639,12 @@ module WithToken (Token : TokenType) = struct
 
     let is_module_membership_declaration =
       has_kind SyntaxKind.ModuleMembershipDeclaration
+
+    let is_package_declaration = has_kind SyntaxKind.PackageDeclaration
+
+    let is_package_uses = has_kind SyntaxKind.PackageUses
+
+    let is_package_includes = has_kind SyntaxKind.PackageIncludes
 
     let is_loop_statement node =
       is_for_statement node
@@ -2477,6 +2486,48 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc module_membership_declaration_name in
         let acc = f acc module_membership_declaration_semicolon in
         acc
+      | PackageDeclaration
+          {
+            package_declaration_attribute_spec;
+            package_declaration_package_keyword;
+            package_declaration_name;
+            package_declaration_left_brace;
+            package_declaration_uses;
+            package_declaration_includes;
+            package_declaration_right_brace;
+          } ->
+        let acc = f acc package_declaration_attribute_spec in
+        let acc = f acc package_declaration_package_keyword in
+        let acc = f acc package_declaration_name in
+        let acc = f acc package_declaration_left_brace in
+        let acc = f acc package_declaration_uses in
+        let acc = f acc package_declaration_includes in
+        let acc = f acc package_declaration_right_brace in
+        acc
+      | PackageUses
+          {
+            package_uses_use_keyword;
+            package_uses_left_brace;
+            package_uses_uses;
+            package_uses_right_brace;
+          } ->
+        let acc = f acc package_uses_use_keyword in
+        let acc = f acc package_uses_left_brace in
+        let acc = f acc package_uses_uses in
+        let acc = f acc package_uses_right_brace in
+        acc
+      | PackageIncludes
+          {
+            package_includes_include_keyword;
+            package_includes_left_brace;
+            package_includes_includes;
+            package_includes_right_brace;
+          } ->
+        let acc = f acc package_includes_include_keyword in
+        let acc = f acc package_includes_left_brace in
+        let acc = f acc package_includes_includes in
+        let acc = f acc package_includes_right_brace in
+        acc
 
     (* The order that the children are returned in should match the order
        that they appear in the source text *)
@@ -4121,6 +4172,51 @@ module WithToken (Token : TokenType) = struct
           module_membership_declaration_module_keyword;
           module_membership_declaration_name;
           module_membership_declaration_semicolon;
+        ]
+      | PackageDeclaration
+          {
+            package_declaration_attribute_spec;
+            package_declaration_package_keyword;
+            package_declaration_name;
+            package_declaration_left_brace;
+            package_declaration_uses;
+            package_declaration_includes;
+            package_declaration_right_brace;
+          } ->
+        [
+          package_declaration_attribute_spec;
+          package_declaration_package_keyword;
+          package_declaration_name;
+          package_declaration_left_brace;
+          package_declaration_uses;
+          package_declaration_includes;
+          package_declaration_right_brace;
+        ]
+      | PackageUses
+          {
+            package_uses_use_keyword;
+            package_uses_left_brace;
+            package_uses_uses;
+            package_uses_right_brace;
+          } ->
+        [
+          package_uses_use_keyword;
+          package_uses_left_brace;
+          package_uses_uses;
+          package_uses_right_brace;
+        ]
+      | PackageIncludes
+          {
+            package_includes_include_keyword;
+            package_includes_left_brace;
+            package_includes_includes;
+            package_includes_right_brace;
+          } ->
+        [
+          package_includes_include_keyword;
+          package_includes_left_brace;
+          package_includes_includes;
+          package_includes_right_brace;
         ]
 
     let children node = children_from_syntax node.syntax
@@ -5798,6 +5894,51 @@ module WithToken (Token : TokenType) = struct
           "module_membership_declaration_module_keyword";
           "module_membership_declaration_name";
           "module_membership_declaration_semicolon";
+        ]
+      | PackageDeclaration
+          {
+            package_declaration_attribute_spec;
+            package_declaration_package_keyword;
+            package_declaration_name;
+            package_declaration_left_brace;
+            package_declaration_uses;
+            package_declaration_includes;
+            package_declaration_right_brace;
+          } ->
+        [
+          "package_declaration_attribute_spec";
+          "package_declaration_package_keyword";
+          "package_declaration_name";
+          "package_declaration_left_brace";
+          "package_declaration_uses";
+          "package_declaration_includes";
+          "package_declaration_right_brace";
+        ]
+      | PackageUses
+          {
+            package_uses_use_keyword;
+            package_uses_left_brace;
+            package_uses_uses;
+            package_uses_right_brace;
+          } ->
+        [
+          "package_uses_use_keyword";
+          "package_uses_left_brace";
+          "package_uses_uses";
+          "package_uses_right_brace";
+        ]
+      | PackageIncludes
+          {
+            package_includes_include_keyword;
+            package_includes_left_brace;
+            package_includes_includes;
+            package_includes_right_brace;
+          } ->
+        [
+          "package_includes_include_keyword";
+          "package_includes_left_brace";
+          "package_includes_includes";
+          "package_includes_right_brace";
         ]
 
     let rec to_json_ ?(with_value = false) ?(ignore_missing = false) node =
@@ -7695,6 +7836,54 @@ module WithToken (Token : TokenType) = struct
             module_membership_declaration_module_keyword;
             module_membership_declaration_name;
             module_membership_declaration_semicolon;
+          }
+      | ( SyntaxKind.PackageDeclaration,
+          [
+            package_declaration_attribute_spec;
+            package_declaration_package_keyword;
+            package_declaration_name;
+            package_declaration_left_brace;
+            package_declaration_uses;
+            package_declaration_includes;
+            package_declaration_right_brace;
+          ] ) ->
+        PackageDeclaration
+          {
+            package_declaration_attribute_spec;
+            package_declaration_package_keyword;
+            package_declaration_name;
+            package_declaration_left_brace;
+            package_declaration_uses;
+            package_declaration_includes;
+            package_declaration_right_brace;
+          }
+      | ( SyntaxKind.PackageUses,
+          [
+            package_uses_use_keyword;
+            package_uses_left_brace;
+            package_uses_uses;
+            package_uses_right_brace;
+          ] ) ->
+        PackageUses
+          {
+            package_uses_use_keyword;
+            package_uses_left_brace;
+            package_uses_uses;
+            package_uses_right_brace;
+          }
+      | ( SyntaxKind.PackageIncludes,
+          [
+            package_includes_include_keyword;
+            package_includes_left_brace;
+            package_includes_includes;
+            package_includes_right_brace;
+          ] ) ->
+        PackageIncludes
+          {
+            package_includes_include_keyword;
+            package_includes_left_brace;
+            package_includes_includes;
+            package_includes_right_brace;
           }
       | (SyntaxKind.Missing, []) -> Missing
       | (SyntaxKind.SyntaxList, items) -> SyntaxList items
@@ -10149,6 +10338,63 @@ module WithToken (Token : TokenType) = struct
               module_membership_declaration_module_keyword;
               module_membership_declaration_name;
               module_membership_declaration_semicolon;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_package_declaration
+          package_declaration_attribute_spec
+          package_declaration_package_keyword
+          package_declaration_name
+          package_declaration_left_brace
+          package_declaration_uses
+          package_declaration_includes
+          package_declaration_right_brace =
+        let syntax =
+          PackageDeclaration
+            {
+              package_declaration_attribute_spec;
+              package_declaration_package_keyword;
+              package_declaration_name;
+              package_declaration_left_brace;
+              package_declaration_uses;
+              package_declaration_includes;
+              package_declaration_right_brace;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_package_uses
+          package_uses_use_keyword
+          package_uses_left_brace
+          package_uses_uses
+          package_uses_right_brace =
+        let syntax =
+          PackageUses
+            {
+              package_uses_use_keyword;
+              package_uses_left_brace;
+              package_uses_uses;
+              package_uses_right_brace;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_package_includes
+          package_includes_include_keyword
+          package_includes_left_brace
+          package_includes_includes
+          package_includes_right_brace =
+        let syntax =
+          PackageIncludes
+            {
+              package_includes_include_keyword;
+              package_includes_left_brace;
+              package_includes_includes;
+              package_includes_right_brace;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in

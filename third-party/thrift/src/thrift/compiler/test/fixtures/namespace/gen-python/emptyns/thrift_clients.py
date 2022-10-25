@@ -18,6 +18,7 @@ from thrift.python.client import (
     Client as _fbthrift_python_Client,
 )
 from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier
+from thrift.python.common import RpcOptions
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import emptyns.thrift_types
@@ -43,7 +44,9 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
     
         async def init(
             self,
-            int1: int
+            int1: int,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> int:
             _fbthrift_resp = await self._send_request(
                 "TestService",
@@ -52,6 +55,7 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
                     int1=int1,),
                 emptyns.thrift_types._fbthrift_TestService_init_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -72,7 +76,9 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
     
         def init(
             self,
-            int1: int
+            int1: int,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> int:
             _fbthrift_resp = self._send_request(
                 "TestService",
@@ -80,6 +86,7 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
                 emptyns.thrift_types._fbthrift_TestService_init_args(
                     int1=int1,),
                 emptyns.thrift_types._fbthrift_TestService_init_result,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:

@@ -6,6 +6,7 @@
  */
 
 #include "watchman/CookieSync.h"
+#include <fmt/core.h>
 #include <folly/String.h>
 #include <exception>
 #include <optional>
@@ -119,10 +120,9 @@ folly::SemiFuture<CookieSync::SyncResult> CookieSync::sync() {
     throw std::system_error(
         errCode,
         std::generic_category(),
-        folly::to<std::string>(
-            "sync: creat(",
-            std::get<w_string>(*lastError).view(),
-            ") failed: ",
+        fmt::format(
+            "sync: creat({}) failed: {}",
+            std::get<w_string>(*lastError),
             folly::errnoStr(errCode)));
   }
 
@@ -147,11 +147,9 @@ CookieSync::SyncResult CookieSync::syncToNow(
     try {
       result = std::move(cookieFuture).getTry(timeout);
     } catch (const folly::FutureTimeout&) {
-      auto why = folly::to<std::string>(
-          "syncToNow: timed out waiting for cookie file to be "
-          "observed by watcher within ",
-          timeout.count(),
-          " milliseconds");
+      auto why = fmt::format(
+          "syncToNow: timed out waiting for cookie file to be observed by watcher within {} milliseconds",
+          timeout.count());
       log(ERR, why, "\n");
       throw std::system_error(ETIMEDOUT, std::generic_category(), why);
     }

@@ -40,6 +40,11 @@ public class PubSubStreamingServiceAsyncReactiveWrapper
     }
 
     @java.lang.Override
+    public reactor.core.publisher.Flux<Integer> servicethrows2(final int foo) {
+        throw new UnsupportedOperationException();
+    }
+
+    @java.lang.Override
     public reactor.core.publisher.Flux<Integer> boththrows(final int foo) {
         throw new UnsupportedOperationException();
     }

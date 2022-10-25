@@ -35,11 +35,6 @@ inline uint64_t cpuCycles() {
   uint64_t lo, hi;
   asm volatile("rdtsc" : "=a"((lo)),"=d"(hi));
   return lo | (hi << 32);
-#elif __powerpc64__
-  // This returns a time-base
-  uint64_t tb;
-  asm volatile("mfspr %0, 268" : "=r" (tb));
-  return tb;
 #elif _MSC_VER
   return (uint64_t)__rdtsc();
 #elif __aarch64__
@@ -65,4 +60,3 @@ inline void cycleDelay(uint32_t numCycles) {
 }
 
 }
-

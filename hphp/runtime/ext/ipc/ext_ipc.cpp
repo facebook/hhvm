@@ -54,51 +54,17 @@ namespace HPHP {
 
 static struct SysvmsgExtension final : Extension {
   SysvmsgExtension() : Extension("sysvmsg", NO_EXTENSION_VERSION_YET) {}
-  void moduleInit() override {
-    HHVM_RC_INT(MSG_IPC_NOWAIT, k_MSG_IPC_NOWAIT);
-    HHVM_RC_INT(MSG_EAGAIN,     EAGAIN);
-    HHVM_RC_INT(MSG_ENOMSG,     ENOMSG);
-    HHVM_RC_INT(MSG_NOERROR,    k_MSG_NOERROR);
-    HHVM_RC_INT(MSG_EXCEPT,     k_MSG_EXCEPT);
-
-    HHVM_FE(ftok);
-    HHVM_FE(msg_get_queue);
-    HHVM_FE(msg_queue_exists);
-    HHVM_FE(msg_send);
-    HHVM_FE(msg_receive);
-    HHVM_FE(msg_remove_queue);
-    HHVM_FE(msg_set_queue);
-    HHVM_FE(msg_stat_queue);
-
-    loadSystemlib();
-  }
+  void moduleInit() override;
 } s_sysvmsg_extension;
 
 static struct SysvsemExtension final : Extension {
   SysvsemExtension() : Extension("sysvsem", NO_EXTENSION_VERSION_YET) {}
-  void moduleInit() override {
-    HHVM_FE(sem_acquire);
-    HHVM_FE(sem_get);
-    HHVM_FE(sem_release);
-    HHVM_FE(sem_remove);
-
-    loadSystemlib();
-  }
+  void moduleInit() override;
 } s_sysvsem_extension;
 
 static struct SysvshmExtension final : Extension {
   SysvshmExtension() : Extension("sysvshm", NO_EXTENSION_VERSION_YET) {}
-  void moduleInit() override {
-    HHVM_FE(shm_attach);
-    HHVM_FE(shm_detach);
-    HHVM_FE(shm_remove);
-    HHVM_FE(shm_get_var);
-    HHVM_FE(shm_has_var);
-    HHVM_FE(shm_put_var);
-    HHVM_FE(shm_remove_var);
-
-    loadSystemlib();
-  }
+  void moduleInit() override;
 } s_sysvshm_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -873,6 +839,46 @@ bool HHVM_FUNCTION(shm_remove_var,
   }
   remove_shm_data(shm_list_ptr->ptr, shm_varpos);
   return true;
+}
+
+void SysvmsgExtension::moduleInit() {
+  HHVM_RC_INT(MSG_IPC_NOWAIT, k_MSG_IPC_NOWAIT);
+  HHVM_RC_INT(MSG_EAGAIN,     EAGAIN);
+  HHVM_RC_INT(MSG_ENOMSG,     ENOMSG);
+  HHVM_RC_INT(MSG_NOERROR,    k_MSG_NOERROR);
+  HHVM_RC_INT(MSG_EXCEPT,     k_MSG_EXCEPT);
+
+  HHVM_FE(ftok);
+  HHVM_FE(msg_get_queue);
+  HHVM_FE(msg_queue_exists);
+  HHVM_FE(msg_send);
+  HHVM_FE(msg_receive);
+  HHVM_FE(msg_remove_queue);
+  HHVM_FE(msg_set_queue);
+  HHVM_FE(msg_stat_queue);
+
+  loadSystemlib();
+}
+
+void SysvsemExtension::moduleInit() {
+  HHVM_FE(sem_acquire);
+  HHVM_FE(sem_get);
+  HHVM_FE(sem_release);
+  HHVM_FE(sem_remove);
+
+  loadSystemlib();
+}
+
+void SysvshmExtension::moduleInit() {
+  HHVM_FE(shm_attach);
+  HHVM_FE(shm_detach);
+  HHVM_FE(shm_remove);
+  HHVM_FE(shm_get_var);
+  HHVM_FE(shm_has_var);
+  HHVM_FE(shm_put_var);
+  HHVM_FE(shm_remove_var);
+
+  loadSystemlib();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

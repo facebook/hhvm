@@ -5,7 +5,7 @@
 
 use std::sync::Arc;
 
-use direct_decl_parser::parse_decls_without_reference_text;
+use direct_decl_parser::parse_decls_for_bytecode;
 use direct_decl_parser::Decls;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized_by_ref::shallow_decl_defs::ConstDecl;
@@ -36,7 +36,7 @@ impl<'d> SelfProvider<'d> {
         source_text: SourceText<'_>,
         arena: &'d bumpalo::Bump,
     ) -> Self {
-        let parsed_file = parse_decls_without_reference_text(
+        let parsed_file = parse_decls_for_bytecode(
             &decl_opts,
             source_text.file_path().clone(),
             source_text.text(),

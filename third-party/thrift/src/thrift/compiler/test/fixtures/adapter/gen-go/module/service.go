@@ -232,10 +232,10 @@ func (p *ServiceProcessor) FunctionServiceMap() map[string]string {
 }
 
 func NewServiceProcessor(handler Service) *ServiceProcessor {
-  self21 := &ServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
-  self21.processorMap["func"] = &serviceProcessorFunc{handler:handler}
-  self21.functionServiceMap["func"] = "Service"
-  return self21
+  self29 := &ServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
+  self29.processorMap["func"] = &serviceProcessorFunc{handler:handler}
+  self29.functionServiceMap["func"] = "Service"
+  return self29
 }
 
 type serviceProcessorFunc struct {
@@ -326,7 +326,13 @@ func (p *ServiceFuncArgs) GetArg3() *Foo {
   if !p.IsSetArg3() {
     return ServiceFuncArgs_Arg3_DEFAULT
   }
-return p.Arg3
+  return p.Arg3
+}
+func (p *ServiceFuncArgs) DefaultGetArg3() *Foo {
+  if !p.IsSetArg3() {
+    return NewFoo()
+  }
+  return p.Arg3
 }
 func (p *ServiceFuncArgs) IsSetArg3() bool {
   return p != nil && p.Arg3 != nil
@@ -523,7 +529,7 @@ func (p *ServiceFuncResult) GetSuccess() MyI32 {
   if !p.IsSetSuccess() {
     return ServiceFuncResult_Success_DEFAULT
   }
-return *p.Success
+  return *p.Success
 }
 func (p *ServiceFuncResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil

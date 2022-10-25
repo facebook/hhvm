@@ -106,6 +106,7 @@ bool createFileWithPerms(const fs::path& path, ::gid_t gid, ::mode_t perms) {
 const int kDeriveKindExtends = 0;
 const int kDeriveKindRequireExtends = 1;
 const int kDeriveKindRequireImplements = 2;
+const int kDeriveKindRequireClass = 3;
 
 constexpr int toDBEnum(DeriveKind kind) {
   switch (kind) {
@@ -115,6 +116,8 @@ constexpr int toDBEnum(DeriveKind kind) {
       return kDeriveKindRequireExtends;
     case DeriveKind::RequireImplements:
       return kDeriveKindRequireImplements;
+    case DeriveKind::RequireClass:
+      return kDeriveKindRequireClass;
   }
   return -1;
 }
@@ -608,7 +611,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
 
   ~SQLiteAutoloadDBImpl() override = default;
 
-  static std::unique_ptr<SQLiteAutoloadDB> get(const SQLiteKey& dbData) {
+  static std::shared_ptr<SQLiteAutoloadDB> get(const SQLiteKey& dbData) {
     assertx(dbData.m_path.is_absolute());
     auto db = [&]() {
       try {
@@ -672,7 +675,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       XLOGF(INFO, "Connected to SQLite DB at {}", dbData.m_path.native());
     }
 
-    return std::make_unique<SQLiteAutoloadDBImpl>(std::move(db));
+    return std::make_shared<SQLiteAutoloadDBImpl>(std::move(db));
   }
 
   void commit() override {
@@ -1322,22 +1325,10 @@ private:
   ClockStmts m_clockStmts;
 };
 
-using SQLiteAutoloadDBThreadLocal = hphp_hash_map<
-    std::tuple<std::string, bool>,
-    std::unique_ptr<SQLiteAutoloadDB>>;
-
-THREAD_LOCAL(SQLiteAutoloadDBThreadLocal, t_adb);
-
 } // namespace
 
-SQLiteAutoloadDB& SQLiteAutoloadDB::getThreadLocal(const SQLiteKey& key) {
-  SQLiteAutoloadDBThreadLocal& dbVault = *t_adb.get();
-  auto& dbPtr = dbVault[{
-      key.m_path.native(), key.m_writable != SQLite::OpenMode::ReadOnly}];
-  if (!dbPtr) {
-    dbPtr = SQLiteAutoloadDBImpl::get(key);
-  }
-  return *dbPtr;
+std::shared_ptr<SQLiteAutoloadDB> SQLiteAutoloadDB::get(const SQLiteKey& key) {
+  return SQLiteAutoloadDBImpl::get(key);
 }
 
 } // namespace Facts

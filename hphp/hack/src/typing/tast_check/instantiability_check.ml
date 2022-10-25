@@ -16,7 +16,7 @@ module Cls = Decl_provider.Class
 (* This TAST check raises an error when an abstract final
    class or a trait appears outside of classname<_>. *)
 
-let validate_classname (pos, hint) =
+let rec validate_classname (pos, hint) =
   match hint with
   | Aast.Happly _
   | Aast.Hthis
@@ -31,7 +31,7 @@ let validate_classname (pos, hint) =
   | Aast.Hlike _
   | Aast.Hnothing ->
     ()
-  | Aast.Hrefinement _
+  | Aast.Hrefinement (h, _) -> validate_classname h
   | Aast.Htuple _
   | Aast.Hunion _
   | Aast.Hintersection _

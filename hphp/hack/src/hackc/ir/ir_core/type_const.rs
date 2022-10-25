@@ -10,6 +10,6 @@ use crate::TypedValue;
 #[derive(Debug)]
 pub struct TypeConstant<'a> {
     pub name: Str<'a>,
-    pub initializer: Option<TypedValue<'a>>,
+    pub initializer: Option<TypedValue>,
     pub is_abstract: bool,
 }

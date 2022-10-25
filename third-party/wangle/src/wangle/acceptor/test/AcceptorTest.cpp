@@ -104,7 +104,8 @@ class AcceptorTest : public ::testing::TestWithParam<TestSSLConfig> {
   }
 
   static std::shared_ptr<folly::SSLContext> getTestSslContext() {
-    auto sslContext = std::make_shared<folly::SSLContext>();
+    auto sslContext = std::make_shared<folly::SSLContext>(
+        folly::SSLContext::SSLVersion::TLSv1_2);
     TestSSLConfig testConfig = GetParam();
     if (testConfig == TestSSLConfig::SSL) {
       sslContext->loadCertKeyPairFromFiles(folly::kTestCert, folly::kTestKey);
@@ -458,7 +459,20 @@ TEST_P(
   // add connection, expect callbacks
   SocketAddress serverAddress;
   serverSocket->getAddress(&serverAddress);
-  auto clientSocket = connectClientSocket(serverAddress);
+
+  AsyncSocket::UniquePtr clientSocket;
+  TestSSLConfig testConfig = GetParam();
+  if (testConfig == TestSSLConfig::SSL ||
+      testConfig == TestSSLConfig::SSL_MULTI_CA) {
+    auto sslContext = getTestSslContext();
+    // fallback from Fizz only occurs with TLS 1.2
+    sslContext->disableTLS13();
+    clientSocket = AsyncSSLSocket::newSocket(std::move(sslContext), &evb_);
+    clientSocket->connect(nullptr, serverAddress);
+  } else {
+    clientSocket = AsyncSocket::newSocket(&evb_, serverAddress);
+  }
+
   folly::AsyncTransport* remoteSocket = nullptr;
 
   // we have to EXPECT_EQ below instead of matchers because the remoteSocket
@@ -473,8 +487,8 @@ TEST_P(
         socket->addLifecycleObserver(lifecycleCb.get());
       }));
 
-  if (GetParam() == TestSSLConfig::SSL ||
-      GetParam() == TestSSLConfig::SSL_MULTI_CA) {
+  if (testConfig == TestSSLConfig::SSL ||
+      testConfig == TestSSLConfig::SSL_MULTI_CA) {
     // AsyncSocket -> AsyncFizzServer
     EXPECT_CALL(*lifecycleCb, fdDetach(_))
         .InSequence(s1)

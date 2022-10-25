@@ -7,7 +7,6 @@ use bumpalo::Bump;
 use direct_decl_smart_constructors::ArenaSourceTextAllocator;
 use direct_decl_smart_constructors::DirectDeclSmartConstructors;
 use direct_decl_smart_constructors::NoSourceTextAllocator;
-use direct_decl_smart_constructors::Node;
 use direct_decl_smart_constructors::SourceTextAllocator;
 use mode_parser::parse_mode;
 use ocamlrep::rc::RcOc;
@@ -19,71 +18,71 @@ pub use oxidized_by_ref::typing_defs::UserAttribute;
 use parser::parser::Parser;
 use parser_core_types::parser_env::ParserEnv;
 use parser_core_types::source_text::SourceText;
-use parser_core_types::syntax_error::SyntaxError;
 use relative_path::RelativePath;
 
 /// Parse decls for typechecking.
 /// - References the source text to avoid spending time or space copying
 ///   identifiers into the arena (when possible).
 /// - Excludes user attributes which are irrelevant to typechecking.
-pub fn parse_decls<'a>(
+pub fn parse_decls_for_typechecking<'a>(
     opts: &DeclParserOptions,
     filename: RelativePath,
     text: &'a [u8],
     arena: &'a Bump,
 ) -> ParsedFile<'a> {
-    let text = SourceText::make(RcOc::new(filename), text);
-    let (_, errors, state, mode) = parse_script_with_text_allocator(
+    parse_script_with_text_allocator(
         opts,
-        &text,
+        filename,
+        text,
         arena,
         NoSourceTextAllocator,
         false, // retain_or_omit_user_attributes_for_facts
         false, // elaborate_xhp_namespaces_for_facts
-    );
-    ParsedFile {
-        mode,
-        file_attributes: collect_file_attributes(
-            arena,
-            state.file_attributes.iter().copied(),
-            state.file_attributes.len(),
-        ),
-        decls: state.decls,
-        disable_xhp_element_mangling: opts.disable_xhp_element_mangling,
-        has_first_pass_parse_errors: !errors.is_empty(),
-    }
+    )
+}
+
+/// The same as 'parse_decls_for_typechecking' except
+/// - Returns decls without reference to the source text to avoid the need to
+///   keep the source text in memory when caching decls.
+/// - As in parse_decls_for_typechecking, it excludes user attributes which
+///   are irrelevant to typechecking.
+pub fn parse_decls_for_typechecking_without_reference_text<'a, 'text>(
+    opts: &DeclParserOptions,
+    filename: RelativePath,
+    text: &'text [u8],
+    arena: &'a Bump,
+) -> ParsedFile<'a> {
+    parse_script_with_text_allocator(
+        opts,
+        filename,
+        text,
+        arena,
+        ArenaSourceTextAllocator(arena),
+        false, // retain_or_omit_user_attributes_for_facts
+        false, // elaborate_xhp_namespaces_for_facts
+    )
 }
 
 /// Parse decls for bytecode compilation.
 /// - Returns decls without reference to the source text to avoid the need to
 ///   keep the source text in memory when caching decls.
 /// - Preserves user attributes in decls necessary for producing facts.
-pub fn parse_decls_without_reference_text<'a, 'text>(
+///   (This means that you'll get decl_hash answers that differ from parse_decls).
+pub fn parse_decls_for_bytecode<'a, 'text>(
     opts: &DeclParserOptions,
     filename: RelativePath,
     text: &'text [u8],
     arena: &'a Bump,
 ) -> ParsedFile<'a> {
-    let text = SourceText::make(RcOc::new(filename), text);
-    let (_, errors, state, mode) = parse_script_with_text_allocator(
+    parse_script_with_text_allocator(
         opts,
-        &text,
+        filename,
+        text,
         arena,
         ArenaSourceTextAllocator(arena),
         true, // retain_or_omit_user_attributes_for_facts
         true, // elaborate_xhp_namespaces_for_facts
-    );
-    ParsedFile {
-        mode,
-        file_attributes: collect_file_attributes(
-            arena,
-            state.file_attributes.iter().copied(),
-            state.file_attributes.len(),
-        ),
-        decls: state.decls,
-        disable_xhp_element_mangling: opts.disable_xhp_element_mangling,
-        has_first_pass_parse_errors: !errors.is_empty(),
-    }
+    )
 }
 
 fn collect_file_attributes<'a>(
@@ -101,32 +100,41 @@ fn collect_file_attributes<'a>(
 
 fn parse_script_with_text_allocator<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>>(
     opts: &'o DeclParserOptions,
-    source: &SourceText<'t>,
+    filename: RelativePath,
+    text: &'t [u8],
     arena: &'a Bump,
     source_text_allocator: S,
     retain_or_omit_user_attributes_for_facts: bool,
     elaborate_xhp_namespaces_for_facts: bool,
-) -> (
-    Node<'a>,
-    Vec<SyntaxError>,
-    DirectDeclSmartConstructors<'a, 'o, 't, S>,
-    Option<file_info::Mode>,
-) {
+) -> ParsedFile<'a> {
+    let source = SourceText::make(RcOc::new(filename), text);
     let env = ParserEnv::from(opts);
-    let (_, mode_opt) = parse_mode(source);
+    let (_, mode_opt) = parse_mode(&source);
+    let mode_opt = mode_opt.map(file_info::Mode::from);
     let mode = mode_opt.unwrap_or(file_info::Mode::Mstrict);
     let sc = DirectDeclSmartConstructors::new(
         opts,
-        source,
+        &source,
         mode,
         arena,
         source_text_allocator,
         retain_or_omit_user_attributes_for_facts,
         elaborate_xhp_namespaces_for_facts,
     );
-    let mut parser = Parser::new(source, env, sc);
-    let root = parser.parse_script();
+    let mut parser = Parser::new(&source, env, sc);
+    let _root = parser.parse_script(); // doing it for the side effect, not the return value
     let errors = parser.errors();
     let sc_state = parser.into_sc_state();
-    (root, errors, sc_state, mode_opt)
+
+    ParsedFile {
+        mode: mode_opt,
+        file_attributes: collect_file_attributes(
+            arena,
+            sc_state.file_attributes.iter().copied(),
+            sc_state.file_attributes.len(),
+        ),
+        decls: sc_state.decls,
+        disable_xhp_element_mangling: opts.disable_xhp_element_mangling,
+        has_first_pass_parse_errors: !errors.is_empty(),
+    }
 }

@@ -624,6 +624,8 @@ type t = {
   disable_naming_table_fallback_loading: bool;
       (** Stop loading from OCaml marshalled naming table if sqlite table is missing. *)
   use_type_alias_heap: bool;  (** optimize type alias expansions *)
+  override_load_state_natively: bool;
+      (** Overrides load_state_natively on Sandcastle when true *)
 }
 
 let default =
@@ -740,6 +742,7 @@ let default =
     shallow_decls_manifold_path = None;
     disable_naming_table_fallback_loading = false;
     use_type_alias_heap = false;
+    override_load_state_natively = false;
   }
 
 let path =
@@ -1558,6 +1561,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let override_load_state_natively =
+    bool_if_min_version
+      "override_load_state_natively"
+      ~default:default.override_load_state_natively
+      ~current_version
+      config
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1679,6 +1689,7 @@ let load_ fn ~silent ~current_version overrides =
     shallow_decls_manifold_path;
     disable_naming_table_fallback_loading;
     use_type_alias_heap;
+    override_load_state_natively;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.
@@ -1724,4 +1735,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       disable_naming_table_fallback_loading =
         options.disable_naming_table_fallback_loading;
       use_type_alias_heap = options.use_type_alias_heap;
+      override_load_state_natively = options.override_load_state_natively;
     }

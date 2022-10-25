@@ -77,7 +77,11 @@ pub fn init_term(binary_name: &'static str) -> (slog::Logger, slog_async::AsyncG
 
     let drain = drain.fuse();
 
-    let log = slog::Logger::root(drain, o!("bin" => binary_name));
+    let log = if binary_name.is_empty() {
+        slog::Logger::root(drain, o!())
+    } else {
+        slog::Logger::root(drain, o!("bin" => binary_name))
+    };
     (log, guard)
 }
 

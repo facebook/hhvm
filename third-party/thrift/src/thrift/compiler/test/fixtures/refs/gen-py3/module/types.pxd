@@ -245,6 +245,19 @@ cdef extern from "thrift/compiler/test/fixtures/refs/src/gen-cpp2/module_types_c
         __field_ref[cStructWithRef] c_ref "c_ref" ()
 
 
+    cdef cppclass cStructWithInternBox "::cpp2::StructWithInternBox":
+        cStructWithInternBox() except +
+        cStructWithInternBox(const cStructWithInternBox&) except +
+        bint operator==(cStructWithInternBox&)
+        bint operator!=(cStructWithInternBox&)
+        bint operator<(cStructWithInternBox&)
+        bint operator>(cStructWithInternBox&)
+        bint operator<=(cStructWithInternBox&)
+        bint operator>=(cStructWithInternBox&)
+        __field_ref[cEmpty] field1_ref "field1_ref" ()
+        __field_ref[cMyField] field2_ref "field2_ref" ()
+
+
     cdef cppclass cStructWithRefTypeUnique "::cpp2::StructWithRefTypeUnique":
         cStructWithRefTypeUnique() except +
         cStructWithRefTypeUnique(const cStructWithRefTypeUnique&) except +
@@ -485,6 +498,19 @@ cdef class StructWithNonOptionalBox(thrift.py3.types.Struct):
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cStructWithNonOptionalBox])
+
+
+
+cdef class StructWithInternBox(thrift.py3.types.Struct):
+    cdef shared_ptr[cStructWithInternBox] _cpp_obj
+    cdef _fbthrift_types_fields.__StructWithInternBox_FieldsSetter _fields_setter
+    cdef inline object field1_impl(self)
+    cdef inline object field2_impl(self)
+    cdef Empty __fbthrift_cached_field1
+    cdef MyField __fbthrift_cached_field2
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cStructWithInternBox])
 
 
 

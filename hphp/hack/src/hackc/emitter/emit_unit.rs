@@ -122,3 +122,9 @@ fn emit_unit_<'a, 'arena, 'decl>(
         fatal,
     })
 }
+
+#[derive(Clone, Copy, Debug)]
+enum TypeRefinementInHint {
+    Allowed,
+    Disallowed,
+}

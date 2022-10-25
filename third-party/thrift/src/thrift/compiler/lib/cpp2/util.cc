@@ -68,6 +68,55 @@ bool is_custom_type(const t_type& type) {
       t_typedef::get_first_structured_annotation_or_null(&type, kCppAdapterUri);
 }
 
+bool is_custom_type(const t_field& field) {
+  return gen::cpp::type_resolver::find_first_adapter(field) ||
+      is_custom_type(*field.get_type());
+}
+
+bool container_supports_incomplete_params(const t_type& type) {
+  if (t_typedef::get_first_annotation_or_null(
+          &type,
+          {
+              "cpp.container_supports_incomplete_params",
+          }) ||
+      !is_custom_type(type)) {
+    return true;
+  }
+
+  static const std::unordered_set<std::string> template_exceptions = [] {
+    std::unordered_set<std::string> types;
+    for (auto& type : {
+             "folly::F14NodeMap",
+             "folly::F14VectorMap",
+             "folly::small_vector_map",
+             "folly::sorted_vector_map",
+
+             "folly::F14NodeSet",
+             "folly::F14VectorSet",
+             "folly::small_vector_set",
+             "folly::sorted_vector_set",
+
+             "std::forward_list",
+             "std::list",
+         }) {
+      types.insert(type);
+      types.insert(fmt::format("::{}", type));
+    }
+    return types;
+  }();
+  auto cpp_template = t_typedef::get_first_annotation_or_null(
+      &type,
+      {
+          "cpp.template",
+          "cpp2.template",
+      });
+  if (cpp_template && template_exceptions.count(*cpp_template)) {
+    return true;
+  }
+
+  return false;
+}
+
 std::unordered_map<t_struct*, std::vector<t_struct*>>
 gen_struct_dependency_graph(
     const t_program* program, const std::vector<t_struct*>& objects) {
@@ -104,10 +153,22 @@ gen_struct_dependency_graph(
         auto t = ftype->get_true_type();
         if (auto map = dynamic_cast<t_map const*>(t)) {
           // We don't add non-custom type `std::map` to dependency graph since
-          // it supports incomplete types
-          if (cpp2::is_custom_type(*map)) {
+          // all known implementations support incomplete types (though as UB).
+          if (!cpp2::container_supports_incomplete_params(*map)) {
             add_dependency(map->get_key_type());
             add_dependency(map->get_val_type());
+          }
+        } else if (auto set = dynamic_cast<t_set const*>(t)) {
+          // We don't add non-custom type `std::set` to dependency graph since
+          // all known implementations support incomplete types (though as UB).
+          if (!cpp2::container_supports_incomplete_params(*set)) {
+            add_dependency(set->get_elem_type());
+          }
+        } else if (auto list = dynamic_cast<t_list const*>(t)) {
+          // We don't add non-custom type `std::vector` to dependency graph
+          // since it supports incomplete types (as of C++17).
+          if (!cpp2::container_supports_incomplete_params(*list)) {
+            add_dependency(list->get_elem_type());
           }
         } else {
           add_dependency(t);
@@ -125,6 +186,17 @@ gen_struct_dependency_graph(
   };
   return edges;
 }
+
+namespace {
+bool has_dependent_adapter(const t_type& node) {
+  if (auto annotation = t_typedef::get_first_structured_annotation_or_null(
+          &node, kCppAdapterUri)) {
+    return !annotation->get_value_from_structured_annotation_or_null(
+        "adaptedType");
+  }
+  return false;
+}
+} // namespace
 
 std::unordered_map<const t_type*, std::vector<const t_type*>>
 gen_adapter_dependency_graph(
@@ -148,8 +220,7 @@ gen_adapter_dependency_graph(
           if (!dynamic_cast<t_typedef const*>(type) &&
               !(dynamic_cast<t_struct const*>(type) &&
                 (include_structs ||
-                 gen::cpp::type_resolver::find_first_adapter(
-                     *type->get_true_type())))) {
+                 has_dependent_adapter(*type->get_true_type())))) {
             return;
           }
         }
@@ -192,6 +263,28 @@ gen_adapter_dependency_graph(
         const auto* type = field->get_type();
         if (dynamic_cast<t_typedef const*>(type)) {
           add_dependency(type, false);
+        } else if (auto map = dynamic_cast<t_map const*>(type)) {
+          // Container depends on typedefs even if it supports incomplete types
+          if (auto* key_type =
+                  dynamic_cast<t_typedef const*>(map->get_key_type())) {
+            add_dependency(key_type, false);
+          }
+          if (auto* val_type =
+                  dynamic_cast<t_typedef const*>(map->get_val_type())) {
+            add_dependency(val_type, false);
+          }
+        } else if (auto set = dynamic_cast<t_set const*>(type)) {
+          // Container depends on typedefs even if it supports incomplete types
+          if (auto* elem_type =
+                  dynamic_cast<t_typedef const*>(set->get_elem_type())) {
+            add_dependency(elem_type, false);
+          }
+        } else if (auto list = dynamic_cast<t_list const*>(type)) {
+          // Container depends on typedefs even if it supports incomplete types
+          if (auto* elem_type =
+                  dynamic_cast<t_typedef const*>(list->get_elem_type())) {
+            add_dependency(elem_type, false);
+          }
         }
         return true;
       });
@@ -207,75 +300,143 @@ gen_adapter_dependency_graph(
   return edges;
 }
 
-bool is_orderable(
-    std::unordered_set<t_type const*>& seen,
+std::unordered_map<const t_type*, std::vector<const t_type*>>
+gen_dependency_graph(
+    const t_program* program, const std::vector<const t_type*>& nodes) {
+  auto deps = gen_adapter_dependency_graph(program, nodes, program->typedefs());
+  auto struct_deps = gen_struct_dependency_graph(program, program->objects());
+  for (auto& [k, v] : struct_deps) {
+    deps[k].insert(deps[k].end(), v.begin(), v.end());
+    // Order all deps in the order they are defined in.
+    std::sort(
+        deps[k].begin(), deps[k].end(), [](const t_type* a, const t_type* b) {
+          return a->src_range().begin.offset() < b->src_range().begin.offset();
+        });
+  }
+  return deps;
+}
+
+namespace {
+
+struct is_orderable_walk_context {
+  std::unordered_set<t_type const*> pending_back_propagation;
+  std::unordered_set<t_type const*> seen;
+  std::unordered_map<t_type const*, std::unordered_set<t_type const*>>
+      inv_graph;
+};
+
+bool is_orderable_walk(
     std::unordered_map<t_type const*, bool>& memo,
-    t_type const& type) {
+    t_type const& type,
+    t_type const* prev,
+    is_orderable_walk_context& context) {
   const bool has_disqualifying_annotation = is_custom_type(type);
   auto memo_it = memo.find(&type);
   if (memo_it != memo.end()) {
     return memo_it->second;
   }
-  if (!seen.insert(&type).second) {
-    return true;
+  if (prev != nullptr) {
+    context.inv_graph[&type].insert(prev);
+  }
+  if (!context.seen.insert(&type).second) {
+    return true; // Recursive type, speculate success.
   }
   auto make_scope_guard = [](auto f) {
     auto deleter = [=](void*) { f(); };
     return std::unique_ptr<void, decltype(deleter)>(&f, deleter);
   };
-  auto g = make_scope_guard([&] { seen.erase(&type); });
-  // TODO: Consider why typedef is not resolved in this method
-  if (type.is_base_type()) {
-    return true;
-  }
-  if (type.is_enum()) {
+  auto g = make_scope_guard([&] { context.seen.erase(&type); });
+  if (type.is_base_type() || type.is_enum()) {
     return true;
   }
   bool result = false;
-  auto g2 = make_scope_guard([&] { memo[&type] = result; });
+  auto g2 = make_scope_guard([&] {
+    memo[&type] = result;
+    if (!result) {
+      context.pending_back_propagation.insert(&type);
+    }
+  });
   if (type.is_typedef()) {
     auto const& real = [&]() -> auto&& { return *type.get_true_type(); };
     auto const& next = *(dynamic_cast<t_typedef const&>(type).get_type());
-    return result = is_orderable(seen, memo, next) &&
+    return result = is_orderable_walk(memo, next, &type, context) &&
         (!(real().is_set() || real().is_map()) ||
          !has_disqualifying_annotation);
-  }
-  if (type.is_struct() || type.is_xception()) {
-    const auto& as_sturct = static_cast<t_struct const&>(type);
+  } else if (type.is_struct() || type.is_xception()) {
+    const auto& as_struct = static_cast<t_struct const&>(type);
     return result = std::all_of(
-               as_sturct.fields().begin(),
-               as_sturct.fields().end(),
+               as_struct.fields().begin(),
+               as_struct.fields().end(),
                [&](const auto& f) {
-                 return is_orderable(seen, memo, f.type().deref());
+                 return is_orderable_walk(
+                     memo, f.type().deref(), &type, context);
                });
-  }
-  if (type.is_list()) {
-    return result = is_orderable(
-               seen,
+  } else if (type.is_list()) {
+    return result = is_orderable_walk(
                memo,
-               *(dynamic_cast<t_list const&>(type).get_elem_type()));
-  }
-  if (type.is_set()) {
+               *(dynamic_cast<t_list const&>(type).get_elem_type()),
+               &type,
+               context);
+  } else if (type.is_set()) {
     return result = !has_disqualifying_annotation &&
-        is_orderable(
-               seen, memo, *(dynamic_cast<t_set const&>(type).get_elem_type()));
-  }
-  if (type.is_map()) {
-    return result = !has_disqualifying_annotation &&
-        is_orderable(
-               seen,
+        is_orderable_walk(
                memo,
-               *(dynamic_cast<t_map const&>(type).get_key_type())) &&
-        is_orderable(
-               seen, memo, *(dynamic_cast<t_map const&>(type).get_val_type()));
+               *(dynamic_cast<t_set const&>(type).get_elem_type()),
+               &type,
+               context);
+  } else if (type.is_map()) {
+    return result = !has_disqualifying_annotation &&
+        is_orderable_walk(
+               memo,
+               *(dynamic_cast<t_map const&>(type).get_key_type()),
+               &type,
+               context) &&
+        is_orderable_walk(
+               memo,
+               *(dynamic_cast<t_map const&>(type).get_val_type()),
+               &type,
+               context);
   }
   return false;
 }
 
+void is_orderable_back_propagate(
+    std::unordered_map<t_type const*, bool>& memo,
+    is_orderable_walk_context& context) {
+  while (!context.pending_back_propagation.empty()) {
+    auto type = *context.pending_back_propagation.begin();
+    context.pending_back_propagation.erase(
+        context.pending_back_propagation.begin());
+    auto edges = context.inv_graph.find(type);
+    if (edges == context.inv_graph.end()) {
+      continue;
+    }
+    for (t_type const* prev : edges->second) {
+      if (std::exchange(memo[prev], false)) {
+        context.pending_back_propagation.insert(prev);
+      }
+    }
+    context.inv_graph.erase(edges);
+  }
+}
+
+} // namespace
+
+bool is_orderable(
+    std::unordered_map<t_type const*, bool>& memo, t_type const& type) {
+  // Thrift struct could self-reference, so have to perform a two-stage walk:
+  // first all self-references are speculated, then negative classification is
+  // back-propagated through the traversed dependencies.
+  is_orderable_walk_context context;
+  is_orderable_walk(memo, type, nullptr, context);
+  is_orderable_back_propagate(memo, context);
+  auto it = memo.find(&type);
+  return it == memo.end() || it->second;
+}
+
 bool is_orderable(t_type const& type) {
-  std::unordered_set<t_type const*> seen;
   std::unordered_map<t_type const*, bool> memo;
-  return is_orderable(seen, memo, type);
+  return is_orderable(memo, type);
 }
 
 fmt::string_view get_type(const t_type* type) {
@@ -297,6 +458,7 @@ bool field_transitively_refers_to_unique(const t_field* field) {
       return true;
     }
     case gen::cpp::reference_type::boxed:
+    case gen::cpp::reference_type::boxed_intern:
     case gen::cpp::reference_type::shared_const:
     case gen::cpp::reference_type::shared_mutable: {
       return false;
@@ -407,6 +569,7 @@ bool has_ref_annotation(const t_field& field) {
     case gen::cpp::reference_type::shared_mutable:
       return true;
     case gen::cpp::reference_type::none:
+    case gen::cpp::reference_type::boxed_intern:
     case gen::cpp::reference_type::boxed:
       return false;
   }

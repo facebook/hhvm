@@ -20,6 +20,7 @@
 #include <exception>
 #include <stdexcept>
 
+#include <folly/ExceptionString.h>
 #include <folly/experimental/coro/AsyncGenerator.h>
 #include <folly/experimental/coro/BlockingWait.h>
 #include <folly/experimental/coro/Sleep.h>
@@ -35,13 +36,15 @@ testing::AssertionResult runRoundTripTest(
   RoundTripResponse res;
   try {
     client.sync_roundTrip(res, *roundTrip.request());
-  } catch (const apache::thrift::TApplicationException&) {
-    return *roundTrip.expectException() ? testing::AssertionSuccess()
-                                        : testing::AssertionFailure();
+  } catch (const apache::thrift::TApplicationException& e) {
+    return *roundTrip.expectException()
+        ? testing::AssertionSuccess()
+        : (testing::AssertionFailure()
+           << "Unexpected exception: " << folly::exceptionStr(e));
   }
 
   if (*roundTrip.expectException()) {
-    return testing::AssertionFailure();
+    return testing::AssertionFailure() << "No expected exception.";
   }
 
   const Any& expectedAny = roundTrip.expectedResponse()
@@ -233,6 +236,40 @@ StreamInitialResponseClientTestResult runStreamInitialResponse(
   return testResult;
 }
 
+StreamDeclaredExceptionClientTestResult runStreamDeclaredException(
+    RPCConformanceServiceAsyncClient& client,
+    const StreamDeclaredExceptionClientInstruction& instruction) {
+  StreamDeclaredExceptionClientTestResult testResult;
+  folly::coro::blockingWait([&]() -> folly::coro::Task<void> {
+    auto gen =
+        (co_await client.co_streamDeclaredException(*instruction.request()))
+            .toAsyncGenerator();
+    try {
+      co_await gen.next();
+    } catch (const UserException& e) {
+      testResult.userException() = e;
+    }
+  }());
+  return testResult;
+}
+
+StreamUndeclaredExceptionClientTestResult runStreamUndeclaredException(
+    RPCConformanceServiceAsyncClient& client,
+    const StreamUndeclaredExceptionClientInstruction& instruction) {
+  StreamUndeclaredExceptionClientTestResult testResult;
+  folly::coro::blockingWait([&]() -> folly::coro::Task<void> {
+    auto gen =
+        (co_await client.co_streamUndeclaredException(*instruction.request()))
+            .toAsyncGenerator();
+    try {
+      co_await gen.next();
+    } catch (const TApplicationException& e) {
+      testResult.exceptionMessage() = e.getMessage();
+    }
+  }());
+  return testResult;
+}
+
 // =================== Sink ===================
 SinkBasicClientTestResult runSinkBasic(
     RPCConformanceServiceAsyncClient& client,
@@ -277,6 +314,66 @@ SinkChunkTimeoutClientTestResult runSinkChunkTimeout(
   return result;
 }
 
+// =================== Interactions ===================
+InteractionConstructorClientTestResult runInteractionConstructor(
+    RPCConformanceServiceAsyncClient& client,
+    const InteractionConstructorClientInstruction&) {
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<InteractionConstructorClientTestResult> {
+        auto interaction = client.createBasicInteraction();
+        co_await interaction.co_init();
+        co_return InteractionConstructorClientTestResult();
+      }());
+}
+
+InteractionFactoryFunctionClientTestResult runInteractionFactoryFunction(
+    RPCConformanceServiceAsyncClient& client,
+    const InteractionFactoryFunctionClientInstruction& instruction) {
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<InteractionFactoryFunctionClientTestResult> {
+        co_await client.co_basicInteractionFactoryFunction(
+            *instruction.initialSum());
+        co_return InteractionFactoryFunctionClientTestResult();
+      }());
+}
+
+template <class InteractionClientInstruction>
+Client<RPCConformanceService>::BasicInteraction createInteraction(
+    RPCConformanceServiceAsyncClient& client,
+    const InteractionClientInstruction& instruction) {
+  if (instruction.initialSum().has_value()) {
+    return folly::coro::blockingWait(
+        client.co_basicInteractionFactoryFunction(*instruction.initialSum()));
+  } else {
+    return client.createBasicInteraction();
+  }
+}
+
+InteractionPersistsStateClientTestResult runInteractionPersistsState(
+    RPCConformanceServiceAsyncClient& client,
+    const InteractionPersistsStateClientInstruction& instruction) {
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<InteractionPersistsStateClientTestResult> {
+        auto interaction = createInteraction(client, instruction);
+        InteractionPersistsStateClientTestResult result;
+        for (auto& arg : *instruction.valuesToAdd()) {
+          result.responses()->emplace_back(co_await interaction.co_add(arg));
+        }
+        co_return result;
+      }());
+}
+
+InteractionTerminationClientTestResult runInteractionTermination(
+    RPCConformanceServiceAsyncClient& client,
+    const InteractionTerminationClientInstruction& instruction) {
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<InteractionTerminationClientTestResult> {
+        auto interaction = createInteraction(client, instruction);
+        co_await interaction.co_init();
+        co_return InteractionTerminationClientTestResult();
+      }());
+}
+
 ClientTestResult runClientSteps(
     Client<RPCConformanceService>& client,
     const ClientInstruction& clientInstruction) {
@@ -310,6 +407,14 @@ ClientTestResult runClientSteps(
       result.streamInitialResponse_ref() = runStreamInitialResponse(
           client, *clientInstruction.streamInitialResponse_ref());
       break;
+    case ClientInstruction::Type::streamDeclaredException:
+      result.streamDeclaredException_ref() = runStreamDeclaredException(
+          client, *clientInstruction.streamDeclaredException_ref());
+      break;
+    case ClientInstruction::Type::streamUndeclaredException:
+      result.streamUndeclaredException_ref() = runStreamUndeclaredException(
+          client, *clientInstruction.streamUndeclaredException_ref());
+      break;
     case ClientInstruction::Type::sinkBasic:
       result.sinkBasic_ref() =
           runSinkBasic(client, *clientInstruction.sinkBasic_ref());
@@ -317,6 +422,22 @@ ClientTestResult runClientSteps(
     case ClientInstruction::Type::sinkChunkTimeout:
       result.sinkChunkTimeout_ref() = runSinkChunkTimeout(
           client, *clientInstruction.sinkChunkTimeout_ref());
+      break;
+    case ClientInstruction::Type::interactionConstructor:
+      result.interactionConstructor_ref() = runInteractionConstructor(
+          client, *clientInstruction.interactionConstructor_ref());
+      break;
+    case ClientInstruction::Type::interactionFactoryFunction:
+      result.interactionFactoryFunction_ref() = runInteractionFactoryFunction(
+          client, *clientInstruction.interactionFactoryFunction_ref());
+      break;
+    case ClientInstruction::Type::interactionPersistsState:
+      result.interactionPersistsState_ref() = runInteractionPersistsState(
+          client, *clientInstruction.interactionPersistsState_ref());
+      break;
+    case ClientInstruction::Type::interactionTermination:
+      result.interactionTermination_ref() = runInteractionTermination(
+          client, *clientInstruction.interactionTermination_ref());
       break;
     default:
       throw std::runtime_error("Invalid TestCase Type.");

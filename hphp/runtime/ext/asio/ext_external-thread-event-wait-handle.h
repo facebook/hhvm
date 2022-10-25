@@ -86,13 +86,6 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   friend struct SweepableMember<c_ExternalThreadEventWaitHandle>;
 };
 
-void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnCreateCallback,
-                        const Variant& callback);
-void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnSuccessCallback,
-                        const Variant& callback);
-void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnFailCallback,
-                        const Variant& callback);
-
 inline c_ExternalThreadEventWaitHandle* c_Awaitable::asExternalThreadEvent() {
   assertx(getKind() == Kind::ExternalThreadEvent);
   return static_cast<c_ExternalThreadEventWaitHandle*>(this);

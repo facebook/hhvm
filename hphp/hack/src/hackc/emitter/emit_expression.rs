@@ -49,6 +49,7 @@ use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
+use itertools::Itertools;
 use lazy_static::lazy_static;
 use naming_special_names_rust::emitter_special_functions;
 use naming_special_names_rust::fb;
@@ -76,6 +77,7 @@ use oxidized::pos::Pos;
 use regex::Regex;
 use serde_json::json;
 
+use super::TypeRefinementInHint;
 use crate::emit_adata;
 use crate::emit_fatal;
 use crate::emit_type_constant;
@@ -319,7 +321,7 @@ mod inout_locals {
     // collect lvars on the left hand side of '=' operator
     fn collect_lvars_hs<'r, 'ast, 'arena>(ctx: &mut Ctx<'r, 'ast, 'arena>, expr: &'ast ast::Expr) {
         let ast::Expr(_, _, e) = expr;
-        match &*e {
+        match e {
             ast::Expr_::Lvar(lid) => {
                 let Lid(_, lid) = &**lid;
                 if !super::is_local_this(ctx.env, lid) {
@@ -333,10 +335,11 @@ mod inout_locals {
     }
 } //mod inout_locals
 
-pub fn get_type_structure_for_hint<'arena, 'decl>(
+pub(crate) fn get_type_structure_for_hint<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     tparams: &[&str],
     targ_map: &IndexSet<&str>,
+    type_refinement_in_hint: TypeRefinementInHint,
     hint: &aast::Hint,
 ) -> Result<InstrSeq<'arena>> {
     let targ_map: BTreeMap<&str, i64> = targ_map
@@ -352,6 +355,7 @@ pub fn get_type_structure_for_hint<'arena, 'decl>(
         hint,
         false,
         false,
+        type_refinement_in_hint,
     )?;
     emit_adata::typed_value_into_instr(e, tv)
 }
@@ -746,7 +750,7 @@ fn emit_string2<'a, 'arena, 'decl>(
             emit_pos(pos),
             instr::concat(),
             InstrSeq::gather(
-                (&es[2..])
+                es[2..]
                     .iter()
                     .map(|expr| {
                         Ok(InstrSeq::gather(vec![
@@ -843,7 +847,7 @@ pub fn emit_await<'a, 'arena, 'decl>(
             let after_await = emitter.label_gen_mut().next_regular();
             let instrs = match e {
                 ast::Expr_::Call(c) => {
-                    emit_call_expr(emitter, env, pos, Some(after_await.clone()), false, &*c)?
+                    emit_call_expr(emitter, env, pos, Some(after_await.clone()), false, c)?
                 }
                 _ => emit_expr(emitter, env, expr)?,
             };
@@ -1097,18 +1101,13 @@ fn emit_named_collection_str<'a, 'arena, 'decl>(
     emit_named_collection(e, env, pos, expr, fields, ctype)
 }
 
-fn mk_afkvalues(es: &[(ast::Expr, ast::Expr)]) -> Vec<ast::Afield> {
-    es.to_owned()
-        .into_iter()
-        .map(|(e1, e2)| ast::Afield::mk_afkvalue(e1, e2))
+fn mk_afkvalues(es: impl Iterator<Item = (ast::Expr, ast::Expr)>) -> Vec<ast::Afield> {
+    es.map(|(e1, e2)| ast::Afield::mk_afkvalue(e1, e2))
         .collect()
 }
 
 fn mk_afvalues(es: &[ast::Expr]) -> Vec<ast::Afield> {
-    es.to_owned()
-        .into_iter()
-        .map(ast::Afield::mk_afvalue)
-        .collect()
+    es.iter().cloned().map(ast::Afield::mk_afvalue).collect()
 }
 
 fn emit_collection<'a, 'arena, 'decl>(
@@ -1244,7 +1243,7 @@ fn emit_array<'a, 'arena, 'decl>(
 
 fn non_numeric(s: &str) -> bool {
     // Note(hrust): OCaml Int64.of_string and float_of_string ignore underscores
-    let s = s.replace("_", "");
+    let s = s.replace('_', "");
     lazy_static! {
         static ref HEX: Regex = Regex::new(r"(?P<sign>^-?)0[xX](?P<digits>.*)").unwrap();
         static ref OCTAL: Regex = Regex::new(r"(?P<sign>^-?)0[oO](?P<digits>.*)").unwrap();
@@ -1273,7 +1272,7 @@ fn non_numeric(s: &str) -> bool {
         .map_err(|_| ())
     }
     fn float_from_str_radix(s: &str, radix: u32) -> Result<f64, ()> {
-        let i = i64::from_str_radix(&s.replace(".", ""), radix).map_err(|_| ())?;
+        let i = i64::from_str_radix(&s.replace('.', ""), radix).map_err(|_| ())?;
         Ok(match s.matches('.').count() {
             0 => i as f64,
             1 => {
@@ -1806,7 +1805,7 @@ fn emit_call_default<'a, 'arena, 'decl>(
                 InstrSeq::gather(
                     iter::repeat_with(instr::null_uninit)
                         .take(num_uninit as usize)
-                        .collect::<Vec<_>>(),
+                        .collect_vec(),
                 ),
                 lhs,
                 args,
@@ -1820,19 +1819,27 @@ fn emit_call_default<'a, 'arena, 'decl>(
     })
 }
 
-pub fn emit_reified_targs<'a, 'arena, 'decl>(
+fn is_soft(ual: &[ast::UserAttribute]) -> bool {
+    ual.iter().any(|ua| user_attributes::is_soft(&ua.name.1))
+}
+
+pub fn emit_reified_targs<'a, 'arena, 'decl, I>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    targs: &[&ast::Hint],
-) -> Result<InstrSeq<'arena>> {
+    targs: I,
+) -> Result<InstrSeq<'arena>>
+where
+    I: Iterator<Item = &'a ast::Hint> + ExactSizeIterator + Clone,
+{
     let alloc = env.arena;
     let current_fun_tparams = env.scope.get_fun_tparams();
     let current_cls_tparams = env.scope.get_class_tparams();
     let is_in_lambda = env.scope.is_in_lambda();
-    let is_soft =
-        |ual: &Vec<ast::UserAttribute>| ual.iter().any(|ua| user_attributes::is_soft(&ua.name.1));
-    let same_as_targs = |tparams: &[ast::Tparam]| {
+    fn same_as_targs<'a, I>(targs: I, tparams: &[ast::Tparam]) -> bool
+    where
+        I: Iterator<Item = &'a ast::Hint> + ExactSizeIterator + Clone,
+    {
         tparams.len() == targs.len()
             && tparams.iter().zip(targs).all(|(tp, ta)| {
                 ta.1.as_happly().map_or(false, |(id, hs)| {
@@ -1842,33 +1849,35 @@ pub fn emit_reified_targs<'a, 'arena, 'decl>(
                         && tp.reified.is_reified()
                 })
             })
-    };
-    Ok(if !is_in_lambda && same_as_targs(current_fun_tparams) {
-        instr::c_get_l(e.named_local(string_utils::reified::GENERICS_LOCAL_NAME.into()))
-    } else if !is_in_lambda && same_as_targs(current_cls_tparams) {
-        InstrSeq::gather(vec![
-            instr::check_this(),
-            instr::base_h(),
-            instr::query_m(
-                0,
-                QueryMOp::CGet,
-                MemberKey::PT(
-                    hhbc::PropName::from_raw_string(alloc, string_utils::reified::PROP_NAME),
-                    ReadonlyOp::Any,
+    }
+    Ok(
+        if !is_in_lambda && same_as_targs(targs.clone(), current_fun_tparams) {
+            instr::c_get_l(e.named_local(string_utils::reified::GENERICS_LOCAL_NAME.into()))
+        } else if !is_in_lambda && same_as_targs(targs.clone(), current_cls_tparams) {
+            InstrSeq::gather(vec![
+                instr::check_this(),
+                instr::base_h(),
+                instr::query_m(
+                    0,
+                    QueryMOp::CGet,
+                    MemberKey::PT(
+                        hhbc::PropName::from_raw_string(alloc, string_utils::reified::PROP_NAME),
+                        ReadonlyOp::Any,
+                    ),
                 ),
-            ),
-        ])
-    } else {
-        InstrSeq::gather(vec![
-            InstrSeq::gather(
-                targs
-                    .iter()
-                    .map(|h| Ok(emit_reified_arg(e, env, pos, false, h)?.0))
-                    .collect::<Result<Vec<_>>>()?,
-            ),
-            instr::new_vec(targs.len() as u32),
-        ])
-    })
+            ])
+        } else {
+            let targs_len = targs.len() as u32;
+            InstrSeq::gather(vec![
+                InstrSeq::gather(
+                    targs
+                        .map(|h| Ok(emit_reified_arg(e, env, pos, false, h)?.0))
+                        .collect::<Result<Vec<_>>>()?,
+                ),
+                instr::new_vec(targs_len),
+            ])
+        },
+    )
 }
 
 fn get_erased_tparams<'a, 'arena>(env: &'a Env<'a, 'arena>) -> Vec<&'a str> {
@@ -1938,16 +1947,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                 Ok(instr::empty())
             } else {
                 fcall_args.flags |= FCallArgsFlags::HasGenerics;
-                emit_reified_targs(
-                    e,
-                    env,
-                    pos,
-                    targs
-                        .iter()
-                        .map(|targ| &targ.1)
-                        .collect::<Vec<_>>()
-                        .as_slice(),
-                )
+                emit_reified_targs(e, env, pos, targs.iter().map(|targ| &targ.1))
             }
         };
 
@@ -2828,7 +2828,13 @@ fn emit_special_function<'a, 'arena, 'decl>(
             Ok(Some(emit_tag_provenance_here(e, env, pos, args)?))
         }
         ("HH\\embed_type_decl", _)
-            if args.is_empty() && targs.len() == 1 && e.decl_provider.is_some() =>
+            // `enable_intrinsics_extension` is roughly being used as a proxy here for "are we in
+            // a non-production environment?" `embed_type_decl` is *not* fit for production use.
+            // The typechecker doesn't understand it anyhow.
+            if e.options().hhbc.enable_intrinsics_extension
+                && args.is_empty()
+                && targs.len() == 1
+                && e.decl_provider.is_some() =>
         {
             match (targs[0].1).1.as_ref() {
                 aast_defs::Hint_::Happly(ast_defs::Id(_, id), _) => {
@@ -3001,12 +3007,7 @@ fn emit_class_meth_native<'a, 'arena, 'decl>(
     }
     let has_generics = has_non_tparam_generics_targs(env, targs);
     let mut emit_generics = || -> Result<InstrSeq<'arena>> {
-        emit_reified_targs(
-            e,
-            env,
-            pos,
-            &targs.iter().map(|targ| &targ.1).collect::<Vec<_>>(),
-        )
+        emit_reified_targs(e, env, pos, targs.iter().map(|targ| &targ.1))
     };
     Ok(match cexpr {
         ClassExpr::Id(ast_defs::Id(_, name)) if !has_generics => instr::resolve_cls_method_d(
@@ -3108,16 +3109,7 @@ fn emit_hh_fun<'a, 'arena, 'decl>(
     let alloc = env.arena;
     let fname = string_utils::strip_global_ns(fname);
     if has_non_tparam_generics_targs(env, targs) {
-        let generics = emit_reified_targs(
-            e,
-            env,
-            pos,
-            targs
-                .iter()
-                .map(|targ| &targ.1)
-                .collect::<Vec<_>>()
-                .as_slice(),
-        )?;
+        let generics = emit_reified_targs(e, env, pos, targs.iter().map(|targ| &targ.1))?;
         Ok(InstrSeq::gather(vec![
             generics,
             instr::resolve_r_func(hhbc::FunctionName::new(Str::new_str(alloc, fname))),
@@ -3144,7 +3136,13 @@ fn emit_is<'a, 'arena, 'decl>(
                 instr::is_late_bound_cls()
             }
             _ => InstrSeq::gather(vec![
-                get_type_structure_for_hint(e, &[], &IndexSet::new(), h)?,
+                get_type_structure_for_hint(
+                    e,
+                    &[],
+                    &IndexSet::new(),
+                    TypeRefinementInHint::Disallowed,
+                    h,
+                )?,
                 instr::is_type_struct_c_resolve(),
             ]),
         }
@@ -3308,11 +3306,8 @@ fn emit_keyval_collection_expr<'a, 'arena, 'decl>(
     let (kind, _, fields) = e;
     let fields = mk_afkvalues(
         fields
-            .to_owned()
-            .into_iter()
-            .map(|ast::Field(e1, e2)| (e1, e2))
-            .collect::<Vec<_>>()
-            .as_slice(),
+            .iter()
+            .map(|ast::Field(e1, e2)| (e1.clone(), e2.clone())),
     );
     let collection_typ = match kind {
         aast_defs::KvcKind::Map => CollectionType::Map,
@@ -3380,7 +3375,13 @@ fn emit_darray<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     Ok(emit_pos_then(
         pos,
-        emit_collection(emitter, env, expression, &mk_afkvalues(&e.1), None)?,
+        emit_collection(
+            emitter,
+            env,
+            expression,
+            &mk_afkvalues(e.1.iter().cloned()),
+            None,
+        )?,
     ))
 }
 
@@ -3911,12 +3912,7 @@ fn emit_new_obj_reified_instrs<'a, 'b, 'arena, 'decl>(
             ]),
             NewObjOpInfo::NewObjD(id, targs) => {
                 let ts = match targs {
-                    Some(targs) => emit_reified_targs(
-                        e,
-                        env,
-                        pos,
-                        &targs.iter().map(|t| &t.1).collect::<Vec<_>>(),
-                    )?,
+                    Some(targs) => emit_reified_targs(e, env, pos, targs.iter().map(|t| &t.1))?,
                     None => instr::empty(),
                 };
                 let store_cls_and_obj = InstrSeq::gather(vec![
@@ -5012,7 +5008,7 @@ fn emit_null_coalesce_assignment<'a, 'arena, 'decl>(
         Some(n) => InstrSeq::gather(
             iter::repeat_with(instr::pop_c)
                 .take(n as usize)
-                .collect::<Vec<_>>(),
+                .collect_vec(),
         ),
         None => instr::empty(),
     };
@@ -5181,7 +5177,13 @@ fn emit_as<'a, 'arena, 'decl>(
         };
         let i2 = if is_static {
             main_block(
-                get_type_structure_for_hint(e, &[], &IndexSet::new(), h)?,
+                get_type_structure_for_hint(
+                    e,
+                    &[],
+                    &IndexSet::new(),
+                    TypeRefinementInHint::Disallowed,
+                    h,
+                )?,
                 TypeStructResolveOp::Resolve,
             )
         } else {
@@ -5299,9 +5301,7 @@ pub fn emit_set_range_expr<'a, 'arena, 'decl>(
         count_instrs,
         base_setup,
         instr::instr(Instruct::Opcode(Opcode::SetRangeM(
-            (base_stack + cls_stack)
-                .try_into()
-                .expect("StackIndex overflow"),
+            base_stack + cls_stack,
             kind.size.try_into().expect("SetRange size overflow"),
             kind.op,
         ))),
@@ -5314,9 +5314,6 @@ pub fn is_reified_tparam<'a, 'arena>(
     name: &str,
 ) -> Option<(usize, bool)> {
     let is = |tparams: &[ast::Tparam]| {
-        let is_soft = |ual: &Vec<ast::UserAttribute>| {
-            ual.iter().any(|ua| user_attributes::is_soft(&ua.name.1))
-        };
         use ast::ReifyKind;
         tparams.iter().enumerate().find_map(|(i, tp)| {
             if (tp.reified == ReifyKind::Reified || tp.reified == ReifyKind::SoftReified)
@@ -5512,7 +5509,7 @@ fn emit_base_<'a, 'arena, 'decl>(
         inner_expr: &ast::Expr, // expression inside of readonly expression
     | -> Option<Result<ArrayGetBase<'_>>> {
         // Readonly local variable requires a CheckROCOW
-        if let aast::Expr(_, _, Expr_::Lvar(x)) = &*inner_expr {
+        if let aast::Expr(_, _, Expr_::Lvar(x)) = inner_expr {
             if !is_local_this(env, &x.1) || env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS) {
                 match get_local(e, env, &x.0, &(x.1).1) {
                     Ok(v) => {
@@ -6654,11 +6651,9 @@ pub fn emit_reified_arg<'b, 'arena, 'decl>(
         .scope
         .get_fun_tparams()
         .iter()
-        .fold(HashSet::<&str>::default(), |acc, t| f(acc, &*t));
+        .fold(HashSet::<&str>::default(), f);
     let class_tparams = env.scope.get_class_tparams();
-    let current_tags = class_tparams
-        .iter()
-        .fold(current_tags, |acc, t| f(acc, &*t));
+    let current_tags = class_tparams.iter().fold(current_tags, f);
     let mut collector = Collector {
         current_tags: &current_tags,
         acc: IndexSet::new(),
@@ -6671,7 +6666,18 @@ pub fn emit_reified_arg<'b, 'arena, 'decl>(
             Ok((emit_reified_type(e, env, pos, name)?, false))
         }
         _ => {
-            let ts = get_type_structure_for_hint(e, &[], &collector.acc, &hint)?;
+            let type_refinement_in_hint = if isas {
+                TypeRefinementInHint::Disallowed
+            } else {
+                TypeRefinementInHint::Allowed
+            };
+            let ts = get_type_structure_for_hint(
+                e,
+                &[],
+                &collector.acc,
+                type_refinement_in_hint,
+                &hint,
+            )?;
             let ts_list = if collector.acc.is_empty() {
                 ts
             } else {

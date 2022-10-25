@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -24,9 +23,14 @@ struct Options {
 }
 
 fn main() {
+    // This is the entrypoint when used from buck.
     let opts = Options::from_args();
-    let hsl_dir = opts.hsl_stamp.parent().unwrap();
     let out_dir = std::env::var("OUT").unwrap(); // $OUT implicitly provided by buck
+    run(opts, &out_dir)
+}
+
+fn run(opts: Options, out_dir: &str) {
+    let hsl_dir = opts.hsl_stamp.parent().unwrap();
 
     let mut hhi_contents = vec![];
 
@@ -37,7 +41,7 @@ fn main() {
     );
 
     let out_filename = PathBuf::from(out_dir).join("lib.rs");
-    write_hhi_contents_file(&out_filename, &hhi_contents).unwrap();
+    gen_hhi_contents_lib::write_hhi_contents_file(&out_filename, &hhi_contents).unwrap();
 }
 
 fn get_hhis_in_dir(root: &Path) -> impl Iterator<Item = (PathBuf, String)> + '_ {
@@ -52,22 +56,4 @@ fn get_hhis_in_dir(root: &Path) -> impl Iterator<Item = (PathBuf, String)> + '_ 
             let relative_path = e.path().strip_prefix(root).unwrap().to_owned();
             (relative_path, contents)
         })
-}
-
-fn write_hhi_contents_file(
-    out_filename: &Path,
-    hhi_contents: &[(PathBuf, String)],
-) -> std::io::Result<()> {
-    let mut out_file = std::fs::File::create(&out_filename)?;
-    writeln!(out_file, "pub const HHI_CONTENTS: &[(&str, &str)] = &[")?;
-    for (path, contents) in hhi_contents {
-        writeln!(
-            out_file,
-            "    (\"{}\", r###\"{}\"###),",
-            path.display(),
-            contents
-        )?;
-    }
-    writeln!(out_file, "];")?;
-    Ok(())
 }

@@ -40,27 +40,31 @@ class ThriftStruct {
   public static function withDefaultValues()[]: this {
     return new static("");
   }
+
+  public function clearTerseFields()[write_props]: void {}
 }
-    
+
 class NestedStruct {
   public string $str;
-  
+
   public function __construct(string $str) {
     $this->str = $str;
   }
-  
+
   public function withDefaultValues()[]: this {
     return new static("");
   }
+
+  public function clearTerseFields()[write_props]: void {}
 };
 
 class NestedStructAdapter {
   const type THackType = NestedStruct;
-   
+
   public static function toThrift(NestedStruct $hack_value): ThriftStruct {
     return new ThriftStruct(HH\Lib\Str\reverse($hack_value->str));
   }
-  
+
   public static function fromThrift(ThriftStruct $thrift_struct): NestedStruct {
     return new NestedStruct(HH\Lib\Str\reverse($thrift_struct->str));
   }
@@ -77,10 +81,12 @@ class Foo {
   ];
 
   public ?NestedStructAdapter::THackType $nested = null;
-  
+
   public static function withDefaultValues()[]: this {
     return new static();
   }
+
+  public function clearTerseFields()[write_props]: void {}
 };
 
 class DummyProtocol {

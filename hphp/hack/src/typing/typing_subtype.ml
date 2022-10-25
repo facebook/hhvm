@@ -555,12 +555,16 @@ let rec simplify_subtype
     ~(subtype_env : subtype_env)
     ?(this_ty : locl_ty option = None)
     ?(super_like = false)
+    ?(sub_supportdyn = false)
+    ?(super_supportdyn = false)
     ty_sub
     ty_super =
   simplify_subtype_i
     ~subtype_env
     ~this_ty
     ~super_like
+    ~sub_supportdyn
+    ~super_supportdyn
     (LoclType ty_sub)
     (LoclType ty_super)
 
@@ -842,6 +846,8 @@ and simplify_subtype_i
     ~(subtype_env : subtype_env)
     ?(this_ty : locl_ty option = None)
     ?(super_like : bool = false)
+    ?(sub_supportdyn : bool = false)
+    ?(super_supportdyn : bool = false)
     (ty_sub : internal_type)
     (ty_super : internal_type)
     env : env * TL.subtype_prop =
@@ -1486,19 +1492,25 @@ and simplify_subtype_i
                   ||| simplify_subtype_i ~subtype_env ~this_ty ty_sub ty_super)
             in
             (* Heuristicky logic to decide whether to "break" the intersection
-               or the union first, based on observing that the following cases often occur:
-                 - A & B <: (A & B) | C
-                   In which case we want to "break" the union on the right first
-                   in order to have the following recursive calls :
-                       A & B <: A & B
-                       A & B <: C
-                 - A & (B | C) <: B | C
-                   In which case we want to "break" the intersection on the left first
-                   in order to have the following recursive calls:
-                       A <: B | C
-                       B | C <: B | C
+                or the union first, based on observing that the following cases often occur:
+                  - A & B <: (A & B) | C
+                    In which case we want to "break" the union on the right first
+                    in order to have the following recursive calls :
+                        A & B <: A & B
+                        A & B <: C
+                  - A & (B | C) <: B | C
+                    In which case we want to "break" the intersection on the left first
+                    in order to have the following recursive calls:
+                        A <: B | C
+                        B | C <: B | C
+               If there is a type variable in the union, then generally it's helpful to
+               break the union apart.
             *)
-            if List.exists tyl_super ~f:(Typing_utils.is_tintersection env) then
+            if
+              List.exists tyl_super ~f:(fun t ->
+                  Typing_utils.is_tintersection env t
+                  || Typing_utils.is_tyvar env t)
+            then
               simplify_sub_union env ety_sub tyl_super
             else if List.exists tyl_sub ~f:(Typing_utils.is_tunion env) then
               simplify_super_intersection env tyl_sub (LoclType ty_super)
@@ -2048,6 +2060,7 @@ and simplify_subtype_i
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
       | LoclType lty ->
+        let (sub_supportdyn', lty) = TUtils.strip_supportdyn lty in
         (match deref lty with
         | (r_sub, Tshape (shape_kind_sub, fdm_sub)) ->
           simplify_subtype_shape
@@ -2055,8 +2068,8 @@ and simplify_subtype_i
             ~env
             ~this_ty
             ~super_like
-            (r_sub, shape_kind_sub, fdm_sub)
-            (r_super, shape_kind_super, fdm_super)
+            (sub_supportdyn || sub_supportdyn', r_sub, shape_kind_sub, fdm_sub)
+            (super_supportdyn, r_super, shape_kind_super, fdm_super)
         | _ -> default_subtype env))
     | (_, Tvec_or_dict _) ->
       (match ety_sub with
@@ -2103,6 +2116,8 @@ and simplify_subtype_i
                ~subtype_env
                ~this_ty
                ~super_like
+               ~super_supportdyn:true
+               ~sub_supportdyn:true
                tyarg_sub
                tyarg_super
         | (_, (Tgeneric _ | Tvar _)) -> default_subtype env
@@ -2113,6 +2128,7 @@ and simplify_subtype_i
                ~subtype_env
                ~this_ty
                ~super_like
+               ~super_supportdyn:true
                lty_sub
                tyarg_super
           &&& simplify_dynamic_aware_subtype
@@ -2220,7 +2236,16 @@ and simplify_subtype_i
         | _ -> default_subtype env))
     | (r_super, Tclass (x_super, Nonexact cr_super, tyl_super))
       when (not (Class_refinement.is_empty cr_super))
-           && subtype_env.require_soundness ->
+           && (subtype_env.require_soundness
+              || (* To deal with refinements, the code below generates a
+                  * constraint type. That is currently not supported when
+                  * require_soundness is not set (see below in the function
+                  * decompose_subtype_add_prop). Consequently, if soundness
+                  * is not required, we treat the refinement information
+                  * only if we know for sure that we can discharge it on
+                  * the spot; e.g., when ety_sub is a class-ish. This
+                  * limits the information lost by skipping refinements. *)
+              TUtils.is_class_i ety_sub) ->
       (* We discharge class refinements before anything
        * else ... *)
       Class_refinement.fold_type_refs
@@ -2461,8 +2486,8 @@ and simplify_subtype_shape
     ~(env : env)
     ~(this_ty : locl_ty option)
     ?(super_like = false)
-    (r_sub, shape_kind_sub, fdm_sub)
-    (r_super, shape_kind_super, fdm_super) =
+    (supportdyn_sub, r_sub, shape_kind_sub, fdm_sub)
+    (supportdyn_super, r_super, shape_kind_super, fdm_super) =
   (*
     Shape projection for shape type `s` and field `f` (`s |_ f`) is defined as:
       - if `f` appears in `s` as `f => ty` then `s |_ f` = `Required ty`
@@ -2474,15 +2499,27 @@ and simplify_subtype_shape
       - `?f => nothing` should be ignored, and treated as `Absent`.
         Such a field cannot be given a value, and so is effectively not present.
   *)
-  let shape_projection field_name shape_kind shape_map r =
+  let shape_projection ~supportdyn field_name shape_kind shape_map r =
+    let make_supportdyn ty =
+      if
+        supportdyn
+        && not
+             (is_sub_type_for_union_i
+                env
+                (LoclType ty)
+                (LoclType (MakeType.supportdyn r (MakeType.mixed r))))
+      then
+        MakeType.supportdyn r ty
+      else
+        ty
+    in
+
     match TShapeMap.find_opt field_name shape_map with
     | Some { sft_ty; sft_optional } ->
-      begin
-        match (deref sft_ty, sft_optional) with
-        | ((_, Tunion []), true) -> `Absent
-        | (_, true) -> `Optional sft_ty
-        | (_, false) -> `Required sft_ty
-      end
+      (match (deref sft_ty, sft_optional) with
+      | ((_, Tunion []), true) -> `Absent
+      | (_, true) -> `Optional (make_supportdyn sft_ty)
+      | (_, false) -> `Required (make_supportdyn sft_ty))
     | None ->
       begin
         match shape_kind with
@@ -2494,7 +2531,7 @@ and simplify_subtype_shape
             MakeType.mixed
               (Reason.Rmissing_optional_field (Reason.to_pos r, printable_name))
           in
-          `Optional mixed_ty
+          `Optional (make_supportdyn mixed_ty)
         | Closed_shape -> `Absent
       end
   in
@@ -2575,15 +2612,25 @@ and simplify_subtype_shape
   in
   (* Helper function to project out a field and then simplify subtype *)
   let shape_project_and_simplify_subtype
-      (r_sub, shape_kind_sub, shape_map_sub)
-      (r_super, shape_kind_super, shape_map_super)
+      (supportdyn_sub, r_sub, shape_kind_sub, shape_map_sub)
+      (supportdyn_super, r_super, shape_kind_super, shape_map_super)
       field_name
       res =
     let proj_sub =
-      shape_projection field_name shape_kind_sub shape_map_sub r_sub
+      shape_projection
+        ~supportdyn:supportdyn_sub
+        field_name
+        shape_kind_sub
+        shape_map_sub
+        r_sub
     in
     let proj_super =
-      shape_projection field_name shape_kind_super shape_map_super r_super
+      shape_projection
+        ~supportdyn:supportdyn_super
+        field_name
+        shape_kind_super
+        shape_map_super
+        r_super
     in
     simplify_subtype_shape_projection
       (r_sub, proj_sub)
@@ -2612,8 +2659,8 @@ and simplify_subtype_shape
   | _ ->
     TShapeSet.fold
       (shape_project_and_simplify_subtype
-         (r_sub, shape_kind_sub, fdm_sub)
-         (r_super, shape_kind_super, fdm_super))
+         (supportdyn_sub, r_sub, shape_kind_sub, fdm_sub)
+         (supportdyn_super, r_super, shape_kind_super, fdm_super))
       (TShapeSet.of_list (TShapeMap.keys fdm_sub @ TShapeMap.keys fdm_super))
       (env, TL.valid)
 
@@ -2669,6 +2716,28 @@ and simplify_subtype_has_type_member
   match ety_sub with
   | ConstraintType _ -> invalid ~fail env
   | LoclType ty_sub ->
+    let concrete_rigid_tvar_access env ucckind bndtys =
+      (* First, we try to discharge the subtype query on the bound; if
+       * that fails, we mint a fresh rigid type variable to represent
+       * the concrete type constant and try to solve the query using it *)
+      let ( ||| ) = ( ||| ) ~fail in
+      let bndty = MakeType.intersection (get_reason ty_sub) bndtys in
+      simplify_subtype_i ~subtype_env ~this_ty (LoclType bndty) htmty env
+      ||| fun env ->
+      (* TODO(refinements): The treatment of `this_ty` below is
+       * no good; see below. *)
+      let (env, dtmemty) =
+        Typing_type_member.make_type_member
+          env
+          ~this_ty:(Option.value this_ty ~default:ty_sub)
+          ~on_error:subtype_env.on_error
+          ucckind
+          bndtys
+          (Reason.to_pos r, memid)
+      in
+      simplify_subtype ~subtype_env ~this_ty dtmemty memty env
+      &&& simplify_subtype ~subtype_env ~this_ty memty dtmemty
+    in
     (match deref ty_sub with
     | (_r_sub, Tclass (x_sub, exact_sub, _tyl_sub)) ->
       let (env, type_member) =
@@ -2691,27 +2760,12 @@ and simplify_subtype_has_type_member
         simplify_subtype ~subtype_env ~this_ty ty memty env
         &&& simplify_subtype ~subtype_env ~this_ty memty ty
       | Typing_type_member.Abstract _ -> invalid ~fail env)
-    | (_r_sub, Tdependent (dtkind, bndty)) ->
-      (* First, we try to discharge the subtype query on the Tdependent
-       * bound; if that fails, we mint a fresh rigid type variable to
-       * represent the concrete type constant and try to solve the query
-       * using it *)
-      let ( ||| ) = ( ||| ) ~fail in
-      simplify_subtype_i ~subtype_env ~this_ty (LoclType bndty) htmty env
-      ||| fun env ->
-      (* TODO(refinements): The treatment of `this_ty` below is
-       * no good; see above. *)
-      let (env, dtmemty) =
-        Typing_type_member.make_dep_bound_type_member
-          env
-          ~this_ty:(Option.value this_ty ~default:ty_sub)
-          ~on_error:subtype_env.on_error
-          dtkind
-          bndty
-          (Reason.to_pos r, memid)
-      in
-      simplify_subtype ~subtype_env ~this_ty dtmemty memty env
-      &&& simplify_subtype ~subtype_env ~this_ty memty dtmemty
+    | (_r_sub, Tdependent (DTexpr eid, bndty)) ->
+      concrete_rigid_tvar_access env (Typing_type_member.EDT eid) [bndty]
+    | (_r_sub, Tgeneric (s, ty_args))
+      when String.equal s Naming_special_names.Typehints.this ->
+      let bnd_tys = Typing_set.elements (Env.get_upper_bounds env s ty_args) in
+      concrete_rigid_tvar_access env Typing_type_member.This bnd_tys
     | (_, (Tvar _ | Tgeneric _ | Tunion _ | Tintersection _ | Terr)) ->
       default_subtype env
     | _ -> invalid ~fail env)

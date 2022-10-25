@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<df56c2e32cd2e1a5dd2ec204f769d0f7>>
+// @generated SignedSource<<0c90c9594f51adbb6b1cf937aeffa792>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,8 +11,8 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -40,6 +40,7 @@ pub use oxidized::typing_reason::ArgPosition;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum ExprDepTypeReason<'a> {
     ERexpr(isize),
@@ -74,6 +75,7 @@ pub use oxidized::typing_reason::BlameSource;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = "deriving eq")]
 #[repr(C, u8)]
 pub enum Blame<'a> {

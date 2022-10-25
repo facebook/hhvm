@@ -113,10 +113,6 @@ void cgLdObjInvoke(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   emitLdLowPtr(v, cls[Class::invokeOff()], dst, sizeof(LowPtr<Func>));
-
-  auto const sf = v.makeReg();
-  v << testq{dst, dst, sf};
-  v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 
 IMPL_OPCODE_CALL(HasToString);

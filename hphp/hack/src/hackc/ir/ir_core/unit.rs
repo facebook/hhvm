@@ -4,14 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Str;
-use hash::HashMap;
 pub use hhbc::ClassName;
 pub use hhbc::ConstName;
 pub use hhbc::FunctionName;
 pub use hhbc::IncludePath;
 pub use hhbc::Typedef;
 
-use crate::constant::AdataId;
 use crate::func::SrcLoc;
 use crate::string_intern::StringInterner;
 use crate::Attribute;
@@ -19,7 +17,6 @@ use crate::Class;
 use crate::Function;
 use crate::HackConstant;
 use crate::Module;
-use crate::TypedValue;
 
 pub enum FatalOp<'a> {
     None,
@@ -45,14 +42,6 @@ pub struct SymbolRefs<'a> {
 /// Unit represents a single parsed file.
 #[derive(Default)]
 pub struct Unit<'a> {
-    /// Mapping of internal name to array constants. Note that these are
-    /// internal names, not user-defined.
-    ///
-    /// ```
-    /// $a = vec[1, 2, 3];
-    /// ```
-    pub adata: HashMap<AdataId<'a>, TypedValue<'a>>,
-
     /// The list of classes defined in this Unit. This also includes enums which
     /// are transformed into classes internally.
     ///

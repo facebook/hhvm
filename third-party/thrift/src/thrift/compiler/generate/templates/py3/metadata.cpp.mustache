@@ -26,14 +26,14 @@
 {{#program:enums}}
   ::apache::thrift::detail::md::EnumMetadata<{{enum:cpp_name}}>::gen(metadata);
 {{/program:enums}}
-{{#program:structs}}
+{{#program:filtered_structs}}
 {{#struct:exception?}}
   ::apache::thrift::detail::md::ExceptionMetadata<{{struct:name}}>::gen(metadata);
 {{/struct:exception?}}
 {{^struct:exception?}}
   ::apache::thrift::detail::md::StructMetadata<{{struct:name}}>::gen(metadata);
 {{/struct:exception?}}
-{{/program:structs}}
+{{/program:filtered_structs}}
 {{#program:services}}
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<{{service:qualified_name}}>>::gen(response);
 {{/program:services}}

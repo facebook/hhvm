@@ -15,9 +15,6 @@ pub(crate) fn lower<'a>(func: Func<'a>, strings: &mut StringInterner) -> Func<'a
     );
     let mut builder = FuncBuilder::with_func(func);
 
-    // Emit a new ENTRY_BID to check inputs and extract parameters.
-    super::func_entry::rewrite_entry(&mut builder, strings);
-
     // Simplify various Instrs.
     super::instrs::lower_instrs(&mut builder);
 

@@ -49,30 +49,6 @@ struct sByte;
 struct mListList;
 struct age;
 struct name;
-struct setOfSetOfInt;
-struct listofListOfListOfListOfEnum;
-struct listOfListOfMyStruct;
-struct setOfListOfListOfLong;
-struct setOfSetOfsetOfLong;
-struct mapStructListOfListOfLong;
-struct mKeyStructValInt;
-struct listOfMapKeyIntValInt;
-struct listOfMapKeyStrValList;
-struct mapKeySetValLong;
-struct mapKeyListValLong;
-struct mapKeyMapValMap;
-struct mapKeySetValMap;
-struct NestedMaps;
-struct mapKeyIntValList;
-struct mapKeyIntValSet;
-struct mapKeySetValInt;
-struct mapKeyListValSet;
-struct myEnum;
-struct myStruct;
-struct myDataItem;
-struct complexNestedStruct;
-struct longValue;
-struct intValue;
 struct myLongDFset;
 struct myLongDF;
 struct portDFset;
@@ -105,9 +81,33 @@ struct myListField;
 struct myListTypedef;
 struct myMapListOfTypeDef;
 struct myEnum;
+struct myStruct;
+struct myDataItem;
+struct complexNestedStruct;
+struct longValue;
+struct intValue;
+struct myEnum;
 struct setFloat;
 struct myDataItem;
 struct complexNestedStruct;
+struct setOfSetOfInt;
+struct listofListOfListOfListOfEnum;
+struct listOfListOfMyStruct;
+struct setOfListOfListOfLong;
+struct setOfSetOfsetOfLong;
+struct mapStructListOfListOfLong;
+struct mKeyStructValInt;
+struct listOfMapKeyIntValInt;
+struct listOfMapKeyStrValList;
+struct mapKeySetValLong;
+struct mapKeyListValLong;
+struct mapKeyMapValMap;
+struct mapKeySetValMap;
+struct NestedMaps;
+struct mapKeyIntValList;
+struct mapKeyIntValSet;
+struct mapKeySetValInt;
+struct mapKeyListValSet;
 struct lsMap;
 struct ioMap;
 struct BigInteger;
@@ -268,102 +268,6 @@ APACHE_THRIFT_DEFINE_ACCESSOR(age);
 #define APACHE_THRIFT_ACCESSOR_name
 APACHE_THRIFT_DEFINE_ACCESSOR(name);
 #endif
-#ifndef APACHE_THRIFT_ACCESSOR_setOfSetOfInt
-#define APACHE_THRIFT_ACCESSOR_setOfSetOfInt
-APACHE_THRIFT_DEFINE_ACCESSOR(setOfSetOfInt);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_listofListOfListOfListOfEnum
-#define APACHE_THRIFT_ACCESSOR_listofListOfListOfListOfEnum
-APACHE_THRIFT_DEFINE_ACCESSOR(listofListOfListOfListOfEnum);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_listOfListOfMyStruct
-#define APACHE_THRIFT_ACCESSOR_listOfListOfMyStruct
-APACHE_THRIFT_DEFINE_ACCESSOR(listOfListOfMyStruct);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_setOfListOfListOfLong
-#define APACHE_THRIFT_ACCESSOR_setOfListOfListOfLong
-APACHE_THRIFT_DEFINE_ACCESSOR(setOfListOfListOfLong);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_setOfSetOfsetOfLong
-#define APACHE_THRIFT_ACCESSOR_setOfSetOfsetOfLong
-APACHE_THRIFT_DEFINE_ACCESSOR(setOfSetOfsetOfLong);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_mapStructListOfListOfLong
-#define APACHE_THRIFT_ACCESSOR_mapStructListOfListOfLong
-APACHE_THRIFT_DEFINE_ACCESSOR(mapStructListOfListOfLong);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_mKeyStructValInt
-#define APACHE_THRIFT_ACCESSOR_mKeyStructValInt
-APACHE_THRIFT_DEFINE_ACCESSOR(mKeyStructValInt);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_listOfMapKeyIntValInt
-#define APACHE_THRIFT_ACCESSOR_listOfMapKeyIntValInt
-APACHE_THRIFT_DEFINE_ACCESSOR(listOfMapKeyIntValInt);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_listOfMapKeyStrValList
-#define APACHE_THRIFT_ACCESSOR_listOfMapKeyStrValList
-APACHE_THRIFT_DEFINE_ACCESSOR(listOfMapKeyStrValList);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_mapKeySetValLong
-#define APACHE_THRIFT_ACCESSOR_mapKeySetValLong
-APACHE_THRIFT_DEFINE_ACCESSOR(mapKeySetValLong);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_mapKeyListValLong
-#define APACHE_THRIFT_ACCESSOR_mapKeyListValLong
-APACHE_THRIFT_DEFINE_ACCESSOR(mapKeyListValLong);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_mapKeyMapValMap
-#define APACHE_THRIFT_ACCESSOR_mapKeyMapValMap
-APACHE_THRIFT_DEFINE_ACCESSOR(mapKeyMapValMap);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_mapKeySetValMap
-#define APACHE_THRIFT_ACCESSOR_mapKeySetValMap
-APACHE_THRIFT_DEFINE_ACCESSOR(mapKeySetValMap);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_NestedMaps
-#define APACHE_THRIFT_ACCESSOR_NestedMaps
-APACHE_THRIFT_DEFINE_ACCESSOR(NestedMaps);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_mapKeyIntValList
-#define APACHE_THRIFT_ACCESSOR_mapKeyIntValList
-APACHE_THRIFT_DEFINE_ACCESSOR(mapKeyIntValList);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_mapKeyIntValSet
-#define APACHE_THRIFT_ACCESSOR_mapKeyIntValSet
-APACHE_THRIFT_DEFINE_ACCESSOR(mapKeyIntValSet);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_mapKeySetValInt
-#define APACHE_THRIFT_ACCESSOR_mapKeySetValInt
-APACHE_THRIFT_DEFINE_ACCESSOR(mapKeySetValInt);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_mapKeyListValSet
-#define APACHE_THRIFT_ACCESSOR_mapKeyListValSet
-APACHE_THRIFT_DEFINE_ACCESSOR(mapKeyListValSet);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_myEnum
-#define APACHE_THRIFT_ACCESSOR_myEnum
-APACHE_THRIFT_DEFINE_ACCESSOR(myEnum);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_myStruct
-#define APACHE_THRIFT_ACCESSOR_myStruct
-APACHE_THRIFT_DEFINE_ACCESSOR(myStruct);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_myDataItem
-#define APACHE_THRIFT_ACCESSOR_myDataItem
-APACHE_THRIFT_DEFINE_ACCESSOR(myDataItem);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_complexNestedStruct
-#define APACHE_THRIFT_ACCESSOR_complexNestedStruct
-APACHE_THRIFT_DEFINE_ACCESSOR(complexNestedStruct);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_longValue
-#define APACHE_THRIFT_ACCESSOR_longValue
-APACHE_THRIFT_DEFINE_ACCESSOR(longValue);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_intValue
-#define APACHE_THRIFT_ACCESSOR_intValue
-APACHE_THRIFT_DEFINE_ACCESSOR(intValue);
-#endif
 #ifndef APACHE_THRIFT_ACCESSOR_myLongDFset
 #define APACHE_THRIFT_ACCESSOR_myLongDFset
 APACHE_THRIFT_DEFINE_ACCESSOR(myLongDFset);
@@ -492,6 +396,30 @@ APACHE_THRIFT_DEFINE_ACCESSOR(myMapListOfTypeDef);
 #define APACHE_THRIFT_ACCESSOR_myEnum
 APACHE_THRIFT_DEFINE_ACCESSOR(myEnum);
 #endif
+#ifndef APACHE_THRIFT_ACCESSOR_myStruct
+#define APACHE_THRIFT_ACCESSOR_myStruct
+APACHE_THRIFT_DEFINE_ACCESSOR(myStruct);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_myDataItem
+#define APACHE_THRIFT_ACCESSOR_myDataItem
+APACHE_THRIFT_DEFINE_ACCESSOR(myDataItem);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_complexNestedStruct
+#define APACHE_THRIFT_ACCESSOR_complexNestedStruct
+APACHE_THRIFT_DEFINE_ACCESSOR(complexNestedStruct);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_longValue
+#define APACHE_THRIFT_ACCESSOR_longValue
+APACHE_THRIFT_DEFINE_ACCESSOR(longValue);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_intValue
+#define APACHE_THRIFT_ACCESSOR_intValue
+APACHE_THRIFT_DEFINE_ACCESSOR(intValue);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_myEnum
+#define APACHE_THRIFT_ACCESSOR_myEnum
+APACHE_THRIFT_DEFINE_ACCESSOR(myEnum);
+#endif
 #ifndef APACHE_THRIFT_ACCESSOR_setFloat
 #define APACHE_THRIFT_ACCESSOR_setFloat
 APACHE_THRIFT_DEFINE_ACCESSOR(setFloat);
@@ -503,6 +431,78 @@ APACHE_THRIFT_DEFINE_ACCESSOR(myDataItem);
 #ifndef APACHE_THRIFT_ACCESSOR_complexNestedStruct
 #define APACHE_THRIFT_ACCESSOR_complexNestedStruct
 APACHE_THRIFT_DEFINE_ACCESSOR(complexNestedStruct);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_setOfSetOfInt
+#define APACHE_THRIFT_ACCESSOR_setOfSetOfInt
+APACHE_THRIFT_DEFINE_ACCESSOR(setOfSetOfInt);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_listofListOfListOfListOfEnum
+#define APACHE_THRIFT_ACCESSOR_listofListOfListOfListOfEnum
+APACHE_THRIFT_DEFINE_ACCESSOR(listofListOfListOfListOfEnum);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_listOfListOfMyStruct
+#define APACHE_THRIFT_ACCESSOR_listOfListOfMyStruct
+APACHE_THRIFT_DEFINE_ACCESSOR(listOfListOfMyStruct);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_setOfListOfListOfLong
+#define APACHE_THRIFT_ACCESSOR_setOfListOfListOfLong
+APACHE_THRIFT_DEFINE_ACCESSOR(setOfListOfListOfLong);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_setOfSetOfsetOfLong
+#define APACHE_THRIFT_ACCESSOR_setOfSetOfsetOfLong
+APACHE_THRIFT_DEFINE_ACCESSOR(setOfSetOfsetOfLong);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_mapStructListOfListOfLong
+#define APACHE_THRIFT_ACCESSOR_mapStructListOfListOfLong
+APACHE_THRIFT_DEFINE_ACCESSOR(mapStructListOfListOfLong);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_mKeyStructValInt
+#define APACHE_THRIFT_ACCESSOR_mKeyStructValInt
+APACHE_THRIFT_DEFINE_ACCESSOR(mKeyStructValInt);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_listOfMapKeyIntValInt
+#define APACHE_THRIFT_ACCESSOR_listOfMapKeyIntValInt
+APACHE_THRIFT_DEFINE_ACCESSOR(listOfMapKeyIntValInt);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_listOfMapKeyStrValList
+#define APACHE_THRIFT_ACCESSOR_listOfMapKeyStrValList
+APACHE_THRIFT_DEFINE_ACCESSOR(listOfMapKeyStrValList);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_mapKeySetValLong
+#define APACHE_THRIFT_ACCESSOR_mapKeySetValLong
+APACHE_THRIFT_DEFINE_ACCESSOR(mapKeySetValLong);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_mapKeyListValLong
+#define APACHE_THRIFT_ACCESSOR_mapKeyListValLong
+APACHE_THRIFT_DEFINE_ACCESSOR(mapKeyListValLong);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_mapKeyMapValMap
+#define APACHE_THRIFT_ACCESSOR_mapKeyMapValMap
+APACHE_THRIFT_DEFINE_ACCESSOR(mapKeyMapValMap);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_mapKeySetValMap
+#define APACHE_THRIFT_ACCESSOR_mapKeySetValMap
+APACHE_THRIFT_DEFINE_ACCESSOR(mapKeySetValMap);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_NestedMaps
+#define APACHE_THRIFT_ACCESSOR_NestedMaps
+APACHE_THRIFT_DEFINE_ACCESSOR(NestedMaps);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_mapKeyIntValList
+#define APACHE_THRIFT_ACCESSOR_mapKeyIntValList
+APACHE_THRIFT_DEFINE_ACCESSOR(mapKeyIntValList);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_mapKeyIntValSet
+#define APACHE_THRIFT_ACCESSOR_mapKeyIntValSet
+APACHE_THRIFT_DEFINE_ACCESSOR(mapKeyIntValSet);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_mapKeySetValInt
+#define APACHE_THRIFT_ACCESSOR_mapKeySetValInt
+APACHE_THRIFT_DEFINE_ACCESSOR(mapKeySetValInt);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_mapKeyListValSet
+#define APACHE_THRIFT_ACCESSOR_mapKeyListValSet
+APACHE_THRIFT_DEFINE_ACCESSOR(mapKeyListValSet);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_lsMap
 #define APACHE_THRIFT_ACCESSOR_lsMap
@@ -633,14 +633,14 @@ extern const _MyEnum_EnumMapFactory::NamesToValuesMapType _MyEnum_NAMES_TO_VALUE
 namespace cpp2 {
 class MyStructFloatFieldThrowExp;
 class MyStructMapFloatThrowExp;
-class MyDataItem;
 class MyStruct;
 class SimpleStruct;
-class ComplexNestedStruct;
-class MyUnion;
 class defaultStruct;
 class MyStructTypeDef;
+class MyDataItem;
+class MyUnion;
 class MyUnionFloatFieldThrowExp;
+class ComplexNestedStruct;
 class TypeRemapped;
 class emptyXcep;
 class reqXcep;
@@ -3896,8 +3896,11 @@ class MyUnion final  {
   MyUnion(MyUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::myEnum:
       {
         set_myEnum(std::move(rhs.value_.myEnum));
@@ -3940,8 +3943,11 @@ class MyUnion final  {
   MyUnion(const MyUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::myEnum:
       {
         set_myEnum(rhs.value_.myEnum);
@@ -3983,8 +3989,11 @@ class MyUnion final  {
   MyUnion& operator=(MyUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::myEnum:
       {
         set_myEnum(std::move(rhs.value_.myEnum));
@@ -4028,8 +4037,11 @@ class MyUnion final  {
   MyUnion& operator=(const MyUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::myEnum:
       {
         set_myEnum(rhs.value_.myEnum);
@@ -6213,8 +6225,11 @@ class MyUnionFloatFieldThrowExp final  {
   MyUnionFloatFieldThrowExp(MyUnionFloatFieldThrowExp&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::myEnum:
       {
         set_myEnum(std::move(rhs.value_.myEnum));
@@ -6247,8 +6262,11 @@ class MyUnionFloatFieldThrowExp final  {
   MyUnionFloatFieldThrowExp(const MyUnionFloatFieldThrowExp& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::myEnum:
       {
         set_myEnum(rhs.value_.myEnum);
@@ -6280,8 +6298,11 @@ class MyUnionFloatFieldThrowExp final  {
   MyUnionFloatFieldThrowExp& operator=(MyUnionFloatFieldThrowExp&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::myEnum:
       {
         set_myEnum(std::move(rhs.value_.myEnum));
@@ -6315,8 +6336,11 @@ class MyUnionFloatFieldThrowExp final  {
   MyUnionFloatFieldThrowExp& operator=(const MyUnionFloatFieldThrowExp& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::myEnum:
       {
         set_myEnum(rhs.value_.myEnum);

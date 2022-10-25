@@ -33,14 +33,14 @@ Test createRequestResponseBasicTest() {
   testCase.name() = "RequestResponseBasic/Success";
 
   auto& rpcTest = testCase.rpc_ref().emplace();
-  rpcTest.clientInstruction_ref()
+  rpcTest.clientInstruction()
       .emplace()
       .requestResponseBasic_ref()
       .emplace()
       .request()
       .emplace()
       .data() = "hello";
-  rpcTest.clientTestResult_ref()
+  rpcTest.clientTestResult()
       .emplace()
       .requestResponseBasic_ref()
       .emplace()
@@ -48,14 +48,14 @@ Test createRequestResponseBasicTest() {
       .emplace()
       .data() = "world";
 
-  rpcTest.serverInstruction_ref()
+  rpcTest.serverInstruction()
       .emplace()
       .requestResponseBasic_ref()
       .emplace()
       .response()
       .emplace()
       .data() = "world";
-  rpcTest.serverTestResult_ref()
+  rpcTest.serverTestResult()
       .emplace()
       .requestResponseBasic_ref()
       .emplace()
@@ -79,25 +79,25 @@ Test createRequestResponseDeclaredExceptionTest() {
   userException.msg() = "world";
 
   auto& rpcTest = testCase.rpc_ref().emplace();
-  rpcTest.clientInstruction_ref()
+  rpcTest.clientInstruction()
       .emplace()
       .requestResponseDeclaredException_ref()
       .emplace()
       .request()
       .emplace()
       .data() = "hello";
-  rpcTest.clientTestResult_ref()
+  rpcTest.clientTestResult()
       .emplace()
       .requestResponseDeclaredException_ref()
       .emplace()
       .userException() = userException;
 
-  rpcTest.serverInstruction_ref()
+  rpcTest.serverInstruction()
       .emplace()
       .requestResponseDeclaredException_ref()
       .emplace()
       .userException() = userException;
-  rpcTest.serverTestResult_ref()
+  rpcTest.serverTestResult()
       .emplace()
       .requestResponseDeclaredException_ref()
       .emplace()
@@ -117,25 +117,25 @@ Test createRequestResponseUndeclaredExceptionTest() {
   testCase.name() = "RequestResponseUndeclaredException/Success";
 
   auto& rpcTest = testCase.rpc_ref().emplace();
-  rpcTest.clientInstruction_ref()
+  rpcTest.clientInstruction()
       .emplace()
       .requestResponseUndeclaredException_ref()
       .emplace()
       .request()
       .emplace()
       .data() = "hello";
-  rpcTest.clientTestResult_ref()
+  rpcTest.clientTestResult()
       .emplace()
       .requestResponseUndeclaredException_ref()
       .emplace()
       .exceptionMessage() = "my undeclared exception";
 
-  rpcTest.serverInstruction_ref()
+  rpcTest.serverInstruction()
       .emplace()
       .requestResponseUndeclaredException_ref()
       .emplace()
       .exceptionMessage() = "my undeclared exception";
-  rpcTest.serverTestResult_ref()
+  rpcTest.serverTestResult()
       .emplace()
       .requestResponseUndeclaredException_ref()
       .emplace()
@@ -155,20 +155,20 @@ Test createRequestResponseNoArgVoidResponse() {
   testCase.name() = "RequestResponseNoArgVoidResponse/Success";
 
   auto& rpcTest = testCase.rpc_ref().emplace();
-  rpcTest.clientInstruction_ref()
+  rpcTest.clientInstruction()
       .emplace()
       .requestResponseNoArgVoidResponse_ref()
       .emplace();
-  rpcTest.clientTestResult_ref()
+  rpcTest.clientTestResult()
       .emplace()
       .requestResponseNoArgVoidResponse_ref()
       .emplace();
 
-  rpcTest.serverInstruction_ref()
+  rpcTest.serverInstruction()
       .emplace()
       .requestResponseNoArgVoidResponse_ref()
       .emplace();
-  rpcTest.serverTestResult_ref()
+  rpcTest.serverTestResult()
       .emplace()
       .requestResponseNoArgVoidResponse_ref()
       .emplace();
@@ -185,25 +185,25 @@ Test createRequestResponseTimeoutTest() {
   testCase.name() = "RequestResponseTimeout/Success";
 
   auto& rpcTest = testCase.rpc_ref().emplace();
-  auto& clientInstruction = rpcTest.clientInstruction_ref()
+  auto& clientInstruction = rpcTest.clientInstruction()
                                 .emplace()
                                 .requestResponseTimeout_ref()
                                 .emplace();
   clientInstruction.request().emplace().data() = "hello";
   clientInstruction.timeoutMs() = 100;
 
-  rpcTest.clientTestResult_ref()
+  rpcTest.clientTestResult()
       .emplace()
       .requestResponseTimeout_ref()
       .emplace()
       .timeoutException() = true;
 
-  rpcTest.serverInstruction_ref()
+  rpcTest.serverInstruction()
       .emplace()
       .requestResponseTimeout_ref()
       .emplace()
       .timeoutMs() = 150;
-  rpcTest.serverTestResult_ref()
+  rpcTest.serverTestResult()
       .emplace()
       .requestResponseTimeout_ref()
       .emplace()
@@ -223,14 +223,14 @@ Test createRequestResponseFragmentationTest() {
   testCase.name() = "RequestResponseFragmentation/Success";
 
   auto& rpcTest = testCase.rpc_ref().emplace();
-  rpcTest.clientInstruction_ref()
+  rpcTest.clientInstruction()
       .emplace()
       .requestResponseBasic_ref()
       .emplace()
       .request()
       .emplace()
       .data() = kLargeData;
-  rpcTest.clientTestResult_ref()
+  rpcTest.clientTestResult()
       .emplace()
       .requestResponseBasic_ref()
       .emplace()
@@ -238,14 +238,14 @@ Test createRequestResponseFragmentationTest() {
       .emplace()
       .data() = kLargeData;
 
-  rpcTest.serverInstruction_ref()
+  rpcTest.serverInstruction()
       .emplace()
       .requestResponseBasic_ref()
       .emplace()
       .response()
       .emplace()
       .data() = kLargeData;
-  rpcTest.serverTestResult_ref()
+  rpcTest.serverTestResult()
       .emplace()
       .requestResponseBasic_ref()
       .emplace()
@@ -267,25 +267,25 @@ Test createStreamBasicTest() {
 
   auto& rpcTest = testCase.rpc_ref().emplace();
   auto& clientInstruction =
-      rpcTest.clientInstruction_ref().emplace().streamBasic_ref().emplace();
+      rpcTest.clientInstruction().emplace().streamBasic_ref().emplace();
   clientInstruction.request().emplace().data() = "hello";
   clientInstruction.bufferSize() = kDefaultBufferSize;
 
   auto& serverInstruction =
-      rpcTest.serverInstruction_ref().emplace().streamBasic_ref().emplace();
+      rpcTest.serverInstruction().emplace().streamBasic_ref().emplace();
   for (int i = 0; i < 100; i++) {
     auto& payload = serverInstruction.streamPayloads()->emplace_back();
     payload.data() = folly::to<std::string>(i);
   }
 
-  rpcTest.clientTestResult_ref()
+  rpcTest.clientTestResult()
       .emplace()
       .streamBasic_ref()
       .emplace()
       .streamPayloads()
       .copy_from(serverInstruction.streamPayloads());
 
-  rpcTest.serverTestResult_ref()
+  rpcTest.serverTestResult()
       .emplace()
       .streamBasic_ref()
       .emplace()
@@ -305,32 +305,26 @@ Test createStreamChunkTimeoutTest() {
   testCase.name() = "StreamChunkTimeout/Success";
 
   auto& rpcTest = testCase.rpc_ref().emplace();
-  auto& clientInstruction = rpcTest.clientInstruction_ref()
-                                .emplace()
-                                .streamChunkTimeout_ref()
-                                .emplace();
+  auto& clientInstruction =
+      rpcTest.clientInstruction().emplace().streamChunkTimeout_ref().emplace();
   clientInstruction.request().emplace().data() = "hello";
   clientInstruction.chunkTimeoutMs() = 100;
 
-  auto& serverInstruction = rpcTest.serverInstruction_ref()
-                                .emplace()
-                                .streamChunkTimeout_ref()
-                                .emplace();
+  auto& serverInstruction =
+      rpcTest.serverInstruction().emplace().streamChunkTimeout_ref().emplace();
   for (int i = 0; i < 100; i++) {
     auto& payload = serverInstruction.streamPayloads()->emplace_back();
     payload.data() = folly::to<std::string>(i);
   }
   serverInstruction.chunkTimeoutMs() = 150;
 
-  auto& clientTestResult = rpcTest.clientTestResult_ref()
-                               .emplace()
-                               .streamChunkTimeout_ref()
-                               .emplace();
+  auto& clientTestResult =
+      rpcTest.clientTestResult().emplace().streamChunkTimeout_ref().emplace();
   clientTestResult.streamPayloads().copy_from(
       serverInstruction.streamPayloads());
   clientTestResult.chunkTimeoutException() = true;
 
-  rpcTest.serverTestResult_ref()
+  rpcTest.serverTestResult()
       .emplace()
       .streamChunkTimeout_ref()
       .emplace()
@@ -351,22 +345,22 @@ Test createStreamFragmentationTest() {
 
   auto& rpcTest = testCase.rpc_ref().emplace();
   auto& clientInstruction =
-      rpcTest.clientInstruction_ref().emplace().streamBasic_ref().emplace();
+      rpcTest.clientInstruction().emplace().streamBasic_ref().emplace();
   clientInstruction.request().emplace().data() = kLargeData;
   clientInstruction.bufferSize() = kDefaultBufferSize;
 
   auto& serverInstruction =
-      rpcTest.serverInstruction_ref().emplace().streamBasic_ref().emplace();
+      rpcTest.serverInstruction().emplace().streamBasic_ref().emplace();
   serverInstruction.streamPayloads()->emplace_back().data() = kLargeData;
 
-  rpcTest.clientTestResult_ref()
+  rpcTest.clientTestResult()
       .emplace()
       .streamBasic_ref()
       .emplace()
       .streamPayloads()
       .copy_from(serverInstruction.streamPayloads());
 
-  rpcTest.serverTestResult_ref()
+  rpcTest.serverTestResult()
       .emplace()
       .streamBasic_ref()
       .emplace()
@@ -386,7 +380,7 @@ Test createStreamInitialResponseTest() {
   testCase.name() = "StreamInitialResponse/Success";
 
   auto& rpcTest = testCase.rpc_ref().emplace();
-  rpcTest.clientInstruction_ref()
+  rpcTest.clientInstruction()
       .emplace()
       .streamInitialResponse_ref()
       .emplace()
@@ -394,7 +388,7 @@ Test createStreamInitialResponseTest() {
       .emplace()
       .data() = "hello";
 
-  auto& serverInstruction = rpcTest.serverInstruction_ref()
+  auto& serverInstruction = rpcTest.serverInstruction()
                                 .emplace()
                                 .streamInitialResponse_ref()
                                 .emplace();
@@ -404,7 +398,7 @@ Test createStreamInitialResponseTest() {
   }
   serverInstruction.initialResponse().emplace().data() = "world";
 
-  auto& clientTestResult = rpcTest.clientTestResult_ref()
+  auto& clientTestResult = rpcTest.clientTestResult()
                                .emplace()
                                .streamInitialResponse_ref()
                                .emplace();
@@ -412,7 +406,7 @@ Test createStreamInitialResponseTest() {
       serverInstruction.streamPayloads());
   clientTestResult.initialResponse().emplace().data() = "world";
 
-  rpcTest.serverTestResult_ref()
+  rpcTest.serverTestResult()
       .emplace()
       .streamInitialResponse_ref()
       .emplace()
@@ -436,25 +430,25 @@ Test createStreamSubsequentCreditsTest() {
 
   auto& rpcTest = testCase.rpc_ref().emplace();
   auto& clientInstruction =
-      rpcTest.clientInstruction_ref().emplace().streamBasic_ref().emplace();
+      rpcTest.clientInstruction().emplace().streamBasic_ref().emplace();
   clientInstruction.request().emplace().data() = "hello";
   clientInstruction.bufferSize() = 10;
 
   auto& serverInstruction =
-      rpcTest.serverInstruction_ref().emplace().streamBasic_ref().emplace();
+      rpcTest.serverInstruction().emplace().streamBasic_ref().emplace();
   for (int i = 0; i < 100; i++) {
     auto& payload = serverInstruction.streamPayloads()->emplace_back();
     payload.data() = folly::to<std::string>(i);
   }
 
-  rpcTest.clientTestResult_ref()
+  rpcTest.clientTestResult()
       .emplace()
       .streamBasic_ref()
       .emplace()
       .streamPayloads()
       .copy_from(serverInstruction.streamPayloads());
 
-  rpcTest.serverTestResult_ref()
+  rpcTest.serverTestResult()
       .emplace()
       .streamBasic_ref()
       .emplace()
@@ -474,32 +468,110 @@ Test createStreamCreditTimeoutTest() {
   testCase.name() = "StreamCreditTimeout/Success";
 
   auto& rpcTest = testCase.rpc_ref().emplace();
-  auto& clientInstruction = rpcTest.clientInstruction_ref()
-                                .emplace()
-                                .streamCreditTimeout_ref()
-                                .emplace();
+  auto& clientInstruction =
+      rpcTest.clientInstruction().emplace().streamCreditTimeout_ref().emplace();
   clientInstruction.request().emplace().data() = "hello";
   clientInstruction.creditTimeoutMs() = 100;
 
-  auto& serverInstruction = rpcTest.serverInstruction_ref()
-                                .emplace()
-                                .streamCreditTimeout_ref()
-                                .emplace();
+  auto& serverInstruction =
+      rpcTest.serverInstruction().emplace().streamCreditTimeout_ref().emplace();
   for (int i = 0; i < 100; i++) {
     auto& payload = serverInstruction.streamPayloads()->emplace_back();
     payload.data() = folly::to<std::string>(i);
   }
   serverInstruction.streamExpireTime() = 10;
 
-  auto& clientTestResult = rpcTest.clientTestResult_ref()
-                               .emplace()
-                               .streamCreditTimeout_ref()
-                               .emplace();
+  auto& clientTestResult =
+      rpcTest.clientTestResult().emplace().streamCreditTimeout_ref().emplace();
   clientTestResult.creditTimeoutException() = true;
 
-  rpcTest.serverTestResult_ref()
+  rpcTest.serverTestResult()
       .emplace()
       .streamCreditTimeout_ref()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  return ret;
+}
+
+Test createStreamDeclaredExceptionTest() {
+  Test ret;
+  ret.name() = "StreamDeclaredExceptionTest";
+  ret.tags()->emplace("spec/protocol/interface/rocket#stream-exception");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "StreamDeclaredException/Success";
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  rpcTest.clientInstruction()
+      .emplace()
+      .streamDeclaredException_ref()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  rpcTest.serverInstruction()
+      .emplace()
+      .streamDeclaredException_ref()
+      .emplace()
+      .userException()
+      .emplace()
+      .msg() = "world";
+
+  rpcTest.clientTestResult()
+      .emplace()
+      .streamDeclaredException_ref()
+      .emplace()
+      .userException()
+      .emplace()
+      .msg() = "world";
+
+  rpcTest.serverTestResult()
+      .emplace()
+      .streamDeclaredException_ref()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  return ret;
+}
+
+Test createStreamUndeclaredExceptionTest() {
+  Test ret;
+  ret.name() = "StreamUndeclaredExceptionTest";
+  ret.tags()->emplace("spec/protocol/interface/rocket#stream-exception");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "StreamUndeclaredException/Success";
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  rpcTest.clientInstruction()
+      .emplace()
+      .streamUndeclaredException_ref()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  rpcTest.serverInstruction()
+      .emplace()
+      .streamUndeclaredException_ref()
+      .emplace()
+      .exceptionMessage() = "world";
+
+  rpcTest.clientTestResult()
+      .emplace()
+      .streamUndeclaredException_ref()
+      .emplace()
+      .exceptionMessage() = "world";
+
+  rpcTest.serverTestResult()
+      .emplace()
+      .streamUndeclaredException_ref()
       .emplace()
       .request()
       .emplace()
@@ -519,14 +591,14 @@ Test createSinkBasicTest() {
 
   auto& rpcTest = testCase.rpc_ref().emplace();
   auto& clientInstruction =
-      rpcTest.clientInstruction_ref().emplace().sinkBasic_ref().emplace();
+      rpcTest.clientInstruction().emplace().sinkBasic_ref().emplace();
   clientInstruction.request().emplace().data() = "hello";
   for (int i = 0; i < 100; i++) {
     auto& sinkPayload = clientInstruction.sinkPayloads()->emplace_back();
     sinkPayload.data() = folly::to<std::string>(i);
   }
 
-  rpcTest.clientTestResult_ref()
+  rpcTest.clientTestResult()
       .emplace()
       .sinkBasic_ref()
       .emplace()
@@ -535,12 +607,12 @@ Test createSinkBasicTest() {
       .data() = "world";
 
   auto& serverInstruction =
-      rpcTest.serverInstruction_ref().emplace().sinkBasic_ref().emplace();
+      rpcTest.serverInstruction().emplace().sinkBasic_ref().emplace();
   serverInstruction.finalResponse().emplace().data() = "world";
   serverInstruction.bufferSize() = kDefaultBufferSize;
 
   auto& serverResult =
-      rpcTest.serverTestResult_ref().emplace().sinkBasic_ref().emplace();
+      rpcTest.serverTestResult().emplace().sinkBasic_ref().emplace();
   serverResult.request().emplace().data() = "hello";
   serverResult.sinkPayloads().copy_from(clientInstruction.sinkPayloads());
 
@@ -557,11 +629,11 @@ Test createSinkFragmentationTest() {
 
   auto& rpcTest = testCase.rpc_ref().emplace();
   auto& clientInstruction =
-      rpcTest.clientInstruction_ref().emplace().sinkBasic_ref().emplace();
+      rpcTest.clientInstruction().emplace().sinkBasic_ref().emplace();
   clientInstruction.request().emplace().data() = kLargeData;
   clientInstruction.sinkPayloads()->emplace_back().data() = kLargeData;
 
-  rpcTest.clientTestResult_ref()
+  rpcTest.clientTestResult()
       .emplace()
       .sinkBasic_ref()
       .emplace()
@@ -570,12 +642,12 @@ Test createSinkFragmentationTest() {
       .data() = kLargeData;
 
   auto& serverInstruction =
-      rpcTest.serverInstruction_ref().emplace().sinkBasic_ref().emplace();
+      rpcTest.serverInstruction().emplace().sinkBasic_ref().emplace();
   serverInstruction.finalResponse().emplace().data() = kLargeData;
   serverInstruction.bufferSize() = kDefaultBufferSize;
 
   auto& serverResult =
-      rpcTest.serverTestResult_ref().emplace().sinkBasic_ref().emplace();
+      rpcTest.serverTestResult().emplace().sinkBasic_ref().emplace();
   serverResult.request().emplace().data() = kLargeData;
   serverResult.sinkPayloads().copy_from(clientInstruction.sinkPayloads());
 
@@ -595,14 +667,14 @@ Test createSinkSubsequentCreditsTest() {
 
   auto& rpcTest = testCase.rpc_ref().emplace();
   auto& clientInstruction =
-      rpcTest.clientInstruction_ref().emplace().sinkBasic_ref().emplace();
+      rpcTest.clientInstruction().emplace().sinkBasic_ref().emplace();
   clientInstruction.request().emplace().data() = "hello";
   for (int i = 0; i < 100; i++) {
     auto& sinkPayload = clientInstruction.sinkPayloads()->emplace_back();
     sinkPayload.data() = folly::to<std::string>(i);
   }
 
-  rpcTest.clientTestResult_ref()
+  rpcTest.clientTestResult()
       .emplace()
       .sinkBasic_ref()
       .emplace()
@@ -611,12 +683,12 @@ Test createSinkSubsequentCreditsTest() {
       .data() = "world";
 
   auto& serverInstruction =
-      rpcTest.serverInstruction_ref().emplace().sinkBasic_ref().emplace();
+      rpcTest.serverInstruction().emplace().sinkBasic_ref().emplace();
   serverInstruction.finalResponse().emplace().data() = "world";
   serverInstruction.bufferSize() = 10;
 
   auto& serverResult =
-      rpcTest.serverTestResult_ref().emplace().sinkBasic_ref().emplace();
+      rpcTest.serverTestResult().emplace().sinkBasic_ref().emplace();
   serverResult.request().emplace().data() = "hello";
   serverResult.sinkPayloads().copy_from(clientInstruction.sinkPayloads());
 
@@ -632,10 +704,8 @@ Test createSinkChunkTimeoutTest() {
   testCase.name() = "SinkChunkTimeout/Success";
 
   auto& rpcTest = testCase.rpc_ref().emplace();
-  auto& clientInstruction = rpcTest.clientInstruction_ref()
-                                .emplace()
-                                .sinkChunkTimeout_ref()
-                                .emplace();
+  auto& clientInstruction =
+      rpcTest.clientInstruction().emplace().sinkChunkTimeout_ref().emplace();
   clientInstruction.request().emplace().data() = "hello";
   for (int i = 0; i < 100; i++) {
     auto& sinkPayload = clientInstruction.sinkPayloads()->emplace_back();
@@ -643,24 +713,213 @@ Test createSinkChunkTimeoutTest() {
   }
   clientInstruction.chunkTimeoutMs() = 150;
 
-  rpcTest.clientTestResult_ref()
+  rpcTest.clientTestResult()
       .emplace()
       .sinkChunkTimeout_ref()
       .emplace()
       .chunkTimeoutException() = true;
 
-  auto& serverInstruction = rpcTest.serverInstruction_ref()
-                                .emplace()
-                                .sinkChunkTimeout_ref()
-                                .emplace();
+  auto& serverInstruction =
+      rpcTest.serverInstruction().emplace().sinkChunkTimeout_ref().emplace();
   serverInstruction.finalResponse().emplace().data() = "world";
   serverInstruction.chunkTimeoutMs() = 100;
 
   auto& serverResult =
-      rpcTest.serverTestResult_ref().emplace().sinkChunkTimeout_ref().emplace();
+      rpcTest.serverTestResult().emplace().sinkChunkTimeout_ref().emplace();
   serverResult.request().emplace().data() = "hello";
   serverResult.sinkPayloads().copy_from(clientInstruction.sinkPayloads());
   serverResult.chunkTimeoutException() = true;
+
+  return ret;
+}
+
+// =================== Interactions ===================
+Test createInteractionConstructorTest() {
+  Test ret;
+  ret.name() = "InteractionConstructorTest";
+  ret.tags()->emplace("spec/protocol/interface/#constructors-deprecated");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "InteractionConstructorTest/Success";
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  rpcTest.clientInstruction().emplace().interactionConstructor_ref().emplace();
+
+  rpcTest.clientTestResult().emplace().interactionConstructor_ref().emplace();
+
+  rpcTest.serverInstruction().emplace().interactionConstructor_ref().emplace();
+
+  rpcTest.serverTestResult()
+      .emplace()
+      .interactionConstructor_ref()
+      .emplace()
+      .constructorCalled() = true;
+
+  return ret;
+}
+
+Test createInteractionFactoryFunctionTest() {
+  Test ret;
+  ret.name() = "InteractionFactoryFunctionTest";
+  ret.tags()->emplace("spec/protocol/interface/#factory-functions");
+  ret.tags()->emplace("spec/protocol/interface/rocket/#factory-functions");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "InteractionFactoryFunctionTest/Success";
+
+  constexpr int initialSum = 10;
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  rpcTest.clientInstruction()
+      .emplace()
+      .interactionFactoryFunction_ref()
+      .emplace()
+      .initialSum() = initialSum;
+
+  rpcTest.clientTestResult()
+      .emplace()
+      .interactionFactoryFunction_ref()
+      .emplace();
+
+  rpcTest.serverInstruction()
+      .emplace()
+      .interactionFactoryFunction_ref()
+      .emplace();
+
+  rpcTest.serverTestResult()
+      .emplace()
+      .interactionFactoryFunction_ref()
+      .emplace()
+      .initialSum() = initialSum;
+
+  return ret;
+}
+
+Test createInteractionConstructorPersistsStateTest() {
+  Test ret;
+  ret.name() = "InteractionConstructorPersistsStateTest";
+  ret.tags()->emplace("spec/protocol/interface/#interactions");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "InteractionConstructorPersistsStateTest/Success";
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  auto& clientInstruction = rpcTest.clientInstruction()
+                                .emplace()
+                                .interactionPersistsState_ref()
+                                .emplace();
+
+  auto& clientTestResult = rpcTest.clientTestResult()
+                               .emplace()
+                               .interactionPersistsState_ref()
+                               .emplace();
+
+  int sum = 0;
+  for (int i = 1; i <= 5; i++) {
+    sum += i;
+    clientInstruction.valuesToAdd()->emplace_back(i);
+    clientTestResult.responses()->emplace_back(sum);
+  }
+
+  rpcTest.serverInstruction()
+      .emplace()
+      .interactionPersistsState_ref()
+      .emplace();
+
+  rpcTest.serverTestResult().emplace().interactionPersistsState_ref().emplace();
+
+  return ret;
+}
+
+Test createInteractionFactoryFunctionPersistsStateTest() {
+  Test ret;
+  ret.name() = "InteractionFactoryFunctionPersistsStateTest";
+  ret.tags()->emplace("spec/protocol/interface/#interactions");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "InteractionFactoryFunctionPersistsStateTest/Success";
+
+  constexpr int initialSum = 10;
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  auto& clientInstruction = rpcTest.clientInstruction()
+                                .emplace()
+                                .interactionPersistsState_ref()
+                                .emplace();
+  clientInstruction.initialSum() = initialSum;
+
+  auto& clientTestResult = rpcTest.clientTestResult()
+                               .emplace()
+                               .interactionPersistsState_ref()
+                               .emplace();
+
+  int sum = initialSum;
+  for (int i = 1; i <= 5; i++) {
+    sum += i;
+    clientInstruction.valuesToAdd()->emplace_back(i);
+    clientTestResult.responses()->emplace_back(sum);
+  }
+
+  rpcTest.serverInstruction()
+      .emplace()
+      .interactionPersistsState_ref()
+      .emplace();
+
+  rpcTest.serverTestResult().emplace().interactionPersistsState_ref().emplace();
+
+  return ret;
+}
+
+Test createInteractionConstructorTerminationTest() {
+  Test ret;
+  ret.name() = "InteractionConstructorTerminationTest";
+  ret.tags()->emplace("spec/protocol/interface/#termination");
+  ret.tags()->emplace("spec/protocol/interface/rocket/#termination");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "InteractionConstructorTerminationTest/Success";
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  rpcTest.clientInstruction().emplace().interactionTermination_ref().emplace();
+
+  rpcTest.clientTestResult().emplace().interactionTermination_ref().emplace();
+
+  rpcTest.serverInstruction().emplace().interactionTermination_ref().emplace();
+
+  rpcTest.serverTestResult()
+      .emplace()
+      .interactionTermination_ref()
+      .emplace()
+      .terminationReceived() = true;
+
+  return ret;
+}
+
+Test createInteractionFactoryFunctionTerminationTest() {
+  Test ret;
+  ret.name() = "InteractionFactoryFunctionTerminationTest";
+  ret.tags()->emplace("spec/protocol/interface/#sink-chunk-timeout");
+  ret.tags()->emplace("spec/protocol/interface/rocket/#termination");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "InteractionFactoryFunctionTerminationTest/Success";
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  rpcTest.clientInstruction()
+      .emplace()
+      .interactionTermination_ref()
+      .emplace()
+      .initialSum() = 10;
+
+  rpcTest.clientTestResult().emplace().interactionTermination_ref().emplace();
+
+  rpcTest.serverInstruction().emplace().interactionTermination_ref().emplace();
+
+  rpcTest.serverTestResult()
+      .emplace()
+      .interactionTermination_ref()
+      .emplace()
+      .terminationReceived() = true;
 
   return ret;
 }
@@ -682,10 +941,19 @@ void addCommonRPCTests(TestSuite& suite) {
   suite.tests()->push_back(createStreamFragmentationTest());
   suite.tests()->push_back(createStreamInitialResponseTest());
   suite.tests()->push_back(createStreamSubsequentCreditsTest());
+  suite.tests()->push_back(createStreamDeclaredExceptionTest());
+  suite.tests()->push_back(createStreamUndeclaredExceptionTest());
   // =================== Sink ===================
   suite.tests()->push_back(createSinkBasicTest());
   suite.tests()->push_back(createSinkFragmentationTest());
   suite.tests()->push_back(createSinkSubsequentCreditsTest());
+  // =================== Interactions ===================
+  suite.tests()->push_back(createInteractionConstructorTest());
+  suite.tests()->push_back(createInteractionFactoryFunctionTest());
+  suite.tests()->push_back(createInteractionConstructorPersistsStateTest());
+  suite.tests()->push_back(createInteractionFactoryFunctionPersistsStateTest());
+  suite.tests()->push_back(createInteractionConstructorTerminationTest());
+  suite.tests()->push_back(createInteractionFactoryFunctionTerminationTest());
 }
 
 } // namespace

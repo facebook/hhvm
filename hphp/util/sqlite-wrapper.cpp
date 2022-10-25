@@ -322,6 +322,7 @@ SQLiteStmt::SQLiteStmt(SQLite& db, const std::string_view sql) {
 
 SQLiteQuery SQLiteStmt::query() noexcept {
   assertx(!m_queryExists);
+  assertx(m_stmt != nullptr);
   m_queryExists = true;
   return SQLiteQuery{*this};
 }

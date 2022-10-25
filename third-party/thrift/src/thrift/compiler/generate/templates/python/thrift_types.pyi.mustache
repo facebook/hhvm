@@ -21,13 +21,10 @@ Generated Python typestubs for Thrift types
 
 import typing as _typing
 
-{{#program:enums?}}
+{{#program:unions?}}
 import enum
 
-{{/program:enums?}}{{^program:enums?}}{{#program:unions?}}
-import enum
-
-{{/program:unions?}}{{/program:enums?}}
+{{/program:unions?}}
 import folly.iobuf as _fbthrift_iobuf
 import {{program:base_library_package}}.types as _fbthrift_python_types
 import {{program:base_library_package}}.exceptions as _fbthrift_python_exceptions
@@ -43,9 +40,9 @@ import {{module_path}}
 {{#program:enums}}
 
 
-class {{enum:name}}(_fbthrift_python_types.Enum, enum.{{!
+class {{enum:name}}(_fbthrift_python_types.{{!
         }}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
-        }}{{^enum:flags?}}IntEnum{{/enum:flags?}}):
+        }}{{^enum:flags?}}Enum, int{{/enum:flags?}}):
     {{#enum:values}}
     {{enum_value:py_name}}: {{enum:name}} = ...
     {{/enum:values}}

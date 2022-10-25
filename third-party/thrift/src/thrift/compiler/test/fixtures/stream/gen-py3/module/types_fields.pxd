@@ -63,3 +63,13 @@ cdef class __FooEx_FieldsSetter(__StructFieldsSetter):
     @staticmethod
     cdef __FooEx_FieldsSetter _fbthrift_create(_module_types.cFooEx* struct_cpp_obj)
 
+
+ctypedef void (*__FooEx2_FieldsSetterFunc)(__FooEx2_FieldsSetter, object) except *
+
+cdef class __FooEx2_FieldsSetter(__StructFieldsSetter):
+    cdef _module_types.cFooEx2* _struct_cpp_obj
+    cdef cumap[__cstring_view, __FooEx2_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __FooEx2_FieldsSetter _fbthrift_create(_module_types.cFooEx2* struct_cpp_obj)
+

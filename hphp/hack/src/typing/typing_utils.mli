@@ -144,6 +144,10 @@ val localize :
   Typing_defs.decl_ty ->
   (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
 
+val is_class_i : Typing_defs.internal_type -> bool
+
+val is_class : Typing_defs.locl_ty -> bool
+
 val is_mixed_i : Typing_env_types.env -> Typing_defs.internal_type -> bool
 
 val is_mixed : Typing_env_types.env -> Typing_defs.locl_ty -> bool
@@ -189,6 +193,8 @@ val is_any : Typing_env_types.env -> Typing_defs.locl_ty -> bool
 val is_tunion : Typing_env_types.env -> Typing_defs.locl_ty -> bool
 
 val is_tintersection : Typing_env_types.env -> Typing_defs.locl_ty -> bool
+
+val is_tyvar : Typing_env_types.env -> Typing_defs.locl_ty -> bool
 
 val get_base_type :
   Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty
@@ -506,3 +512,5 @@ val supports_dynamic :
 
 (* Return true if type definitely is a subtype of supportdyn<mixed> *)
 val is_supportdyn : Typing_env_types.env -> Typing_defs.locl_ty -> bool
+
+val strip_supportdyn : Typing_defs.locl_ty -> bool * Typing_defs.locl_ty

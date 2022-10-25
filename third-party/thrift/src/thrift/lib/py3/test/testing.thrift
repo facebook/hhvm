@@ -379,6 +379,7 @@ service TestingService {
 
   void hard_error(1: bool valid) throws (1: HardError e);
   bool renamed_func(1: bool ret) (cpp.name = "renamed_func_in_cpp");
+  i32 getPriority();
 } (fun_times = "yes", single_quote = "'", double_quotes = '"""')
 
 service TestingServiceChild extends TestingService {

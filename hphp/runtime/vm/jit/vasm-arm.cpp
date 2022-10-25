@@ -300,6 +300,7 @@ struct Vgen {
   void emit(const andq& i) { a->And(X(i.d), X(i.s1), X(i.s0), UF(i.fl)); }
   void emit(const andqi& i) { a->And(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
   void emit(const andqi64& i) { a->And(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
+  void emit(const btrq& i) { a->Bic(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
   void emit(const cmovb& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovw& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovl& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }

@@ -152,7 +152,7 @@ class MetadataTests(unittest.TestCase):
         self.assertEqual(testingService.parent, None)
         self.assertEqual(testingServiceClass.parent, None)
         self.assertEqual(testingServiceInstance.parent, None)
-        self.assertEqual(len(testingService.functions), 13)
+        self.assertEqual(len(testingService.functions), 14)
 
         func = testingService.functions[6]
         _, _, _, _, _, _, funcClass, *rest = testingServiceClass.functions

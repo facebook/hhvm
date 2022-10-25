@@ -26,6 +26,13 @@ struct ForEachField<::cpp2::FooEx> {
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
   }
 };
+
+template <>
+struct ForEachField<::cpp2::FooEx2> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

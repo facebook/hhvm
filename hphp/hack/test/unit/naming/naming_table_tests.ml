@@ -881,6 +881,7 @@ let () =
       }
   in
   let (_ : SharedMem.handle) = SharedMem.init config ~num_workers:0 in
+  EventLogger.init_fake ();
   Unit_test.run_all
     [
       ("test_get_pos", test_get_pos);

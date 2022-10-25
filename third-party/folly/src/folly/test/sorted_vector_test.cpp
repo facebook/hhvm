@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
+#include <functional>
 #include <iterator>
 #include <list>
+#include <map>
 #include <memory>
+#include <set>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include <folly/Range.h>
@@ -32,6 +37,32 @@ using folly::sorted_vector_map;
 using folly::sorted_vector_set;
 
 namespace {
+
+static_assert(
+    folly::is_sorted_vector_map_v<folly::sorted_vector_map<int, double>>);
+static_assert(
+    folly::is_sorted_vector_map_v<folly::sorted_vector_map<
+        int,
+        double,
+        /* Compare */ std::greater<int>,
+        /* Allocator */ std::allocator<std::pair<int, double>>,
+        /* GrowthPolicy */ void,
+        /* Container */ folly::small_vector<std::pair<int, double>, 10>>>);
+static_assert(!folly::is_sorted_vector_map_v<std::map<int, double>>);
+static_assert(!folly::is_sorted_vector_map_v<std::unordered_map<int, double>>);
+static_assert(
+    !folly::is_sorted_vector_map_v<std::vector<std::pair<int, double>>>);
+
+static_assert(folly::is_sorted_vector_set_v<folly::sorted_vector_set<int>>);
+static_assert(folly::is_sorted_vector_set_v<folly::sorted_vector_set<
+                  int,
+                  /* Compare */ std::greater<int>,
+                  /* Allocator */ std::allocator<int>,
+                  /* GrowthPolicy */ void,
+                  /* Container */ folly::small_vector<int, 20>>>);
+static_assert(!folly::is_sorted_vector_set_v<std::set<int>>);
+static_assert(!folly::is_sorted_vector_set_v<std::unordered_set<int>>);
+static_assert(!folly::is_sorted_vector_set_v<std::vector<int>>);
 
 template <class T>
 struct less_invert {
@@ -1135,6 +1166,7 @@ TEST(SortedVectorTypes, TestPmrMoveConstructSameAlloc) {
     auto d = s1.data();
 
     pmr::sorted_vector_set<int> s2(std::move(s1), a2);
+    // NOLINTNEXTLINE(bugprone-use-after-move)
     EXPECT_EQ(s1.get_allocator(), s2.get_allocator());
     EXPECT_EQ(s2.data(), d);
     EXPECT_EQ(s2.count(42), 1);
@@ -1146,6 +1178,7 @@ TEST(SortedVectorTypes, TestPmrMoveConstructSameAlloc) {
     auto d = m1.data();
 
     pmr::sorted_vector_map<int, int> m2(std::move(m1), a2);
+    // NOLINTNEXTLINE(bugprone-use-after-move)
     EXPECT_EQ(m1.get_allocator(), m2.get_allocator());
     EXPECT_EQ(m2.data(), d);
     EXPECT_EQ(m2.at(42), 42);
@@ -1167,6 +1200,7 @@ TEST(SortedVectorTypes, TestPmrMoveConstructDifferentAlloc) {
     auto d = s1.data();
 
     pmr::sorted_vector_set<int> s2(std::move(s1), a2);
+    // NOLINTNEXTLINE(bugprone-use-after-move)
     EXPECT_NE(s1.get_allocator(), s2.get_allocator());
     EXPECT_NE(s2.data(), d);
     EXPECT_EQ(s2.count(42), 1);
@@ -1178,6 +1212,7 @@ TEST(SortedVectorTypes, TestPmrMoveConstructDifferentAlloc) {
     auto d = m1.data();
 
     pmr::sorted_vector_map<int, int> m2(std::move(m1), a2);
+    // NOLINTNEXTLINE(bugprone-use-after-move)
     EXPECT_NE(m1.get_allocator(), m2.get_allocator());
     EXPECT_NE(m2.data(), d);
     EXPECT_EQ(m2.at(42), 42);
@@ -1337,4 +1372,11 @@ TEST(SortedVectorTypes, TestInsertHintCopy) {
     map.insert(mit, mkey);
   }
   EXPECT_EQ(CountCopyCtor::gCount_, 0);
+}
+
+TEST(SortedVectorTypes, TestGetContainer) {
+  sorted_vector_set<int> set;
+  sorted_vector_map<int, int> map;
+  EXPECT_TRUE(set.get_container().empty());
+  EXPECT_TRUE(map.get_container().empty());
 }

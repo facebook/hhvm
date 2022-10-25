@@ -122,6 +122,12 @@ class SizeExpr : public QueryExpr {
 
     return std::make_unique<SizeExpr>(comp);
   }
+
+  std::optional<std::vector<std::string>> computeGlobUpperBound(
+      CaseSensitivity) const override {
+    // `size` doesn't constrain the path.
+    return std::nullopt;
+  }
 };
 W_TERM_PARSER(size, SizeExpr::parse);
 

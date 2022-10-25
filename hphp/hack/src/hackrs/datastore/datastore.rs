@@ -23,7 +23,35 @@ pub use non_evicting::NonEvictingStore;
 pub trait Store<K: Copy, V>: Debug + Send + Sync {
     fn get(&self, key: K) -> Result<Option<V>>;
     fn insert(&self, key: K, val: V) -> Result<()>;
+
+    /// Return `true` if the store contains a value for the given key (i.e.,
+    /// `self.get(key)?.is_some()` would evaluate to `true`).
+    ///
+    /// A default implementation is provided which uses the store's
+    /// implementation of `Store::get`, but some implementors will be able to
+    /// implement `contains_key` more efficiently than `get`.
+    fn contains_key(&self, key: K) -> Result<bool> {
+        Ok(self.get(key)?.is_some())
+    }
+
+    /// Implementations are free to ignore a key to be removed if it does not
+    /// exist.
     fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()>;
+
+    /// Implementations should return an error if a key to be moved does not
+    /// exist and well defined behavior is not a requirement if a key occurs in
+    /// both an old and new position.
+    fn move_batch(&self, keys: &mut dyn Iterator<Item = (K, K)>) -> Result<()> {
+        for (old_key, new_key) in keys {
+            if let Some(val) = self.get(old_key)? {
+                self.remove_batch(&mut std::iter::once(old_key))?;
+                self.insert(new_key, val)?;
+            } else {
+                anyhow::bail!("move_batch: Trying to remove a non-existent value");
+            }
+        }
+        Ok(())
+    }
 }
 
 /// A thread-local datastore, intended for decl caching in typechecker workers.
@@ -41,9 +69,16 @@ pub trait LocalStore<K: Copy, V>: Debug {
 /// `DeltaStore`).
 pub trait ReadonlyStore<K: Copy, V>: Send + Sync {
     fn get(&self, key: K) -> Result<Option<V>>;
+    fn contains_key(&self, key: K) -> Result<bool> {
+        Ok(self.get(key)?.is_some())
+    }
 }
 
 impl<T: Store<K, V>, K: Copy, V> ReadonlyStore<K, V> for T {
+    fn contains_key(&self, key: K) -> Result<bool> {
+        Store::contains_key(self, key)
+    }
+
     fn get(&self, key: K) -> Result<Option<V>> {
         Store::get(self, key)
     }

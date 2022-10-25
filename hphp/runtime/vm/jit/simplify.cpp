@@ -72,7 +72,6 @@ namespace {
 const StaticString s_isEmpty("isEmpty");
 const StaticString s_count("count");
 const StaticString s_1("1");
-const StaticString s_invoke("__invoke");
 const StaticString s_isFinished("isFinished");
 const StaticString s_isSucceeded("isSucceeded");
 const StaticString s_isFailed("isFailed");
@@ -337,14 +336,59 @@ SSATmp* simplifyCallViolatesModuleBoundary(State& env,
 
 
 SSATmp* simplifyEqFunc(State& env, const IRInstruction* inst) {
-  auto const src0 = inst->src(0);
-  auto const src1 = inst->src(1);
+  auto const src0 = canonical(inst->src(0));
+  auto const src1 = canonical(inst->src(1));
+  if (src0 == src1) return cns(env, true);
   if (src0->hasConstVal() && src1->hasConstVal()) {
     return cns(env, src0->funcVal() == src1->funcVal());
   }
+  if (!src0->hasConstVal() && !src1->hasConstVal()) return nullptr;
+
+  auto const func = src0->hasConstVal() ? src0->funcVal() : src1->funcVal();
+  auto const cls = func->implCls();
+
+  // Consider only methods on final classes, where we could compare class
+  // pointers instead.
+  if (!cls || !(cls->attrs() & AttrNoOverride)) return nullptr;
+
+  auto const funcInst = (src0->hasConstVal() ? src1 : src0)->inst();
+  switch (funcInst->op()) {
+    case LdClsMethod:
+      if (cls->getMethodSafe(funcInst->src(1)->intVal()) == func) {
+        return gen(env, EqCls, funcInst->src(0), cns(env, cls));
+      }
+      break;
+
+    case LdIfaceMethod: {
+      auto const extra = funcInst->extra<LdIfaceMethod>();
+      if (cls->getIfaceMethodSafe(extra->vtableIdx, extra->methodIdx) == func) {
+        return gen(env, EqCls, funcInst->src(0), cns(env, cls));
+      }
+      break;
+    }
+
+    case LdObjInvoke:
+      if (cls->getRegularInvoke() == func) {
+        return gen(env, EqCls, funcInst->src(0), cns(env, cls));
+      }
+      break;
+
+    default:
+      break;
+  }
+
   return nullptr;
 }
 
+
+SSATmp* simplifyLdFuncCls(State& env, const IRInstruction* inst) {
+  auto const funcTmp = inst->src(0);
+  return funcTmp->hasConstVal(TFunc)
+    ? funcTmp->funcVal()->cls()
+      ? cns(env, funcTmp->funcVal()->cls())
+      : cns(env, nullptr)
+    : nullptr;
+}
 
 SSATmp* simplifyLdFuncInOutBits(State& env, const IRInstruction* inst) {
   auto const funcTmp = inst->src(0);
@@ -586,8 +630,8 @@ SSATmp* simplifyLdObjInvoke(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (!src->hasConstVal(TCls)) return nullptr;
 
-  auto const meth = src->clsVal()->getCachedInvoke();
-  return meth == nullptr ? nullptr : cns(env, meth);
+  auto const meth = src->clsVal()->getRegularInvoke();
+  return meth == nullptr ? cns(env, nullptr) : cns(env, meth);
 }
 
 SSATmp* simplifyMov(State& /*env*/, const IRInstruction* inst) {
@@ -3945,6 +3989,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(LdStructDictVal)
       X(LdTypeStructureVal)
       X(MethodExists)
+      X(LdFuncCls)
       X(LdFuncInOutBits)
       X(LdFuncNumParams)
       X(FuncHasAttr)

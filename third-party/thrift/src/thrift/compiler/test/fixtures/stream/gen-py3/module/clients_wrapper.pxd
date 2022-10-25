@@ -51,6 +51,8 @@ cdef extern from "thrift/compiler/test/fixtures/stream/src/gen-py3/module/client
       cint32_t arg_foo,)
     cFollyFuture[cClientBufferedStream[cint32_t]] servicethrows(cRpcOptions, 
       cint32_t arg_foo,)
+    cFollyFuture[cClientBufferedStream[cint32_t]] servicethrows2(cRpcOptions, 
+      cint32_t arg_foo,)
     cFollyFuture[cClientBufferedStream[cint32_t]] boththrows(cRpcOptions, 
       cint32_t arg_foo,)
     cFollyFuture[cResponseAndClientBufferedStream[cint32_t,cint32_t]] responseandstreamstreamthrows(cRpcOptions, 

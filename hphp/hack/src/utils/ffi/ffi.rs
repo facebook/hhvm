@@ -186,7 +186,6 @@ impl<U, V, W, X> std::convert::From<(U, V, W, X)> for Quadruple<U, V, W, X> {
 // `from_raw_parts_mut`/`from_raw_parts`. We rely on this in the
 // implementation of traits such as `Eq` and friends.
 
-#[derive(Clone, Copy)]
 #[repr(C)]
 /// A type to substitute for `&'a[T]`.
 // Safety: Must be initialized from an `&[T]`. Use `Slice<'a,
@@ -196,6 +195,19 @@ pub struct Slice<'a, T> {
     len: usize,
     marker: std::marker::PhantomData<&'a ()>,
 }
+
+// A Slice can be cloned even if the underlying data is non-clonable.
+impl<'a, T> Clone for Slice<'a, T> {
+    fn clone(&self) -> Slice<'a, T> {
+        Slice {
+            data: self.data,
+            len: self.len,
+            marker: self.marker,
+        }
+    }
+}
+
+impl<'a, T> Copy for Slice<'a, T> {}
 
 impl<'a, T: serde::Serialize> Serialize for Slice<'a, T> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -417,6 +429,12 @@ impl<'a> Str<'a> {
         // T>::new()` from some `&'a BStr` and so the call to
         // `from_raw_parts` is valid.
         unsafe { std::slice::from_raw_parts(self.data, self.len).into() }
+    }
+}
+
+impl std::borrow::Borrow<[u8]> for Str<'_> {
+    fn borrow(&self) -> &[u8] {
+        self.as_ref()
     }
 }
 

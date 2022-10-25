@@ -344,6 +344,9 @@ pub use impls::vec_from_ocaml_map;
 pub use impls::vec_from_ocaml_map_in;
 pub use impls::vec_from_ocaml_set;
 pub use impls::vec_from_ocaml_set_in;
+pub use ocamlrep_derive::FromOcamlRep;
+pub use ocamlrep_derive::FromOcamlRepIn;
+pub use ocamlrep_derive::ToOcamlRep;
 pub use value::OpaqueValue;
 pub use value::Value;
 

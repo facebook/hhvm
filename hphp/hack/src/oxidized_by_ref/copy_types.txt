@@ -117,7 +117,7 @@ oxidized::error_codes::Naming
 oxidized::error_codes::NastCheck
 oxidized::error_codes::Parsing
 oxidized::error_codes::Typing
-oxidized::error_codes::GlobalWriteCheck
+oxidized::error_codes::GlobalAccessCheck
 oxidized::errors::ErrorCode
 oxidized::errors::Format
 oxidized::errors::NameContext

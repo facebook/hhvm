@@ -17,10 +17,8 @@ module Entry : sig
   val register : string -> ('param -> unit) -> 'param t
 end
 
-(**
- * Shells out the program with the given args.
- * Sends input to stdin of spawned process if given.
- *)
+(** Shells out the program with the given args.
+    Sends input to stdin of spawned process if given. *)
 val exec :
   Exec_command.t ->
   ?input:string ->
@@ -28,20 +26,18 @@ val exec :
   string list ->
   Process_types.t
 
-(**
- * Shells out the program with the given args.
- * Sets the working directory to the one specified before executing.
- * NOTE: make sure to call Daemon.check_entry_point in your main entry point if passing
- * this argument! We actually spawn our own process with chdir_main as the entry point, which
- * changes the current working directory to the desired directory, executes the program,
- * and redirect the output back to the original process. Therefore,
- * if you don't check entry point, the process will use the regular main entry
- * point instead, and the results will be unpredictable and difficult to understand.
- * Sends input to stdin of spawned process if given.
- * NOTE: the default environment for the execution is the current program's environment.
- * Specify the desired environment if you want a different behavior.
- * Sends input to stdin of spawned process if given.
- *)
+(** Shells out the program with the given args.
+    Sets the working directory to the one specified before executing.
+    NOTE: make sure to call Daemon.check_entry_point in your main entry point if passing
+    this argument! We actually spawn our own process with chdir_main as the entry point, which
+    changes the current working directory to the desired directory, executes the program,
+    and redirect the output back to the original process. Therefore,
+    if you don't check entry point, the process will use the regular main entry
+    point instead, and the results will be unpredictable and difficult to understand.
+    Sends input to stdin of spawned process if given.
+    NOTE: the default environment for the execution is the current program's environment.
+    Specify the desired environment if you want a different behavior.
+    Sends input to stdin of spawned process if given. *)
 val exec_with_working_directory :
   dir:string ->
   Exec_command.t ->
@@ -53,21 +49,19 @@ val exec_with_working_directory :
 val register_entry_point : string -> ('param -> unit) -> 'param Entry.t
 
 (** Wraps a entry point inside a Process, so we get Process's
- * goodness for free (read_and_wait_pid and is_ready). The entry will be
- * spawned into a separate process. *)
+    goodness for free (read_and_wait_pid and is_ready). The entry will be
+    spawned into a separate process. *)
 val run_entry :
   ?input:string -> environment -> 'a Entry.t -> 'a -> Process_types.t
 
-(**
- * Read data from stdout and stderr until EOF is reached. Waits for
- * process to terminate returns the stderr and stdout
- * and stderr.
- *
- * Idempotent.
- *
- * If process exits with something other than (Unix.WEXITED 0), will return a
- * Error
- *)
+(** Read data from stdout and stderr until EOF is reached. Waits for
+    process to terminate returns the stderr and stdout
+    and stderr.
+
+    Idempotent.
+
+    If process exits with something other than (Unix.WEXITED 0), will return a
+    Error. *)
 val read_and_wait_pid : timeout:int -> Process_types.t -> process_result
 
 val failure_msg : failure -> string

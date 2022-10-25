@@ -1011,6 +1011,10 @@ TypedValue HHVM_FUNCTION(dynamic_class_meth_force, StringArg cls,
   return dynamicClassMeth<DynamicAttr::Ignore, false>(cls.get(), meth.get());
 }
 
+TypedValue HHVM_FUNCTION(classname_from_string_unsafe, StringArg cls) {
+  return make_tv<KindOfLazyClass>(LazyClassData::create(cls.get()));
+}
+
 namespace {
 
 const StaticString
@@ -1480,6 +1484,7 @@ static struct HHExtension final : Extension {
     X(dynamic_fun_force);
     X(dynamic_class_meth);
     X(dynamic_class_meth_force);
+    X(classname_from_string_unsafe);
     X(enable_per_file_coverage);
     X(disable_per_file_coverage);
     X(get_files_with_coverage);

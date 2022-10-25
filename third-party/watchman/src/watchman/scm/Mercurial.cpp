@@ -6,6 +6,7 @@
  */
 
 #include "Mercurial.h"
+#include <fmt/core.h>
 #include <folly/String.h>
 #include <chrono>
 #include <cmath>
@@ -20,7 +21,6 @@
 W_CAP_REG("scm-hg")
 
 using namespace std::chrono;
-using folly::to;
 
 namespace {
 using namespace watchman;
@@ -126,7 +126,7 @@ ChildProcess::Options Mercurial::makeHgOptions(
 
 Mercurial::Mercurial(w_string_piece rootPath, w_string_piece scmRoot)
     : SCM(rootPath, scmRoot),
-      dirStatePath_(to<std::string>(getSCMRoot().view(), "/.hg/dirstate")),
+      dirStatePath_(fmt::format("{}/.hg/dirstate", getSCMRoot())),
       commitsPrior_(Configuration(), "scm_hg_commits_prior", 32, 10),
       mergeBases_(Configuration(), "scm_hg_mergebase", 32, 10),
       filesChangedSinceMergeBaseWith_(
@@ -155,15 +155,14 @@ w_string Mercurial::mergeBaseWith(
     w_string_piece commitId,
     const std::optional<w_string>& requestId) const {
   auto mtime = getDirStateMtime();
-  auto key = folly::to<std::string>(
-      commitId.view(), ":", mtime.tv_sec, ":", mtime.tv_nsec);
+  auto key = fmt::format("{}:{}:{}", commitId, mtime.tv_sec, mtime.tv_nsec);
   auto commit = std::string{commitId.view()};
 
   return mergeBases_
       .get(
           key,
           [this, commit, requestId](const std::string&) {
-            auto revset = to<std::string>("ancestor(.,", commit, ")");
+            auto revset = fmt::format("ancestor(.,{})", commit);
             auto result = runMercurial(
                 {hgExecutablePath(), "log", "-T", "{node}", "-r", revset},
                 makeHgOptions(requestId),
@@ -191,7 +190,7 @@ std::vector<w_string> Mercurial::getFilesChangedSinceMergeBaseWith(
     w_string_piece commitId,
     w_string_piece clock,
     const std::optional<w_string>& requestId) const {
-  auto key = folly::to<std::string>(commitId.view(), ":", clock.view());
+  auto key = fmt::format("{}:{}", commitId, clock);
   auto commitCopy = std::string{commitId.view()};
 
   // This is not going to include changes to directories across commits because
@@ -244,8 +243,8 @@ time_point<system_clock> Mercurial::getCommitDate(
 time_point<system_clock> Mercurial::convertCommitDate(const char* commitDate) {
   double date;
   if (std::sscanf(commitDate, "%lf", &date) != 1) {
-    throw std::runtime_error(to<std::string>(
-        "failed to parse date value `", commitDate, "` into a double"));
+    throw std::runtime_error(fmt::format(
+        "failed to parse date value `{}` into a double", commitDate));
   }
   return system_clock::from_time_t(date);
 }
@@ -255,8 +254,8 @@ std::vector<w_string> Mercurial::getCommitsPriorToAndIncluding(
     int numCommits,
     const std::optional<w_string>& requestId) const {
   auto mtime = getDirStateMtime();
-  auto key = folly::to<std::string>(
-      commitId.view(), ":", numCommits, ":", mtime.tv_sec, ":", mtime.tv_nsec);
+  auto key = fmt::format(
+      "{}:{}:{}:{}", commitId, numCommits, mtime.tv_sec, mtime.tv_nsec);
   auto commitCopy = std::string{commitId.view()};
 
   return commitsPrior_
@@ -264,12 +263,8 @@ std::vector<w_string> Mercurial::getCommitsPriorToAndIncluding(
           key,
           [this, commit = std::move(commitCopy), numCommits, requestId](
               const std::string&) {
-            auto revset = to<std::string>(
-                "reverse(last(_firstancestors(",
-                commit,
-                "), ",
-                numCommits,
-                "))\n");
+            auto revset = fmt::format(
+                "reverse(last(_firstancestors({}), {}))\n", commit, numCommits);
             auto result = runMercurial(
                 {hgExecutablePath(),
                  "--traceback",

@@ -35,7 +35,7 @@ class AllSyncCollectionRouteFactoryTest
   }
 
   void testCreate(folly::StringPiece config) {
-    TestFiberManager fm;
+    TestFiberManager<HelloGoodbyeRouterInfo> fm;
 
     auto rh = getAllSyncCollectionRoute(config);
     ASSERT_TRUE(rh);
@@ -74,7 +74,7 @@ class ArgumentPassingCollectionRouteFactoryTest
   }
 
   void testCreate(folly::StringPiece config) {
-    TestFiberManager fm;
+    TestFiberManager<HelloGoodbyeRouterInfo> fm;
 
     auto rh = getArgumentPassingCollectionRoute(config);
     ASSERT_TRUE(rh);

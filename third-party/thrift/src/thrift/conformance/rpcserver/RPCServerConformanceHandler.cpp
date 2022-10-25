@@ -83,6 +83,26 @@ RPCServerConformanceHandler::streamInitialResponse(
       std::move(stream)};
 }
 
+apache::thrift::ServerStream<Response>
+RPCServerConformanceHandler::streamDeclaredException(
+    std::unique_ptr<Request> req) {
+  result_.streamDeclaredException_ref().emplace().request() = *req;
+  throw *testCase_->serverInstruction()
+      ->streamDeclaredException_ref()
+      ->userException();
+  co_return;
+}
+
+apache::thrift::ServerStream<Response>
+RPCServerConformanceHandler::streamUndeclaredException(
+    std::unique_ptr<Request> req) {
+  result_.streamUndeclaredException_ref().emplace().request() = *req;
+  throw std::runtime_error(*testCase_->serverInstruction()
+                                ->streamUndeclaredException_ref()
+                                ->exceptionMessage());
+  co_return;
+}
+
 // =================== Sink ===================
 apache::thrift::SinkConsumer<Request, Response>
 RPCServerConformanceHandler::sinkBasic(std::unique_ptr<Request> req) {
@@ -125,6 +145,48 @@ RPCServerConformanceHandler::sinkChunkTimeout(std::unique_ptr<Request> req) {
       .setChunkTimeout(std::chrono::milliseconds{*testCase_->serverInstruction()
                                                       ->sinkChunkTimeout_ref()
                                                       ->chunkTimeoutMs()});
+}
+
+// =================== Interactions ===================
+std::unique_ptr<RPCServerConformanceHandler::BasicInteractionIf>
+RPCServerConformanceHandler::createBasicInteraction() {
+  switch (testCase_->serverInstruction()->getType()) {
+    case ServerInstruction::interactionConstructor:
+      result_.interactionConstructor_ref().emplace().constructorCalled() = true;
+      break;
+    case ServerInstruction::interactionPersistsState:
+      result_.interactionPersistsState_ref().emplace();
+      break;
+    case ServerInstruction::interactionTermination:
+      result_.interactionTermination_ref().emplace();
+      break;
+    default:
+      throw std::runtime_error(
+          "BasicInteraction constructor called unexpectedly");
+  }
+  return std::make_unique<BasicInteraction>(*testCase_, result_);
+}
+
+apache::thrift::
+    TileAndResponse<RPCServerConformanceHandler::BasicInteractionIf, void>
+    RPCServerConformanceHandler::basicInteractionFactoryFunction(
+        int32_t initialSum) {
+  switch (testCase_->serverInstruction()->getType()) {
+    case ServerInstruction::interactionFactoryFunction:
+      result_.interactionFactoryFunction_ref().emplace().initialSum() =
+          initialSum;
+      break;
+    case ServerInstruction::interactionPersistsState:
+      result_.interactionPersistsState_ref().emplace();
+      break;
+    case ServerInstruction::interactionTermination:
+      result_.interactionTermination_ref().emplace();
+      break;
+    default:
+      throw std::runtime_error(
+          "BasicInteraction factory function called unexpectedly");
+  }
+  return {std::make_unique<BasicInteraction>(*testCase_, result_, initialSum)};
 }
 
 } // namespace apache::thrift::conformance

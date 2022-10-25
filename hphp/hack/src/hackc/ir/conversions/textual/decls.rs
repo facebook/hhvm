@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use anyhow::Error;
-use itertools::Itertools;
 use strum::IntoEnumIterator as _;
 
 use crate::hack::Builtin;
@@ -28,15 +27,6 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
     for builtin in Builtin::iter() {
         let name = builtin.into_str();
         match builtin {
-            Builtin::ArgPack(_) => {
-                for n in 0..5 {
-                    let builtin = Builtin::ArgPack(n);
-                    let args = (0..=n).into_iter().map(|_| ty!(mixed)).collect_vec();
-                    let name = builtin.into_str();
-                    declare_function(w, &name, &args, ty!(*HackParams))?
-                }
-            }
-
             Builtin::Bool => declare_function(w, &name, &[ty!(bool)], ty!(mixed))?,
             Builtin::Int => declare_function(w, &name, &[ty!(int)], ty!(mixed))?,
             Builtin::Null => declare_function(w, &name, &[], ty!(mixed))?,

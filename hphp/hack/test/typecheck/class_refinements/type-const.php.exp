@@ -1,0 +1,6 @@
+File "type-const.php", line 10, characters 21-45:
+Type refinements cannot appear on the right-hand side of a type constant. (NastCheck[3101])
+File "type-const.php", line 12, characters 33-57:
+Type refinements cannot appear on the right-hand side of a type constant. (NastCheck[3101])
+File "type-const.php", line 15, characters 17-41:
+Type refinements cannot appear on the right-hand side of a type constant. (NastCheck[3101])

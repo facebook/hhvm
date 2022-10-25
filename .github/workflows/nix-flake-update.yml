@@ -6,9 +6,14 @@ permissions:
 
 jobs:
   nix-flake-update:
+    if: github.repository != 'hhvm/hhvm-staging'
     permissions:
-      contents: write  # for peter-evans/create-pull-request to create branch
-      pull-requests: write  # for peter-evans/create-pull-request to create a PR
+      # for aws-actions/configure-aws-credentials to assume an AWS role
+      id-token: write
+      # for peter-evans/create-pull-request to create branch
+      contents: write
+      # for peter-evans/create-pull-request to create a PR
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.4.0
@@ -21,8 +26,31 @@ jobs:
             extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
             extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
       - run: nix flake update
+      - run: git config user.name 'HHVM/Hack Open Source'
+      - run: git config user.email 'hhvm-oss@meta.com'
+      - run: git commit --all '--message=Update flake lock file'
+      - name: Merge existing commits to avoid force push
+        run: |
+          if git fetch --depth=1 origin refs/heads/nix-flake-update/${{github.ref_name}}
+          then
+            git merge --no-edit --allow-unrelated-histories --strategy ours FETCH_HEAD
+          fi
+      - name: Assume the AWS role
+        continue-on-error: true
+        id: configure-aws-credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
+          aws-region: us-west-2
+      - if: steps.configure-aws-credentials.outcome == 'success'
+        name: Push changes via ssh protocol
+        run: |
+          set -ex
+          set -o pipefail
+          eval "$(ssh-agent)"
+          aws kms decrypt --ciphertext-blob "fileb://$PWD/main-repo-push-key.kms-ciphertext" --query Plaintext --output text | base64 --decode | ssh-add -
+          git push git@github.com:${{github.repository}}.git HEAD:refs/heads/nix-flake-update/${{github.ref_name}}
       - uses: peter-evans/create-pull-request@v4
         with:
           branch: nix-flake-update/${{github.ref_name}}
           title: Update flake lock file
-          commit-message: Update flake lock file

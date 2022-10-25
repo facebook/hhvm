@@ -6,8 +6,8 @@
 use std::collections::BTreeMap;
 
 use eq_modulo_pos::EqModuloPos;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 pub use oxidized::ast_defs::Visibility;
 pub use oxidized_by_ref::method_flags::MethodFlags;
 pub use oxidized_by_ref::prop_flags::PropFlags;
@@ -174,10 +174,12 @@ pub struct ShallowClass<R: Reason> {
     pub docs_url: Option<String>,
 }
 
-walkable!(ShallowClass<R> => [
-    tparams, where_constraints, extends, uses, xhp_attr_uses, req_extends,
-    req_implements, implements, consts, typeconsts, props, static_props,
-    constructor, static_methods, methods, enum_type
+walkable!(ShallowClass<R> as visit_shallow_class => [
+    mode, is_final, is_abstract, is_xhp, is_internal, has_xhp_keyword, kind,
+    module, name, tparams, where_constraints, extends, uses, xhp_attr_uses,
+    xhp_enum_values, req_extends, req_implements, req_class, implements,
+    support_dynamic_type, consts, typeconsts, props, static_props, constructor,
+    static_methods, methods, user_attributes, enum_type, docs_url
 ]);
 
 pub type FunDecl<R> = FunElt<R>;
@@ -199,7 +201,7 @@ pub enum NamedDecl<R: Reason> {
     Module(ModuleName, ModuleDecl<R>),
 }
 
-walkable!(NamedDecl<R> => {
+walkable!(NamedDecl<R> as visit_named_decl => {
     Self::Class(_, x) => [x],
     Self::Fun(_, x) => [x],
     Self::Typedef(_, x) => [x],
@@ -242,7 +244,7 @@ pub enum Decl<R: Reason> {
     Module(ModuleDecl<R>),
 }
 
-walkable!(Decl<R> => {
+walkable!(Decl<R> as visit_decl => {
     Self::Class(x) => [x],
     Self::Fun(x) => [x],
     Self::Typedef(x) => [x],

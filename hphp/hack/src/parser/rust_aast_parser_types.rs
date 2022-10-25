@@ -7,8 +7,8 @@ use std::time::Duration;
 
 use file_info::Mode;
 use lint_rust::LintError;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 use oxidized::aast::Program;
 use oxidized::errors::Error;
 use oxidized::file_info;

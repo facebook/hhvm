@@ -10,6 +10,10 @@ cimport folly.iobuf as _fbthrift_iobuf
 
 cimport thrift.py3.builder
 
+cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
+cimport facebook.thrift.annotation.cpp.builders as _facebook_thrift_annotation_cpp_builders
+cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
+cimport facebook.thrift.annotation.thrift.builders as _facebook_thrift_annotation_thrift_builders
 cimport include.types as _include_types
 cimport include.builders as _include_builders
 
@@ -71,6 +75,14 @@ cdef class MinPadding_Builder(thrift.py3.builder.StructBuilder):
     cdef public pint tiny
 
 
+cdef class MinPaddingWithCustomType_Builder(thrift.py3.builder.StructBuilder):
+    cdef public pint small
+    cdef public pint big
+    cdef public pint medium
+    cdef public pint biggish
+    cdef public pint tiny
+
+
 cdef class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     cdef public pint MyIntField
     cdef public str MyStringField
@@ -104,29 +116,44 @@ cdef class ForwardUsageByRef_Builder(thrift.py3.builder.StructBuilder):
     cdef public object foo
 
 
-cdef class NoexceptMoveEmpty_Builder(thrift.py3.builder.StructBuilder):
+cdef class IncompleteMap_Builder(thrift.py3.builder.StructBuilder):
+    cdef public dict field
+
+
+cdef class IncompleteMapDep_Builder(thrift.py3.builder.StructBuilder):
     pass
 
 
-cdef class NoexceptMoveSimpleStruct_Builder(thrift.py3.builder.StructBuilder):
-    cdef public pint boolField
+cdef class CompleteMap_Builder(thrift.py3.builder.StructBuilder):
+    cdef public dict field
 
 
-cdef class NoexceptMoveComplexStruct_Builder(thrift.py3.builder.StructBuilder):
-    cdef public pbool MyBoolField
-    cdef public pint MyIntField
-    cdef public str MyStringField
-    cdef public str MyStringField2
-    cdef public bytes MyBinaryField
-    cdef public bytes MyBinaryField2
-    cdef public bytes MyBinaryField3
-    cdef public list MyBinaryListField4
-    cdef public dict MyMapEnumAndInt
+cdef class CompleteMapDep_Builder(thrift.py3.builder.StructBuilder):
+    pass
 
 
-cdef class NoExceptMoveUnion_Builder(thrift.py3.builder.StructBuilder):
-    cdef public str string_field
-    cdef public pint i32_field
+cdef class IncompleteList_Builder(thrift.py3.builder.StructBuilder):
+    cdef public list field
+
+
+cdef class IncompleteListDep_Builder(thrift.py3.builder.StructBuilder):
+    pass
+
+
+cdef class CompleteList_Builder(thrift.py3.builder.StructBuilder):
+    cdef public list field
+
+
+cdef class CompleteListDep_Builder(thrift.py3.builder.StructBuilder):
+    pass
+
+
+cdef class AdaptedList_Builder(thrift.py3.builder.StructBuilder):
+    cdef public list field
+
+
+cdef class DependentAdaptedList_Builder(thrift.py3.builder.StructBuilder):
+    cdef public list field
 
 
 cdef class AllocatorAware_Builder(thrift.py3.builder.StructBuilder):

@@ -11,6 +11,11 @@
 #else
 #include <thrift/compiler/test/fixtures/adapter/src/gen-cpp2/module_handlers.h>
 #endif
+#if __has_include(<thrift/compiler/test/fixtures/adapter/src/gen-cpp2/AdapterService.h>)
+#include <thrift/compiler/test/fixtures/adapter/src/gen-cpp2/AdapterService.h>
+#else
+#include <thrift/compiler/test/fixtures/adapter/src/gen-cpp2/module_handlers.h>
+#endif
 #include <folly/python/futures.h>
 #include <Python.h>
 
@@ -36,6 +41,23 @@ folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };
 
 std::shared_ptr<apache::thrift::ServerInterface> ServiceInterface(PyObject *if_object, folly::Executor *exc);
+
+
+class AdapterServiceWrapper : virtual public AdapterServiceSvIf {
+  protected:
+    PyObject *if_object;
+    folly::Executor *executor;
+  public:
+    explicit AdapterServiceWrapper(PyObject *if_object, folly::Executor *exc);
+    void async_tm_count(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::CountingStruct>>> callback) override;
+    void async_tm_adaptedTypes(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>> callback
+        , std::unique_ptr<::facebook::thrift::test::HeapAllocated> arg
+    ) override;
+folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
+folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
+};
+
+std::shared_ptr<apache::thrift::ServerInterface> AdapterServiceInterface(PyObject *if_object, folly::Executor *exc);
 } // namespace facebook
 } // namespace thrift
 } // namespace test

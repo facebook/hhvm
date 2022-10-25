@@ -1,5 +1,22 @@
 open Asserter
 
+let test_exception_pp () =
+  let prefix = "Bang!!!" in
+  let err_inst = Future.create_default_error_instance prefix in
+  let gv ~timeout:_ = Error err_inst in
+  let future = Future.make (gv, (fun _ -> true)) in
+  try
+    Future.get_exn future;
+    failwith "Expected future to throw an exception"
+  with
+  | exn ->
+    let e = Exception.wrap exn in
+    Bool_asserter.assert_equals
+      true
+      (String.starts_with ~prefix @@ Exception.to_string e)
+      "Expected error to be rendered correctly";
+    true
+
 let test_delayed_future () =
   let future = Future.delayed_value ~delays:3 "Delayed value" in
   Bool_asserter.assert_equals false (Future.is_ready future) "First delay";
@@ -206,6 +223,7 @@ let test_bound_future_idempotency () =
 
 let tests =
   [
+    ("test_exception_pp", test_exception_pp);
     ("test_delayed_future", test_delayed_future);
     ("test_continue_delayed_future_with", test_continue_delayed_future_with);
     ("test_of_error", test_of_error);

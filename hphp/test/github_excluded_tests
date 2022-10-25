@@ -19,6 +19,20 @@ server/http/tests/runTest1.php
 server/http/tests/staticContentHeaderTest.php
 server/http/tests/staticContentTest.php
 server/http/tests/takeoverTest.php
+# the vsdebug tests also start a server (and the extension is currently unused in OSS)
+slow/ext_vsdebug/breakpoints.php
+slow/ext_vsdebug/conditional_bp.php
+slow/ext_vsdebug/context.php
+slow/ext_vsdebug/exception_bp.php
+slow/ext_vsdebug/info.php
+slow/ext_vsdebug/launch.php
+slow/ext_vsdebug/not_enabled.php
+slow/ext_vsdebug/options.php
+slow/ext_vsdebug/repl_respects_repo_options.php
+slow/ext_vsdebug/step.php
+slow/ext_vsdebug/todebugdisplay.php
+slow/ext_vsdebug/unix_context.php
+slow/ext_vsdebug/variables_all_types.php
 
 # fail apparently due to stale or out of sync tzdata
 slow/dv_array/ext_datetime.php
@@ -117,6 +131,9 @@ zend/good/ext/mbstring/tests/mb_ereg_replace_variation1.php
 # TODO(atry) failed in repo mode
 hphp/test/slow/use_function/override.php
 hphp/test/slow/coeffects/closure-inherit-2.php
+
+# TODO(atry) the CAA record for google.com is flaky (maybe network issue?)
+slow/ext_network/dns_get_record_caa.php
 
 # TODO(alexeyt) failures not yet categorized
 slow/coeffects/apc_pure.php

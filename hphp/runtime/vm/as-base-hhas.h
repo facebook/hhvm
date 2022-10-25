@@ -51,7 +51,8 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrInterface,                C,       "interface");            \
   X(AttrNoExpandTrait,            C,       "no_expand_trait");      \
   X(AttrAbstract,                 C|F|T,   "abstract");             \
-  X(AttrNoOverride,               C|F|T,   "no_override");          \
+  X(AttrNoOverride,               C|F,     "no_override");          \
+  X(AttrNoOverrideRegular,        C,       "no_override_regular");  \
   X(AttrFinal,                    C|F|T,   "final");                \
   X(AttrSealed,                   C,       "sealed");               \
   X(AttrTrait,                    C|F|P,   "trait");                \

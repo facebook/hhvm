@@ -128,6 +128,7 @@ let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
       else
         Unenforced
     | Toption ty -> enforcement include_dynamic env visited ty
+    | Tnewtype _ -> Unenforced
   in
   enforcement false env SSet.empty ty
 

@@ -626,6 +626,36 @@
               "column" : 42
             }
           }
+        },
+        "listMap" : {
+          "type_enum" : "LIST",
+          "spec_args" : { "type_enum" : "MAP", "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 83,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 83,
+              "column" : 34
+            }
+          }
+        },
+        "mapMap" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "MAP", "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } } } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 84,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 84,
+              "column" : 40
+            }
+          }
         }
       },
       "source_range" : {
@@ -634,13 +664,13 @@
           "column" : 1
         },
         "end" : {
-          "line" : 82,
+          "line" : 85,
           "column" : 2
         }
       }
     },
     "LateDefStruct" : {
-      "lineno" : 85,
+      "lineno" : 88,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -648,12 +678,108 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 85,
+          "line" : 88,
           "column" : 1
         },
         "end" : {
-          "line" : 85,
+          "line" : 88,
           "column" : 24
+        }
+      }
+    },
+    "Recursive" : {
+      "lineno" : 90,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "nodes" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "Recursive"} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 91,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 92,
+              "column" : 32
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 90,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 93,
+          "column" : 2
+        }
+      }
+    },
+    "Bar" : {
+      "lineno" : 95,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "loop" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "Loop",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 96,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 96,
+              "column" : 23
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 95,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 97,
+          "column" : 2
+        }
+      }
+    },
+    "Loop" : {
+      "lineno" : 99,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "bar" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "Bar",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 101,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 102,
+              "column" : 11
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 99,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 103,
+          "column" : 2
         }
       }
     },
@@ -1074,7 +1200,7 @@
         }
       }
     },
-    "MyStructFieldN10Patch" : {
+    "MyStructField10Patch" : {
       "lineno" : 22,
       "is_exception" : false,
       "is_union" : false,
@@ -1121,7 +1247,7 @@
         }
       }
     },
-    "MyStructFieldN25Patch" : {
+    "MyStructField25Patch" : {
       "lineno" : 22,
       "is_exception" : false,
       "is_union" : false,
@@ -1168,7 +1294,7 @@
         }
       }
     },
-    "MyStructFieldN28Patch" : {
+    "MyStructField28Patch" : {
       "lineno" : 22,
       "is_exception" : false,
       "is_union" : false,
@@ -1275,7 +1401,7 @@
         }
       }
     },
-    "MyStructFieldN29Patch" : {
+    "MyStructField29Patch" : {
       "lineno" : 22,
       "is_exception" : false,
       "is_union" : false,
@@ -1352,7 +1478,7 @@
         }
       }
     },
-    "MyStructFieldN30Patch" : {
+    "MyStructField30Patch" : {
       "lineno" : 22,
       "is_exception" : false,
       "is_union" : false,
@@ -1387,9 +1513,39 @@
             }
           }
         },
+        "patchPrior" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "patch.StringPatch"} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
         "add" : {
           "type_enum" : "MAP",
           "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRING", "spec_args" : null} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "patch" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "patch.StringPatch"} } ,
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -1444,14 +1600,517 @@
         }
       }
     },
+    "MyStructField31Patch" : {
+      "lineno" : 22,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "assign" : {
+          "type_enum" : "LIST",
+          "spec_args" : { "type_enum" : "MAP", "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } } ,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "clear" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "patch" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "I32", "spec_args" : null }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "MyStructField31Patch1"} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "remove" : {
+          "type_enum" : "LIST",
+          "spec_args" : { "type_enum" : "MAP", "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "prepend" : {
+          "type_enum" : "LIST",
+          "spec_args" : { "type_enum" : "MAP", "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "append" : {
+          "type_enum" : "LIST",
+          "spec_args" : { "type_enum" : "MAP", "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 22,
+          "column" : 13
+        },
+        "end" : {
+          "line" : 22,
+          "column" : 21
+        }
+      }
+    },
+    "MyStructField31Patch1" : {
+      "lineno" : 22,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "assign" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } ,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "clear" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "patchPrior" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "patch.I32Patch"} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "add" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "patch" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "patch.I32Patch"} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "remove" : {
+          "type_enum" : "SET",
+          "spec_args" : { "type_enum" : "STRING", "spec_args" : null} ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "put" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 22,
+          "column" : 14
+        },
+        "end" : {
+          "line" : 22,
+          "column" : 21
+        }
+      }
+    },
+    "MyStructField32Patch" : {
+      "lineno" : 22,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "assign" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "MAP", "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } } } ,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "clear" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "patchPrior" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "MyStructField32Patch1"} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "add" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "MAP", "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } } } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "patch" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "MyStructField32Patch1"} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "remove" : {
+          "type_enum" : "SET",
+          "spec_args" : { "type_enum" : "STRING", "spec_args" : null} ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "put" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "MAP", "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } } } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 22,
+          "column" : 15
+        },
+        "end" : {
+          "line" : 22,
+          "column" : 21
+        }
+      }
+    },
+    "MyStructField32Patch1" : {
+      "lineno" : 22,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "assign" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } ,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "clear" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "patchPrior" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "patch.I32Patch"} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "add" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "patch" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "patch.I32Patch"} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "remove" : {
+          "type_enum" : "SET",
+          "spec_args" : { "type_enum" : "STRING", "spec_args" : null} ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "put" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 22,
+          "column" : 16
+        },
+        "end" : {
+          "line" : 22,
+          "column" : 21
+        }
+      }
+    },
     "MyStructFieldPatch" : {
       "lineno" : 22,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
+        "mapMap" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "MyStructField32Patch",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "listMap" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "MyStructField31Patch",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
         "optMapVal" : {
           "type_enum" : "STRUCT",
-          "spec_args" : "MyStructFieldN30Patch",
+          "spec_args" : "MyStructField30Patch",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -1466,7 +2125,7 @@
         },
         "optSetVal" : {
           "type_enum" : "STRUCT",
-          "spec_args" : "MyStructFieldN29Patch",
+          "spec_args" : "MyStructField29Patch",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -1481,7 +2140,7 @@
         },
         "optListVal" : {
           "type_enum" : "STRUCT",
-          "spec_args" : "MyStructFieldN28Patch",
+          "spec_args" : "MyStructField28Patch",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -1526,7 +2185,7 @@
         },
         "optEnumVal" : {
           "type_enum" : "STRUCT",
-          "spec_args" : "MyStructFieldN25Patch",
+          "spec_args" : "MyStructField25Patch",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -1751,7 +2410,7 @@
         },
         "enumVal" : {
           "type_enum" : "STRUCT",
-          "spec_args" : "MyStructFieldN10Patch",
+          "spec_args" : "MyStructField10Patch",
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -1903,7 +2562,7 @@
       "source_range" : {
         "begin" : {
           "line" : 22,
-          "column" : 13
+          "column" : 17
         },
         "end" : {
           "line" : 22,
@@ -1995,7 +2654,7 @@
       "source_range" : {
         "begin" : {
           "line" : 22,
-          "column" : 14
+          "column" : 18
         },
         "end" : {
           "line" : 22,
@@ -2013,7 +2672,7 @@
       "source_range" : {
         "begin" : {
           "line" : 22,
-          "column" : 15
+          "column" : 19
         },
         "end" : {
           "line" : 22,
@@ -2105,7 +2764,381 @@
       "source_range" : {
         "begin" : {
           "line" : 22,
-          "column" : 16
+          "column" : 20
+        },
+        "end" : {
+          "line" : 22,
+          "column" : 21
+        }
+      }
+    },
+    "RecursiveField1Patch" : {
+      "lineno" : 91,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "assign" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "Recursive"} } ,
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 91,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 91,
+              "column" : 25
+            }
+          }
+        },
+        "clear" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 91,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 91,
+              "column" : 25
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 91,
+          "column" : 23
+        },
+        "end" : {
+          "line" : 91,
+          "column" : 25
+        }
+      }
+    },
+    "RecursiveFieldPatch" : {
+      "lineno" : 23,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "nodes" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "RecursiveField1Patch",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 23,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 22,
+          "column" : 21
+        }
+      }
+    },
+    "RecursivePatch" : {
+      "lineno" : 23,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "assign" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "Recursive",
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "clear" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "patchPrior" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "RecursiveFieldPatch",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "ensure" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "Recursive",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "patch" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "RecursiveFieldPatch",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 23,
+          "column" : 2
+        },
+        "end" : {
+          "line" : 22,
+          "column" : 21
+        }
+      }
+    },
+    "BarFieldPatch" : {
+      "lineno" : 23,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "loop" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "LoopPatch",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 23,
+          "column" : 3
+        },
+        "end" : {
+          "line" : 22,
+          "column" : 21
+        }
+      }
+    },
+    "BarPatch" : {
+      "lineno" : 23,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "assign" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "Bar",
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "clear" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "patchPrior" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "BarFieldPatch",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "ensure" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "Bar",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "patch" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "BarFieldPatch",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 23,
+          "column" : 4
+        },
+        "end" : {
+          "line" : 22,
+          "column" : 21
+        }
+      }
+    },
+    "LoopFieldPatch" : {
+      "lineno" : 23,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "bar" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "BarPatch",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 23,
+          "column" : 5
+        },
+        "end" : {
+          "line" : 22,
+          "column" : 21
+        }
+      }
+    },
+    "LoopPatch" : {
+      "lineno" : 23,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "assign" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "Loop",
+          "required" : false,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        },
+        "clear" : {
+          "type_enum" : "BOOL",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 22,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 22,
+              "column" : 21
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 23,
+          "column" : 6
         },
         "end" : {
           "line" : 22,

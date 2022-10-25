@@ -3,15 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ae8566636916fe1c45e85068aa079f89>>
+// @generated SignedSource<<3d43cb90da9a165ed8be598c0f8e9f7a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 pub use oxidized::file_info::Mode;
 pub use oxidized::file_info::NameType;
 pub use prim_defs::*;

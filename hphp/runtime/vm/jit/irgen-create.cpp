@@ -343,7 +343,7 @@ void emitCreateCl(IRGS& env, uint32_t numParams, const StringData* name) {
     )
   );
 
-  auto const func = cls->getCachedInvoke();
+  auto const func = cls->getRegularInvoke();
 
   auto const live_ctx = [&] {
     if (func->isStatic()) return ldCtxCls(env);

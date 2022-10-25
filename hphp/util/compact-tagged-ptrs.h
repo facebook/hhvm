@@ -35,8 +35,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-#if !(defined(__x86_64__) || defined(_M_X64) || defined(__powerpc64__) || \
-      defined(__aarch64__))
+#if !(defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__))
 #error CompactTaggedPtr is not supported on your architecture.
 #endif
 
@@ -79,6 +78,13 @@ struct CompactTaggedPtr {
 
   void swap(CompactTaggedPtr& o) noexcept {
     std::swap(m_data, o.m_data);
+  }
+
+  bool operator==(const CompactTaggedPtr& o) const {
+    return m_data == o.m_data;
+  }
+  bool operator!=(const CompactTaggedPtr& o) const {
+    return m_data != o.m_data;
   }
 
 private:
@@ -131,4 +137,3 @@ void swap(CompactSizedPtr<T>& p1, CompactSizedPtr<T>& p2) noexcept {
 //////////////////////////////////////////////////////////////////////
 
 }
-

@@ -573,16 +573,13 @@ mstch::node mstch_program::has_thrift_uris() {
 mstch::node mstch_program::structs() {
   std::string id = program_->name() + get_program_namespace(program_);
   return make_mstch_array_cached(
-      get_program_objects(),
-      *context_.struct_factory,
-      context_.struct_cache,
-      id);
+      program_->objects(), *context_.struct_factory, context_.struct_cache, id);
 }
 
 mstch::node mstch_program::enums() {
   std::string id = program_->name() + get_program_namespace(program_);
   return make_mstch_array_cached(
-      get_program_enums(), *context_.enum_factory, context_.enum_cache, id);
+      program_->enums(), *context_.enum_factory, context_.enum_cache, id);
 }
 
 mstch::node mstch_program::services() {
@@ -626,13 +623,6 @@ mstch::node mstch_program::interned_values() {
         nullptr));
   }
   return a;
-}
-
-const std::vector<t_struct*>& mstch_program::get_program_objects() {
-  return program_->objects();
-}
-const std::vector<t_enum*>& mstch_program::get_program_enums() {
-  return program_->enums();
 }
 
 } // namespace compiler

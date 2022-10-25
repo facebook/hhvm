@@ -9,8 +9,6 @@ use std::collections::BTreeSet;
 
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
 
 fn val<T: FromOcamlRep + ToOcamlRep>(value: T) -> usize {
     let arena = Box::leak(Box::new(ocamlrep::Arena::new()));

@@ -22,6 +22,8 @@
 
 #include <folly/Format.h>
 
+#include <boost/container/flat_set.hpp>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 struct Variant;

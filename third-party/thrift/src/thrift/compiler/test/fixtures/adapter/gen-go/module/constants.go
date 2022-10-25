@@ -36,6 +36,15 @@ var Var3 *MyStruct
 const Var4 = 40
 const Var5 = "50"
 var Var6 *MyStruct
+const Timeout = 42
+const Msg = "hello, world"
+var Person *Person2
+const TimeoutNoTransitive = 420
+const MsgNoTransitive = "hello, world 2"
+var PersonNoTransitive *Person2
+var TypeAdapted AdaptedBool
+var NestedAdapted *MoveOnly
+var ContainerOfAdapted []AdaptedByte
 
 func init() {
 Var3 = &MyStruct{
@@ -48,6 +57,27 @@ Var6 = &MyStruct{
   Field: 60,
   SetString: []string{
     "30",     "40",   },
+}
+
+Person = &Person2{
+  Name: "DefaultName",
+}
+
+PersonNoTransitive = &Person2{
+  Name: "DefaultName 2",
+}
+
+TypeAdapted = true
+
+NestedAdapted = &MoveOnly{
+  Ptr: &HeapAllocated{
+  },
+}
+
+ContainerOfAdapted = []AdaptedByte{
+  1,
+  2,
+  3,
 }
 
 }

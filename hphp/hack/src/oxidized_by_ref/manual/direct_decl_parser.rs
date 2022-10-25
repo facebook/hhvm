@@ -6,9 +6,9 @@
 use arena_collections::List;
 use arena_trait::TrivialDrop;
 use no_pos_hash::NoPosHash;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use ocamlrep_caml_builtins::Int64;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
 use oxidized::file_info::NameType;
 use serde::Deserialize;
 use serde::Serialize;
@@ -43,7 +43,7 @@ pub struct ParsedFile<'a> {
 }
 
 // NB: Must keep in sync with OCaml type `Direct_decl_parser.parsed_file_with_hashes`
-#[derive(ocamlrep_derive::ToOcamlRep)]
+#[derive(ToOcamlRep)]
 pub struct ParsedFileWithHashes<'a> {
     pub mode: Option<file_info::Mode>,
     pub hash: Int64,
@@ -64,6 +64,17 @@ impl<'a> From<ParsedFile<'a>> for ParsedFileWithHashes<'a> {
             hash: file_decls_hash,
             decls,
         }
+    }
+}
+
+impl<'a> ParsedFileWithHashes<'a> {
+    pub fn remove_php_stdlib_decls_and_rev(&mut self, arena: &'a bumpalo::Bump) {
+        self.decls = Vec::from_iter(self.decls.drain(..).rev().filter_map(|(name, decl, hash)| {
+            filter_php_stdlib_decls(arena, decl).map(|decl| (name, decl, hash))
+        }));
+    }
+    pub fn rev(&mut self) {
+        self.decls.reverse()
     }
 }
 
@@ -143,6 +154,51 @@ impl<'a> Decls<'a> {
             Decl::Module(decl) => Some((*name, decl)),
             _ => None,
         })
+    }
+
+    pub fn remove_php_stdlib_decls_and_rev(&mut self, arena: &'a bumpalo::Bump) {
+        self.0 = List::rev_from_iter_in(
+            (self.0.iter().copied())
+                .filter_map(|(name, d)| filter_php_stdlib_decls(arena, d).map(|d| (name, d))),
+            arena,
+        );
+    }
+}
+
+// c.f. `hphp/hack/src/providers/direct_decl_utils.ml`
+fn filter_php_stdlib_decls<'a>(arena: &'a bumpalo::Bump, decl: Decl<'a>) -> Option<Decl<'a>> {
+    use crate::method_flags::MethodFlags;
+    use crate::prop_flags::PropFlags;
+    fn filter<'b, T: Copy>(
+        items: &'b [T],
+        arena: &'b bumpalo::Bump,
+        pred: impl FnMut(&T) -> bool,
+    ) -> &'b [T] {
+        bumpalo::collections::Vec::from_iter_in(items.iter().copied().filter(pred), arena)
+            .into_bump_slice()
+    }
+    match decl {
+        Decl::Fun(f) if f.php_std_lib => None,
+        Decl::Class(c) if (c.user_attributes.iter()).any(|ua| ua.name.1 == "__PHPStdLib") => None,
+        Decl::Class(c) => {
+            let masked = arena.alloc(shallow_decl_defs::ShallowClass {
+                props: filter(c.props, arena, |p| {
+                    !p.flags.contains(PropFlags::PHP_STD_LIB)
+                }),
+                sprops: filter(c.sprops, arena, |p| {
+                    !p.flags.contains(PropFlags::PHP_STD_LIB)
+                }),
+                methods: filter(c.methods, arena, |m| {
+                    !m.flags.contains(MethodFlags::PHP_STD_LIB)
+                }),
+                static_methods: filter(c.static_methods, arena, |m| {
+                    !m.flags.contains(MethodFlags::PHP_STD_LIB)
+                }),
+                ..*c
+            });
+            Some(Decl::Class(masked))
+        }
+        _ => Some(decl),
     }
 }
 

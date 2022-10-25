@@ -35,7 +35,10 @@ namespace go thrift.lib.thrift.protocol_detail
 namespace py thrift.lib.thrift.protocol_detail
 
 // A dynamic struct/union/exception
-@cpp.Adapter{name = "::apache::thrift::protocol::detail::ObjectAdapter"}
+@cpp.Adapter{
+  name = "::apache::thrift::protocol::detail::ObjectAdapter",
+  adaptedType = "::apache::thrift::protocol::detail::ObjectWrapper<::apache::thrift::protocol::detail::detail::Object>",
+}
 @cpp.UseOpEncode
 struct Object {
   // The type of the object, if applicable.
@@ -47,7 +50,10 @@ struct Object {
 } (cpp.virtual, thrift.uri = "facebook.com/thrift/protocol/Object")
 
 // A dynamic value.
-@cpp.Adapter{name = "::apache::thrift::protocol::detail::ValueAdapter"}
+@cpp.Adapter{
+  name = "::apache::thrift::protocol::detail::ValueAdapter",
+  adaptedType = "::apache::thrift::protocol::detail::ValueWrapper<::apache::thrift::protocol::detail::detail::Value>",
+}
 @cpp.ScopedEnumAsUnionType
 @cpp.UseOpEncode
 union Value {

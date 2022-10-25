@@ -27,7 +27,7 @@
  *
  * Additional documentation is in folly/docs/Range.md
  *
- * @refcode docs/examples/folly/Range.h
+ * @refcode folly/docs/examples/folly/Range.h
  * @struct folly::range
  */
 
@@ -1059,10 +1059,10 @@ class Range {
    * @author: Marcelo Juchem <marcelo@fb.com>
    */
   Range split_step(value_type delimiter) {
-    auto i = std::find(b_, e_, delimiter);
-    Range result(b_, i);
+    auto i = find(delimiter);
+    Range result(b_, i == std::string::npos ? size() : i);
 
-    b_ = i == e_ ? e_ : std::next(i);
+    b_ = result.end() == e_ ? e_ : std::next(result.end());
 
     return result;
   }

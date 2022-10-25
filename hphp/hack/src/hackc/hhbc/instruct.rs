@@ -34,6 +34,12 @@ impl Dummy {
 #[repr(transparent)]
 pub struct Label(pub u32);
 
+impl std::convert::From<Label> for usize {
+    fn from(id: Label) -> Self {
+        id.0 as usize
+    }
+}
+
 impl std::fmt::Display for Label {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.0.fmt(f)
@@ -46,6 +52,10 @@ impl Label {
 
     pub fn is_valid(&self) -> bool {
         self.0 != u32::MAX
+    }
+
+    pub fn as_usize(&self) -> usize {
+        self.0 as usize
     }
 }
 
@@ -122,10 +132,20 @@ impl<'arena> FCallArgs<'arena> {
         }
     }
 
+    /// num_inputs() only includes "interesting" inputs - so it doesn't include
+    /// the ActRec or inout values. It also doesn't include inputs defined by
+    /// the specific instruct (such as FCallFunc vs FCallFuncD).
+    ///
+    /// This is similar but not exactly the same as the numArgsInclUnpack()
+    /// lambda in HHVM's fcallImpl().
     pub fn num_inputs(&self) -> usize {
         self.num_args as usize
             + self.flags.contains(FCallArgsFlags::HasUnpack) as usize
             + self.flags.contains(FCallArgsFlags::HasGenerics) as usize
+    }
+
+    pub fn num_inouts(&self) -> usize {
+        self.inouts.iter().map(|&b| b as usize).sum()
     }
 }
 
@@ -198,9 +218,6 @@ impl std::default::Default for IterArgs {
         }
     }
 }
-
-/// Conventionally this is "A_" followed by an integer
-pub type AdataId<'arena> = Str<'arena>;
 
 #[derive(Clone, Copy, Debug, Hash, Eq, PartialEq, Serialize)]
 #[repr(C)]

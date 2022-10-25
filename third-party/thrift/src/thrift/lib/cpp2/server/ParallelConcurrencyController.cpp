@@ -90,13 +90,13 @@ bool ParallelConcurrencyController::trySchedule(bool onEnqueued) {
       ++counters.requestInExecution;
       --counters.pendingDequeCalls;
 
+      // If the swap succeeded we schedule the task on the executor
       if (!counters_.compare_exchange_weak(countersOld, counters)) {
         continue;
       }
 
-      if (executorSupportPriority) {
-        // If the swap succeeded we schedule the task on the executor
-        // and by default we have 2 prios, external requests should go to
+      if (executor_.getNumPriorities() > 1) {
+        // By default we have 2 prios, external requests should go to
         // lower priority queue to yield to the internal ones
         executor_.addWithPriority(
             [this]() { executeRequest(); }, folly::Executor::LO_PRI);
@@ -119,7 +119,7 @@ bool ParallelConcurrencyController::trySchedule(bool onEnqueued) {
 }
 
 void ParallelConcurrencyController::executeRequest() {
-  auto req = pile_.dequeue();
+  auto [req, userdata] = pile_.dequeue();
   if (req) {
     ServerRequest& serverRequest = req.value();
     // Only continue when the request has not
@@ -134,7 +134,11 @@ void ParallelConcurrencyController::executeRequest() {
       return;
     }
 
-    serverRequest.setRequestPileNotification(&pile_);
+    if (userdata) {
+      serverRequest.requestData().requestPileUserData = *userdata;
+      serverRequest.setRequestPileNotification(&pile_);
+    }
+
     serverRequest.setConcurrencyControllerNotification(this);
     auto stats = ConcurrencyControllerBase::onExecute(serverRequest);
     AsyncProcessorHelper::executeRequest(std::move(*req));

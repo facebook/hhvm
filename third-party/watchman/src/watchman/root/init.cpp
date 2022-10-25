@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <fmt/core.h>
 #include <folly/String.h>
 #include "watchman/Logging.h"
 #include "watchman/QueryableView.h"
@@ -31,10 +32,8 @@ void ClientStateAssertions::queueAssertion(
     auto disp = state_q->second.back()->disposition;
     if (disp == ClientStateDisposition::PendingEnter ||
         disp == ClientStateDisposition::Asserted) {
-      throw std::runtime_error(folly::to<std::string>(
-          "state ",
-          assertion->name.view(),
-          " is already Asserted or PendingEnter"));
+      throw std::runtime_error(fmt::format(
+          "state {} is already Asserted or PendingEnter", assertion->name));
     }
   }
   states_[assertion->name].push_back(assertion);

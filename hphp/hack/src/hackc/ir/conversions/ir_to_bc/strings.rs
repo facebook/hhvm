@@ -9,7 +9,7 @@ use ir::StringInterner;
 use ir::UnitBytesId;
 
 pub(crate) struct StringCache<'a, 'b> {
-    alloc: &'a bumpalo::Bump,
+    pub alloc: &'a bumpalo::Bump,
     cache: DashMap<UnitBytesId, Str<'a>>,
     pub interner: &'b StringInterner,
 }

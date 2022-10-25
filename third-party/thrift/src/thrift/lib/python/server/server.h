@@ -162,15 +162,14 @@ class PythonAsyncProcessor : public apache::thrift::AsyncProcessor {
   }
 
   template <typename ProtocolIn_, typename ProtocolOut_>
-  std::unique_ptr<apache::thrift::ContextStack> preProcessRequest(
+  apache::thrift::ContextStack::UniquePtr preProcessRequest(
       apache::thrift::SerializedRequest& serializedRequest,
       apache::thrift::Cpp2RequestContext* ctx) {
     static_assert(ProtocolIn_::protocolType() == ProtocolOut_::protocolType());
-    std::unique_ptr<apache::thrift::ContextStack> ctxStack(
-        this->getContextStack(
-            serviceName_.c_str(),
-            functionFullNameMap_.at(ctx->getMethodName()).c_str(),
-            ctx));
+    apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(
+        serviceName_.c_str(),
+        functionFullNameMap_.at(ctx->getMethodName()).c_str(),
+        ctx));
 
     if (ctxStack) {
       ctxStack->preRead();
@@ -201,7 +200,7 @@ class PythonAsyncProcessor : public apache::thrift::AsyncProcessor {
     ProtocolIn_ prot;
     auto serializedRequest =
         std::move(serializedCompressedRequest).uncompress();
-    std::unique_ptr<apache::thrift::ContextStack> ctxStack =
+    apache::thrift::ContextStack::UniquePtr ctxStack =
         preProcessRequest<ProtocolIn_, ProtocolOut_>(serializedRequest, ctx);
 
     auto callback = std::make_unique<
@@ -247,7 +246,7 @@ class PythonAsyncProcessor : public apache::thrift::AsyncProcessor {
     ProtocolIn_ prot;
     auto serializedRequest =
         std::move(serializedCompressedRequest).uncompress();
-    std::unique_ptr<apache::thrift::ContextStack> ctxStack =
+    apache::thrift::ContextStack::UniquePtr ctxStack =
         preProcessRequest<ProtocolIn_, ProtocolOut_>(serializedRequest, ctx);
 
     auto callback = std::make_unique<apache::thrift::HandlerCallbackBase>(

@@ -43,7 +43,7 @@ TEST(BigValueRouteTest, smallvalue) {
   const std::string keyGet = "smallvalue_get";
   const std::string keySet = "smallvalue_set";
 
-  TestFiberManager fm;
+  TestFiberManager<MemcacheRouterInfo> fm;
   fm.runAll({[&]() {
     McrouterRouteHandle<BigValueRoute> rh(routeHandles[0], opts);
 
@@ -86,7 +86,7 @@ TEST(BigValueRouteTest, bigvalue) {
   const std::string keyGet = "bigvalue_get";
   const std::string keySet = "bigvalue_set";
 
-  TestFiberManager fm;
+  TestFiberManager<MemcacheRouterInfo> fm;
   fm.runAll({[&]() {
     { // Test Get Like path with init_reply in corect format
       McrouterRouteHandle<BigValueRoute> rh(routeHandles[0], opts);

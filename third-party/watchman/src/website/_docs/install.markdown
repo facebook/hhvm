@@ -105,19 +105,23 @@ If you use Homebrew on Linux, it's a great way to get a recent Watchman build.
 
 Follow the [macOS instructions above](#homebrew-instructions).
 
-### Fedora
+### Fedora (Prebuilt RPMs)
 
-Fedora packages an older version, and is **not recommended**. It is missing security, bug, and performance fixes.
+**Warning**: Do not install the Fedora-supplied Watchman package. It is old and missing security, bug, and performance fixes.
 
-But if you must:
+1. From the [latest release](https://github.com/facebook/watchman/releases/latest), download the .rpm corresponding to your Fedora version
+2. `sudo dnf localinstall watchman-$VERSION.fc$FEDORA_VERSION.x86_64.rpm`
+3. Confirm successful installation by running `watchman version`
 
-```
-sudo dnf install watchman
-```
+### Ubuntu (Prebuilt Debs)
 
-### Ubuntu
+**Warning**: Do not install the Ubuntu-supplied Watchman package. It is old and missing security, bug, and performance fixes.
 
-Ubuntu packages an ancient version of Watchman, and is **not recommended**. It is missing security, bug, and performance fixes.
+1. From the [latest release](https://github.com/facebook/watchman/releases/latest), download the .deb corresponding to your Ubuntu version
+2. `sudo dpkg -i watchman_$UBUNTU_RELEASE_$VERSION.deb`
+3. You will likely see errors about unresolved dependencies. The next step will resolve them.
+4. `sudo apt-get -f install`
+5. Confirm successful installation by running `watchman version`
 
 ### <a name="building-from-source"></a> Building from Source
 
@@ -126,16 +130,22 @@ Download a [source snapshot from the latest release](https://github.com/facebook
 ```bash
 $ cd watchman
 
+# Ensure Cargo is installed. Either through your OS's package manager or https://rustup.rs/
+$ cargo version
+
 # Optionally, to save time, you can ask Watchman's build process to install system dependencies
 $ sudo ./install-system-packages.sh
 
 $ ./autogen.sh
-$
 ```
 
 ### Prebuilt Binaries
 
-*Note: Our binaries are built from the main branch only.  We don't provide binaries for v4.9.0.*
+**Note**: Our binaries are built from the main branch only.  We don't provide binaries for v4.9.0.
+
+**Note**: The Linux binaries are compiled on a GitHub Action VM (ubuntu-20.04 at the time of this writing),
+and Linux binaries are [not generally compatible across distributions](https://github.com/facebook/watchman/issues/1019),
+so try the prebuilt Fedora, Ubuntu, or Homebrew packages first.
 
 Watchman is continuously deployed as it passes our internal test validation
 inside Meta and doesn't use manually assigned or "approved" version numbers.
@@ -143,12 +153,6 @@ inside Meta and doesn't use manually assigned or "approved" version numbers.
 Outside Meta we have automation that cuts a tag and builds binaries on Monday of
 each week and assigns a tag based on the date.  That process is in a beta
 state; some or all of the binaries may not be present for any given tag.
-
-You can find the binary downloads in the [latest release](https://github.com/facebook/watchman/releases/latest)
-
-**Note**: The Linux binaries are compiled on a GitHub Action VM (ubuntu-20.04 at the time of this writing),
-and Linux binaries are [not generally compatible across distributions](https://github.com/facebook/watchman/issues/1019),
-so you may have better luck [building from source](#building-from-source) or [installing with Homebrew](#homebrew).
 
 1. Download and extract the release for your system from the [latest release](https://github.com/facebook/watchman/releases/latest)
 2. It will be named something like `watchman-vYYYY.MM.DD.00-linux.zip`
@@ -195,7 +199,7 @@ This means that if an overflow does occur, you won't miss a legitimate change
 notification, but instead will get spurious notifications for files that
 haven't actually changed.
 
-### Mac OS File Descriptor Limits
+### macOS File Descriptor Limits
 
 *Only applicable on macOS 10.6 and earlier*
 

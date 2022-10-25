@@ -1,0 +1,2 @@
+--enable-global-access-check-files "/"
+--allowed-fixme-codes-strict 11001,11002,11003

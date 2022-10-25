@@ -352,6 +352,17 @@ struct BlobEncoder {
     return *this;
   }
 
+  template <typename T>
+  BlobEncoder& sharedPtr(const std::shared_ptr<T>& p) {
+    if (p) {
+      (*this)(true);
+      (*this)(*p);
+    } else {
+      (*this)(false);
+    }
+    return *this;
+  }
+
   /*
    * Record the size of the data emitted during f(), which
    * BlobDecoder::skipSize or BlobDecoder::peekSize can later read.
@@ -735,6 +746,18 @@ struct BlobDecoder {
     return *this;
   }
 
+  template <typename T>
+  BlobDecoder& sharedPtr(std::shared_ptr<T>& p) {
+    bool present;
+    (*this)(present);
+    if (present) {
+      p = std::make_shared<T>(make<T>());
+    } else {
+      p.reset();
+    }
+    return *this;
+  }
+
   /*
    * Read a block of data (using f()) which is previously encoded with
    * BlobEncoder::withSize.
@@ -863,6 +886,19 @@ private:
   const unsigned char* m_p;
   const unsigned char* const m_last;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+// Can't form non-const refs to bitfields, so use this to serde them
+// instead.
+#define SERDE_BITFIELD(X, SD)                   \
+  if constexpr (std::remove_reference<decltype(SD)>::type::deserializing) { \
+    decltype(X) v;                              \
+    SD(v);                                      \
+    X = v;                                      \
+  } else {                                      \
+    SD(X);                                      \
+  }
 
 //////////////////////////////////////////////////////////////////////
 

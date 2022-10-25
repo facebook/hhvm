@@ -75,6 +75,7 @@ public class TestServiceReactiveClient
 
 
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };

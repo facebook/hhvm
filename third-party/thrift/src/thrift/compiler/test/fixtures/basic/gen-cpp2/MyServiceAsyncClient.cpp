@@ -237,7 +237,7 @@ void apache::thrift::Client<::test::fixtures::basic::MyService>::pingImpl(apache
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::pingCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::pingCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -425,7 +425,7 @@ void apache::thrift::Client<::test::fixtures::basic::MyService>::getRandomDataIm
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::getRandomDataCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::getRandomDataCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -613,7 +613,7 @@ void apache::thrift::Client<::test::fixtures::basic::MyService>::sinkImpl(apache
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::sinkCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::sinkCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -801,7 +801,7 @@ void apache::thrift::Client<::test::fixtures::basic::MyService>::putDataByIdImpl
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::putDataByIdCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::putDataByIdCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -989,7 +989,7 @@ void apache::thrift::Client<::test::fixtures::basic::MyService>::hasDataByIdImpl
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::hasDataByIdCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::hasDataByIdCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -1179,7 +1179,7 @@ void apache::thrift::Client<::test::fixtures::basic::MyService>::getDataByIdImpl
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::getDataByIdCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::getDataByIdCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -1367,7 +1367,7 @@ void apache::thrift::Client<::test::fixtures::basic::MyService>::deleteDataByIdI
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::deleteDataByIdCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::deleteDataByIdCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -1556,7 +1556,7 @@ void apache::thrift::Client<::test::fixtures::basic::MyService>::lobDataByIdImpl
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::lobDataByIdCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::lobDataByIdCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -1675,7 +1675,7 @@ void apache::thrift::Client<::test::fixtures::basic::MyService>::invalid_return_
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::invalid_return_for_hackCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::invalid_return_for_hackCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -1863,7 +1863,7 @@ void apache::thrift::Client<::test::fixtures::basic::MyService>::rpc_skipped_cod
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::rpc_skipped_codegenCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::test::fixtures::basic::MyService>::rpc_skipped_codegenCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());

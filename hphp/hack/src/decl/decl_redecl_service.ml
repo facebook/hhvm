@@ -150,19 +150,25 @@ let compare_decls_and_get_fanout
   let { FileInfo.n_classes; n_funs; n_types; n_consts; n_modules } = all_defs in
   let acc = empty_fanout in
   (* Fetching everything at once is faster *)
-  let old_funs = Decl_heap.Funs.get_old_batch n_funs in
+  let (old_funs, old_types, old_consts, old_modules) =
+    match Provider_backend.get () with
+    | Provider_backend.Rust_provider_backend be ->
+      Rust_provider_backend.Decl.get_old_defs be all_defs
+    | _ ->
+      ( Decl_heap.Funs.get_old_batch n_funs,
+        Decl_heap.Typedefs.get_old_batch n_types,
+        Decl_heap.GConsts.get_old_batch n_consts,
+        Decl_heap.Modules.get_old_batch n_modules )
+  in
   let (acc, old_funs_missing) =
     compare_funs_and_get_fanout ctx old_funs acc n_funs
   in
-  let old_types = Decl_heap.Typedefs.get_old_batch n_types in
   let (acc, old_types_missing) =
     compare_types_and_get_fanout ctx old_types acc n_types
   in
-  let old_consts = Decl_heap.GConsts.get_old_batch n_consts in
   let (acc, old_gconsts_missing) =
     compare_gconsts_and_get_fanout ctx old_consts acc n_consts
   in
-
   let (acc, old_classes_missing) =
     if shallow_decl_enabled ctx || force_shallow_decl_fanout_enabled ctx then
       (acc, 0)
@@ -171,12 +177,9 @@ let compare_decls_and_get_fanout
       let new_classes = Decl_heap.Classes.get_batch n_classes in
       compare_classes_and_get_fanout ctx old_classes new_classes acc n_classes
   in
-
-  let old_modules = Decl_heap.Modules.get_old_batch n_modules in
   let (acc, old_modules_missing) =
     compare_modules_and_get_fanout ctx old_modules acc n_modules
   in
-
   let old_decl_missing_count =
     old_funs_missing
     + old_types_missing
@@ -327,50 +330,62 @@ let parallel_redecl_compare_and_get_fanout
 (*****************************************************************************)
 (* Code invalidating the heap *)
 (*****************************************************************************)
-let oldify_defs
+let[@warning "-21"] oldify_defs (* -21 for dune stubs *)
     (ctx : Provider_context.t)
-    { FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }
+    ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } as names)
     (elems : Decl_class_elements.t SMap.t)
     ~(collect_garbage : bool) : unit =
-  Decl_heap.Funs.oldify_batch n_funs;
-  Decl_class_elements.oldify_all elems;
-  Decl_heap.Classes.oldify_batch n_classes;
-  Shallow_classes_provider.oldify_batch ctx n_classes;
-  Decl_heap.Typedefs.oldify_batch n_types;
-  Decl_heap.GConsts.oldify_batch n_consts;
-  Decl_heap.Modules.oldify_batch n_modules;
-  if collect_garbage then SharedMem.GC.collect `gentle;
-  ()
+  match Provider_backend.get () with
+  | Provider_backend.Rust_provider_backend be ->
+    Rust_provider_backend.Decl.oldify_defs be (names, elems)
+  | _ ->
+    Decl_heap.Funs.oldify_batch n_funs;
+    Decl_class_elements.oldify_all elems;
+    Decl_heap.Classes.oldify_batch n_classes;
+    Shallow_classes_provider.oldify_batch ctx n_classes;
+    Decl_heap.Typedefs.oldify_batch n_types;
+    Decl_heap.GConsts.oldify_batch n_consts;
+    Decl_heap.Modules.oldify_batch n_modules;
+    if collect_garbage then SharedMem.GC.collect `gentle;
+    ()
 
-let remove_old_defs
+let[@warning "-21"] remove_old_defs (* -21 for dune stubs *)
     (ctx : Provider_context.t)
-    { FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }
+    ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } as names)
     (elems : Decl_class_elements.t SMap.t) : unit =
-  Decl_heap.Funs.remove_old_batch n_funs;
-  Decl_class_elements.remove_old_all elems;
-  Decl_heap.Classes.remove_old_batch n_classes;
-  Shallow_classes_provider.remove_old_batch ctx n_classes;
-  Decl_heap.Typedefs.remove_old_batch n_types;
-  Decl_heap.GConsts.remove_old_batch n_consts;
-  Decl_heap.Modules.remove_old_batch n_modules;
-  SharedMem.GC.collect `gentle;
-  ()
+  match Provider_backend.get () with
+  | Provider_backend.Rust_provider_backend be ->
+    Rust_provider_backend.Decl.remove_old_defs be (names, elems)
+  | _ ->
+    Decl_heap.Funs.remove_old_batch n_funs;
+    Decl_class_elements.remove_old_all elems;
+    Decl_heap.Classes.remove_old_batch n_classes;
+    Shallow_classes_provider.remove_old_batch ctx n_classes;
+    Decl_heap.Typedefs.remove_old_batch n_types;
+    Decl_heap.GConsts.remove_old_batch n_consts;
+    Decl_heap.Modules.remove_old_batch n_modules;
+    SharedMem.GC.collect `gentle;
+    ()
 
-let remove_defs
+let[@warning "-21"] remove_defs (* -21 for dune stubs *)
     (ctx : Provider_context.t)
-    { FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }
+    ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } as names)
     (elems : Decl_class_elements.t SMap.t)
     ~(collect_garbage : bool) : unit =
-  Decl_heap.Funs.remove_batch n_funs;
-  Decl_class_elements.remove_all elems;
-  Decl_heap.Classes.remove_batch n_classes;
-  Shallow_classes_provider.remove_batch ctx n_classes;
-  Linearization_provider.remove_batch ctx n_classes;
-  Decl_heap.Typedefs.remove_batch n_types;
-  Decl_heap.GConsts.remove_batch n_consts;
-  Decl_heap.Modules.remove_batch n_modules;
-  if collect_garbage then SharedMem.GC.collect `gentle;
-  ()
+  match Provider_backend.get () with
+  | Provider_backend.Rust_provider_backend be ->
+    Rust_provider_backend.Decl.remove_defs be (names, elems)
+  | _ ->
+    Decl_heap.Funs.remove_batch n_funs;
+    Decl_class_elements.remove_all elems;
+    Decl_heap.Classes.remove_batch n_classes;
+    Shallow_classes_provider.remove_batch ctx n_classes;
+    Linearization_provider.remove_batch ctx n_classes;
+    Decl_heap.Typedefs.remove_batch n_types;
+    Decl_heap.GConsts.remove_batch n_consts;
+    Decl_heap.Modules.remove_batch n_modules;
+    if collect_garbage then SharedMem.GC.collect `gentle;
+    ()
 
 let is_dependent_class_of_any ctx classes (c : string) : bool =
   if SSet.mem classes c then

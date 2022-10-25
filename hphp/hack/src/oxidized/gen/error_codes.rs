@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1572e8b213d9602480691c85aa02eaf6>>
+// @generated SignedSource<<cc7fdc5368fda8084df29558e67e5303>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,9 +11,9 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -224,6 +224,9 @@ pub enum NastCheck {
     PrivateAndFinal = 3097,
     InternalMemberInsidePublicTrait = 3099,
     AttributeConflictingMemoize = 3100,
+    RefinementInTypeStruct = 3101,
+    #[rust_to_ocaml(name = "Soft_internal_without_internal")]
+    SoftInternalWithoutInternal = 3102,
 }
 impl TrivialDrop for NastCheck {}
 arena_deserializer::impl_deserialize_in_arena!(NastCheck);
@@ -623,11 +626,11 @@ arena_deserializer::impl_deserialize_in_arena!(Init);
 )]
 #[rust_to_ocaml(attr = "deriving (enum, (show { with_path = false }))")]
 #[repr(C)]
-pub enum GlobalWriteCheck {
-    StaticVariableDirectWrite = 11001,
-    GlobalVariableWrite = 11002,
-    GlobalVariableInFunctionCall = 11003,
-    GlobalVariableDirectRead = 11004,
+pub enum GlobalAccessCheck {
+    DefiniteGlobalWrite = 11001,
+    PossibleGlobalWriteViaReference = 11002,
+    PossibleGlobalWriteViaFunctionCall = 11003,
+    DefiniteGlobalRead = 11004,
 }
-impl TrivialDrop for GlobalWriteCheck {}
-arena_deserializer::impl_deserialize_in_arena!(GlobalWriteCheck);
+impl TrivialDrop for GlobalAccessCheck {}
+arena_deserializer::impl_deserialize_in_arena!(GlobalAccessCheck);

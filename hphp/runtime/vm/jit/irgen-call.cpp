@@ -1058,8 +1058,7 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
 
     if (!clsHint->empty()) {
       auto const cls = lookupUniqueClass(env, clsHint);
-      if (cls) {
-        assertx(!isInterface(cls));
+      if (cls && isNormalClass(cls)) {
         obj = gen(env, AssertType, Type::SubObj(cls), obj);
         auto const callCtx =
           MemberLookupContext(callContext(env, fca, cls), curFunc(env));
@@ -1074,7 +1073,8 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
         // We may still want to use MethProfile to gather more information in
         // case the class isn't known exactly.
         auto const exactClass =
-          obj->type().clsSpec().exact() || cls->attrs() & AttrNoOverride;
+          obj->type().clsSpec().exact() ||
+          cls->attrs() & AttrNoOverrideRegular;
         auto const callCtx =
           MemberLookupContext(callContext(env, fca, cls), curFunc(env));
         return lookupImmutableObjMethod(cls, methodName->strVal(),
@@ -1156,7 +1156,8 @@ void fcallFuncObj(IRGS& env, const FCallArgs& fca) {
 
   auto const slowExit = makeExitSlow(env);
   auto const cls = gen(env, LdObjClass, obj);
-  auto const func = gen(env, LdObjInvoke, slowExit, cls);
+  auto const funcOpt = gen(env, LdObjInvoke, cls);
+  auto const func = gen(env, CheckNonNull, slowExit, funcOpt);
   discard(env);
   updateStackOffset(env);
   prepareAndCallProfiled(env, func, fca, obj, false, false);
@@ -1171,6 +1172,9 @@ void fcallFuncFunc(IRGS& env, const FCallArgs& fca) {
   ifElse(
     env,
     [&] (Block* taken) {
+      // This is super sketchy, as we did not check for isMethCaller() yet.
+      // However, it is faster than checking isMethCaller() first, and it does
+      // the right thing(tm) no matter whether the CheckNonNull jumps or not.
       gen(env, CheckNonNull, taken, gen(env, LdFuncCls, func));
       auto const attr = AttrData { AttrIsMethCaller };
       gen(env, JmpNZero, taken, gen(env, FuncHasAttr, attr, func));
@@ -1292,7 +1296,7 @@ void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) 
 }
 
 void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
-  auto const lookup = lookupImmutableFunc(curUnit(env), funcName);
+  auto const lookup = lookupImmutableFunc(funcName);
   auto const callerCtx = [&] {
     if (!fca.context) return curClass(env);
     auto const ret = lookupUniqueClass(env, fca.context, true /* trustUnit */);
@@ -1329,7 +1333,7 @@ void emitFCallFunc(IRGS& env, FCallArgs fca) {
 }
 
 void emitResolveFunc(IRGS& env, const StringData* name) {
-  auto const lookup = lookupImmutableFunc(curUnit(env), name);
+  auto const lookup = lookupImmutableFunc(name);
   if (!lookup.func) {
     auto const func =
       gen(env, LookupFuncCached, FuncNameData { name, curClass(env) });
@@ -1345,7 +1349,7 @@ void emitResolveFunc(IRGS& env, const StringData* name) {
 }
 
 void emitResolveMethCaller(IRGS& env, const StringData* name) {
-  auto const lookup = lookupImmutableFunc(curUnit(env), name);
+  auto const lookup = lookupImmutableFunc(name);
   auto func = lookup.func;
 
   // We de-duplicate meth_caller across the repo which may lead to the resolved
@@ -1380,7 +1384,7 @@ void emitResolveRFunc(IRGS& env, const StringData* name) {
   auto const tsList = popC(env);
 
   auto const funcTmp = [&] () -> SSATmp* {
-    auto const lookup = lookupImmutableFunc(curUnit(env), name);
+    auto const lookup = lookupImmutableFunc(name);
     auto const func = lookup.func;
     if (!func) {
       return gen(env, LookupFuncCached, FuncNameData { name, curClass(env) });
@@ -1510,7 +1514,7 @@ void emitFCallCtor(IRGS& env, FCallArgs fca, const StringData* clsHint) {
   auto const exactCls = [&] {
     if (!clsHint->empty()) {
       auto const cls = lookupUniqueClass(env, clsHint);
-      if (cls) return cls;
+      if (cls && isNormalClass(cls)) return cls;
     }
     return obj->type().clsSpec().exactCls();
   }();
@@ -1902,7 +1906,7 @@ void fcallClsMethodCommon(IRGS& env,
   auto const knownClass = [&] () -> std::pair<const Class*, bool> {
     if (!clsHint->empty()) {
       auto const cls = lookupUniqueClass(env, clsHint);
-      if (cls) return std::make_pair(cls, true);
+      if (cls && isNormalClass(cls)) return std::make_pair(cls, true);
     }
 
     if (auto const cs = clsVal->type().clsSpec()) {

@@ -11,6 +11,11 @@
 #else
 #include <thrift/compiler/test/fixtures/adapter/src/gen-cpp2/module_clients.h>
 #endif
+#if __has_include(<thrift/compiler/test/fixtures/adapter/src/gen-cpp2/AdapterService.h>)
+#include <thrift/compiler/test/fixtures/adapter/src/gen-cpp2/AdapterService.h>
+#else
+#include <thrift/compiler/test/fixtures/adapter/src/gen-cpp2/module_clients.h>
+#endif
 
 #include <folly/futures/Future.h>
 #include <folly/futures/Promise.h>
@@ -38,6 +43,18 @@ class ServiceClientWrapper : public ::thrift::py3::ClientWrapper {
       std::string arg_arg1,
       std::string arg_arg2,
       ::facebook::thrift::test::Foo arg_arg3);
+};
+
+
+class AdapterServiceClientWrapper : public ::thrift::py3::ClientWrapper {
+  public:
+    using ::thrift::py3::ClientWrapper::ClientWrapper;
+
+    folly::Future<::facebook::thrift::test::CountingStruct> count(
+      apache::thrift::RpcOptions& rpcOptions);
+    folly::Future<::facebook::thrift::test::HeapAllocated> adaptedTypes(
+      apache::thrift::RpcOptions& rpcOptions,
+      ::facebook::thrift::test::HeapAllocated arg_arg);
 };
 
 

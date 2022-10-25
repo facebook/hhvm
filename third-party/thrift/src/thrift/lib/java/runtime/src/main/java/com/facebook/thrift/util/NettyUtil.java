@@ -16,8 +16,10 @@
 
 package com.facebook.thrift.util;
 
+import com.facebook.thrift.protocol.ByteBufTProtocol;
 import com.facebook.thrift.rsocket.transport.reactor.server.RSocketProtocolDetector;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.EventLoopGroup;
@@ -136,6 +138,16 @@ public final class NettyUtil {
             (t, e) -> LOGGER.error("uncaught exception on thread {}", t.getName(), e))
         .setThreadFactory(ThriftEventLoopThread::new)
         .build();
+  }
+
+  public static void releaseIfByteBufTProtocol(Object o) {
+    if (o instanceof ByteBufTProtocol) {
+      ByteBufTProtocol b = (ByteBufTProtocol) o;
+      ByteBuf byteBuf = b.getByteBuf();
+      if (byteBuf != null && byteBuf.refCnt() > 0) {
+        byteBuf.release();
+      }
+    }
   }
 
   /**

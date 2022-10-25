@@ -1,6 +1,6 @@
 <?hh
 
-<<file:__EnableUnstableFeatures("modules")>>
+
 module a;
 
 function bar1() { return foo<>; }

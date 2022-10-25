@@ -9,17 +9,31 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+#if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
+// This attribute is applied to the static data members to ensure that they are
+// not stripped from the compiled binary, in order to keep them available for
+// use by debuggers at runtime.
+//
+// The attribute works by forcing all of the data members (both used and unused
+// ones) into the same section. This stops the linker from stripping the unused
+// data, as it works on a per-section basis and only removes sections if they
+// are entirely unused.
+#define THRIFT_DATA_SECTION [[gnu::section(".rodata.thrift.data")]]
+#else
+#define THRIFT_DATA_SECTION
+#endif
+
 namespace apache {
 namespace thrift {
 
-const std::array<::test::fixtures::enums::Metasyntactic, 5> TEnumDataStorage<::test::fixtures::enums::Metasyntactic>::values = {{
+THRIFT_DATA_SECTION const std::array<::test::fixtures::enums::Metasyntactic, 5> TEnumDataStorage<::test::fixtures::enums::Metasyntactic>::values = {{
   type::FOO,
   type::BAR,
   type::BAZ,
   type::BAX,
   type::Unspecified,
 }};
-const std::array<folly::StringPiece, 5> TEnumDataStorage<::test::fixtures::enums::Metasyntactic>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TEnumDataStorage<::test::fixtures::enums::Metasyntactic>::names = {{
   "FOO",
   "BAR",
   "BAZ",
@@ -27,7 +41,7 @@ const std::array<folly::StringPiece, 5> TEnumDataStorage<::test::fixtures::enums
   "Unspecified",
 }};
 
-const std::array<::test::fixtures::enums::MyEnum1, 6> TEnumDataStorage<::test::fixtures::enums::MyEnum1>::values = {{
+THRIFT_DATA_SECTION const std::array<::test::fixtures::enums::MyEnum1, 6> TEnumDataStorage<::test::fixtures::enums::MyEnum1>::values = {{
   type::ME1_1,
   type::ME1_2,
   type::ME1_3,
@@ -35,7 +49,7 @@ const std::array<::test::fixtures::enums::MyEnum1, 6> TEnumDataStorage<::test::f
   type::ME1_6,
   type::ME1_0,
 }};
-const std::array<folly::StringPiece, 6> TEnumDataStorage<::test::fixtures::enums::MyEnum1>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 6> TEnumDataStorage<::test::fixtures::enums::MyEnum1>::names = {{
   "ME1_1",
   "ME1_2",
   "ME1_3",
@@ -44,18 +58,18 @@ const std::array<folly::StringPiece, 6> TEnumDataStorage<::test::fixtures::enums
   "ME1_0",
 }};
 
-const std::array<::test::fixtures::enums::MyEnum2, 3> TEnumDataStorage<::test::fixtures::enums::MyEnum2>::values = {{
+THRIFT_DATA_SECTION const std::array<::test::fixtures::enums::MyEnum2, 3> TEnumDataStorage<::test::fixtures::enums::MyEnum2>::values = {{
   type::ME2_0,
   type::ME2_1,
   type::ME2_2,
 }};
-const std::array<folly::StringPiece, 3> TEnumDataStorage<::test::fixtures::enums::MyEnum2>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 3> TEnumDataStorage<::test::fixtures::enums::MyEnum2>::names = {{
   "ME2_0",
   "ME2_1",
   "ME2_2",
 }};
 
-const std::array<::test::fixtures::enums::MyEnum3, 6> TEnumDataStorage<::test::fixtures::enums::MyEnum3>::values = {{
+THRIFT_DATA_SECTION const std::array<::test::fixtures::enums::MyEnum3, 6> TEnumDataStorage<::test::fixtures::enums::MyEnum3>::values = {{
   type::ME3_0,
   type::ME3_1,
   type::ME3_N2,
@@ -63,7 +77,7 @@ const std::array<::test::fixtures::enums::MyEnum3, 6> TEnumDataStorage<::test::f
   type::ME3_9,
   type::ME3_10,
 }};
-const std::array<folly::StringPiece, 6> TEnumDataStorage<::test::fixtures::enums::MyEnum3>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 6> TEnumDataStorage<::test::fixtures::enums::MyEnum3>::names = {{
   "ME3_0",
   "ME3_1",
   "ME3_N2",
@@ -72,14 +86,14 @@ const std::array<folly::StringPiece, 6> TEnumDataStorage<::test::fixtures::enums
   "ME3_10",
 }};
 
-const std::array<::test::fixtures::enums::MyEnum4, 5> TEnumDataStorage<::test::fixtures::enums::MyEnum4>::values = {{
+THRIFT_DATA_SECTION const std::array<::test::fixtures::enums::MyEnum4, 5> TEnumDataStorage<::test::fixtures::enums::MyEnum4>::values = {{
   type::ME4_A,
   type::ME4_B,
   type::ME4_C,
   type::ME4_D,
   type::Unspecified,
 }};
-const std::array<folly::StringPiece, 5> TEnumDataStorage<::test::fixtures::enums::MyEnum4>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TEnumDataStorage<::test::fixtures::enums::MyEnum4>::names = {{
   "ME4_A",
   "ME4_B",
   "ME4_C",
@@ -87,88 +101,88 @@ const std::array<folly::StringPiece, 5> TEnumDataStorage<::test::fixtures::enums
   "Unspecified",
 }};
 
-const std::array<::test::fixtures::enums::MyBitmaskEnum1, 4> TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum1>::values = {{
+THRIFT_DATA_SECTION const std::array<::test::fixtures::enums::MyBitmaskEnum1, 4> TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum1>::values = {{
   type::ONE,
   type::TWO,
   type::FOUR,
   type::Unspecified,
 }};
-const std::array<folly::StringPiece, 4> TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum1>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum1>::names = {{
   "ONE",
   "TWO",
   "FOUR",
   "Unspecified",
 }};
 
-const std::array<::test::fixtures::enums::MyBitmaskEnum2, 4> TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum2>::values = {{
+THRIFT_DATA_SECTION const std::array<::test::fixtures::enums::MyBitmaskEnum2, 4> TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum2>::values = {{
   type::ONE,
   type::TWO,
   type::FOUR,
   type::Unspecified,
 }};
-const std::array<folly::StringPiece, 4> TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum2>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum2>::names = {{
   "ONE",
   "TWO",
   "FOUR",
   "Unspecified",
 }};
 
-const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::fields_names = {{
   "reasonable",
   "fine",
   "questionable",
   "tags",
 }};
-const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::fields_ids = {{
   1,
   2,
   3,
   4,
 }};
-const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::fields_types = {{
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
   TType::T_SET,
 }};
-const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::storage_names = {{
   "__fbthrift_field_reasonable",
   "__fbthrift_field_fine",
   "__fbthrift_field_questionable",
   "__fbthrift_field_tags",
 }};
-const std::array<int, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::isset_indexes = {{
   0,
   1,
   2,
   3,
 }};
 
-const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::fields_names = {{
   "me2_3",
   "me3_n3",
   "me1_t1",
   "me1_t2",
 }};
-const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::fields_ids = {{
   1,
   2,
   4,
   6,
 }};
-const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::fields_types = {{
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
 }};
-const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::storage_names = {{
   "__fbthrift_field_me2_3",
   "__fbthrift_field_me3_n3",
   "__fbthrift_field_me1_t1",
   "__fbthrift_field_me1_t2",
 }};
-const std::array<int, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 4> TStructDataStorage<::test::fixtures::enums::MyStruct>::isset_indexes = {{
   0,
   1,
   2,

@@ -1629,9 +1629,9 @@ std::string Client::Stats::toString(const std::string& phase,
     return s;
   };
 
-  auto const pct = [] (size_t a, size_t b) {
-    if (!b) return 0.0;
-    return double(a) / b * 100.0;
+  auto const pct = [] (size_t a, size_t b) -> std::string {
+    if (!b) return "--";
+    return folly::sformat("{:.2f}%", double(a) / b * 100.0);
   };
 
   auto const execs_ = execs.load();
@@ -1643,7 +1643,7 @@ std::string Client::Stats::toString(const std::string& phase,
 
   return folly::sformat(
     "  {}:{}\n"
-    "  Execs: {:,} total, {:,} cache-hits ({:.2f}%), {:,} optimistically, {:,} fallback\n"
+    "  Execs: {:,} total, {:,} cache-hits ({}), {:,} optimistically, {:,} fallback\n"
     "  Files: {:,} total, {:,} read, {:,} queried, {:,} uploaded ({}), {:,} fallback\n"
     "  Blobs: {:,} total, {:,} queried, {:,} uploaded ({}), {:,} fallback\n"
     "  Cpu: {} usage, {:,} allocated cores ({}/core)\n"

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<22544eb82fcb23ca4970b86b77cc8d08>>
+// @generated SignedSource<<e7d7d108fdb8797b0ff7a60cbf27e043>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,8 +11,8 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 pub use reason::PosId;
 use serde::Deserialize;
 use serde::Serialize;
@@ -323,6 +323,7 @@ arena_deserializer::impl_deserialize_in_arena!(Ty<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum NegType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -359,6 +360,7 @@ arena_deserializer::impl_deserialize_in_arena!(NegType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "sft_")]
 #[repr(C)]
 pub struct ShapeFieldType<'a> {
@@ -384,6 +386,7 @@ arena_deserializer::impl_deserialize_in_arena!(ShapeFieldType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Ty_<'a> {
     /// The late static bound type of a class
@@ -489,16 +492,6 @@ pub enum Ty_<'a> {
     /// Name of class, name of type const, remaining names of type consts
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Taccess(&'a TaccessType<'a>),
-    /// This represents a type alias that lacks necessary type arguments. Given
-    /// type Foo<T1,T2> = ...
-    /// Tunappliedalias "Foo" stands for usages of plain Foo, without supplying
-    /// further type arguments. In particular, Tunappliedalias always stands for
-    /// a higher-kinded type. It is never used for an alias like
-    /// type Foo2 = ...
-    /// that simply doesn't require type arguments.
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Tunapplied_alias")]
-    TunappliedAlias(&'a str),
     /// The type of an opaque type or enum. Outside their defining files or
     /// when they represent enums, they are "opaque", which means that they
     /// only unify with themselves. Within a file, uses of newtypes are
@@ -524,6 +517,16 @@ pub enum Ty_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
     Tnewtype(&'a (&'a str, &'a [&'a Ty<'a>], &'a Ty<'a>)),
+    /// This represents a type alias that lacks necessary type arguments. Given
+    /// type Foo<T1,T2> = ...
+    /// Tunappliedalias "Foo" stands for usages of plain Foo, without supplying
+    /// further type arguments. In particular, Tunappliedalias always stands for
+    /// a higher-kinded type. It is never used for an alias like
+    /// type Foo2 = ...
+    /// that simply doesn't require type arguments.
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Tunapplied_alias")]
+    TunappliedAlias(&'a str),
     /// see dependent_type
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
@@ -556,6 +559,7 @@ arena_deserializer::impl_deserialize_in_arena!(Ty_<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct TaccessType<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Ty<'a>,
@@ -580,6 +584,7 @@ arena_deserializer::impl_deserialize_in_arena!(TaccessType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Exact<'a> {
     Exact,
@@ -605,6 +610,7 @@ arena_deserializer::impl_deserialize_in_arena!(Exact<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct ClassRefinement<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -629,6 +635,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassRefinement<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum ClassTypeRefinement<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -655,6 +662,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassTypeRefinement<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "tr_")]
 #[repr(C)]
 pub struct ClassTypeRefinementBounds<'a> {
@@ -682,6 +690,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassTypeRefinementBounds<'arena>
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Capability<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -709,6 +718,7 @@ arena_deserializer::impl_deserialize_in_arena!(Capability<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct FunImplicitParams<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -733,6 +743,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunImplicitParams<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "ft_")]
 #[repr(C)]
 pub struct FunType<'a> {
@@ -769,6 +780,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "et_")]
 #[repr(C)]
 pub struct PossiblyEnforcedTy<'a> {
@@ -795,6 +807,7 @@ arena_deserializer::impl_deserialize_in_arena!(PossiblyEnforcedTy<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "fp_")]
 #[repr(C)]
 pub struct FunParam<'a> {
@@ -809,6 +822,7 @@ pub struct FunParam<'a> {
 impl<'a> TrivialDrop for FunParam<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(FunParam<'arena>);
 
+#[rust_to_ocaml(and)]
 pub type FunParams<'a> = [&'a FunParam<'a>];
 
 pub use oxidized::typing_defs_core::DestructureKind;
@@ -1009,6 +1023,7 @@ arena_deserializer::impl_deserialize_in_arena!(ConstraintType_<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = "deriving show")]
 #[repr(C)]
 pub struct ConstraintType<'a>(

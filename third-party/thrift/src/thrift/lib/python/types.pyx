@@ -369,7 +369,7 @@ cdef class EnumTypeInfo:
             return int(value)
         if not isinstance(value, self._class):
             raise TypeError(f"value {value} is not '{self._class}'.")
-        return value._value_
+        return value._fbthrift_value_
 
     # convert deserialized data to user format
     def to_python_value(self, object value):
@@ -1270,20 +1270,193 @@ cdef Struct _fbthrift_struct_update_nested_field(Struct obj, list path_and_vals)
 
     return obj(**updatedict)
 
-class Enum:
+
+class EnumMeta(type):
+    def __new__(metacls, classname, bases, dct):
+        # if no bases, it's creating Enum or Flag base class, no need to parse members.
+        attrs = {
+            "__members__": {},
+            "__reversed_map__": {},
+        }
+        if not bases:
+            return super().__new__(metacls, classname, (), dict(dct, **attrs))
+        for name, value in dct.items():
+            if not isinstance(value, int):
+                attrs[name] = value
+        klass = super().__new__(
+            metacls,
+            classname,
+            bases,
+            attrs,
+        )
+        for name, value in dct.items():
+            if not isinstance(value, int):
+                continue
+            option = klass.__new__(klass, value)
+            option._fbthrift_name_ = name
+            option._fbthrift_value_ = value
+            klass.__members__[name] = option
+            klass.__reversed_map__[value] = option
+            type.__setattr__(klass, name, option)
+        return klass
+
+    def __len__(cls):
+        return len(cls.__members__)
+
+    def __getitem__(cls, attribute):
+        return cls.__members__[attribute]
+
+    def __iter__(cls):
+        return iter(cls.__members__.values())
+
+    def __setattr__(cls, name, _):
+        raise AttributeError(f"'{cls.__qualname__}' has no attribute '{name}'")
+
+    def __delattr__(cls, name):
+        raise AttributeError(f"{cls.__name__}: cannot delete Enum member.")
+
+    def __call__(cls, value, /):
+        if isinstance(value, cls):
+            return value
+        try:
+            return cls.__reversed_map__[value]
+        except KeyError:
+            inst =  cls._fbthrift_missing_(value)
+            if inst is not None:
+                return inst
+            raise ValueError(
+                f"Enum type {cls.__name__} has no attribute with value {value!r}"
+            ) from None
+
+
+class Enum(metaclass=EnumMeta):
+    def __init__(self, _):
+        # pass on purpose to keep the __init__ interface consistent with the other base class (i.e. int)
+        pass
+
+    @classmethod
+    def _fbthrift_missing_(cls, value):
+        return None
+
+    @property
+    def name(self):
+        return self._fbthrift_name_
+
+    @property
+    def value(self):
+        return self._fbthrift_value_
+
+    def __dir__(self):
+        return ["name", "value"]
+
+    def __str__(self):
+        return f"{type(self).__name__}.{self.name}"
+
+    def __repr__(self):
+        return f"<{type(self).__name__}.{self.name}: {self.value}>"
+
+    def __reduce_ex__(self, proto):
+        return type(self), (self.value,)
+
+    def __hash__(self):
+        return hash(self._fbthrift_name_)
+
     @staticmethod
     def __get_metadata__():
         raise NotImplementedError()
 
     @staticmethod
-    def __get_thrift_name__() -> str:
+    def __get_thrift_name__():
         return NotImplementedError()
 
-    def __format__(self, format_spec):
-        return format(str(self), format_spec)
+    def __bool__(self):
+        return True
+
+
+class Flag(Enum):
+    @classmethod
+    def _fbthrift_missing_(cls, value):
+        """
+        Returns member (possibly creating it) if one can be found for value.
+        """
+        masked_value = 0
+        for m in cls:
+            masked_value |= value & m._fbthrift_value_
+        if value >= 0 and value != masked_value:
+            raise ValueError(f"{value!r} is not a valid {cls.__qualname__}")
+        return cls._fbthrift_create_pseudo_member_(masked_value)
+
+    @classmethod
+    def _fbthrift_create_pseudo_member_(cls, value):
+        """
+        Create a composite member iff value contains only members.
+        """
+        pseudo_member = cls.__reversed_map__.get(value, None)
+        if pseudo_member is None:
+            pseudo_member = object.__new__(cls)
+            pseudo_member._fbthrift_name_ = None
+            pseudo_member._fbthrift_value_ = value
+            # use setdefault in case another thread already created a composite
+            # with this value
+            pseudo_member = cls.__reversed_map__.setdefault(value, pseudo_member)
+        return pseudo_member
+
+    @classmethod
+    def _fbthrift_get_name(cls, value):
+        # _decompose is only called if the value is not named
+        names = []
+        while value != 0:
+            highest = 1 << (value.bit_length() - 1)
+            names.append(cls(highest)._fbthrift_name_)
+            value &= ~highest
+        return names
+
+    def __repr__(self):
+        cls = type(self)
+        if self._fbthrift_name_ is not None:
+            return f"<{cls.__name__}.{self._fbthrift_name_}: {self._fbthrift_value_!r}>"
+        names = '|'.join(cls._fbthrift_get_name(self._fbthrift_value_))
+        return f"<{cls.__name__}.{names}: {self._fbthrift_value_!r}>"
+
+    def __str__(self):
+        cls = type(self)
+        if self._fbthrift_name_ is not None:
+            return f"{cls.__name__}.{self._fbthrift_name_}"
+        names = cls._fbthrift_get_name(self._fbthrift_value_)
+        return f"{cls.__name__}.{names}"
+
+    def __contains__(self, other):
+        if type(other) is not type(self):
+            return NotImplemented
+        return other._fbthrift_value_ & self._fbthrift_value_ == other._fbthrift_value_
 
     def __bool__(self):
-        return bool(self._value_) if isinstance(self, enum.Flag) else True
+        return bool(self._fbthrift_value_)
+
+    def __or__(self, other):
+        cls = type(self)
+        if type(other) is not cls:
+            return NotImplemented
+        return cls(self._fbthrift_value_ | other._fbthrift_value_)
+
+    def __and__(self, other):
+        cls = type(self)
+        if type(other) is not cls:
+            return NotImplemented
+        return cls(self._fbthrift_value_ & other._fbthrift_value_)
+
+    def __xor__(self, other):
+        cls = type(self)
+        if type(other) is not cls:
+            return NotImplemented
+        return cls(self._fbthrift_value_ ^ other._fbthrift_value_)
+
+    def __invert__(self):
+        cls = type(self)
+        res = self._fbthrift_value_
+        for m in cls:
+            res ^= m._fbthrift_value_
+        return cls(res)
 
 cdef class ServiceInterface:
     @staticmethod

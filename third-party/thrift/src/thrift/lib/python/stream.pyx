@@ -38,6 +38,7 @@ cdef void client_stream_callback(
     stream, pyfuture = <object> userdata
     if result.hasException():
         pyfuture.set_exception(
+            #TODO: T133841402
             create_py_exception(result.exception(), None)
         )
     else:

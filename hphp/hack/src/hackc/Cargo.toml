@@ -11,18 +11,17 @@ path = "hackc/hackc.rs"
 [dependencies]
 aast_parser = { path = "../parser/cargo/aast_parser" }
 anyhow = "1.0.65"
+assemble = { path = "cargo/assemble" }
 bc_to_ir = { path = "ir/conversions/bc_to_ir" }
-bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
 byte-unit = "4.0.14"
 bytecode_printer = { path = "bytecode_printer" }
-clap = { version = "3.2.17", features = ["derive", "regex", "unicode", "wrap_help"] }
+clap = { version = "3.2.17", features = ["derive", "env", "regex", "unicode", "wrap_help"] }
 compile = { path = "compile/cargo/compile" }
 decl_parser = { path = "../hackrs/decl_parser/cargo/decl_parser" }
 decl_provider = { path = "decl_provider" }
 direct_decl_parser = { path = "../parser/api/cargo/direct_decl_parser" }
 env_logger = "0.7"
-escaper = { path = "../utils/escaper" }
 facts_rust = { path = "../facts/cargo/facts_rust" }
 ffi = { path = "../utils/ffi" }
 file_provider = { path = "../hackrs/file_provider/cargo/file_provider" }

@@ -15,6 +15,7 @@ module Initialize_from_saved_state = struct
     naming_table_load_info: naming_table_load_info option;
     use_ranked_autocomplete: bool;
     config: (string * string) list;
+    ignore_hh_version: bool;
     open_files: Path.t list;
   }
 

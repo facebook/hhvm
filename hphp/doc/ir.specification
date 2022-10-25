@@ -248,12 +248,12 @@ Instruction set
   A no-op at runtime, this instruction serves to mark the end of the initial
   sequence of guards in a trace.
 
-| CheckNonNull, DSubtract(0, Nullptr), SNullptr(Cls,Func,Obj,Str,Mem,TCA,Dict,Vec), B|LA
+| CheckNonNull, DSubtract(0, Nullptr), SNullptr(Cls,Func,Obj,Str,Mem,TCA,Dict,Vec), B|P|LA
 
   If the value in S0 is Nullptr, branch to block B. If S0 cannot be Nullptr, or
   always is Nullptr, this check may be optimized away.
 
-| AssertNonNull, DSubtract(0, Nullptr), S(StaticStr|Nullptr), P
+| AssertNonNull, DSubtract(0, Nullptr), SNullptr(Func,StaticStr), P
 
   Returns S0, with Nullptr removed from its type. This instruction currently
   supports a very limited range of types but can be expanded if needed.
@@ -1231,10 +1231,10 @@ To string conversions:
   Caches the mapping in the TC cache (using S1) and target cache. Raises a fatal
   if the class does not have an accessible method with the given name.
 
-| LdObjInvoke, D(Func), S(Cls), B
+| LdObjInvoke, D(Func|Nullptr), S(Cls), NF
 
-  Try to load a cached non-static __invoke Func from the Class in S0, or branch
-  to block B if it is not present.
+  Load a regular (non-static in prologue) __invoke Func from the Class in S0,
+  or nullptr if it is not present.
 
 | LdObjClass, DLdObjCls, S(Obj), NF
 
@@ -1295,7 +1295,7 @@ To string conversions:
 
 | LdFuncCls, D(Cls|Nullptr), S(Func), NF
 
-  Loads the Class* of S0.
+  Loads the Func::cls() of S0, assuming !Func::isMethCaller().
 
 | LdStrLen, D(Int), S(Str), NF
 
@@ -1762,10 +1762,6 @@ To string conversions:
 | StImplicitContext, ND, S(Obj|InitNull), NF
 
   Sets the implicit context to S0.
-
-| StImplicitContextWH, ND, S(Obj), NF
-
-  Stores the implicit context from RDS to the WaitHandle in S0.
 
 | StLoc<localId>, ND, S(FramePtr) S(Cell), NF
 

@@ -158,6 +158,7 @@ void skip(Protocol_& prot, WireType arg_type) {
       prot.readBool(boolv);
       return;
     }
+    // case TType::T_I08: // same numeric value as T_BYTE
     case TType::T_BYTE: {
       int8_t bytev;
       prot.readByte(bytev);
@@ -173,6 +174,7 @@ void skip(Protocol_& prot, WireType arg_type) {
       prot.readI32(i32);
       return;
     }
+    case TType::T_U64:
     case TType::T_I64: {
       int64_t i64;
       prot.readI64(i64);
@@ -188,6 +190,9 @@ void skip(Protocol_& prot, WireType arg_type) {
       prot.readFloat(flt);
       return;
     }
+    // case TType::T_UTF7: // same numeric value as T_STRING
+    case TType::T_UTF8:
+    case TType::T_UTF16:
     case TType::T_STRING: {
       apache::thrift::detail::SkipNoopString str;
       prot.readBinary(str);
@@ -234,6 +239,10 @@ void skip(Protocol_& prot, WireType arg_type) {
       prot.readListEnd();
       return;
     }
+    case TType::T_STOP:
+    case TType::T_VOID:
+    case TType::T_STREAM:
+      // Unimplemented, fallback to default
     default: {
       TProtocolException::throwInvalidSkipType(arg_type);
     }

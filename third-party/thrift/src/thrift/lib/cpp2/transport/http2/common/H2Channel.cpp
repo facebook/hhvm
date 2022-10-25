@@ -18,8 +18,8 @@
 
 #include <folly/Range.h>
 #include <folly/String.h>
+#include <folly/base64.h>
 #include <proxygen/lib/http/codec/CodecUtil.h>
-#include <proxygen/lib/utils/Base64.h>
 #include <thrift/lib/cpp/transport/THeader.h>
 
 namespace apache {
@@ -52,8 +52,8 @@ void H2Channel::encodeHeaders(
         !proxygen::CodecUtil::validateHeaderValue(
             folly::ByteRange(folly::StringPiece(it->second)),
             proxygen::CodecUtil::CtlEscapeMode::STRICT)) {
-      auto name = proxygen::Base64::urlEncode(folly::StringPiece(it->first));
-      auto value = proxygen::Base64::urlEncode(folly::StringPiece(it->second));
+      auto name = folly::base64URLEncode(it->first);
+      auto value = folly::base64URLEncode(it->second);
       msgHeaders.set(
           folly::to<std::string>("encode_", name),
           folly::to<std::string>(name, "_", value));
@@ -87,9 +87,17 @@ void H2Channel::decodeHeaders(
       if (folly::StringPiece(key).startsWith("encode_")) {
         auto us = val.find("_");
         if (us != string::npos) {
-          // TODO: urlDecode with StringPiece?
-          auto decodedKey = proxygen::Base64::urlDecode(val.substr(0, us));
-          auto decodedVal = proxygen::Base64::urlDecode(val.substr(us + 1));
+          std::string decodedKey;
+          std::string decodedVal;
+          try {
+            decodedKey =
+                folly::base64URLDecode(std::string_view(val.data(), us));
+            decodedVal = folly::base64URLDecode(
+                std::string_view(val.data() + us + 1, val.length() - us - 1));
+          } catch (...) {
+            // Code previously used proxygen::Base64::urlDecode which converted
+            // exceptions to empty string.  Preserving that behavior.
+          }
           dest.emplace(std::move(decodedKey), std::move(decodedVal));
           return;
         }

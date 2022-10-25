@@ -98,7 +98,7 @@ cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:
 {{> types/enum }}
 {{> types/union_type_enum }}
 
-{{#program:structs}}
+{{#program:filtered_structs}}
 {{^struct:union?}}
 @__cython.auto_pickle(False)
 cdef class {{struct:name}}({{> types/python_struct_class}}):
@@ -453,7 +453,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("{{program:py_deprecated_module_path}}.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.{{struct:name}}, self)
-{{/program:structs}}
+{{/program:filtered_structs}}
 {{#program:containerTypes}}
 @__cython.auto_pickle(False)
 cdef class {{> types/cython_python_type}}(thrift.py3.types.{{!

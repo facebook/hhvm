@@ -37,6 +37,10 @@ type t =
     }
   | Interface_with_partial_typeconst of Pos.t
   | Partially_abstract_typeconst_definition of Pos.t
+  | Refinement_in_typestruct of {
+      pos: Pos.t;
+      kind: string;
+    }
   | Multiple_xhp_category of Pos.t
   | Return_in_gen of Pos.t
   | Return_in_finally of Pos.t
@@ -122,6 +126,7 @@ type t =
       pos: Pos.t;
       second_pos: Pos.t;
     }
+  | Soft_internal_without_internal of Pos.t
 
 include
   Phase_error.S with type t := t and module Error_code = Error_codes.NastCheck

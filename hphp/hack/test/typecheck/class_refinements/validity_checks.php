@@ -2,8 +2,7 @@
 
 <<file: __EnableUnstableFeatures('type_refinements')>>
 
-class C {
-}
+class C {}
 
 abstract class D extends C {
   abstract const type T as arraykey;
@@ -13,9 +12,13 @@ class E extends D {
   const type T = string;
 }
 
-type BAD0 = C with { type T = int };
-type BAD1 = D with { type T = C };
-type BAD2 = E with { type T = int };
+interface Bad {
+  abstract const type BAD0 as C with { type T = int };
+  abstract const type BAD1 as D with { type T = C };
+  abstract const type BAD2 as E with { type T = int };
+}
 
-type OK0 = D with { type T = int };
-type OK1 = E with { type T = string };
+interface Good {
+  abstract const type OK0 as D with { type T = int };
+  abstract const type OK1 as E with { type T = string };
+}

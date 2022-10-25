@@ -77,6 +77,9 @@ function create_class_pointer(string $name): mixed;
 function create_clsmeth_pointer(string $cls, string $meth): mixed;
 
 <<__Native>>
+function is_lazy_class(mixed $val): bool;
+
+<<__Native>>
 function dummy_lots_inout(inout $p1, inout $p2, inout $p3, inout $p4,
                           inout $p1, inout $p2, inout $p3, inout $p4,
                           inout $p1, inout $p2, inout $p3, inout $p4): mixed;

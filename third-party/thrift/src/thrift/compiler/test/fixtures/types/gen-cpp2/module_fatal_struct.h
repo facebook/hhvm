@@ -7,6 +7,8 @@
 #pragma once
 
 #include  "thrift/compiler/test/fixtures/types/gen-cpp2/include_fatal_types.h"
+#include  "thrift/annotation/gen-cpp2/cpp_fatal_types.h"
+#include  "thrift/annotation/gen-cpp2/thrift_fatal_types.h"
 
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/module_types.h"
 
@@ -618,20 +620,7 @@ class MinPadding_struct_traits {
       using tiny = __fbthrift_refl_impl::reflected_no_annotations;
     };
 
-    struct __fbthrift_keys {
-      using cpp_minimize_padding = __fbthrift_strings_module::cpp_minimize_padding;
-    };
-
-    struct __fbthrift_values {
-      using cpp_minimize_padding = ::fatal::sequence<char, '1'>;
-    };
-
    public:
-    using keys = __fbthrift_keys;
-    using values = __fbthrift_values;
-    using map = ::fatal::list<
-        ::apache::thrift::annotation<keys::cpp_minimize_padding, values::cpp_minimize_padding>
-    >;
     using members = __fbthrift_members;
   };
 
@@ -722,43 +711,105 @@ class MinPadding_struct_traits {
   >;
 };
 
-class MyDataItem_struct_traits {
+class MinPaddingWithCustomType_struct_traits {
   class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
     class __fbthrift_members {
      public:
-    };
-
-    struct __fbthrift_keys {
-      using cpp_noncomparable = __fbthrift_strings_module::cpp_noncomparable;
-    };
-
-    struct __fbthrift_values {
-      using cpp_noncomparable = ::fatal::sequence<char, '1'>;
+      using small = __fbthrift_refl_impl::reflected_no_annotations;
+      using big = __fbthrift_refl_impl::reflected_no_annotations;
+      using medium = __fbthrift_refl_impl::reflected_no_annotations;
+      using biggish = __fbthrift_refl_impl::reflected_no_annotations;
+      using tiny = __fbthrift_refl_impl::reflected_no_annotations;
     };
 
    public:
-    using keys = __fbthrift_keys;
-    using values = __fbthrift_values;
-    using map = ::fatal::list<
-        ::apache::thrift::annotation<keys::cpp_noncomparable, values::cpp_noncomparable>
-    >;
     using members = __fbthrift_members;
   };
 
+  struct __fbthrift_member_small {
+    using owner = ::apache::thrift::fixtures::types::MinPaddingWithCustomType;
+    using name = __fbthrift_strings_module::__fbthrift_hash_81db8ebbbbc69c6c6ad4a6aa92b76e0c08af547da236b9e2c9dbe1d8285a8130;
+    using type = ::std::int8_t;
+    using tag = ::apache::thrift::ident::small;
+    static constexpr ::apache::thrift::field_id_t id = 1;
+    static constexpr auto optional = ::apache::thrift::optionality::terse;
+    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::small>;
+    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::small>;
+    using type_class = ::apache::thrift::type_class::integral;
+    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::small>;
+  };
+  struct __fbthrift_member_big {
+    using owner = ::apache::thrift::fixtures::types::MinPaddingWithCustomType;
+    using name = __fbthrift_strings_module::__fbthrift_hash_2a21fe6d592a19b7de898b50eb53c429608de1a66f3e9f62da19714a770553d1;
+    using type = ::std::int64_t;
+    using tag = ::apache::thrift::ident::big;
+    static constexpr ::apache::thrift::field_id_t id = 2;
+    static constexpr auto optional = ::apache::thrift::optionality::terse;
+    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::big>;
+    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::big>;
+    using type_class = ::apache::thrift::type_class::integral;
+    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::big>;
+  };
+  struct __fbthrift_member_medium {
+    using owner = ::apache::thrift::fixtures::types::MinPaddingWithCustomType;
+    using name = __fbthrift_strings_module::__fbthrift_hash_c082456a7766e23a18db084cd34b6ff510baef506548b897cc80e9b7d3e121c8;
+    using type = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::std::int16_t, MinPaddingWithCustomType>;
+    using tag = ::apache::thrift::ident::medium;
+    static constexpr ::apache::thrift::field_id_t id = 3;
+    static constexpr auto optional = ::apache::thrift::optionality::terse;
+    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::medium>;
+    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::medium>;
+    using type_class = ::apache::thrift::type_class::integral;
+    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::medium>;
+  };
+  struct __fbthrift_member_biggish {
+    using owner = ::apache::thrift::fixtures::types::MinPaddingWithCustomType;
+    using name = __fbthrift_strings_module::__fbthrift_hash_7af8f5c4c7c52a8a8bd7151e1a20e8003de8a0f5b4c08676355b69772b2ae1d7;
+    using type = ::std::int32_t;
+    using tag = ::apache::thrift::ident::biggish;
+    static constexpr ::apache::thrift::field_id_t id = 4;
+    static constexpr auto optional = ::apache::thrift::optionality::terse;
+    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::biggish>;
+    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::biggish>;
+    using type_class = ::apache::thrift::type_class::integral;
+    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::biggish>;
+  };
+  struct __fbthrift_member_tiny {
+    using owner = ::apache::thrift::fixtures::types::MinPaddingWithCustomType;
+    using name = __fbthrift_strings_module::__fbthrift_hash_8950abfda7b727630760dd35bcf5c3daa7631aff223a90f7728c0d2521dde10c;
+    using type = ::std::int8_t;
+    using tag = ::apache::thrift::ident::tiny;
+    static constexpr ::apache::thrift::field_id_t id = 5;
+    static constexpr auto optional = ::apache::thrift::optionality::terse;
+    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::tiny>;
+    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::tiny>;
+    using type_class = ::apache::thrift::type_class::integral;
+    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::tiny>;
+  };
 
   struct __fbthrift_member {
+    using small = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_small>;
+    using big = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_big>;
+    using medium = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_medium>;
+    using biggish = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_biggish>;
+    using tiny = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_tiny>;
   };
  public:
-  using type = ::apache::thrift::fixtures::types::MyDataItem;
-  using name = __fbthrift_strings_module::MyDataItem;
+  using type = ::apache::thrift::fixtures::types::MinPaddingWithCustomType;
+  using name = __fbthrift_strings_module::MinPaddingWithCustomType;
   using member = __fbthrift_member;
   using members = ::fatal::list<
+      member::small,
+      member::big,
+      member::medium,
+      member::biggish,
+      member::tiny
   >;
   using members_annotations = __fbthrift_annotations::members;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(4790436723586763884ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(13079220944072737932ull)
   >;
 };
 
@@ -862,6 +913,46 @@ class MyStruct_struct_traits {
   >;
 };
 
+class MyDataItem_struct_traits {
+  class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
+    class __fbthrift_members {
+     public:
+    };
+
+    struct __fbthrift_keys {
+      using cpp_noncomparable = __fbthrift_strings_module::cpp_noncomparable;
+    };
+
+    struct __fbthrift_values {
+      using cpp_noncomparable = ::fatal::sequence<char, '1'>;
+    };
+
+   public:
+    using keys = __fbthrift_keys;
+    using values = __fbthrift_values;
+    using map = ::fatal::list<
+        ::apache::thrift::annotation<keys::cpp_noncomparable, values::cpp_noncomparable>
+    >;
+    using members = __fbthrift_members;
+  };
+
+
+  struct __fbthrift_member {
+  };
+ public:
+  using type = ::apache::thrift::fixtures::types::MyDataItem;
+  using name = __fbthrift_strings_module::MyDataItem;
+  using member = __fbthrift_member;
+  using members = ::fatal::list<
+  >;
+  using members_annotations = __fbthrift_annotations::members;
+  using metadata = ::apache::thrift::detail::type_common_metadata_impl<
+      module_tags::module,
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
+      static_cast<::apache::thrift::legacy_type_id_t>(4790436723586763884ull)
+  >;
+};
+
 class Renamed_struct_traits {
   class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
     class __fbthrift_members {
@@ -961,48 +1052,6 @@ class AnnotatedTypes_struct_traits {
   >;
 };
 
-class ForwardUsageStruct_struct_traits {
-  class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
-    class __fbthrift_members {
-     public:
-      using foo = __fbthrift_refl_impl::reflected_no_annotations;
-    };
-
-   public:
-    using members = __fbthrift_members;
-  };
-
-  struct __fbthrift_member_foo {
-    using owner = ::apache::thrift::fixtures::types::ForwardUsageStruct;
-    using name = __fbthrift_strings_module::__fbthrift_hash_2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae;
-    using type = ::apache::thrift::fixtures::types::ForwardUsageRoot;
-    using tag = ::apache::thrift::ident::foo;
-    static constexpr ::apache::thrift::field_id_t id = 1;
-    static constexpr auto optional = ::apache::thrift::optionality::optional;
-    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::foo>;
-    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::foo>;
-    using type_class = ::apache::thrift::type_class::structure;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::foo>;
-  };
-
-  struct __fbthrift_member {
-    using foo = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_foo>;
-  };
- public:
-  using type = ::apache::thrift::fixtures::types::ForwardUsageStruct;
-  using name = __fbthrift_strings_module::ForwardUsageStruct;
-  using member = __fbthrift_member;
-  using members = ::fatal::list<
-      member::foo
-  >;
-  using members_annotations = __fbthrift_annotations::members;
-  using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      module_tags::module,
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(17360210329199062572ull)
-  >;
-};
-
 class ForwardUsageRoot_struct_traits {
   class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
     class __fbthrift_members {
@@ -1060,6 +1109,48 @@ class ForwardUsageRoot_struct_traits {
   >;
 };
 
+class ForwardUsageStruct_struct_traits {
+  class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
+    class __fbthrift_members {
+     public:
+      using foo = __fbthrift_refl_impl::reflected_no_annotations;
+    };
+
+   public:
+    using members = __fbthrift_members;
+  };
+
+  struct __fbthrift_member_foo {
+    using owner = ::apache::thrift::fixtures::types::ForwardUsageStruct;
+    using name = __fbthrift_strings_module::__fbthrift_hash_2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae;
+    using type = ::apache::thrift::fixtures::types::ForwardUsageRoot;
+    using tag = ::apache::thrift::ident::foo;
+    static constexpr ::apache::thrift::field_id_t id = 1;
+    static constexpr auto optional = ::apache::thrift::optionality::optional;
+    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::foo>;
+    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::foo>;
+    using type_class = ::apache::thrift::type_class::structure;
+    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::foo>;
+  };
+
+  struct __fbthrift_member {
+    using foo = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_foo>;
+  };
+ public:
+  using type = ::apache::thrift::fixtures::types::ForwardUsageStruct;
+  using name = __fbthrift_strings_module::ForwardUsageStruct;
+  using member = __fbthrift_member;
+  using members = ::fatal::list<
+      member::foo
+  >;
+  using members_annotations = __fbthrift_annotations::members;
+  using metadata = ::apache::thrift::detail::type_common_metadata_impl<
+      module_tags::module,
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
+      static_cast<::apache::thrift::legacy_type_id_t>(17360210329199062572ull)
+  >;
+};
+
 class ForwardUsageByRef_struct_traits {
   class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
     class __fbthrift_members {
@@ -1102,234 +1193,447 @@ class ForwardUsageByRef_struct_traits {
   >;
 };
 
-class NoexceptMoveEmpty_struct_traits {
+class IncompleteMap_struct_traits {
   class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
     class __fbthrift_members {
      public:
+      using field = __fbthrift_refl_impl::reflected_no_annotations;
     };
 
    public:
     using members = __fbthrift_members;
   };
 
-
-  struct __fbthrift_member {
-  };
- public:
-  using type = ::apache::thrift::fixtures::types::NoexceptMoveEmpty;
-  using name = __fbthrift_strings_module::NoexceptMoveEmpty;
-  using member = __fbthrift_member;
-  using members = ::fatal::list<
-  >;
-  using members_annotations = __fbthrift_annotations::members;
-  using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      module_tags::module,
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(11676134689775956652ull)
-  >;
-};
-
-class NoexceptMoveSimpleStruct_struct_traits {
-  class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
-    class __fbthrift_members {
-     public:
-      using boolField = __fbthrift_refl_impl::reflected_no_annotations;
-    };
-
-   public:
-    using members = __fbthrift_members;
-  };
-
-  struct __fbthrift_member_boolField {
-    using owner = ::apache::thrift::fixtures::types::NoexceptMoveSimpleStruct;
-    using name = __fbthrift_strings_module::__fbthrift_hash_7344f88cfc3a0641f9d9c1151035f98a899ffcba15f609b3ace596c7a2e5eeff;
-    using type = ::std::int64_t;
-    using tag = ::apache::thrift::ident::boolField;
+  struct __fbthrift_member_field {
+    using owner = ::apache::thrift::fixtures::types::IncompleteMap;
+    using name = __fbthrift_strings_module::__fbthrift_hash_c0d2856b74d0df05b9d4456b177950351bd88e98b77f12574dfb7a911acee0d0;
+    using type = ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>;
+    using tag = ::apache::thrift::ident::field;
     static constexpr ::apache::thrift::field_id_t id = 1;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
-    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::boolField>;
-    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::boolField>;
-    using type_class = ::apache::thrift::type_class::integral;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::boolField>;
-  };
-
-  struct __fbthrift_member {
-    using boolField = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_boolField>;
-  };
- public:
-  using type = ::apache::thrift::fixtures::types::NoexceptMoveSimpleStruct;
-  using name = __fbthrift_strings_module::NoexceptMoveSimpleStruct;
-  using member = __fbthrift_member;
-  using members = ::fatal::list<
-      member::boolField
-  >;
-  using members_annotations = __fbthrift_annotations::members;
-  using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      module_tags::module,
-      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(18391302915442473772ull)
-  >;
-};
-
-class NoexceptMoveComplexStruct_struct_traits {
-  class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
-    class __fbthrift_members {
-     public:
-      using MyBoolField = __fbthrift_refl_impl::reflected_no_annotations;
-      using MyIntField = __fbthrift_refl_impl::reflected_no_annotations;
-      using MyStringField = __fbthrift_refl_impl::reflected_no_annotations;
-      using MyStringField2 = __fbthrift_refl_impl::reflected_no_annotations;
-      using MyBinaryField = __fbthrift_refl_impl::reflected_no_annotations;
-      using MyBinaryField2 = __fbthrift_refl_impl::reflected_no_annotations;
-      using MyBinaryField3 = __fbthrift_refl_impl::reflected_no_annotations;
-      using MyBinaryListField4 = __fbthrift_refl_impl::reflected_no_annotations;
-      using MyMapEnumAndInt = __fbthrift_refl_impl::reflected_no_annotations;
-    };
-
-   public:
-    using members = __fbthrift_members;
-  };
-
-  struct __fbthrift_member_MyBoolField {
-    using owner = ::apache::thrift::fixtures::types::NoexceptMoveComplexStruct;
-    using name = __fbthrift_strings_module::__fbthrift_hash_b7d039bee92d4ff161705e900e0bff872e78ff5be3f367911e49edaf3e716947;
-    using type = bool;
-    using tag = ::apache::thrift::ident::MyBoolField;
-    static constexpr ::apache::thrift::field_id_t id = 1;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
-    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::MyBoolField>;
-    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::MyBoolField>;
-    using type_class = ::apache::thrift::type_class::integral;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::MyBoolField>;
-  };
-  struct __fbthrift_member_MyIntField {
-    using owner = ::apache::thrift::fixtures::types::NoexceptMoveComplexStruct;
-    using name = __fbthrift_strings_module::__fbthrift_hash_efda3b7db6b44fe655cfcf36ce339c894e64337d7f192d6ad81a95d5c98a2359;
-    using type = ::std::int64_t;
-    using tag = ::apache::thrift::ident::MyIntField;
-    static constexpr ::apache::thrift::field_id_t id = 2;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
-    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::MyIntField>;
-    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::MyIntField>;
-    using type_class = ::apache::thrift::type_class::integral;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::MyIntField>;
-  };
-  struct __fbthrift_member_MyStringField {
-    using owner = ::apache::thrift::fixtures::types::NoexceptMoveComplexStruct;
-    using name = __fbthrift_strings_module::__fbthrift_hash_b2a30733d38d491ca5f3dcb7fd435cd0774f957f27f886d82bd5018c558abb72;
-    using type = ::std::string;
-    using tag = ::apache::thrift::ident::MyStringField;
-    static constexpr ::apache::thrift::field_id_t id = 3;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
-    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::MyStringField>;
-    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::MyStringField>;
-    using type_class = ::apache::thrift::type_class::string;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::MyStringField>;
-  };
-  struct __fbthrift_member_MyStringField2 {
-    using owner = ::apache::thrift::fixtures::types::NoexceptMoveComplexStruct;
-    using name = __fbthrift_strings_module::__fbthrift_hash_c71ece60df4b15681a48d377f2c27b4e9c2e95e74f09dbfa070a7175138895c6;
-    using type = ::std::string;
-    using tag = ::apache::thrift::ident::MyStringField2;
-    static constexpr ::apache::thrift::field_id_t id = 4;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
-    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::MyStringField2>;
-    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::MyStringField2>;
-    using type_class = ::apache::thrift::type_class::string;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::MyStringField2>;
-  };
-  struct __fbthrift_member_MyBinaryField {
-    using owner = ::apache::thrift::fixtures::types::NoexceptMoveComplexStruct;
-    using name = __fbthrift_strings_module::__fbthrift_hash_b990788541621b423065dbd4854d7828982345f9e894712b245de816f7b01c08;
-    using type = ::std::string;
-    using tag = ::apache::thrift::ident::MyBinaryField;
-    static constexpr ::apache::thrift::field_id_t id = 5;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
-    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::MyBinaryField>;
-    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::MyBinaryField>;
-    using type_class = ::apache::thrift::type_class::binary;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::MyBinaryField>;
-  };
-  struct __fbthrift_member_MyBinaryField2 {
-    using owner = ::apache::thrift::fixtures::types::NoexceptMoveComplexStruct;
-    using name = __fbthrift_strings_module::__fbthrift_hash_52947f27873dfc0055cd1c77444997c1984e68f1fc59d8ce37d03289b07a590e;
-    using type = ::std::string;
-    using tag = ::apache::thrift::ident::MyBinaryField2;
-    static constexpr ::apache::thrift::field_id_t id = 6;
     static constexpr auto optional = ::apache::thrift::optionality::optional;
-    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::MyBinaryField2>;
-    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::MyBinaryField2>;
-    using type_class = ::apache::thrift::type_class::binary;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::MyBinaryField2>;
-  };
-  struct __fbthrift_member_MyBinaryField3 {
-    using owner = ::apache::thrift::fixtures::types::NoexceptMoveComplexStruct;
-    using name = __fbthrift_strings_module::__fbthrift_hash_fb6bdbc1e35b5b8ab22480d6ab3b1e32944a9c94fa2d587b0a52833284cf8e01;
-    using type = ::std::string;
-    using tag = ::apache::thrift::ident::MyBinaryField3;
-    static constexpr ::apache::thrift::field_id_t id = 7;
-    static constexpr auto optional = ::apache::thrift::optionality::required;
-    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::MyBinaryField3>;
-    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::MyBinaryField3>;
-    using type_class = ::apache::thrift::type_class::binary;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::MyBinaryField3>;
-  };
-  struct __fbthrift_member_MyBinaryListField4 {
-    using owner = ::apache::thrift::fixtures::types::NoexceptMoveComplexStruct;
-    using name = __fbthrift_strings_module::__fbthrift_hash_2e54f5233578189784a1df2243a55418ebaf80680ada3332bff39422aad513cf;
-    using type = ::std::vector<::std::string>;
-    using tag = ::apache::thrift::ident::MyBinaryListField4;
-    static constexpr ::apache::thrift::field_id_t id = 8;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
-    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::MyBinaryListField4>;
-    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::MyBinaryListField4>;
-    using type_class = ::apache::thrift::type_class::list<::apache::thrift::type_class::binary>;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::MyBinaryListField4>;
-  };
-  struct __fbthrift_member_MyMapEnumAndInt {
-    using owner = ::apache::thrift::fixtures::types::NoexceptMoveComplexStruct;
-    using name = __fbthrift_strings_module::__fbthrift_hash_acb2b9be972cf644d03da8b8f9c39133d122094133c61c2fdd2b634bfa7177a9;
-    using type = ::std::map<::apache::thrift::fixtures::types::MyEnumA, ::std::string>;
-    using tag = ::apache::thrift::ident::MyMapEnumAndInt;
-    static constexpr ::apache::thrift::field_id_t id = 9;
-    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
-    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::MyMapEnumAndInt>;
-    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::MyMapEnumAndInt>;
-    using type_class = ::apache::thrift::type_class::map<::apache::thrift::type_class::enumeration, ::apache::thrift::type_class::string>;
-    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::MyMapEnumAndInt>;
+    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::field>;
+    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::field>;
+    using type_class = ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>;
+    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field>;
   };
 
   struct __fbthrift_member {
-    using MyBoolField = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_MyBoolField>;
-    using MyIntField = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_MyIntField>;
-    using MyStringField = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_MyStringField>;
-    using MyStringField2 = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_MyStringField2>;
-    using MyBinaryField = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_MyBinaryField>;
-    using MyBinaryField2 = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_MyBinaryField2>;
-    using MyBinaryField3 = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_MyBinaryField3>;
-    using MyBinaryListField4 = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_MyBinaryListField4>;
-    using MyMapEnumAndInt = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_MyMapEnumAndInt>;
+    using field = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_field>;
   };
  public:
-  using type = ::apache::thrift::fixtures::types::NoexceptMoveComplexStruct;
-  using name = __fbthrift_strings_module::NoexceptMoveComplexStruct;
+  using type = ::apache::thrift::fixtures::types::IncompleteMap;
+  using name = __fbthrift_strings_module::IncompleteMap;
   using member = __fbthrift_member;
   using members = ::fatal::list<
-      member::MyBoolField,
-      member::MyIntField,
-      member::MyStringField,
-      member::MyStringField2,
-      member::MyBinaryField,
-      member::MyBinaryField2,
-      member::MyBinaryField3,
-      member::MyBinaryListField4,
-      member::MyMapEnumAndInt
+      member::field
   >;
   using members_annotations = __fbthrift_annotations::members;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(4890647338471635948ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(4263956426928267372ull)
+  >;
+};
+
+class IncompleteMapDep_struct_traits {
+  class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
+    class __fbthrift_members {
+     public:
+    };
+
+   public:
+    using members = __fbthrift_members;
+  };
+
+
+  struct __fbthrift_member {
+  };
+ public:
+  using type = ::apache::thrift::fixtures::types::IncompleteMapDep;
+  using name = __fbthrift_strings_module::IncompleteMapDep;
+  using member = __fbthrift_member;
+  using members = ::fatal::list<
+  >;
+  using members_annotations = __fbthrift_annotations::members;
+  using metadata = ::apache::thrift::detail::type_common_metadata_impl<
+      module_tags::module,
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
+      static_cast<::apache::thrift::legacy_type_id_t>(18053936334525778220ull)
+  >;
+};
+
+class CompleteMap_struct_traits {
+  class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
+    class __fbthrift_members {
+     public:
+      using field = __fbthrift_refl_impl::reflected_no_annotations;
+    };
+
+   public:
+    using members = __fbthrift_members;
+  };
+
+  struct __fbthrift_member_field {
+    using owner = ::apache::thrift::fixtures::types::CompleteMap;
+    using name = __fbthrift_strings_module::__fbthrift_hash_c0d2856b74d0df05b9d4456b177950351bd88e98b77f12574dfb7a911acee0d0;
+    using type = std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>;
+    using tag = ::apache::thrift::ident::field;
+    static constexpr ::apache::thrift::field_id_t id = 1;
+    static constexpr auto optional = ::apache::thrift::optionality::optional;
+    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::field>;
+    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::field>;
+    using type_class = ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>;
+    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field>;
+  };
+
+  struct __fbthrift_member {
+    using field = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_field>;
+  };
+ public:
+  using type = ::apache::thrift::fixtures::types::CompleteMap;
+  using name = __fbthrift_strings_module::CompleteMap;
+  using member = __fbthrift_member;
+  using members = ::fatal::list<
+      member::field
+  >;
+  using members_annotations = __fbthrift_annotations::members;
+  using metadata = ::apache::thrift::detail::type_common_metadata_impl<
+      module_tags::module,
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
+      static_cast<::apache::thrift::legacy_type_id_t>(8343028395366820076ull)
+  >;
+};
+
+class CompleteMapDep_struct_traits {
+  class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
+    class __fbthrift_members {
+     public:
+    };
+
+   public:
+    using members = __fbthrift_members;
+  };
+
+
+  struct __fbthrift_member {
+  };
+ public:
+  using type = ::apache::thrift::fixtures::types::CompleteMapDep;
+  using name = __fbthrift_strings_module::CompleteMapDep;
+  using member = __fbthrift_member;
+  using members = ::fatal::list<
+  >;
+  using members_annotations = __fbthrift_annotations::members;
+  using metadata = ::apache::thrift::detail::type_common_metadata_impl<
+      module_tags::module,
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
+      static_cast<::apache::thrift::legacy_type_id_t>(13729134695714584908ull)
+  >;
+};
+
+class IncompleteList_struct_traits {
+  class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
+    class __fbthrift_members {
+     public:
+      using field = __fbthrift_refl_impl::reflected_no_annotations;
+    };
+
+   public:
+    using members = __fbthrift_members;
+  };
+
+  struct __fbthrift_member_field {
+    using owner = ::apache::thrift::fixtures::types::IncompleteList;
+    using name = __fbthrift_strings_module::__fbthrift_hash_c0d2856b74d0df05b9d4456b177950351bd88e98b77f12574dfb7a911acee0d0;
+    using type = ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>;
+    using tag = ::apache::thrift::ident::field;
+    static constexpr ::apache::thrift::field_id_t id = 1;
+    static constexpr auto optional = ::apache::thrift::optionality::optional;
+    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::field>;
+    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::field>;
+    using type_class = ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>;
+    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field>;
+  };
+
+  struct __fbthrift_member {
+    using field = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_field>;
+  };
+ public:
+  using type = ::apache::thrift::fixtures::types::IncompleteList;
+  using name = __fbthrift_strings_module::IncompleteList;
+  using member = __fbthrift_member;
+  using members = ::fatal::list<
+      member::field
+  >;
+  using members_annotations = __fbthrift_annotations::members;
+  using metadata = ::apache::thrift::detail::type_common_metadata_impl<
+      module_tags::module,
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
+      static_cast<::apache::thrift::legacy_type_id_t>(6070816234583371852ull)
+  >;
+};
+
+class IncompleteListDep_struct_traits {
+  class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
+    class __fbthrift_members {
+     public:
+    };
+
+   public:
+    using members = __fbthrift_members;
+  };
+
+
+  struct __fbthrift_member {
+  };
+ public:
+  using type = ::apache::thrift::fixtures::types::IncompleteListDep;
+  using name = __fbthrift_strings_module::IncompleteListDep;
+  using member = __fbthrift_member;
+  using members = ::fatal::list<
+  >;
+  using members_annotations = __fbthrift_annotations::members;
+  using metadata = ::apache::thrift::detail::type_common_metadata_impl<
+      module_tags::module,
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
+      static_cast<::apache::thrift::legacy_type_id_t>(2937149170882946924ull)
+  >;
+};
+
+class CompleteList_struct_traits {
+  class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
+    class __fbthrift_members {
+     public:
+      using field = __fbthrift_refl_impl::reflected_no_annotations;
+    };
+
+   public:
+    using members = __fbthrift_members;
+  };
+
+  struct __fbthrift_member_field {
+    using owner = ::apache::thrift::fixtures::types::CompleteList;
+    using name = __fbthrift_strings_module::__fbthrift_hash_c0d2856b74d0df05b9d4456b177950351bd88e98b77f12574dfb7a911acee0d0;
+    using type = folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>;
+    using tag = ::apache::thrift::ident::field;
+    static constexpr ::apache::thrift::field_id_t id = 1;
+    static constexpr auto optional = ::apache::thrift::optionality::optional;
+    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::field>;
+    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::field>;
+    using type_class = ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>;
+    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field>;
+  };
+
+  struct __fbthrift_member {
+    using field = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_field>;
+  };
+ public:
+  using type = ::apache::thrift::fixtures::types::CompleteList;
+  using name = __fbthrift_strings_module::CompleteList;
+  using member = __fbthrift_member;
+  using members = ::fatal::list<
+      member::field
+  >;
+  using members_annotations = __fbthrift_annotations::members;
+  using metadata = ::apache::thrift::detail::type_common_metadata_impl<
+      module_tags::module,
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
+      static_cast<::apache::thrift::legacy_type_id_t>(3256794469108197708ull)
+  >;
+};
+
+class CompleteListDep_struct_traits {
+  class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
+    class __fbthrift_members {
+     public:
+    };
+
+   public:
+    using members = __fbthrift_members;
+  };
+
+
+  struct __fbthrift_member {
+  };
+ public:
+  using type = ::apache::thrift::fixtures::types::CompleteListDep;
+  using name = __fbthrift_strings_module::CompleteListDep;
+  using member = __fbthrift_member;
+  using members = ::fatal::list<
+  >;
+  using members_annotations = __fbthrift_annotations::members;
+  using metadata = ::apache::thrift::detail::type_common_metadata_impl<
+      module_tags::module,
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
+      static_cast<::apache::thrift::legacy_type_id_t>(15463451425253800684ull)
+  >;
+};
+
+class AdaptedList_struct_traits {
+  class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
+    class __fbthrift_members {
+     public:
+      using field = __fbthrift_refl_impl::reflected_no_annotations;
+    };
+
+   public:
+    using members = __fbthrift_members;
+  };
+
+  struct __fbthrift_member_field {
+    using owner = ::apache::thrift::fixtures::types::AdaptedList;
+    using name = __fbthrift_strings_module::__fbthrift_hash_c0d2856b74d0df05b9d4456b177950351bd88e98b77f12574dfb7a911acee0d0;
+    using type = ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>;
+    using tag = ::apache::thrift::ident::field;
+    static constexpr ::apache::thrift::field_id_t id = 1;
+    static constexpr auto optional = ::apache::thrift::optionality::optional;
+    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::field>;
+    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::field>;
+    using type_class = ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>;
+    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field>;
+  };
+
+  struct __fbthrift_member {
+    using field = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_field>;
+  };
+ public:
+  using type = ::apache::thrift::fixtures::types::AdaptedList;
+  using name = __fbthrift_strings_module::AdaptedList;
+  using member = __fbthrift_member;
+  using members = ::fatal::list<
+      member::field
+  >;
+  using members_annotations = __fbthrift_annotations::members;
+  using metadata = ::apache::thrift::detail::type_common_metadata_impl<
+      module_tags::module,
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
+      static_cast<::apache::thrift::legacy_type_id_t>(419971460217063020ull)
+  >;
+};
+
+class AdaptedListDep_struct_traits {
+  class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
+    class __fbthrift_members {
+     public:
+      using field = __fbthrift_refl_impl::reflected_no_annotations;
+    };
+
+   public:
+    using members = __fbthrift_members;
+  };
+
+  struct __fbthrift_member_field {
+    using owner = ::apache::thrift::fixtures::types::detail::AdaptedListDep;
+    using name = __fbthrift_strings_module::__fbthrift_hash_c0d2856b74d0df05b9d4456b177950351bd88e98b77f12574dfb7a911acee0d0;
+    using type = ::apache::thrift::fixtures::types::AdaptedList;
+    using tag = ::apache::thrift::ident::field;
+    static constexpr ::apache::thrift::field_id_t id = 1;
+    static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;
+    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::field>;
+    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::field>;
+    using type_class = ::apache::thrift::type_class::structure;
+    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field>;
+  };
+
+  struct __fbthrift_member {
+    using field = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_field>;
+  };
+ public:
+  using type = ::apache::thrift::fixtures::types::detail::AdaptedListDep;
+  using name = __fbthrift_strings_module::AdaptedListDep;
+  using member = __fbthrift_member;
+  using members = ::fatal::list<
+      member::field
+  >;
+  using members_annotations = __fbthrift_annotations::members;
+  using metadata = ::apache::thrift::detail::type_common_metadata_impl<
+      module_tags::module,
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
+      static_cast<::apache::thrift::legacy_type_id_t>(2761510975620061964ull)
+  >;
+};
+
+class DependentAdaptedList_struct_traits {
+  class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
+    class __fbthrift_members {
+     public:
+      using field = __fbthrift_refl_impl::reflected_no_annotations;
+    };
+
+   public:
+    using members = __fbthrift_members;
+  };
+
+  struct __fbthrift_member_field {
+    using owner = ::apache::thrift::fixtures::types::DependentAdaptedList;
+    using name = __fbthrift_strings_module::__fbthrift_hash_c0d2856b74d0df05b9d4456b177950351bd88e98b77f12574dfb7a911acee0d0;
+    using type = ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>;
+    using tag = ::apache::thrift::ident::field;
+    static constexpr ::apache::thrift::field_id_t id = 1;
+    static constexpr auto optional = ::apache::thrift::optionality::optional;
+    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::field>;
+    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::field>;
+    using type_class = ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>;
+    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field>;
+  };
+
+  struct __fbthrift_member {
+    using field = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_field>;
+  };
+ public:
+  using type = ::apache::thrift::fixtures::types::DependentAdaptedList;
+  using name = __fbthrift_strings_module::DependentAdaptedList;
+  using member = __fbthrift_member;
+  using members = ::fatal::list<
+      member::field
+  >;
+  using members_annotations = __fbthrift_annotations::members;
+  using metadata = ::apache::thrift::detail::type_common_metadata_impl<
+      module_tags::module,
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
+      static_cast<::apache::thrift::legacy_type_id_t>(2147534213873488908ull)
+  >;
+};
+
+class DependentAdaptedListDep_struct_traits {
+  class __fbthrift_annotations : public __fbthrift_refl_impl::no_annotations {
+    class __fbthrift_members {
+     public:
+      using field = __fbthrift_refl_impl::reflected_no_annotations;
+    };
+
+   public:
+    using members = __fbthrift_members;
+  };
+
+  struct __fbthrift_member_field {
+    using owner = ::apache::thrift::fixtures::types::detail::DependentAdaptedListDep;
+    using name = __fbthrift_strings_module::__fbthrift_hash_c0d2856b74d0df05b9d4456b177950351bd88e98b77f12574dfb7a911acee0d0;
+    using type = ::std::int16_t;
+    using tag = ::apache::thrift::ident::field;
+    static constexpr ::apache::thrift::field_id_t id = 1;
+    static constexpr auto optional = ::apache::thrift::optionality::optional;
+    using getter = __fbthrift_refl_impl::data_member_accessor<::apache::thrift::ident::field>;
+    using field_ref_getter = ::apache::thrift::access_field_fn<::apache::thrift::ident::field>;
+    using type_class = ::apache::thrift::type_class::integral;
+    using annotations = ::apache::thrift::reflected_annotations<__fbthrift_annotations::members::field>;
+  };
+
+  struct __fbthrift_member {
+    using field = ::apache::thrift::reflected_struct_data_member<__fbthrift_member_field>;
+  };
+ public:
+  using type = ::apache::thrift::fixtures::types::detail::DependentAdaptedListDep;
+  using name = __fbthrift_strings_module::DependentAdaptedListDep;
+  using member = __fbthrift_member;
+  using members = ::fatal::list<
+      member::field
+  >;
+  using members_annotations = __fbthrift_annotations::members;
+  using metadata = ::apache::thrift::detail::type_common_metadata_impl<
+      module_tags::module,
+      ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
+      static_cast<::apache::thrift::legacy_type_id_t>(4387040533057387340ull)
   >;
 };
 
@@ -1659,16 +1963,26 @@ THRIFT_REGISTER_STRUCT_TRAITS(TrivialNestedWithDefault, __fbthrift_refl::Trivial
 THRIFT_REGISTER_STRUCT_TRAITS(ComplexString, __fbthrift_refl::ComplexString_struct_traits);
 THRIFT_REGISTER_STRUCT_TRAITS(ComplexNestedWithDefault, __fbthrift_refl::ComplexNestedWithDefault_struct_traits);
 THRIFT_REGISTER_STRUCT_TRAITS(MinPadding, __fbthrift_refl::MinPadding_struct_traits);
-THRIFT_REGISTER_STRUCT_TRAITS(MyDataItem, __fbthrift_refl::MyDataItem_struct_traits);
+THRIFT_REGISTER_STRUCT_TRAITS(MinPaddingWithCustomType, __fbthrift_refl::MinPaddingWithCustomType_struct_traits);
 THRIFT_REGISTER_STRUCT_TRAITS(MyStruct, __fbthrift_refl::MyStruct_struct_traits);
+THRIFT_REGISTER_STRUCT_TRAITS(MyDataItem, __fbthrift_refl::MyDataItem_struct_traits);
 THRIFT_REGISTER_STRUCT_TRAITS(Renamed, __fbthrift_refl::Renamed_struct_traits);
 THRIFT_REGISTER_STRUCT_TRAITS(AnnotatedTypes, __fbthrift_refl::AnnotatedTypes_struct_traits);
-THRIFT_REGISTER_STRUCT_TRAITS(ForwardUsageStruct, __fbthrift_refl::ForwardUsageStruct_struct_traits);
 THRIFT_REGISTER_STRUCT_TRAITS(ForwardUsageRoot, __fbthrift_refl::ForwardUsageRoot_struct_traits);
+THRIFT_REGISTER_STRUCT_TRAITS(ForwardUsageStruct, __fbthrift_refl::ForwardUsageStruct_struct_traits);
 THRIFT_REGISTER_STRUCT_TRAITS(ForwardUsageByRef, __fbthrift_refl::ForwardUsageByRef_struct_traits);
-THRIFT_REGISTER_STRUCT_TRAITS(NoexceptMoveEmpty, __fbthrift_refl::NoexceptMoveEmpty_struct_traits);
-THRIFT_REGISTER_STRUCT_TRAITS(NoexceptMoveSimpleStruct, __fbthrift_refl::NoexceptMoveSimpleStruct_struct_traits);
-THRIFT_REGISTER_STRUCT_TRAITS(NoexceptMoveComplexStruct, __fbthrift_refl::NoexceptMoveComplexStruct_struct_traits);
+THRIFT_REGISTER_STRUCT_TRAITS(IncompleteMap, __fbthrift_refl::IncompleteMap_struct_traits);
+THRIFT_REGISTER_STRUCT_TRAITS(IncompleteMapDep, __fbthrift_refl::IncompleteMapDep_struct_traits);
+THRIFT_REGISTER_STRUCT_TRAITS(CompleteMap, __fbthrift_refl::CompleteMap_struct_traits);
+THRIFT_REGISTER_STRUCT_TRAITS(CompleteMapDep, __fbthrift_refl::CompleteMapDep_struct_traits);
+THRIFT_REGISTER_STRUCT_TRAITS(IncompleteList, __fbthrift_refl::IncompleteList_struct_traits);
+THRIFT_REGISTER_STRUCT_TRAITS(IncompleteListDep, __fbthrift_refl::IncompleteListDep_struct_traits);
+THRIFT_REGISTER_STRUCT_TRAITS(CompleteList, __fbthrift_refl::CompleteList_struct_traits);
+THRIFT_REGISTER_STRUCT_TRAITS(CompleteListDep, __fbthrift_refl::CompleteListDep_struct_traits);
+THRIFT_REGISTER_STRUCT_TRAITS(AdaptedList, __fbthrift_refl::AdaptedList_struct_traits);
+THRIFT_REGISTER_STRUCT_TRAITS(detail::AdaptedListDep, __fbthrift_refl::AdaptedListDep_struct_traits);
+THRIFT_REGISTER_STRUCT_TRAITS(DependentAdaptedList, __fbthrift_refl::DependentAdaptedList_struct_traits);
+THRIFT_REGISTER_STRUCT_TRAITS(detail::DependentAdaptedListDep, __fbthrift_refl::DependentAdaptedListDep_struct_traits);
 THRIFT_REGISTER_STRUCT_TRAITS(AllocatorAware, __fbthrift_refl::AllocatorAware_struct_traits);
 THRIFT_REGISTER_STRUCT_TRAITS(AllocatorAware2, __fbthrift_refl::AllocatorAware2_struct_traits);
 THRIFT_REGISTER_STRUCT_TRAITS(TypedefStruct, __fbthrift_refl::TypedefStruct_struct_traits);

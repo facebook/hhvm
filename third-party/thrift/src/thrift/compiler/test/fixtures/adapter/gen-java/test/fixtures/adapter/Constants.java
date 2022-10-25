@@ -32,4 +32,26 @@ public final class Constants {
         .add("30")
         .add("40")
         .build()).build();
+
+    public static final int TIMEOUT = 42;
+
+    public static final String MSG = "hello, world";
+
+    public static final test.fixtures.adapter.Person2 PERSON = new test.fixtures.adapter.Person2.Builder().setName("DefaultName").build();
+
+    public static final int TIMEOUT_NO_TRANSITIVE = 420;
+
+    public static final String MSG_NO_TRANSITIVE = "hello, world 2";
+
+    public static final test.fixtures.adapter.Person2 PERSON_NO_TRANSITIVE = new test.fixtures.adapter.Person2.Builder().setName("DefaultName 2").build();
+
+    public static final boolean TYPE_ADAPTED = true;
+
+    public static final test.fixtures.adapter.MoveOnly NESTED_ADAPTED = new test.fixtures.adapter.MoveOnly.Builder().setPtr(new test.fixtures.adapter.HeapAllocated.Builder().build()).build();
+
+    public static final List<Byte> CONTAINER_OF_ADAPTED = ImmutableList.<Byte>builder()
+        .add((byte)1)
+        .add((byte)2)
+        .add((byte)3)
+        .build();
 }

@@ -34,13 +34,13 @@ use ocaml_helper::parse_int;
 use ocaml_helper::ParseIntError;
 use ocamlrep::rc::RcOc;
 use oxidized::aast;
+use oxidized::aast_defs::DocComment;
 use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::Node;
 use oxidized::aast_visitor::Visitor;
 use oxidized::ast;
 use oxidized::ast::Expr;
 use oxidized::ast::Expr_;
-use oxidized::doc_comment::DocComment;
 use oxidized::errors::Error as HHError;
 use oxidized::errors::Naming;
 use oxidized::errors::NastCheck;
@@ -4554,8 +4554,7 @@ fn extract_docblock<'a>(node: S<'a>, env: &Env<'_>) -> Option<DocComment> {
             .indexed_source_text
             .relative_pos(anchor + start, anchor + end)
             .into();
-        let ps = (pos, txt);
-        oxidized::doc_comment::DocComment::new(ps)
+        (pos, txt)
     })
 }
 

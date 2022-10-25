@@ -312,6 +312,9 @@ class Cpp2Worker : public IOWorkerContext,
     } else if (!eventBase) {
       eventBase = folly::EventBaseManager::get()->getEventBase();
     }
+    if (server) {
+      fizzPeeker_.setTransportOptions(server->getFizzConfig().transportOptions);
+    }
     init(nullptr, eventBase, nullptr, fizzContext);
     initRequestsRegistry();
 

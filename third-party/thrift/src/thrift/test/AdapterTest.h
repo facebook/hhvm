@@ -51,9 +51,9 @@ struct TemplatedTestAdapter {
     return {value};
   }
 
-  template <typename T>
-  static T toThrift(Wrapper<T> wrapper) {
-    return wrapper.value;
+  template <typename Wrapper>
+  static auto&& toThrift(Wrapper&& wrapper) {
+    return std::forward<Wrapper>(wrapper).value;
   }
 };
 

@@ -224,6 +224,19 @@ void reset_field<::cpp2::StructWithNonOptionalBox>(
 }
 
 template<>
+void reset_field<::cpp2::StructWithInternBox>(
+    ::cpp2::StructWithInternBox& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.field1_ref().copy_from(default_inst<::cpp2::StructWithInternBox>().field1_ref());
+      return;
+    case 1:
+      obj.field2_ref().copy_from(default_inst<::cpp2::StructWithInternBox>().field2_ref());
+      return;
+  }
+}
+
+template<>
 void reset_field<::cpp2::StructWithRefTypeUnique>(
     ::cpp2::StructWithRefTypeUnique& obj, uint16_t index) {
   switch (index) {
@@ -406,6 +419,16 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 template<>
 const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::StructWithNonOptionalBox>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::cpp2::StructWithInternBox>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

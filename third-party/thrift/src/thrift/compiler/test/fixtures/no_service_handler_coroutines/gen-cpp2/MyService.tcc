@@ -31,7 +31,7 @@ void MyServiceAsyncProcessor::executeRequest_foo(apache::thrift::ServerRequest&&
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::MyService_foo_pargs args;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "MyService.foo", serverRequest.requestContext()));
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.foo", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "foo", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -97,7 +97,7 @@ void MyServiceAsyncProcessor::executeRequest_bar(apache::thrift::ServerRequest&&
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::MyService_bar_pargs args;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "MyService.bar", serverRequest.requestContext()));
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.bar", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "bar", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

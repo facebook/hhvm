@@ -25,7 +25,12 @@ let member_type env member_ce =
   if Option.is_none (get_ce_xhp_attr member_ce) then
     default_result
   else
-    match get_node default_result with
+    let (stripped_ty, has_like) =
+      match get_node default_result with
+      | Tlike ty -> (ty, true)
+      | _ -> (default_result, false)
+    in
+    match get_node stripped_ty with
     | Tapply (enum_id, _) ->
       (* XHP attribute type transform is necessary to account for
        * non-first class Enums:
@@ -62,7 +67,10 @@ let member_type env member_ce =
               interface = _;
             } ->
           let ty = mk (get_reason default_result, get_node enum_ty) in
-          ty))
+          if has_like then
+            mk (get_reason default_result, Tlike ty)
+          else
+            ty))
     | _ -> default_result
 
 let enum_check_const ty_exp env cc t =

@@ -1,1 +1,1 @@
-Fatal error: Trait 'T' may only be used from class 'C', which must be final in %s/requireclass_hierarchy_02.bad.php on line 12
+Fatal error: Non final class 'D' uses trait 'T', but trait 'T' may only be used from class 'C', which must be final in %s/requireclass_hierarchy_02.bad.php on line 12

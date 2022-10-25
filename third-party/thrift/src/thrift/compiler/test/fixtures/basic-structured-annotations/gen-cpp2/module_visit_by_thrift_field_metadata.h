@@ -42,19 +42,6 @@ struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured
 };
 
 template <>
-struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured_annotation_forward> {
-  template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-    switch (fieldId) {
-    case 1:
-      return f(0, static_cast<T&&>(t).count_ref());
-    default:
-      throwInvalidThriftId(fieldId, "::test::fixtures::basic-structured-annotations::structured_annotation_forward");
-    }
-  }
-};
-
-template <>
 struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
@@ -67,6 +54,19 @@ struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured
       return f(2, static_cast<T&&>(t).forward_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::basic-structured-annotations::structured_annotation_recursive");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::basic-structured-annotations::structured_annotation_forward> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).count_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::basic-structured-annotations::structured_annotation_forward");
     }
   }
 };

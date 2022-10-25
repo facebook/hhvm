@@ -180,6 +180,13 @@ let rec assign
            situation, it is not meaningful to report a candidate. *)
         env
     end
+  | A.Class_get (_, _, _)
+  | A.Obj_get (_, _, _, _) ->
+    (* Imprecise local handling so that false positives are invalidated *)
+    let env =
+      Option.fold ~init:env ~f:(dynamic_when_local ~origin:__LINE__ pos) rhs
+    in
+    not_yet_supported env lhs_pos ("lvalue: " ^ Utils.expr_name lval)
   | _ -> not_yet_supported env lhs_pos ("lvalue: " ^ Utils.expr_name lval)
 
 and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
@@ -481,6 +488,15 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     in
     let env = Env.add_inter_constraint env constr_ in
     (env, Some entity_)
+  | A.Class_get (_, _, _)
+  | A.Obj_get (_, _, _, _) ->
+    let env = not_yet_supported env pos ("expression: " ^ Utils.expr_name e) in
+    (* Imprecise local handling so that false positives are invalidated *)
+    when_local_mode env.tast_env ~default:(env, None) @@ fun () ->
+    let entity_ = Env.fresh_var () in
+    let constraint_ = decorate ~origin:__LINE__ @@ Has_dynamic_key entity_ in
+    let env = Env.add_constraint env constraint_ in
+    (env, Some entity_)
   | _ ->
     let env = not_yet_supported env pos ("expression: " ^ Utils.expr_name e) in
     (env, None)
@@ -642,44 +658,44 @@ and block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt
 
 let decl_hint kind tast_env ((ty, hint) : T.type_hint) :
     decorated_constraints * entity =
-  if might_be_dict tast_env ty then
-    let hint_pos = pos_of_hint hint in
-    let entity_ =
-      match kind with
-      | `Parameter (id, idx) -> Inter (HT.Param ((hint_pos, id), idx))
-      | `Return -> Literal hint_pos
+  let hint_pos = pos_of_hint hint in
+  let entity_ =
+    match kind with
+    | `Parameter (id, idx) -> Inter (HT.Param ((hint_pos, id), idx))
+    | `Return -> Literal hint_pos
+  in
+  let decorate ~origin constraint_ =
+    { hack_pos = hint_pos; origin; constraint_ }
+  in
+  let inter_constraints =
+    match kind with
+    | `Parameter (id, idx) ->
+      DecoratedInterConstraintSet.singleton
+      @@ decorate ~origin:__LINE__
+      @@ HT.Param ((hint_pos, id), idx)
+    | `Return -> DecoratedInterConstraintSet.empty
+  in
+  let kind =
+    match kind with
+    | `Parameter _ -> Parameter
+    | `Return -> Return
+  in
+  let constraints =
+    if might_be_dict tast_env ty then
+      DecoratedConstraintSet.singleton
+      @@ decorate ~origin:__LINE__
+      @@ Marks (kind, hint_pos)
+    else
+      DecoratedConstraintSet.empty
+  in
+  let constraints =
+    when_local_mode tast_env ~default:constraints @@ fun () ->
+    let invalidation_constraint =
+      decorate ~origin:__LINE__ @@ Has_dynamic_key entity_
     in
-    let decorate ~origin constraint_ =
-      { hack_pos = hint_pos; origin; constraint_ }
-    in
-    let inter_constraints =
-      match kind with
-      | `Parameter (id, idx) ->
-        DecoratedInterConstraintSet.singleton
-        @@ decorate ~origin:__LINE__
-        @@ HT.Param ((hint_pos, id), idx)
-      | `Return -> DecoratedInterConstraintSet.empty
-    in
-    let kind =
-      match kind with
-      | `Parameter _ -> Parameter
-      | `Return -> Return
-    in
-    let marker_constraint =
-      decorate ~origin:__LINE__ @@ Marks (kind, hint_pos)
-    in
-
-    let constraints = DecoratedConstraintSet.singleton marker_constraint in
-    let constraints =
-      when_local_mode tast_env ~default:constraints @@ fun () ->
-      let invalidation_constraint =
-        decorate ~origin:__LINE__ @@ Has_dynamic_key entity_
-      in
-      DecoratedConstraintSet.add invalidation_constraint constraints
-    in
-    ((constraints, inter_constraints), Some entity_)
-  else
-    ((DecoratedConstraintSet.empty, DecoratedInterConstraintSet.empty), None)
+    DecoratedConstraintSet.add invalidation_constraint constraints
+  in
+  ((constraints, inter_constraints), Some entity_)
 
 let init_params id tast_env (params : T.fun_param list) :
     decorated_constraints * entity LMap.t =

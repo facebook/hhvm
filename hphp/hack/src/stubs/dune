@@ -128,9 +128,9 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name decl_ipc_ffi_externs)
+ (name decl_service_client)
  (wrapped false)
- (modules decl_ipc_ffi_externs)
+ (modules decl_service_client)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 

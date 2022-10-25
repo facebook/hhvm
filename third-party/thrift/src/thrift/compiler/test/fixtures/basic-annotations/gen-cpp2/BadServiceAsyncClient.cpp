@@ -80,7 +80,7 @@ void apache::thrift::Client<::cpp2::GoodService>::barImpl(apache::thrift::RpcOpt
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::GoodService>::barCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::GoodService>::barCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -292,7 +292,7 @@ void apache::thrift::Client<::cpp2::GoodService>::BadInteraction::fooImpl(apache
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::GoodService>::BadInteraction::fooCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::GoodService>::BadInteraction::fooCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());

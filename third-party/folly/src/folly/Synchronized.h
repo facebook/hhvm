@@ -626,7 +626,7 @@ class SynchronizedBase<Subclass, detail::SynchronizedMutexLevel::Unique> {
  * @tparam T  The type of datum to be stored.
  * @tparam Mutex  The mutex type that guards the datum. Must be Lockable.
  *
- * @refcode docs/examples/folly/Synchronized.cpp
+ * @refcode folly/docs/examples/folly/Synchronized.cpp
  */
 template <class T, class Mutex = SharedMutex>
 struct Synchronized : public SynchronizedBase<
@@ -653,7 +653,7 @@ struct Synchronized : public SynchronizedBase<
   /**
    * Default constructor leaves both members call their own default constructor.
    */
-  Synchronized() = default;
+  constexpr Synchronized() = default;
 
  public:
   /**
@@ -704,7 +704,7 @@ struct Synchronized : public SynchronizedBase<
    * instance `in_place` as the first argument.
    */
   template <typename... Args>
-  explicit Synchronized(in_place_t, Args&&... args)
+  explicit constexpr Synchronized(in_place_t, Args&&... args)
       : datum_(std::forward<Args>(args)...) {}
 
   /**

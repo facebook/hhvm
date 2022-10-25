@@ -104,6 +104,7 @@ using DisposeCallback =
                      std::unique_ptr<extern_worker::Client>)>;
 
 void whole_program(WholeProgramInput inputs,
+                   Config config,
                    std::unique_ptr<coro::TicketExecutor> executor,
                    std::unique_ptr<extern_worker::Client> client,
                    const EmitCallback& callback,

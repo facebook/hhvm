@@ -153,6 +153,7 @@ final class UndefinedVariableException extends LogicException {}
 final class AccessPropertyOnNonObjectException extends LogicException {}
 final class ReadonlyViolationException extends LogicException {}
 final class CoeffectViolationException extends LogicException {}
+final class ModuleBoundaryViolationException extends LogicException {}
 
 class RuntimeException extends Exception {
   use ExceptionWithPureGetMessageTrait;

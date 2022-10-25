@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include <limits>
@@ -51,10 +52,6 @@ class ParallelConcurrencyController : public ConcurrencyControllerBase {
 
   uint64_t numPendingDequeRequest() const override {
     return counters_.load().pendingDequeCalls;
-  }
-
-  void setExecutorSupportPriority(bool support) override {
-    executorSupportPriority = support;
   }
 
  private:

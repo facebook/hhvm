@@ -10,8 +10,6 @@ use eq_modulo_pos::EqModuloPos;
 use hcons::Conser;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
 use once_cell::sync::Lazy;
 pub use oxidized::typing_reason::ArgPosition;
 pub use oxidized::typing_reason::BlameSource;

@@ -7,6 +7,7 @@ use anyhow::Result;
 use ffi::Slice;
 use ffi::Str;
 use hash::HashMap;
+use hhbc::AdataId;
 use hhbc::ClassName;
 use hhbc::Dummy;
 use hhbc::FCallArgs;
@@ -26,6 +27,7 @@ use hhbc::SetOpOp;
 use hhbc::SrcLoc;
 use hhbc::SwitchKind;
 use hhbc::Targets;
+use hhbc::TypedValue;
 use hhbc_gen::InstrFlags;
 use hhbc_gen::Outputs;
 use itertools::Itertools;
@@ -52,10 +54,15 @@ pub(crate) struct State<'arena, 'a> {
     pub(crate) iterators: IterIdMap<IterState>,
     pub(crate) locals: HashMap<Local, Value>,
     pub(crate) stack: Vec<Value>,
+    adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
 }
 
 impl<'arena, 'a> State<'arena, 'a> {
-    pub(crate) fn new(body: &'a Body<'arena>, debug_name: &'static str) -> Self {
+    pub(crate) fn new(
+        body: &'a Body<'arena>,
+        debug_name: &'static str,
+        adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
+    ) -> Self {
         Self {
             body,
             debug_name,
@@ -63,12 +70,13 @@ impl<'arena, 'a> State<'arena, 'a> {
             iterators: Default::default(),
             locals: Default::default(),
             stack: Default::default(),
+            adata,
         }
     }
 
     /// Return an Input for a Value where the Input represents a non-COW
     /// datatype.
-    fn non_cow(&self, value: Value) -> Input {
+    fn non_cow(&self, value: Value) -> Input<'arena> {
         match value {
             Value::Constant(c) => Input::Constant(c),
             Value::Defined(v) => Input::Read(v),
@@ -78,7 +86,7 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     /// Compute the ownership for a Value and return an Input representing that
     /// Value with its ownership.
-    fn reffy(&self, value: Value) -> Input {
+    fn reffy(&self, value: Value) -> Input<'arena> {
         match value {
             Value::Constant(c) => Input::Constant(c),
             Value::Defined(v) => {
@@ -107,7 +115,7 @@ impl<'arena, 'a> State<'arena, 'a> {
     /// are also returned.
     pub(crate) fn collect(
         mut self,
-        value_builder: &mut ValueBuilder,
+        value_builder: &mut ValueBuilder<'arena>,
     ) -> Result<StateCollect<'arena, 'a>> {
         let debug_name = format!("{}{}", self.debug_name, self.ip);
         trace!("--- Collecting sequence {}", debug_name);
@@ -226,6 +234,7 @@ impl<'arena, 'a> State<'arena, 'a> {
             iterators: self.iterators.clone(),
             locals: self.locals.clone(),
             stack: self.stack.clone(),
+            adata: self.adata,
         }
     }
 
@@ -237,6 +246,7 @@ impl<'arena, 'a> State<'arena, 'a> {
             iterators: self.iterators.clone(),
             locals: self.locals.clone(),
             stack: vec![],
+            adata: self.adata,
         }
     }
 
@@ -308,7 +318,6 @@ impl<'arena, 'a> State<'arena, 'a> {
                 | ref opcode @ Opcode::Keyset(_)
                 | ref opcode @ Opcode::LateBoundCls
                 | ref opcode @ Opcode::LazyClass(..)
-                | ref opcode @ Opcode::LazyClassFromClass
                 | ref opcode @ Opcode::Method
                 | ref opcode @ Opcode::NewCol(..)
                 | ref opcode @ Opcode::NewDictArray(_)
@@ -520,7 +529,7 @@ impl<'arena, 'a> State<'arena, 'a> {
     fn step_base(
         &mut self,
         builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
-        inputs: &mut Vec<Input>,
+        inputs: &mut Vec<Input<'arena>>,
     ) -> Result<node::BaseOp> {
         let instr = self.instr().unwrap();
         let src_loc = Rc::clone(self.body.ip_to_loc(self.ip));
@@ -565,7 +574,7 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     fn step_dim(
         &mut self,
-        inputs: &mut Vec<Input>,
+        inputs: &mut Vec<Input<'arena>>,
     ) -> Result<Option<node::IntermediateOp<'arena>>> {
         // Loop because we may have to skip intermediate SrcLoc.
         loop {
@@ -590,7 +599,7 @@ impl<'arena, 'a> State<'arena, 'a> {
         }
     }
 
-    fn step_final(&mut self, inputs: &mut Vec<Input>) -> Result<node::FinalOp<'arena>> {
+    fn step_final(&mut self, inputs: &mut Vec<Input<'arena>>) -> Result<node::FinalOp<'arena>> {
         let instr = self
             .instr()
             .ok_or_else(|| anyhow!("Early end in MemberOp sequence"))?;
@@ -668,11 +677,10 @@ impl<'arena, 'a> State<'arena, 'a> {
         builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
         opcode: &Opcode<'arena>,
     ) -> Result<()> {
-        let clean_instr = NodeInstr::Opcode(opcode.clone());
+        let clean_instr = NodeInstr::Opcode(clean_opcode(opcode));
         debug_assert_eq!(opcode.num_inputs(), 0);
         debug_assert!(matches!(LocalInfo::for_opcode(opcode), LocalInfo::None));
         debug_assert!(opcode.targets().is_empty());
-        debug_assert_eq!(*opcode, clean_opcode(opcode));
         let data = crate::body::lookup_data_for_opcode(opcode);
         debug_assert!(match &data.outputs {
             Outputs::Fixed(n) => n.len() == 1,
@@ -685,7 +693,14 @@ impl<'arena, 'a> State<'arena, 'a> {
         debug_assert!(!data.flags.contains(InstrFlags::TF));
 
         // For a constant the outputs are based entirely on the input instr.
-        let output = builder.compute_constant(&clean_instr);
+        let output = match opcode {
+            Opcode::Dict(id) | Opcode::Keyset(id) | Opcode::Vec(id) => {
+                // But for an array-based constant we want to use the array data as an input.
+                let tv = self.adata[id];
+                builder.compute_value(&clean_instr, 0, &[Input::ConstantArray(tv.clone())])
+            }
+            _ => builder.compute_constant(&clean_instr),
+        };
         self.stack_push(output);
 
         Ok(())
@@ -698,7 +713,7 @@ impl<'arena, 'a> State<'arena, 'a> {
     ) -> Result<()> {
         // Start by computing the inputs for this opcode. For a 'default'
         // opcode we can handle stack and locals.
-        let mut inputs: Vec<Input> = self
+        let mut inputs: Vec<Input<'arena>> = self
             .stack_pop_n(opcode.num_inputs())?
             .into_iter()
             .map(|v| self.reffy(v))
@@ -768,7 +783,7 @@ impl<'arena, 'a> State<'arena, 'a> {
 
     fn push_member_key_inputs(
         &mut self,
-        inputs: &mut Vec<Input>,
+        inputs: &mut Vec<Input<'arena>>,
         member_key: &MemberKey<'arena>,
     ) -> Result<MemberKey<'arena>> {
         match *member_key {
@@ -793,12 +808,6 @@ impl<'arena, 'a> State<'arena, 'a> {
         opcode: &Opcode<'arena>,
     ) -> Result<()> {
         let data = crate::body::lookup_data_for_opcode(opcode);
-
-        let inputs = self
-            .stack_pop_n(opcode.num_inputs())?
-            .into_iter()
-            .map(|v| self.reffy(v))
-            .collect_vec();
 
         fn sanitize_fca<'arena>(
             FCallArgs {
@@ -868,7 +877,14 @@ impl<'arena, 'a> State<'arena, 'a> {
             _ => unreachable!(),
         };
 
-        self.stack_pop_n(fca.inouts.iter().filter(|&&inout| inout).count())?;
+        let num_inouts = fca.num_inouts();
+        let num_inputs = opcode.num_inputs();
+        let inputs = self
+            .stack_pop_n(num_inputs)?
+            .into_iter()
+            .take(num_inputs - num_inouts)
+            .map(|v| self.reffy(v))
+            .collect_vec();
 
         let instr = NodeInstr::Opcode(opcode);
 
@@ -1112,7 +1128,7 @@ impl<'arena, 'a> State<'arena, 'a> {
         &self,
         builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
         instr: NodeInstr<'arena>,
-        inputs: impl Into<Box<[Input]>>,
+        inputs: impl Into<Box<[Input<'arena>]>>,
     ) {
         let src_loc = Rc::clone(self.body.ip_to_loc(self.ip));
         self.seq_push_with_loc(builder, instr, inputs, src_loc);
@@ -1122,7 +1138,7 @@ impl<'arena, 'a> State<'arena, 'a> {
         &self,
         builder: &mut InstrSeqBuilder<'arena, 'a, '_>,
         instr: NodeInstr<'arena>,
-        inputs: impl Into<Box<[Input]>>,
+        inputs: impl Into<Box<[Input<'arena>]>>,
         src_loc: Rc<SrcLoc>,
     ) {
         let inputs = inputs.into();
@@ -1213,11 +1229,16 @@ type IterIdMap<V> = std::collections::HashMap<IterId, V, BuildIdHasher<u32>>;
 struct InstrSeqBuilder<'arena, 'a, 'b> {
     seq: Vec<Node<'arena>>,
     forks: Vec<State<'arena, 'a>>,
-    value_builder: &'b mut ValueBuilder,
+    value_builder: &'b mut ValueBuilder<'arena>,
 }
 
 impl<'arena, 'a, 'b> InstrSeqBuilder<'arena, 'a, 'b> {
-    fn compute_value(&mut self, instr: &NodeInstr<'_>, idx: usize, inputs: &[Input]) -> Value {
+    fn compute_value(
+        &mut self,
+        instr: &NodeInstr<'arena>,
+        idx: usize,
+        inputs: &[Input<'arena>],
+    ) -> Value {
         // The Instruct used to compute the value shouldn't have any
         // non-comparable bits: Local or Target
         for local in LocalInfo::for_node(instr).locals().iter() {
@@ -1230,7 +1251,7 @@ impl<'arena, 'a, 'b> InstrSeqBuilder<'arena, 'a, 'b> {
             .compute_value(instr, idx, inputs.to_vec().into_boxed_slice())
     }
 
-    fn compute_constant(&mut self, instr: &NodeInstr<'_>) -> Value {
+    fn compute_constant(&mut self, instr: &NodeInstr<'arena>) -> Value {
         // The Instruct used to compute the value shouldn't have any
         // non-comparable bits: Local or Target
         for local in LocalInfo::for_node(instr).locals().iter() {
@@ -1684,7 +1705,6 @@ fn clean_opcode<'arena>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
         | Opcode::CombineAndResolveTypeStruct(_)
         | Opcode::ConcatN(_)
         | Opcode::ContCheck(_)
-        | Opcode::Dict(_)
         | Opcode::Double(_)
         | Opcode::FCallFunc(_)
         | Opcode::Fatal(_)
@@ -1695,7 +1715,6 @@ fn clean_opcode<'arena>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
         | Opcode::IsTypeC(_)
         | Opcode::IsTypeStructC(_)
         | Opcode::IterFree(_)
-        | Opcode::Keyset(_)
         | Opcode::LazyClass(_)
         | Opcode::NewCol(_)
         | Opcode::NewDictArray(_)
@@ -1716,10 +1735,13 @@ fn clean_opcode<'arena>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
         | Opcode::SetOpS(_)
         | Opcode::SetS(_)
         | Opcode::String(_)
-        | Opcode::Vec(_)
         | Opcode::VerifyOutType(_)
         | Opcode::VerifyParamType(_)
         | Opcode::VerifyParamTypeTS(_) => opcode.clone(),
+
+        Opcode::Dict(_) => Opcode::Dict(AdataId::empty()),
+        Opcode::Keyset(_) => Opcode::Keyset(AdataId::empty()),
+        Opcode::Vec(_) => Opcode::Vec(AdataId::empty()),
 
         Opcode::MemoGetEager(_, dummy, _) => {
             Opcode::MemoGetEager([Label::INVALID, Label::INVALID], dummy, LocalRange::EMPTY)

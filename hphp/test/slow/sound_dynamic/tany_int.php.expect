@@ -1,0 +1,11 @@
+===== HH\FIXME\TANY_MARKER<int> =====
+$tany_int: 4
+$tany_int: not Tany int
+$t: 4 [reified]
+$t: not Tany int [reified]
+
+===== Typeconsts::Tany_int =====
+$t: 4 [reified]
+$t: not Tany int [typeconst] [reified]
+Type structure kind: 13
+Assigned type text: HH\FIXME\TANY_MARKER

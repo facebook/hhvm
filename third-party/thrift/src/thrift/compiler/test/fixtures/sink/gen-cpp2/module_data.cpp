@@ -9,118 +9,132 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+#if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
+// This attribute is applied to the static data members to ensure that they are
+// not stripped from the compiled binary, in order to keep them available for
+// use by debuggers at runtime.
+//
+// The attribute works by forcing all of the data members (both used and unused
+// ones) into the same section. This stops the linker from stripping the unused
+// data, as it works on a per-section basis and only removes sections if they
+// are entirely unused.
+#define THRIFT_DATA_SECTION [[gnu::section(".rodata.thrift.data")]]
+#else
+#define THRIFT_DATA_SECTION
+#endif
+
 namespace apache {
 namespace thrift {
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::InitialResponse>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::InitialResponse>::fields_names = {{
   "content",
 }};
-const std::array<int16_t, 1> TStructDataStorage<::cpp2::InitialResponse>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::cpp2::InitialResponse>::fields_ids = {{
   1,
 }};
-const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::InitialResponse>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::InitialResponse>::fields_types = {{
   TType::T_STRING,
 }};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::InitialResponse>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::InitialResponse>::storage_names = {{
   "__fbthrift_field_content",
 }};
-const std::array<int, 1> TStructDataStorage<::cpp2::InitialResponse>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::cpp2::InitialResponse>::isset_indexes = {{
   0,
 }};
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::FinalResponse>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::FinalResponse>::fields_names = {{
   "content",
 }};
-const std::array<int16_t, 1> TStructDataStorage<::cpp2::FinalResponse>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::cpp2::FinalResponse>::fields_ids = {{
   1,
 }};
-const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::FinalResponse>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::FinalResponse>::fields_types = {{
   TType::T_STRING,
 }};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::FinalResponse>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::FinalResponse>::storage_names = {{
   "__fbthrift_field_content",
 }};
-const std::array<int, 1> TStructDataStorage<::cpp2::FinalResponse>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::cpp2::FinalResponse>::isset_indexes = {{
   0,
 }};
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::SinkPayload>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::SinkPayload>::fields_names = {{
   "content",
 }};
-const std::array<int16_t, 1> TStructDataStorage<::cpp2::SinkPayload>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::cpp2::SinkPayload>::fields_ids = {{
   1,
 }};
-const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::SinkPayload>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::SinkPayload>::fields_types = {{
   TType::T_STRING,
 }};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::SinkPayload>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::SinkPayload>::storage_names = {{
   "__fbthrift_field_content",
 }};
-const std::array<int, 1> TStructDataStorage<::cpp2::SinkPayload>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::cpp2::SinkPayload>::isset_indexes = {{
   0,
 }};
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::CompatibleWithKeywordSink>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::CompatibleWithKeywordSink>::fields_names = {{
   "sink",
 }};
-const std::array<int16_t, 1> TStructDataStorage<::cpp2::CompatibleWithKeywordSink>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::cpp2::CompatibleWithKeywordSink>::fields_ids = {{
   1,
 }};
-const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::CompatibleWithKeywordSink>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::CompatibleWithKeywordSink>::fields_types = {{
   TType::T_STRING,
 }};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::CompatibleWithKeywordSink>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::CompatibleWithKeywordSink>::storage_names = {{
   "__fbthrift_field_sink",
 }};
-const std::array<int, 1> TStructDataStorage<::cpp2::CompatibleWithKeywordSink>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::cpp2::CompatibleWithKeywordSink>::isset_indexes = {{
   0,
 }};
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::InitialException>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::InitialException>::fields_names = {{
   "reason",
 }};
-const std::array<int16_t, 1> TStructDataStorage<::cpp2::InitialException>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::cpp2::InitialException>::fields_ids = {{
   1,
 }};
-const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::InitialException>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::InitialException>::fields_types = {{
   TType::T_STRING,
 }};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::InitialException>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::InitialException>::storage_names = {{
   "__fbthrift_field_reason",
 }};
-const std::array<int, 1> TStructDataStorage<::cpp2::InitialException>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::cpp2::InitialException>::isset_indexes = {{
   0,
 }};
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::SinkException1>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::SinkException1>::fields_names = {{
   "reason",
 }};
-const std::array<int16_t, 1> TStructDataStorage<::cpp2::SinkException1>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::cpp2::SinkException1>::fields_ids = {{
   1,
 }};
-const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::SinkException1>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::SinkException1>::fields_types = {{
   TType::T_STRING,
 }};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::SinkException1>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::SinkException1>::storage_names = {{
   "__fbthrift_field_reason",
 }};
-const std::array<int, 1> TStructDataStorage<::cpp2::SinkException1>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::cpp2::SinkException1>::isset_indexes = {{
   0,
 }};
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::SinkException2>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::SinkException2>::fields_names = {{
   "reason",
 }};
-const std::array<int16_t, 1> TStructDataStorage<::cpp2::SinkException2>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::cpp2::SinkException2>::fields_ids = {{
   1,
 }};
-const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::SinkException2>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::SinkException2>::fields_types = {{
   TType::T_I64,
 }};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::SinkException2>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::SinkException2>::storage_names = {{
   "__fbthrift_field_reason",
 }};
-const std::array<int, 1> TStructDataStorage<::cpp2::SinkException2>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::cpp2::SinkException2>::isset_indexes = {{
   0,
 }};
 

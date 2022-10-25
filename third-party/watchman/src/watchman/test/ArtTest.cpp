@@ -6,6 +6,7 @@
  */
 
 #include <fcntl.h>
+#include <fmt/core.h>
 #include <folly/logging/xlog.h>
 #include <folly/portability/GTest.h>
 #include <inttypes.h>
@@ -36,8 +37,7 @@ static FILE* open_test_file(const char* name) {
   if (f) {
     return f;
   }
-  throw std::runtime_error(
-      folly::to<std::string>("can't find test data file ", name));
+  throw std::runtime_error(fmt::format("can't find test data file {}", name));
 }
 
 TEST(Art, insert) {

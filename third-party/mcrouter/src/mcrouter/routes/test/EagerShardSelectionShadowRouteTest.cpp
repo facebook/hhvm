@@ -669,7 +669,7 @@ TEST_F(EagerShardSelectionShadowRouteTest, basicRequestTest) {
   }
   )";
 
-  TestFiberManager fm{FiberManagerContextTag()};
+  TestFiberManager<MemcacheRouterInfo> fm;
   std::unordered_map<std::string, size_t> normalResults;
   std::unordered_map<std::string, size_t> shadowResults;
   EagerShardShadowSelectorPolicy policy(shadowResults);
@@ -756,7 +756,7 @@ TEST_F(EagerShardSelectionShadowRouteTest, basicShardTest) {
   }
   )";
 
-  TestFiberManager fm{FiberManagerContextTag()};
+  TestFiberManager<MemcacheRouterInfo> fm;
   std::unordered_map<std::string, size_t> normalResults;
   std::unordered_map<std::string, size_t> shadowResults;
   EagerShardShadowSelectorPolicy policy(shadowResults);
@@ -848,7 +848,7 @@ TEST_F(EagerShardSelectionShadowRouteTest, basicShardWithWeightsTest) {
   }
   )";
 
-  TestFiberManager fm{FiberManagerContextTag()};
+  TestFiberManager<MemcacheRouterInfo> fm;
   std::unordered_map<std::string, size_t> normalResults;
   std::unordered_map<std::string, size_t> shadowResults;
   EagerShardShadowSelectorPolicy policy(shadowResults);
@@ -940,7 +940,7 @@ TEST_F(EagerShardSelectionShadowRouteTest, basicShardWithLowWeightsTest) {
   }
   )";
 
-  TestFiberManager fm{FiberManagerContextTag()};
+  TestFiberManager<MemcacheRouterInfo> fm;
   std::unordered_map<std::string, size_t> normalResults;
   std::unordered_map<std::string, size_t> shadowResults;
   EagerShardShadowSelectorPolicy policy(shadowResults);
@@ -1077,7 +1077,7 @@ TEST_F(EagerShardSelectionShadowRouteTest, basicShadowShardTest) {
   }
   )";
 
-  TestFiberManager fm{FiberManagerContextTag()};
+  TestFiberManager<MemcacheRouterInfo> fm;
   std::unordered_map<std::string, size_t> normalResults;
   std::unordered_map<std::string, size_t> shadowResults;
   EagerShardShadowSelectorPolicy policy(shadowResults);
@@ -1211,7 +1211,7 @@ TEST_F(EagerShardSelectionShadowRouteTest, basicShadowShardWithShardTest) {
   }
   )";
 
-  TestFiberManager fm{FiberManagerContextTag()};
+  TestFiberManager<MemcacheRouterInfo> fm;
   std::unordered_map<std::string, size_t> shadowResults;
   EagerShardShadowSelectorPolicy policy(shadowResults);
   auto rh =
@@ -1329,7 +1329,7 @@ TEST_F(EagerShardSelectionShadowRouteTest, basicShadowShardWithNoShardTest) {
   }
   )";
 
-  TestFiberManager fm{FiberManagerContextTag()};
+  TestFiberManager<MemcacheRouterInfo> fm;
   std::unordered_map<std::string, size_t> shadowResults;
   EagerShardShadowSelectorPolicy policy(shadowResults);
   auto rh =

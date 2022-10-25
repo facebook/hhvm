@@ -1,6 +1,6 @@
 <?hh
 
-<<file:__EnableUnstableFeatures("modules")>>
+
 
 <<Ok, Yes>>
 new module A {}

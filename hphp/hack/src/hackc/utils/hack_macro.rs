@@ -759,7 +759,7 @@ mod emit {
             .iter()
             .map(|p| p.emit_tokens(e))
             .collect::<Result<_>>()?;
-        return Ok(quote!(vec![#(#out),*]));
+        Ok(quote!(vec![#(#out),*]))
     }
 
     fn emit_repl_sequence_helper<T: EmitTokens>(
@@ -767,7 +767,7 @@ mod emit {
         e: &Emitter,
         chk: impl for<'a> Fn(&'a Emitter, &'a T) -> Option<&'a ReplVar>,
     ) -> Result<TokenStream> {
-        let has_repl = slice.iter().find(|p| chk(e, p).is_some()).is_some();
+        let has_repl = slice.iter().any(|p| chk(e, p).is_some());
         if !has_repl {
             return emit_sequence_helper(slice, e);
         }
@@ -784,7 +784,7 @@ mod emit {
 
         let mut cur = Vec::new();
         for v in slice {
-            if let Some(repl) = chk(e, &v) {
+            if let Some(repl) = chk(e, v) {
                 if !cur.is_empty() {
                     result = quote!(#result.chain([#(#cur),*].into_iter()));
                 }
@@ -976,7 +976,7 @@ mod emit {
     impl EmitTokens for ast::Lid {
         fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
             let ast::Lid(pos, (scope, name)) = self;
-            if let Some(repl) = e.lookup_replacement(&name) {
+            if let Some(repl) = e.lookup_replacement(name) {
                 let pos = &repl.pos;
                 let tmp = syn::Ident::new("tmp", Span::mixed_site());
                 let expr = &repl.expr;

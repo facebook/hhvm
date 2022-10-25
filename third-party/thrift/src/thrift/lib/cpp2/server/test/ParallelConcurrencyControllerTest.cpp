@@ -70,11 +70,12 @@ class FIFORequestPile : public RequestPileInterface {
     return std::nullopt;
   }
 
-  std::optional<ServerRequest> dequeue() override {
+  std::pair<std::optional<ServerRequest>, std::optional<intptr_t>> dequeue()
+      override {
     if (auto res = queue_.try_dequeue()) {
-      return std::move(*res);
+      return std::make_pair(std::move(*res), std::nullopt);
     } else {
-      return std::nullopt;
+      return {std::nullopt, std::nullopt};
     }
   }
 
@@ -343,6 +344,9 @@ TEST(ParallelConcurrencyControllerTest, DifferentOrdering2) {
 
 TEST(ParallelConcurrencyControllerTest, InternalPrioritization) {
   THRIFT_FLAG_SET_MOCK(experimental_use_resource_pools, true);
+  if (!apache::thrift::useResourcePoolsFlagsSet()) {
+    GTEST_SKIP() << "Invalid resource pools mode";
+  }
 
   std::atomic<int> counter{0};
   folly::Baton<> blockingBaton{};

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,47 @@ DEFINE_int32(port, 7878, "Port for the thrift server");
 DEFINE_int32(threshold, 32 * 1024, "Zerocopy threshold");
 DEFINE_bool(debug_logs, false, "Debug logs");
 
+DEFINE_int32(read_buffer_allocation_size, -1, "readBufferAllocationSize");
+DEFINE_int32(read_buffer_min_read_size, -1, "readBufferMinReadSize");
+
+DEFINE_int32(read_mode, -1, "readMode - ReadBuffer = 0, ReadVec = 1");
+
+DEFINE_int32(read_vec_block_size, 64 * 1024, "readVecBlockSize");
+DEFINE_int32(read_vec_read_size, 32 * 1024, "readVecReadSize");
+
 using namespace thrift::zerocopy::cpp2;
 
 namespace {
+class ServerIOVecQueue : public fizz::AsyncFizzBase::IOVecQueueOps {
+ public:
+  ServerIOVecQueue(size_t readVecBlockSize, size_t readVecReadSize)
+      : readVecBlockSize_(readVecBlockSize),
+        readVecReadSize_(readVecReadSize) {}
+  ~ServerIOVecQueue() override = default;
+  void allocateBuffers(folly::IOBufIovecBuilder::IoVecVec& iovs) override {
+    if (FOLLY_UNLIKELY(!ioVecQueue_)) {
+      ioVecQueue_.reset(new folly::IOBufIovecBuilder(
+          folly::IOBufIovecBuilder::Options().setBlockSize(readVecBlockSize_)));
+    }
+    if (FLAGS_debug_logs) {
+      LOG(INFO) << this << " allocateBuffers(" << readVecReadSize_ << ")";
+    }
+    ioVecQueue_->allocateBuffers(iovs, readVecReadSize_);
+  }
+
+  std::unique_ptr<folly::IOBuf> extractIOBufChain(size_t len) override {
+    DCHECK(!!ioVecQueue_);
+    if (FLAGS_debug_logs) {
+      LOG(INFO) << this << "extractIOBufChain(" << len << ")";
+    }
+    return ioVecQueue_->extractIOBufChain(len);
+  }
+
+ private:
+  size_t readVecBlockSize_;
+  size_t readVecReadSize_;
+  folly::ThreadLocalPtr<folly::IOBufIovecBuilder> ioVecQueue_;
+};
 class ZeroCopyServiceImpl
     : public apache::thrift::ServiceHandler<ZeroCopyService>,
       public ::facebook::fb303::FacebookBase2DeprecationMigration {
@@ -83,6 +121,31 @@ int main(int argc, char* argv[]) {
   facebook::services::TLSConfig::applyDefaultsToThriftServer(*server);
 
   server->setSSLPolicy(apache::thrift::SSLPolicy::PERMITTED);
+
+  fizz::AsyncFizzBase::TransportOptions transportOptions;
+
+  if (FLAGS_read_buffer_allocation_size > 0) {
+    transportOptions.readBufferAllocationSize =
+        FLAGS_read_buffer_allocation_size;
+  }
+
+  if (FLAGS_read_buffer_min_read_size > 0) {
+    transportOptions.readBufferMinReadSize = FLAGS_read_buffer_min_read_size;
+  }
+
+  if (FLAGS_read_mode ==
+      static_cast<int>(folly::AsyncReader::ReadCallback::ReadMode::ReadVec)) {
+    auto ioVecQueue = std::make_shared<ServerIOVecQueue>(
+        FLAGS_read_vec_block_size, FLAGS_read_vec_read_size);
+    transportOptions.ioVecQueue = ioVecQueue;
+    transportOptions.readMode =
+        folly::AsyncReader::ReadCallback::ReadMode::ReadVec;
+  }
+
+  auto config = server->getFizzConfig();
+  config.transportOptions = transportOptions;
+
+  server->setFizzConfig(config);
 
   if (FLAGS_threshold > 0) {
     LOG(INFO) << "Adding zerocopy enable func with threshold = "

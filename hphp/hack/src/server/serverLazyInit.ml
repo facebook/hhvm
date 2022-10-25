@@ -1077,7 +1077,7 @@ let write_symbol_info
   let paths_file = env.swriteopt.symbol_write_index_paths_file in
   let exclude_hhi = not env.swriteopt.symbol_write_include_hhi in
   let ignore_paths = env.swriteopt.symbol_write_ignore_paths in
-  let _ = env.swriteopt.symbol_write_sym_hash_in in
+  let incremental = env.swriteopt.symbol_write_sym_hash_in in
   let gen_sym_hash = env.swriteopt.symbol_write_sym_hash_out in
   let files =
     if List.length paths > 0 || Option.is_some paths_file then
@@ -1121,6 +1121,12 @@ let write_symbol_info
 
     Hh_logger.log "Indexing: %d files" (List.length files);
     Hh_logger.log "Writing JSON to: %s" out_dir;
+    (match incremental with
+    | Some t -> Hh_logger.log "Reading hashtable from: %s" t
+    | None -> ());
+    let incremental =
+      Option.map ~f:(fun path -> Symbol_sym_hash.read ~path) incremental
+    in
 
     let ctx = Provider_utils.ctx_from_server_env env in
     let root_path = env.swriteopt.symbol_write_root_path in
@@ -1137,6 +1143,7 @@ let write_symbol_info
       ~out_dir
       ~root_path
       ~hhi_path
+      ~incremental
       ~files;
 
     (env, t)
@@ -1160,13 +1167,6 @@ let full_init
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
-  let mode = genv.local_config.ServerLocalConfig.hulk_strategy in
-  let env =
-    if HulkStrategy.is_hulk_v2 mode then
-      ServerCheckUtils.start_delegate_if_needed env genv 3_000_000 env.errorl
-    else
-      env
-  in
   let init_telemetry =
     ServerEnv.Init_telemetry.make
       ServerEnv.Init_telemetry.Init_lazy_full
@@ -1214,7 +1214,7 @@ let full_init
   in
   let fnl = Relative_path.Map.keys defs_per_file in
   let env =
-    if is_check_mode && not (HulkStrategy.is_hulk_v2 mode) then
+    if is_check_mode then
       ServerCheckUtils.start_delegate_if_needed
         env
         genv

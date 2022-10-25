@@ -33,9 +33,7 @@ AsyncFizzBase::AsyncFizzBase(
     : folly::WriteChainAsyncTransportWrapper<folly::AsyncTransportWrapper>(
           std::move(transport)),
       handshakeTimeout_(*this, transport_->getEventBase()),
-      transportOptions_(std::move(options)),
-      ioVecQueue_(folly::IOBufIovecBuilder::Options().setBlockSize(
-          transportOptions_.readVecBlockSize)) {
+      transportOptions_(std::move(options)) {
   setReadMode(transportOptions_.readMode);
 }
 
@@ -413,14 +411,16 @@ void AsyncFizzBase::getReadBuffer(void** bufReturn, size_t* lenReturn) {
 }
 
 void AsyncFizzBase::getReadBuffers(folly::IOBufIovecBuilder::IoVecVec& iovs) {
-  ioVecQueue_.allocateBuffers(iovs, transportOptions_.readVecReadSize);
+  DCHECK(!!transportOptions_.ioVecQueue);
+  transportOptions_.ioVecQueue->allocateBuffers(iovs);
 }
 
 void AsyncFizzBase::readDataAvailable(size_t len) noexcept {
   DelayedDestruction::DestructorGuard dg(this);
 
   if (getReadMode() == folly::AsyncTransport::ReadCallback::ReadMode::ReadVec) {
-    auto tmp = ioVecQueue_.extractIOBufChain(len);
+    DCHECK(!!transportOptions_.ioVecQueue);
+    auto tmp = transportOptions_.ioVecQueue->extractIOBufChain(len);
     transportReadBuf_.append(std::move(tmp));
   } else {
     transportReadBuf_.postallocate(len);

@@ -45,7 +45,7 @@ end
 module FetchAsync = struct
   (** The input record that gets passed from the main process to the daemon process *)
   type input = {
-    hh_config_version: string;
+    hhconfig_version: string;
     destination_path: string;
     no_limit: bool;
     decl_hashes: string list;
@@ -53,15 +53,15 @@ module FetchAsync = struct
 
   (** The main entry point of the daemon process that fetches the remote old decl blobs
       and writes them to a file. *)
-  let fetch { hh_config_version; destination_path; no_limit; decl_hashes } :
-      unit =
+  let fetch { hhconfig_version; destination_path; no_limit; decl_hashes } : unit
+      =
     begin
       match
-        Remote_old_decls_ffi.get_decls hh_config_version no_limit decl_hashes
+        Remote_old_decls_ffi.get_decls hhconfig_version no_limit decl_hashes
       with
-      | Ok decl_blobs ->
+      | Ok decl_hashes_and_blobs ->
         let chan = Stdlib.open_out_bin destination_path in
-        Marshal.to_channel chan decl_blobs [];
+        Marshal.to_channel chan decl_hashes_and_blobs [];
         Stdlib.close_out chan
       | Error msg -> Hh_logger.log "Error fetching remote decls: %s" msg
     end;
@@ -76,7 +76,7 @@ module FetchAsync = struct
     Process.register_entry_point "remote_old_decls_fetch_async_entry" fetch
 end
 
-let fetch_async ~hh_config_version ~destination_path ~no_limit decl_hashes =
+let fetch_async ~hhconfig_version ~destination_path ~no_limit decl_hashes =
   Hh_logger.log
     "Fetching %d remote old decls to %s"
     (List.length decl_hashes)
@@ -86,8 +86,27 @@ let fetch_async ~hh_config_version ~destination_path ~no_limit decl_hashes =
     (Process.run_entry
        Process_types.Default
        fetch_entry
-       { hh_config_version; destination_path; no_limit; decl_hashes })
+       { hhconfig_version; destination_path; no_limit; decl_hashes })
     (fun _output -> Hh_logger.log "Finished fetching remote old decls")
+
+let fetch_old_decl_hashes_and_blobs ~hhconfig_version ~no_limit ~decl_hashes =
+  let tmp_dir = Tempfile.mkdtemp ~skip_mocking:false in
+  let destination_path = Path.(to_string @@ concat tmp_dir "decl_blobs") in
+  let decl_fetch_future =
+    fetch_async ~hhconfig_version ~destination_path ~no_limit decl_hashes
+  in
+  match Future.get ~timeout:12000 decl_fetch_future with
+  | Error e ->
+    Hh_logger.log
+      "Failed to fetch decl hashes and blobs from remote decl store: %s"
+      (Future.error_to_string e);
+    exit 1
+  | Ok () ->
+    let chan = Stdlib.open_in_bin destination_path in
+    let decl_hashes_and_blobs : (string * string) list =
+      Marshal.from_channel chan
+    in
+    decl_hashes_and_blobs
 
 let fetch_old_decls
     ~(telemetry_label : string)
@@ -105,7 +124,7 @@ let fetch_old_decls
     (match decl_hashes with
     | [] -> SMap.empty
     | _ ->
-      let hh_config_version = Utils.get_hh_version () in
+      let hhconfig_version = Utils.get_hh_version () in
       let start_t = Unix.gettimeofday () in
       let no_limit =
         TypecheckerOptions.remote_old_decls_no_limit
@@ -114,7 +133,7 @@ let fetch_old_decls
       let tmp_dir = Tempfile.mkdtemp ~skip_mocking:false in
       let destination_path = Path.(to_string @@ concat tmp_dir "decl_blobs") in
       let decl_fetch_future =
-        fetch_async ~hh_config_version ~destination_path ~no_limit decl_hashes
+        fetch_async ~hhconfig_version ~destination_path ~no_limit decl_hashes
       in
       (match Future.get ~timeout:120 decl_fetch_future with
       | Error e ->
@@ -124,7 +143,12 @@ let fetch_old_decls
         SMap.empty
       | Ok () ->
         let chan = Stdlib.open_in_bin destination_path in
-        let decl_blobs : string list = Marshal.from_channel chan in
+        let decl_hashes_and_blobs : (string * string) list =
+          Marshal.from_channel chan
+        in
+        let decl_blobs =
+          List.map ~f:(fun (_decl_hash, blob) -> blob) decl_hashes_and_blobs
+        in
         Stdlib.close_in chan;
         let decls =
           List.fold

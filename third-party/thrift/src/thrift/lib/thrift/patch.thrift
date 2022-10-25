@@ -28,6 +28,7 @@ namespace cpp2 apache.thrift.op
 namespace py3 apache.thrift.op
 namespace java com.facebook.thrift.op
 namespace java.swift com.facebook.thrift.op
+namespace js apache.thrift.op
 namespace py.asyncio apache_thrift_asyncio.patch
 namespace go thrift.lib.thrift.patch
 namespace py thrift.lib.thrift.patch
@@ -40,10 +41,13 @@ namespace py thrift.lib.thrift.patch
 @scope.Structured
 struct GeneratePatch {}
 
+@scope.Field
+@scope.Structured
+struct AssignOnlyPatch {}
+
 /** A patch for a boolean value. */
 @cpp.Adapter{
   underlyingName = "BoolPatchStruct",
-  extraNamespace = "",
   name = "::apache::thrift::op::detail::BoolPatchAdapter",
 }
 struct BoolPatch {
@@ -64,7 +68,6 @@ struct BoolPatch {
 /** A patch for an 8-bit integer value. */
 @cpp.Adapter{
   underlyingName = "BytePatchStruct",
-  extraNamespace = "",
   name = "::apache::thrift::op::detail::NumberPatchAdapter",
 }
 struct BytePatch {
@@ -85,7 +88,6 @@ struct BytePatch {
 /** A patch for a 16-bit integer value. */
 @cpp.Adapter{
   underlyingName = "I16PatchStruct",
-  extraNamespace = "",
   name = "::apache::thrift::op::detail::NumberPatchAdapter",
 }
 struct I16Patch {
@@ -106,7 +108,6 @@ struct I16Patch {
 /** A patch for a 32-bit integer value. */
 @cpp.Adapter{
   underlyingName = "I32PatchStruct",
-  extraNamespace = "",
   name = "::apache::thrift::op::detail::NumberPatchAdapter",
 }
 struct I32Patch {
@@ -127,7 +128,6 @@ struct I32Patch {
 /** A patch for a 64-bit integer value. */
 @cpp.Adapter{
   underlyingName = "I64PatchStruct",
-  extraNamespace = "",
   name = "::apache::thrift::op::detail::NumberPatchAdapter",
 }
 struct I64Patch {
@@ -148,7 +148,6 @@ struct I64Patch {
 /** A patch for a 32-bit floating point value. */
 @cpp.Adapter{
   underlyingName = "FloatPatchStruct",
-  extraNamespace = "",
   name = "::apache::thrift::op::detail::NumberPatchAdapter",
 }
 struct FloatPatch {
@@ -169,7 +168,6 @@ struct FloatPatch {
 /** A patch for an 64-bit floating point value. */
 @cpp.Adapter{
   underlyingName = "DoublePatchStruct",
-  extraNamespace = "",
   name = "::apache::thrift::op::detail::NumberPatchAdapter",
 }
 struct DoublePatch {
@@ -190,7 +188,6 @@ struct DoublePatch {
 /** A patch for a string value. */
 @cpp.Adapter{
   underlyingName = "StringPatchStruct",
-  extraNamespace = "",
   name = "::apache::thrift::op::detail::StringPatchAdapter",
 }
 struct StringPatch {
@@ -214,7 +211,6 @@ struct StringPatch {
 /** A patch for a binary value. */
 @cpp.Adapter{
   underlyingName = "BinaryPatchStruct",
-  extraNamespace = "",
   name = "::apache::thrift::op::detail::BinaryPatchAdapter",
 }
 struct BinaryPatch {
@@ -238,7 +234,6 @@ struct BinaryPatch {
 /** A patch for a Duration value. */
 @cpp.Adapter{
   underlyingName = "DurationStructPatch",
-  extraNamespace = "",
   name = "::apache::thrift::op::detail::AssignPatchAdapter",
 }
 struct DurationPatch {
@@ -260,7 +255,6 @@ struct DurationPatch {
 /** A patch for a Time value. */
 @cpp.Adapter{
   underlyingName = "TimeStructPatch",
-  extraNamespace = "",
   name = "::apache::thrift::op::detail::AssignPatchAdapter",
 }
 struct TimePatch {

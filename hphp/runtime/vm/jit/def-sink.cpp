@@ -625,11 +625,10 @@ TriBool will_conflict(const IRInstruction& inst) {
     effects,
     [&] (const IrrelevantEffects&)   { return TriBool::No; },
     [&] (const GeneralEffects& g)    {
-      if (g.stores != AEmpty || g.kills != AEmpty || g.inout != AEmpty) {
+      if (g.loads != AEmpty || g.stores != AEmpty || g.kills != AEmpty ||
+          g.inout != AEmpty) {
         return TriBool::Maybe;
       }
-      // A load out something ref-counted can be blocked.
-      if (g.loads.maybe(AHeapAny)) return TriBool::Maybe;
       return TriBool::No;
     },
     [&] (const PureLoad& x)          { return TriBool::Maybe; },

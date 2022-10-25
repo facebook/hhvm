@@ -81,6 +81,18 @@ size_t TypePosValLayout::valueOffsetForSlot(const StructLayout* l, Slot slot) {
     sizeof(Value);
 }
 
+size_t TypePosValLayout::numFieldsOffset() {
+  return offsetof(StructDict, m_extra_lo8);
+}
+
+size_t TypePosValLayout::numFieldsSize() {
+  return sizeof(StructDict::m_extra_lo8);
+}
+
+size_t TypePosValLayout::numFields(const StructDict* sad) {
+  return sad->m_extra_lo8;
+}
+
 size_t TypePosValLayout::staticTypeOffset() {
   return sizeof(StructDict);
 }
@@ -100,25 +112,29 @@ void UnalignedTVLayout::init(StructDict* sad) {
 }
 
 void UnalignedTVLayout::initSizeIndex(StructLayout* l) {
-  auto const bytes = sizeof(StructDict) + (sizeof(UnalignedTypedValue) +
-    sizeof(StructDict::PosType)) * l->numFields();
-  if (debug) {
-    header(l)->m_unused = 0x00;
-  }
+  // The actual size can be 1 byte more due to slot alignment,
+  // but it should not affect the size index.
+  auto const slotSize = l->isBigStruct() ? 2 : 1;
+  auto const bytes = sizeof(StructDict) +
+    (sizeof(UnalignedTypedValue) + slotSize) * l->numFields();
   l->m_size_index = MemoryManager::size2Index(bytes);
 }
 
 size_t UnalignedTVLayout::positionOffset(const StructDict* sad) {
-  return sizeof(StructDict) + sad->numFields() * sizeof(UnalignedTypedValue);
+  auto const unalignedOffset =
+    sizeof(StructDict) + sad->numFields() * sizeof(UnalignedTypedValue);
+  return sad->isBigStruct() ? (unalignedOffset + 1) & ~1 : unalignedOffset;
 }
 
 size_t UnalignedTVLayout::positionOffset(const StructLayout* l) {
-  return sizeof(StructDict) + l->numFields() * sizeof(UnalignedTypedValue);
+  auto const unalignedOffset =
+    sizeof(StructDict) + l->numFields() * sizeof(UnalignedTypedValue);
+  return l->isBigStruct() ? (unalignedOffset + 1) & ~1 : unalignedOffset;
 }
 
-size_t UnalignedTVLayout::typeOffsetForSlot(const StructLayout* l, Slot slot) {
+size_t UnalignedTVLayout::typeOffsetForSlot(
+  UNUSED const StructLayout* l, Slot slot) {
   assertx(slot < l->numFields());
-  (void)l;
   return sizeof(StructDict) +
     slot * sizeof(UnalignedTypedValue) +
     offsetof(UnalignedTypedValue, m_type);
@@ -130,6 +146,26 @@ size_t UnalignedTVLayout::valueOffsetForSlot(
   return sizeof(StructDict) +
     slot * sizeof(UnalignedTypedValue) +
     offsetof(UnalignedTypedValue, m_data);
+}
+
+size_t UnalignedTVLayout::numFieldsOffset() {
+  return offsetof(StructDict, m_extra_lo16);
+}
+
+size_t UnalignedTVLayout::numFieldsSize() {
+  return sizeof(StructDict::m_extra_lo16);
+}
+
+size_t UnalignedTVLayout::numFields(const StructDict* sad) {
+  return sad->m_extra_lo16;
+}
+
+bool UnalignedTVLayout::isBigStruct(const StructDict* sad) {
+  return sad->numFields() > 0xff;
+}
+
+bool UnalignedTVLayout::isBigStruct(const StructLayout* l) {
+  return l->numFields() > 0xff;
 }
 
 UnalignedTVLayout::HeaderData* UnalignedTVLayout::header(StructLayout* l) {

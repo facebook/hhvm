@@ -10,9 +10,9 @@ use std::path::PathBuf;
 
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -55,7 +55,7 @@ impl Display for Prefix {
     }
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 #[derive(EqModuloPos, FromOcamlRep, ToOcamlRep, NoPosHash)]
 pub struct RelativePath {
     prefix: Prefix,
@@ -91,6 +91,24 @@ impl RelativePath {
 impl Display for RelativePath {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}|{}", self.prefix, self.path.display())
+    }
+}
+
+// This custom impl of Ord treats the path suffix as raw bytes instead of a
+// Path, so that they are ordered the same as in OCaml (i.e., `foo.bar` comes
+// before `foo/bar` lexicographically, but Rust Paths consider `foo/bar` to come
+// first because the `foo` component is shorter than `foo.bar`)
+impl Ord for RelativePath {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.prefix
+            .cmp(&other.prefix)
+            .then(self.path.as_os_str().cmp(other.path.as_os_str()))
+    }
+}
+
+impl PartialOrd for RelativePath {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
     }
 }
 

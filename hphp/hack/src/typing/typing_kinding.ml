@@ -441,6 +441,24 @@ module Simple = struct
             typedef.td_tparams
         | None -> ()
       end
+    | Tnewtype (name, tyl, _) ->
+      (match Env.get_typedef env name with
+      | Some typedef ->
+        Option.iter
+          ~f:Errors.add_typing_error
+          (Typing_visibility.check_top_level_access
+             ~in_signature
+             ~use_pos
+             ~def_pos:typedef.td_pos
+             env
+             typedef.td_internal
+             (Option.map typedef.td_module ~f:snd));
+        check_against_tparams
+          ~in_signature
+          typedef.td_pos
+          tyl
+          typedef.td_tparams
+      | None -> ())
 
   and check_well_kinded
       ~in_signature env (ty : decl_ty) (expected_nkind : Simple.named_kind) =

@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <string>
+#include "GlobEscaping.h"
 #include "watchman/CommandRegistry.h"
 #include "watchman/Errors.h"
 #include "watchman/query/FileResult.h"
@@ -17,6 +18,46 @@
 
 namespace watchman {
 
+namespace {
+/// Trims the given \param pattern after the first occurrence of the `**`
+/// token, if any.
+w_string_piece trimGlobAfterDoubleStar(w_string_piece pattern) {
+  bool inClass = false;
+  const char* pos = pattern.data();
+  const char* end = pattern.data() + pattern.size();
+  while (pos < end) {
+    if (inClass) {
+      switch (*pos) {
+        case ']':
+          inClass = false;
+          break;
+        case '\\':
+          // skip the escaped character
+          ++pos;
+          break;
+      }
+    } else {
+      switch (*pos) {
+        case '[':
+          inClass = true;
+          break;
+        case '\\':
+          // skip the escaped character
+          ++pos;
+          break;
+        case '*':
+          // Look ahead to see if this is a `**` token.
+          if ((pos + 1 < end) && pos[1] == '*') {
+            return w_string_piece{pattern.data(), pos + 2};
+          }
+          break;
+      }
+    }
+    ++pos;
+  }
+  return pattern;
+}
+} // namespace
 class WildMatchExpr : public QueryExpr {
   std::string pattern;
   CaseSensitivity caseSensitive;
@@ -139,6 +180,33 @@ class WildMatchExpr : public QueryExpr {
       Query* query,
       const json_ref& term) {
     return parse(query, term, CaseSensitivity::CaseInSensitive);
+  }
+
+  std::optional<std::vector<std::string>> computeGlobUpperBound(
+      CaseSensitivity outputCaseSensitive) const override {
+    if (caseSensitive == CaseSensitivity::CaseInSensitive &&
+        outputCaseSensitive != CaseSensitivity::CaseInSensitive) {
+      // The caller asked for a case-sensitive upper bound, so treat imatch as
+      // unbounded.
+      return std::nullopt;
+    }
+    if (!wholename) {
+      // basename matches don't bound the prefix, so they're not very useful.
+      return std::nullopt;
+    }
+    w_string outputPattern{pattern};
+    if (outputPattern.piece().startsWith("**")) {
+      // This pattern doesn't bound the prefix, so just report it as unbounded.
+      return std::nullopt;
+    }
+    if (outputCaseSensitive == CaseSensitivity::CaseInSensitive) {
+      outputPattern = outputPattern.piece().asLowerCase();
+    }
+    if (noescape) {
+      outputPattern = convertNoEscapeGlobToGlob(outputPattern);
+    }
+    return std::vector<std::string>{
+        trimGlobAfterDoubleStar(outputPattern).string()};
   }
 };
 W_TERM_PARSER(match, WildMatchExpr::parseMatch);

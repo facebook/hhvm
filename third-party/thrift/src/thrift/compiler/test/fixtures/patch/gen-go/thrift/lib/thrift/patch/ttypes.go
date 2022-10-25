@@ -184,6 +184,71 @@ func (p *GeneratePatch) String() string {
   return fmt.Sprintf("GeneratePatch({})")
 }
 
+type AssignOnlyPatch struct {
+}
+
+func NewAssignOnlyPatch() *AssignOnlyPatch {
+  return &AssignOnlyPatch{}
+}
+
+type AssignOnlyPatchBuilder struct {
+  obj *AssignOnlyPatch
+}
+
+func NewAssignOnlyPatchBuilder() *AssignOnlyPatchBuilder{
+  return &AssignOnlyPatchBuilder{
+    obj: NewAssignOnlyPatch(),
+  }
+}
+
+func (p AssignOnlyPatchBuilder) Emit() *AssignOnlyPatch{
+  return &AssignOnlyPatch{
+  }
+}
+
+func (p *AssignOnlyPatch) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    if err := iprot.Skip(fieldTypeId); err != nil {
+      return err
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *AssignOnlyPatch) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("AssignOnlyPatch"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *AssignOnlyPatch) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  return fmt.Sprintf("AssignOnlyPatch({})")
+}
+
 // A patch for a boolean value.
 // 
 // Attributes:
@@ -208,7 +273,7 @@ func (p *BoolPatch) GetAssign() bool {
   if !p.IsSetAssign() {
     return BoolPatch_Assign_DEFAULT
   }
-return *p.Assign
+  return *p.Assign
 }
 
 func (p *BoolPatch) GetClear() bool {
@@ -422,7 +487,7 @@ func (p *BytePatch) GetAssign() int8 {
   if !p.IsSetAssign() {
     return BytePatch_Assign_DEFAULT
   }
-return *p.Assign
+  return *p.Assign
 }
 
 func (p *BytePatch) GetClear() bool {
@@ -638,7 +703,7 @@ func (p *I16Patch) GetAssign() int16 {
   if !p.IsSetAssign() {
     return I16Patch_Assign_DEFAULT
   }
-return *p.Assign
+  return *p.Assign
 }
 
 func (p *I16Patch) GetClear() bool {
@@ -852,7 +917,7 @@ func (p *I32Patch) GetAssign() int32 {
   if !p.IsSetAssign() {
     return I32Patch_Assign_DEFAULT
   }
-return *p.Assign
+  return *p.Assign
 }
 
 func (p *I32Patch) GetClear() bool {
@@ -1066,7 +1131,7 @@ func (p *I64Patch) GetAssign() int64 {
   if !p.IsSetAssign() {
     return I64Patch_Assign_DEFAULT
   }
-return *p.Assign
+  return *p.Assign
 }
 
 func (p *I64Patch) GetClear() bool {
@@ -1280,7 +1345,7 @@ func (p *FloatPatch) GetAssign() float32 {
   if !p.IsSetAssign() {
     return FloatPatch_Assign_DEFAULT
   }
-return *p.Assign
+  return *p.Assign
 }
 
 func (p *FloatPatch) GetClear() bool {
@@ -1494,7 +1559,7 @@ func (p *DoublePatch) GetAssign() float64 {
   if !p.IsSetAssign() {
     return DoublePatch_Assign_DEFAULT
   }
-return *p.Assign
+  return *p.Assign
 }
 
 func (p *DoublePatch) GetClear() bool {
@@ -1710,7 +1775,7 @@ func (p *StringPatch) GetAssign() string {
   if !p.IsSetAssign() {
     return StringPatch_Assign_DEFAULT
   }
-return *p.Assign
+  return *p.Assign
 }
 
 func (p *StringPatch) GetClear() bool {
@@ -2218,7 +2283,13 @@ func (p *DurationPatch) GetAssign() *standard3.DurationStruct {
   if !p.IsSetAssign() {
     return DurationPatch_Assign_DEFAULT
   }
-return p.Assign
+  return p.Assign
+}
+func (p *DurationPatch) DefaultGetAssign() *standard3.DurationStruct {
+  if !p.IsSetAssign() {
+    return standard3.NewDurationStruct()
+  }
+  return p.Assign
 }
 
 func (p *DurationPatch) GetClear() bool {
@@ -2229,7 +2300,13 @@ func (p *DurationPatch) GetAdd() *standard3.DurationStruct {
   if !p.IsSetAdd() {
     return DurationPatch_Add_DEFAULT
   }
-return p.Add
+  return p.Add
+}
+func (p *DurationPatch) DefaultGetAdd() *standard3.DurationStruct {
+  if !p.IsSetAdd() {
+    return standard3.NewDurationStruct()
+  }
+  return p.Add
 }
 func (p *DurationPatch) IsSetAssign() bool {
   return p != nil && p.Assign != nil
@@ -2446,7 +2523,13 @@ func (p *TimePatch) GetAssign() *standard3.TimeStruct {
   if !p.IsSetAssign() {
     return TimePatch_Assign_DEFAULT
   }
-return p.Assign
+  return p.Assign
+}
+func (p *TimePatch) DefaultGetAssign() *standard3.TimeStruct {
+  if !p.IsSetAssign() {
+    return standard3.NewTimeStruct()
+  }
+  return p.Assign
 }
 
 func (p *TimePatch) GetClear() bool {
@@ -2457,7 +2540,13 @@ func (p *TimePatch) GetAdd() *standard3.DurationStruct {
   if !p.IsSetAdd() {
     return TimePatch_Add_DEFAULT
   }
-return p.Add
+  return p.Add
+}
+func (p *TimePatch) DefaultGetAdd() *standard3.DurationStruct {
+  if !p.IsSetAdd() {
+    return standard3.NewDurationStruct()
+  }
+  return p.Add
 }
 func (p *TimePatch) IsSetAssign() bool {
   return p != nil && p.Assign != nil

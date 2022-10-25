@@ -238,6 +238,16 @@ let localize x = !localize_ref x
 (* Checking properties of types *)
 (*****************************************************************************)
 
+let is_class ty =
+  match get_node ty with
+  | Tclass _ -> true
+  | _ -> false
+
+let is_class_i ty =
+  match ty with
+  | ConstraintType _ -> false
+  | LoclType ty -> is_class ty
+
 let is_mixed_i env ty =
   let mixed = LoclType (MakeType.mixed Reason.Rnone) in
   is_sub_type_for_union_i env mixed ty
@@ -277,6 +287,12 @@ let is_tintersection env ty =
   | Tintersection _ -> true
   | _ -> false
 
+let is_tyvar env ty =
+  let (_env, ty) = Env.expand_type env ty in
+  match get_node ty with
+  | Tvar _ -> true
+  | _ -> false
+
 (** Simplify unions and intersections of constraint
 types which involve mixed or nothing. *)
 let simplify_constraint_type env ty =
@@ -309,7 +325,7 @@ let contains_unresolved_tyvars env ty =
 
       method! on_tvar (env, occurs) r v =
         let (env, ty) = Env.expand_var env r v in
-        if is_tyvar ty then
+        if Typing_defs.is_tyvar ty then
           (env, true)
         else
           this#on_type (env, occurs) ty
@@ -813,3 +829,9 @@ let is_capability_i ty =
 let supports_dynamic env ty =
   let r = get_reason ty in
   sub_type env ty (MakeType.supportdyn r (MakeType.mixed Reason.Rnone))
+
+let strip_supportdyn ty =
+  match get_node ty with
+  | Tnewtype (name, [tyarg], _) when String.equal name SN.Classes.cSupportDyn ->
+    (true, tyarg)
+  | _ -> (false, ty)

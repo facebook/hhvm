@@ -34,6 +34,7 @@ let check_types env (_, p, te) =
                || String.equal cn SN.Collections.cVec ->
           true
         | Tunion tyl -> List.for_all ~f:iter tyl
+        | Tintersection tyl -> List.exists ~f:iter tyl
         | Tgeneric _
         | Tnewtype _
         | Tdependent _ ->

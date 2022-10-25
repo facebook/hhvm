@@ -45,6 +45,18 @@ std::unique_ptr<Client<RPCConformanceService>> createClient() {
       }));
 }
 
+template <class InteractionClientInstruction>
+Client<RPCConformanceService>::BasicInteraction createInteraction(
+    const InteractionClientInstruction& instruction) {
+  auto client = createClient();
+  if (instruction.initialSum().has_value()) {
+    return folly::coro::blockingWait(
+        client->co_basicInteractionFactoryFunction(*instruction.initialSum()));
+  } else {
+    return client->createBasicInteraction();
+  }
+}
+
 // =================== Request-Response ===================
 RequestResponseBasicClientTestResult runRequestResponseBasicTest(
     const RequestResponseBasicClientInstruction& instruction) {
@@ -194,6 +206,42 @@ StreamCreditTimeoutClientTestResult streamCreditTimeoutTest(
   return result;
 }
 
+StreamDeclaredExceptionClientTestResult streamDeclaredExceptionTest(
+    StreamDeclaredExceptionClientInstruction& instruction) {
+  auto client = createClient();
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<StreamDeclaredExceptionClientTestResult> {
+        auto gen = (co_await client->co_streamDeclaredException(
+                        *instruction.request()))
+                       .toAsyncGenerator();
+        StreamDeclaredExceptionClientTestResult result;
+        try {
+          co_await gen.next();
+        } catch (const UserException& e) {
+          result.userException() = e;
+        }
+        co_return result;
+      }());
+}
+
+StreamUndeclaredExceptionClientTestResult streamUndeclaredExceptionTest(
+    StreamUndeclaredExceptionClientInstruction& instruction) {
+  auto client = createClient();
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<StreamUndeclaredExceptionClientTestResult> {
+        auto gen = (co_await client->co_streamUndeclaredException(
+                        *instruction.request()))
+                       .toAsyncGenerator();
+        StreamUndeclaredExceptionClientTestResult result;
+        try {
+          co_await gen.next();
+        } catch (const TApplicationException& e) {
+          result.exceptionMessage() = e.getMessage();
+        }
+        co_return result;
+      }());
+}
+
 // =================== Sink ===================
 SinkBasicClientTestResult sinkBasicTest(
     SinkBasicClientInstruction& instruction) {
@@ -210,6 +258,54 @@ SinkBasicClientTestResult sinkBasicTest(
         SinkBasicClientTestResult result;
         result.finalResponse() = std::move(finalResponse);
         co_return result;
+      }());
+}
+
+// =================== Interactions ===================
+InteractionConstructorClientTestResult interactionConstructorTest(
+    InteractionConstructorClientInstruction&) {
+  auto client = createClient();
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<InteractionConstructorClientTestResult> {
+        auto interaction = client->createBasicInteraction();
+        co_await interaction.co_init();
+        co_return InteractionConstructorClientTestResult();
+      }());
+}
+
+InteractionFactoryFunctionClientTestResult interactionFactoryFunctionTest(
+    InteractionFactoryFunctionClientInstruction& instruction) {
+  auto client = createClient();
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<InteractionFactoryFunctionClientTestResult> {
+        co_await client->co_basicInteractionFactoryFunction(
+            *instruction.initialSum());
+        co_return InteractionFactoryFunctionClientTestResult();
+      }());
+}
+
+InteractionPersistsStateClientTestResult interactionPersistsStateTest(
+    InteractionPersistsStateClientInstruction& instruction) {
+  auto client = createClient();
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<InteractionPersistsStateClientTestResult> {
+        auto interaction = createInteraction(instruction);
+        InteractionPersistsStateClientTestResult result;
+        for (auto& arg : *instruction.valuesToAdd()) {
+          result.responses()->emplace_back(co_await interaction.co_add(arg));
+        }
+        co_return result;
+      }());
+}
+
+InteractionTerminationClientTestResult interactionTerminationTest(
+    InteractionTerminationClientInstruction& instruction) {
+  auto client = createClient();
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<InteractionTerminationClientTestResult> {
+        auto interaction = createInteraction(instruction);
+        co_await interaction.co_init();
+        co_return InteractionTerminationClientTestResult();
       }());
 }
 
@@ -262,9 +358,33 @@ int main(int argc, char** argv) {
       result.streamCreditTimeout_ref() =
           streamCreditTimeoutTest(*clientInstruction.streamCreditTimeout_ref());
       break;
+    case ClientInstruction::Type::streamDeclaredException:
+      result.streamDeclaredException_ref() = streamDeclaredExceptionTest(
+          *clientInstruction.streamDeclaredException_ref());
+      break;
+    case ClientInstruction::Type::streamUndeclaredException:
+      result.streamUndeclaredException_ref() = streamUndeclaredExceptionTest(
+          *clientInstruction.streamUndeclaredException_ref());
+      break;
     case ClientInstruction::Type::sinkBasic:
       result.sinkBasic_ref() =
           sinkBasicTest(*clientInstruction.sinkBasic_ref());
+      break;
+    case ClientInstruction::Type::interactionConstructor:
+      result.interactionConstructor_ref() = interactionConstructorTest(
+          *clientInstruction.interactionConstructor_ref());
+      break;
+    case ClientInstruction::Type::interactionFactoryFunction:
+      result.interactionFactoryFunction_ref() = interactionFactoryFunctionTest(
+          *clientInstruction.interactionFactoryFunction_ref());
+      break;
+    case ClientInstruction::Type::interactionPersistsState:
+      result.interactionPersistsState_ref() = interactionPersistsStateTest(
+          *clientInstruction.interactionPersistsState_ref());
+      break;
+    case ClientInstruction::Type::interactionTermination:
+      result.interactionTermination_ref() = interactionTerminationTest(
+          *clientInstruction.interactionTermination_ref());
       break;
     default:
       throw std::runtime_error("Invalid TestCase Type.");

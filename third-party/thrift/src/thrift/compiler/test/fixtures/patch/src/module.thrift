@@ -79,7 +79,25 @@ struct MyStruct {
   optional list<i16> optListVal;
   optional set<string> optSetVal;
   optional map<string, string> optMapVal;
+
+  list<map<string, i32>> listMap;
+  map<string, map<string, i32>> mapMap;
 }
 
 // Intentionally defined after MyStruct, so it's patch types are generated after MyStruct's.
 struct LateDefStruct {}
+
+struct Recursive {
+  @patch.AssignOnlyPatch
+  map<string, Recursive> nodes;
+}
+
+struct Bar {
+  Loop loop (cpp.ref);
+}
+
+@patch.AssignOnlyPatch
+struct Loop {
+  @patch.AssignOnlyPatch
+  Bar bar;
+}

@@ -1,4 +1,4 @@
-File "runner-pattern.php", line 32, characters 12-17:
+File "runner-pattern.php", line 37, characters 12-17:
 A `where` type constraint is violated here (Typing[4323])
   File "runner-pattern.php", line 24, characters 19-24:
   This is the method with `where` type constraints

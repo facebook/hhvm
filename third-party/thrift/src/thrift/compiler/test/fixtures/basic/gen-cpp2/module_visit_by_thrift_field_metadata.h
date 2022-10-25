@@ -14,17 +14,6 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct VisitByFieldId<::test::fixtures::basic::MyDataItem> {
-  template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-    switch (fieldId) {
-    default:
-      throwInvalidThriftId(fieldId, "::test::fixtures::basic::MyDataItem");
-    }
-  }
-};
-
-template <>
 struct VisitByFieldId<::test::fixtures::basic::MyStruct> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
@@ -49,6 +38,17 @@ struct VisitByFieldId<::test::fixtures::basic::MyStruct> {
       return f(8, static_cast<T&&>(t).no_hack_codegen_field_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::basic::MyStruct");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::test::fixtures::basic::MyDataItem> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    default:
+      throwInvalidThriftId(fieldId, "::test::fixtures::basic::MyDataItem");
     }
   }
 };

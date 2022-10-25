@@ -55,10 +55,10 @@ TEST(CompareTest, Double) {
   EXPECT_EQ(hash(0.0), hash(-0.0));
 
   // 1 is identical and equal to itself.
-  EXPECT_TRUE(identical<type::double_t>(1.0, 1.0));
-  EXPECT_TRUE(equal<type::double_t>(1.0, 1.0));
-  EXPECT_FALSE(less<type::double_t>(1.0, 1.0));
-  EXPECT_EQ(compare<type::double_t>(1.0, 1.0), folly::ordering::eq);
+  EXPECT_TRUE(identical<double>(1.0, 1.0));
+  EXPECT_TRUE(equal<double>(1.0, 1.0));
+  EXPECT_FALSE(less<double>(1.0, 1.0));
+  EXPECT_EQ(compare<double>(1.0, 1.0), folly::ordering::eq);
 
   // 1 is neither identical or equal to 2.
   EXPECT_FALSE(identical<type::double_t>(1.0, 2.0));
@@ -94,8 +94,8 @@ TEST(CompareTest, Float) {
   EXPECT_EQ(hash(0.0f), hash(-0.0f));
 
   // 1 is equal and identical to itself.
-  EXPECT_TRUE(equal<type::float_t>(1.0f, 1.0f));
-  EXPECT_TRUE(identical<type::float_t>(1.0f, 1.0f));
+  EXPECT_TRUE(equal<float>(1.0f, 1.0f));
+  EXPECT_TRUE(identical<float>(1.0f, 1.0f));
 
   // 1 is neither equal or identical to 2.
   EXPECT_FALSE(equal<type::float_t>(1.0f, 2.0f));
@@ -122,8 +122,8 @@ TEST(CompareTest, StructWithFloat) {
 
   lhs.floatValue_ref().ensure() = std::numeric_limits<float>::quiet_NaN();
   rhs.floatValue_ref().ensure() = std::numeric_limits<float>::quiet_NaN();
-  EXPECT_FALSE(equal(lhs, rhs));
-  EXPECT_FALSE(identical(lhs, rhs)); // Should be true!
+  EXPECT_FALSE(op::equal<Value>(lhs, rhs));
+  EXPECT_FALSE(op::identical<Value>(lhs, rhs)); // Should be true!
 
   lhs.floatValue_ref().ensure() = -0.0f;
   rhs.floatValue_ref().ensure() = +0.0f;

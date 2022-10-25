@@ -24,8 +24,22 @@ cdef __StructSpec get_reflection__MyStruct()
 
 cdef __StructSpec get_reflection__LateDefStruct()
 
+cdef __StructSpec get_reflection__Recursive()
+
+cdef __StructSpec get_reflection__Bar()
+
+cdef __StructSpec get_reflection__Loop()
+
 cdef __ListSpec get_reflection__List__i16()
 
 cdef __SetSpec get_reflection__Set__string()
 
 cdef __MapSpec get_reflection__Map__string_string()
+
+cdef __MapSpec get_reflection__Map__string_i32()
+
+cdef __ListSpec get_reflection__List__Map__string_i32()
+
+cdef __MapSpec get_reflection__Map__string_Map__string_i32()
+
+cdef __MapSpec get_reflection__Map__string_Recursive()

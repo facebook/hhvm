@@ -54,7 +54,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         @com.facebook.swift.codec.ThriftField(value=-27, name="optLateStructVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final test.fixtures.patch.LateDefStruct optLateStructVal,
         @com.facebook.swift.codec.ThriftField(value=-28, name="optListVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final List<Short> optListVal,
         @com.facebook.swift.codec.ThriftField(value=-29, name="optSetVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Set<String> optSetVal,
-        @com.facebook.swift.codec.ThriftField(value=-30, name="optMapVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Map<String, String> optMapVal
+        @com.facebook.swift.codec.ThriftField(value=-30, name="optMapVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL) final Map<String, String> optMapVal,
+        @com.facebook.swift.codec.ThriftField(value=-31, name="listMap", isLegacyId=true, requiredness=Requiredness.TERSE) final List<Map<String, Integer>> listMap,
+        @com.facebook.swift.codec.ThriftField(value=-32, name="mapMap", isLegacyId=true, requiredness=Requiredness.TERSE) final Map<String, Map<String, Integer>> mapMap
     ) {
         this.boolVal = boolVal;
         this.byteVal = byteVal;
@@ -86,6 +88,8 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         this.optListVal = optListVal;
         this.optSetVal = optSetVal;
         this.optMapVal = optMapVal;
+        this.listMap = listMap;
+        this.mapMap = mapMap;
     }
     
     @ThriftConstructor
@@ -120,6 +124,8 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       this.optListVal = null;
       this.optSetVal = null;
       this.optMapVal = null;
+      this.listMap = com.facebook.thrift.util.IntrinsicDefaults.defaultList();
+      this.mapMap = com.facebook.thrift.util.IntrinsicDefaults.defaultMap();
     }
     
     public static class Builder {
@@ -154,6 +160,8 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         private List<Short> optListVal = null;
         private Set<String> optSetVal = null;
         private Map<String, String> optMapVal = null;
+        private List<Map<String, Integer>> listMap = com.facebook.thrift.util.IntrinsicDefaults.defaultList();
+        private Map<String, Map<String, Integer>> mapMap = com.facebook.thrift.util.IntrinsicDefaults.defaultMap();
     
         @com.facebook.swift.codec.ThriftField(value=-1, name="boolVal", isLegacyId=true, requiredness=Requiredness.TERSE)
         public Builder setBoolVal(boolean boolVal) {
@@ -395,6 +403,22 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public Map<String, String> getOptMapVal() { return optMapVal; }
     
+            @com.facebook.swift.codec.ThriftField(value=-31, name="listMap", isLegacyId=true, requiredness=Requiredness.TERSE)
+        public Builder setListMap(List<Map<String, Integer>> listMap) {
+            this.listMap = listMap;
+            return this;
+        }
+    
+        public List<Map<String, Integer>> getListMap() { return listMap; }
+    
+            @com.facebook.swift.codec.ThriftField(value=-32, name="mapMap", isLegacyId=true, requiredness=Requiredness.TERSE)
+        public Builder setMapMap(Map<String, Map<String, Integer>> mapMap) {
+            this.mapMap = mapMap;
+            return this;
+        }
+    
+        public Map<String, Map<String, Integer>> getMapMap() { return mapMap; }
+    
         public Builder() { }
         public Builder(MyStruct other) {
             this.boolVal = other.boolVal;
@@ -427,6 +451,8 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             this.optListVal = other.optListVal;
             this.optSetVal = other.optSetVal;
             this.optMapVal = other.optMapVal;
+            this.listMap = other.listMap;
+            this.mapMap = other.mapMap;
         }
     
         @ThriftConstructor
@@ -461,7 +487,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
                 this.optLateStructVal,
                 this.optListVal,
                 this.optSetVal,
-                this.optMapVal
+                this.optMapVal,
+                this.listMap,
+                this.mapMap
             );
             return result;
         }
@@ -561,6 +589,12 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         private final Map<String, String> optMapVal;
     public static final int _OPTMAPVAL = -30;
     private static final TField OPT_MAP_VAL_FIELD_DESC = new TField("optMapVal", TType.MAP, (short)-30);
+        private final List<Map<String, Integer>> listMap;
+    public static final int _LISTMAP = -31;
+    private static final TField LIST_MAP_FIELD_DESC = new TField("listMap", TType.LIST, (short)-31);
+        private final Map<String, Map<String, Integer>> mapMap;
+    public static final int _MAPMAP = -32;
+    private static final TField MAP_MAP_FIELD_DESC = new TField("mapMap", TType.MAP, (short)-32);
     static {
       NAMES_TO_IDS.put("boolVal", -1);
       THRIFT_NAMES_TO_IDS.put("boolVal", -1);
@@ -652,6 +686,12 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       NAMES_TO_IDS.put("optMapVal", -30);
       THRIFT_NAMES_TO_IDS.put("optMapVal", -30);
       FIELD_METADATA.put(-30, OPT_MAP_VAL_FIELD_DESC);
+      NAMES_TO_IDS.put("listMap", -31);
+      THRIFT_NAMES_TO_IDS.put("listMap", -31);
+      FIELD_METADATA.put(-31, LIST_MAP_FIELD_DESC);
+      NAMES_TO_IDS.put("mapMap", -32);
+      THRIFT_NAMES_TO_IDS.put("mapMap", -32);
+      FIELD_METADATA.put(-32, MAP_MAP_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
         new com.facebook.thrift.type.UniversalName("test.dev/fixtures/patch/MyStruct"), 
         MyStruct.class, MyStruct::read0));
@@ -806,6 +846,16 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     @com.facebook.swift.codec.ThriftField(value=-30, name="optMapVal", isLegacyId=true, requiredness=Requiredness.OPTIONAL)
     public Map<String, String> getOptMapVal() { return optMapVal; }
     
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=-31, name="listMap", isLegacyId=true, requiredness=Requiredness.TERSE)
+    public List<Map<String, Integer>> getListMap() { return listMap; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=-32, name="mapMap", isLegacyId=true, requiredness=Requiredness.TERSE)
+    public Map<String, Map<String, Integer>> getMapMap() { return mapMap; }
+    
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -839,6 +889,8 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         helper.add("optListVal", optListVal);
         helper.add("optSetVal", optSetVal);
         helper.add("optMapVal", optMapVal);
+        helper.add("listMap", listMap);
+        helper.add("mapMap", mapMap);
         return helper.toString();
     }
     
@@ -884,6 +936,8 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             Objects.equals(optListVal, other.optListVal) &&
             Objects.equals(optSetVal, other.optSetVal) &&
             Objects.equals(optMapVal, other.optMapVal) &&
+            Objects.equals(listMap, other.listMap) &&
+            Objects.equals(mapMap, other.mapMap) &&
             true;
     }
     
@@ -919,7 +973,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             optLateStructVal,
             optListVal,
             optSetVal,
-            optMapVal
+            optMapVal,
+            listMap,
+            mapMap
         });
     }
     
@@ -1207,6 +1263,79 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             TProtocolUtil.skip(oprot, __field.type);
           }
           break;
+        case _LISTMAP:
+          if (__field.type == TType.LIST) {
+            List<Map<String, Integer>> listMap;
+            {
+            TList _list = oprot.readListBegin();
+            listMap = new ArrayList<Map<String, Integer>>(Math.max(0, _list.size));
+            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                
+                Map<String, Integer> _value1;
+                            {
+                            TMap _map1 = oprot.readMapBegin();
+                            _value1 = new HashMap<String, Integer>(Math.max(0, _map1.size));
+                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                
+                                
+                                String _key2 = oprot.readString();
+                                
+                
+                                
+                                int _value2 = oprot.readI32();
+                                
+                                
+                                _value1.put(_key2, _value2);
+                                
+                            }
+                            }
+                            oprot.readMapEnd();
+                listMap.add(_value1);
+            }
+            oprot.readListEnd();
+            }
+            builder.setListMap(listMap);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _MAPMAP:
+          if (__field.type == TType.MAP) {
+            Map<String, Map<String, Integer>> mapMap;
+            {
+            TMap _map = oprot.readMapBegin();
+            mapMap = new HashMap<String, Map<String, Integer>>(Math.max(0, _map.size));
+            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                
+                String _key1 = oprot.readString();
+                Map<String, Integer> _value1;
+                            {
+                            TMap _map1 = oprot.readMapBegin();
+                            _value1 = new HashMap<String, Integer>(Math.max(0, _map1.size));
+                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                
+                                
+                                String _key2 = oprot.readString();
+                                
+                
+                                
+                                int _value2 = oprot.readI32();
+                                
+                                
+                                _value1.put(_key2, _value2);
+                                
+                            }
+                            }
+                            oprot.readMapEnd();
+                                mapMap.put(_key1, _value1);
+            }
+            }
+            oprot.readMapEnd();
+            builder.setMapMap(mapMap);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(oprot, __field.type);
           break;
@@ -1414,6 +1543,42 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         for (Map.Entry<String, String> _iter1 : _iter0.entrySet()) {
           oprot.writeString(_iter1.getKey());
           oprot.writeString(_iter1.getValue());
+        }
+        oprot.writeMapEnd();
+        oprot.writeFieldEnd();
+      }
+      java.util.Objects.requireNonNull(listMap, "listMap must not be null");
+      
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(listMap)) {
+        oprot.writeFieldBegin(LIST_MAP_FIELD_DESC);
+        List<Map<String, Integer>> _iter0 = listMap;
+        oprot.writeListBegin(new TList(TType.MAP, _iter0.size()));
+        for (Map<String, Integer> _iter1 : _iter0) {
+          oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter1.size()));
+        for (Map.Entry<String, Integer> _iter2 : _iter1.entrySet()) {
+          oprot.writeString(_iter2.getKey());
+          oprot.writeI32(_iter2.getValue());
+        }
+        oprot.writeMapEnd();
+        }
+        oprot.writeListEnd();
+        oprot.writeFieldEnd();
+      }
+      java.util.Objects.requireNonNull(mapMap, "mapMap must not be null");
+      
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(mapMap)) {
+        oprot.writeFieldBegin(MAP_MAP_FIELD_DESC);
+        Map<String, Map<String, Integer>> _iter0 = mapMap;
+        oprot.writeMapBegin(new TMap(TType.STRING, TType.MAP, _iter0.size()));
+        for (Map.Entry<String, Map<String, Integer>> _iter1 : _iter0.entrySet()) {
+          oprot.writeString(_iter1.getKey());
+          
+          oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter1.getValue().size()));
+        for (Map.Entry<String, Integer> _iter2 : _iter1.getValue().entrySet()) {
+          oprot.writeString(_iter2.getKey());
+          oprot.writeI32(_iter2.getValue());
+        }
+        oprot.writeMapEnd();
         }
         oprot.writeMapEnd();
         oprot.writeFieldEnd();

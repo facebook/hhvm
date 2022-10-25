@@ -171,7 +171,12 @@ let get_batch (ctx : Provider_context.t) (names : SSet.t) :
   | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Analysis ->
     failwith "invalid"
-  | Provider_backend.Rust_provider_backend _
+  | Provider_backend.Rust_provider_backend be ->
+    SSet.fold
+      (fun name acc ->
+        SMap.add name (Rust_provider_backend.Decl.get_shallow_class be name) acc)
+      names
+      SMap.empty
   | Provider_backend.Shared_memory ->
     Shallow_classes_heap.Classes.get_batch names
   | Provider_backend.Local_memory _ ->
@@ -189,7 +194,35 @@ let get_old_batch
   | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Analysis ->
     failwith "invalid"
-  | Provider_backend.Rust_provider_backend _
+  (* TODO(sf, 2022-10-20): Reduce duplication between the following two cases. *)
+  | Provider_backend.Rust_provider_backend be ->
+    let old_classes =
+      Rust_provider_backend.Decl.get_old_shallow_classes_batch
+        be
+        (SSet.elements names)
+    in
+    if fetch_remote_old_decls ctx then
+      let missing_old_classes =
+        SMap.fold
+          (fun cid decl_opt missing_classes ->
+            if Option.is_some decl_opt then
+              missing_classes
+            else
+              cid :: missing_classes)
+          old_classes
+          []
+      in
+      let remote_old_classes = fetch_old_decls missing_old_classes in
+      SMap.fold
+        (fun a b acc ->
+          if Option.is_some b || not (SMap.mem a remote_old_classes) then
+            SMap.add a b acc
+          else
+            SMap.add a (SMap.find a remote_old_classes) acc)
+        old_classes
+        SMap.empty
+    else
+      old_classes
   | Provider_backend.Shared_memory ->
     let old_classes = Shallow_classes_heap.Classes.get_old_batch names in
     if fetch_remote_old_decls ctx then

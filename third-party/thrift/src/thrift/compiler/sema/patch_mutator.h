@@ -83,7 +83,7 @@ class patch_generator {
   //   }
   //
   t_struct& add_struct_patch(
-      const t_node& annot, t_struct& value_type, t_type_ref patch_type);
+      const t_const& annot, t_struct& value_type, t_type_ref patch_type);
 
   // Add a value patch representation for the given union and associate patch
   // type, and return a reference to it.
@@ -105,7 +105,7 @@ class patch_generator {
   //   }
   //
   t_struct& add_union_patch(
-      const t_node& annot, t_union& value_type, t_type_ref patch_type);
+      const t_const& annot, t_union& value_type, t_type_ref patch_type);
 
  private:
   friend class PatchGeneratorTest;
@@ -126,15 +126,20 @@ class patch_generator {
   t_struct& gen_patch(
       const t_const& annot,
       const t_structured& orig,
-      const std::string& suffix,
-      t_type_ref type);
+      const t_field_id& field_id,
+      t_type_ref type,
+      size_t traversal_order = 0);
 
   // Attempts to resolve the associated patch type for the given field.
   //
   // If a shared representation cannot be found, a new one may be generated.
   // Otherwise an empty t_type_ref is returned.
   t_type_ref find_patch_type(
-      const t_const& annot, const t_structured& parent, t_type_ref type);
+      const t_const& annot,
+      const t_structured& parent,
+      t_type_ref type,
+      const t_field_id& field_id,
+      size_t traversal_order = 0);
   t_type_ref find_patch_type(
       const t_const& annot, const t_structured& parent, const t_field& field);
 
@@ -155,6 +160,11 @@ class patch_generator {
   t_type_ref inst_list(t_type_ref val);
   t_type_ref inst_set(t_type_ref key);
   t_type_ref inst_map(t_type_ref val, t_type_ref key);
+
+  const t_const* get_assign_only_annotation_or_null(const t_named& node);
+
+  const t_const& get_field_annotation(
+      const t_const& annot, const t_field& field);
 };
 
 } // namespace compiler

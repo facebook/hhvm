@@ -19,6 +19,7 @@ include "thrift/annotation/scope.thrift"
 package "facebook.com/thrift/annotation"
 
 namespace java com.facebook.thrift.annotation_deprecated
+namespace js thrift.annotation.thrift
 namespace py.asyncio facebook_thrift_asyncio.annotation.thrift
 namespace go thrift.annotation.thrift
 namespace py thrift.annotation.thrift
@@ -298,8 +299,8 @@ struct GenerateRuntimeSchema {
 
 // Indicates that a field's value should never be stored on the 'stack', and that
 // identical values can be shared in immutable contexts.
+// It currently only supports sharing immutable default value.
 //
 // Unlike `@thrift.Box` above, this annotation does not work yet :-).
 @scope.Field
-@Testing // TODO: Implement.
 struct InternBox {}

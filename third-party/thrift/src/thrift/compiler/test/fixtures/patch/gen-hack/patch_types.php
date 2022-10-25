@@ -213,6 +213,96 @@ class GeneratePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
 }
 
 /**
+ * Original thrift struct:-
+ * AssignOnlyPatch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/op/AssignOnlyPatch'))>>
+class AssignOnlyPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const type TShape = shape(
+    ...
+  );
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'AssignOnlyPatch';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "patch.AssignOnlyPatch",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\Field' => \thrift\annotation\Field::fromShape(
+          shape(
+          )
+        ),
+        '\thrift\annotation\Structured' => \thrift\annotation\Structured::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+  }
+
+}
+
+/**
  * A patch for a boolean value.
  *
  * Original thrift struct:-
@@ -356,7 +446,6 @@ class BoolPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::BoolPatchAdapter",
             "underlyingName" => "BoolPatchStruct",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -548,7 +637,6 @@ class BytePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
             "underlyingName" => "BytePatchStruct",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -750,7 +838,6 @@ class I16Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
             "underlyingName" => "I16PatchStruct",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -952,7 +1039,6 @@ class I32Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
             "underlyingName" => "I32PatchStruct",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -1154,7 +1240,6 @@ class I64Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
             "underlyingName" => "I64PatchStruct",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -1346,7 +1431,6 @@ class FloatPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
             "underlyingName" => "FloatPatchStruct",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -1538,7 +1622,6 @@ class DoublePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
             "underlyingName" => "DoublePatchStruct",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -1757,7 +1840,6 @@ class StringPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::StringPatchAdapter",
             "underlyingName" => "StringPatchStruct",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -2011,7 +2093,6 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::BinaryPatchAdapter",
             "underlyingName" => "BinaryPatchStruct",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -2251,7 +2332,6 @@ class DurationPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
             "underlyingName" => "DurationStructPatch",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -2468,7 +2548,6 @@ class TimePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
             "underlyingName" => "TimeStructPatch",
-            "extraNamespace" => "",
           )
         ),
       ],

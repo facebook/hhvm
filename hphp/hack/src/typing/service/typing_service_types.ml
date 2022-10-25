@@ -24,7 +24,7 @@ type remote_computation_payload = {
   nonce: string;
   payload: workitem BigList.t;
   changed_files: Relative_path.t list option; [@opaque]
-  dirty_files: (Relative_path.t * string option) list;
+  dirty_files: (Relative_path.t * string option) list; [@opaque]
 }
 [@@deriving show]
 
@@ -138,6 +138,8 @@ module type LocalServerApi = sig
      It may be called many times during execution.
   *)
   val update_state : state_filename:string -> check_id:string option -> unit
+
+  val upload_naming_table : nonce:string -> unit
 
   (* Tells the server to save the naming table state to a given
      destination path.

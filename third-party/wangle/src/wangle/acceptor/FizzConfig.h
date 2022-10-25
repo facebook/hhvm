@@ -17,6 +17,7 @@
 #pragma once
 
 #include <fizz/extensions/tokenbinding/Types.h>
+#include <fizz/protocol/AsyncFizzBase.h>
 #include <fizz/record/Types.h>
 
 namespace wangle {
@@ -40,6 +41,7 @@ struct FizzConfig {
   folly::Optional<uint16_t> paddingModulo;
   std::vector<fizz::CertificateCompressionAlgorithm>
       supportedCompressionAlgorithms;
+  fizz::AsyncFizzBase::TransportOptions transportOptions;
 };
 
 struct FizzClientConfig {

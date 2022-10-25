@@ -42,27 +42,6 @@
   (pps ppx_deriving.std)))
 
 (library
- (name decl_service_client)
- (modules decl_service_client)
- (libraries
-  collections
-  core_kernel
-  decl_ipc_ffi_externs
-  decl_parser_options
-  direct_decl_parser
-  heap_shared_mem
-  marshal_tools
-  naming_types
-  relative_path
-  typing_defs
-  utils_core
-  shallow_decl_defs
-  typing_deps
-  sys_utils)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
  (name file_provider)
  (modules file_provider)
  (libraries ast provider_backend relative_path rust_provider_backend_stubs sys_utils)

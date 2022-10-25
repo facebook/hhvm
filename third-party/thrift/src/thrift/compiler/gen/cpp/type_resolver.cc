@@ -39,10 +39,10 @@ const std::string& type_resolver::get_native_type(
 
   if (auto* annotation =
           field.find_structured_annotation_or_null(kCppAdapterUri)) {
-    if (auto* adaptedType =
+    if (auto* adapted_type =
             annotation->get_value_from_structured_annotation_or_null(
                 "adaptedType")) {
-      return adaptedType->get_string();
+      return adapted_type->get_string();
     }
     const auto& adapter_on_field =
         annotation->get_value_from_structured_annotation("name").get_string();
@@ -66,10 +66,10 @@ const std::string& type_resolver::get_native_type(const t_const& cnst) {
 
   if (auto* annotation =
           cnst.find_structured_annotation_or_null(kCppAdapterUri)) {
-    if (auto* adaptedType =
+    if (auto* adapted_type =
             annotation->get_value_from_structured_annotation_or_null(
                 "adaptedType")) {
-      return adaptedType->get_string();
+      return adapted_type->get_string();
     }
     return detail::get_or_gen(const_cache_, &cnst, [&]() {
       const auto& adapter =
@@ -82,13 +82,19 @@ const std::string& type_resolver::get_native_type(const t_const& cnst) {
 }
 
 const std::string& type_resolver::get_underlying_type_name(const t_type& node) {
-  if (!is_directly_adapted(node)) {
-    return get_native_type(node);
+  if (auto* annotation = find_nontransitive_adapter(node)) {
+    if (auto* adapted_type =
+            annotation->get_value_from_structured_annotation_or_null(
+                "adaptedType")) {
+      return adapted_type->get_string();
+    }
+    const auto& adapter =
+        annotation->get_value_from_structured_annotation("name").get_string();
+    return detail::get_or_gen(underlying_type_cache_, &node, [&]() {
+      return gen_adapted_type(&adapter, get_underlying_namespaced_name(node));
+    });
   }
-  return detail::get_or_gen(underlying_type_cache_, &node, [&]() {
-    auto adapter = find_structured_adapter_annotation(node);
-    return gen_adapted_type(adapter, get_underlying_namespaced_name(node));
-  });
+  return get_native_type(node);
 }
 
 const std::string& type_resolver::get_underlying_type_name(
@@ -103,10 +109,10 @@ const std::string& type_resolver::get_underlying_type_name(
   }
 
   if (auto* annotation = find_nontransitive_adapter(node)) {
-    if (auto* adaptedType =
+    if (auto* adapted_type =
             annotation->get_value_from_structured_annotation_or_null(
                 "adaptedType")) {
-      return adaptedType->get_string();
+      return adapted_type->get_string();
     }
     const auto& adapter =
         annotation->get_value_from_structured_annotation("name").get_string();
@@ -146,14 +152,18 @@ const std::string& type_resolver::get_underlying_name(const t_type& node) {
 
 const std::string* type_resolver::get_extra_namespace(const t_type& node) {
   if (const t_const* annotation = find_nontransitive_adapter(node)) {
-    if (const t_const_value* value =
-            annotation->get_value_from_structured_annotation_or_null(
-                "extraNamespace")) {
-      return value->get_string().empty() ? nullptr : &value->get_string();
+    const auto* ns = annotation->get_value_from_structured_annotation_or_null(
+        "extraNamespace");
+    if (ns != nullptr && !ns->get_string().empty()) {
+      return &ns->get_string();
     }
-    // Default isn't propagated from IDL.
-    static const std::string kDefault = "detail";
-    return &kDefault;
+    // If there is also no underlying name, use "detail".
+    const auto* name = annotation->get_value_from_structured_annotation_or_null(
+        "underlyingName");
+    if (name == nullptr || name->get_string().empty()) {
+      static const std::string kDefault = "detail";
+      return &kDefault;
+    }
   }
   return nullptr;
 }
@@ -334,6 +344,9 @@ std::string type_resolver::gen_storage_type(
     case reference_type::boxed:
       return detail::gen_template_type(
           "::apache::thrift::detail::boxed_value_ptr", {native_type});
+    case reference_type::boxed_intern:
+      return detail::gen_template_type(
+          "::apache::thrift::detail::boxed_value", {native_type});
     default:
       throw std::runtime_error("unknown cpp ref_type");
   }

@@ -25,15 +25,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class Awaitable
 
-void HHVM_STATIC_METHOD(Awaitable, setOnIOWaitEnterCallback,
-                        const Variant& callback);
-void HHVM_STATIC_METHOD(Awaitable, setOnIOWaitExitCallback,
-                        const Variant& callback);
-void HHVM_STATIC_METHOD(Awaitable, setOnJoinCallback,
-                        const Variant& callback);
-bool HHVM_METHOD(Awaitable, isFinished);
-bool HHVM_METHOD(Awaitable, isSucceeded);
-bool HHVM_METHOD(Awaitable, isFailed);
 String HHVM_METHOD(Awaitable, getName);
 
 /**

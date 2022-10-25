@@ -16,6 +16,7 @@
 
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
+include "thrift/test/adapter.thrift"
 cpp_include "thrift/test/AdapterTest.h"
 
 namespace cpp2 cpp2
@@ -197,6 +198,50 @@ struct FieldAdapterRefStruct {
   9: string box_field (cpp.box);
 }
 
+struct StructAdapterRefStruct {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: adapter.DirectlyAdaptedStruct def_shared_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: optional adapter.DirectlyAdaptedStruct opt_shared_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  3: required adapter.DirectlyAdaptedStruct req_shared_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  4: adapter.DirectlyAdaptedStruct def_shared_const_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  5: optional adapter.DirectlyAdaptedStruct opt_shared_const_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  6: required adapter.DirectlyAdaptedStruct req_shared_const_field;
+  @thrift.Box
+  7: optional adapter.DirectlyAdaptedStruct opt_box_field;
+  8: adapter.DirectlyAdaptedStruct box_field (cpp.box);
+}
+
+struct DoubleAdaptedRefStruct {
+  @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: adapter.DirectlyAdaptedStruct def_shared_field;
+  @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  2: optional adapter.DirectlyAdaptedStruct opt_shared_field;
+  @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  3: required adapter.DirectlyAdaptedStruct req_shared_field;
+  @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+  @cpp.Ref{type = cpp.RefType.Shared}
+  4: adapter.DirectlyAdaptedStruct def_shared_const_field;
+  @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+  @cpp.Ref{type = cpp.RefType.Shared}
+  5: optional adapter.DirectlyAdaptedStruct opt_shared_const_field;
+  @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+  @cpp.Ref{type = cpp.RefType.Shared}
+  6: required adapter.DirectlyAdaptedStruct req_shared_const_field;
+  @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+  @thrift.Box
+  7: optional adapter.DirectlyAdaptedStruct opt_box_field;
+  @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+  8: adapter.DirectlyAdaptedStruct box_field (cpp.box);
+}
+
 struct StructuredAnnotation {
   @cpp.Ref{type = cpp.RefType.Unique}
   1: optional PlainStruct opt_unique_field;
@@ -206,6 +251,9 @@ struct StructuredAnnotation {
 
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   3: optional PlainStruct opt_shared_mutable_field;
+
+  @thrift.InternBox
+  4: PlainStruct intern_box_field;
 }
 
 struct StructWithString {

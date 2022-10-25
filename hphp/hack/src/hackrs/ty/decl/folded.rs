@@ -7,23 +7,21 @@ use std::collections::BTreeMap;
 use std::fmt;
 
 use eq_modulo_pos::EqModuloPos;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
+use hash::IndexMap;
+use hash::IndexSet;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 pub use oxidized::ast_defs::Abstraction;
 pub use oxidized::ast_defs::ClassishKind;
 use pos::Bytes;
-use pos::ClassConstNameIndexMap;
-use pos::MethodNameIndexMap;
+use pos::ClassConstName;
+use pos::MethodName;
 use pos::ModuleName;
 use pos::Positioned;
-use pos::PropNameIndexMap;
-use pos::PropNameIndexSet;
+use pos::PropName;
 use pos::Symbol;
 use pos::TypeConstName;
-use pos::TypeConstNameIndexMap;
 use pos::TypeName;
-use pos::TypeNameIndexMap;
-use pos::TypeNameIndexSet;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -193,26 +191,26 @@ pub struct FoldedClass<R: Reason> {
     pub module: Option<Positioned<ModuleName, R::Pos>>,
     pub tparams: Box<[Tparam<R, Ty<R>>]>,
     pub where_constraints: Box<[WhereConstraint<Ty<R>>]>,
-    pub substs: TypeNameIndexMap<SubstContext<R>>,
-    pub ancestors: TypeNameIndexMap<Ty<R>>,
-    pub props: PropNameIndexMap<FoldedElement>,
-    pub static_props: PropNameIndexMap<FoldedElement>,
-    pub methods: MethodNameIndexMap<FoldedElement>,
-    pub static_methods: MethodNameIndexMap<FoldedElement>,
+    pub substs: IndexMap<TypeName, SubstContext<R>>,
+    pub ancestors: IndexMap<TypeName, Ty<R>>,
+    pub props: IndexMap<PropName, FoldedElement>,
+    pub static_props: IndexMap<PropName, FoldedElement>,
+    pub methods: IndexMap<MethodName, FoldedElement>,
+    pub static_methods: IndexMap<MethodName, FoldedElement>,
     pub constructor: Constructor,
-    pub consts: ClassConstNameIndexMap<ClassConst<R>>,
-    pub type_consts: TypeConstNameIndexMap<TypeConst<R>>,
+    pub consts: IndexMap<ClassConstName, ClassConst<R>>,
+    pub type_consts: IndexMap<TypeConstName, TypeConst<R>>,
     pub xhp_enum_values: BTreeMap<Symbol, Box<[XhpEnumValue]>>,
-    pub extends: TypeNameIndexSet,
-    pub xhp_attr_deps: TypeNameIndexSet,
+    pub extends: IndexSet<TypeName>,
+    pub xhp_attr_deps: IndexSet<TypeName>,
     pub req_ancestors: Box<[Requirement<R>]>,
-    pub req_ancestors_extends: TypeNameIndexSet,
+    pub req_ancestors_extends: IndexSet<TypeName>,
     /// `req_class_ancestors` gathers all the `require class` requirements
     /// declared in self and ancestors. Note that `require class` requirements
     /// are _not_ stored in `req_ancestors` or `req_ancestors_extends` fields.
     pub req_class_ancestors: Box<[Requirement<R>]>,
-    pub sealed_whitelist: Option<TypeNameIndexSet>,
-    pub deferred_init_members: PropNameIndexSet,
+    pub sealed_whitelist: Option<IndexSet<TypeName>>,
+    pub deferred_init_members: IndexSet<PropName>,
     pub decl_errors: Box<[DeclError<R::Pos>]>,
     pub docs_url: Option<String>,
 }

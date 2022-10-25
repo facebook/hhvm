@@ -24,6 +24,8 @@ namespace testservice {
 
 class TestSinkService : public apache::thrift::ServiceHandler<TestSinkService> {
  public:
+  folly::coro::Task<::std::int32_t> co_test() override { co_return 42; }
+
   apache::thrift::SinkConsumer<int32_t, bool> range(
       int32_t from, int32_t to) override;
 

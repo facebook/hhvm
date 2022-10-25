@@ -20,6 +20,7 @@
 #include <fizz/server/ServerProtocol.h>
 #include <fizz/util/Workarounds.h>
 #include <folly/Overload.h>
+#include <folly/tracing/StaticTracepoint.h>
 #include <algorithm>
 
 using folly::Optional;
@@ -169,9 +170,9 @@ AsyncActions ServerStateMachine::processSocketData(
   } catch (const FizzException& e) {
     return detail::handleError(
         state,
-        ReportError(folly::exception_wrapper(std::current_exception(), e)),
+        ReportError(folly::exception_wrapper(std::current_exception())),
         e.getAlert());
-  } catch (const std::exception& e) {
+  } catch (...) {
     return detail::handleError(
         state,
         ReportError(folly::make_exception_wrapper<FizzException>(
@@ -179,7 +180,7 @@ AsyncActions ServerStateMachine::processSocketData(
                 "error decoding record in state ",
                 toString(state.state()),
                 ": ",
-                e.what()),
+                folly::exceptionStr(std::current_exception())),
             AlertDescription::decode_error)),
         AlertDescription::decode_error);
   }
@@ -254,12 +255,12 @@ AsyncActions processEvent(const State& state, Param param) {
   } catch (const FizzException& e) {
     return detail::handleError(
         state,
-        ReportError(folly::exception_wrapper(std::current_exception(), e)),
+        ReportError(folly::exception_wrapper(std::current_exception())),
         e.getAlert());
-  } catch (const std::exception& e) {
+  } catch (...) {
     return detail::handleError(
         state,
-        ReportError(folly::exception_wrapper(std::current_exception(), e)),
+        ReportError(folly::exception_wrapper(std::current_exception())),
         AlertDescription::unexpected_message);
   }
 }
@@ -527,20 +528,25 @@ static ResumptionStateResult getResumptionState(
     pskMode = negotiate(supportedModes, clientModes->modes);
   }
   if (!psks && !pskMode) {
+    FOLLY_SDT(fizz, session_cache_NotSupported);
     return ResumptionStateResult(
         std::make_pair(PskType::NotSupported, folly::none));
   } else if (!psks || psks->identities.size() <= kPskIndex) {
+    FOLLY_SDT(fizz, session_cache_NotAttempted);
     return ResumptionStateResult(
         std::make_pair(PskType::NotAttempted, folly::none));
   } else if (!ticketCipher) {
+    FOLLY_SDT(fizz, session_cache_NoTicketCipher);
     VLOG(8) << "No ticket cipher, rejecting PSK.";
     return ResumptionStateResult(
         std::make_pair(PskType::Rejected, folly::none));
   } else if (!pskMode) {
+    FOLLY_SDT(fizz, session_cache_PskModeMismatch);
     VLOG(8) << "No psk mode match, rejecting PSK.";
     return ResumptionStateResult(
         std::make_pair(PskType::Rejected, folly::none));
   } else {
+    FOLLY_SDT(fizz, session_cache_ResumptionSuccess);
     const auto& ident = psks->identities[kPskIndex].psk_identity;
     return ResumptionStateResult(
         ticketCipher->decrypt(ident->clone()),
@@ -555,6 +561,7 @@ static SemiFuture<ReplayCacheResult> getReplayCacheResult(
     ReplayCache* replayCache) {
   if (!zeroRttEnabled || !replayCache ||
       !getExtension<ClientEarlyData>(chlo.extensions)) {
+    FOLLY_SDT(fizz, replay_cache_NotChecked);
     return ReplayCacheResult::NotChecked;
   }
   auto randBuf = folly::IOBuf::copyBuffer(chlo.random, chlo.random.size());
@@ -567,11 +574,13 @@ static bool validateResumptionState(
     ProtocolVersion version,
     CipherSuite cipher) {
   if (resState.version != version) {
+    FOLLY_SDT(fizz, resumption_state_ProtocolVersionMismatch);
     VLOG(8) << "Protocol version mismatch, rejecting PSK.";
     return false;
   }
 
   if (getHashFunction(resState.cipher) != getHashFunction(cipher)) {
+    FOLLY_SDT(fizz, resumption_state_HashFunctionMismatch);
     VLOG(8) << "Hash mismatch, rejecting PSK.";
     return false;
   }

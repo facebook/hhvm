@@ -34,6 +34,16 @@ module Decl = struct
   let get_folded_class _ _ = failwith "unimplemented"
 
   let declare_folded_class _ _ = failwith "unimplemented"
+
+  let get_old_shallow_classes_batch _ _ = failwith "unimplemented"
+
+  let get_old_defs _ _ = failwith "unimplemented"
+
+  let oldify_defs _ _ = failwith "unimplemented"
+
+  let remove_defs _ _ = failwith "unimplemented"
+
+  let remove_old_defs _ _ = failwith "unimplemented"
 end
 
 module File = struct

@@ -301,6 +301,7 @@ void write_field_vector(ProfDataSerializer& ser, const StructLayout* layout) {
   write_raw(ser, num);
   for (auto slot = 0; slot < num; ++slot) {
     auto const& f = layout->field(slot);
+    assertx(f.key->color() != StringData::kInvalidColor);
     write_string(ser, f.key);
     write_raw(ser, f.required);
     write_raw(ser, f.type_mask);
@@ -470,6 +471,7 @@ void serializeBespokeLayouts(ProfDataSerializer& ser) {
     layouts.push_back(StructLayout::As(&layout));
   });
   write_raw(ser, layouts.size());
+  write_raw(ser, StructLayout::maxColoredFields());
   for (auto const layout : layouts) {
     write_raw(ser, layout->index());
     write_field_vector(ser, layout);
@@ -506,11 +508,12 @@ void deserializeBespokeLayouts(ProfDataDeserializer& des) {
   always_assert(bespoke::countSinks() == 0);
 
   auto const layouts = read_raw<size_t>(des);
+  auto const maxColoredFields = read_raw<size_t>(des);
   for (auto i = 0; i < layouts; i++) {
     auto const index = read_raw<bespoke::LayoutIndex>(des);
     auto const fields = read_field_vector(des);
     auto const layout = StructLayout::Deserialize(index, fields);
-    layout->createColoringHashMap();
+    layout->createColoringHashMap(maxColoredFields);
   }
   auto const runtimeStructs = read_raw<size_t>(des);
   for (auto i = 0; i < runtimeStructs; i++) {

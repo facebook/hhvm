@@ -86,6 +86,7 @@ public class MyServiceRpcServerHandler
 
         _chain.postWrite(_r);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -112,6 +113,7 @@ public class MyServiceRpcServerHandler
 
         _chain.postWriteException(_t);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -213,6 +215,7 @@ oprot.writeString(_iter0);
 
         _chain.postWrite(_r);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -304,6 +307,7 @@ oprot.writeBool(_iter0);
 
         _chain.postWrite(_r);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -396,6 +400,7 @@ oprot.writeString(_iter0);
 
         _chain.postWrite(_r);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -486,6 +491,7 @@ oprot.writeString(_iter0);
 
         _chain.postWrite(_r);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -574,6 +580,7 @@ oprot.writeString(_iter0);
 
         _chain.postWrite(_r);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };

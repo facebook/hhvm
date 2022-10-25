@@ -373,6 +373,8 @@ BytecodeVec decodeBytecodeVec(const Buffer& buffer, size_t& pos) {
     switch (inst.op) { OPCODES }
 #undef O
   }
+
+  bcs.shrink_to_fit();
   return bcs;
 }
 
@@ -424,6 +426,7 @@ BlockVec decodeBlockVec(const Buffer& buffer, size_t& pos) {
     };
     block.emplace(std::move(tmp));
   }
+  blocks.shrink_to_fit();
   return blocks;
 }
 
@@ -436,6 +439,7 @@ void encodeBlockVec(Buffer& buffer, const BlockVec& blocks) {
     encode(buffer, block->throwExit - NoBlockId);
     encode(buffer, block->initializer);
   }
+  buffer.shrink_to_fit();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -523,6 +527,7 @@ void WideFunc::release() {
 CompressedBlockUpdate::CompressedBlockUpdate(BlockUpdateInfo&& in) {
   php::encode(raw, in);
   in = {};
+  raw.shrink_to_fit();
 }
 
 void CompressedBlockUpdate::expand(BlockUpdateInfo& out) {

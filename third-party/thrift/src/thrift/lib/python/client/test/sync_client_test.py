@@ -18,7 +18,13 @@ from __future__ import annotations
 import time
 import unittest
 
+from thrift.lib.python.client.test.event_handler_helper import (
+    addEventHandler,
+    client_handler_that_throws,
+)
+
 from thrift.python.client import ClientType, get_sync_client
+from thrift.python.common import RpcOptions
 from thrift.python.exceptions import (
     ApplicationError,
     ApplicationErrorType,
@@ -130,12 +136,25 @@ class SyncClientTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 client.add(1, 2)
 
-    # TODO: add similar test to the async_client_test
-    def test_add_test_handler_should_hijack_transport_error(self) -> None:
+    def test_add_test_handler_with_rpc_options_should_hijack_transport_error_and_use_rpc_options(
+        self,
+    ) -> None:
         with HijackTestHelper():
             with get_sync_client(TestService, path="/no/where") as client:
-                with self.assertRaises(HijackTestException):
+                with self.assertRaises(HijackTestException) as context:
+                    options = RpcOptions()
+                    options.timeout = 12.5
+                    client.add(1, 2, rpc_options=options)
+                self.assertEqual(context.exception.timeout, 12.5)
+
+    def test_add_test_handler_without_rpc_options_should_hijack_transport_error(
+        self,
+    ) -> None:
+        with HijackTestHelper():
+            with get_sync_client(TestService, path="/no/where") as client:
+                with self.assertRaises(HijackTestException) as context:
                     client.add(1, 2)
+                self.assertEqual(context.exception.timeout, 0.0)
 
     def test_exit_callback(self) -> None:
         class Callback:
@@ -155,3 +174,17 @@ class SyncClientTests(unittest.TestCase):
 
         self.assertTrue(cb1.triggered)
         self.assertTrue(cb2.triggered)
+
+    def test_exception_in_client_event_handler(self) -> None:
+        with self.assertRaises(RuntimeError):
+            with client_handler_that_throws():
+                with server_in_another_process() as path:
+                    with get_sync_client(TestService, path=path) as client:
+                        self.assertEqual(3, client.add(1, 2))
+
+    def test_no_exception_when_clear_event_handler(self) -> None:
+        addEventHandler()
+        with server_in_another_process() as path:
+            with get_sync_client(TestService, path=path) as client:
+                client.clear_event_handlers()
+                self.assertEqual(3, client.add(1, 2))

@@ -90,6 +90,17 @@ cdef extern from "thrift/compiler/test/fixtures/stream/src/gen-cpp2/module_types
         bint operator>=(cFooEx&)
 
 
+    cdef cppclass cFooEx2 "::cpp2::FooEx2"(cTException):
+        cFooEx2() except +
+        cFooEx2(const cFooEx2&) except +
+        bint operator==(cFooEx2&)
+        bint operator!=(cFooEx2&)
+        bint operator<(cFooEx2&)
+        bint operator>(cFooEx2&)
+        bint operator<=(cFooEx2&)
+        bint operator>=(cFooEx2&)
+
+
 
 
 cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
@@ -107,6 +118,15 @@ cdef class FooEx(thrift.py3.exceptions.GeneratedError):
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cFooEx])
+
+
+
+cdef class FooEx2(thrift.py3.exceptions.GeneratedError):
+    cdef shared_ptr[cFooEx2] _cpp_obj
+    cdef _fbthrift_types_fields.__FooEx2_FieldsSetter _fields_setter
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cFooEx2])
 
 
 

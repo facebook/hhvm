@@ -61,6 +61,8 @@ val string_contains : string -> string -> bool
 
 val exec_read : string -> string option
 
+val exec_try_read : string -> string option
+
 val exec_read_lines : ?reverse:bool -> string -> string list
 
 val collect_paths : (string -> bool) -> string -> string list

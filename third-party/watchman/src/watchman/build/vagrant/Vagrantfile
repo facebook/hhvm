@@ -165,6 +165,15 @@ Vagrant.configure("2") do |config|
     sync_fuse ubuntu
   end
 
+  config.vm.define "watchman-fedora-35", autostart: false do |fedora35|
+    fedora35.vm.box = "generic/fedora35"
+    fedora35.vm.hostname = "watchman-fedora-35"
+
+    provision_fedora fedora35
+    provider_linux fedora35
+    sync_fuse fedora35
+  end
+
   config.vm.define "watchman-fedora-36", autostart: false do |fedora36|
     fedora36.vm.box = "generic/fedora36"
     fedora36.vm.hostname = "watchman-fedora-36"

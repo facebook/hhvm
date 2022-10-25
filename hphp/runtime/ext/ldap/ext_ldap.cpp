@@ -56,105 +56,7 @@ static struct LdapExtension final : Extension {
   LdapExtension() : Extension("ldap", NO_EXTENSION_VERSION_YET) {}
   void requestInit() override;
   void requestShutdown() override;
-  void moduleInit() override {
-    HHVM_RC_INT(LDAP_ESCAPE_FILTER, k_LDAP_ESCAPE_FILTER);
-    HHVM_RC_INT(LDAP_ESCAPE_DN, k_LDAP_ESCAPE_DN);
-
-    HHVM_FE(ldap_connect);
-    HHVM_FE(ldap_explode_dn);
-    HHVM_FE(ldap_dn2ufn);
-    HHVM_FE(ldap_err2str);
-    HHVM_FE(ldap_add);
-    HHVM_FE(ldap_mod_add);
-    HHVM_FE(ldap_mod_del);
-    HHVM_FE(ldap_mod_replace);
-    HHVM_FE(ldap_modify);
-    HHVM_FE(ldap_modify_batch);
-    HHVM_FE(ldap_bind);
-    HHVM_FE(ldap_set_rebind_proc);
-    HHVM_FE(ldap_sort);
-    HHVM_FE(ldap_start_tls);
-    HHVM_FE(ldap_unbind);
-    HHVM_FE(ldap_get_option);
-    HHVM_FE(ldap_set_option);
-    HHVM_FE(ldap_close);
-    HHVM_FE(ldap_list);
-    HHVM_FE(ldap_read);
-    HHVM_FE(ldap_search);
-    HHVM_FE(ldap_rename);
-    HHVM_FE(ldap_delete);
-    HHVM_FE(ldap_compare);
-    HHVM_FE(ldap_errno);
-    HHVM_FE(ldap_error);
-    HHVM_FE(ldap_get_dn);
-    HHVM_FE(ldap_count_entries);
-    HHVM_FE(ldap_get_entries);
-    HHVM_FE(ldap_first_entry);
-    HHVM_FE(ldap_next_entry);
-    HHVM_FE(ldap_get_attributes);
-    HHVM_FE(ldap_first_attribute);
-    HHVM_FE(ldap_next_attribute);
-    HHVM_FE(ldap_first_reference);
-    HHVM_FE(ldap_next_reference);
-    HHVM_FE(ldap_parse_reference);
-    HHVM_FE(ldap_parse_result);
-    HHVM_FE(ldap_free_result);
-    HHVM_FE(ldap_get_values_len);
-    HHVM_FE(ldap_get_values);
-    HHVM_FE(ldap_control_paged_result);
-    HHVM_FE(ldap_control_paged_result_response);
-    HHVM_FE(ldap_escape);
-
-    HHVM_RC_INT_SAME(LDAP_DEREF_ALWAYS);
-    HHVM_RC_INT_SAME(LDAP_DEREF_FINDING);
-    HHVM_RC_INT_SAME(LDAP_DEREF_NEVER);
-    HHVM_RC_INT_SAME(LDAP_DEREF_SEARCHING);
-
-    HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_ADD);
-    HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_REMOVE);
-    HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_REMOVE_ALL);
-    HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_REPLACE);
-    HHVM_RC_STR_SAME(LDAP_MODIFY_BATCH_ATTRIB);
-    HHVM_RC_STR_SAME(LDAP_MODIFY_BATCH_MODTYPE);
-    HHVM_RC_STR_SAME(LDAP_MODIFY_BATCH_VALUES);
-
-    HHVM_RC_INT_SAME(LDAP_OPT_DEREF);
-    HHVM_RC_INT_SAME(LDAP_OPT_SIZELIMIT);
-    HHVM_RC_INT_SAME(LDAP_OPT_TIMELIMIT);
-    HHVM_RC_INT_SAME(LDAP_OPT_PROTOCOL_VERSION);
-    HHVM_RC_INT_SAME(LDAP_OPT_ERROR_NUMBER);
-    HHVM_RC_INT_SAME(LDAP_OPT_REFERRALS);
-    HHVM_RC_INT_SAME(LDAP_OPT_ERROR_STRING);
-    HHVM_RC_INT_SAME(LDAP_OPT_SERVER_CONTROLS);
-    HHVM_RC_INT_SAME(LDAP_OPT_CLIENT_CONTROLS);
-
-#ifdef LDAP_OPT_NETWORK_TIMEOUT
-    HHVM_RC_INT_SAME(LDAP_OPT_NETWORK_TIMEOUT);
-#elif defined(LDAP_X_OPT_NETWORK_TIMEOUT)
-    HHVM_RC_INT(LDAP_OPT_NETWORK_TIMEOUT, LDAP_X_OPT_NETWORK_TIMEOUT);
-#endif
-#ifdef LDAP_OPT_TIMEOUT
-    HHVM_RC_INT_SAME(LDAP_OPT_TIMEOUT);
-#endif
-#ifdef LDAP_OPT_RESTART
-    HHVM_RC_INT_SAME(LDAP_OPT_RESTART);
-#endif
-#ifdef LDAP_OPT_HOST_NAME
-    HHVM_RC_INT_SAME(LDAP_OPT_HOST_NAME);
-#endif
-#ifdef LDAP_OPT_MATCHED_DN
-    HHVM_RC_INT_SAME(LDAP_OPT_MATCHED_DN);
-#endif
-#ifdef LDAP_OPT_DEBUG_LEVEL
-    HHVM_RC_INT_SAME(LDAP_OPT_DEBUG_LEVEL);
-#endif
-
-    loadSystemlib();
-    LDAP* link = nullptr;
-    if (ldap_create(&link) == LDAP_SUCCESS) {
-      ldap_unbind(link);
-    }
-  }
+  void moduleInit() override;
 } s_ldap_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2159,6 +2061,106 @@ String HHVM_FUNCTION(ldap_escape,
 
   result.setSize(r - rdata);
   return result;
+}
+
+void LdapExtension::moduleInit() {
+  HHVM_RC_INT(LDAP_ESCAPE_FILTER, k_LDAP_ESCAPE_FILTER);
+  HHVM_RC_INT(LDAP_ESCAPE_DN, k_LDAP_ESCAPE_DN);
+
+  HHVM_FE(ldap_connect);
+  HHVM_FE(ldap_explode_dn);
+  HHVM_FE(ldap_dn2ufn);
+  HHVM_FE(ldap_err2str);
+  HHVM_FE(ldap_add);
+  HHVM_FE(ldap_mod_add);
+  HHVM_FE(ldap_mod_del);
+  HHVM_FE(ldap_mod_replace);
+  HHVM_FE(ldap_modify);
+  HHVM_FE(ldap_modify_batch);
+  HHVM_FE(ldap_bind);
+  HHVM_FE(ldap_set_rebind_proc);
+  HHVM_FE(ldap_sort);
+  HHVM_FE(ldap_start_tls);
+  HHVM_FE(ldap_unbind);
+  HHVM_FE(ldap_get_option);
+  HHVM_FE(ldap_set_option);
+  HHVM_FE(ldap_close);
+  HHVM_FE(ldap_list);
+  HHVM_FE(ldap_read);
+  HHVM_FE(ldap_search);
+  HHVM_FE(ldap_rename);
+  HHVM_FE(ldap_delete);
+  HHVM_FE(ldap_compare);
+  HHVM_FE(ldap_errno);
+  HHVM_FE(ldap_error);
+  HHVM_FE(ldap_get_dn);
+  HHVM_FE(ldap_count_entries);
+  HHVM_FE(ldap_get_entries);
+  HHVM_FE(ldap_first_entry);
+  HHVM_FE(ldap_next_entry);
+  HHVM_FE(ldap_get_attributes);
+  HHVM_FE(ldap_first_attribute);
+  HHVM_FE(ldap_next_attribute);
+  HHVM_FE(ldap_first_reference);
+  HHVM_FE(ldap_next_reference);
+  HHVM_FE(ldap_parse_reference);
+  HHVM_FE(ldap_parse_result);
+  HHVM_FE(ldap_free_result);
+  HHVM_FE(ldap_get_values_len);
+  HHVM_FE(ldap_get_values);
+  HHVM_FE(ldap_control_paged_result);
+  HHVM_FE(ldap_control_paged_result_response);
+  HHVM_FE(ldap_escape);
+
+  HHVM_RC_INT_SAME(LDAP_DEREF_ALWAYS);
+  HHVM_RC_INT_SAME(LDAP_DEREF_FINDING);
+  HHVM_RC_INT_SAME(LDAP_DEREF_NEVER);
+  HHVM_RC_INT_SAME(LDAP_DEREF_SEARCHING);
+
+  HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_ADD);
+  HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_REMOVE);
+  HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_REMOVE_ALL);
+  HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_REPLACE);
+  HHVM_RC_STR_SAME(LDAP_MODIFY_BATCH_ATTRIB);
+  HHVM_RC_STR_SAME(LDAP_MODIFY_BATCH_MODTYPE);
+  HHVM_RC_STR_SAME(LDAP_MODIFY_BATCH_VALUES);
+
+  HHVM_RC_INT_SAME(LDAP_OPT_DEREF);
+  HHVM_RC_INT_SAME(LDAP_OPT_SIZELIMIT);
+  HHVM_RC_INT_SAME(LDAP_OPT_TIMELIMIT);
+  HHVM_RC_INT_SAME(LDAP_OPT_PROTOCOL_VERSION);
+  HHVM_RC_INT_SAME(LDAP_OPT_ERROR_NUMBER);
+  HHVM_RC_INT_SAME(LDAP_OPT_REFERRALS);
+  HHVM_RC_INT_SAME(LDAP_OPT_ERROR_STRING);
+  HHVM_RC_INT_SAME(LDAP_OPT_SERVER_CONTROLS);
+  HHVM_RC_INT_SAME(LDAP_OPT_CLIENT_CONTROLS);
+
+#ifdef LDAP_OPT_NETWORK_TIMEOUT
+  HHVM_RC_INT_SAME(LDAP_OPT_NETWORK_TIMEOUT);
+#elif defined(LDAP_X_OPT_NETWORK_TIMEOUT)
+  HHVM_RC_INT(LDAP_OPT_NETWORK_TIMEOUT, LDAP_X_OPT_NETWORK_TIMEOUT);
+#endif
+#ifdef LDAP_OPT_TIMEOUT
+  HHVM_RC_INT_SAME(LDAP_OPT_TIMEOUT);
+#endif
+#ifdef LDAP_OPT_RESTART
+  HHVM_RC_INT_SAME(LDAP_OPT_RESTART);
+#endif
+#ifdef LDAP_OPT_HOST_NAME
+  HHVM_RC_INT_SAME(LDAP_OPT_HOST_NAME);
+#endif
+#ifdef LDAP_OPT_MATCHED_DN
+  HHVM_RC_INT_SAME(LDAP_OPT_MATCHED_DN);
+#endif
+#ifdef LDAP_OPT_DEBUG_LEVEL
+  HHVM_RC_INT_SAME(LDAP_OPT_DEBUG_LEVEL);
+#endif
+
+  loadSystemlib();
+  LDAP* link = nullptr;
+  if (ldap_create(&link) == LDAP_SUCCESS) {
+    ldap_unbind(link);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

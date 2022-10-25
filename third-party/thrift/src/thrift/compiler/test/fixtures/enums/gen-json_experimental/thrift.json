@@ -7,6 +7,7 @@
   "namespaces": {
     "go": "thrift.annotation.thrift",
     "java": "com.facebook.thrift.annotation_deprecated",
+    "js": "thrift.annotation.thrift",
     "py": "thrift.annotation.thrift",
     "py.asyncio": "facebook_thrift_asyncio.annotation.thrift"
   },  "structs" :
@@ -17,14 +18,16 @@
           "scope.Program" : {
         "type" : {
   "type" : "struct",
-  "name" : "Program"
+  "name" : "Program",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Definition" : {
         "type" : {
   "type" : "struct",
-  "name" : "Definition"
+  "name" : "Definition",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -32,7 +35,7 @@
         "docstring" : "Indicates a definition/feature may change in incompatible ways.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 31
+        "lineno" : 32
       },
       "Experimental" : {
         "name" : "Experimental",
@@ -40,14 +43,16 @@
           "scope.Program" : {
         "type" : {
   "type" : "struct",
-  "name" : "Program"
+  "name" : "Program",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Definition" : {
         "type" : {
   "type" : "struct",
-  "name" : "Definition"
+  "name" : "Definition",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -55,7 +60,7 @@
         "docstring" : "Indicates a definition/feature should only be used with permission, may only\nwork in specific contexts, and may change in incompatible ways without notice.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 39
+        "lineno" : 40
       },
       "Testing" : {
         "name" : "Testing",
@@ -63,14 +68,16 @@
           "scope.Program" : {
         "type" : {
   "type" : "struct",
-  "name" : "Program"
+  "name" : "Program",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Definition" : {
         "type" : {
   "type" : "struct",
-  "name" : "Definition"
+  "name" : "Definition",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -78,7 +85,7 @@
         "docstring" : "Indicates a definition/feature should only be used in an ephemeral testing\nenviornment.\n\nSuch enviornments only store serialized values temporarly and strictly\ncontrol which versions of Thrift definitions are used, so 'compatibility'\nis not a concern.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 51
+        "lineno" : 52
       },
       "Deprecated" : {
         "name" : "Deprecated",
@@ -93,14 +100,16 @@
           "scope.Program" : {
         "type" : {
   "type" : "struct",
-  "name" : "Program"
+  "name" : "Program",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Definition" : {
         "type" : {
   "type" : "struct",
-  "name" : "Definition"
+  "name" : "Definition",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -110,14 +119,14 @@
           "message" : {
             "name" : "message",
             "key" : 1,
-            "lineno" : 62,
+            "lineno" : 63,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 58
+        "lineno" : 59
       },
       "ReserveIds" : {
         "name" : "ReserveIds",
@@ -125,14 +134,16 @@
           "scope.Structured" : {
         "type" : {
   "type" : "struct",
-  "name" : "Structured"
+  "name" : "Structured",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.FbthriftInternalEnum" : {
         "type" : {
   "type" : "struct",
-  "name" : "FbthriftInternalEnum"
+  "name" : "FbthriftInternalEnum",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -141,7 +152,7 @@
           "ids" : {
             "name" : "ids",
             "key" : 1,
-            "lineno" : 82,
+            "lineno" : 83,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
@@ -151,7 +162,7 @@
           "id_ranges" : {
             "name" : "id_ranges",
             "key" : 2,
-            "lineno" : 87,
+            "lineno" : 88,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
@@ -162,7 +173,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 78
+        "lineno" : 79
       },
       "Legacy" : {
         "name" : "Legacy",
@@ -177,7 +188,8 @@
           "scope.Transitive" : {
         "type" : {
   "type" : "struct",
-  "name" : "Transitive"
+  "name" : "Transitive",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -187,14 +199,14 @@
           "message" : {
             "name" : "message",
             "key" : 1,
-            "lineno" : 100,
+            "lineno" : 101,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 97
+        "lineno" : 98
       },
       "RequiresBackwardCompatibility" : {
         "name" : "RequiresBackwardCompatibility",
@@ -202,7 +214,8 @@
           "scope.Structured" : {
         "type" : {
   "type" : "struct",
-  "name" : "Structured"
+  "name" : "Structured",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
@@ -220,14 +233,14 @@
             "name" : "field_name",
             "default_value" : 0,
             "key" : 1,
-            "lineno" : 111,
+            "lineno" : 112,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 108
+        "lineno" : 109
       },
       "NoExperimental" : {
         "name" : "NoExperimental",
@@ -235,14 +248,16 @@
           "scope.Program" : {
         "type" : {
   "type" : "struct",
-  "name" : "Program"
+  "name" : "Program",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Definition" : {
         "type" : {
   "type" : "struct",
-  "name" : "Definition"
+  "name" : "Definition",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -250,7 +265,7 @@
         "docstring" : "Best-effort disables experimental features.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 115
+        "lineno" : 116
       },
       "NoBeta" : {
         "name" : "NoBeta",
@@ -265,7 +280,8 @@
           "scope.Transitive" : {
         "type" : {
   "type" : "struct",
-  "name" : "Transitive"
+  "name" : "Transitive",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -273,7 +289,7 @@
         "docstring" : "Best-effort disables @Beta features.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 120
+        "lineno" : 121
       },
       "NoLegacy" : {
         "name" : "NoLegacy",
@@ -281,14 +297,16 @@
           "scope.Program" : {
         "type" : {
   "type" : "struct",
-  "name" : "Program"
+  "name" : "Program",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Definition" : {
         "type" : {
   "type" : "struct",
-  "name" : "Definition"
+  "name" : "Definition",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
@@ -303,7 +321,7 @@
         "docstring" : "Best-effort disables @Legacy features.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 129
+        "lineno" : 130
       },
       "NoDeprecated" : {
         "name" : "NoDeprecated",
@@ -325,7 +343,8 @@
           "scope.Transitive" : {
         "type" : {
   "type" : "struct",
-  "name" : "Transitive"
+  "name" : "Transitive",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -333,7 +352,7 @@
         "docstring" : "Best-effort disables @Deprecated features.\n\nShould only be enabled in `test` versions, as deprecated implies removing\nthe feature will break current usage (otherwise it would be @Legacy or\ndeleted)\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 141
+        "lineno" : 142
       },
       "TerseWrite" : {
         "name" : "TerseWrite",
@@ -341,28 +360,32 @@
           "scope.Program" : {
         "type" : {
   "type" : "struct",
-  "name" : "Program"
+  "name" : "Program",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Struct" : {
         "type" : {
   "type" : "struct",
-  "name" : "Struct"
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Exception" : {
         "type" : {
   "type" : "struct",
-  "name" : "Exception"
+  "name" : "Exception",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Field" : {
         "type" : {
   "type" : "struct",
-  "name" : "Field"
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
@@ -377,7 +400,7 @@
         "docstring" : "An annotation that changes the field qualifier from 'none' to 'terse'.\nA terse field is eligible to skip serialization, when it equals to the\nintrinsic default value. It also clears to the intrinsic default value\nbefore deserialization to distinguish between if a terse field was skipped\nor missing during serialization. This is different from an unqualified\nfield, as an unqualified field is always serialized regardless of its value,\nand it is not cleared before deserialization.\n\nThe annotation can be only used to annotate an unqualified field, and when\nit is annotating a struct or exception, it changes all unqualified fields to\nterse fields. Note, the annotation can not be used for union.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 164
+        "lineno" : 165
       },
       "Box" : {
         "name" : "Box",
@@ -385,7 +408,8 @@
           "scope.Field" : {
         "type" : {
   "type" : "struct",
-  "name" : "Field"
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
@@ -399,7 +423,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 172
+        "lineno" : 173
       },
       "Mixin" : {
         "name" : "Mixin",
@@ -407,7 +431,8 @@
           "scope.Field" : {
         "type" : {
   "type" : "struct",
-  "name" : "Field"
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
@@ -421,7 +446,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 177
+        "lineno" : 178
       },
       "SerializeInFieldIdOrder" : {
         "name" : "SerializeInFieldIdOrder",
@@ -429,7 +454,8 @@
           "scope.Struct" : {
         "type" : {
   "type" : "struct",
-  "name" : "Struct"
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
@@ -444,7 +470,7 @@
         "docstring" : "Option to serialize thrift struct in ascending field id order.\n\nThis can potentially make serialized data size smaller in compact protocol,\nsince compact protocol can write deltas between subsequent field ids.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 187
+        "lineno" : 188
       },
       "GenDefaultEnumValue" : {
         "name" : "GenDefaultEnumValue",
@@ -452,14 +478,16 @@
           "scope.FbthriftInternalEnum" : {
         "type" : {
   "type" : "struct",
-  "name" : "FbthriftInternalEnum"
+  "name" : "FbthriftInternalEnum",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Program" : {
         "type" : {
   "type" : "struct",
-  "name" : "Program"
+  "name" : "Program",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
@@ -478,14 +506,14 @@
             "default_value" : "Unspecified",
             "docstring" : "The name to use for the generated enum value.\n\nThis intentionally does **not** use the most common 'zero' enum value name,\n'Default', by default; as, defining a `Default = 0` enum value explicitly\nis a useful means of self-documenting that setting an explicit value is\nnever required. In which case, it is part of the API, and should not be\nremoved in favor of an implicitly generated value.\n\nOn the other hand, 'Unspecified' clearly indicates that the requirements\nare not intrinsic to the enum. In which case, the relevant documentation\nshould be consulted (e.g. the doc strings on the function or field).\n",
             "key" : 1,
-            "lineno" : 219,
+            "lineno" : 220,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 202
+        "lineno" : 203
       },
       "v1" : {
         "name" : "v1",
@@ -493,7 +521,8 @@
           "scope.Transitive" : {
         "type" : {
   "type" : "struct",
-  "name" : "Transitive"
+  "name" : "Transitive",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -501,7 +530,7 @@
         "docstring" : "Enables all released v1 features.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 228
+        "lineno" : 229
       },
       "v1beta" : {
         "name" : "v1beta",
@@ -544,7 +573,8 @@
           "scope.Transitive" : {
         "type" : {
   "type" : "struct",
-  "name" : "Transitive"
+  "name" : "Transitive",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -552,7 +582,7 @@
         "docstring" : "Enables all beta v1 features.\n\nBeta features are guaranteed to *not* break unrelated Thrift features\nso they should be relatively safe to test alongside other beta or\nreleased Thrift features.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 238
+        "lineno" : 239
       },
       "v1alpha" : {
         "name" : "v1alpha",
@@ -581,7 +611,8 @@
           "scope.Transitive" : {
         "type" : {
   "type" : "struct",
-  "name" : "Transitive"
+  "name" : "Transitive",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -589,7 +620,7 @@
         "docstring" : "Enables all experimental v1 features.\n\nUse with *caution* and only with explicit permission. This may enable\nfeatures may change significantly without notice or not work correctly\nin all contexts.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 253
+        "lineno" : 254
       },
       "v1test" : {
         "name" : "v1test",
@@ -618,7 +649,8 @@
           "scope.Transitive" : {
         "type" : {
   "type" : "struct",
-  "name" : "Transitive"
+  "name" : "Transitive",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -626,7 +658,7 @@
         "docstring" : "Enables experimental features, even those that are known to break common\nuse cases.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 263
+        "lineno" : 264
       },
       "ExceptionMessage" : {
         "name" : "ExceptionMessage",
@@ -634,7 +666,8 @@
           "scope.Exception" : {
         "type" : {
   "type" : "struct",
-  "name" : "Exception"
+  "name" : "Exception",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -644,14 +677,14 @@
           "field" : {
             "name" : "field",
             "key" : 1,
-            "lineno" : 276,
+            "lineno" : 277,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 274
+        "lineno" : 275
       },
       "BitmaskEnum" : {
         "name" : "BitmaskEnum",
@@ -659,7 +692,8 @@
           "scope.FbthriftInternalEnum" : {
         "type" : {
   "type" : "struct",
-  "name" : "Enum"
+  "name" : "Enum",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -667,7 +701,7 @@
         "docstring" : "Specifies if the enum is a bitmask.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 283
+        "lineno" : 284
       },
       "GenerateRuntimeSchema" : {
         "name" : "GenerateRuntimeSchema",
@@ -675,28 +709,32 @@
           "scope.Structured" : {
         "type" : {
   "type" : "struct",
-  "name" : "Structured"
+  "name" : "Structured",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Service" : {
         "type" : {
   "type" : "struct",
-  "name" : "Service"
+  "name" : "Service",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Const" : {
         "type" : {
   "type" : "struct",
-  "name" : "Const"
+  "name" : "Const",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.FbthriftInternalEnum" : {
         "type" : {
   "type" : "struct",
-  "name" : "Enum"
+  "name" : "Enum",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
@@ -713,14 +751,14 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 296,
+            "lineno" : 297,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 290
+        "lineno" : 291
       },
       "InternBox" : {
         "name" : "InternBox",
@@ -728,21 +766,15 @@
           "scope.Field" : {
         "type" : {
   "type" : "struct",
-  "name" : "Field"
-},
-        "value" : {}
-      },
-          "thrift.Testing" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Testing"
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 303
+        "lineno" : 305
       }
       },
   "source_path" : "thrift/annotation/thrift",

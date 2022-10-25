@@ -25,6 +25,26 @@ external push_local_changes_ffi : t -> unit
 external pop_local_changes_ffi : t -> unit
   = "hh_rust_provider_backend_pop_local_changes"
 
+external get_old_funs_batch_ffi :
+  t -> string list -> Shallow_decl_defs.fun_decl option SMap.t
+  = "hh_rust_provider_backend_get_old_funs_batch"
+
+external get_old_shallow_classes_batch_ffi :
+  t -> string list -> Shallow_decl_defs.class_decl option SMap.t
+  = "hh_rust_provider_backend_get_old_shallow_classes_batch"
+
+external get_old_typedefs_batch_ffi :
+  t -> string list -> Shallow_decl_defs.typedef_decl option SMap.t
+  = "hh_rust_provider_backend_get_old_typedefs_batch"
+
+external get_old_gconsts_batch_ffi :
+  t -> string list -> Shallow_decl_defs.const_decl option SMap.t
+  = "hh_rust_provider_backend_get_old_gconsts_batch"
+
+external get_old_modules_batch_ffi :
+  t -> string list -> Shallow_decl_defs.module_decl option SMap.t
+  = "hh_rust_provider_backend_get_old_modules_batch"
+
 module Decl = struct
   module type Store = sig
     type key
@@ -32,6 +52,12 @@ module Decl = struct
     type value
 
     val get : t -> key -> value option
+
+    val remove_batch : t -> key list -> unit
+
+    val remove_old_batch : t -> key list -> unit
+
+    val oldify_batch : t -> key list -> unit
 
     val clear_cache : unit -> unit
   end
@@ -41,7 +67,11 @@ module Decl = struct
       (Value : SharedMem.Value) (Ffi : sig
         val get : t -> Key.t -> Value.t option
 
-        (* val remove_batch : t -> Key.t list -> unit *)
+        val remove_batch : t -> Key.t list -> unit
+
+        val remove_old_batch : t -> Key.t list -> unit
+
+        val oldify_batch : t -> Key.t list -> unit
       end) : Store with type key = Key.t and type value = Value.t = struct
     type key = Key.t
 
@@ -53,6 +83,8 @@ module Decl = struct
           let capacity = 1000
         end)
 
+    let clear_cache = Cache.clear
+
     let get t key =
       match Cache.get key with
       | Some _ as value_opt -> value_opt
@@ -63,11 +95,18 @@ module Decl = struct
         | None -> ());
         value_opt
 
-    (* let remove_batch backend keys =
-       Cache.remove_batch keys;
-       Ffi.remove_batch backend keys *)
+    let remove_local_batch (keys : Key.t list) = List.iter ~f:Cache.remove keys
 
-    let clear_cache = Cache.clear
+    let remove_batch backend (keys : Key.t list) =
+      remove_local_batch keys;
+      Ffi.remove_batch backend keys
+
+    let oldify_batch backend (keys : Key.t list) =
+      remove_local_batch keys;
+      Ffi.oldify_batch backend keys
+
+    let remove_old_batch backend (keys : Key.t list) =
+      Ffi.remove_old_batch backend keys
   end
 
   module Funs =
@@ -81,6 +120,15 @@ module Decl = struct
       (struct
         external get : t -> string -> Shallow_decl_defs.fun_decl option
           = "hh_rust_provider_backend_get_fun"
+
+        external remove_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_funs_batch"
+
+        external remove_old_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_old_funs_batch"
+
+        external oldify_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_oldify_funs_batch"
       end)
 
   module ShallowClasses =
@@ -94,6 +142,15 @@ module Decl = struct
       (struct
         external get : t -> string -> Shallow_decl_defs.class_decl option
           = "hh_rust_provider_backend_get_shallow_class"
+
+        external remove_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_shallow_classes_batch"
+
+        external remove_old_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_old_shallow_classes_batch"
+
+        external oldify_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_oldify_shallow_classes_batch"
       end)
 
   module Typedefs =
@@ -107,6 +164,15 @@ module Decl = struct
       (struct
         external get : t -> string -> Shallow_decl_defs.typedef_decl option
           = "hh_rust_provider_backend_get_typedef"
+
+        external remove_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_typedefs_batch"
+
+        external remove_old_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_old_typedefs_batch"
+
+        external oldify_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_oldify_typedefs_batch"
       end)
 
   module GConsts =
@@ -120,6 +186,15 @@ module Decl = struct
       (struct
         external get : t -> string -> Shallow_decl_defs.const_decl option
           = "hh_rust_provider_backend_get_gconst"
+
+        external remove_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_gconsts_batch"
+
+        external remove_old_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_old_gconsts_batch"
+
+        external oldify_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_oldify_gconsts_batch"
       end)
 
   module Modules =
@@ -133,6 +208,15 @@ module Decl = struct
       (struct
         external get : t -> string -> Shallow_decl_defs.module_decl option
           = "hh_rust_provider_backend_get_module"
+
+        external remove_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_modules_batch"
+
+        external remove_old_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_old_modules_batch"
+
+        external oldify_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_oldify_modules_batch"
       end)
 
   module ClassEltKey = struct
@@ -159,6 +243,15 @@ module Decl = struct
       (struct
         external get : t -> string * string -> Typing_defs.decl_ty option
           = "hh_rust_provider_backend_get_prop"
+
+        external remove_batch : t -> (string * string) list -> unit
+          = "hh_rust_provider_backend_remove_props_batch"
+
+        external remove_old_batch : t -> (string * string) list -> unit
+          = "hh_rust_provider_backend_remove_old_props_batch"
+
+        external oldify_batch : t -> (string * string) list -> unit
+          = "hh_rust_provider_backend_oldify_props_batch"
       end)
 
   module StaticProps =
@@ -172,6 +265,15 @@ module Decl = struct
       (struct
         external get : t -> string * string -> Typing_defs.decl_ty option
           = "hh_rust_provider_backend_get_static_prop"
+
+        external remove_batch : t -> (string * string) list -> unit
+          = "hh_rust_provider_backend_remove_static_props_batch"
+
+        external remove_old_batch : t -> (string * string) list -> unit
+          = "hh_rust_provider_backend_remove_old_static_props_batch"
+
+        external oldify_batch : t -> (string * string) list -> unit
+          = "hh_rust_provider_backend_oldify_static_props_batch"
       end)
 
   let build_fun_elt fe_type =
@@ -199,6 +301,15 @@ module Decl = struct
           = "hh_rust_provider_backend_get_method"
 
         let get t name = get_ffi t name |> Option.map ~f:build_fun_elt
+
+        external remove_batch : t -> (string * string) list -> unit
+          = "hh_rust_provider_backend_remove_methods_batch"
+
+        external remove_old_batch : t -> (string * string) list -> unit
+          = "hh_rust_provider_backend_remove_old_methods_batch"
+
+        external oldify_batch : t -> (string * string) list -> unit
+          = "hh_rust_provider_backend_oldify_methods_batch"
       end)
 
   module StaticMethods =
@@ -214,6 +325,15 @@ module Decl = struct
           = "hh_rust_provider_backend_get_static_method"
 
         let get t name = get_ffi t name |> Option.map ~f:build_fun_elt
+
+        external remove_batch : t -> (string * string) list -> unit
+          = "hh_rust_provider_backend_remove_static_methods_batch"
+
+        external remove_old_batch : t -> (string * string) list -> unit
+          = "hh_rust_provider_backend_remove_old_static_methods_batch"
+
+        external oldify_batch : t -> (string * string) list -> unit
+          = "hh_rust_provider_backend_oldify_static_methods_batch"
       end)
 
   module Constructors =
@@ -229,6 +349,15 @@ module Decl = struct
           = "hh_rust_provider_backend_get_constructor"
 
         let get t name = get_ffi t name |> Option.map ~f:build_fun_elt
+
+        external remove_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_constructors_batch"
+
+        external remove_old_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_old_constructors_batch"
+
+        external oldify_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_oldify_constructors_batch"
       end)
 
   module FoldedClasses =
@@ -242,6 +371,15 @@ module Decl = struct
       (struct
         external get : t -> string -> Decl_defs.decl_class_type option
           = "hh_rust_provider_backend_get_folded_class"
+
+        external remove_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_folded_classes_batch"
+
+        external remove_old_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_old_folded_classes_batch"
+
+        external oldify_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_oldify_folded_classes_batch"
       end)
 
   let decl_store t =
@@ -320,6 +458,104 @@ module Decl = struct
   let get_folded_class t =
     set_decl_store t;
     FoldedClasses.get t
+
+  let oldify_defs
+      t ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }, elems) =
+    set_decl_store t;
+    Funs.oldify_batch t (SSet.elements n_funs);
+    ShallowClasses.oldify_batch t (SSet.elements n_classes);
+    FoldedClasses.oldify_batch t (SSet.elements n_classes);
+    Typedefs.oldify_batch t (SSet.elements n_types);
+    GConsts.oldify_batch t (SSet.elements n_consts);
+    Modules.oldify_batch t (SSet.elements n_modules);
+    SMap.iter
+      (fun cls es ->
+        Constructors.oldify_batch t [cls];
+        Props.oldify_batch
+          t
+          (Decl_heap.Props.KeySet.elements es.Decl_class_elements.props);
+        StaticProps.oldify_batch
+          t
+          (Decl_heap.StaticProps.KeySet.elements es.Decl_class_elements.sprops);
+        Methods.oldify_batch
+          t
+          (Decl_heap.Methods.KeySet.elements es.Decl_class_elements.meths);
+        StaticMethods.oldify_batch
+          t
+          (Decl_heap.StaticMethods.KeySet.elements
+             es.Decl_class_elements.smeths);
+        ())
+      elems;
+    ()
+
+  let remove_defs
+      t ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }, elems) =
+    set_decl_store t;
+    Funs.remove_batch t (SSet.elements n_funs);
+    ShallowClasses.remove_batch t (SSet.elements n_classes);
+    FoldedClasses.remove_batch t (SSet.elements n_classes);
+    Typedefs.remove_batch t (SSet.elements n_types);
+    GConsts.remove_batch t (SSet.elements n_consts);
+    Modules.remove_batch t (SSet.elements n_modules);
+    SMap.iter
+      (fun cls es ->
+        Constructors.remove_batch t [cls];
+        Props.remove_batch
+          t
+          (Decl_heap.Props.KeySet.elements es.Decl_class_elements.props);
+        StaticProps.remove_batch
+          t
+          (Decl_heap.StaticProps.KeySet.elements es.Decl_class_elements.sprops);
+        Methods.remove_batch
+          t
+          (Decl_heap.Methods.KeySet.elements es.Decl_class_elements.meths);
+        StaticMethods.remove_batch
+          t
+          (Decl_heap.StaticMethods.KeySet.elements
+             es.Decl_class_elements.smeths);
+        ())
+      elems;
+    ()
+
+  let remove_old_defs
+      t ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }, elems) =
+    set_decl_store t;
+    Funs.remove_old_batch t (SSet.elements n_funs);
+    ShallowClasses.remove_old_batch t (SSet.elements n_classes);
+    FoldedClasses.remove_old_batch t (SSet.elements n_classes);
+    Typedefs.remove_old_batch t (SSet.elements n_types);
+    GConsts.remove_old_batch t (SSet.elements n_consts);
+    Modules.remove_old_batch t (SSet.elements n_modules);
+    SMap.iter
+      (fun cls es ->
+        Constructors.remove_old_batch t [cls];
+        Props.remove_old_batch
+          t
+          (Decl_heap.Props.KeySet.elements es.Decl_class_elements.props);
+        StaticProps.remove_old_batch
+          t
+          (Decl_heap.StaticProps.KeySet.elements es.Decl_class_elements.sprops);
+        Methods.remove_old_batch
+          t
+          (Decl_heap.Methods.KeySet.elements es.Decl_class_elements.meths);
+        StaticMethods.remove_old_batch
+          t
+          (Decl_heap.StaticMethods.KeySet.elements
+             es.Decl_class_elements.smeths);
+        ())
+      elems;
+    ()
+
+  let get_old_shallow_classes_batch t keys =
+    set_decl_store t;
+    get_old_shallow_classes_batch_ffi t keys
+
+  let get_old_defs t { FileInfo.n_funs; n_types; n_consts; n_modules; _ } =
+    set_decl_store t;
+    ( get_old_funs_batch_ffi t (SSet.elements n_funs),
+      get_old_typedefs_batch_ffi t (SSet.elements n_types),
+      get_old_gconsts_batch_ffi t (SSet.elements n_consts),
+      get_old_modules_batch_ffi t (SSet.elements n_modules) )
 
   external declare_folded_class : t -> string -> unit
     = "hh_rust_provider_backend_declare_folded_class"

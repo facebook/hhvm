@@ -292,7 +292,7 @@ class structured_annotation_recursive implements \IThriftSyncStruct {
     ?'forward' => ?\fixtures\basic-structured-annotations\structured_annotation_forward,
   );
 
-  const int STRUCTURAL_ID = 7354537001799650471;
+  const int STRUCTURAL_ID = 2762967868033251423;
   /**
    * Original thrift field:-
    * 1: string name
@@ -372,6 +372,7 @@ class structured_annotation_recursive implements \IThriftSyncStruct {
                 )
               ),
               "name" => "recurse",
+              "is_optional" => true,
             )
           ),
           \tmeta_ThriftField::fromShape(

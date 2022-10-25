@@ -1,7 +1,8 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-mod assemble;
+
+mod asm;
 mod cmp_unit;
 mod compile;
 mod crc;
@@ -102,7 +103,7 @@ struct FileOpts {
 #[derive(Parser, Debug)]
 enum Command {
     /// Assemble HHAS file(s) into Unit. Prints those HCUs' HHAS representation.
-    Assemble(assemble::Opts),
+    Assemble(asm::Opts),
 
     /// Compute bincode-serialized decls for a set of Hack source files.
     BinaryDecls(decls::Opts),
@@ -263,7 +264,7 @@ fn main() -> Result<()> {
         .unwrap();
 
     match opts.command.take() {
-        Some(Command::Assemble(opts)) => assemble::run(opts),
+        Some(Command::Assemble(opts)) => asm::run(opts),
         Some(Command::BinaryDecls(decls_opts)) => decls::binary_decls(opts, decls_opts),
         Some(Command::JsonDecls(decls_opts)) => decls::json_decls(opts, decls_opts),
         Some(Command::CompileInfer(opts)) => infer::run(opts),

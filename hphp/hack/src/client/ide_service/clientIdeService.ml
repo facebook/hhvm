@@ -308,6 +308,7 @@ let initialize_from_saved_state
        option)
     ~(use_ranked_autocomplete : bool)
     ~(config : (string * string) list)
+    ~(ignore_hh_version : bool)
     ~(open_files : Path.t list) :
     (unit, ClientIdeMessage.stopped_reason) Lwt_result.t =
   let open ClientIdeMessage in
@@ -333,6 +334,7 @@ let initialize_from_saved_state
               naming_table_load_info;
               use_ranked_autocomplete;
               config;
+              ignore_hh_version;
               open_files;
             };
       }

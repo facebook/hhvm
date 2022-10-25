@@ -146,6 +146,24 @@ class ConformanceVerificationServer
     }
   }
 
+  apache::thrift::ServerStream<Response> streamDeclaredException(
+      std::unique_ptr<Request> req) override {
+    serverResult_.streamDeclaredException_ref().emplace().request() = *req;
+    throw *testCase_.serverInstruction()
+        ->streamDeclaredException_ref()
+        ->userException();
+    co_return;
+  }
+
+  apache::thrift::ServerStream<Response> streamUndeclaredException(
+      std::unique_ptr<Request> req) override {
+    serverResult_.streamUndeclaredException_ref().emplace().request() = *req;
+    throw std::runtime_error(*testCase_.serverInstruction()
+                                  ->streamUndeclaredException_ref()
+                                  ->exceptionMessage());
+    co_return;
+  }
+
   // =================== Sink ===================
   apache::thrift::SinkConsumer<Request, Response> sinkBasic(
       std::unique_ptr<Request> req) override {
@@ -163,6 +181,78 @@ class ConformanceVerificationServer
         },
         static_cast<uint64_t>(
             *testCase_.serverInstruction()->sinkBasic_ref()->bufferSize())};
+  }
+
+  // =================== Interactions ===================
+  class BasicInteraction : public BasicInteractionIf {
+   public:
+    BasicInteraction(
+        const RpcTestCase& testCase,
+        ServerTestResult& result,
+        int32_t initialSum = 0)
+        : testCase_(testCase), serverResult_(result), sum_(initialSum) {}
+    void init() override {}
+    int32_t add(int32_t toAdd) override {
+      sum_ += toAdd;
+      return sum_;
+    }
+    folly::coro::Task<void> co_onTermination() override {
+      switch (testCase_.serverInstruction()->getType()) {
+        case ServerInstruction::interactionTermination:
+          serverResult_.interactionTermination_ref()
+              .ensure()
+              .terminationReceived() = true;
+          break;
+        default:; // do nothing
+      }
+      co_return;
+    }
+
+   private:
+    const RpcTestCase& testCase_;
+    ServerTestResult& serverResult_;
+    int32_t sum_;
+  };
+
+  std::unique_ptr<BasicInteractionIf> createBasicInteraction() override {
+    switch (testCase_.serverInstruction()->getType()) {
+      case ServerInstruction::interactionConstructor:
+        serverResult_.interactionConstructor_ref()
+            .emplace()
+            .constructorCalled() = true;
+        break;
+      case ServerInstruction::interactionPersistsState:
+        serverResult_.interactionPersistsState_ref().emplace();
+        break;
+      case ServerInstruction::interactionTermination:
+        serverResult_.interactionTermination_ref().emplace();
+        break;
+      default:
+        throw std::runtime_error(
+            "BasicInteraction constructor called unexpectedly");
+    }
+    return std::make_unique<BasicInteraction>(testCase_, serverResult_);
+  }
+
+  apache::thrift::TileAndResponse<BasicInteractionIf, void>
+  basicInteractionFactoryFunction(int32_t initialSum) override {
+    switch (testCase_.serverInstruction()->getType()) {
+      case ServerInstruction::interactionFactoryFunction:
+        serverResult_.interactionFactoryFunction_ref().emplace().initialSum() =
+            initialSum;
+        break;
+      case ServerInstruction::interactionPersistsState:
+        serverResult_.interactionPersistsState_ref().emplace();
+        break;
+      case ServerInstruction::interactionTermination:
+        serverResult_.interactionTermination_ref().emplace();
+        break;
+      default:
+        throw std::runtime_error(
+            "BasicInteraction factory function called unexpectedly");
+    }
+    return {std::make_unique<BasicInteraction>(
+        testCase_, serverResult_, initialSum)};
   }
 
   folly::SemiFuture<folly::Unit> getTestReceived() {

@@ -1,5 +1,6 @@
 ---
 state: draft
+sidebar_position: 3
 ---
 
 # Channels

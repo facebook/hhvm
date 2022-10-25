@@ -609,6 +609,15 @@ template <typename SM>
 void AsyncFizzClientT<SM>::ActionMoveVisitor::operator()(
     SecretAvailable& secret) {
   client_.secretAvailable(secret.secret);
+#if 0
+  FOLLY_SDT(
+      fizz,
+      fizz_secret_available,
+      secret.secret.secret.size(),
+      secret.secret.secret.data(),
+      secret.secret.type,
+      client_.getClientRandom()->data());
+#endif
 }
 
 template <typename SM>

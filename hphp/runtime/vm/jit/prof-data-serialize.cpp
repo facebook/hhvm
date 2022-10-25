@@ -1611,7 +1611,7 @@ void write_func(ProfDataSerializer& ser, const Func* func) {
     auto const* cls = func->implCls();
     auto const nslot = [&] () -> uint32_t {
       const uint32_t slot = func->methodSlot();
-      if (cls->getMethod(slot) != func) {
+      if (cls->getMethodSafe(slot) != func) {
         if (func->name() == s_86pinit.get()) return k86pinitSlot;
         if (func->name() == s_86sinit.get()) return k86sinitSlot;
         if (func->name() == s_86linit.get()) return k86linitSlot;

@@ -61,6 +61,19 @@ class PubSubStreamingServiceInterface(
     ) -> _typing.Union[_typing.Awaitable[_typing.AsyncGenerator[int, None]],_typing.AsyncGenerator[int, None]]: ...
 
     @staticmethod
+    def createPublisher_servicethrows2(callback=None) -> _typing.Tuple[
+        _typing.AsyncGenerator[int, None],
+        _module_types.ServerPublisher_cint32_t
+    ]: ...
+
+
+    @abstractmethod
+    def servicethrows2(
+        self,
+        foo: int
+    ) -> _typing.Union[_typing.Awaitable[_typing.AsyncGenerator[int, None]],_typing.AsyncGenerator[int, None]]: ...
+
+    @staticmethod
     def createPublisher_boththrows(callback=None) -> _typing.Tuple[
         _typing.AsyncGenerator[int, None],
         _module_types.ServerPublisher_cint32_t

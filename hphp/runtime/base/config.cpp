@@ -32,6 +32,60 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+template<typename T>
+void hdfConfigGetSet(const Hdf& hdf, T& values) {
+  values.clear();
+  for (Hdf child = hdf.firstChild(); child.exists(); child = child.next()) {
+    values.insert(child.configGetString(""));
+  }
+}
+
+template<typename T>
+void hdfConfigGetMap(const Hdf& hdf, T& values) {
+  values.clear();
+  for (Hdf child = hdf.firstChild(); child.exists(); child = child.next()) {
+    values[child.getName()] = child.configGetString("");
+  }
+}
+
+template<typename T>
+void hdfConfigGet(const Hdf& hdf, T& values) {
+  hdf.configGet(values);
+}
+
+void hdfConfigGet(const Hdf& hdf, boost::container::flat_set<std::string>& values) {
+  hdfConfigGetSet(hdf, values);
+}
+
+void hdfConfigGet(const Hdf& hdf, std::set<std::string, stdltistr>& values) {
+  hdfConfigGetSet(hdf, values);
+}
+
+void hdfConfigGet(const Hdf& hdf, hphp_fast_string_set& values) {
+  hdfConfigGetSet(hdf, values);
+}
+
+void hdfConfigGet(const Hdf& hdf, std::map<std::string, std::string,
+                    stdltistr>& values) {
+  hdfConfigGetMap(hdf, values);
+}
+
+void hdfConfigGet(const Hdf& hdf, hphp_string_imap<std::string>& values) {
+  hdfConfigGetMap(hdf, values);
+}
+
+void hdfConfigGet(const Hdf& hdf, hphp_fast_string_map<std::string>& values) {
+  hdfConfigGetMap(hdf, values);
+}
+
+void hdfConfigGet(const Hdf& hdf, hphp_fast_string_imap<std::string>& values) {
+  hdfConfigGetMap(hdf, values);
+}
+
+}
+
 std::string
 Config::IniName(const Hdf& config, bool /*prepend_hhvm*/ /* = true */) {
   return Config::IniName(config.getFullPath());
@@ -297,7 +351,7 @@ T Config::Get##METHOD(const IniSetting::Map& ini, const Hdf& config, \
     /** have an hdf value, that it maintains its edge as beating out **/ \
     /** ini                                                          **/ \
     if (hdf.exists() && !hdf.isEmpty()) { \
-      hdf.configGet(hdf_ret); \
+      hdfConfigGet(hdf, hdf_ret); \
       if (hdf_ret != ini_ret) { \
         ini_ret = hdf_ret; \
         IniSetting::SetSystem(ini_name, ini_get(ini_ret)); \
@@ -306,7 +360,7 @@ T Config::Get##METHOD(const IniSetting::Map& ini, const Hdf& config, \
     return ini_ret; \
   } \
   if (hdf.exists() && !hdf.isEmpty()) { \
-    hdf.configGet(hdf_ret); \
+    hdfConfigGet(hdf, hdf_ret); \
     return hdf_ret; \
   } \
   return defValue; \

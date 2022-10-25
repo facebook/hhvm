@@ -27,6 +27,9 @@ public class PubSubStreamingServiceRpcServerHandler
   private final java.util.List<com.facebook.thrift.payload.Reader> _servicethrowsReaders;
   private final com.facebook.thrift.server.generated.SingleRequestStreamResponseDelegate<Integer> _delegate_servicethrows;
   private final com.facebook.thrift.server.generated.StreamResponseHandler<Integer> _handler_servicethrows;
+  private final java.util.List<com.facebook.thrift.payload.Reader> _servicethrows2Readers;
+  private final com.facebook.thrift.server.generated.SingleRequestStreamResponseDelegate<Integer> _delegate_servicethrows2;
+  private final com.facebook.thrift.server.generated.StreamResponseHandler<Integer> _handler_servicethrows2;
   private final java.util.List<com.facebook.thrift.payload.Reader> _boththrowsReaders;
   private final com.facebook.thrift.server.generated.SingleRequestStreamResponseDelegate<Integer> _delegate_boththrows;
   private final com.facebook.thrift.server.generated.StreamResponseHandler<Integer> _handler_boththrows;
@@ -112,6 +115,24 @@ public class PubSubStreamingServiceRpcServerHandler
       _servicethrowsReaders,
       "servicethrows",
       test.fixtures.stream.FooEx.class
+    );
+
+    _methodMap.put("servicethrows2", this);
+    _servicethrows2Readers = _create_servicethrows2_request_readers();
+    _delegate_servicethrows2 = (java.util.List<Object> _list) -> {
+        java.util.Iterator _iterator = _list.iterator();
+        int foo = (int) _iterator.next();
+
+        return _delegate.servicethrows2(foo);
+    };
+
+    _handler_servicethrows2 =
+    new com.facebook.thrift.server.generated.StreamResponseHandler<>(
+      _delegate_servicethrows2,
+      _ResponseWriterFactory_servicethrows2,
+      _servicethrows2Readers,
+      "servicethrows2",
+      test.fixtures.stream.FooEx.class, test.fixtures.stream.FooEx2.class
     );
 
     _methodMap.put("boththrows", this);
@@ -234,6 +255,7 @@ oprot.writeI32(_iter0);
 
         _chain.postWrite(_o);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -265,6 +287,7 @@ oprot.writeI32(_iter0);
 
         _chain.postWrite(_o);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -296,6 +319,39 @@ oprot.writeI32(_iter0);
 
         _chain.postWrite(_o);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
+        throw reactor.core.Exceptions.propagate(_e);
+      }
+    };
+  };
+
+
+  private final static java.util.List<com.facebook.thrift.payload.Reader> _create_servicethrows2_request_readers() {
+    java.util.List<com.facebook.thrift.payload.Reader> _readerList = new java.util.ArrayList<>();
+
+    
+    _readerList.add(Readers.i32Reader());
+
+    return _readerList;
+  }
+
+  private final static com.facebook.thrift.server.generated.ResponseWriterFactory _ResponseWriterFactory_servicethrows2 = (java.lang.Object _o, com.facebook.swift.service.ContextChain _chain, com.facebook.thrift.payload.ServerRequestPayload _requestPayload) -> {
+    return oprot -> {
+      try {
+        oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
+
+        
+        int _iter0 = (int)_o;
+        oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.I32_FIELD);
+oprot.writeI32(_iter0);
+        oprot.writeFieldEnd();
+
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+
+        _chain.postWrite(_o);
+      } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -327,6 +383,7 @@ oprot.writeI32(_iter0);
 
         _chain.postWrite(_o);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -358,6 +415,7 @@ oprot.writeI32(_iter0);
 
         _chain.postWrite(_o);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -379,6 +437,7 @@ oprot.writeI32(_iter0);
 
         _chain.postWrite(_o);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -410,6 +469,7 @@ oprot.writeI32(_iter0);
 
         _chain.postWrite(_o);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -431,6 +491,7 @@ oprot.writeI32(_iter0);
 
         _chain.postWrite(_o);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -462,6 +523,7 @@ oprot.writeI32(_iter0);
 
         _chain.postWrite(_o);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -483,6 +545,7 @@ oprot.writeI32(_iter0);
 
         _chain.postWrite(_o);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -516,6 +579,7 @@ oprot.writeI32(_iter0);
 
         _chain.postWrite(_o);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -549,6 +613,9 @@ oprot.writeI32(_iter0);
           break;
         case "servicethrows":
           _result = _handler_servicethrows.handleStream(_payload, _chain);
+          break;
+        case "servicethrows2":
+          _result = _handler_servicethrows2.handleStream(_payload, _chain);
           break;
         case "boththrows":
           _result = _handler_boththrows.handleStream(_payload, _chain);

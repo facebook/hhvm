@@ -770,7 +770,7 @@ void HttpServer::CheckMemAndWait(bool final) {
 
     auto const rssMb = Process::GetMemUsageMb();
     MemInfo memInfo;
-    if (!Process::GetMemoryInfo(memInfo)) {
+    if (!Process::GetMemoryInfo(memInfo, RO::EvalMemInfoCheckCgroup2)) {
       Logger::Error("Failed to obtain memory information");
       HttpServer::StopOldServer();
       return;
@@ -797,7 +797,7 @@ void HttpServer::MarkShutdownStat(ShutdownEvent event) {
   if (!RuntimeOption::EvalLogServerRestartStats) return;
   std::lock_guard<folly::MicroSpinLock> lock(StatsLock);
   MemInfo mem;
-  Process::GetMemoryInfo(mem);
+  Process::GetMemoryInfo(mem, RO::EvalMemInfoCheckCgroup2);
   auto const rss = Process::GetMemUsageMb();
   auto const requests = requestCount();
   if (event == ShutdownEvent::SHUTDOWN_PREPARE) {

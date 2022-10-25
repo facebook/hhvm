@@ -11,9 +11,10 @@ path = "../../compile.rs"
 aast_parser = { path = "../../../../parser/cargo/aast_parser" }
 anyhow = "1.0.65"
 bc_to_ir = { path = "../../../ir/conversions/bc_to_ir" }
+bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
 bumpalo = { version = "3.8", features = ["collections"] }
 bytecode_printer = { path = "../../../bytecode_printer" }
-clap = { version = "3.2.17", features = ["derive", "regex", "unicode", "wrap_help"] }
+clap = { version = "3.2.17", features = ["derive", "env", "regex", "unicode", "wrap_help"] }
 decl_provider = { path = "../../../decl_provider" }
 elaborate_namespaces_visitor = { path = "../../../../naming/cargo/elaborate_namespaces" }
 emit_unit = { path = "../../../emitter/cargo/emit_unit" }

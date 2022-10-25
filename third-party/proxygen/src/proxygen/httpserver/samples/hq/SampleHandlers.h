@@ -551,10 +551,10 @@ class DummyHandler : public BaseSampleHandler {
 
 class DelayHandler
     : public BaseSampleHandler
-    , folly::DelayedDestruction {
+    , private folly::AsyncTimeout {
  public:
   explicit DelayHandler(const HandlerParams& params, folly::EventBase* evb)
-      : BaseSampleHandler(params), evb_(evb) {
+      : BaseSampleHandler(params), AsyncTimeout(evb) {
   }
 
   DelayHandler() = delete;
@@ -571,9 +571,11 @@ class DelayHandler
     maybeAddAltSvcHeader(resp);
     VLOG(10) << "DelayHandler::onHeadersComplete calling sendHeaders";
     txn_->sendHeaders(resp);
-    duration_ = getQueryParamAsNumber(msg, "duration", 0);
 
-    delayFutureCallback(msg);
+    auto duration = getQueryParamAsNumber(msg, "duration", 0);
+    responseBody_ = fmt::format(
+        "Response Body for: {} {}", msg->getMethodString(), msg->getURL());
+    scheduleTimeout(std::chrono::milliseconds(duration));
   }
 
   void onBody(std::unique_ptr<folly::IOBuf> /*chain*/) noexcept override {
@@ -585,28 +587,16 @@ class DelayHandler
   }
 
   void onError(const proxygen::HTTPException& /*error*/) noexcept override {
-    sleepFuture_.cancel();
-    txn_->sendAbort();
+    cancelTimeout();
   }
 
  private:
-  void delayFutureCallback(std::unique_ptr<proxygen::HTTPMessage>& msg) {
-    DestructorGuard destructorGuard(this);
-
-    std::string responseBody = fmt::format(
-        "Response Body for: {} {}", msg->getMethodString(), msg->getURL());
-
-    sleepFuture_ = folly::futures::sleep(std::chrono::milliseconds(duration_))
-                       .via(evb_)
-                       .then([this, responseBody, destructorGuard](auto&&) {
-                         txn_->sendBody(folly::IOBuf::copyBuffer(responseBody));
-                         txn_->sendEOM();
-                       });
+  void timeoutExpired() noexcept override {
+    txn_->sendBody(folly::IOBuf::copyBuffer(responseBody_));
+    txn_->sendEOM();
   }
 
-  uint32_t duration_{0}; // delay duration in milliseconds
-  folly::EventBase* evb_;
-  folly::SemiFuture<folly::Unit> sleepFuture_;
+  std::string responseBody_;
 };
 
 class HealthCheckHandler : public BaseSampleHandler {

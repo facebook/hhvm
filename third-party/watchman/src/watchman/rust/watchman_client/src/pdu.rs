@@ -16,6 +16,16 @@ use serde_bser::value::Value;
 
 use crate::expr::Expr;
 
+#[derive(Deserialize, Debug)]
+pub struct GetVersionResponse {
+    pub version: String,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct WatchListResponse {
+    pub roots: Vec<PathBuf>,
+}
+
 /// The `get-sockname` command response
 #[derive(Deserialize, Debug)]
 pub struct GetSockNameResponse {

@@ -1,6 +1,6 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures("modules")>>
+
 module foo;
 internal enum class E : mixed {
   int A = 42;

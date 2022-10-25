@@ -328,22 +328,24 @@ let parse_options () =
     ref (TypecheckerOptions.profile_top_level_definitions GlobalOptions.default)
   in
   let memtrace = ref None in
-  let enable_global_write_check = ref [] in
-  let enable_global_write_check_functions = ref SSet.empty in
+  let enable_global_access_check_files = ref [] in
+  let enable_global_access_check_functions = ref SSet.empty in
+  let global_access_check_on_write = ref true in
+  let global_access_check_on_read = ref true in
   let refactor_mode = ref "" in
   let refactor_analysis_mode = ref "" in
-  let set_enable_global_write_check_functions s =
+  let set_enable_global_access_check_functions s =
     let json_obj = Hh_json.json_of_file s in
     let add_function f =
       match f with
       | Hh_json.JSON_String str ->
-        enable_global_write_check_functions :=
-          SSet.add str !enable_global_write_check_functions
+        enable_global_access_check_functions :=
+          SSet.add str !enable_global_access_check_functions
       | _ -> ()
     in
     match json_obj with
     | Hh_json.JSON_Array lst -> List.iter lst ~f:add_function
-    | _ -> enable_global_write_check_functions := SSet.empty
+    | _ -> enable_global_access_check_functions := SSet.empty
   in
   let allow_all_files_for_module_declarations = ref true in
   let loop_iteration_upper_bound = ref None in
@@ -563,16 +565,7 @@ let parse_options () =
         Arg.Set shallow_class_decl,
         " Look up class members lazily from shallow declarations" );
       ( "--rust-provider-backend",
-        Arg.Unit
-          (fun () ->
-            rust_provider_backend := true;
-            sharedmem_config :=
-              SharedMem.
-                {
-                  default_config with
-                  shm_use_sharded_hashtbl = true;
-                  shm_cache_size = 2 * 1024 * 1024 * 1024;
-                }),
+        Arg.Set rust_provider_backend,
         " Use the Rust implementation of Provider_backend (including decl-folding)"
       );
       ( "--skip-hierarchy-checks",
@@ -606,6 +599,35 @@ let parse_options () =
             set_float_ simple_pessimize 1.0;
             set_bool_ complex_coercion ()),
         " Enables all like types features" );
+      ( "--naive-implicit-pess",
+        Arg.Unit
+          (fun () ->
+            set_bool_ enable_sound_dynamic ();
+            set_bool_ everything_sdt ();
+            set_bool_ like_type_hints ();
+            set_bool_ always_pessimise_return ();
+            set_bool_ enable_supportdyn_hint ();
+            set_bool_ pessimise_builtins ()),
+        " Enables naive implicit pessimisation" );
+      ( "--implicit-pess",
+        Arg.Unit
+          (fun () ->
+            set_bool_ enable_sound_dynamic ();
+            set_bool_ everything_sdt ();
+            set_bool_ like_type_hints ();
+            set_bool_ enable_supportdyn_hint ();
+            set_bool_ pessimise_builtins ()),
+        " Enables implicit pessimisation" );
+      ( "--explicit-pess",
+        Arg.String
+          (fun dir ->
+            set_bool_ enable_sound_dynamic ();
+            set_bool_ like_type_hints ();
+            set_bool_ enable_supportdyn_hint ();
+            set_bool_ pessimise_builtins ();
+            custom_hhi_path := Some dir),
+        " Enables checking explicitly pessimised files. Requires path to pessimised .hhi files "
+      );
       ( "--symbolindex-file",
         Arg.String (fun str -> symbolindex_file := Some str),
         " Load the symbol index from this file" );
@@ -814,15 +836,22 @@ let parse_options () =
         " Sets the amount of fuel that the type printer can use to display an individual type. Default: "
         ^ string_of_int
             (TypecheckerOptions.type_printer_fuel GlobalOptions.default) );
-      ( "--enable-global-write-check",
+      ( "--enable-global-access-check-files",
         Arg.String
-          (fun s -> enable_global_write_check := String_utils.split ',' s),
-        " Run global write checker on any file whose path is prefixed by the argument (use \"\\\" for hh_single_type_check)"
+          (fun s ->
+            enable_global_access_check_files := String_utils.split ',' s),
+        " Run global access checker on any file whose path is prefixed by the argument (use \"\\\" for hh_single_type_check)"
       );
-      ( "--enable-global-write-check-functions",
-        Arg.String set_enable_global_write_check_functions,
-        " Run global write checker on functions listed in the given JSON file"
+      ( "--enable-global-access-check-functions",
+        Arg.String set_enable_global_access_check_functions,
+        " Run global access checker on functions listed in the given JSON file"
       );
+      ( "--disable-global-access-check-on-write",
+        Arg.Clear global_access_check_on_write,
+        " Disable global access checker to check global writes" );
+      ( "--disable-global-access-check-on-read",
+        Arg.Clear global_access_check_on_read,
+        " Disable global access checker to check global reads" );
       ( "--overwrite-loop-iteration-upper-bound",
         Arg.Int (fun u -> loop_iteration_upper_bound := Some u),
         " Sets the maximum number of iterations that will be used to typecheck loops"
@@ -965,9 +994,11 @@ let parse_options () =
           ["/"]
         else
           [])
-      ~tco_global_write_check_enabled:!enable_global_write_check
-      ~tco_global_write_check_functions_enabled:
-        !enable_global_write_check_functions
+      ~tco_global_access_check_files_enabled:!enable_global_access_check_files
+      ~tco_global_access_check_functions_enabled:
+        !enable_global_access_check_functions
+      ~tco_global_access_check_on_write:!global_access_check_on_write
+      ~tco_global_access_check_on_read:!global_access_check_on_read
       ~tco_use_direct_decl_parser:!use_direct_decl_parser
       ~po_enable_enum_classes:(not !disable_enum_classes)
       ~po_interpret_soft_types_as_like_types:!interpret_soft_types_as_like_types
@@ -1068,7 +1099,16 @@ let parse_options () =
     },
     root,
     !naming_table,
-    !sharedmem_config )
+    if !rust_provider_backend then
+      SharedMem.
+        {
+          !sharedmem_config with
+          shm_use_sharded_hashtbl = true;
+          shm_cache_size =
+            max !sharedmem_config.shm_cache_size (2 * 1024 * 1024 * 1024);
+        }
+    else
+      !sharedmem_config )
 
 (* Make readable test output *)
 let replace_color input =

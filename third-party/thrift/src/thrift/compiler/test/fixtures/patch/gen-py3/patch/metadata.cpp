@@ -15,6 +15,7 @@ namespace op {
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
   ::apache::thrift::detail::md::EnumMetadata<PatchOp>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<GeneratePatch>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<AssignOnlyPatch>::gen(metadata);
   return metadata;
 }
 } // namespace apache

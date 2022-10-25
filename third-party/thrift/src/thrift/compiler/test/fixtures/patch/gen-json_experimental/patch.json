@@ -12,6 +12,7 @@
     "go": "thrift.lib.thrift.patch",
     "java": "com.facebook.thrift.op",
     "java.swift": "com.facebook.thrift.op",
+    "js": "apache.thrift.op",
     "py": "thrift.lib.thrift.patch",
     "py.asyncio": "apache_thrift_asyncio.patch",
     "py3": "apache.thrift.op"
@@ -24,55 +25,55 @@
           "Assign" : {
             "name" : "Assign",
             "docstring" : "Set the value. Supersedes all other ops.\n",
-            "lineno" : 292,
+            "lineno" : 286,
             "value" : 1
           },
           "Clear" : {
             "name" : "Clear",
             "docstring" : "Set to the intrinsic default (which might be 'unset').\n",
-            "lineno" : 295,
+            "lineno" : 289,
             "value" : 2
           },
           "PatchPrior" : {
             "name" : "PatchPrior",
             "docstring" : "Apply a field/value-wise patch.\n",
-            "lineno" : 298,
+            "lineno" : 292,
             "value" : 3
           },
           "EnsureUnion" : {
             "name" : "EnsureUnion",
             "docstring" : "Set to the given default, if not already of the same type.\n\nIn a dynamic context this means the ids/values must match exactly:\n    ensureUnion(Object ensureUnion, Object value) {\n      if (ensureUnion.ids() != value.ids())\n        value = ensureUnion;\n    }\n",
-            "lineno" : 309,
+            "lineno" : 303,
             "value" : 4
           },
           "EnsureStruct" : {
             "name" : "EnsureStruct",
             "docstring" : " * A pair-wise ensure operation.\n *\n * For maps this is an \"add if key not present\".\n *\n * For structs, this can be use to encodes the default state of the fields, based\n * on thier qualifier type:\n * - optional: absent\n * - terse: intrinsic default\n * - fill: custom default\n*\n",
-            "lineno" : 322,
+            "lineno" : 316,
             "value" : 5
           },
           "PatchAfter" : {
             "name" : "PatchAfter",
             "docstring" : "Apply a field/value-wise patch after all other ops.\n",
-            "lineno" : 327,
+            "lineno" : 321,
             "value" : 6
           },
           "Remove" : {
             "name" : "Remove",
             "docstring" : "Remove if present.\n\nA key/value-based remove for set/list, 'saturating subtract' for\nnumeric/'counting' types, and 'remove by key' for maps.\n",
-            "lineno" : 335,
+            "lineno" : 329,
             "value" : 7
           },
           "Add" : {
             "name" : "Add",
             "docstring" : "Add/prepend a value,with the following semantics:\n- Key/value-based 'add' for set;\n- 'prepend' for list, string, or binary; and\n- saturating 'add' for numeric/counting types.\n",
-            "lineno" : 343,
+            "lineno" : 337,
             "value" : 8
           },
           "Put" : {
             "name" : "Put",
             "docstring" : "Put/append/invert a value, with the following semantics:\n- Identical to 'add' for set;\n- 'update or insert' for maps;\n- 'append' for list, string or binary; and\n- 'invert' for boolean.\n",
-            "lineno" : 352,
+            "lineno" : 346,
             "value" : 9
           },
           "Unspecified" : {
@@ -82,7 +83,7 @@
           }
         },
         "docstring" : "The meaning of the patch op field ids, in all properly formulated patch\ndefinitions.\n\nPatch field ids are interpreted at runtime, as a dynamic patch protocol,\nwithout any additional schema derived from IDL patch definitions.\n",
-        "lineno" : 289
+        "lineno" : 283
       }
       },
   "structs" :
@@ -93,14 +94,16 @@
           "scope.Program" : {
         "type" : {
   "type" : "struct",
-  "name" : "Program"
+  "name" : "Program",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Structured" : {
         "type" : {
   "type" : "struct",
-  "name" : "Structured"
+  "name" : "Structured",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -108,7 +111,31 @@
         "docstring" : "An annotation that indicates a patch representation\nshould be generated for the associated definition.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 39
+        "lineno" : 40
+      },
+      "AssignOnlyPatch" : {
+        "name" : "AssignOnlyPatch",
+        "structured_annotations": {
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Structured" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Structured",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 44
       },
       "BoolPatch" : {
         "name" : "BoolPatch",
@@ -116,9 +143,10 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "BoolPatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::BoolPatchAdapter"}
+        "value" : {"underlyingName": "BoolPatchStruct", "name": "::apache::thrift::op::detail::BoolPatchAdapter"}
       }
         },
         "docstring" : "A patch for a boolean value.\n",
@@ -127,7 +155,7 @@
             "name" : "assign",
             "docstring" : "Assign to a given value.\n\nIf set, all other patch operations are ignored.\n",
             "key" : 1,
-            "lineno" : 55,
+            "lineno" : 59,
             "required" : "optional",
             "type" : "bool"
                   },
@@ -135,7 +163,7 @@
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
             "key" : 2,
-            "lineno" : 58,
+            "lineno" : 62,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   },
@@ -143,14 +171,14 @@
             "name" : "invert",
             "docstring" : "If the bool value should be inverted.\n",
             "key" : 9,
-            "lineno" : 61,
+            "lineno" : 65,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 44
+        "lineno" : 49
       },
       "BytePatch" : {
         "name" : "BytePatch",
@@ -158,9 +186,10 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "BytePatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
+        "value" : {"underlyingName": "BytePatchStruct", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
       }
         },
         "docstring" : "A patch for an 8-bit integer value.\n",
@@ -169,7 +198,7 @@
             "name" : "assign",
             "docstring" : "Assign to a given value.\n\nIf set, all other patch operations are ignored.\n",
             "key" : 1,
-            "lineno" : 76,
+            "lineno" : 79,
             "required" : "optional",
             "type" : "byte"
                   },
@@ -177,7 +206,7 @@
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
             "key" : 2,
-            "lineno" : 79,
+            "lineno" : 82,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   },
@@ -185,14 +214,14 @@
             "name" : "add",
             "docstring" : "Add to a given value.\n",
             "key" : 8,
-            "lineno" : 82,
+            "lineno" : 85,
             "required" : "opt-in-req-out",
             "type" : "byte"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 65
+        "lineno" : 69
       },
       "I16Patch" : {
         "name" : "I16Patch",
@@ -200,9 +229,10 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "I16PatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
+        "value" : {"underlyingName": "I16PatchStruct", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
       }
         },
         "docstring" : "A patch for a 16-bit integer value.\n",
@@ -211,7 +241,7 @@
             "name" : "assign",
             "docstring" : "Assign to a given value.\n\nIf set, all other patch operations are ignored.\n",
             "key" : 1,
-            "lineno" : 97,
+            "lineno" : 99,
             "required" : "optional",
             "type" : "i16"
                   },
@@ -219,7 +249,7 @@
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
             "key" : 2,
-            "lineno" : 100,
+            "lineno" : 102,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   },
@@ -227,14 +257,14 @@
             "name" : "add",
             "docstring" : "Add to a given value.\n",
             "key" : 8,
-            "lineno" : 103,
+            "lineno" : 105,
             "required" : "opt-in-req-out",
             "type" : "i16"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 86
+        "lineno" : 89
       },
       "I32Patch" : {
         "name" : "I32Patch",
@@ -242,9 +272,10 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "I32PatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
+        "value" : {"underlyingName": "I32PatchStruct", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
       }
         },
         "docstring" : "A patch for a 32-bit integer value.\n",
@@ -253,7 +284,7 @@
             "name" : "assign",
             "docstring" : "Assign to a given value.\n\nIf set, all other patch operations are ignored.\n",
             "key" : 1,
-            "lineno" : 118,
+            "lineno" : 119,
             "required" : "optional",
             "type" : "i32"
                   },
@@ -261,7 +292,7 @@
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
             "key" : 2,
-            "lineno" : 121,
+            "lineno" : 122,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   },
@@ -269,14 +300,14 @@
             "name" : "add",
             "docstring" : "Add to a given value.\n",
             "key" : 8,
-            "lineno" : 124,
+            "lineno" : 125,
             "required" : "opt-in-req-out",
             "type" : "i32"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 107
+        "lineno" : 109
       },
       "I64Patch" : {
         "name" : "I64Patch",
@@ -284,9 +315,10 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "I64PatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
+        "value" : {"underlyingName": "I64PatchStruct", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
       }
         },
         "docstring" : "A patch for a 64-bit integer value.\n",
@@ -318,7 +350,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 128
+        "lineno" : 129
       },
       "FloatPatch" : {
         "name" : "FloatPatch",
@@ -326,9 +358,10 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "FloatPatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
+        "value" : {"underlyingName": "FloatPatchStruct", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
       }
         },
         "docstring" : "A patch for a 32-bit floating point value.\n",
@@ -337,7 +370,7 @@
             "name" : "assign",
             "docstring" : "Assign to a given value.\n\nIf set, all other patch operations are ignored.\n",
             "key" : 1,
-            "lineno" : 160,
+            "lineno" : 159,
             "required" : "optional",
             "type" : "float"
                   },
@@ -345,7 +378,7 @@
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
             "key" : 2,
-            "lineno" : 163,
+            "lineno" : 162,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   },
@@ -353,7 +386,7 @@
             "name" : "add",
             "docstring" : "Add to a given value.\n",
             "key" : 8,
-            "lineno" : 166,
+            "lineno" : 165,
             "required" : "opt-in-req-out",
             "type" : "float"
                   }
@@ -368,9 +401,10 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "DoublePatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
+        "value" : {"underlyingName": "DoublePatchStruct", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
       }
         },
         "docstring" : "A patch for an 64-bit floating point value.\n",
@@ -379,7 +413,7 @@
             "name" : "assign",
             "docstring" : "Assign to a given value.\n\nIf set, all other patch operations are ignored.\n",
             "key" : 1,
-            "lineno" : 181,
+            "lineno" : 179,
             "required" : "optional",
             "type" : "double"
                   },
@@ -387,7 +421,7 @@
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
             "key" : 2,
-            "lineno" : 184,
+            "lineno" : 182,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   },
@@ -395,14 +429,14 @@
             "name" : "add",
             "docstring" : "Add to a given value.\n",
             "key" : 8,
-            "lineno" : 187,
+            "lineno" : 185,
             "required" : "opt-in-req-out",
             "type" : "double"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 170
+        "lineno" : 169
       },
       "StringPatch" : {
         "name" : "StringPatch",
@@ -410,9 +444,10 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "StringPatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::StringPatchAdapter"}
+        "value" : {"underlyingName": "StringPatchStruct", "name": "::apache::thrift::op::detail::StringPatchAdapter"}
       }
         },
         "docstring" : "A patch for a string value.\n",
@@ -421,7 +456,7 @@
             "name" : "assign",
             "docstring" : "Assign to a given value.\n\nIf set, all other patch operations are ignored.\n",
             "key" : 1,
-            "lineno" : 202,
+            "lineno" : 199,
             "required" : "optional",
             "type" : "string"
                   },
@@ -429,7 +464,7 @@
             "name" : "clear",
             "docstring" : "Clear a given string.\n",
             "key" : 2,
-            "lineno" : 205,
+            "lineno" : 202,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   },
@@ -437,7 +472,7 @@
             "name" : "prepend",
             "docstring" : "Prepend to a given value.\n",
             "key" : 8,
-            "lineno" : 208,
+            "lineno" : 205,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
@@ -445,14 +480,14 @@
             "name" : "append",
             "docstring" : "Append to a given value.\n",
             "key" : 9,
-            "lineno" : 211,
+            "lineno" : 208,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 191
+        "lineno" : 189
       },
       "BinaryPatch" : {
         "name" : "BinaryPatch",
@@ -460,9 +495,10 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "BinaryPatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::BinaryPatchAdapter"}
+        "value" : {"underlyingName": "BinaryPatchStruct", "name": "::apache::thrift::op::detail::BinaryPatchAdapter"}
       }
         },
         "docstring" : "A patch for a binary value.\n",
@@ -471,7 +507,7 @@
             "name" : "assign",
             "docstring" : "Assign to a given value.\n\nIf set, all other patch operations are ignored.\n",
             "key" : 1,
-            "lineno" : 226,
+            "lineno" : 222,
             "required" : "optional",
             "type" : "binary"
                   },
@@ -479,7 +515,7 @@
             "name" : "clear",
             "docstring" : "Clear a given binary.\n",
             "key" : 2,
-            "lineno" : 229,
+            "lineno" : 225,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   },
@@ -487,7 +523,7 @@
             "name" : "prepend",
             "docstring" : "Prepend to a given value.\n",
             "key" : 8,
-            "lineno" : 232,
+            "lineno" : 228,
             "required" : "opt-in-req-out",
             "type" : "binary"
                   },
@@ -495,14 +531,14 @@
             "name" : "append",
             "docstring" : "Append to a given value.\n",
             "key" : 9,
-            "lineno" : 235,
+            "lineno" : 231,
             "required" : "opt-in-req-out",
             "type" : "binary"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 215
+        "lineno" : 212
       },
       "DurationPatch" : {
         "name" : "DurationPatch",
@@ -510,9 +546,10 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "DurationStructPatch", "extraNamespace": "", "name": "::apache::thrift::op::detail::AssignPatchAdapter"}
+        "value" : {"underlyingName": "DurationStructPatch", "name": "::apache::thrift::op::detail::AssignPatchAdapter"}
       }
         },
         "docstring" : "A patch for a Duration value.\n",
@@ -521,18 +558,19 @@
             "name" : "assign",
             "docstring" : "Assign to a given value.\n\nIf set, all other patch operations are ignored.\n",
             "key" : 1,
-            "lineno" : 250,
+            "lineno" : 245,
             "required" : "optional",
             "type" : {
   "type" : "struct",
-  "name" : "DurationStruct"
+  "name" : "DurationStruct",
+  "path" : "thrift/lib/thrift/standard.thrift"
 }
                   },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
             "key" : 2,
-            "lineno" : 253,
+            "lineno" : 248,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   },
@@ -540,18 +578,20 @@
             "name" : "add",
             "docstring" : "Add to a given value.\n",
             "key" : 8,
-            "lineno" : 256,
+            "lineno" : 251,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "DurationStruct"
+  "name" : "DurationStruct",
+  "path" : "thrift/lib/thrift/standard.thrift"
 }
             ,
             "structured_annotations": {
               "thrift.Testing" : {
             "type" : {
   "type" : "struct",
-  "name" : "Testing"
+  "name" : "Testing",
+  "path" : "thrift/annotation/thrift.thrift"
 },
             "value" : {}
           }
@@ -560,7 +600,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 239
+        "lineno" : 235
       },
       "TimePatch" : {
         "name" : "TimePatch",
@@ -568,9 +608,10 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "TimeStructPatch", "extraNamespace": "", "name": "::apache::thrift::op::detail::AssignPatchAdapter"}
+        "value" : {"underlyingName": "TimeStructPatch", "name": "::apache::thrift::op::detail::AssignPatchAdapter"}
       }
         },
         "docstring" : "A patch for a Time value.\n",
@@ -579,18 +620,19 @@
             "name" : "assign",
             "docstring" : "Assign to a given value.\n\nIf set, all other patch operations are ignored.\n",
             "key" : 1,
-            "lineno" : 272,
+            "lineno" : 266,
             "required" : "optional",
             "type" : {
   "type" : "struct",
-  "name" : "TimeStruct"
+  "name" : "TimeStruct",
+  "path" : "thrift/lib/thrift/standard.thrift"
 }
                   },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
             "key" : 2,
-            "lineno" : 275,
+            "lineno" : 269,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   },
@@ -598,18 +640,20 @@
             "name" : "add",
             "docstring" : "Add to a given value.\n",
             "key" : 8,
-            "lineno" : 278,
+            "lineno" : 272,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "DurationStruct"
+  "name" : "DurationStruct",
+  "path" : "thrift/lib/thrift/standard.thrift"
 }
             ,
             "structured_annotations": {
               "thrift.Testing" : {
             "type" : {
   "type" : "struct",
-  "name" : "Testing"
+  "name" : "Testing",
+  "path" : "thrift/annotation/thrift.thrift"
 },
             "value" : {}
           }
@@ -618,7 +662,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 261
+        "lineno" : 256
       }
       },
   "source_path" : "thrift/lib/thrift/patch",

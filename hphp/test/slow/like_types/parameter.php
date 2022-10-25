@@ -1,9 +1,9 @@
 <?hh
 
 /**
- * Like-types are treated as mixed, allowing any argument value.
+ * Like-types are enforced at their inner type.
  */
-function f(~int $x): void {
+function f(<<__Soft>> ~int $x): void {
   var_dump($x);
 }
 

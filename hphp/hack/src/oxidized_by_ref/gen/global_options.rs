@@ -3,14 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<54540867c465e9e095690f8ca897b356>>
+// @generated SignedSource<<2a77a2c2d322fbefbf2f3d04a3a7b4dd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -158,9 +158,11 @@ pub struct GlobalOptions<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tco_ifc_enabled: &'a [&'a str],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub tco_global_write_check_enabled: &'a [&'a str],
+    pub tco_global_access_check_files_enabled: &'a [&'a str],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub tco_global_write_check_functions_enabled: s_set::SSet<'a>,
+    pub tco_global_access_check_functions_enabled: s_set::SSet<'a>,
+    pub tco_global_access_check_on_write: bool,
+    pub tco_global_access_check_on_read: bool,
     pub po_enable_enum_supertyping: bool,
     pub po_interpret_soft_types_as_like_types: bool,
     pub tco_enable_strict_string_concat_interp: bool,

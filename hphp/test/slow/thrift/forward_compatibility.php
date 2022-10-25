@@ -20,6 +20,7 @@ class OldStruct {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class NewStruct {
@@ -42,6 +43,7 @@ class NewStruct {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 function testBinary() {

@@ -872,21 +872,21 @@ func (p *RaiserDoRaiseResult) GetB() *Banal {
   if !p.IsSetB() {
     return RaiserDoRaiseResult_B_DEFAULT
   }
-return p.B
+  return p.B
 }
 var RaiserDoRaiseResult_F_DEFAULT *Fiery
 func (p *RaiserDoRaiseResult) GetF() *Fiery {
   if !p.IsSetF() {
     return RaiserDoRaiseResult_F_DEFAULT
   }
-return p.F
+  return p.F
 }
 var RaiserDoRaiseResult_S_DEFAULT *Serious
 func (p *RaiserDoRaiseResult) GetS() *Serious {
   if !p.IsSetS() {
     return RaiserDoRaiseResult_S_DEFAULT
   }
-return p.S
+  return p.S
 }
 func (p *RaiserDoRaiseResult) IsSetB() bool {
   return p != nil && p.B != nil
@@ -1172,7 +1172,7 @@ func (p *RaiserGet200Result) GetSuccess() string {
   if !p.IsSetSuccess() {
     return RaiserGet200Result_Success_DEFAULT
   }
-return *p.Success
+  return *p.Success
 }
 func (p *RaiserGet200Result) IsSetSuccess() bool {
   return p != nil && p.Success != nil
@@ -1370,28 +1370,28 @@ func (p *RaiserGet500Result) GetSuccess() string {
   if !p.IsSetSuccess() {
     return RaiserGet500Result_Success_DEFAULT
   }
-return *p.Success
+  return *p.Success
 }
 var RaiserGet500Result_F_DEFAULT *Fiery
 func (p *RaiserGet500Result) GetF() *Fiery {
   if !p.IsSetF() {
     return RaiserGet500Result_F_DEFAULT
   }
-return p.F
+  return p.F
 }
 var RaiserGet500Result_B_DEFAULT *Banal
 func (p *RaiserGet500Result) GetB() *Banal {
   if !p.IsSetB() {
     return RaiserGet500Result_B_DEFAULT
   }
-return p.B
+  return p.B
 }
 var RaiserGet500Result_S_DEFAULT *Serious
 func (p *RaiserGet500Result) GetS() *Serious {
   if !p.IsSetS() {
     return RaiserGet500Result_S_DEFAULT
   }
-return p.S
+  return p.S
 }
 func (p *RaiserGet500Result) IsSetSuccess() bool {
   return p != nil && p.Success != nil

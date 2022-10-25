@@ -114,7 +114,7 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
             a::Expr_::Binop(bop) => emit_binop(e, env, e_, pos, bop),
             _ => emit_expr::emit_ignored_expr(e, env, pos, e_),
         },
-        a::Stmt_::Return(r_opt) => emit_return_(e, env, (&**r_opt).as_ref(), pos),
+        a::Stmt_::Return(r_opt) => emit_return_(e, env, (**r_opt).as_ref(), pos),
         a::Stmt_::Block(b) => emit_block(env, e, b),
         a::Stmt_::If(f) => emit_if(e, env, pos, &f.0, &f.1, &f.2),
         a::Stmt_::While(x) => emit_while(e, env, &x.0, &x.1),

@@ -12,6 +12,6 @@ final class CtxShadyProjection<TBox as Box, T> {
 
 abstract class Box { abstract const type T; }
 abstract class BoxWithCtx extends Box {
-  const type TCtx = Ctx<this, this::T>; // FIXME(type-refinements) gives error but it shouldn't
+  const type TCtx = Ctx<this, this::T>; // OK
   const type TCtxUnsound = CtxShadyProjection<this, this::T>; // OK
 }

@@ -594,7 +594,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_i16_param
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_i16_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_i16_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -782,7 +782,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_byte_i16_
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_byte_i16_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_byte_i16_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -970,7 +970,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_map_param
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_map_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_map_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -1158,7 +1158,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_map_setli
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_map_setlist_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_map_setlist_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -1346,7 +1346,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_map_typed
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_map_typedef_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_map_typedef_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -1534,7 +1534,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_enum_para
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_enum_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_enum_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -1722,7 +1722,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_struct_pa
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_struct_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_struct_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -1910,7 +1910,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_listunion
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_listunion_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::void_ret_listunion_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -2098,7 +2098,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::bool_ret_i32_i64_p
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::bool_ret_i32_i64_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::bool_ret_i32_i64_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -2288,7 +2288,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::bool_ret_map_param
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::bool_ret_map_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::bool_ret_map_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -2478,7 +2478,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::bool_ret_union_par
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::bool_ret_union_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::bool_ret_union_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -2668,7 +2668,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::i64_ret_float_doub
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::i64_ret_float_double_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::i64_ret_float_double_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -2858,7 +2858,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::i64_ret_string_typ
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::i64_ret_string_typedef_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::i64_ret_string_typedef_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -3048,7 +3048,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::i64_ret_i32_i32_i3
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::i64_ret_i32_i32_i32_i32_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::i64_ret_i32_i32_i32_i32_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -3238,7 +3238,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::double_ret_setstru
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::double_ret_setstruct_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::double_ret_setstruct_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -3428,7 +3428,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::string_ret_string_
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::string_ret_string_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::string_ret_string_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -3616,7 +3616,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::binary_ret_binary_
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::binary_ret_binary_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::binary_ret_binary_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -3804,7 +3804,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::map_ret_bool_param
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::map_ret_bool_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::map_ret_bool_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -3992,7 +3992,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::list_ret_map_setli
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::list_ret_map_setlist_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::list_ret_map_setlist_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -4180,7 +4180,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::mapsetlistmaplists
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::mapsetlistmapliststring_ret_listlistlist_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::mapsetlistmapliststring_ret_listlistlist_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -4368,7 +4368,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::typedef_ret_i32_pa
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::typedef_ret_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::typedef_ret_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -4558,7 +4558,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::listtypedef_ret_ty
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::listtypedef_ret_typedef_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::listtypedef_ret_typedef_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -4746,7 +4746,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::enum_ret_double_pa
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::enum_ret_double_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::enum_ret_double_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -4936,7 +4936,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::enum_ret_double_en
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::enum_ret_double_enum_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::enum_ret_double_enum_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -5126,7 +5126,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::listenum_ret_map_p
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::listenum_ret_map_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::listenum_ret_map_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -5314,7 +5314,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::struct_ret_i16_par
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::struct_ret_i16_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::struct_ret_i16_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -5502,7 +5502,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::setstruct_ret_set_
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::setstruct_ret_set_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::setstruct_ret_set_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -5690,7 +5690,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::union_ret_i32_i32_
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::union_ret_i32_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::union_ret_i32_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -5878,7 +5878,7 @@ void apache::thrift::Client<::some::valid::ns::ParamService>::listunion_string_p
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::listunion_string_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ParamService>::listunion_string_paramCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());

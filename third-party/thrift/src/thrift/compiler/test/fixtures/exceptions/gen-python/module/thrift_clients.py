@@ -18,6 +18,7 @@ from thrift.python.client import (
     Client as _fbthrift_python_Client,
 )
 from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier
+from thrift.python.common import RpcOptions
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import module.thrift_types
@@ -43,7 +44,9 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             return module.thrift_metadata.gen_metadata_service_Raiser()
     
         async def doBland(
-            self
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = await self._send_request(
                 "Raiser",
@@ -51,10 +54,13 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 module.thrift_types._fbthrift_Raiser_doBland_args(),
                 module.thrift_types._fbthrift_Raiser_doBland_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                rpc_options=rpc_options,
             )
     
         async def doRaise(
-            self
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = await self._send_request(
                 "Raiser",
@@ -62,6 +68,7 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 module.thrift_types._fbthrift_Raiser_doRaise_args(),
                 module.thrift_types._fbthrift_Raiser_doRaise_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                rpc_options=rpc_options,
             )
             if _fbthrift_resp.b is not None:
                 raise _fbthrift_resp.b
@@ -71,7 +78,9 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 raise _fbthrift_resp.s
     
         async def get200(
-            self
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> str:
             _fbthrift_resp = await self._send_request(
                 "Raiser",
@@ -79,6 +88,7 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 module.thrift_types._fbthrift_Raiser_get200_args(),
                 module.thrift_types._fbthrift_Raiser_get200_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -89,7 +99,9 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             )
     
         async def get500(
-            self
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> str:
             _fbthrift_resp = await self._send_request(
                 "Raiser",
@@ -97,6 +109,7 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 module.thrift_types._fbthrift_Raiser_get500_args(),
                 module.thrift_types._fbthrift_Raiser_get500_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -122,23 +135,29 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             return module.thrift_metadata.gen_metadata_service_Raiser()
     
         def doBland(
-            self
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = self._send_request(
                 "Raiser",
                 "doBland",
                 module.thrift_types._fbthrift_Raiser_doBland_args(),
                 module.thrift_types._fbthrift_Raiser_doBland_result,
+                rpc_options=rpc_options,
             )
     
         def doRaise(
-            self
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = self._send_request(
                 "Raiser",
                 "doRaise",
                 module.thrift_types._fbthrift_Raiser_doRaise_args(),
                 module.thrift_types._fbthrift_Raiser_doRaise_result,
+                rpc_options=rpc_options,
             )
             if _fbthrift_resp.b is not None:
                 raise _fbthrift_resp.b
@@ -148,13 +167,16 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 raise _fbthrift_resp.s
     
         def get200(
-            self
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> str:
             _fbthrift_resp = self._send_request(
                 "Raiser",
                 "get200",
                 module.thrift_types._fbthrift_Raiser_get200_args(),
                 module.thrift_types._fbthrift_Raiser_get200_result,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -165,13 +187,16 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             )
     
         def get500(
-            self
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> str:
             _fbthrift_resp = self._send_request(
                 "Raiser",
                 "get500",
                 module.thrift_types._fbthrift_Raiser_get500_args(),
                 module.thrift_types._fbthrift_Raiser_get500_result,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:

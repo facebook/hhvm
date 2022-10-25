@@ -17,7 +17,6 @@ HHVM_DEFINE_EXTENSION(
     attribute-map.h
     autoload-db.h
     exception.h
-    ext_facts.h
     fact-extractor.h
     file-facts.h
     inheritance-info.h

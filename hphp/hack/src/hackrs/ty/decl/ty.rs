@@ -8,8 +8,8 @@ use std::fmt;
 
 use eq_modulo_pos::EqModuloPos;
 use hcons::Hc;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 use oxidized::aast;
 pub use oxidized::aast_defs::ReifyKind;
 pub use oxidized::aast_defs::Tprim as Prim;
@@ -68,6 +68,11 @@ pub enum XhpEnumValue {
     XEVString(Symbol),
 }
 
+walkable!(XhpEnumValue => {
+    Self::XEVInt(i) => [i],
+    Self::XEVString(s) => [s],
+});
+
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]
 pub enum CeVisibility {
@@ -76,6 +81,13 @@ pub enum CeVisibility {
     Protected(TypeName),
     Internal(ModuleName),
 }
+
+walkable!(CeVisibility => {
+    Self::Public => [],
+    Self::Private(t) => [t],
+    Self::Protected(t) => [t],
+    Self::Internal(m) => [m],
+});
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]
@@ -130,6 +142,8 @@ pub struct UserAttribute<P> {
     pub name: Positioned<TypeName, P>,
     pub classname_params: Box<[TypeName]>,
 }
+
+walkable!(impl<R: Reason> for UserAttribute<R::Pos> => [name, classname_params]);
 
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]
@@ -410,7 +424,6 @@ pub struct ClassRefinement<TY> {
     pub types: BTreeMap<TypeConstName, ClassTypeRefinement<TY>>,
 }
 
-walkable!(TypeConstName); // To walk the typeconsts BTreeMap
 walkable!(impl<R: Reason> for ClassRefinement<Ty<R>> => [types]);
 
 /// Type constant refinements

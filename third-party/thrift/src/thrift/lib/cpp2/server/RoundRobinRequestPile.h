@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include <atomic>
@@ -98,7 +99,8 @@ class RoundRobinRequestPile : public RequestPileBase {
   std::optional<ServerRequestRejection> enqueue(
       ServerRequest&& request) override;
 
-  std::optional<ServerRequest> dequeue() override;
+  std::pair<std::optional<ServerRequest>, std::optional<intptr_t>> dequeue()
+      override;
 
   uint64_t requestCount() const override;
 

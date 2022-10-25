@@ -613,7 +613,7 @@ HPHP::MemberKey TranslationState::translateMemberKey(const hhbc::MemberKey& mkey
 }
 
 ArrayData* TranslationState::getArrayfromAdataId(const AdataId& id) {
-  auto const it = adataMap.find(toString(id));
+  auto const it = adataMap.find(toString(id._0));
   assertx(it != adataMap.end());
   assertx(it->second->isStatic());
   return it->second;
@@ -1274,7 +1274,7 @@ void translateClass(TranslationState& ts, const hhbc::Class& c) {
 }
 
 void translateAdata(TranslationState& ts, const hhbc::Adata& ad) {
-  auto const name = toString(ad.id);
+  auto const name = toString(ad.id._0);
   auto tv = toTypedValue(ad.value);
   auto arr = tv.m_data.parr;
   ArrayData::GetScalarArray(&arr);
@@ -1309,8 +1309,14 @@ void translateModule(TranslationState& ts, const hhbc::Module& m) {
   UserAttributeMap userAttrs;
   translateUserAttributes(m.attributes, userAttrs);
 
+  // auto const dc = maybe(b.doc_comment);
+  // if (dc) ts.fe->docComment = makeDocComment(dc.value());
+
   ts.ue->addModule(HPHP::Module{
     toStaticString(m.name._0),
+    maybeOrElse(m.doc_comment,
+      [&](Str& s) {return makeDocComment(s);},
+      [&]() {return staticEmptyString();}),
     static_cast<int>(m.span.line_begin),
     static_cast<int>(m.span.line_end),
     Attr(AttrNone),

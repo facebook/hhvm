@@ -57,3 +57,13 @@ cdef class __GeneratePatch_FieldsSetter(__StructFieldsSetter):
     @staticmethod
     cdef __GeneratePatch_FieldsSetter _fbthrift_create(_apache_thrift_op_patch_types.cGeneratePatch* struct_cpp_obj)
 
+
+ctypedef void (*__AssignOnlyPatch_FieldsSetterFunc)(__AssignOnlyPatch_FieldsSetter, object) except *
+
+cdef class __AssignOnlyPatch_FieldsSetter(__StructFieldsSetter):
+    cdef _apache_thrift_op_patch_types.cAssignOnlyPatch* _struct_cpp_obj
+    cdef cumap[__cstring_view, __AssignOnlyPatch_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __AssignOnlyPatch_FieldsSetter _fbthrift_create(_apache_thrift_op_patch_types.cAssignOnlyPatch* struct_cpp_obj)
+

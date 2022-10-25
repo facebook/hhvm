@@ -169,16 +169,22 @@ void detect_low_process_priority() {
   }
 #endif
 
-  watchman::getThreadPool().start(
-      cfg_get_int("thread_pool_worker_threads", 16),
-      cfg_get_int("thread_pool_max_items", 1024 * 1024));
+  bool res = false;
+  {
+    watchman::getThreadPool().start(
+        cfg_get_int("thread_pool_worker_threads", 16),
+        cfg_get_int("thread_pool_max_items", 1024 * 1024));
 
-  ClockSpec::init();
-  w_state_load();
-  bool res = w_start_listener();
-  w_root_free_watched_roots();
-  perf_shutdown();
-  cfg_shutdown();
+    ClockSpec::init();
+    w_state_load();
+    SCOPE_EXIT {
+      w_state_shutdown();
+    };
+    res = w_start_listener();
+    w_root_free_watched_roots();
+    perf_shutdown();
+    cfg_shutdown();
+  }
 
   log(ERR, "Exiting from service with res=", res, "\n");
 
@@ -518,7 +524,7 @@ static SpawnResult spawn_via_launchd() {
     watchman_args = {"/bin/sh", "-c", folly::join(" ", watchman_args)};
   }
 
-  auto plist_content = folly::to<std::string>(
+  auto plist_content = fmt::format(
       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
       "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" "
       "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
@@ -529,8 +535,8 @@ static SpawnResult spawn_via_launchd() {
       "    <key>Disabled</key>\n"
       "    <false/>\n"
       "    <key>ProgramArguments</key>\n"
-      "    <array>\n",
-      prep_args_for_plist(watchman_args, 8),
+      "    <array>\n"
+      "{}"
       "    </array>\n"
       "    <key>KeepAlive</key>\n"
       "    <dict>\n"
@@ -542,8 +548,8 @@ static SpawnResult spawn_via_launchd() {
       "    <key>EnvironmentVariables</key>\n"
       "    <dict>\n"
       "        <key>PATH</key>\n"
-      "        <string>",
-      path_env,
+      "        <string>"
+      "{}"
       "</string>\n"
       "    </dict>\n"
       "    <key>ProcessType</key>\n"
@@ -551,7 +557,9 @@ static SpawnResult spawn_via_launchd() {
       "    <key>Nice</key>\n"
       "    <integer>-5</integer>\n"
       "</dict>\n"
-      "</plist>\n");
+      "</plist>\n",
+      prep_args_for_plist(watchman_args, 8),
+      path_env);
   fwrite(plist_content.data(), 1, plist_content.size(), fp);
   fclose(fp);
   // Don't rely on umask, ensure we have the correct perms
@@ -721,7 +729,7 @@ static void compute_file_name(
       exit(1);
     }
 
-    str = folly::to<std::string>(state_dir, "/", suffix);
+    str = fmt::format("{}/{}", state_dir, suffix);
   }
 #ifndef _WIN32
   if (require_absolute && !w_string_piece(str).pathIsAbsolute()) {
@@ -1098,13 +1106,11 @@ int main(int argc, char** argv) {
   try {
     return inner_main(argc, argv);
   } catch (const std::exception& e) {
-    log(ERR,
-        "Uncaught C++ exception: ",
-        folly::exceptionStr(e).toStdString(),
-        "\n");
+    logf_stderr(
+        "Uncaught C++ exception: {}\n", folly::exceptionStr(e).toStdString());
     return 1;
   } catch (...) {
-    log(ERR, "Uncaught C++ exception: ...\n");
+    logf_stderr("Uncaught C++ exception: ...\n");
     return 1;
   }
 }

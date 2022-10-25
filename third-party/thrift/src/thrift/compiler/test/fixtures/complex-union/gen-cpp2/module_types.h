@@ -175,8 +175,11 @@ class ComplexUnion final  {
   ComplexUnion(ComplexUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::intValue:
       {
         set_intValue(std::move(rhs.value_.intValue));
@@ -219,8 +222,11 @@ class ComplexUnion final  {
   ComplexUnion(const ComplexUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::intValue:
       {
         set_intValue(rhs.value_.intValue);
@@ -262,8 +268,11 @@ class ComplexUnion final  {
   ComplexUnion& operator=(ComplexUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::intValue:
       {
         set_intValue(std::move(rhs.value_.intValue));
@@ -307,8 +316,11 @@ class ComplexUnion final  {
   ComplexUnion& operator=(const ComplexUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::intValue:
       {
         set_intValue(rhs.value_.intValue);
@@ -762,8 +774,11 @@ class ListUnion final  {
   ListUnion(ListUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::intListValue:
       {
         set_intListValue(std::move(rhs.value_.intListValue));
@@ -786,8 +801,11 @@ class ListUnion final  {
   ListUnion(const ListUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::intListValue:
       {
         set_intListValue(rhs.value_.intListValue);
@@ -809,8 +827,11 @@ class ListUnion final  {
   ListUnion& operator=(ListUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::intListValue:
       {
         set_intListValue(std::move(rhs.value_.intListValue));
@@ -834,8 +855,11 @@ class ListUnion final  {
   ListUnion& operator=(const ListUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::intListValue:
       {
         set_intListValue(rhs.value_.intListValue);
@@ -1051,8 +1075,11 @@ class DataUnion final  {
   DataUnion(DataUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::binaryData:
       {
         set_binaryData(std::move(rhs.value_.binaryData));
@@ -1075,8 +1102,11 @@ class DataUnion final  {
   DataUnion(const DataUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::binaryData:
       {
         set_binaryData(rhs.value_.binaryData);
@@ -1098,8 +1128,11 @@ class DataUnion final  {
   DataUnion& operator=(DataUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::binaryData:
       {
         set_binaryData(std::move(rhs.value_.binaryData));
@@ -1123,8 +1156,11 @@ class DataUnion final  {
   DataUnion& operator=(const DataUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::binaryData:
       {
         set_binaryData(rhs.value_.binaryData);
@@ -1568,8 +1604,11 @@ class ValUnion final  {
   ValUnion(ValUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::v1:
       {
         set_v1(std::move(rhs.value_.v1));
@@ -1592,8 +1631,11 @@ class ValUnion final  {
   ValUnion(const ValUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::v1:
       {
         set_v1(rhs.value_.v1);
@@ -1615,8 +1657,11 @@ class ValUnion final  {
   ValUnion& operator=(ValUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::v1:
       {
         set_v1(std::move(rhs.value_.v1));
@@ -1640,8 +1685,11 @@ class ValUnion final  {
   ValUnion& operator=(const ValUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::v1:
       {
         set_v1(rhs.value_.v1);
@@ -1857,8 +1905,11 @@ class VirtualComplexUnion  {
   VirtualComplexUnion(VirtualComplexUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::thingOne:
       {
         set_thingOne(std::move(rhs.value_.thingOne));
@@ -1881,8 +1932,11 @@ class VirtualComplexUnion  {
   VirtualComplexUnion(const VirtualComplexUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::thingOne:
       {
         set_thingOne(rhs.value_.thingOne);
@@ -1904,8 +1958,11 @@ class VirtualComplexUnion  {
   VirtualComplexUnion& operator=(VirtualComplexUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::thingOne:
       {
         set_thingOne(std::move(rhs.value_.thingOne));
@@ -1929,8 +1986,11 @@ class VirtualComplexUnion  {
   VirtualComplexUnion& operator=(const VirtualComplexUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::thingOne:
       {
         set_thingOne(rhs.value_.thingOne);
@@ -2262,8 +2322,11 @@ class NonCopyableUnion final  {
   NonCopyableUnion(NonCopyableUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::s:
       {
         set_s(std::move(rhs.value_.s));
@@ -2281,8 +2344,11 @@ class NonCopyableUnion final  {
   NonCopyableUnion& operator=(NonCopyableUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::s:
       {
         set_s(std::move(rhs.value_.s));

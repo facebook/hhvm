@@ -117,6 +117,13 @@ struct StructWithNonOptionalBox {
   3: StructWithRef c (cpp.box);
 }
 
+struct StructWithInternBox {
+  @thrift.InternBox
+  1: Empty field1;
+  @thrift.InternBox
+  2: MyField field2;
+}
+
 const StructWithRef kStructWithRef = {
   "def_field": {},
   "opt_field": {},

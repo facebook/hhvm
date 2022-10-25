@@ -27,11 +27,27 @@ namespace thrift {
 namespace compiler {
 namespace {
 
+struct json_codegen_data {
+  // The current program being generated
+  const t_program* current_program;
+  std::string compiler_path;
+  source_manager* sm;
+};
+
 int get_lineno(const t_node& node, source_manager& sm) {
   auto loc = node.src_range().begin;
   return loc != source_location()
       ? resolved_location(node.src_range().begin, sm).line()
       : 0;
+}
+
+std::string get_filepath(
+    const t_node& node, source_manager& sm, std::string compiler_path) {
+  auto path = boost::filesystem::path(
+      resolved_location(node.src_range().begin, sm).file_name());
+  return boost::filesystem::relative(
+             boost::filesystem::canonical(path), compiler_path)
+      .generic_string();
 }
 
 class t_json_experimental_generator : public t_mstch_generator {
@@ -45,6 +61,7 @@ class t_json_experimental_generator : public t_mstch_generator {
 
  private:
   void set_mstch_factories();
+  json_codegen_data data_;
 };
 
 class json_experimental_program : public mstch_program {
@@ -110,8 +127,8 @@ class json_experimental_service : public mstch_service {
       const t_service* s,
       mstch_context& ctx,
       mstch_element_position pos,
-      source_manager* sm)
-      : mstch_service(s, ctx, pos), source_mgr_(*sm) {
+      json_codegen_data d)
+      : mstch_service(s, ctx, pos), data_(d) {
     register_methods(
         this,
         {
@@ -122,17 +139,16 @@ class json_experimental_service : public mstch_service {
         });
   }
   mstch::node get_lineno() {
-    return compiler::get_lineno(*service_, source_mgr_);
+    return compiler::get_lineno(*service_, *data_.sm);
   }
   mstch::node has_docstring() { return service_->has_doc(); }
   mstch::node get_docstring() { return json_quote_ascii(service_->get_doc()); }
   mstch::node path() {
-    return service_->program()->include_prefix() + service_->program()->name() +
-        ".thrift";
+    return compiler::get_filepath(*service_, *data_.sm, data_.compiler_path);
   }
 
  private:
-  source_manager& source_mgr_;
+  json_codegen_data data_;
 };
 
 class json_experimental_function : public mstch_function {
@@ -189,6 +205,35 @@ class json_experimental_struct : public mstch_struct {
 
  private:
   source_manager& source_mgr_;
+};
+
+class json_experimental_type : public mstch_type {
+ public:
+  json_experimental_type(
+      const t_type* t,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      json_codegen_data d)
+      : mstch_type(t, ctx, pos), data_(d) {
+    register_methods(
+        this,
+        {
+            {"type:lineno", &json_experimental_type::get_lineno},
+            {"type:external?", &json_experimental_type::is_external},
+            {"type:path", &json_experimental_type::path},
+        });
+  }
+
+  mstch::node get_lineno() { return compiler::get_lineno(*type_, *data_.sm); }
+  mstch::node path() {
+    return compiler::get_filepath(*type_, *data_.sm, data_.compiler_path);
+  }
+  mstch::node is_external() {
+    return data_.current_program != type_->program();
+  }
+
+ private:
+  json_codegen_data data_;
 };
 
 class json_experimental_field : public mstch_field {
@@ -402,6 +447,9 @@ class json_experimental_const_value : public mstch_const_value {
 void t_json_experimental_generator::generate_program() {
   out_dir_base_ = "gen-json_experimental";
   const auto* program = get_program();
+  data_.current_program = program;
+  data_.compiler_path = boost::filesystem::current_path().generic_string();
+  data_.sm = &source_mgr_;
   set_mstch_factories();
   auto mstch_program = mstch_context_.program_factory->make_mstch_object(
       program, mstch_context_);
@@ -410,7 +458,7 @@ void t_json_experimental_generator::generate_program() {
 
 void t_json_experimental_generator::set_mstch_factories() {
   mstch_context_.add<json_experimental_program>();
-  mstch_context_.add<json_experimental_service>(&source_mgr_);
+  mstch_context_.add<json_experimental_service>(data_);
   mstch_context_.add<json_experimental_function>(&source_mgr_);
   mstch_context_.add<json_experimental_struct>(&source_mgr_);
   mstch_context_.add<json_experimental_field>(&source_mgr_);
@@ -418,6 +466,7 @@ void t_json_experimental_generator::set_mstch_factories() {
   mstch_context_.add<json_experimental_enum_value>(&source_mgr_);
   mstch_context_.add<json_experimental_const_value>(&source_mgr_);
   mstch_context_.add<json_experimental_typedef>(&source_mgr_);
+  mstch_context_.add<json_experimental_type>(data_);
 }
 
 THRIFT_REGISTER_GENERATOR(json_experimental, "JSON_EXPERIMENTAL", "");

@@ -7,8 +7,6 @@
 
 from __future__ import annotations
 
-import enum
-
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
@@ -147,7 +145,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.enums.module.thrift_metadata
 
-class Metasyntactic(_fbthrift_python_types.Enum, enum.IntEnum):
+class Metasyntactic(_fbthrift_python_types.Enum, int):
     FOO = 1
     BAR = 2
     BAZ = 3
@@ -171,7 +169,7 @@ class Metasyntactic(_fbthrift_python_types.Enum, enum.IntEnum):
 
     def _to_py_deprecated(self):
         return self.value
-class MyEnum1(_fbthrift_python_types.Enum, enum.IntEnum):
+class MyEnum1(_fbthrift_python_types.Enum, int):
     ME1_1 = 1
     ME1_2 = 2
     ME1_3 = 3
@@ -196,7 +194,7 @@ class MyEnum1(_fbthrift_python_types.Enum, enum.IntEnum):
 
     def _to_py_deprecated(self):
         return self.value
-class MyEnum2(_fbthrift_python_types.Enum, enum.IntEnum):
+class MyEnum2(_fbthrift_python_types.Enum, int):
     ME2_0 = 0
     ME2_1 = 1
     ME2_2 = 2
@@ -218,7 +216,7 @@ class MyEnum2(_fbthrift_python_types.Enum, enum.IntEnum):
 
     def _to_py_deprecated(self):
         return self.value
-class MyEnum3(_fbthrift_python_types.Enum, enum.IntEnum):
+class MyEnum3(_fbthrift_python_types.Enum, int):
     ME3_0 = 0
     ME3_1 = 1
     ME3_N2 = -2
@@ -243,7 +241,7 @@ class MyEnum3(_fbthrift_python_types.Enum, enum.IntEnum):
 
     def _to_py_deprecated(self):
         return self.value
-class MyEnum4(_fbthrift_python_types.Enum, enum.IntEnum):
+class MyEnum4(_fbthrift_python_types.Enum, int):
     ME4_A = 2147483645
     ME4_B = 2147483646
     ME4_C = 2147483647
@@ -267,7 +265,7 @@ class MyEnum4(_fbthrift_python_types.Enum, enum.IntEnum):
 
     def _to_py_deprecated(self):
         return self.value
-class MyBitmaskEnum1(_fbthrift_python_types.Enum, enum.IntEnum):
+class MyBitmaskEnum1(_fbthrift_python_types.Enum, int):
     ONE = 1
     TWO = 2
     FOUR = 4
@@ -290,7 +288,7 @@ class MyBitmaskEnum1(_fbthrift_python_types.Enum, enum.IntEnum):
 
     def _to_py_deprecated(self):
         return self.value
-class MyBitmaskEnum2(_fbthrift_python_types.Enum, enum.IntEnum):
+class MyBitmaskEnum2(_fbthrift_python_types.Enum, int):
     ONE = 1
     TWO = 2
     FOUR = 4

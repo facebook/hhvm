@@ -666,13 +666,13 @@ class GeneratedAsyncProcessorBase : public AsyncProcessor {
 
   // TODO(praihan): This function will be removed once we enforce that
   // createMethodMetadata is always implemented correctly.
-  // void processSerializedCompressedRequest(
-  //     ResponseChannelRequest::UniquePtr req,
-  //     SerializedCompressedRequest&& serializedRequest,
-  //     protocol::PROTOCOL_TYPES prot_type,
-  //     Cpp2RequestContext* context,
-  //     folly::EventBase* eb,
-  //     concurrency::ThreadManager* tm) override = 0;
+  void processSerializedCompressedRequest(
+      ResponseChannelRequest::UniquePtr req,
+      SerializedCompressedRequest&& serializedRequest,
+      protocol::PROTOCOL_TYPES prot_type,
+      Cpp2RequestContext* context,
+      folly::EventBase* eb,
+      concurrency::ThreadManager* tm) override = 0;
 
   // Sends an error response if validation fails.
   static bool validateRpcKind(
@@ -1171,7 +1171,7 @@ class HandlerCallbackBase {
 
   HandlerCallbackBase(
       ResponseChannelRequest::UniquePtr req,
-      std::unique_ptr<ContextStack> ctx,
+      ContextStack::UniquePtr ctx,
       exnw_ptr ewp,
       folly::EventBase* eb,
       concurrency::ThreadManager* tm,
@@ -1193,7 +1193,7 @@ class HandlerCallbackBase {
 
   HandlerCallbackBase(
       ResponseChannelRequest::UniquePtr req,
-      std::unique_ptr<ContextStack> ctx,
+      ContextStack::UniquePtr ctx,
       exnw_ptr ewp,
       folly::EventBase* eb,
       folly::Executor::KeepAlive<> executor,
@@ -1265,9 +1265,6 @@ class HandlerCallbackBase {
 
   ResponseChannelRequest* getRequest() { return req_.get(); }
 
-  template <class F>
-  void runFuncInQueue(F&& func, bool oneway = false);
-
   const folly::Executor::KeepAlive<>& getInternalKeepAlive();
 
  protected:
@@ -1308,7 +1305,7 @@ class HandlerCallbackBase {
 
   // Required for this call
   ResponseChannelRequest::UniquePtr req_;
-  std::unique_ptr<ContextStack> ctx_;
+  ContextStack::UniquePtr ctx_;
   TilePtr interaction_;
 
   // May be null in a oneway call
@@ -1340,7 +1337,7 @@ class HandlerCallback : public HandlerCallbackBase {
 
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
-      std::unique_ptr<ContextStack> ctx,
+      ContextStack::UniquePtr ctx,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1351,7 +1348,7 @@ class HandlerCallback : public HandlerCallbackBase {
 
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
-      std::unique_ptr<ContextStack> ctx,
+      ContextStack::UniquePtr ctx,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1386,7 +1383,7 @@ class HandlerCallback<void> : public HandlerCallbackBase {
 
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
-      std::unique_ptr<ContextStack> ctx,
+      ContextStack::UniquePtr ctx,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1397,7 +1394,7 @@ class HandlerCallback<void> : public HandlerCallbackBase {
 
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
-      std::unique_ptr<ContextStack> ctx,
+      ContextStack::UniquePtr ctx,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1668,20 +1665,6 @@ void GeneratedAsyncProcessorBase::processInThread(
   }
 }
 
-template <class F>
-void HandlerCallbackBase::runFuncInQueue(F&& func, bool) {
-  assert(getEventBase()->isInEventBaseThread());
-  if (auto threadManager = getThreadManager_deprecated()) {
-    threadManager->add(
-        concurrency::FunctionRunner::create(std::forward<F>(func)),
-        0, // timeout
-        0, // expiration
-        true); // upstream
-  } else {
-    getHandlerExecutor()->add(std::forward<F>(func));
-  }
-}
-
 template <typename F, typename T>
 void HandlerCallbackBase::callExceptionInEventBaseThread(F&& f, T&& ex) {
   if (!f) {
@@ -1725,7 +1708,7 @@ void HandlerCallbackBase::putMessageInReplyQueue(
 template <typename T>
 HandlerCallback<T>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
-    std::unique_ptr<ContextStack> ctx,
+    ContextStack::UniquePtr ctx,
     cob_ptr cp,
     exnw_ptr ewp,
     int32_t protoSeqId,
@@ -1748,7 +1731,7 @@ HandlerCallback<T>::HandlerCallback(
 template <typename T>
 HandlerCallback<T>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
-    std::unique_ptr<ContextStack> ctx,
+    ContextStack::UniquePtr ctx,
     cob_ptr cp,
     exnw_ptr ewp,
     int32_t protoSeqId,

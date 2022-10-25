@@ -834,6 +834,7 @@ struct RuntimeOption {
   F(uint32_t, WarnOnImplicitCoercionOfEnumValue, 0)                     \
   F(bool, EnableLogBridge,             true)                            \
   F(bool, MoreAccurateMemStats,        true)                            \
+  F(bool, MemInfoCheckCgroup2,         true)                            \
   F(bool, AllowScopeBinding,           false)                           \
   F(bool, TranslateHackC,              false)                           \
   F(bool, JitNoGdb,                    true)                            \
@@ -1164,13 +1165,13 @@ struct RuntimeOption {
   /* Should we use structs? If so, how big can they get? Due to how we  \
    * represent structs, we can't make any with more than 255 keys. */   \
   F(bool, EmitBespokeStructDicts, true)                                 \
-  F(uint8_t, BespokeStructDictMaxNumKeys, 245)                          \
+  F(uint16_t, BespokeStructDictMaxNumKeys, 2048)                        \
   F(double, BespokeStructDictKeyCoverageThreshold, 95.0)                \
-  F(uint8_t, BespokeStructDictMinKeys, 4)                               \
-  F(double, BespokeStructDictMaxSizeRatio, 256.0)                       \
+  F(uint8_t, BespokeStructDictMinKeys, 128)                             \
+  F(double, BespokeStructDictMaxSizeRatio, 2.0)                         \
   /* What is the maximum number of keys to track in key order           \
    * profiles? */                                                       \
-  F(uint64_t, BespokeMaxTrackedKeys, 245)                               \
+  F(uint64_t, BespokeMaxTrackedKeys, 2048)                              \
   F(bool, EmitAPCBespokeArrays, true)                                   \
   /* Should we use monotypes? */                                        \
   F(bool, EmitBespokeMonotypes, false)                                  \
@@ -1325,7 +1326,7 @@ struct RuntimeOption {
    * 1 - Warn                                                           \
    * 2 - Throw exception                                                \
    */                                                                   \
-  F(uint32_t, EnforceModules, 0)                                        \
+  F(uint32_t, EnforceModules, 2)                                        \
   /*                                                                    \
    * Controls behavior on reflection to default value expressions       \
    * that throw during evaluation                                       \

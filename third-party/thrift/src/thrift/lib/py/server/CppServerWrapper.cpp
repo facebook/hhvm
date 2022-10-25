@@ -54,6 +54,8 @@ using namespace boost::python;
 #define _Py_IsFinalizing() false
 #endif
 
+THRIFT_FLAG_DEFINE_bool(allow_resource_pools_in_cpp_server_wrapper, false);
+
 namespace {
 
 const std::string kHeaderEx = "uex";
@@ -701,27 +703,39 @@ class CppServerWrapper : public ThriftServer {
   }
 
   void setNewSimpleThreadManager(size_t count, size_t) {
-    auto tm = ThreadManager::newSimpleThreadManager(count);
-    auto poolThreadName = getCPUWorkerThreadName();
-    if (!poolThreadName.empty()) {
-      tm->setNamePrefix(poolThreadName);
-    }
+    if (THRIFT_FLAG(allow_resource_pools_in_cpp_server_wrapper)) {
+      setNumCPUWorkerThreads(count);
+      setThreadManagerType(
+          apache::thrift::BaseThriftServer::ThreadManagerType::SIMPLE);
+    } else {
+      auto tm = ThreadManager::newSimpleThreadManager(count);
+      auto poolThreadName = getCPUWorkerThreadName();
+      if (!poolThreadName.empty()) {
+        tm->setNamePrefix(poolThreadName);
+      }
 
-    tm->threadFactory(std::make_shared<PosixThreadFactory>());
-    tm->start();
-    setThreadManager(std::move(tm));
+      tm->threadFactory(std::make_shared<PosixThreadFactory>());
+      tm->start();
+      setThreadManager_deprecated(std::move(tm));
+    }
   }
 
   void setNewPriorityQueueThreadManager(size_t numThreads) {
-    auto tm = ThreadManager::newPriorityQueueThreadManager(numThreads);
-    auto poolThreadName = getCPUWorkerThreadName();
-    if (!poolThreadName.empty()) {
-      tm->setNamePrefix(poolThreadName);
-    }
+    if (THRIFT_FLAG(allow_resource_pools_in_cpp_server_wrapper)) {
+      setNumCPUWorkerThreads(numThreads);
+      setThreadManagerType(
+          apache::thrift::BaseThriftServer::ThreadManagerType::PRIORITY_QUEUE);
+    } else {
+      auto tm = ThreadManager::newPriorityQueueThreadManager(numThreads);
+      auto poolThreadName = getCPUWorkerThreadName();
+      if (!poolThreadName.empty()) {
+        tm->setNamePrefix(poolThreadName);
+      }
 
-    tm->threadFactory(std::make_shared<PosixThreadFactory>());
-    tm->start();
-    setThreadManager(std::move(tm));
+      tm->threadFactory(std::make_shared<PosixThreadFactory>());
+      tm->start();
+      setThreadManager_deprecated(std::move(tm));
+    }
   }
 
   void setNewPriorityThreadManager(
@@ -731,17 +745,24 @@ class CppServerWrapper : public ThriftServer {
       size_t normal,
       size_t best_effort,
       size_t) {
-    auto tm = PriorityThreadManager::newPriorityThreadManager(
-        {{high_important, high, important, normal, best_effort}});
-    tm->enableCodel(getEnableCodel());
-    auto poolThreadName = getCPUWorkerThreadName();
-    if (!poolThreadName.empty()) {
-      tm->setNamePrefix(poolThreadName);
-    }
+    if (THRIFT_FLAG(allow_resource_pools_in_cpp_server_wrapper)) {
+      setThreadManagerType(
+          apache::thrift::BaseThriftServer::ThreadManagerType::PRIORITY);
+      setThreadManagerPoolSizes(
+          {{high_important, high, important, normal, best_effort}});
+    } else {
+      auto tm = PriorityThreadManager::newPriorityThreadManager(
+          {{high_important, high, important, normal, best_effort}});
+      tm->enableCodel(getEnableCodel());
+      auto poolThreadName = getCPUWorkerThreadName();
+      if (!poolThreadName.empty()) {
+        tm->setNamePrefix(poolThreadName);
+      }
 
-    tm->threadFactory(std::make_shared<PosixThreadFactory>());
-    tm->start();
-    setThreadManager(std::move(tm));
+      tm->threadFactory(std::make_shared<PosixThreadFactory>());
+      tm->start();
+      setThreadManager_deprecated(std::move(tm));
+    }
   }
 
   // this adapts from a std::shared_ptr, which boost::python does not (yet)

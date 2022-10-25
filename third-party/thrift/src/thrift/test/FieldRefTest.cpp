@@ -22,6 +22,7 @@
 #include <thrift/lib/cpp2/BoxedValuePtr.h>
 #include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
+#include <thrift/lib/cpp2/op/Clear.h>
 
 #include <folly/Traits.h>
 #include <folly/portability/GTest.h>
@@ -29,9 +30,12 @@
 using apache::thrift::bad_field_access;
 using apache::thrift::boxed_field_ref;
 using apache::thrift::field_ref;
+using apache::thrift::intern_boxed_field_ref;
 using apache::thrift::optional_boxed_field_ref;
 using apache::thrift::optional_field_ref;
 using apache::thrift::terse_field_ref;
+using apache::thrift::detail::boxed_ptr;
+using apache::thrift::detail::boxed_value;
 using apache::thrift::detail::boxed_value_ptr;
 
 // A struct which is assignable but not constructible from int or other types
@@ -248,6 +252,83 @@ class TestStructBoxedValuePtr {
   boxed_value_ptr<int> int_val_default_ = 0;
   boxed_value_ptr<std::unique_ptr<int>> uptr_;
   boxed_value_ptr<Nested> nested_;
+};
+
+class ThriftStruct {
+ public:
+  using __fbthrift_cpp2_type = ThriftStruct;
+  static constexpr bool __fbthrift_cpp2_is_union = false;
+  terse_field_ref<std::string&> name() & { return {name_}; }
+  terse_field_ref<const std::string&> name() const& { return {name_}; }
+  terse_field_ref<std::string&&> name() && { return {std::move(name_)}; }
+  terse_field_ref<const std::string&&> name() const&& {
+    return {std::move(name_)};
+  }
+
+ private:
+  std::string name_ = "default";
+};
+
+class TestStructInternBoxedValue {
+ public:
+  auto struct_field1() & {
+    return intern_boxed_field_ref<boxed_value<ThriftStruct>&>{
+        __fbthrift_struct_field1,
+        apache::thrift::op::getDefault<ThriftStruct>,
+        __isset.at(folly::index_constant<0>())};
+  }
+  auto struct_field1() && {
+    return intern_boxed_field_ref<boxed_value<ThriftStruct>&&>{
+        std::move(__fbthrift_struct_field1),
+        apache::thrift::op::getDefault<ThriftStruct>,
+        __isset.at(folly::index_constant<0>())};
+  }
+  auto struct_field1() const& {
+    return intern_boxed_field_ref<const boxed_value<ThriftStruct>&>{
+        std::as_const(__fbthrift_struct_field1),
+        apache::thrift::op::getDefault<ThriftStruct>,
+        __isset.at(folly::index_constant<0>())};
+  }
+  auto struct_field1() const&& {
+    return intern_boxed_field_ref<const boxed_value<ThriftStruct>&&>{
+        std::move(__fbthrift_struct_field1),
+        apache::thrift::op::getDefault<ThriftStruct>,
+        __isset.at(folly::index_constant<0>())};
+  }
+
+  auto struct_field2() & {
+    return intern_boxed_field_ref<boxed_value<ThriftStruct>&>{
+        __fbthrift_struct_field2,
+        apache::thrift::op::getDefault<ThriftStruct>,
+        __isset.at(folly::index_constant<1>())};
+  }
+  auto struct_field2() && {
+    return intern_boxed_field_ref<boxed_value<ThriftStruct>&&>{
+        std::move(__fbthrift_struct_field2),
+        apache::thrift::op::getDefault<ThriftStruct>,
+        __isset.at(folly::index_constant<1>())};
+  }
+  auto struct_field2() const& {
+    return intern_boxed_field_ref<const boxed_value<ThriftStruct>&>{
+        __fbthrift_struct_field2,
+        apache::thrift::op::getDefault<ThriftStruct>,
+        __isset.at(folly::index_constant<1>())};
+  }
+  auto struct_field2() const&& {
+    return intern_boxed_field_ref<const boxed_value<ThriftStruct>&&>{
+        std::move(__fbthrift_struct_field2),
+        apache::thrift::op::getDefault<ThriftStruct>,
+        __isset.at(folly::index_constant<1>())};
+  }
+
+ private:
+  boxed_value<ThriftStruct> __fbthrift_struct_field1{
+      boxed_value<ThriftStruct>::fromStaticConstant(
+          &apache::thrift::op::getDefault<ThriftStruct>())};
+  boxed_value<ThriftStruct> __fbthrift_struct_field2{
+      boxed_value<ThriftStruct>::fromStaticConstant(
+          &apache::thrift::op::getDefault<ThriftStruct>())};
+  apache::thrift::detail::isset_bitset<2> __isset{};
 };
 
 // TODO(dokwon): Clean up FieldRefTest using TYPED_TEST.
@@ -919,4 +1000,91 @@ TEST(boxed_field_ref_test, emplace) {
   EXPECT_EQ(s.name(), "bar");
   s.name().emplace({'b', 'a', 'z'}, std::allocator<char>());
   EXPECT_EQ(s.name(), "baz");
+}
+
+const ThriftStruct* getInternDefaultAddress() {
+  return &apache::thrift::op::getDefault<ThriftStruct>();
+}
+
+TEST(intern_boxed_field_ref_test, access) {
+  auto s = TestStructInternBoxedValue();
+  EXPECT_EQ(
+      &*std::as_const(s).struct_field1(), &*std::as_const(s).struct_field2());
+  EXPECT_EQ(&*std::as_const(s).struct_field1(), getInternDefaultAddress());
+  EXPECT_NE(&*std::as_const(s).struct_field1(), &*s.struct_field2());
+  EXPECT_NE(&*s.struct_field1(), &*s.struct_field2());
+  EXPECT_NE(&*std::as_const(s).struct_field1(), getInternDefaultAddress());
+  EXPECT_NE(&*std::as_const(s).struct_field2(), getInternDefaultAddress());
+}
+
+TEST(intern_boxed_field_ref_test, shallow_copy_from) {
+  auto s = TestStructInternBoxedValue();
+  s.struct_field1()->name() = "foo";
+  // 's' owns 'struct_field1' but not 'struct_field2'.
+  EXPECT_NE(
+      &*std::as_const(s).struct_field1(), &*std::as_const(s).struct_field2());
+  s.struct_field1().copy_from(std::as_const(s).struct_field2());
+  // Performs shallow copy as 'struct_field2' is not owned.
+  EXPECT_EQ(
+      &*std::as_const(s).struct_field1(), &*std::as_const(s).struct_field2());
+  EXPECT_EQ(&*std::as_const(s).struct_field1(), getInternDefaultAddress());
+}
+
+TEST(intern_boxed_field_ref_test, deep_copy_from) {
+  auto s = TestStructInternBoxedValue();
+  s.struct_field1()->name() = "foo";
+  // 's' owns 'struct_field1' but not 'struct_field2'.
+  EXPECT_NE(
+      &*std::as_const(s).struct_field1(), &*std::as_const(s).struct_field2());
+  s.struct_field2().copy_from(std::as_const(s).struct_field1());
+  // Performs deep copy as 'struct_field2' is not owned.
+  EXPECT_NE(
+      &*std::as_const(s).struct_field1(), &*std::as_const(s).struct_field2());
+  EXPECT_NE(&*std::as_const(s).struct_field1(), getInternDefaultAddress());
+  EXPECT_NE(&*std::as_const(s).struct_field2(), getInternDefaultAddress());
+}
+
+TEST(intern_boxed_field_ref_test, reset) {
+  auto s = TestStructInternBoxedValue();
+  s.struct_field1()->name() = "foo";
+  // 's' owns 'struct_field1' but not 'struct_field2'.
+  EXPECT_NE(
+      &*std::as_const(s).struct_field1(), &*std::as_const(s).struct_field2());
+  s.struct_field1().reset();
+  // 'struct_field1' reset back to the interned default value.
+  EXPECT_EQ(
+      &*std::as_const(s).struct_field1(), &*std::as_const(s).struct_field2());
+  EXPECT_EQ(&*std::as_const(s).struct_field1(), getInternDefaultAddress());
+}
+
+TEST(intern_boxed_field_ref_test, emplace) {
+  TestStructInternBoxedValue s;
+  s.struct_field1().emplace();
+  EXPECT_TRUE(s.struct_field1().is_set());
+  EXPECT_NE(
+      &*std::as_const(s).struct_field1(), &*std::as_const(s).struct_field2());
+  EXPECT_NE(&*std::as_const(s).struct_field1(), getInternDefaultAddress());
+}
+
+TEST(intern_boxed_field_ref_test, has_value) {
+  TestStructInternBoxedValue s;
+  EXPECT_FALSE(s.struct_field1().is_set());
+  s.struct_field1() = ThriftStruct();
+  EXPECT_TRUE(s.struct_field1().is_set());
+}
+
+TEST(intern_boxed_field_ref_test, ensure) {
+  TestStructInternBoxedValue s;
+  s.struct_field1().value().name() = "foo";
+  EXPECT_FALSE(s.struct_field1().is_set());
+  s.struct_field1().ensure();
+  EXPECT_TRUE(s.struct_field1().is_set());
+  EXPECT_EQ(s.struct_field1()->name(), "foo");
+}
+
+TEST(intern_boxed_field_ref_test, assignment) {
+  TestStructInternBoxedValue s;
+  s.struct_field1() = apache::thrift::op::getDefault<ThriftStruct>();
+  // Although this is setting with the default value, it is not interned.
+  EXPECT_NE(&*std::as_const(s).struct_field1(), getInternDefaultAddress());
 }

@@ -9,15 +9,14 @@ path = "../../pos.rs"
 
 [dependencies]
 arena_trait = { path = "../../../../arena_trait" }
-bstr = { version = "0.2", features = ["serde1"] }
+bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
 bumpalo = { version = "3.8", features = ["collections"] }
 eq_modulo_pos = { path = "../../../../utils/eq_modulo_pos" }
 hh24_types = { path = "../../../../utils/hh24_types" }
-im = { version = "14.2", features = ["rayon", "serde"] }
+im = { version = "15.1", features = ["rayon", "serde"] }
 indexmap = { version = "1.9.1", features = ["rayon", "serde-1"] }
 intern = { path = "../../../../utils/intern" }
 ocamlrep = { path = "../../../../ocamlrep" }
-ocamlrep_derive = { path = "../../../../ocamlrep_derive" }
 oxidized = { path = "../../../../oxidized" }
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }
 relative_path = { path = "../../../../utils/rust/relative_path" }

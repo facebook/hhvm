@@ -40,6 +40,10 @@ type t =
     }
   | Interface_with_partial_typeconst of Pos.t
   | Partially_abstract_typeconst_definition of Pos.t
+  | Refinement_in_typestruct of {
+      pos: Pos.t;
+      kind: string;
+    }
   | Multiple_xhp_category of Pos.t
   | Return_in_gen of Pos.t
   | Return_in_finally of Pos.t
@@ -125,6 +129,7 @@ type t =
       pos: Pos.t;
       second_pos: Pos.t;
     }
+  | Soft_internal_without_internal of Pos.t
 
 let repeated_record_field_name pos name prev_pos =
   User_error.make
@@ -252,6 +257,14 @@ let partially_abstract_typeconst_definition pos =
   User_error.make
     Error_code.(to_enum PartiallyAbstractTypeconstDefinition)
     (pos, "`as` constraints are only legal on abstract type constants")
+    []
+
+let refinement_in_typestruct kind pos =
+  User_error.make
+    Error_code.(to_enum RefinementInTypeStruct)
+    ( pos,
+      "Type refinements cannot appear on the right-hand side of " ^ kind ^ "."
+    )
     []
 
 let multiple_xhp_category pos =
@@ -570,6 +583,14 @@ let private_and_final pos =
     (pos, "Class methods cannot be both `private` and `final`.")
     []
 
+let soft_internal_without_internal pos =
+  User_error.make
+    Error_code.(to_enum Soft_internal_without_internal)
+    ( pos,
+      "<<__SoftInternal>> can only be used on internal symbols. Try adding internal to this symbol."
+    )
+    []
+
 let internal_member_inside_public_trait member_pos trait_pos =
   User_error.make
     Error_code.(to_enum InternalMemberInsidePublicTrait)
@@ -613,6 +634,7 @@ let to_user_error = function
   | Interface_with_partial_typeconst pos -> interface_with_partial_typeconst pos
   | Partially_abstract_typeconst_definition pos ->
     partially_abstract_typeconst_definition pos
+  | Refinement_in_typestruct { pos; kind } -> refinement_in_typestruct kind pos
   | Multiple_xhp_category pos -> multiple_xhp_category pos
   | Return_in_gen pos -> return_in_gen pos
   | Return_in_finally pos -> return_in_finally pos
@@ -661,3 +683,4 @@ let to_user_error = function
     internal_member_inside_public_trait member_pos trait_pos
   | Attribute_conflicting_memoize { pos; second_pos } ->
     attribute_conflicting_memoize pos second_pos
+  | Soft_internal_without_internal pos -> soft_internal_without_internal pos

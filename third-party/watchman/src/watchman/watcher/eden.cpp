@@ -6,6 +6,7 @@
  */
 
 #include <cpptoml.h>
+#include <fmt/core.h>
 #include <folly/String.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/AsyncSocket.h>
@@ -671,7 +672,27 @@ std::vector<NameAndDType> globNameAndDType(
     params.sync() = getSyncBehavior();
 
     Glob glob;
-    client->sync_globFiles(glob, params);
+    try {
+      client->sync_globFiles(glob, params);
+    } catch (const apache::thrift::transport::TTransportException& ex) {
+      logf(
+          ERR,
+          "Thrift exception raised from EdenFS when globbing files: {} (errno {}, type {})\n",
+          ex.what(),
+          ex.getErrno(),
+          ex.getType());
+      throw;
+    } catch (const std::exception& ex) {
+      logf(
+          ERR,
+          "Exception raised from EdenFS when globbing files: {}\n",
+          ex.what());
+      throw;
+    }
+    logf(
+        DBG,
+        "Glob finished. Received {} files.\n",
+        glob.matchingFiles_ref()->size());
     std::vector<NameAndDType> result;
     appendGlobResultToNameAndDTypeVec(result, std::move(glob));
     return result;
@@ -696,9 +717,13 @@ std::shared_ptr<apache::thrift::RequestChannel> makeThriftChannel(
             numRetries,
             apache::thrift::ReconnectingRequestChannel::newChannel(
                 eb, [rootPath](folly::EventBase& eb) {
-                  return apache::thrift::RocketClientChannel::newChannel(
-                      AsyncSocket::newSocket(
-                          &eb, getEdenSocketAddress(rootPath)));
+                  auto channel =
+                      apache::thrift::RocketClientChannel::newChannel(
+                          AsyncSocket::newSocket(
+                              &eb, getEdenSocketAddress(rootPath)));
+                  // set maximum timeout to 15 minutes.
+                  channel->setTimeout(900000);
+                  return channel;
                 }));
       });
   return channel;
@@ -718,7 +743,9 @@ class EdenView final : public QueryableView {
         splitGlobPattern_(config.getBool("eden_split_glob_pattern", false)),
         thresholdForFreshInstance_(config.getInt(
             "eden_file_count_threshold_for_fresh_instance",
-            10000)) {}
+            10000)),
+        enableGlobUpperBounds_(
+            config.getBool("eden_enable_glob_upper_bounds", false)) {}
 
   void timeGenerator(const Query* /*query*/, QueryContext* ctx) const override {
     ctx->generationStarted();
@@ -817,12 +844,11 @@ class EdenView final : public QueryableView {
 
   void executeGlobBasedQuery(
       const std::vector<std::string>& globStrings,
-      const Query* query,
       QueryContext* ctx,
+      bool includeDotfiles,
       bool includeDir = true) const {
     auto client = getEdenClient(thriftChannel_);
 
-    auto includeDotfiles = (query->glob_flags & WM_PERIOD) == 0;
     auto fileInfo = globNameAndDType(
         client.get(),
         mountPoint_,
@@ -893,7 +919,7 @@ class EdenView final : public QueryableView {
           w_string::pathCat({rel, escapeGlobSpecialChars(path.name), glob})
               .view()});
     }
-    executeGlobBasedQuery(globStrings, query, ctx);
+    executeGlobBasedQuery(globStrings, ctx, /*includeDotfiles=*/true);
 
     // We send another round of glob queries to query about the information
     // about the path themselves since we want to include the paths if they are
@@ -905,7 +931,8 @@ class EdenView final : public QueryableView {
           w_string::pathCat({rel, escapeGlobSpecialChars(path.name)}).view()});
     }
 
-    executeGlobBasedQuery(globStrings, query, ctx, false);
+    executeGlobBasedQuery(
+        globStrings, ctx, /*includeDotfiles=*/true, /*includeDir=*/false);
   }
 
   void globGenerator(const Query* query, QueryContext* ctx) const override {
@@ -933,21 +960,14 @@ class EdenView final : public QueryableView {
       throw QueryExecError(
           "glob_noescape is not supported for the eden watcher");
     }
-    executeGlobBasedQuery(globStrings, query, ctx);
+    bool includeDotfiles = (query->glob_flags & WM_PERIOD) == 0;
+    executeGlobBasedQuery(globStrings, ctx, includeDotfiles);
   }
 
-  void allFilesGenerator(const Query* query, QueryContext* ctx) const override {
+  void allFilesGenerator(const Query*, QueryContext* ctx) const override {
     ctx->generationStarted();
-    // If the query is anchored to a relative_root, use that that
-    // avoid sucking down a massive list of files from eden
-    std::string globPattern;
-    auto rel = computeRelativePathPiece(ctx);
-    if (rel.size() > 0) {
-      globPattern.append(rel.data(), rel.size());
-      globPattern.append("/");
-    }
-    globPattern.append("**");
-    executeGlobBasedQuery(std::vector<std::string>{globPattern}, query, ctx);
+    auto globPatterns = getGlobPatternsForAllFiles(ctx);
+    executeGlobBasedQuery(globPatterns, ctx, /*includeDotfiles=*/true);
   }
 
   ClockPosition getMostRecentRootNumberAndTickValue() const override {
@@ -1097,6 +1117,50 @@ class EdenView final : public QueryableView {
 
  private:
   /**
+   * Returns glob patterns (relative to the project root) that describe an upper
+   * bound on the result set, for use by queries that would otherwise need to
+   * scan the entire repo.
+   */
+  std::vector<std::string> getGlobPatternsForAllFiles(QueryContext* ctx) const {
+    std::vector<std::string> globPatterns;
+    std::optional<std::vector<std::string>> globUpperBound;
+    if (enableGlobUpperBounds_ && ctx->query->expr) {
+      globUpperBound =
+          ctx->query->expr->computeGlobUpperBound(ctx->root->case_sensitive);
+    }
+    bool didFindUpperBound = globUpperBound.has_value();
+    if (enableGlobUpperBounds_) {
+      if (didFindUpperBound) {
+        log(DBG,
+            "Found ",
+            globUpperBound->size(),
+            " glob pattern(s) as upper bound on query.",
+            "\n");
+      } else {
+        log(DBG, "Did not find a glob upper bound on query.", "\n");
+      }
+    }
+    if (!didFindUpperBound) {
+      globUpperBound = std::vector<std::string>{"**"};
+    }
+    for (auto& pattern : *globUpperBound) {
+      if (didFindUpperBound) {
+        log(DBG, "  Glob upper bound pattern: ", pattern, "\n");
+      }
+      std::string globPattern;
+      if (ctx->query->relative_root) {
+        w_string_piece rel(*ctx->query->relative_root);
+        rel.advance(ctx->root->root_path.size() + 1);
+        globPattern.append(rel.data(), rel.size());
+        globPattern.append("/");
+      }
+      globPattern.append(pattern);
+      globPatterns.emplace_back(std::move(globPattern));
+    }
+    return globPatterns;
+  }
+
+  /**
    * Returns all the files in the watched directory for a fresh instance.
    *
    * In the case where the query specifically ask for an empty file list on a
@@ -1109,23 +1173,15 @@ class EdenView final : public QueryableView {
       return std::vector<NameAndDType>();
     }
 
-    std::string globPattern;
-    if (ctx->query->relative_root) {
-      w_string_piece rel(*ctx->query->relative_root);
-      rel.advance(ctx->root->root_path.size() + 1);
-      globPattern.append(rel.data(), rel.size());
-      globPattern.append("/");
-    }
-    globPattern.append("**");
-
-    auto includeDotfiles = (ctx->query->glob_flags & WM_PERIOD) == 0;
+    auto globPatterns = getGlobPatternsForAllFiles(ctx);
 
     auto client = getEdenClient(thriftChannel_);
     return globNameAndDType(
         client.get(),
         mountPoint_,
-        std::vector<std::string>{std::move(globPattern)},
-        includeDotfiles);
+        std::move(globPatterns),
+        /*includeDotfiles=*/true,
+        splitGlobPattern_);
   }
 
   struct GetAllChangesSinceResult {
@@ -1294,6 +1350,7 @@ class EdenView final : public QueryableView {
   folly::SharedPromise<folly::Unit> subscribeReadyPromise_;
   bool splitGlobPattern_;
   unsigned int thresholdForFreshInstance_;
+  bool enableGlobUpperBounds_;
 };
 
 #ifdef _WIN32

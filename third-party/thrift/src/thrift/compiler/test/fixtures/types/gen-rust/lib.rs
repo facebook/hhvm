@@ -2,7 +2,7 @@
 // This file is probably not the place you want to edit!
 
 #![recursion_limit = "100000000"]
-#![allow(non_camel_case_types, non_snake_case, non_upper_case_globals, unused_crate_dependencies, clippy::type_complexity)]
+#![allow(non_camel_case_types, non_snake_case, non_upper_case_globals, unused_crate_dependencies, clippy::all)]
 
 pub use self::errors::*;
 pub use self::types::*;
@@ -12,6 +12,8 @@ pub mod types;
 #[doc(hidden)]
 pub mod dependencies {
     pub use include as include;
+    pub use cpp as cpp;
+    pub use thrift as thrift;
 }
 
 pub mod services {
@@ -584,7 +586,7 @@ pub mod client {
         pub fn new<P, T>(
             protocol: P,
             transport: T,
-        ) -> ::std::sync::Arc<impl SomeService + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl SomeService + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             T: ::fbthrift::Transport,
@@ -598,7 +600,7 @@ pub mod client {
             protocol: P,
             transport: T,
             spawner: S,
-        ) -> ::std::sync::Arc<impl SomeService + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl SomeService + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             T: ::fbthrift::Transport,
@@ -618,7 +620,7 @@ pub mod client {
         pub fn new<P>(
             protocol: P,
             transport: T,
-        ) -> ::std::sync::Arc<impl SomeServiceExt<T> + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl SomeServiceExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             P::Deserializer: ::std::marker::Send,
@@ -631,7 +633,7 @@ pub mod client {
             protocol: P,
             transport: T,
             spawner: S,
-        ) -> ::std::sync::Arc<impl SomeServiceExt<T> + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl SomeServiceExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             P::Deserializer: ::std::marker::Send,
@@ -654,7 +656,7 @@ pub mod client {
         fn with_spawner<P, T, S>(protocol: P, transport: T, spawner: S) -> ::std::sync::Arc<Self::Api>
         where
             P: ::fbthrift::Protocol<Frame = T>,
-            T: ::fbthrift::Transport + ::std::marker::Sync,
+            T: ::fbthrift::Transport,
             P::Deserializer: ::std::marker::Send,
             S: ::fbthrift::help::Spawner,
         {

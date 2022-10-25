@@ -263,8 +263,8 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
                     self,
                     dominated_iids.contains(&op_iid),
                     "iid {} doesn't dominate use at {}",
-                    FmtVid(self.func, op_vid, true),
-                    FmtVid(self.func, ValueId::from_instr(src_iid), true),
+                    FmtVid(self.func, op_vid, true, self.strings),
+                    FmtVid(self.func, ValueId::from_instr(src_iid), true, self.strings),
                 );
                 match op_instr.unwrap() {
                     Instr::Special(Special::Tombstone) => {
@@ -274,7 +274,7 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
                             "iid {} operand {} ({})is a tombstone",
                             src_iid,
                             op_idx,
-                            FmtVid(self.func, op_vid, true)
+                            FmtVid(self.func, op_vid, true, self.strings)
                         ));
                     }
                     _ => {}

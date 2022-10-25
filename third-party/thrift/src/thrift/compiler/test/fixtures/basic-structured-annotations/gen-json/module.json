@@ -214,7 +214,22 @@
         "recurse" : {
           "type_enum" : "STRUCT",
           "spec_args" : "structured_annotation_recursive",
-          "required" : true,
+          "required" : false,
+          "annotations" : {
+            "cpp.ref" : {
+              "value" : "1",
+              "source_range" : {
+                "begin" : {
+                  "line" : 34,
+                  "column" : 56
+                },
+                "end" : {
+                  "line" : 34,
+                  "column" : 63
+                }
+              }
+            }
+          },
           "source_range" : {
             "begin" : {
               "line" : 34,
@@ -222,7 +237,7 @@
             },
             "end" : {
               "line" : 34,
-              "column" : 46
+              "column" : 65
             }
           }
         },

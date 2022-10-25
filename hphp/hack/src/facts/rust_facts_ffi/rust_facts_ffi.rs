@@ -61,8 +61,7 @@ fn extract_facts_as_json_ffi(
     };
 
     let arena = bumpalo::Bump::new();
-    let parsed_file =
-        direct_decl_parser::parse_decls_without_reference_text(&opts, filename, text, &arena);
+    let parsed_file = direct_decl_parser::parse_decls_for_bytecode(&opts, filename, text, &arena);
 
     let pretty = false;
     if parsed_file.has_first_pass_parse_errors {

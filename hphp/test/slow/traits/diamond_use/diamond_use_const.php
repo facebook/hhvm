@@ -1,7 +1,7 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('method_trait_diamond')>>
+
 
 class C {
   const int X = 1;

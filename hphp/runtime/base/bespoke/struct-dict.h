@@ -40,19 +40,23 @@ struct UnalignedTVLayout;
  */
 struct StructDict : public BespokeArray {
 
-  using PosType = uint8_t;
-
-  static StructDict* MakeFromVanilla(ArrayData* ad, const StructLayout* layout);
+  static StructDict* MakeFromVanilla(ArrayData*, const StructLayout*);
 
   template<bool Static>
   static StructDict* MakeReserve(const StructLayout* layout, bool legacy);
 
   static StructDict* MakeEmpty(const StructLayout* layout);
-  static StructDict* AllocStructDict(uint8_t sizeIndex, uint32_t extra);
+  static StructDict* AllocStructDict(uint8_t sizeIndex,
+                                     uint32_t extra,
+                                     bool mayContainCounted);
 
-  static StructDict* MakeStructDict(
-      uint8_t sizeIndex, uint32_t extra, uint32_t size,
-      const PosType* slots, const TypedValue* vals);
+  static StructDict* MakeStructDictSmall(
+      uint8_t sizeIndex, uint32_t extra, uint32_t size, bool mayContainCounted,
+      const uint8_t* slots, const TypedValue* vals);
+
+  static StructDict* MakeStructDictBig(
+      uint8_t sizeIndex, uint32_t extra, uint32_t size, bool mayContainCounted,
+      const uint16_t* slots, const TypedValue* vals);
 
   static size_t sizeFromLayout(const StructLayout*);
 
@@ -70,14 +74,16 @@ struct StructDict : public BespokeArray {
   BESPOKE_LAYOUT_FUNCTIONS(StructDict)
 #undef X
 
+  bool isBigStruct() const;
+
   const StructLayout* layout() const;
 
   size_t numFields() const;
 
   size_t positionOffset() const;
 
-  const PosType* rawPositions() const;
-  PosType* rawPositions();
+  const void* rawPositions() const;
+  void* rawPositions();
 
   tv_lval lvalUnchecked(Slot slot);
   tv_rval rvalUnchecked(Slot slot) const;
@@ -85,23 +91,37 @@ struct StructDict : public BespokeArray {
   ArrayData* escalateWithCapacity(size_t capacity, const char* reason) const;
   arr_lval elemImpl(StringData* k, bool throwOnMissing);
   StructDict* copy() const;
+  bool mayContainCounted() const { return m_aux16 & kMayContainCounted; }
   void incRefValues();
   void decRefValues();
 
   void addNextSlot(Slot slot);
-  void removeSlot(Slot slot);
-  Slot getSlotInPos(size_t pos) const;
   bool checkInvariants() const;
 
-  static constexpr size_t numFieldsOffset() {
-    return offsetof(StructDict, m_extra_lo8);
+  static size_t numFieldsOffset() {
+    return StructDataLayout::numFieldsOffset();
   }
-  static constexpr size_t numFieldsSize() {
-    return sizeof(m_extra_lo8);
+  static size_t numFieldsSize() {
+    return StructDataLayout::numFieldsSize();
   }
 
   static TypedValue NvGetStrNonStatic(
       const StructDict* sad, const StringData* k);
+
+  friend detail_struct_data_layout::TypePosValLayout;
+  friend detail_struct_data_layout::UnalignedTVLayout;
+
+private:
+  template<typename PosType>
+  static StructDict* MakeFromVanillaImpl(ArrayData*, const StructLayout*);
+
+  template<typename PosType>
+  static StructDict* MakeStructDict(
+    uint8_t sizeIndex, uint32_t extra, uint32_t size, bool mayContainCounted,
+    const PosType* slots, const TypedValue* tvs);
+
+  template<typename PosType> void removeSlot(Slot slot);
+  template<typename PosType> Slot getSlotInPos(size_t pos) const;
 };
 
 /*
@@ -147,10 +167,12 @@ struct StructLayout : public ConcreteLayout {
   static const StructLayout* GetLayout(const FieldVector&, bool create);
   static const StructLayout* Deserialize(LayoutIndex index, const FieldVector&);
 
+  bool isBigStruct() const;
   size_t numFields() const;
   size_t sizeIndex() const;
   uint32_t extraInitializer() const;
   size_t numRequiredFields() const { return m_num_required_fields; }
+  bool mayContainCounted() const { return m_may_contain_counted; }
 
   static Slot keySlot(LayoutIndex index, const StringData* key);
   static Slot keySlotStatic(LayoutIndex index, const StringData* key);
@@ -186,20 +208,27 @@ struct StructLayout : public ConcreteLayout {
 
   Optional<int64_t> numElements() const override;
 
-  void createColoringHashMap() const;
+  void createColoringHashMap(size_t numColoredFields) const;
 
   // Perfect hashing implementation.
+  // If maybeDup is true, a hash miss does not imply that the field is not
+  // present in the layout and StructLayout::m_key_to_slot needs to be checked.
   struct PerfectHashEntry {
     LowStringPtr str;
     uint8_t typeMask;
-    StructDict::PosType slot;
+    bool maybeDup;
+    uint16_t slot;
   };
+  static_assert(!use_lowptr || sizeof(PerfectHashEntry) == 8);
 
-  static constexpr size_t kMaxColor = 255;
+  static constexpr size_t kMaxColor = 511;
+  static_assert(kMaxColor > 2);
   using PerfectHashTable = PerfectHashEntry[kMaxColor + 1];
 
   static PerfectHashTable* hashTable(const Layout* layout);
   static PerfectHashTable* hashTableSet();
+  static size_t maxColoredFields();
+  static void setMaxColoredFields(size_t);
 
   static constexpr size_t fieldsOffset() {
     return offsetof(StructLayout, m_fields);
@@ -238,7 +267,8 @@ private:
   };
   static_assert(sizeof(StructDataLayout::HeaderData) == 4);
   uint8_t m_size_index;
-  uint8_t m_num_required_fields = 0;
+  bool m_may_contain_counted;
+  uint16_t m_num_required_fields = 0;
 
   folly::F14FastMap<StaticKey, Slot, Hash, Equal> m_key_to_slot;
 

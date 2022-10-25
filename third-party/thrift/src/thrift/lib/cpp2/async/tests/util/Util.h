@@ -60,6 +60,7 @@ class AsyncTestSetup : public TestSetup {
     }
   }
 
+  template <class SocketT = folly::AsyncSocket>
   void connectToServer(
       folly::Function<folly::coro::Task<void>(Client&)> callMe) {
     folly::coro::blockingWait([this, &callMe]() -> folly::coro::Task<void> {
@@ -69,7 +70,7 @@ class AsyncTestSetup : public TestSetup {
           executor, ioThread_, [&](folly::EventBase& evb) {
             auto channel = apache::thrift::RocketClientChannel::newChannel(
                 folly::AsyncSocket::UniquePtr(
-                    new folly::AsyncSocket(&evb, "::1", serverPort_)));
+                    new SocketT(&evb, "::1", serverPort_)));
             channel->setTimeout(500 /* ms */);
             return channel;
           });
@@ -86,6 +87,27 @@ class AsyncTestSetup : public TestSetup {
       std::make_shared<folly::ScopedEventBaseThread>()};
   std::unique_ptr<ThriftServer> server_;
   std::shared_ptr<Handler> handler_;
+};
+
+class DuplicateWriteSocket : public folly::AsyncSocket {
+ public:
+  using folly::AsyncSocket::AsyncSocket;
+
+  void writeChain(
+      WriteCallback* callback,
+      std::unique_ptr<IOBuf>&& buf,
+      folly::WriteFlags flags = folly::WriteFlags::NONE) override {
+    // first request sends setup frame, don't duplicate this payload
+    if (firstWrite_) {
+      firstWrite_ = false;
+    } else {
+      buf->appendChain(buf->clone());
+    }
+    folly::AsyncSocket::writeChain(callback, std::move(buf), flags);
+  }
+
+ private:
+  bool firstWrite_{true};
 };
 
 } // namespace thrift

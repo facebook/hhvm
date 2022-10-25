@@ -54,8 +54,7 @@ TEST(oustandingLimitRouteTest, basic) {
 
   std::vector<std::string> replyOrder;
 
-  TestFiberManager testfm{
-      typename fiber_local<MemcacheRouterInfo>::ContextTypeTag()};
+  TestFiberManager<MemcacheRouterInfo> testfm;
   auto& fm = testfm.getFiberManager();
 
   sendRequest(fm, rh, 1, 1, replyOrder);

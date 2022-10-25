@@ -5,6 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <fmt/core.h>
+
 #include "watchman/watcher/WatcherRegistry.h"
 
 #include "watchman/CommandRegistry.h"
@@ -31,7 +33,7 @@ void WatcherRegistry::registerFactory(const WatcherRegistry& factory) {
   auto& reg = getRegistry();
   reg.emplace(factory.name_, factory);
 
-  auto capname = folly::to<std::string>("watcher-", factory.name_);
+  auto capname = fmt::format("watcher-{}", factory.name_);
   capability_register(capname.c_str());
 }
 
@@ -51,11 +53,10 @@ static inline std::shared_ptr<watchman::QueryableView> reportWatcher(
     const w_string& root_path,
     std::shared_ptr<watchman::QueryableView>&& watcher) {
   if (!watcher) {
-    throw std::runtime_error(folly::to<std::string>(
-        "watcher ",
-        watcherName,
-        " returned nullptr, but should throw an exception"
-        " to correctly report initialization issues"));
+    throw std::runtime_error(fmt::format(
+        "watcher {} returned nullptr, but should throw an exception"
+        " to correctly report initialization issues",
+        watcherName));
   }
   watchman::log(
       watchman::ERR,

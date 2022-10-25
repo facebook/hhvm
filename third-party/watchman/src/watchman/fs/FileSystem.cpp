@@ -6,6 +6,7 @@
  */
 
 #include "watchman/fs/FileSystem.h"
+#include <fmt/core.h>
 #include <folly/String.h>
 #include "watchman/fs/FSDetect.h"
 #include "watchman/portability/WinError.h"
@@ -91,8 +92,7 @@ void checkCanonicalBaseName(const char* path) {
     throw std::system_error(
         errno,
         std::generic_category(),
-        folly::to<std::string>(
-            "checkCanonicalBaseName(", path, "): getattrlist failed"));
+        fmt::format("checkCanonicalBaseName({}): getattrlist failed", path));
   }
 
   w_string_piece name(((char*)&vomit.ref) + vomit.ref.attr_dataoffset);
@@ -100,14 +100,11 @@ void checkCanonicalBaseName(const char* path) {
     throw std::system_error(
         ENOENT,
         std::generic_category(),
-        folly::to<std::string>(
-            "checkCanonicalBaseName(",
+        fmt::format(
+            "checkCanonicalBaseName({}): ({}) doesn't match canonical base ({})",
             path,
-            "): (",
-            name.view(),
-            ") doesn't match canonical base (",
-            base.view(),
-            ")"));
+            name,
+            base));
   }
 #else
   // Older Linux and BSDish systems are in this category.
@@ -125,10 +122,9 @@ void checkCanonicalBaseName(const char* path) {
       throw std::system_error(
           ENOENT,
           std::generic_category(),
-          folly::to<std::string>(
-              "checkCanonicalBaseName(",
-              path,
-              "): no match found in parent dir"));
+          fmt::format(
+              "checkCanonicalBaseName({}): no match found in parent dir",
+              path));
     }
     // Note: we don't break out early if we get a case-insensitive match
     // because the dir may contain multiple representations of the same
@@ -167,7 +163,7 @@ FileDescriptor openFileHandle(
   if (fd == -1) {
     int err = errno;
     throw std::system_error(
-        err, std::generic_category(), folly::to<std::string>("open: ", path));
+        err, std::generic_category(), fmt::format("open: {}", path));
   }
   FileDescriptor file(fd, FileDescriptor::FDType::Unknown);
 #else // _WIN32
@@ -256,11 +252,10 @@ FileDescriptor openFileHandle(
   throw std::system_error(
       ENOENT,
       std::generic_category(),
-      folly::to<std::string>(
-          "open(",
+      fmt::format(
+          "open({}): opened path doesn't match canonical path {}",
           path,
-          "): opened path doesn't match canonical path ",
-          opened.view()));
+          opened));
 }
 
 FileInformation getFileInformation(

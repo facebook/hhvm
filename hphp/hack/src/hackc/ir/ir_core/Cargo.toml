@@ -9,7 +9,7 @@ path = "lib.rs"
 
 [dependencies]
 ascii = "1.0"
-bstr = { version = "0.2", features = ["serde1"] }
+bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
 ffi = { path = "../../../utils/ffi" }
 hash = { path = "../../../utils/hash" }
 hhbc = { path = "../../hhbc/cargo/hhbc" }

@@ -237,7 +237,7 @@ impl MaybeNamingDb {
 
     fn set_db_path(&self, db_path: PathBuf) -> Result<()> {
         let mut lock = self.0.lock();
-        *lock = Some((names::Names::from_file(&db_path)?, db_path));
+        *lock = Some((names::Names::from_file_assume_valid_db(&db_path)?, db_path));
         Ok(())
     }
 
@@ -277,6 +277,13 @@ impl ReadonlyStore<ToplevelSymbolHash, (Pos, naming_types::KindOfType)> for Type
 }
 
 impl ReadonlyStore<ToplevelCanonSymbolHash, TypeName> for TypeDb {
+    fn contains_key(&self, key: ToplevelCanonSymbolHash) -> Result<bool> {
+        Ok(self
+            .0
+            .with_db(|db| db.get_type_name_case_insensitive(key))?
+            .is_some())
+    }
+
     fn get(&self, key: ToplevelCanonSymbolHash) -> Result<Option<TypeName>> {
         self.0
             .with_db(|db| Ok(db.get_type_name_case_insensitive(key)?.map(TypeName::new)))
@@ -287,6 +294,13 @@ impl ReadonlyStore<ToplevelCanonSymbolHash, TypeName> for TypeDb {
 struct FunDb(Arc<MaybeNamingDb>);
 
 impl ReadonlyStore<ToplevelSymbolHash, Pos> for FunDb {
+    fn contains_key(&self, key: ToplevelSymbolHash) -> Result<bool> {
+        Ok(self
+            .0
+            .with_db(|db| db.get_path_by_symbol_hash(key))?
+            .is_some())
+    }
+
     fn get(&self, key: ToplevelSymbolHash) -> Result<Option<Pos>> {
         self.0.with_db(|db| {
             Ok(db
@@ -297,6 +311,13 @@ impl ReadonlyStore<ToplevelSymbolHash, Pos> for FunDb {
 }
 
 impl ReadonlyStore<ToplevelCanonSymbolHash, FunName> for FunDb {
+    fn contains_key(&self, key: ToplevelCanonSymbolHash) -> Result<bool> {
+        Ok(self
+            .0
+            .with_db(|db| db.get_fun_name_case_insensitive(key))?
+            .is_some())
+    }
+
     fn get(&self, key: ToplevelCanonSymbolHash) -> Result<Option<FunName>> {
         self.0
             .with_db(|db| Ok(db.get_fun_name_case_insensitive(key)?.map(FunName::new)))
@@ -307,6 +328,13 @@ impl ReadonlyStore<ToplevelCanonSymbolHash, FunName> for FunDb {
 struct ConstDb(Arc<MaybeNamingDb>);
 
 impl ReadonlyStore<ToplevelSymbolHash, Pos> for ConstDb {
+    fn contains_key(&self, key: ToplevelSymbolHash) -> Result<bool> {
+        Ok(self
+            .0
+            .with_db(|db| db.get_path_by_symbol_hash(key))?
+            .is_some())
+    }
+
     fn get(&self, key: ToplevelSymbolHash) -> Result<Option<Pos>> {
         self.0.with_db(|db| {
             Ok(db
@@ -320,6 +348,13 @@ impl ReadonlyStore<ToplevelSymbolHash, Pos> for ConstDb {
 struct ModuleDb(Arc<MaybeNamingDb>);
 
 impl ReadonlyStore<ToplevelSymbolHash, Pos> for ModuleDb {
+    fn contains_key(&self, key: ToplevelSymbolHash) -> Result<bool> {
+        Ok(self
+            .0
+            .with_db(|db| db.get_path_by_symbol_hash(key))?
+            .is_some())
+    }
+
     fn get(&self, key: ToplevelSymbolHash) -> Result<Option<Pos>> {
         self.0.with_db(|db| {
             Ok(db

@@ -2,12 +2,12 @@
 
 class B {
   public static int $static_property = 0;
-  <<__SafeForGlobalWriteCheck>> public static int $static_property_safe = 0;
+  <<__SafeForGlobalAccessCheck>> public static int $static_property_safe = 0;
 }
 
 class C {
   private static int $static_property = 0;
-  <<__SafeForGlobalWriteCheck>> private static int $static_property_safe = 0;
+  <<__SafeForGlobalAccessCheck>> private static int $static_property_safe = 0;
   public string $instanceProperty = "";
 
   public function foo(): void {

@@ -17,6 +17,7 @@ use aast_parser::AastParser;
 use aast_parser::Error as AastError;
 use anyhow::anyhow;
 use anyhow::Result;
+use bstr::ByteSlice;
 use bytecode_printer::Context;
 use decl_provider::DeclProvider;
 use emit_unit::emit_unit;
@@ -473,7 +474,7 @@ fn parse_file(
                 match errors.next() {
                     Some(e) => Err(ParseError(
                         e.pos().clone(),
-                        String::from(e.msg()),
+                        e.msg().to_str_lossy().into_owned(),
                         FatalOp::Parse,
                     )),
                     None => Ok(aast),

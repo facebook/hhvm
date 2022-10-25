@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<62ef891eda33f849f5c3d4f42bdde9bf>>
+// @generated SignedSource<<84da2a58d71a826699a02f5cafebca03>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,9 +11,9 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 pub use typing_defs::*;
@@ -242,6 +242,7 @@ pub struct DeclClassType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "elt_")]
 #[repr(C)]
 pub struct Element {

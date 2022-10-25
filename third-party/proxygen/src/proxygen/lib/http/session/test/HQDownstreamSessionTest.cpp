@@ -3419,7 +3419,7 @@ TEST_P(HQDownstreamSessionTestHQDeliveryAck,
             socketDriver->checkNotReadOnlyStream(id);
             auto it = socketDriver->streams_.find(id);
             if (it == socketDriver->streams_.end() ||
-                it->second.writeOffset >= offset) {
+                it->second.nextWriteOffset >= offset) {
               return folly::makeUnexpected(LocalErrorCode::STREAM_NOT_EXISTS);
             }
             CHECK_NE(it->second.writeState,
@@ -3578,7 +3578,7 @@ TEST_P(HQDownstreamSessionTestHQDeliveryAck, TestBodyDeliveryErr) {
             socketDriver->checkNotReadOnlyStream(id);
             auto it = socketDriver->streams_.find(id);
             if (it == socketDriver->streams_.end() ||
-                it->second.writeOffset >= offset) {
+                it->second.nextWriteOffset >= offset) {
               return folly::makeUnexpected(LocalErrorCode::STREAM_NOT_EXISTS);
             }
             CHECK_NE(it->second.writeState,

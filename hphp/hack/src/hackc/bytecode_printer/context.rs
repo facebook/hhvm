@@ -62,7 +62,7 @@ pub struct Context<'a> {
 }
 
 impl<'a> Context<'a> {
-    pub fn new<'arena, 'decl>(
+    pub fn new(
         include_processor: &'a dyn IncludeProcessor,
         path: Option<&'a RelativePath>,
         array_provenance: bool,

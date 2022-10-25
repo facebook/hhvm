@@ -11,7 +11,6 @@
 
 #include <fmt/core.h>
 #include <folly/FBString.h>
-#include <folly/ScopeGuard.h>
 
 #include <stdint.h>
 #include <string.h>
@@ -442,6 +441,20 @@ class w_string {
     return nullptr != rhs.str_;
   }
 
+  /**
+   * Generates a w_string with a known size by calling a function to
+   * produce the contents.
+   */
+  template <typename Fn>
+  static w_string generate(uint32_t size, w_string_type_t type, Fn&& fn) {
+    auto* s = StringHeader::alloc(size, type);
+    w_string rv{s}; // Will deallocate if fn fails.
+    char* buf = s->buf();
+    fn(buf);
+    buf[size] = 0;
+    return rv;
+  }
+
   /** path concatenation
    * Pass in a list of w_string_pieces to join them all similarly to
    * the python os.path.join() function. */
@@ -466,21 +479,9 @@ class w_string {
   template <typename... Args>
   static w_string format(fmt::string_view format_str, Args&&... args) {
     uint32_t size = fmt::formatted_size(fmt::runtime(format_str), args...);
-
-    auto* s = StringHeader::alloc(size, W_STRING_BYTE);
-
-    {
-      // in case format_to throws
-      SCOPE_FAIL {
-        delete[](char*) s;
-      };
-
-      auto mut_buf = const_cast<char*>(s->buf());
-      fmt::format_to(mut_buf, fmt::runtime(format_str), args...);
-      mut_buf[s->len] = 0;
-    }
-
-    return w_string{s};
+    return w_string::generate(size, W_STRING_BYTE, [&](char* buf) {
+      fmt::format_to(buf, fmt::runtime(format_str), args...);
+    });
   }
 
   /** Return a possibly new version of this string that has its separators
@@ -551,7 +552,7 @@ struct formatter<w_string> {
   }
 
   template <typename FormatContext>
-  auto format(const w_string& s, FormatContext& ctx) {
+  auto format(const w_string& s, FormatContext& ctx) const {
     return format_to(ctx.out(), "{}", s.view());
   }
 };
@@ -564,7 +565,7 @@ struct formatter<w_string_piece> {
   }
 
   template <typename FormatContext>
-  auto format(const w_string_piece& s, FormatContext& ctx) {
+  auto format(const w_string_piece& s, FormatContext& ctx) const {
     return format_to(ctx.out(), "{}", s.view());
   }
 };

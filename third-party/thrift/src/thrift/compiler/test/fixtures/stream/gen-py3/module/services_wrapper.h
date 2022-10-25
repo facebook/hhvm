@@ -34,6 +34,9 @@ class PubSubStreamingServiceWrapper : virtual public PubSubStreamingServiceSvIf 
     void async_tm_servicethrows(std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>> callback
         , int32_t foo
     ) override;
+    void async_tm_servicethrows2(std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>> callback
+        , int32_t foo
+    ) override;
     void async_tm_boththrows(std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::ServerStream<int32_t>>> callback
         , int32_t foo
     ) override;

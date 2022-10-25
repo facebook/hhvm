@@ -661,6 +661,9 @@ pub mod typehints {
 
     pub const HH_SUPPORTDYN: &str = "\\HH\\supportdyn";
 
+    pub const TANY_MARKER: &str = "\\HH\\FIXME\\TANY_MARKER";
+    pub const POISON_MARKER: &str = "\\HH\\FIXME\\POISON_MARKER";
+
     pub const WILDCARD: &str = "_";
 
     lazy_static! {
@@ -1126,6 +1129,7 @@ pub mod unstable_features {
     pub const EXPRESSION_TREES: &str = "expression_trees";
     pub const MODULES: &str = "modules";
     pub const MODULE_REFERENCES: &str = "module_references";
+    pub const PACKAGES: &str = "packages";
 }
 
 pub mod regex {

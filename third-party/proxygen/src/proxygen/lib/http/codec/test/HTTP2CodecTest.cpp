@@ -1772,11 +1772,21 @@ TEST_F(HTTP2CodecTest, DuplicateBadHeaderPriority) {
   EXPECT_EQ(callbacks_.streamErrors, 1);
   EXPECT_EQ(callbacks_.sessionErrors, 0);
 
-  // On the same stream, send another request.
+  // On the same stream, send another request, interpreted as trailers with
+  // a pseudo header which is illegal
   HTTPMessage nextRequest = getGetRequest();
   upstreamCodec_.generateHeader(output_, 1, nextRequest, true /* eom */);
   parse();
   EXPECT_EQ(callbacks_.streamErrors, 2);
+  EXPECT_EQ(callbacks_.sessionErrors, 0);
+
+  callbacks_.reset();
+
+  // Now send a legit request
+  upstreamCodec_.generateHeader(output_, 3, nextRequest, true /* eom */);
+  parse();
+  callbacks_.expectMessage(true, 1, "/");
+  EXPECT_EQ(callbacks_.streamErrors, 0);
   EXPECT_EQ(callbacks_.sessionErrors, 0);
 }
 

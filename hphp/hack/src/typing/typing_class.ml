@@ -45,12 +45,13 @@ let get_decl_method_header tcopt cls method_id ~is_static =
 let is_literal_with_trivially_inferable_type (_, _, e) =
   Option.is_some @@ Decl_utils.infer_const e
 
-let method_dynamically_callable env cls m params_decl_ty ret_locl_ty =
+let method_dynamically_callable env cls m params_decl_ty return =
   let env = { env with in_support_dynamic_type_method_check = true } in
   (* Add `dynamic` lower and upper bound to any type parameters that are marked <<__RequireDynamic>> *)
   let env_with_require_dynamic =
     Typing_dynamic.add_require_dynamic_bounds env cls
   in
+  let ret_locl_ty = return.Typing_env_return_info.return_type.et_type in
   let interface_check =
     Typing_dynamic.sound_dynamic_interface_check
       env_with_require_dynamic
@@ -68,10 +69,7 @@ let method_dynamically_callable env cls m params_decl_ty ret_locl_ty =
     let dynamic_return_ty = make_dynamic (get_pos ret_locl_ty) in
     let dynamic_return_info =
       Typing_env_return_info.
-        {
-          return_type = MakeType.unenforced dynamic_return_ty;
-          return_disposable = false;
-        }
+        { return with return_type = MakeType.unenforced dynamic_return_ty }
     in
     let (env, param_tys) =
       Typing_param.make_param_local_tys
@@ -186,7 +184,7 @@ let method_return env m ret_decl_ty =
   let return =
     Typing_return.make_info hint_pos m.m_fun_kind m.m_user_attributes env ret_ty
   in
-  (env, return, ret_ty)
+  (env, return)
 
 let method_def ~is_disposable env cls m =
   let tcopt = Env.get_tcopt env in
@@ -262,7 +260,7 @@ let method_def ~is_disposable env cls m =
     merge_decl_header_with_hints ~params:m.m_params ~ret:m.m_ret decl_header env
   in
   let env = Env.set_fn_kind env m.m_fun_kind in
-  let (env, return, return_ty) = method_return env m ret_decl_ty in
+  let (env, return) = method_return env m ret_decl_ty in
   let sound_dynamic_check_saved_env = env in
   let (env, param_tys) =
     Typing_param.make_param_local_tys
@@ -292,7 +290,8 @@ let method_def ~is_disposable env cls m =
     in
     List.map_env env (List.zip_exn param_tys m.m_params) ~f:bind_param_and_check
   in
-  let env = set_tyvars_variance_in_callable env return_ty.et_type param_tys in
+  let ret_locl_ty = return.Typing_env_return_info.return_type.et_type in
+  let env = set_tyvars_variance_in_callable env ret_locl_ty param_tys in
   let local_tpenv = Env.get_tpenv env in
   let disable =
     Naming_attributes.mem
@@ -343,7 +342,7 @@ let method_def ~is_disposable env cls m =
       cls
       m
       params_decl_ty
-      return_ty.et_type;
+      return;
   let method_def =
     {
       Aast.m_annotation = Env.save local_tpenv env;
@@ -362,7 +361,7 @@ let method_def ~is_disposable env cls m =
       Aast.m_fun_kind = m.m_fun_kind;
       Aast.m_user_attributes = user_attributes;
       Aast.m_readonly_ret = m.m_readonly_ret;
-      Aast.m_ret = (return_ty.et_type, hint_of_type_hint m.m_ret);
+      Aast.m_ret = (ret_locl_ty, hint_of_type_hint m.m_ret);
       Aast.m_body = { Aast.fb_ast = tb };
       Aast.m_external = m.m_external;
       Aast.m_doc_comment = m.m_doc_comment;

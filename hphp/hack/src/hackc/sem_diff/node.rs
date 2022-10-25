@@ -12,11 +12,13 @@ use hhbc::SetOpOp;
 use hhbc::SetRangeOp;
 use hhbc::SrcLoc;
 use hhbc::Targets;
+use hhbc::TypedValue;
 
 #[derive(Debug, Eq, PartialEq, Clone, Hash)]
-pub(crate) enum Input {
+pub(crate) enum Input<'arena> {
     Class(String),
     Constant(u32),
+    ConstantArray(TypedValue<'arena>),
     // A value that appears exactly once in the stack or locals.
     Owned(u32),
     // A value that is guaranteed to be used in a read-only context.
@@ -28,22 +30,25 @@ pub(crate) enum Input {
     Unowned(u32),
 }
 
-impl Input {
-    pub(crate) fn to_read_only(&self) -> Input {
+impl<'arena> Input<'arena> {
+    pub(crate) fn to_read_only(&self) -> Input<'arena> {
         match *self {
             Input::Owned(idx) | Input::Read(idx) | Input::Shared(idx) | Input::Unowned(idx) => {
                 Input::Read(idx)
             }
-            Input::Class(_) | Input::Constant(_) | Input::Undefined => self.clone(),
+            Input::Class(_) | Input::Constant(_) | Input::ConstantArray(_) | Input::Undefined => {
+                self.clone()
+            }
         }
     }
 }
 
-impl fmt::Display for Input {
+impl fmt::Display for Input<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Input::Class(s) => write!(f, "class({s})"),
             Input::Constant(v) => write!(f, "constant(#{v})"),
+            Input::ConstantArray(tv) => write!(f, "constant({tv:?})"),
             Input::Owned(v) => write!(f, "owned(@{v})"),
             Input::Read(v) => write!(f, "read(@{v})"),
             Input::Shared(v) => write!(f, "shared(@{v})"),
@@ -126,6 +131,6 @@ impl Targets for NodeInstr<'_> {
 #[derive(Debug)]
 pub(crate) struct Node<'arena> {
     pub(crate) instr: NodeInstr<'arena>,
-    pub(crate) inputs: Box<[Input]>,
+    pub(crate) inputs: Box<[Input<'arena>]>,
     pub(crate) src_loc: Rc<SrcLoc>,
 }

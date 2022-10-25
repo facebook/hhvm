@@ -11,9 +11,9 @@ doctest = false
 proc-macro = true
 
 [dependencies]
-proc-macro2 = "1.0"
+proc-macro2 = "1.0.46"
 quote = "1.0"
-syn = { version = "1.0.96", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
+syn = { version = "1.0.102", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
 synstructure = "0.12"
 
 [dev-dependencies]

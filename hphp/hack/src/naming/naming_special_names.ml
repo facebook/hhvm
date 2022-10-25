@@ -347,13 +347,15 @@ module UserAttributes = struct
 
   let uaHasReifiedParent = "__HasReifiedParent"
 
+  let uaSoftInternal = "__SoftInternal"
+
   let uaNoFlatten = "__NoFlatten"
 
-  (* <<__SafeForGlobalWriteCheck>> marks global variables as safe from mutations.
-     This attribute merely ensures that the global_write_check does NOT raise
+  (* <<__SafeForGlobalAccessCheck>> marks global variables as safe from mutations.
+     This attribute merely ensures that the global_access_check does NOT raise
      errors/warnings from writing to the annotated global variable, and it
      has NO runtime/semantic implication. *)
-  let uaSafeGlobalVariable = "__SafeForGlobalWriteCheck"
+  let uaSafeGlobalVariable = "__SafeForGlobalAccessCheck"
 
   type attr_info = {
     contexts: string list;
@@ -698,7 +700,14 @@ module UserAttributes = struct
               autocomplete = false;
               doc =
                 "Marks this global variable as safe from mutation."
-                ^ " This ensures the global_write_check does NOT raise errors/warnings from writing to this global variable.";
+                ^ " This ensures the global_access_check does NOT raise errors/warnings from writing to this global variable.";
+            } );
+          ( uaSoftInternal,
+            {
+              contexts = [fn; cls; mthd; instProperty; staticProperty];
+              autocomplete = false;
+              doc =
+                "Instead of throwing an exception upon a module boundary violation at this symbol, logs a warning instead.";
             } );
         ])
 
@@ -1081,6 +1090,12 @@ module HH = struct
   let contains = "\\HH\\Lib\\C\\contains"
 
   let contains_key = "\\HH\\Lib\\C\\contains_key"
+
+  module FIXME = struct
+    let tTanyMarker = "\\HH\\FIXME\\TANY_MARKER"
+
+    let tPoisonMarker = "\\HH\\FIXME\\POISON_MARKER"
+  end
 end
 
 module Shapes = struct

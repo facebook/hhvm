@@ -18,6 +18,7 @@ from thrift.python.client import (
     Client as _fbthrift_python_Client,
 )
 from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier
+from thrift.python.common import RpcOptions
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import test.fixtures.basic.module.thrift_types
@@ -43,7 +44,9 @@ class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"])
             return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_FooService()
     
         async def simple_rpc(
-            self
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = await self._send_request(
                 "FooService",
@@ -51,6 +54,7 @@ class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"])
                 test.fixtures.basic.module.thrift_types._fbthrift_FooService_simple_rpc_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_FooService_simple_rpc_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                rpc_options=rpc_options,
             )
     
     class Sync(_fbthrift_python_SyncClient):
@@ -63,13 +67,16 @@ class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"])
             return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_FooService()
     
         def simple_rpc(
-            self
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = self._send_request(
                 "FooService",
                 "simple_rpc",
                 test.fixtures.basic.module.thrift_types._fbthrift_FooService_simple_rpc_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_FooService_simple_rpc_result,
+                rpc_options=rpc_options,
             )
     
 
@@ -93,7 +100,9 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
     
         async def simple_rpc(
             self,
-            int_parameter: int
+            int_parameter: int,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> test.fixtures.basic.module.thrift_types.ReservedKeyword:
             _fbthrift_resp = await self._send_request(
                 "FB303Service",
@@ -102,6 +111,7 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
                     int_parameter=int_parameter,),
                 test.fixtures.basic.module.thrift_types._fbthrift_FB303Service_simple_rpc_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -122,7 +132,9 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
     
         def simple_rpc(
             self,
-            int_parameter: int
+            int_parameter: int,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> test.fixtures.basic.module.thrift_types.ReservedKeyword:
             _fbthrift_resp = self._send_request(
                 "FB303Service",
@@ -130,6 +142,7 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
                 test.fixtures.basic.module.thrift_types._fbthrift_FB303Service_simple_rpc_args(
                     int_parameter=int_parameter,),
                 test.fixtures.basic.module.thrift_types._fbthrift_FB303Service_simple_rpc_result,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -159,7 +172,9 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_MyService()
     
         async def ping(
-            self
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = await self._send_request(
                 "MyService",
@@ -167,10 +182,13 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_ping_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_ping_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                rpc_options=rpc_options,
             )
     
         async def getRandomData(
-            self
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> str:
             _fbthrift_resp = await self._send_request(
                 "MyService",
@@ -178,6 +196,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_getRandomData_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_getRandomData_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -189,7 +208,9 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         async def sink(
             self,
-            sink: int
+            sink: int,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = await self._send_request(
                 "MyService",
@@ -198,12 +219,15 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     sink=sink,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_sink_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                rpc_options=rpc_options,
             )
     
         async def putDataById(
             self,
             id: int,
-            data: str
+            data: str,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = await self._send_request(
                 "MyService",
@@ -213,11 +237,14 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     data=data,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_putDataById_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                rpc_options=rpc_options,
             )
     
         async def hasDataById(
             self,
-            id: int
+            id: int,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> bool:
             _fbthrift_resp = await self._send_request(
                 "MyService",
@@ -226,6 +253,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     id=id,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_hasDataById_result,
                 qualifier = _fbthrift_FunctionQualifier.ReadOnly,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -237,7 +265,9 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         async def getDataById(
             self,
-            id: int
+            id: int,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> str:
             _fbthrift_resp = await self._send_request(
                 "MyService",
@@ -246,6 +276,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     id=id,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_getDataById_result,
                 qualifier = _fbthrift_FunctionQualifier.ReadOnly,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -257,7 +288,9 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         async def deleteDataById(
             self,
-            id: int
+            id: int,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = await self._send_request(
                 "MyService",
@@ -266,12 +299,15 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     id=id,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_deleteDataById_result,
                 qualifier = _fbthrift_FunctionQualifier.Idempotent,
+                rpc_options=rpc_options,
             )
     
         async def lobDataById(
             self,
             id: int,
-            data: str
+            data: str,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = await self._send_request(
                 "MyService",
@@ -281,10 +317,13 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     data=data,),
                 None,
                 qualifier = _fbthrift_FunctionQualifier.OneWay,
+                rpc_options=rpc_options,
             )
     
         async def invalid_return_for_hack(
-            self
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _typing.AbstractSet[float]:
             _fbthrift_resp = await self._send_request(
                 "MyService",
@@ -292,6 +331,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_invalid_return_for_hack_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_invalid_return_for_hack_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -302,7 +342,9 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             )
     
         async def rpc_skipped_codegen(
-            self
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = await self._send_request(
                 "MyService",
@@ -310,6 +352,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_rpc_skipped_codegen_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_rpc_skipped_codegen_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                rpc_options=rpc_options,
             )
     
     class Sync(_fbthrift_python_SyncClient):
@@ -322,23 +365,29 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_MyService()
     
         def ping(
-            self
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "ping",
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_ping_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_ping_result,
+                rpc_options=rpc_options,
             )
     
         def getRandomData(
-            self
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> str:
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "getRandomData",
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_getRandomData_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_getRandomData_result,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -350,7 +399,9 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         def sink(
             self,
-            sink: int
+            sink: int,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = self._send_request(
                 "MyService",
@@ -358,12 +409,15 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_sink_args(
                     sink=sink,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_sink_result,
+                rpc_options=rpc_options,
             )
     
         def putDataById(
             self,
             id: int,
-            data: str
+            data: str,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = self._send_request(
                 "MyService",
@@ -372,11 +426,14 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     id=id,
                     data=data,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_putDataById_result,
+                rpc_options=rpc_options,
             )
     
         def hasDataById(
             self,
-            id: int
+            id: int,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> bool:
             _fbthrift_resp = self._send_request(
                 "MyService",
@@ -384,6 +441,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_hasDataById_args(
                     id=id,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_hasDataById_result,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -395,7 +453,9 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         def getDataById(
             self,
-            id: int
+            id: int,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> str:
             _fbthrift_resp = self._send_request(
                 "MyService",
@@ -403,6 +463,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_getDataById_args(
                     id=id,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_getDataById_result,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -414,7 +475,9 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         def deleteDataById(
             self,
-            id: int
+            id: int,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = self._send_request(
                 "MyService",
@@ -422,12 +485,15 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_deleteDataById_args(
                     id=id,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_deleteDataById_result,
+                rpc_options=rpc_options,
             )
     
         def lobDataById(
             self,
             id: int,
-            data: str
+            data: str,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = self._send_request(
                 "MyService",
@@ -436,16 +502,20 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     id=id,
                     data=data,),
                 None,
+                rpc_options=rpc_options,
             )
     
         def invalid_return_for_hack(
-            self
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> _typing.AbstractSet[float]:
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "invalid_return_for_hack",
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_invalid_return_for_hack_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_invalid_return_for_hack_result,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -456,13 +526,16 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             )
     
         def rpc_skipped_codegen(
-            self
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "rpc_skipped_codegen",
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_rpc_skipped_codegen_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_rpc_skipped_codegen_result,
+                rpc_options=rpc_options,
             )
     
 
@@ -486,7 +559,9 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
     
         async def getDataByKey0(
             self,
-            key: str
+            key: str,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> bytes:
             _fbthrift_resp = await self._send_request(
                 "DbMixedStackArguments",
@@ -495,6 +570,7 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
                     key=key,),
                 test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey0_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -506,7 +582,9 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
     
         async def getDataByKey1(
             self,
-            key: str
+            key: str,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> bytes:
             _fbthrift_resp = await self._send_request(
                 "DbMixedStackArguments",
@@ -515,6 +593,7 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
                     key=key,),
                 test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey1_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -535,7 +614,9 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
     
         def getDataByKey0(
             self,
-            key: str
+            key: str,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> bytes:
             _fbthrift_resp = self._send_request(
                 "DbMixedStackArguments",
@@ -543,6 +624,7 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
                 test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey0_args(
                     key=key,),
                 test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey0_result,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -554,7 +636,9 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
     
         def getDataByKey1(
             self,
-            key: str
+            key: str,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> bytes:
             _fbthrift_resp = self._send_request(
                 "DbMixedStackArguments",
@@ -562,6 +646,7 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
                 test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey1_args(
                     key=key,),
                 test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey1_result,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:

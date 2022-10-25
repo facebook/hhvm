@@ -261,7 +261,7 @@ struct FuncBase {
    */
   bool isNative;
 
-private:
+protected:
   /*
    * All owning pointers to blocks are in this vector, which has the
    * blocks in an unspecified order.  Blocks use BlockIds to represent
@@ -434,6 +434,20 @@ struct Func : FuncBase {
    * User attribute list.
    */
   UserAttributeMap userAttributes;
+
+  /*
+   * Bytecode is stored using copy_ptr, which allows multiple
+   * functions to share the same bytecode if they're the same. This
+   * gets lost if we serde the function, which can lead to increased
+   * memory pressure.
+   *
+   * If s_reuser is non-nullptr during deserializing, it will be used
+   * to try to find similar bytecode and reuse it, restoring the
+   * sharding of copy_ptr (and maybe more).
+   */
+  using BytecodeReuser =
+    folly_concurrent_hash_map_simd<SHA1, copy_ptr<CompactVector<char>>>;
+  static BytecodeReuser* s_reuser;
 
   template <typename SerDe> void serde(SerDe&, Class* c = nullptr);
 };

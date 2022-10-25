@@ -128,7 +128,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
  private:
   template <typename Protocol_, typename RpcOptions>
   void frobnicateT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> frobnicateCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> frobnicateCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
  void ping(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -194,7 +194,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
  private:
   template <typename Protocol_, typename RpcOptions>
   void pingT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> pingCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> pingCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
  void truthify(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -281,7 +281,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
  private:
   template <typename Protocol_, typename RpcOptions>
   void truthifyT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> truthifyCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> truthifyCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
  protected:
   void encodeImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
@@ -296,7 +296,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
  private:
   template <typename Protocol_, typename RpcOptions>
   void encodeT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> encodeCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> encodeCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };class MyInteractionFast final : public apache::thrift::InteractionHandle {
   using apache::thrift::InteractionHandle::InteractionHandle;
@@ -392,7 +392,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
  private:
   template <typename Protocol_, typename RpcOptions>
   void frobnicateT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> frobnicateCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> frobnicateCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
  void ping(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -458,7 +458,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
  private:
   template <typename Protocol_, typename RpcOptions>
   void pingT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> pingCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> pingCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
  void truthify(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
  protected:
@@ -545,7 +545,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
  private:
   template <typename Protocol_, typename RpcOptions>
   void truthifyT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> truthifyCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> truthifyCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
  protected:
   void encodeImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback, bool stealRpcOptions = false);
@@ -560,7 +560,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
  private:
   template <typename Protocol_, typename RpcOptions>
   void encodeT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::SinkClientCallback* callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> encodeCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> encodeCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };class SerialInteraction final : public apache::thrift::InteractionHandle {
   using apache::thrift::InteractionHandle::InteractionHandle;
@@ -654,7 +654,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
  private:
   template <typename Protocol_, typename RpcOptions>
   void frobnicateT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> frobnicateCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> frobnicateCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };
   MyInteraction createMyInteraction();
@@ -751,7 +751,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
  private:
   template <typename Protocol_, typename RpcOptions>
   void fooT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> fooCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> fooCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
  void interact(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const apache::thrift::InteractionHandle& handle, ::std::int32_t p_arg);
  protected:
@@ -840,7 +840,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
  private:
   template <typename Protocol_, typename RpcOptions>
   void interactT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const apache::thrift::InteractionHandle& handle, ::std::int32_t p_arg);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> interactCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> interactCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
  void interactFast(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const apache::thrift::InteractionHandle& handle);
  protected:
@@ -930,7 +930,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
  private:
   template <typename Protocol_, typename RpcOptions>
   void interactFastT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const apache::thrift::InteractionHandle& handle);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> interactFastCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> interactFastCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
  void serialize(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const apache::thrift::InteractionHandle& handle);
  protected:
@@ -1022,7 +1022,7 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
  private:
   template <typename Protocol_, typename RpcOptions>
   void serializeT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, const apache::thrift::InteractionHandle& handle);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> serializeCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> serializeCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };
 

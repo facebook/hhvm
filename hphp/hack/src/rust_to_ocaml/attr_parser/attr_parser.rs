@@ -12,16 +12,105 @@ use syn::NestedMeta::Meta;
 static DOC: &str = "doc";
 static RUST_TO_OCAML: &str = "rust_to_ocaml";
 static PREFIX: &str = "prefix";
+static AND: &str = "and";
 static ATTR: &str = "attr";
 static NAME: &str = "name";
 static INLINE_TUPLE: &str = "inline_tuple";
 
+/// The attributes understood by `rust_to_ocaml`.
 #[derive(Clone, Debug)]
 pub struct Attrs {
+    /// Doc comments (and their desugared form, the `#[doc]` attribute) are
+    /// picked up by rust_to_ocaml and included as ocamldoc comments.
+    ///
+    ///     /// Type A
+    ///     pub type A = X;
+    ///
+    /// is converted to:
+    ///
+    ///     (** Type A *)
+    ///     type a = x
     pub doc: Vec<String>,
+
+    /// Sometimes OCaml programs use prefixes to distinguish fields of the same
+    /// name in different records (avoiding OCaml warning 30). The `prefix`
+    /// attribute (on a declaration of a struct or a struct-like enum variant)
+    /// indicates the prefix that should be added to each field name.
+    ///
+    ///     #[rust_to_ocaml(prefix = "a_")]
+    ///     pub struct StructA { pub foo: isize, pub bar: isize }
+    ///     #[rust_to_ocaml(prefix = "b_")]
+    ///     pub struct StructB { pub foo: isize, pub bar: isize }
+    ///
+    /// is converted to:
+    ///
+    ///     type struct_a = { a_foo: int; a_bar: int; }
+    ///     type struct_b = { b_foo: int; b_bar: int; }
     pub prefix: Option<String>,
+
+    /// OCaml attributes (in OCaml syntax) to annotate a type or field
+    /// declaration with in the generated OCaml.
+    ///
+    ///     #[rust_to_ocaml(attr = "deriving show")]
+    ///     pub type X = A;
+    ///
+    /// is converted to:
+    ///
+    ///     type x = a [@@deriving show]
     pub attrs: Vec<String>,
+
+    /// Mutual recursion in type definitions is opt-in in OCaml; one writes
+    /// `type x = y list and y = x list` rather than `type x = y list ;; type y
+    /// = x list` (which is an error because the type name `y` is not bound in
+    /// the declaration of `x`). Use the `#[rust_to_ocaml(and)]` attribute to
+    /// indicate when the `and` keyword should be used to continue a mutually
+    /// recursive type declaration.
+    ///
+    ///     pub struct Foo(pub Bar, pub Bar);
+    ///     #[rust_to_ocaml(and)]
+    ///     pub struct Bar(pub Option<Foo>, pub Option<Foo>);
+    ///
+    /// is converted to:
+    ///
+    ///     type foo = bar * bar
+    ///     and bar = foo option * foo option
+    pub mutual_rec: bool,
+
+    /// Normally, rust_to_ocaml will convert the names of fields and enum
+    /// variants by attempting to convert idiomatic Rust casing to idiomatic
+    /// OCaml casing. Use the `#[rust_to_ocaml(name = "my_name")]` attribute to
+    /// override this behavior and provide some other name. This attribute takes
+    /// precedence over the `prefix` attribute (no prefix will be applied to the
+    /// given name). This attribute cannot be used to rename types (use
+    /// rust_to_ocaml_config.toml instead).
     pub name: Option<String>,
+
+    /// In OCaml, a variant declared as `Foo of (a * b)` is a variant with one
+    /// field which is a pointer to a heap-allocated tuple. A variant declared
+    /// as `Baz of a * b` is a variant with two fields of type `a` and `b`.
+    ///
+    /// By default, rust_to_ocaml will produce variants with a single field. But
+    /// this behavior can be overridden with the `inline_tuple` attribute,
+    /// converting the fields of a tuple (possibly behind a reference, `Box`, or
+    /// any other wrapper type declared in the `types.transparent` section in
+    /// rust_to_ocaml_config.toml) to fields of the OCaml variant.
+    ///
+    ///     pub enum E {
+    ///         Foo((A, B)),
+    ///         Bar(Box<(A, B)>),
+    ///         #[rust_to_ocaml(inline_tuple)]
+    ///         Baz((A, B)),
+    ///         #[rust_to_ocaml(inline_tuple)]
+    ///         Qux(Box<(A, B)>),
+    ///     }
+    ///
+    /// is converted to:
+    ///
+    ///     type e =
+    ///       | Foo of (a * b)
+    ///       | Bar of (a * b)
+    ///       | Baz of a * b
+    ///       | Qux of a * b
     pub inline_tuple: bool,
 }
 
@@ -47,6 +136,7 @@ impl Attrs {
         let doc = get_doc_comment(attrs);
         let mut prefix = None;
         let mut ocaml_attrs = vec![];
+        let mut mutual_rec = false;
         let mut name = None;
         let mut inline_tuple = false;
 
@@ -69,6 +159,12 @@ impl Attrs {
                     if let Ok(s) = get_lit_str(ATTR, &m.lit) {
                         ocaml_attrs.push(s.value());
                     }
+                }
+                // Parse `#[rust_to_ocaml(and)]`
+                Meta(Path(word)) if word.is_ident(AND) => {
+                    // TODO: emit an error instead
+                    assert_eq!(kind, AttrKind::Container);
+                    mutual_rec = true;
                 }
                 // Parse `#[rust_to_ocaml(name = "foo")]`
                 Meta(NameValue(m)) if m.path.is_ident(NAME) => {
@@ -105,6 +201,7 @@ impl Attrs {
             doc,
             prefix,
             attrs: ocaml_attrs,
+            mutual_rec,
             name,
             inline_tuple,
         }

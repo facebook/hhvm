@@ -249,13 +249,17 @@ Watcher::ConsumeNotifyRet KQueueAndFSEventsWatcher::consumeNotify(
 
   {
     auto fseventWatches = fseventWatchers_.wlock();
-    for (auto& [watchpath, fsevent] : *fseventWatches) {
+    auto it = fseventWatches->begin();
+    while (it != fseventWatches->end()) {
+      auto& [watchpath, fsevent] = *it;
       auto [cancelSelf] = fsevent->consumeNotify(root, coll);
       if (cancelSelf) {
         fsevent->stopThreads();
         root->cookies.removeCookieDir(watchpath);
-        fseventWatches->erase(watchpath);
+        it = fseventWatches->erase(it);
         continue;
+      } else {
+        ++it;
       }
     }
   }

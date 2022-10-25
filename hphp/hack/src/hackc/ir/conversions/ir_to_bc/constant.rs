@@ -5,16 +5,26 @@
 
 use hhbc::Constant;
 
-pub(crate) fn convert_hack_constant<'a>(constant: ir::HackConstant<'a>) -> Constant<'a> {
+use crate::convert;
+use crate::strings::StringCache;
+
+pub(crate) fn convert_hack_constant<'a>(
+    constant: ir::HackConstant<'a>,
+    strings: &StringCache<'a, '_>,
+) -> Constant<'a> {
     let ir::HackConstant {
         name,
         value,
         is_abstract,
     } = constant;
 
+    let value = value
+        .map(|v| convert::convert_typed_value(&v, strings))
+        .into();
+
     Constant {
         name,
-        value: value.into(),
+        value,
         is_abstract,
     }
 }

@@ -40,12 +40,12 @@ class StructMetadata<::test::fixtures::basic-structured-annotations::structured_
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::basic-structured-annotations::structured_annotation_forward> {
+class StructMetadata<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> {
+class StructMetadata<::test::fixtures::basic-structured-annotations::structured_annotation_forward> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

@@ -13,7 +13,8 @@ bumpalo = { version = "3.8", features = ["collections"] }
 datastore = { path = "../../../datastore" }
 depgraph_api = { path = "../../../depgraph_api/cargo/depgraph_api" }
 folded_decl_provider = { path = "../../../folded_decl_provider/cargo/folded_decl_provider" }
-im = { version = "14.2", features = ["rayon", "serde"] }
+hash = { path = "../../../../utils/hash" }
+im = { version = "15.1", features = ["rayon", "serde"] }
 itertools = "0.10.3"
 lint_rust = { path = "../../../../utils/lint" }
 ocamlrep = { path = "../../../../ocamlrep" }

@@ -102,6 +102,33 @@ cdef void PubSubStreamingService_servicethrows_callback(
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
+cdef void PubSubStreamingService_servicethrows2_callback(
+    cFollyTry[cClientBufferedStream[cint32_t]]&& result,
+    PyObject* userdata
+):
+    client, pyfuture, options = <object> userdata  
+    if result.hasException[_module_types.cFooEx]():
+        try:
+            exc = _module_types.FooEx._fbthrift_create(try_make_shared_exception[_module_types.cFooEx](result.exception()))
+        except Exception as ex:
+            pyfuture.set_exception(ex.with_traceback(None))
+        else:
+            pyfuture.set_exception(exc)
+    elif result.hasException[_module_types.cFooEx2]():
+        try:
+            exc = _module_types.FooEx2._fbthrift_create(try_make_shared_exception[_module_types.cFooEx2](result.exception()))
+        except Exception as ex:
+            pyfuture.set_exception(ex.with_traceback(None))
+        else:
+            pyfuture.set_exception(exc)
+    elif result.hasException():
+        pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
+    else:
+        try:
+            pyfuture.set_result(_module_types.ClientBufferedStream__i32._fbthrift_create(result.value(), options))
+        except Exception as ex:
+            pyfuture.set_exception(ex.with_traceback(None))
+
 cdef void PubSubStreamingService_boththrows_callback(
     cFollyTry[cClientBufferedStream[cint32_t]]&& result,
     PyObject* userdata
@@ -285,6 +312,32 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
                 foo,
             ),
             PubSubStreamingService_servicethrows_callback,
+            <PyObject *> __userdata
+        )
+        return asyncio_shield(__future)
+
+    @cython.always_allow_keywords(True)
+    def servicethrows2(
+            PubSubStreamingService self,
+            foo not None,
+            __RpcOptions rpc_options=None
+    ):
+        if rpc_options is None:
+            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
+        if not isinstance(foo, int):
+            raise TypeError(f'foo is not a {int !r}.')
+        else:
+            foo = <cint32_t> foo
+        self._check_connect_future()
+        __loop = asyncio_get_event_loop()
+        __future = __loop.create_future()
+        __userdata = (self, __future, rpc_options)
+        bridgeFutureWith[cClientBufferedStream[cint32_t]](
+            self._executor,
+            down_cast_ptr[cPubSubStreamingServiceClientWrapper, cClientWrapper](self._client.get()).servicethrows2(rpc_options._cpp_obj, 
+                foo,
+            ),
+            PubSubStreamingService_servicethrows2_callback,
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)

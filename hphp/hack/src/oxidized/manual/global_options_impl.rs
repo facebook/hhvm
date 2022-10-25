@@ -24,25 +24,25 @@ impl Default for GlobalOptions {
             tco_remote_check_id: None,
             tco_remote_max_batch_size: 8000,
             tco_remote_min_batch_size: 5000,
-            tco_num_remote_workers: 0,
+            tco_num_remote_workers: 0, // 4 in ocaml
             so_remote_version_specifier: None,
-            so_remote_worker_vfs_checkout_threshold: 0,
+            so_remote_worker_vfs_checkout_threshold: 0, // 10000 in ocaml
             so_naming_sqlite_path: None,
             po_auto_namespace_map: vec![],
             po_codegen: false,
             po_deregister_php_stdlib: false,
             po_disallow_toplevel_requires: false,
-            po_allow_unstable_features: false,
+            po_allow_unstable_features: false, // true in /etc/hh.conf
             tco_log_large_fanouts_threshold: None,
             tco_log_inference_constraints: false,
             tco_language_feature_logging: false,
             tco_timeout: 0,
-            tco_disallow_invalid_arraykey: false,
+            tco_disallow_invalid_arraykey: false, // true in ocaml, true in .hhconfig
             tco_disallow_byref_dynamic_calls: false,
             tco_disallow_byref_calls: true,
             allowed_fixme_codes_strict: i_set::ISet::new(),
             log_levels: s_map::SMap::new(),
-            po_disable_lval_as_an_expression: false,
+            po_disable_lval_as_an_expression: false, // true in ocaml
             tco_shallow_class_decl: false,
             tco_force_shallow_decl_fanout: false,
             tco_remote_old_decls_no_limit: false,
@@ -81,16 +81,16 @@ impl Default for GlobalOptions {
             po_disallow_func_ptrs_in_constants: false,
             tco_error_php_lambdas: false,
             tco_disallow_discarded_nullable_awaitables: false,
-            po_enable_xhp_class_modifier: false,
-            po_disable_xhp_element_mangling: false,
-            po_disable_xhp_children_declarations: false,
+            po_enable_xhp_class_modifier: false, // true in ocaml
+            po_disable_xhp_element_mangling: false, // true in ocaml
+            po_disable_xhp_children_declarations: false, // true in ocaml
             glean_service: String::new(),
             glean_hostname: String::new(),
             glean_port: 0,
-            glean_reponame: String::new(),
+            glean_reponame: String::new(), // "www.autocomplete" in ocaml
             symbol_write_ownership: false,
-            symbol_write_root_path: String::new(),
-            symbol_write_hhi_path: String::new(),
+            symbol_write_root_path: String::new(), // "www" in ocaml
+            symbol_write_hhi_path: String::new(),  // "hhi" in ocaml
             symbol_write_ignore_paths: vec![],
             symbol_write_index_paths: vec![],
             symbol_write_index_paths_file: None,
@@ -111,8 +111,10 @@ impl Default for GlobalOptions {
             po_disallow_inst_meth: false,
             tco_use_direct_decl_parser: true,
             tco_ifc_enabled: vec![],
-            tco_global_write_check_enabled: vec![],
-            tco_global_write_check_functions_enabled: s_set::SSet::new(),
+            tco_global_access_check_files_enabled: vec![],
+            tco_global_access_check_functions_enabled: s_set::SSet::new(),
+            tco_global_access_check_on_write: true,
+            tco_global_access_check_on_read: true,
             po_enable_enum_supertyping: true,
             po_interpret_soft_types_as_like_types: false,
             tco_enable_strict_string_concat_interp: false,

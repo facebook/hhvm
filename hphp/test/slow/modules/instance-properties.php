@@ -1,5 +1,5 @@
 <?hh
-<<file:__EnableUnstableFeatures("modules")>>
+
 
 
 <<__EntryPoint>>

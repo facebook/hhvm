@@ -16,6 +16,7 @@
 #include <fizz/protocol/AsyncFizzBase.h>
 #include <fizz/protocol/Exporter.h>
 #include <folly/io/SocketOptionMap.h>
+#include <folly/tracing/StaticTracepoint.h>
 
 namespace fizz {
 namespace client {

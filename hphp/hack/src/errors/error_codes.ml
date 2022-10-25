@@ -267,6 +267,8 @@ module NastCheck = struct
     (* | InternalOutsideModuleDEPRECATED [@value 3098] *)
     | InternalMemberInsidePublicTrait [@value 3099]
     | AttributeConflictingMemoize [@value 3100]
+    | RefinementInTypeStruct [@value 3101]
+    | Soft_internal_without_internal [@value 3102]
   (* Add new NastCheck codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 
@@ -765,19 +767,20 @@ end
 (* 9xxx: reserved for FB ai *)
 (* 10xxx: reserved for FB ai *)
 
-(* 11xxx: reserved for global write check (fbcode/hphp/hack/src/typing/tast_check/global_write_check.ml),
- * which is used to detect data leaks through global variable access.
- * 11001 represents the error when a static variable is directly written.
- * 11002 represents the error when a global variable is written via reference.
- * 11003 represents the error when a global variable is passed to (or returned from) a function call.
+(* 11xxx: reserved for global access check (fbcode/hphp/hack/src/typing/tast_check/global_access_check.ml),
+ * which is used to detect potential data leaks caused by global variable access.
+ * 11001 represents the error when a global variable is definitely written.
+ * 11002 represents the warning when a global variable is possibly written via reference.
+ * 11003 represents the warning when a global variable is possibly written via function calls.
+ * 11004 represents the error when a global variable is definitely read.
  *)
-module GlobalWriteCheck = struct
+module GlobalAccessCheck = struct
   type t =
-    | StaticVariableDirectWrite [@value 11001]
-    | GlobalVariableWrite [@value 11002]
-    | GlobalVariableInFunctionCall [@value 11003]
-    | GlobalVariableDirectRead [@value 11004]
-  (* Add new GlobalWriteCheck codes here! Comment out when deprecating. *)
+    | DefiniteGlobalWrite [@value 11001]
+    | PossibleGlobalWriteViaReference [@value 11002]
+    | PossibleGlobalWriteViaFunctionCall [@value 11003]
+    | DefiniteGlobalRead [@value 11004]
+  (* Add new GlobalAccessCheck codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

@@ -21,3 +21,7 @@ cdef class FooEx_Builder(thrift.py3.builder.StructBuilder):
     pass
 
 
+cdef class FooEx2_Builder(thrift.py3.builder.StructBuilder):
+    pass
+
+

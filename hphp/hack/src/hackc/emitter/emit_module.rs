@@ -22,10 +22,12 @@ pub fn emit_module<'a, 'arena, 'decl>(
     let attributes = emit_attribute::from_asts(emitter, &ast_module.user_attributes)?;
     let name = ClassName::from_ast_name_and_mangle(alloc, &ast_module.name.1);
     let span = Span::from_pos(&ast_module.span);
+    let doc_comment = ast_module.doc_comment.clone();
     Ok(Module {
         attributes: Slice::fill_iter(alloc, attributes.into_iter()),
         name,
         span,
+        doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &c.1))),
     })
 }
 

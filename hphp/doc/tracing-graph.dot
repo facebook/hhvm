@@ -1,0 +1,75 @@
+digraph Tracing {
+  // top level
+  "http-request" -> {"autoload-ensure-updated", "invoke", "onShutdownPostSend"}
+  "cli-request" // need to look into why this isn't getting logged
+
+  // second level
+  "invoke" ->  {"warmup", "dispatch", "enter-tc",
+                "shutdown-pre-send", "autoload", "autoload-native"}
+  "warmup" -> "invoke"
+
+  // I'm not 100% about the circular dependency here if it comes from above.
+  // I don't think it's enter-tc -> dispatch but rather the actual execution
+  // check with Rick
+  "dispatch" -> {"enter-tc", "dispatch-bb", "autoload", "autoload-native"}
+
+  // Jitting code
+  "enter-tc" -> {"dispatch", "emit-interp-no-translate-stub", "retranslate",
+                 "emit-func-prologue", "svcreq::emitStub", "autoload",
+                 "autoload-native"}
+  "dispatch-bb"
+
+  "retranslate" -> {"select-tracelet", "translate", "emit-translation",
+                    "svcreq::emitStub"}
+  "emit-func-prologue" -> {"hhir-optimize", "vasm-gen"}
+
+  "translate" -> {"hhir-gen", "vasm-gen"} // this refers specifically to region translation
+  "emit-translation" -> "vasm-emit"
+  "hhir-gen" -> {"select-tracelet", "hhir-optimize"}
+  "vasm-gen" -> {"vasm-optimize", "vauto-finish"}
+  "vasm-emit" -> "emit-X64"
+  "svcreq::emitStub" -> "vauto-finish"
+
+  "select-tracelet"
+  "hhir-optimize"
+  "vasm-optimize"
+  "vauto-finish"
+
+  // autoloading
+  "autoload" -> "lookup-unit"
+  "autoload-native" -> "lookup-unit"
+  "autoload-ensure-updated"
+
+  // unit loading
+  "lookup-unit" -> "lookup-unit-non-repo-auth"
+  "lookup-unit-non-repo-auth" -> {"create-unit-from-file",
+                                  "load-unit-non-repo-auth",
+                                  "prefetch-symbol-refs",
+                                  "realpath", "repo-options"}
+
+  "prefetch-symbol-refs" -> "prefetch-unit"
+  "prefetch-unit" -> {"prefetch-unit-enqueue", "realpath"}
+  "prefetch-unit-enqueue" -> {"create-unit-from-file", "realpath",
+                              "repo-options"}
+
+  "load-unit-non-repo-auth" -> {"unit-cache-lock-acquire", "read-file"}
+  "unit-cache-lock-acquire" -> {"create-unit-from-file", "read-file"}
+  "create-unit-from-file" -> {"create-unit-from-file-load", "bccache",
+                              "unit-create"}
+  "create-unit-from-file-load" -> {"parse", "bccache", "unit-create"}
+
+  "parse" -> {"unit-compiler-run", "assemble", "parse-load"}
+  "parse-load" -> {"unit-compiler-run", "assemble"}
+  "unit-compiler-run" -> {"unit-compiler-run-load", "hackc"}
+  "unit-compiler-run-load" -> "hackc"
+  "hackc" -> {"assemble", "unit-create"}
+  "assemble"
+  "unit-create"
+
+  // bytecode cache
+  "bccache" -> {"bccache-uncacheable", "bccache-hit", "bccache-timeout",
+                "bccache-error", "bccache-miss", "bccache-ice"}
+  "bccache-hit" -> "bccache-blob-decode"
+  "bccache-miss" -> "bccache-blob-encode"
+  "bccache-blob-decode"
+}

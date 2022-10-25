@@ -13,6 +13,8 @@ import typing as _typing
 from types import TracebackType
 
 import module.types as _module_types
+import facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
+import facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 import include.types as _include_types
 
 

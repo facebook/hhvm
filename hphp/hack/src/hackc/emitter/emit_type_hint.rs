@@ -116,6 +116,11 @@ pub fn fmt_hint<'arena>(
                 format!("?{}", fmt_hint(alloc, tparams, false, hint)?)
             }
         }
+        Hrefinement(hint, _) => {
+            // NOTE: refinements are already banned in type structures
+            // and in other cases they should be invisible to the HHVM, so unpack hint
+            fmt_hint(alloc, tparams, strip_tparams, hint)?
+        }
         // No guarantee that this is in the correct order when using map instead of list
         //  TODO: Check whether shape fields need to retain order *)
         Hshape(NastShapeInfo { field_map, .. }) => {
@@ -205,9 +210,7 @@ fn hint_to_type_constraint<'arena>(
 ) -> Result<Constraint<'arena>> {
     let Hint(_, hint) = h;
     Ok(match &**hint {
-        Hdynamic | Hlike(_) | Hfun(_) | Hunion(_) | Hintersection(_) | Hmixed => {
-            Constraint::default()
-        }
+        Hdynamic | Hfun(_) | Hunion(_) | Hintersection(_) | Hmixed => Constraint::default(),
         Haccess(_, _) => Constraint::make(
             Just("".into()),
             TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::TypeConstant,
@@ -222,6 +225,7 @@ fn hint_to_type_constraint<'arena>(
             t,
             TypeConstraintFlags::Soft | TypeConstraintFlags::ExtendedHint,
         )?,
+        Hlike(h) => hint_to_type_constraint(alloc, kind, tparams, skipawaitable, h)?,
         Herr | Hany => {
             return Err(Error::unrecoverable(
                 "This should be an error caught in naming",
@@ -281,11 +285,22 @@ fn hint_to_type_constraint<'arena>(
                         _ => hint_to_type_constraint(alloc, kind, tparams, false, &hs[0]),
                     };
                 }
+                [h] if s == typehints::POISON_MARKER => {
+                    return hint_to_type_constraint(alloc, kind, tparams, false, h);
+                }
+                [_h] if s == typehints::TANY_MARKER => {
+                    return Ok(Constraint::default());
+                }
                 _ => {}
             };
             type_application_helper(alloc, tparams, kind, s)?
         }
         Habstr(s, _hs) => type_application_helper(alloc, tparams, kind, s)?,
+        Hrefinement(hint, _) => {
+            // NOTE: refinements are already banned in type structures
+            // and in other cases they should be invisible to the HHVM, so unpack hint
+            hint_to_type_constraint(alloc, kind, tparams, skipawaitable, hint)?
+        }
         h => type_application_helper(alloc, tparams, kind, hint_to_string(h))?,
     })
 }

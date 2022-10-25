@@ -5,15 +5,16 @@ use anyhow::Context;
 use anyhow::Result;
 use ffi::Str;
 use hash::HashMap;
+use hhbc::AdataId;
 use hhbc::Instruct;
 use hhbc::Label;
 use hhbc::Local;
 use hhbc::Opcode;
 use hhbc::Pseudo;
 use hhbc::SrcLoc;
+use hhbc::TypedValue;
 use hhbc_gen::OpcodeData;
 use newtype::IdVec;
-use once_cell::sync::OnceCell;
 
 use crate::code_path::CodePath;
 use crate::instr_ptr::InstrPtr;
@@ -45,10 +46,12 @@ use crate::work_queue::WorkQueue;
 /// Finally we compare the two sequences to make sure that they're equal or we
 /// return an Err (see `Sequence::compare()`).
 ///
-pub(crate) fn compare_bodies<'arena>(
+pub(crate) fn compare_bodies<'arena, 'a>(
     path: &CodePath<'_>,
     body_a: &'arena hhbc::Body<'arena>,
+    a_adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
     body_b: &'arena hhbc::Body<'arena>,
+    b_adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
 ) -> Result<()> {
     let mut work_queue = WorkQueue::default();
 
@@ -56,7 +59,7 @@ pub(crate) fn compare_bodies<'arena>(
     let b = Body::new(body_b);
 
     let mut value_builder = ValueBuilder::new();
-    work_queue.init_from_bodies(&mut value_builder, &a, &b);
+    work_queue.init_from_bodies(&mut value_builder, &a, a_adata, &b, b_adata);
 
     // If we loop more than this number of times it's almost certainly a bug.
     let mut infinite_loop = std::cmp::max(body_a.body_instrs.len(), body_b.body_instrs.len()) * 5;
@@ -194,12 +197,5 @@ fn body_instrs<'arena>(
 }
 
 pub(crate) fn lookup_data_for_opcode(opcode: &Opcode<'_>) -> &'static OpcodeData {
-    static LOOKUP: OnceCell<HashMap<&'static str, &'static OpcodeData>> = OnceCell::new();
-    let lookup = LOOKUP.get_or_init(|| {
-        hhbc_gen::opcode_data()
-            .iter()
-            .map(|opcode| (opcode.name, opcode))
-            .collect()
-    });
-    lookup[opcode.variant_name()]
+    hhbc_gen::opcode_data().get(opcode.variant_index()).unwrap()
 }

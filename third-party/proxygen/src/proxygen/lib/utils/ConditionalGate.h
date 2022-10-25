@@ -82,10 +82,10 @@ class ConditionalGate {
 
  private:
   void invoke() {
-    for (auto& f : functions_) {
+    auto functions = std::move(functions_);
+    for (auto& f : functions) {
       f();
     }
-    functions_.clear();
   }
 
   std::bitset<N> conditions_;

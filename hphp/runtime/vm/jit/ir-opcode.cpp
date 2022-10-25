@@ -890,7 +890,6 @@ bool opcodeMayRaise(Opcode opc) {
   case StFrameFunc:
   case StFrameMeta:
   case StImplicitContext:
-  case StImplicitContextWH:
   case StIterBase:
   case StIterEnd:
   case StIterPos:

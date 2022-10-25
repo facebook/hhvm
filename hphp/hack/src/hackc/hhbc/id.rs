@@ -19,6 +19,10 @@ macro_rules! impl_id {
                 Self(s)
             }
 
+            pub fn empty() -> Self {
+                Self(ffi::Slice::new(b""))
+            }
+
             pub fn is_empty(&self) -> bool {
                 self.0.is_empty()
             }
@@ -85,6 +89,13 @@ macro_rules! impl_add_suffix {
         }
     };
 }
+
+/// Conventionally this is "A_" followed by an integer
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
+#[repr(C)]
+pub struct AdataId<'arena>(Str<'arena>);
+
+impl_id!(AdataId);
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
 #[repr(C)]

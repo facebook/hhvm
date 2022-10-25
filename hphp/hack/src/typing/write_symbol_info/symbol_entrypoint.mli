@@ -9,6 +9,7 @@
 (* entry point to the hack indexer *)
 
 module Indexable = Symbol_indexable
+module Sym_hash = Symbol_sym_hash
 
 val index_files :
   Provider_context.t -> out_dir:string -> files:Relative_path.t list -> unit
@@ -22,5 +23,6 @@ val go :
   out_dir:string ->
   root_path:string ->
   hhi_path:string ->
+  incremental:Sym_hash.t option ->
   files:Indexable.t list ->
   unit

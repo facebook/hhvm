@@ -49,6 +49,12 @@ void saltKey(
 void populateRandom(unsigned char* field, uint32_t len) {
   CHECK_EQ(RAND_bytes(field, len), 1);
 }
+
+std::string generateRandomTicketSeed() {
+  uint8_t seed[32];
+  folly::Random::secureRandom(seed, sizeof(seed));
+  return std::string((char*)seed, sizeof(seed));
+}
 } // namespace
 
 namespace wangle {
@@ -93,7 +99,10 @@ std::unique_ptr<TLSTicketKeyManager> TLSTicketKeyManager::fromSeeds(
   return mgr;
 }
 
-TLSTicketKeyManager::TLSTicketKeyManager() {}
+TLSTicketKeyManager::TLSTicketKeyManager()
+    : fallbackTicketKey_{
+          generateRandomTicketSeed(),
+          TLSTicketSeedType::SEED_CURRENT} {}
 
 TLSTicketKeyManager::~TLSTicketKeyManager() {}
 
@@ -136,8 +145,15 @@ int TLSTicketKeyManager::encryptCallback(
     // no keys available to encrypt
     FB_LOG_EVERY_MS(WARNING, 1000)
         << "No TLS ticket key available for encryption. Either set a ticket "
-        << "key or uninstall TLSTicketKeyManager from this SSLContext.";
-    return 0;
+        << "key or uninstall TLSTicketKeyManager from this SSLContext. "
+        << "Returning un-resumable fallback ticket.";
+    // In OpenSSL 1.1.1 (and probably previous versions), when using TLS 1.3,
+    // NewSessionTickets are not properly encoded when this callback returns 0.
+    // See https://github.com/openssl/openssl/issues/18977.
+    //
+    // Return a dummy value instead, that the decryptCallback won't be able to
+    // parse and session won't be resumed.
+    key = &fallbackTicketKey_;
   }
   VLOG(4) << "Encrypting new ticket with key name="
           << SSLUtil::hexlify(encryptionKeyName_);

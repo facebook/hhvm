@@ -18,12 +18,12 @@ namespace detail {
 namespace md {
 
 template <>
-class StructMetadata<::apache::thrift::test::B> {
+class StructMetadata<::apache::thrift::test::A> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::apache::thrift::test::A> {
+class StructMetadata<::apache::thrift::test::B> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

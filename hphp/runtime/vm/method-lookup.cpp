@@ -229,7 +229,7 @@ lookupImmutableObjMethod(const Class* cls,
     nullptr
   };
   if (!cls) return notFound;
-  exactClass |= cls->attrs() & AttrNoOverride;
+  exactClass |= cls->attrs() & AttrNoOverrideRegular;
 
   if (isInterface(cls)) {
     if (auto const func = lookupIfaceMethod(cls, name)) {
@@ -332,8 +332,7 @@ const Func* lookupImmutableCtor(const Class* cls,
   return func;
 }
 
-ImmutableFuncLookup lookupImmutableFunc(const Unit* unit,
-                                        const StringData* name) {
+ImmutableFuncLookup lookupImmutableFunc(const StringData* name) {
   auto const ne = NamedEntity::get(name);
   if (auto const f = ne->getCachedFunc()) {
     if (f->isUnique()) {
@@ -348,11 +347,8 @@ ImmutableFuncLookup lookupImmutableFunc(const Unit* unit,
       if (f->isMethCaller() && !RO::RepoAuthoritative) return {nullptr, true};
 
       // We can use this function. If its persistent (which means its unit's
-      // pseudo-main is trivial), its safe to use unconditionally. If its defined
-      // in the same unit as the caller, its also safe to use unconditionally. By
-      // virtue of the fact that we're already in the unit, we know its already
-      // defined.
-      if (f->isPersistent() || f->unit() == unit) {
+      // pseudo-main is trivial), its safe to use unconditionally.
+      if (f->isPersistent()) {
         if (!RO::EvalJitEnableRenameFunction || f->isMethCaller()) {
           return {f, false};
         }
@@ -364,30 +360,6 @@ ImmutableFuncLookup lookupImmutableFunc(const Unit* unit,
     }
   }
 
-  // Trust nothing if we can rename functions
-  if (RuntimeOption::EvalJitEnableRenameFunction) return {nullptr, true};
-
-  // There's no unique function currently known for this name. However, if the
-  // current unit defines a single top-level function with this name, we can use
-  // it. Why? When this unit is loaded, either it successfully defined the
-  // function, in which case its the correct function, or it fataled, which
-  // means this code won't run anyways.
-
-  Func* found = nullptr;
-  for (auto& f : unit->funcs()) {
-    if (!f->name()->isame(name)) continue;
-    if (found) {
-      // Function with duplicate name
-      found = nullptr;
-      break;
-    }
-    found = f;
-  }
-
-  if (found && !found->isInterceptable() &&
-      (RO::RepoAuthoritative || !found->isMethCaller())) {
-    return {found, false};
-  }
   return {nullptr, true};
 }
 

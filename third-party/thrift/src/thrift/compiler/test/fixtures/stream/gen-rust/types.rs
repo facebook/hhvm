@@ -60,6 +60,33 @@ impl ::std::fmt::Display for FooEx {
     }
 }
 
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct FooEx2 {
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+impl ::fbthrift::ExceptionInfo for FooEx2 {
+    fn exn_value(&self) -> String {
+        format!("{:?}", self)
+    }
+
+    #[inline]
+    fn exn_is_declared(&self) -> bool { true }
+}
+
+impl ::std::error::Error for FooEx2 {}
+
+impl ::std::fmt::Display for FooEx2 {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::FooStreamEx {
     fn default() -> Self {
@@ -155,6 +182,65 @@ where
 }
 
 impl<P> ::fbthrift::Deserialize<P> for self::FooEx
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::FooEx2 {
+    fn default() -> Self {
+        Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::FooEx2 {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("FooEx2")
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::FooEx2 {}
+unsafe impl ::std::marker::Sync for self::FooEx2 {}
+
+impl ::fbthrift::GetTType for self::FooEx2 {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::FooEx2
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("FooEx2");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::FooEx2
 where
     P: ::fbthrift::ProtocolReader,
 {

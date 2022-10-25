@@ -2,9 +2,11 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use pos::ClassConstNameIndexMap;
+
+use hash::IndexMap;
+use pos::ClassConstName;
 use pos::Positioned;
-use pos::TypeNameIndexMap;
+use pos::TypeName;
 use special_names as sn;
 use ty::decl::folded::ClassConst;
 use ty::decl::Prim;
@@ -38,7 +40,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     fn enum_kind(
         &self,
         inner_ty: Option<&Ty<R>>,
-        ancestors: &TypeNameIndexMap<Ty<R>>,
+        ancestors: &IndexMap<TypeName, Ty<R>>,
     ) -> Option<EnumKind<R>> {
         let is_enum_class = matches!(self.child.kind, ty::decl::ty::ClassishKind::CenumClass(..));
         match &self.child.enum_type {
@@ -113,8 +115,8 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     pub fn rewrite_class_consts_for_enum(
         &self,
         inner_ty: Option<&Ty<R>>,
-        ancestors: &TypeNameIndexMap<Ty<R>>,
-        consts: &mut ClassConstNameIndexMap<ClassConst<R>>,
+        ancestors: &IndexMap<TypeName, Ty<R>>,
+        consts: &mut IndexMap<ClassConstName, ClassConst<R>>,
     ) {
         let EnumKind {
             // base: _,

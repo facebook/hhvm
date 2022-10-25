@@ -5,7 +5,7 @@
 abstract class Box {
   abstract const type T;
   public function m(): void {
-    f(static::class); // FIXME(static-constraints)
+    f(static::class); // OK
     f(self::class); // ERROR
   }
 }

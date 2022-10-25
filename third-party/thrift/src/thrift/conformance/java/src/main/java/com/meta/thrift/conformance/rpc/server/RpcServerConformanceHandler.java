@@ -169,4 +169,12 @@ public class RpcServerConformanceHandler implements RPCConformanceService {
       throws TException {
     return null;
   }
+
+  @Override
+  public BasicInteraction createBasicInteraction() throws TException {
+    return null;
+  }
+
+  @Override
+  public void basicInteractionFactoryFunction(int initialSum) throws TException {}
 }

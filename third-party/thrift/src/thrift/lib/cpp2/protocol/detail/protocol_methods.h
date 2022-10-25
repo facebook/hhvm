@@ -89,13 +89,13 @@ class Wrap;
 namespace detail {
 namespace pm {
 
-template <typename T>
-auto reserve_if_possible(T* t, std::uint32_t size)
+template <typename Container, typename Size>
+auto reserve_if_possible(Container* t, Size size)
     -> decltype(t->reserve(size), std::true_type{}) {
   // Workaround for libstdc++ < 7, resize to `size + 1` to avoid an extra
   // rehash: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=71181.
   // TODO: Remove once libstdc++ < 7 is not supported any longer.
-  std::uint32_t extra = folly::kIsGlibcxx && folly::kGlibcxxVer < 7 ? 1 : 0;
+  Size extra = folly::kIsGlibcxx && folly::kGlibcxxVer < 7 ? 1 : 0;
   t->reserve(size + extra);
   return {};
 }
@@ -196,12 +196,12 @@ deserialize_known_length_map(
   typename Map::container_type tmp(map.get_allocator());
   reserve_if_possible(&tmp, map_size);
   {
-    auto& elem0 = emplace_back_default_map(tmp, map);
+    decltype(auto) elem0 = emplace_back_default_map(tmp, map);
     kr(elem0.first);
     mr(elem0.second);
   }
   for (size_t i = 1; i < map_size; ++i) {
-    auto& elem = emplace_back_default_map(tmp, map);
+    decltype(auto) elem = emplace_back_default_map(tmp, map);
     kr(elem.first);
     mr(elem.second);
     sorted = sorted && map.key_comp()(tmp[i - 1].first, elem.first);

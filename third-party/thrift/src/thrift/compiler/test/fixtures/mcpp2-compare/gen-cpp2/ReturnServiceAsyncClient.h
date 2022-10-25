@@ -125,7 +125,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void noReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> noReturnCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> noReturnCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void boolReturn(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void boolReturn(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -220,7 +220,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void boolReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> boolReturnCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> boolReturnCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void i16Return(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void i16Return(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -315,7 +315,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void i16ReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> i16ReturnCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> i16ReturnCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void i32Return(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void i32Return(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -410,7 +410,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void i32ReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> i32ReturnCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> i32ReturnCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void i64Return(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void i64Return(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -505,7 +505,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void i64ReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> i64ReturnCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> i64ReturnCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void floatReturn(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void floatReturn(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -600,7 +600,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void floatReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> floatReturnCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> floatReturnCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void doubleReturn(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void doubleReturn(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -695,7 +695,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void doubleReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> doubleReturnCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> doubleReturnCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void stringReturn(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void stringReturn(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -790,7 +790,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void stringReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> stringReturnCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> stringReturnCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void binaryReturn(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void binaryReturn(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -885,7 +885,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void binaryReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> binaryReturnCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> binaryReturnCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void mapReturn(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void mapReturn(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -980,7 +980,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void mapReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> mapReturnCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> mapReturnCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void simpleTypedefReturn(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void simpleTypedefReturn(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -1075,7 +1075,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void simpleTypedefReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> simpleTypedefReturnCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> simpleTypedefReturnCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void complexTypedefReturn(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void complexTypedefReturn(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -1170,7 +1170,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void complexTypedefReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> complexTypedefReturnCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> complexTypedefReturnCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void list_mostComplexTypedefReturn(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void list_mostComplexTypedefReturn(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -1265,7 +1265,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void list_mostComplexTypedefReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> list_mostComplexTypedefReturnCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> list_mostComplexTypedefReturnCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void enumReturn(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void enumReturn(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -1360,7 +1360,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void enumReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> enumReturnCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> enumReturnCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void list_EnumReturn(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void list_EnumReturn(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -1455,7 +1455,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void list_EnumReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> list_EnumReturnCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> list_EnumReturnCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void structReturn(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void structReturn(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -1550,7 +1550,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void structReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> structReturnCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> structReturnCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void set_StructReturn(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void set_StructReturn(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -1645,7 +1645,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void set_StructReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> set_StructReturnCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> set_StructReturnCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void unionReturn(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void unionReturn(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -1740,7 +1740,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void unionReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> unionReturnCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> unionReturnCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void list_UnionReturn(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void list_UnionReturn(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
@@ -1835,7 +1835,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void list_UnionReturnT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> list_UnionReturnCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> list_UnionReturnCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void readDataEb(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_size);
   virtual void readDataEb(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_size);
@@ -1930,7 +1930,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void readDataEbT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_size);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> readDataEbCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> readDataEbCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void readData(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_size);
   virtual void readData(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_size);
@@ -2025,7 +2025,7 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
  private:
   template <typename Protocol_, typename RpcOptions>
   void readDataT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_size);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> readDataCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> readDataCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };
 

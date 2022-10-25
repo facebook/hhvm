@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d77ccb17aaf45143187ca5de1077efab>>
+// @generated SignedSource<<bb8fff2dc42c496a3938a8df06034d27>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -18,12 +18,11 @@ pub use ast_defs::ReifyKind;
 pub use ast_defs::Tprim;
 pub use ast_defs::TypedefVisibility;
 pub use ast_defs::Visibility;
-pub use doc_comment::DocComment;
 pub use local_id::LocalId;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -44,11 +43,14 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct Lid(pub Pos, pub LocalId);
 
+#[rust_to_ocaml(and)]
 pub type Sid = ast_defs::Id;
 
+#[rust_to_ocaml(and)]
 pub type ClassName = Sid;
 
 /// Aast.program represents the top-level definitions in a Hack program.
@@ -68,6 +70,7 @@ pub type ClassName = Sid;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct Program<Ex, En>(pub Vec<Def<Ex, En>>);
 
@@ -85,6 +88,7 @@ pub struct Program<Ex, En>(pub Vec<Def<Ex, En>>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct Stmt<Ex, En>(pub Pos, pub Stmt_<Ex, En>);
 
@@ -102,6 +106,7 @@ pub struct Stmt<Ex, En>(pub Pos, pub Stmt_<Ex, En>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Stmt_<Ex, En> {
     /// Marker for a switch statement that falls through.
@@ -258,6 +263,7 @@ pub enum Stmt_<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(u8)]
 pub enum EnvAnnot {
     Join,
@@ -280,6 +286,7 @@ arena_deserializer::impl_deserialize_in_arena!(EnvAnnot);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "us_")]
 #[repr(C)]
 pub struct UsingStmt<Ex, En> {
@@ -303,6 +310,7 @@ pub struct UsingStmt<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum AsExpr<Ex, En> {
     #[rust_to_ocaml(name = "As_v")]
@@ -315,6 +323,7 @@ pub enum AsExpr<Ex, En> {
     AwaitAsKv(Pos, Expr<Ex, En>, Expr<Ex, En>),
 }
 
+#[rust_to_ocaml(and)]
 pub type Block<Ex, En> = Vec<Stmt<Ex, En>>;
 
 #[derive(
@@ -331,6 +340,7 @@ pub type Block<Ex, En> = Vec<Stmt<Ex, En>>;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct ClassId<Ex, En>(pub Ex, pub Pos, pub ClassId_<Ex, En>);
 
@@ -349,6 +359,7 @@ pub struct ClassId<Ex, En>(pub Ex, pub Pos, pub ClassId_<Ex, En>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum ClassId_<Ex, En> {
     /// The class ID of the parent of the lexically scoped class.
@@ -409,6 +420,7 @@ pub enum ClassId_<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct Expr<Ex, En>(pub Ex, pub Pos, pub Expr_<Ex, En>);
 
@@ -426,6 +438,7 @@ pub struct Expr<Ex, En>(pub Ex, pub Pos, pub Expr_<Ex, En>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum CollectionTarg<Ex> {
     CollectionTV(Targ<Ex>),
@@ -446,6 +459,7 @@ pub enum CollectionTarg<Ex> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum FunctionPtrId<Ex, En> {
     #[rust_to_ocaml(name = "FP_id")]
@@ -472,6 +486,7 @@ pub enum FunctionPtrId<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "et_")]
 #[repr(C)]
 pub struct ExpressionTree<Ex, En> {
@@ -517,6 +532,7 @@ pub struct ExpressionTree<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Expr_<Ex, En> {
     /// darray literal.
@@ -970,6 +986,7 @@ pub enum Expr_<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum HoleSource {
     Typing,
@@ -992,6 +1009,7 @@ pub enum HoleSource {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum ClassGetExpr<Ex, En> {
     CGstring(Pstring),
@@ -1012,6 +1030,7 @@ pub enum ClassGetExpr<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct Case<Ex, En>(pub Expr<Ex, En>, pub Block<Ex, En>);
 
@@ -1029,6 +1048,7 @@ pub struct Case<Ex, En>(pub Expr<Ex, En>, pub Block<Ex, En>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct DefaultCase<Ex, En>(pub Pos, pub Block<Ex, En>);
 
@@ -1046,6 +1066,7 @@ pub struct DefaultCase<Ex, En>(pub Pos, pub Block<Ex, En>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum GenCase<Ex, En> {
     Case(Case<Ex, En>),
@@ -1066,6 +1087,7 @@ pub enum GenCase<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct Catch<Ex, En>(pub ClassName, pub Lid, pub Block<Ex, En>);
 
@@ -1083,6 +1105,7 @@ pub struct Catch<Ex, En>(pub ClassName, pub Lid, pub Block<Ex, En>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct Field<Ex, En>(pub Expr<Ex, En>, pub Expr<Ex, En>);
 
@@ -1100,6 +1123,7 @@ pub struct Field<Ex, En>(pub Expr<Ex, En>, pub Expr<Ex, En>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Afield<Ex, En> {
     AFvalue(Expr<Ex, En>),
@@ -1120,6 +1144,7 @@ pub enum Afield<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "xs_")]
 #[repr(C)]
 pub struct XhpSimple<Ex, En> {
@@ -1142,6 +1167,7 @@ pub struct XhpSimple<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum XhpAttribute<Ex, En> {
     #[rust_to_ocaml(name = "Xhp_simple")]
@@ -1150,6 +1176,7 @@ pub enum XhpAttribute<Ex, En> {
     XhpSpread(Expr<Ex, En>),
 }
 
+#[rust_to_ocaml(and)]
 pub type IsVariadic = bool;
 
 #[derive(
@@ -1166,6 +1193,7 @@ pub type IsVariadic = bool;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "param_")]
 #[repr(C)]
 pub struct FunParam<Ex, En> {
@@ -1195,6 +1223,7 @@ pub struct FunParam<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "f_")]
 #[repr(C)]
 pub struct Fun_<Ex, En> {
@@ -1237,6 +1266,7 @@ pub struct Fun_<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct FuncBody<Ex, En> {
     pub fb_ast: Block<Ex, En>,
@@ -1259,6 +1289,7 @@ pub struct FuncBody<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct TypeHint<Ex>(pub Ex, pub TypeHint_);
 
@@ -1280,9 +1311,11 @@ pub struct TypeHint<Ex>(pub Ex, pub TypeHint_);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct Targ<Ex>(pub Ex, pub Hint);
 
+#[rust_to_ocaml(and)]
 pub type TypeHint_ = Option<Hint>;
 
 #[derive(
@@ -1299,6 +1332,7 @@ pub type TypeHint_ = Option<Hint>;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "ua_")]
 #[repr(C)]
 pub struct UserAttribute<Ex, En> {
@@ -1321,6 +1355,7 @@ pub struct UserAttribute<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "fa_")]
 #[repr(C)]
 pub struct FileAttribute<Ex, En> {
@@ -1342,6 +1377,7 @@ pub struct FileAttribute<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "tp_")]
 #[repr(C)]
 pub struct Tparam<Ex, En> {
@@ -1369,6 +1405,7 @@ pub struct Tparam<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(u8)]
 pub enum RequireKind {
     RequireExtends,
@@ -1394,6 +1431,7 @@ arena_deserializer::impl_deserialize_in_arena!(RequireKind);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum EmitId {
     /// For globally defined type, the ID used in the .main function.
@@ -1418,6 +1456,7 @@ arena_deserializer::impl_deserialize_in_arena!(EmitId);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "c_")]
 #[repr(C)]
 pub struct Class_<Ex, En> {
@@ -1456,10 +1495,13 @@ pub struct Class_<Ex, En> {
     pub module: Option<Sid>,
 }
 
+#[rust_to_ocaml(and)]
 pub type ClassHint = Hint;
 
+#[rust_to_ocaml(and)]
 pub type TraitHint = Hint;
 
+#[rust_to_ocaml(and)]
 pub type XhpAttrHint = Hint;
 
 #[derive(
@@ -1478,6 +1520,7 @@ pub type XhpAttrHint = Hint;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(u8)]
 pub enum XhpAttrTag {
     Required,
@@ -1500,6 +1543,7 @@ arena_deserializer::impl_deserialize_in_arena!(XhpAttrTag);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct XhpAttr<Ex, En>(
     pub TypeHint<Ex>,
@@ -1522,6 +1566,7 @@ pub struct XhpAttr<Ex, En>(
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum ClassConstKind<Ex, En> {
     /// CCAbstract represents the states
@@ -1549,6 +1594,7 @@ pub enum ClassConstKind<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "cc_")]
 #[repr(C)]
 pub struct ClassConst<Ex, En> {
@@ -1579,6 +1625,7 @@ pub struct ClassConst<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "c_atc_")]
 #[repr(C)]
 pub struct ClassAbstractTypeconst {
@@ -1601,6 +1648,7 @@ pub struct ClassAbstractTypeconst {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct ClassConcreteTypeconst {
     pub c_tc_type: Hint,
@@ -1620,6 +1668,7 @@ pub struct ClassConcreteTypeconst {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum ClassTypeconst {
     TCAbstract(ClassAbstractTypeconst),
@@ -1640,6 +1689,7 @@ pub enum ClassTypeconst {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "c_tconst_")]
 #[repr(C)]
 pub struct ClassTypeconstDef<Ex, En> {
@@ -1665,6 +1715,7 @@ pub struct ClassTypeconstDef<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "xai_")]
 #[repr(C)]
 pub struct XhpAttrInfo {
@@ -1687,6 +1738,7 @@ pub struct XhpAttrInfo {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "cv_")]
 #[repr(C)]
 pub struct ClassVar<Ex, En> {
@@ -1719,6 +1771,7 @@ pub struct ClassVar<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "m_")]
 #[repr(C)]
 pub struct Method_<Ex, En> {
@@ -1746,6 +1799,7 @@ pub struct Method_<Ex, En> {
     pub doc_comment: Option<DocComment>,
 }
 
+#[rust_to_ocaml(and)]
 pub type Nsenv = ocamlrep::rc::RcOc<namespace_env::Env>;
 
 #[derive(
@@ -1762,6 +1816,7 @@ pub type Nsenv = ocamlrep::rc::RcOc<namespace_env::Env>;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "t_")]
 #[repr(C)]
 pub struct Typedef<Ex, En> {
@@ -1799,6 +1854,7 @@ pub struct Typedef<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "cst_")]
 #[repr(C)]
 pub struct Gconst<Ex, En> {
@@ -1827,6 +1883,7 @@ pub struct Gconst<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "fd_")]
 #[repr(C)]
 pub struct FunDef<Ex, En> {
@@ -1853,6 +1910,7 @@ pub struct FunDef<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "md_")]
 #[repr(C)]
 pub struct ModuleDef<Ex, En> {
@@ -1881,6 +1939,7 @@ pub struct ModuleDef<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum MdNameKind {
     MDNameGlobal(Pos),
@@ -1902,6 +1961,7 @@ pub enum MdNameKind {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Def<Ex, En> {
     Fun(Box<FunDef<Ex, En>>),
@@ -1934,6 +1994,7 @@ pub enum Def<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(u8)]
 pub enum NsKind {
     NSNamespace,
@@ -1944,6 +2005,9 @@ pub enum NsKind {
 }
 impl TrivialDrop for NsKind {}
 arena_deserializer::impl_deserialize_in_arena!(NsKind);
+
+#[rust_to_ocaml(and)]
+pub type DocComment = ast_defs::Pstring;
 
 #[derive(
     Clone,
@@ -1961,6 +2025,7 @@ arena_deserializer::impl_deserialize_in_arena!(NsKind);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(u8)]
 pub enum ImportFlavor {
     Include,
@@ -1985,6 +2050,7 @@ arena_deserializer::impl_deserialize_in_arena!(ImportFlavor);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum XhpChild {
     ChildName(Sid),
@@ -2009,6 +2075,7 @@ pub enum XhpChild {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(u8)]
 pub enum XhpChildOp {
     ChildStar,
@@ -2032,9 +2099,11 @@ arena_deserializer::impl_deserialize_in_arena!(XhpChildOp);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct Hint(pub Pos, pub Box<Hint_>);
 
+#[rust_to_ocaml(and)]
 pub type VariadicHint = Option<Hint>;
 
 #[derive(
@@ -2051,6 +2120,7 @@ pub type VariadicHint = Option<Hint>;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct Contexts(pub Pos, pub Vec<Hint>);
 
@@ -2068,6 +2138,7 @@ pub struct Contexts(pub Pos, pub Vec<Hint>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "hfparam_")]
 #[repr(C)]
 pub struct HfParamInfo {
@@ -2089,6 +2160,7 @@ pub struct HfParamInfo {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "hf_")]
 #[repr(C)]
 pub struct HintFun {
@@ -2115,6 +2187,7 @@ pub struct HintFun {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Hint_ {
     Hoption(Hint),
@@ -2178,6 +2251,7 @@ pub enum Hint_ {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Refinement {
     Rctx(Sid, CtxRefinement),
@@ -2198,6 +2272,7 @@ pub enum Refinement {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum TypeRefinement {
     TRexact(Hint),
@@ -2218,6 +2293,7 @@ pub enum TypeRefinement {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "tr_")]
 #[repr(C)]
 pub struct TypeRefinementBounds {
@@ -2239,6 +2315,7 @@ pub struct TypeRefinementBounds {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum CtxRefinement {
     CRexact(Hint),
@@ -2259,6 +2336,7 @@ pub enum CtxRefinement {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "cr_")]
 #[repr(C)]
 pub struct CtxRefinementBounds {
@@ -2280,6 +2358,7 @@ pub struct CtxRefinementBounds {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "sfi_")]
 #[repr(C)]
 pub struct ShapeFieldInfo {
@@ -2302,6 +2381,7 @@ pub struct ShapeFieldInfo {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "nsi_")]
 #[repr(C)]
 pub struct NastShapeInfo {
@@ -2325,6 +2405,7 @@ pub struct NastShapeInfo {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = "visitors.opaque")]
 #[repr(u8)]
 pub enum KvcKind {
@@ -2351,6 +2432,7 @@ arena_deserializer::impl_deserialize_in_arena!(KvcKind);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = "visitors.opaque")]
 #[repr(u8)]
 pub enum VcKind {
@@ -2378,6 +2460,7 @@ arena_deserializer::impl_deserialize_in_arena!(VcKind);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "e_")]
 #[repr(C)]
 pub struct Enum_ {
@@ -2400,6 +2483,7 @@ pub struct Enum_ {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = r#"deriving ((show { with_path = false }), eq, ord,
     (visitors
        {

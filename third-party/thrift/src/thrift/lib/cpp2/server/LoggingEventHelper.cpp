@@ -19,6 +19,7 @@
 #include <fizz/server/AsyncFizzServer.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/LoggingEventHelper.h>
+#include <thrift/lib/cpp2/server/peeking/PeekingManager.h>
 
 using fizz::server::AsyncFizzServer;
 
@@ -52,20 +53,16 @@ void logNonTLSEvent(const ConnectionLoggingContext& context) {
   }
 }
 
-void logIfAlpnMismatch(
+void logIfPeekingTransport(
     const ConnectionLoggingContext& context,
     const folly::AsyncTransport* transport) {
-  auto sock = transport->getUnderlyingTransport<folly::AsyncSSLSocket>();
-  if (sock) {
-    if (sock->getApplicationProtocol().empty() &&
-        !sock->getClientAlpns().empty()) {
-      THRIFT_CONNECTION_EVENT(alpn.mismatch.ssl).log(context);
-    }
-  } else if (auto fizz = transport->getUnderlyingTransport<AsyncFizzServer>()) {
-    auto& state = fizz->getState();
-    if (!state.alpn() && !state.handshakeLogging()->clientAlpns.empty()) {
-      THRIFT_CONNECTION_EVENT(alpn.mismatch.fizz).log(context);
-    }
+  if (auto decorator =
+          dynamic_cast<const PreReceivedDataAsyncTransportWrapper*>(
+              transport)) {
+    // Transport was wrapped by TransportPeekingManager, presumably because no
+    // ALPN was provided. The ConnectionEventLogEntry should captures all the
+    // ALPN details we need.
+    THRIFT_CONNECTION_EVENT(peeking_manager.tls).log(context);
   }
 }
 } // namespace
@@ -97,7 +94,7 @@ void logSetupConnectionEventsOnce(
           if (!transport->getPeerCertificate()) {
             logTlsNoPeerCertEvent(context);
           }
-          logIfAlpnMismatch(context, transport);
+          logIfPeekingTransport(context, transport);
         } else {
           logNonTLSEvent(context);
         }

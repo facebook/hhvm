@@ -7,6 +7,7 @@ use ffi::Slice;
 use hhbc::Method;
 use log::trace;
 
+use crate::adata::AdataCache;
 use crate::convert;
 use crate::convert::UnitBuilder;
 use crate::emitter;
@@ -33,9 +34,9 @@ use crate::strings::StringCache;
 /// block.
 ///
 pub(crate) fn convert_func<'a>(
-    alloc: &'a bumpalo::Bump,
     mut func: ir::Func<'a>,
     strings: &StringCache<'a, '_>,
+    adata: &mut AdataCache<'a>,
 ) -> hhbc::Body<'a> {
     // Compute liveness and implicit block parameters.
 
@@ -56,17 +57,17 @@ pub(crate) fn convert_func<'a>(
     // Now emit the instructions.
     trace!("-- emit instrs");
     let mut labeler = emitter::Labeler::new(&func);
-    let (body_instrs, decl_vars) = emitter::emit_func(alloc, &func, &mut labeler, strings);
+    let (body_instrs, decl_vars) = emitter::emit_func(&func, &mut labeler, strings, adata);
 
-    let return_type_info = crate::types::convert(alloc, &func.return_type, strings);
+    let return_type_info = crate::types::convert(&func.return_type, strings);
 
-    let decl_vars = Slice::fill_iter(alloc, decl_vars.into_iter());
+    let decl_vars = Slice::fill_iter(strings.alloc, decl_vars.into_iter());
 
     let params = Slice::fill_iter(
-        alloc,
+        strings.alloc,
         func.params.into_iter().map(|param| {
             let name = strings.lookup_ffi_str(param.name);
-            let user_attributes = convert::convert_attributes(alloc, param.user_attributes);
+            let user_attributes = convert::convert_attributes(param.user_attributes, strings);
             let default_value = param
                 .default_value
                 .map(|dv| {
@@ -83,7 +84,7 @@ pub(crate) fn convert_func<'a>(
                 is_inout: param.is_inout,
                 is_readonly: param.is_readonly,
                 user_attributes,
-                type_info: crate::types::convert(alloc, &param.ty, strings),
+                type_info: crate::types::convert(&param.ty, strings),
                 default_value,
             }
         }),
@@ -92,15 +93,15 @@ pub(crate) fn convert_func<'a>(
     let doc_comment = func.doc_comment.into();
 
     let upper_bounds = Slice::fill_iter(
-        alloc,
+        strings.alloc,
         func.tparams.iter().map(|(name, tparam)| {
             let name = strings.lookup_class_name(*name);
             let bounds = Slice::fill_iter(
-                alloc,
+                strings.alloc,
                 tparam
                     .bounds
                     .iter()
-                    .map(|ty| crate::types::convert(alloc, ty, strings).unwrap()),
+                    .map(|ty| crate::types::convert(ty, strings).unwrap()),
             );
             hhbc::UpperBound {
                 name: name.as_ffi_str(),
@@ -110,14 +111,18 @@ pub(crate) fn convert_func<'a>(
     );
 
     let shadowed_tparams = Slice::fill_iter(
-        alloc,
+        strings.alloc,
         func.shadowed_tparams
             .iter()
             .map(|name| strings.lookup_class_name(*name).as_ffi_str()),
     );
 
+    let body_instrs = body_instrs.compact(strings.alloc);
+    let stack_depth =
+        stack_depth::compute_stack_depth(params.as_ref(), body_instrs.as_ref()).unwrap();
+
     hhbc::Body {
-        body_instrs: body_instrs.compact(alloc),
+        body_instrs,
         decl_vars,
         doc_comment,
         is_memoize_wrapper: func.is_memoize_wrapper,
@@ -127,11 +132,11 @@ pub(crate) fn convert_func<'a>(
         return_type_info,
         shadowed_tparams,
         upper_bounds,
+        stack_depth,
     }
 }
 
 pub(crate) fn convert_function<'a>(
-    alloc: &'a bumpalo::Bump,
     unit: &mut UnitBuilder<'a>,
     function: ir::Function<'a>,
     strings: &StringCache<'a, '_>,
@@ -139,12 +144,12 @@ pub(crate) fn convert_function<'a>(
     let name = function.name;
     trace!("convert_function {}", name.as_bstr());
     let span = function.func.loc(function.func.loc_id).to_span();
-    let body = convert_func(alloc, function.func, strings);
-    let attributes = convert::convert_attributes(alloc, function.attributes);
+    let body = convert_func(function.func, strings, &mut unit.adata_cache);
+    let attributes = convert::convert_attributes(function.attributes, strings);
     let hhas_func = hhbc::Function {
         attributes,
         body,
-        coeffects: convert_coeffects(alloc, &function.coeffects),
+        coeffects: convert_coeffects(strings.alloc, &function.coeffects),
         flags: function.flags,
         name,
         span,
@@ -154,20 +159,20 @@ pub(crate) fn convert_function<'a>(
 }
 
 pub(crate) fn convert_method<'a>(
-    alloc: &'a bumpalo::Bump,
     method: ir::Method<'a>,
     strings: &StringCache<'a, '_>,
+    adata: &mut AdataCache<'a>,
 ) -> Method<'a> {
     trace!("convert_method {}", method.name.as_bstr());
     let span = method.func.loc(method.func.loc_id).to_span();
-    let body = convert_func(alloc, method.func, strings);
-    let attributes = convert::convert_attributes(alloc, method.attributes);
+    let body = convert_func(method.func, strings, adata);
+    let attributes = convert::convert_attributes(method.attributes, strings);
     hhbc::Method {
         attributes,
         name: method.name,
         body,
         span,
-        coeffects: convert_coeffects(alloc, &method.coeffects),
+        coeffects: convert_coeffects(strings.alloc, &method.coeffects),
         flags: method.flags,
         visibility: method.visibility,
         attrs: method.attrs,

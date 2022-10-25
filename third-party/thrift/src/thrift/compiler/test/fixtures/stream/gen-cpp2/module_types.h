@@ -26,6 +26,7 @@ namespace detail {
 namespace cpp2 {
 class FooStreamEx;
 class FooEx;
+class FooEx2;
 } // cpp2
 // END forward_declare
 // BEGIN hash_and_equal_to
@@ -52,9 +53,9 @@ class FOLLY_EXPORT FooStreamEx : public virtual apache::thrift::TException {
   static constexpr ::apache::thrift::ExceptionKind __fbthrift_cpp2_gen_exception_kind =
          ::apache::thrift::ExceptionKind::UNSPECIFIED;
   static constexpr ::apache::thrift::ExceptionSafety __fbthrift_cpp2_gen_exception_safety =
-         ::apache::thrift::ExceptionSafety::UNSPECIFIED;
+         ::apache::thrift::ExceptionSafety::SAFE;
   static constexpr ::apache::thrift::ExceptionBlame __fbthrift_cpp2_gen_exception_blame =
-         ::apache::thrift::ExceptionBlame::UNSPECIFIED;
+         ::apache::thrift::ExceptionBlame::SERVER;
 
  public:
   using __fbthrift_cpp2_type = FooStreamEx;
@@ -130,9 +131,9 @@ class FOLLY_EXPORT FooEx : public virtual apache::thrift::TException {
   static constexpr ::apache::thrift::ExceptionKind __fbthrift_cpp2_gen_exception_kind =
          ::apache::thrift::ExceptionKind::UNSPECIFIED;
   static constexpr ::apache::thrift::ExceptionSafety __fbthrift_cpp2_gen_exception_safety =
-         ::apache::thrift::ExceptionSafety::UNSPECIFIED;
+         ::apache::thrift::ExceptionSafety::SAFE;
   static constexpr ::apache::thrift::ExceptionBlame __fbthrift_cpp2_gen_exception_blame =
-         ::apache::thrift::ExceptionBlame::UNSPECIFIED;
+         ::apache::thrift::ExceptionBlame::SERVER;
 
  public:
   using __fbthrift_cpp2_type = FooEx;
@@ -187,6 +188,84 @@ class FOLLY_EXPORT FooEx : public virtual apache::thrift::TException {
 
 template <class Protocol_>
 unsigned long FooEx::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class FOLLY_EXPORT FooEx2 : public virtual apache::thrift::TException {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+  static constexpr ::apache::thrift::ExceptionKind __fbthrift_cpp2_gen_exception_kind =
+         ::apache::thrift::ExceptionKind::UNSPECIFIED;
+  static constexpr ::apache::thrift::ExceptionSafety __fbthrift_cpp2_gen_exception_safety =
+         ::apache::thrift::ExceptionSafety::SAFE;
+  static constexpr ::apache::thrift::ExceptionBlame __fbthrift_cpp2_gen_exception_blame =
+         ::apache::thrift::ExceptionBlame::SERVER;
+
+ public:
+  using __fbthrift_cpp2_type = FooEx2;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  FooEx2();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  FooEx2(apache::thrift::FragileConstructor);
+
+  FooEx2(FooEx2&&) noexcept;
+
+  FooEx2(const FooEx2& src);
+
+
+  FooEx2& operator=(FooEx2&&) noexcept;
+  FooEx2& operator=(const FooEx2& src);
+
+  ~FooEx2() override;
+
+
+ public:
+
+  bool operator==(const FooEx2&) const;
+  bool operator<(const FooEx2&) const;
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+  const char* what() const noexcept override {
+    return "::cpp2::FooEx2";
+  }
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<FooEx2>;
+  friend void swap(FooEx2& a, FooEx2& b);
+};
+
+template <class Protocol_>
+unsigned long FooEx2::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;

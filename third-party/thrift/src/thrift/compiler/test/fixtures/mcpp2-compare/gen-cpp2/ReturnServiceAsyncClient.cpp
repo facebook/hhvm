@@ -419,7 +419,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::noReturnImpl(apac
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::noReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::noReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -607,7 +607,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::boolReturnImpl(ap
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::boolReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::boolReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -797,7 +797,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::i16ReturnImpl(apa
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::i16ReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::i16ReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -987,7 +987,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::i32ReturnImpl(apa
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::i32ReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::i32ReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -1177,7 +1177,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::i64ReturnImpl(apa
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::i64ReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::i64ReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -1367,7 +1367,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::floatReturnImpl(a
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::floatReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::floatReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -1557,7 +1557,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::doubleReturnImpl(
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::doubleReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::doubleReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -1747,7 +1747,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::stringReturnImpl(
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::stringReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::stringReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -1935,7 +1935,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::binaryReturnImpl(
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::binaryReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::binaryReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -2123,7 +2123,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::mapReturnImpl(apa
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::mapReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::mapReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -2311,7 +2311,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::simpleTypedefRetu
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::simpleTypedefReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::simpleTypedefReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -2501,7 +2501,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::complexTypedefRet
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::complexTypedefReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::complexTypedefReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -2689,7 +2689,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::list_mostComplexT
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::list_mostComplexTypedefReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::list_mostComplexTypedefReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -2877,7 +2877,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::enumReturnImpl(ap
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::enumReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::enumReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -3067,7 +3067,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::list_EnumReturnIm
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::list_EnumReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::list_EnumReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -3255,7 +3255,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::structReturnImpl(
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::structReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::structReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -3443,7 +3443,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::set_StructReturnI
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::set_StructReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::set_StructReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -3631,7 +3631,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::unionReturnImpl(a
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::unionReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::unionReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -3819,7 +3819,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::list_UnionReturnI
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::list_UnionReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::list_UnionReturnCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -4007,7 +4007,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::readDataEbImpl(ap
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::readDataEbCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::readDataEbCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());
@@ -4195,7 +4195,7 @@ void apache::thrift::Client<::some::valid::ns::ReturnService>::readDataImpl(apac
   }
 }
 
-std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::readDataCtx(apache::thrift::RpcOptions* rpcOptions) {
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::some::valid::ns::ReturnService>::readDataCtx(apache::thrift::RpcOptions* rpcOptions) {
   auto header = std::make_shared<apache::thrift::transport::THeader>(
       apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
   header->setProtocolId(channel_->getProtocolId());

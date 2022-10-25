@@ -784,7 +784,7 @@ const Func* Class::getDeclaredCtor() const {
   return f != SystemLib::s_nullCtor ? f : nullptr;
 }
 
-const Func* Class::getCachedInvoke() const {
+const Func* Class::getRegularInvoke() const {
   assertx(IMPLIES(m_invoke, !m_invoke->isStaticInPrologue()));
   return m_invoke;
 }
@@ -1469,9 +1469,9 @@ bool Class::isClosureClass() const {
 bool Class::hasClosureCoeffectsProp() const {
   assertx(isClosureClass());
   if (!(attrs() & AttrHasClosureCoeffectsProp)) return false;
-  assertx(getCachedInvoke()->hasCoeffectRules());
-  assertx(getCachedInvoke()->getCoeffectRules().size() == 1);
-  assertx(getCachedInvoke()->getCoeffectRules()[0].isClosureParentScope());
+  assertx(getRegularInvoke()->hasCoeffectRules());
+  assertx(getRegularInvoke()->getCoeffectRules().size() == 1);
+  assertx(getRegularInvoke()->getCoeffectRules()[0].isClosureParentScope());
   return true;
 }
 
@@ -4393,7 +4393,10 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
       assertx(m_preClass->name() != reqName || !(m_preClass->attrs() & AttrFinal));
       for (auto const& traitCls : m_extra->m_usedTraits) {
         if (traitCls->allRequirements().contains(reqName)) {
-          raise_error("Trait '%s' may only be used from class '%s', which must be final",
+          raise_error("%s class '%s' uses trait '%s', but trait '%s' may only be used from class '%s', which must be final",
+                      m_preClass->attrs() & AttrFinal ? "Final" : "Non final",
+                      m_preClass->name()->data(),
+                      traitCls->preClass()->name()->data(),
                       traitCls->preClass()->name()->data(),
                       reqName->data());
         }
@@ -4403,7 +4406,9 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
         // A result of trait flattening, analogous to the RequirementImplements case above
         assertx(!m_extra || m_extra->m_usedTraits.size() == 0);
         assertx(m_preClass->requirements().size() > 0);
-        raise_error("Trait '<<flattened>>' may only be used from class '%s', which must be final",
+        raise_error("%s class '%s' uses trait '<<flattened>>', but trait '<<flattened>>' may only be used from class '%s', which must be final",
+                    m_preClass->attrs() & AttrFinal ? "Final" : "Non final",
+                    m_preClass->name()->data(),
                     reqName->data());
       }
       break;
@@ -4469,7 +4474,10 @@ void Class::checkRequirementConstraints() const {
         break;
       }
       case PreClass::RequirementClass: {
-        if (m_preClass->name() != reqName || !(m_preClass->attrs() & AttrFinal))  {
+        // remark: `require class` enforcement is disabled for mock classes
+        if ((m_preClass->name() != reqName || !(m_preClass->attrs() & AttrFinal)) &&
+            (m_preClass->userAttributes().find(s___MockClass.get()) ==
+             m_preClass->userAttributes().end())) {
           raiseUnsatisfiedRequirement(req);
         }
         break;

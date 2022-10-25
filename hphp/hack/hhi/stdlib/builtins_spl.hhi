@@ -213,9 +213,9 @@ class SplPriorityQueue<T> implements Iterator<T>, Countable {
   public function insert($value, $priority) {}
   public function isEmpty() {}
   public function key() {}
-  public function next() {}
+  public function next(): void {}
   public function recoverFromCorruption() {}
-  public function rewind() {}
+  public function rewind(): void {}
   public function setExtractFlags($flags) {}
   public function top() {}
   public function valid() {}

@@ -31,6 +31,7 @@ from thrift.python.client import (
     install_proxy_factory,
 )
 from thrift.python.client.async_client import AsyncClient
+from thrift.python.common import RpcOptions
 from thrift.python.exceptions import (
     ApplicationError,
     ApplicationErrorType,
@@ -46,6 +47,8 @@ from thrift.python.test.thrift_types import (
     EmptyException,
     SimpleResponse,
 )
+
+from .exceptions_helper import HijackTestException, HijackTestHelper
 
 
 TEST_HEADER_KEY = "headerKey"
@@ -283,6 +286,26 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
         # Should be able to unhook a factory
         install_proxy_factory(None)
         self.assertEqual(get_proxy_factory(), None)
+
+    async def test_add_test_handler_with_rpc_options_should_hijack_transport_error_and_use_rpc_options(
+        self,
+    ) -> None:
+        with HijackTestHelper():
+            async with get_client(TestService, path="/no/where") as client:
+                with self.assertRaises(HijackTestException) as context:
+                    options = RpcOptions()
+                    options.timeout = 12.5
+                    await client.add(1, 2, rpc_options=options)
+                self.assertEqual(context.exception.timeout, 12.5)
+
+    async def test_add_test_handler_without_rpc_options_should_hijack_transport_error(
+        self,
+    ) -> None:
+        with HijackTestHelper():
+            async with get_client(TestService, path="/no/where") as client:
+                with self.assertRaises(HijackTestException) as context:
+                    await client.add(1, 2)
+                self.assertEqual(context.exception.timeout, 0.0)
 
     async def test_exit_callback(self) -> None:
         class Callback:

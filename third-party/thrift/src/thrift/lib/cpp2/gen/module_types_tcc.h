@@ -95,6 +95,11 @@ auto make_mutable_smart_ptr(folly::tag_t<boxed_value_ptr<T>>) {
   return boxed_value_ptr<T>(T());
 }
 
+template <typename..., class T>
+auto make_mutable_smart_ptr(folly::tag_t<boxed_value<T>>) {
+  return boxed_value<T>(std::make_unique<T>());
+}
+
 template <class T, class... Args>
 auto make_mutable_smart_ptr(Args&&... args) {
   return make_mutable_smart_ptr(folly::tag_t<T>(), std::forward<Args>(args)...);

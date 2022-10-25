@@ -9,8 +9,6 @@ use std::hash::Hash;
 use eq_modulo_pos::EqModuloPos;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
 use oxidized::file_pos_small::FilePosSmall;
 use oxidized::pos_span_raw::PosSpanRaw;
 use oxidized::pos_span_tiny::PosSpanTiny;

@@ -50,7 +50,6 @@
 #include "hphp/runtime/base/watchman-connection.h"
 #include "hphp/runtime/base/watchman.h"
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/facts/ext_facts.h"
 #include "hphp/runtime/ext/facts/fact-extractor.h"
 #include "hphp/runtime/ext/facts/facts-store.h"
 #include "hphp/runtime/ext/facts/logging.h"
@@ -319,6 +318,7 @@ X(attributes)
 X(kind)
 X(flags)
 X(baseTypes)
+X(requireClass)
 X(requireExtends)
 X(requireImplements)
 X(methods)
@@ -380,13 +380,14 @@ Array makeVec(const std::vector<MethodDetails>& methods) {
 }
 
 Array makeShape(const TypeDetails& type) {
-  size_t retSize = 8;
+  size_t retSize = 9;
   DictInit ret{retSize};
   ret.set(StrNR{s_name}, type.m_name);
   ret.set(StrNR{s_kind}, String{toString(type.m_kind)});
   ret.set(StrNR{s_flags}, type.m_flags);
   ret.set(StrNR{s_baseTypes}, makeVec(type.m_baseTypes));
   ret.set(StrNR{s_attributes}, makeVec(type.m_attributes));
+  ret.set(StrNR{s_requireClass}, makeVec(type.m_requireClass));
   ret.set(StrNR{s_requireExtends}, makeVec(type.m_requireExtends));
   ret.set(StrNR{s_requireImplements}, makeVec(type.m_requireImplements));
   ret.set(StrNR{s_methods}, makeVec(type.m_methods));
@@ -546,106 +547,7 @@ struct Facts final : Extension {
     }
   }
 
-  void moduleInit() override {
-    // This, unfortunately, cannot be done in moduleLoad() due to the fact
-    // that certain async loggers may create a new thread.  HHVM will throw
-    // if any threads have been created during the moduleLoad() step.
-    try {
-      enableFactsLogging(
-          RuntimeOption::ServerUser,
-          RuntimeOption::AutoloadLogging,
-          RuntimeOption::AutoloadLoggingAllowPropagation);
-    } catch (std::exception& e) {
-      Logger::FError(
-          "Caught exception ({}) while setting up logging with settings: {}",
-          e.what(),
-          RuntimeOption::AutoloadLogging);
-    }
-
-    HHVM_NAMED_FE(HH\\Facts\\enabled, HHVM_FN(facts_enabled));
-    HHVM_NAMED_FE(HH\\Facts\\db_path, HHVM_FN(facts_db_path));
-    HHVM_NAMED_FE(HH\\Facts\\type_to_path, HHVM_FN(facts_type_to_path));
-    HHVM_NAMED_FE(HH\\Facts\\function_to_path, HHVM_FN(facts_function_to_path));
-    HHVM_NAMED_FE(HH\\Facts\\constant_to_path, HHVM_FN(facts_constant_to_path));
-    HHVM_NAMED_FE(HH\\Facts\\module_to_path, HHVM_FN(facts_module_to_path));
-    HHVM_NAMED_FE(
-        HH\\Facts\\type_alias_to_path, HHVM_FN(facts_type_alias_to_path));
-
-    HHVM_NAMED_FE(HH\\Facts\\path_to_types, HHVM_FN(facts_path_to_types));
-    HHVM_NAMED_FE(
-        HH\\Facts\\path_to_functions, HHVM_FN(facts_path_to_functions));
-    HHVM_NAMED_FE(
-        HH\\Facts\\path_to_constants, HHVM_FN(facts_path_to_constants));
-    HHVM_NAMED_FE(
-        HH\\Facts\\path_to_type_aliases, HHVM_FN(facts_path_to_type_aliases));
-    HHVM_NAMED_FE(HH\\Facts\\path_to_modules, HHVM_FN(facts_path_to_modules));
-    HHVM_NAMED_FE(HH\\Facts\\type_name, HHVM_FN(facts_type_name));
-    HHVM_NAMED_FE(HH\\Facts\\kind, HHVM_FN(facts_kind));
-    HHVM_NAMED_FE(HH\\Facts\\is_abstract, HHVM_FN(facts_is_abstract));
-    HHVM_NAMED_FE(HH\\Facts\\is_final, HHVM_FN(facts_is_final));
-    HHVM_NAMED_FE(HH\\Facts\\subtypes, HHVM_FN(facts_subtypes));
-    HHVM_NAMED_FE(
-        HH\\Facts\\transitive_subtypes, HHVM_FN(facts_transitive_subtypes));
-    HHVM_NAMED_FE(HH\\Facts\\supertypes, HHVM_FN(facts_supertypes));
-    HHVM_NAMED_FE(
-        HH\\Facts\\types_with_attribute, HHVM_FN(facts_types_with_attribute));
-    HHVM_NAMED_FE(
-        HH\\Facts\\type_aliases_with_attribute,
-        HHVM_FN(facts_type_aliases_with_attribute));
-    HHVM_NAMED_FE(
-        HH\\Facts\\methods_with_attribute,
-        HHVM_FN(facts_methods_with_attribute));
-    HHVM_NAMED_FE(
-        HH\\Facts\\files_with_attribute, HHVM_FN(facts_files_with_attribute));
-    HHVM_NAMED_FE(HH\\Facts\\type_attributes, HHVM_FN(facts_type_attributes));
-    HHVM_NAMED_FE(
-        HH\\Facts\\type_alias_attributes, HHVM_FN(facts_type_alias_attributes));
-    HHVM_NAMED_FE(
-        HH\\Facts\\method_attributes, HHVM_FN(facts_method_attributes));
-    HHVM_NAMED_FE(HH\\Facts\\file_attributes, HHVM_FN(facts_file_attributes));
-    HHVM_NAMED_FE(
-        HH\\Facts\\type_attribute_parameters,
-        HHVM_FN(facts_type_attribute_parameters));
-    HHVM_NAMED_FE(
-        HH\\Facts\\type_alias_attribute_parameters,
-        HHVM_FN(facts_type_alias_attribute_parameters));
-    HHVM_NAMED_FE(
-        HH\\Facts\\method_attribute_parameters,
-        HHVM_FN(facts_method_attribute_parameters));
-    HHVM_NAMED_FE(
-        HH\\Facts\\file_attribute_parameters,
-        HHVM_FN(facts_file_attribute_parameters));
-    HHVM_NAMED_FE(HH\\Facts\\all_types, HHVM_FN(facts_all_types));
-    HHVM_NAMED_FE(HH\\Facts\\all_functions, HHVM_FN(facts_all_functions));
-    HHVM_NAMED_FE(HH\\Facts\\all_constants, HHVM_FN(facts_all_constants));
-    HHVM_NAMED_FE(HH\\Facts\\all_type_aliases, HHVM_FN(facts_all_type_aliases));
-    HHVM_NAMED_FE(HH\\Facts\\all_modules, HHVM_FN(facts_all_modules));
-    HHVM_NAMED_FE(HH\\Facts\\extract, HHVM_FN(facts_extract));
-    loadSystemlib();
-
-    if (!RuntimeOption::AutoloadEnabled) {
-      XLOG(INFO)
-          << "Autoload.Enabled is not true, not enabling native autoloader.";
-      return;
-    }
-
-    if (RuntimeOption::AutoloadDBPath.empty()) {
-      XLOG(ERR)
-          << "Autoload.DB.Path was empty, not enabling native autoloader.";
-      return;
-    }
-
-    if (RO::WatchmanDefaultSocket.empty()) {
-      XLOG(INFO) << "watchman.socket.default was not provided.";
-    }
-
-    if (RO::WatchmanRootSocket.empty()) {
-      XLOG(INFO) << "watchman.socket.root was not provided.";
-    }
-
-    m_data->m_mapFactory = std::make_unique<WatchmanAutoloadMapFactory>();
-    FactsFactory::setInstance(m_data->m_mapFactory.get());
-  }
+  void moduleInit() override;
 
   void moduleShutdown() override {
     // Destroy all resources at a deterministic time to avoid SDOF
@@ -709,8 +611,9 @@ WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
   Treadmill::enqueue(
       [this] { garbageCollectUnusedAutoloadMaps(s_ext.getExpirationTime()); });
 
-  auto dbHandle = [dbKey = mapKey->m_dbKey]() -> AutoloadDB& {
-    return SQLiteAutoloadDB::getThreadLocal(dbKey);
+  AutoloadDB::Handle dbHandle =
+      [dbKey = mapKey->m_dbKey]() -> std::shared_ptr<AutoloadDB> {
+    return SQLiteAutoloadDB::get(dbKey);
   };
 
   if (mapKey->m_dbKey.m_writable == SQLite::OpenMode::ReadOnly) {
@@ -772,8 +675,8 @@ void WatchmanAutoloadMapFactory::garbageCollectUnusedAutoloadMaps(
     return maps;
   }();
 
-  // Final references to shared_ptr<Facts> fall out of scope
-  // while `m_mutex` lock is not held
+  // Final references to shared_ptr<Facts> fall out of scope on the Treadmill
+  Treadmill::enqueue([_destroyed = std::move(mapsToRemove)]() {});
 }
 
 FactsStore& getFactsOrThrow() {
@@ -1065,4 +968,103 @@ Array HHVM_FUNCTION(
   return factsArr.toArray();
 }
 
+namespace Facts {
+
+void Facts::moduleInit() {
+  // This, unfortunately, cannot be done in moduleLoad() due to the fact
+  // that certain async loggers may create a new thread.  HHVM will throw
+  // if any threads have been created during the moduleLoad() step.
+  try {
+    enableFactsLogging(
+        RuntimeOption::ServerUser,
+        RuntimeOption::AutoloadLogging,
+        RuntimeOption::AutoloadLoggingAllowPropagation);
+  } catch (std::exception& e) {
+    Logger::FError(
+        "Caught exception ({}) while setting up logging with settings: {}",
+        e.what(),
+        RuntimeOption::AutoloadLogging);
+  }
+
+  HHVM_NAMED_FE(HH\\Facts\\enabled, HHVM_FN(facts_enabled));
+  HHVM_NAMED_FE(HH\\Facts\\db_path, HHVM_FN(facts_db_path));
+  HHVM_NAMED_FE(HH\\Facts\\type_to_path, HHVM_FN(facts_type_to_path));
+  HHVM_NAMED_FE(HH\\Facts\\function_to_path, HHVM_FN(facts_function_to_path));
+  HHVM_NAMED_FE(HH\\Facts\\constant_to_path, HHVM_FN(facts_constant_to_path));
+  HHVM_NAMED_FE(HH\\Facts\\module_to_path, HHVM_FN(facts_module_to_path));
+  HHVM_NAMED_FE(
+      HH\\Facts\\type_alias_to_path, HHVM_FN(facts_type_alias_to_path));
+
+  HHVM_NAMED_FE(HH\\Facts\\path_to_types, HHVM_FN(facts_path_to_types));
+  HHVM_NAMED_FE(HH\\Facts\\path_to_functions, HHVM_FN(facts_path_to_functions));
+  HHVM_NAMED_FE(HH\\Facts\\path_to_constants, HHVM_FN(facts_path_to_constants));
+  HHVM_NAMED_FE(
+      HH\\Facts\\path_to_type_aliases, HHVM_FN(facts_path_to_type_aliases));
+  HHVM_NAMED_FE(HH\\Facts\\path_to_modules, HHVM_FN(facts_path_to_modules));
+  HHVM_NAMED_FE(HH\\Facts\\type_name, HHVM_FN(facts_type_name));
+  HHVM_NAMED_FE(HH\\Facts\\kind, HHVM_FN(facts_kind));
+  HHVM_NAMED_FE(HH\\Facts\\is_abstract, HHVM_FN(facts_is_abstract));
+  HHVM_NAMED_FE(HH\\Facts\\is_final, HHVM_FN(facts_is_final));
+  HHVM_NAMED_FE(HH\\Facts\\subtypes, HHVM_FN(facts_subtypes));
+  HHVM_NAMED_FE(
+      HH\\Facts\\transitive_subtypes, HHVM_FN(facts_transitive_subtypes));
+  HHVM_NAMED_FE(HH\\Facts\\supertypes, HHVM_FN(facts_supertypes));
+  HHVM_NAMED_FE(
+      HH\\Facts\\types_with_attribute, HHVM_FN(facts_types_with_attribute));
+  HHVM_NAMED_FE(
+      HH\\Facts\\type_aliases_with_attribute,
+      HHVM_FN(facts_type_aliases_with_attribute));
+  HHVM_NAMED_FE(
+      HH\\Facts\\methods_with_attribute, HHVM_FN(facts_methods_with_attribute));
+  HHVM_NAMED_FE(
+      HH\\Facts\\files_with_attribute, HHVM_FN(facts_files_with_attribute));
+  HHVM_NAMED_FE(HH\\Facts\\type_attributes, HHVM_FN(facts_type_attributes));
+  HHVM_NAMED_FE(
+      HH\\Facts\\type_alias_attributes, HHVM_FN(facts_type_alias_attributes));
+  HHVM_NAMED_FE(HH\\Facts\\method_attributes, HHVM_FN(facts_method_attributes));
+  HHVM_NAMED_FE(HH\\Facts\\file_attributes, HHVM_FN(facts_file_attributes));
+  HHVM_NAMED_FE(
+      HH\\Facts\\type_attribute_parameters,
+      HHVM_FN(facts_type_attribute_parameters));
+  HHVM_NAMED_FE(
+      HH\\Facts\\type_alias_attribute_parameters,
+      HHVM_FN(facts_type_alias_attribute_parameters));
+  HHVM_NAMED_FE(
+      HH\\Facts\\method_attribute_parameters,
+      HHVM_FN(facts_method_attribute_parameters));
+  HHVM_NAMED_FE(
+      HH\\Facts\\file_attribute_parameters,
+      HHVM_FN(facts_file_attribute_parameters));
+  HHVM_NAMED_FE(HH\\Facts\\all_types, HHVM_FN(facts_all_types));
+  HHVM_NAMED_FE(HH\\Facts\\all_functions, HHVM_FN(facts_all_functions));
+  HHVM_NAMED_FE(HH\\Facts\\all_constants, HHVM_FN(facts_all_constants));
+  HHVM_NAMED_FE(HH\\Facts\\all_type_aliases, HHVM_FN(facts_all_type_aliases));
+  HHVM_NAMED_FE(HH\\Facts\\all_modules, HHVM_FN(facts_all_modules));
+  HHVM_NAMED_FE(HH\\Facts\\extract, HHVM_FN(facts_extract));
+  loadSystemlib();
+
+  if (!RuntimeOption::AutoloadEnabled) {
+    XLOG(INFO)
+        << "Autoload.Enabled is not true, not enabling native autoloader.";
+    return;
+  }
+
+  if (RuntimeOption::AutoloadDBPath.empty()) {
+    XLOG(ERR) << "Autoload.DB.Path was empty, not enabling native autoloader.";
+    return;
+  }
+
+  if (RO::WatchmanDefaultSocket.empty()) {
+    XLOG(INFO) << "watchman.socket.default was not provided.";
+  }
+
+  if (RO::WatchmanRootSocket.empty()) {
+    XLOG(INFO) << "watchman.socket.root was not provided.";
+  }
+
+  m_data->m_mapFactory = std::make_unique<WatchmanAutoloadMapFactory>();
+  FactsFactory::setInstance(m_data->m_mapFactory.get());
+}
+
+} // namespace Facts
 } // namespace HPHP

@@ -140,20 +140,6 @@ void HHVM_FUNCTION(register_shutdown_function, const Variant& function) {
   g_context->registerShutdownFunction(function, ExecutionContext::ShutDown);
 }
 
-void StandardExtension::initFunction() {
-  HHVM_FE(get_defined_functions);
-  HHVM_FE(function_exists);
-  HHVM_FE(is_callable);
-  HHVM_FE(is_callable_with_name);
-  HHVM_FE(call_user_func);
-  HHVM_FE(call_user_func_array);
-  HHVM_FE(register_postsend_function);
-  HHVM_FE(register_shutdown_function);
-  HHVM_FALIAS(HH\\fun_get_function, HH_fun_get_function);
-
-  loadSystemlib("std_function");
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 String HHVM_FUNCTION(HH_fun_get_function, TypedValue v) {
@@ -168,6 +154,22 @@ String HHVM_FUNCTION(HH_fun_get_function, TypedValue v) {
       folly::sformat("Argument 1 passed to {}() must be a fun",
       __FUNCTION__+5));
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void StandardExtension::initFunction() {
+  HHVM_FE(get_defined_functions);
+  HHVM_FE(function_exists);
+  HHVM_FE(is_callable);
+  HHVM_FE(is_callable_with_name);
+  HHVM_FE(call_user_func);
+  HHVM_FE(call_user_func_array);
+  HHVM_FE(register_postsend_function);
+  HHVM_FE(register_shutdown_function);
+  HHVM_FALIAS(HH\\fun_get_function, HH_fun_get_function);
+
+  loadSystemlib("std_function");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

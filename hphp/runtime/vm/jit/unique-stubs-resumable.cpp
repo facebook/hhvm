@@ -165,11 +165,26 @@ void unblockParents(Vout& v, Vreg firstBl) {
   });
 }
 
+namespace {
+constexpr ptrdiff_t ar_rel(ptrdiff_t off) {
+  return off - c_AsyncFunctionWaitHandle::arOff();
+};
+} // namespace
+
 TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner, const UniqueStubs& us,
                         const char* /*name*/) {
   alignCacheLine(cb);
 
   auto const ret = vwrap(cb, data, [] (Vout& v) {
+    // wh->m_implicitContext = *ImplicitContext::activeCtx
+    markRDSAccess(v, ImplicitContext::activeCtx.handle());
+    auto const implicitContext = v.makeReg();
+    v << load{rvmtl()[ImplicitContext::activeCtx.handle()], implicitContext};
+    v << store{
+      implicitContext,
+      rvmfp()[ar_rel(c_AsyncFunctionWaitHandle::implicitContextOff())]
+    };
+
     // Set rvmfp() to the suspending WaitHandle's parent frame.
     v << load{rvmfp()[AROFF(m_sfp)], rvmfp()};
   });
@@ -205,7 +220,7 @@ TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner, const Unique
     markRDSAccess(v, ImplicitContext::activeCtx.handle());
     auto const implicitContext = v.makeReg();
     v << load {
-      afwh[c_ResumableWaitHandle::implicitContextOff()],
+      afwh[c_AsyncFunctionWaitHandle::implicitContextOff()],
       implicitContext
     };
     v << store{implicitContext, rvmtl()[ImplicitContext::activeCtx.handle()]};

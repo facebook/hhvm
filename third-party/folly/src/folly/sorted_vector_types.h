@@ -376,6 +376,8 @@ class sorted_vector_set : detail::growth_policy_wrapper<GrowthPolicy> {
 
   Allocator get_allocator() const { return m_.cont_.get_allocator(); }
 
+  const Container& get_container() const noexcept { return m_.cont_; }
+
   sorted_vector_set& operator=(const sorted_vector_set& other) = default;
 
   sorted_vector_set& operator=(sorted_vector_set&& other) = default;
@@ -800,6 +802,15 @@ inline void swap(
   return a.swap(b);
 }
 
+template <typename T>
+struct is_sorted_vector_set : std::false_type {};
+
+template <typename... T>
+struct is_sorted_vector_set<folly::sorted_vector_set<T...>> : std::true_type {};
+
+template <typename T>
+constexpr bool is_sorted_vector_set_v = is_sorted_vector_set<T>::value;
+
 #if FOLLY_HAS_MEMORY_RESOURCE
 
 namespace pmr {
@@ -975,6 +986,8 @@ class sorted_vector_map : detail::growth_policy_wrapper<GrowthPolicy> {
   }
 
   Allocator get_allocator() const { return m_.cont_.get_allocator(); }
+
+  const Container& get_container() const noexcept { return m_.cont_; }
 
   sorted_vector_map& operator=(const sorted_vector_map& other) = default;
 
@@ -1351,7 +1364,7 @@ class sorted_vector_map : detail::growth_policy_wrapper<GrowthPolicy> {
 
   template <typename Self, typename K>
   static self_iterator_t<Self> lower_bound(Self& self, K const& key) {
-    auto f = [c = self.key_comp()](value_type const& a, K const& b) {
+    auto f = [c = self.key_comp()](auto const& a, K const& b) {
       return c(a.first, b);
     };
     return std::lower_bound(self.begin(), self.end(), key, f);
@@ -1359,7 +1372,7 @@ class sorted_vector_map : detail::growth_policy_wrapper<GrowthPolicy> {
 
   template <typename Self, typename K>
   static self_iterator_t<Self> upper_bound(Self& self, K const& key) {
-    auto f = [c = self.key_comp()](K const& a, value_type const& b) {
+    auto f = [c = self.key_comp()](K const& a, auto const& b) {
       return c(a, b.first);
     };
     return std::upper_bound(self.begin(), self.end(), key, f);
@@ -1438,6 +1451,15 @@ inline void swap(
     sorted_vector_map<K, V, C, A, G>& a, sorted_vector_map<K, V, C, A, G>& b) {
   return a.swap(b);
 }
+
+template <typename T>
+struct is_sorted_vector_map : std::false_type {};
+
+template <typename... T>
+struct is_sorted_vector_map<folly::sorted_vector_map<T...>> : std::true_type {};
+
+template <typename T>
+constexpr bool is_sorted_vector_map_v = is_sorted_vector_map<T>::value;
 
 #if FOLLY_HAS_MEMORY_RESOURCE
 

@@ -10,6 +10,10 @@ import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.builder
 
+import facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
+import facebook.thrift.annotation.cpp.builders as _facebook_thrift_annotation_cpp_builders
+import facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
+import facebook.thrift.annotation.thrift.builders as _facebook_thrift_annotation_thrift_builders
 import include.types as _include_types
 import include.builders as _include_builders
 
@@ -92,6 +96,16 @@ class MinPadding_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 
 
+class MinPaddingWithCustomType_Builder(thrift.py3.builder.StructBuilder):
+    small: _typing.Optional[int]
+    big: _typing.Optional[int]
+    medium: _typing.Optional[int]
+    biggish: _typing.Optional[int]
+    tiny: _typing.Optional[int]
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
+
+
 class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     MyIntField: _typing.Optional[int]
     MyStringField: _typing.Optional[str]
@@ -138,34 +152,58 @@ class ForwardUsageByRef_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 
 
-class NoexceptMoveEmpty_Builder(thrift.py3.builder.StructBuilder):
+class IncompleteMap_Builder(thrift.py3.builder.StructBuilder):
+    field: _typing.Optional[dict]
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 
 
-class NoexceptMoveSimpleStruct_Builder(thrift.py3.builder.StructBuilder):
-    boolField: _typing.Optional[int]
+class IncompleteMapDep_Builder(thrift.py3.builder.StructBuilder):
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 
 
-class NoexceptMoveComplexStruct_Builder(thrift.py3.builder.StructBuilder):
-    MyBoolField: _typing.Optional[bool]
-    MyIntField: _typing.Optional[int]
-    MyStringField: _typing.Optional[str]
-    MyStringField2: _typing.Optional[str]
-    MyBinaryField: _typing.Optional[bytes]
-    MyBinaryField2: _typing.Optional[bytes]
-    MyBinaryField3: _typing.Optional[bytes]
-    MyBinaryListField4: _typing.Optional[list]
-    MyMapEnumAndInt: _typing.Optional[dict]
+class CompleteMap_Builder(thrift.py3.builder.StructBuilder):
+    field: _typing.Optional[dict]
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 
 
-class NoExceptMoveUnion_Builder(thrift.py3.builder.StructBuilder):
-    string_field: _typing.Optional[str]
-    i32_field: _typing.Optional[int]
+class CompleteMapDep_Builder(thrift.py3.builder.StructBuilder):
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
+
+
+class IncompleteList_Builder(thrift.py3.builder.StructBuilder):
+    field: _typing.Optional[list]
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
+
+
+class IncompleteListDep_Builder(thrift.py3.builder.StructBuilder):
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
+
+
+class CompleteList_Builder(thrift.py3.builder.StructBuilder):
+    field: _typing.Optional[list]
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
+
+
+class CompleteListDep_Builder(thrift.py3.builder.StructBuilder):
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
+
+
+class AdaptedList_Builder(thrift.py3.builder.StructBuilder):
+    field: _typing.Optional[list]
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
+
+
+class DependentAdaptedList_Builder(thrift.py3.builder.StructBuilder):
+    field: _typing.Optional[list]
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 

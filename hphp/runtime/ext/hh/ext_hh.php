@@ -256,6 +256,13 @@ function dynamic_fun_force(string $name)[]: mixed;
 function dynamic_class_meth_force(string $cls, string $meth)[]: mixed;
 
 /**
+ * Creates a LazyClass pointer from input $classname. It does not eagerly
+ * verify that the $classname is in fact a valid class.
+ */
+<<__Native>>
+function classname_from_string_unsafe(string $classname)[]: mixed;
+
+/**
  * Begin collecting code coverage on all subsequent calls into files in $files
  * during this request.
  *
@@ -563,4 +570,8 @@ function reflection_class_is_interface(
 )[]: bool;
 
 
+}
+
+namespace HH\FIXME {
+  type TANY_MARKER<T> = T;
 }

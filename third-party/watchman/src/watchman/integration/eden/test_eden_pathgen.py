@@ -285,3 +285,22 @@ class TestEdenPathGenerator(WatchmanEdenTestCase.WatchmanEdenTestCase):
             "query", root, {"fields": ["name"], "glob": ["cdir/*", "cdir/*/*"]}
         )
         self.assertFileListsEqual(res["files"], ["cdir/sub", "cdir/sub/file"])
+
+    def test_path_and_glob_dotfiles(self):
+        root = self.makeEdenMount(populate)
+        res = self.watchmanCommand("watch", root)
+        self.assertEqual("eden", res["watcher"])
+
+        # glob_includedotfiles is false by default. Ensure it doesn't interfere
+        # with the path generator (which is a glob under the hood)
+        res = self.watchmanCommand(
+            "query",
+            root,
+            {
+                "fields": ["name"],
+                "glob": [],
+                "path": [{"path": "", "depth": 0}],
+                "expression": ["name", ".eden"],
+            },
+        )
+        self.assertFileListsEqual(res["files"], [".eden"])

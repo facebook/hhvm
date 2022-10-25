@@ -14,8 +14,8 @@ use mode_parser::parse_mode;
 use mode_parser::Language;
 use namespaces_rust as namespaces;
 use ocamlrep::rc::RcOc;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 use oxidized::aast::Program;
 use oxidized::file_info::Mode;
 use oxidized::namespace_env::Env as NamespaceEnv;
@@ -277,7 +277,7 @@ impl<'src> AastParser {
                 .parser_options
                 .po_interpret_soft_types_as_like_types,
         };
-        (language, mode, parser_env)
+        (language, mode.map(Into::into), parser_env)
     }
 
     fn parse<'arena>(

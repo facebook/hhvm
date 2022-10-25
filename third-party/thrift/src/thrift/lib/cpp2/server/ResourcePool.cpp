@@ -102,15 +102,6 @@ void ResourcePoolSet::setResourcePool(
     throw std::logic_error("Cannot setResourcePool() after lock()");
   }
 
-  if (executor && concurrencyController) {
-    try {
-      // dummy check whether executor support priority
-      executor->addWithPriority([] {}, 1);
-    } catch (...) {
-      concurrencyController->setExecutorSupportPriority(false);
-    }
-  }
-
   resourcePools_.resize(std::max(resourcePools_.size(), handle.index() + 1));
   if (resourcePools_.at(handle.index())) {
     LOG(ERROR) << "Cannot overwrite resourcePool:" << handle.name();
@@ -136,15 +127,6 @@ ResourcePoolHandle ResourcePoolSet::addResourcePool(
   std::lock_guard<std::mutex> lock(mutex_);
   if (locked_) {
     throw std::logic_error("Cannot addResourcePool() after lock()");
-  }
-
-  if (executor && concurrencyController) {
-    try {
-      // dummy check whether executor support priority
-      executor->addWithPriority([] {}, 1);
-    } catch (...) {
-      concurrencyController->setExecutorSupportPriority(false);
-    }
   }
 
   std::unique_ptr<ResourcePool> pool{new ResourcePool{
@@ -242,6 +224,7 @@ bool ResourcePoolSet::hasResourcePool(const ResourcePoolHandle& handle) const {
 
 ResourcePool& ResourcePoolSet::resourcePool(
     const ResourcePoolHandle& handle) const {
+  folly::annotate_ignore_thread_sanitizer_guard g(__FILE__, __LINE__);
   auto guard = locked_ ? std::unique_lock<std::mutex>()
                        : std::unique_lock<std::mutex>(mutex_);
   DCHECK_LT(handle.index(), resourcePools_.size());
@@ -303,6 +286,9 @@ std::size_t ResourcePoolSet::idleWorkerCount() const {
 }
 
 void ResourcePoolSet::stopAndJoin() {
+  auto guard = locked_ ? std::unique_lock<std::mutex>()
+                       : std::unique_lock<std::mutex>(mutex_);
+
   for (auto& resourcePool : resourcePools_) {
     if (resourcePool) {
       resourcePool->stop();

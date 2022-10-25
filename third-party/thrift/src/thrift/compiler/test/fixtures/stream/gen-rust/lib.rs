@@ -2,7 +2,7 @@
 // This file is probably not the place you want to edit!
 
 #![recursion_limit = "100000000"]
-#![allow(non_camel_case_types, non_snake_case, non_upper_case_globals, unused_crate_dependencies, clippy::type_complexity)]
+#![allow(non_camel_case_types, non_snake_case, non_upper_case_globals, unused_crate_dependencies, clippy::all)]
 
 pub use self::errors::*;
 pub use self::types::*;
@@ -947,6 +947,367 @@ pub mod services {
         }
 
         impl ::fbthrift::GetTType for ServicethrowsExn {
+            const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+        }
+
+
+
+        #[derive(Clone, Debug)]
+        pub enum Servicethrows2StreamExn {
+            #[doc(hidden)]
+            Success(::std::primitive::i32),
+            ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::fbthrift::ExceptionInfo for Servicethrows2StreamExn {
+            fn exn_name(&self) -> &'static str {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_name(),
+                }
+            }
+
+            fn exn_value(&self) -> String {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_value(),
+                }
+            }
+
+            fn exn_is_declared(&self) -> bool {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                }
+            }
+        }
+
+        impl ::fbthrift::ResultInfo for Servicethrows2StreamExn {
+            fn result_type(&self) -> ::fbthrift::ResultType {
+                match self {
+                    Self::Success(_) => ::fbthrift::ResultType::Return,
+                    Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                }
+            }
+        }
+
+        impl ::std::convert::From<::fbthrift::ApplicationException> for Servicethrows2StreamExn {
+            fn from(exn: ::fbthrift::ApplicationException) -> Self {
+                Self::ApplicationException(exn)
+            }
+        }
+
+        impl ::fbthrift::GetTType for Servicethrows2StreamExn {
+            const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+        }
+
+        impl<P> ::fbthrift::Serialize<P> for Servicethrows2StreamExn
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            fn write(&self, p: &mut P) {
+                if let Self::ApplicationException(aexn) = self {
+                    return aexn.write(p);
+                }
+                p.write_struct_begin("Servicethrows2");
+                match self {
+                    Self::Success(inner) => {
+                        p.write_field_begin(
+                            "Success",
+                            ::fbthrift::TType::I32,
+                            0i16,
+                        );
+                        inner.write(p);
+                        p.write_field_end();
+                    }
+                    Self::ApplicationException(_) => unreachable!(),
+                }
+                p.write_field_stop();
+                p.write_struct_end();
+            }
+        }
+
+        impl<P> ::fbthrift::Deserialize<P> for Servicethrows2StreamExn
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            fn read(p: &mut P) -> ::anyhow::Result<Self> {
+                static RETURNS: &[::fbthrift::Field] = &[
+                    ::fbthrift::Field::new("Success", ::fbthrift::TType::Stream, 0),
+                    ::fbthrift::Field::new("e1", ::fbthrift::TType::Struct, 1),
+                    ::fbthrift::Field::new("e2", ::fbthrift::TType::Struct, 2),
+                ];
+                let _ = p.read_struct_begin(|_| ())?;
+                let mut once = false;
+                let mut alt = ::std::option::Option::None;
+                loop {
+                    let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                    match ((fty, fid as ::std::primitive::i32), once) {
+                        ((::fbthrift::TType::Stop, _), _) => {
+                            p.read_field_end()?;
+                            break;
+                        }
+                        ((::fbthrift::TType::I32, 0i32), false) => {
+                            once = true;
+                            alt = ::std::option::Option::Some(Self::Success(::fbthrift::Deserialize::read(p)?));
+                        }
+                        ((ty, _id), false) => p.skip(ty)?,
+                        ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                            ::fbthrift::ApplicationException::new(
+                                ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                                format!(
+                                    "unwanted extra union {} field ty {:?} id {}",
+                                    "Servicethrows2StreamExn",
+                                    badty,
+                                    badid,
+                                ),
+                            )
+                        )),
+                    }
+                    p.read_field_end()?;
+                }
+                p.read_struct_end()?;
+                alt.ok_or_else(||
+                    ::fbthrift::ApplicationException::new(
+                        ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
+                        format!("Empty union {}", "Servicethrows2StreamExn"),
+                    )
+                    .into(),
+                )
+            }
+        }
+
+        #[derive(Clone, Debug)]
+        pub enum Servicethrows2ResponseExn {
+            #[doc(hidden)]
+            Success(()),
+            e1(crate::types::FooEx),            e2(crate::types::FooEx2),
+            ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::fbthrift::ExceptionInfo for Servicethrows2ResponseExn {
+            fn exn_name(&self) -> &'static str {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_name(),
+                    Self::e1(exn) => exn.exn_name(),
+                    Self::e2(exn) => exn.exn_name(),
+                }
+            }
+
+            fn exn_value(&self) -> String {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_value(),
+                    Self::e1(exn) => exn.exn_value(),
+                    Self::e2(exn) => exn.exn_value(),
+                }
+            }
+
+            fn exn_is_declared(&self) -> bool {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                    Self::e1(exn) => exn.exn_is_declared(),
+                    Self::e2(exn) => exn.exn_is_declared(),
+                }
+            }
+        }
+
+        impl ::fbthrift::ResultInfo for Servicethrows2ResponseExn {
+            fn result_type(&self) -> ::fbthrift::ResultType {
+                match self {
+                    Self::Success(_) => ::fbthrift::ResultType::Return,
+                    Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                    Self::e1(_exn) => fbthrift::ResultType::Error,
+                    Self::e2(_exn) => fbthrift::ResultType::Error,
+                }
+            }
+        }
+
+        impl ::std::convert::From<crate::types::FooEx> for Servicethrows2ResponseExn {
+            fn from(exn: crate::types::FooEx) -> Self {
+                Self::e1(exn)
+            }
+        }        impl ::std::convert::From<crate::types::FooEx2> for Servicethrows2ResponseExn {
+            fn from(exn: crate::types::FooEx2) -> Self {
+                Self::e2(exn)
+            }
+        }
+
+        impl ::std::convert::From<::fbthrift::ApplicationException> for Servicethrows2ResponseExn {
+            fn from(exn: ::fbthrift::ApplicationException) -> Self {
+                Self::ApplicationException(exn)
+            }
+        }
+
+        impl ::fbthrift::GetTType for Servicethrows2ResponseExn {
+            const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Void;
+        }
+
+        impl<P> ::fbthrift::Serialize<P> for Servicethrows2ResponseExn
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            fn write(&self, p: &mut P) {
+                if let Self::ApplicationException(aexn) = self {
+                    return aexn.write(p);
+                }
+                p.write_struct_begin("Servicethrows2");
+                match self {
+                    Self::Success(_inner) => {
+                        p.write_field_begin(
+                            "Success",
+                            ::fbthrift::TType::Void,
+                            0i16,
+                        );
+                        p.write_field_end();
+                    }
+                    Self::e1(inner) => {
+                        p.write_field_begin(
+                            "e1",
+                            ::fbthrift::TType::Struct,
+                            1,
+                        );
+                        inner.write(p);
+                        p.write_field_end();
+                    }
+                    Self::e2(inner) => {
+                        p.write_field_begin(
+                            "e2",
+                            ::fbthrift::TType::Struct,
+                            2,
+                        );
+                        inner.write(p);
+                        p.write_field_end();
+                    }
+                    Self::ApplicationException(_) => unreachable!(),
+                }
+                p.write_field_stop();
+                p.write_struct_end();
+            }
+        }
+
+        impl<P> ::fbthrift::Deserialize<P> for Servicethrows2ResponseExn
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            fn read(p: &mut P) -> ::anyhow::Result<Self> {
+                static RETURNS: &[::fbthrift::Field] = &[
+                    ::fbthrift::Field::new("Success", ::fbthrift::TType::Stream, 0),
+                    ::fbthrift::Field::new("e1", ::fbthrift::TType::Struct, 1),
+                    ::fbthrift::Field::new("e2", ::fbthrift::TType::Struct, 2),
+                ];
+                let _ = p.read_struct_begin(|_| ())?;
+                let mut once = false;
+                let mut alt = Self::Success(());
+                loop {
+                    let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                    match ((fty, fid as ::std::primitive::i32), once) {
+                        ((::fbthrift::TType::Stop, _), _) => {
+                            p.read_field_end()?;
+                            break;
+                        }
+                        ((::fbthrift::TType::Void, 0i32), false) => {
+                            once = true;
+                            alt = Self::Success(::fbthrift::Deserialize::read(p)?);
+                        }
+                        ((::fbthrift::TType::Struct, 1), false) => {
+                            once = true;
+                            alt = Self::e1(::fbthrift::Deserialize::read(p)?);
+                        }
+                        ((::fbthrift::TType::Struct, 2), false) => {
+                            once = true;
+                            alt = Self::e2(::fbthrift::Deserialize::read(p)?);
+                        }
+                        ((ty, _id), false) => p.skip(ty)?,
+                        ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                            ::fbthrift::ApplicationException::new(
+                                ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                                format!(
+                                    "unwanted extra union {} field ty {:?} id {}",
+                                    "Servicethrows2ResponseExn",
+                                    badty,
+                                    badid,
+                                ),
+                            )
+                        )),
+                    }
+                    p.read_field_end()?;
+                }
+                p.read_struct_end()?;
+                ::std::result::Result::Ok(alt)
+            }
+        }
+
+        pub enum Servicethrows2Exn {
+            #[doc(hidden)]
+            Success(    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::Servicethrows2StreamExn>>
+),
+            e1(crate::types::FooEx),
+            e2(crate::types::FooEx2),
+            ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<crate::types::FooEx> for Servicethrows2Exn {
+            fn from(exn: crate::types::FooEx) -> Self {
+                Self::e1(exn)
+            }
+        }
+
+        impl ::std::convert::From<crate::types::FooEx2> for Servicethrows2Exn {
+            fn from(exn: crate::types::FooEx2) -> Self {
+                Self::e2(exn)
+            }
+        }
+
+        impl ::std::convert::From<::fbthrift::ApplicationException> for Servicethrows2Exn {
+            fn from(exn: ::fbthrift::ApplicationException) -> Self {
+                Self::ApplicationException(exn)
+            }
+        }
+
+        impl ::fbthrift::ExceptionInfo for Servicethrows2Exn {
+            fn exn_name(&self) -> &'static str {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_name(),
+                    Self::e1(exn) => exn.exn_name(),
+                    Self::e2(exn) => exn.exn_name(),
+                }
+            }
+
+            fn exn_value(&self) -> String {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_value(),
+                    Self::e1(exn) => exn.exn_value(),
+                    Self::e2(exn) => exn.exn_value(),
+                }
+            }
+
+            fn exn_is_declared(&self) -> bool {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                    Self::e1(exn) => exn.exn_is_declared(),
+                    Self::e2(exn) => exn.exn_is_declared(),
+                }
+            }
+        }
+
+        impl ::fbthrift::ResultInfo for Servicethrows2Exn {
+            fn result_type(&self) -> ::fbthrift::ResultType {
+                match self {
+                    Self::Success(_) => ::fbthrift::ResultType::Return,
+                    Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                    Self::e1(_exn) => fbthrift::ResultType::Error,
+                    Self::e2(_exn) => fbthrift::ResultType::Error,
+                }
+            }
+        }
+
+        impl ::fbthrift::GetTType for Servicethrows2Exn {
             const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
         }
 
@@ -2661,8 +3022,8 @@ pub mod client {
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamError>> {
             use ::const_cstr::const_cstr;
-            use ::futures::future::FutureExt as _;
             use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
             use ::futures::StreamExt as _;
             use ::fbthrift::Deserialize as _;
 
@@ -2676,6 +3037,7 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("returnstream", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
@@ -2726,8 +3088,8 @@ pub mod client {
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::StreamthrowsStreamError>>, crate::errors::pub_sub_streaming_service::StreamthrowsError>> {
             use ::const_cstr::const_cstr;
-            use ::futures::future::FutureExt as _;
             use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
             use ::futures::StreamExt as _;
             use ::fbthrift::Deserialize as _;
 
@@ -2740,6 +3102,7 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("streamthrows", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
@@ -2790,8 +3153,8 @@ pub mod client {
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ServicethrowsStreamError>>, crate::errors::pub_sub_streaming_service::ServicethrowsError>> {
             use ::const_cstr::const_cstr;
-            use ::futures::future::FutureExt as _;
             use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
             use ::futures::StreamExt as _;
             use ::fbthrift::Deserialize as _;
 
@@ -2804,6 +3167,7 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("servicethrows", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
@@ -2848,14 +3212,79 @@ pub mod client {
             .boxed()
         }
 
+        fn _servicethrows2_impl(
+            &self,
+            arg_foo: ::std::primitive::i32,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, crate::errors::pub_sub_streaming_service::Servicethrows2Error>> {
+            use ::const_cstr::const_cstr;
+            use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
+            use ::futures::StreamExt as _;
+            use ::fbthrift::Deserialize as _;
+
+            const_cstr! {
+                SERVICE_NAME = "PubSubStreamingService";
+                METHOD_NAME = "PubSubStreamingService.servicethrows2";
+            }
+            let args = self::Args_PubSubStreamingService_servicethrows2 {
+                foo: arg_foo,
+                _phantom: ::std::marker::PhantomData,
+            };
+
+            // need to do call setup outside of async block because T: Transport isn't Send
+            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("servicethrows2", &args) {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+            };
+
+            let call_stream = self.transport()
+                .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.servicethrows2"));
+
+            async move {
+                let (initial, stream) = call_stream.await?;
+
+                let new_stream = stream.then(|item_res| {
+                    async move {
+                        match item_res {
+                            ::std::result::Result::Err(err) =>
+                                ::std::result::Result::Err(crate::errors::pub_sub_streaming_service::Servicethrows2StreamError::from(err)),
+                            ::std::result::Result::Ok(item_enc) => {
+                                let res = S::spawn(move || {
+                                    let mut de = P::deserializer(item_enc);
+                                    crate::services::pub_sub_streaming_service::Servicethrows2StreamExn::read(&mut de)
+                                }).await?;
+
+                                let item: ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError> =
+                                    ::std::convert::From::from(res);
+                                item
+                            }
+                        }
+                    }
+                })
+                .boxed();
+
+                let de = P::deserializer(initial);
+                let res: crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn =
+                    ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?.0?;
+
+                let initial: ::std::result::Result<(), crate::errors::pub_sub_streaming_service::Servicethrows2Error> =
+                    ::std::convert::From::from(res);
+                initial.map(move |_| new_stream)
+            }
+            .instrument(::tracing::info_span!("PubSubStreamingService.servicethrows2"))
+            .boxed()
+        }
+
         fn _boththrows_impl(
             &self,
             arg_foo: ::std::primitive::i32,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::BoththrowsStreamError>>, crate::errors::pub_sub_streaming_service::BoththrowsError>> {
             use ::const_cstr::const_cstr;
-            use ::futures::future::FutureExt as _;
             use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
             use ::futures::StreamExt as _;
             use ::fbthrift::Deserialize as _;
 
@@ -2868,6 +3297,7 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("boththrows", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
@@ -2918,8 +3348,8 @@ pub mod client {
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsError>> {
             use ::const_cstr::const_cstr;
-            use ::futures::future::FutureExt as _;
             use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
             use ::futures::StreamExt as _;
             use ::fbthrift::Deserialize as _;
 
@@ -2932,6 +3362,7 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("responseandstreamstreamthrows", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
@@ -2982,8 +3413,8 @@ pub mod client {
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsError>> {
             use ::const_cstr::const_cstr;
-            use ::futures::future::FutureExt as _;
             use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
             use ::futures::StreamExt as _;
             use ::fbthrift::Deserialize as _;
 
@@ -2996,6 +3427,7 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("responseandstreamservicethrows", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
@@ -3046,8 +3478,8 @@ pub mod client {
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsError>> {
             use ::const_cstr::const_cstr;
-            use ::futures::future::FutureExt as _;
             use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
             use ::futures::StreamExt as _;
             use ::fbthrift::Deserialize as _;
 
@@ -3060,6 +3492,7 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("responseandstreamboththrows", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
@@ -3111,8 +3544,8 @@ pub mod client {
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamFastError>> {
             use ::const_cstr::const_cstr;
-            use ::futures::future::FutureExt as _;
             use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
             use ::futures::StreamExt as _;
             use ::fbthrift::Deserialize as _;
 
@@ -3126,6 +3559,7 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("returnstreamFast", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
@@ -3188,6 +3622,11 @@ pub mod client {
             arg_foo: ::std::primitive::i32,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ServicethrowsStreamError>>, crate::errors::pub_sub_streaming_service::ServicethrowsError>>;
 
+        fn servicethrows2(
+            &self,
+            arg_foo: ::std::primitive::i32,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, crate::errors::pub_sub_streaming_service::Servicethrows2Error>>;
+
         fn boththrows(
             &self,
             arg_foo: ::std::primitive::i32,
@@ -3235,6 +3674,11 @@ pub mod client {
             arg_foo: ::std::primitive::i32,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ServicethrowsStreamError>>, crate::errors::pub_sub_streaming_service::ServicethrowsError>>;
+        fn servicethrows2_with_rpc_opts(
+            &self,
+            arg_foo: ::std::primitive::i32,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, crate::errors::pub_sub_streaming_service::Servicethrows2Error>>;
         fn boththrows_with_rpc_opts(
             &self,
             arg_foo: ::std::primitive::i32,
@@ -3311,6 +3755,24 @@ pub mod client {
     impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_PubSubStreamingService_servicethrows<'a> {
         #[inline]
         #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "PubSubStreamingService.servicethrows"))]
+        fn write(&self, p: &mut P) {
+            p.write_struct_begin("args");
+            p.write_field_begin("foo", ::fbthrift::TType::I32, 1i16);
+            ::fbthrift::Serialize::write(&self.foo, p);
+            p.write_field_end();
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+
+    struct Args_PubSubStreamingService_servicethrows2<'a> {
+        foo: ::std::primitive::i32,
+        _phantom: ::std::marker::PhantomData<&'a ()>,
+    }
+
+    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_PubSubStreamingService_servicethrows2<'a> {
+        #[inline]
+        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "PubSubStreamingService.servicethrows2"))]
         fn write(&self, p: &mut P) {
             p.write_struct_begin("args");
             p.write_field_begin("foo", ::fbthrift::TType::I32, 1i16);
@@ -3456,6 +3918,16 @@ pub mod client {
                 rpc_options,
             )
         }
+        fn servicethrows2(
+            &self,
+            arg_foo: ::std::primitive::i32,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, crate::errors::pub_sub_streaming_service::Servicethrows2Error>> {
+            let rpc_options = T::RpcOptions::default();
+            self._servicethrows2_impl(
+                arg_foo,
+                rpc_options,
+            )
+        }
         fn boththrows(
             &self,
             arg_foo: ::std::primitive::i32,
@@ -3551,6 +4023,16 @@ pub mod client {
                 rpc_options,
             )
         }
+        fn servicethrows2_with_rpc_opts(
+            &self,
+            arg_foo: ::std::primitive::i32,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, crate::errors::pub_sub_streaming_service::Servicethrows2Error>> {
+            self._servicethrows2_impl(
+                arg_foo,
+                rpc_options,
+            )
+        }
         fn boththrows_with_rpc_opts(
             &self,
             arg_foo: ::std::primitive::i32,
@@ -3633,6 +4115,14 @@ pub mod client {
             arg_foo: ::std::primitive::i32,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ServicethrowsStreamError>>, crate::errors::pub_sub_streaming_service::ServicethrowsError>> {
             self.as_ref().servicethrows(
+                arg_foo,
+            )
+        }
+        fn servicethrows2(
+            &self,
+            arg_foo: ::std::primitive::i32,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, crate::errors::pub_sub_streaming_service::Servicethrows2Error>> {
+            self.as_ref().servicethrows2(
                 arg_foo,
             )
         }
@@ -3719,6 +4209,16 @@ pub mod client {
                 rpc_options,
             )
         }
+        fn servicethrows2_with_rpc_opts(
+            &self,
+            arg_foo: ::std::primitive::i32,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, crate::errors::pub_sub_streaming_service::Servicethrows2Error>> {
+            <Self as ::std::convert::AsRef<dyn PubSubStreamingServiceExt<T>>>::as_ref(self).servicethrows2_with_rpc_opts(
+                arg_foo,
+                rpc_options,
+            )
+        }
         fn boththrows_with_rpc_opts(
             &self,
             arg_foo: ::std::primitive::i32,
@@ -3793,7 +4293,7 @@ pub mod client {
         pub fn new<P, T>(
             protocol: P,
             transport: T,
-        ) -> ::std::sync::Arc<impl PubSubStreamingService + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl PubSubStreamingService + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             T: ::fbthrift::Transport,
@@ -3807,7 +4307,7 @@ pub mod client {
             protocol: P,
             transport: T,
             spawner: S,
-        ) -> ::std::sync::Arc<impl PubSubStreamingService + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl PubSubStreamingService + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             T: ::fbthrift::Transport,
@@ -3827,7 +4327,7 @@ pub mod client {
         pub fn new<P>(
             protocol: P,
             transport: T,
-        ) -> ::std::sync::Arc<impl PubSubStreamingServiceExt<T> + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl PubSubStreamingServiceExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             P::Deserializer: ::std::marker::Send,
@@ -3840,7 +4340,7 @@ pub mod client {
             protocol: P,
             transport: T,
             spawner: S,
-        ) -> ::std::sync::Arc<impl PubSubStreamingServiceExt<T> + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl PubSubStreamingServiceExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             P::Deserializer: ::std::marker::Send,
@@ -3863,7 +4363,7 @@ pub mod client {
         fn with_spawner<P, T, S>(protocol: P, transport: T, spawner: S) -> ::std::sync::Arc<Self::Api>
         where
             P: ::fbthrift::Protocol<Frame = T>,
-            T: ::fbthrift::Transport + ::std::marker::Sync,
+            T: ::fbthrift::Transport,
             P::Deserializer: ::std::marker::Send,
             S: ::fbthrift::help::Spawner,
         {
@@ -3917,6 +4417,20 @@ pub mod server {
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "PubSubStreamingService",
                     "servicethrows",
+                ),
+            ))
+        }
+        async fn servicethrows2(
+            &self,
+            _foo: ::std::primitive::i32,
+        ) -> ::std::result::Result<
+        ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::Servicethrows2StreamExn>>
+,
+    crate::services::pub_sub_streaming_service::Servicethrows2Exn> {
+            ::std::result::Result::Err(crate::services::pub_sub_streaming_service::Servicethrows2Exn::ApplicationException(
+                ::fbthrift::ApplicationException::unimplemented_method(
+                    "PubSubStreamingService",
+                    "servicethrows2",
                 ),
             ))
         }
@@ -4039,6 +4553,17 @@ pub mod server {
 ,
     crate::services::pub_sub_streaming_service::ServicethrowsExn> {
             (**self).servicethrows(
+                foo, 
+            ).await
+        }
+        async fn servicethrows2(
+            &self,
+            foo: ::std::primitive::i32,
+        ) -> ::std::result::Result<
+        ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::Servicethrows2StreamExn>>
+,
+    crate::services::pub_sub_streaming_service::Servicethrows2Exn> {
+            (**self).servicethrows2(
                 foo, 
             ).await
         }
@@ -4203,6 +4728,34 @@ pub mod server {
             p.read_struct_end()?;
             ::std::result::Result::Ok(Self {
                 foo: field_foo.ok_or_else(|| ::anyhow::anyhow!("`{}` missing arg `{}`", "PubSubStreamingService.servicethrows", "foo"))?,
+            })
+        }
+    }
+
+    struct Args_PubSubStreamingService_servicethrows2 {
+        foo: ::std::primitive::i32,
+    }
+    impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_PubSubStreamingService_servicethrows2 {
+        #[inline]
+        #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "PubSubStreamingService.servicethrows2"))]
+        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+            static ARGS: &[::fbthrift::Field] = &[
+                ::fbthrift::Field::new("foo", ::fbthrift::TType::I32, 1),
+            ];
+            let mut field_foo = ::std::option::Option::None;
+            let _ = p.read_struct_begin(|_| ())?;
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
+                match (fty, fid as ::std::primitive::i32) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (::fbthrift::TType::I32, 1) => field_foo = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            ::std::result::Result::Ok(Self {
+                foo: field_foo.ok_or_else(|| ::anyhow::anyhow!("`{}` missing arg `{}`", "PubSubStreamingService.servicethrows2", "foo"))?,
             })
         }
     }
@@ -4708,6 +5261,125 @@ pub mod server {
 
             let response = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
                         "servicethrows",
+                        METHOD_NAME.as_cstr(),
+                        _seqid,
+                        req_ctxt,
+                        &mut ctx_stack,
+                        response
+                    )?;
+
+            let _ = reply_state.lock().unwrap().send_stream_reply(response, stream, P::PROTOCOL_ID);
+            Ok(())
+        }
+
+        #[::tracing::instrument(skip_all, fields(method = "PubSubStreamingService.servicethrows2"))]
+        async fn handle_servicethrows2<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<::std::sync::Mutex<RS>>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::const_cstr::const_cstr;
+            use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
+
+            const_cstr! {
+                SERVICE_NAME = "PubSubStreamingService";
+                METHOD_NAME = "PubSubStreamingService.servicethrows2";
+            }
+            let mut ctx_stack = req_ctxt.get_context_stack(
+                SERVICE_NAME.as_cstr(),
+                METHOD_NAME.as_cstr(),
+            )?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_PubSubStreamingService_servicethrows2 = ::fbthrift::Deserialize::read(p)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, &::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME.as_cstr(),
+                buffer: ::std::marker::PhantomData, // FIXME P::into_buffer(p).reset(),
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, 0)?;
+
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.servicethrows2(
+                    _args.foo,
+                )
+            )
+            .catch_unwind()
+            .instrument(::tracing::info_span!("service_handler", method = "PubSubStreamingService.servicethrows2"))
+            .await;
+
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::info!(method = "PubSubStreamingService.servicethrows2", "success");
+                    crate::services::pub_sub_streaming_service::Servicethrows2Exn::Success(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::Servicethrows2Exn::Success(_))) => {
+                    panic!(
+                        "{} attempted to return success via error",
+                        "servicethrows2",
+                    )
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    exn
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.servicethrows2", exn);
+                    crate::services::pub_sub_streaming_service::Servicethrows2Exn::ApplicationException(aexn)
+                }
+            };
+
+            use ::futures::StreamExt as _;
+
+            let (response, stream) = match res {
+                crate::services::pub_sub_streaming_service::Servicethrows2Exn::Success(res) => {
+                    let response = crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn::Success(());
+                    let stream = res;
+
+                    let stream = ::std::panic::AssertUnwindSafe(stream)
+                        .catch_unwind()
+                        .map(|item| {
+                            match item {
+                                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                                    let item = crate::services::pub_sub_streaming_service::Servicethrows2StreamExn::Success(res);
+                                    match ::fbthrift::help::serialize_stream_item::<P, _>(item) {
+                                        Ok(payload) => ::fbthrift::SerializedStreamElement::Success(payload),
+                                        Err(err) => ::fbthrift::SerializedStreamElement::SerializationError(err),
+                                    }
+                                }
+                                ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::Servicethrows2StreamExn::Success(_))) => {
+                                    panic!("{} attempted to return success via error", "servicethrows2");
+                                }
+                                ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::Servicethrows2StreamExn::ApplicationException(aexn))) => {
+                                    ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
+                                }
+                                ::std::result::Result::Err(exn) => {
+                                    let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.servicethrows2", exn);
+                                    ::fbthrift::SerializedStreamElement::ApplicationException(aexn)
+                                }
+                            }
+                        })
+                        .boxed();
+                    (response, Some(stream))
+                },
+                crate::services::pub_sub_streaming_service::Servicethrows2Exn::e1(exn) => {
+                    let response = crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn::e1(exn);
+                    (response, None)
+                },
+                crate::services::pub_sub_streaming_service::Servicethrows2Exn::e2(exn) => {
+                    let response = crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn::e2(exn);
+                    (response, None)
+                },
+                crate::services::pub_sub_streaming_service::Servicethrows2Exn::ApplicationException(aexn)=> {
+                    let response = crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn::ApplicationException(aexn);
+                    (response, None)
+                },
+            };
+
+            let response = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+                        "servicethrows2",
                         METHOD_NAME.as_cstr(),
                         _seqid,
                         req_ctxt,
@@ -5327,11 +5999,12 @@ pub mod server {
                 b"returnstream" => ::std::result::Result::Ok(0usize),
                 b"streamthrows" => ::std::result::Result::Ok(1usize),
                 b"servicethrows" => ::std::result::Result::Ok(2usize),
-                b"boththrows" => ::std::result::Result::Ok(3usize),
-                b"responseandstreamstreamthrows" => ::std::result::Result::Ok(4usize),
-                b"responseandstreamservicethrows" => ::std::result::Result::Ok(5usize),
-                b"responseandstreamboththrows" => ::std::result::Result::Ok(6usize),
-                b"returnstreamFast" => ::std::result::Result::Ok(7usize),
+                b"servicethrows2" => ::std::result::Result::Ok(3usize),
+                b"boththrows" => ::std::result::Result::Ok(4usize),
+                b"responseandstreamstreamthrows" => ::std::result::Result::Ok(5usize),
+                b"responseandstreamservicethrows" => ::std::result::Result::Ok(6usize),
+                b"responseandstreamboththrows" => ::std::result::Result::Ok(7usize),
+                b"returnstreamFast" => ::std::result::Result::Ok(8usize),
                 _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
             }
         }
@@ -5356,18 +6029,21 @@ pub mod server {
                     self.handle_servicethrows(_p, _r, _reply_state, _seqid).await
                 }
                 3usize => {
-                    self.handle_boththrows(_p, _r, _reply_state, _seqid).await
+                    self.handle_servicethrows2(_p, _r, _reply_state, _seqid).await
                 }
                 4usize => {
-                    self.handle_responseandstreamstreamthrows(_p, _r, _reply_state, _seqid).await
+                    self.handle_boththrows(_p, _r, _reply_state, _seqid).await
                 }
                 5usize => {
-                    self.handle_responseandstreamservicethrows(_p, _r, _reply_state, _seqid).await
+                    self.handle_responseandstreamstreamthrows(_p, _r, _reply_state, _seqid).await
                 }
                 6usize => {
-                    self.handle_responseandstreamboththrows(_p, _r, _reply_state, _seqid).await
+                    self.handle_responseandstreamservicethrows(_p, _r, _reply_state, _seqid).await
                 }
                 7usize => {
+                    self.handle_responseandstreamboththrows(_p, _r, _reply_state, _seqid).await
+                }
+                8usize => {
                     self.handle_returnstreamFast(_p, _r, _reply_state, _seqid).await
                 }
                 bad => panic!(
@@ -5595,6 +6271,7 @@ pub mod mock {
         pub returnstream: r#impl::pub_sub_streaming_service::returnstream<'mock>,
         pub streamthrows: r#impl::pub_sub_streaming_service::streamthrows<'mock>,
         pub servicethrows: r#impl::pub_sub_streaming_service::servicethrows<'mock>,
+        pub servicethrows2: r#impl::pub_sub_streaming_service::servicethrows2<'mock>,
         pub boththrows: r#impl::pub_sub_streaming_service::boththrows<'mock>,
         pub responseandstreamstreamthrows: r#impl::pub_sub_streaming_service::responseandstreamstreamthrows<'mock>,
         pub responseandstreamservicethrows: r#impl::pub_sub_streaming_service::responseandstreamservicethrows<'mock>,
@@ -5609,6 +6286,7 @@ pub mod mock {
                 returnstream: r#impl::pub_sub_streaming_service::returnstream::unimplemented(),
                 streamthrows: r#impl::pub_sub_streaming_service::streamthrows::unimplemented(),
                 servicethrows: r#impl::pub_sub_streaming_service::servicethrows::unimplemented(),
+                servicethrows2: r#impl::pub_sub_streaming_service::servicethrows2::unimplemented(),
                 boththrows: r#impl::pub_sub_streaming_service::boththrows::unimplemented(),
                 responseandstreamstreamthrows: r#impl::pub_sub_streaming_service::responseandstreamstreamthrows::unimplemented(),
                 responseandstreamservicethrows: r#impl::pub_sub_streaming_service::responseandstreamservicethrows::unimplemented(),
@@ -5642,6 +6320,14 @@ pub mod mock {
             arg_foo: ::std::primitive::i32,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ServicethrowsStreamError>>, crate::errors::pub_sub_streaming_service::ServicethrowsError>> {
             let mut closure = self.servicethrows.closure.lock().unwrap();
+            let closure: &mut dyn ::std::ops::FnMut(::std::primitive::i32) -> _ = &mut **closure;
+            ::std::boxed::Box::pin(::futures::future::ready(closure(arg_foo.clone())))
+        }
+        fn servicethrows2(
+            &self,
+            arg_foo: ::std::primitive::i32,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, crate::errors::pub_sub_streaming_service::Servicethrows2Error>> {
+            let mut closure = self.servicethrows2.closure.lock().unwrap();
             let closure: &mut dyn ::std::ops::FnMut(::std::primitive::i32) -> _ = &mut **closure;
             ::std::boxed::Box::pin(::futures::future::ready(closure(arg_foo.clone())))
         }
@@ -5819,6 +6505,51 @@ pub mod mock {
                 pub fn throw<E>(&self, exception: E)
                 where
                     E: ::std::convert::Into<crate::errors::pub_sub_streaming_service::ServicethrowsError>,
+                    E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
+                {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move |_: ::std::primitive::i32| ::std::result::Result::Err(exception.clone().into()));
+                }
+            }
+
+            pub struct servicethrows2<'mock> {
+                pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
+                    dyn ::std::ops::FnMut(::std::primitive::i32) -> ::std::result::Result<
+                        ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>,
+                        crate::errors::pub_sub_streaming_service::Servicethrows2Error,
+                    > + ::std::marker::Send + ::std::marker::Sync + 'mock,
+                >>,
+            }
+
+            #[allow(clippy::redundant_closure)]
+            impl<'mock> servicethrows2<'mock> {
+                pub fn unimplemented() -> Self {
+                    Self {
+                        closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: ::std::primitive::i32| panic!(
+                            "{}::{} is not mocked",
+                            "PubSubStreamingService",
+                            "servicethrows2",
+                        ))),
+                    }
+                }
+
+                pub fn ret(&self, _value: ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>) {
+                    unimplemented!("Mocking streams is not yet implemented, as value isn't cloneable")
+                }
+
+                pub fn mock(&self, mut mock: impl ::std::ops::FnMut(::std::primitive::i32) -> ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move |foo| ::std::result::Result::Ok(mock(foo)));
+                }
+
+                pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut(::std::primitive::i32) -> ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, crate::errors::pub_sub_streaming_service::Servicethrows2Error> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move |foo| mock(foo));
+                }
+
+                pub fn throw<E>(&self, exception: E)
+                where
+                    E: ::std::convert::Into<crate::errors::pub_sub_streaming_service::Servicethrows2Error>,
                     E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
                 {
                     let mut closure = self.closure.lock().unwrap();
@@ -6069,6 +6800,9 @@ pub mod errors {
                     if let Some(ServicethrowsError::e(e)) = cause.downcast_ref::<ServicethrowsError>() {
                         return Some(e);
                     }
+                    if let Some(Servicethrows2Error::e1(e)) = cause.downcast_ref::<Servicethrows2Error>() {
+                        return Some(e);
+                    }
                     if let Some(BoththrowsError::e(e)) = cause.downcast_ref::<BoththrowsError>() {
                         return Some(e);
                     }
@@ -6076,6 +6810,21 @@ pub mod errors {
                         return Some(e);
                     }
                     if let Some(ResponseandstreamboththrowsError::e(e)) = cause.downcast_ref::<ResponseandstreamboththrowsError>() {
+                        return Some(e);
+                    }
+                }
+                None
+            }
+        }
+
+        pub trait AsFooEx2 {
+            fn as_foo_ex2(&self) -> Option<&crate::types::FooEx2>;
+        }
+
+        impl AsFooEx2 for ::anyhow::Error {
+            fn as_foo_ex2(&self) -> Option<&crate::types::FooEx2> {
+                for cause in self.chain() {
+                    if let Some(Servicethrows2Error::e2(e)) = cause.downcast_ref::<Servicethrows2Error>() {
                         return Some(e);
                     }
                 }
@@ -6293,6 +7042,115 @@ pub mod errors {
                         ::std::result::Result::Ok(res),
                     crate::services::pub_sub_streaming_service::ServicethrowsStreamExn::ApplicationException(aexn) =>
                         ::std::result::Result::Err(ServicethrowsStreamError::ApplicationException(aexn)),
+                }
+            }
+        }
+
+        /// Errors for servicethrows2 (client side).
+        #[derive(Debug, ::thiserror::Error)]
+        pub enum Servicethrows2Error {
+            #[error("PubSubStreamingService::servicethrows2 failed with {0:?}")]
+            e1(crate::types::FooEx),
+            #[error("PubSubStreamingService::servicethrows2 failed with {0:?}")]
+            e2(crate::types::FooEx2),
+            #[error("Application exception: {0:?}")]
+            ApplicationException(::fbthrift::types::ApplicationException),
+            #[error("{0}")]
+            ThriftError(::anyhow::Error),
+        }
+
+        impl ::std::convert::From<crate::types::FooEx> for Servicethrows2Error {
+            fn from(e: crate::types::FooEx) -> Self {
+                Self::e1(e)
+            }
+        }
+
+        impl AsFooEx for Servicethrows2Error {
+            fn as_foo_ex(&self) -> Option<&crate::types::FooEx> {
+                match self {
+                    Self::e1(inner) => Some(inner),
+                    _ => None,
+                }
+            }
+        }
+
+        impl ::std::convert::From<crate::types::FooEx2> for Servicethrows2Error {
+            fn from(e: crate::types::FooEx2) -> Self {
+                Self::e2(e)
+            }
+        }
+
+        impl AsFooEx2 for Servicethrows2Error {
+            fn as_foo_ex2(&self) -> Option<&crate::types::FooEx2> {
+                match self {
+                    Self::e2(inner) => Some(inner),
+                    _ => None,
+                }
+            }
+        }
+
+        impl ::std::convert::From<::anyhow::Error> for Servicethrows2Error {
+            fn from(err: ::anyhow::Error) -> Self {
+                Self::ThriftError(err)
+            }
+        }
+
+        impl ::std::convert::From<::fbthrift::ApplicationException> for Servicethrows2Error {
+            fn from(ae: ::fbthrift::ApplicationException) -> Self {
+                Self::ApplicationException(ae)
+            }
+        }
+        impl ::std::convert::From<crate::services::pub_sub_streaming_service::Servicethrows2Exn> for
+            ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::Servicethrows2StreamError>>, Servicethrows2Error>
+        {
+            fn from(e: crate::services::pub_sub_streaming_service::Servicethrows2Exn) -> Self {
+                match e {
+                    crate::services::pub_sub_streaming_service::Servicethrows2Exn::Success(res) => {
+                        use ::futures::stream::StreamExt;
+                        let stream = res;
+                        ::std::result::Result::Ok(stream.map(|res| match res {
+                            ::std::result::Result::Ok(item) => ::std::result::Result::Ok(item),
+                            ::std::result::Result::Err(exn) => exn.into(),
+                        }).boxed())
+                    }
+                    crate::services::pub_sub_streaming_service::Servicethrows2Exn::ApplicationException(aexn) =>
+                        ::std::result::Result::Err(Servicethrows2Error::ApplicationException(aexn)),
+                    crate::services::pub_sub_streaming_service::Servicethrows2Exn::e1(exn) =>
+                        ::std::result::Result::Err(Servicethrows2Error::e1(exn)),
+                    crate::services::pub_sub_streaming_service::Servicethrows2Exn::e2(exn) =>
+                        ::std::result::Result::Err(Servicethrows2Error::e2(exn)),
+                }
+            }
+        }
+
+        impl ::std::convert::From<crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn> for
+            ::std::result::Result<(), Servicethrows2Error>
+        {
+            fn from(e: crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn) -> Self {
+                match e {
+                    crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn::Success(res) =>
+                        ::std::result::Result::Ok(res),
+                    crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn::ApplicationException(aexn) =>
+                        ::std::result::Result::Err(Servicethrows2Error::ApplicationException(aexn)),
+                    crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn::e1(exn) =>
+                        ::std::result::Result::Err(Servicethrows2Error::e1(exn)),
+                    crate::services::pub_sub_streaming_service::Servicethrows2ResponseExn::e2(exn) =>
+                        ::std::result::Result::Err(Servicethrows2Error::e2(exn)),
+                }
+            }
+        }
+
+        pub type Servicethrows2StreamError = ::fbthrift::NonthrowingFunctionError;
+
+        impl ::std::convert::From<crate::services::pub_sub_streaming_service::Servicethrows2StreamExn> for
+            ::std::result::Result<::std::primitive::i32, Servicethrows2StreamError>
+        {
+            fn from(e: crate::services::pub_sub_streaming_service::Servicethrows2StreamExn) -> Self {
+                match e {
+                    crate::services::pub_sub_streaming_service::Servicethrows2StreamExn::Success(res) =>
+                        ::std::result::Result::Ok(res),
+                    crate::services::pub_sub_streaming_service::Servicethrows2StreamExn::ApplicationException(aexn) =>
+                        ::std::result::Result::Err(Servicethrows2StreamError::ApplicationException(aexn)),
                 }
             }
         }

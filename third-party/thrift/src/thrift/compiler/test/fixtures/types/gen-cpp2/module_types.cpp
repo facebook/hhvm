@@ -90,32 +90,6 @@ FOLLY_POP_WARNING
 #endif
 }}}} // apache::thrift::fixtures::types
 
-namespace apache { namespace thrift {
-
-constexpr std::size_t const TEnumTraits<::apache::thrift::fixtures::types::MyEnumA>::size;
-folly::Range<::apache::thrift::fixtures::types::MyEnumA const*> const TEnumTraits<::apache::thrift::fixtures::types::MyEnumA>::values = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::MyEnumA>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::fixtures::types::MyEnumA>::names = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::MyEnumA>::names);
-
-bool TEnumTraits<::apache::thrift::fixtures::types::MyEnumA>::findName(type value, folly::StringPiece* out) noexcept {
-  return ::apache::thrift::detail::st::enum_find_name(value, out);
-}
-
-bool TEnumTraits<::apache::thrift::fixtures::types::MyEnumA>::findValue(folly::StringPiece name, type* out) noexcept {
-  return ::apache::thrift::detail::st::enum_find_value(name, out);
-}
-
-}} // apache::thrift
-
-namespace apache { namespace thrift { namespace fixtures { namespace types {
-#ifndef ANDROID
-FOLLY_PUSH_WARNING
-FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
-const _MyEnumA_EnumMapFactory::ValuesToNamesMapType _MyEnumA_VALUES_TO_NAMES = _MyEnumA_EnumMapFactory::makeValuesToNamesMap();
-const _MyEnumA_EnumMapFactory::NamesToValuesMapType _MyEnumA_NAMES_TO_VALUES = _MyEnumA_EnumMapFactory::makeNamesToValuesMap();
-FOLLY_POP_WARNING
-#endif
-}}}} // apache::thrift::fixtures::types
-
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -1318,11 +1292,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::apache::thrift::fixtures::types::MyDataItem>::translateFieldName(
+void TccStructTraits<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>;
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -1337,41 +1311,138 @@ void TccStructTraits<::apache::thrift::fixtures::types::MyDataItem>::translateFi
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
-const folly::StringPiece MyDataItem::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+const folly::StringPiece MinPaddingWithCustomType::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
-  return apache::thrift::TStructDataStorage<MyDataItem>::fields_names[folly::to_underlying(ord) - 1];
+  return apache::thrift::TStructDataStorage<MinPaddingWithCustomType>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+MinPaddingWithCustomType::MinPaddingWithCustomType(const MinPaddingWithCustomType& srcObj) :
+    __fbthrift_field_medium(srcObj.__fbthrift_field_medium),
+    __fbthrift_field_big(srcObj.__fbthrift_field_big),
+    __fbthrift_field_biggish(srcObj.__fbthrift_field_biggish),
+    __fbthrift_field_small(srcObj.__fbthrift_field_small),
+    __fbthrift_field_tiny(srcObj.__fbthrift_field_tiny) {
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 3>(__fbthrift_field_medium, *this);
+}
+
+MinPaddingWithCustomType& MinPaddingWithCustomType::operator=(const MinPaddingWithCustomType& other) {
+  MinPaddingWithCustomType tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
+MinPaddingWithCustomType::MinPaddingWithCustomType(FOLLY_MAYBE_UNUSED MinPaddingWithCustomType&& other) noexcept :
+    __fbthrift_field_medium(std::move(other.__fbthrift_field_medium)),
+    __fbthrift_field_big(std::move(other.__fbthrift_field_big)),
+    __fbthrift_field_biggish(std::move(other.__fbthrift_field_biggish)),
+    __fbthrift_field_small(std::move(other.__fbthrift_field_small)),
+    __fbthrift_field_tiny(std::move(other.__fbthrift_field_tiny)) {
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 3>(__fbthrift_field_medium, *this);
+}
+
+MinPaddingWithCustomType& MinPaddingWithCustomType::operator=(FOLLY_MAYBE_UNUSED MinPaddingWithCustomType&& other) noexcept {
+    this->__fbthrift_field_medium = std::move(other.__fbthrift_field_medium);
+    this->__fbthrift_field_big = std::move(other.__fbthrift_field_big);
+    this->__fbthrift_field_biggish = std::move(other.__fbthrift_field_biggish);
+    this->__fbthrift_field_small = std::move(other.__fbthrift_field_small);
+    this->__fbthrift_field_tiny = std::move(other.__fbthrift_field_tiny);
+    return *this;
 }
 
 
-MyDataItem::MyDataItem(apache::thrift::FragileConstructor) {}
+MinPaddingWithCustomType::MinPaddingWithCustomType(apache::thrift::FragileConstructor, ::std::int8_t small__arg, ::std::int64_t big__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::std::int16_t, MinPaddingWithCustomType> medium__arg, ::std::int32_t biggish__arg, ::std::int8_t tiny__arg) :
+    __fbthrift_field_medium(std::move(medium__arg)),
+    __fbthrift_field_big(std::move(big__arg)),
+    __fbthrift_field_biggish(std::move(biggish__arg)),
+    __fbthrift_field_small(std::move(small__arg)),
+    __fbthrift_field_tiny(std::move(tiny__arg)) {
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 3>(__fbthrift_field_medium, *this);
+}
 
 
-void MyDataItem::__fbthrift_clear() {
+void MinPaddingWithCustomType::__fbthrift_clear() {
   // clear all fields
+  this->__fbthrift_field_small = ::std::int8_t();
+  this->__fbthrift_field_big = ::std::int64_t();
+  ::apache::thrift::adapt_detail::clear<::my::Adapter, 3>(__fbthrift_field_medium, *this);
+  this->__fbthrift_field_biggish = ::std::int32_t();
+  this->__fbthrift_field_tiny = ::std::int8_t();
 }
 
-void MyDataItem::__fbthrift_clear_terse_fields() {
+void MinPaddingWithCustomType::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_small = ::std::int8_t();
+  this->__fbthrift_field_big = ::std::int64_t();
+  ::apache::thrift::adapt_detail::clear<::my::Adapter, 3>(__fbthrift_field_medium, *this);
+  this->__fbthrift_field_biggish = ::std::int32_t();
+  this->__fbthrift_field_tiny = ::std::int8_t();
 }
 
-bool MyDataItem::__fbthrift_is_empty() const {
+bool MinPaddingWithCustomType::__fbthrift_is_empty() const {
+  return this->__fbthrift_field_small == ::std::int8_t() &&
+ this->__fbthrift_field_big == ::std::int64_t() &&
+ this->__fbthrift_field_medium == ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::std::int16_t, MinPaddingWithCustomType>() &&
+ this->__fbthrift_field_biggish == ::std::int32_t() &&
+ this->__fbthrift_field_tiny == ::std::int8_t();
+}
+
+bool MinPaddingWithCustomType::operator==(FOLLY_MAYBE_UNUSED const MinPaddingWithCustomType& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.small_ref() == rhs.small_ref())) {
+    return false;
+  }
+  if (!(lhs.big_ref() == rhs.big_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter>(lhs.__fbthrift_field_medium, rhs.__fbthrift_field_medium)) {
+    return false;
+  }
+  if (!(lhs.biggish_ref() == rhs.biggish_ref())) {
+    return false;
+  }
+  if (!(lhs.tiny_ref() == rhs.tiny_ref())) {
+    return false;
+  }
   return true;
 }
 
-
-
-
-void swap(FOLLY_MAYBE_UNUSED MyDataItem& a, FOLLY_MAYBE_UNUSED MyDataItem& b) {
-  using ::std::swap;
+bool MinPaddingWithCustomType::operator<(FOLLY_MAYBE_UNUSED const MinPaddingWithCustomType& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.small_ref() == rhs.small_ref())) {
+    return lhs.small_ref() < rhs.small_ref();
+  }
+  if (!(lhs.big_ref() == rhs.big_ref())) {
+    return lhs.big_ref() < rhs.big_ref();
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter>(lhs.__fbthrift_field_medium, rhs.__fbthrift_field_medium)) {
+    return ::apache::thrift::adapt_detail::less<::my::Adapter>(lhs.__fbthrift_field_medium, rhs.__fbthrift_field_medium);
+  }
+  if (!(lhs.biggish_ref() == rhs.biggish_ref())) {
+    return lhs.biggish_ref() < rhs.biggish_ref();
+  }
+  if (!(lhs.tiny_ref() == rhs.tiny_ref())) {
+    return lhs.tiny_ref() < rhs.tiny_ref();
+  }
+  return false;
 }
 
-template void MyDataItem::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t MyDataItem::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t MyDataItem::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t MyDataItem::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void MyDataItem::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t MyDataItem::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t MyDataItem::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t MyDataItem::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+void swap(FOLLY_MAYBE_UNUSED MinPaddingWithCustomType& a, FOLLY_MAYBE_UNUSED MinPaddingWithCustomType& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_medium, b.__fbthrift_field_medium);
+  swap(a.__fbthrift_field_big, b.__fbthrift_field_big);
+  swap(a.__fbthrift_field_biggish, b.__fbthrift_field_biggish);
+  swap(a.__fbthrift_field_small, b.__fbthrift_field_small);
+  swap(a.__fbthrift_field_tiny, b.__fbthrift_field_tiny);
+}
+
+template void MinPaddingWithCustomType::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MinPaddingWithCustomType::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MinPaddingWithCustomType::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MinPaddingWithCustomType::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MinPaddingWithCustomType::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MinPaddingWithCustomType::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MinPaddingWithCustomType::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MinPaddingWithCustomType::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 }}}} // apache::thrift::fixtures::types
@@ -1486,6 +1557,68 @@ static_assert(
         ::apache::thrift::type_class::structure,
         ::apache::thrift::fixtures::types::MyDataItem>,
     "inconsistent use of json option");
+
+}}}} // apache::thrift::fixtures::types
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::fixtures::types::MyDataItem>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const folly::StringPiece MyDataItem::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MyDataItem>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+
+MyDataItem::MyDataItem(apache::thrift::FragileConstructor) {}
+
+
+void MyDataItem::__fbthrift_clear() {
+  // clear all fields
+}
+
+void MyDataItem::__fbthrift_clear_terse_fields() {
+}
+
+bool MyDataItem::__fbthrift_is_empty() const {
+  return true;
+}
+
+
+
+
+void swap(FOLLY_MAYBE_UNUSED MyDataItem& a, FOLLY_MAYBE_UNUSED MyDataItem& b) {
+  using ::std::swap;
+}
+
+template void MyDataItem::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyDataItem::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyDataItem::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyDataItem::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyDataItem::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyDataItem::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyDataItem::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyDataItem::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
 
 }}}} // apache::thrift::fixtures::types
 
@@ -1681,116 +1814,6 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::apache::thrift::fixtures::types::ForwardUsageStruct>::translateFieldName(
-    folly::StringPiece _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
-namespace apache { namespace thrift { namespace fixtures { namespace types {
-
-const folly::StringPiece ForwardUsageStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
-  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
-  return apache::thrift::TStructDataStorage<ForwardUsageStruct>::fields_names[folly::to_underlying(ord) - 1];
-}
-
-ForwardUsageStruct::ForwardUsageStruct(const ForwardUsageStruct&) = default;
-ForwardUsageStruct& ForwardUsageStruct::operator=(const ForwardUsageStruct&) = default;
-ForwardUsageStruct::ForwardUsageStruct(FOLLY_MAYBE_UNUSED ForwardUsageStruct&& other) noexcept :
-    __fbthrift_field_foo(std::move(other.__fbthrift_field_foo)),
-    __isset(other.__isset) {
-}
-
-ForwardUsageStruct& ForwardUsageStruct::operator=(FOLLY_MAYBE_UNUSED ForwardUsageStruct&& other) noexcept {
-    this->__fbthrift_field_foo = std::move(other.__fbthrift_field_foo);
-    __isset = other.__isset;
-    return *this;
-}
-
-
-ForwardUsageStruct::ForwardUsageStruct(apache::thrift::FragileConstructor, ::apache::thrift::fixtures::types::ForwardUsageRoot foo__arg) :
-    __fbthrift_field_foo(std::move(foo__arg)) {
-  __isset.set(folly::index_constant<0>(), true);
-}
-
-
-void ForwardUsageStruct::__fbthrift_clear() {
-  // clear all fields
-  ::apache::thrift::clear(this->__fbthrift_field_foo);
-  __isset = {};
-}
-
-void ForwardUsageStruct::__fbthrift_clear_terse_fields() {
-}
-
-bool ForwardUsageStruct::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0));
-}
-
-bool ForwardUsageStruct::operator==(FOLLY_MAYBE_UNUSED const ForwardUsageStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.foo_ref() == rhs.foo_ref())) {
-    return false;
-  }
-  return true;
-}
-
-bool ForwardUsageStruct::operator<(FOLLY_MAYBE_UNUSED const ForwardUsageStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.foo_ref() == rhs.foo_ref())) {
-    return lhs.foo_ref() < rhs.foo_ref();
-  }
-  return false;
-}
-
-const ::apache::thrift::fixtures::types::ForwardUsageRoot* ForwardUsageStruct::get_foo() const& {
-  return foo_ref().has_value() ? std::addressof(__fbthrift_field_foo) : nullptr;
-}
-
-::apache::thrift::fixtures::types::ForwardUsageRoot* ForwardUsageStruct::get_foo() & {
-  return foo_ref().has_value() ? std::addressof(__fbthrift_field_foo) : nullptr;
-}
-
-
-void swap(FOLLY_MAYBE_UNUSED ForwardUsageStruct& a, FOLLY_MAYBE_UNUSED ForwardUsageStruct& b) {
-  using ::std::swap;
-  swap(a.__fbthrift_field_foo, b.__fbthrift_field_foo);
-  swap(a.__isset, b.__isset);
-}
-
-template void ForwardUsageStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t ForwardUsageStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t ForwardUsageStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t ForwardUsageStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void ForwardUsageStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t ForwardUsageStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t ForwardUsageStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t ForwardUsageStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-
-static_assert(
-    ::apache::thrift::detail::st::gen_check_json<
-        ForwardUsageStruct,
-        ::apache::thrift::type_class::structure,
-        ::apache::thrift::fixtures::types::ForwardUsageRoot>,
-    "inconsistent use of json option");
-
-}}}} // apache::thrift::fixtures::types
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
 void TccStructTraits<::apache::thrift::fixtures::types::ForwardUsageRoot>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
@@ -1930,6 +1953,112 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::apache::thrift::fixtures::types::ForwardUsageStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const folly::StringPiece ForwardUsageStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<ForwardUsageStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+ForwardUsageStruct::ForwardUsageStruct(const ForwardUsageStruct& srcObj) :
+    __fbthrift_field_foo(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_foo)) {
+}
+
+ForwardUsageStruct& ForwardUsageStruct::operator=(const ForwardUsageStruct& other) {
+  ForwardUsageStruct tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
+ForwardUsageStruct::ForwardUsageStruct(FOLLY_MAYBE_UNUSED ForwardUsageStruct&& other) noexcept :
+    __fbthrift_field_foo(std::move(other.__fbthrift_field_foo)) {
+}
+
+ForwardUsageStruct& ForwardUsageStruct::operator=(FOLLY_MAYBE_UNUSED ForwardUsageStruct&& other) noexcept {
+    this->__fbthrift_field_foo = std::move(other.__fbthrift_field_foo);
+    return *this;
+}
+
+
+ForwardUsageStruct::ForwardUsageStruct(apache::thrift::FragileConstructor, ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot> foo__arg) :
+    __fbthrift_field_foo(std::move(foo__arg)) {
+}
+
+
+void ForwardUsageStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_foo.reset();
+}
+
+void ForwardUsageStruct::__fbthrift_clear_terse_fields() {
+}
+
+bool ForwardUsageStruct::__fbthrift_is_empty() const {
+  return !(this->__fbthrift_field_foo);
+}
+
+bool ForwardUsageStruct::operator==(FOLLY_MAYBE_UNUSED const ForwardUsageStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if ((!::apache::thrift::detail::pointer_equal(lhs.foo_ref(), rhs.foo_ref()))) {
+    return false;
+  }
+  return true;
+}
+
+bool ForwardUsageStruct::operator<(FOLLY_MAYBE_UNUSED const ForwardUsageStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if ((!::apache::thrift::detail::pointer_equal(lhs.foo_ref(), rhs.foo_ref()))) {
+    return ::apache::thrift::detail::pointer_less(lhs.foo_ref(), rhs.foo_ref());
+  }
+  return false;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED ForwardUsageStruct& a, FOLLY_MAYBE_UNUSED ForwardUsageStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_foo, b.__fbthrift_field_foo);
+}
+
+template void ForwardUsageStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ForwardUsageStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ForwardUsageStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ForwardUsageStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ForwardUsageStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ForwardUsageStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ForwardUsageStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ForwardUsageStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ForwardUsageStruct,
+        ::apache::thrift::type_class::structure,
+        ::apache::thrift::fixtures::types::ForwardUsageRoot>,
+    "inconsistent use of json option");
+
+}}}} // apache::thrift::fixtures::types
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::apache::thrift::fixtures::types::ForwardUsageByRef>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
@@ -1954,42 +2083,47 @@ const folly::StringPiece ForwardUsageByRef::__fbthrift_get_field_name(::apache::
   return apache::thrift::TStructDataStorage<ForwardUsageByRef>::fields_names[folly::to_underlying(ord) - 1];
 }
 
-ForwardUsageByRef::ForwardUsageByRef(const ForwardUsageByRef&) = default;
-ForwardUsageByRef& ForwardUsageByRef::operator=(const ForwardUsageByRef&) = default;
+ForwardUsageByRef::ForwardUsageByRef(const ForwardUsageByRef& srcObj) :
+    __fbthrift_field_foo(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_foo)) {
+}
+
+ForwardUsageByRef& ForwardUsageByRef::operator=(const ForwardUsageByRef& other) {
+  ForwardUsageByRef tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
 ForwardUsageByRef::ForwardUsageByRef(FOLLY_MAYBE_UNUSED ForwardUsageByRef&& other) noexcept :
-    __fbthrift_field_foo(std::move(other.__fbthrift_field_foo)),
-    __isset(other.__isset) {
+    __fbthrift_field_foo(std::move(other.__fbthrift_field_foo)) {
 }
 
 ForwardUsageByRef& ForwardUsageByRef::operator=(FOLLY_MAYBE_UNUSED ForwardUsageByRef&& other) noexcept {
     this->__fbthrift_field_foo = std::move(other.__fbthrift_field_foo);
-    __isset = other.__isset;
     return *this;
 }
 
 
-ForwardUsageByRef::ForwardUsageByRef(apache::thrift::FragileConstructor, ::apache::thrift::fixtures::types::ForwardUsageRoot foo__arg) :
+ForwardUsageByRef::ForwardUsageByRef(apache::thrift::FragileConstructor, ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageRoot> foo__arg) :
     __fbthrift_field_foo(std::move(foo__arg)) {
-  __isset.set(folly::index_constant<0>(), true);
 }
 
 
 void ForwardUsageByRef::__fbthrift_clear() {
   // clear all fields
-  ::apache::thrift::clear(this->__fbthrift_field_foo);
-  __isset = {};
+  this->__fbthrift_field_foo.reset();
 }
 
 void ForwardUsageByRef::__fbthrift_clear_terse_fields() {
 }
 
 bool ForwardUsageByRef::__fbthrift_is_empty() const {
-  return !(this->__isset.get(0));
+  return !(this->__fbthrift_field_foo);
 }
 
 bool ForwardUsageByRef::operator==(FOLLY_MAYBE_UNUSED const ForwardUsageByRef& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.foo_ref() == rhs.foo_ref())) {
+  if ((!::apache::thrift::detail::pointer_equal(lhs.foo_ref(), rhs.foo_ref()))) {
     return false;
   }
   return true;
@@ -1997,25 +2131,16 @@ bool ForwardUsageByRef::operator==(FOLLY_MAYBE_UNUSED const ForwardUsageByRef& r
 
 bool ForwardUsageByRef::operator<(FOLLY_MAYBE_UNUSED const ForwardUsageByRef& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.foo_ref() == rhs.foo_ref())) {
-    return lhs.foo_ref() < rhs.foo_ref();
+  if ((!::apache::thrift::detail::pointer_equal(lhs.foo_ref(), rhs.foo_ref()))) {
+    return ::apache::thrift::detail::pointer_less(lhs.foo_ref(), rhs.foo_ref());
   }
   return false;
-}
-
-const ::apache::thrift::fixtures::types::ForwardUsageRoot* ForwardUsageByRef::get_foo() const& {
-  return foo_ref().has_value() ? std::addressof(__fbthrift_field_foo) : nullptr;
-}
-
-::apache::thrift::fixtures::types::ForwardUsageRoot* ForwardUsageByRef::get_foo() & {
-  return foo_ref().has_value() ? std::addressof(__fbthrift_field_foo) : nullptr;
 }
 
 
 void swap(FOLLY_MAYBE_UNUSED ForwardUsageByRef& a, FOLLY_MAYBE_UNUSED ForwardUsageByRef& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_foo, b.__fbthrift_field_foo);
-  swap(a.__isset, b.__isset);
 }
 
 template void ForwardUsageByRef::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2040,11 +2165,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::apache::thrift::fixtures::types::NoexceptMoveEmpty>::translateFieldName(
+void TccStructTraits<::apache::thrift::fixtures::types::IncompleteMap>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::NoexceptMoveEmpty>;
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -2059,350 +2184,83 @@ void TccStructTraits<::apache::thrift::fixtures::types::NoexceptMoveEmpty>::tran
 
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
-const folly::StringPiece NoexceptMoveEmpty::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+const folly::StringPiece IncompleteMap::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
-  return apache::thrift::TStructDataStorage<NoexceptMoveEmpty>::fields_names[folly::to_underlying(ord) - 1];
+  return apache::thrift::TStructDataStorage<IncompleteMap>::fields_names[folly::to_underlying(ord) - 1];
 }
 
-
-NoexceptMoveEmpty::NoexceptMoveEmpty(apache::thrift::FragileConstructor) {}
-
-
-void NoexceptMoveEmpty::__fbthrift_clear() {
-  // clear all fields
-}
-
-void NoexceptMoveEmpty::__fbthrift_clear_terse_fields() {
-}
-
-bool NoexceptMoveEmpty::__fbthrift_is_empty() const {
-  return true;
-}
-
-bool NoexceptMoveEmpty::operator==(FOLLY_MAYBE_UNUSED const NoexceptMoveEmpty& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return true;
-}
-
-bool NoexceptMoveEmpty::operator<(FOLLY_MAYBE_UNUSED const NoexceptMoveEmpty& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
-}
-
-
-void swap(FOLLY_MAYBE_UNUSED NoexceptMoveEmpty& a, FOLLY_MAYBE_UNUSED NoexceptMoveEmpty& b) {
-  using ::std::swap;
-}
-
-template void NoexceptMoveEmpty::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t NoexceptMoveEmpty::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t NoexceptMoveEmpty::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t NoexceptMoveEmpty::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void NoexceptMoveEmpty::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t NoexceptMoveEmpty::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t NoexceptMoveEmpty::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t NoexceptMoveEmpty::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-
-
-}}}} // apache::thrift::fixtures::types
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::apache::thrift::fixtures::types::NoexceptMoveSimpleStruct>::translateFieldName(
-    folly::StringPiece _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::NoexceptMoveSimpleStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
-namespace apache { namespace thrift { namespace fixtures { namespace types {
-
-const folly::StringPiece NoexceptMoveSimpleStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
-  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
-  return apache::thrift::TStructDataStorage<NoexceptMoveSimpleStruct>::fields_names[folly::to_underlying(ord) - 1];
-}
-
-
-NoexceptMoveSimpleStruct::NoexceptMoveSimpleStruct(apache::thrift::FragileConstructor, ::std::int64_t boolField__arg) :
-    __fbthrift_field_boolField(std::move(boolField__arg)) {
-  __isset.set(folly::index_constant<0>(), true);
-}
-
-
-void NoexceptMoveSimpleStruct::__fbthrift_clear() {
-  // clear all fields
-  this->__fbthrift_field_boolField = ::std::int64_t();
-  __isset = {};
-}
-
-void NoexceptMoveSimpleStruct::__fbthrift_clear_terse_fields() {
-}
-
-bool NoexceptMoveSimpleStruct::__fbthrift_is_empty() const {
-  return false;
-}
-
-bool NoexceptMoveSimpleStruct::operator==(FOLLY_MAYBE_UNUSED const NoexceptMoveSimpleStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.boolField_ref() == rhs.boolField_ref())) {
-    return false;
-  }
-  return true;
-}
-
-bool NoexceptMoveSimpleStruct::operator<(FOLLY_MAYBE_UNUSED const NoexceptMoveSimpleStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.boolField_ref() == rhs.boolField_ref())) {
-    return lhs.boolField_ref() < rhs.boolField_ref();
-  }
-  return false;
-}
-
-
-void swap(FOLLY_MAYBE_UNUSED NoexceptMoveSimpleStruct& a, FOLLY_MAYBE_UNUSED NoexceptMoveSimpleStruct& b) {
-  using ::std::swap;
-  swap(a.__fbthrift_field_boolField, b.__fbthrift_field_boolField);
-  swap(a.__isset, b.__isset);
-}
-
-template void NoexceptMoveSimpleStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t NoexceptMoveSimpleStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t NoexceptMoveSimpleStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t NoexceptMoveSimpleStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void NoexceptMoveSimpleStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t NoexceptMoveSimpleStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t NoexceptMoveSimpleStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t NoexceptMoveSimpleStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-
-
-}}}} // apache::thrift::fixtures::types
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::apache::thrift::fixtures::types::NoexceptMoveComplexStruct>::translateFieldName(
-    folly::StringPiece _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::NoexceptMoveComplexStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
-namespace apache { namespace thrift { namespace fixtures { namespace types {
-
-const folly::StringPiece NoexceptMoveComplexStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
-  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
-  return apache::thrift::TStructDataStorage<NoexceptMoveComplexStruct>::fields_names[folly::to_underlying(ord) - 1];
-}
-
-NoexceptMoveComplexStruct::NoexceptMoveComplexStruct(const NoexceptMoveComplexStruct&) = default;
-NoexceptMoveComplexStruct& NoexceptMoveComplexStruct::operator=(const NoexceptMoveComplexStruct&) = default;
-NoexceptMoveComplexStruct::NoexceptMoveComplexStruct() :
-      __fbthrift_field_MyBoolField(),
-      __fbthrift_field_MyIntField(static_cast<::std::int64_t>(12)),
-      __fbthrift_field_MyStringField(apache::thrift::StringTraits<std::string>::fromStringLiteral("test")),
-      __fbthrift_field_MyMapEnumAndInt(static_cast<::std::map<::apache::thrift::fixtures::types::MyEnumA, ::std::string>>(std::initializer_list<std::pair<const ::apache::thrift::fixtures::types::MyEnumA, ::std::string>>{{ ::apache::thrift::fixtures::types::MyEnumA::fieldA, apache::thrift::StringTraits<std::string>::fromStringLiteral("fieldA")},
-  { ::apache::thrift::fixtures::types::MyEnumA::fieldC, apache::thrift::StringTraits<std::string>::fromStringLiteral("fieldC")}})) {
-}
-
-
-NoexceptMoveComplexStruct::~NoexceptMoveComplexStruct() {}
-
-NoexceptMoveComplexStruct::NoexceptMoveComplexStruct(FOLLY_MAYBE_UNUSED NoexceptMoveComplexStruct&& other) noexcept :
-    __fbthrift_field_MyBoolField(std::move(other.__fbthrift_field_MyBoolField)),
-    __fbthrift_field_MyIntField(std::move(other.__fbthrift_field_MyIntField)),
-    __fbthrift_field_MyStringField(std::move(other.__fbthrift_field_MyStringField)),
-    __fbthrift_field_MyStringField2(std::move(other.__fbthrift_field_MyStringField2)),
-    __fbthrift_field_MyBinaryField(std::move(other.__fbthrift_field_MyBinaryField)),
-    __fbthrift_field_MyBinaryField2(std::move(other.__fbthrift_field_MyBinaryField2)),
-    __fbthrift_field_MyBinaryField3(std::move(other.__fbthrift_field_MyBinaryField3)),
-    __fbthrift_field_MyBinaryListField4(std::move(other.__fbthrift_field_MyBinaryListField4)),
-    __fbthrift_field_MyMapEnumAndInt(std::move(other.__fbthrift_field_MyMapEnumAndInt)),
+IncompleteMap::IncompleteMap(const IncompleteMap&) = default;
+IncompleteMap& IncompleteMap::operator=(const IncompleteMap&) = default;
+IncompleteMap::IncompleteMap(FOLLY_MAYBE_UNUSED IncompleteMap&& other) noexcept :
+    __fbthrift_field_field(std::move(other.__fbthrift_field_field)),
     __isset(other.__isset) {
 }
 
-NoexceptMoveComplexStruct& NoexceptMoveComplexStruct::operator=(FOLLY_MAYBE_UNUSED NoexceptMoveComplexStruct&& other) noexcept {
-    this->__fbthrift_field_MyBoolField = std::move(other.__fbthrift_field_MyBoolField);
-    this->__fbthrift_field_MyIntField = std::move(other.__fbthrift_field_MyIntField);
-    this->__fbthrift_field_MyStringField = std::move(other.__fbthrift_field_MyStringField);
-    this->__fbthrift_field_MyStringField2 = std::move(other.__fbthrift_field_MyStringField2);
-    this->__fbthrift_field_MyBinaryField = std::move(other.__fbthrift_field_MyBinaryField);
-    this->__fbthrift_field_MyBinaryField2 = std::move(other.__fbthrift_field_MyBinaryField2);
-    this->__fbthrift_field_MyBinaryField3 = std::move(other.__fbthrift_field_MyBinaryField3);
-    this->__fbthrift_field_MyBinaryListField4 = std::move(other.__fbthrift_field_MyBinaryListField4);
-    this->__fbthrift_field_MyMapEnumAndInt = std::move(other.__fbthrift_field_MyMapEnumAndInt);
+IncompleteMap& IncompleteMap::operator=(FOLLY_MAYBE_UNUSED IncompleteMap&& other) noexcept {
+    this->__fbthrift_field_field = std::move(other.__fbthrift_field_field);
     __isset = other.__isset;
     return *this;
 }
 
 
-NoexceptMoveComplexStruct::NoexceptMoveComplexStruct(apache::thrift::FragileConstructor, bool MyBoolField__arg, ::std::int64_t MyIntField__arg, ::std::string MyStringField__arg, ::std::string MyStringField2__arg, ::std::string MyBinaryField__arg, ::std::string MyBinaryField2__arg, ::std::string MyBinaryField3__arg, ::std::vector<::std::string> MyBinaryListField4__arg, ::std::map<::apache::thrift::fixtures::types::MyEnumA, ::std::string> MyMapEnumAndInt__arg) :
-    __fbthrift_field_MyBoolField(std::move(MyBoolField__arg)),
-    __fbthrift_field_MyIntField(std::move(MyIntField__arg)),
-    __fbthrift_field_MyStringField(std::move(MyStringField__arg)),
-    __fbthrift_field_MyStringField2(std::move(MyStringField2__arg)),
-    __fbthrift_field_MyBinaryField(std::move(MyBinaryField__arg)),
-    __fbthrift_field_MyBinaryField2(std::move(MyBinaryField2__arg)),
-    __fbthrift_field_MyBinaryField3(std::move(MyBinaryField3__arg)),
-    __fbthrift_field_MyBinaryListField4(std::move(MyBinaryListField4__arg)),
-    __fbthrift_field_MyMapEnumAndInt(std::move(MyMapEnumAndInt__arg)) {
+IncompleteMap::IncompleteMap(apache::thrift::FragileConstructor, ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep> field__arg) :
+    __fbthrift_field_field(std::move(field__arg)) {
   __isset.set(folly::index_constant<0>(), true);
-  __isset.set(folly::index_constant<1>(), true);
-  __isset.set(folly::index_constant<2>(), true);
-  __isset.set(folly::index_constant<3>(), true);
-  __isset.set(folly::index_constant<4>(), true);
-  __isset.set(folly::index_constant<5>(), true);
-  __isset.set(folly::index_constant<6>(), true);
-  __isset.set(folly::index_constant<7>(), true);
 }
 
 
-void NoexceptMoveComplexStruct::__fbthrift_clear() {
+void IncompleteMap::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_MyBoolField = bool();
-  this->__fbthrift_field_MyIntField = ::std::int64_t();
-  this->__fbthrift_field_MyStringField = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_MyStringField2 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_MyBinaryField = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_MyBinaryField2 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_MyBinaryField3 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_MyBinaryListField4.clear();
-  this->__fbthrift_field_MyMapEnumAndInt.clear();
+  this->__fbthrift_field_field.clear();
   __isset = {};
 }
 
-void NoexceptMoveComplexStruct::__fbthrift_clear_terse_fields() {
+void IncompleteMap::__fbthrift_clear_terse_fields() {
 }
 
-bool NoexceptMoveComplexStruct::__fbthrift_is_empty() const {
-  return false;
+bool IncompleteMap::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0));
 }
 
-bool NoexceptMoveComplexStruct::operator==(FOLLY_MAYBE_UNUSED const NoexceptMoveComplexStruct& rhs) const {
+bool IncompleteMap::operator==(FOLLY_MAYBE_UNUSED const IncompleteMap& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.MyBoolField_ref() == rhs.MyBoolField_ref())) {
-    return false;
-  }
-  if (!(lhs.MyIntField_ref() == rhs.MyIntField_ref())) {
-    return false;
-  }
-  if (!(lhs.MyStringField_ref() == rhs.MyStringField_ref())) {
-    return false;
-  }
-  if (!(lhs.MyStringField2_ref() == rhs.MyStringField2_ref())) {
-    return false;
-  }
-  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_MyBinaryField, rhs.__fbthrift_field_MyBinaryField)) {
-    return false;
-  }
-  if (lhs.MyBinaryField2_ref().has_value() != rhs.MyBinaryField2_ref().has_value() || (lhs.MyBinaryField2_ref().has_value() && !apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_MyBinaryField2, rhs.__fbthrift_field_MyBinaryField2))) {
-    return false;
-  }
-  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_MyBinaryField3, rhs.__fbthrift_field_MyBinaryField3)) {
-    return false;
-  }
-  if (!(lhs.MyBinaryListField4_ref() == rhs.MyBinaryListField4_ref())) {
-    return false;
-  }
-  if (!(lhs.MyMapEnumAndInt_ref() == rhs.MyMapEnumAndInt_ref())) {
+  if (!(lhs.field_ref() == rhs.field_ref())) {
     return false;
   }
   return true;
 }
 
-bool NoexceptMoveComplexStruct::operator<(FOLLY_MAYBE_UNUSED const NoexceptMoveComplexStruct& rhs) const {
+bool IncompleteMap::operator<(FOLLY_MAYBE_UNUSED const IncompleteMap& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.MyBoolField_ref() == rhs.MyBoolField_ref())) {
-    return lhs.MyBoolField_ref() < rhs.MyBoolField_ref();
-  }
-  if (!(lhs.MyIntField_ref() == rhs.MyIntField_ref())) {
-    return lhs.MyIntField_ref() < rhs.MyIntField_ref();
-  }
-  if (!(lhs.MyStringField_ref() == rhs.MyStringField_ref())) {
-    return lhs.MyStringField_ref() < rhs.MyStringField_ref();
-  }
-  if (!(lhs.MyStringField2_ref() == rhs.MyStringField2_ref())) {
-    return lhs.MyStringField2_ref() < rhs.MyStringField2_ref();
-  }
-  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_MyBinaryField, rhs.__fbthrift_field_MyBinaryField)) {
-    return apache::thrift::StringTraits<std::string>::isLess(lhs.__fbthrift_field_MyBinaryField, rhs.__fbthrift_field_MyBinaryField);
-  }
-  if (lhs.MyBinaryField2_ref().has_value() != rhs.MyBinaryField2_ref().has_value() || (lhs.MyBinaryField2_ref().has_value() && !apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_MyBinaryField2, rhs.__fbthrift_field_MyBinaryField2))) {
-    return !lhs.MyBinaryField2_ref().has_value() || (rhs.MyBinaryField2_ref().has_value() && apache::thrift::StringTraits<std::string>::isLess(lhs.__fbthrift_field_MyBinaryField2, rhs.__fbthrift_field_MyBinaryField2));
-  }
-  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_MyBinaryField3, rhs.__fbthrift_field_MyBinaryField3)) {
-    return apache::thrift::StringTraits<std::string>::isLess(lhs.__fbthrift_field_MyBinaryField3, rhs.__fbthrift_field_MyBinaryField3);
-  }
-  if (!(lhs.MyBinaryListField4_ref() == rhs.MyBinaryListField4_ref())) {
-    return lhs.MyBinaryListField4_ref() < rhs.MyBinaryListField4_ref();
-  }
-  if (!(lhs.MyMapEnumAndInt_ref() == rhs.MyMapEnumAndInt_ref())) {
-    return lhs.MyMapEnumAndInt_ref() < rhs.MyMapEnumAndInt_ref();
+  if (!(lhs.field_ref() == rhs.field_ref())) {
+    return lhs.field_ref() < rhs.field_ref();
   }
   return false;
 }
 
-const ::std::vector<::std::string>& NoexceptMoveComplexStruct::get_MyBinaryListField4() const& {
-  return __fbthrift_field_MyBinaryListField4;
+const ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>* IncompleteMap::get_field() const& {
+  return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
 
-::std::vector<::std::string> NoexceptMoveComplexStruct::get_MyBinaryListField4() && {
-  return std::move(__fbthrift_field_MyBinaryListField4);
-}
-
-const ::std::map<::apache::thrift::fixtures::types::MyEnumA, ::std::string>& NoexceptMoveComplexStruct::get_MyMapEnumAndInt() const& {
-  return __fbthrift_field_MyMapEnumAndInt;
-}
-
-::std::map<::apache::thrift::fixtures::types::MyEnumA, ::std::string> NoexceptMoveComplexStruct::get_MyMapEnumAndInt() && {
-  return std::move(__fbthrift_field_MyMapEnumAndInt);
+::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>* IncompleteMap::get_field() & {
+  return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
 
 
-void swap(FOLLY_MAYBE_UNUSED NoexceptMoveComplexStruct& a, FOLLY_MAYBE_UNUSED NoexceptMoveComplexStruct& b) {
+void swap(FOLLY_MAYBE_UNUSED IncompleteMap& a, FOLLY_MAYBE_UNUSED IncompleteMap& b) {
   using ::std::swap;
-  swap(a.__fbthrift_field_MyBoolField, b.__fbthrift_field_MyBoolField);
-  swap(a.__fbthrift_field_MyIntField, b.__fbthrift_field_MyIntField);
-  swap(a.__fbthrift_field_MyStringField, b.__fbthrift_field_MyStringField);
-  swap(a.__fbthrift_field_MyStringField2, b.__fbthrift_field_MyStringField2);
-  swap(a.__fbthrift_field_MyBinaryField, b.__fbthrift_field_MyBinaryField);
-  swap(a.__fbthrift_field_MyBinaryField2, b.__fbthrift_field_MyBinaryField2);
-  swap(a.__fbthrift_field_MyBinaryField3, b.__fbthrift_field_MyBinaryField3);
-  swap(a.__fbthrift_field_MyBinaryListField4, b.__fbthrift_field_MyBinaryListField4);
-  swap(a.__fbthrift_field_MyMapEnumAndInt, b.__fbthrift_field_MyMapEnumAndInt);
+  swap(a.__fbthrift_field_field, b.__fbthrift_field_field);
   swap(a.__isset, b.__isset);
 }
 
-template void NoexceptMoveComplexStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t NoexceptMoveComplexStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t NoexceptMoveComplexStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t NoexceptMoveComplexStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void NoexceptMoveComplexStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t NoexceptMoveComplexStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t NoexceptMoveComplexStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t NoexceptMoveComplexStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+template void IncompleteMap::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t IncompleteMap::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t IncompleteMap::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t IncompleteMap::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void IncompleteMap::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t IncompleteMap::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t IncompleteMap::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t IncompleteMap::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
 }}}} // apache::thrift::fixtures::types
@@ -2411,11 +2269,11 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::apache::thrift::fixtures::types::NoExceptMoveUnion>::translateFieldName(
+void TccStructTraits<::apache::thrift::fixtures::types::IncompleteMapDep>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
     apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::NoExceptMoveUnion>;
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>;
   static const st::translate_field_name_table table{
       data::fields_size,
       data::fields_names.data(),
@@ -2428,91 +2286,980 @@ void TccStructTraits<::apache::thrift::fixtures::types::NoExceptMoveUnion>::tran
 } // namespace thrift
 } // namespace apache
 
-namespace apache { namespace thrift {
-
-constexpr std::size_t const TEnumTraits<::apache::thrift::fixtures::types::NoExceptMoveUnion::Type>::size;
-folly::Range<::apache::thrift::fixtures::types::NoExceptMoveUnion::Type const*> const TEnumTraits<::apache::thrift::fixtures::types::NoExceptMoveUnion::Type>::values = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::NoExceptMoveUnion::Type>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::fixtures::types::NoExceptMoveUnion::Type>::names = folly::range(TEnumDataStorage<::apache::thrift::fixtures::types::NoExceptMoveUnion::Type>::names);
-
-bool TEnumTraits<::apache::thrift::fixtures::types::NoExceptMoveUnion::Type>::findName(type value, folly::StringPiece* out) noexcept {
-  return ::apache::thrift::detail::st::enum_find_name(value, out);
-}
-
-bool TEnumTraits<::apache::thrift::fixtures::types::NoExceptMoveUnion::Type>::findValue(folly::StringPiece name, type* out) noexcept {
-  return ::apache::thrift::detail::st::enum_find_value(name, out);
-}
-}} // apache::thrift
 namespace apache { namespace thrift { namespace fixtures { namespace types {
 
-const folly::StringPiece NoExceptMoveUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+const folly::StringPiece IncompleteMapDep::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
-  return apache::thrift::TStructDataStorage<NoExceptMoveUnion>::fields_names[folly::to_underlying(ord) - 1];
+  return apache::thrift::TStructDataStorage<IncompleteMapDep>::fields_names[folly::to_underlying(ord) - 1];
 }
 
-void NoExceptMoveUnion::__fbthrift_clear() {
+
+IncompleteMapDep::IncompleteMapDep(apache::thrift::FragileConstructor) {}
+
+
+void IncompleteMapDep::__fbthrift_clear() {
   // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
-  switch(getType()) {
-    case Type::string_field:
-      destruct(value_.string_field);
-      break;
-    case Type::i32_field:
-      destruct(value_.i32_field);
-      break;
-    default:
-      assert(false);
-      break;
-  }
-  type_ = folly::to_underlying(Type::__EMPTY__);
 }
 
-bool NoExceptMoveUnion::__fbthrift_is_empty() const {
-  return getType() == Type::__EMPTY__;
+void IncompleteMapDep::__fbthrift_clear_terse_fields() {
 }
 
-bool NoExceptMoveUnion::operator==(const NoExceptMoveUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::string_field:
-      return value_.string_field == rhs.value_.string_field;
-    case Type::i32_field:
-      return value_.i32_field == rhs.value_.i32_field;
-    default:
-      return true;
-  }
+bool IncompleteMapDep::__fbthrift_is_empty() const {
+  return true;
 }
 
-bool NoExceptMoveUnion::operator<(FOLLY_MAYBE_UNUSED const NoExceptMoveUnion& rhs) const {
+bool IncompleteMapDep::operator==(FOLLY_MAYBE_UNUSED const IncompleteMapDep& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::string_field:
-      return lhs.value_.string_field < rhs.value_.string_field;
-    case Type::i32_field:
-      return lhs.value_.i32_field < rhs.value_.i32_field;
-    default:
-      return false;
-  }
+  return true;
 }
 
-void swap(NoExceptMoveUnion& a, NoExceptMoveUnion& b) {
-  NoExceptMoveUnion temp(std::move(a));
-  a = std::move(b);
-  b = std::move(temp);
+bool IncompleteMapDep::operator<(FOLLY_MAYBE_UNUSED const IncompleteMapDep& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return false;
 }
 
-template void NoExceptMoveUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t NoExceptMoveUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t NoExceptMoveUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t NoExceptMoveUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void NoExceptMoveUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t NoExceptMoveUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t NoExceptMoveUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t NoExceptMoveUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+void swap(FOLLY_MAYBE_UNUSED IncompleteMapDep& a, FOLLY_MAYBE_UNUSED IncompleteMapDep& b) {
+  using ::std::swap;
+}
+
+template void IncompleteMapDep::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t IncompleteMapDep::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t IncompleteMapDep::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t IncompleteMapDep::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void IncompleteMapDep::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t IncompleteMapDep::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t IncompleteMapDep::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t IncompleteMapDep::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
+}}}} // apache::thrift::fixtures::types
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::fixtures::types::CompleteMap>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const folly::StringPiece CompleteMap::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<CompleteMap>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+CompleteMap::CompleteMap(const CompleteMap&) = default;
+CompleteMap& CompleteMap::operator=(const CompleteMap&) = default;
+CompleteMap::CompleteMap(FOLLY_MAYBE_UNUSED CompleteMap&& other) noexcept :
+    __fbthrift_field_field(std::move(other.__fbthrift_field_field)),
+    __isset(other.__isset) {
+}
+
+CompleteMap& CompleteMap::operator=(FOLLY_MAYBE_UNUSED CompleteMap&& other) noexcept {
+    this->__fbthrift_field_field = std::move(other.__fbthrift_field_field);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+CompleteMap::CompleteMap(apache::thrift::FragileConstructor, std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep> field__arg) :
+    __fbthrift_field_field(std::move(field__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void CompleteMap::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_field.clear();
+  __isset = {};
+}
+
+void CompleteMap::__fbthrift_clear_terse_fields() {
+}
+
+bool CompleteMap::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0));
+}
+
+bool CompleteMap::operator==(FOLLY_MAYBE_UNUSED const CompleteMap& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field_ref() == rhs.field_ref())) {
+    return false;
+  }
+  return true;
+}
+
+const std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>* CompleteMap::get_field() const& {
+  return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
+}
+
+std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>* CompleteMap::get_field() & {
+  return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED CompleteMap& a, FOLLY_MAYBE_UNUSED CompleteMap& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_field, b.__fbthrift_field_field);
+  swap(a.__isset, b.__isset);
+}
+
+template void CompleteMap::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t CompleteMap::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t CompleteMap::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t CompleteMap::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void CompleteMap::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t CompleteMap::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t CompleteMap::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t CompleteMap::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}}} // apache::thrift::fixtures::types
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::fixtures::types::CompleteMapDep>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const folly::StringPiece CompleteMapDep::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<CompleteMapDep>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+
+CompleteMapDep::CompleteMapDep(apache::thrift::FragileConstructor) {}
+
+
+void CompleteMapDep::__fbthrift_clear() {
+  // clear all fields
+}
+
+void CompleteMapDep::__fbthrift_clear_terse_fields() {
+}
+
+bool CompleteMapDep::__fbthrift_is_empty() const {
+  return true;
+}
+
+bool CompleteMapDep::operator==(FOLLY_MAYBE_UNUSED const CompleteMapDep& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
+}
+
+bool CompleteMapDep::operator<(FOLLY_MAYBE_UNUSED const CompleteMapDep& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return false;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED CompleteMapDep& a, FOLLY_MAYBE_UNUSED CompleteMapDep& b) {
+  using ::std::swap;
+}
+
+template void CompleteMapDep::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t CompleteMapDep::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t CompleteMapDep::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t CompleteMapDep::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void CompleteMapDep::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t CompleteMapDep::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t CompleteMapDep::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t CompleteMapDep::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}}} // apache::thrift::fixtures::types
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::fixtures::types::IncompleteList>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const folly::StringPiece IncompleteList::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<IncompleteList>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+IncompleteList::IncompleteList(const IncompleteList&) = default;
+IncompleteList& IncompleteList::operator=(const IncompleteList&) = default;
+IncompleteList::IncompleteList(FOLLY_MAYBE_UNUSED IncompleteList&& other) noexcept :
+    __fbthrift_field_field(std::move(other.__fbthrift_field_field)),
+    __isset(other.__isset) {
+}
+
+IncompleteList& IncompleteList::operator=(FOLLY_MAYBE_UNUSED IncompleteList&& other) noexcept {
+    this->__fbthrift_field_field = std::move(other.__fbthrift_field_field);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+IncompleteList::IncompleteList(apache::thrift::FragileConstructor, ::std::list<::apache::thrift::fixtures::types::IncompleteListDep> field__arg) :
+    __fbthrift_field_field(std::move(field__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void IncompleteList::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_field.clear();
+  __isset = {};
+}
+
+void IncompleteList::__fbthrift_clear_terse_fields() {
+}
+
+bool IncompleteList::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0));
+}
+
+bool IncompleteList::operator==(FOLLY_MAYBE_UNUSED const IncompleteList& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field_ref() == rhs.field_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool IncompleteList::operator<(FOLLY_MAYBE_UNUSED const IncompleteList& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field_ref() == rhs.field_ref())) {
+    return lhs.field_ref() < rhs.field_ref();
+  }
+  return false;
+}
+
+const ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>* IncompleteList::get_field() const& {
+  return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
+}
+
+::std::list<::apache::thrift::fixtures::types::IncompleteListDep>* IncompleteList::get_field() & {
+  return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED IncompleteList& a, FOLLY_MAYBE_UNUSED IncompleteList& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_field, b.__fbthrift_field_field);
+  swap(a.__isset, b.__isset);
+}
+
+template void IncompleteList::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t IncompleteList::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t IncompleteList::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t IncompleteList::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void IncompleteList::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t IncompleteList::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t IncompleteList::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t IncompleteList::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}}} // apache::thrift::fixtures::types
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::fixtures::types::IncompleteListDep>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const folly::StringPiece IncompleteListDep::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<IncompleteListDep>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+
+IncompleteListDep::IncompleteListDep(apache::thrift::FragileConstructor) {}
+
+
+void IncompleteListDep::__fbthrift_clear() {
+  // clear all fields
+}
+
+void IncompleteListDep::__fbthrift_clear_terse_fields() {
+}
+
+bool IncompleteListDep::__fbthrift_is_empty() const {
+  return true;
+}
+
+bool IncompleteListDep::operator==(FOLLY_MAYBE_UNUSED const IncompleteListDep& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
+}
+
+bool IncompleteListDep::operator<(FOLLY_MAYBE_UNUSED const IncompleteListDep& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return false;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED IncompleteListDep& a, FOLLY_MAYBE_UNUSED IncompleteListDep& b) {
+  using ::std::swap;
+}
+
+template void IncompleteListDep::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t IncompleteListDep::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t IncompleteListDep::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t IncompleteListDep::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void IncompleteListDep::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t IncompleteListDep::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t IncompleteListDep::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t IncompleteListDep::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}}} // apache::thrift::fixtures::types
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::fixtures::types::CompleteList>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const folly::StringPiece CompleteList::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<CompleteList>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+CompleteList::CompleteList(const CompleteList&) = default;
+CompleteList& CompleteList::operator=(const CompleteList&) = default;
+CompleteList::CompleteList(FOLLY_MAYBE_UNUSED CompleteList&& other) noexcept :
+    __fbthrift_field_field(std::move(other.__fbthrift_field_field)),
+    __isset(other.__isset) {
+}
+
+CompleteList& CompleteList::operator=(FOLLY_MAYBE_UNUSED CompleteList&& other) noexcept {
+    this->__fbthrift_field_field = std::move(other.__fbthrift_field_field);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+CompleteList::CompleteList(apache::thrift::FragileConstructor, folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep> field__arg) :
+    __fbthrift_field_field(std::move(field__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void CompleteList::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_field.clear();
+  __isset = {};
+}
+
+void CompleteList::__fbthrift_clear_terse_fields() {
+}
+
+bool CompleteList::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0));
+}
+
+bool CompleteList::operator==(FOLLY_MAYBE_UNUSED const CompleteList& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field_ref() == rhs.field_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool CompleteList::operator<(FOLLY_MAYBE_UNUSED const CompleteList& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field_ref() == rhs.field_ref())) {
+    return lhs.field_ref() < rhs.field_ref();
+  }
+  return false;
+}
+
+const folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>* CompleteList::get_field() const& {
+  return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
+}
+
+folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>* CompleteList::get_field() & {
+  return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED CompleteList& a, FOLLY_MAYBE_UNUSED CompleteList& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_field, b.__fbthrift_field_field);
+  swap(a.__isset, b.__isset);
+}
+
+template void CompleteList::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t CompleteList::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t CompleteList::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t CompleteList::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void CompleteList::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t CompleteList::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t CompleteList::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t CompleteList::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}}} // apache::thrift::fixtures::types
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::fixtures::types::CompleteListDep>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const folly::StringPiece CompleteListDep::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<CompleteListDep>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+
+CompleteListDep::CompleteListDep(apache::thrift::FragileConstructor) {}
+
+
+void CompleteListDep::__fbthrift_clear() {
+  // clear all fields
+}
+
+void CompleteListDep::__fbthrift_clear_terse_fields() {
+}
+
+bool CompleteListDep::__fbthrift_is_empty() const {
+  return true;
+}
+
+bool CompleteListDep::operator==(FOLLY_MAYBE_UNUSED const CompleteListDep& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
+}
+
+bool CompleteListDep::operator<(FOLLY_MAYBE_UNUSED const CompleteListDep& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return false;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED CompleteListDep& a, FOLLY_MAYBE_UNUSED CompleteListDep& b) {
+  using ::std::swap;
+}
+
+template void CompleteListDep::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t CompleteListDep::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t CompleteListDep::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t CompleteListDep::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void CompleteListDep::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t CompleteListDep::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t CompleteListDep::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t CompleteListDep::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}}} // apache::thrift::fixtures::types
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::fixtures::types::AdaptedList>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const folly::StringPiece AdaptedList::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<AdaptedList>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+AdaptedList::AdaptedList(const AdaptedList&) = default;
+AdaptedList& AdaptedList::operator=(const AdaptedList&) = default;
+AdaptedList::AdaptedList(FOLLY_MAYBE_UNUSED AdaptedList&& other) noexcept :
+    __fbthrift_field_field(std::move(other.__fbthrift_field_field)),
+    __isset(other.__isset) {
+}
+
+AdaptedList& AdaptedList::operator=(FOLLY_MAYBE_UNUSED AdaptedList&& other) noexcept {
+    this->__fbthrift_field_field = std::move(other.__fbthrift_field_field);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+AdaptedList::AdaptedList(apache::thrift::FragileConstructor, ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep> field__arg) :
+    __fbthrift_field_field(std::move(field__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void AdaptedList::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_field.clear();
+  __isset = {};
+}
+
+void AdaptedList::__fbthrift_clear_terse_fields() {
+}
+
+bool AdaptedList::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0));
+}
+
+bool AdaptedList::operator==(FOLLY_MAYBE_UNUSED const AdaptedList& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field_ref() == rhs.field_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool AdaptedList::operator<(FOLLY_MAYBE_UNUSED const AdaptedList& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field_ref() == rhs.field_ref())) {
+    return lhs.field_ref() < rhs.field_ref();
+  }
+  return false;
+}
+
+const ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>* AdaptedList::get_field() const& {
+  return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
+}
+
+::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>* AdaptedList::get_field() & {
+  return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED AdaptedList& a, FOLLY_MAYBE_UNUSED AdaptedList& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_field, b.__fbthrift_field_field);
+  swap(a.__isset, b.__isset);
+}
+
+template void AdaptedList::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t AdaptedList::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t AdaptedList::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t AdaptedList::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void AdaptedList::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t AdaptedList::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t AdaptedList::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t AdaptedList::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}}} // apache::thrift::fixtures::types
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::fixtures::types::detail::AdaptedListDep>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift { namespace fixtures { namespace types {namespace detail {
+
+
+const folly::StringPiece AdaptedListDep::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<AdaptedListDep>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+AdaptedListDep::AdaptedListDep(const AdaptedListDep&) = default;
+AdaptedListDep& AdaptedListDep::operator=(const AdaptedListDep&) = default;
+AdaptedListDep::AdaptedListDep(FOLLY_MAYBE_UNUSED AdaptedListDep&& other) noexcept :
+    __fbthrift_field_field(std::move(other.__fbthrift_field_field)),
+    __isset(other.__isset) {
+}
+
+AdaptedListDep& AdaptedListDep::operator=(FOLLY_MAYBE_UNUSED AdaptedListDep&& other) noexcept {
+    this->__fbthrift_field_field = std::move(other.__fbthrift_field_field);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+AdaptedListDep::AdaptedListDep(apache::thrift::FragileConstructor, ::apache::thrift::fixtures::types::AdaptedList field__arg) :
+    __fbthrift_field_field(std::move(field__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void AdaptedListDep::__fbthrift_clear() {
+  // clear all fields
+  ::apache::thrift::clear(this->__fbthrift_field_field);
+  __isset = {};
+}
+
+void AdaptedListDep::__fbthrift_clear_terse_fields() {
+}
+
+bool AdaptedListDep::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool AdaptedListDep::operator==(FOLLY_MAYBE_UNUSED const AdaptedListDep& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field_ref() == rhs.field_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool AdaptedListDep::operator<(FOLLY_MAYBE_UNUSED const AdaptedListDep& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field_ref() == rhs.field_ref())) {
+    return lhs.field_ref() < rhs.field_ref();
+  }
+  return false;
+}
+
+const ::apache::thrift::fixtures::types::AdaptedList& AdaptedListDep::get_field() const& {
+  return __fbthrift_field_field;
+}
+
+::apache::thrift::fixtures::types::AdaptedList AdaptedListDep::get_field() && {
+  return std::move(__fbthrift_field_field);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED AdaptedListDep& a, FOLLY_MAYBE_UNUSED AdaptedListDep& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_field, b.__fbthrift_field_field);
+  swap(a.__isset, b.__isset);
+}
+
+template void AdaptedListDep::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t AdaptedListDep::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t AdaptedListDep::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t AdaptedListDep::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void AdaptedListDep::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t AdaptedListDep::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t AdaptedListDep::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t AdaptedListDep::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        AdaptedListDep,
+        ::apache::thrift::type_class::structure,
+        ::apache::thrift::fixtures::types::AdaptedList>,
+    "inconsistent use of json option");
+
+} // namespace detail
+}}}} // apache::thrift::fixtures::types
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::fixtures::types::DependentAdaptedList>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const folly::StringPiece DependentAdaptedList::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<DependentAdaptedList>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+DependentAdaptedList::DependentAdaptedList(const DependentAdaptedList&) = default;
+DependentAdaptedList& DependentAdaptedList::operator=(const DependentAdaptedList&) = default;
+DependentAdaptedList::DependentAdaptedList(FOLLY_MAYBE_UNUSED DependentAdaptedList&& other) noexcept :
+    __fbthrift_field_field(std::move(other.__fbthrift_field_field)),
+    __isset(other.__isset) {
+}
+
+DependentAdaptedList& DependentAdaptedList::operator=(FOLLY_MAYBE_UNUSED DependentAdaptedList&& other) noexcept {
+    this->__fbthrift_field_field = std::move(other.__fbthrift_field_field);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+DependentAdaptedList::DependentAdaptedList(apache::thrift::FragileConstructor, ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep> field__arg) :
+    __fbthrift_field_field(std::move(field__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void DependentAdaptedList::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_field.clear();
+  __isset = {};
+}
+
+void DependentAdaptedList::__fbthrift_clear_terse_fields() {
+}
+
+bool DependentAdaptedList::__fbthrift_is_empty() const {
+  return !(this->__isset.get(0));
+}
+
+bool DependentAdaptedList::operator==(FOLLY_MAYBE_UNUSED const DependentAdaptedList& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field_ref() == rhs.field_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool DependentAdaptedList::operator<(FOLLY_MAYBE_UNUSED const DependentAdaptedList& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field_ref() == rhs.field_ref())) {
+    return lhs.field_ref() < rhs.field_ref();
+  }
+  return false;
+}
+
+const ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>* DependentAdaptedList::get_field() const& {
+  return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
+}
+
+::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>* DependentAdaptedList::get_field() & {
+  return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED DependentAdaptedList& a, FOLLY_MAYBE_UNUSED DependentAdaptedList& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_field, b.__fbthrift_field_field);
+  swap(a.__isset, b.__isset);
+}
+
+template void DependentAdaptedList::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t DependentAdaptedList::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t DependentAdaptedList::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t DependentAdaptedList::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void DependentAdaptedList::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t DependentAdaptedList::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t DependentAdaptedList::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t DependentAdaptedList::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}}} // apache::thrift::fixtures::types
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift { namespace fixtures { namespace types {namespace detail {
+
+
+const folly::StringPiece DependentAdaptedListDep::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<DependentAdaptedListDep>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+DependentAdaptedListDep::DependentAdaptedListDep(const DependentAdaptedListDep&) = default;
+DependentAdaptedListDep& DependentAdaptedListDep::operator=(const DependentAdaptedListDep&) = default;
+DependentAdaptedListDep::DependentAdaptedListDep(FOLLY_MAYBE_UNUSED DependentAdaptedListDep&& other) noexcept :
+    __fbthrift_field_field(std::move(other.__fbthrift_field_field)) {
+}
+
+DependentAdaptedListDep& DependentAdaptedListDep::operator=(FOLLY_MAYBE_UNUSED DependentAdaptedListDep&& other) noexcept {
+    this->__fbthrift_field_field = std::move(other.__fbthrift_field_field);
+    return *this;
+}
+
+
+DependentAdaptedListDep::DependentAdaptedListDep(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::std::int16_t> field__arg) :
+    __fbthrift_field_field(std::move(field__arg)) {
+}
+
+
+void DependentAdaptedListDep::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_field.reset();
+}
+
+void DependentAdaptedListDep::__fbthrift_clear_terse_fields() {
+}
+
+bool DependentAdaptedListDep::__fbthrift_is_empty() const {
+  return !(this->__fbthrift_field_field);
+}
+
+bool DependentAdaptedListDep::operator==(FOLLY_MAYBE_UNUSED const DependentAdaptedListDep& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if ((!::apache::thrift::detail::pointer_equal(lhs.field_ref(), rhs.field_ref()))) {
+    return false;
+  }
+  return true;
+}
+
+bool DependentAdaptedListDep::operator<(FOLLY_MAYBE_UNUSED const DependentAdaptedListDep& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if ((!::apache::thrift::detail::pointer_equal(lhs.field_ref(), rhs.field_ref()))) {
+    return ::apache::thrift::detail::pointer_less(lhs.field_ref(), rhs.field_ref());
+  }
+  return false;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED DependentAdaptedListDep& a, FOLLY_MAYBE_UNUSED DependentAdaptedListDep& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_field, b.__fbthrift_field_field);
+}
+
+template void DependentAdaptedListDep::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t DependentAdaptedListDep::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t DependentAdaptedListDep::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t DependentAdaptedListDep::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void DependentAdaptedListDep::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t DependentAdaptedListDep::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t DependentAdaptedListDep::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t DependentAdaptedListDep::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+} // namespace detail
 }}}} // apache::thrift::fixtures::types
 
 namespace apache {
@@ -3055,5 +3802,6 @@ template uint32_t StructWithDoubleUnderscores::serializedSizeZC<>(apache::thrift
 
 namespace apache { namespace thrift { namespace fixtures { namespace types { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 3, ::std::int16_t, ::apache::thrift::fixtures::types::MinPaddingWithCustomType>();
 }
 }}}}} // apache::thrift::fixtures::types

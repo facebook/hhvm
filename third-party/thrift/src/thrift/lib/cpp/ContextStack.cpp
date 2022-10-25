@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <cstdio>
 #include <thrift/lib/cpp/ContextStack.h>
 
 #include <folly/tracing/StaticTracepoint.h>
@@ -61,7 +62,7 @@ ContextStack::~ContextStack() {
   }
 }
 
-std::unique_ptr<ContextStack> ContextStack::create(
+ContextStack::UniquePtr ContextStack::create(
     const std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>&
         handlers,
     const char* serviceName,
@@ -77,10 +78,10 @@ std::unique_ptr<ContextStack> ContextStack::create(
   auto* object = new (storage)
       ContextStack(handlers, serviceName, method, connectionContext);
 
-  return std::unique_ptr<ContextStack>(object);
+  return ContextStack::UniquePtr(object);
 }
 
-std::unique_ptr<ContextStack> ContextStack::createWithClientContext(
+ContextStack::UniquePtr ContextStack::createWithClientContext(
     const std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>&
         handlers,
     const char* serviceName,
@@ -104,7 +105,48 @@ std::unique_ptr<ContextStack> ContextStack::createWithClientContext(
       method,
       connectionContext);
 
-  return std::unique_ptr<ContextStack>(object);
+  return ContextStack::UniquePtr(object);
+}
+
+ContextStack::UniquePtr ContextStack::createWithClientContextCopyNames(
+    const std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>&
+        handlers,
+    const std::string& serviceName,
+    const std::string& methodName,
+    transport::THeader& header) {
+  if (!handlers || handlers->empty()) {
+    return {};
+  }
+
+  size_t serviceNameBytes = serviceName.size() + 1;
+  size_t methodNameBytes = serviceName.size() + 1 + methodName.size() + 1;
+
+  const size_t nbytes = sizeof(ContextStack) +
+      sizeof(Cpp2ClientRequestContext) + handlers->size() * sizeof(void*) +
+      serviceNameBytes + methodNameBytes;
+  auto* storage = static_cast<ContextStack*>(operator new (
+      nbytes, std::align_val_t{alignof(ContextStack)}));
+
+  auto* connectionContext = new (storage + 1) Cpp2ClientRequestContext(&header);
+  auto serviceNameStorage = reinterpret_cast<char*>(storage) + nbytes -
+      serviceNameBytes - methodNameBytes;
+  auto methodNameStorage = serviceNameStorage + serviceNameBytes;
+  snprintf(serviceNameStorage, serviceNameBytes, "%s", serviceName.c_str());
+  snprintf(
+      methodNameStorage,
+      methodNameBytes,
+      "%s.%s",
+      serviceName.c_str(),
+      methodName.c_str());
+
+  auto* object = new (storage) ContextStack(
+      WithEmbeddedClientRequestContext(),
+      handlers,
+      serviceNameStorage,
+      methodNameStorage,
+      connectionContext);
+
+  return ContextStack::UniquePtr(object);
 }
 
 void ContextStack::preWrite() {

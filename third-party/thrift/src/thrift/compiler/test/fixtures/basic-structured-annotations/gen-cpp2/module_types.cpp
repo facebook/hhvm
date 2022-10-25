@@ -254,6 +254,161 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-structured-annotations {
+
+const char* structured_annotation_recursive::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-structured-annotations/structured_annotation_recursive";
+}
+
+const folly::StringPiece structured_annotation_recursive::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<structured_annotation_recursive>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+structured_annotation_recursive::structured_annotation_recursive(const structured_annotation_recursive& srcObj) :
+    __fbthrift_field_name(srcObj.__fbthrift_field_name),
+    __fbthrift_field_recurse(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_recurse)),
+    __fbthrift_field_forward(srcObj.__fbthrift_field_forward),
+    __isset(srcObj.__isset) {
+}
+
+structured_annotation_recursive& structured_annotation_recursive::operator=(const structured_annotation_recursive& other) {
+  structured_annotation_recursive tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
+structured_annotation_recursive::structured_annotation_recursive(FOLLY_MAYBE_UNUSED structured_annotation_recursive&& other) noexcept :
+    __fbthrift_field_name(std::move(other.__fbthrift_field_name)),
+    __fbthrift_field_recurse(std::move(other.__fbthrift_field_recurse)),
+    __fbthrift_field_forward(std::move(other.__fbthrift_field_forward)),
+    __isset(other.__isset) {
+}
+
+structured_annotation_recursive& structured_annotation_recursive::operator=(FOLLY_MAYBE_UNUSED structured_annotation_recursive&& other) noexcept {
+    this->__fbthrift_field_name = std::move(other.__fbthrift_field_name);
+    this->__fbthrift_field_recurse = std::move(other.__fbthrift_field_recurse);
+    this->__fbthrift_field_forward = std::move(other.__fbthrift_field_forward);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+structured_annotation_recursive::structured_annotation_recursive(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> recurse__arg, ::test::fixtures::basic-structured-annotations::structured_annotation_forward forward__arg) :
+    __fbthrift_field_name(std::move(name__arg)),
+    __fbthrift_field_recurse(std::move(recurse__arg)),
+    __fbthrift_field_forward(std::move(forward__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+}
+
+
+void structured_annotation_recursive::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_recurse.reset();
+  ::apache::thrift::clear(this->__fbthrift_field_forward);
+  __isset = {};
+}
+
+void structured_annotation_recursive::__fbthrift_clear_terse_fields() {
+}
+
+bool structured_annotation_recursive::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool structured_annotation_recursive::operator==(FOLLY_MAYBE_UNUSED const structured_annotation_recursive& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.name_ref() == rhs.name_ref())) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.recurse_ref(), rhs.recurse_ref()))) {
+    return false;
+  }
+  if (!(lhs.forward_ref() == rhs.forward_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool structured_annotation_recursive::operator<(FOLLY_MAYBE_UNUSED const structured_annotation_recursive& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.name_ref() == rhs.name_ref())) {
+    return lhs.name_ref() < rhs.name_ref();
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.recurse_ref(), rhs.recurse_ref()))) {
+    return ::apache::thrift::detail::pointer_less(lhs.recurse_ref(), rhs.recurse_ref());
+  }
+  if (!(lhs.forward_ref() == rhs.forward_ref())) {
+    return lhs.forward_ref() < rhs.forward_ref();
+  }
+  return false;
+}
+
+const ::test::fixtures::basic-structured-annotations::structured_annotation_forward& structured_annotation_recursive::get_forward() const& {
+  return __fbthrift_field_forward;
+}
+
+::test::fixtures::basic-structured-annotations::structured_annotation_forward structured_annotation_recursive::get_forward() && {
+  return std::move(__fbthrift_field_forward);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED structured_annotation_recursive& a, FOLLY_MAYBE_UNUSED structured_annotation_recursive& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_name, b.__fbthrift_field_name);
+  swap(a.__fbthrift_field_recurse, b.__fbthrift_field_recurse);
+  swap(a.__fbthrift_field_forward, b.__fbthrift_field_forward);
+  swap(a.__isset, b.__isset);
+}
+
+template void structured_annotation_recursive::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t structured_annotation_recursive::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t structured_annotation_recursive::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t structured_annotation_recursive::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void structured_annotation_recursive::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t structured_annotation_recursive::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t structured_annotation_recursive::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t structured_annotation_recursive::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        structured_annotation_recursive,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        structured_annotation_recursive,
+        ::apache::thrift::type_class::structure,
+        ::test::fixtures::basic-structured-annotations::structured_annotation_forward>,
+    "inconsistent use of json option");
+
+}}} // test::fixtures::basic-structured-annotations
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
@@ -334,158 +489,6 @@ template uint32_t structured_annotation_forward::write<>(apache::thrift::Compact
 template uint32_t structured_annotation_forward::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t structured_annotation_forward::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
-
-}}} // test::fixtures::basic-structured-annotations
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::translateFieldName(
-    folly::StringPiece _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
-namespace test { namespace fixtures { namespace basic-structured-annotations {
-
-const char* structured_annotation_recursive::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic-structured-annotations/structured_annotation_recursive";
-}
-
-const folly::StringPiece structured_annotation_recursive::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
-  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
-  return apache::thrift::TStructDataStorage<structured_annotation_recursive>::fields_names[folly::to_underlying(ord) - 1];
-}
-
-structured_annotation_recursive::structured_annotation_recursive(const structured_annotation_recursive&) = default;
-structured_annotation_recursive& structured_annotation_recursive::operator=(const structured_annotation_recursive&) = default;
-structured_annotation_recursive::structured_annotation_recursive(FOLLY_MAYBE_UNUSED structured_annotation_recursive&& other) noexcept :
-    __fbthrift_field_name(std::move(other.__fbthrift_field_name)),
-    __fbthrift_field_recurse(std::move(other.__fbthrift_field_recurse)),
-    __fbthrift_field_forward(std::move(other.__fbthrift_field_forward)),
-    __isset(other.__isset) {
-}
-
-structured_annotation_recursive& structured_annotation_recursive::operator=(FOLLY_MAYBE_UNUSED structured_annotation_recursive&& other) noexcept {
-    this->__fbthrift_field_name = std::move(other.__fbthrift_field_name);
-    this->__fbthrift_field_recurse = std::move(other.__fbthrift_field_recurse);
-    this->__fbthrift_field_forward = std::move(other.__fbthrift_field_forward);
-    __isset = other.__isset;
-    return *this;
-}
-
-
-structured_annotation_recursive::structured_annotation_recursive(apache::thrift::FragileConstructor, ::std::string name__arg, ::test::fixtures::basic-structured-annotations::structured_annotation_recursive recurse__arg, ::test::fixtures::basic-structured-annotations::structured_annotation_forward forward__arg) :
-    __fbthrift_field_name(std::move(name__arg)),
-    __fbthrift_field_recurse(std::move(recurse__arg)),
-    __fbthrift_field_forward(std::move(forward__arg)) {
-  __isset.set(folly::index_constant<0>(), true);
-  __isset.set(folly::index_constant<1>(), true);
-  __isset.set(folly::index_constant<2>(), true);
-}
-
-
-void structured_annotation_recursive::__fbthrift_clear() {
-  // clear all fields
-  this->__fbthrift_field_name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  ::apache::thrift::clear(this->__fbthrift_field_recurse);
-  ::apache::thrift::clear(this->__fbthrift_field_forward);
-  __isset = {};
-}
-
-void structured_annotation_recursive::__fbthrift_clear_terse_fields() {
-}
-
-bool structured_annotation_recursive::__fbthrift_is_empty() const {
-  return false;
-}
-
-bool structured_annotation_recursive::operator==(FOLLY_MAYBE_UNUSED const structured_annotation_recursive& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return false;
-  }
-  if (!(lhs.recurse_ref() == rhs.recurse_ref())) {
-    return false;
-  }
-  if (!(lhs.forward_ref() == rhs.forward_ref())) {
-    return false;
-  }
-  return true;
-}
-
-bool structured_annotation_recursive::operator<(FOLLY_MAYBE_UNUSED const structured_annotation_recursive& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return lhs.name_ref() < rhs.name_ref();
-  }
-  if (!(lhs.recurse_ref() == rhs.recurse_ref())) {
-    return lhs.recurse_ref() < rhs.recurse_ref();
-  }
-  if (!(lhs.forward_ref() == rhs.forward_ref())) {
-    return lhs.forward_ref() < rhs.forward_ref();
-  }
-  return false;
-}
-
-const ::test::fixtures::basic-structured-annotations::structured_annotation_recursive& structured_annotation_recursive::get_recurse() const& {
-  return __fbthrift_field_recurse;
-}
-
-::test::fixtures::basic-structured-annotations::structured_annotation_recursive structured_annotation_recursive::get_recurse() && {
-  return std::move(__fbthrift_field_recurse);
-}
-
-const ::test::fixtures::basic-structured-annotations::structured_annotation_forward& structured_annotation_recursive::get_forward() const& {
-  return __fbthrift_field_forward;
-}
-
-::test::fixtures::basic-structured-annotations::structured_annotation_forward structured_annotation_recursive::get_forward() && {
-  return std::move(__fbthrift_field_forward);
-}
-
-
-void swap(FOLLY_MAYBE_UNUSED structured_annotation_recursive& a, FOLLY_MAYBE_UNUSED structured_annotation_recursive& b) {
-  using ::std::swap;
-  swap(a.__fbthrift_field_name, b.__fbthrift_field_name);
-  swap(a.__fbthrift_field_recurse, b.__fbthrift_field_recurse);
-  swap(a.__fbthrift_field_forward, b.__fbthrift_field_forward);
-  swap(a.__isset, b.__isset);
-}
-
-template void structured_annotation_recursive::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t structured_annotation_recursive::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t structured_annotation_recursive::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t structured_annotation_recursive::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void structured_annotation_recursive::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t structured_annotation_recursive::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t structured_annotation_recursive::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t structured_annotation_recursive::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-
-static_assert(
-    ::apache::thrift::detail::st::gen_check_json<
-        structured_annotation_recursive,
-        ::apache::thrift::type_class::structure,
-        ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>,
-    "inconsistent use of json option");
-static_assert(
-    ::apache::thrift::detail::st::gen_check_json<
-        structured_annotation_recursive,
-        ::apache::thrift::type_class::structure,
-        ::test::fixtures::basic-structured-annotations::structured_annotation_forward>,
-    "inconsistent use of json option");
 
 }}} // test::fixtures::basic-structured-annotations
 

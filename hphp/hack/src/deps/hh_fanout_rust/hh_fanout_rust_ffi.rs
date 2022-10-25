@@ -10,7 +10,7 @@ use ocamlrep_custom::Custom;
 use rpds::HashTrieSet;
 
 #[cfg(fbcode_build)]
-pub struct HhFanoutRustFfi(hh_fanout_lib::HhFanoutInproc);
+pub struct HhFanoutRustFfi(hh_fanout_lib::HhFanoutImpl);
 #[cfg(not(fbcode_build))]
 pub struct HhFanoutRustFfi;
 
@@ -18,7 +18,7 @@ impl ocamlrep_custom::CamlSerialize for HhFanoutRustFfi {
     ocamlrep_custom::caml_serialize_default_impls!();
 }
 
-#[derive(ocamlrep_derive::ToOcamlRep, ocamlrep_derive::FromOcamlRep)]
+#[derive(ocamlrep::ToOcamlRep, ocamlrep::FromOcamlRep)]
 #[repr(C)]
 enum EdgesError {
     EeDecl(String),
@@ -28,18 +28,18 @@ type EdgesResult<T> = Result<T, EdgesError>;
 
 /// Rust set of edges.
 #[derive(Debug)]
-pub struct EdgesBuffer(HashTrieSet<hh24_types::DepgraphEdge>);
+pub struct EdgesBuffer(HashTrieSet<hh24_types::DepGraphEdge>);
 
 impl std::ops::Deref for EdgesBuffer {
-    type Target = HashTrieSet<hh24_types::DepgraphEdge>;
+    type Target = HashTrieSet<hh24_types::DepGraphEdge>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl From<HashTrieSet<hh24_types::DepgraphEdge>> for EdgesBuffer {
-    fn from(set: HashTrieSet<hh24_types::DepgraphEdge>) -> Self {
+impl From<HashTrieSet<hh24_types::DepGraphEdge>> for EdgesBuffer {
+    fn from(set: HashTrieSet<hh24_types::DepGraphEdge>) -> Self {
         Self(set)
     }
 }

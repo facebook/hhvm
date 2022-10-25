@@ -95,13 +95,13 @@
               fi
             '';
 
-            preConfigure = ''
+            postConfigure = ''
               cat build/CMakeCache.txt
             '';
 
             postBuild = ''
               "RUSTC_WRAPPER" --stop-server
-            ''
+            '';
           });
           packages.hhvm_clang = packages.hhvm.override {
             stdenv = pkgs.llvmPackages_14.stdenv;

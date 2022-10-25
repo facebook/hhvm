@@ -1,25 +1,30 @@
 === Shape analysis results for idx2.php
 Constraints for \idx_ife:
    3: Parameter at [3:18-37]
-   4: (Param (([3:18-37], "\\idx_ife"), 0)) ⊆ ?1
    4: (Param (([3:18-37], "\\idx_ife"), 0)) ⊆ ?2
-   4: ?1 ⊆ ?3
-   4: ?2 ⊆ ?3
-   5: ! SK ?1 : shape('a' => mixed)
-   5: ? SK ?1 : shape('a' => mixed)
-   6: ! SK ?1 : shape(?'b' => mixed)
-   6: ? SK ?1 : shape(?'b' => mixed)
-   7: ! SK ?1 : shape('c1' => mixed)
-   7: ? SK ?1 : shape('c1' => mixed)
-   8: ! SK ?1 : shape(?'d1' => mixed)
-   8: ? SK ?1 : shape(?'d1' => mixed)
-  10: ! SK ?2 : shape('a' => mixed)
-  10: ? SK ?2 : shape('a' => mixed)
-  11: ! SK ?2 : shape(?'b' => mixed)
-  11: ? SK ?2 : shape(?'b' => mixed)
-  12: ! SK ?2 : shape('c2' => mixed)
-  12: ? SK ?2 : shape('c2' => mixed)
-  13: ! SK ?2 : shape(?'d2' => mixed)
-  13: ? SK ?2 : shape(?'d2' => mixed)
+   4: (Param (([3:42-46], "\\idx_ife"), 1)) ⊆ ?1
+   4: (Param (([3:18-37], "\\idx_ife"), 0)) ⊆ ?4
+   4: (Param (([3:42-46], "\\idx_ife"), 1)) ⊆ ?3
+   4: ?1 ⊆ ?5
+   4: ?2 ⊆ ?6
+   4: ?3 ⊆ ?5
+   4: ?4 ⊆ ?6
+   5: ! SK ?2 : shape('a' => mixed)
+   5: ? SK ?2 : shape('a' => mixed)
+   6: ! SK ?2 : shape(?'b' => mixed)
+   6: ? SK ?2 : shape(?'b' => mixed)
+   7: ! SK ?2 : shape('c1' => mixed)
+   7: ? SK ?2 : shape('c1' => mixed)
+   8: ! SK ?2 : shape(?'d1' => mixed)
+   8: ? SK ?2 : shape(?'d1' => mixed)
+  10: ! SK ?4 : shape('a' => mixed)
+  10: ? SK ?4 : shape('a' => mixed)
+  11: ! SK ?4 : shape(?'b' => mixed)
+  11: ? SK ?4 : shape(?'b' => mixed)
+  12: ! SK ?4 : shape('c2' => mixed)
+  12: ? SK ?4 : shape('c2' => mixed)
+  13: ! SK ?4 : shape(?'d2' => mixed)
+  13: ? SK ?4 : shape(?'d2' => mixed)
    3: Parameter (([3:18-37], "\\idx_ife"), 0)
+   3: Parameter (([3:42-46], "\\idx_ife"), 1)
 

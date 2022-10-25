@@ -58,6 +58,7 @@ union ServerTestResult {
   201: SinkChunkTimeoutServerTestResult sinkChunkTimeout;
   300: InteractionConstructorServerTestResult interactionConstructor;
   301: InteractionFactoryFunctionServerTestResult interactionFactoryFunction;
+  302: InteractionPersistsStateServerTestResult interactionPersistsState;
 }
 
 union ClientTestResult {
@@ -74,6 +75,7 @@ union ClientTestResult {
   201: SinkChunkTimeoutClientTestResult sinkChunkTimeout;
   300: InteractionConstructorClientTestResult interactionConstructor;
   301: InteractionFactoryFunctionClientTestResult interactionFactoryFunction;
+  302: InteractionPersistsStateClientTestResult interactionPersistsState;
 }
 
 struct RequestResponseBasicServerTestResult {
@@ -129,6 +131,8 @@ struct InteractionFactoryFunctionServerTestResult {
   1: i32 initialSum;
 }
 
+struct InteractionPersistsStateServerTestResult {}
+
 struct RequestResponseBasicClientTestResult {
   1: Response response;
 }
@@ -179,6 +183,10 @@ struct InteractionConstructorClientTestResult {}
 
 struct InteractionFactoryFunctionClientTestResult {}
 
+struct InteractionPersistsStateClientTestResult {
+  1: list<i32> responses;
+}
+
 union ClientInstruction {
   1: RequestResponseBasicClientInstruction requestResponseBasic;
   2: RequestResponseDeclaredExceptionClientInstruction requestResponseDeclaredException;
@@ -193,6 +201,7 @@ union ClientInstruction {
   201: SinkChunkTimeoutClientInstruction sinkChunkTimeout;
   300: InteractionConstructorClientInstruction interactionConstructor;
   301: InteractionFactoryFunctionClientInstruction interactionFactoryFunction;
+  302: InteractionPersistsStateClientInstruction interactionPersistsState;
 }
 
 union ServerInstruction {
@@ -209,6 +218,7 @@ union ServerInstruction {
   201: SinkChunkTimeoutServerInstruction sinkChunkTimeout;
   300: InteractionConstructorServerInstruction interactionConstructor;
   301: InteractionFactoryFunctionServerInstruction interactionFactoryFunction;
+  302: InteractionPersistsStateServerInstruction interactionPersistsState;
 }
 
 struct RequestResponseBasicClientInstruction {
@@ -266,6 +276,11 @@ struct InteractionFactoryFunctionClientInstruction {
   1: i32 initialSum;
 }
 
+struct InteractionPersistsStateClientInstruction {
+  1: optional i32 initialSum;
+  2: list<i32> valuesToAdd;
+}
+
 struct RequestResponseBasicServerInstruction {
   1: Response response;
 }
@@ -319,8 +334,12 @@ struct InteractionConstructorServerInstruction {}
 
 struct InteractionFactoryFunctionServerInstruction {}
 
+struct InteractionPersistsStateServerInstruction {}
+
 interaction BasicInteraction {
   void init();
+  // adds i to the cumulative sum and returns the new value
+  i32 add(1: i32 i);
 }
 
 service RPCConformanceService {

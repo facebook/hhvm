@@ -85,16 +85,6 @@ void Cpp2Worker::onNewConnection(
     return;
   }
 
-  PeekingManagerOptions const peekingManagerOptions =
-      PeekingManagerOptions().withPreferBufferMovable(
-          secureTransportType == wangle::SecureTransportType::NONE &&
-          server_->preferIoUring() &&
-          folly::AsyncIoUringSocketFactory::supports(sock->getEventBase()));
-  if (peekingManagerOptions.preferBufferMovable()) {
-    sock = folly::AsyncIoUringSocketFactory::create<
-        folly::AsyncTransport::UniquePtr>(std::move(sock));
-  }
-
   const auto& func = server_->getZeroCopyEnableFunc();
   if (func && sock) {
     sock->setZeroCopy(true);
@@ -105,13 +95,13 @@ void Cpp2Worker::onNewConnection(
   switch (secureTransportType) {
     // If no security, peek into the socket to determine type
     case wangle::SecureTransportType::NONE: {
+      if (server_->preferIoUring() &&
+          folly::AsyncIoUringSocketFactory::supports(sock->getEventBase())) {
+        sock = folly::AsyncIoUringSocketFactory::create<
+            folly::AsyncTransport::UniquePtr>(std::move(sock));
+      }
       new TransportPeekingManager(
-          shared_from_this(),
-          *addr,
-          tinfo,
-          server_,
-          std::move(sock),
-          peekingManagerOptions);
+          shared_from_this(), *addr, tinfo, server_, std::move(sock));
       break;
     }
     case wangle::SecureTransportType::TLS:

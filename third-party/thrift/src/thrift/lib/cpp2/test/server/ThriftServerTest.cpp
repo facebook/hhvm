@@ -3190,6 +3190,35 @@ TEST(ThriftServer, RocketOverSSLNoALPN) {
   EXPECT_EQ(response, "test64");
 }
 
+// Tests that the TransportPeekingManager's logic succeeds when using TLS 1.3
+// and not providing an ALPN. The RocketOverSSLNoALPN test above currently uses
+// TLS 1.2.
+TEST(ThriftServer, RocketOverSSLNoALPNWithTLS13) {
+  auto server = std::static_pointer_cast<ThriftServer>(
+      TestThriftServerFactory<TestInterface>().create());
+  server->setSSLPolicy(SSLPolicy::REQUIRED);
+  setupServerSSL(*server);
+  ScopedServerThread sst(std::move(server));
+
+  folly::EventBase base;
+  auto port = sst.getAddress()->getPort();
+  folly::SocketAddress loopback("::1", port);
+
+  auto ctx = makeClientSslContext();
+  // explicitly enable TLS 1.3, otherwise uses TLS 1.2, the current default
+  ctx->enableTLS13();
+  folly::AsyncSSLSocket::UniquePtr sslSock(
+      new folly::AsyncSSLSocket(ctx, &base));
+  sslSock->connect(nullptr /* connect callback */, loopback);
+
+  TestServiceAsyncClient client(
+      RocketClientChannel::newChannel(std::move(sslSock)));
+
+  std::string response;
+  client.sync_sendResponse(response, 64);
+  EXPECT_EQ(response, "test64");
+}
+
 TEST(ThriftServer, PooledRocketSyncChannel) {
   auto server = std::static_pointer_cast<ThriftServer>(
       TestThriftServerFactory<TestInterface>().create());

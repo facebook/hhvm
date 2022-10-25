@@ -19,6 +19,7 @@
 #include <fizz/server/AsyncFizzServer.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/LoggingEventHelper.h>
+#include <thrift/lib/cpp2/server/peeking/PeekingManager.h>
 
 using fizz::server::AsyncFizzServer;
 
@@ -51,6 +52,19 @@ void logNonTLSEvent(const ConnectionLoggingContext& context) {
     THRIFT_CONNECTION_EVENT(non_tls).log(context);
   }
 }
+
+void logIfPeekingTransport(
+    const ConnectionLoggingContext& context,
+    const folly::AsyncTransport* transport) {
+  if (auto decorator =
+          dynamic_cast<const PreReceivedDataAsyncTransportWrapper*>(
+              transport)) {
+    // Transport was wrapped by TransportPeekingManager, presumably because no
+    // ALPN was provided. The ConnectionEventLogEntry should captures all the
+    // ALPN details we need.
+    THRIFT_CONNECTION_EVENT(peeking_manager.tls).log(context);
+  }
+}
 } // namespace
 
 void logSetupConnectionEventsOnce(
@@ -80,6 +94,7 @@ void logSetupConnectionEventsOnce(
           if (!transport->getPeerCertificate()) {
             logTlsNoPeerCertEvent(context);
           }
+          logIfPeekingTransport(context, transport);
         } else {
           logNonTLSEvent(context);
         }

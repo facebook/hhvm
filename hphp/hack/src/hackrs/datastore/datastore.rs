@@ -34,7 +34,7 @@ pub trait Store<K: Copy, V>: Debug + Send + Sync {
         Ok(self.get(key)?.is_some())
     }
 
-    /// Implementations should return an error if a key to be removed does not
+    /// Implementations are free to ignore a key to be removed if it does not
     /// exist.
     fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()>;
 

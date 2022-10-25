@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<60535165087fd50f656c268f9de0953c>>
+// @generated SignedSource<<f294274a967773cf89544039b3a13a97>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,8 +11,8 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 pub use typing_defs_core::*;
@@ -343,6 +343,7 @@ arena_deserializer::impl_deserialize_in_arena!(Requirement<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "atc_")]
 #[repr(C)]
 pub struct AbstractTypeconst<'a> {
@@ -371,6 +372,7 @@ arena_deserializer::impl_deserialize_in_arena!(AbstractTypeconst<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct ConcreteTypeconst<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -394,6 +396,7 @@ arena_deserializer::impl_deserialize_in_arena!(ConcreteTypeconst<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "patc_")]
 #[repr(C)]
 pub struct PartiallyAbstractTypeconst<'a> {
@@ -421,6 +424,7 @@ arena_deserializer::impl_deserialize_in_arena!(PartiallyAbstractTypeconst<'arena
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Typeconst<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -446,6 +450,7 @@ arena_deserializer::impl_deserialize_in_arena!(Typeconst<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "ttc_")]
 #[repr(C)]
 pub struct TypeconstType<'a> {
@@ -499,6 +504,7 @@ arena_deserializer::impl_deserialize_in_arena!(TypeconstType<'arena>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "te_")]
 #[repr(C)]

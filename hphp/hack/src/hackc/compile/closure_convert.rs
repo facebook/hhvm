@@ -470,7 +470,7 @@ impl<'arena> State<'arena> {
         if !coeffects_of_scope.get_static_coeffects().is_empty() {
             self.global_state
                 .lambda_coeffects_of_scope
-                .insert(key.clone(), coeffects_of_scope);
+                .insert(key, coeffects_of_scope);
         }
     }
 
@@ -1210,7 +1210,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
                             let mangled_class_name = mangled_class_name.unsafe_as_str();
                             Ok(self.convert_meth_caller_to_func_ptr(
                                 scope,
-                                &*pos,
+                                pos,
                                 pc,
                                 mangled_class_name,
                                 pf,
@@ -1224,7 +1224,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
                 }
                 (Expr_::String(cls_name), Some(fname)) => Ok(self.convert_meth_caller_to_func_ptr(
                     scope,
-                    &*pos,
+                    pos,
                     pc,
                     // FIXME: This is not safe--string literals are binary strings.
                     // There's no guarantee that they're valid UTF-8.

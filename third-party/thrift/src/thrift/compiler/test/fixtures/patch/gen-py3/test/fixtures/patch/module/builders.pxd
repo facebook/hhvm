@@ -65,9 +65,23 @@ cdef class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     cdef public list optListVal
     cdef public set optSetVal
     cdef public dict optMapVal
+    cdef public list listMap
+    cdef public dict mapMap
 
 
 cdef class LateDefStruct_Builder(thrift.py3.builder.StructBuilder):
     pass
+
+
+cdef class Recursive_Builder(thrift.py3.builder.StructBuilder):
+    cdef public dict nodes
+
+
+cdef class Bar_Builder(thrift.py3.builder.StructBuilder):
+    cdef public object loop
+
+
+cdef class Loop_Builder(thrift.py3.builder.StructBuilder):
+    cdef public object bar
 
 

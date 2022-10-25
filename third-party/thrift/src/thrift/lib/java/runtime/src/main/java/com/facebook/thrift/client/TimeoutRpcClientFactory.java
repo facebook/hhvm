@@ -52,10 +52,20 @@ public class TimeoutRpcClientFactory extends DelegatingRpcClientFactory {
 
   @Override
   public Mono<RpcClient> createRpcClient(SocketAddress socketAddress) {
-    return getDelegate().createRpcClient(socketAddress).map(this::wrapRpcClient);
+    return getDelegate()
+        .createRpcClient(socketAddress)
+        .transform(
+            new MonoTimeoutTransformer<>(
+                RpcResources.getEventLoopGroup().next(),
+                connectionTimeoutMs,
+                TimeUnit.MILLISECONDS))
+        .onErrorMap(
+            TimeoutException.class,
+            e -> new TimeoutException(e.getMessage() + " for 'client_connection'"))
+        .map(this::wrapRpcClient);
   }
 
-  private RpcClient wrapRpcClient(RpcClient rpcClient) {
+  private TimeoutRpcClient wrapRpcClient(RpcClient rpcClient) {
     return new TimeoutRpcClient(rpcClient, defaultClientTimeoutMs);
   }
 
@@ -78,7 +88,7 @@ public class TimeoutRpcClientFactory extends DelegatingRpcClientFactory {
       long timeoutMs = calculateRequestTimeout(options);
       return target.transform(
           new MonoTimeoutTransformer<>(
-              RpcResources.getClientOffLoopScheduler(), timeoutMs, TimeUnit.MILLISECONDS));
+              RpcResources.getEventLoopGroup().next(), timeoutMs, TimeUnit.MILLISECONDS));
     }
 
     @VisibleForTesting

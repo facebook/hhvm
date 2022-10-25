@@ -12,7 +12,7 @@ from thrift.Thrift import TType, TMessageType, TPriority, TRequestContext, TProc
 from thrift.protocol.TProtocol import TProtocolException
 
 
-from .ttypes import UTF8STRINGS, has_bitwise_ops, is_unscoped, MyForwardRefEnum, MyEnumA, decorated_struct, ContainerStruct, CppTypeStruct, VirtualStruct, MyStructWithForwardRefEnum, TrivialNumeric, TrivialNestedWithDefault, ComplexString, ComplexNestedWithDefault, MinPadding, MinPaddingWithCustomType, MyStruct, MyDataItem, Renaming, AnnotatedTypes, ForwardUsageRoot, ForwardUsageStruct, ForwardUsageByRef, NoexceptMoveEmpty, NoexceptMoveSimpleStruct, NoexceptMoveComplexStruct, NoExceptMoveUnion, AllocatorAware, AllocatorAware2, TypedefStruct, StructWithDoubleUnderscores, TBinary, IntTypedef, UintTypedef
+from .ttypes import UTF8STRINGS, has_bitwise_ops, is_unscoped, MyForwardRefEnum, decorated_struct, ContainerStruct, CppTypeStruct, VirtualStruct, MyStructWithForwardRefEnum, TrivialNumeric, TrivialNestedWithDefault, ComplexString, ComplexNestedWithDefault, MinPadding, MinPaddingWithCustomType, MyStruct, MyDataItem, Renaming, AnnotatedTypes, ForwardUsageRoot, ForwardUsageStruct, ForwardUsageByRef, IncompleteMap, IncompleteMapDep, CompleteMap, CompleteMapDep, IncompleteList, IncompleteListDep, CompleteList, CompleteListDep, AdaptedList, AdaptedListDep, DependentAdaptedList, DependentAdaptedListDep, AllocatorAware, AllocatorAware2, TypedefStruct, StructWithDoubleUnderscores, TBinary, IntTypedef, UintTypedef
 import include.ttypes
 import thrift.annotation.cpp.ttypes
 import thrift.annotation.thrift.ttypes
@@ -106,17 +106,17 @@ class bounce_map_args:
       if fid == 1:
         if ftype == TType.MAP:
           self.m = {}
-          (_ktype164, _vtype165, _size163 ) = iprot.readMapBegin() 
-          if _size163 >= 0:
-            for _i167 in range(_size163):
-              _key168 = iprot.readI32()
-              _val169 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.m[_key168] = _val169
+          (_ktype199, _vtype200, _size198 ) = iprot.readMapBegin() 
+          if _size198 >= 0:
+            for _i202 in range(_size198):
+              _key203 = iprot.readI32()
+              _val204 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.m[_key203] = _val204
           else: 
             while iprot.peekMap():
-              _key170 = iprot.readI32()
-              _val171 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.m[_key170] = _val171
+              _key205 = iprot.readI32()
+              _val206 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.m[_key205] = _val206
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -136,9 +136,9 @@ class bounce_map_args:
     if self.m != None:
       oprot.writeFieldBegin('m', TType.MAP, 1)
       oprot.writeMapBegin(TType.I32, TType.STRING, len(self.m))
-      for kiter172,viter173 in self.m.items():
-        oprot.writeI32(kiter172)
-        oprot.writeString(viter173.encode('utf-8')) if UTF8STRINGS and not isinstance(viter173, bytes) else oprot.writeString(viter173)
+      for kiter207,viter208 in self.m.items():
+        oprot.writeI32(kiter207)
+        oprot.writeString(viter208.encode('utf-8')) if UTF8STRINGS and not isinstance(viter208, bytes) else oprot.writeString(viter208)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -222,17 +222,17 @@ class bounce_map_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype175, _vtype176, _size174 ) = iprot.readMapBegin() 
-          if _size174 >= 0:
-            for _i178 in range(_size174):
-              _key179 = iprot.readI32()
-              _val180 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.success[_key179] = _val180
+          (_ktype210, _vtype211, _size209 ) = iprot.readMapBegin() 
+          if _size209 >= 0:
+            for _i213 in range(_size209):
+              _key214 = iprot.readI32()
+              _val215 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.success[_key214] = _val215
           else: 
             while iprot.peekMap():
-              _key181 = iprot.readI32()
-              _val182 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.success[_key181] = _val182
+              _key216 = iprot.readI32()
+              _val217 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.success[_key216] = _val217
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -252,9 +252,9 @@ class bounce_map_result:
     if self.success != None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.I32, TType.STRING, len(self.success))
-      for kiter183,viter184 in self.success.items():
-        oprot.writeI32(kiter183)
-        oprot.writeString(viter184.encode('utf-8')) if UTF8STRINGS and not isinstance(viter184, bytes) else oprot.writeString(viter184)
+      for kiter218,viter219 in self.success.items():
+        oprot.writeI32(kiter218)
+        oprot.writeString(viter219.encode('utf-8')) if UTF8STRINGS and not isinstance(viter219, bytes) else oprot.writeString(viter219)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -337,15 +337,15 @@ class binary_keyed_map_args:
       if fid == 1:
         if ftype == TType.LIST:
           self.r = []
-          (_etype188, _size185) = iprot.readListBegin()
-          if _size185 >= 0:
-            for _i189 in range(_size185):
-              _elem190 = iprot.readI64()
-              self.r.append(_elem190)
+          (_etype223, _size220) = iprot.readListBegin()
+          if _size220 >= 0:
+            for _i224 in range(_size220):
+              _elem225 = iprot.readI64()
+              self.r.append(_elem225)
           else: 
             while iprot.peekList():
-              _elem191 = iprot.readI64()
-              self.r.append(_elem191)
+              _elem226 = iprot.readI64()
+              self.r.append(_elem226)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -365,8 +365,8 @@ class binary_keyed_map_args:
     if self.r != None:
       oprot.writeFieldBegin('r', TType.LIST, 1)
       oprot.writeListBegin(TType.I64, len(self.r))
-      for iter192 in self.r:
-        oprot.writeI64(iter192)
+      for iter227 in self.r:
+        oprot.writeI64(iter227)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -450,17 +450,17 @@ class binary_keyed_map_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype194, _vtype195, _size193 ) = iprot.readMapBegin() 
-          if _size193 >= 0:
-            for _i197 in range(_size193):
-              _key198 = iprot.readString()
-              _val199 = iprot.readI64()
-              self.success[_key198] = _val199
+          (_ktype229, _vtype230, _size228 ) = iprot.readMapBegin() 
+          if _size228 >= 0:
+            for _i232 in range(_size228):
+              _key233 = iprot.readString()
+              _val234 = iprot.readI64()
+              self.success[_key233] = _val234
           else: 
             while iprot.peekMap():
-              _key200 = iprot.readString()
-              _val201 = iprot.readI64()
-              self.success[_key200] = _val201
+              _key235 = iprot.readString()
+              _val236 = iprot.readI64()
+              self.success[_key235] = _val236
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -480,9 +480,9 @@ class binary_keyed_map_result:
     if self.success != None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.I64, len(self.success))
-      for kiter202,viter203 in self.success.items():
-        oprot.writeString(kiter202)
-        oprot.writeI64(viter203)
+      for kiter237,viter238 in self.success.items():
+        oprot.writeString(kiter237)
+        oprot.writeI64(viter238)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()

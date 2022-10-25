@@ -188,8 +188,8 @@ fn compare_instrs<'arena>(
 
 fn sem_diff_input(
     path: &CodePath<'_>,
-    input0: &Input,
-    input1: &Input,
+    input0: &Input<'_>,
+    input1: &Input<'_>,
     check_cow: bool,
 ) -> Result<()> {
     if check_cow {

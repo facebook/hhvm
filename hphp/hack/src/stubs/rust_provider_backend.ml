@@ -56,6 +56,72 @@ module Decl = struct
   let remove_static_methods_batch _ _ = failwith "unimplemented"
 
   let remove_constructors_batch _ _ = failwith "unimplemented"
+
+  let get_old_funs_batch _ _ = failwith "unimplemented"
+
+  let get_old_shallow_classes_batch _ _ = failwith "unimplemented"
+
+  let get_old_folded_classes_batch _ _ = failwith "unimplemented"
+
+  let get_old_typedefs_batch _ _ = failwith "unimplemented"
+
+  let get_old_gconsts_batch _ _ = failwith "unimplemented"
+
+  let get_old_modules_batch _ _ = failwith "unimplemented"
+
+  let get_old_props_batch _ _ = failwith "unimplemented"
+
+  let get_old_static_props_batch _ _ = failwith "unimplemented"
+
+  let get_old_methods_batch _ _ = failwith "unimplemented"
+
+  let get_old_static_methods_batch _ _ = failwith "unimplemented"
+
+  let get_old_constructors_batch _ _ = failwith "unimplemented"
+
+  let remove_old_funs_batch _ _ = failwith "unimplemented"
+
+  let remove_old_shallow_classes_batch _ _ = failwith "unimplemented"
+
+  let remove_old_folded_classes_batch _ _ = failwith "unimplemented"
+
+  let remove_old_typedefs_batch _ _ = failwith "unimplemented"
+
+  let remove_old_gconsts_batch _ _ = failwith "unimplemented"
+
+  let remove_old_modules_batch _ _ = failwith "unimplemented"
+
+  let remove_old_props_batch _ _ = failwith "unimplemented"
+
+  let remove_old_static_props_batch _ _ = failwith "unimplemented"
+
+  let remove_old_methods_batch _ _ = failwith "unimplemented"
+
+  let remove_old_static_methods_batch _ _ = failwith "unimplemented"
+
+  let remove_old_constructors_batch _ _ = failwith "unimplemented"
+
+  let oldify_funs_batch _ _ = failwith "unimplemented"
+
+  let oldify_shallow_classes_batch _ _ = failwith "unimplemented"
+
+  let oldify_folded_classes_batch _ _ = failwith "unimplemented"
+
+  let oldify_typedefs_batch _ _ = failwith "unimplemented"
+
+  let oldify_gconsts_batch _ _ = failwith "unimplemented"
+
+  let oldify_modules_batch _ _ = failwith "unimplemented"
+
+  let oldify_props_batch _ _ = failwith "unimplemented"
+
+  let oldify_static_props_batch _ _ = failwith "unimplemented"
+
+  let oldify_methods_batch _ _ = failwith "unimplemented"
+
+  let oldify_static_methods_batch _ _ = failwith "unimplemented"
+
+  let oldify_constructors_batch _ _ = failwith "unimplemented"
 end
 
 module File = struct

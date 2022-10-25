@@ -17,7 +17,12 @@
 %><%
 // Computes lhs.{field} < rhs.{field}, assuming lhs.{field} != rhs.{field}.
 %><%#field:cpp_ref?%><%
-  %>::apache::thrift::detail::pointer_less(lhs.<%field:cpp_name%>_ref(), rhs.<%field:cpp_name%>_ref())<%
+  %><%#field:intern_boxed_ref?%><%!
+    %>lhs.<%field:cpp_name%>_ref() < rhs.<%field:cpp_name%>_ref()<%
+  %><%/field:intern_boxed_ref?%><%!
+  %><%^field:intern_boxed_ref?%><%!
+    %>::apache::thrift::detail::pointer_less(lhs.<%field:cpp_name%>_ref(), rhs.<%field:cpp_name%>_ref())<%
+  %><%/field:intern_boxed_ref?%><%!
 %><%/field:cpp_ref?%><%
 %><%^field:cpp_ref?%><%
   %><%#field:raw_binary?%><%

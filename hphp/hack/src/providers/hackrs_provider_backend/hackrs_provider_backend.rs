@@ -22,8 +22,8 @@ use folded_decl_provider::LazyFoldedDeclProvider;
 use naming_provider::NamingProvider;
 use naming_table::NamingTable;
 use ocamlrep::ptr::UnsafeOcamlPtr;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 use oxidized::global_options::GlobalOptions;
 use pos::ConstName;
 use pos::FunName;
@@ -216,6 +216,18 @@ impl HhServerProviderBackend {
             .funs
             .remove_batch(&mut names.iter().copied())
     }
+    pub fn get_old_funs_batch(
+        &self,
+        names: &[FunName],
+    ) -> Result<std::collections::BTreeMap<FunName, Option<Arc<decl::FunDecl<BR>>>>> {
+        let funs: &ChangesStore<FunName, _> = &self.shallow_decl_changes_store.funs;
+        let mut res = std::collections::BTreeMap::new();
+        for &name in names.iter() {
+            let old_name = FunName::new(format!("old${}", name));
+            res.insert(name, funs.get(old_name)?);
+        }
+        Ok(res)
+    }
     pub fn remove_old_funs_batch(&self, names: &[FunName]) -> Result<()> {
         let funs: &ChangesStore<FunName, _> = &self.shallow_decl_changes_store.funs;
         let mut deletes = Vec::new();
@@ -244,12 +256,23 @@ impl HhServerProviderBackend {
         classes.remove_batch(&mut deletes.iter().copied())?;
         Ok(())
     }
+    pub fn get_old_shallow_classes_batch(
+        &self,
+        names: &[TypeName],
+    ) -> Result<std::collections::BTreeMap<TypeName, Option<Arc<decl::ShallowClass<BR>>>>> {
+        let classes: &ChangesStore<TypeName, _> = &self.shallow_decl_changes_store.classes;
+        let mut res = std::collections::BTreeMap::new();
+        for &name in names.iter() {
+            let old_name = TypeName::new(format!("old${}", name));
+            res.insert(name, classes.get(old_name)?);
+        }
+        Ok(res)
+    }
     pub fn remove_shallow_classes_batch(&self, names: &[TypeName]) -> Result<()> {
         self.shallow_decl_changes_store
             .classes
             .remove_batch(&mut names.iter().copied())
     }
-
     pub fn remove_old_shallow_classes_batch(&self, names: &[TypeName]) -> Result<()> {
         let classes: &ChangesStore<TypeName, _> = &self.shallow_decl_changes_store.classes;
         let mut deletes = Vec::new();
@@ -277,6 +300,18 @@ impl HhServerProviderBackend {
         classes.move_batch(&mut moves.into_iter())?;
         classes.remove_batch(&mut deletes.iter().copied())?;
         Ok(())
+    }
+    pub fn get_old_folded_classes_batch(
+        &self,
+        names: &[TypeName],
+    ) -> Result<std::collections::BTreeMap<TypeName, Option<Arc<FoldedClass<BR>>>>> {
+        let classes: &ChangesStore<TypeName, _> = &self.folded_classes_store;
+        let mut res = std::collections::BTreeMap::new();
+        for &name in names.iter() {
+            let old_name = TypeName::new(format!("old${}", name));
+            res.insert(name, classes.get(old_name)?);
+        }
+        Ok(res)
     }
     pub fn remove_folded_classes_batch(&self, names: &[TypeName]) -> Result<()> {
         self.folded_classes_store
@@ -315,6 +350,18 @@ impl HhServerProviderBackend {
             .typedefs
             .remove_batch(&mut names.iter().copied())
     }
+    pub fn get_old_typedefs_batch(
+        &self,
+        names: &[TypeName],
+    ) -> Result<std::collections::BTreeMap<TypeName, Option<Arc<decl::TypedefDecl<BR>>>>> {
+        let typedefs: &ChangesStore<TypeName, _> = &self.shallow_decl_changes_store.typedefs;
+        let mut res = std::collections::BTreeMap::new();
+        for &name in names.iter() {
+            let old_name = TypeName::new(format!("old${}", name));
+            res.insert(name, typedefs.get(old_name)?);
+        }
+        Ok(res)
+    }
     pub fn remove_old_typedefs_batch(&self, names: &[TypeName]) -> Result<()> {
         let typedefs: &ChangesStore<TypeName, _> = &self.shallow_decl_changes_store.typedefs;
         let mut deletes = Vec::new();
@@ -347,6 +394,18 @@ impl HhServerProviderBackend {
         self.shallow_decl_changes_store
             .consts
             .remove_batch(&mut names.iter().copied())
+    }
+    pub fn get_old_gconsts_batch(
+        &self,
+        names: &[ConstName],
+    ) -> Result<std::collections::BTreeMap<ConstName, Option<Arc<decl::ConstDecl<BR>>>>> {
+        let consts: &ChangesStore<ConstName, _> = &self.shallow_decl_changes_store.consts;
+        let mut res = std::collections::BTreeMap::new();
+        for &name in names.iter() {
+            let old_name = ConstName::new(format!("old${}", name));
+            res.insert(name, consts.get(old_name)?);
+        }
+        Ok(res)
     }
     pub fn remove_old_gconsts_batch(&self, names: &[ConstName]) -> Result<()> {
         let consts: &ChangesStore<ConstName, _> = &self.shallow_decl_changes_store.consts;
@@ -381,6 +440,18 @@ impl HhServerProviderBackend {
             .modules
             .remove_batch(&mut names.iter().copied())
     }
+    pub fn get_old_modules_batch(
+        &self,
+        names: &[ModuleName],
+    ) -> Result<std::collections::BTreeMap<ModuleName, Option<Arc<decl::ModuleDecl<BR>>>>> {
+        let modules: &ChangesStore<ModuleName, _> = &self.shallow_decl_changes_store.modules;
+        let mut res = std::collections::BTreeMap::new();
+        for &name in names.iter() {
+            let old_name = ModuleName::new(format!("old${}", name));
+            res.insert(name, modules.get(old_name)?);
+        }
+        Ok(res)
+    }
     pub fn remove_old_modules_batch(&self, names: &[ModuleName]) -> Result<()> {
         let modules: &ChangesStore<ModuleName, _> = &self.shallow_decl_changes_store.modules;
         let mut deletes = Vec::new();
@@ -413,6 +484,18 @@ impl HhServerProviderBackend {
         self.shallow_decl_changes_store
             .props
             .remove_batch(&mut names.iter().copied())
+    }
+    pub fn get_old_props_batch(
+        &self,
+        names: &[(TypeName, PropName)],
+    ) -> Result<std::collections::BTreeMap<(TypeName, PropName), Option<decl::Ty<BR>>>> {
+        let props: &ChangesStore<(TypeName, PropName), _> = &self.shallow_decl_changes_store.props;
+        let mut res = std::collections::BTreeMap::new();
+        for &name in names.iter() {
+            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
+            res.insert(name, props.get(old_name)?);
+        }
+        Ok(res)
     }
     pub fn remove_old_props_batch(&self, names: &[(TypeName, PropName)]) -> Result<()> {
         let props: &ChangesStore<(TypeName, PropName), _> = &self.shallow_decl_changes_store.props;
@@ -448,6 +531,19 @@ impl HhServerProviderBackend {
             .static_props
             .remove_batch(&mut names.iter().copied())
     }
+    pub fn get_old_static_props_batch(
+        &self,
+        names: &[(TypeName, PropName)],
+    ) -> Result<std::collections::BTreeMap<(TypeName, PropName), Option<decl::Ty<BR>>>> {
+        let static_props: &ChangesStore<(TypeName, PropName), _> =
+            &self.shallow_decl_changes_store.static_props;
+        let mut res = std::collections::BTreeMap::new();
+        for &name in names.iter() {
+            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
+            res.insert(name, static_props.get(old_name)?);
+        }
+        Ok(res)
+    }
     pub fn remove_old_static_props_batch(&self, names: &[(TypeName, PropName)]) -> Result<()> {
         let static_props: &ChangesStore<(TypeName, PropName), _> =
             &self.shallow_decl_changes_store.static_props;
@@ -477,6 +573,19 @@ impl HhServerProviderBackend {
         methods.move_batch(&mut moves.into_iter())?;
         methods.remove_batch(&mut deletes.iter().copied())?;
         Ok(())
+    }
+    pub fn get_old_methods_batch(
+        &self,
+        names: &[(TypeName, MethodName)],
+    ) -> Result<std::collections::BTreeMap<(TypeName, MethodName), Option<decl::Ty<BR>>>> {
+        let methods: &ChangesStore<(TypeName, MethodName), _> =
+            &self.shallow_decl_changes_store.methods;
+        let mut res = std::collections::BTreeMap::new();
+        for &name in names.iter() {
+            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
+            res.insert(name, methods.get(old_name)?);
+        }
+        Ok(res)
     }
     pub fn remove_methods_batch(&self, names: &[(TypeName, MethodName)]) -> Result<()> {
         self.shallow_decl_changes_store
@@ -518,6 +627,19 @@ impl HhServerProviderBackend {
             .static_methods
             .remove_batch(&mut names.iter().copied())
     }
+    pub fn get_old_static_methods_batch(
+        &self,
+        names: &[(TypeName, MethodName)],
+    ) -> Result<std::collections::BTreeMap<(TypeName, MethodName), Option<decl::Ty<BR>>>> {
+        let static_methods: &ChangesStore<(TypeName, MethodName), _> =
+            &self.shallow_decl_changes_store.static_methods;
+        let mut res = std::collections::BTreeMap::new();
+        for &name in names.iter() {
+            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
+            res.insert(name, static_methods.get(old_name)?);
+        }
+        Ok(res)
+    }
     pub fn remove_old_static_methods_batch(&self, names: &[(TypeName, MethodName)]) -> Result<()> {
         let static_methods: &ChangesStore<(TypeName, MethodName), _> =
             &self.shallow_decl_changes_store.static_methods;
@@ -552,6 +674,19 @@ impl HhServerProviderBackend {
         self.shallow_decl_changes_store
             .constructors
             .remove_batch(&mut names.iter().copied())
+    }
+    pub fn get_old_constructors_batch(
+        &self,
+        names: &[TypeName],
+    ) -> Result<std::collections::BTreeMap<TypeName, Option<decl::Ty<BR>>>> {
+        let constructors: &ChangesStore<TypeName, _> =
+            &self.shallow_decl_changes_store.constructors;
+        let mut res = std::collections::BTreeMap::new();
+        for &name in names.iter() {
+            let old_name = TypeName::new(format!("old${}", name));
+            res.insert(name, constructors.get(old_name)?);
+        }
+        Ok(res)
     }
     pub fn remove_old_constructors_batch(&self, names: &[TypeName]) -> Result<()> {
         let constructors: &ChangesStore<TypeName, _> =

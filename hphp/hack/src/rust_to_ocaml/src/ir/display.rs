@@ -38,12 +38,17 @@ impl Display for ir::Def {
             Self::Alias {
                 doc,
                 attrs,
+                mutual_rec,
                 tparams,
                 name,
                 ty,
             } => {
                 write_toplevel_doc_comment(f, doc)?;
-                write!(f, "type ")?;
+                if *mutual_rec {
+                    write!(f, "and ")?;
+                } else {
+                    write!(f, "type ")?;
+                }
                 write_type_parameters(f, tparams)?;
                 write!(f, "{name} = {ty}")?;
                 for attr in attrs {
@@ -54,12 +59,17 @@ impl Display for ir::Def {
             Self::Record {
                 doc,
                 attrs,
+                mutual_rec,
                 tparams,
                 name,
                 fields,
             } => {
                 write_toplevel_doc_comment(f, doc)?;
-                write!(f, "type ")?;
+                if *mutual_rec {
+                    write!(f, "and ")?;
+                } else {
+                    write!(f, "type ")?;
+                }
                 write_type_parameters(f, tparams)?;
                 writeln!(f, "{name} = {{")?;
                 for field in fields {
@@ -74,12 +84,17 @@ impl Display for ir::Def {
             Self::Variant {
                 doc,
                 attrs,
+                mutual_rec,
                 tparams,
                 name,
                 variants,
             } => {
                 write_toplevel_doc_comment(f, doc)?;
-                write!(f, "type ")?;
+                if *mutual_rec {
+                    write!(f, "and ")?;
+                } else {
+                    write!(f, "type ")?;
+                }
                 write_type_parameters(f, tparams)?;
                 writeln!(f, "{name} =")?;
                 for variant in variants {

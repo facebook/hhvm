@@ -17,9 +17,9 @@ open Hh_prelude
 
 let go (genv : ServerEnv.genv) : unit =
   (* Keep the hhconfig version (e.g. v0.0.1) consistent between decl and file prefetching *)
-  let hh_config_version = "v0.0.1" in
+  let hhconfig_version = "v0.0.1" in
   let manifold_dir =
-    "hack_sub1m_file_store/tree/" ^ hh_config_version ^ "/files"
+    "hack_sub1m_file_store/tree/" ^ hhconfig_version ^ "/files"
   in
   let cmd = "manifold mkdirs " ^ manifold_dir in
   ignore (Sys.command cmd);
@@ -61,5 +61,5 @@ let go (genv : ServerEnv.genv) : unit =
   in
 
   Hh_logger.log "Uploading %d files to %s" (List.length results) manifold_dir;
-  let _ = Remote_files_ffi.put_files hh_config_version results in
+  let _ = Remote_files_ffi.put_files hhconfig_version results in
   ()

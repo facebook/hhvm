@@ -33,6 +33,7 @@ enum class reference_type {
   shared_const,
   shared_mutable,
   boxed,
+  boxed_intern,
 };
 
 reference_type find_ref_type(const t_field& node);

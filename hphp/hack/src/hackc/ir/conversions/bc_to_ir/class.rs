@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hhbc::Class;
+use ir::StringInterner;
 use itertools::Itertools;
 
 use crate::convert;
@@ -14,7 +15,7 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, filename: ir::Filename,
         .constants
         .as_ref()
         .iter()
-        .map(crate::constant::convert_constant)
+        .map(|c| crate::constant::convert_constant(c, &mut unit.strings))
         .collect_vec();
 
     let enum_type = cls
@@ -32,7 +33,7 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, filename: ir::Filename,
     let type_constants = cls
         .type_constants
         .iter()
-        .map(convert_type_constant)
+        .map(|c| convert_type_constant(c, &mut unit.strings))
         .collect();
 
     let ctx_constants = cls.ctx_constants.iter().map(convert_ctx_constant).collect();
@@ -62,7 +63,7 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, filename: ir::Filename,
         .attributes
         .as_ref()
         .iter()
-        .map(convert::convert_attribute)
+        .map(|a| convert::convert_attribute(a, &mut unit.strings))
         .collect_vec();
 
     let base = cls
@@ -75,6 +76,13 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, filename: ir::Filename,
         .as_ref()
         .iter()
         .map(|interface| ir::ClassId::from_hhbc(*interface, &mut unit.strings))
+        .collect_vec();
+
+    let properties = cls
+        .properties
+        .as_ref()
+        .iter()
+        .map(|prop| convert_property(prop, &mut unit.strings))
         .collect_vec();
 
     let name = ir::ClassId::from_hhbc(cls.name, &mut unit.strings);
@@ -91,7 +99,7 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, filename: ir::Filename,
         implements,
         methods: Default::default(),
         name,
-        properties: cls.properties.as_ref().to_vec(),
+        properties,
         requirements,
         src_loc: ir::SrcLoc::from_span(filename, &cls.span),
         type_constants,
@@ -104,6 +112,30 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, filename: ir::Filename,
     });
 }
 
+fn convert_property<'a>(
+    prop: &hhbc::Property<'a>,
+    strings: &mut ir::StringInterner,
+) -> ir::Property<'a> {
+    let attributes = prop
+        .attributes
+        .iter()
+        .map(|a| convert::convert_attribute(a, strings))
+        .collect_vec();
+    ir::Property {
+        name: prop.name,
+        flags: prop.flags,
+        attributes,
+        visibility: prop.visibility,
+        initial_value: prop
+            .initial_value
+            .as_ref()
+            .map(|tv| convert::convert_typed_value(tv, strings))
+            .into(),
+        type_info: prop.type_info.clone(),
+        doc_comment: prop.doc_comment,
+    }
+}
+
 fn convert_ctx_constant<'a>(ctx: &hhbc::CtxConstant<'a>) -> ir::CtxConstant<'a> {
     ir::CtxConstant {
         name: ctx.name,
@@ -113,10 +145,18 @@ fn convert_ctx_constant<'a>(ctx: &hhbc::CtxConstant<'a>) -> ir::CtxConstant<'a> 
     }
 }
 
-fn convert_type_constant<'a>(tc: &hhbc::TypeConstant<'a>) -> ir::TypeConstant<'a> {
+fn convert_type_constant<'a>(
+    tc: &hhbc::TypeConstant<'a>,
+    strings: &mut StringInterner,
+) -> ir::TypeConstant<'a> {
+    let initializer = tc
+        .initializer
+        .as_ref()
+        .map(|tv| convert::convert_typed_value(tv, strings))
+        .into();
     ir::TypeConstant {
         name: tc.name,
-        initializer: tc.initializer.clone().into(),
+        initializer,
         is_abstract: tc.is_abstract,
     }
 }

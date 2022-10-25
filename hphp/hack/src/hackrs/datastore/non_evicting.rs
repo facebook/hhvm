@@ -8,7 +8,7 @@ use std::hash::Hash;
 use anyhow::Result;
 
 pub struct NonEvictingStore<K: Hash + Eq, V> {
-    store: dashmap::DashMap<K, V>,
+    store: hash::DashMap<K, V>,
 }
 
 pub struct NonEvictingLocalStore<K: Hash + Eq, V> {

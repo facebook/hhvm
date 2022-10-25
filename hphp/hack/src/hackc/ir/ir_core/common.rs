@@ -2,8 +2,9 @@
 
 use ffi::Str;
 // Types imported from HHAS
-pub use hhbc::TypedValue;
 pub use hhvm_types_ffi::ffi::Attr;
+
+use crate::TypedValue;
 
 /// Attributes are the bit of metadata that appears in double angle-brackets
 /// before a definition. They look like either raw identifiers or function
@@ -18,5 +19,5 @@ pub use hhvm_types_ffi::ffi::Attr;
 #[derive(Clone, Debug)]
 pub struct Attribute<'a> {
     pub name: Str<'a>,
-    pub arguments: Vec<TypedValue<'a>>,
+    pub arguments: Vec<TypedValue>,
 }

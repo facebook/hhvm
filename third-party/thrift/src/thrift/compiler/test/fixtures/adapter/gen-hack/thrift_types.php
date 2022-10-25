@@ -2577,10 +2577,6 @@ class InternBox implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
           )
         ),
-        '\thrift\annotation\Testing' => \thrift\annotation\Testing::fromShape(
-          shape(
-          )
-        ),
       ],
       'fields' => dict[
       ],

@@ -10,9 +10,9 @@ use std::path::PathBuf;
 
 use eq_modulo_pos::EqModuloPos;
 use ocamlrep::rc::RcOc;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use relative_path::Prefix;
 use relative_path::RelativePath;
 use serde::Deserialize;

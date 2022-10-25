@@ -299,8 +299,8 @@ struct GenerateRuntimeSchema {
 
 // Indicates that a field's value should never be stored on the 'stack', and that
 // identical values can be shared in immutable contexts.
+// It currently only supports sharing immutable default value.
 //
 // Unlike `@thrift.Box` above, this annotation does not work yet :-).
 @scope.Field
-@Testing // TODO: Implement.
 struct InternBox {}

@@ -29,17 +29,16 @@ final class ResourceConfiguration {
           Queues.SMALL_BUFFER_SIZE,
           Integer.getInteger("thrift.pending-tasks.count", Integer.MAX_VALUE));
 
-  static final int minEventLoopThreadsDefault =
-      Math.max(8, Runtime.getRuntime().availableProcessors() / 2);
-
   static final int numThreadsForEventLoop =
-      Math.max(1, Integer.getInteger("thrift.eventloop-threads.count", minEventLoopThreadsDefault));
-
+      Math.max(
+          1,
+          Integer.getInteger(
+              "thrift.eventloop-threads.count", Runtime.getRuntime().availableProcessors()));
   static final int numThreadsForOffLoop =
       Math.max(
           numThreadsForEventLoop,
           Integer.getInteger(
-              "thrift.executor-threads.count", Runtime.getRuntime().availableProcessors() * 2));
+              "thrift.executor-threads.count", Runtime.getRuntime().availableProcessors() * 4));
 
   static final int minNumThreadsForOffLoop = numThreadsForEventLoop;
 

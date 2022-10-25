@@ -1,34 +1,26 @@
 // RUN: %hackc compile-infer %s | FileCheck %s
 // CHECK: attribute source_language = "hack"
 
-// CHECK: define _Hmain(params: *HackParams) : *Mixed
-// CHECK:  n0: *Mixed = load &params
-// CHECK:  n1 = verify_param_count(n0, hack_int(0), hack_int(0))
-// CHECK:  hhbc_print(hack_string("Hello, World!\n"))
+// CHECK: define _Hmain(this: *void) : *void {
+// CHECK:  n0 = hhbc_print(hack_string("Hello, World!\n"))
 // CHECK:  ret hack_null()
 function main(): void {
   echo "Hello, World!\n";
 }
 
-// CHECK: define _Hcmp(params: *HackParams) : *Mixed
+// CHECK: define _Hcmp(this: *void, $a: *Mixed, $b: *Mixed) : *void {
 // CHECK: #b0:
-// CHECK:   n0: *Mixed = load &params
-// CHECK:   n1 = verify_param_count(n0, hack_int(2), hack_int(2))
-// CHECK:   n2 = get_param(n0, hack_int(0))
-// CHECK:   store &$a <- n2: *Mixed
-// CHECK:   n3 = get_param(n0, hack_int(1))
-// CHECK:   store &$b <- n3: *Mixed
-// CHECK:   n4: *Mixed = load &$b
-// CHECK:   n5: *Mixed = load &$a
-// CHECK:   n6 = hhbc_cmp_eq(n5, n4)
+// CHECK:   n0: *Mixed = load &$b
+// CHECK:   n1: *Mixed = load &$a
+// CHECK:   n2 = hhbc_cmp_eq(n1, n0)
 // CHECK:   jmp b1, b2
 // CHECK: #b1:
-// CHECK:   prune ! hack_is_true(n6)
-// CHECK:   n7 = hhbc_print(hack_string("unequal"))
+// CHECK:   prune ! hack_is_true(n2)
+// CHECK:   n3 = hhbc_print(hack_string("unequal"))
 // CHECK:   jmp b3
 // CHECK: #b2:
-// CHECK:   prune hack_is_true(n6)
-// CHECK:   n8 = hhbc_print(hack_string("equal"))
+// CHECK:   prune hack_is_true(n2)
+// CHECK:   n4 = hhbc_print(hack_string("equal"))
 // CHECK:   jmp b3
 // CHECK: #b3:
 // CHECK:   ret hack_null()
@@ -40,30 +32,27 @@ function cmp(mixed $a, mixed $b): void {
   }
 }
 
-// CHECK: define _Hret_str(params: *HackParams) : *Mixed {
+// CHECK: define _Hret_str(this: *void) : *string {
 // CHECK: #b0:
-// CHECK:   n0: *Mixed = load &params
-// CHECK:   n1 = verify_param_count(n0, hack_int(0), hack_int(0))
-// CHECK:   n2 = hhbc_is_type_str(hack_string("hello, world\n"))
-// CHECK:   n3 = hhbc_not(n2)
+// CHECK:   n0 = hhbc_is_type_str(hack_string("hello, world\n"))
+// CHECK:   n1 = hhbc_not(n0)
 // CHECK:   jmp b1, b2
 // CHECK: #b1:
-// CHECK:   prune hack_is_true(n3)
-// CHECK:   n4 = hhbc_verify_failed()
+// CHECK:   prune hack_is_true(n1)
+// CHECK:   n2 = hhbc_verify_failed()
 // CHECK:   ret 0 // unreachable
 // CHECK: #b2:
-// CHECK:   prune ! hack_is_true(n3)
+// CHECK:   prune ! hack_is_true(n1)
 // CHECK:   ret hack_string("hello, world\n")
 function ret_str(): string {
   return "hello, world\n";
 }
 
-// CHECK: define _Hbool_call(params: *HackParams) : *Mixed {
+// CHECK: define _Hbool_call(this: *void) : *void {
 // CHECK: #b0:
-// CHECK:   n2 = arg_pack_1(null, hack_bool(false))
-// CHECK:   n3 = _Hf_bool(n2)
-// CHECK:   n4 = arg_pack_1(null, hack_bool(true))
-// CHECK:   n5 = _Hf_bool(n4)
+// CHECK:   n0 = _Hf_bool(null, hack_bool(false))
+// CHECK:   n1 = _Hf_bool(null, hack_bool(true))
+// CHECK:   ret hack_null()
 function bool_call(): void {
   f_bool(false);
   f_bool(true);

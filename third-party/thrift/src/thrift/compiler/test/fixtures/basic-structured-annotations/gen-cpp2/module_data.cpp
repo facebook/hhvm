@@ -103,8 +103,8 @@ THRIFT_DATA_SECTION const std::array<folly::StringPiece, 3> TStructDataStorage<:
 }};
 THRIFT_DATA_SECTION const std::array<int, 3> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::isset_indexes = {{
   0,
+  -1,
   1,
-  2,
 }};
 
 THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::fields_names = {{

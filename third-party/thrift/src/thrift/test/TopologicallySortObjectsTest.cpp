@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-#include <thrift/test/gen-cpp2/MapWithIncompleteTypeTest_types.h>
+#include <thrift/test/gen-cpp2/TopologicallySortObjectsTest_types.h>
 
 #include <folly/portability/GTest.h>
 
 using namespace apache::thrift::test;
 
-TEST(MapWithIncompleteTypeTest, it_compiles) {
-  C c;
-  D d;
+TEST(TopologicallySortObjectsTest, it_compiles) {
+  IncompleteMap im;
+  CompleteMap cm;
+  IncompleteList il;
+  CompleteList cl;
+  AdaptedList al;
+  DependentAdaptedList dal;
 }

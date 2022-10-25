@@ -70,7 +70,7 @@ type rollout_flags = {
   use_manifold_cython_client: bool;
   disable_naming_table_fallback_loading: bool;
   use_type_alias_heap: bool;
-  load_state_natively_v4: bool;
+  override_load_state_natively: bool;
 }
 
 let flush () = ()

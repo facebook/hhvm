@@ -236,6 +236,9 @@ TEST(RoundRobinRequestPileTest, SingleBucket) {
 
 TEST(RoundRobinRequestPileTest, requestCount) {
   THRIFT_FLAG_SET_MOCK(experimental_use_resource_pools, true);
+  if (!apache::thrift::useResourcePoolsFlagsSet()) {
+    GTEST_SKIP() << "Invalid resource pools mode";
+  }
 
   class BlockingCallTestService
       : public apache::thrift::ServiceHandler<TestService> {

@@ -101,6 +101,16 @@ TEST(FrozenVectorTypes, VectorAsSet) {
   EXPECT_EQ(0, fdm.count(4));
 }
 
+TEST(FrozenVectorTypes, VectorBoolAsSet) {
+  // This is a silly use case, but vector<bool>::reference is not a
+  // reference which is an interesting case to support.
+  VectorAsSet<bool> dm;
+  dm.insert(true);
+  auto fdm = freeze(dm);
+  EXPECT_EQ(1, fdm.count(true));
+  EXPECT_EQ(0, fdm.count(false));
+}
+
 TEST(FrozenVectorTypes, VectorAsHashSet) {
   VectorAsHashSet<int> dm;
   dm.insert(3);

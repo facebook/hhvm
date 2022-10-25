@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<91d108136ccfb8e370b4d3f75668ee34>>
+// @generated SignedSource<<a68a9995bc4a306c19c174abbaf497cc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,9 +11,9 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 pub use reason::PosId;
 use serde::Deserialize;
 use serde::Serialize;
@@ -438,6 +438,7 @@ pub struct Ty(pub reason::T_, pub Box<Ty_>);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum NegType {
     #[rust_to_ocaml(name = "Neg_prim")]
@@ -470,6 +471,7 @@ pub enum NegType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "sft_")]
 #[repr(C)]
 pub struct ShapeFieldType {
@@ -492,6 +494,7 @@ pub struct ShapeFieldType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Ty_ {
     /// The late static bound type of a class
@@ -631,6 +634,7 @@ pub enum Ty_ {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct TaccessType(pub Ty, pub PosId);
 
@@ -649,6 +653,7 @@ pub struct TaccessType(pub Ty, pub PosId);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Exact {
     Exact,
@@ -670,6 +675,7 @@ pub enum Exact {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct ClassRefinement {
     pub cr_types: s_map::SMap<ClassTypeRefinement>,
@@ -690,6 +696,7 @@ pub struct ClassRefinement {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum ClassTypeRefinement {
     TRexact(Ty),
@@ -711,6 +718,7 @@ pub enum ClassTypeRefinement {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "tr_")]
 #[repr(C)]
 pub struct ClassTypeRefinementBounds {
@@ -733,6 +741,7 @@ pub struct ClassTypeRefinementBounds {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Capability {
     CapDefaults(pos_or_decl::PosOrDecl),
@@ -756,6 +765,7 @@ pub enum Capability {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct FunImplicitParams {
     pub capability: Capability,
@@ -777,6 +787,7 @@ pub struct FunImplicitParams {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "ft_")]
 #[repr(C)]
 pub struct FunType {
@@ -805,6 +816,7 @@ pub struct FunType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "et_")]
 #[repr(C)]
 pub struct PossiblyEnforcedTy {
@@ -828,6 +840,7 @@ pub struct PossiblyEnforcedTy {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "fp_")]
 #[repr(C)]
 pub struct FunParam {
@@ -837,6 +850,7 @@ pub struct FunParam {
     pub flags: typing_defs_flags::FunParamFlags,
 }
 
+#[rust_to_ocaml(and)]
 pub type FunParams = Vec<FunParam>;
 
 #[derive(
@@ -1027,6 +1041,7 @@ pub enum ConstraintType_ {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = "deriving show")]
 #[repr(C)]
 pub struct ConstraintType(pub reason::Reason, pub Box<ConstraintType_>);

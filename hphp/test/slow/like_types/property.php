@@ -1,7 +1,7 @@
 <?hh
 
 final class C {
-  private ~int $x = 1;
+  <<__Soft>> private ~int $x = 1;
   public function setX(mixed $x): this {
     // Like-types are treated as mixed, allowing any property value.
     $this->x = $x;

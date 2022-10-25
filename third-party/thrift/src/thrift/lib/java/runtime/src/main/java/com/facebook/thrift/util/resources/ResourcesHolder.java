@@ -23,6 +23,7 @@ import static com.facebook.thrift.util.resources.ResourceConfiguration.minNumThr
 import static com.facebook.thrift.util.resources.ResourceConfiguration.minPendingTasksBeforeNewThread;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.numThreadsForEventLoop;
 import static com.facebook.thrift.util.resources.ResourceConfiguration.numThreadsForOffLoop;
+import static com.facebook.thrift.util.resources.ResourceConfiguration.separateOffLoopScheduler;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.channel.EventLoopGroup;
@@ -31,14 +32,12 @@ import io.netty.util.HashedWheelTimer;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.concurrent.EventExecutor;
 import io.rsocket.Closeable;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
-import reactor.core.scheduler.Scheduler;
 
 class ResourcesHolder implements Closeable {
   private static final Logger LOGGER = LoggerFactory.getLogger(ResourcesHolder.class);
@@ -47,16 +46,17 @@ class ResourcesHolder implements Closeable {
 
   private final HashedWheelTimer timer;
   private final EventLoopGroup eventLoopGroup;
-  private final ForkJoinPoolScheduler offLoopScheduler =
-      ForkJoinPoolScheduler.create("thrift-offloop");
-  private final ForkJoinPoolScheduler clientOffLoopScheduler =
-      ForkJoinPoolScheduler.create("thrift-offloop-client");
+  private final ThreadPoolScheduler offLoopScheduler;
+  private final ThreadPoolScheduler clientOffLoopScheduler;
 
   public ResourcesHolder() {
     this.timer = createHashedWheelTimer();
     this.eventLoopGroup =
         com.facebook.thrift.util.NettyUtil.createEventLoopGroup(
             numThreadsForEventLoop, eventLoopGroupThreadPrefix);
+    this.offLoopScheduler = createOffLoopScheduler();
+    this.clientOffLoopScheduler =
+        separateOffLoopScheduler ? createClientOffLoopScheduler() : offLoopScheduler;
 
     // If system properties does not contain leak detection, disable it
     if (!System.getProperties().containsKey("io.netty.leakDetectionLevel")) {
@@ -72,11 +72,11 @@ class ResourcesHolder implements Closeable {
     return eventLoopGroup;
   }
 
-  public Scheduler getOffLoopScheduler() {
+  public ThreadPoolScheduler getOffLoopScheduler() {
     return offLoopScheduler;
   }
 
-  public Scheduler getClientOffLoopScheduler() {
+  public ThreadPoolScheduler getClientOffLoopScheduler() {
     return clientOffLoopScheduler;
   }
 
@@ -156,10 +156,7 @@ class ResourcesHolder implements Closeable {
   }
 
   public Map<String, Long> stats() {
-    Map<String, Long> stats = new HashMap<>();
-    stats.putAll(offLoopScheduler.getStats());
-    stats.putAll(clientOffLoopScheduler.getStats());
-    return stats;
+    return offLoopScheduler.getStats();
   }
 
   @Override

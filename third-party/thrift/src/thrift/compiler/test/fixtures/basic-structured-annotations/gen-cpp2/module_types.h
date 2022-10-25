@@ -836,10 +836,9 @@ class structured_annotation_recursive final  {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  structured_annotation_recursive(apache::thrift::FragileConstructor, ::std::string name__arg, ::test::fixtures::basic-structured-annotations::structured_annotation_recursive recurse__arg, ::test::fixtures::basic-structured-annotations::structured_annotation_forward forward__arg);
+  structured_annotation_recursive(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> recurse__arg, ::test::fixtures::basic-structured-annotations::structured_annotation_forward forward__arg);
 
   structured_annotation_recursive(structured_annotation_recursive&&) noexcept;
-
   structured_annotation_recursive(const structured_annotation_recursive& src);
 
 
@@ -848,11 +847,11 @@ class structured_annotation_recursive final  {
  private:
   ::std::string __fbthrift_field_name;
  private:
-  ::test::fixtures::basic-structured-annotations::structured_annotation_recursive __fbthrift_field_recurse;
+  ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> __fbthrift_field_recurse;
  private:
   ::test::fixtures::basic-structured-annotations::structured_annotation_forward __fbthrift_field_forward;
  private:
-  apache::thrift::detail::isset_bitset<3, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  apache::thrift::detail::isset_bitset<2, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -898,85 +897,84 @@ class structured_annotation_recursive final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> name() && {
     return {static_cast<T&&>(this->__fbthrift_field_name), __isset.at(0), __isset.bit(0)};
   }
-
-  template <typename..., typename T = ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> recurse_ref() const& {
-    return {this->__fbthrift_field_recurse, __isset.at(1), __isset.bit(1)};
+  template <typename ..., typename T = ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>
+  FOLLY_ERASE T& recurse_ref() & {
+    return __fbthrift_field_recurse;
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> recurse_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_recurse), __isset.at(1), __isset.bit(1)};
+  template <typename ..., typename T = ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>
+  FOLLY_ERASE const T& recurse_ref() const& {
+    return __fbthrift_field_recurse;
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> recurse_ref() & {
-    return {this->__fbthrift_field_recurse, __isset.at(1), __isset.bit(1)};
+  template <typename ..., typename T = ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>
+  FOLLY_ERASE T&& recurse_ref() && {
+    return static_cast<T&&>(__fbthrift_field_recurse);
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> recurse_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_recurse), __isset.at(1), __isset.bit(1)};
+  template <typename ..., typename T = ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>
+  FOLLY_ERASE const T&& recurse_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_recurse);
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> recurse() const& {
-    return {this->__fbthrift_field_recurse, __isset.at(1), __isset.bit(1)};
+  template <typename ..., typename T = ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>
+  FOLLY_ERASE T& recurse() & {
+    return __fbthrift_field_recurse;
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> recurse() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_recurse), __isset.at(1), __isset.bit(1)};
+  template <typename ..., typename T = ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>
+  FOLLY_ERASE const T& recurse() const& {
+    return __fbthrift_field_recurse;
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> recurse() & {
-    return {this->__fbthrift_field_recurse, __isset.at(1), __isset.bit(1)};
+  template <typename ..., typename T = ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>
+  FOLLY_ERASE T&& recurse() && {
+    return static_cast<T&&>(__fbthrift_field_recurse);
   }
 
-  template <typename..., typename T = ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> recurse() && {
-    return {static_cast<T&&>(this->__fbthrift_field_recurse), __isset.at(1), __isset.bit(1)};
+  template <typename ..., typename T = ::std::unique_ptr<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>>
+  FOLLY_ERASE const T&& recurse() const&& {
+    return static_cast<const T&&>(__fbthrift_field_recurse);
   }
 
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::structured_annotation_forward>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> forward_ref() const& {
-    return {this->__fbthrift_field_forward, __isset.at(2), __isset.bit(2)};
+    return {this->__fbthrift_field_forward, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::structured_annotation_forward>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> forward_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_forward), __isset.at(2), __isset.bit(2)};
+    return {static_cast<const T&&>(this->__fbthrift_field_forward), __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::structured_annotation_forward>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> forward_ref() & {
-    return {this->__fbthrift_field_forward, __isset.at(2), __isset.bit(2)};
+    return {this->__fbthrift_field_forward, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::structured_annotation_forward>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> forward_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_forward), __isset.at(2), __isset.bit(2)};
+    return {static_cast<T&&>(this->__fbthrift_field_forward), __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::structured_annotation_forward>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> forward() const& {
-    return {this->__fbthrift_field_forward, __isset.at(2), __isset.bit(2)};
+    return {this->__fbthrift_field_forward, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::structured_annotation_forward>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> forward() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_forward), __isset.at(2), __isset.bit(2)};
+    return {static_cast<const T&&>(this->__fbthrift_field_forward), __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::structured_annotation_forward>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> forward() & {
-    return {this->__fbthrift_field_forward, __isset.at(2), __isset.bit(2)};
+    return {this->__fbthrift_field_forward, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::basic-structured-annotations::structured_annotation_forward>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> forward() && {
-    return {static_cast<T&&>(this->__fbthrift_field_forward), __isset.at(2), __isset.bit(2)};
+    return {static_cast<T&&>(this->__fbthrift_field_forward), __isset.at(1), __isset.bit(1)};
   }
 
   const ::std::string& get_name() const& {
@@ -992,15 +990,6 @@ class structured_annotation_recursive final  {
   ::std::string& set_name(T_structured_annotation_recursive_name_struct_setter&& name_) {
     name_ref() = std::forward<T_structured_annotation_recursive_name_struct_setter>(name_);
     return __fbthrift_field_name;
-  }
-  const ::test::fixtures::basic-structured-annotations::structured_annotation_recursive& get_recurse() const&;
-  ::test::fixtures::basic-structured-annotations::structured_annotation_recursive get_recurse() &&;
-
-  template <typename T_structured_annotation_recursive_recurse_struct_setter = ::test::fixtures::basic-structured-annotations::structured_annotation_recursive>
-  [[deprecated("Use `FOO.recurse_ref() = BAR;` instead of `FOO.set_recurse(BAR);`")]]
-  ::test::fixtures::basic-structured-annotations::structured_annotation_recursive& set_recurse(T_structured_annotation_recursive_recurse_struct_setter&& recurse_) {
-    recurse_ref() = std::forward<T_structured_annotation_recursive_recurse_struct_setter>(recurse_);
-    return __fbthrift_field_recurse;
   }
   const ::test::fixtures::basic-structured-annotations::structured_annotation_forward& get_forward() const&;
   ::test::fixtures::basic-structured-annotations::structured_annotation_forward get_forward() &&;

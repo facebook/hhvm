@@ -16,8 +16,8 @@ class IteratorIterator<Tv> implements OuterIterator<Tv> {
   public function valid();
   public function key();
   public function current();
-  public function next();
-  public function rewind();
+  public function next(): void;
+  public function rewind(): void;
   public function call__($func, $params);
   protected function _fetch($check);
   protected function _getPosition();

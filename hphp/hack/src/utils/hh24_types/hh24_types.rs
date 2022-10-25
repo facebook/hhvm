@@ -54,16 +54,51 @@ macro_rules! u64_hash_wrapper_impls {
 /// But let's hold off until we've adopted thiserror 1.0.34 and rustc post backtrace stabilization
 #[derive(thiserror::Error, Debug)]
 pub enum HhError {
+    /// This error is used for all unexpected scenarios - anything where we want a callstack
+    /// and telemetry. This includes disk io errors, json parsing errors.
     #[error("Unexpected: {0:#}")]
     Unexpected(anyhow::Error),
 
-    #[error("Disk changed: {0} - do hh_decl --update then restart the operation. [{1}]")]
+    /// This means that hh_decl was asked for a decl, and it had to read it off disk, but
+    /// what it read off disk is different from what it expected in the naming table.
+    /// This means that the disk has changed in a material way since the last time anyone
+    /// invoked "hh_decl change", or its user-facing caller "hh update". Therefore,
+    /// any facts or derived facts (shallow or folded decs, or depgraph edges) that we
+    /// attempted to deduce based on reading a disk file run the risk of being invalid in ways
+    /// that we won't subsequently be able to invalidate. Therefore, we must not commit such
+    /// facts to memory or anywhere. In the face of such a situation, no useful work is
+    /// possible by hh_decl nor by the caller of it (hh_fanout, hh_worker, hh). The only thing
+    /// that hh_decl or its callers can do in this situation is propagate the DiskChanged error
+    /// upwards for now, and terminate themselves. What's needed for work to proceed is
+    /// to do "hh_decl change" with the affected files. More typically, this will be done
+    /// by "hh update", which will query watchman for all modified files, then invoke "hh_decl change"
+    /// for them, then invoke "hh_fanout change" for modified symbols. Note that the only
+    /// component which can recover from DiskChanged is "hh --retry-on-disk-changed", which
+    /// sees a DiskChanged error reported from one of its subcomponents (hh_decl, hh_fanout, hh_worker)
+    /// and does that "hh update" remediation step itself.
+    #[error("Disk changed: {0} - do hh_decl change then restart the operation. [{1}]")]
     DiskChanged(std::path::PathBuf, String),
 
-    #[error("Decl-store changed its checksum: {0:?} - restart the operation. [{1}]")]
+    /// This means that hh_decl was asked for a decl by some component (hh_fanout, hh_worker, hh)
+    /// but some concurrent process had already done "hh_decl change" to inform it of modified
+    /// symbols. In other words, hh_decl is "in the future" and knows about changes on disk
+    /// that its caller doesn't yet know about. In such a situation it's unsafe for the caller
+    /// to continue -- any facts or derived facts that the caller attempts to store will be
+    /// invalid in ways it can't recover from. The only action the caller can do is terminate
+    /// itself, and trust that someone will restart it. For cases purely within "hh check" this
+    /// situation won't arise. Where it will arise is if someone did "hh --type-at-pos ..." in the
+    /// background, and then also did "hh update", and the hh update might have updated hh_decl
+    /// in such a way that the type-at-pos worker is unable to proceed. (If someone had done
+    /// "hh --type-at-pos --retry-on-disk-changed" then after the worker terminated with this error,
+    // then hh would know to restart it.)
+    #[error("Hh_decl changed its checksum: {0:?} - restart the operation. [{1}]")]
     ChecksumChanged(Checksum, String),
 
-    #[error("Decl-store stopped - abandon the operation. [{0}]")]
+    /// This means that hh_decl was told to stop. This error is our chief signalling mechanism for
+    /// getting concurrent workers to stop too: they are (presumably) spending their time reading
+    /// hh_decl, and once we tell hh_decl to stop then they'll soon get the message, and know
+    /// to shut down.
+    #[error("Hh_decl stopped - abandon the operation. [{0}]")]
     Stopped(String),
 }
 
@@ -448,15 +483,15 @@ impl std::str::FromStr for DepgraphEdge {
                 dependency: dependency.parse()?,
                 dependent: dependent.parse()?,
             }),
-            _ => Err(ParseDepgraphEdgeError::Invalid),
+            _ => Err(ParseDepgraphEdgeError::Invalid(s.to_owned())),
         }
     }
 }
 
 #[derive(thiserror::Error, Debug)]
 pub enum ParseDepgraphEdgeError {
-    #[error("expected dependency_hash:dependent_hash")]
-    Invalid,
+    #[error("expected dependency_hash:dependent_hash format. actual \"{0}\"")]
+    Invalid(String),
     #[error("{0}")]
     FromInt(#[from] std::num::ParseIntError),
 }

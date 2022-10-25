@@ -62,6 +62,16 @@ decltype(auto) at(C& container, size_t i) {
   return *itr;
 }
 
+template <typename Protocol>
+MaskedDecodeResult parseObjectWithTest(
+    const folly::IOBuf& buf, Mask mask, bool string_to_binary = true) {
+  auto ret = parseObject<Protocol>(buf, mask, string_to_binary);
+  auto v =
+      parseObjectWithoutExcludedData<Protocol>(buf, mask, string_to_binary);
+  EXPECT_EQ(ret.included, v);
+  return ret;
+}
+
 TEST(ObjectTest, Example) {
   using facebook::thrift::lib::test::Bar;
 
@@ -445,7 +455,8 @@ void testWithMask(bool testSerialize) {
     auto iobuf = serialize<Protocol, T>(testsetValue);
     {
       // parseObject with allMask should parse the entire object.
-      auto result = parseObject<protocol_reader_t<Protocol>>(*iobuf, allMask());
+      auto result =
+          parseObjectWithTest<protocol_reader_t<Protocol>>(*iobuf, allMask());
       if (testSerialize) {
         reserialize(result);
       } else { // manually check the result
@@ -458,7 +469,7 @@ void testWithMask(bool testSerialize) {
     {
       // parseObject with noneMask should parse nothing.
       auto result =
-          parseObject<protocol_reader_t<Protocol>>(*iobuf, noneMask());
+          parseObjectWithTest<protocol_reader_t<Protocol>>(*iobuf, noneMask());
       if (testSerialize) {
         reserialize(result);
       } else { // manually check the result
@@ -477,7 +488,8 @@ void testWithMask(bool testSerialize) {
       // parseObject with Mask = includes{1: allMask()}
       Mask mask;
       mask.includes_ref().emplace()[1] = allMask();
-      auto result = parseObject<protocol_reader_t<Protocol>>(*iobuf, mask);
+      auto result =
+          parseObjectWithTest<protocol_reader_t<Protocol>>(*iobuf, mask);
       if (testSerialize) {
         reserialize(result);
       } else { // manually check the result
@@ -894,8 +906,8 @@ void testParseObjectWithMask(bool testSerialize) {
 
   // serialize the object and deserialize with mask
   auto serialized = protocol::serializeObject<protocol_writer_t<Protocol>>(obj);
-  MaskedDecodeResult result =
-      parseObject<protocol_reader_t<Protocol>>(*serialized, mask, false);
+  MaskedDecodeResult result = parseObjectWithTest<protocol_reader_t<Protocol>>(
+      *serialized, mask, false);
 
   if (testSerialize) {
     // test serializeObject with mask
@@ -951,8 +963,8 @@ void testSerializeObjectWithMask() {
 
   // serialize the object and deserialize with mask
   auto serialized = protocol::serializeObject<protocol_writer_t<Protocol>>(obj);
-  MaskedDecodeResult result =
-      parseObject<protocol_reader_t<Protocol>>(*serialized, mask, false);
+  MaskedDecodeResult result = parseObjectWithTest<protocol_reader_t<Protocol>>(
+      *serialized, mask, false);
   {
     Object expected, bar;
     // expected{1: {1: "foo"},
@@ -1139,8 +1151,8 @@ void testParseObjectWithMapMask(bool testSerialize) {
   expected[FieldId{2}] = asValueStruct<type::set<type::byte_t>>(set);
 
   // serialize the object and deserialize with mask
-  MaskedDecodeResult result =
-      parseObject<protocol_reader_t<Protocol>>(*serialized, mask, false);
+  MaskedDecodeResult result = parseObjectWithTest<protocol_reader_t<Protocol>>(
+      *serialized, mask, false);
 
   if (testSerialize) {
     testSerializeObjectWithMapMask<Protocol>(result, obj);

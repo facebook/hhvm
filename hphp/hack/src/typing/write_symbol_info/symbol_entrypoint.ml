@@ -12,21 +12,23 @@ module File_info = Symbol_file_info
 module Add_fact = Symbol_add_fact
 module Fact_acc = Symbol_predicate.Fact_acc
 module Indexable = Symbol_indexable
+module Sym_hash = Symbol_sym_hash
 
 module JobReturn = struct
   type t = {
     elapsed: float;
     hashes: Md5.Set.t;
+    reindexed: SSet.t;
   }
 
-  let dummy = { elapsed = 0.0; hashes = Md5.Set.empty }
-
-  let neutral = { elapsed = 0.0; hashes = Md5.Set.empty }
+  let neutral =
+    { elapsed = 0.0; hashes = Md5.Set.empty; reindexed = SSet.empty }
 
   let merge t1 t2 =
     {
       elapsed = t1.elapsed +. t2.elapsed;
       hashes = Md5.Set.union t1.hashes t2.hashes;
+      reindexed = SSet.union t1.reindexed t2.reindexed;
     }
 end
 
@@ -90,7 +92,7 @@ let write_json
         file_info.File_info.sym_hash)
     |> Md5.Set.of_list
   in
-  JobReturn.{ elapsed; hashes }
+  JobReturn.{ elapsed; hashes; reindexed = SSet.empty }
 
 let recheck_job
     (ctx : Provider_context.t)
@@ -98,16 +100,34 @@ let recheck_job
     (root_path : string)
     (hhi_path : string)
     ~(gen_sym_hash : bool)
+    ~(incremental : Sym_hash.t option)
     (ownership : bool)
     (_ : JobReturn.t)
     (progress : Indexable.t list) : JobReturn.t =
   let start_time = Unix.gettimeofday () in
+  let gen_sym_hash = gen_sym_hash || Option.is_some incremental in
   let files_info =
     List.map
       progress
       ~f:(File_info.create ctx ~root_path ~hhi_path ~gen_sym_hash)
   in
-  write_json ctx ownership out_dir files_info start_time
+  let reindex f =
+    match (f.File_info.fanout, incremental, f.File_info.sym_hash) with
+    | (true, Some table, Some hash) when Sym_hash.mem table hash -> false
+    | _ -> true
+  in
+  let to_reindex = List.filter ~f:reindex files_info in
+  let res = write_json ctx ownership out_dir to_reindex start_time in
+  let fanout_reindexed =
+    let f File_info.{ path; fanout; _ } =
+      if fanout then
+        Some path
+      else
+        None
+    in
+    List.filter_map to_reindex ~f |> SSet.of_list
+  in
+  JobReturn.{ res with reindexed = fanout_reindexed }
 
 let index_files ctx ~out_dir ~files =
   let idx = List.map files ~f:Indexable.from_file in
@@ -117,8 +137,9 @@ let index_files ctx ~out_dir ~files =
     "www"
     "hhi"
     ~gen_sym_hash:false
+    ~incremental:None
     false
-    JobReturn.dummy
+    JobReturn.neutral
     idx
   |> ignore
 
@@ -132,6 +153,7 @@ let go
     ~(out_dir : string)
     ~(root_path : string)
     ~(hhi_path : string)
+    ~(incremental : Sym_hash.t option)
     ~(files : Indexable.t list) : unit =
   let num_workers =
     match workers with
@@ -142,7 +164,15 @@ let go
   let jobs =
     MultiWorker.call
       workers
-      ~job:(recheck_job ctx out_dir root_path hhi_path ~gen_sym_hash ownership)
+      ~job:
+        (recheck_job
+           ctx
+           out_dir
+           root_path
+           hhi_path
+           ~gen_sym_hash
+           ~incremental
+           ownership)
       ~merge:JobReturn.merge
       ~next:(Bucket.make ~num_workers ~max_size:115 files)
       ~neutral:JobReturn.neutral
@@ -151,10 +181,14 @@ let go
   let shard_name =
     Md5.digest_string (Float.to_string start_time) |> Md5.to_hex
   in
-  let shard_facts =
-    gen_shard_facts namespace_map ~ownership ~shard_name jobs.JobReturn.hashes
-  in
-  write_file out_dir 1 shard_facts;
+  if gen_sym_hash then
+    let shard_facts =
+      gen_shard_facts namespace_map ~ownership ~shard_name jobs.JobReturn.hashes
+    in
+    write_file out_dir 1 shard_facts
+  else
+    ();
+  SSet.iter (Hh_logger.log "Reindexed: %s") jobs.JobReturn.reindexed;
   let cumulated_elapsed = jobs.JobReturn.elapsed in
   log_elapsed "Processed all batches (cumulated time) in " cumulated_elapsed;
   let elapsed = Unix.gettimeofday () -. start_time in

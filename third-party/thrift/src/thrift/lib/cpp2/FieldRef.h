@@ -227,13 +227,13 @@ class BitRef {
   const bool is_atomic_ = false;
 };
 
-template <typename value_type>
+template <typename value_type, typename return_type = value_type>
 using EnableIfConst =
-    std::enable_if_t<std::is_const<value_type>::value, value_type>;
+    std::enable_if_t<std::is_const<value_type>::value, return_type>;
 
-template <typename value_type>
+template <typename value_type, typename return_type = value_type>
 using EnableIfNonConst =
-    std::enable_if_t<!std::is_const<value_type>::value, value_type>;
+    std::enable_if_t<!std::is_const<value_type>::value, return_type>;
 } // namespace detail
 
 // A reference to an unqualified field of the possibly const-qualified type
@@ -817,6 +817,11 @@ struct is_boxed_value_ptr : std::false_type {};
 template <typename T>
 struct is_boxed_value_ptr<boxed_value_ptr<T>> : std::true_type {};
 
+template <typename T>
+struct is_boxed_value : std::false_type {};
+template <typename T>
+struct is_boxed_value<boxed_value<T>> : std::true_type {};
+
 template <typename From, typename To>
 using copy_reference_t = std::conditional_t<
     std::is_lvalue_reference<From>{},
@@ -1328,6 +1333,254 @@ bool operator>(const U& a, boxed_field_ref<T> b) {
 
 template <typename T, typename U>
 bool operator>=(const U& a, boxed_field_ref<T> b) {
+  return b <= a;
+}
+
+// A reference to a 'Fill' intern boxed field.
+//
+// It currently only supports Thrift structs.
+template <typename T>
+class intern_boxed_field_ref {
+  static_assert(std::is_reference<T>::value, "not a reference");
+  static_assert(
+      detail::is_boxed_value<folly::remove_cvref_t<T>>::value,
+      "not a boxed_value");
+
+  using element_type = typename folly::remove_cvref_t<T>::element_type;
+  using boxed_value_type = std::remove_reference_t<T>;
+
+  static_assert(
+      apache::thrift::is_thrift_struct_v<element_type>, "not a thrift struct.");
+
+  template <typename U>
+  friend class intern_boxed_field_ref;
+
+  using get_default_t = std::function<const element_type&()>;
+
+ public:
+  using value_type = detail::copy_const_t<T, element_type>;
+  using reference_type = detail::copy_reference_t<T, value_type>;
+
+ private:
+  using BitRef =
+      apache::thrift::detail::BitRef<std::is_const<value_type>::value>;
+
+ public:
+  FOLLY_ERASE intern_boxed_field_ref(
+      T value,
+      get_default_t get_default,
+      typename BitRef::Isset& is_set,
+      const uint8_t bit_index = 0) noexcept
+      : value_(value), get_default_(get_default), bitref_(is_set, bit_index) {}
+
+  FOLLY_ERASE intern_boxed_field_ref(
+      T value,
+      get_default_t get_default,
+      typename BitRef::AtomicIsset& is_set,
+      const uint8_t bit_index = 0) noexcept
+      : value_(value), get_default_(get_default), bitref_(is_set, bit_index) {}
+
+  template <
+      typename U,
+      std::enable_if_t<
+          std::is_same<
+              std::add_const_t<std::remove_reference_t<U>>,
+              std::remove_reference_t<T>>{} &&
+              !(std::is_rvalue_reference<T>{} && std::is_lvalue_reference<U>{}),
+          int> = 0>
+  FOLLY_ERASE /* implicit */ intern_boxed_field_ref(
+      const intern_boxed_field_ref<U>& other) noexcept
+      : value_(other.value_), bitref_(other.bitref_) {}
+
+  template <typename U = value_type>
+  FOLLY_ERASE std::enable_if_t<
+      std::is_assignable<value_type&, U&&>::value,
+      intern_boxed_field_ref&>
+  operator=(U&& value) {
+    value_.mut() = static_cast<U&&>(value);
+    bitref_ = true;
+    return *this;
+  }
+
+  // Workaround for https://bugs.llvm.org/show_bug.cgi?id=49442
+  FOLLY_ERASE intern_boxed_field_ref& operator=(value_type&& value) noexcept(
+      std::is_nothrow_move_assignable<value_type>::value) {
+    value_.mut() = static_cast<value_type&&>(value);
+    bitref_ = true;
+    return *this;
+    value.~value_type(); // Force emit destructor...
+  }
+
+  // If the other field owns the value, it will perform deep copy. If the other
+  // field does not own the value, it will perform a shallow copy.
+  template <typename U>
+  FOLLY_ERASE void copy_from(const intern_boxed_field_ref<U>& other) {
+    value_ = other.value_;
+    bitref_ = other.is_set();
+  }
+
+  [[deprecated("Use is_set() method instead")]] FOLLY_ERASE bool has_value()
+      const noexcept {
+    return bool(bitref_);
+  }
+
+  // Returns true iff the field is set. 'intern_boxed_field_ref' doesn't provide
+  // conversion to bool to avoid confusion between checking if the field is set
+  // and getting the field's value, particularly for bool fields.
+  FOLLY_ERASE bool is_set() const noexcept { return bool(bitref_); }
+
+  FOLLY_ERASE void reset() noexcept {
+    // reset to the intern default.
+    value_ = boxed_value_type::fromStaticConstant(&get_default_());
+    bitref_ = false;
+  }
+
+  template <typename U = value_type>
+  FOLLY_ERASE detail::EnableIfNonConst<U, reference_type> value() {
+    return static_cast<reference_type>(value_.mut());
+  }
+  template <typename U = value_type>
+  FOLLY_ERASE detail::EnableIfConst<U, reference_type> value() const {
+    return static_cast<reference_type>(value_.value());
+  }
+
+  FOLLY_ERASE reference_type ensure() noexcept {
+    bitref_ = true;
+    return static_cast<reference_type>(value_.mut());
+  }
+
+  FOLLY_ERASE reference_type operator*() { return value(); }
+  FOLLY_ERASE reference_type operator*() const { return value(); }
+
+  template <typename U = value_type>
+  [[deprecated(
+      "Please use `foo.value().bar()` instead of `foo->bar()` "
+      "since const is not propagated correctly in `operator->` API")]] FOLLY_ERASE
+      detail::EnableIfNonConst<U>*
+      operator->() {
+    return &value_.mut();
+  }
+
+  template <typename U = value_type>
+  FOLLY_ERASE detail::EnableIfConst<U>* operator->() const {
+    return &value_.value();
+  }
+
+  template <typename... Args>
+  FOLLY_ERASE value_type& emplace(Args&&... args) {
+    bitref_ = false; // C++ Standard requires *this to be empty if
+                     // `std::optional::emplace(...)` throws
+    value_.reset(std::make_unique<value_type>(static_cast<Args&&>(args)...));
+    bitref_ = true;
+    return value_.mut();
+  }
+
+  template <class U, class... Args>
+  FOLLY_ERASE std::enable_if_t<
+      std::is_constructible<value_type, std::initializer_list<U>&, Args&&...>::
+          value,
+      value_type&>
+  emplace(std::initializer_list<U> ilist, Args&&... args) {
+    bitref_ = false;
+    value_.reset(
+        std::make_unique<value_type>(ilist, static_cast<Args&&>(args)...));
+    bitref_ = true;
+    return value_.value();
+  }
+
+ private:
+  boxed_value_type& value_;
+  get_default_t get_default_;
+  BitRef bitref_;
+};
+
+template <typename T1, typename T2>
+bool operator==(intern_boxed_field_ref<T1> a, intern_boxed_field_ref<T2> b) {
+  return *a == *b;
+}
+
+template <typename T1, typename T2>
+bool operator!=(intern_boxed_field_ref<T1> a, intern_boxed_field_ref<T2> b) {
+  return !(a == b);
+}
+
+template <typename T1, typename T2>
+bool operator<(intern_boxed_field_ref<T1> a, intern_boxed_field_ref<T2> b) {
+  return *a < *b;
+}
+
+template <typename T1, typename T2>
+bool operator>(intern_boxed_field_ref<T1> a, intern_boxed_field_ref<T2> b) {
+  return b < a;
+}
+
+template <typename T1, typename T2>
+bool operator<=(intern_boxed_field_ref<T1> a, intern_boxed_field_ref<T2> b) {
+  return !(a > b);
+}
+
+template <typename T1, typename T2>
+bool operator>=(intern_boxed_field_ref<T1> a, intern_boxed_field_ref<T2> b) {
+  return !(a < b);
+}
+
+template <typename T, typename U>
+bool operator==(intern_boxed_field_ref<T> a, const U& b) {
+  return *a == b;
+}
+
+template <typename T, typename U>
+bool operator!=(intern_boxed_field_ref<T> a, const U& b) {
+  return !(a == b);
+}
+
+template <typename T, typename U>
+bool operator==(const U& a, intern_boxed_field_ref<T> b) {
+  return b == a;
+}
+
+template <typename T, typename U>
+bool operator!=(const U& a, intern_boxed_field_ref<T> b) {
+  return b != a;
+}
+
+template <typename T, typename U>
+bool operator<(intern_boxed_field_ref<T> a, const U& b) {
+  return *a < b;
+}
+
+template <typename T, typename U>
+bool operator>(intern_boxed_field_ref<T> a, const U& b) {
+  return *a > b;
+}
+
+template <typename T, typename U>
+bool operator<=(intern_boxed_field_ref<T> a, const U& b) {
+  return !(a > b);
+}
+
+template <typename T, typename U>
+bool operator>=(intern_boxed_field_ref<T> a, const U& b) {
+  return !(a < b);
+}
+
+template <typename T, typename U>
+bool operator<(const U& a, intern_boxed_field_ref<T> b) {
+  return b > a;
+}
+
+template <typename T, typename U>
+bool operator<=(const U& a, intern_boxed_field_ref<T> b) {
+  return b >= a;
+}
+
+template <typename T, typename U>
+bool operator>(const U& a, intern_boxed_field_ref<T> b) {
+  return b < a;
+}
+
+template <typename T, typename U>
+bool operator>=(const U& a, intern_boxed_field_ref<T> b) {
   return b <= a;
 }
 

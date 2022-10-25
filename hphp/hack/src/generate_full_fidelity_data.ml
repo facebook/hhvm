@@ -2344,7 +2344,7 @@ module GenerateFFRustTriviaKind = struct
     make_header CStyle ""
     ^ "
 
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep::{FromOcamlRep, ToOcamlRep};
 
 #[derive(Debug, Copy, Clone, FromOcamlRep, ToOcamlRep, PartialEq)]
 #[repr(u8)]
@@ -2440,7 +2440,7 @@ module GenerateFFRustSyntaxKind = struct
     make_header CStyle ""
     ^ "
 
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep::{FromOcamlRep, ToOcamlRep};
 
 use crate::token_kind::TokenKind;
 
@@ -2701,7 +2701,7 @@ module GenerateFFRustTokenKind = struct
 
 use std::num::NonZeroUsize;
 
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep::{FromOcamlRep, ToOcamlRep};
 
 #[allow(non_camel_case_types)] // allow Include_once and Require_once
 #[derive(Debug, Copy, Clone, PartialEq, Ord, Eq, PartialOrd, FromOcamlRep, ToOcamlRep)]
@@ -2831,7 +2831,7 @@ module GenerateFFOperatorRust = struct
     make_header CStyle ""
     ^ "
 
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep::{FromOcamlRep, ToOcamlRep};
 
 #[derive(FromOcamlRep, ToOcamlRep)]
 pub enum Operator {

@@ -100,6 +100,7 @@ impl ItemConverter {
         Ok(Def::Alias {
             doc: attrs.doc,
             attrs: attrs.attrs,
+            mutual_rec: attrs.mutual_rec,
             tparams: self.tparams,
             name,
             ty,
@@ -113,6 +114,7 @@ impl ItemConverter {
             syn::Fields::Unit => Ok(Def::Alias {
                 doc: container_attrs.doc,
                 attrs: container_attrs.attrs,
+                mutual_rec: container_attrs.mutual_rec,
                 tparams: self.tparams,
                 name,
                 ty: ir::Type::Path(ir::TypePath::simple("unit")),
@@ -124,6 +126,7 @@ impl ItemConverter {
                 Ok(Def::Alias {
                     doc: container_attrs.doc,
                     attrs: container_attrs.attrs,
+                    mutual_rec: container_attrs.mutual_rec,
                     tparams: self.tparams,
                     name,
                     ty: if elems.is_empty() {
@@ -154,6 +157,7 @@ impl ItemConverter {
                 Ok(Def::Record {
                     doc: container_attrs.doc,
                     attrs: container_attrs.attrs,
+                    mutual_rec: container_attrs.mutual_rec,
                     tparams: self.tparams,
                     name,
                     fields,
@@ -244,6 +248,7 @@ impl ItemConverter {
         Ok(Def::Variant {
             doc: container_attrs.doc,
             attrs: container_attrs.attrs,
+            mutual_rec: container_attrs.mutual_rec,
             tparams: self.tparams,
             name,
             variants,

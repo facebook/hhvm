@@ -108,7 +108,7 @@ cdef class GeneratedError(Error):
     cdef iobuf.IOBuf _serialize(GeneratedError self, Protocol proto)
     cdef uint32_t _deserialize(GeneratedError self, iobuf.IOBuf buf, Protocol proto) except? 0
 
-# TODO: add a HandlerManager class to wrap functionality below
+# TODO: T134656128
 ctypedef object(*Handler)(const cFollyExceptionWrapper& ex, PyObject* user_data)
 cdef void addHandler(Handler handler)
 cdef void removeAllHandlers()

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c03f27d91e21e22a37dd66bb784d4af5>>
+// @generated SignedSource<<01a92154745f8d0bb2ec08f9e9bfd09c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,8 +11,8 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 pub use pos::Pos;
 use serde::Deserialize;
 use serde::Serialize;
@@ -21,6 +21,7 @@ pub use crate::shape_map;
 #[allow(unused_imports)]
 use crate::*;
 
+#[rust_to_ocaml(and)]
 pub type Id_<'a> = str;
 
 #[derive(
@@ -38,6 +39,7 @@ pub type Id_<'a> = str;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct Id<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Pos<'a>,
@@ -46,10 +48,13 @@ pub struct Id<'a>(
 impl<'a> TrivialDrop for Id<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Id<'arena>);
 
+#[rust_to_ocaml(and)]
 pub type Pstring<'a> = (&'a Pos<'a>, &'a str);
 
+#[rust_to_ocaml(and)]
 pub type ByteString<'a> = str;
 
+#[rust_to_ocaml(and)]
 pub type PositionedByteString<'a> = (&'a Pos<'a>, &'a bstr::BStr);
 
 #[derive(
@@ -68,6 +73,7 @@ pub type PositionedByteString<'a> = (&'a Pos<'a>, &'a bstr::BStr);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum ShapeFieldName<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -106,6 +112,7 @@ pub use oxidized::ast_defs::Variance;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum ParamKind<'a> {
     /// Contains the position for an entire `inout` annotated expression, e.g.:
@@ -140,6 +147,7 @@ pub use oxidized::ast_defs::ReadonlyKind;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Bop<'a> {
     /// Addition: x + y
@@ -221,6 +229,7 @@ pub use oxidized::ast_defs::Visibility;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum XhpEnumValue<'a> {
     #[rust_to_ocaml(name = "XEV_Int")]

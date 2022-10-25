@@ -56,20 +56,6 @@ fmt::string_view value_or_empty(const std::string* value) {
 
 } // namespace
 
-bool is_custom_type(const t_field& field) {
-  const t_type* type = field.get_type();
-  return gen::cpp::type_resolver::find_first_adapter(field) ||
-      t_typedef::get_first_annotation_or_null(
-             type,
-             {
-                 "cpp.template",
-                 "cpp2.template",
-                 "cpp.type",
-                 "cpp2.type",
-             }) ||
-      t_typedef::get_first_structured_annotation_or_null(type, kCppAdapterUri);
-}
-
 bool is_custom_type(const t_type& type) {
   return t_typedef::get_first_annotation_or_null(
              &type,
@@ -80,6 +66,55 @@ bool is_custom_type(const t_type& type) {
                  "cpp2.type",
              }) ||
       t_typedef::get_first_structured_annotation_or_null(&type, kCppAdapterUri);
+}
+
+bool is_custom_type(const t_field& field) {
+  return gen::cpp::type_resolver::find_first_adapter(field) ||
+      is_custom_type(*field.get_type());
+}
+
+bool container_supports_incomplete_params(const t_type& type) {
+  if (t_typedef::get_first_annotation_or_null(
+          &type,
+          {
+              "cpp.container_supports_incomplete_params",
+          }) ||
+      !is_custom_type(type)) {
+    return true;
+  }
+
+  static const std::unordered_set<std::string> template_exceptions = [] {
+    std::unordered_set<std::string> types;
+    for (auto& type : {
+             "folly::F14NodeMap",
+             "folly::F14VectorMap",
+             "folly::small_vector_map",
+             "folly::sorted_vector_map",
+
+             "folly::F14NodeSet",
+             "folly::F14VectorSet",
+             "folly::small_vector_set",
+             "folly::sorted_vector_set",
+
+             "std::forward_list",
+             "std::list",
+         }) {
+      types.insert(type);
+      types.insert(fmt::format("::{}", type));
+    }
+    return types;
+  }();
+  auto cpp_template = t_typedef::get_first_annotation_or_null(
+      &type,
+      {
+          "cpp.template",
+          "cpp2.template",
+      });
+  if (cpp_template && template_exceptions.count(*cpp_template)) {
+    return true;
+  }
+
+  return false;
 }
 
 std::unordered_map<t_struct*, std::vector<t_struct*>>
@@ -118,10 +153,22 @@ gen_struct_dependency_graph(
         auto t = ftype->get_true_type();
         if (auto map = dynamic_cast<t_map const*>(t)) {
           // We don't add non-custom type `std::map` to dependency graph since
-          // it supports incomplete types
-          if (cpp2::is_custom_type(*map)) {
+          // all known implementations support incomplete types (though as UB).
+          if (!cpp2::container_supports_incomplete_params(*map)) {
             add_dependency(map->get_key_type());
             add_dependency(map->get_val_type());
+          }
+        } else if (auto set = dynamic_cast<t_set const*>(t)) {
+          // We don't add non-custom type `std::set` to dependency graph since
+          // all known implementations support incomplete types (though as UB).
+          if (!cpp2::container_supports_incomplete_params(*set)) {
+            add_dependency(set->get_elem_type());
+          }
+        } else if (auto list = dynamic_cast<t_list const*>(t)) {
+          // We don't add non-custom type `std::vector` to dependency graph
+          // since it supports incomplete types (as of C++17).
+          if (!cpp2::container_supports_incomplete_params(*list)) {
+            add_dependency(list->get_elem_type());
           }
         } else {
           add_dependency(t);
@@ -139,6 +186,17 @@ gen_struct_dependency_graph(
   };
   return edges;
 }
+
+namespace {
+bool has_dependent_adapter(const t_type& node) {
+  if (auto annotation = t_typedef::get_first_structured_annotation_or_null(
+          &node, kCppAdapterUri)) {
+    return !annotation->get_value_from_structured_annotation_or_null(
+        "adaptedType");
+  }
+  return false;
+}
+} // namespace
 
 std::unordered_map<const t_type*, std::vector<const t_type*>>
 gen_adapter_dependency_graph(
@@ -162,8 +220,7 @@ gen_adapter_dependency_graph(
           if (!dynamic_cast<t_typedef const*>(type) &&
               !(dynamic_cast<t_struct const*>(type) &&
                 (include_structs ||
-                 gen::cpp::type_resolver::find_first_adapter(
-                     *type->get_true_type())))) {
+                 has_dependent_adapter(*type->get_true_type())))) {
             return;
           }
         }
@@ -206,6 +263,28 @@ gen_adapter_dependency_graph(
         const auto* type = field->get_type();
         if (dynamic_cast<t_typedef const*>(type)) {
           add_dependency(type, false);
+        } else if (auto map = dynamic_cast<t_map const*>(type)) {
+          // Container depends on typedefs even if it supports incomplete types
+          if (auto* key_type =
+                  dynamic_cast<t_typedef const*>(map->get_key_type())) {
+            add_dependency(key_type, false);
+          }
+          if (auto* val_type =
+                  dynamic_cast<t_typedef const*>(map->get_val_type())) {
+            add_dependency(val_type, false);
+          }
+        } else if (auto set = dynamic_cast<t_set const*>(type)) {
+          // Container depends on typedefs even if it supports incomplete types
+          if (auto* elem_type =
+                  dynamic_cast<t_typedef const*>(set->get_elem_type())) {
+            add_dependency(elem_type, false);
+          }
+        } else if (auto list = dynamic_cast<t_list const*>(type)) {
+          // Container depends on typedefs even if it supports incomplete types
+          if (auto* elem_type =
+                  dynamic_cast<t_typedef const*>(list->get_elem_type())) {
+            add_dependency(elem_type, false);
+          }
         }
         return true;
       });
@@ -379,6 +458,7 @@ bool field_transitively_refers_to_unique(const t_field* field) {
       return true;
     }
     case gen::cpp::reference_type::boxed:
+    case gen::cpp::reference_type::boxed_intern:
     case gen::cpp::reference_type::shared_const:
     case gen::cpp::reference_type::shared_mutable: {
       return false;
@@ -489,6 +569,7 @@ bool has_ref_annotation(const t_field& field) {
     case gen::cpp::reference_type::shared_mutable:
       return true;
     case gen::cpp::reference_type::none:
+    case gen::cpp::reference_type::boxed_intern:
     case gen::cpp::reference_type::boxed:
       return false;
   }

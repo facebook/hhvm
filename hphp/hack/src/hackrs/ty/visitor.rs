@@ -20,10 +20,48 @@ pub trait Visitor<R: Reason> {
     /// Must return `self`.
     fn object(&mut self) -> &mut dyn Visitor<R>;
 
+    fn visit_pos(&mut self, _: &R::Pos) {}
+    fn visit_symbol(&mut self, _: &pos::Symbol) {}
+
+    fn visit_type_name(&mut self, o: &pos::TypeName) {
+        o.recurse(self.object());
+    }
+    fn visit_module_name(&mut self, o: &pos::ModuleName) {
+        o.recurse(self.object());
+    }
+    fn visit_const_name(&mut self, o: &pos::ConstName) {
+        o.recurse(self.object());
+    }
+    fn visit_fun_name(&mut self, o: &pos::FunName) {
+        o.recurse(self.object());
+    }
+    fn visit_class_const_name(&mut self, o: &pos::ClassConstName) {
+        o.recurse(self.object());
+    }
+    fn visit_type_const_name(&mut self, o: &pos::TypeConstName) {
+        o.recurse(self.object());
+    }
+    fn visit_method_name(&mut self, o: &pos::MethodName) {
+        o.recurse(self.object());
+    }
+    fn visit_prop_name(&mut self, o: &pos::PropName) {
+        o.recurse(self.object());
+    }
+
     fn visit_decl_ty(&mut self, o: &decl::Ty<R>) {
         o.recurse(self.object());
     }
     fn visit_local_ty(&mut self, o: &local::Ty<R>) {
+        o.recurse(self.object());
+    }
+
+    fn visit_decl(&mut self, o: &crate::decl::shallow::Decl<R>) {
+        o.recurse(self.object());
+    }
+    fn visit_named_decl(&mut self, o: &crate::decl::shallow::NamedDecl<R>) {
+        o.recurse(self.object());
+    }
+    fn visit_shallow_class(&mut self, o: &crate::decl::ShallowClass<R>) {
         o.recurse(self.object());
     }
 }
@@ -37,7 +75,14 @@ impl<R: Reason, T: Walkable<R>> Walkable<R> for Option<T> {
     }
 }
 
-impl<R: Reason, T: Walkable<R>> Walkable<R> for Box<T> {
+impl<R: Reason, T: Walkable<R> + ?Sized> Walkable<R> for &T {
+    fn recurse(&self, v: &mut dyn Visitor<R>) {
+        let obj: &T = &**self;
+        obj.accept(v)
+    }
+}
+
+impl<R: Reason, T: Walkable<R> + ?Sized> Walkable<R> for Box<T> {
     fn recurse(&self, v: &mut dyn Visitor<R>) {
         let obj: &T = &**self;
         obj.accept(v)
@@ -73,6 +118,13 @@ impl<R: Reason, T: Walkable<R>> Walkable<R> for hcons::Hc<T> {
     fn recurse(&self, v: &mut dyn Visitor<R>) {
         let obj: &T = &**self;
         obj.accept(v)
+    }
+}
+
+impl<R: Reason, S: Copy + Walkable<R>> Walkable<R> for pos::Positioned<S, R::Pos> {
+    fn recurse(&self, v: &mut dyn Visitor<R>) {
+        v.visit_pos(self.pos());
+        self.id_ref().accept(v);
     }
 }
 
@@ -233,6 +285,24 @@ macro_rules! walkable {
     };
 }
 
+walkable!(isize);
+walkable!(bool);
+walkable!(String);
+
 walkable!(impl<R: Reason, A, B> for (A, B) => [0, 1]);
 walkable!(impl<R: Reason, A, B, C> for (A, B, C) => [0, 1, 2]);
 walkable!(impl<R: Reason, A, B, C, D> for (A, B, C, D) => [0, 1, 2, 3]);
+
+walkable!(oxidized::file_info::Mode);
+
+walkable!(pos::Symbol as visit_symbol => []);
+walkable!(pos::TypeName as visit_type_name => [0]);
+walkable!(pos::ModuleName as visit_module_name => [0]);
+walkable!(pos::ConstName as visit_const_name => [0]);
+walkable!(pos::FunName as visit_fun_name => [0]);
+walkable!(pos::ClassConstName as visit_class_const_name => [0]);
+walkable!(pos::TypeConstName as visit_type_const_name => [0]);
+walkable!(pos::MethodName as visit_method_name => [0]);
+walkable!(pos::PropName as visit_prop_name => [0]);
+
+walkable!(crate::decl::ty::ClassishKind);

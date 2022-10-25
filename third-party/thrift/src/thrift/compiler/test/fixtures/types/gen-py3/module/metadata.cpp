@@ -17,7 +17,6 @@ namespace types {
   ::apache::thrift::detail::md::EnumMetadata<has_bitwise_ops>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<is_unscoped>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<MyForwardRefEnum>::gen(metadata);
-  ::apache::thrift::detail::md::EnumMetadata<MyEnumA>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<decorated_struct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ContainerStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<CppTypeStruct>::gen(metadata);
@@ -36,10 +35,16 @@ namespace types {
   ::apache::thrift::detail::md::StructMetadata<ForwardUsageRoot>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ForwardUsageStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ForwardUsageByRef>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<NoexceptMoveEmpty>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<NoexceptMoveSimpleStruct>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<NoexceptMoveComplexStruct>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<NoExceptMoveUnion>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<IncompleteMap>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<IncompleteMapDep>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<CompleteMap>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<CompleteMapDep>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<IncompleteList>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<IncompleteListDep>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<CompleteList>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<CompleteListDep>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<AdaptedList>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<DependentAdaptedList>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AllocatorAware>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AllocatorAware2>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<TypedefStruct>::gen(metadata);

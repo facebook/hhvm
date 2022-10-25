@@ -14,114 +14,112 @@
  * limitations under the License.
  */
 
+#include <stdexcept>
+#include <type_traits>
+
+#include <folly/Portability.h>
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/BoxedValuePtr.h>
 
 using namespace apache::thrift::detail;
 
 struct TestStruct {
+  using __fbthrift_cpp2_type = TestStruct;
+  static constexpr bool __fbthrift_cpp2_is_union = false;
+
   TestStruct() : a(0) {}
-  TestStruct(int val) : a(val) {}
-  TestStruct(const TestStruct& other) : a(other.a) {}
-
-  TestStruct& operator=(const TestStruct& other) {
-    TestStruct tmp{other};
-    std::swap(a, tmp.a);
-    return *this;
-  }
-
-  TestStruct& operator=(int val) {
-    TestStruct tmp{val};
-    std::swap(a, tmp.a);
-    return *this;
-  }
-
+  explicit TestStruct(int val) : a(val) {}
+  void set_a(int b) { a = b; }
   int a;
 };
 
+constexpr bool operator==(const TestStruct& lhs, const TestStruct& rhs) {
+  return lhs.a == rhs.a;
+}
 constexpr bool operator==(const TestStruct& lhs, int rhs) {
   return lhs.a == rhs;
 }
-
 constexpr bool operator==(int lhs, const TestStruct& rhs) {
   return lhs == rhs.a;
 }
 
-template <typename T>
-class BoxedTest : public ::testing::Test {};
+constexpr bool operator<(const TestStruct& lhs, const TestStruct& rhs) {
+  return lhs.a < rhs.a;
+}
+constexpr bool operator<(const TestStruct& lhs, int rhs) {
+  return lhs.a < rhs;
+}
+constexpr bool operator<(int lhs, const TestStruct& rhs) {
+  return lhs < rhs.a;
+}
 
-using BoxedPtrTypes =
-    ::testing::Types<boxed_value_ptr<TestStruct>, boxed_ptr<TestStruct>>;
-
-TYPED_TEST_SUITE(BoxedTest, BoxedPtrTypes);
-
-TYPED_TEST(BoxedTest, DefaultConstructor) {
-  TypeParam a;
+TEST(BoxedValuePtrTest, DefaultConstructor) {
+  boxed_value_ptr<TestStruct> a;
   EXPECT_FALSE(static_cast<bool>(a));
 }
 
-TYPED_TEST(BoxedTest, Constructor) {
-  TypeParam a(5);
+TEST(BoxedValuePtrTest, Constructor) {
+  boxed_value_ptr<TestStruct> a(5);
   EXPECT_EQ(*a, 5);
 }
 
-TYPED_TEST(BoxedTest, CopyConstructor) {
-  TypeParam a(5);
-  TypeParam b(a);
+TEST(BoxedValuePtrTest, CopyConstructor) {
+  boxed_value_ptr<TestStruct> a(5);
+  boxed_value_ptr<TestStruct> b(a);
   EXPECT_EQ(*b, 5);
   EXPECT_EQ(*a, 5);
 }
 
-TYPED_TEST(BoxedTest, CopyAssignment) {
-  TypeParam a(5);
-  TypeParam b;
+TEST(BoxedValuePtrTest, CopyAssignment) {
+  boxed_value_ptr<TestStruct> a(5);
+  boxed_value_ptr<TestStruct> b;
   b = a;
   EXPECT_EQ(*b, 5);
   EXPECT_EQ(*a, 5);
 }
 
-TYPED_TEST(BoxedTest, MoveConstructor) {
-  TypeParam a(5);
-  TypeParam b(std::move(a));
+TEST(BoxedValuePtrTest, MoveConstructor) {
+  boxed_value_ptr<TestStruct> a(5);
+  boxed_value_ptr<TestStruct> b(std::move(a));
   EXPECT_EQ(*b, 5);
 }
 
-TYPED_TEST(BoxedTest, MoveAssignment) {
-  TypeParam a(5);
-  TypeParam b;
+TEST(BoxedValuePtrTest, MoveAssignment) {
+  boxed_value_ptr<TestStruct> a(5);
+  boxed_value_ptr<TestStruct> b;
   b = std::move(a);
   EXPECT_EQ(*b, 5);
 }
 
-TYPED_TEST(BoxedTest, EmptyAssignment) {
-  TypeParam a;
-  TypeParam b(5);
+TEST(BoxedValuePtrTest, EmptyAssignment) {
+  boxed_value_ptr<TestStruct> a;
+  boxed_value_ptr<TestStruct> b(5);
   EXPECT_EQ(*b, 5);
   b = a;
   EXPECT_FALSE(static_cast<bool>(b));
 }
 
-TYPED_TEST(BoxedTest, Emplace) {
-  TypeParam a;
+TEST(BoxedValuePtrTest, Emplace) {
+  boxed_value_ptr<TestStruct> a;
   a.emplace(5);
   EXPECT_EQ(*a, 5);
   a.emplace(7);
   EXPECT_EQ(*a, 7);
 }
 
-TYPED_TEST(BoxedTest, Reset) {
-  TypeParam a(6);
+TEST(BoxedValuePtrTest, Reset) {
+  boxed_value_ptr<TestStruct> a(6);
   a.reset();
   EXPECT_FALSE(static_cast<bool>(a));
 }
 
-TYPED_TEST(BoxedTest, Assignment) {
-  TypeParam a;
+TEST(BoxedValuePtrTest, Assignment) {
+  boxed_value_ptr<TestStruct> a;
   a = 6;
   EXPECT_EQ(*a, 6);
 }
 
-TYPED_TEST(BoxedTest, MoveOnlyType) {
+TEST(BoxedValuePtrTest, MoveOnlyType) {
   boxed_value_ptr<std::unique_ptr<int>> a;
   a = std::make_unique<int>(5);
   EXPECT_EQ(**a, 5);
@@ -129,17 +127,17 @@ TYPED_TEST(BoxedTest, MoveOnlyType) {
   EXPECT_EQ(**b, 5);
 }
 
-TYPED_TEST(BoxedTest, Swap) {
-  TypeParam a(5);
-  TypeParam b(7);
+TEST(BoxedValuePtrTest, Swap) {
+  boxed_value_ptr<TestStruct> a(5);
+  boxed_value_ptr<TestStruct> b(7);
   std::swap(a, b);
   EXPECT_EQ(*a, 7);
   EXPECT_EQ(*b, 5);
 }
 
-TYPED_TEST(BoxedTest, Equal) {
-  TypeParam a;
-  TypeParam b;
+TEST(BoxedValuePtrTest, Equal) {
+  boxed_value_ptr<TestStruct> a;
+  boxed_value_ptr<TestStruct> b;
   EXPECT_TRUE(a == b);
   a = 5;
   EXPECT_FALSE(a == b);
@@ -149,9 +147,314 @@ TYPED_TEST(BoxedTest, Equal) {
   EXPECT_FALSE(a == b);
 }
 
+TEST(BoxedPtrTest, DefaultConstructor) {
+  boxed_ptr<TestStruct> a;
+  EXPECT_FALSE(static_cast<bool>(a));
+}
+
+TEST(BoxedPtrTest, FromStaticConstant) {
+  const TestStruct t{5};
+  boxed_ptr<TestStruct> a = boxed_ptr<TestStruct>::fromStaticConstant(&t);
+  EXPECT_EQ(*a, 5);
+}
+
+TEST(BoxedPtrTest, UniquePtrConstructor) {
+  boxed_ptr<TestStruct> a{std::make_unique<TestStruct>(5)};
+  EXPECT_EQ(*a, 5);
+}
+
+TEST(BoxedPtrTest, CopyConstructorAndAssignment) {
+  static_assert(!std::is_copy_constructible<boxed_ptr<TestStruct>>::value);
+  static_assert(!std::is_copy_assignable<boxed_ptr<TestStruct>>::value);
+}
+
+TEST(BoxedPtrTest, MoveConstructor) {
+  const TestStruct t{5};
+  boxed_ptr<TestStruct> a = boxed_ptr<TestStruct>::fromStaticConstant(&t);
+  boxed_ptr<TestStruct> b(std::move(a));
+  EXPECT_EQ(*b, 5);
+}
+
+TEST(BoxedPtrTest, MoveAssignment) {
+  const TestStruct t{5};
+  boxed_ptr<TestStruct> a = boxed_ptr<TestStruct>::fromStaticConstant(&t);
+  boxed_ptr<TestStruct> b;
+  b = std::move(a);
+  EXPECT_EQ(*b, 5);
+}
+
+TEST(BoxedPtrTest, Reset) {
+  const TestStruct t{5};
+  boxed_ptr<TestStruct> a = boxed_ptr<TestStruct>::fromStaticConstant(&t);
+  a.reset();
+  EXPECT_FALSE(static_cast<bool>(a));
+
+  a.reset(std::make_unique<TestStruct>(6));
+  EXPECT_TRUE(static_cast<bool>(a));
+  EXPECT_EQ(*a, 6);
+}
+
+TEST(BoxedPtrTest, Swap) {
+  const TestStruct t1{5};
+  const TestStruct t2{7};
+
+  boxed_ptr<TestStruct> a = boxed_ptr<TestStruct>::fromStaticConstant(&t1);
+  boxed_ptr<TestStruct> b = boxed_ptr<TestStruct>::fromStaticConstant(&t2);
+
+  std::swap(a, b);
+  EXPECT_EQ(*a, 7);
+  EXPECT_EQ(*b, 5);
+}
+
+TEST(BoxedPtrTest, Equal) {
+  const TestStruct t1{5};
+  const TestStruct t2{7};
+
+  boxed_ptr<TestStruct> a;
+  boxed_ptr<TestStruct> b;
+  EXPECT_TRUE(a == b);
+  a = boxed_ptr<TestStruct>::fromStaticConstant(&t1);
+  EXPECT_FALSE(a == b);
+  b = boxed_ptr<TestStruct>::fromStaticConstant(&t1);
+  EXPECT_TRUE(a == b);
+  b = boxed_ptr<TestStruct>::fromStaticConstant(&t2);
+  EXPECT_FALSE(a == b);
+}
+
+TEST(BoxedPtrTest, Mut) {
+  const TestStruct t1{5};
+
+  boxed_ptr<TestStruct> a = boxed_ptr<TestStruct>::fromStaticConstant(&t1);
+  boxed_ptr<TestStruct> b = boxed_ptr<TestStruct>::fromStaticConstant(&t1);
+
+  EXPECT_TRUE(a == b);
+
+  (void)a.mut();
+
+  EXPECT_FALSE(a == b);
+}
+
+TEST(BoxedPtrTest, MutFromDefaultConstructed) {
+  boxed_ptr<TestStruct> a;
+
+  EXPECT_FALSE(static_cast<bool>(a));
+  if (folly::kIsDebug) {
+    EXPECT_DEATH(a.mut(), "");
+  }
+}
+
+TEST(BoxedPtrTest, Copy) {
+  const TestStruct t1{5};
+
+  boxed_ptr<TestStruct> a = boxed_ptr<TestStruct>::fromStaticConstant(&t1);
+  // Shallow copy when 'boxed_ptr' does not own the value.
+  boxed_ptr<TestStruct> b = a.copy();
+
+  EXPECT_TRUE(a == b);
+
+  (void)a.mut();
+  // Deep copy when 'boxed_ptr' owns the value.
+  boxed_ptr<TestStruct> c = a.copy();
+
+  EXPECT_FALSE(a == c);
+}
+
+TEST(BoxedValueTest, DefaultConstructor) {
+  boxed_value<TestStruct> a;
+  EXPECT_FALSE(a.has_value());
+}
+
+TEST(BoxedValueTest, FromStaticConstant) {
+  const TestStruct t{5};
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t);
+  EXPECT_EQ(a.value(), 5);
+}
+
+TEST(BoxedValueTest, UniquePtrConstructor) {
+  boxed_value<TestStruct> a{std::make_unique<TestStruct>(5)};
+  EXPECT_EQ(a.value(), 5);
+}
+
+TEST(BoxedValueTest, CopyConstructor) {
+  const TestStruct t{5};
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t);
+  boxed_value<TestStruct> b{a};
+  EXPECT_EQ(a.value(), 5);
+  // shallow copy.
+  EXPECT_EQ(&b.value(), &a.value());
+
+  a.mut();
+  boxed_value<TestStruct> c{a};
+  // deep copy.
+  EXPECT_NE(&c.value(), &a.value());
+}
+
+TEST(BoxedValueTest, CopyAssignment) {
+  const TestStruct t{5};
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t);
+  boxed_value<TestStruct> b = a;
+  EXPECT_EQ(a.value(), 5);
+  // shallow copy.
+  EXPECT_EQ(&b.value(), &a.value());
+
+  a.mut();
+  boxed_value<TestStruct> c = a;
+  // deep copy.
+  EXPECT_NE(&c.value(), &a.value());
+}
+
+TEST(BoxedValueTest, MoveConstructor) {
+  const TestStruct t{5};
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t);
+  boxed_value<TestStruct> b(std::move(a));
+  EXPECT_EQ(b.value(), 5);
+}
+
+TEST(BoxedValueTest, MoveAssignment) {
+  const TestStruct t{5};
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t);
+  boxed_value<TestStruct> b;
+  b = std::move(a);
+  EXPECT_EQ(b.value(), 5);
+}
+
+TEST(BoxedValueTest, Reset) {
+  const TestStruct t{5};
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t);
+  a.reset();
+  EXPECT_FALSE(a.has_value());
+
+  a.reset(std::make_unique<TestStruct>(6));
+  EXPECT_TRUE(a.has_value());
+  EXPECT_EQ(*a, 6);
+}
+
+TEST(BoxedValueTest, Swap) {
+  const TestStruct t1{5};
+  const TestStruct t2{7};
+
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t1);
+  boxed_value<TestStruct> b = boxed_value<TestStruct>::fromStaticConstant(&t2);
+
+  std::swap(a, b);
+  EXPECT_EQ(*a, 7);
+  EXPECT_EQ(*b, 5);
+}
+
+TEST(BoxedValueTest, Mut) {
+  const TestStruct t1{5};
+
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t1);
+  boxed_value<TestStruct> b = boxed_value<TestStruct>::fromStaticConstant(&t1);
+
+  a.mut().set_a(1);
+  std::move(b).mut().set_a(2);
+
+  EXPECT_EQ(a.value(), 1);
+  EXPECT_EQ(b.value(), 2);
+}
+
+TEST(BoxedValueTest, MutFromDefaultConstructed) {
+  boxed_value<TestStruct> a;
+  EXPECT_THROW(a.mut(), std::logic_error);
+  EXPECT_THROW(std::move(a).mut(), std::logic_error);
+}
+
+TEST(BoxedValueTest, Comparison) {
+  const TestStruct t1{1};
+  const TestStruct t2{2};
+
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t1);
+  boxed_value<TestStruct> b = boxed_value<TestStruct>::fromStaticConstant(&t2);
+
+  EXPECT_FALSE(a == b);
+  EXPECT_TRUE(a != b);
+  EXPECT_TRUE(a < b);
+  EXPECT_TRUE(a <= b);
+  EXPECT_FALSE(a > b);
+  EXPECT_FALSE(a >= b);
+
+  EXPECT_FALSE(a == t2);
+  EXPECT_TRUE(a != t2);
+  EXPECT_TRUE(a < t2);
+  EXPECT_TRUE(a <= t2);
+  EXPECT_FALSE(a > t2);
+  EXPECT_FALSE(a >= t2);
+
+  EXPECT_FALSE(t1 == b);
+  EXPECT_TRUE(t1 != b);
+  EXPECT_TRUE(t1 < b);
+  EXPECT_TRUE(t1 <= b);
+  EXPECT_FALSE(t1 > b);
+  EXPECT_FALSE(t1 >= b);
+
+  EXPECT_TRUE(t2 == b);
+  EXPECT_FALSE(t2 != b);
+  EXPECT_FALSE(t2 < b);
+  EXPECT_TRUE(t2 <= b);
+  EXPECT_FALSE(t2 > b);
+  EXPECT_TRUE(t2 >= b);
+}
+
+TEST(BoxedValueTest, ComparisonWithNoValue) {
+  const TestStruct t1{1};
+
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t1);
+  boxed_value<TestStruct> b;
+  boxed_value<TestStruct> c;
+
+  EXPECT_FALSE(a == b);
+  EXPECT_TRUE(a != b);
+  EXPECT_FALSE(a < b);
+  EXPECT_FALSE(a <= b);
+  EXPECT_TRUE(a > b);
+  EXPECT_TRUE(a >= b);
+
+  EXPECT_FALSE(b == t1);
+  EXPECT_TRUE(b != t1);
+  EXPECT_TRUE(b < t1);
+  EXPECT_TRUE(b <= t1);
+  EXPECT_FALSE(b > t1);
+  EXPECT_FALSE(b >= t1);
+
+  EXPECT_FALSE(t1 == b);
+  EXPECT_TRUE(t1 != b);
+  EXPECT_FALSE(t1 < b);
+  EXPECT_FALSE(t1 <= b);
+  EXPECT_TRUE(t1 > b);
+  EXPECT_TRUE(t1 >= b);
+}
+
+TEST(BoxedValueTest, ValueComparison) {
+  const TestStruct t{1};
+
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t);
+  boxed_value<TestStruct> b = boxed_value<TestStruct>::fromStaticConstant(&t);
+  b.mut();
+
+  // 'b' points to shared value; meanwhile, 'c' owns the same value.
+  EXPECT_NE(&a.value(), &b.value());
+  EXPECT_EQ(a, b);
+}
+
+TEST(BoxedValueTest, Ensure) {
+  const TestStruct t{1};
+  boxed_value<TestStruct> a = boxed_value<TestStruct>::fromStaticConstant(&t);
+  boxed_value<TestStruct> b = boxed_value<TestStruct>::fromStaticConstant(&t);
+  boxed_value<TestStruct> c;
+
+  EXPECT_EQ(&a.value(), &b.value());
+  a.ensure();
+  EXPECT_EQ(&a.value(), &b.value());
+
+  c.ensure();
+  c.mut().set_a(1);
+  EXPECT_EQ(a, c);
+}
+
 class LifecycleTester {
  public:
-  using __fbthrift_cpp2_type = std::true_type;
+  using __fbthrift_cpp2_type = LifecycleTester;
 
   LifecycleTester() : isACopy_(false), hasBeenCopied_(false) {}
   explicit LifecycleTester(int) : isACopy_(false), hasBeenCopied_(false) {}
@@ -180,32 +483,31 @@ class LifecycleTester {
 };
 
 TEST(LifecycleTest, ConstUnownedCopy) {
-  LifecycleTester lct;
+  const LifecycleTester lct;
 
-  boxed_ptr<LifecycleTester> boxed1 = &lct;
+  boxed_value<LifecycleTester> boxed1 =
+      boxed_value<LifecycleTester>::fromStaticConstant(&lct);
   EXPECT_FALSE(boxed1->isACopy());
   EXPECT_FALSE(boxed1->hasBeenCopied());
 
-  boxed_ptr<LifecycleTester> boxed2 = boxed1;
+  boxed_value<LifecycleTester> boxed2 = boxed1;
   EXPECT_FALSE(boxed1->hasBeenCopied());
   EXPECT_FALSE(boxed2->isACopy());
-
-  EXPECT_FALSE(lct.hasBeenCopied());
-  EXPECT_EQ(boxed1, boxed2);
 }
 
 TEST(LifecycleTest, MutOwnedRefCopy) {
-  LifecycleTester lct;
+  const LifecycleTester lct;
 
-  boxed_ptr<LifecycleTester> boxed{&lct};
+  boxed_value<LifecycleTester> boxed =
+      boxed_value<LifecycleTester>::fromStaticConstant(&lct);
   EXPECT_FALSE(boxed->isACopy());
-  EXPECT_TRUE(boxed.mut()->isACopy()); // This mutable ref creates a copy.
-  EXPECT_TRUE(lct.hasBeenCopied());
+  EXPECT_TRUE(boxed.mut().isACopy()); // This mutable ref creates a copy.
 }
 
 TEST(LifecycleTest, copyOfMutableRefCreatesCopy) {
   // Creating the object this way starts with a MutOwned state.
-  boxed_ptr<LifecycleTester> boxed1{0};
+  boxed_value<LifecycleTester> boxed1;
+  boxed1.ensure();
   EXPECT_FALSE(boxed1->hasBeenCopied());
   auto boxed2 = boxed1;
   EXPECT_TRUE(boxed1->hasBeenCopied());

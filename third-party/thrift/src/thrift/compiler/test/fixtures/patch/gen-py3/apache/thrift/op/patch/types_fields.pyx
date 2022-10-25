@@ -34,3 +34,20 @@ cdef class __GeneratePatch_FieldsSetter(__StructFieldsSetter):
             raise TypeError(f"invalid field name {name.decode('utf-8')}")
         deref(found).second(self, value)
 
+
+@__cython.auto_pickle(False)
+cdef class __AssignOnlyPatch_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __AssignOnlyPatch_FieldsSetter _fbthrift_create(_apache_thrift_op_patch_types.cAssignOnlyPatch* struct_cpp_obj):
+        cdef __AssignOnlyPatch_FieldsSetter __fbthrift_inst = __AssignOnlyPatch_FieldsSetter.__new__(__AssignOnlyPatch_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        return __fbthrift_inst
+
+    cdef void set_field(__AssignOnlyPatch_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __AssignOnlyPatch_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+

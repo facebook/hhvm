@@ -69,13 +69,6 @@ pub(crate) enum Builtin {
     ///   AllocWords(int) -> *void
     #[strum(props(Function = "alloc_words"))]
     AllocWords,
-    /// Build a *HackParams for the given number of parameters. Takes a "this"
-    /// value and the number of parameters as the value (so one more total than
-    /// the arg).
-    ///   ArgPack<0>(*Mixed) -> *HackParams
-    ///   ArgPack<1>(*Mixed, *Mixed) -> *HackParams
-    ///   ArgPack<2>(*Mixed, *Mixed, *Mixed) -> *HackParams
-    ArgPack(usize),
     /// Throws a BadMethodCall exception.
     ///   BadMethodCall() -> noreturn
     #[strum(props(Function = "hack_bad_method_call"))]
@@ -124,7 +117,6 @@ impl Builtin {
     pub(crate) fn into_str(&self) -> Cow<'static, str> {
         match self {
             Builtin::Hhbc(hhbc) => Cow::Borrowed(hhbc.get_str("Function").unwrap()),
-            Builtin::ArgPack(n) => Cow::Owned(format!("arg_pack_{}", n)),
             _ => Cow::Borrowed(self.get_str("Function").unwrap()),
         }
     }

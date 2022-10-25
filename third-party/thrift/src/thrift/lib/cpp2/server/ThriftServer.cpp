@@ -78,7 +78,6 @@ FOLLY_GFLAGS_DEFINE_string(
 
 THRIFT_FLAG_DEFINE_bool(server_alpn_prefer_rocket, true);
 THRIFT_FLAG_DEFINE_bool(server_enable_stoptls, false);
-THRIFT_FLAG_DEFINE_bool(alpn_allow_mismatch, true);
 
 THRIFT_FLAG_DEFINE_bool(dump_snapshot_on_long_shutdown, true);
 
@@ -1898,10 +1897,6 @@ folly::observer::CallbackHandle ThriftServer::getSSLCallbackHandle() {
     }
     this->updateCertsToWatch();
   });
-}
-
-folly::observer::Observer<bool> ThriftServer::alpnAllowMismatch() {
-  return THRIFT_FLAG_OBSERVE(alpn_allow_mismatch);
 }
 
 void ThriftServer::addIOThreadPoolObserver(

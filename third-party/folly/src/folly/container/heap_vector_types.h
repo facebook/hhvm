@@ -350,7 +350,12 @@ void heapify(Container& cont) {
     if (next == index) {
       continue;
     }
-    auto tmp = std::move(cont[index]);
+    // Subtlety: operator[] returns a Container::reference. Because
+    // Container::reference can be a proxy, using bare `auto` is not
+    // sufficient to remove the "reference nature" of
+    // Container::reference and force a move out of the container;
+    // instead, we need Container::value_type.
+    typename Container::value_type tmp = std::move(cont[index]);
     rotate(next, index);
     cont[next] = std::move(tmp);
   }
@@ -649,7 +654,7 @@ struct value_compare_map : Compare {
   }
 
   template <typename value_type>
-  auto& getKey(value_type& a) const noexcept {
+  const auto& getKey(const value_type& a) const noexcept {
     return a.first;
   }
 
@@ -984,6 +989,8 @@ class heap_vector_container : growth_policy_wrapper<GrowthPolicy> {
   }
 
   Allocator get_allocator() const { return m_.cont_.get_allocator(); }
+
+  const Container& get_container() const noexcept { return m_.cont_; }
 
   heap_vector_container& operator=(const heap_vector_container& other) =
       default;

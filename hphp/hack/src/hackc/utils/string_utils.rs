@@ -81,7 +81,7 @@ pub fn mangle_xhp_id(mut name: String) -> String {
         if is_xhp(&name) {
             name.replace_range(..1, "xhp_")
         }
-        name.replace(":", "__").replace("-", "_")
+        name.replace(':', "__").replace('-', "_")
     } else {
         name
     }
@@ -91,10 +91,10 @@ fn unmangle_xhp_id(name: &str) -> String {
     if name.starts_with("xhp_") {
         format!(
             ":{}",
-            lstrip(name, "xhp_").replace("__", ":").replace("_", "-")
+            lstrip(name, "xhp_").replace("__", ":").replace('_', "-")
         )
     } else {
-        name.replace("__", ":").replace("_", "-")
+        name.replace("__", ":").replace('_', "-")
     }
 }
 

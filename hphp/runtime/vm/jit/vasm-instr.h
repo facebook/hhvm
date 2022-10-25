@@ -173,7 +173,7 @@ struct Vunit;
   O(andq, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))     \
   O(andqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(andqi64, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
-  O(btrq, I(s0), UH(s1,d), DH(d,s1) D(sf))\
+  O(btrq, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))    \
   O(decl, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(declm, I(fl), UM(m), D(sf))\
   O(decq, I(fl), UH(s,d), DH(d,s) D(sf))\

@@ -477,8 +477,8 @@ void setMaskedDataFull(
 }
 
 // parseValue with readMask and writeMask
-template <typename Protocol>
-MaskedDecodeResultValue parseValue(
+template <bool KeepExcludedData, typename Protocol>
+MaskedDecodeResultValue parseValueWithMask(
     Protocol& prot,
     TType arg_type,
     MaskRef readMask,
@@ -491,6 +491,10 @@ MaskedDecodeResultValue parseValue(
     return result;
   }
   if (readMask.isNoneMask()) { // do not deserialize
+    if (!KeepExcludedData) { // no need to store
+      apache::thrift::skip(prot, arg_type);
+      return result;
+    }
     if (writeMask.isNoneMask()) { // store the serialized data
       setMaskedDataFull(prot, arg_type, result.excluded, protocolData);
       return result;
@@ -515,13 +519,19 @@ MaskedDecodeResultValue parseValue(
         }
         MaskRef nextRead = readMask.get(FieldId{fid});
         MaskRef nextWrite = writeMask.get(FieldId{fid});
-        MaskedDecodeResultValue nestedResult = parseValue(
-            prot, ftype, nextRead, nextWrite, protocolData, string_to_binary);
+        MaskedDecodeResultValue nestedResult =
+            parseValueWithMask<KeepExcludedData>(
+                prot,
+                ftype,
+                nextRead,
+                nextWrite,
+                protocolData,
+                string_to_binary);
         // Set nested MaskedDecodeResult if not empty.
         if (!apache::thrift::empty(nestedResult.included)) {
           object[FieldId{fid}] = std::move(nestedResult.included);
         }
-        if (!apache::thrift::empty(nestedResult.excluded)) {
+        if (KeepExcludedData && !apache::thrift::empty(nestedResult.excluded)) {
           result.excluded.fields_ref().ensure()[FieldId{fid}] =
               std::move(nestedResult.excluded);
         }
@@ -542,13 +552,19 @@ MaskedDecodeResultValue parseValue(
             readMask.get(findMapIdByValue(readMask.mask, keyValue));
         MaskRef nextWrite =
             writeMask.get(findMapIdByValue(writeMask.mask, keyValue));
-        MaskedDecodeResultValue nestedResult = parseValue(
-            prot, valType, nextRead, nextWrite, protocolData, string_to_binary);
+        MaskedDecodeResultValue nestedResult =
+            parseValueWithMask<KeepExcludedData>(
+                prot,
+                valType,
+                nextRead,
+                nextWrite,
+                protocolData,
+                string_to_binary);
         // Set nested MaskedDecodeResult if not empty.
         if (!apache::thrift::empty(nestedResult.included)) {
           map[keyValue] = std::move(nestedResult.included);
         }
-        if (!apache::thrift::empty(nestedResult.excluded)) {
+        if (KeepExcludedData && !apache::thrift::empty(nestedResult.excluded)) {
           auto& keys = protocolData.keys().ensure();
           keys.push_back(keyValue);
           type::ValueId id =
@@ -567,7 +583,7 @@ MaskedDecodeResultValue parseValue(
   }
 }
 
-template <typename Protocol>
+template <typename Protocol, bool KeepExcludedData>
 MaskedDecodeResult parseObject(
     const folly::IOBuf& buf,
     Mask readMask,
@@ -578,13 +594,14 @@ MaskedDecodeResult parseObject(
   MaskedDecodeResult result;
   MaskedProtocolData& protocolData = result.excluded;
   protocolData.protocol() = get_standard_protocol<Protocol>;
-  MaskedDecodeResultValue parseValueResult = parseValue(
-      prot,
-      T_STRUCT,
-      MaskRef{readMask, false},
-      MaskRef{writeMask, false},
-      protocolData,
-      string_to_binary);
+  MaskedDecodeResultValue parseValueResult =
+      parseValueWithMask<KeepExcludedData>(
+          prot,
+          T_STRUCT,
+          MaskRef{readMask, false},
+          MaskRef{writeMask, false},
+          protocolData,
+          string_to_binary);
   protocolData.data() = std::move(parseValueResult.excluded);
   // Calling ensure as it is possible that the value is not set.
   result.included =

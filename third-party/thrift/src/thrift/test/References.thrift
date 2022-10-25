@@ -251,6 +251,9 @@ struct StructuredAnnotation {
 
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   3: optional PlainStruct opt_shared_mutable_field;
+
+  @thrift.InternBox
+  4: PlainStruct intern_box_field;
 }
 
 struct StructWithString {

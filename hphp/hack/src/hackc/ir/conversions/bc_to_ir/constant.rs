@@ -4,15 +4,24 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hhbc::Constant;
+use ir::StringInterner;
 
-pub(crate) fn convert_constant<'a>(constant: &Constant<'a>) -> ir::HackConstant<'a> {
+use crate::convert;
+
+pub(crate) fn convert_constant<'a>(
+    constant: &Constant<'a>,
+    strings: &mut StringInterner,
+) -> ir::HackConstant<'a> {
     let Constant {
         name,
         ref value,
         is_abstract,
     } = *constant;
 
-    let value = value.clone().into();
+    let value = value
+        .as_ref()
+        .map(|tv| convert::convert_typed_value(tv, strings))
+        .into();
 
     ir::HackConstant {
         name,

@@ -26,6 +26,10 @@ bool IsStructDict(const ArrayData* ad) {
   return StructLayout::IsStructLayout(index);
 }
 
+bool IsBigStructDict(const ArrayData* ad) {
+  return StructDict::As(ad)->isBigStruct();
+}
+
 TypedValue GetStructDictKey(const ArrayData* ad, int64_t pos) {
   return StructDict::GetPosKey(StructDict::As(ad), pos);
 }
@@ -34,10 +38,18 @@ TypedValue GetStructDictVal(const ArrayData* ad, int64_t pos) {
   return StructDict::GetPosVal(StructDict::As(ad), pos);
 }
 
+template<typename PosType>
 tv_lval GetStructDictLval(ArrayData* ad, int64_t pos) {
   auto const sd = StructDict::As(ad);
-  auto const slot = sd->rawPositions()[pos];
+  auto const slot = static_cast<PosType*>(sd->rawPositions())[pos];
   return sd->lvalUnchecked(slot);
+}
+
+tv_lval GetSmallStructDictLval(ArrayData* ad, int64_t pos) {
+  return GetStructDictLval<uint8_t>(ad, pos);
+}
+tv_lval GetBigStructDictLval(ArrayData* ad, int64_t pos) {
+  return GetStructDictLval<uint8_t>(ad, pos);
 }
 
 }

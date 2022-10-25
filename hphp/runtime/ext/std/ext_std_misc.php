@@ -38,7 +38,7 @@ function server_warmup_status_monotonic(): string;
  * on an unnamed JobQueue within the server.
  */
 <<__Native>>
-function execution_context(): string;
+function execution_context()[read_globals]: string;
 
 <<__Native, __IsFoldable>>
 function array_mark_legacy(mixed $v, bool $recursive = false)[]: mixed;

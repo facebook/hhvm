@@ -9,8 +9,8 @@ use std::result::Result::*;
 
 use bumpalo::Bump;
 use eq_modulo_pos::EqModuloPos;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use oxidized::file_pos::FilePos;
 use oxidized::file_pos_large::FilePosLarge;
 use oxidized::file_pos_small::FilePosSmall;

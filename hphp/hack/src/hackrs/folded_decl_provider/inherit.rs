@@ -8,16 +8,15 @@ use std::sync::Arc;
 use depgraph_api::DeclName;
 use depgraph_api::DepGraphWriter;
 use depgraph_api::DependencyName;
+use hash::IndexMap;
 use indexmap::map::Entry;
 use oxidized::global_options::GlobalOptions;
-use pos::ClassConstNameIndexMap;
+use pos::ClassConstName;
 use pos::MethodName;
-use pos::MethodNameIndexMap;
 use pos::Pos;
-use pos::PropNameIndexMap;
-use pos::TypeConstNameIndexMap;
+use pos::PropName;
+use pos::TypeConstName;
 use pos::TypeName;
-use pos::TypeNameIndexMap;
 use ty::decl::folded::Constructor;
 use ty::decl::subst::Subst;
 use ty::decl::ty::ConsistentKind;
@@ -44,14 +43,14 @@ use super::Result;
 #[derive(Debug)]
 pub struct Inherited<R: Reason> {
     // note(sf, 2022-01-27): c.f. `Decl_inherit.inherited`
-    pub substs: TypeNameIndexMap<SubstContext<R>>,
-    pub props: PropNameIndexMap<FoldedElement>,
-    pub static_props: PropNameIndexMap<FoldedElement>,
-    pub methods: MethodNameIndexMap<FoldedElement>,
-    pub static_methods: MethodNameIndexMap<FoldedElement>,
+    pub substs: IndexMap<TypeName, SubstContext<R>>,
+    pub props: IndexMap<PropName, FoldedElement>,
+    pub static_props: IndexMap<PropName, FoldedElement>,
+    pub methods: IndexMap<MethodName, FoldedElement>,
+    pub static_methods: IndexMap<MethodName, FoldedElement>,
     pub constructor: Constructor,
-    pub consts: ClassConstNameIndexMap<ClassConst<R>>,
-    pub type_consts: TypeConstNameIndexMap<TypeConst<R>>,
+    pub consts: IndexMap<ClassConstName, ClassConst<R>>,
+    pub type_consts: IndexMap<TypeConstName, TypeConst<R>>,
 }
 
 impl<R: Reason> Default for Inherited<R> {
@@ -102,7 +101,7 @@ impl<R: Reason> Inherited<R> {
         );
     }
 
-    fn add_substs(&mut self, other_substs: TypeNameIndexMap<SubstContext<R>>) {
+    fn add_substs(&mut self, other_substs: IndexMap<TypeName, SubstContext<R>>) {
         for (key, new_subst) in other_substs {
             match self.substs.entry(key) {
                 Entry::Vacant(e) => {
@@ -129,7 +128,7 @@ impl<R: Reason> Inherited<R> {
     }
 
     fn add_method(
-        methods: &mut MethodNameIndexMap<FoldedElement>,
+        methods: &mut IndexMap<MethodName, FoldedElement>,
         (key, mut fe): (MethodName, FoldedElement),
     ) {
         match methods.entry(key) {
@@ -153,27 +152,27 @@ impl<R: Reason> Inherited<R> {
         }
     }
 
-    fn add_methods(&mut self, other_methods: MethodNameIndexMap<FoldedElement>) {
+    fn add_methods(&mut self, other_methods: IndexMap<MethodName, FoldedElement>) {
         for (key, fe) in other_methods {
             Self::add_method(&mut self.methods, (key, fe))
         }
     }
 
-    fn add_static_methods(&mut self, other_static_methods: MethodNameIndexMap<FoldedElement>) {
+    fn add_static_methods(&mut self, other_static_methods: IndexMap<MethodName, FoldedElement>) {
         for (key, fe) in other_static_methods {
             Self::add_method(&mut self.static_methods, (key, fe))
         }
     }
 
-    fn add_props(&mut self, other_props: PropNameIndexMap<FoldedElement>) {
+    fn add_props(&mut self, other_props: IndexMap<PropName, FoldedElement>) {
         self.props.extend(other_props)
     }
 
-    fn add_static_props(&mut self, other_static_props: PropNameIndexMap<FoldedElement>) {
+    fn add_static_props(&mut self, other_static_props: IndexMap<PropName, FoldedElement>) {
         self.static_props.extend(other_static_props)
     }
 
-    fn add_consts(&mut self, other_consts: ClassConstNameIndexMap<ClassConst<R>>) {
+    fn add_consts(&mut self, other_consts: IndexMap<ClassConstName, ClassConst<R>>) {
         for (name, new_const) in other_consts {
             match self.consts.entry(name) {
                 Entry::Vacant(e) => {
@@ -221,7 +220,7 @@ impl<R: Reason> Inherited<R> {
         &mut self,
         opts: &GlobalOptions,
         child: &ShallowClass<R>,
-        other_type_consts: TypeConstNameIndexMap<TypeConst<R>>,
+        other_type_consts: IndexMap<TypeConstName, TypeConst<R>>,
     ) {
         let fix_synthesized = opts.tco_enable_strict_const_semantics > 3;
 
@@ -350,7 +349,7 @@ impl<R: Reason> Inherited<R> {
 struct MemberFolder<'a, R: Reason> {
     opts: &'a GlobalOptions,
     child: &'a ShallowClass<R>,
-    parents: &'a TypeNameIndexMap<Arc<FoldedClass<R>>>,
+    parents: &'a IndexMap<TypeName, Arc<FoldedClass<R>>>,
     dependency_registrar: &'a dyn DepGraphWriter,
     members: Inherited<R>,
 }
@@ -604,7 +603,7 @@ impl<R: Reason> Inherited<R> {
     pub fn make(
         opts: &GlobalOptions,
         child: &ShallowClass<R>,
-        parents: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
+        parents: &IndexMap<TypeName, Arc<FoldedClass<R>>>,
         dependency_registrar: &dyn DepGraphWriter,
     ) -> Result<Self> {
         let mut folder = MemberFolder {

@@ -40,3 +40,16 @@ cdef __StructSpec get_reflection__GeneratePatch():
         },
     )
     return spec
+cdef __StructSpec get_reflection__AssignOnlyPatch():
+    cdef _apache_thrift_op_patch_types.AssignOnlyPatch defaults = _apache_thrift_op_patch_types.AssignOnlyPatch._fbthrift_create(
+        constant_shared_ptr[_apache_thrift_op_patch_types.cAssignOnlyPatch](
+            default_inst[_apache_thrift_op_patch_types.cAssignOnlyPatch]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="AssignOnlyPatch",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    return spec

@@ -11,12 +11,11 @@ use std::sync::Arc;
 use depgraph_api::DeclName;
 use folded_decl_provider::FoldedDeclProvider;
 use folded_decl_provider::Substitution;
+use hash::HashMap;
 use once_cell::unsync::OnceCell;
 use oxidized::ast_defs::ConstraintKind;
 use pos::MethodName;
-use pos::MethodNameMap;
 use pos::PropName;
-use pos::PropNameMap;
 use pos::TypeName;
 use ty::decl::ty::ConsistentKind;
 use ty::decl::EnumType;
@@ -37,10 +36,10 @@ use super::Result;
 /// c.f. OCaml type `Typing_classes_heap.eager_members`
 #[derive(Debug)]
 struct Members<R: Reason> {
-    props: PropNameMap<Rc<ClassElt<R>>>,
-    static_props: PropNameMap<Rc<ClassElt<R>>>,
-    methods: MethodNameMap<Rc<ClassElt<R>>>,
-    static_methods: MethodNameMap<Rc<ClassElt<R>>>,
+    props: HashMap<PropName, Rc<ClassElt<R>>>,
+    static_props: HashMap<PropName, Rc<ClassElt<R>>>,
+    methods: HashMap<MethodName, Rc<ClassElt<R>>>,
+    static_methods: HashMap<MethodName, Rc<ClassElt<R>>>,
     constructor: OnceCell<Option<Rc<ClassElt<R>>>>,
 }
 

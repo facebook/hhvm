@@ -74,6 +74,14 @@ struct ForEachField<::facebook::thrift::test::detail::DirectlyAdapted> {
 };
 
 template <>
+struct ForEachField<::facebook::thrift::test::detail::IndependentDirectlyAdapted> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).field_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::facebook::thrift::test::StructWithFieldAdapter> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {

@@ -2,9 +2,11 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
+use hash::HashMap;
 use oxidized::typing_defs_flags::FunTypeFlags;
 use pos::Positioned;
-use pos::SymbolMap;
+use pos::Symbol;
 use pos::TypeName;
 use ty::decl;
 use ty::local;
@@ -25,7 +27,7 @@ use crate::typing_decl_provider::TypeDecl;
 /// On OCaml, this  called `expand_env`.
 #[derive(Debug, Clone)]
 pub struct LocalizeEnv<R: Reason> {
-    substs: SymbolMap<local::Ty<R>>,
+    substs: HashMap<Symbol, local::Ty<R>>,
 }
 
 impl<R: Reason> LocalizeEnv<R> {

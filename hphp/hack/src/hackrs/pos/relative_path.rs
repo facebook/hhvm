@@ -11,8 +11,7 @@ use std::path::PathBuf;
 
 use ocamlrep::FromOcamlRep;
 use ocamlrep::FromOcamlRepIn;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::ToOcamlRep;
 pub use relative_path::Prefix;
 
 use crate::Bytes;

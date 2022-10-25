@@ -17,7 +17,6 @@ im = { version = "15.1", features = ["rayon", "serde"] }
 indexmap = { version = "1.9.1", features = ["rayon", "serde-1"] }
 intern = { path = "../../../../utils/intern" }
 ocamlrep = { path = "../../../../ocamlrep" }
-ocamlrep_derive = { path = "../../../../ocamlrep_derive" }
 oxidized = { path = "../../../../oxidized" }
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }
 relative_path = { path = "../../../../utils/rust/relative_path" }

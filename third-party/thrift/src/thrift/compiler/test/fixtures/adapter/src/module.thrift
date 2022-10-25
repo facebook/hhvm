@@ -141,6 +141,11 @@ struct DirectlyAdapted {
   1: i32 field;
 }
 
+@cpp.Adapter{name = "::my::Adapter", adaptedType = "::my::Type"}
+struct IndependentDirectlyAdapted {
+  1: i32 field;
+}
+
 struct StructWithFieldAdapter {
   @cpp.Adapter{name = "::my::Adapter1"}
   @python.Adapter{name = "my.Adapter1", typeHint = "my.AdaptedType1"}

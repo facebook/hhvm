@@ -537,7 +537,7 @@
       }
     },
     "InternBox" : {
-      "lineno" : 304,
+      "lineno" : 305,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -545,7 +545,7 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 304,
+          "line" : 305,
           "column" : 1
         },
         "end" : {

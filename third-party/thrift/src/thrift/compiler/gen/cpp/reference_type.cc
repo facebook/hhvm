@@ -47,6 +47,10 @@ reference_type find_ref_type(const t_field& node) {
     return reference_type::boxed;
   }
 
+  if (node.find_structured_annotation_or_null(kInternBoxUri)) {
+    return reference_type::boxed_intern;
+  }
+
   // Look for a specific ref type annotation.
   if (const std::string* ref_type = find_ref_type_annot(node)) {
     if (*ref_type == "unique") {

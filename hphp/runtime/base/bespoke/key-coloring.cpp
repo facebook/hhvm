@@ -27,35 +27,34 @@ TRACE_SET_MOD(bespoke);
 
 namespace {
 
-struct ColoringMetadata {
-  Optional<ColorMap> coloring;
-  LayoutWeightVector coloringAcceptedLayouts;
-  LayoutWeightVector coloringDiscardedLayouts;
-};
-
-ColoringMetadata s_metadata;
+// For logging
+ColoringMetaData s_metadata;
 
 //////////////////////////////////////////////////////////////////////////////
 
-Optional<ColorMap> performColoring(
-    const LayoutWeightVector::const_iterator& begin,
-    const LayoutWeightVector::const_iterator& end) {
-  FTRACE(3, "Attempting to color {} layouts.\n", std::distance(begin, end));
+Optional<ColorMap> performColoring(const LayoutWeightVector& layouts,
+                                   size_t maxColored) {
+  FTRACE(
+    3,
+    "Attempting to color {} layouts with {} distinctly colored fields.\n",
+    layouts.size(), maxColored);
 
-  if (begin == end) return {ColorMap()};
+  assertx(maxColored > 0);
 
   // 1. Construct the interference graph from the layout set.
   using VertexSet = folly::F14FastSet<const StringData*>;
   using EdgeSet = folly::F14FastMap<const StringData*, VertexSet>;
+  // Two colors are reserved for invalid and duplicate colors
+  assertx(maxColored <= StructLayout::kMaxColor - 2);
   auto allEdges = [&] {
     auto result = EdgeSet();
-    std::for_each(begin, end, [&](auto const& pair) {
+    std::for_each(layouts.cbegin(), layouts.end(), [&](auto const& pair) {
       auto const& layout = pair.first;
-      auto const numFields = layout->numFields();
-      for (Slot i = 0; i < numFields; ++i) {
+      auto const numFieldsToColor = std::min(layout->numFields(), maxColored);
+      for (Slot i = 0; i < numFieldsToColor; ++i) {
         auto const first = layout->field(i).key;
         result.try_emplace(first);
-        for (Slot j = i + 1; j < numFields; ++j) {
+        for (Slot j = i + 1; j < numFieldsToColor; ++j) {
           auto const second = layout->field(j).key;
           result[first].insert(second);
           result[second].insert(first);
@@ -101,7 +100,8 @@ Optional<ColorMap> performColoring(
       colorsUsed.insert(it->second);
     }
     auto const colorAssigned = [&] {
-      for (Color i = 1; i <= StructLayout::kMaxColor; i++) {
+      auto constexpr firstColor = StringData::kDupColor + 1;
+      for (Color i = firstColor; i <= StructLayout::kMaxColor; i++) {
         if (colorsUsed.find(i) == colorsUsed.end()) {
           colors[vertex] = i;
           return true;
@@ -110,21 +110,26 @@ Optional<ColorMap> performColoring(
       return false;
     }();
     if (!colorAssigned) {
-      FTRACE(3, "Colors exhausted while coloring {} layouts.\n",
-             std::distance(begin, end));
+      FTRACE(
+        3,
+        "Colors exhausted while coloring {} layouts for {} fields.\n",
+         layouts.size(), maxColored);
       return std::nullopt;
     }
   }
 
   // 4. Validate the coloring.
   if constexpr (debug) {
-    std::for_each(begin, end, [&](auto const& pair) {
+    std::for_each(layouts.cbegin(), layouts.cend(), [&](auto const& pair) {
       auto const& layout = pair.first;
-      auto const numFields = layout->numFields();
-      for (Slot i = 0; i < numFields; ++i) {
+      auto const numFieldsToColor = std::min(layout->numFields(), maxColored);
+      for (Slot i = 0; i < numFieldsToColor; ++i) {
         auto const first = layout->field(i).key;
-        always_assert(0 < colors[first] && colors[first] <= StructLayout::kMaxColor);
-        for (Slot j = i + 1; j < numFields; ++j) {
+        always_assert(
+          StringData::kDupColor < colors[first] &&
+          colors[first] <= StructLayout::kMaxColor
+        );
+        for (Slot j = i + 1; j < numFieldsToColor; ++j) {
           auto const second = layout->field(j).key;
           always_assert(colors[first] != colors[second]);
         }
@@ -141,7 +146,7 @@ Optional<ColorMap> performColoring(
       }
     );
     assertx(maxColor != colors.cend());
-    FTRACE(3, "Colored {} layouts with {} colors.\n", std::distance(begin, end),
+    FTRACE(3, "Colored {} layouts with {} colors.\n", layouts.size(),
            maxColor->second);
   }
 
@@ -151,10 +156,9 @@ Optional<ColorMap> performColoring(
 
 //////////////////////////////////////////////////////////////////////////////
 
-std::pair<LayoutWeightVector::const_iterator, Optional<ColorMap>>
- findKeyColoring(LayoutWeightVector& layouts) {
+ColoringMetaData findKeyColoring(LayoutWeightVector& layouts) {
   FTRACE(3, "Attempting to color a prefix of {} layouts.\n", layouts.size());
-  if (layouts.empty()) return {layouts.begin(), {}};
+  if (layouts.empty()) return {{}, 1};
 
   // Sort the layouts in descending order by weight.
   std::sort(
@@ -162,76 +166,69 @@ std::pair<LayoutWeightVector::const_iterator, Optional<ColorMap>>
     [](auto const& a, auto const& b) { return a.second > b.second; }
   );
 
-  // Binary search for a colorable prefix.
-  auto lo_idx = 0;
-  auto hi_idx = layouts.size();
-  while (lo_idx + 1 != hi_idx) {
-    auto const mid_idx = (lo_idx + hi_idx) / 2;
-    auto const result = performColoring(
-      layouts.begin(),
-      layouts.begin() + (mid_idx + 1)
-    );
+  // Binary search for max number of distinctly colorable fields.
+  size_t maxColored = (StructLayout::kMaxColor - 2) / 2;
+  auto lastHigh = StructLayout::kMaxColor - 1; // lowest unsuccessful so far
+  auto lastLow = 1; // highest successful so far
+  size_t newMaxColored;
+  Optional<ColorMap> result;
+  do {
+    result = performColoring(layouts, maxColored);
     if (result) {
-      lo_idx = mid_idx;
+      newMaxColored = (maxColored + lastHigh) / 2;
+      if (newMaxColored == maxColored) break;
+      lastLow = maxColored;
+      maxColored = newMaxColored;
     } else {
-      hi_idx = mid_idx;
+      newMaxColored = (lastLow + maxColored) / 2;
+      lastHigh = maxColored;
+      maxColored = newMaxColored;
     }
-  }
-  assertx(lo_idx + 1 == hi_idx);
+  } while(1);
+  assertx(maxColored + 1 == lastHigh);
+  assertx(maxColored > 0);
+  assertx(result);
 
-  // Record the discarded and accepted layouts.
-  std::copy(
-    layouts.begin(), layouts.begin() + hi_idx,
-    std::back_inserter(s_metadata.coloringAcceptedLayouts)
-  );
-  std::copy(
-    layouts.begin() + hi_idx, layouts.end(),
-    std::back_inserter(s_metadata.coloringDiscardedLayouts)
-  );
-  auto const coloring = performColoring(
-    layouts.begin(),
-    layouts.begin() + hi_idx
-  );
-  s_metadata.coloring = coloring;
+  s_metadata.coloring = *result;
+  s_metadata.numColoredFields = maxColored;
 
-  FTRACE(3, "Final coloring: {} layouts.\n", hi_idx);
+  FTRACE(3, "Final coloring: {} max colored fields.\n", maxColored);
 
-  return {layouts.begin() + hi_idx, coloring};
+  return {*result, maxColored};
 }
 
-void applyColoring(const ColorMap& coloring) {
-  for (auto const& [key, color] : coloring) {
+void applyColoring(const ColoringMetaData& coloring,
+                   const LayoutWeightVector& layouts) {
+  for (auto const& [key, color] : coloring.coloring) {
     const_cast<StringData*>(key)->setColor(color);
   }
+  std::for_each(layouts.cbegin(), layouts.cend(), [&](auto const& pair) {
+    auto const& layout = pair.first;
+    for (Slot i = coloring.numColoredFields; i < layout->numFields(); ++i){
+      auto const key = layout->field(i).key.get();
+      if (key->color() == StringData::kInvalidColor) {
+        const_cast<StringData*>(key)->setColor(StringData::kDupColor);
+      }
+    }
+  });
+  StructLayout::setMaxColoredFields(coloring.numColoredFields);
 }
 
 std::string dumpColoringInfo() {
-  if (!s_metadata.coloring) {
-    return "Coloring unsuccessful\n\n";
-  }
-
   std::ostringstream ss;
+  ss << "Max number of colored fields: " << s_metadata.numColoredFields << "\n";
   {
     auto maxColor = Color{0};
-    for (auto const& [key, color] : *s_metadata.coloring) {
+    for (auto const& [key, color] : s_metadata.coloring) {
       maxColor = std::max(maxColor, color);
     }
-    ss << maxColor << " colors used\n\n";
-  }
-
-  {
-    auto const& discarded = s_metadata.coloringDiscardedLayouts;
-    ss << "Discarded layouts (" << discarded.size() << "):\n";
-    for (auto const& [layout, _] : discarded) {
-      ss << "  " << layout->describe() << "\n";
-    }
-    ss << "\n";
+    ss << maxColor - 1 << " distinct colors used\n\n";
   }
 
   {
     ss << "Color assignments:\n";
     auto colorsToKeys = folly::F14FastMap<Color, std::vector<const StringData*>>{};
-    for (auto const& [key, color] : *s_metadata.coloring) {
+    for (auto const& [key, color] : s_metadata.coloring) {
       colorsToKeys[color].push_back(key);
     }
 
@@ -254,19 +251,26 @@ std::string dumpColoringInfo() {
 
   {
     ss << "Max color indices:\n";
-    for (auto const& [layout, _] : s_metadata.coloringAcceptedLayouts) {
-      auto const& coloring = *s_metadata.coloring;
+
+    auto numStructs = size_t{0};
+    eachLayout([&](Layout& l) {
+      if (!l.isConcrete() || !jit::ArrayLayout(&l).is_struct()) return;
+      numStructs++;
+      auto const layout = StructLayout::As(&l);
       auto maxColor = Color{0};
-      auto const numFields = layout->numFields();
-      for (Slot i = 0; i < numFields; ++i) {
+      auto const numColoredFields =
+        std::min(layout->numFields(), s_metadata.numColoredFields);
+      for (Slot i = 0; i < numColoredFields; ++i) {
         auto const key = layout->field(i).key;
-        auto const iter = coloring.find(key);
-        assertx(iter != coloring.end());
+        auto const iter = s_metadata.coloring.find(key);
+        assertx(iter != s_metadata.coloring.end());
         maxColor = std::max(maxColor, iter->second);
       }
       ss << "  " << layout->describe() << ": " << maxColor << "\n";
-    }
+    });
     ss << "\n";
+
+    ss << "Number of colored layouts: " << numStructs << "\n";
   }
 
   return ss.str();

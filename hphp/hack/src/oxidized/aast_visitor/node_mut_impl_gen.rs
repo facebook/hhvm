@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f99ac62a744cb782821af87e4add1dfb>>
+// @generated SignedSource<<ce00e3e118e9b4240ed4a41b11cbb66a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -17,8 +17,6 @@ use crate::aast_defs::*;
 use crate::aast_defs::{self};
 use crate::ast_defs::*;
 use crate::ast_defs::{self};
-use crate::doc_comment::*;
-use crate::doc_comment::{self};
 use crate::*;
 impl<P: Params> NodeMut<P> for Abstraction {
     fn accept<'node>(
@@ -585,22 +583,6 @@ impl<P: Params> NodeMut<P> for DefaultCase<P::Ex, P::En> {
     ) -> Result<(), P::Error> {
         self.0.accept(c, v)?;
         self.1.accept(c, v)
-    }
-}
-impl<P: Params> NodeMut<P> for DocComment {
-    fn accept<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_doc_comment(c, self)
-    }
-    fn recurse<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        self.0.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for EmitId {

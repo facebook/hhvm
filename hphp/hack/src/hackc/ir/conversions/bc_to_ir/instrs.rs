@@ -5,6 +5,7 @@
 
 use std::cmp::Ordering;
 use std::fmt::Display;
+use std::sync::Arc;
 
 use hhbc::Instruct;
 use hhbc::Opcode;
@@ -946,6 +947,22 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
             Action::Terminal(Terminator::ThrowAsTypeStructException([s1, s2], ctx.loc))
         }
 
+        Opcode::Dict(name) => {
+            let tv = Arc::clone(&ctx.adata_lookup[&name]);
+            debug_assert!(matches!(*tv, ir::TypedValue::Dict(_)));
+            Action::Constant(Constant::Array(tv))
+        }
+        Opcode::Keyset(name) => {
+            let tv = Arc::clone(&ctx.adata_lookup[&name]);
+            debug_assert!(matches!(*tv, ir::TypedValue::Keyset(_)));
+            Action::Constant(Constant::Array(tv))
+        }
+        Opcode::Vec(name) => {
+            let tv = Arc::clone(&ctx.adata_lookup[&name]);
+            debug_assert!(matches!(*tv, ir::TypedValue::Vec(_)));
+            Action::Constant(Constant::Array(tv))
+        }
+
         Opcode::AKExists => simple!(Hhbc::AKExists),
         Opcode::Add => simple!(Hhbc::Add),
         Opcode::AddElemC => simple!(Hhbc::AddElemC),
@@ -1002,7 +1019,6 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::ContValid => simple!(Hhbc::ContValid),
         Opcode::CreateCont => simple!(Hhbc::CreateCont),
         Opcode::DblAsBits => todo!(),
-        Opcode::Dict => simple!(Constant::Dict),
         Opcode::Dir => simple!(Constant::Dir),
         Opcode::Div => simple!(Hhbc::Div),
         Opcode::Double => simple!(Constant::Double),
@@ -1033,7 +1049,6 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::IssetL => simple!(Hhbc::IssetL),
         Opcode::IssetS => simple!(Hhbc::IssetS),
         Opcode::IterFree => simple!(Hhbc::IterFree),
-        Opcode::Keyset => simple!(Constant::Keyset),
         Opcode::LIterFree => todo!(),
         Opcode::LIterInit => todo!(),
         Opcode::LIterNext => todo!(),
@@ -1109,7 +1124,6 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::UGetCUNop => todo!(),
         Opcode::UnsetG => simple!(Hhbc::UnsetG),
         Opcode::UnsetL => simple!(Hhbc::UnsetL),
-        Opcode::Vec => simple!(Constant::Vec),
         Opcode::VerifyImplicitContextState => simple!(Hhbc::VerifyImplicitContextState),
         Opcode::VerifyOutType => simple!(Hhbc::VerifyOutType),
         Opcode::VerifyParamType => simple!(Hhbc::VerifyParamType),

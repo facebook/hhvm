@@ -33,8 +33,8 @@ class FilesystemIterator extends DirectoryIterator
   public function current();
   public function getFlags();
   public function key();
-  public function next();
-  public function rewind();
+  public function next(): void;
+  public function rewind(): void;
   public function setFlags(int $flags);
   public function seek(int $position): void;
   public function __toString();

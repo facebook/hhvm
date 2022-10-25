@@ -128,8 +128,11 @@ inline bool is_ref(const t_field* f) {
 }
 
 inline bool field_has_isset(const t_field* field) {
+  auto ref_type = gen::cpp::find_ref_type(*field);
   return field->get_req() != t_field::e_req::required &&
-      field->get_req() != t_field::e_req::terse && !is_explicit_ref(field);
+      field->get_req() != t_field::e_req::terse &&
+      (ref_type == gen::cpp::reference_type::none ||
+       ref_type == gen::cpp::reference_type::boxed_intern);
 }
 
 inline bool is_lazy(const t_field* field) {
@@ -255,13 +258,26 @@ bool is_cpp_ref_unique_either(const t_field* f);
 
 bool deprecated_terse_writes(const t_field* field);
 
+namespace detail {
+template <typename T>
+decltype(std::declval<T>()->name()) stringify(const T& t) {
+  return t->name();
+}
+inline const std::string& stringify(const std::string& t) {
+  return t;
+}
+} // namespace detail
+
 //  topological_sort
 //
 //  Given a container of objects and a function to obtain dependencies,
 //  produces a vector of those nodes in a topologicaly sorted order.
 template <typename T, typename ForwardIt, typename Edges>
 std::vector<T> topological_sort(
-    ForwardIt begin, ForwardIt end, const Edges& edges) {
+    ForwardIt begin,
+    ForwardIt end,
+    const Edges& edges,
+    bool throwOnCycle = false) {
   struct iter_state {
     T node;
     std::vector<T> edges;
@@ -284,19 +300,34 @@ std::vector<T> topological_sort(
       continue;
     }
     std::stack<iter_state> st;
+    std::unordered_set<T> in_stack;
     st.emplace(*it, edges.at(*it));
+    in_stack.insert(*it);
     visited.insert(*it);
     while (!st.empty()) {
       iter_state& s = st.top();
       if (s.pos == s.edges.end()) {
         output.emplace_back(s.node);
+        in_stack.erase(s.node);
         st.pop();
         continue;
       }
 
       if (visited.find(*s.pos) == visited.end()) {
         st.emplace(*s.pos, edges.at(*s.pos));
+        in_stack.insert(*s.pos);
         visited.insert(*s.pos);
+      } else if (in_stack.count(*s.pos) && throwOnCycle) {
+        T start = *s.pos;
+        std::vector<std::string> cycle{detail::stringify(start)};
+        while (st.top().node != start) {
+          cycle.push_back(detail::stringify(st.top().node));
+          st.pop();
+        }
+        cycle.push_back(detail::stringify(st.top().node));
+        std::reverse(cycle.begin(), cycle.end());
+        throw std::runtime_error(
+            fmt::format("Cyclic dependency: {}", fmt::join(cycle, " -> ")));
       }
       ++s.pos;
     }

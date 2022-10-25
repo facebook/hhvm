@@ -165,6 +165,24 @@ class ConformanceVerificationServer
             *testCase_.serverInstruction()->sinkBasic_ref()->bufferSize())};
   }
 
+  // =================== Interactions ===================
+  class BasicInteraction : public BasicInteractionIf {
+    void init() override {}
+  };
+
+  std::unique_ptr<BasicInteractionIf> createBasicInteraction() override {
+    serverResult_.interactionConstructor_ref().emplace().constructorCalled() =
+        true;
+    return std::make_unique<BasicInteraction>();
+  }
+
+  apache::thrift::TileAndResponse<BasicInteractionIf, void>
+  basicInteractionFactoryFunction(int32_t initialSum) override {
+    serverResult_.interactionFactoryFunction_ref().emplace().initialSum() =
+        initialSum;
+    return {std::make_unique<BasicInteraction>()};
+  }
+
   folly::SemiFuture<folly::Unit> getTestReceived() {
     return getTestReceivedPromise_.getSemiFuture();
   }

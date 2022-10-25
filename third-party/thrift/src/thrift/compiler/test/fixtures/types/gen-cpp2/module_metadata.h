@@ -42,11 +42,6 @@ class EnumMetadata<::apache::thrift::fixtures::types::MyForwardRefEnum> {
   static void gen(ThriftMetadata& metadata);
 };
 template <>
-class EnumMetadata<::apache::thrift::fixtures::types::MyEnumA> {
- public:
-  static void gen(ThriftMetadata& metadata);
-};
-template <>
 class StructMetadata<::apache::thrift::fixtures::types::decorated_struct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
@@ -137,22 +132,62 @@ class StructMetadata<::apache::thrift::fixtures::types::ForwardUsageByRef> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::apache::thrift::fixtures::types::NoexceptMoveEmpty> {
+class StructMetadata<::apache::thrift::fixtures::types::IncompleteMap> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::apache::thrift::fixtures::types::NoexceptMoveSimpleStruct> {
+class StructMetadata<::apache::thrift::fixtures::types::IncompleteMapDep> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::apache::thrift::fixtures::types::NoexceptMoveComplexStruct> {
+class StructMetadata<::apache::thrift::fixtures::types::CompleteMap> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::apache::thrift::fixtures::types::NoExceptMoveUnion> {
+class StructMetadata<::apache::thrift::fixtures::types::CompleteMapDep> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::apache::thrift::fixtures::types::IncompleteList> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::apache::thrift::fixtures::types::IncompleteListDep> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::apache::thrift::fixtures::types::CompleteList> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::apache::thrift::fixtures::types::CompleteListDep> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::apache::thrift::fixtures::types::AdaptedList> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::apache::thrift::fixtures::types::detail::AdaptedListDep> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::apache::thrift::fixtures::types::DependentAdaptedList> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

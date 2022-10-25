@@ -13,5 +13,4 @@ arena_trait = { path = "../../../arena_trait" }
 eq_modulo_pos = { path = "../../../utils/eq_modulo_pos" }
 no_pos_hash = { path = "../../../utils/no_pos_hash" }
 ocamlrep = { path = "../../../ocamlrep" }
-ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }

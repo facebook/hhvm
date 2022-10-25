@@ -210,9 +210,7 @@ fn hint_to_type_constraint<'arena>(
 ) -> Result<Constraint<'arena>> {
     let Hint(_, hint) = h;
     Ok(match &**hint {
-        Hdynamic | Hlike(_) | Hfun(_) | Hunion(_) | Hintersection(_) | Hmixed => {
-            Constraint::default()
-        }
+        Hdynamic | Hfun(_) | Hunion(_) | Hintersection(_) | Hmixed => Constraint::default(),
         Haccess(_, _) => Constraint::make(
             Just("".into()),
             TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::TypeConstant,
@@ -227,6 +225,7 @@ fn hint_to_type_constraint<'arena>(
             t,
             TypeConstraintFlags::Soft | TypeConstraintFlags::ExtendedHint,
         )?,
+        Hlike(h) => hint_to_type_constraint(alloc, kind, tparams, skipawaitable, h)?,
         Herr | Hany => {
             return Err(Error::unrecoverable(
                 "This should be an error caught in naming",

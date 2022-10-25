@@ -280,6 +280,29 @@ SinkChunkTimeoutClientTestResult runSinkChunkTimeout(
   return result;
 }
 
+// =================== Interactions ===================
+InteractionConstructorClientTestResult runInteractionConstructor(
+    RPCConformanceServiceAsyncClient& client,
+    const InteractionConstructorClientInstruction&) {
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<InteractionConstructorClientTestResult> {
+        auto interaction = client.createBasicInteraction();
+        co_await interaction.co_init();
+        co_return InteractionConstructorClientTestResult();
+      }());
+}
+
+InteractionFactoryFunctionClientTestResult runInteractionFactoryFunction(
+    RPCConformanceServiceAsyncClient& client,
+    const InteractionFactoryFunctionClientInstruction& instruction) {
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<InteractionFactoryFunctionClientTestResult> {
+        co_await client.co_basicInteractionFactoryFunction(
+            *instruction.initialSum());
+        co_return InteractionFactoryFunctionClientTestResult();
+      }());
+}
+
 ClientTestResult runClientSteps(
     Client<RPCConformanceService>& client,
     const ClientInstruction& clientInstruction) {
@@ -320,6 +343,14 @@ ClientTestResult runClientSteps(
     case ClientInstruction::Type::sinkChunkTimeout:
       result.sinkChunkTimeout_ref() = runSinkChunkTimeout(
           client, *clientInstruction.sinkChunkTimeout_ref());
+      break;
+    case ClientInstruction::Type::interactionConstructor:
+      result.interactionConstructor_ref() = runInteractionConstructor(
+          client, *clientInstruction.interactionConstructor_ref());
+      break;
+    case ClientInstruction::Type::interactionFactoryFunction:
+      result.interactionFactoryFunction_ref() = runInteractionFactoryFunction(
+          client, *clientInstruction.interactionFactoryFunction_ref());
       break;
     default:
       throw std::runtime_error("Invalid TestCase Type.");

@@ -9,8 +9,8 @@
 use std::borrow::Cow;
 use std::cmp::Ordering;
 
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 
 use crate::token_kind::TokenKind;
 
@@ -217,6 +217,9 @@ pub const error1064: Error = Cow::Borrowed("XHP children declarations are no lon
 pub const error1065: Error = Cow::Borrowed("A backtick ``` is expected here.");
 pub const error1066: Error = Cow::Borrowed("Only one 'exports to' is allowed.");
 pub const error1067: Error = Cow::Borrowed("Only one 'imports from' is allowed.");
+pub const error1068: Error = Cow::Borrowed("Only one 'use' is allowed.");
+pub const error1069: Error = Cow::Borrowed("Only one 'include' is allowed.");
+pub const error1070: Error = Cow::Borrowed("A 'use' or 'include' is expected here.");
 pub const error2001: Error = Cow::Borrowed("A type annotation is required in `strict` mode.");
 pub const error2003: Error =
     Cow::Borrowed("A `case` statement may only appear directly inside a `switch`.");

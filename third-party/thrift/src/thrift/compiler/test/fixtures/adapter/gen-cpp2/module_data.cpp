@@ -239,6 +239,22 @@ THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::facebook::thri
   0,
 }};
 
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::fields_names = {{
+  "field",
+}};
+THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::fields_ids = {{
+  1,
+}};
+THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::fields_types = {{
+  TType::T_I32,
+}};
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::storage_names = {{
+  "__fbthrift_field_field",
+}};
+THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::isset_indexes = {{
+  0,
+}};
+
 THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::fields_names = {{
   "field",
   "shared_field",

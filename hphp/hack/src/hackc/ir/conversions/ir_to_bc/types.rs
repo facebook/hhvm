@@ -12,11 +12,7 @@ use ir::TypeConstraintFlags;
 
 use crate::strings::StringCache;
 
-fn convert_type<'a>(
-    alloc: &'a bumpalo::Bump,
-    ty: &ir::UserType,
-    strings: &StringCache<'a, '_>,
-) -> TypeInfo<'a> {
+fn convert_type<'a>(ty: &ir::UserType, strings: &StringCache<'a, '_>) -> TypeInfo<'a> {
     let mut user_type = ty.user_type.map(|ut| strings.lookup_ffi_str(ut));
 
     let name = if let Some(name) = base_type_string(&ty.enforced.ty) {
@@ -30,7 +26,7 @@ fn convert_type<'a>(
                 name
             } else {
                 let len = name.len() + nullable as usize + soft as usize;
-                let p = alloc.alloc_slice_fill_copy(len, 0u8);
+                let p = strings.alloc.alloc_slice_fill_copy(len, 0u8);
                 let mut i = 0;
                 if soft {
                     p[i] = b'@';
@@ -56,7 +52,7 @@ fn convert_type<'a>(
     TypeInfo {
         user_type: user_type.into(),
         type_constraint: Constraint {
-            name: name.map(|name| Str::new_slice(alloc, &name)).into(),
+            name: name.map(|name| Str::new_slice(strings.alloc, &name)).into(),
             flags: ty.enforced.modifiers,
         },
     }
@@ -93,14 +89,10 @@ fn base_type_string(ty: &ir::BaseType) -> Option<Str<'static>> {
     }
 }
 
-pub(crate) fn convert<'a>(
-    alloc: &'a bumpalo::Bump,
-    ty: &ir::UserType,
-    strings: &StringCache<'a, '_>,
-) -> Maybe<TypeInfo<'a>> {
+pub(crate) fn convert<'a>(ty: &ir::UserType, strings: &StringCache<'a, '_>) -> Maybe<TypeInfo<'a>> {
     if ty.is_empty() {
         Maybe::Nothing
     } else {
-        Maybe::Just(convert_type(alloc, ty, strings))
+        Maybe::Just(convert_type(ty, strings))
     }
 }

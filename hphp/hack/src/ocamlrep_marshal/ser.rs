@@ -26,7 +26,7 @@ bitflags::bitflags! {
 }
 
 // NB: Must match the definition order in ocaml's marshal.ml
-#[derive(ocamlrep_derive::FromOcamlRep)]
+#[derive(ocamlrep::FromOcamlRep)]
 enum ExternFlag {
     NoSharing,
     Closures,

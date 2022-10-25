@@ -22,5 +22,5 @@ import thrift.annotation.cpp.ttypes
 import thrift.lib.thrift.standard.ttypes
 
 
-from .ttypes import UTF8STRINGS, PatchOp, GeneratePatch, BoolPatch, BytePatch, I16Patch, I32Patch, I64Patch, FloatPatch, DoublePatch, StringPatch, BinaryPatch, DurationPatch, TimePatch
+from .ttypes import UTF8STRINGS, PatchOp, GeneratePatch, AssignOnlyPatch, BoolPatch, BytePatch, I16Patch, I32Patch, I64Patch, FloatPatch, DoublePatch, StringPatch, BinaryPatch, DurationPatch, TimePatch
 

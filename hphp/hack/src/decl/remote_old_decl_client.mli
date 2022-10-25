@@ -1,3 +1,9 @@
+val fetch_old_decl_hashes_and_blobs :
+  hhconfig_version:string ->
+  no_limit:bool ->
+  decl_hashes:string list ->
+  (string * string) list
+
 val fetch_old_decls :
   telemetry_label:string ->
   ctx:Provider_context.t ->

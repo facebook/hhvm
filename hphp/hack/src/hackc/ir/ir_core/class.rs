@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Str;
-pub use hhbc::Property;
 pub use hhbc::Span;
 pub use hhbc::TraitReqKind;
 
@@ -16,6 +15,7 @@ use crate::HackConstant;
 use crate::Method;
 use crate::SrcLoc;
 use crate::TypeConstant;
+use crate::TypedValue;
 use crate::UserType;
 
 /// This represents a Hack class or enum in IR.
@@ -62,6 +62,17 @@ pub struct Class<'a> {
     pub upper_bounds: Vec<(Str<'a>, Vec<UserType>)>,
 
     pub uses: Vec<ClassId>,
+}
+
+#[derive(Clone, Debug)]
+pub struct Property<'arena> {
+    pub name: hhbc::PropName<'arena>,
+    pub flags: Attr,
+    pub attributes: Vec<Attribute<'arena>>,
+    pub visibility: hhbc::Visibility,
+    pub initial_value: Option<TypedValue>,
+    pub type_info: hhbc::TypeInfo<'arena>,
+    pub doc_comment: ffi::Maybe<Str<'arena>>,
 }
 
 #[derive(Debug)]

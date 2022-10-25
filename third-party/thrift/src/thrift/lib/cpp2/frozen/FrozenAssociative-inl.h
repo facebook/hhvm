@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
+#include <type_traits>
+
 namespace apache {
 namespace thrift {
 namespace frozen {
 
 namespace detail {
 
-template <class K, class V>
+template <class Table, class K, class V>
 struct KeyExtractor {
   using KeyType = K;
+  using rvalue_reference = std::add_rvalue_reference_t<
+      std::remove_reference_t<typename Table::const_reference>>;
+  using const_reference = typename Table::const_reference;
+
   // deleted functions used to avoid returning references to temporary values
-  static const K& getKey(const std::pair<const K, V>&&) = delete;
+  static const K& getKey(const std::pair<const K, V>&& pair) = delete;
   static const K& getKey(const std::pair<const K, V>& pair) {
     return pair.first;
   }
@@ -33,17 +39,27 @@ struct KeyExtractor {
   static const K& getKey(const std::pair<K, V>&& pair) = delete;
   static const K& getKey(const std::pair<K, V>& pair) { return pair.first; }
 
-  static const std::pair<const K, V>* getPointer(
-      const std::pair<const K, V>&&) = delete;
-  static const std::pair<const K, V>* getPointer(
-      const std::pair<const K, V>& pair) {
-    return &pair;
+  // Some maps don't contain pairs; listen to whatever they say about their
+  // const_reference type. template shenanigans used to avoid duplicating the
+  // previous two overloads in the cases where they're redundant.
+  template <typename K2 = K, typename V2 = V>
+  static std::enable_if_t<
+      !std::is_same_v<rvalue_reference, const std::pair<K2, V2>&&> &&
+          !std::is_same_v<rvalue_reference, const std::pair<const K2, V2>&&>,
+      const K&>
+      getKey(rvalue_reference) = delete;
+  template <typename K2 = K, typename V2 = V>
+  static std::enable_if_t<
+      !std::is_same_v<const_reference, const std::pair<K2, V2>&> &&
+          !std::is_same_v<const_reference, const std::pair<const K2, V2>&>,
+      const K&>
+  getKey(const_reference pair) {
+    return pair.first;
   }
 
-  static const std::pair<const K, V>* getPointer(const std::pair<K, V>&&) =
-      delete;
-  static const std::pair<const K, V>* getPointer(const std::pair<K, V>& pair) {
-    // To allow freezing from VectorAsHashMap
+  static const std::pair<const K, V>* getPointer(rvalue_reference) = delete;
+  static const std::pair<const K, V>* getPointer(const_reference pair) {
+    // Cast to support VectorAsHashMap.
     return reinterpret_cast<const std::pair<const K, V>*>(&pair);
   }
 
@@ -73,8 +89,8 @@ template <
     template <class, class, class, class>
     class Table>
 struct MapTableLayout
-    : public Table<T, std::pair<const K, V>, KeyExtractor<K, V>, K> {
-  typedef Table<T, std::pair<const K, V>, KeyExtractor<K, V>, K> Base;
+    : public Table<T, std::pair<const K, V>, KeyExtractor<T, K, V>, K> {
+  typedef Table<T, std::pair<const K, V>, KeyExtractor<T, K, V>, K> Base;
   typedef MapTableLayout LayoutSelf;
 
   class View : public Base::View {

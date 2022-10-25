@@ -157,7 +157,7 @@ cdef class AsyncClient:
             future.set_result(None)
             return future
         else:
-            userdata = (future, response_cls, protocol)
+            userdata = (future, response_cls, protocol, rpc_options)
             rpc_kind = RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE if isinstance(
                 response_cls, tuple) else RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE
             bridgeSemiFutureWith[cOmniClientResponseWithHeaders](
@@ -187,12 +187,11 @@ cdef void _async_client_send_request_callback(
     cFollyTry[cOmniClientResponseWithHeaders]&& result,
     PyObject* userdata,
 ):
-    pyfuture, response_cls, protocol = <object> userdata
+    pyfuture, response_cls, protocol, rpc_options = <object> userdata
     cdef cOmniClientResponseWithHeaders resp = cmove(result.value())
 
     if resp.buf.hasError():
-        # TODO: pass a proper RpcOptions value
-        pyfuture.set_exception(create_py_exception(resp.buf.error(), None))
+        pyfuture.set_exception(create_py_exception(resp.buf.error(), rpc_options))
         return
     if not resp.buf.hasValue():
         pyfuture.set_exception(ApplicationError(

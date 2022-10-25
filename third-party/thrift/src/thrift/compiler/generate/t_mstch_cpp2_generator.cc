@@ -574,8 +574,8 @@ class cpp_mstch_program : public mstch_program {
     nodes.insert(
         nodes.end(), program_->objects().begin(), program_->objects().end());
     auto deps = cpp2::gen_dependency_graph(program_, nodes);
-    auto sorted =
-        cpp2::topological_sort<const t_type*>(nodes.begin(), nodes.end(), deps);
+    auto sorted = cpp2::topological_sort<const t_type*>(
+        nodes.begin(), nodes.end(), deps, true);
 
     // Generate the sorted nodes
     mstch::array ret;
@@ -1061,6 +1061,8 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::cpp_underlying_type},
             {"struct:is_directly_adapted?",
              &cpp_mstch_struct::is_directly_adapted},
+            {"struct:dependent_direct_adapter?",
+             &cpp_mstch_struct::dependent_direct_adapter},
             {"struct:cpp_name", &cpp_mstch_struct::cpp_name},
             {"struct:cpp_fullname", &cpp_mstch_struct::cpp_fullname},
             {"struct:cpp_methods", &cpp_mstch_struct::cpp_methods},
@@ -1190,6 +1192,12 @@ class cpp_mstch_struct : public mstch_struct {
   mstch::node is_directly_adapted() {
     return cpp_context_->resolver().is_directly_adapted(*struct_);
   }
+  mstch::node dependent_direct_adapter() {
+    auto adapter =
+        cpp_context_->resolver().find_nontransitive_adapter(*struct_);
+    return adapter &&
+        !adapter->get_value_from_structured_annotation_or_null("adaptedType");
+  }
 
   mstch::node cpp_methods() {
     return struct_->get_annotation({"cpp.methods", "cpp2.methods"});
@@ -1230,6 +1238,7 @@ class cpp_mstch_struct : public mstch_struct {
         case gen::cpp::reference_type::shared_mutable: {
           return true;
         }
+        case gen::cpp::reference_type::boxed_intern:
         case gen::cpp::reference_type::boxed:
         case gen::cpp::reference_type::none:
         case gen::cpp::reference_type::unique:
@@ -1642,6 +1651,7 @@ class cpp_mstch_field : public mstch_field {
             {"field:lazy?", &cpp_mstch_field::lazy},
             {"field:lazy_ref?", &cpp_mstch_field::lazy_ref},
             {"field:boxed_ref?", &cpp_mstch_field::boxed_ref},
+            {"field:intern_boxed_ref?", &cpp_mstch_field::intern_boxed_ref},
             {"field:use_field_ref?", &cpp_mstch_field::use_field_ref},
             {"field:field_ref_type", &cpp_mstch_field::field_ref_type},
             {"field:transitively_refers_to_unique?",
@@ -1719,9 +1729,15 @@ class cpp_mstch_field : public mstch_field {
   mstch::node boxed_ref() {
     return gen::cpp::find_ref_type(*field_) == gen::cpp::reference_type::boxed;
   }
+  mstch::node intern_boxed_ref() {
+    return gen::cpp::find_ref_type(*field_) ==
+        gen::cpp::reference_type::boxed_intern;
+  }
   mstch::node use_field_ref() {
-    return !cpp2::is_explicit_ref(field_) ||
-        gen::cpp::find_ref_type(*field_) == gen::cpp::reference_type::boxed;
+    auto ref_type = gen::cpp::find_ref_type(*field_);
+    return ref_type == gen::cpp::reference_type::none ||
+        ref_type == gen::cpp::reference_type::boxed ||
+        ref_type == gen::cpp::reference_type::boxed_intern;
   }
   mstch::node field_ref_type() {
     static const std::string ns = "::apache::thrift::";
@@ -1736,6 +1752,19 @@ class cpp_mstch_field : public mstch_field {
         case t_field::e_req::required:
         default:
           throw std::runtime_error("unsupported boxed field");
+      }
+    }
+
+    if (gen::cpp::find_ref_type(*field_) ==
+        gen::cpp::reference_type::boxed_intern) {
+      switch (field_->get_req()) {
+        case t_field::e_req::opt_in_req_out:
+          return ns + "intern_boxed_field_ref";
+        case t_field::e_req::terse:
+        case t_field::e_req::required:
+        case t_field::e_req::optional:
+        default:
+          throw std::runtime_error("unsupported intern boxed field");
       }
     }
 
@@ -1783,7 +1812,8 @@ class cpp_mstch_field : public mstch_field {
   mstch::node cpp_ref_not_boxed() {
     auto ref_type = gen::cpp::find_ref_type(*field_);
     return ref_type != gen::cpp::reference_type::none &&
-        ref_type != gen::cpp::reference_type::boxed;
+        ref_type != gen::cpp::reference_type::boxed &&
+        ref_type != gen::cpp::reference_type::boxed_intern;
   }
   mstch::node cpp_first_adapter() {
     if (const std::string* adapter =

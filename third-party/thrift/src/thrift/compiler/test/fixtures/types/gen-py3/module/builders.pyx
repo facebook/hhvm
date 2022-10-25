@@ -137,38 +137,65 @@ cdef class ForwardUsageByRef_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self):
         yield "foo", self.foo
 
-cdef class NoexceptMoveEmpty_Builder(thrift.py3.builder.StructBuilder):
-    _struct_type = _module_types.NoexceptMoveEmpty
+cdef class IncompleteMap_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _module_types.IncompleteMap
+
+    def __iter__(self):
+        yield "field", self.field
+
+cdef class IncompleteMapDep_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _module_types.IncompleteMapDep
 
     def __iter__(self):
         pass
 
-cdef class NoexceptMoveSimpleStruct_Builder(thrift.py3.builder.StructBuilder):
-    _struct_type = _module_types.NoexceptMoveSimpleStruct
+cdef class CompleteMap_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _module_types.CompleteMap
 
     def __iter__(self):
-        yield "boolField", self.boolField
+        yield "field", self.field
 
-cdef class NoexceptMoveComplexStruct_Builder(thrift.py3.builder.StructBuilder):
-    _struct_type = _module_types.NoexceptMoveComplexStruct
-
-    def __iter__(self):
-        yield "MyBoolField", self.MyBoolField
-        yield "MyIntField", self.MyIntField
-        yield "MyStringField", self.MyStringField
-        yield "MyStringField2", self.MyStringField2
-        yield "MyBinaryField", self.MyBinaryField
-        yield "MyBinaryField2", self.MyBinaryField2
-        yield "MyBinaryField3", self.MyBinaryField3
-        yield "MyBinaryListField4", self.MyBinaryListField4
-        yield "MyMapEnumAndInt", self.MyMapEnumAndInt
-
-cdef class NoExceptMoveUnion_Builder(thrift.py3.builder.StructBuilder):
-    _struct_type = _module_types.NoExceptMoveUnion
+cdef class CompleteMapDep_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _module_types.CompleteMapDep
 
     def __iter__(self):
-        yield "string_field", self.string_field
-        yield "i32_field", self.i32_field
+        pass
+
+cdef class IncompleteList_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _module_types.IncompleteList
+
+    def __iter__(self):
+        yield "field", self.field
+
+cdef class IncompleteListDep_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _module_types.IncompleteListDep
+
+    def __iter__(self):
+        pass
+
+cdef class CompleteList_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _module_types.CompleteList
+
+    def __iter__(self):
+        yield "field", self.field
+
+cdef class CompleteListDep_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _module_types.CompleteListDep
+
+    def __iter__(self):
+        pass
+
+cdef class AdaptedList_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _module_types.AdaptedList
+
+    def __iter__(self):
+        yield "field", self.field
+
+cdef class DependentAdaptedList_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _module_types.DependentAdaptedList
+
+    def __iter__(self):
+        yield "field", self.field
 
 cdef class AllocatorAware_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _module_types.AllocatorAware

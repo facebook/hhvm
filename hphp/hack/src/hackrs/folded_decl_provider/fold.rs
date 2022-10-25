@@ -7,19 +7,16 @@ use std::sync::Arc;
 
 use depgraph_api::DepGraphWriter;
 use eq_modulo_pos::EqModuloPos;
+use hash::IndexMap;
+use hash::IndexSet;
 use oxidized::global_options::GlobalOptions;
 use pos::ClassConstName;
-use pos::ClassConstNameIndexMap;
-use pos::MethodNameIndexMap;
+use pos::MethodName;
 use pos::ModuleName;
 use pos::Positioned;
-use pos::PropNameIndexMap;
-use pos::PropNameIndexSet;
+use pos::PropName;
 use pos::TypeConstName;
-use pos::TypeConstNameIndexMap;
 use pos::TypeName;
-use pos::TypeNameIndexMap;
-use pos::TypeNameIndexSet;
 use special_names as sn;
 use ty::decl::folded::Constructor;
 use ty::decl::subst::Subst;
@@ -67,7 +64,7 @@ pub struct DeclFolder<'a, R: Reason> {
     /// The class whose folded decl we are producing.
     child: &'a ShallowClass<R>,
     /// The folded decls of all (recursive) ancestors of `child`.
-    parents: &'a TypeNameIndexMap<Arc<FoldedClass<R>>>,
+    parents: &'a IndexMap<TypeName, Arc<FoldedClass<R>>>,
     /// Hack errors which will be written to `child`'s folded decl.
     errors: Vec<DeclError<R::Pos>>,
 }
@@ -84,7 +81,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         opts: &'a GlobalOptions,
         dependency_registrar: &'a dyn DepGraphWriter,
         child: &'a ShallowClass<R>,
-        parents: &'a TypeNameIndexMap<Arc<FoldedClass<R>>>,
+        parents: &'a IndexMap<TypeName, Arc<FoldedClass<R>>>,
         errors: Vec<DeclError<R::Pos>>,
     ) -> Result<Arc<FoldedClass<R>>> {
         let this = Self {
@@ -113,7 +110,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         }
     }
 
-    fn synthesize_const_defaults(&self, consts: &mut ClassConstNameIndexMap<ClassConst<R>>) {
+    fn synthesize_const_defaults(&self, consts: &mut IndexMap<ClassConstName, ClassConst<R>>) {
         for c in consts.values_mut() {
             if c.kind == ClassConstKind::CCAbstract(true) {
                 c.kind = ClassConstKind::CCConcrete;
@@ -126,8 +123,8 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     /// constants.
     fn synthesize_type_const_defaults(
         &self,
-        type_consts: &mut TypeConstNameIndexMap<TypeConst<R>>,
-        consts: &mut ClassConstNameIndexMap<ClassConst<R>>,
+        type_consts: &mut IndexMap<TypeConstName, TypeConst<R>>,
+        consts: &mut IndexMap<ClassConstName, ClassConst<R>>,
     ) {
         for (name, tc) in type_consts.iter_mut() {
             if let Typeconst::TCAbstract(atc) = &mut tc.kind {
@@ -144,7 +141,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
 
     /// Every class, interface, and trait implicitly defines a `::class` to allow
     /// accessing its fully qualified name as a string.
-    fn decl_class_class(&self, consts: &mut ClassConstNameIndexMap<ClassConst<R>>) {
+    fn decl_class_class(&self, consts: &mut IndexMap<ClassConstName, ClassConst<R>>) {
         // note(sf, 2022-02-08): c.f. Decl_folded_class.class_class_decl
         let pos = self.child.name.pos();
         let name = self.child.name.id();
@@ -203,8 +200,8 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
 
     fn decl_type_const(
         &self,
-        type_consts: &mut TypeConstNameIndexMap<TypeConst<R>>,
-        class_consts: &mut ClassConstNameIndexMap<ClassConst<R>>,
+        type_consts: &mut IndexMap<TypeConstName, TypeConst<R>>,
+        class_consts: &mut IndexMap<ClassConstName, ClassConst<R>>,
         stc: &ShallowTypeconst<R>,
     ) {
         // note(sf, 2022-02-10): c.f. Decl_folded_class.typeconst_fold
@@ -238,7 +235,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
 
     fn decl_class_const(
         &self,
-        consts: &mut ClassConstNameIndexMap<ClassConst<R>>,
+        consts: &mut IndexMap<ClassConstName, ClassConst<R>>,
         c: &ShallowClassConst<R>,
     ) {
         // note(sf, 2022-02-10): c.f. Decl_folded_class.class_const_fold
@@ -253,7 +250,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         consts.insert(c.name.id(), class_const);
     }
 
-    fn decl_prop(&self, props: &mut PropNameIndexMap<FoldedElement>, sp: &ShallowProp<R>) {
+    fn decl_prop(&self, props: &mut IndexMap<PropName, FoldedElement>, sp: &ShallowProp<R>) {
         // note(sf, 2022-02-08): c.f. Decl_folded_class.prop_decl
         let cls = self.child.name.id();
         let prop = sp.name.id();
@@ -289,7 +286,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
 
     fn decl_static_prop(
         &self,
-        static_props: &mut PropNameIndexMap<FoldedElement>,
+        static_props: &mut IndexMap<PropName, FoldedElement>,
         sp: &ShallowProp<R>,
     ) {
         let cls = self.child.name.id();
@@ -324,7 +321,11 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         static_props.insert(prop, elt);
     }
 
-    fn decl_method(&self, methods: &mut MethodNameIndexMap<FoldedElement>, sm: &ShallowMethod<R>) {
+    fn decl_method(
+        &self,
+        methods: &mut IndexMap<MethodName, FoldedElement>,
+        sm: &ShallowMethod<R>,
+    ) {
         let cls = self.child.name.id();
         let meth = sm.name.id();
         let vis = match (methods.get(&meth), sm.visibility) {
@@ -417,7 +418,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         }
     }
 
-    fn get_implements(&self, ty: &Ty<R>, ancestors: &mut TypeNameIndexMap<Ty<R>>) {
+    fn get_implements(&self, ty: &Ty<R>, ancestors: &mut IndexMap<TypeName, Ty<R>>) {
         let (_, pos_id, tyl) = ty.unwrap_class_type();
         match self.parents.get(&pos_id.id()) {
             None => {
@@ -492,7 +493,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     fn add_class_parent_or_trait(
         &mut self,
         pass: Pass,
-        extends: &mut TypeNameIndexSet,
+        extends: &mut IndexSet<TypeName>,
         ty: &Ty<R>,
     ) {
         let (_, pos_id, _) = ty.unwrap_class_type();
@@ -512,8 +513,8 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         }
     }
 
-    fn get_extends(&mut self) -> TypeNameIndexSet {
-        let mut extends = TypeNameIndexSet::default();
+    fn get_extends(&mut self) -> IndexSet<TypeName> {
+        let mut extends = IndexSet::default();
         for extend in self.child.extends.iter() {
             self.add_class_parent_or_trait(Pass::Extends, &mut extends, extend)
         }
@@ -523,8 +524,8 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         extends
     }
 
-    fn get_xhp_attr_deps(&mut self) -> TypeNameIndexSet {
-        let mut xhp_attr_deps = TypeNameIndexSet::default();
+    fn get_xhp_attr_deps(&mut self) -> IndexSet<TypeName> {
+        let mut xhp_attr_deps = IndexSet::default();
         for xhp_attr_use in self.child.xhp_attr_uses.iter() {
             self.add_class_parent_or_trait(Pass::Xhp, &mut xhp_attr_deps, xhp_attr_use)
         }
@@ -536,7 +537,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     fn flatten_parent_class_reqs(
         &self,
         req_ancestors: &mut Vec<Requirement<R>>,
-        req_ancestors_extends: &mut TypeNameIndexSet,
+        req_ancestors_extends: &mut IndexSet<TypeName>,
         parent_ty: &Ty<R>,
     ) {
         let (_, pos_id, parent_params) = parent_ty.unwrap_class_type();
@@ -584,7 +585,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     fn declared_class_req(
         &self,
         req_ancestors: &mut Vec<Requirement<R>>,
-        req_ancestors_extends: &mut TypeNameIndexSet,
+        req_ancestors_extends: &mut IndexSet<TypeName>,
         req_ty: &Ty<R>,
     ) {
         let (_, pos_id, _) = req_ty.unwrap_class_type();
@@ -617,7 +618,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     /// that prunes the list via proper subtyping, but that's a little more work
     /// than I'm willing to do now.
     fn naive_dedup(&self, req_ancestors: &mut Vec<Requirement<R>>) {
-        let mut seen_reqs: TypeNameIndexMap<Vec<Ty<R>>> = TypeNameIndexMap::default();
+        let mut seen_reqs: IndexMap<TypeName, Vec<Ty<R>>> = IndexMap::default();
         // Reverse to match the OCaml ordering for building the seen_reqs map
         // (since OCaml uses `rev_filter_map` for perf reasons)
         req_ancestors.reverse();
@@ -646,11 +647,11 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         &self,
     ) -> (
         Box<[Requirement<R>]>,
-        TypeNameIndexSet,
+        IndexSet<TypeName>,
         Box<[Requirement<R>]>,
     ) {
         let mut req_ancestors = vec![];
-        let mut req_ancestors_extends = TypeNameIndexSet::default();
+        let mut req_ancestors_extends = IndexSet::default();
 
         for req_extend in self.child.req_extends.iter() {
             self.declared_class_req(&mut req_ancestors, &mut req_ancestors_extends, req_extend);
@@ -708,13 +709,13 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         )
     }
 
-    fn get_sealed_whitelist(&self) -> Option<TypeNameIndexSet> {
+    fn get_sealed_whitelist(&self) -> Option<IndexSet<TypeName>> {
         (self.child.user_attributes.iter())
             .find(|ua| ua.name.id() == *sn::user_attributes::uaSealed)
             .map(|ua| ua.classname_params.iter().copied().collect())
     }
 
-    fn get_deferred_init_members_helper(&self) -> PropNameIndexSet {
+    fn get_deferred_init_members_helper(&self) -> IndexSet<PropName> {
         let shallow_props = (self.child.props.iter())
             .filter(|prop| prop.xhp_attr.is_none())
             .filter(|prop| !prop.flags.is_lateinit())
@@ -748,7 +749,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
 
     /// Return all init-requiring props of the class and its ancestors from the
     /// given shallow class decl and the ancestors' folded decls.
-    fn get_deferred_init_members(&self, cstr: &Option<FoldedElement>) -> PropNameIndexSet {
+    fn get_deferred_init_members(&self, cstr: &Option<FoldedElement>) -> IndexSet<PropName> {
         let has_concrete_cstr = match cstr {
             Some(e) if !e.is_abstract() => true,
             _ => false,
@@ -759,7 +760,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                 self.get_deferred_init_members_helper()
             }
             ClassishKind::Ctrait => self.get_deferred_init_members_helper(),
-            _ => PropNameIndexSet::default(),
+            _ => IndexSet::default(),
         }
     }
 

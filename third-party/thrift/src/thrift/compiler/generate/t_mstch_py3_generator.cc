@@ -918,6 +918,7 @@ class py3_mstch_field : public mstch_field {
       case gen::cpp::reference_type::shared_mutable: {
         return ref_type_ = RefType::Shared;
       }
+      case gen::cpp::reference_type::boxed_intern:
       case gen::cpp::reference_type::boxed: {
         return ref_type_ = RefType::NotRef;
       }

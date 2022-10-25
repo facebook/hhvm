@@ -354,6 +354,27 @@ THRIFT_DATA_SECTION const std::array<int, 3> TStructDataStorage<::cpp2::StructWi
   -1,
 }};
 
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::StructWithInternBox>::fields_names = {{
+  "field1",
+  "field2",
+}};
+THRIFT_DATA_SECTION const std::array<int16_t, 2> TStructDataStorage<::cpp2::StructWithInternBox>::fields_ids = {{
+  1,
+  2,
+}};
+THRIFT_DATA_SECTION const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::StructWithInternBox>::fields_types = {{
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+}};
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::StructWithInternBox>::storage_names = {{
+  "__fbthrift_field_field1",
+  "__fbthrift_field_field2",
+}};
+THRIFT_DATA_SECTION const std::array<int, 2> TStructDataStorage<::cpp2::StructWithInternBox>::isset_indexes = {{
+  0,
+  1,
+}};
+
 THRIFT_DATA_SECTION const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithRefTypeUnique>::fields_names = {{
   "def_field",
   "opt_field",

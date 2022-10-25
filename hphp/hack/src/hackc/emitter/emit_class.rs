@@ -393,7 +393,7 @@ fn validate_class_name(ns: &namespace_env::Env, ast::Id(p, class_name): &ast::Id
             format!(
                 "Cannot use '{}' as class name as it is reserved",
                 if is_reserved_global_name {
-                    &name
+                    name
                 } else {
                     string_utils::strip_global_ns(class_name)
                 }
@@ -413,12 +413,7 @@ fn emit_reified_extends_params<'a, 'arena, 'decl>(
         [h, ..] => match h.1.as_happly() {
             Some((_, l)) if !l.is_empty() => {
                 return Ok(InstrSeq::gather(vec![
-                    emit_expression::emit_reified_targs(
-                        e,
-                        env,
-                        &ast_class.span,
-                        &l.iter().collect::<Vec<_>>(),
-                    )?,
+                    emit_expression::emit_reified_targs(e, env, &ast_class.span, l.iter())?,
                     instr::record_reified_generic(),
                 ]));
             }
@@ -915,13 +910,13 @@ pub fn emit_class<'a, 'arena, 'decl>(
         name,
         span,
         flags,
-        doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &(c.0).1))),
+        doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &c.1))),
         uses: Slice::fill_iter(alloc, uses.into_iter()),
         methods: Slice::fill_iter(alloc, methods.into_iter()),
         enum_type: Maybe::from(enum_type),
         upper_bounds: Slice::fill_iter(alloc, upper_bounds.into_iter()),
         properties: Slice::fill_iter(alloc, properties.into_iter().map(|p| p.prop)),
-        requirements: Slice::fill_iter(alloc, requirements.into_iter().map(|r| r.into())),
+        requirements: Slice::fill_iter(alloc, requirements.into_iter()),
         type_constants: Slice::fill_iter(alloc, type_constants.into_iter()),
         ctx_constants: Slice::fill_iter(alloc, ctx_constants.into_iter()),
         constants: Slice::fill_iter(alloc, constants.into_iter().map(|(c, _)| c)),

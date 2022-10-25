@@ -16,7 +16,6 @@ dependencies = [
  "namespaces_rust",
  "naming_special_names_rust",
  "ocamlrep",
- "ocamlrep_derive",
  "oxidized",
  "parser_core_types",
  "positioned_by_ref_parser",
@@ -113,7 +112,6 @@ dependencies = [
  "arena_trait",
  "bumpalo",
  "ocamlrep",
- "ocamlrep_derive",
  "quickcheck",
  "serde",
 ]
@@ -1132,7 +1130,6 @@ dependencies = [
  "hh_fanout_rust_ffi",
  "ocamlrep",
  "ocamlrep_custom",
- "ocamlrep_derive",
  "once_cell",
  "rpds",
 ]
@@ -1523,7 +1520,6 @@ dependencies = [
  "naming_types",
  "no_pos_hash",
  "ocamlrep",
- "ocamlrep_derive",
  "parser_core_types",
  "rc_pos",
  "relative_path",
@@ -1594,6 +1590,7 @@ dependencies = [
  "datastore",
  "depgraph_api",
  "eq_modulo_pos",
+ "hash",
  "indexmap",
  "itertools 0.10.3",
  "oxidized",
@@ -1845,6 +1842,7 @@ dependencies = [
 name = "hash"
 version = "0.0.0"
 dependencies = [
+ "dashmap",
  "indexmap",
  "rustc-hash",
 ]
@@ -2043,7 +2041,6 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_caml_builtins",
  "ocamlrep_custom",
- "ocamlrep_derive",
  "ocamlrep_ocamlpool",
  "rpds",
 ]
@@ -2438,7 +2435,6 @@ name = "lint_rust"
 version = "0.0.0"
 dependencies = [
  "ocamlrep",
- "ocamlrep_derive",
  "oxidized",
 ]
 
@@ -2693,7 +2689,6 @@ dependencies = [
  "eq_modulo_pos",
  "no_pos_hash",
  "ocamlrep",
- "ocamlrep_derive",
  "serde",
 ]
 
@@ -2770,17 +2765,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "num-derive"
-version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "876a53fff98e03a936a674b29568b0e605f06b29372c2489ff4de23f1949743d"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "num-traits"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2837,8 +2821,9 @@ dependencies = [
  "bstr 1.0.1",
  "bumpalo",
  "bytes",
+ "hash",
  "indexmap",
- "nohash-hasher",
+ "ocamlrep_derive",
  "serde",
 ]
 
@@ -2876,7 +2861,6 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "ocamlrep",
- "ocamlrep_derive",
 ]
 
 [[package]]
@@ -2920,7 +2904,6 @@ name = "operator"
 version = "0.0.0"
 dependencies = [
  "ocamlrep",
- "ocamlrep_derive",
  "parser_core_types",
 ]
 
@@ -2977,7 +2960,6 @@ dependencies = [
  "naming_types",
  "no_pos_hash",
  "ocamlrep",
- "ocamlrep_derive",
  "parser_core_types",
  "pretty_assertions",
  "rc_pos",
@@ -3001,7 +2983,6 @@ dependencies = [
  "no_pos_hash",
  "ocamlrep",
  "ocamlrep_caml_builtins",
- "ocamlrep_derive",
  "oxidized",
  "pretty_assertions",
  "relative_path",
@@ -3109,7 +3090,6 @@ dependencies = [
  "line_break_map",
  "ocaml_helper",
  "ocamlrep",
- "ocamlrep_derive",
  "relative_path",
  "serde",
 ]
@@ -3200,7 +3180,6 @@ dependencies = [
  "indexmap",
  "intern",
  "ocamlrep",
- "ocamlrep_derive",
  "oxidized",
  "oxidized_by_ref",
  "relative_path",
@@ -3280,7 +3259,6 @@ version = "0.0.0"
 dependencies = [
  "ffi",
  "ir_core",
- "itertools 0.10.3",
 ]
 
 [[package]]
@@ -3542,7 +3520,6 @@ dependencies = [
  "eq_modulo_pos",
  "no_pos_hash",
  "ocamlrep",
- "ocamlrep_derive",
  "parser_core_types",
  "pretty_assertions",
  "relative_path",
@@ -3602,7 +3579,6 @@ dependencies = [
  "eq_modulo_pos",
  "no_pos_hash",
  "ocamlrep",
- "ocamlrep_derive",
  "pretty_assertions",
  "serde",
 ]
@@ -3701,7 +3677,6 @@ version = "0.0.0"
 dependencies = [
  "lint_rust",
  "ocamlrep",
- "ocamlrep_derive",
  "oxidized",
  "parser_core_types",
 ]
@@ -4047,7 +4022,6 @@ name = "smart_constructors"
 version = "0.0.0"
 dependencies = [
  "ocamlrep",
- "ocamlrep_derive",
  "parser_core_types",
 ]
 
@@ -4065,6 +4039,7 @@ dependencies = [
 name = "special_names"
 version = "0.0.0"
 dependencies = [
+ "hash",
  "naming_special_names_rust",
  "once_cell",
  "pos",
@@ -4302,8 +4277,6 @@ dependencies = [
  "itertools 0.10.3",
  "log",
  "newtype",
- "num-derive",
- "num-traits",
  "strum",
  "strum_macros",
 ]
@@ -4402,10 +4375,10 @@ dependencies = [
  "arena_collections",
  "bumpalo",
  "eq_modulo_pos",
+ "hash",
  "hcons",
  "im",
  "ocamlrep",
- "ocamlrep_derive",
  "once_cell",
  "oxidized",
  "oxidized_by_ref",
@@ -4524,7 +4497,6 @@ version = "0.0.0"
 dependencies = [
  "eq_modulo_pos",
  "ocamlrep",
- "ocamlrep_derive",
  "oxidized",
  "pos",
  "serde",

@@ -106,39 +106,6 @@ class MyForwardRefEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata
 }
 
 /**
- * Original thrift enum:-
- * MyEnumA
- */
-enum MyEnumA: int {
-  fieldA = 1;
-  fieldB = 2;
-  fieldC = 4;
-}
-
-class MyEnumA_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
-  public static function getEnumMetadata()[]: \tmeta_ThriftEnum {
-    return tmeta_ThriftEnum::fromShape(
-      shape(
-        "name" => "module.MyEnumA",
-        "elements" => dict[
-          1 => "fieldA",
-          2 => "fieldB",
-          4 => "fieldC",
-        ],
-      )
-    );
-  }
-
-  public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
-    return shape(
-      'enum' => dict[],
-      'constants' => dict[
-      ],
-    );
-  }
-}
-
-/**
  * Original thrift struct:-
  * decorated_struct
  */
@@ -3112,9 +3079,153 @@ class ForwardUsageByRef implements \IThriftSyncStruct {
 
 /**
  * Original thrift struct:-
- * NoexceptMoveEmpty
+ * IncompleteMap
  */
-class NoexceptMoveEmpty implements \IThriftSyncStruct {
+class IncompleteMap implements \IThriftSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'field',
+      'type' => \TType::MAP,
+      'ktype' => \TType::I32,
+      'vtype' => \TType::STRUCT,
+      'key' => shape(
+        'type' => \TType::I32,
+      ),
+      'val' => shape(
+        'type' => \TType::STRUCT,
+        'class' => IncompleteMapDep::class,
+      ),
+      'format' => 'collection',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'field' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'field' => ?Map<int, IncompleteMapDep>,
+  );
+
+  const int STRUCTURAL_ID = 8146873538067102953;
+  /**
+   * Original thrift field:-
+   * 1: map<i32, struct module.IncompleteMapDep> field
+   */
+  public ?Map<int, IncompleteMapDep> $field;
+
+  public function __construct(?Map<int, IncompleteMapDep> $field = null)[] {
+    $this->field = $field;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'field'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'IncompleteMap';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.IncompleteMap",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_map" => tmeta_ThriftMapType::fromShape(
+                    shape(
+                      "keyType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                      "valueType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                            shape(
+                              "name" => "module.IncompleteMapDep",
+                              "underlyingType" => tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                                    shape(
+                                      "name" => "module.IncompleteMapDep",
+                                    )
+                                  ),
+                                )
+                              ),
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "field",
+              "is_optional" => true,
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'field') !== null) {
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Map<int, IncompleteMapDep>>($parsed['field']);
+      $_container4 = Map {};
+      foreach($_json3 as $_key1 => $_value2) {
+        $_value5 = IncompleteMapDep::withDefaultValues();
+        $_tmp6 = \json_encode($_value2);
+        $_tmp7 = IncompleteMapDep::withDefaultValues();
+        $_tmp7->readFromJson($_tmp6);
+        $_value5 = $_tmp7;
+        $_container4[$_key1] = $_value5;
+      }
+      $this->field = $_container4;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * IncompleteMapDep
+ */
+class IncompleteMapDep implements \IThriftSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -3140,7 +3251,7 @@ class NoexceptMoveEmpty implements \IThriftSyncStruct {
   }
 
   public function getName()[]: string {
-    return 'NoexceptMoveEmpty';
+    return 'IncompleteMapDep';
   }
 
   public function clearTerseFields()[write_props]: void {
@@ -3149,7 +3260,7 @@ class NoexceptMoveEmpty implements \IThriftSyncStruct {
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
-        "name" => "module.NoexceptMoveEmpty",
+        "name" => "module.IncompleteMapDep",
         "is_union" => false,
       )
     );
@@ -3180,249 +3291,44 @@ class NoexceptMoveEmpty implements \IThriftSyncStruct {
 
 /**
  * Original thrift struct:-
- * NoexceptMoveSimpleStruct
+ * CompleteMap
  */
-class NoexceptMoveSimpleStruct implements \IThriftSyncStruct {
+class CompleteMap implements \IThriftSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
     1 => shape(
-      'var' => 'boolField',
-      'type' => \TType::I64,
-    ),
-  ];
-  const dict<string, int> FIELDMAP = dict[
-    'boolField' => 1,
-  ];
-
-  const type TConstructorShape = shape(
-    ?'boolField' => ?int,
-  );
-
-  const int STRUCTURAL_ID = 7058232826271171943;
-  /**
-   * Original thrift field:-
-   * 1: i64 boolField
-   */
-  public int $boolField;
-
-  public function __construct(?int $boolField = null)[] {
-    $this->boolField = $boolField ?? 0;
-  }
-
-  public static function withDefaultValues()[]: this {
-    return new static();
-  }
-
-  public static function fromShape(self::TConstructorShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'boolField'),
-    );
-  }
-
-  public function getName()[]: string {
-    return 'NoexceptMoveSimpleStruct';
-  }
-
-  public function clearTerseFields()[write_props]: void {
-  }
-
-  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
-      shape(
-        "name" => "module.NoexceptMoveSimpleStruct",
-        "fields" => vec[
-          tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
-                )
-              ),
-              "name" => "boolField",
-            )
-          ),
-        ],
-        "is_union" => false,
-      )
-    );
-  }
-
-  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
-    return shape(
-      'struct' => dict[],
-      'fields' => dict[
-      ],
-    );
-  }
-
-  public function getInstanceKey()[write_props]: string {
-    return \TCompactSerializer::serialize($this);
-  }
-
-  public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
-
-    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
-      throw new \TProtocolException("Cannot parse the given json string.");
-    }
-
-    if (idx($parsed, 'boolField') !== null) {
-      $this->boolField = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['boolField']);
-    }
-  }
-
-}
-
-/**
- * Original thrift struct:-
- * NoexceptMoveComplexStruct
- */
-class NoexceptMoveComplexStruct implements \IThriftSyncStruct {
-  use \ThriftSerializationTrait;
-
-  const dict<int, this::TFieldSpec> SPEC = dict[
-    1 => shape(
-      'var' => 'MyBoolField',
-      'type' => \TType::BOOL,
-    ),
-    2 => shape(
-      'var' => 'MyIntField',
-      'type' => \TType::I64,
-    ),
-    3 => shape(
-      'var' => 'MyStringField',
-      'type' => \TType::STRING,
-    ),
-    4 => shape(
-      'var' => 'MyStringField2',
-      'type' => \TType::STRING,
-    ),
-    5 => shape(
-      'var' => 'MyBinaryField',
-      'type' => \TType::STRING,
-      'is_binary' => true,
-    ),
-    6 => shape(
-      'var' => 'MyBinaryField2',
-      'type' => \TType::STRING,
-      'is_binary' => true,
-    ),
-    7 => shape(
-      'var' => 'MyBinaryField3',
-      'type' => \TType::STRING,
-      'is_binary' => true,
-    ),
-    8 => shape(
-      'var' => 'MyBinaryListField4',
-      'type' => \TType::LST,
-      'etype' => \TType::STRING,
-      'elem' => shape(
-        'type' => \TType::STRING,
-        'is_binary' => true,
-      ),
-      'format' => 'collection',
-    ),
-    9 => shape(
-      'var' => 'MyMapEnumAndInt',
+      'var' => 'field',
       'type' => \TType::MAP,
       'ktype' => \TType::I32,
-      'vtype' => \TType::STRING,
+      'vtype' => \TType::STRUCT,
       'key' => shape(
         'type' => \TType::I32,
-        'enum' => MyEnumA::class,
       ),
       'val' => shape(
-        'type' => \TType::STRING,
+        'type' => \TType::STRUCT,
+        'class' => CompleteMapDep::class,
       ),
       'format' => 'collection',
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
-    'MyBoolField' => 1,
-    'MyIntField' => 2,
-    'MyStringField' => 3,
-    'MyStringField2' => 4,
-    'MyBinaryField' => 5,
-    'MyBinaryField2' => 6,
-    'MyBinaryField3' => 7,
-    'MyBinaryListField4' => 8,
-    'MyMapEnumAndInt' => 9,
+    'field' => 1,
   ];
 
   const type TConstructorShape = shape(
-    ?'MyBoolField' => ?bool,
-    ?'MyIntField' => ?int,
-    ?'MyStringField' => ?string,
-    ?'MyStringField2' => ?string,
-    ?'MyBinaryField' => ?string,
-    ?'MyBinaryField2' => ?string,
-    ?'MyBinaryField3' => ?string,
-    ?'MyBinaryListField4' => ?Vector<string>,
-    ?'MyMapEnumAndInt' => ?Map<MyEnumA, string>,
+    ?'field' => ?Map<int, CompleteMapDep>,
   );
 
-  const int STRUCTURAL_ID = 8958221528844030164;
+  const int STRUCTURAL_ID = 8146873538067102953;
   /**
    * Original thrift field:-
-   * 1: bool MyBoolField
+   * 1: map<i32, struct module.CompleteMapDep> field
    */
-  public bool $MyBoolField;
-  /**
-   * Original thrift field:-
-   * 2: i64 MyIntField
-   */
-  public int $MyIntField;
-  /**
-   * Original thrift field:-
-   * 3: string MyStringField
-   */
-  public string $MyStringField;
-  /**
-   * Original thrift field:-
-   * 4: string MyStringField2
-   */
-  public string $MyStringField2;
-  /**
-   * Original thrift field:-
-   * 5: binary MyBinaryField
-   */
-  public string $MyBinaryField;
-  /**
-   * Original thrift field:-
-   * 6: binary MyBinaryField2
-   */
-  public ?string $MyBinaryField2;
-  /**
-   * Original thrift field:-
-   * 7: binary MyBinaryField3
-   */
-  public string $MyBinaryField3;
-  /**
-   * Original thrift field:-
-   * 8: list<binary> MyBinaryListField4
-   */
-  public Vector<string> $MyBinaryListField4;
-  /**
-   * Original thrift field:-
-   * 9: map<enum module.MyEnumA, string> MyMapEnumAndInt
-   */
-  public Map<MyEnumA, string> $MyMapEnumAndInt;
+  public ?Map<int, CompleteMapDep> $field;
 
-  public function __construct(?bool $MyBoolField = null, ?int $MyIntField = null, ?string $MyStringField = null, ?string $MyStringField2 = null, ?string $MyBinaryField = null, ?string $MyBinaryField2 = null, ?string $MyBinaryField3 = null, ?Vector<string> $MyBinaryListField4 = null, ?Map<MyEnumA, string> $MyMapEnumAndInt = null)[] {
-    $this->MyBoolField = $MyBoolField ?? false;
-    $this->MyIntField = $MyIntField ?? 12;
-    $this->MyStringField = $MyStringField ?? "test";
-    $this->MyStringField2 = $MyStringField2 ?? '';
-    $this->MyBinaryField = $MyBinaryField ?? '';
-    $this->MyBinaryField2 = $MyBinaryField2;
-    $this->MyBinaryField3 = $MyBinaryField3 ?? '';
-    $this->MyBinaryListField4 = $MyBinaryListField4 ?? Vector {};
-    $this->MyMapEnumAndInt = $MyMapEnumAndInt ?? Map {
-      MyEnumA::fieldA => "fieldA",
-      MyEnumA::fieldC => "fieldC",
-    };
+  public function __construct(?Map<int, CompleteMapDep> $field = null)[] {
+    $this->field = $field;
   }
 
   public static function withDefaultValues()[]: this {
@@ -3431,20 +3337,12 @@ class NoexceptMoveComplexStruct implements \IThriftSyncStruct {
 
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'MyBoolField'),
-      Shapes::idx($shape, 'MyIntField'),
-      Shapes::idx($shape, 'MyStringField'),
-      Shapes::idx($shape, 'MyStringField2'),
-      Shapes::idx($shape, 'MyBinaryField'),
-      Shapes::idx($shape, 'MyBinaryField2'),
-      Shapes::idx($shape, 'MyBinaryField3'),
-      Shapes::idx($shape, 'MyBinaryListField4'),
-      Shapes::idx($shape, 'MyMapEnumAndInt'),
+      Shapes::idx($shape, 'field'),
     );
   }
 
   public function getName()[]: string {
-    return 'NoexceptMoveComplexStruct';
+    return 'CompleteMap';
   }
 
   public function clearTerseFields()[write_props]: void {
@@ -3453,131 +3351,44 @@ class NoexceptMoveComplexStruct implements \IThriftSyncStruct {
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
-        "name" => "module.NoexceptMoveComplexStruct",
+        "name" => "module.CompleteMap",
         "fields" => vec[
           tmeta_ThriftField::fromShape(
             shape(
               "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
-                )
-              ),
-              "name" => "MyBoolField",
-            )
-          ),
-          tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 2,
-              "type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
-                )
-              ),
-              "name" => "MyIntField",
-            )
-          ),
-          tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 3,
-              "type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
-                )
-              ),
-              "name" => "MyStringField",
-            )
-          ),
-          tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 4,
-              "type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
-                )
-              ),
-              "name" => "MyStringField2",
-            )
-          ),
-          tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 5,
-              "type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
-                )
-              ),
-              "name" => "MyBinaryField",
-            )
-          ),
-          tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 6,
-              "type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
-                )
-              ),
-              "name" => "MyBinaryField2",
-              "is_optional" => true,
-            )
-          ),
-          tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 7,
-              "type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
-                )
-              ),
-              "name" => "MyBinaryField3",
-            )
-          ),
-          tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 8,
-              "type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_list" => tmeta_ThriftListType::fromShape(
-                    shape(
-                      "valueType" => tmeta_ThriftType::fromShape(
-                        shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
-                        )
-                      ),
-                    )
-                  ),
-                )
-              ),
-              "name" => "MyBinaryListField4",
-            )
-          ),
-          tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 9,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
                   "t_map" => tmeta_ThriftMapType::fromShape(
                     shape(
                       "keyType" => tmeta_ThriftType::fromShape(
                         shape(
-                          "t_enum" => tmeta_ThriftEnumType::fromShape(
-                            shape(
-                              "name" => "module.MyEnumA",
-                            )
-                          ),
+                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
                         )
                       ),
                       "valueType" => tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                            shape(
+                              "name" => "module.CompleteMapDep",
+                              "underlyingType" => tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                                    shape(
+                                      "name" => "module.CompleteMapDep",
+                                    )
+                                  ),
+                                )
+                              ),
+                            )
+                          ),
                         )
                       ),
                     )
                   ),
                 )
               ),
-              "name" => "MyMapEnumAndInt",
+              "name" => "field",
+              "is_optional" => true,
             )
           ),
         ],
@@ -3605,111 +3416,41 @@ class NoexceptMoveComplexStruct implements \IThriftSyncStruct {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
-    if (idx($parsed, 'MyBoolField') !== null) {
-      $this->MyBoolField = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['MyBoolField']);
-    }
-    if (idx($parsed, 'MyIntField') !== null) {
-      $this->MyIntField = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['MyIntField']);
-    }
-    if (idx($parsed, 'MyStringField') !== null) {
-      $this->MyStringField = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['MyStringField']);
-    }
-    if (idx($parsed, 'MyStringField2') !== null) {
-      $this->MyStringField2 = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['MyStringField2']);
-    }
-    if (idx($parsed, 'MyBinaryField') !== null) {
-      $this->MyBinaryField = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['MyBinaryField']);
-    }
-    if (idx($parsed, 'MyBinaryField2') !== null) {
-      $this->MyBinaryField2 = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['MyBinaryField2']);
-    }
-    if (idx($parsed, 'MyBinaryField3') !== null) {
-      $this->MyBinaryField3 = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['MyBinaryField3']);
-    } else {
-      throw new \TProtocolException("Required field MyBinaryField3 cannot be found.");
-    }
-    if (idx($parsed, 'MyBinaryListField4') !== null) {
-      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<string>>($parsed['MyBinaryListField4']);
-      $_container4 = Vector {};
+    if (idx($parsed, 'field') !== null) {
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Map<int, CompleteMapDep>>($parsed['field']);
+      $_container4 = Map {};
       foreach($_json3 as $_key1 => $_value2) {
-        $_elem5 = '';
-        $_elem5 = $_value2;
-        $_container4 []= $_elem5;
+        $_value5 = CompleteMapDep::withDefaultValues();
+        $_tmp6 = \json_encode($_value2);
+        $_tmp7 = CompleteMapDep::withDefaultValues();
+        $_tmp7->readFromJson($_tmp6);
+        $_value5 = $_tmp7;
+        $_container4[$_key1] = $_value5;
       }
-      $this->MyBinaryListField4 = $_container4;
-    }
-    if (idx($parsed, 'MyMapEnumAndInt') !== null) {
-      $_json9 = HH\FIXME\UNSAFE_CAST<mixed, Map<MyEnumA, string>>($parsed['MyMapEnumAndInt']);
-      $_container10 = Map {};
-      foreach($_json9 as $_key7 => $_value8) {
-        $_value11 = '';
-        $_value11 = $_value8;
-        $_container10[$_key7] = $_value11;
-      }
-      $this->MyMapEnumAndInt = $_container10;
+      $this->field = $_container4;
     }
   }
 
 }
 
-enum NoExceptMoveUnionEnum: int {
-  _EMPTY_ = 0;
-  string_field = 1;
-  i32_field = 2;
-}
-
 /**
  * Original thrift struct:-
- * NoExceptMoveUnion
+ * CompleteMapDep
  */
-class NoExceptMoveUnion implements \IThriftSyncStruct, \IThriftUnion<NoExceptMoveUnionEnum> {
-  use \ThriftUnionSerializationTrait;
+class CompleteMapDep implements \IThriftSyncStruct {
+  use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
-    1 => shape(
-      'var' => 'string_field',
-      'union' => true,
-      'type' => \TType::STRING,
-    ),
-    2 => shape(
-      'var' => 'i32_field',
-      'union' => true,
-      'type' => \TType::I32,
-    ),
   ];
   const dict<string, int> FIELDMAP = dict[
-    'string_field' => 1,
-    'i32_field' => 2,
   ];
 
   const type TConstructorShape = shape(
-    ?'string_field' => ?string,
-    ?'i32_field' => ?int,
   );
 
-  const int STRUCTURAL_ID = 5659539827624892912;
-  /**
-   * Original thrift field:-
-   * 1: string string_field
-   */
-  public ?string $string_field;
-  /**
-   * Original thrift field:-
-   * 2: i32 i32_field
-   */
-  public ?int $i32_field;
-  protected NoExceptMoveUnionEnum $_type = NoExceptMoveUnionEnum::_EMPTY_;
+  const int STRUCTURAL_ID = 957977401221134810;
 
-  public function __construct(?string $string_field = null, ?int $i32_field = null)[] {
-    $this->_type = NoExceptMoveUnionEnum::_EMPTY_;
-    if ($string_field !== null) {
-      $this->string_field = $string_field;
-      $this->_type = NoExceptMoveUnionEnum::string_field;
-    }
-    if ($i32_field !== null) {
-      $this->i32_field = $i32_field;
-      $this->_type = NoExceptMoveUnionEnum::i32_field;
-    }
+  public function __construct()[] {
   }
 
   public static function withDefaultValues()[]: this {
@@ -3718,71 +3459,11 @@ class NoExceptMoveUnion implements \IThriftSyncStruct, \IThriftUnion<NoExceptMov
 
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'string_field'),
-      Shapes::idx($shape, 'i32_field'),
     );
   }
 
   public function getName()[]: string {
-    return 'NoExceptMoveUnion';
-  }
-
-  public function getType()[]: NoExceptMoveUnionEnum {
-    return $this->_type;
-  }
-
-  public function reset()[write_props]: void {
-    switch ($this->_type) {
-      case NoExceptMoveUnionEnum::string_field:
-        $this->string_field = null;
-        break;
-      case NoExceptMoveUnionEnum::i32_field:
-        $this->i32_field = null;
-        break;
-      case NoExceptMoveUnionEnum::_EMPTY_:
-        break;
-    }
-    $this->_type = NoExceptMoveUnionEnum::_EMPTY_;
-  }
-
-  public function set_string_field(string $string_field)[write_props]: this {
-    $this->reset();
-    $this->_type = NoExceptMoveUnionEnum::string_field;
-    $this->string_field = $string_field;
-    return $this;
-  }
-
-  public function get_string_field()[]: ?string {
-    return $this->string_field;
-  }
-
-  public function getx_string_field()[]: string {
-    invariant(
-      $this->_type === NoExceptMoveUnionEnum::string_field,
-      'get_string_field called on an instance of NoExceptMoveUnion whose current type is %s',
-      (string)$this->_type,
-    );
-    return $this->string_field as nonnull;
-  }
-
-  public function set_i32_field(int $i32_field)[write_props]: this {
-    $this->reset();
-    $this->_type = NoExceptMoveUnionEnum::i32_field;
-    $this->i32_field = $i32_field;
-    return $this;
-  }
-
-  public function get_i32_field()[]: ?int {
-    return $this->i32_field;
-  }
-
-  public function getx_i32_field()[]: int {
-    invariant(
-      $this->_type === NoExceptMoveUnionEnum::i32_field,
-      'get_i32_field called on an instance of NoExceptMoveUnion whose current type is %s',
-      (string)$this->_type,
-    );
-    return $this->i32_field as nonnull;
+    return 'CompleteMapDep';
   }
 
   public function clearTerseFields()[write_props]: void {
@@ -3791,32 +3472,8 @@ class NoExceptMoveUnion implements \IThriftSyncStruct, \IThriftUnion<NoExceptMov
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
-        "name" => "module.NoExceptMoveUnion",
-        "fields" => vec[
-          tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
-                )
-              ),
-              "name" => "string_field",
-            )
-          ),
-          tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 2,
-              "type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
-                )
-              ),
-              "name" => "i32_field",
-            )
-          ),
-        ],
-        "is_union" => true,
+        "name" => "module.CompleteMapDep",
+        "is_union" => false,
       )
     );
   }
@@ -3834,25 +3491,917 @@ class NoExceptMoveUnion implements \IThriftSyncStruct, \IThriftUnion<NoExceptMov
   }
 
   public function readFromJson(string $jsonText): void {
-    $this->_type = NoExceptMoveUnionEnum::_EMPTY_;
     $parsed = json_decode($jsonText, true);
 
     if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
-    if (idx($parsed, 'string_field') !== null) {
-      $this->string_field = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['string_field']);
-      $this->_type = NoExceptMoveUnionEnum::string_field;
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * IncompleteList
+ */
+class IncompleteList implements \IThriftSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'field',
+      'type' => \TType::LST,
+      'etype' => \TType::STRUCT,
+      'elem' => shape(
+        'type' => \TType::STRUCT,
+        'class' => IncompleteListDep::class,
+      ),
+      'format' => 'collection',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'field' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'field' => ?Vector<IncompleteListDep>,
+  );
+
+  const int STRUCTURAL_ID = 8146873538067102953;
+  /**
+   * Original thrift field:-
+   * 1: list<struct module.IncompleteListDep> field
+   */
+  public ?Vector<IncompleteListDep> $field;
+
+  public function __construct(?Vector<IncompleteListDep> $field = null)[] {
+    $this->field = $field;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'field'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'IncompleteList';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.IncompleteList",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                            shape(
+                              "name" => "module.IncompleteListDep",
+                              "underlyingType" => tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                                    shape(
+                                      "name" => "module.IncompleteListDep",
+                                    )
+                                  ),
+                                )
+                              ),
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "field",
+              "is_optional" => true,
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
     }
-    if (idx($parsed, 'i32_field') !== null) {
-      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['i32_field']);
-      if ($_tmp0 > 0x7fffffff) {
+
+    if (idx($parsed, 'field') !== null) {
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<IncompleteListDep>>($parsed['field']);
+      $_container4 = Vector {};
+      foreach($_json3 as $_key1 => $_value2) {
+        $_elem5 = IncompleteListDep::withDefaultValues();
+        $_tmp6 = \json_encode($_value2);
+        $_tmp7 = IncompleteListDep::withDefaultValues();
+        $_tmp7->readFromJson($_tmp6);
+        $_elem5 = $_tmp7;
+        $_container4 []= $_elem5;
+      }
+      $this->field = $_container4;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * IncompleteListDep
+ */
+class IncompleteListDep implements \IThriftSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'IncompleteListDep';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.IncompleteListDep",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * CompleteList
+ */
+class CompleteList implements \IThriftSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'field',
+      'type' => \TType::LST,
+      'etype' => \TType::STRUCT,
+      'elem' => shape(
+        'type' => \TType::STRUCT,
+        'class' => CompleteListDep::class,
+      ),
+      'format' => 'collection',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'field' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'field' => ?Vector<CompleteListDep>,
+  );
+
+  const int STRUCTURAL_ID = 8146873538067102953;
+  /**
+   * Original thrift field:-
+   * 1: list<struct module.CompleteListDep> field
+   */
+  public ?Vector<CompleteListDep> $field;
+
+  public function __construct(?Vector<CompleteListDep> $field = null)[] {
+    $this->field = $field;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'field'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'CompleteList';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.CompleteList",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                            shape(
+                              "name" => "module.CompleteListDep",
+                              "underlyingType" => tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                                    shape(
+                                      "name" => "module.CompleteListDep",
+                                    )
+                                  ),
+                                )
+                              ),
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "field",
+              "is_optional" => true,
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'field') !== null) {
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<CompleteListDep>>($parsed['field']);
+      $_container4 = Vector {};
+      foreach($_json3 as $_key1 => $_value2) {
+        $_elem5 = CompleteListDep::withDefaultValues();
+        $_tmp6 = \json_encode($_value2);
+        $_tmp7 = CompleteListDep::withDefaultValues();
+        $_tmp7->readFromJson($_tmp6);
+        $_elem5 = $_tmp7;
+        $_container4 []= $_elem5;
+      }
+      $this->field = $_container4;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * CompleteListDep
+ */
+class CompleteListDep implements \IThriftSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'CompleteListDep';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.CompleteListDep",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * AdaptedList
+ */
+class AdaptedList implements \IThriftSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'field',
+      'type' => \TType::LST,
+      'etype' => \TType::STRUCT,
+      'elem' => shape(
+        'type' => \TType::STRUCT,
+        'class' => AdaptedListDep::class,
+      ),
+      'format' => 'collection',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'field' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'field' => ?Vector<AdaptedListDep>,
+  );
+
+  const int STRUCTURAL_ID = 8146873538067102953;
+  /**
+   * Original thrift field:-
+   * 1: list<struct module.AdaptedListDep> field
+   */
+  public ?Vector<AdaptedListDep> $field;
+
+  public function __construct(?Vector<AdaptedListDep> $field = null)[] {
+    $this->field = $field;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'field'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'AdaptedList';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.AdaptedList",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                            shape(
+                              "name" => "module.AdaptedListDep",
+                              "underlyingType" => tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                                    shape(
+                                      "name" => "module.AdaptedListDep",
+                                    )
+                                  ),
+                                )
+                              ),
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "field",
+              "is_optional" => true,
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'field') !== null) {
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<AdaptedListDep>>($parsed['field']);
+      $_container4 = Vector {};
+      foreach($_json3 as $_key1 => $_value2) {
+        $_elem5 = AdaptedListDep::withDefaultValues();
+        $_tmp6 = \json_encode($_value2);
+        $_tmp7 = AdaptedListDep::withDefaultValues();
+        $_tmp7->readFromJson($_tmp6);
+        $_elem5 = $_tmp7;
+        $_container4 []= $_elem5;
+      }
+      $this->field = $_container4;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * AdaptedListDep
+ */
+class AdaptedListDep implements \IThriftSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'field',
+      'type' => \TType::STRUCT,
+      'class' => AdaptedList::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'field' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'field' => ?AdaptedList,
+  );
+
+  const int STRUCTURAL_ID = 4190573964717330521;
+  /**
+   * Original thrift field:-
+   * 1: struct module.AdaptedList field
+   */
+  public ?AdaptedList $field;
+
+  public function __construct(?AdaptedList $field = null)[] {
+    $this->field = $field;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'field'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'AdaptedListDep';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.AdaptedListDep",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedList",
+                    )
+                  ),
+                )
+              ),
+              "name" => "field",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "IdentityAdapter<detail::AdaptedListDep>",
+            "adaptedType" => "detail::AdaptedListDep",
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'field') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, AdaptedList>($parsed['field']));
+      $_tmp1 = AdaptedList::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->field = $_tmp1;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * DependentAdaptedList
+ */
+class DependentAdaptedList implements \IThriftSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'field',
+      'type' => \TType::LST,
+      'etype' => \TType::STRUCT,
+      'elem' => shape(
+        'type' => \TType::STRUCT,
+        'class' => DependentAdaptedListDep::class,
+      ),
+      'format' => 'collection',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'field' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'field' => ?Vector<DependentAdaptedListDep>,
+  );
+
+  const int STRUCTURAL_ID = 8146873538067102953;
+  /**
+   * Original thrift field:-
+   * 1: list<struct module.DependentAdaptedListDep> field
+   */
+  public ?Vector<DependentAdaptedListDep> $field;
+
+  public function __construct(?Vector<DependentAdaptedListDep> $field = null)[] {
+    $this->field = $field;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'field'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'DependentAdaptedList';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.DependentAdaptedList",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                            shape(
+                              "name" => "module.DependentAdaptedListDep",
+                              "underlyingType" => tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                                    shape(
+                                      "name" => "module.DependentAdaptedListDep",
+                                    )
+                                  ),
+                                )
+                              ),
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "field",
+              "is_optional" => true,
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'field') !== null) {
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<DependentAdaptedListDep>>($parsed['field']);
+      $_container4 = Vector {};
+      foreach($_json3 as $_key1 => $_value2) {
+        $_elem5 = DependentAdaptedListDep::withDefaultValues();
+        $_tmp6 = \json_encode($_value2);
+        $_tmp7 = DependentAdaptedListDep::withDefaultValues();
+        $_tmp7->readFromJson($_tmp6);
+        $_elem5 = $_tmp7;
+        $_container4 []= $_elem5;
+      }
+      $this->field = $_container4;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * DependentAdaptedListDep
+ */
+class DependentAdaptedListDep implements \IThriftSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'field',
+      'type' => \TType::I16,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'field' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'field' => ?int,
+  );
+
+  const int STRUCTURAL_ID = 4533421093368234312;
+  /**
+   * Original thrift field:-
+   * 1: i16 field
+   */
+  public ?int $field;
+
+  public function __construct(?int $field = null)[] {
+    $this->field = $field;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'field'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'DependentAdaptedListDep';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.DependentAdaptedListDep",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
+                )
+              ),
+              "name" => "field",
+              "is_optional" => true,
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "IdentityAdapter<detail::DependentAdaptedListDep>",
+          )
+        ),
+      ],
+      'fields' => dict[
+        'field' => shape(
+          'field' => dict[
+            '\thrift\annotation\Box' => \thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'field') !== null) {
+      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['field']);
+      if ($_tmp0 > 0x7fff) {
         throw new \TProtocolException("number exceeds limit in field");
       } else {
-        $this->i32_field = (int)$_tmp0;
+        $this->field = (int)$_tmp0;
       }
-      $this->_type = NoExceptMoveUnionEnum::i32_field;
     }
   }
 

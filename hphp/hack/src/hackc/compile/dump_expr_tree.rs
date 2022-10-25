@@ -37,7 +37,7 @@ impl<'ast> Visitor<'ast> for ExprTreeLiteralExtractor {
         use aast::Expr_;
         match &e.2 {
             Expr_::ExpressionTree(et) => {
-                self.literals.push((e.1.clone(), (&**et).clone()));
+                self.literals.push((e.1.clone(), (**et).clone()));
             }
             _ => e.recurse(env, self)?,
         }
@@ -68,7 +68,7 @@ fn find_et_literals(program: ast::Program) -> Vec<(Pos, ast::ExpressionTree)> {
     visitor.literals
 }
 
-fn sort_by_start_pos<T>(items: &mut Vec<(Pos, T)>) {
+fn sort_by_start_pos<T>(items: &mut [(Pos, T)]) {
     items.sort_by(|(p1, _), (p2, _)| p1.start_offset().cmp(&p2.start_offset()));
 }
 

@@ -423,6 +423,7 @@ struct StringData final : MaybeCountable,
    */
   constexpr static uint16_t kColorMask = 0x3fff;
   constexpr static uint16_t kInvalidColor = 0x0000;
+  constexpr static uint16_t kDupColor = 0x0001;
   static ptrdiff_t colorOffset();
 
   /*

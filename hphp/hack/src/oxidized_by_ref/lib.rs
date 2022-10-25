@@ -15,7 +15,6 @@ pub use manual::decl_counters;
 pub use manual::decl_env;
 pub use manual::decl_provider;
 pub use manual::direct_decl_parser;
-pub use manual::doc_comment;
 pub use manual::i_map;
 pub use manual::i_set;
 pub use manual::ident;

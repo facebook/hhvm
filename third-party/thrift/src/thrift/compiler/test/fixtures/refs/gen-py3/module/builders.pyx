@@ -96,6 +96,13 @@ cdef class StructWithNonOptionalBox_Builder(thrift.py3.builder.StructBuilder):
         yield "b", self.b
         yield "c", self.c
 
+cdef class StructWithInternBox_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _module_types.StructWithInternBox
+
+    def __iter__(self):
+        yield "field1", self.field1
+        yield "field2", self.field2
+
 cdef class StructWithRefTypeUnique_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _module_types.StructWithRefTypeUnique
 

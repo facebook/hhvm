@@ -344,6 +344,9 @@ TEST(ParallelConcurrencyControllerTest, DifferentOrdering2) {
 
 TEST(ParallelConcurrencyControllerTest, InternalPrioritization) {
   THRIFT_FLAG_SET_MOCK(experimental_use_resource_pools, true);
+  if (!apache::thrift::useResourcePoolsFlagsSet()) {
+    GTEST_SKIP() << "Invalid resource pools mode";
+  }
 
   std::atomic<int> counter{0};
   folly::Baton<> blockingBaton{};

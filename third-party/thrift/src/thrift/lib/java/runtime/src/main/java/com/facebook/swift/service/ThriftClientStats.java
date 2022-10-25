@@ -16,7 +16,6 @@
 
 package com.facebook.swift.service;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.airlift.stats.DecayCounter;
 import io.airlift.stats.Distribution;
 import io.airlift.stats.ExponentialDecay;
@@ -168,14 +167,5 @@ public class ThriftClientStats {
     } catch (Throwable t) {
       // Suppress exception/error while adding value to distribution
     }
-  }
-
-  @VisibleForTesting
-  public void reset() {
-    counters.clear();
-    decayCounters.clear();
-    distributions.clear();
-    oneHourDistributions.clear();
-    oneMinuteDistributions.clear();
   }
 }

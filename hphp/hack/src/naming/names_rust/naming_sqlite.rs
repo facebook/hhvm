@@ -29,6 +29,12 @@ impl Names {
         Ok(Self { conn })
     }
 
+    pub fn from_file_assume_valid_db(path: impl AsRef<Path>) -> anyhow::Result<Self> {
+        let path = path.as_ref();
+        let conn = Connection::open(path)?;
+        Ok(Self { conn })
+    }
+
     pub fn new_in_memory() -> anyhow::Result<Self> {
         let mut conn = Connection::open_in_memory()?;
         Self::create_tables(&mut conn)?;
@@ -793,6 +799,8 @@ impl Names {
         Ok(())
     }
 
+    /// This creates a sqlite directory at the specified path.
+    /// It will fail if the directory containing that path doesn't exist.
     pub fn build_at_path(
         path: impl AsRef<Path>,
         file_summaries: impl IntoIterator<Item = (RelativePath, crate::FileSummary)>,

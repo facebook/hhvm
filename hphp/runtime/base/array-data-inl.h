@@ -134,7 +134,8 @@ inline bool ArrayData::hasStrKeyTable() const {
 }
 
 inline uint8_t ArrayData::auxBits() const {
-  return safe_cast<uint8_t>(m_aux16 & (kLegacyArray | kSampledArray));
+  return safe_cast<uint8_t>(m_aux16 &
+                            (kLegacyArray | kSampledArray | kMayContainCounted));
 }
 
 inline uint8_t ArrayData::sizeIndex() const {

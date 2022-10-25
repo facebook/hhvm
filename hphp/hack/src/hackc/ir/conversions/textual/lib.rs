@@ -10,6 +10,8 @@
 //!   hackc compile-infer test/infer/basic.hack > basic.sil
 //!   ./infer/bin/infer compile --capture-textual basic.sil
 
+#![feature(box_patterns)]
+
 /// Helper for tx_ty! Called like `tx_ty_sub!(AllowNaked Pat)` where
 /// AllowNaked=0 means naked raw-types not allowed and AllowNaked=1 means naked
 /// raw-types are allowed.
@@ -33,10 +35,10 @@ macro_rules! tx_ty_sub {
         textual::Ty::Void
     };
     (1 $name:ident) => {
-        crate::textual::Ty::RawType(stringify!($name).to_owned())
+        crate::textual::Ty::Type(stringify!($name).to_owned())
     };
     ($_:tt * $($rest:tt)+) => {
-        crate::textual::Ty::RawPtr(Box::new(tx_ty_sub!(1 $($rest)+)))
+        crate::textual::Ty::Ptr(Box::new(tx_ty_sub!(1 $($rest)+)))
     };
 }
 
@@ -58,6 +60,7 @@ mod mangle;
 mod member_op;
 mod state;
 mod textual;
+mod types;
 mod util;
 mod writer;
 

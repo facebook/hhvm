@@ -4,8 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
+use hash::HashMap;
 use hash::HashSet;
+use hhbc::AdataId;
 use hhbc::Local;
+use hhbc::TypedValue;
 use log::trace;
 
 use crate::body::Body;
@@ -22,12 +25,14 @@ pub(crate) struct WorkQueue<'arena, 'a> {
 impl<'arena, 'a> WorkQueue<'arena, 'a> {
     pub(crate) fn init_from_bodies(
         &mut self,
-        value_builder: &mut ValueBuilder,
+        value_builder: &mut ValueBuilder<'arena>,
         a: &'a Body<'arena>,
+        a_adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
         b: &'a Body<'arena>,
+        b_adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
     ) {
-        let mut a_state = State::new(a, "A");
-        let mut b_state = State::new(b, "B");
+        let mut a_state = State::new(a, "A", a_adata);
+        let mut b_state = State::new(b, "B", b_adata);
 
         // Also need to handle entrypoints for defaults!
         for (idx, (param_a, param_b)) in a

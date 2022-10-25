@@ -633,36 +633,27 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
     LayoutWeightVector(layoutWeights.begin(), layoutWeights.end());
 
   // Find a colorable subset of the selected layouts.
-  auto const [coloringEnd, coloring] = findKeyColoring(layoutVector);
-  if (!coloring) return {};
+  auto coloring = findKeyColoring(layoutVector);
 
-  // Remove groups with missing or discarded StructLayouts.
+  // Remove groups with missing StructLayouts.
   {
-    auto discarded = folly::F14FastSet<const StructLayout*>();
-    std::transform(
-      coloringEnd,
-      layoutVector.cend(),
-      std::inserter(discarded, discarded.end()),
-      [&](auto const& a) { return a.first; }
-    );
     groups.erase(
       std::remove_if(
         groups.begin(),
         groups.end(),
         [&](auto const& a) {
-          return a.layout == nullptr ||
-                 discarded.find(a.layout) != discarded.end();
+          return a.layout == nullptr;
         }
       ), groups.end()
     );
   }
 
   // Apply coloring to strings, and then have each layout create its hash map.
-  applyColoring(*coloring);
+  applyColoring(coloring, layoutVector);
   std::for_each(
-    layoutVector.cbegin(), coloringEnd,
+    layoutVector.cbegin(), layoutVector.cend(),
     [&](auto const& layout) {
-      layout.first->createColoringHashMap();
+      layout.first->createColoringHashMap(coloring.numColoredFields);
     }
   );
 

@@ -67,3 +67,19 @@ struct MyStruct {
 
 // Intentionally defined after MyStruct, so it's patch types are generated after MyStruct's.
 struct LateDefStruct {}
+
+// AssignOnlyPatch annotation is required on struct level to avoid generating patchPrior
+// and patch operation support. Because they will require FieldPatch types to be present,
+// but they will be not defined yet.
+@patch.AssignOnlyPatch
+struct Bar {
+  @patch.AssignOnlyPatch
+  MapStruct extraCycle;
+}
+
+struct MapStruct {
+  @patch.AssignOnlyPatch
+  1: map<i32, MapStruct> rabbitHole;
+  @thrift.Box
+  2: optional Bar bar;
+}

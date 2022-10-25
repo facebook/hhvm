@@ -59,6 +59,7 @@ union ServerTestResult {
   300: InteractionConstructorServerTestResult interactionConstructor;
   301: InteractionFactoryFunctionServerTestResult interactionFactoryFunction;
   302: InteractionPersistsStateServerTestResult interactionPersistsState;
+  303: InteractionTerminationServerTestResult interactionTermination;
 }
 
 union ClientTestResult {
@@ -76,6 +77,7 @@ union ClientTestResult {
   300: InteractionConstructorClientTestResult interactionConstructor;
   301: InteractionFactoryFunctionClientTestResult interactionFactoryFunction;
   302: InteractionPersistsStateClientTestResult interactionPersistsState;
+  303: InteractionTerminationClientTestResult interactionTermination;
 }
 
 struct RequestResponseBasicServerTestResult {
@@ -133,6 +135,10 @@ struct InteractionFactoryFunctionServerTestResult {
 
 struct InteractionPersistsStateServerTestResult {}
 
+struct InteractionTerminationServerTestResult {
+  1: bool terminationReceived;
+}
+
 struct RequestResponseBasicClientTestResult {
   1: Response response;
 }
@@ -187,6 +193,8 @@ struct InteractionPersistsStateClientTestResult {
   1: list<i32> responses;
 }
 
+struct InteractionTerminationClientTestResult {}
+
 union ClientInstruction {
   1: RequestResponseBasicClientInstruction requestResponseBasic;
   2: RequestResponseDeclaredExceptionClientInstruction requestResponseDeclaredException;
@@ -202,6 +210,7 @@ union ClientInstruction {
   300: InteractionConstructorClientInstruction interactionConstructor;
   301: InteractionFactoryFunctionClientInstruction interactionFactoryFunction;
   302: InteractionPersistsStateClientInstruction interactionPersistsState;
+  303: InteractionTerminationClientInstruction interactionTermination;
 }
 
 union ServerInstruction {
@@ -219,6 +228,7 @@ union ServerInstruction {
   300: InteractionConstructorServerInstruction interactionConstructor;
   301: InteractionFactoryFunctionServerInstruction interactionFactoryFunction;
   302: InteractionPersistsStateServerInstruction interactionPersistsState;
+  303: InteractionTerminationServerInstruction interactionTermination;
 }
 
 struct RequestResponseBasicClientInstruction {
@@ -281,6 +291,10 @@ struct InteractionPersistsStateClientInstruction {
   2: list<i32> valuesToAdd;
 }
 
+struct InteractionTerminationClientInstruction {
+  1: optional i32 initialSum;
+}
+
 struct RequestResponseBasicServerInstruction {
   1: Response response;
 }
@@ -335,6 +349,8 @@ struct InteractionConstructorServerInstruction {}
 struct InteractionFactoryFunctionServerInstruction {}
 
 struct InteractionPersistsStateServerInstruction {}
+
+struct InteractionTerminationServerInstruction {}
 
 interaction BasicInteraction {
   void init();

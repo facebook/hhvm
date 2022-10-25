@@ -35,28 +35,6 @@ module Decl = struct
 
   let declare_folded_class _ _ = failwith "unimplemented"
 
-  let remove_funs_batch _ _ = failwith "unimplemented"
-
-  let remove_shallow_classes_batch _ _ = failwith "unimplemented"
-
-  let remove_folded_classes_batch _ _ = failwith "unimplemented"
-
-  let remove_typedefs_batch _ _ = failwith "unimplemented"
-
-  let remove_gconsts_batch _ _ = failwith "unimplemented"
-
-  let remove_modules_batch _ _ = failwith "unimplemented"
-
-  let remove_props_batch _ _ = failwith "unimplemented"
-
-  let remove_static_props_batch _ _ = failwith "unimplemented"
-
-  let remove_methods_batch _ _ = failwith "unimplemented"
-
-  let remove_static_methods_batch _ _ = failwith "unimplemented"
-
-  let remove_constructors_batch _ _ = failwith "unimplemented"
-
   let get_old_funs_batch _ _ = failwith "unimplemented"
 
   let get_old_shallow_classes_batch _ _ = failwith "unimplemented"
@@ -100,6 +78,8 @@ module Decl = struct
   let oldify_static_methods_batch _ _ = failwith "unimplemented"
 
   let oldify_constructors_batch _ _ = failwith "unimplemented"
+
+  let remove_defs _ _ = failwith "unimplemented"
 
   let remove_old_defs _ _ = failwith "unimplemented"
 end

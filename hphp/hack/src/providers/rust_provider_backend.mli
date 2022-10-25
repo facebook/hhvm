@@ -40,28 +40,6 @@ module Decl : sig
 
   val declare_folded_class : t -> string -> unit
 
-  val remove_funs_batch : t -> string list -> unit
-
-  val remove_shallow_classes_batch : t -> string list -> unit
-
-  val remove_folded_classes_batch : t -> string list -> unit
-
-  val remove_typedefs_batch : t -> string list -> unit
-
-  val remove_gconsts_batch : t -> string list -> unit
-
-  val remove_modules_batch : t -> string list -> unit
-
-  val remove_props_batch : t -> (string * string) list -> unit
-
-  val remove_static_props_batch : t -> (string * string) list -> unit
-
-  val remove_methods_batch : t -> (string * string) list -> unit
-
-  val remove_static_methods_batch : t -> (string * string) list -> unit
-
-  val remove_constructors_batch : t -> string list -> unit
-
   val oldify_funs_batch : t -> string list -> unit
 
   val oldify_shallow_classes_batch : t -> string list -> unit
@@ -98,6 +76,8 @@ module Decl : sig
 
   val get_old_modules_batch :
     t -> string list -> Shallow_decl_defs.module_decl option SMap.t
+
+  val remove_defs : t -> FileInfo.names * Decl_class_elements.t SMap.t -> unit
 
   val remove_old_defs :
     t -> FileInfo.names * Decl_class_elements.t SMap.t -> unit

@@ -390,7 +390,7 @@ let[@warning "-21"] oldify_defs (* -21 for dune stubs *)
     if collect_garbage then SharedMem.GC.collect `gentle;
     ()
 
-let[@warning "-21"] remove_old_defs
+let[@warning "-21"] remove_old_defs (* -21 for dune stubs *)
     (ctx : Provider_context.t)
     ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } as names)
     (elems : Decl_class_elements.t SMap.t) : unit =
@@ -408,32 +408,14 @@ let[@warning "-21"] remove_old_defs
     SharedMem.GC.collect `gentle;
     ()
 
-let[@warning "-21"] remove_defs
+let[@warning "-21"] remove_defs (* -21 for dune stubs *)
     (ctx : Provider_context.t)
-    { FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }
+    ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } as names)
     (elems : Decl_class_elements.t SMap.t)
     ~(collect_garbage : bool) : unit =
   match Provider_backend.get () with
   | Provider_backend.Rust_provider_backend be ->
-    let open Rust_provider_backend.Decl in
-    remove_funs_batch be (SSet.elements n_funs);
-    remove_shallow_classes_batch be (SSet.elements n_classes);
-    remove_folded_classes_batch be (SSet.elements n_classes);
-    remove_typedefs_batch be (SSet.elements n_types);
-    remove_gconsts_batch be (SSet.elements n_consts);
-    remove_modules_batch be (SSet.elements n_modules);
-    SMap.iter
-      ~f:(fun cls es ->
-        let open Decl_heap in
-        let open Decl_class_elements in
-        remove_constructors_batch be [cls];
-        remove_props_batch be (Props.KeySet.elements es.props);
-        remove_static_props_batch be (StaticProps.KeySet.elements es.sprops);
-        remove_methods_batch be (Methods.KeySet.elements es.meths);
-        remove_static_methods_batch be (StaticMethods.KeySet.elements es.smeths);
-        ())
-      elems;
-    ()
+    Rust_provider_backend.Decl.remove_defs be (names, elems)
   | _ ->
     Decl_heap.Funs.remove_batch n_funs;
     Decl_class_elements.remove_all elems;

@@ -459,13 +459,38 @@ module Decl = struct
     set_decl_store t;
     FoldedClasses.get t
 
-  let oldify_funs_batch t keys =
-    set_decl_store t;
-    Funs.oldify_batch t keys
-
   let get_old_funs_batch t keys =
     set_decl_store t;
     get_old_funs_batch_ffi t keys
+
+  let oldify_defs
+      t ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }, elems) =
+    set_decl_store t;
+    Funs.oldify_batch t (SSet.elements n_funs);
+    ShallowClasses.oldify_batch t (SSet.elements n_classes);
+    FoldedClasses.oldify_batch t (SSet.elements n_classes);
+    Typedefs.oldify_batch t (SSet.elements n_types);
+    GConsts.oldify_batch t (SSet.elements n_consts);
+    Modules.oldify_batch t (SSet.elements n_modules);
+    SMap.iter
+      (fun cls es ->
+        Constructors.oldify_batch t [cls];
+        Props.oldify_batch
+          t
+          (Decl_heap.Props.KeySet.elements es.Decl_class_elements.props);
+        StaticProps.oldify_batch
+          t
+          (Decl_heap.StaticProps.KeySet.elements es.Decl_class_elements.sprops);
+        Methods.oldify_batch
+          t
+          (Decl_heap.Methods.KeySet.elements es.Decl_class_elements.meths);
+        StaticMethods.oldify_batch
+          t
+          (Decl_heap.StaticMethods.KeySet.elements
+             es.Decl_class_elements.smeths);
+        ())
+      elems;
+    ()
 
   let remove_defs
       t ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }, elems) =
@@ -525,61 +550,21 @@ module Decl = struct
       elems;
     ()
 
-  let oldify_shallow_classes_batch t keys =
-    set_decl_store t;
-    ShallowClasses.oldify_batch t keys
-
   let get_old_shallow_classes_batch t keys =
     set_decl_store t;
     get_old_shallow_classes_batch_ffi t keys
-
-  let oldify_folded_classes_batch t keys =
-    set_decl_store t;
-    FoldedClasses.oldify_batch t keys
-
-  let oldify_typedefs_batch t keys =
-    set_decl_store t;
-    Typedefs.oldify_batch t keys
 
   let get_old_typedefs_batch t keys =
     set_decl_store t;
     get_old_typedefs_batch_ffi t keys
 
-  let oldify_gconsts_batch t keys =
-    set_decl_store t;
-    GConsts.oldify_batch t keys
-
   let get_old_gconsts_batch t keys =
     set_decl_store t;
     get_old_gconsts_batch_ffi t keys
 
-  let oldify_modules_batch t keys =
-    set_decl_store t;
-    Modules.oldify_batch t keys
-
   let get_old_modules_batch t keys =
     set_decl_store t;
     get_old_modules_batch_ffi t keys
-
-  let oldify_props_batch t keys =
-    set_decl_store t;
-    Props.oldify_batch t keys
-
-  let oldify_static_props_batch t keys =
-    set_decl_store t;
-    StaticProps.oldify_batch t keys
-
-  let oldify_methods_batch t keys =
-    set_decl_store t;
-    Methods.oldify_batch t keys
-
-  let oldify_static_methods_batch t keys =
-    set_decl_store t;
-    StaticMethods.oldify_batch t keys
-
-  let oldify_constructors_batch t keys =
-    set_decl_store t;
-    Constructors.oldify_batch t keys
 
   external declare_folded_class : t -> string -> unit
     = "hh_rust_provider_backend_declare_folded_class"

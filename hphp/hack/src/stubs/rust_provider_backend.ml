@@ -57,27 +57,7 @@ module Decl = struct
 
   let get_old_constructors_batch _ _ = failwith "unimplemented"
 
-  let oldify_funs_batch _ _ = failwith "unimplemented"
-
-  let oldify_shallow_classes_batch _ _ = failwith "unimplemented"
-
-  let oldify_folded_classes_batch _ _ = failwith "unimplemented"
-
-  let oldify_typedefs_batch _ _ = failwith "unimplemented"
-
-  let oldify_gconsts_batch _ _ = failwith "unimplemented"
-
-  let oldify_modules_batch _ _ = failwith "unimplemented"
-
-  let oldify_props_batch _ _ = failwith "unimplemented"
-
-  let oldify_static_props_batch _ _ = failwith "unimplemented"
-
-  let oldify_methods_batch _ _ = failwith "unimplemented"
-
-  let oldify_static_methods_batch _ _ = failwith "unimplemented"
-
-  let oldify_constructors_batch _ _ = failwith "unimplemented"
+  let oldify_defs _ _ = failwith "unimplemented"
 
   let remove_defs _ _ = failwith "unimplemented"
 

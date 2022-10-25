@@ -40,28 +40,6 @@ module Decl : sig
 
   val declare_folded_class : t -> string -> unit
 
-  val oldify_funs_batch : t -> string list -> unit
-
-  val oldify_shallow_classes_batch : t -> string list -> unit
-
-  val oldify_folded_classes_batch : t -> string list -> unit
-
-  val oldify_typedefs_batch : t -> string list -> unit
-
-  val oldify_gconsts_batch : t -> string list -> unit
-
-  val oldify_modules_batch : t -> string list -> unit
-
-  val oldify_props_batch : t -> (string * string) list -> unit
-
-  val oldify_static_props_batch : t -> (string * string) list -> unit
-
-  val oldify_methods_batch : t -> (string * string) list -> unit
-
-  val oldify_static_methods_batch : t -> (string * string) list -> unit
-
-  val oldify_constructors_batch : t -> string list -> unit
-
   val get_old_funs_batch :
     t -> string list -> Shallow_decl_defs.fun_decl option SMap.t
 
@@ -76,6 +54,8 @@ module Decl : sig
 
   val get_old_modules_batch :
     t -> string list -> Shallow_decl_defs.module_decl option SMap.t
+
+  val oldify_defs : t -> FileInfo.names * Decl_class_elements.t SMap.t -> unit
 
   val remove_defs : t -> FileInfo.names * Decl_class_elements.t SMap.t -> unit
 

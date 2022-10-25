@@ -256,6 +256,15 @@ let rec print_global_expr env expr =
     remove_question_mark_prefix class_ty_str ^ "->" ^ print_global_expr env m_id
   | _ -> "Unknown"
 
+(* Given a function call of type Aast.expr_, if it's memoized, return its function
+   name, otherwise return None. *)
+let check_func_is_memoized func_expr env =
+  let (func_ty, _, te) = func_expr in
+  let open Typing_defs in
+  match get_node func_ty with
+  | Tfun fty when get_ft_is_memoized fty -> Some (print_global_expr env te)
+  | _ -> None
+
 (* Given the environment, the context and an expression, this function returns
   the set of global variables (i.e static variables / return of memoized functions)
   used in that expression. When track_refs is true, the references to global variables
@@ -322,14 +331,10 @@ let rec get_globals_from_expr env ctx (_, _, te) ~track_refs =
       (get_globals_from_expr env ctx e2 ~track_refs)
   | Call (((_, _, func_expr) as caller), _, tpl, _) ->
     (* First check if the called function is memoized. *)
-    let caller_ty = Tast.get_type caller in
-    let open Typing_defs in
     let globals_set_opt =
       ref
-        (match get_node caller_ty with
-        | Tfun fty when get_ft_is_memoized fty ->
-          Some (SSet.singleton (print_global_expr env te))
-        | _ -> None)
+        (Option.bind (check_func_is_memoized caller env) (fun f ->
+             Some (SSet.singleton f)))
     in
     (* For most function calls, we treat them as black boxes and don't expect their return
        to be global; yet, for some special function (i.e. idx), its return value is assumed
@@ -475,7 +480,7 @@ let visitor =
 
     method! on_stmt_ (env, (ctx, fun_name)) s =
       match s with
-      | If ((_, _, cond), b1, b2) ->
+      | If (((_, _, cond) as c), b1, b2) ->
         (* Make a copy of null_global_var_set, and reset afterwards. *)
         let null_global_var_set_cpy = !(ctx.null_global_var_set) in
         let ctx_else_branch =
@@ -547,6 +552,7 @@ let visitor =
            (which is uncommon but possible). *)
         (* Check two branches separately, then merge the table of global variables
            and reset the set of nullable variables. *)
+        super#on_expr (env, (ctx, fun_name)) c;
         super#on_block (env, (ctx, fun_name)) b1;
         super#on_block (env, (ctx_else_branch, fun_name)) b2;
         merge_var_refs_tbls
@@ -576,7 +582,8 @@ let visitor =
             ctx_len := Hashtbl.length !(ctx.global_var_refs_tbl)
           else
             has_context_change := false
-        done
+        done;
+        super#on_stmt_ (env, (ctx, fun_name)) s
       | Return r ->
         (match r with
         | Some ((ty, p, _) as e) ->
@@ -597,26 +604,67 @@ let visitor =
         super#on_stmt_ (env, (ctx, fun_name)) s
       | _ -> super#on_stmt_ (env, (ctx, fun_name)) s
 
-    method! on_expr (env, (ctx, fun_name)) ((_, p, e) as te) =
-      (match e with
-      | Binop (Ast_defs.Eq _, le, re) ->
-        let () = self#on_expr (env, (ctx, fun_name)) re in
-        let re_ty = Tast_env.print_ty env (Tast.get_type re) in
-        let le_global_opt = get_globals_from_expr env ctx le ~track_refs:true in
-        let re_direct_global_opt =
-          get_globals_from_expr env ctx re ~track_refs:false
+    method! on_expr (env, (ctx, fun_name)) ((ty, p, e) as te) =
+      match e with
+      (* For the case where the expression is directly a static variable or a memoized
+         function, and we report a global read. Notice that if the expression is on
+         the LHS of an assignment, we will not run on_expr on it, hence no global
+         reads would be reported; similarly, for the unary operation like "Foo::$prop++",
+         we don't report a global read. *)
+      | Class_get (class_id, expr, Is_prop) ->
+        (* Ignore static variables annotated with <<__SafeForGlobalAccessCheck>> *)
+        let class_elts = get_static_prop_elts env class_id expr in
+        let is_annotated_safe =
+          List.exists class_elts ~f:Typing_defs.get_ce_safe_global_variable
         in
-        (match re_direct_global_opt with
-        | Some re_direct_global ->
+        if not is_annotated_safe then
+          let expr_str = print_global_expr env e in
+          let ty_str = Tast_env.print_ty env ty in
           raise_global_access_error
             env
             p
             fun_name
-            re_ty
-            re_direct_global
+            ty_str
+            (SSet.singleton expr_str)
+            NoPattern
+            GlobalAccessCheck.DefiniteGlobalRead
+      | Call (func_expr, _, tpl, _) ->
+        (* First check if the called function is memoized. *)
+        let func_ty_str = Tast_env.print_ty env ty in
+        (match check_func_is_memoized func_expr env with
+        | Some memoized_func_name ->
+          raise_global_access_error
+            env
+            p
+            fun_name
+            func_ty_str
+            (SSet.singleton memoized_func_name)
             NoPattern
             GlobalAccessCheck.DefiniteGlobalRead
         | None -> ());
+        (* Check if a global variable is used as the parameter. *)
+        List.iter tpl ~f:(fun (pk, ((ty, pos, _) as expr)) ->
+            let e_global_opt =
+              match pk with
+              | Ast_defs.Pinout _ ->
+                get_globals_from_expr env ctx expr ~track_refs:true
+              | Ast_defs.Pnormal ->
+                get_global_and_mutable_from_expr env ctx expr ~track_refs:true
+            in
+            if Option.is_some e_global_opt then
+              raise_global_access_error
+                env
+                pos
+                fun_name
+                (Tast_env.print_ty env ty)
+                (Option.get e_global_opt)
+                NoPattern
+                GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall);
+        super#on_expr (env, (ctx, fun_name)) te
+      | Binop (Ast_defs.Eq _, le, re) ->
+        let () = self#on_expr (env, (ctx, fun_name)) re in
+        let re_ty = Tast_env.print_ty env (Tast.get_type re) in
+        let le_global_opt = get_globals_from_expr env ctx le ~track_refs:true in
         (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
         let pattern =
           match le_global_opt with
@@ -631,7 +679,7 @@ let visitor =
             else
               NoPattern
         in
-        if is_expr_static env le && Option.is_some le_global_opt then
+        (if is_expr_static env le && Option.is_some le_global_opt then
           raise_global_access_error
             env
             p
@@ -670,7 +718,8 @@ let visitor =
                   !(ctx.global_var_refs_tbl)
                   v
                   (Option.get re_global_and_mutable_opt))
-              !vars_in_le
+              !vars_in_le);
+        super#on_expr (env, (ctx, fun_name)) re
         (* add_var_refs_to_tbl !(ctx.global_var_refs_tbl) !vars_in_le *)
       | Unop (op, e) ->
         let e_global_opt = get_globals_from_expr env ctx e ~track_refs:true in
@@ -701,26 +750,7 @@ let visitor =
                 e_global
                 CounterIncrement
                 GlobalAccessCheck.PossibleGlobalWriteViaReference
-          | _ -> ())
-      | Call (_, _, tpl, _) ->
-        (* Check if a global variable is used as the parameter. *)
-        List.iter tpl ~f:(fun (pk, ((ty, pos, _) as expr)) ->
-            let e_global_opt =
-              match pk with
-              | Ast_defs.Pinout _ ->
-                get_globals_from_expr env ctx expr ~track_refs:true
-              | Ast_defs.Pnormal ->
-                get_global_and_mutable_from_expr env ctx expr ~track_refs:true
-            in
-            if Option.is_some e_global_opt then
-              raise_global_access_error
-                env
-                pos
-                fun_name
-                (Tast_env.print_ty env ty)
-                (Option.get e_global_opt)
-                NoPattern
-                GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall)
+          | _ -> super#on_expr (env, (ctx, fun_name)) e)
       | New (_, _, el, _, _) ->
         List.iter el ~f:(fun ((ty, pos, _) as expr) ->
             let e_global_opt =
@@ -734,9 +764,9 @@ let visitor =
                 (Tast_env.print_ty env ty)
                 (Option.get e_global_opt)
                 NoPattern
-                GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall)
-      | _ -> ());
-      super#on_expr (env, (ctx, fun_name)) te
+                GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall);
+        super#on_expr (env, (ctx, fun_name)) te
+      | _ -> super#on_expr (env, (ctx, fun_name)) te
   end
 
 (* Determine if a file is enabled for global access check *)

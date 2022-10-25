@@ -1,4 +1,4 @@
-File "test_anonymous.php", line 14, characters 5-18:
+File "test_anonymous.php", line 14, characters 10-18:
 [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
 File "test_anonymous.php", line 16, characters 7-27:
 [Test::test_method_call]{Foo::$static_prop}(int) A global variable is definitely written. (Other[11001])

@@ -20,7 +20,7 @@ namespace proxygen {
  */
 class FileServerListGenerator : public ServerListGenerator {
  public:
-  enum class FileType { PLAIN_TEXT, JSON };
+  enum class FileType { PLAIN_TEXT, JSON, THRIFT };
   // If FileType is specified as PLAIN_TEXT, we will read the file line by line.
   // If FileType is specified as JSON, we will parse it as a json and take the
   // entry that's named poolName.
@@ -34,10 +34,10 @@ class FileServerListGenerator : public ServerListGenerator {
 
  protected:
   struct Params {
-    explicit Params(const std::string& file,
-                    const FileType fileType,
-                    const std::string& pool)
-        : fileName(file), fileType(fileType), poolName(pool) {
+    explicit Params(std::string file, const FileType fileType, std::string pool)
+        : fileName(std::move(file)),
+          fileType(fileType),
+          poolName(std::move(pool)) {
     }
     std::string fileName;
     FileType fileType;

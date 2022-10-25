@@ -468,6 +468,132 @@ TEST(StructPatchTest, MapPatch) {
       removePatch,
       {{"a", "0"}, {"c", "3"}, {"d", "4"}},
       {{"a", "0"}, {"b", "2"}});
+
+  MapPatch elementPatch;
+  elementPatch.patchByKey("a") += "1";
+  elementPatch.add({{"b", "2"}});
+  elementPatch.patchByKey("b") += "1";
+
+  EXPECT_TRUE(elementPatch.toThrift().patchPrior()->contains("a"));
+  EXPECT_FALSE(elementPatch.toThrift().patchPrior()->contains("b"));
+  EXPECT_TRUE(elementPatch.toThrift().patch()->contains("b"));
+  EXPECT_FALSE(elementPatch.toThrift().patch()->contains("a"));
+
+  test::expectPatch(
+      elementPatch,
+      {{"a", "0"}},
+      {{"a", "01"}, {"b", "21"}},
+      {{"a", "011"}, {"b", "211"}});
+
+  MapPatch patchMerging1, patchMerging2;
+  patchMerging2.patchByKey("d") += "2";
+  patchMerging2.patchByKey("f") += "2";
+  patchMerging2.patchByKey("e") += "3";
+  patchMerging2.add({{"g", "6"}});
+  patchMerging2.put({{"e", "5"}});
+  patchMerging2.patchByKey("g") += "2";
+  patchMerging2.erase("z");
+  patchMerging2.patchByKey("z") += "2";
+
+  EXPECT_EQ(patchMerging2.toThrift().patchPrior()->size(), 2);
+  EXPECT_TRUE(patchMerging2.toThrift().patchPrior()->contains("d"));
+  EXPECT_TRUE(patchMerging2.toThrift().patchPrior()->contains("f"));
+  EXPECT_EQ(
+      *patchMerging2.toThrift().put(),
+      (std::map<std::string, std::string>{{"e", "5"}}));
+  EXPECT_EQ(
+      patchMerging2.toThrift().add(),
+      (std::map<std::string, std::string>{{"g", "6"}}));
+  EXPECT_EQ(
+      *patchMerging2.toThrift().remove(),
+      (std::unordered_set<std::string>{"z"}));
+  EXPECT_EQ(patchMerging2.toThrift().patch()->size(), 2);
+  EXPECT_TRUE(patchMerging2.toThrift().patch()->contains("g"));
+  EXPECT_TRUE(patchMerging2.toThrift().patch()->contains("z"));
+
+  auto expectAfterMerge = [&](const std::unordered_set<std::string>& patchPrior,
+                              const std::map<std::string, std::string>& add,
+                              const std::unordered_set<std::string>& remove,
+                              const std::map<std::string, std::string>& put,
+                              const std::unordered_set<std::string>& patch) {
+    patchMerging1.merge(patchMerging2);
+
+    EXPECT_EQ(patchMerging1.toThrift().patchPrior()->size(), patchPrior.size());
+    for (const auto& key : patchPrior) {
+      EXPECT_TRUE(patchMerging1.toThrift().patchPrior()->contains(key))
+          << "for key " << key;
+    }
+    EXPECT_EQ(*patchMerging1.toThrift().add(), add);
+    EXPECT_EQ(*patchMerging1.toThrift().remove(), remove);
+    EXPECT_EQ(*patchMerging1.toThrift().put(), put);
+    EXPECT_EQ(patchMerging1.toThrift().patch()->size(), patch.size());
+    for (const auto& key : patch) {
+      EXPECT_TRUE(patchMerging1.toThrift().patch()->contains(key))
+          << "for key " << key;
+    }
+  };
+
+  { // merge with add
+    patchMerging1 = MapPatch{};
+    patchMerging1.patchByKey("a") += "1";
+    patchMerging1.add({{"b", "2"}});
+    patchMerging1.patchByKey("b") += "1";
+
+    expectAfterMerge(
+        {"a", "d", "f"}, // patchPrior
+        {{"b", "2"}, {"g", "6"}}, // add
+        {"z"}, // remove
+        {{"e", "5"}}, // put
+        {"b", "g"} // patchAfter
+    );
+  }
+
+  { // merge with remove
+    patchMerging1 = MapPatch{};
+    patchMerging1.patchByKey("a") += "1";
+    patchMerging1.erase("b");
+    patchMerging1.patchByKey("b") += "1";
+
+    expectAfterMerge(
+        {"a", "d", "f"}, // patchPrior
+        {{"g", "6"}}, // add
+        {"b", "z"}, // remove
+        {{"e", "5"}}, // put
+        {"g"} // patchAfter
+    );
+  }
+
+  { // merge with put
+    patchMerging1 = MapPatch{};
+    patchMerging1.patchByKey("a") += "1";
+    patchMerging1.insert_or_assign("b", "2");
+    patchMerging1.patchByKey("b") += "1";
+
+    expectAfterMerge(
+        {"a", "d", "f"}, // patchPrior
+        {{"g", "6"}}, // add
+        {"z"}, // remove
+        {{"b", "2"}, {"e", "5"}}, // put
+        {"b", "g"} // patchAfter
+    );
+  }
+
+  { // merge with add, remove and put
+    patchMerging1 = MapPatch{};
+    patchMerging1.patchByKey("a") += "1";
+    patchMerging1.add({{"d", "1"}});
+    patchMerging1.insert_or_assign("b", "2");
+    patchMerging1.patchByKey("b") += "1";
+    patchMerging1.erase("f");
+
+    expectAfterMerge(
+        {"a"}, // patchPrior
+        {{"d", "1"}, {"g", "6"}}, // add
+        {"z", "f"}, // remove
+        {{"b", "2"}, {"e", "5"}}, // put
+        {"b", "d", "g"} // patchAfter
+    );
+  }
 }
 
 TEST(UnionPatchTest, Assign) {

@@ -703,10 +703,11 @@ public:
   const Func* get86linit() const;
 
   /*
-   * Look up a class' cached __invoke function.  We only cache __invoke methods
-   * if they are instance methods or if the class is a static closure.
+   * Look up this class's regular __invoke function. A regular invoke function
+   * is an invoke function that is not static in prologue. Closures' invoke
+   * functions are always regular.
    */
-  const Func* getCachedInvoke() const;
+  const Func* getRegularInvoke() const;
 
 
   /////////////////////////////////////////////////////////////////////////////

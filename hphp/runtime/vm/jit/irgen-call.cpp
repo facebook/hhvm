@@ -1156,7 +1156,8 @@ void fcallFuncObj(IRGS& env, const FCallArgs& fca) {
 
   auto const slowExit = makeExitSlow(env);
   auto const cls = gen(env, LdObjClass, obj);
-  auto const func = gen(env, LdObjInvoke, slowExit, cls);
+  auto const funcOpt = gen(env, LdObjInvoke, cls);
+  auto const func = gen(env, CheckNonNull, slowExit, funcOpt);
   discard(env);
   updateStackOffset(env);
   prepareAndCallProfiled(env, func, fca, obj, false, false);

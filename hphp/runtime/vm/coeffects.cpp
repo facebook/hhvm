@@ -264,8 +264,8 @@ RuntimeCoeffects getFunParamHelper(const TypedValue* tv, uint32_t paramIdx) {
     auto const cls = obj->getVMClass();
     if (cls->isClosureClass()) {
       if (!cls->hasClosureCoeffectsProp()) {
-        assertx(!cls->getCachedInvoke()->hasCoeffectRules());
-        return cls->getCachedInvoke()->requiredCoeffects();
+        assertx(!cls->getRegularInvoke()->hasCoeffectRules());
+        return cls->getRegularInvoke()->requiredCoeffects();
       }
       return c_Closure::fromObject(obj)->getCoeffects();
     }

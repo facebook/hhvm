@@ -72,7 +72,6 @@ namespace {
 const StaticString s_isEmpty("isEmpty");
 const StaticString s_count("count");
 const StaticString s_1("1");
-const StaticString s_invoke("__invoke");
 const StaticString s_isFinished("isFinished");
 const StaticString s_isSucceeded("isSucceeded");
 const StaticString s_isFailed("isFailed");
@@ -595,8 +594,8 @@ SSATmp* simplifyLdObjInvoke(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (!src->hasConstVal(TCls)) return nullptr;
 
-  auto const meth = src->clsVal()->getCachedInvoke();
-  return meth == nullptr ? nullptr : cns(env, meth);
+  auto const meth = src->clsVal()->getRegularInvoke();
+  return meth == nullptr ? cns(env, nullptr) : cns(env, meth);
 }
 
 SSATmp* simplifyMov(State& /*env*/, const IRInstruction* inst) {

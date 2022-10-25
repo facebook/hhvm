@@ -285,8 +285,8 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
               },
               [&] {
                 // Statically known coeffects
-                auto const unreachable = makeUnreachable(env, ASSERT_REASON);
-                auto const invoke = gen(env, LdObjInvoke, unreachable, cls);
+                auto const invokeOpt = gen(env, LdObjInvoke, cls);
+                auto const invoke = gen(env, AssertNonNull, invokeOpt);
                 return gen(env, LdFuncRequiredCoeffects, invoke);
               }
             );

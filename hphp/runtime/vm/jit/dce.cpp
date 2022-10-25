@@ -175,6 +175,7 @@ bool canDCE(const IRInstruction& inst) {
   case LdIfaceMethod:
   case LdPropAddr:
   case LdObjClass:
+  case LdObjInvoke:
   case LdClsName:
   case LdLazyClsName:
   case LdLazyCls:
@@ -416,7 +417,6 @@ bool canDCE(const IRInstruction& inst) {
   case LdInitPropAddr:
   case LdObjMethodD:
   case LdObjMethodS:
-  case LdObjInvoke:
   case LdFunc:
   case LdFuncCached:
   case LookupFuncCached:

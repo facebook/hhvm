@@ -190,25 +190,25 @@ TEST(Simplifier, LdObjClass) {
 TEST(Simplifier, LdObjInvoke) {
   IRUnit unit{test_context};
   auto const dummy = BCContext { BCMarker::Dummy(), 0 };
-  auto const taken = unit.defBlock();
 
   // LdObjInvoke t1:Cls doesn't simplify
   {
     auto type = TCls;
     auto cls = unit.gen(Conjure, dummy, type);
-    auto load = unit.gen(LdObjInvoke, dummy, taken, cls->dst());
+    auto load = unit.gen(LdObjInvoke, dummy, cls->dst());
     auto result = simplify(unit, load);
     EXPECT_NO_CHANGE(result);
   }
 
   // LdObjInvoke t1:Cls(C), where C is persistent but has no __invoke
-  // doesn't simplify.
+  // simplifies to nullptr.
   {
     auto type = Type::cns(SystemLib::s_HH_IteratorClass);
     auto cls = unit.gen(Conjure, dummy, type);
-    auto load = unit.gen(LdObjInvoke, dummy, taken, cls->dst());
+    auto load = unit.gen(LdObjInvoke, dummy, cls->dst());
     auto result = simplify(unit, load);
-    EXPECT_NO_CHANGE(result);
+    EXPECT_EQ(result.dst->type(), TNullptr);
+    EXPECT_EQ(result.instrs.size(), 0);
   }
 }
 

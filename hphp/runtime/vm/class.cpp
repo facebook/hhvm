@@ -784,7 +784,7 @@ const Func* Class::getDeclaredCtor() const {
   return f != SystemLib::s_nullCtor ? f : nullptr;
 }
 
-const Func* Class::getCachedInvoke() const {
+const Func* Class::getRegularInvoke() const {
   assertx(IMPLIES(m_invoke, !m_invoke->isStaticInPrologue()));
   return m_invoke;
 }
@@ -1469,9 +1469,9 @@ bool Class::isClosureClass() const {
 bool Class::hasClosureCoeffectsProp() const {
   assertx(isClosureClass());
   if (!(attrs() & AttrHasClosureCoeffectsProp)) return false;
-  assertx(getCachedInvoke()->hasCoeffectRules());
-  assertx(getCachedInvoke()->getCoeffectRules().size() == 1);
-  assertx(getCachedInvoke()->getCoeffectRules()[0].isClosureParentScope());
+  assertx(getRegularInvoke()->hasCoeffectRules());
+  assertx(getRegularInvoke()->getCoeffectRules().size() == 1);
+  assertx(getRegularInvoke()->getCoeffectRules()[0].isClosureParentScope());
   return true;
 }
 

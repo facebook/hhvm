@@ -75,6 +75,7 @@ _iter0.write0(oprot);
 
         _chain.postWrite(_r);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -166,6 +167,7 @@ _iter0.write0(oprot);
 
         _chain.postWrite(_r);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };

@@ -93,6 +93,7 @@ public class NestedContainersReactiveClient
 
 
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -159,6 +160,7 @@ public class NestedContainersReactiveClient
 
 
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -224,6 +226,7 @@ public class NestedContainersReactiveClient
 
 
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -288,6 +291,7 @@ public class NestedContainersReactiveClient
 
 
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -368,6 +372,7 @@ public class NestedContainersReactiveClient
 
 
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };

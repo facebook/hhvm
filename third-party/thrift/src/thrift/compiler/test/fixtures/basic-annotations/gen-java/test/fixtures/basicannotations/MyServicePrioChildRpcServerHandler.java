@@ -68,6 +68,7 @@ public class MyServicePrioChildRpcServerHandler  extends test.fixtures.basicanno
 
         _chain.postWrite(_r);
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };

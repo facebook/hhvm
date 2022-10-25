@@ -173,6 +173,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
         {{/function:args}}
 
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -320,6 +321,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
         {{/function:args}}
 
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -336,6 +338,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
         oprot.writeFieldEnd();
 
       } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
         throw reactor.core.Exceptions.propagate(_e);
       }
     };
@@ -442,6 +445,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
           {{/function:args}}
 
         } catch (Throwable _e) {
+          com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
           throw reactor.core.Exceptions.propagate(_e);
         }
       };
@@ -528,6 +532,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
           {{/function:args}}
 
         } catch (Throwable _e) {
+          com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
           throw reactor.core.Exceptions.propagate(_e);
         }
       };

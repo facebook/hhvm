@@ -25,8 +25,8 @@ struct Included {
 }
 
 const Included ExampleIncluded = {
-  MyIntField: 2,
-  MyTransitiveField: transitive.ExampleFoo,
+  "MyIntField": 2,
+  "MyTransitiveField": transitive.ExampleFoo,
 };
 
 typedef i64 IncludedInt64

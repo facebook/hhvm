@@ -469,13 +469,13 @@ impl DependencyHash {
     serde::Deserialize,
     serde::Serialize
 )]
-pub struct DepgraphEdge {
+pub struct DepGraphEdge {
     pub dependency: DependencyHash,
     pub dependent: ToplevelSymbolHash,
 }
 
-impl std::str::FromStr for DepgraphEdge {
-    type Err = ParseDepgraphEdgeError;
+impl std::str::FromStr for DepGraphEdge {
+    type Err = ParseDepGraphEdgeError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut iter = s.split(':');
         match (iter.next(), iter.next(), iter.next()) {
@@ -483,13 +483,13 @@ impl std::str::FromStr for DepgraphEdge {
                 dependency: dependency.parse()?,
                 dependent: dependent.parse()?,
             }),
-            _ => Err(ParseDepgraphEdgeError::Invalid(s.to_owned())),
+            _ => Err(ParseDepGraphEdgeError::Invalid(s.to_owned())),
         }
     }
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum ParseDepgraphEdgeError {
+pub enum ParseDepGraphEdgeError {
     #[error("expected dependency_hash:dependent_hash format. actual \"{0}\"")]
     Invalid(String),
     #[error("{0}")]

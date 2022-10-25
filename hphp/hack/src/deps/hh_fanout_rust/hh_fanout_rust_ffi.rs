@@ -28,18 +28,18 @@ type EdgesResult<T> = Result<T, EdgesError>;
 
 /// Rust set of edges.
 #[derive(Debug)]
-pub struct EdgesBuffer(HashTrieSet<hh24_types::DepgraphEdge>);
+pub struct EdgesBuffer(HashTrieSet<hh24_types::DepGraphEdge>);
 
 impl std::ops::Deref for EdgesBuffer {
-    type Target = HashTrieSet<hh24_types::DepgraphEdge>;
+    type Target = HashTrieSet<hh24_types::DepGraphEdge>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl From<HashTrieSet<hh24_types::DepgraphEdge>> for EdgesBuffer {
-    fn from(set: HashTrieSet<hh24_types::DepgraphEdge>) -> Self {
+impl From<HashTrieSet<hh24_types::DepGraphEdge>> for EdgesBuffer {
+    fn from(set: HashTrieSet<hh24_types::DepGraphEdge>) -> Self {
         Self(set)
     }
 }

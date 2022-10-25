@@ -78,7 +78,9 @@
                 chmod -R u+w -- "$sourceRoot"
                 runHook postUnpack
               else
-                ${previousAttrs.unpackPhase}
+                # The default unpackPhase function, which copies sources to
+                # a directory whose name is different between builds
+                eval unpackPhase
               fi
             '';
 

@@ -1,0 +1,3 @@
+[FAILURE] \instance_write: "[9:15-32]: Unsupported expression: Obj_get"
+[FAILURE] \class_write: "[13:15-29]: Unsupported expression: Class_get"
+No errors

@@ -180,6 +180,13 @@ let rec assign
            situation, it is not meaningful to report a candidate. *)
         env
     end
+  | A.Class_get (_, _, _)
+  | A.Obj_get (_, _, _, _) ->
+    (* Imprecise local handling so that false positives are invalidated *)
+    let env =
+      Option.fold ~init:env ~f:(dynamic_when_local ~origin:__LINE__ pos) rhs
+    in
+    not_yet_supported env lhs_pos ("lvalue: " ^ Utils.expr_name lval)
   | _ -> not_yet_supported env lhs_pos ("lvalue: " ^ Utils.expr_name lval)
 
 and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
@@ -480,6 +487,15 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
       }
     in
     let env = Env.add_inter_constraint env constr_ in
+    (env, Some entity_)
+  | A.Class_get (_, _, _)
+  | A.Obj_get (_, _, _, _) ->
+    let env = not_yet_supported env pos ("expression: " ^ Utils.expr_name e) in
+    (* Imprecise local handling so that false positives are invalidated *)
+    when_local_mode env.tast_env ~default:(env, None) @@ fun () ->
+    let entity_ = Env.fresh_var () in
+    let constraint_ = decorate ~origin:__LINE__ @@ Has_dynamic_key entity_ in
+    let env = Env.add_constraint env constraint_ in
     (env, Some entity_)
   | _ ->
     let env = not_yet_supported env pos ("expression: " ^ Utils.expr_name e) in

@@ -47,6 +47,7 @@ type global_access_pattern =
   | WriteEmptyOrNUll (* Assign null or empty string to a global variable *)
   | WriteLiteral (* Assign a literal to a global variable *)
   | WriteGlobalToGlobal (* Assign a global variable to another one *)
+  | WriteNonSensitive (* Write non-sensitive data to a global variable *)
   | NoPattern (* No pattern above is recognized *)
 [@@deriving show { with_path = false }]
 
@@ -100,45 +101,73 @@ let raise_global_access_error
     in
     Errors.global_access_error error_code pos message
 
+(* Various types of data sources for a local variable. *)
+type data_source =
+  | GlobalReference of string (* A reference to a mutable global var *)
+  | GlobalValue of string (* The value of a immutable global var *)
+  | NullOrEmpty (* null or empty string *)
+  | Literal (* Boolean, integer, floating-point, or string literals *)
+  | NonSensitive (* E.g. timer, site var *)
+  | Unknown (* Other sources that have not been identified yet *)
+[@@deriving eq, ord, show]
+
+module DataSourceSet = Caml.Set.Make (struct
+  type t = data_source
+
+  let compare = compare_data_source
+end)
+
 (* The context maintains:
-  (1) A hash table from local variables to the orresponding references of
-  global variables (i.e. static variables or memoized functions).
-  For example, consider the following program:
+  (1) A hash table from local variables to the corresponding data sources.
+  For any local variable, if its data sources contain GlobalReference(s), then
+  it is potentially a reference to global variable. Notice that a local variable
+  may refers to multiple global variables, for example:
   "if (condition) { $a = Foo::$bar; } else { $a = memoized_func(); }"
   after the above code, $a has a reference to either Foo::$bar or memoized_func,
-  thus global_var_refs_tbl is like {"a" => {"Foo::$bar", "\memoized_func"}}.
+  thus var_data_src_tbl is like {"a" => {GlobalReference of "Foo::$bar",
+  GlobalReference of "\memoized_func"}}.
   (2) A set of global variables whose values are null, which can be used to
   identify singletons. For example, consider the following program:
   "if (Foo::$bar is null) { Foo::$bar = new Bar(); }"
   inside the true branch, null_global_var_set is {"Foo::$bar"}, and
   the assignment to Foo::$bar shall be identified as a singleton. *)
 type ctx = {
-  global_var_refs_tbl: (string, SSet.t) Hashtbl.t ref;
+  var_data_src_tbl: (string, DataSourceSet.t) Hashtbl.t ref;
   null_global_var_set: SSet.t ref;
 }
 
 let current_ctx =
   {
-    global_var_refs_tbl = ref (Hashtbl.create 0);
+    var_data_src_tbl = ref (Hashtbl.create 0);
     null_global_var_set = ref SSet.empty;
   }
 
-(* Add the key (a variable name) and the value (a set of references) to the table. *)
-let add_var_refs_to_tbl tbl var refs =
-  let pre_ref_set =
+(* Add the key (a variable name) and the value (a set of data srcs) to the table. *)
+let add_var_data_srcs_to_tbl tbl var srcs =
+  let pre_data_src_set =
     if Hashtbl.mem tbl var then
       Hashtbl.find tbl var
     else
-      SSet.empty
+      DataSourceSet.empty
   in
-  Hashtbl.replace tbl var (SSet.union pre_ref_set refs)
+  Hashtbl.replace tbl var (DataSourceSet.union pre_data_src_set srcs)
 
-(* Given two hash tables of type (string, SSet.t) Hashtbl.t, merge the second
+let replace_var_data_srcs_in_tbl tbl var srcs = Hashtbl.replace tbl var srcs
+
+(* Given two hash tables of type (string, DataSourceSet.t) Hashtbl.t, merge the second
   table into the first one. *)
-let merge_var_refs_tbls tbl1 tbl2 = Hashtbl.iter (add_var_refs_to_tbl tbl1) tbl2
+let merge_var_data_srcs_tbls tbl1 tbl2 =
+  Hashtbl.iter (add_var_data_srcs_to_tbl tbl1) tbl2
 
 (* Remove a set of variables from the var_refs_tbl table. *)
 let remove_vars_from_tbl tbl vars = SSet.iter (Hashtbl.remove tbl) vars
+
+(* For a hash table whose value is DataSourceSet, get its total cardinal. *)
+let get_tbl_total_cardinal tbl =
+  Hashtbl.fold
+    (fun _ v cur_cardinal -> cur_cardinal + DataSourceSet.cardinal v)
+    tbl
+    0
 
 let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
   let open Typing_defs in
@@ -265,95 +294,6 @@ let check_func_is_memoized func_expr env =
   | Tfun fty when get_ft_is_memoized fty -> Some (print_global_expr env te)
   | _ -> None
 
-(* Given the environment, the context and an expression, this function returns
-  the set of global variables (i.e static variables / return of memoized functions)
-  used in that expression. When track_refs is true, the references to global variables
-  are also taken into account; otherwise, we get only the direct use of global variables.
-  If there is no such global variable, return None. *)
-let rec get_globals_from_expr env ctx (_, _, te) ~track_refs =
-  let merge_opt_sets opt_s1 opt_s2 =
-    match opt_s1 with
-    | None -> opt_s2
-    | Some s1 ->
-      (match opt_s2 with
-      | None -> opt_s1
-      | Some s2 -> Some (SSet.union s1 s2))
-  in
-  match te with
-  | Class_get (class_id, expr, Is_prop) ->
-    (* Ignore static variables annotated with <<__SafeForGlobalAccessCheck>> *)
-    let class_elts = get_static_prop_elts env class_id expr in
-    if not (List.exists class_elts ~f:Typing_defs.get_ce_safe_global_variable)
-    then
-      Some (SSet.singleton (print_global_expr env te))
-    else
-      None
-  | Lvar (_, id) ->
-    if track_refs then
-      Hashtbl.find_opt !(ctx.global_var_refs_tbl) (Local_id.to_string id)
-    else
-      None
-  | Obj_get (e, _, _, Is_prop) -> get_globals_from_expr env ctx e ~track_refs
-  | Darray (_, tpl) ->
-    List.fold tpl ~init:None ~f:(fun cur_opt_set (_, e) ->
-        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e ~track_refs))
-  | Varray (_, el) ->
-    List.fold el ~init:None ~f:(fun cur_opt_set e ->
-        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e ~track_refs))
-  | Shape tpl ->
-    List.fold tpl ~init:None ~f:(fun cur_opt_set (_, e) ->
-        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e ~track_refs))
-  | ValCollection (_, _, el) ->
-    List.fold el ~init:None ~f:(fun cur_opt_set e ->
-        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e ~track_refs))
-  | KeyValCollection (_, _, fl) ->
-    List.fold fl ~init:None ~f:(fun cur_opt_set (_, e) ->
-        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e ~track_refs))
-  | Array_get (e, _) -> get_globals_from_expr env ctx e ~track_refs
-  | Await e -> get_globals_from_expr env ctx e ~track_refs
-  | ReadonlyExpr e -> get_globals_from_expr env ctx e ~track_refs
-  | Tuple el
-  | List el ->
-    List.fold el ~init:None ~f:(fun cur_opt_set e ->
-        merge_opt_sets cur_opt_set (get_globals_from_expr env ctx e ~track_refs))
-  | Cast (_, e) -> get_globals_from_expr env ctx e ~track_refs
-  | Eif (_, e1, e2) ->
-    merge_opt_sets
-      (match e1 with
-      | Some e -> get_globals_from_expr env ctx e ~track_refs
-      | None -> None)
-      (get_globals_from_expr env ctx e2 ~track_refs)
-  | As (e, _, _) -> get_globals_from_expr env ctx e ~track_refs
-  | Upcast (e, _) -> get_globals_from_expr env ctx e ~track_refs
-  | Pair (_, e1, e2) ->
-    merge_opt_sets
-      (get_globals_from_expr env ctx e1 ~track_refs)
-      (get_globals_from_expr env ctx e2 ~track_refs)
-  | Call (((_, _, func_expr) as caller), _, tpl, _) ->
-    (* First check if the called function is memoized. *)
-    let globals_set_opt =
-      ref
-        (Option.bind (check_func_is_memoized caller env) (fun f ->
-             Some (SSet.singleton f)))
-    in
-    (* For most function calls, we treat them as black boxes and don't expect their return
-       to be global; yet, for some special function (i.e. idx), its return value is assumed
-       to be global if its first parameter is global. *)
-    let () =
-      match func_expr with
-      | Id (_, "\\HH\\idx") ->
-        (match tpl with
-        | (_, para_expr) :: _ ->
-          let global_opt =
-            get_globals_from_expr env ctx para_expr ~track_refs:true
-          in
-          globals_set_opt := merge_opt_sets !globals_set_opt global_opt
-        | [] -> ())
-      | _ -> ()
-    in
-    !globals_set_opt
-  | _ -> None
-
 (* Check if type is a collection. *)
 let is_value_collection_ty env ty =
   let mixed = MakeType.mixed Reason.none in
@@ -428,11 +368,160 @@ let rec has_no_object_ref_ty env (seen : SSet.t) ty =
     let union = MakeType.union Reason.none primitive_types in
     not (Typing_subtype.is_type_disjoint env ty union)
 
-let get_global_and_mutable_from_expr env ctx (tp, p, te) ~track_refs =
-  if not (has_no_object_ref_ty env SSet.empty tp) then
-    get_globals_from_expr env ctx (tp, p, te) ~track_refs
-  else
+(* Get all possible data sources for the given expression. *)
+let rec get_data_srcs_from_expr env ctx (tp, _, te) =
+  let is_immutable_ty = has_no_object_ref_ty env SSet.empty tp in
+  let convert_ref_to_val srcs =
+    DataSourceSet.map
+      (fun src ->
+        match src with
+        | GlobalReference s -> GlobalValue s
+        | _ as s -> s)
+      srcs
+  in
+  let get_data_srcs_of_expr_list list =
+    List.fold list ~init:DataSourceSet.empty ~f:(fun cur_src_set e ->
+        DataSourceSet.union cur_src_set (get_data_srcs_from_expr env ctx e))
+  in
+  let get_data_srcs_of_pair_expr_list list =
+    List.fold list ~init:DataSourceSet.empty ~f:(fun cur_src_set (_, e) ->
+        DataSourceSet.union cur_src_set (get_data_srcs_from_expr env ctx e))
+  in
+  match te with
+  | Class_get (class_id, expr, Is_prop) ->
+    (* Static variables annotated with <<__SafeForGlobalAccessCheck>> are
+       treated as non-sensitive. *)
+    let class_elts = get_static_prop_elts env class_id expr in
+    if List.exists class_elts ~f:Typing_defs.get_ce_safe_global_variable then
+      DataSourceSet.singleton NonSensitive
+    else
+      let expr_str = print_global_expr env te in
+      if is_immutable_ty then
+        DataSourceSet.singleton (GlobalValue expr_str)
+      else
+        DataSourceSet.singleton (GlobalReference expr_str)
+  | Lvar (_, id) ->
+    (match Hashtbl.mem !(ctx.var_data_src_tbl) (Local_id.to_string id) with
+    | true -> Hashtbl.find !(ctx.var_data_src_tbl) (Local_id.to_string id)
+    | false -> DataSourceSet.singleton Unknown)
+  | Call (((_, _, func_expr) as caller), _, tpl, _) ->
+    (match check_func_is_memoized caller env with
+    | Some func_name ->
+      (* If the called function is memoized, then its return is global. *)
+      (match is_immutable_ty with
+      | true -> DataSourceSet.singleton (GlobalValue func_name)
+      | false -> DataSourceSet.singleton (GlobalReference func_name))
+    | None ->
+      (* Otherwise, the function call is treated as a black boxes, except
+         for some special function (i.e. idx), the data source of its return
+         is assumed to be the same as its first parameter. *)
+      (match func_expr with
+      | Id (_, "\\HH\\idx") ->
+        (match tpl with
+        | (_, para_expr) :: _ -> get_data_srcs_from_expr env ctx para_expr
+        | [] -> DataSourceSet.singleton Unknown)
+      | _ -> DataSourceSet.singleton Unknown))
+  | Darray (_, tpl) -> get_data_srcs_of_pair_expr_list tpl
+  | Varray (_, el) -> get_data_srcs_of_expr_list el
+  | Shape tpl -> get_data_srcs_of_pair_expr_list tpl
+  | ValCollection (_, _, el) -> get_data_srcs_of_expr_list el
+  | KeyValCollection (_, _, fl) -> get_data_srcs_of_pair_expr_list fl
+  | Null -> DataSourceSet.singleton NullOrEmpty
+  | Clone e -> get_data_srcs_from_expr env ctx e
+  | Array_get (e, _) -> get_data_srcs_from_expr env ctx e
+  | Obj_get (obj_expr, _, _, Is_prop) ->
+    let obj_data_srcs = get_data_srcs_from_expr env ctx obj_expr in
+    if is_immutable_ty then
+      convert_ref_to_val obj_data_srcs
+    else
+      obj_data_srcs
+  | Class_const _ -> DataSourceSet.singleton NonSensitive
+  | Await e -> get_data_srcs_from_expr env ctx e
+  | ReadonlyExpr e -> get_data_srcs_from_expr env ctx e
+  | Tuple el
+  | List el ->
+    get_data_srcs_of_expr_list el
+  | Cast (_, e) -> get_data_srcs_from_expr env ctx e
+  | Unop (_, e) -> get_data_srcs_from_expr env ctx e
+  | Binop (_, e1, e2) ->
+    DataSourceSet.union
+      (get_data_srcs_from_expr env ctx e1)
+      (get_data_srcs_from_expr env ctx e2)
+  | Pipe (_, _, e) -> get_data_srcs_from_expr env ctx e
+  | Eif (_, e1, e2) ->
+    DataSourceSet.union
+      (match e1 with
+      | Some e -> get_data_srcs_from_expr env ctx e
+      | None -> DataSourceSet.empty)
+      (get_data_srcs_from_expr env ctx e2)
+  | As (e, _, _) -> get_data_srcs_from_expr env ctx e
+  | Upcast (e, _) -> get_data_srcs_from_expr env ctx e
+  | Pair (_, e1, e2) ->
+    DataSourceSet.union
+      (get_data_srcs_from_expr env ctx e1)
+      (get_data_srcs_from_expr env ctx e2)
+  | True
+  | False
+  | Int _
+  | Float _
+  | String _
+  | String2 _
+  | PrefixedString _
+  | ExpressionTree _ ->
+    DataSourceSet.singleton Literal
+  | This
+  | Omitted
+  | Id _
+  | Dollardollar _
+  | Obj_get (_, _, _, Is_method)
+  | Class_get (_, _, Is_method)
+  | FunctionPointer _
+  | Yield _
+  | Is _
+  | New _
+  | Efun _
+  | Lfun _
+  | Xml _
+  | Import _
+  | Collection _
+  | Lplaceholder _
+  | Fun_id _
+  | Method_id _
+  | Method_caller _
+  | Smethod_id _
+  | ET_Splice _
+  | EnumClassLabel _
+  | Hole _ ->
+    DataSourceSet.singleton Unknown
+
+(* Get the global variable names from the given expression's data sources.
+   By default, include_immutable is true, and we return both GlobalReference
+   and GlobalValue; otherwise, we return only GlobalReference. If no such
+   global variable exists, None is returned. *)
+let get_global_vars_from_expr ?(include_immutable = true) env ctx expr =
+  let is_src_global src =
+    match src with
+    | GlobalReference _ -> true
+    | GlobalValue _ -> include_immutable
+    | _ -> false
+  in
+  let print_src src =
+    match src with
+    | GlobalReference str
+    | GlobalValue str ->
+      str
+    | _ as s -> show_data_source s
+  in
+  let data_srcs = get_data_srcs_from_expr env ctx expr in
+  let global_srcs = DataSourceSet.filter is_src_global data_srcs in
+  if DataSourceSet.is_empty global_srcs then
     None
+  else
+    Some
+      (DataSourceSet.fold
+         (fun src s -> SSet.add (print_src src) s)
+         global_srcs
+         SSet.empty)
 
 (* Given an expression that appears on LHS of an assignment,
   this method gets the set of variables whose value may be assigned. *)
@@ -464,18 +553,20 @@ let visitor =
     inherit [_] Tast_visitor.iter_with_state as super
 
     method! on_method_ (env, (ctx, fun_name)) m =
-      Hashtbl.clear !(ctx.global_var_refs_tbl);
+      Hashtbl.clear !(ctx.var_data_src_tbl);
+      ctx.null_global_var_set := SSet.empty;
       super#on_method_ (env, (ctx, fun_name)) m
 
     method! on_fun_def (env, (ctx, fun_name)) f =
-      Hashtbl.clear !(ctx.global_var_refs_tbl);
+      Hashtbl.clear !(ctx.var_data_src_tbl);
+      ctx.null_global_var_set := SSet.empty;
       super#on_fun_def (env, (ctx, fun_name)) f
 
     method! on_fun_ (env, (ctx, fun_name)) f =
-      let global_var_refs_tbl_cpy = Hashtbl.copy !(ctx.global_var_refs_tbl) in
+      let var_data_src_tbl_cpy = Hashtbl.copy !(ctx.var_data_src_tbl) in
       let null_global_var_set_cpy = !(ctx.null_global_var_set) in
       super#on_fun_ (env, (ctx, fun_name)) f;
-      ctx.global_var_refs_tbl := global_var_refs_tbl_cpy;
+      ctx.var_data_src_tbl := var_data_src_tbl_cpy;
       ctx.null_global_var_set := null_global_var_set_cpy
 
     method! on_stmt_ (env, (ctx, fun_name)) s =
@@ -485,7 +576,7 @@ let visitor =
         let null_global_var_set_cpy = !(ctx.null_global_var_set) in
         let ctx_else_branch =
           {
-            global_var_refs_tbl = ref (Hashtbl.copy !(ctx.global_var_refs_tbl));
+            var_data_src_tbl = ref (Hashtbl.copy !(ctx.var_data_src_tbl));
             null_global_var_set = ref !(ctx.null_global_var_set);
           }
         in
@@ -533,7 +624,7 @@ let visitor =
           | None -> ()
           | Some (nullable_expr, if_branch) ->
             let nullable_global_vars_opt =
-              get_globals_from_expr env ctx nullable_expr ~track_refs:true
+              get_global_vars_from_expr env ctx nullable_expr
             in
             (* Add nullable global variables to null_global_var_set of the right branch. *)
             (match (nullable_global_vars_opt, if_branch) with
@@ -555,9 +646,9 @@ let visitor =
         super#on_expr (env, (ctx, fun_name)) c;
         super#on_block (env, (ctx, fun_name)) b1;
         super#on_block (env, (ctx_else_branch, fun_name)) b2;
-        merge_var_refs_tbls
-          !(ctx.global_var_refs_tbl)
-          !(ctx_else_branch.global_var_refs_tbl);
+        merge_var_data_srcs_tbls
+          !(ctx.var_data_src_tbl)
+          !(ctx_else_branch.var_data_src_tbl);
         ctx.null_global_var_set := null_global_var_set_cpy
       | Do (b, _)
       | While (_, b)
@@ -567,19 +658,23 @@ let visitor =
            no new global variable is found *)
         let ctx_cpy =
           {
-            global_var_refs_tbl = ref (Hashtbl.copy !(ctx.global_var_refs_tbl));
+            var_data_src_tbl = ref (Hashtbl.copy !(ctx.var_data_src_tbl));
             null_global_var_set = ref !(ctx.null_global_var_set);
           }
         in
-        let ctx_len = ref (Hashtbl.length !(ctx.global_var_refs_tbl)) in
+        let ctx_len = ref (get_tbl_total_cardinal !(ctx.var_data_src_tbl)) in
         let has_context_change = ref true in
+        (* Continue the loop until no more data sources are found. *)
         while !has_context_change do
           super#on_block (env, (ctx_cpy, fun_name)) b;
-          merge_var_refs_tbls
-            !(ctx.global_var_refs_tbl)
-            !(ctx_cpy.global_var_refs_tbl);
-          if Hashtbl.length !(ctx.global_var_refs_tbl) <> !ctx_len then
-            ctx_len := Hashtbl.length !(ctx.global_var_refs_tbl)
+          merge_var_data_srcs_tbls
+            !(ctx.var_data_src_tbl)
+            !(ctx_cpy.var_data_src_tbl);
+          let new_ctx_tbl_cardinal =
+            get_tbl_total_cardinal !(ctx.var_data_src_tbl)
+          in
+          if new_ctx_tbl_cardinal <> !ctx_len then
+            ctx_len := new_ctx_tbl_cardinal
           else
             has_context_change := false
         done;
@@ -588,7 +683,7 @@ let visitor =
         (match r with
         | Some ((ty, p, _) as e) ->
           (match
-             get_global_and_mutable_from_expr env ctx e ~track_refs:true
+             get_global_vars_from_expr ~include_immutable:false env ctx e
            with
           | Some global_set ->
             raise_global_access_error
@@ -646,10 +741,9 @@ let visitor =
         List.iter tpl ~f:(fun (pk, ((ty, pos, _) as expr)) ->
             let e_global_opt =
               match pk with
-              | Ast_defs.Pinout _ ->
-                get_globals_from_expr env ctx expr ~track_refs:true
+              | Ast_defs.Pinout _ -> get_global_vars_from_expr env ctx expr
               | Ast_defs.Pnormal ->
-                get_global_and_mutable_from_expr env ctx expr ~track_refs:true
+                get_global_vars_from_expr ~include_immutable:false env ctx expr
             in
             if Option.is_some e_global_opt then
               raise_global_access_error
@@ -664,7 +758,7 @@ let visitor =
       | Binop (Ast_defs.Eq _, le, re) ->
         let () = self#on_expr (env, (ctx, fun_name)) re in
         let re_ty = Tast_env.print_ty env (Tast.get_type re) in
-        let le_global_opt = get_globals_from_expr env ctx le ~track_refs:true in
+        let le_global_opt = get_global_vars_from_expr env ctx le in
         (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
         let pattern =
           match le_global_opt with
@@ -679,6 +773,7 @@ let visitor =
             else
               NoPattern
         in
+        let re_data_srcs = get_data_srcs_from_expr env ctx re in
         (if is_expr_static env le && Option.is_some le_global_opt then
           raise_global_access_error
             env
@@ -689,12 +784,9 @@ let visitor =
             pattern
             GlobalAccessCheck.DefiniteGlobalWrite
         else
-          let re_global_and_mutable_opt =
-            get_global_and_mutable_from_expr env ctx re ~track_refs:true
-          in
           let vars_in_le = ref SSet.empty in
           let () = get_vars_in_expr vars_in_le le in
-          (match has_global_write_access le with
+          match has_global_write_access le with
           | true ->
             if Option.is_some le_global_opt then
               raise_global_access_error
@@ -704,25 +796,23 @@ let visitor =
                 re_ty
                 (Option.get le_global_opt)
                 pattern
-                GlobalAccessCheck.PossibleGlobalWriteViaReference
-          | false ->
-            if
-              Option.is_some le_global_opt
-              && Option.is_none re_global_and_mutable_opt
-            then
-              remove_vars_from_tbl !(ctx.global_var_refs_tbl) !vars_in_le);
-          if Option.is_some re_global_and_mutable_opt then
+                GlobalAccessCheck.PossibleGlobalWriteViaReference;
             SSet.iter
               (fun v ->
-                add_var_refs_to_tbl
-                  !(ctx.global_var_refs_tbl)
+                add_var_data_srcs_to_tbl !(ctx.var_data_src_tbl) v re_data_srcs)
+              !vars_in_le
+          | false ->
+            SSet.iter
+              (fun v ->
+                replace_var_data_srcs_in_tbl
+                  !(ctx.var_data_src_tbl)
                   v
-                  (Option.get re_global_and_mutable_opt))
+                  re_data_srcs)
               !vars_in_le);
         super#on_expr (env, (ctx, fun_name)) re
         (* add_var_refs_to_tbl !(ctx.global_var_refs_tbl) !vars_in_le *)
       | Unop (op, e) ->
-        let e_global_opt = get_globals_from_expr env ctx e ~track_refs:true in
+        let e_global_opt = get_global_vars_from_expr env ctx e in
         if Option.is_some e_global_opt then
           let e_global = Option.get e_global_opt in
           let e_ty = Tast_env.print_ty env (Tast.get_type e) in
@@ -754,7 +844,7 @@ let visitor =
       | New (_, _, el, _, _) ->
         List.iter el ~f:(fun ((ty, pos, _) as expr) ->
             let e_global_opt =
-              get_global_and_mutable_from_expr env ctx expr ~track_refs:true
+              get_global_vars_from_expr ~include_immutable:false env ctx expr
             in
             if Option.is_some e_global_opt then
               raise_global_access_error

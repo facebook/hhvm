@@ -206,6 +206,24 @@ StreamCreditTimeoutClientTestResult streamCreditTimeoutTest(
   return result;
 }
 
+StreamDeclaredExceptionClientTestResult streamDeclaredExceptionTest(
+    StreamDeclaredExceptionClientInstruction& instruction) {
+  auto client = createClient();
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<StreamDeclaredExceptionClientTestResult> {
+        auto gen = (co_await client->co_streamDeclaredException(
+                        *instruction.request()))
+                       .toAsyncGenerator();
+        StreamDeclaredExceptionClientTestResult result;
+        try {
+          co_await gen.next();
+        } catch (const UserException& e) {
+          result.userException() = e;
+        }
+        co_return result;
+      }());
+}
+
 // =================== Sink ===================
 SinkBasicClientTestResult sinkBasicTest(
     SinkBasicClientInstruction& instruction) {
@@ -321,6 +339,10 @@ int main(int argc, char** argv) {
     case ClientInstruction::Type::streamCreditTimeout:
       result.streamCreditTimeout_ref() =
           streamCreditTimeoutTest(*clientInstruction.streamCreditTimeout_ref());
+      break;
+    case ClientInstruction::Type::streamDeclaredException:
+      result.streamDeclaredException_ref() = streamDeclaredExceptionTest(
+          *clientInstruction.streamDeclaredException_ref());
       break;
     case ClientInstruction::Type::sinkBasic:
       result.sinkBasic_ref() =

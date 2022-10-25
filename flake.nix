@@ -41,6 +41,7 @@
                   NIX_CFLAGS_COMPILE
                   CMAKE_INIT_CACHE;
               };
+          setupCompilerCache = "/nix/var/sccache/setup-compiler-cache.sh";
         in
         rec {
           packages.sccache_pr1086 = pkgs.sccache.overrideAttrs (finalAttrs: previousAttrs: rec {
@@ -60,9 +61,38 @@
               homepage = "https://github.com/mozilla/sccache/pull/1086";
             };
           });
-          packages.hhvm = pkgs.callPackage ./hhvm.nix {
+          packages.hhvm = (pkgs.callPackage ./hhvm.nix {
+            inherit setupCompilerCache;
             lastModifiedDate = self.lastModifiedDate;
-          };
+          }).overrideAttrs(finalAttrs: previousAttrs: {
+            # Override unpackPhase to create a fixed sourceRoot so that the path can be
+            # cached by sccache
+            unpackPhase = ''
+              if [[ -f ${pkgs.lib.strings.escapeShellArg setupCompilerCache} ]]
+              then
+                runHook preUnpack
+                sourceRoot=/tmp/hhvm-cmake-build
+                cp -pr --reflink=auto -- "$src" "$sourceRoot"
+                cd "$sourceRoot"
+                echo "source root is $sourceRoot"
+                chmod -R u+w -- "$sourceRoot"
+                runHook postUnpack
+              else
+                ${previousAttrs.unpackPhase}
+              fi
+            '';
+
+            # We pass compiler cache settings as a shell script specified by
+            # `setupCompilerCache`, not as derivation attributes, because we don't want
+            # to change the derivation hash changes due to different AWS_SESSION_TOKEN
+            # values.
+            preConfigure = ''
+              if [[ -f ${lib.strings.escapeShellArg setupCompilerCache} ]]
+              then
+                . ${lib.strings.escapeShellArg setupCompilerCache}
+              fi
+            '';
+          });
           packages.hhvm_clang = packages.hhvm.override {
             stdenv = pkgs.llvmPackages_14.stdenv;
           };

@@ -57,7 +57,7 @@
 , re2
 , re2c
 , rustChannelOf
-, setup-compiler-cache ? "/nix/var/sccache/setup-compiler-cache.sh"
+, setupCompilerCache
 , stdenv
 , sqlite
 , tbb
@@ -105,30 +105,6 @@ let
   };
 in
 stdenv.mkDerivation rec {
-
-  # Override unpackPhase to create a fixed sourceRoot so that the path can be
-  # cached by sccache
-  unpackPhase = ''
-    runHook preUnpack
-    sourceRoot=/tmp/hhvm-cmake-build
-    cp -pr --reflink=auto -- "$src" "$sourceRoot"
-    cd "$sourceRoot"
-    echo "source root is $sourceRoot"
-    chmod -R u+w -- "$sourceRoot"
-    runHook postUnpack
-  '';
-
-  # We pass compiler cache settings as a shell script specified by
-  # `setup-compiler-cache`, not as derivation attributes, because we don't want
-  # to change the derivation hash changes due to different AWS_SESSION_TOKEN
-  # values.
-  preConfigure = ''
-    if [[ -f ${lib.strings.escapeShellArg setup-compiler-cache} ]]
-    then
-      . ${lib.strings.escapeShellArg setup-compiler-cache}
-    fi
-  '';
-
   pname = "hhvm";
   version = builtins.foldl' lib.trivial.id makeVersion versionParts;
   src = ./.;

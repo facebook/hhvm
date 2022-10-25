@@ -115,7 +115,8 @@ jobs:
         sudo tee -a /nix/var/cache/setup-compiler-cache.sh
     - name: Build and install HHVM
       run: nix profile install --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
-    - name: Print sccache logs
+    - if: always()
+      name: Print sccache logs
       run: cat /nix/var/cache/sccache_log.txt
     - run: hhvm --version
     - name: Build the deb package

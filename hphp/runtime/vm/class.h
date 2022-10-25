@@ -759,9 +759,18 @@ public:
   /*
    * Get or set a method by its index in the funcVec, which is allocated
    * contiguously before `this' in memory.
+   *
+   * Requires idx < numMethods().
    */
   Func* getMethod(Slot idx) const;
   void setMethod(Slot idx, Func* func);
+
+  /*
+   * Get a method by its index in the funcVec, or pair of vtable/method indices.
+   * Return nullptr if indices are out of range or no such method exists.
+   */
+  Func* getMethodSafe(Slot idx) const;
+  Func* getIfaceMethodSafe(Slot vtableIdx, Slot methodIdx) const;
 
   /*
    * Look up a method by name.

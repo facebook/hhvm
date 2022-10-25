@@ -336,11 +336,47 @@ SSATmp* simplifyCallViolatesModuleBoundary(State& env,
 
 
 SSATmp* simplifyEqFunc(State& env, const IRInstruction* inst) {
-  auto const src0 = inst->src(0);
-  auto const src1 = inst->src(1);
+  auto const src0 = canonical(inst->src(0));
+  auto const src1 = canonical(inst->src(1));
+  if (src0 == src1) return cns(env, true);
   if (src0->hasConstVal() && src1->hasConstVal()) {
     return cns(env, src0->funcVal() == src1->funcVal());
   }
+  if (!src0->hasConstVal() && !src1->hasConstVal()) return nullptr;
+
+  auto const func = src0->hasConstVal() ? src0->funcVal() : src1->funcVal();
+  auto const cls = func->implCls();
+
+  // Consider only methods on final classes, where we could compare class
+  // pointers instead.
+  if (!cls || !(cls->attrs() & AttrNoOverride)) return nullptr;
+
+  auto const funcInst = (src0->hasConstVal() ? src1 : src0)->inst();
+  switch (funcInst->op()) {
+    case LdClsMethod:
+      if (cls->getMethodSafe(funcInst->src(1)->intVal()) == func) {
+        return gen(env, EqCls, funcInst->src(0), cns(env, cls));
+      }
+      break;
+
+    case LdIfaceMethod: {
+      auto const extra = funcInst->extra<LdIfaceMethod>();
+      if (cls->getIfaceMethodSafe(extra->vtableIdx, extra->methodIdx) == func) {
+        return gen(env, EqCls, funcInst->src(0), cns(env, cls));
+      }
+      break;
+    }
+
+    case LdObjInvoke:
+      if (cls->getRegularInvoke() == func) {
+        return gen(env, EqCls, funcInst->src(0), cns(env, cls));
+      }
+      break;
+
+    default:
+      break;
+  }
+
   return nullptr;
 }
 

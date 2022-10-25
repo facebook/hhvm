@@ -363,13 +363,28 @@ inline size_t Class::numMethods() const {
 }
 
 inline Func* Class::getMethod(Slot idx) const {
+  assertx(idx < numMethods());
   auto funcVec = (LowPtr<Func>*)this;
   return funcVec[-((int32_t)idx + 1)];
 }
 
 inline void Class::setMethod(Slot idx, Func* func) {
+  assertx(idx < numMethods());
   auto funcVec = (LowPtr<Func>*)this;
   funcVec[-((int32_t)idx + 1)] = func;
+}
+
+inline Func* Class::getMethodSafe(Slot idx) const {
+  if (idx >= numMethods()) return nullptr;
+  return getMethod(idx);
+}
+
+inline Func* Class::getIfaceMethodSafe(Slot vtableIdx, Slot methodIdx) const {
+  if (vtableIdx >= m_vtableVecLen) return nullptr;
+  auto const& vtable = m_vtableVec[vtableIdx];
+  if (vtable.iface == nullptr) return nullptr;
+  if (methodIdx >= vtable.iface->numMethods()) return nullptr;
+  return vtable.vtable[methodIdx];
 }
 
 inline Func* Class::lookupMethod(const StringData* methName) const {

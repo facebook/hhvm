@@ -1171,6 +1171,9 @@ void fcallFuncFunc(IRGS& env, const FCallArgs& fca) {
   ifElse(
     env,
     [&] (Block* taken) {
+      // This is super sketchy, as we did not check for isMethCaller() yet.
+      // However, it is faster than checking isMethCaller() first, and it does
+      // the right thing(tm) no matter whether the CheckNonNull jumps or not.
       gen(env, CheckNonNull, taken, gen(env, LdFuncCls, func));
       auto const attr = AttrData { AttrIsMethCaller };
       gen(env, JmpNZero, taken, gen(env, FuncHasAttr, attr, func));

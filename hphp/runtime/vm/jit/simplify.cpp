@@ -346,6 +346,15 @@ SSATmp* simplifyEqFunc(State& env, const IRInstruction* inst) {
 }
 
 
+SSATmp* simplifyLdFuncCls(State& env, const IRInstruction* inst) {
+  auto const funcTmp = inst->src(0);
+  return funcTmp->hasConstVal(TFunc)
+    ? funcTmp->funcVal()->cls()
+      ? cns(env, funcTmp->funcVal()->cls())
+      : cns(env, nullptr)
+    : nullptr;
+}
+
 SSATmp* simplifyLdFuncInOutBits(State& env, const IRInstruction* inst) {
   auto const funcTmp = inst->src(0);
   return funcTmp->hasConstVal(TFunc)
@@ -3945,6 +3954,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(LdStructDictVal)
       X(LdTypeStructureVal)
       X(MethodExists)
+      X(LdFuncCls)
       X(LdFuncInOutBits)
       X(LdFuncNumParams)
       X(FuncHasAttr)

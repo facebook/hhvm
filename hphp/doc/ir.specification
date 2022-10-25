@@ -1295,7 +1295,7 @@ To string conversions:
 
 | LdFuncCls, D(Cls|Nullptr), S(Func), NF
 
-  Loads the Class* of S0.
+  Loads the Func::cls() of S0, assuming !Func::isMethCaller().
 
 | LdStrLen, D(Int), S(Str), NF
 

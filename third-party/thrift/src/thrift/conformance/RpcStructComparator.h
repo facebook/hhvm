@@ -22,18 +22,28 @@ namespace apache::thrift::conformance {
 
 inline bool equal(
     const ClientTestResult& actual, const ClientTestResult& expected) {
+  auto stringContains = [](std::string_view a, std::string_view b) {
+    // return true iff b is a substring of a
+    return a.find(b) != std::string::npos;
+  };
   switch (expected.getType()) {
     case ClientTestResult::Type::requestResponseUndeclaredException:
       if (actual.getType() !=
           ClientTestResult::Type::requestResponseUndeclaredException) {
         return false;
       }
-      // return true iff expected exception message is a substring of actual
-      // exception message
-      return actual.requestResponseUndeclaredException_ref()
-                 ->exceptionMessage()
-                 ->find(*expected.requestResponseUndeclaredException_ref()
-                             ->exceptionMessage()) != std::string::npos;
+      return stringContains(
+          *actual.requestResponseUndeclaredException_ref()->exceptionMessage(),
+          *expected.requestResponseUndeclaredException_ref()
+               ->exceptionMessage());
+    case ClientTestResult::Type::streamUndeclaredException:
+      if (actual.getType() !=
+          ClientTestResult::Type::streamUndeclaredException) {
+        return false;
+      }
+      return stringContains(
+          *actual.streamUndeclaredException_ref()->exceptionMessage(),
+          *expected.streamUndeclaredException_ref()->exceptionMessage());
     default:
       return actual == expected;
   }

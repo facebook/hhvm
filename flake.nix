@@ -87,9 +87,9 @@
             # to change the derivation hash changes due to different AWS_SESSION_TOKEN
             # values.
             preConfigure = ''
-              if [[ -f ${lib.strings.escapeShellArg setupCompilerCache} ]]
+              if [[ -f ${pkgs.lib.strings.escapeShellArg setupCompilerCache} ]]
               then
-                . ${lib.strings.escapeShellArg setupCompilerCache}
+                . ${pkgs.lib.strings.escapeShellArg setupCompilerCache}
               fi
             '';
           });

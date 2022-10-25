@@ -75,7 +75,9 @@ class McBucketRoute {
     if (bucketId < bucketizeUntil_) {
       if (auto* ctx = fiber_local<MemcacheRouterInfo>::getTraverseCtx()) {
         ctx->recordBucketizationData(
-            req.key_ref()->fullKey().str(), bucketId, bucketizationKeyspace_);
+            req.key_ref()->keyWithoutRoute().str(),
+            bucketId,
+            bucketizationKeyspace_);
       }
       return fiber_local<MemcacheRouterInfo>::runWithLocals(
           [this, &req, &t, bucketId]() {
@@ -102,7 +104,9 @@ class McBucketRoute {
 
     if (UNLIKELY(ctx->recordingBucketData())) {
       ctx->recordBucketizationData(
-          req.key_ref()->fullKey().str(), bucketId, bucketizationKeyspace_);
+          req.key_ref()->keyWithoutRoute().str(),
+          bucketId,
+          bucketizationKeyspace_);
       return createReply<McDeleteRequest>(DefaultReply, req);
     }
     return routeImpl(req, bucketId);

@@ -392,31 +392,11 @@ let[@warning "-21"] oldify_defs (* -21 for dune stubs *)
 
 let[@warning "-21"] remove_old_defs
     (ctx : Provider_context.t)
-    { FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }
+    ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules } as names)
     (elems : Decl_class_elements.t SMap.t) : unit =
   match Provider_backend.get () with
   | Provider_backend.Rust_provider_backend be ->
-    let open Rust_provider_backend.Decl in
-    remove_old_funs_batch be (SSet.elements n_funs);
-    remove_old_shallow_classes_batch be (SSet.elements n_classes);
-    remove_old_folded_classes_batch be (SSet.elements n_classes);
-    remove_old_typedefs_batch be (SSet.elements n_types);
-    remove_old_gconsts_batch be (SSet.elements n_consts);
-    remove_old_modules_batch be (SSet.elements n_modules);
-    SMap.iter
-      ~f:(fun cls es ->
-        let open Decl_heap in
-        let open Decl_class_elements in
-        remove_old_constructors_batch be [cls];
-        remove_old_props_batch be (Props.KeySet.elements es.props);
-        remove_old_static_props_batch be (StaticProps.KeySet.elements es.sprops);
-        remove_old_methods_batch be (Methods.KeySet.elements es.meths);
-        remove_old_static_methods_batch
-          be
-          (StaticMethods.KeySet.elements es.smeths);
-        ())
-      elems;
-    ()
+    Rust_provider_backend.Decl.remove_old_defs be (names, elems)
   | _ ->
     Decl_heap.Funs.remove_old_batch n_funs;
     Decl_class_elements.remove_old_all elems;

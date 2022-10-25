@@ -79,28 +79,6 @@ module Decl = struct
 
   let get_old_constructors_batch _ _ = failwith "unimplemented"
 
-  let remove_old_funs_batch _ _ = failwith "unimplemented"
-
-  let remove_old_shallow_classes_batch _ _ = failwith "unimplemented"
-
-  let remove_old_folded_classes_batch _ _ = failwith "unimplemented"
-
-  let remove_old_typedefs_batch _ _ = failwith "unimplemented"
-
-  let remove_old_gconsts_batch _ _ = failwith "unimplemented"
-
-  let remove_old_modules_batch _ _ = failwith "unimplemented"
-
-  let remove_old_props_batch _ _ = failwith "unimplemented"
-
-  let remove_old_static_props_batch _ _ = failwith "unimplemented"
-
-  let remove_old_methods_batch _ _ = failwith "unimplemented"
-
-  let remove_old_static_methods_batch _ _ = failwith "unimplemented"
-
-  let remove_old_constructors_batch _ _ = failwith "unimplemented"
-
   let oldify_funs_batch _ _ = failwith "unimplemented"
 
   let oldify_shallow_classes_batch _ _ = failwith "unimplemented"
@@ -122,6 +100,8 @@ module Decl = struct
   let oldify_static_methods_batch _ _ = failwith "unimplemented"
 
   let oldify_constructors_batch _ _ = failwith "unimplemented"
+
+  let remove_old_defs _ _ = failwith "unimplemented"
 end
 
 module File = struct

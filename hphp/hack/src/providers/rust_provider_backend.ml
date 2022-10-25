@@ -471,9 +471,34 @@ module Decl = struct
     set_decl_store t;
     get_old_funs_batch_ffi t keys
 
-  let remove_old_funs_batch t keys =
+  let remove_old_defs
+      t ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }, elems) =
     set_decl_store t;
-    Funs.remove_old_batch t keys
+    Funs.remove_old_batch t (SSet.elements n_funs);
+    ShallowClasses.remove_old_batch t (SSet.elements n_classes);
+    FoldedClasses.remove_old_batch t (SSet.elements n_classes);
+    Typedefs.remove_old_batch t (SSet.elements n_types);
+    GConsts.remove_old_batch t (SSet.elements n_consts);
+    Modules.remove_old_batch t (SSet.elements n_modules);
+    SMap.iter
+      (fun cls es ->
+        Constructors.remove_old_batch t [cls];
+        Props.remove_old_batch
+          t
+          (Decl_heap.Props.KeySet.elements es.Decl_class_elements.props);
+        StaticProps.remove_old_batch
+          t
+          (Decl_heap.StaticProps.KeySet.elements es.Decl_class_elements.sprops);
+        Methods.remove_old_batch
+          t
+          (Decl_heap.Methods.KeySet.elements es.Decl_class_elements.meths);
+        StaticMethods.remove_old_batch
+          t
+          (Decl_heap.StaticMethods.KeySet.elements
+             es.Decl_class_elements.smeths);
+        ())
+      elems;
+    ()
 
   let remove_shallow_classes_batch t keys =
     set_decl_store t;
@@ -487,10 +512,6 @@ module Decl = struct
     set_decl_store t;
     get_old_shallow_classes_batch_ffi t keys
 
-  let remove_old_shallow_classes_batch t keys =
-    set_decl_store t;
-    ShallowClasses.remove_old_batch t keys
-
   let remove_folded_classes_batch t keys =
     set_decl_store t;
     FoldedClasses.remove_batch t keys
@@ -498,10 +519,6 @@ module Decl = struct
   let oldify_folded_classes_batch t keys =
     set_decl_store t;
     FoldedClasses.oldify_batch t keys
-
-  let remove_old_folded_classes_batch t keys =
-    set_decl_store t;
-    FoldedClasses.remove_old_batch t keys
 
   let remove_typedefs_batch t keys =
     set_decl_store t;
@@ -515,10 +532,6 @@ module Decl = struct
     set_decl_store t;
     get_old_typedefs_batch_ffi t keys
 
-  let remove_old_typedefs_batch t keys =
-    set_decl_store t;
-    Typedefs.remove_old_batch t keys
-
   let remove_gconsts_batch t keys =
     set_decl_store t;
     GConsts.remove_batch t keys
@@ -530,10 +543,6 @@ module Decl = struct
   let get_old_gconsts_batch t keys =
     set_decl_store t;
     get_old_gconsts_batch_ffi t keys
-
-  let remove_old_gconsts_batch t keys =
-    set_decl_store t;
-    GConsts.remove_old_batch t keys
 
   let remove_modules_batch t keys =
     set_decl_store t;
@@ -547,10 +556,6 @@ module Decl = struct
     set_decl_store t;
     get_old_modules_batch_ffi t keys
 
-  let remove_old_modules_batch t keys =
-    set_decl_store t;
-    Modules.remove_old_batch t keys
-
   let remove_props_batch t keys =
     set_decl_store t;
     Props.remove_batch t keys
@@ -558,10 +563,6 @@ module Decl = struct
   let oldify_props_batch t keys =
     set_decl_store t;
     Props.oldify_batch t keys
-
-  let remove_old_props_batch t keys =
-    set_decl_store t;
-    Props.remove_old_batch t keys
 
   let remove_static_props_batch t keys =
     set_decl_store t;
@@ -571,10 +572,6 @@ module Decl = struct
     set_decl_store t;
     StaticProps.oldify_batch t keys
 
-  let remove_old_static_props_batch t keys =
-    set_decl_store t;
-    StaticProps.remove_old_batch t keys
-
   let remove_methods_batch t keys =
     set_decl_store t;
     Methods.remove_batch t keys
@@ -582,10 +579,6 @@ module Decl = struct
   let oldify_methods_batch t keys =
     set_decl_store t;
     Methods.oldify_batch t keys
-
-  let remove_old_methods_batch t keys =
-    set_decl_store t;
-    Methods.remove_old_batch t keys
 
   let remove_static_methods_batch t keys =
     set_decl_store t;
@@ -595,10 +588,6 @@ module Decl = struct
     set_decl_store t;
     StaticMethods.oldify_batch t keys
 
-  let remove_old_static_methods_batch t keys =
-    set_decl_store t;
-    StaticMethods.remove_old_batch t keys
-
   let remove_constructors_batch t keys =
     set_decl_store t;
     Constructors.remove_batch t keys
@@ -606,10 +595,6 @@ module Decl = struct
   let oldify_constructors_batch t keys =
     set_decl_store t;
     Constructors.oldify_batch t keys
-
-  let remove_old_constructors_batch t keys =
-    set_decl_store t;
-    Constructors.remove_old_batch t keys
 
   external declare_folded_class : t -> string -> unit
     = "hh_rust_provider_backend_declare_folded_class"

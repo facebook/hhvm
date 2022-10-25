@@ -198,6 +198,41 @@ cdef void getNextGenerator_PubSubStreamingService_servicethrows(object generator
             __promise
         )
     )
+async def runGenerator_PubSubStreamingService_servicethrows2(object generator, Promise_cint32_t_Stream promise):
+    try:
+        item = await generator.asend(None)
+    except StopAsyncIteration:
+        promise.cPromise.setValue(optional[cint32_t]())
+    except __ApplicationError as ex:
+        # If the handler raised an ApplicationError convert it to a C++ one
+        promise.cPromise.setException(cTApplicationException(
+            ex.type.value, ex.message.encode('UTF-8')
+        ))
+    except Exception as ex:
+        print(
+            "Unexpected error in servicethrows2:",
+            file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
+        ))
+    except asyncio.CancelledError as ex:
+        print("Coroutine was cancelled in service handler servicethrows2:", file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
+        ))
+    else:
+        promise.cPromise.setValue(optional[cint32_t](<cint32_t?>item))
+
+cdef void getNextGenerator_PubSubStreamingService_servicethrows2(object generator, cFollyPromise[optional[cint32_t]] cPromise):
+    cdef Promise_cint32_t_Stream __promise = Promise_cint32_t_Stream._fbthrift_create(cmove(cPromise))
+    asyncio.get_event_loop().create_task(
+        runGenerator_PubSubStreamingService_servicethrows2(
+            generator,
+            __promise
+        )
+    )
 async def runGenerator_PubSubStreamingService_boththrows(object generator, Promise_cint32_t_Stream promise):
     try:
         item = await generator.asend(None)
@@ -489,6 +524,17 @@ cdef class PubSubStreamingServiceInterface(
 
         return (ServerStream_cint32_t._fbthrift_create(cmove(deref(streams).first)), ServerPublisher_cint32_t._fbthrift_create(cmove(deref(streams).second)))
 
+    async def servicethrows2(
+            self,
+            foo):
+        raise NotImplementedError("async def servicethrows2 is not implemented")
+
+    @staticmethod
+    def createPublisher_servicethrows2(callback=None):
+        cdef unique_ptr[pair[cServerStream[cint32_t], cServerStreamPublisher[cint32_t]]] streams = make_unique[pair[cServerStream[cint32_t], cServerStreamPublisher[cint32_t]]](cServerStream[cint32_t].createPublisher(pythonFuncToCppFunc(callback)))
+
+        return (ServerStream_cint32_t._fbthrift_create(cmove(deref(streams).first)), ServerPublisher_cint32_t._fbthrift_create(cmove(deref(streams).second)))
+
     async def boththrows(
             self,
             foo):
@@ -612,6 +658,24 @@ cdef api void call_cy_PubSubStreamingService_servicethrows(
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
         PubSubStreamingService_servicethrows_coro(
+            self,
+            __promise,
+            arg_foo
+        )
+    )
+    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+cdef api void call_cy_PubSubStreamingService_servicethrows2(
+    object self,
+    Cpp2RequestContext* ctx,
+    cFollyPromise[cServerStream[cint32_t]] cPromise,
+    cint32_t foo
+):
+    cdef Promise_cServerStream__cint32_t __promise = Promise_cServerStream__cint32_t._fbthrift_create(cmove(cPromise))
+    arg_foo = foo
+    __context = RequestContext._fbthrift_create(ctx)
+    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    asyncio.get_event_loop().create_task(
+        PubSubStreamingService_servicethrows2_coro(
             self,
             __promise,
             arg_foo
@@ -832,6 +896,44 @@ async def PubSubStreamingService_servicethrows_coro(
         ))
     except asyncio.CancelledError as ex:
         print("Coroutine was cancelled in service handler servicethrows:", file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
+        ))
+    else:
+        promise.cPromise.setValue(cmove(deref((<ServerStream_cint32_t?>result).cStream)))
+
+async def PubSubStreamingService_servicethrows2_coro(
+    object self,
+    Promise_cServerStream__cint32_t promise,
+    foo
+):
+    try:
+        result = self.servicethrows2(
+                    foo)
+        if not isinstance(result, (ServerStream, AsyncIterator)):
+            result = await result
+        if isinstance(result, AsyncIterator):
+            result = ServerStream_cint32_t._fbthrift_create(cmove(createAsyncIteratorFromPyIterator[cint32_t](result, get_executor(), &getNextGenerator_PubSubStreamingService_servicethrows2)))
+    except _module_types.FooEx as ex:
+        promise.cPromise.setException(deref((<_module_types.FooEx> ex)._cpp_obj))
+    except _module_types.FooEx2 as ex:
+        promise.cPromise.setException(deref((<_module_types.FooEx2> ex)._cpp_obj))
+    except __ApplicationError as ex:
+        # If the handler raised an ApplicationError convert it to a C++ one
+        promise.cPromise.setException(cTApplicationException(
+            ex.type.value, ex.message.encode('UTF-8')
+        ))
+    except Exception as ex:
+        print(
+            "Unexpected error in service handler servicethrows2:",
+            file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
+        ))
+    except asyncio.CancelledError as ex:
+        print("Coroutine was cancelled in service handler servicethrows2:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')

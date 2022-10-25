@@ -48,5 +48,16 @@ THRIFT_DATA_SECTION const std::array<folly::StringPiece, 0> TStructDataStorage<:
 THRIFT_DATA_SECTION const std::array<int, 0> TStructDataStorage<::cpp2::FooEx>::isset_indexes = {{
 }};
 
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::FooEx2>::fields_names = {{
+}};
+THRIFT_DATA_SECTION const std::array<int16_t, 0> TStructDataStorage<::cpp2::FooEx2>::fields_ids = {{
+}};
+THRIFT_DATA_SECTION const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::FooEx2>::fields_types = {{
+}};
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::FooEx2>::storage_names = {{
+}};
+THRIFT_DATA_SECTION const std::array<int, 0> TStructDataStorage<::cpp2::FooEx2>::isset_indexes = {{
+}};
+
 } // namespace thrift
 } // namespace apache

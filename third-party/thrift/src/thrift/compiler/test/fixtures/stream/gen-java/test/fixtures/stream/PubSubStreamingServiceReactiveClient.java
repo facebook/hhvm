@@ -42,6 +42,11 @@ public class PubSubStreamingServiceReactiveClient
   private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _servicethrows_EXCEPTION_READERS = new HashMap<>();
   private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _servicethrows_STREAM_EXCEPTION_READERS = java.util.Collections.emptyMap();
   private static final com.facebook.thrift.payload.Reader _servicethrows_EXCEPTION_READER0 = Readers.wrap(test.fixtures.stream.FooEx.asReader());
+  private static final TField _servicethrows2_FOO_FIELD_DESC = new TField("foo", TType.I32, (short)1);
+  private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _servicethrows2_EXCEPTION_READERS = new HashMap<>();
+  private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _servicethrows2_STREAM_EXCEPTION_READERS = java.util.Collections.emptyMap();
+  private static final com.facebook.thrift.payload.Reader _servicethrows2_EXCEPTION_READER0 = Readers.wrap(test.fixtures.stream.FooEx.asReader());
+  private static final com.facebook.thrift.payload.Reader _servicethrows2_EXCEPTION_READER1 = Readers.wrap(test.fixtures.stream.FooEx2.asReader());
   private static final TField _boththrows_FOO_FIELD_DESC = new TField("foo", TType.I32, (short)1);
   private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _boththrows_EXCEPTION_READERS = new HashMap<>();
   private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _boththrows_STREAM_EXCEPTION_READERS = new HashMap<>();
@@ -68,6 +73,8 @@ public class PubSubStreamingServiceReactiveClient
   static {
     _streamthrows_STREAM_EXCEPTION_READERS.put((short)1, _streamthrows_STREAM_EXCEPTION_READER0);
     _servicethrows_EXCEPTION_READERS.put((short)1, _servicethrows_EXCEPTION_READER0);
+    _servicethrows2_EXCEPTION_READERS.put((short)1, _servicethrows2_EXCEPTION_READER0);
+    _servicethrows2_EXCEPTION_READERS.put((short)2, _servicethrows2_EXCEPTION_READER1);
     _boththrows_EXCEPTION_READERS.put((short)1, _boththrows_EXCEPTION_READER0);
     _boththrows_STREAM_EXCEPTION_READERS.put((short)1, _boththrows_STREAM_EXCEPTION_READER0);
     _responseandstreamstreamthrows_STREAM_EXCEPTION_READERS.put((short)1, _responseandstreamstreamthrows_STREAM_EXCEPTION_READER0);
@@ -291,6 +298,67 @@ public class PubSubStreamingServiceReactiveClient
   @java.lang.Override
   public reactor.core.publisher.Flux<Integer> servicethrows(final int foo) {
     return servicethrows(foo,  com.facebook.thrift.client.RpcOptions.EMPTY);
+  }
+
+  private com.facebook.thrift.payload.Writer _createservicethrows2Writer(final int foo) {
+    return oprot -> {
+      try {
+        {
+          oprot.writeFieldBegin(_servicethrows2_FOO_FIELD_DESC);
+
+          int _iter0 = foo;
+
+          oprot.writeI32(foo);
+          oprot.writeFieldEnd();
+        }
+
+
+      } catch (Throwable _e) {
+        throw reactor.core.Exceptions.propagate(_e);
+      }
+    };
+  }
+
+  private static final com.facebook.thrift.payload.Reader _servicethrows2_READER = Readers.i32Reader();
+
+
+  @java.lang.Override
+  public reactor.core.publisher.Flux<com.facebook.thrift.client.ResponseWrapper<Integer>> servicethrows2Wrapper(final int foo,  final com.facebook.thrift.client.RpcOptions rpcOptions) {
+    return _rpcClient
+      .flatMapMany(_rpc -> {
+        org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
+                .setName("servicethrows2")
+                .setKind(org.apache.thrift.RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE)
+                .setOtherMetadata(getHeaders(rpcOptions))
+                .setProtocol(_protocolId)
+                .build();
+
+            com.facebook.thrift.payload.ClientRequestPayload<Integer> _crp =
+                com.facebook.thrift.payload.ClientRequestPayload.create(
+                    "PubSubStreamingService",
+                    _createservicethrows2Writer(foo),
+                    _servicethrows2_READER,
+                    _servicethrows2_EXCEPTION_READERS,
+                    _servicethrows2_STREAM_EXCEPTION_READERS,
+                    _metadata,
+                    java.util.Collections.emptyMap());
+
+            return _rpc
+                .singleRequestStreamingResponse(_crp, rpcOptions)
+                .doOnNext(_p -> {if(_p.getException() != null) throw reactor.core.Exceptions.propagate(_p.getException());})
+                .filter((_p) -> ((com.facebook.thrift.model.StreamResponse)_p.getData()).isSetData())
+                .map(_p -> ResponseWrapper.create(((com.facebook.thrift.model.StreamResponse<Void, Integer>)_p.getData()).getData(), _p.getHeaders(), _p.getBinaryHeaders()));
+      });
+  }
+
+  @java.lang.Override
+  public reactor.core.publisher.Flux<Integer> servicethrows2(final int foo,  final com.facebook.thrift.client.RpcOptions rpcOptions) {
+      return servicethrows2Wrapper(foo,  rpcOptions).map(_p -> _p.getData());
+  }
+
+  @java.lang.Override
+  public reactor.core.publisher.Flux<Integer> servicethrows2(final int foo) {
+    return servicethrows2(foo,  com.facebook.thrift.client.RpcOptions.EMPTY);
   }
 
   private com.facebook.thrift.payload.Writer _createboththrowsWriter(final int foo) {

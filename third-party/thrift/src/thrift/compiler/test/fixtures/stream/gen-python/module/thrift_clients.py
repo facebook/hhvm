@@ -100,6 +100,28 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                 raise _fbthrift_resp.e
             return _fbthrift_stream
     
+        async def servicethrows2(
+            self,
+            foo: int,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> _typing.AsyncGenerator[int, None]:
+            _fbthrift_resp = await self._send_request(
+                "PubSubStreamingService",
+                "servicethrows2",
+                module.thrift_types._fbthrift_PubSubStreamingService_servicethrows2_args(
+                    foo=foo,),
+                (module.thrift_types._fbthrift_PubSubStreamingService_servicethrows2_result, module.thrift_types._fbthrift_PubSubStreamingService_servicethrows2_result_stream),
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                rpc_options=rpc_options,
+            )
+            _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
+            if _fbthrift_resp.e1 is not None:
+                raise _fbthrift_resp.e1
+            if _fbthrift_resp.e2 is not None:
+                raise _fbthrift_resp.e2
+            return _fbthrift_stream
+    
         async def boththrows(
             self,
             foo: int,

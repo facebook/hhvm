@@ -76,6 +76,38 @@ class FooEx(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
         import thrift.util.converter
         return thrift.util.converter.to_py_struct(py_deprecated_types.FooEx, self)
 
+
+class FooEx2(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_SPEC = (
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.FooEx2"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return None
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__exception_FooEx2()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.FooEx2, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.FooEx2, self)
+
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
 
@@ -84,10 +116,13 @@ def _fbthrift_metadata__exception_FooStreamEx():
     return module.thrift_metadata.gen_metadata_exception_FooStreamEx()
 def _fbthrift_metadata__exception_FooEx():
     return module.thrift_metadata.gen_metadata_exception_FooEx()
+def _fbthrift_metadata__exception_FooEx2():
+    return module.thrift_metadata.gen_metadata_exception_FooEx2()
 
 _fbthrift_all_structs = [
     FooStreamEx,
     FooEx,
+    FooEx2,
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
@@ -198,6 +233,53 @@ class _fbthrift_PubSubStreamingService_servicethrows_result(metaclass=_fbthrift_
 
 
 class _fbthrift_PubSubStreamingService_servicethrows_result_stream(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            _fbthrift_python_types.typeinfo_i32,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+
+class _fbthrift_PubSubStreamingService_servicethrows2_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "foo",  # name
+            _fbthrift_python_types.typeinfo_i32,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+
+class _fbthrift_PubSubStreamingService_servicethrows2_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "e1",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(FooEx),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "e2",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(FooEx2),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+
+class _fbthrift_PubSubStreamingService_servicethrows2_result_stream(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         (
             0,  # id
@@ -456,6 +538,9 @@ _fbthrift_python_types.fill_specs(
     _fbthrift_PubSubStreamingService_servicethrows_args,
     _fbthrift_PubSubStreamingService_servicethrows_result,
     _fbthrift_PubSubStreamingService_servicethrows_result_stream,
+    _fbthrift_PubSubStreamingService_servicethrows2_args,
+    _fbthrift_PubSubStreamingService_servicethrows2_result,
+    _fbthrift_PubSubStreamingService_servicethrows2_result_stream,
     _fbthrift_PubSubStreamingService_boththrows_args,
     _fbthrift_PubSubStreamingService_boththrows_result,
     _fbthrift_PubSubStreamingService_boththrows_result_stream,

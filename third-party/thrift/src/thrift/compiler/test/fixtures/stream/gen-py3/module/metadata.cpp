@@ -13,6 +13,7 @@ namespace cpp2 {
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
   ::apache::thrift::detail::md::ExceptionMetadata<FooStreamEx>::gen(metadata);
   ::apache::thrift::detail::md::ExceptionMetadata<FooEx>::gen(metadata);
+  ::apache::thrift::detail::md::ExceptionMetadata<FooEx2>::gen(metadata);
   ::apache::thrift::detail::md::ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>>::gen(response);
   return metadata;
 }

@@ -116,6 +116,16 @@ public interface PubSubStreamingService extends java.io.Closeable, com.facebook.
             throw new UnsupportedOperationException();
         }
 
+        reactor.core.publisher.Flux<Integer> servicethrows2(final int foo);
+
+        default reactor.core.publisher.Flux<Integer> servicethrows2(final int foo, RpcOptions rpcOptions) {
+            throw new UnsupportedOperationException();
+        }
+
+        default reactor.core.publisher.Flux<ResponseWrapper<Integer>> servicethrows2Wrapper(final int foo, RpcOptions rpcOptions) {
+            throw new UnsupportedOperationException();
+        }
+
         reactor.core.publisher.Flux<Integer> boththrows(final int foo);
 
         default reactor.core.publisher.Flux<Integer> boththrows(final int foo, RpcOptions rpcOptions) {

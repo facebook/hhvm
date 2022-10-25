@@ -93,6 +93,28 @@ cdef __InterfaceSpec get_reflection__PubSubStreamingService(bint for_clients):
     )
     spec.add_method(
         __MethodSpec._fbthrift_create(
+            name="servicethrows2",
+            arguments=(
+                __ArgumentSpec._fbthrift_create(
+                    name="foo",
+                    type=int,
+                    kind=__NumberType.I32,
+                    annotations={
+                    },
+                ),
+            ),
+            result=_module_types.ClientBufferedStream__i32 if for_clients else _module_types.ServerStream__i32,
+            result_kind=__NumberType.NOT_A_NUMBER,
+            exceptions=(
+                _module_types.FooEx,
+                _module_types.FooEx2,
+            ),
+            annotations={
+            },
+        )
+    )
+    spec.add_method(
+        __MethodSpec._fbthrift_create(
             name="boththrows",
             arguments=(
                 __ArgumentSpec._fbthrift_create(

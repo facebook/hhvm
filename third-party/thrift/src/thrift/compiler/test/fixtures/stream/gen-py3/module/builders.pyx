@@ -16,3 +16,9 @@ cdef class FooEx_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self):
         pass
 
+cdef class FooEx2_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _module_types.FooEx2
+
+    def __iter__(self):
+        pass
+

@@ -16,7 +16,7 @@ import sys
 if sys.version_info[0] >= 3:
   long = int
 
-from .ttypes import UTF8STRINGS, FooStreamEx, FooEx
+from .ttypes import UTF8STRINGS, FooStreamEx, FooEx, FooEx2
 from thrift.Thrift import TProcessor
 import pprint
 import warnings

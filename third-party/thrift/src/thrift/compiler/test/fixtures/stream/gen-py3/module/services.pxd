@@ -13,6 +13,7 @@ cdef class PubSubStreamingServiceInterface(ServiceInterface):
     cdef bint _for_cython_returnstream
     cdef bint _for_cython_streamthrows
     cdef bint _for_cython_servicethrows
+    cdef bint _for_cython_servicethrows2
     cdef bint _for_cython_boththrows
     cdef bint _for_cython_responseandstreamstreamthrows
     cdef bint _for_cython_responseandstreamservicethrows

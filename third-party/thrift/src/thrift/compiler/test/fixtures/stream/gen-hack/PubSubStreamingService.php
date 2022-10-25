@@ -50,6 +50,15 @@ interface PubSubStreamingServiceAsyncClientIf extends PubSubStreamingServiceAsyn
 
   /**
    * Original thrift definition:-
+   * void, stream<i32>
+   *   servicethrows2(1: i32 foo)
+   *   throws (1: FooEx e1,
+   *           2: FooEx2 e2);
+   */
+  public function servicethrows2(int $foo): Awaitable<\ResponseAndClientStream<null, int>>;
+
+  /**
+   * Original thrift definition:-
    * void, stream<i32, throws (1: FooStreamEx e)>
    *   boththrows(1: i32 foo)
    *   throws (1: FooEx e);
@@ -115,6 +124,15 @@ interface PubSubStreamingServiceClientIf extends \IThriftSyncIf {
    *   throws (1: FooEx e);
    */
   public function servicethrows(int $foo): Awaitable<\ResponseAndClientStream<null, int>>;
+
+  /**
+   * Original thrift definition:-
+   * void, stream<i32>
+   *   servicethrows2(1: i32 foo)
+   *   throws (1: FooEx e1,
+   *           2: FooEx2 e2);
+   */
+  public function servicethrows2(int $foo): Awaitable<\ResponseAndClientStream<null, int>>;
 
   /**
    * Original thrift definition:-
@@ -226,6 +244,27 @@ class PubSubStreamingServiceAsyncClient extends \ThriftClientBase implements Pub
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "servicethrows", $args);
     $currentseqid = $this->sendImplHelper($args, "servicethrows", false);
     return await $this->genAwaitStreamResponse(PubSubStreamingService_servicethrows_FirstResponse::class, PubSubStreamingService_servicethrows_StreamResponse::class, "servicethrows", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void, stream<i32>
+   *   servicethrows2(1: i32 foo)
+   *   throws (1: FooEx e1,
+   *           2: FooEx2 e2);
+   */
+  public async function servicethrows2(int $foo): Awaitable<\ResponseAndClientStream<null, int>> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = PubSubStreamingService_servicethrows2_args::fromShape(shape(
+      'foo' => $foo,
+    ));
+    await $this->asyncHandler_->genBefore("PubSubStreamingService", "servicethrows2", $args);
+    $currentseqid = $this->sendImplHelper($args, "servicethrows2", false);
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_servicethrows2_FirstResponse::class, PubSubStreamingService_servicethrows2_StreamResponse::class, "servicethrows2", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -391,6 +430,27 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
     await $this->asyncHandler_->genBefore("PubSubStreamingService", "servicethrows", $args);
     $currentseqid = $this->sendImplHelper($args, "servicethrows", false);
     return await $this->genAwaitStreamResponse(PubSubStreamingService_servicethrows_FirstResponse::class, PubSubStreamingService_servicethrows_StreamResponse::class, "servicethrows", true, $currentseqid, $rpc_options);
+  }
+
+  /**
+   * Original thrift definition:-
+   * void, stream<i32>
+   *   servicethrows2(1: i32 foo)
+   *   throws (1: FooEx e1,
+   *           2: FooEx2 e2);
+   */
+  public async function servicethrows2(int $foo): Awaitable<\ResponseAndClientStream<null, int>> {
+    $hh_frame_metadata = $this->getHHFrameMetadata();
+    if ($hh_frame_metadata !== null) {
+      \HH\set_frame_metadata($hh_frame_metadata);
+    }
+    $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
+    $args = PubSubStreamingService_servicethrows2_args::fromShape(shape(
+      'foo' => $foo,
+    ));
+    await $this->asyncHandler_->genBefore("PubSubStreamingService", "servicethrows2", $args);
+    $currentseqid = $this->sendImplHelper($args, "servicethrows2", false);
+    return await $this->genAwaitStreamResponse(PubSubStreamingService_servicethrows2_FirstResponse::class, PubSubStreamingService_servicethrows2_StreamResponse::class, "servicethrows2", true, $currentseqid, $rpc_options);
   }
 
   /**
@@ -1210,6 +1270,278 @@ class PubSubStreamingService_servicethrows_FirstResponse extends \ThriftSyncStru
   public function checkForException(): ?\TException {
     if ($this->e !== null) {
       return $this->e;
+    }
+    return null;
+  }
+}
+
+class PubSubStreamingService_servicethrows2_args implements \IThriftSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'foo',
+      'type' => \TType::I32,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'foo' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'foo' => ?int,
+  );
+
+  const int STRUCTURAL_ID = 4302560019326481254;
+  public int $foo;
+
+  public function __construct(?int $foo = null)[] {
+    $this->foo = $foo ?? 0;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'foo'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'PubSubStreamingService_servicethrows2_args';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.servicethrows2_args",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                )
+              ),
+              "name" => "foo",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+class PubSubStreamingService_servicethrows2_StreamResponse extends \ThriftSyncStructWithResult {
+  use \ThriftSerializationTrait;
+
+  const type TResult = int;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    0 => shape(
+      'var' => 'success',
+      'type' => \TType::I32,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'success' => 0,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'success' => ?this::TResult,
+  );
+
+  const int STRUCTURAL_ID = 3865318819874171525;
+  public ?this::TResult $success;
+
+  public function __construct(?this::TResult $success = null)[] {
+    $this->success = $success;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'success'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'PubSubStreamingService_servicethrows2_StreamResponse';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.PubSubStreamingService_servicethrows2_StreamResponse",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 0,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                )
+              ),
+              "name" => "success",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+class PubSubStreamingService_servicethrows2_FirstResponse extends \ThriftSyncStructWithoutResult {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'e1',
+      'type' => \TType::STRUCT,
+      'class' => FooEx::class,
+    ),
+    2 => shape(
+      'var' => 'e2',
+      'type' => \TType::STRUCT,
+      'class' => FooEx2::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'e1' => 1,
+    'e2' => 2,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'e1' => ?FooEx,
+    ?'e2' => ?FooEx2,
+  );
+
+  const int STRUCTURAL_ID = 5404057405652507927;
+  public ?FooEx $e1;
+  public ?FooEx2 $e2;
+
+  public function __construct(?FooEx $e1 = null, ?FooEx2 $e2 = null)[] {
+    $this->e1 = $e1;
+    $this->e2 = $e2;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'e1'),
+      Shapes::idx($shape, 'e2'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'PubSubStreamingService_servicethrows2_FirstResponse';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.PubSubStreamingService_servicethrows2_FirstResponse",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.FooEx",
+                    )
+                  ),
+                )
+              ),
+              "name" => "e1",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.FooEx2",
+                    )
+                  ),
+                )
+              ),
+              "name" => "e2",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function checkForException(): ?\TException {
+    if ($this->e1 !== null) {
+      return $this->e1;
+    }
+    if ($this->e2 !== null) {
+      return $this->e2;
     }
     return null;
   }
@@ -2694,6 +3026,74 @@ class PubSubStreamingServiceStaticMetadata implements \IThriftServiceStaticMetad
           ),
           tmeta_ThriftFunction::fromShape(
             shape(
+              "name" => "servicethrows2",
+              "return_type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_stream" => tmeta_ThriftStreamType::fromShape(
+                    shape(
+                      "elemType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                      "initialResponseType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_VOID_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "arguments" => vec[
+                tmeta_ThriftField::fromShape(
+                  shape(
+                    "id" => 1,
+                    "type" => tmeta_ThriftType::fromShape(
+                      shape(
+                        "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                      )
+                    ),
+                    "name" => "foo",
+                  )
+                ),
+              ],
+              "exceptions" => vec[
+                tmeta_ThriftField::fromShape(
+                  shape(
+                    "id" => 1,
+                    "type" => tmeta_ThriftType::fromShape(
+                      shape(
+                        "t_struct" => tmeta_ThriftStructType::fromShape(
+                          shape(
+                            "name" => "module.FooEx",
+                          )
+                        ),
+                      )
+                    ),
+                    "name" => "e1",
+                  )
+                ),
+                tmeta_ThriftField::fromShape(
+                  shape(
+                    "id" => 2,
+                    "type" => tmeta_ThriftType::fromShape(
+                      shape(
+                        "t_struct" => tmeta_ThriftStructType::fromShape(
+                          shape(
+                            "name" => "module.FooEx2",
+                          )
+                        ),
+                      )
+                    ),
+                    "name" => "e2",
+                  )
+                ),
+              ],
+            )
+          ),
+          tmeta_ThriftFunction::fromShape(
+            shape(
               "name" => "boththrows",
               "return_type" => tmeta_ThriftType::fromShape(
                 shape(
@@ -2960,6 +3360,7 @@ class PubSubStreamingServiceStaticMetadata implements \IThriftServiceStaticMetad
             ],
             'exceptions' => dict[
               'module.FooEx' => FooEx::getExceptionMetadata(),
+              'module.FooEx2' => FooEx2::getExceptionMetadata(),
             ],
             'services' => dict[
             ],

@@ -321,12 +321,12 @@
                         .boxed();
                     (response, Some(stream))
                 },
-                {{#function:exceptions?}}
-                {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::{{#function:exceptions}}{{field:rust_name}}{{/function:exceptions}}(exn) => {
-                    let response = {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn::{{#function:exceptions}}{{field:rust_name}}{{/function:exceptions}}(exn);
+                {{#function:exceptions}}
+                {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::{{field:rust_name}}(exn) => {
+                    let response = {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn::{{field:rust_name}}(exn);
                     (response, None)
                 },
-                {{/function:exceptions?}}
+                {{/function:exceptions}}
                 {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::ApplicationException(aexn)=> {
                     let response = {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}ResponseExn::ApplicationException(aexn);
                     (response, None)

@@ -34,6 +34,17 @@ struct VisitByFieldId<::cpp2::FooEx> {
     }
   }
 };
+
+template <>
+struct VisitByFieldId<::cpp2::FooEx2> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    default:
+      throwInvalidThriftId(fieldId, "::cpp2::FooEx2");
+    }
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

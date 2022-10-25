@@ -37,6 +37,17 @@ class FooEx(_fbthrift_python_exceptions.GeneratedError):
     def _to_py_deprecated(self) -> "module.ttypes.FooEx": ...  # type: ignore
 
 
+class FooEx2(_fbthrift_python_exceptions.GeneratedError):
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
+    def _to_python(self) -> FooEx2: ...
+    def _to_py3(self) -> "module.types.FooEx2": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.FooEx2": ...  # type: ignore
+
+
 class _fbthrift_PubSubStreamingService_returnstream_args(_fbthrift_python_types.Struct):
     i32_from: _typing.Final[int] = ...
     i32_to: _typing.Final[int] = ...
@@ -151,6 +162,50 @@ class _fbthrift_PubSubStreamingService_servicethrows_result(_fbthrift_python_typ
 
 
 class _fbthrift_PubSubStreamingService_servicethrows_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[int]):
+
+    def __init__(
+        self, *, success: _typing.Optional[int] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            int,
+        ]]]: ...
+
+
+class _fbthrift_PubSubStreamingService_servicethrows2_args(_fbthrift_python_types.Struct):
+    foo: _typing.Final[int] = ...
+
+    def __init__(
+        self, *,
+        foo: _typing.Optional[int]=...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None, int]]]: ...
+
+
+class _fbthrift_PubSubStreamingService_servicethrows2_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[None]
+    e1: _typing.Final[FooEx]
+    e2: _typing.Final[FooEx2]
+
+    def __init__(
+        self, *, success: _typing.Optional[None] = ..., e1: _typing.Optional[FooEx]=..., e2: _typing.Optional[FooEx2]=...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            None,
+            FooEx,
+            FooEx2,
+        ]]]: ...
+
+
+class _fbthrift_PubSubStreamingService_servicethrows2_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[int]):
 
     def __init__(
         self, *, success: _typing.Optional[int] = ...

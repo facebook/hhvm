@@ -311,6 +311,99 @@ class Client<::cpp2::PubSubStreamingService> : public apache::thrift::GeneratedA
   void servicethrowsT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo);
   std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> servicethrowsCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
+  virtual void servicethrows2(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
+  virtual void servicethrows2(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
+ protected:
+  void servicethrows2Impl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo, bool stealRpcOptions = false);
+ public:
+
+  virtual apache::thrift::ClientBufferedStream<::std::int32_t> sync_servicethrows2(::std::int32_t p_foo);
+  virtual apache::thrift::ClientBufferedStream<::std::int32_t> sync_servicethrows2(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
+
+  virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> semifuture_servicethrows2(::std::int32_t p_foo);
+  virtual folly::SemiFuture<apache::thrift::ClientBufferedStream<::std::int32_t>> semifuture_servicethrows2(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
+  virtual folly::SemiFuture<std::pair<apache::thrift::ClientBufferedStream<::std::int32_t>, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_servicethrows2(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo);
+
+#if FOLLY_HAS_COROUTINES
+#if __clang__
+  template <int = 0>
+  folly::coro::Task<apache::thrift::ClientBufferedStream<::std::int32_t>> co_servicethrows2(::std::int32_t p_foo) {
+    return co_servicethrows2<false>(nullptr, p_foo);
+  }
+  template <int = 0>
+  folly::coro::Task<apache::thrift::ClientBufferedStream<::std::int32_t>> co_servicethrows2(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo) {
+    return co_servicethrows2<true>(&rpcOptions, p_foo);
+  }
+#else
+  folly::coro::Task<apache::thrift::ClientBufferedStream<::std::int32_t>> co_servicethrows2(::std::int32_t p_foo) {
+    co_return co_await folly::coro::detachOnCancel(semifuture_servicethrows2(p_foo));
+  }
+  folly::coro::Task<apache::thrift::ClientBufferedStream<::std::int32_t>> co_servicethrows2(apache::thrift::RpcOptions& rpcOptions, ::std::int32_t p_foo) {
+    co_return co_await folly::coro::detachOnCancel(semifuture_servicethrows2(rpcOptions, p_foo));
+  }
+#endif
+ private:
+  template <bool hasRpcOptions>
+  folly::coro::Task<apache::thrift::ClientBufferedStream<::std::int32_t>> co_servicethrows2(apache::thrift::RpcOptions* rpcOptions, ::std::int32_t p_foo) {
+    const folly::CancellationToken& cancelToken =
+        co_await folly::coro::co_current_cancellation_token;
+    const bool cancellable = cancelToken.canBeCancelled();
+    apache::thrift::ClientReceiveState returnState;
+    apache::thrift::ClientCoroCallback<false> callback(&returnState, co_await folly::coro::co_current_executor);
+    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto [ctx, header] = servicethrows2Ctx(rpcOptions);
+    using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
+    auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
+    static apache::thrift::RpcOptions defaultRpcOptions;
+    auto wrappedCallback = apache::thrift::createStreamClientCallback(
+        apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
+      hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions.getBufferOptions());
+    if constexpr (hasRpcOptions) {
+      servicethrows2Impl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+    } else {
+      servicethrows2Impl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_foo);
+    }
+    if (cancellable) {
+      folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
+      co_await callback.co_waitUntilDone();
+    } else {
+      co_await callback.co_waitUntilDone();
+    }
+    if (returnState.isException()) {
+      co_yield folly::coro::co_error(std::move(returnState.exception()));
+    }
+    returnState.resetProtocolId(protocolId);
+    returnState.resetCtx(std::move(ctx));
+    SCOPE_EXIT {
+      if (hasRpcOptions && returnState.header()) {
+        auto* rheader = returnState.header();
+        if (!rheader->getHeaders().empty()) {
+          rpcOptions->setReadHeaders(rheader->releaseHeaders());
+        }
+        rpcOptions->setRoutingData(rheader->releaseRoutingData());
+      }
+    };
+    apache::thrift::ClientBufferedStream<::std::int32_t> _return;
+    if (auto ew = recv_wrapped_servicethrows2(_return, returnState)) {
+      co_yield folly::coro::co_error(std::move(ew));
+    }
+    co_return _return;
+  }
+ public:
+#endif // FOLLY_HAS_COROUTINES
+
+
+
+  static folly::exception_wrapper recv_wrapped_servicethrows2(apache::thrift::ClientBufferedStream<::std::int32_t>& _return, ::apache::thrift::ClientReceiveState& state);
+  static apache::thrift::ClientBufferedStream<::std::int32_t> recv_servicethrows2(::apache::thrift::ClientReceiveState& state);
+  // Mock friendly virtual instance method
+  virtual apache::thrift::ClientBufferedStream<::std::int32_t> recv_instance_servicethrows2(::apache::thrift::ClientReceiveState& state);
+  virtual folly::exception_wrapper recv_instance_wrapped_servicethrows2(apache::thrift::ClientBufferedStream<::std::int32_t>& _return, ::apache::thrift::ClientReceiveState& state);
+ private:
+  template <typename Protocol_, typename RpcOptions>
+  void servicethrows2T(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::StreamClientCallback* callback, ::std::int32_t p_foo);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> servicethrows2Ctx(apache::thrift::RpcOptions* rpcOptions);
+ public:
   virtual void boththrows(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
   virtual void boththrows(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_foo);
  protected:

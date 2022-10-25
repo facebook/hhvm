@@ -74,6 +74,15 @@ class ServiceHandler<::cpp2::PubSubStreamingService> : public apache::thrift::Se
   virtual folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> co_servicethrows(apache::thrift::RequestParams params, ::std::int32_t p_foo);
 #endif
   virtual void async_tm_servicethrows(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>> callback, ::std::int32_t p_foo);
+  virtual ::apache::thrift::ServerStream<::std::int32_t> sync_servicethrows2(::std::int32_t /*foo*/);
+  [[deprecated("Use sync_servicethrows2 instead")]] virtual ::apache::thrift::ServerStream<::std::int32_t> servicethrows2(::std::int32_t /*foo*/);
+  virtual folly::Future<::apache::thrift::ServerStream<::std::int32_t>> future_servicethrows2(::std::int32_t p_foo);
+  virtual folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>> semifuture_servicethrows2(::std::int32_t p_foo);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> co_servicethrows2(::std::int32_t p_foo);
+  virtual folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> co_servicethrows2(apache::thrift::RequestParams params, ::std::int32_t p_foo);
+#endif
+  virtual void async_tm_servicethrows2(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>> callback, ::std::int32_t p_foo);
   virtual ::apache::thrift::ServerStream<::std::int32_t> sync_boththrows(::std::int32_t /*foo*/);
   [[deprecated("Use sync_boththrows instead")]] virtual ::apache::thrift::ServerStream<::std::int32_t> boththrows(::std::int32_t /*foo*/);
   virtual folly::Future<::apache::thrift::ServerStream<::std::int32_t>> future_boththrows(::std::int32_t p_foo);
@@ -116,6 +125,7 @@ class ServiceHandler<::cpp2::PubSubStreamingService> : public apache::thrift::Se
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_returnstream{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_streamthrows{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_servicethrows{apache::thrift::detail::si::InvocationType::AsyncTm};
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_servicethrows2{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_boththrows{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_responseandstreamstreamthrows{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_responseandstreamservicethrows{apache::thrift::detail::si::InvocationType::AsyncTm};
@@ -177,6 +187,14 @@ class PubSubStreamingServiceAsyncProcessor : public ::apache::thrift::GeneratedA
   static apache::thrift::ResponseAndServerStreamFactory return_servicethrows(apache::thrift::ContextStack* ctx, folly::Executor::KeepAlive<> executor, ::apache::thrift::ServerStream<::std::int32_t>&& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_servicethrows(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_servicethrows2(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_servicethrows2(apache::thrift::ServerRequest&& serverRequest);
+  template <class ProtocolIn_, class ProtocolOut_>
+  static apache::thrift::ResponseAndServerStreamFactory return_servicethrows2(apache::thrift::ContextStack* ctx, folly::Executor::KeepAlive<> executor, ::apache::thrift::ServerStream<::std::int32_t>&& _return);
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_servicethrows2(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
   template <typename ProtocolIn_, typename ProtocolOut_>
   void setUpAndProcess_boththrows(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
   template <typename ProtocolIn_, typename ProtocolOut_>

@@ -50,6 +50,26 @@ def _fbthrift_gen_metadata_exception_FooEx(metadata_struct: _fbthrift_metadata.T
 def gen_metadata_exception_FooEx() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_exception_FooEx(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
 
+# TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
+# instead of re-generating thrift structs
+def _fbthrift_gen_metadata_exception_FooEx2(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.FooEx2"
+
+    if qualified_name in metadata_struct.exceptions:
+        return metadata_struct
+    fields = [
+    ]
+    struct_dict = dict(metadata_struct.exceptions)
+    struct_dict[qualified_name] = _fbthrift_metadata.ThriftException(name=qualified_name, fields=fields,
+        structured_annotations=[
+        ])
+    new_struct = metadata_struct(exceptions=struct_dict)
+
+
+    return new_struct
+def gen_metadata_exception_FooEx2() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_exception_FooEx2(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
 
 def gen_metadata_service_PubSubStreamingService() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_service_PubSubStreamingService(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -80,6 +100,16 @@ def _fbthrift_gen_metadata_service_PubSubStreamingService(metadata_struct: _fbth
             ]),
         ], exceptions = [
             _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.FooEx")), name="e", is_optional=False, structured_annotations=[
+            ]),
+        ], is_oneway=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftFunction(name="servicethrows2", return_type=_fbthrift_metadata.ThriftType(t_stream=_fbthrift_metadata.ThriftStreamType(elemType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE))), arguments=[
+            _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE), name="foo", is_optional=False, structured_annotations=[
+            ]),
+        ], exceptions = [
+            _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.FooEx")), name="e1", is_optional=False, structured_annotations=[
+            ]),
+            _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.FooEx2")), name="e2", is_optional=False, structured_annotations=[
             ]),
         ], is_oneway=False, structured_annotations=[
         ]),
@@ -153,6 +183,15 @@ def _fbthrift_gen_metadata_service_PubSubStreamingService(metadata_struct: _fbth
     
      # foo
     
+    new_struct = _fbthrift_gen_metadata_exception_FooEx(new_struct) # e1
+    new_struct = _fbthrift_gen_metadata_exception_FooEx2(new_struct) # e2
+    
+     # elem
+     # response  # return value
+    
+    
+     # foo
+    
     new_struct = _fbthrift_gen_metadata_exception_FooEx(new_struct) # e
     
      # elem
@@ -205,5 +244,6 @@ def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
     meta = _fbthrift_gen_metadata_exception_FooStreamEx(meta)
     meta = _fbthrift_gen_metadata_exception_FooEx(meta)
+    meta = _fbthrift_gen_metadata_exception_FooEx2(meta)
     meta = _fbthrift_gen_metadata_service_PubSubStreamingService(meta)
     return meta

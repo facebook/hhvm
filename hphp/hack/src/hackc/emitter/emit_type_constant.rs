@@ -12,6 +12,7 @@ use hhbc::TypedValue;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::TypeStructureKind;
 use naming_special_names_rust::classes;
+use naming_special_names_rust::typehints;
 use options::Options;
 use oxidized::aast;
 use oxidized::aast_defs;
@@ -287,6 +288,20 @@ fn hint_to_type_constant_list<'arena>(
                     ]);
                 }
             }
+            let hints = match &hints[..] {
+                [h] if name == typehints::POISON_MARKER => {
+                    return hint_to_type_constant_list(
+                        alloc,
+                        opts,
+                        tparams,
+                        targ_map,
+                        type_refinement_in_hint,
+                        h,
+                    );
+                }
+                [_h] if name == typehints::TANY_MARKER => <&[Hint]>::default(),
+                _ => hints,
+            };
             let (classname, s_res) = resolve_classname(alloc, tparams, name.to_owned());
             let mut r = bumpalo::vec![in alloc];
             if s_res.eq_ignore_ascii_case("tuple") || s_res.eq_ignore_ascii_case("shape") {

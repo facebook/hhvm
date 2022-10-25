@@ -227,6 +227,21 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     when String.equal x Naming_special_names.FB.cIncorrectType
          && Env.is_typedef env x ->
     localize ~ety_env env (mk (get_reason dty, Tlike arg))
+  | Tapply ((_, x), [arg])
+    when String.equal x Naming_special_names.HH.FIXME.tTanyMarker ->
+    if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
+      localize ~ety_env env arg
+    else
+      ((env, None), mk (r, Typing_utils.tany env))
+  | Tapply ((_, x), [arg])
+    when String.equal x Naming_special_names.HH.FIXME.tPoisonMarker ->
+    let decl_ty =
+      if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
+        mk (get_reason dty, Tlike arg)
+      else
+        arg
+    in
+    localize ~ety_env env decl_ty
   | Tapply (((_p, cid) as cls), argl) ->
     begin
       match Env.get_class_or_typedef env cid with

@@ -46,3 +46,8 @@ function UNSAFE_CAST<<<__Explicit>> Tin, <<__Explicit>> Tout>(Tin $t, ?\HH\Forma
  * ```
  */
 function UNSAFE_NONNULL_CAST<T as nonnull>(?T $t, ?\HH\FormatString<nothing> $msg = null)[]: T;
+
+/* Acts as Tany under current semantics, and T under sound dynamic */
+type TANY_MARKER<T> = T;
+/* Acts as T under current semantics, and ~T under sound dynamic */
+type POISON_MARKER<T> = T;

@@ -661,6 +661,9 @@ pub mod typehints {
 
     pub const HH_SUPPORTDYN: &str = "\\HH\\supportdyn";
 
+    pub const TANY_MARKER: &str = "\\HH\\FIXME\\TANY_MARKER";
+    pub const POISON_MARKER: &str = "\\HH\\FIXME\\POISON_MARKER";
+
     pub const WILDCARD: &str = "_";
 
     lazy_static! {

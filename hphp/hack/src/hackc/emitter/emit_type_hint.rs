@@ -285,6 +285,12 @@ fn hint_to_type_constraint<'arena>(
                         _ => hint_to_type_constraint(alloc, kind, tparams, false, &hs[0]),
                     };
                 }
+                [h] if s == typehints::POISON_MARKER => {
+                    return hint_to_type_constraint(alloc, kind, tparams, false, h);
+                }
+                [_h] if s == typehints::TANY_MARKER => {
+                    return Ok(Constraint::default());
+                }
                 _ => {}
             };
             type_application_helper(alloc, tparams, kind, s)?

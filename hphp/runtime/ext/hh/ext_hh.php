@@ -571,3 +571,7 @@ function reflection_class_is_interface(
 
 
 }
+
+namespace HH\FIXME {
+  type TANY_MARKER<T> = T;
+}

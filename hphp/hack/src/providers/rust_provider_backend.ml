@@ -459,10 +459,6 @@ module Decl = struct
     set_decl_store t;
     FoldedClasses.get t
 
-  let get_old_funs_batch t keys =
-    set_decl_store t;
-    get_old_funs_batch_ffi t keys
-
   let oldify_defs
       t ({ FileInfo.n_funs; n_classes; n_types; n_consts; n_modules }, elems) =
     set_decl_store t;
@@ -554,17 +550,12 @@ module Decl = struct
     set_decl_store t;
     get_old_shallow_classes_batch_ffi t keys
 
-  let get_old_typedefs_batch t keys =
+  let get_old_defs t { FileInfo.n_funs; n_types; n_consts; n_modules; _ } =
     set_decl_store t;
-    get_old_typedefs_batch_ffi t keys
-
-  let get_old_gconsts_batch t keys =
-    set_decl_store t;
-    get_old_gconsts_batch_ffi t keys
-
-  let get_old_modules_batch t keys =
-    set_decl_store t;
-    get_old_modules_batch_ffi t keys
+    ( get_old_funs_batch_ffi t (SSet.elements n_funs),
+      get_old_typedefs_batch_ffi t (SSet.elements n_types),
+      get_old_gconsts_batch_ffi t (SSet.elements n_consts),
+      get_old_modules_batch_ffi t (SSet.elements n_modules) )
 
   external declare_folded_class : t -> string -> unit
     = "hh_rust_provider_backend_declare_folded_class"

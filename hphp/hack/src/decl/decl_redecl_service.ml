@@ -150,38 +150,25 @@ let compare_decls_and_get_fanout
   let { FileInfo.n_classes; n_funs; n_types; n_consts; n_modules } = all_defs in
   let acc = empty_fanout in
   (* Fetching everything at once is faster *)
-  let old_funs =
+  let (old_funs, old_types, old_consts, old_modules) =
     match Provider_backend.get () with
     | Provider_backend.Rust_provider_backend be ->
-      Rust_provider_backend.Decl.get_old_funs_batch be (SSet.elements n_funs)
-    | _ -> Decl_heap.Funs.get_old_batch n_funs
+      Rust_provider_backend.Decl.get_old_defs be all_defs
+    | _ ->
+      ( Decl_heap.Funs.get_old_batch n_funs,
+        Decl_heap.Typedefs.get_old_batch n_types,
+        Decl_heap.GConsts.get_old_batch n_consts,
+        Decl_heap.Modules.get_old_batch n_modules )
   in
   let (acc, old_funs_missing) =
     compare_funs_and_get_fanout ctx old_funs acc n_funs
   in
-  let old_types =
-    match Provider_backend.get () with
-    | Provider_backend.Rust_provider_backend be ->
-      Rust_provider_backend.Decl.get_old_typedefs_batch
-        be
-        (SSet.elements n_types)
-    | _ -> Decl_heap.Typedefs.get_old_batch n_types
-  in
   let (acc, old_types_missing) =
     compare_types_and_get_fanout ctx old_types acc n_types
-  in
-  let old_consts =
-    match Provider_backend.get () with
-    | Provider_backend.Rust_provider_backend be ->
-      Rust_provider_backend.Decl.get_old_gconsts_batch
-        be
-        (SSet.elements n_consts)
-    | _ -> Decl_heap.GConsts.get_old_batch n_consts
   in
   let (acc, old_gconsts_missing) =
     compare_gconsts_and_get_fanout ctx old_consts acc n_consts
   in
-
   let (acc, old_classes_missing) =
     if shallow_decl_enabled ctx || force_shallow_decl_fanout_enabled ctx then
       (acc, 0)
@@ -190,19 +177,9 @@ let compare_decls_and_get_fanout
       let new_classes = Decl_heap.Classes.get_batch n_classes in
       compare_classes_and_get_fanout ctx old_classes new_classes acc n_classes
   in
-
-  let old_modules =
-    match Provider_backend.get () with
-    | Provider_backend.Rust_provider_backend be ->
-      Rust_provider_backend.Decl.get_old_modules_batch
-        be
-        (SSet.elements n_modules)
-    | _ -> Decl_heap.Modules.get_old_batch n_modules
-  in
   let (acc, old_modules_missing) =
     compare_modules_and_get_fanout ctx old_modules acc n_modules
   in
-
   let old_decl_missing_count =
     old_funs_missing
     + old_types_missing

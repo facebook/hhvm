@@ -10,8 +10,6 @@
 
 #include <glog/logging.h>
 
-#include <folly/Random.h>
-
 namespace facebook {
 namespace db {
 

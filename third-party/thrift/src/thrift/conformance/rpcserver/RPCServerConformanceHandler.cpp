@@ -130,7 +130,17 @@ RPCServerConformanceHandler::sinkChunkTimeout(std::unique_ptr<Request> req) {
 // =================== Interactions ===================
 std::unique_ptr<RPCServerConformanceHandler::BasicInteractionIf>
 RPCServerConformanceHandler::createBasicInteraction() {
-  result_.interactionConstructor_ref().emplace().constructorCalled() = true;
+  switch (testCase_->serverInstruction()->getType()) {
+    case ServerInstruction::interactionConstructor:
+      result_.interactionConstructor_ref().emplace().constructorCalled() = true;
+      break;
+    case ServerInstruction::interactionPersistsState:
+      result_.interactionPersistsState_ref().emplace();
+      break;
+    default:
+      throw std::runtime_error(
+          "BasicInteraction constructor called unexpectedly");
+  }
   return std::make_unique<BasicInteraction>();
 }
 
@@ -138,8 +148,19 @@ apache::thrift::
     TileAndResponse<RPCServerConformanceHandler::BasicInteractionIf, void>
     RPCServerConformanceHandler::basicInteractionFactoryFunction(
         int32_t initialSum) {
-  result_.interactionFactoryFunction_ref().emplace().initialSum() = initialSum;
-  return {std::make_unique<BasicInteraction>()};
+  switch (testCase_->serverInstruction()->getType()) {
+    case ServerInstruction::interactionFactoryFunction:
+      result_.interactionFactoryFunction_ref().emplace().initialSum() =
+          initialSum;
+      break;
+    case ServerInstruction::interactionPersistsState:
+      result_.interactionPersistsState_ref().emplace();
+      break;
+    default:
+      throw std::runtime_error(
+          "BasicInteraction factory function called unexpectedly");
+  }
+  return {std::make_unique<BasicInteraction>(initialSum)};
 }
 
 } // namespace apache::thrift::conformance

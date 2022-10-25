@@ -167,20 +167,50 @@ class ConformanceVerificationServer
 
   // =================== Interactions ===================
   class BasicInteraction : public BasicInteractionIf {
+   public:
+    explicit BasicInteraction(int32_t initialSum = 0) : sum_(initialSum) {}
     void init() override {}
+    int32_t add(int32_t toAdd) override {
+      sum_ += toAdd;
+      return sum_;
+    }
+
+   private:
+    int32_t sum_;
   };
 
   std::unique_ptr<BasicInteractionIf> createBasicInteraction() override {
-    serverResult_.interactionConstructor_ref().emplace().constructorCalled() =
-        true;
+    switch (testCase_.serverInstruction()->getType()) {
+      case ServerInstruction::interactionConstructor:
+        serverResult_.interactionConstructor_ref()
+            .emplace()
+            .constructorCalled() = true;
+        break;
+      case ServerInstruction::interactionPersistsState:
+        serverResult_.interactionPersistsState_ref().emplace();
+        break;
+      default:
+        throw std::runtime_error(
+            "BasicInteraction constructor called unexpectedly");
+    }
     return std::make_unique<BasicInteraction>();
   }
 
   apache::thrift::TileAndResponse<BasicInteractionIf, void>
   basicInteractionFactoryFunction(int32_t initialSum) override {
-    serverResult_.interactionFactoryFunction_ref().emplace().initialSum() =
-        initialSum;
-    return {std::make_unique<BasicInteraction>()};
+    switch (testCase_.serverInstruction()->getType()) {
+      case ServerInstruction::interactionFactoryFunction:
+        serverResult_.interactionFactoryFunction_ref().emplace().initialSum() =
+            initialSum;
+        break;
+      case ServerInstruction::interactionPersistsState:
+        serverResult_.interactionPersistsState_ref().emplace();
+        break;
+      default:
+        throw std::runtime_error(
+            "BasicInteraction factory function called unexpectedly");
+    }
+    return {std::make_unique<BasicInteraction>(initialSum)};
   }
 
   folly::SemiFuture<folly::Unit> getTestReceived() {

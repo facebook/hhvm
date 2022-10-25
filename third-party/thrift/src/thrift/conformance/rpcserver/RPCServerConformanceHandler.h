@@ -52,7 +52,16 @@ class RPCServerConformanceHandler
 
   // =================== Interactions ===================
   class BasicInteraction : public BasicInteractionIf {
+   public:
+    explicit BasicInteraction(int32_t initialSum = 0) : sum_(initialSum) {}
     void init() override {}
+    int32_t add(int32_t toAdd) override {
+      sum_ += toAdd;
+      return sum_;
+    }
+
+   private:
+    int32_t sum_;
   };
 
   std::unique_ptr<BasicInteractionIf> createBasicInteraction() override;

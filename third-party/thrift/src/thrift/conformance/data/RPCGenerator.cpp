@@ -736,6 +736,87 @@ Test createInteractionFactoryFunctionTest() {
   return ret;
 }
 
+Test createInteractionConstructorPersistsStateTest() {
+  Test ret;
+  ret.name() = "InteractionConstructorPersistsStateTest";
+  ret.tags()->emplace("spec/protocol/interface/#interactions");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "InteractionConstructorPersistsStateTest/Success";
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  auto& clientInstruction = rpcTest.clientInstruction_ref()
+                                .emplace()
+                                .interactionPersistsState_ref()
+                                .emplace();
+
+  auto& clientTestResult = rpcTest.clientTestResult_ref()
+                               .emplace()
+                               .interactionPersistsState_ref()
+                               .emplace();
+
+  int sum = 0;
+  for (int i = 1; i <= 5; i++) {
+    sum += i;
+    clientInstruction.valuesToAdd()->emplace_back(i);
+    clientTestResult.responses()->emplace_back(sum);
+  }
+
+  rpcTest.serverInstruction_ref()
+      .emplace()
+      .interactionPersistsState_ref()
+      .emplace();
+
+  rpcTest.serverTestResult_ref()
+      .emplace()
+      .interactionPersistsState_ref()
+      .emplace();
+
+  return ret;
+}
+
+Test createInteractionFactoryFunctionPersistsStateTest() {
+  Test ret;
+  ret.name() = "InteractionFactoryFunctionPersistsStateTest";
+  ret.tags()->emplace("spec/protocol/interface/#interactions");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "InteractionFactoryFunctionPersistsStateTest/Success";
+
+  constexpr int initialSum = 10;
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  auto& clientInstruction = rpcTest.clientInstruction_ref()
+                                .emplace()
+                                .interactionPersistsState_ref()
+                                .emplace();
+  clientInstruction.initialSum() = initialSum;
+
+  auto& clientTestResult = rpcTest.clientTestResult_ref()
+                               .emplace()
+                               .interactionPersistsState_ref()
+                               .emplace();
+
+  int sum = initialSum;
+  for (int i = 1; i <= 5; i++) {
+    sum += i;
+    clientInstruction.valuesToAdd()->emplace_back(i);
+    clientTestResult.responses()->emplace_back(sum);
+  }
+
+  rpcTest.serverInstruction_ref()
+      .emplace()
+      .interactionPersistsState_ref()
+      .emplace();
+
+  rpcTest.serverTestResult_ref()
+      .emplace()
+      .interactionPersistsState_ref()
+      .emplace();
+
+  return ret;
+}
+
 void addCommonRequestResponseTests(TestSuite& suite) {
   // =================== Request-Response ===================
   suite.tests()->push_back(createRequestResponseBasicTest());
@@ -760,6 +841,8 @@ void addCommonRPCTests(TestSuite& suite) {
   // =================== Interactions ===================
   suite.tests()->push_back(createInteractionConstructorTest());
   suite.tests()->push_back(createInteractionFactoryFunctionTest());
+  suite.tests()->push_back(createInteractionConstructorPersistsStateTest());
+  suite.tests()->push_back(createInteractionFactoryFunctionPersistsStateTest());
 }
 
 } // namespace

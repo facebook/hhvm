@@ -303,6 +303,28 @@ InteractionFactoryFunctionClientTestResult runInteractionFactoryFunction(
       }());
 }
 
+InteractionPersistsStateClientTestResult runInteractionPersistsState(
+    RPCConformanceServiceAsyncClient& client,
+    const InteractionPersistsStateClientInstruction& instruction) {
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<InteractionPersistsStateClientTestResult> {
+        std::optional<Client<RPCConformanceService>::BasicInteraction>
+            interaction;
+        if (instruction.initialSum().has_value()) {
+          interaction.emplace(
+              co_await client.co_basicInteractionFactoryFunction(
+                  *instruction.initialSum()));
+        } else {
+          interaction.emplace(client.createBasicInteraction());
+        }
+        InteractionPersistsStateClientTestResult result;
+        for (auto& arg : *instruction.valuesToAdd()) {
+          result.responses()->emplace_back(co_await interaction->co_add(arg));
+        }
+        co_return result;
+      }());
+}
+
 ClientTestResult runClientSteps(
     Client<RPCConformanceService>& client,
     const ClientInstruction& clientInstruction) {
@@ -351,6 +373,10 @@ ClientTestResult runClientSteps(
     case ClientInstruction::Type::interactionFactoryFunction:
       result.interactionFactoryFunction_ref() = runInteractionFactoryFunction(
           client, *clientInstruction.interactionFactoryFunction_ref());
+      break;
+    case ClientInstruction::Type::interactionPersistsState:
+      result.interactionPersistsState_ref() = runInteractionPersistsState(
+          client, *clientInstruction.interactionPersistsState_ref());
       break;
     default:
       throw std::runtime_error("Invalid TestCase Type.");

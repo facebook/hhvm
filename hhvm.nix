@@ -57,7 +57,7 @@
 , re2
 , re2c
 , rustChannelOf
-, setup-compiler-cache ? "/nix/var/cache/setup-compiler-cache.sh"
+, setup-compiler-cache ? "/nix/var/sccache/setup-compiler-cache.sh"
 , stdenv
 , sqlite
 , tbb

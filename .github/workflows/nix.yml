@@ -117,7 +117,7 @@ jobs:
       run: nix profile install --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
     - if: always()
       name: Print sccache logs
-      run: cat /nix/var/sccache/sccache_log.txt
+      run: sudo cat /nix/var/sccache/sccache_log.txt
     - run: hhvm --version
     - name: Build the deb package
       if: runner.os == 'Linux'

@@ -212,12 +212,24 @@ class EnumTests(unittest.TestCase):
         self.assertIn(Color.blue, Color)
         self.assertIn(1, Color)
 
+    def test_equal(self) -> None:
+        self.assertEqual(Color.blue, Color.blue)
+        self.assertNotEqual(Color.blue, Color.green)
+        self.assertEqual(Color.blue, 1)
+        self.assertEqual(2, Color.green)
+        self.assertNotEqual(Color.blue, Kind.FIFO)
+
     def test_hash(self) -> None:
         colors = {}
         colors[Color.red] = 0xFF0000
         colors[Color.blue] = 0x0000FF
         colors[Color.green] = 0x00FF00
         self.assertEqual(colors[Color.green], 0x00FF00)
+        self.assertTrue(Color.blue in colors)
+        self.assertTrue(Kind.CHAR not in colors)
+        self.assertTrue(1 in colors)
+        values_to_names = {v.value: v.name for v in Color}
+        self.assertEqual(values_to_names[Color.red], "red")
 
     def test_enum_in_enum_out(self) -> None:
         self.assertIs(Color(Color.blue), Color.blue)

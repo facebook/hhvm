@@ -39,7 +39,7 @@
                 ];
                 inherit (hhvm)
                   NIX_CFLAGS_COMPILE
-                  CMAKE_INIT_CACHE;
+                  CMAKE_TOOLCHAIN_FILE;
               };
         in
         rec {

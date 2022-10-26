@@ -36,5 +36,4 @@ Tests in thrift conformance are grouped. There are smoke test and regression tes
 
 ### Conformance tests
 
-- [Conformance Quickstart Guide](fb/quickstart.md)
 - [Test Suites](testsuite/index.md)

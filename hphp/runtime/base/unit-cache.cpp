@@ -460,32 +460,32 @@ bool isChanged(const struct stat* old_st, const struct stat* new_st) {
          old_st->st_dev != new_st->st_dev;
 }
 
-Optional<SHA1> getHashForFile(const std::string& path,
+Optional<SHA1> getHashForFile(const std::string& relPath,
                               Stream::Wrapper* wrapper,
                               const std::filesystem::path& root) {
   if (RO::EvalUseEdenFS) {
-    if (auto const h = getHashFromEden(path.data(), wrapper)) return SHA1{*h};
+    if (auto const h = getHashFromEden(relPath.data(), wrapper)) return SHA1{*h};
   }
 
   auto& cache = getHashCache(root.string());
 
   struct stat st;
-  auto const fullpath = root / path;
+  auto const fullpath = root / relPath;
   if (StatCache::stat(fullpath.string(), &st) != 0) return {};
 
   {
     HashCache::const_accessor acc;
-    if (cache.find(acc, path)) {
+    if (cache.find(acc, relPath)) {
       if (!isChanged(&acc->second.first, &st)) return acc->second.second;
     }
   }
 
   HashCache::accessor acc;
-  if (!cache.insert(acc, path)) {
+  if (!cache.insert(acc, relPath)) {
     if (!isChanged(&acc->second.first, &st)) return acc->second.second;
   }
 
-  if (auto const c = loadFileContents(path.data(), wrapper)) {
+  if (auto const c = loadFileContents(fullpath.c_str(), wrapper)) {
     auto const ret = SHA1{string_sha1(c->slice())};
     acc->second = std::make_pair(st, ret);
     return ret;

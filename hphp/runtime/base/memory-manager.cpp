@@ -1126,5 +1126,24 @@ void MemoryManager::setGCEnabled(bool isGCEnabled) {
   updateNextGc();
 }
 
+void MemoryManager::debugFreeFill(void* ptr, size_t bytes) {
+  if (bytes >= sizeof(HeapObject) + 16u) {
+    auto node = static_cast<FreeNode*>(ptr);
+    auto p = reinterpret_cast<uint64_t*>(node + 1);
+    // try to remember the class of the object when applicable.
+    auto const obj = innerObj(static_cast<HeapObject*>(ptr));
+    if (obj) {
+      *p = reinterpret_cast<uint64_t>(obj->getVMClass());
+    } else {
+      *p = *(reinterpret_cast<uint64_t*>(ptr) + 1);
+    }
+    *(p + 1) = *reinterpret_cast<uint64_t*>(ptr);
+    memset(ptr, kSmallFreeFill, sizeof(FreeNode));
+    memset(p + 2, kSmallFreeFill, bytes - sizeof(FreeNode) - 16);
+  } else {
+    memset(ptr, kSmallFreeFill, bytes);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

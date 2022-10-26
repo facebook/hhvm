@@ -1046,6 +1046,7 @@ private:
   // Allocation sampling
   void checkSampling(size_t bytes);
 
+  void debugFreeFill(void* ptr, size_t bytes);
   /////////////////////////////////////////////////////////////////////////////
 
 private:

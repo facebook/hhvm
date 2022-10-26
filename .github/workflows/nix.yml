@@ -65,6 +65,7 @@ jobs:
         printf \
           '
             export TEMPDIR=/tmp
+            export TMPDIR=/tmp
 
             export SCCACHE_BUCKET="hhvm-sccache"
             export SCCACHE_ENDPOINT="https://hhvm-sccache.s3-accelerate.amazonaws.com"
@@ -73,12 +74,10 @@ jobs:
             export SCCACHE_ERROR_LOG=/nix/var/sccache/sccache_log.txt
             export SCCACHE_LOG=info
 
-            export CMAKE_C_COMPILER_LAUNCHER=%q/bin/sccache
-            export CMAKE_CXX_COMPILER_LAUNCHER=%q/bin/sccache
             export RUSTC_WRAPPER=%q/bin/sccache
+            export CMAKE_C_COMPILER_LAUNCHER="$RUSTC_WRAPPER"
+            export CMAKE_CXX_COMPILER_LAUNCHER="$RUSTC_WRAPPER"
           ' \
-          "$SCCACHE_INSTALL_PATH" \
-          "$SCCACHE_INSTALL_PATH" \
           "$SCCACHE_INSTALL_PATH" |
           sudo tee /nix/var/sccache/setup-compiler-cache.sh
 

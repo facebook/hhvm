@@ -103,7 +103,7 @@
             '';
 
             postBuild = ''
-              "RUSTC_WRAPPER" --stop-server
+              "$RUSTC_WRAPPER" --stop-server
             '';
           });
           packages.hhvm_clang = packages.hhvm.override {

@@ -1961,7 +1961,11 @@ void printDIE(std::ostream& os,
 
       auto attr_value = [&]() -> std::string {
         if (type == DW_AT_ranges) {
-          auto const ranges = dwarf.getRanges(attr);
+          // Dwarf v5 uses debug_rnglists, whereas previous versions use
+          // debug_ranges and both can coexist in the same file
+          auto const ranges = die->context->version >= 5 ?
+            dwarf.getRngLists(attr) :
+            dwarf.getRanges(attr);
           std::string res;
           for (auto range : ranges) {
             if (range.dwr_addr1 == DwarfState::Dwarf_Ranges::kSelection) {
@@ -2032,6 +2036,15 @@ void printDIE(std::ostream& os,
             }
             return folly::sformat("Location: [{}]", output);
           }
+
+          case DW_FORM_strx1:
+          case DW_FORM_strx2:
+          case DW_FORM_strx3:
+          case DW_FORM_strx4:
+            return folly::sformat(
+              "\"{}\"",
+              dwarf.getAttributeValueString(attr)
+            );
 
           case DW_FORM_block1:
           case DW_FORM_block2:
@@ -2270,7 +2283,11 @@ private:
       [&](Dwarf_Attribute attr) {
         switch (dwarf.getAttributeType(attr)) {
           case DW_AT_ranges:
-            ranges = dwarf.getRanges(attr);
+            // Dwarf v5 uses debug_rnglists, whereas previous versions use
+            // debug_ranges
+            ranges = die->context->version >= 5 ?
+              dwarf.getRngLists(attr) :
+              dwarf.getRanges(attr);
             break;
           case DW_AT_low_pc:
             // Some times GCC/Clang emits very low numbers for addresses in

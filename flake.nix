@@ -96,7 +96,10 @@
             '';
 
             postConfigure = ''
+              set -x
               cat CMakeCache.txt
+              env
+              set +x
             '';
 
             postBuild = ''

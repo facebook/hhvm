@@ -144,7 +144,7 @@ jobs:
     - run: sudo apt-get install ./${{matrix.package}}.deb
     - run: echo "HHVM_BIN=$(command -v hhvm)" >> "$GITHUB_ENV"
     - run: |
-        "$HHVM_BIN" hphp/test/run.php -x hphp/test/github_excluded_tests ${{matrix.flags}}
+        "$HHVM_BIN" hphp/test/run.php ${{matrix.flags}}
   upload-deb:
     if: github.event_name == 'push' && github.ref_type == 'tag'
     runs-on: ubuntu-latest

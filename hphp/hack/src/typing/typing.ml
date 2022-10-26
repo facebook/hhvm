@@ -1668,7 +1668,6 @@ let safely_refine_class_type
            || Cls.has_ancestor class_info name
            || Cls.requires_ancestor class_info name ->
       true
-    | Tdynamic -> true
     | Toption ty -> might_be_supertype ty
     | Tunion tyl -> List.for_all tyl ~f:might_be_supertype
     | _ -> false
@@ -1745,19 +1744,25 @@ let rec class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
 
 let refine_and_simplify_intersection
     ~hint_first env p reason ivar_pos ivar_ty hint_ty =
-  match get_node ivar_ty with
-  | Tunion [ty1; ty2]
-    when Typing_defs.is_dynamic ty1 || Typing_defs.is_dynamic ty2 ->
+  let like_type_simplify ty =
     (* Distribute the intersection over the union *)
-    let (env, hint_ty1) =
-      class_for_refinement env p reason ivar_pos ty1 hint_ty
+    let (env, hint_ty) =
+      class_for_refinement env p reason ivar_pos ty hint_ty
     in
-    let (env, hint_ty2) =
-      class_for_refinement env p reason ivar_pos ty2 hint_ty
-    in
-    let (env, ty1) = Inter.intersect env ~r:reason ty1 hint_ty1 in
-    let (env, ty2) = Inter.intersect env ~r:reason ty2 hint_ty2 in
-    Typing_union.union env ty1 ty2
+    let (env, ty2) = Inter.intersect env ~r:reason ty hint_ty in
+    match get_node hint_ty with
+    (* If the hint is fully enforced, keep that information around *)
+    | Tclass (_, _, [])
+    | Tprim _ ->
+      let (env, dyn_ty) =
+        Inter.intersect env ~r:reason (MakeType.dynamic reason) hint_ty
+      in
+      Typing_union.union env dyn_ty ty2
+    | _ -> (env, MakeType.locl_like reason ty2)
+  in
+  match Typing_utils.try_strip_dynamic env ivar_ty with
+  | Some ty when TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) ->
+    like_type_simplify ty
   | _ ->
     let (env, hint_ty) =
       class_for_refinement env p reason ivar_pos ivar_ty hint_ty

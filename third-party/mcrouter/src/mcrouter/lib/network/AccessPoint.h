@@ -64,18 +64,6 @@ struct AccessPoint {
       std::optional<uint16_t> taskId = std::nullopt);
 
   /**
-   * Constructor used by SRRoute where AccessPoints need to be
-   * constructed on the fly for logging purposes only and only require
-   * the IP in string format
-   */
-  struct HostOnlyTag {};
-  AccessPoint(
-      HostOnlyTag,
-      const folly::IPAddress& addr,
-      mc_protocol_t protocol = mc_unknown_protocol,
-      std::optional<uint16_t> taskId = std::nullopt);
-
-  /**
    * @param apString accepts host:port, host:port:protocol and
    *                 host:port:protocol:(ssl|plain):(compressed|notcompressed)
    * @param defaultProtocol this is the protocol used if no protocol specified

@@ -227,10 +227,10 @@ CarbonRouterClient<RouterInfo>::findAffinitizedProxyIdx(
         }
         return false;
       },
-      [&hash](const SRHost& srHost, const RequestClass& requestClass) {
+      [&hash](const AccessPoint& srHost, const RequestClass& requestClass) {
         if (!requestClass.is(RequestClass::kShadow) &&
-            srHost.getTwTaskId().has_value()) {
-          hash = srHost.getTwTaskId().value();
+            srHost.getTaskId().has_value()) {
+          hash = srHost.getTaskId().value();
           return true;
         }
         return false;

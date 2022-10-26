@@ -94,17 +94,22 @@ module MembersChangeCategory = struct
       some_private_change = false;
     }
 
-  let of_member_change_map (changes : member_change SMap.t) : t =
-    SMap.fold
-      (fun _ change acc ->
-        match change with
-        | Added -> { acc with some_added = true }
-        | Removed -> { acc with some_removed = true }
-        | Changed_inheritance -> { acc with some_changed_inheritance = true }
-        | Modified -> { acc with some_modified = true }
-        | Private_change -> { acc with some_private_change = true })
-      changes
-      no_change
+  let of_member_change_map (changes : member_change SMap.t) : t option =
+    if SMap.is_empty changes then
+      None
+    else
+      Some
+        (SMap.fold
+           (fun _ change acc ->
+             match change with
+             | Added -> { acc with some_added = true }
+             | Removed -> { acc with some_removed = true }
+             | Changed_inheritance ->
+               { acc with some_changed_inheritance = true }
+             | Modified -> { acc with some_modified = true }
+             | Private_change -> { acc with some_private_change = true })
+           changes
+           no_change)
 
   let to_json
       {
@@ -137,12 +142,12 @@ type member_diff = {
 
 module MemberDiffCategory = struct
   type t = {
-    consts_category: MembersChangeCategory.t;
-    typeconsts_category: MembersChangeCategory.t;
-    props_category: MembersChangeCategory.t;
-    sprops_category: MembersChangeCategory.t;
-    methods_category: MembersChangeCategory.t;
-    smethods_category: MembersChangeCategory.t;
+    consts_category: MembersChangeCategory.t option;
+    typeconsts_category: MembersChangeCategory.t option;
+    props_category: MembersChangeCategory.t option;
+    sprops_category: MembersChangeCategory.t option;
+    methods_category: MembersChangeCategory.t option;
+    smethods_category: MembersChangeCategory.t option;
     constructor_category: constructor_change;
   }
 
@@ -171,12 +176,14 @@ module MemberDiffCategory = struct
       } =
     Hh_json.JSON_Object
       [
-        ("consts", MembersChangeCategory.to_json consts_category);
-        ("typeconsts", MembersChangeCategory.to_json typeconsts_category);
-        ("props", MembersChangeCategory.to_json props_category);
-        ("sprops", MembersChangeCategory.to_json sprops_category);
-        ("methods", MembersChangeCategory.to_json methods_category);
-        ("smethods", MembersChangeCategory.to_json smethods_category);
+        ("consts", Hh_json.opt_ MembersChangeCategory.to_json consts_category);
+        ( "typeconsts",
+          Hh_json.opt_ MembersChangeCategory.to_json typeconsts_category );
+        ("props", Hh_json.opt_ MembersChangeCategory.to_json props_category);
+        ("sprops", Hh_json.opt_ MembersChangeCategory.to_json sprops_category);
+        ("methods", Hh_json.opt_ MembersChangeCategory.to_json methods_category);
+        ( "smethods",
+          Hh_json.opt_ MembersChangeCategory.to_json smethods_category );
         ("constructor", constructor_change_to_json constructor_category);
       ]
 end

@@ -74,6 +74,10 @@ jobs:
             export SCCACHE_ENDPOINT="https://hhvm-sccache.s3-accelerate.amazonaws.com"
             export SCCACHE_REGION="us-west-2"
 
+            # Don't shut down sccache server automatically because we will
+            # manually shut down sccache server to print statistics.
+            export SCCACHE_IDLE_TIMEOUT=0
+
             export SCCACHE_ERROR_LOG=/nix/var/sccache/sccache_log.txt
             export SCCACHE_LOG=info
 

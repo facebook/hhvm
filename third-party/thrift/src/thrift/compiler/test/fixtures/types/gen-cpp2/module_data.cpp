@@ -10,30 +10,35 @@
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
-// This attribute is applied to the static data members to ensure that they are
-// not stripped from the compiled binary, in order to keep them available for
-// use by debuggers at runtime.
+// These attributes are applied to the static data members to ensure that they
+// are not stripped from the compiled binary, in order to keep them available
+// for use by debuggers at runtime.
 //
-// The attribute works by forcing all of the data members (both used and unused
-// ones) into the same section. This stops the linker from stripping the unused
-// data, as it works on a per-section basis and only removes sections if they
-// are entirely unused.
-#define THRIFT_DATA_SECTION [[gnu::section(".rodata.thrift.data")]]
+// The "used" attribute is required to ensure the compiler always emits unused
+// data.
+//
+// The "section" attribute is required to stop the linker from stripping used
+// data. It works by forcing all of the data members (both used and unused ones)
+// into the same section. As the linker strips data on a per-section basis, it
+// is then unable to remove unused data without also removing used data.
+// This has a similar effect to the "retain" attribute, but works with older
+// toolchains.
+#define THRIFT_DATA_MEMBER [[gnu::used]] [[gnu::section(".rodata.thrift.data")]]
 #else
-#define THRIFT_DATA_SECTION
+#define THRIFT_DATA_MEMBER
 #endif
 
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_SECTION const std::array<::apache::thrift::fixtures::types::has_bitwise_ops, 5> TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwise_ops>::values = {{
+THRIFT_DATA_MEMBER const std::array<::apache::thrift::fixtures::types::has_bitwise_ops, 5> TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwise_ops>::values = {{
   type::none,
   type::zero,
   type::one,
   type::two,
   type::three,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwise_ops>::names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwise_ops>::names = {{
   "none",
   "zero",
   "one",
@@ -41,41 +46,41 @@ THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TEnumDataStorage<::a
   "three",
 }};
 
-THRIFT_DATA_SECTION const std::array<::apache::thrift::fixtures::types::is_unscoped, 2> TEnumDataStorage<::apache::thrift::fixtures::types::is_unscoped>::values = {{
+THRIFT_DATA_MEMBER const std::array<::apache::thrift::fixtures::types::is_unscoped, 2> TEnumDataStorage<::apache::thrift::fixtures::types::is_unscoped>::values = {{
   type::hello,
   type::world,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::fixtures::types::is_unscoped>::names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::fixtures::types::is_unscoped>::names = {{
   "hello",
   "world",
 }};
 
-THRIFT_DATA_SECTION const std::array<::apache::thrift::fixtures::types::MyForwardRefEnum, 2> TEnumDataStorage<::apache::thrift::fixtures::types::MyForwardRefEnum>::values = {{
+THRIFT_DATA_MEMBER const std::array<::apache::thrift::fixtures::types::MyForwardRefEnum, 2> TEnumDataStorage<::apache::thrift::fixtures::types::MyForwardRefEnum>::values = {{
   type::ZERO,
   type::NONZERO,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::fixtures::types::MyForwardRefEnum>::names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::fixtures::types::MyForwardRefEnum>::names = {{
   "ZERO",
   "NONZERO",
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::fields_names = {{
   "field",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::fields_types = {{
   TType::T_STRING,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::storage_names = {{
   "__fbthrift_field_field",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 8> TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 8> TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::fields_names = {{
   "fieldA",
   "fieldB",
   "fieldC",
@@ -85,7 +90,7 @@ THRIFT_DATA_SECTION const std::array<folly::StringPiece, 8> TStructDataStorage<:
   "fieldG",
   "fieldH",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 8> TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 8> TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::fields_ids = {{
   12,
   2,
   3,
@@ -95,7 +100,7 @@ THRIFT_DATA_SECTION const std::array<int16_t, 8> TStructDataStorage<::apache::th
   7,
   8,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 8> TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 8> TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::fields_types = {{
   TType::T_LIST,
   TType::T_LIST,
   TType::T_LIST,
@@ -105,7 +110,7 @@ THRIFT_DATA_SECTION const std::array<protocol::TType, 8> TStructDataStorage<::ap
   TType::T_MAP,
   TType::T_MAP,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 8> TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 8> TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::storage_names = {{
   "__fbthrift_field_fieldA",
   "__fbthrift_field_fieldB",
   "__fbthrift_field_fieldC",
@@ -115,7 +120,7 @@ THRIFT_DATA_SECTION const std::array<folly::StringPiece, 8> TStructDataStorage<:
   "__fbthrift_field_fieldG",
   "__fbthrift_field_fieldH",
 }};
-THRIFT_DATA_SECTION const std::array<int, 8> TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::isset_indexes = {{
   0,
   1,
   2,
@@ -126,172 +131,172 @@ THRIFT_DATA_SECTION const std::array<int, 8> TStructDataStorage<::apache::thrift
   7,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::fields_names = {{
   "fieldA",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::fields_types = {{
   TType::T_LIST,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::storage_names = {{
   "__fbthrift_field_fieldA",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::fields_names = {{
   "MyIntField",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::fields_types = {{
   TType::T_I64,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::storage_names = {{
   "__fbthrift_field_MyIntField",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::fields_names = {{
   "a",
   "b",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::fields_ids = {{
   1,
   2,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::fields_types = {{
   TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::storage_names = {{
   "__fbthrift_field_a",
   "__fbthrift_field_b",
 }};
-THRIFT_DATA_SECTION const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::isset_indexes = {{
   0,
   1,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::fields_names = {{
   "a",
   "b",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::fields_ids = {{
   1,
   2,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::fields_types = {{
   TType::T_I32,
   TType::T_BOOL,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::storage_names = {{
   "__fbthrift_field_a",
   "__fbthrift_field_b",
 }};
-THRIFT_DATA_SECTION const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::isset_indexes = {{
   0,
   1,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::fields_names = {{
   "z",
   "n",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::fields_ids = {{
   1,
   2,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::fields_types = {{
   TType::T_I32,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::storage_names = {{
   "__fbthrift_field_z",
   "__fbthrift_field_n",
 }};
-THRIFT_DATA_SECTION const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::isset_indexes = {{
   0,
   1,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::fields_names = {{
   "a",
   "b",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::fields_ids = {{
   1,
   2,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::fields_types = {{
   TType::T_STRING,
   TType::T_MAP,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::storage_names = {{
   "__fbthrift_field_a",
   "__fbthrift_field_b",
 }};
-THRIFT_DATA_SECTION const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::isset_indexes = {{
   0,
   1,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::fields_names = {{
   "z",
   "n",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::fields_ids = {{
   1,
   2,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::fields_types = {{
   TType::T_STRING,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::storage_names = {{
   "__fbthrift_field_z",
   "__fbthrift_field_n",
 }};
-THRIFT_DATA_SECTION const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::isset_indexes = {{
   0,
   1,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::fields_names = {{
   "small",
   "big",
   "medium",
   "biggish",
   "tiny",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::fields_ids = {{
   1,
   2,
   3,
   4,
   5,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::fields_types = {{
   TType::T_BYTE,
   TType::T_I64,
   TType::T_I16,
   TType::T_I32,
   TType::T_BYTE,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::storage_names = {{
   "__fbthrift_field_small",
   "__fbthrift_field_big",
   "__fbthrift_field_medium",
   "__fbthrift_field_biggish",
   "__fbthrift_field_tiny",
 }};
-THRIFT_DATA_SECTION const std::array<int, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::isset_indexes = {{
   -1,
   -1,
   -1,
@@ -299,35 +304,35 @@ THRIFT_DATA_SECTION const std::array<int, 5> TStructDataStorage<::apache::thrift
   -1,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::fields_names = {{
   "small",
   "big",
   "medium",
   "biggish",
   "tiny",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::fields_ids = {{
   1,
   2,
   3,
   4,
   5,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::fields_types = {{
   TType::T_BYTE,
   TType::T_I64,
   TType::T_I16,
   TType::T_I32,
   TType::T_BYTE,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::storage_names = {{
   "__fbthrift_field_small",
   "__fbthrift_field_big",
   "__fbthrift_field_medium",
   "__fbthrift_field_biggish",
   "__fbthrift_field_tiny",
 }};
-THRIFT_DATA_SECTION const std::array<int, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::isset_indexes = {{
   -1,
   -1,
   -1,
@@ -335,311 +340,311 @@ THRIFT_DATA_SECTION const std::array<int, 5> TStructDataStorage<::apache::thrift
   -1,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::fields_names = {{
   "MyIntField",
   "MyStringField",
   "majorVer",
   "data",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::fields_ids = {{
   1,
   2,
   3,
   4,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::fields_types = {{
   TType::T_I64,
   TType::T_STRING,
   TType::T_I64,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::storage_names = {{
   "__fbthrift_field_MyIntField",
   "__fbthrift_field_MyStringField",
   "__fbthrift_field_majorVer",
   "__fbthrift_field_data",
 }};
-THRIFT_DATA_SECTION const std::array<int, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::isset_indexes = {{
   0,
   1,
   2,
   3,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_names = {{
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_ids = {{
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_types = {{
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::storage_names = {{
 }};
-THRIFT_DATA_SECTION const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::isset_indexes = {{
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::fields_names = {{
   "foo",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::fields_types = {{
   TType::T_I64,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::storage_names = {{
   "__fbthrift_field_bar",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::fields_names = {{
   "binary_field",
   "list_field",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::fields_ids = {{
   1,
   2,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::fields_types = {{
   TType::T_STRING,
   TType::T_LIST,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::storage_names = {{
   "__fbthrift_field_binary_field",
   "__fbthrift_field_list_field",
 }};
-THRIFT_DATA_SECTION const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::isset_indexes = {{
   0,
   1,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::fields_names = {{
   "ForwardUsageStruct",
   "ForwardUsageByRef",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::fields_ids = {{
   1,
   2,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::fields_types = {{
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::storage_names = {{
   "__fbthrift_field_ForwardUsageStruct",
   "__fbthrift_field_ForwardUsageByRef",
 }};
-THRIFT_DATA_SECTION const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::isset_indexes = {{
   0,
   -1,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::fields_names = {{
   "foo",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::fields_types = {{
   TType::T_STRUCT,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::storage_names = {{
   "__fbthrift_field_foo",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::isset_indexes = {{
   -1,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::fields_names = {{
   "foo",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::fields_types = {{
   TType::T_STRUCT,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::storage_names = {{
   "__fbthrift_field_foo",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::isset_indexes = {{
   -1,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::fields_names = {{
   "field",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::fields_types = {{
   TType::T_MAP,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::storage_names = {{
   "__fbthrift_field_field",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::fields_names = {{
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::fields_ids = {{
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::fields_types = {{
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::storage_names = {{
 }};
-THRIFT_DATA_SECTION const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::isset_indexes = {{
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::fields_names = {{
   "field",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::fields_types = {{
   TType::T_MAP,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::storage_names = {{
   "__fbthrift_field_field",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::fields_names = {{
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::fields_ids = {{
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::fields_types = {{
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::storage_names = {{
 }};
-THRIFT_DATA_SECTION const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::isset_indexes = {{
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::fields_names = {{
   "field",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::fields_types = {{
   TType::T_LIST,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::storage_names = {{
   "__fbthrift_field_field",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::fields_names = {{
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::fields_ids = {{
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::fields_types = {{
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::storage_names = {{
 }};
-THRIFT_DATA_SECTION const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::isset_indexes = {{
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::fields_names = {{
   "field",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::fields_types = {{
   TType::T_LIST,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::storage_names = {{
   "__fbthrift_field_field",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::fields_names = {{
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::fields_ids = {{
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::fields_types = {{
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::storage_names = {{
 }};
-THRIFT_DATA_SECTION const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::isset_indexes = {{
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::fields_names = {{
   "field",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::fields_types = {{
   TType::T_LIST,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::storage_names = {{
   "__fbthrift_field_field",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::fields_names = {{
   "field",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::fields_types = {{
   TType::T_STRUCT,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::storage_names = {{
   "__fbthrift_field_field",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::fields_names = {{
   "field",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::fields_types = {{
   TType::T_LIST,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::storage_names = {{
   "__fbthrift_field_field",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::fields_names = {{
   "field",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::fields_types = {{
   TType::T_I16,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::storage_names = {{
   "__fbthrift_field_field",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::isset_indexes = {{
   -1,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::fields_names = {{
   "aa_list",
   "aa_set",
   "aa_map",
@@ -648,7 +653,7 @@ THRIFT_DATA_SECTION const std::array<folly::StringPiece, 7> TStructDataStorage<:
   "aa_unique",
   "aa_shared",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::fields_ids = {{
   1,
   2,
   3,
@@ -657,7 +662,7 @@ THRIFT_DATA_SECTION const std::array<int16_t, 7> TStructDataStorage<::apache::th
   6,
   7,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::fields_types = {{
   TType::T_LIST,
   TType::T_SET,
   TType::T_MAP,
@@ -666,7 +671,7 @@ THRIFT_DATA_SECTION const std::array<protocol::TType, 7> TStructDataStorage<::ap
   TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::storage_names = {{
   "__fbthrift_field_aa_list",
   "__fbthrift_field_aa_set",
   "__fbthrift_field_aa_map",
@@ -675,7 +680,7 @@ THRIFT_DATA_SECTION const std::array<folly::StringPiece, 7> TStructDataStorage<:
   "__fbthrift_field_aa_unique",
   "__fbthrift_field_aa_shared",
 }};
-THRIFT_DATA_SECTION const std::array<int, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::isset_indexes = {{
   0,
   1,
   2,
@@ -685,61 +690,61 @@ THRIFT_DATA_SECTION const std::array<int, 7> TStructDataStorage<::apache::thrift
   -1,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::fields_names = {{
   "not_a_container",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::fields_types = {{
   TType::T_I32,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::storage_names = {{
   "__fbthrift_field_not_a_container",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::fields_names = {{
   "i32_field",
   "IntTypedef_field",
   "UintTypedef_field",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::fields_ids = {{
   1,
   2,
   3,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::fields_types = {{
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::storage_names = {{
   "__fbthrift_field_i32_field",
   "__fbthrift_field_IntTypedef_field",
   "__fbthrift_field_UintTypedef_field",
 }};
-THRIFT_DATA_SECTION const std::array<int, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::isset_indexes = {{
   0,
   1,
   2,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::fields_names = {{
   "__field",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::fields_types = {{
   TType::T_I32,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::storage_names = {{
   "__fbthrift_field___field",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::isset_indexes = {{
   0,
 }};
 

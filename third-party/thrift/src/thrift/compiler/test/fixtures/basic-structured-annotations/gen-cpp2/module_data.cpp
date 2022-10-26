@@ -10,204 +10,209 @@
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
-// This attribute is applied to the static data members to ensure that they are
-// not stripped from the compiled binary, in order to keep them available for
-// use by debuggers at runtime.
+// These attributes are applied to the static data members to ensure that they
+// are not stripped from the compiled binary, in order to keep them available
+// for use by debuggers at runtime.
 //
-// The attribute works by forcing all of the data members (both used and unused
-// ones) into the same section. This stops the linker from stripping the unused
-// data, as it works on a per-section basis and only removes sections if they
-// are entirely unused.
-#define THRIFT_DATA_SECTION [[gnu::section(".rodata.thrift.data")]]
+// The "used" attribute is required to ensure the compiler always emits unused
+// data.
+//
+// The "section" attribute is required to stop the linker from stripping used
+// data. It works by forcing all of the data members (both used and unused ones)
+// into the same section. As the linker strips data on a per-section basis, it
+// is then unable to remove unused data without also removing used data.
+// This has a similar effect to the "retain" attribute, but works with older
+// toolchains.
+#define THRIFT_DATA_MEMBER [[gnu::used]] [[gnu::section(".rodata.thrift.data")]]
 #else
-#define THRIFT_DATA_SECTION
+#define THRIFT_DATA_MEMBER
 #endif
 
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_SECTION const std::array<::test::fixtures::basic-structured-annotations::MyEnum, 2> TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyEnum>::values = {{
+THRIFT_DATA_MEMBER const std::array<::test::fixtures::basic-structured-annotations::MyEnum, 2> TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyEnum>::values = {{
   type::UNKNOWN,
   type::ONE,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyEnum>::names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyEnum>::names = {{
   "UNKNOWN",
   "ONE",
 }};
 
-THRIFT_DATA_SECTION const std::array<::test::fixtures::basic-structured-annotations::MyUnion::Type, 2> TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyUnion::Type>::values = {{
+THRIFT_DATA_MEMBER const std::array<::test::fixtures::basic-structured-annotations::MyUnion::Type, 2> TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyUnion::Type>::values = {{
   type::first,
   type::second,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyUnion::Type>::names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyUnion::Type>::names = {{
   "first",
   "second",
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_inline>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_inline>::fields_names = {{
   "count",
   "name",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_inline>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_inline>::fields_ids = {{
   1,
   2,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_inline>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_inline>::fields_types = {{
   TType::T_I64,
   TType::T_STRING,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_inline>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_inline>::storage_names = {{
   "__fbthrift_field_count",
   "__fbthrift_field_name",
 }};
-THRIFT_DATA_SECTION const std::array<int, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_inline>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_inline>::isset_indexes = {{
   0,
   1,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>::fields_names = {{
   "name",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>::fields_types = {{
   TType::T_STRING,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>::storage_names = {{
   "__fbthrift_field_name",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 3> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::fields_names = {{
   "name",
   "recurse",
   "forward",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 3> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 3> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::fields_ids = {{
   1,
   2,
   3,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 3> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::fields_types = {{
   TType::T_STRING,
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 3> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::storage_names = {{
   "__fbthrift_field_name",
   "__fbthrift_field_recurse",
   "__fbthrift_field_forward",
 }};
-THRIFT_DATA_SECTION const std::array<int, 3> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::isset_indexes = {{
   0,
   -1,
   1,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::fields_names = {{
   "count",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::fields_types = {{
   TType::T_I64,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::storage_names = {{
   "__fbthrift_field_count",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_nested>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_nested>::fields_names = {{
   "name",
   "nest",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_nested>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_nested>::fields_ids = {{
   1,
   2,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_nested>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_nested>::fields_types = {{
   TType::T_STRING,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_nested>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_nested>::storage_names = {{
   "__fbthrift_field_name",
   "__fbthrift_field_nest",
 }};
-THRIFT_DATA_SECTION const std::array<int, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_nested>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_nested>::isset_indexes = {{
   0,
   1,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyStruct>::fields_names = {{
   "annotated_field",
   "annotated_type",
   "annotated_recursive",
   "annotated_nested",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyStruct>::fields_ids = {{
   1,
   2,
   3,
   4,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyStruct>::fields_types = {{
   TType::T_I64,
   TType::T_STRING,
   TType::T_STRING,
   TType::T_I64,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyStruct>::storage_names = {{
   "__fbthrift_field_annotated_field",
   "__fbthrift_field_annotated_type",
   "__fbthrift_field_annotated_recursive",
   "__fbthrift_field_annotated_nested",
 }};
-THRIFT_DATA_SECTION const std::array<int, 4> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyStruct>::isset_indexes = {{
   0,
   1,
   2,
   3,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyException>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyException>::fields_names = {{
   "context",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyException>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyException>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyException>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyException>::fields_types = {{
   TType::T_STRING,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyException>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyException>::storage_names = {{
   "__fbthrift_field_context",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyException>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyException>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyUnion>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyUnion>::fields_names = {{
   "first",
   "second",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyUnion>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyUnion>::fields_ids = {{
   1,
   2,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyUnion>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyUnion>::fields_types = {{
   TType::T_STRING,
   TType::T_I64,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyUnion>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyUnion>::storage_names = {{
   "first",
   "second",
 }};
-THRIFT_DATA_SECTION const std::array<int, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyUnion>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyUnion>::isset_indexes = {{
   0,
   1,
 }};

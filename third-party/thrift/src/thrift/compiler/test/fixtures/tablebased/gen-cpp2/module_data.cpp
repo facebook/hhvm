@@ -10,69 +10,74 @@
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
-// This attribute is applied to the static data members to ensure that they are
-// not stripped from the compiled binary, in order to keep them available for
-// use by debuggers at runtime.
+// These attributes are applied to the static data members to ensure that they
+// are not stripped from the compiled binary, in order to keep them available
+// for use by debuggers at runtime.
 //
-// The attribute works by forcing all of the data members (both used and unused
-// ones) into the same section. This stops the linker from stripping the unused
-// data, as it works on a per-section basis and only removes sections if they
-// are entirely unused.
-#define THRIFT_DATA_SECTION [[gnu::section(".rodata.thrift.data")]]
+// The "used" attribute is required to ensure the compiler always emits unused
+// data.
+//
+// The "section" attribute is required to stop the linker from stripping used
+// data. It works by forcing all of the data members (both used and unused ones)
+// into the same section. As the linker strips data on a per-section basis, it
+// is then unable to remove unused data without also removing used data.
+// This has a similar effect to the "retain" attribute, but works with older
+// toolchains.
+#define THRIFT_DATA_MEMBER [[gnu::used]] [[gnu::section(".rodata.thrift.data")]]
 #else
-#define THRIFT_DATA_SECTION
+#define THRIFT_DATA_MEMBER
 #endif
 
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_SECTION const std::array<::test::fixtures::tablebased::ExampleEnum, 2> TEnumDataStorage<::test::fixtures::tablebased::ExampleEnum>::values = {{
+THRIFT_DATA_MEMBER const std::array<::test::fixtures::tablebased::ExampleEnum, 2> TEnumDataStorage<::test::fixtures::tablebased::ExampleEnum>::values = {{
   type::ZERO,
   type::NONZERO,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TEnumDataStorage<::test::fixtures::tablebased::ExampleEnum>::names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::test::fixtures::tablebased::ExampleEnum>::names = {{
   "ZERO",
   "NONZERO",
 }};
 
-THRIFT_DATA_SECTION const std::array<::test::fixtures::tablebased::ExampleUnion::Type, 2> TEnumDataStorage<::test::fixtures::tablebased::ExampleUnion::Type>::values = {{
+THRIFT_DATA_MEMBER const std::array<::test::fixtures::tablebased::ExampleUnion::Type, 2> TEnumDataStorage<::test::fixtures::tablebased::ExampleUnion::Type>::values = {{
   type::fieldA,
   type::fieldB,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TEnumDataStorage<::test::fixtures::tablebased::ExampleUnion::Type>::names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::test::fixtures::tablebased::ExampleUnion::Type>::names = {{
   "fieldA",
   "fieldB",
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::fields_names = {{
   "fieldA",
   "fieldB",
   "fieldC",
   "fieldD",
   "fieldE",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::fields_ids = {{
   1,
   2,
   3,
   4,
   5,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::fields_types = {{
   TType::T_I32,
   TType::T_STRING,
   TType::T_STRING,
   TType::T_STRING,
   TType::T_I32,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::storage_names = {{
   "__fbthrift_field_fieldA",
   "__fbthrift_field_fieldB",
   "__fbthrift_field_fieldC",
   "__fbthrift_field_fieldD",
   "__fbthrift_field_fieldE",
 }};
-THRIFT_DATA_SECTION const std::array<int, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::isset_indexes = {{
   0,
   1,
   2,
@@ -80,7 +85,7 @@ THRIFT_DATA_SECTION const std::array<int, 5> TStructDataStorage<::test::fixtures
   4,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::fields_names = {{
   "fieldA",
   "fieldB",
   "fieldC",
@@ -90,7 +95,7 @@ THRIFT_DATA_SECTION const std::array<folly::StringPiece, 8> TStructDataStorage<:
   "fieldG",
   "fieldH",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::fields_ids = {{
   12,
   2,
   3,
@@ -100,7 +105,7 @@ THRIFT_DATA_SECTION const std::array<int16_t, 8> TStructDataStorage<::test::fixt
   7,
   8,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::fields_types = {{
   TType::T_LIST,
   TType::T_LIST,
   TType::T_LIST,
@@ -110,7 +115,7 @@ THRIFT_DATA_SECTION const std::array<protocol::TType, 8> TStructDataStorage<::te
   TType::T_MAP,
   TType::T_LIST,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::storage_names = {{
   "__fbthrift_field_fieldA",
   "__fbthrift_field_fieldB",
   "__fbthrift_field_fieldC",
@@ -120,7 +125,7 @@ THRIFT_DATA_SECTION const std::array<folly::StringPiece, 8> TStructDataStorage<:
   "__fbthrift_field_fieldG",
   "__fbthrift_field_fieldH",
 }};
-THRIFT_DATA_SECTION const std::array<int, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::isset_indexes = {{
   0,
   1,
   2,
@@ -131,23 +136,23 @@ THRIFT_DATA_SECTION const std::array<int, 8> TStructDataStorage<::test::fixtures
   7,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::fields_names = {{
   "fieldA",
   "fieldB",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::fields_ids = {{
   1,
   2,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::fields_types = {{
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::storage_names = {{
   "fieldA",
   "fieldB",
 }};
-THRIFT_DATA_SECTION const std::array<int, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::isset_indexes = {{
   0,
   1,
 }};

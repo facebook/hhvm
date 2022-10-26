@@ -129,8 +129,7 @@ zend/good/ext/intl/tests/msgfmt_millisecond_dates.php
 zend/good/ext/mbstring/tests/mb_ereg_replace_variation1.php
 
 # TODO(atry) failed in repo mode
-hphp/test/slow/use_function/override.php
-hphp/test/slow/coeffects/closure-inherit-2.php
+slow/coeffects/closure-inherit-2.php
 
 # TODO(atry) the CAA record for google.com is flaky (maybe network issue?)
 slow/ext_network/dns_get_record_caa.php

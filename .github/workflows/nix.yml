@@ -64,6 +64,8 @@ jobs:
 
         printf \
           '
+            export TEMPDIR=/tmp
+
             export SCCACHE_BUCKET="hhvm-sccache"
             export SCCACHE_ENDPOINT="https://hhvm-sccache.s3-accelerate.amazonaws.com"
             export SCCACHE_REGION="us-west-2"

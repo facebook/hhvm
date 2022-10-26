@@ -29,7 +29,6 @@ DEFINE_int32(echo_port, 7778, "Echo Server port");
 
 using apache::thrift::HTTP2RoutingHandler;
 using apache::thrift::ThriftServer;
-using apache::thrift::ThriftServerAsyncProcessorFactory;
 using example::chatroom::ChatRoomServiceHandler;
 using example::chatroom::EchoHandler;
 using proxygen::HTTPServerOptions;
@@ -47,12 +46,9 @@ std::unique_ptr<HTTP2RoutingHandler> createHTTP2RoutingHandler(
 template <typename ServiceHandler>
 std::shared_ptr<ThriftServer> newServer(int32_t port) {
   auto handler = std::make_shared<ServiceHandler>();
-  auto proc_factory =
-      std::make_shared<ThriftServerAsyncProcessorFactory<ServiceHandler>>(
-          handler);
   auto server = std::make_shared<ThriftServer>();
   server->setPort(port);
-  server->setInterface(proc_factory);
+  server->setInterface(handler);
   server->addRoutingHandler(createHTTP2RoutingHandler(server));
   return server;
 }

@@ -141,7 +141,7 @@ let go
                   let shallow_decl = Option.value_exn shallow_decl_opt in
                   List.cons
                     (* marshal here to avoid OOM *)
-                    (decl_hash, Marshal.to_string shallow_decl [])
+                    (decl_hash, Marshal.to_string (name, shallow_decl) [])
                     acc
                 else
                   acc)

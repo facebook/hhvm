@@ -80,7 +80,7 @@ jobs:
           "$SCCACHE_INSTALL_PATH" \
           "$SCCACHE_INSTALL_PATH" \
           "$SCCACHE_INSTALL_PATH" |
-          sudo tee -a /nix/var/sccache/setup-compiler-cache.sh
+          sudo tee /nix/var/sccache/setup-compiler-cache.sh
 
         # Assign the owner for the generated shell script, because it will be
         # used by the nix builder users. See https://nixos.wiki/wiki/CCache

@@ -61,12 +61,15 @@
               homepage = "https://github.com/mozilla/sccache/pull/1086";
             };
           });
-          packages.hhvm = (pkgs.callPackage ./hhvm.nix {
+
+          packages.hhvm_nocache = pkgs.callPackage ./hhvm.nix {
             inherit setupCompilerCache;
             lastModifiedDate = self.lastModifiedDate;
-          }).overrideAttrs(finalAttrs: previousAttrs: {
-            # Override unpackPhase to create a fixed sourceRoot so that the path can be
-            # cached by sccache
+          };
+
+          packages.hhvm = hhvm_nocache.overrideAttrs(finalAttrs: previousAttrs: {
+            # Override unpackPhase to create a fixed sourceRoot so that the path
+            # can be cached by sccache
             unpackPhase = ''
               if [[ -f ${pkgs.lib.strings.escapeShellArg setupCompilerCache} ]]
               then

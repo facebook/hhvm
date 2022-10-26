@@ -39,20 +39,34 @@
                 ];
                 inherit (hhvm)
                   NIX_CFLAGS_COMPILE
-                  CMAKE_INIT_CACHE;
+                  CMAKE_TOOLCHAIN_FILE;
+                ${if hhvm?RUSTC_WRAPPER then "RUSTC_WRAPPER" else null} =
+                  hhvm.RUSTC_WRAPPER;
               };
         in
         rec {
           packages.hhvm = pkgs.callPackage ./hhvm.nix {
             lastModifiedDate = self.lastModifiedDate;
+            isDefaultStdlib = true;
           };
+          packages.hhvm_ccache = packages.hhvm.overrideAttrs (finalAttrs: previousAttrs: {
+            RUSTC_WRAPPER = "${pkgs.sccache}/bin/sccache";
+            CMAKE_TOOLCHAIN_FILE = pkgs.writeTextFile {
+              name = "toolchain.cmake";
+              text = ''
+                ${builtins.readFile packages.hhvm.CMAKE_TOOLCHAIN_FILE}
+                set(CMAKE_C_COMPILER_LAUNCHER "${pkgs.sccache}/bin/sccache" CACHE STRING "C compiler launcher" FORCE)
+                set(CMAKE_CXX_COMPILER_LAUNCHER "${pkgs.sccache}/bin/sccache" CACHE STRING "C++ compiler launcher" FORCE)
+              '';
+            };
+          });
           packages.hhvm_clang = packages.hhvm.override {
             stdenv = pkgs.llvmPackages_14.stdenv;
           };
           packages.default = packages.hhvm;
 
           devShells.clang = devShellForPackage packages.hhvm_clang;
-          devShells.default = devShellForPackage packages.hhvm;
+          devShells.default = devShellForPackage packages.hhvm_ccache;
 
           ${if pkgs.hostPlatform.isLinux then "bundlers" else null} =
             let

@@ -25,6 +25,9 @@
 , gperftools
 , hostPlatform
 , icu
+# TODO(https://github.com/NixOS/nixpkgs/pull/193086): Use stdenv.cc.libcxx to
+# detect C++ runtime once it is available
+, isDefaultStdlib
 , imagemagick6
 , jemalloc
 , lastModifiedDate
@@ -70,9 +73,6 @@
 , zstd
 }:
 let
-  # TODO(https://github.com/NixOS/nixpkgs/pull/193086): Use stdenv.cc.libcxx once it is available
-  isDefaultStdlib =
-    builtins.match ".*-stdlib=\+\+.*" (builtins.readFile "${stdenv.cc}/nix-support/libcxx-ldflags") == null;
   versionParts =
     builtins.match
       ''
@@ -214,8 +214,8 @@ stdenv.mkDerivation rec {
       "-Wno-error=unused-command-line-argument"
     ];
 
-  CMAKE_INIT_CACHE = writeTextFile {
-    name = "init-cache.cmake";
+  CMAKE_TOOLCHAIN_FILE = writeTextFile {
+    name = "toolchain.cmake";
     text = ''
       set(ENABLE_SYSTEM_LOCALE_ARCHIVE ON CACHE BOOL "Use system locale archive as the default LOCALE_ARCHIVE for nix patched glibc" FORCE)
       set(CAN_USE_SYSTEM_ZSTD ON CACHE BOOL "Use system zstd" FORCE)
@@ -232,8 +232,6 @@ stdenv.mkDerivation rec {
       }
     '';
   };
-
-  cmakeFlags = [ "-C" CMAKE_INIT_CACHE ];
 
   prePatch = ''
     patchShebangs .

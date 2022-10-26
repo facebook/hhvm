@@ -157,20 +157,28 @@ DEBUG_ONLY bool validate(const State& env,
   // belongs in the simplifier right now.
   auto known_available = [&] (SSATmp* src) -> bool {
     if (!src->type().maybe(TCounted)) return true;
-    for (auto& oldSrc : origInst->srcs()) {
+    src = canonical(src);
+
+    for (auto oldSrc : origInst->srcs()) {
+      oldSrc = canonical(oldSrc);
       if (oldSrc == src) return true;
 
       // Some instructions consume a counted SSATmp and produce a new SSATmp
       // which supports the consumed location. If the result of one such
       // instruction is available then the value whose count it supports must
-      // also be available. For now CreateSSWH is the only instruction of this
-      // form that we care about.
-      if (oldSrc->inst()->is(CreateSSWH) && oldSrc->inst()->src(0) == src) {
+      // also be available. For now CreateSSWH, NewRFunc and NewRClsMeth are
+      // the only instructions of this form that we care about.
+      if ((oldSrc->inst()->is(CreateSSWH) &&
+             canonical(oldSrc->inst()->src(0)) == src) ||
+          (oldSrc->inst()->is(NewRFunc) &&
+             canonical(oldSrc->inst()->src(1)) == src) ||
+          (oldSrc->inst()->is(NewRClsMeth) &&
+             canonical(oldSrc->inst()->src(2)) == src)) {
         return true;
       }
     }
     for (auto& newInst : env.newInsts) {
-      if (newInst->dst() == src) {
+      if (canonical(newInst->dst()) == src) {
         return true;
       }
     }
@@ -3824,16 +3832,48 @@ SSATmp* simplifyNewClsMeth(State& env, const IRInstruction* inst) {
   return cns(env, clsmeth);
 }
 
+SSATmp* simplifyLdFuncFromRFunc(State& env, const IRInstruction* inst) {
+  auto const rfunc = canonical(inst->src(0));
+  if (rfunc->inst()->is(NewRFunc)) return rfunc->inst()->src(0);
+  return nullptr;
+}
+
+SSATmp* simplifyLdGenericsFromRFunc(State& env, const IRInstruction* inst) {
+  auto const rfunc = canonical(inst->src(0));
+  if (rfunc->inst()->is(NewRFunc)) return rfunc->inst()->src(1);
+  return nullptr;
+}
+
 SSATmp* simplifyLdClsFromClsMeth(State& env, const IRInstruction* inst) {
-  auto const clsmeth = inst->src(0);
-  if (!clsmeth->hasConstVal()) return nullptr;
-  return cns(env, clsmeth->clsmethVal()->getCls());
+  auto const clsmeth = canonical(inst->src(0));
+  if (clsmeth->hasConstVal()) return cns(env, clsmeth->clsmethVal()->getCls());
+  if (clsmeth->inst()->is(NewClsMeth)) return clsmeth->inst()->src(0);
+  return nullptr;
 }
 
 SSATmp* simplifyLdFuncFromClsMeth(State& env, const IRInstruction* inst) {
-  auto const clsmeth = inst->src(0);
-  if (!clsmeth->hasConstVal()) return nullptr;
-  return cns(env, clsmeth->clsmethVal()->getFunc());
+  auto const clsmeth = canonical(inst->src(0));
+  if (clsmeth->hasConstVal()) return cns(env, clsmeth->clsmethVal()->getFunc());
+  if (clsmeth->inst()->is(NewClsMeth)) return clsmeth->inst()->src(1);
+  return nullptr;
+}
+
+SSATmp* simplifyLdClsFromRClsMeth(State& env, const IRInstruction* inst) {
+  auto const rclsmeth = canonical(inst->src(0));
+  if (rclsmeth->inst()->is(NewRClsMeth)) return rclsmeth->inst()->src(0);
+  return nullptr;
+}
+
+SSATmp* simplifyLdFuncFromRClsMeth(State& env, const IRInstruction* inst) {
+  auto const rclsmeth = canonical(inst->src(0));
+  if (rclsmeth->inst()->is(NewRClsMeth)) return rclsmeth->inst()->src(1);
+  return nullptr;
+}
+
+SSATmp* simplifyLdGenericsFromRClsMeth(State& env, const IRInstruction* inst) {
+  auto const rclsmeth = canonical(inst->src(0));
+  if (rclsmeth->inst()->is(NewRClsMeth)) return rclsmeth->inst()->src(2);
+  return nullptr;
 }
 
 SSATmp* simplifyStructDictTypeBoundCheck(State& env,
@@ -4103,8 +4143,13 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(LdFrameCls)
       X(NewClsMeth)
       X(CheckClsMethFunc)
+      X(LdFuncFromRFunc)
+      X(LdGenericsFromRFunc)
       X(LdClsFromClsMeth)
       X(LdFuncFromClsMeth)
+      X(LdClsFromRClsMeth)
+      X(LdFuncFromRClsMeth)
+      X(LdGenericsFromRClsMeth)
       X(LdResolvedTypeCns)
       X(LdResolvedTypeCnsNoCheck)
       X(LdResolvedTypeCnsClsName)

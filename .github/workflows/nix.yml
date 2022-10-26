@@ -64,6 +64,9 @@ jobs:
 
         printf \
           '
+            # By default, nix will set TEMPDIR and TMPDIR to a unique directory
+            # among builds, preventing compiler cache.
+            # Set them to /tmp to allow for compiler cache.
             export TEMPDIR=/tmp
             export TMPDIR=/tmp
 

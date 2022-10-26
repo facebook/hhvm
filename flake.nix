@@ -67,7 +67,7 @@
             lastModifiedDate = self.lastModifiedDate;
           };
 
-          packages.hhvm = hhvm_nocache.overrideAttrs(finalAttrs: previousAttrs: {
+          packages.hhvm = packages.hhvm_nocache.overrideAttrs(finalAttrs: previousAttrs: {
             # Override unpackPhase to create a fixed sourceRoot so that the path
             # can be cached by sccache
             unpackPhase = ''

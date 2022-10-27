@@ -4,6 +4,8 @@ HHVM_DEFINE_EXTENSION("hotprofiler" REQUIRED
     ext_hotprofiler.cpp
   HEADERS
     ext_hotprofiler.h
+  SYSTEMLIB
+    ext_hotprofiler.php
   DEPENDS
     libZLib
 )

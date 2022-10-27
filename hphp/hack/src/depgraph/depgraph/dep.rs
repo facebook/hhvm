@@ -6,7 +6,6 @@ use ocamlrep::from;
 use ocamlrep::Allocator;
 use ocamlrep::FromError;
 use ocamlrep::FromOcamlRep;
-use ocamlrep::OpaqueValue;
 use ocamlrep::ToOcamlRep;
 use ocamlrep::Value;
 
@@ -54,11 +53,11 @@ impl FromOcamlRep for Dep {
 }
 
 impl ToOcamlRep for Dep {
-    fn to_ocamlrep<'a, A: Allocator>(&'a self, _alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, _alloc: &'a A) -> Value<'a> {
         let x: u64 = self.0;
         // In Rust, a numeric cast between two integers of the same size
         // is a no-op. We require a 64-bit word size.
         let x = x as isize;
-        OpaqueValue::int(x)
+        Value::int(x)
     }
 }

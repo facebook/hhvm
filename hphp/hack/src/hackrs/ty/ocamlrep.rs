@@ -5,13 +5,12 @@
 
 use ocamlrep::Allocator;
 use ocamlrep::FromOcamlRep;
-use ocamlrep::OpaqueValue;
 use ocamlrep::ToOcamlRep;
 
 use super::decl_error::*;
 
 impl<P: ToOcamlRep> ToOcamlRep for DeclError<P> {
-    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         match self {
             Self::WrongExtendKind {
                 pos,

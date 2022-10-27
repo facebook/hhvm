@@ -89,10 +89,7 @@ impl<'a> ToOxidized<'a> for Symbol {
 }
 
 impl ToOcamlRep for Symbol {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         alloc.add_copy(self.as_str())
     }
 }
@@ -200,10 +197,7 @@ impl<'a> ToOxidized<'a> for Bytes {
 }
 
 impl ToOcamlRep for Bytes {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         alloc.add_copy(self.as_bytes())
     }
 }
@@ -285,7 +279,7 @@ macro_rules! common_impls {
             fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
                 &'a self,
                 alloc: &'a A,
-            ) -> ocamlrep::OpaqueValue<'a> {
+            ) -> ocamlrep::Value<'a> {
                 alloc.add_copy(self.as_str())
             }
         }

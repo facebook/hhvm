@@ -80,8 +80,8 @@ void WarmupRequestHandlerFactory::bumpReqCount() {
 }
 
 void InternalWarmupWorker::doJob(WarmupJob job) {
-  if (f_server_is_stopping()) return;
-  if (f_server_uptime() > 0 &&
+  if (HHVM_FN(server_is_stopping)()) return;
+  if (HHVM_FN(server_uptime)() > 0 &&
       jit::mcgen::retranslateAllScheduled()) return;
   HttpServer::CheckMemAndWait();
   folly::StringPiece f(job.hdfFile);

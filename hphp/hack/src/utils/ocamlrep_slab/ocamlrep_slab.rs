@@ -13,25 +13,19 @@
 //! to reflect the slab's new location in memory. This fixup operation is called
 //! "rebasing".
 
-use std::cell::RefCell;
-use std::collections::HashSet;
+mod error;
+
 use std::fmt;
 use std::fmt::Debug;
 use std::mem;
-use std::sync::atomic::AtomicUsize;
-use std::sync::atomic::Ordering;
 
 use bytes::buf::UninitSlice;
+use ocamlrep::Header;
+use ocamlrep::ToOcamlRep;
+use ocamlrep::Value;
+use ocamlrep::NO_SCAN_TAG;
 
-use crate::block::Header;
-use crate::block::NO_SCAN_TAG;
-use crate::Allocator;
-use crate::BlockBuilder;
-use crate::MemoizationCache;
-use crate::OpaqueValue;
-use crate::SlabIntegrityError;
-use crate::ToOcamlRep;
-use crate::Value;
+use crate::error::SlabIntegrityError;
 
 // The first three words in a slab are for the base pointer, the offset (in
 // words) of the root value from that base, and the magic number.
@@ -41,6 +35,46 @@ const SLAB_METADATA_WORDS: usize = 3;
 const SLAB_MAGIC_NUMBER: usize = 0x51A851A8;
 
 const WORD_SIZE: usize = mem::size_of::<OpaqueValue<'_>>();
+
+#[repr(transparent)]
+#[derive(Clone, Copy)]
+struct OpaqueValue<'a>(usize, std::marker::PhantomData<&'a ()>);
+
+impl<'a> OpaqueValue<'a> {
+    fn is_immediate(self) -> bool {
+        self.0 & 1 == 1
+    }
+    fn as_int(self) -> Option<isize> {
+        if self.is_immediate() {
+            Some((self.0 as isize) >> 1)
+        } else {
+            None
+        }
+    }
+    fn as_header(self) -> Header {
+        Header::from_bits(self.0)
+    }
+    unsafe fn from_bits(value: usize) -> OpaqueValue<'a> {
+        OpaqueValue(value, std::marker::PhantomData)
+    }
+    fn to_bits(self) -> usize {
+        self.0
+    }
+    unsafe fn add_ptr_offset(&mut self, diff: isize) {
+        if !self.is_immediate() {
+            self.0 = (self.0 as isize + diff) as usize;
+        }
+    }
+}
+
+impl Debug for OpaqueValue<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.as_int() {
+            Some(x) => write!(f, "{}", x),
+            None => write!(f, "0x{:x}", self.0),
+        }
+    }
+}
 
 // A contiguous memory region holding a tree of OCaml values reachable from a
 // single root value.
@@ -236,10 +270,10 @@ impl<'a> SlabTrait for Slab<'a> {
         let root_offset = self.root_value_offset();
 
         // The set of offsets to valid blocks, according to the header data.
-        let mut value_offsets = HashSet::new();
+        let mut value_offsets = hash::HashSet::default();
 
         // The set of offsets found in pointers in block fields.
-        let mut offsets_from_pointers = HashSet::new();
+        let mut offsets_from_pointers = hash::HashSet::default();
 
         let mut i = SLAB_METADATA_WORDS;
         while i < len {
@@ -358,178 +392,85 @@ fn debug_slab(name: &'static str, slab: &Slab<'_>, f: &mut fmt::Formatter<'_>) -
     }
 }
 
-// The generation number is used solely to identify which arena a cached value
-// belongs to in `RcOc`.
-//
-// We use usize::max_value() / 4 here to avoid colliding with ocamlpool and
-// Arena generation numbers (ocamlpool starts at 0, and Arena starts at
-// usize::max_value() / 2). This generation trick isn't sound with the use of
-// multiple generation counters, but this mitigation should make it extremely
-// difficult to mix up values allocated with ocamlpool, Arena, and SlabAllocator
-// in practice (one would have to serialize the same value with multiple
-// Allocators, and only after increasing the generation of one by an absurd
-// amount).
-//
-// If we add more allocators, we might want to rethink this strategy.
-static NEXT_GENERATION: AtomicUsize = AtomicUsize::new(usize::max_value() / 4);
-
-struct SlabAllocator {
-    generation: usize,
-    data: RefCell<Vec<OpaqueValue<'static>>>,
-    cache: MemoizationCache,
-}
-
-impl SlabAllocator {
-    /// Create a new `SlabAllocator` with 4KB of capacity preallocated.
-    fn new() -> Self {
-        Self::with_capacity(1024 * 4)
+fn clone_into_slab_impl<'a>(slab: &mut Vec<usize>, root: ocamlrep::Block<'a>) {
+    enum Op<'b> {
+        Alloc(ocamlrep::Block<'b>),
+        ConvertField(usize, &'b [Value<'b>]),
     }
-
-    /// Create a new `SlabAllocator` with `capacity_in_bytes` preallocated.
-    fn with_capacity(capacity_in_bytes: usize) -> Self {
-        let generation = NEXT_GENERATION.fetch_add(1, Ordering::SeqCst);
-        let capacity_in_words = std::cmp::max(2, capacity_in_bytes / WORD_SIZE);
-        let mut data = Vec::with_capacity(capacity_in_words);
-        for _ in 0..SLAB_METADATA_WORDS {
-            data.push(unsafe { OpaqueValue::from_bits(0) });
+    let mut stack: Vec<Op<'a>> = vec![Op::Alloc(root)];
+    let mut seen: hash::HashMap<usize, usize> = Default::default();
+    while let Some(op) = stack.pop() {
+        match op {
+            Op::Alloc(block) => {
+                let header = ocamlrep::Header::new(block.size(), block.tag());
+                slab.push(header.to_bits());
+                let idx = slab.len();
+                seen.insert(block.as_value().to_bits(), idx * WORD_SIZE);
+                for _ in 0..block.size() {
+                    slab.push(0);
+                }
+                match block.as_values() {
+                    None => slab[idx..idx + block.size()].copy_from_slice(block.as_int_slice()),
+                    Some(values) => {
+                        stack.push(Op::ConvertField(idx, values));
+                    }
+                }
+            }
+            Op::ConvertField(idx, values) => {
+                if let Some(value) = values.first() {
+                    match value.as_block() {
+                        None => {
+                            slab[idx] = value.to_bits();
+                            stack.push(Op::ConvertField(idx + 1, &values[1..]))
+                        }
+                        Some(block) => {
+                            if let Some(&copied_value) = seen.get(&value.to_bits()) {
+                                slab[idx] = copied_value;
+                                stack.push(Op::ConvertField(idx + 1, &values[1..]))
+                            } else {
+                                stack.push(Op::ConvertField(idx, values));
+                                stack.push(Op::Alloc(block))
+                            }
+                        }
+                    }
+                }
+            }
         }
-        Self {
-            generation,
-            data: RefCell::new(data),
-            cache: MemoizationCache::new(),
-        }
-    }
-
-    #[inline]
-    fn alloc<'a>(&'a self, size: usize, tag: u8) -> BlockBuilder<'a> {
-        let size_with_header = 1 + size;
-        let mut data = self.data.borrow_mut();
-        data.reserve(size_with_header);
-        let start = data.len();
-        for _ in 0..size_with_header {
-            data.push(OpaqueValue::int(0));
-        }
-        let header = Header::new(size, tag);
-        // SAFETY: We need to ensure this Header is never observed as a Value.
-        // That means this module must never expose our backing Vec (including
-        // after it is wrapped by OwnedSlab).
-        data[start] = unsafe { OpaqueValue::from_bits(header.to_bits()) };
-        BlockBuilder::new((start + 1) * WORD_SIZE, size)
     }
 }
 
-impl Allocator for SlabAllocator {
-    #[inline(always)]
-    fn generation(&self) -> usize {
-        self.generation
+pub fn clone_into_slab(block: ocamlrep::Block<'_>) -> OwnedSlab {
+    let mut slab = vec![];
+    for _ in 0..SLAB_METADATA_WORDS {
+        slab.push(0);
     }
-
-    fn block_with_size_and_tag(&self, size: usize, tag: u8) -> BlockBuilder<'_> {
-        self.alloc(size, tag)
-    }
-
-    #[inline(always)]
-    fn set_field<'a>(&self, block: &mut BlockBuilder<'a>, index: usize, value: OpaqueValue<'a>) {
-        assert!(index < block.size());
-        // SAFETY: `alloc` ensures that the block has `block.size()` fields. The
-        // above assertion ensures that we aren't out-of-bounds.
-        unsafe { *self.block_ptr_mut(block).add(index) = value }
-    }
-
-    unsafe fn block_ptr_mut<'a>(&self, block: &mut BlockBuilder<'a>) -> *mut OpaqueValue<'a> {
-        let mut data = self.data.borrow_mut();
-        // Interpret the block address as a byte offset into our `data` vec.
-        let first_field = &mut data[block.address() / WORD_SIZE];
-        std::mem::transmute::<*mut OpaqueValue<'static>, *mut OpaqueValue<'a>>(
-            first_field as *mut _,
-        )
-    }
-
-    fn memoized<'a>(
-        &'a self,
-        ptr: usize,
-        size: usize,
-        f: impl FnOnce(&'a Self) -> OpaqueValue<'a>,
-    ) -> OpaqueValue<'a> {
-        let bits = self.cache.memoized(ptr, size, || f(self).to_bits());
-        // SAFETY: The only memoized values in the cache are those computed in
-        // the closure on the previous line. Since f returns OpaqueValue<'a>, any
-        // cached bits must represent a valid OpaqueValue<'a>,
-        unsafe { OpaqueValue::from_bits(bits) }
-    }
-
-    fn add_root<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> OpaqueValue<'a> {
-        self.cache.with_cache(|| value.to_ocamlrep(self))
-    }
-}
-
-fn with_slab_allocator(f: impl Fn(&SlabAllocator) -> OpaqueValue<'_>) -> Option<OwnedSlab> {
-    let alloc = SlabAllocator::new();
-    let root_value_byte_offset = {
-        let value = f(&alloc);
-        if value.is_immediate() {
-            return None;
-        }
-        value.to_bits()
-    };
-    let mut data = alloc.data.into_inner();
+    clone_into_slab_impl(&mut slab, block);
     // Add an extra word of padding, so that we have enough room to realign the
     // slab contents if it's copied (as a byte string) to an address which isn't
     // aligned to WORD_SIZE.
-    data.push(unsafe { OpaqueValue::from_bits(0) });
-    let mut slab = data.into_boxed_slice();
-    slab.set_root_value_offset(root_value_byte_offset / WORD_SIZE);
+    slab.push(0);
+    let slab = slab.into_boxed_slice();
+    // The static lifetime is safe to use here, since the slab only contains
+    // offsets rather than pointers to external values, and OwnedSlab does not
+    // expose that lifetime.
+    let mut slab = unsafe { std::mem::transmute::<Box<[usize]>, Box<Slab<'static>>>(slab) };
+    slab.set_base(0);
+    // The root value offset used to be variable (determined by the allocation
+    // order of the value's impl of ToOcamlRep), but now that we clone values
+    // into the slab instead of directly allocating them there, we're in control
+    // of the root value location. It's after the metadata, plus one more word
+    // for the value's header.
+    slab.set_root_value_offset(SLAB_METADATA_WORDS + 1);
     slab.mark_initialized();
-    // SlabAllocator starts its offsets at zero, so there is no need to rebase
-    // to 0 to satisfy OwnedSlab's invariant.
-    Some(OwnedSlab(slab))
+    // We started our offsets at zero, so there is no need to rebase to 0 to
+    // satisfy OwnedSlab's invariant.
+    OwnedSlab(slab)
 }
 
 pub fn to_slab<T: ToOcamlRep>(value: &T) -> Option<OwnedSlab> {
-    // SAFETY: I'm not sure how else to express that the borrow of `T` we have
-    // in `value` is sure to outlive the `SlabAllocator` we borrow in our
-    // closure here, so transmute away the lifetime.
-    with_slab_allocator(|alloc| unsafe {
-        std::mem::transmute::<OpaqueValue<'_>, OpaqueValue<'_>>(alloc.add_root(value))
-    })
-}
-
-/// Copy the slab stored in `src` into `dest`, then fix up the slab's internal
-/// pointers in `dest`.
-///
-/// Padding bytes in `dest` (bytes before the first or after the last aligned
-/// word) will not be modified.
-///
-/// Returns `Err` if `src` does not contain a valid slab.
-///
-/// # Panics
-///
-/// This function will panic if `src` and `dest` have different lengths.
-pub fn copy_slab(src: &[u8], dest: &mut UninitSlice) -> Result<(), SlabIntegrityError> {
-    let dest_addr = dest.as_mut_ptr() as usize;
-
-    // SAFETY: leading_padding does not write from the pointer
-    let new_base = dest_addr + leading_padding(dest.as_mut_ptr(), dest.len());
-
-    let src_slab = Slab::from_bytes(src);
-
-    // SAFETY: UninitSlice expects us to not write unitialized Bytes, or use this to read. This
-    // code actually does read, but only after having initialized the memory by copying into the
-    // UninitSlice.
-    let dest_slab = unsafe { Slab::from_uninit_slice_mut(dest) };
-
-    src_slab.check_initialized()?;
-
-    // memcpy `src_slab` into `dest_slab`. Panic if they differ in length.
-    dest_slab.copy_from_slice(src_slab);
-
-    // Safety: we checked that `src_slab` is a valid slab, and slabs remain
-    // valid after a memcpy (i.e., slabs needing a rebase are still valid).
-    unsafe {
-        dest_slab.rebase_to(new_base);
-    }
-
-    Ok(())
+    let arena = ocamlrep::Arena::new();
+    let value = arena.add_root(value);
+    value.as_block().map(clone_into_slab)
 }
 
 /// Copy the slab stored in `src` into `dest`, then fix up the slab's internal
@@ -594,34 +535,13 @@ pub struct OwnedSlab(
 );
 
 impl OwnedSlab {
-    pub fn from_value(value: Value<'_>) -> Option<Self> {
-        with_slab_allocator(|alloc| value.clone_with_allocator(alloc))
-    }
-
-    pub unsafe fn from_ocaml(value: usize) -> Option<Self> {
-        Self::from_value(Value::from_bits(value))
-    }
-
     pub fn size_in_bytes(&self) -> usize {
         self.0.len() * WORD_SIZE
-    }
-
-    pub fn as_bytes(&self) -> &[u8] {
-        let ptr = self.0.as_ptr() as *const u8;
-        // SAFETY: should be safe to view the underlying memory as bytes
-        // (although the exact behavior will be dependent on platform
-        // endianness)
-        unsafe { std::slice::from_raw_parts(ptr, self.size_in_bytes()) }
     }
 
     pub fn as_reader(&self) -> SlabReader<'_> {
         // SAFETY: `self.0` is a valid Slab
         unsafe { SlabReader::from_slab(&self.0).unwrap() }
-    }
-
-    #[cfg(test)]
-    fn from_slice(slice: &[usize]) -> Result<Self, SlabIntegrityError> {
-        Ok(Self(slab_from_words(slice.into())?))
     }
 
     pub fn rebase(mut self) -> RebasedSlab {
@@ -630,9 +550,29 @@ impl OwnedSlab {
         RebasedSlab(self.0)
     }
 
-    pub fn leak(self) -> Value<'static> {
-        let slab = self.rebase();
-        Box::leak(slab.0).value().unwrap()
+    /// Like `OwnedSlab::deserialize`, but without verifying that the serialized
+    /// slab is valid (for situations where that verification would be
+    /// prohibitively expensive and the serialized slab is known to be valid).
+    ///
+    /// # Safety
+    ///
+    /// The serialized value must be a valid slab (e.g., the result of
+    /// `OwnedSlab::serialize`).
+    pub unsafe fn deserialize_unchecked<'de, D: serde::Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Self, D::Error> {
+        let words: Box<[usize]> = serde::Deserialize::deserialize(deserializer)?;
+        let slab = std::mem::transmute::<Box<[usize]>, Box<Slab<'static>>>(words);
+        // Don't do an expensive integrity check, but do look for the magic
+        // number as a sanity check.
+        slab.check_initialized()
+            .map_err(|e| serde::de::Error::custom(format!("invalid slab: {}", e)))?;
+        if slab.base() != 0 {
+            return Err(serde::de::Error::custom(String::from(
+                "invalid slab: serialized slabs must be rebased to 0",
+            )));
+        }
+        Ok(Self(slab))
     }
 }
 
@@ -658,12 +598,6 @@ fn deserialize_slab<'de, D: serde::Deserializer<'de>>(
     let slab = slab_from_words(words)
         .map_err(|e| serde::de::Error::custom(format!("invalid slab: {}", e)))?;
     Ok(slab)
-}
-
-pub unsafe fn buf_into_value<'a>(buf: &'a mut [u8]) -> Option<Value<'a>> {
-    let slab = Slab::from_bytes_mut(buf);
-    slab.rebase_to(slab.current_address());
-    slab.value()
 }
 
 fn slab_from_words(words: Box<[usize]>) -> Result<Box<Slab<'static>>, SlabIntegrityError> {
@@ -702,25 +636,8 @@ impl RebasedSlab {
 pub struct SlabReader<'a>(&'a [u8]);
 
 impl<'a> SlabReader<'a> {
-    /// Return a SlabReader for the slab embedded in the given byte slice.
-    ///
-    /// # Safety
-    ///
-    /// The caller must only invoke this function on byte slices which were
-    /// initialized by slab APIs (e.g., `OwnedSlab::as_bytes`, `copy_slab`).
-    pub unsafe fn from_bytes(bytes: &'a [u8]) -> Result<Self, SlabIntegrityError> {
-        let slab = Slab::from_bytes(bytes);
-        slab.check_initialized()?;
-        Ok(SlabReader(bytes))
-    }
-
-    /// Return a SlabReader for the given slice.
-    ///
-    /// # Safety
-    ///
-    /// The caller must only invoke this function on slices which were
-    /// initialized by slab APIs (e.g., `OwnedSlab::as_slice`).
-    pub unsafe fn from_words(words: &'a [usize]) -> Result<Self, SlabIntegrityError> {
+    /// Safety: `words` must be a valid slab
+    unsafe fn from_words(words: &'a [usize]) -> Result<Self, SlabIntegrityError> {
         let slab =
             std::slice::from_raw_parts(words.as_ptr() as *const OpaqueValue<'a>, words.len());
         slab.check_initialized()?;
@@ -736,38 +653,12 @@ impl<'a> SlabReader<'a> {
         Self::from_words(words)
     }
 
-    pub fn size_in_words(&self) -> usize {
-        Slab::from_bytes(self.0).len()
-    }
-
-    pub fn size_in_bytes(&self) -> usize {
-        self.size_in_words() * WORD_SIZE
-    }
-
     pub fn value_size_in_words(&self) -> usize {
         Slab::from_bytes(self.0).len() - SLAB_METADATA_WORDS
     }
 
-    pub fn as_bytes(&self) -> &[u8] {
-        let ptr = Slab::from_bytes(self.0).as_ptr() as *const u8;
-        unsafe { std::slice::from_raw_parts(ptr, self.size_in_bytes()) }
-    }
-
-    pub fn as_slice(&self) -> &[usize] {
-        let slab = Slab::from_bytes(self.0);
-        // SAFETY: `usize` has the same size and alignment as `OpaqueValue`. The
-        // returned slice borrows `self`, so the associated memory will not be
-        // mutated while the slice exists.
-        unsafe { std::slice::from_raw_parts(slab.as_ptr() as *const usize, slab.len()) }
-    }
-
     pub fn value(&self) -> Option<Value<'a>> {
         Slab::from_bytes(self.0).value()
-    }
-
-    pub fn value_offset_in_bytes(&self) -> usize {
-        leading_padding(self.0.as_ptr(), self.0.len())
-            + Slab::from_bytes(self.0).root_value_offset() * WORD_SIZE
     }
 }
 
@@ -779,8 +670,9 @@ impl Debug for SlabReader<'_> {
 
 #[cfg(test)]
 mod test {
+    use ocamlrep::FromOcamlRep;
+
     use super::*;
-    use crate::FromOcamlRep;
 
     pub const MIN_SIZE_IN_BYTES: usize = (SLAB_METADATA_WORDS + 2) * WORD_SIZE;
 
@@ -805,7 +697,7 @@ mod test {
         to_slab(&(42, "a".to_string())).unwrap()
     }
 
-    pub fn write_tuple_42_a(slab: &mut Slab<'_>) {
+    pub(super) fn write_tuple_42_a(slab: &mut Slab<'_>) {
         let tuple_slab = alloc_tuple_42_a();
         // Copy everything except the last word, which is an empty padding word
         // which provides space for the slab to be realigned when embedded in a
@@ -830,30 +722,6 @@ mod test {
             <(isize, String)>::from_ocamlrep(value),
             Ok((42, "a".to_string()))
         );
-    }
-
-    #[test]
-    fn to_and_from_slice() {
-        let tuple_slab = alloc_tuple_42_a();
-        let tuple_reader = tuple_slab.as_reader();
-        let mut bytes = vec![0u8; tuple_reader.size_in_bytes() + WORD_SIZE];
-        // Iterate over all possible alignments for our byte slice, embed the
-        // slab in the slice (with appropriate padding), and attempt to convert
-        // it to a list of usizes and back to an OwnedSlab.
-        for offset in 0..WORD_SIZE {
-            let bytes = &mut bytes[offset..offset + tuple_reader.size_in_bytes()];
-            let slice =
-                unsafe { UninitSlice::from_raw_parts_mut(bytes.as_ptr() as *mut _, bytes.len()) };
-            copy_slab(tuple_reader.as_bytes(), slice).unwrap();
-            unsafe {
-                let reader = SlabReader::from_bytes(bytes).unwrap();
-                let owned_slab = OwnedSlab::from_slice(reader.as_slice()).unwrap();
-                assert_eq!(
-                    <(isize, String)>::from_ocamlrep(owned_slab.rebase().value()),
-                    Ok((42, "a".to_string()))
-                );
-            }
-        }
     }
 }
 

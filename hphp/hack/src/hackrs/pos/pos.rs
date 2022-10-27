@@ -289,10 +289,7 @@ impl<'a> ToOxidized<'a> for BPos {
 }
 
 impl ToOcamlRep for BPos {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         let file = match &self.0 {
             PosImpl::Small { prefix, suffix, .. }
             | PosImpl::Large { prefix, suffix, .. }
@@ -435,10 +432,7 @@ impl<'a> ToOxidized<'a> for NPos {
 }
 
 impl ToOcamlRep for NPos {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         oxidized_by_ref::pos::Pos::none().to_ocamlrep(alloc)
     }
 }

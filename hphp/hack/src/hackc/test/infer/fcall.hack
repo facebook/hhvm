@@ -17,3 +17,12 @@ function fcall_func(): void {
 function fcall_static(): void {
   C::f(1, 2, 3);
 }
+
+// CHECK: define $root.fcall_method(this: *void, $a: *C) : *void {
+// CHECK: #b0:
+// CHECK:   n0: *Mixed = load &$a
+// CHECK:   n1 = n0.Mixed.b($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
+// CHECK:   ret $builtins.hack_null()
+function fcall_method(C $a): void {
+  $a->b(1, 2, 3);
+}

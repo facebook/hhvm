@@ -540,7 +540,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     entry->setInt("queue-time-us", queueTimeUs);
     StructuredLog::recordRequestGlobals(*entry);
     tl_heap->recordStats(*entry);
-    entry->setInt("uptime", f_server_uptime());
+    entry->setInt("uptime", HHVM_FN(server_uptime)());
     entry->setInt("rss", ProcStatus::adjustedRssKb());
   }
   HardwareCounter::UpdateServiceData(transport->getCpuTime(),

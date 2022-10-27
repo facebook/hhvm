@@ -384,8 +384,6 @@ where
                     let bytes = self.decompress(heap_value.as_slice()).unwrap();
                     let arena = ocamlrep::Arena::new();
                     let value = unsafe { ocamlrep_marshal::input_value(&bytes, &arena) };
-                    // SAFETY: we just allocated this value with an ocamlrep::Arena
-                    let value = unsafe { ocamlrep::Arena::make_transparent(value) };
                     Ok(V::from_ocamlrep(value)?)
                 })
                 .transpose()

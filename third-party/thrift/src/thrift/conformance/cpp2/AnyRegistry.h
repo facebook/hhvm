@@ -169,20 +169,31 @@ class AnyRegistry {
       const std::type_info& typeInfo, std::string type);
 
  private:
+  template <typename K, typename M>
+  using node_map_t = folly::conditional_t<
+      folly::kIsSanitizeThread,
+      std::unordered_map<K, M>,
+      folly::F14NodeMap<K, M>>;
+  template <typename K, typename M>
+  using fast_map_t = folly::conditional_t<
+      folly::kIsSanitizeThread,
+      std::unordered_map<K, M>,
+      folly::F14FastMap<K, M>>;
+
   struct TypeEntry {
     TypeEntry(const std::type_info& typeInfo, ThriftTypeInfo type);
 
     const std::type_info& typeInfo;
     const folly::fbstring typeHash; // The type hash to use, if applicable.
     const ThriftTypeInfo type; // Referenced by uriIndex_.
-    folly::F14FastMap<Protocol, const AnySerializer*> serializers;
+    fast_map_t<Protocol, const AnySerializer*> serializers;
   };
 
   std::forward_list<std::unique_ptr<AnySerializer>> ownedSerializers_;
   // Referenced by uriIndex_ and idIndex_, so must be a Node map.
-  folly::F14NodeMap<std::type_index, TypeEntry> registry_;
+  node_map_t<std::type_index, TypeEntry> registry_;
 
-  folly::F14FastMap<std::string_view, TypeEntry*> uriIndex_;
+  fast_map_t<std::string_view, TypeEntry*> uriIndex_;
   std::map<folly::fbstring, TypeEntry*> hashIndex_; // Must be sorted.
 
   TypeEntry* registerTypeImpl(

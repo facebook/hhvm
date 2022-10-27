@@ -97,13 +97,13 @@ where
     // those values, but since we're not using `add_root` here, it should be
     // okay.
     pool.set_field(&mut res, 0, unsafe {
-        ocamlrep::OpaqueValue::from_bits(ocaml_state)
+        ocamlrep::Value::from_bits(ocaml_state)
     });
     pool.set_field(&mut res, 1, unsafe {
-        ocamlrep::OpaqueValue::from_bits(ocaml_root)
+        ocamlrep::Value::from_bits(ocaml_root)
     });
     pool.set_field(&mut res, 2, unsafe {
-        ocamlrep::OpaqueValue::from_bits(ocaml_errors)
+        ocamlrep::Value::from_bits(ocaml_errors)
     });
     pool.set_field(&mut res, 3, ocaml_tree);
     // Safety: The UnsafeOcamlPtr must point to the first field in

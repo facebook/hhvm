@@ -170,10 +170,10 @@ impl<'a> Value<'a> {
     pub(crate) fn clone_with<'b>(
         self,
         alloc: &'b impl Allocator,
-        seen: &mut HashMap<usize, OpaqueValue<'b>>,
-    ) -> OpaqueValue<'b> {
+        seen: &mut HashMap<usize, Value<'b>>,
+    ) -> Value<'b> {
         match self.as_block() {
-            None => OpaqueValue(self.0, PhantomData),
+            None => Value(self.0, PhantomData),
             Some(block) => {
                 if let Some(&copied_value) = seen.get(&self.0) {
                     return copied_value;
@@ -188,7 +188,7 @@ impl<'a> Value<'a> {
     /// Recursively clone this `Value` using the given `Allocator`. Structural
     /// sharing is preserved (i.e., values which are physically equal before the
     /// clone will be physically equal after the clone).
-    pub fn clone_with_allocator(self, alloc: &impl Allocator) -> OpaqueValue<'_> {
+    pub fn clone_with_allocator(self, alloc: &impl Allocator) -> Value<'_> {
         self.clone_with(alloc, &mut HashMap::new())
     }
 }
@@ -198,74 +198,6 @@ impl Debug for Value<'_> {
         match self.as_block() {
             None => write!(f, "{}", self.as_int().unwrap()),
             Some(block) => write!(f, "{:?}", block),
-        }
-    }
-}
-
-/// A value, as represented by OCaml. Valid, immutable, and immovable for
-/// lifetime `'a`.
-///
-/// Either an immediate value (i.e., an integer or a zero-argument variant) or
-/// the address of a [`Block`](struct.Block.html) containing fields or binary
-/// data.
-///
-/// Block addresses may be a pointer, or they may be some offset defined by an
-/// Allocator or container rather than an actual address. Therefore, no means of
-/// inspecting the value are exposed. The Allocator or container which produced
-/// the `OpaqueValue` is expected to provide a means of inspecting it as a
-/// `Value` (e.g., `ocamlrep::Arena::make_transparent`).
-#[repr(transparent)]
-#[derive(Clone, Copy)]
-pub struct OpaqueValue<'a>(usize, PhantomData<&'a ()>);
-
-impl<'a> OpaqueValue<'a> {
-    #[inline(always)]
-    pub fn int(value: isize) -> OpaqueValue<'static> {
-        OpaqueValue(isize_to_ocaml_int(value), PhantomData)
-    }
-
-    #[inline(always)]
-    pub fn is_immediate(self) -> bool {
-        is_ocaml_int(self.0)
-    }
-
-    #[inline(always)]
-    pub fn as_int(self) -> Option<isize> {
-        if self.is_immediate() {
-            Some(ocaml_int_to_isize(self.0))
-        } else {
-            None
-        }
-    }
-
-    #[inline(always)]
-    pub(crate) fn as_header(self) -> Header {
-        Header::from_bits(self.0)
-    }
-
-    #[inline(always)]
-    pub unsafe fn from_bits(value: usize) -> OpaqueValue<'a> {
-        OpaqueValue(value, PhantomData)
-    }
-
-    #[inline(always)]
-    pub fn to_bits(self) -> usize {
-        self.0
-    }
-
-    #[inline(always)]
-    pub(crate) unsafe fn add_ptr_offset(&mut self, diff: isize) {
-        if !self.is_immediate() {
-            self.0 = (self.0 as isize + diff) as usize;
-        }
-    }
-}
-
-impl Debug for OpaqueValue<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.as_int() {
-            Some(x) => write!(f, "{}", x),
-            None => write!(f, "0x{:x}", self.0),
         }
     }
 }

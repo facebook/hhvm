@@ -94,10 +94,7 @@ impl<K, V> Default for Map<'_, K, V> {
 }
 
 impl<K: ToOcamlRep, V: ToOcamlRep> ToOcamlRep for Map<'_, K, V> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         match self.0 {
             None => alloc.add(&()),
             Some(val) => alloc.add(val),

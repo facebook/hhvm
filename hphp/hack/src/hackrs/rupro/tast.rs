@@ -6,7 +6,6 @@ use std::marker::PhantomData;
 
 use bumpalo::Bump;
 use ocamlrep::Allocator;
-use ocamlrep::OpaqueValue;
 use ocamlrep::ToOcamlRep;
 use oxidized::aast;
 use oxidized::aast_visitor::NodeMut;
@@ -51,7 +50,7 @@ pub type Typedef<R> = aast::Typedef<Ty<R>, SavedEnv<R>>;
 pub type Gconst<R> = aast::Gconst<Ty<R>, SavedEnv<R>>;
 
 impl<R: Reason> ToOcamlRep for SavedEnv<R> {
-    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         // This implementation of `to_ocamlrep` (which allocates in an arena,
         // converts to OCaml, then drops the arena) violates a `ToOcamlRep`
         // requirement: we may not drop values after passing them to `alloc.add`

@@ -576,22 +576,49 @@ and obj_get_concrete_class
     in
     let old_member_info = Env.get_member args.is_method env class_info id_str in
     let self_id = Option.value (Env.get_self_id env) ~default:"" in
+    let ancestor_tyargs =
+      match Cls.get_ancestor class_info self_id with
+      | Some self_class_type ->
+        begin
+          match get_node self_class_type with
+          | Tapply (_, tyargs) -> Some tyargs
+          | _ -> None
+        end
+      | None ->
+        let all_reqs = Cls.all_ancestor_reqs class_info in
+        let filtered =
+          List.filter_map all_reqs ~f:(fun (_, ty) ->
+              match get_node ty with
+              | Tapply ((_, name), tyargs) when String.equal name self_id ->
+                Some tyargs
+              | _ -> None)
+        in
+        List.hd filtered
+    in
+
     let (member_info, shadowed) =
-      if
-        Cls.has_ancestor class_info self_id
-        || Cls.requires_ancestor class_info self_id
-      then
+      match ancestor_tyargs with
+      | Some tyargs ->
         (* We look up the current context to see if there is a field/method with
          * private visibility. If there is one, that one takes precedence *)
-        match Env.get_self_class env with
-        | None -> (old_member_info, false)
-        | Some self_class ->
-          (match Env.get_member args.is_method env self_class id_str with
-          | Some { ce_visibility = Vprivate _; _ } as member_info ->
-            (member_info, true)
-          | _ -> (old_member_info, false))
-      else
-        (old_member_info, false)
+        begin
+          match Env.get_self_class env with
+          | None -> (old_member_info, false)
+          | Some self_class ->
+            begin
+              match Env.get_member args.is_method env self_class id_str with
+              | Some ({ ce_visibility = Vprivate _; _ } as ce) ->
+                let ce =
+                  Decl_instantiate.(
+                    instantiate_ce
+                      (make_subst (Cls.tparams self_class) tyargs)
+                      ce)
+                in
+                (Some ce, true)
+              | _ -> (old_member_info, false)
+            end
+        end
+      | None -> (old_member_info, false)
     in
     begin
       match member_info with

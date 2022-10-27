@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ocamlrep::Allocator;
-use ocamlrep::OpaqueValue;
 use ocamlrep::ToOcamlRep;
 pub use oxidized_by_ref::typing_defs_core::*;
 
@@ -14,7 +13,7 @@ pub type PrimKind = oxidized_by_ref::aast_defs::Tprim;
 pub struct SavedEnv;
 
 impl ToOcamlRep for SavedEnv {
-    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         let saved_env = oxidized_by_ref::tast::SavedEnv::default();
         // SAFETY: Transmute away the lifetime to allow the stack-allocated
         // value to be converted to OCaml. Won't break type safety in Rust, but

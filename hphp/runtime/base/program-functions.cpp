@@ -2967,7 +2967,7 @@ void hphp_session_exit(Transport* transport) {
                                        true /*psp*/);
     if (entry) {
       entry->setInt("response_code", transport->getResponseCode());
-      entry->setInt("uptime", f_server_uptime());
+      entry->setInt("uptime", HHVM_FN(server_uptime)());
       entry->setInt("rss", ProcStatus::adjustedRssKb());
       if (use_lowptr) {
         entry->setInt("low_mem", alloc::getLowMapped());

@@ -62,7 +62,6 @@ pub(crate) enum Ty {
     AnyArray,
     Arraykey,
     Bool,
-    Class(ir::ClassId),
     Classname,
     Darray,
     Dict,
@@ -106,7 +105,6 @@ impl fmt::Display for FmtTy<'_> {
 
             Ty::AnyArray
             | Ty::Arraykey
-            | Ty::Class(_)
             | Ty::Classname
             | Ty::Darray
             | Ty::Dict
@@ -534,6 +532,30 @@ impl<'a> FuncWriter<'a> {
         let params = params.into_exprs();
         for param in params {
             write!(self.w, ", {}", FmtExpr(self.strings, &param))?;
+        }
+        writeln!(self.w, ")")?;
+        Ok(dst)
+    }
+
+    /// Call the target as a virtual call.
+    pub(crate) fn call_virtual(
+        &mut self,
+        target: &str,
+        this: Expr,
+        params: impl VarArgs,
+    ) -> Result<Sid> {
+        let dst = self.alloc_sid();
+        write!(
+            self.w,
+            "{INDENT}{dst} = {this}.{target}(",
+            dst = FmtSid(dst),
+            this = FmtExpr(self.strings, &this)
+        )?;
+        let params = params.into_exprs();
+        let mut sep = "";
+        for param in params {
+            write!(self.w, "{sep}{}", FmtExpr(self.strings, &param))?;
+            sep = ", ";
         }
         writeln!(self.w, ")")?;
         Ok(dst)

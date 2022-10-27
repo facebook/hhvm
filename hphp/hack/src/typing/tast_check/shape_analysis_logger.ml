@@ -30,14 +30,17 @@ let get_channel () =
   | Some channel -> channel
 
 let log_events_locally typing_env : log list -> unit =
-  let log_result id result : unit =
+  let log_result id error_count result : unit =
     Format.sprintf
       "[RESULT] %s: (# of errors: %d) %s\n"
       id
-      result.error_count
-      (SA.show_shape_result typing_env result.result)
+      error_count
+      (SA.show_shape_result typing_env result)
     |> Out_channel.output_string !Typing_log.out_channel;
     Out_channel.flush !Typing_log.out_channel
+  in
+  let log_results id result : unit =
+    List.iter ~f:(log_result id result.error_count) result.results
   in
   let log_error id error_message =
     Format.sprintf "[FAILURE] %s: %s\n" id (Error.show error_message)
@@ -46,15 +49,15 @@ let log_events_locally typing_env : log list -> unit =
   in
   List.iter ~f:(fun result ->
       Either.iter
-        ~first:(log_result result.location)
+        ~first:(log_results result.location)
         ~second:(log_error result.location)
         result.result)
 
 let log_events_as_codemod typing_env : log list -> unit =
-  let log_success { result; error_count } =
+  let log_success { results; error_count } =
     let channel = get_channel () in
     let len = Out_channel.length channel in
-    let result_json = SAC.group_of_results typing_env [result] ~error_count in
+    let result_json = SAC.group_of_results typing_env results ~error_count in
     let result_str =
       if Int64.(len = of_int 0) then
         Format.asprintf "[\n%a\n]" Hh_json.pp_json result_json
@@ -69,16 +72,17 @@ let log_events_as_codemod typing_env : log list -> unit =
   List.iter ~f:(fun result ->
       Either.iter ~first:log_success ~second:Fn.ignore result.result)
 
-let log_events typing_env =
-  let shape_analysis_log_level =
-    Typing_env.get_tcopt typing_env
-    |> TypecheckerOptions.log_levels
-    |> SMap.find_opt "shape_analysis"
-  in
-  match shape_analysis_log_level with
+let shape_analysis_log_level typing_env =
+  Typing_env.get_tcopt typing_env
+  |> TypecheckerOptions.log_levels
+  |> SMap.find_opt "shape_analysis"
+
+let log_events tast_env =
+  let typing_env = Tast_env.tast_env_as_typing_env tast_env in
+  match shape_analysis_log_level typing_env with
   | Some 1 -> log_events_locally typing_env
   | Some 2 -> Shape_analysis_scuba.log_events_remotely typing_env
-  | Some 3 -> log_events_as_codemod typing_env
+  | Some (3 | 4) -> log_events_as_codemod typing_env
   | _ -> Fn.const ()
 
 let compute_results tast_env id params return body =
@@ -93,8 +97,27 @@ let compute_results tast_env id params return body =
       |> List.map ~f:strip_decorations
       |> SA.simplify typing_env
       |> List.filter ~f:SA.is_shape_like_dict
-      |> List.map ~f:(fun result ->
-             { location = id; result = Either.First { result; error_count } })
+    in
+    let successes =
+      match shape_analysis_log_level typing_env with
+      | Some 4 ->
+        if List.is_empty successes then
+          []
+        else
+          [
+            {
+              location = id;
+              result = Either.First { results = successes; error_count };
+            };
+          ]
+      | _ ->
+        List.map
+          ~f:(fun success ->
+            {
+              location = id;
+              result = Either.First { results = [success]; error_count };
+            })
+          successes
     in
     let failures =
       List.map
@@ -118,7 +141,6 @@ let handler =
     inherit Tast_visitor.handler_base
 
     method! at_class_ tast_env A.{ c_methods; c_name = (_, class_name); _ } =
-      let typing_env = Tast_env.tast_env_as_typing_env tast_env in
       let collect_method_events
           A.{ m_body; m_name = (_, method_name); m_params; m_ret; _ } =
         let id = class_name ^ "::" ^ method_name in
@@ -126,12 +148,10 @@ let handler =
       in
       if should_not_skip tast_env then
         List.concat_map ~f:collect_method_events c_methods
-        |> log_events typing_env
+        |> log_events tast_env
 
     method! at_fun_def tast_env fd =
       let A.{ f_body; f_name = (_, id); f_params; f_ret; _ } = fd.A.fd_fun in
       if should_not_skip tast_env then
-        let typing_env = Tast_env.tast_env_as_typing_env tast_env in
-        compute_results tast_env id f_params f_ret f_body
-        |> log_events typing_env
+        compute_results tast_env id f_params f_ret f_body |> log_events tast_env
   end

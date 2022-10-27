@@ -825,7 +825,7 @@ TypedValue HHVM_FUNCTION(substr_replace,
 /*
  * Calculates and adjusts "start" and "length" according to string's length.
  * This function determines how those two parameters are interpreted in
- * f_substr.
+ * substr.
  */
 static bool string_substr_check(int len, int64_t& f, int64_t& l) {
   assertx(len >= 0);

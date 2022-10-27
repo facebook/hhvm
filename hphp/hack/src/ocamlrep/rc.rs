@@ -24,7 +24,6 @@ use serde::Serializer;
 use crate::Allocator;
 use crate::FromError;
 use crate::FromOcamlRep;
-use crate::OpaqueValue;
 use crate::ToOcamlRep;
 use crate::Value;
 
@@ -266,10 +265,10 @@ impl<T> fmt::Pointer for RcOc<T> {
 }
 
 impl<T: ToOcamlRep> ToOcamlRep for RcOc<T> {
-    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> Value<'a> {
         let generation = alloc.generation();
         match self.get_cached_value_in_generation(generation) {
-            Some(value) => unsafe { OpaqueValue::from_bits(value) },
+            Some(value) => unsafe { Value::from_bits(value) },
             None => {
                 let value = alloc.add(self.as_ref());
                 self.set_cached_value(value.to_bits(), generation);

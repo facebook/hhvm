@@ -25,6 +25,12 @@
 #include <thrift/lib/cpp2/op/Compare.h>
 #include <thrift/lib/cpp2/type/AlignedPtr.h>
 
+#ifdef _MSC_VER
+#define THRIFT_CONSTEXPR_IF_NOT_MSVC
+#else
+#define THRIFT_CONSTEXPR_IF_NOT_MSVC constexpr
+#endif
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -65,27 +71,27 @@ class boxed_value_ptr {
     swap(lhs.ptr_, rhs.ptr_);
   }
 
-  friend constexpr bool operator==(
+  friend THRIFT_CONSTEXPR_IF_NOT_MSVC bool operator==(
       const boxed_value_ptr& lhs, const boxed_value_ptr& rhs) noexcept {
     return lhs.ptr_ == rhs.ptr_;
   }
-  friend constexpr bool operator==(
+  friend THRIFT_CONSTEXPR_IF_NOT_MSVC bool operator==(
       std::nullptr_t, const boxed_value_ptr& rhs) noexcept {
     return nullptr == rhs.ptr_;
   }
-  friend constexpr bool operator==(
+  friend THRIFT_CONSTEXPR_IF_NOT_MSVC bool operator==(
       const boxed_value_ptr& lhs, std::nullptr_t) noexcept {
     return lhs.ptr_ == nullptr;
   }
-  friend constexpr bool operator!=(
+  friend THRIFT_CONSTEXPR_IF_NOT_MSVC bool operator!=(
       const boxed_value_ptr& lhs, const boxed_value_ptr& rhs) noexcept {
     return !(lhs == rhs);
   }
-  friend constexpr bool operator!=(
+  friend THRIFT_CONSTEXPR_IF_NOT_MSVC bool operator!=(
       const boxed_value_ptr& lhs, std::nullptr_t) noexcept {
     return lhs.ptr_ != nullptr;
   }
-  friend constexpr bool operator!=(
+  friend THRIFT_CONSTEXPR_IF_NOT_MSVC bool operator!=(
       std::nullptr_t, const boxed_value_ptr& rhs) noexcept {
     return nullptr != rhs.ptr_;
   }
@@ -225,27 +231,27 @@ class boxed_ptr {
     swap(lhs.ptr_, rhs.ptr_);
   }
 
-  friend constexpr bool operator==(
+  friend THRIFT_CONSTEXPR_IF_NOT_MSVC bool operator==(
       const boxed_ptr& lhs, const boxed_ptr& rhs) noexcept {
     return lhs.ptr_.get() == rhs.ptr_.get();
   }
-  friend constexpr bool operator==(
+  friend THRIFT_CONSTEXPR_IF_NOT_MSVC bool operator==(
       std::nullptr_t, const boxed_ptr& rhs) noexcept {
     return nullptr == rhs.ptr_.get();
   }
-  friend constexpr bool operator==(
+  friend THRIFT_CONSTEXPR_IF_NOT_MSVC bool operator==(
       const boxed_ptr& lhs, std::nullptr_t) noexcept {
     return lhs.ptr_.get() == nullptr;
   }
-  friend constexpr bool operator!=(
+  friend THRIFT_CONSTEXPR_IF_NOT_MSVC bool operator!=(
       const boxed_ptr& lhs, const boxed_ptr& rhs) noexcept {
     return !(lhs == rhs);
   }
-  friend constexpr bool operator!=(
+  friend THRIFT_CONSTEXPR_IF_NOT_MSVC bool operator!=(
       const boxed_ptr& lhs, std::nullptr_t) noexcept {
     return lhs.ptr_.get() != nullptr;
   }
-  friend constexpr bool operator!=(
+  friend THRIFT_CONSTEXPR_IF_NOT_MSVC bool operator!=(
       std::nullptr_t, const boxed_ptr& rhs) noexcept {
     return nullptr != rhs.ptr_.get();
   }
@@ -441,3 +447,5 @@ class boxed_value {
 } // namespace detail
 } // namespace thrift
 } // namespace apache
+
+#undef THRIFT_CONSTEXPR_IF_NOT_MSVC

@@ -3084,7 +3084,7 @@ Variant HHVM_FUNCTION(imagecreatetruecolor, int64_t width, int64_t height) {
   return Variant(req::make<Image>(im));
 }
 
-bool f_imageistruecolor(const Resource& image) {
+bool HHVM_FUNCTION(imageistruecolor, const Resource& image) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   return im->trueColor;

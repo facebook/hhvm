@@ -792,7 +792,7 @@ public:
    * The nativeFuncPtr is a type-punned function pointer to the unerlying
    * function which takes the actual argument types, and does the actual work.
    *
-   * These are the functions with names prefixed by f_ or t_.
+   * These are the functions with names prefixed by f_.
    *
    * All C++ builtins have NativeFunctions, with the ironic exception of HNI
    * functions declared with NeedsActRec.

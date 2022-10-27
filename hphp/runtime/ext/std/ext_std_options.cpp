@@ -132,7 +132,7 @@ static void HHVM_FUNCTION(restore_include_path) {
 }
 
 static String HHVM_FUNCTION(set_include_path, const Variant& new_include_path) {
-  String s = f_get_include_path();
+  String s = HHVM_FN(get_include_path)();
   IniSetting::SetUser("include_path", new_include_path.toString());
   return s;
 }
@@ -695,7 +695,7 @@ static void HHVM_FUNCTION(ini_restore, const String& varname) {
 
 Variant HHVM_FUNCTION(ini_set,
                       const String& varname, const Variant& newvalue) {
-  auto oldvalue = f_ini_get(varname);
+  auto oldvalue = HHVM_FN(ini_get)(varname);
   auto ret = IniSetting::SetUser(varname, newvalue);
   if (!ret) {
     return false;

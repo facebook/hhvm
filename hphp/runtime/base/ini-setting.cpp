@@ -733,8 +733,8 @@ void IniSetting::ParserCallback::makeArray(tv_lval val,
 
 void IniSetting::ParserCallback::onConstant(std::string &result,
                                             const std::string &name) {
-  if (f_defined(name)) {
-    result = f_constant(name).toString().toCppString();
+  if (HHVM_FN(defined)(name)) {
+    result = HHVM_FN(constant)(name).toString().toCppString();
   } else {
     result = name;
   }
@@ -838,8 +838,8 @@ void IniSetting::SystemParserCallback::onPopEntry(const std::string& key,
 void IniSetting::SystemParserCallback::onConstant(std::string &result,
                                                   const std::string &name) {
   IniSetting::s_config_is_a_constant = true;
-  if (f_defined(name, false)) {
-    result = f_constant(name).toString().toCppString();
+  if (HHVM_FN(defined)(name, false)) {
+    result = HHVM_FN(constant)(name).toString().toCppString();
   } else {
     result = name;
   }

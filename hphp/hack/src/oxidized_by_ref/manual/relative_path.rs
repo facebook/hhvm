@@ -114,10 +114,7 @@ impl Display for RelativePath<'_> {
 impl arena_trait::TrivialDrop for RelativePath<'_> {}
 
 impl ToOcamlRep for RelativePath<'_> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         let mut block = alloc.block_with_size(2);
         alloc.set_field(&mut block, 0, alloc.add(&self.prefix));
         alloc.set_field(&mut block, 1, alloc.add(self.path()));

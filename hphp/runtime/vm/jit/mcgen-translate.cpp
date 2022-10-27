@@ -334,10 +334,10 @@ void scheduleSerializeOptProf() {
     }
   }
 
-  // f_server_uptime will return -1 if the http server is not yet
+  // server_uptime will return -1 if the http server is not yet
   // active. In that case, set the uptime to 0, so that we'll trigger
   // exactly delaySeconds after the server becomes active.
-  auto const uptime = std::max(0, static_cast<int>(f_server_uptime()));
+  auto const uptime = std::max(0, static_cast<int>(HHVM_FN(server_uptime)()));
   if (delaySeconds > 0) {
     s_serializeOptProfSeconds = uptime + delaySeconds;
     if (serverMode) {
@@ -624,7 +624,7 @@ void checkRetranslateAll(bool force, bool skipSerialize) {
 
   auto const serverMode = RuntimeOption::ServerExecutionMode();
   if (!force) {
-    auto const uptime = static_cast<int>(f_server_uptime()); // may be -1
+    auto const uptime = static_cast<int>(HHVM_FN(server_uptime)()); // may be -1
     if (uptime >= (int)RuntimeOption::EvalJitRetranslateAllSeconds) {
       assertx(serverMode);
       Logger::FInfo("retranslateAll: scheduled after {} seconds", uptime);
@@ -723,7 +723,7 @@ void checkSerializeOptProf() {
           !RuntimeOption::EvalJitSerdesFile.empty() &&
           isJitSerializing());
 
-  auto const uptime = f_server_uptime(); // may be -1
+  auto const uptime = HHVM_FN(server_uptime)(); // may be -1
   auto const triggerSeconds =
     s_serializeOptProfSeconds.load(std::memory_order_relaxed);
   auto const triggerRequest =

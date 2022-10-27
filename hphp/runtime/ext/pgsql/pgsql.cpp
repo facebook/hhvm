@@ -866,7 +866,7 @@ static Variant HHVM_FUNCTION(pg_last_error, const Resource& connection) {
 
   String ret(pgsql->get().errorMessage(), CopyString);
 
-  return f_trim(ret);
+  return HHVM_FN(trim)(ret);
 }
 
 static Variant HHVM_FUNCTION(pg_last_notice, const Resource& connection) {
@@ -1370,7 +1370,7 @@ static Variant HHVM_FUNCTION(pg_fetch_array,
 
 static Variant HHVM_FUNCTION(pg_fetch_assoc,
   const Resource& result, const Variant& row /* = uninit_variant */) {
-  return f_pg_fetch_array(result, row, PGSQL_ASSOC);
+  return HHVM_FN(pg_fetch_array)(result, row, PGSQL_ASSOC);
 }
 
 static Variant HHVM_FUNCTION(pg_fetch_all, const Resource& result) {
@@ -1386,7 +1386,7 @@ static Variant HHVM_FUNCTION(pg_fetch_all, const Resource& result) {
 
   Array rows;
   for (int i = 0; i < num_rows; i++) {
-    Variant row = f_pg_fetch_assoc(result, i);
+    Variant row = HHVM_FN(pg_fetch_assoc)(result, i);
     rows.set(i, row);
   }
 
@@ -1408,7 +1408,7 @@ static Variant HHVM_FUNCTION(pg_fetch_result,
 
 static Variant HHVM_FUNCTION(pg_fetch_row,
   const Resource& result, const Variant& row /* = uninit_variant */) {
-  return f_pg_fetch_array(result, row, PGSQL_NUM);
+  return HHVM_FN(pg_fetch_array)(result, row, PGSQL_NUM);
 }
 
 ///////////////////// Field information //////////////////////////
@@ -1620,7 +1620,7 @@ static Variant HHVM_FUNCTION(pg_result_error_field,
 
   char * msg = res->get().errorField(fieldcode);
   if (msg) {
-    return f_trim(String(msg, CopyString));
+    return HHVM_FN(trim)(String(msg, CopyString));
   }
 
   FAIL_RETURN;
@@ -1634,7 +1634,7 @@ static Variant HHVM_FUNCTION(pg_result_error, const Resource& result) {
 
   const char * msg = res->get().errorMessage();
   if (msg) {
-    return f_trim(String(msg, CopyString));
+    return HHVM_FN(trim)(String(msg, CopyString));
   }
 
   FAIL_RETURN;

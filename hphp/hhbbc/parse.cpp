@@ -796,7 +796,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
         if (pi.defaultValue.m_type == KindOfUninit &&
             pi.phpCode != nullptr) {
           auto res = eval_cell_value([&] {
-              auto val = f_constant(StrNR(pi.phpCode));
+              auto val = HHVM_FN(constant)(StrNR(pi.phpCode));
               val.setEvalScalar();
               return *val.asTypedValue();
             });

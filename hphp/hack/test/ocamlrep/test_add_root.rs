@@ -112,7 +112,7 @@ impl U32Pair {
     }
 }
 impl ToOcamlRep for U32Pair {
-    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         let mut block = alloc.block_with_size(2);
         alloc.set_field(&mut block, 0, alloc.add_copy(self.fst()));
         alloc.set_field(&mut block, 1, alloc.add_copy(self.snd()));

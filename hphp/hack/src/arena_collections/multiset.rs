@@ -572,10 +572,7 @@ impl<'a, T: Ord> From<MultiSetMut<'a, T>> for SortedSet<'a, T> {
 }
 
 impl<T: ToOcamlRep + Ord> ToOcamlRep for SortedSet<'_, T> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         let len = self.len();
         let mut iter = self.iter().map(|x| x.to_ocamlrep(alloc));
         let (value, _) = ocamlrep::sorted_iter_to_ocaml_set(&mut iter, alloc, len);

@@ -1402,7 +1402,7 @@ bool HHVM_FUNCTION(ldap_set_option,
 
 bool HHVM_FUNCTION(ldap_close,
                    const Resource& link) {
-  return f_ldap_unbind(link);
+  return HHVM_FN(ldap_unbind)(link);
 }
 
 Variant HHVM_FUNCTION(ldap_list,
@@ -1890,7 +1890,7 @@ Variant HHVM_FUNCTION(ldap_get_values,
                       const Resource& link,
                       const Resource& result_entry,
                       const String& attribute) {
-  return f_ldap_get_values_len(link, result_entry, attribute);
+  return HHVM_FN(ldap_get_values_len)(link, result_entry, attribute);
 }
 
 bool HHVM_FUNCTION(ldap_control_paged_result,

@@ -1,0 +1,19 @@
+[RESULT] \test_function: (# of errors: 0) [16:9-15] [Allocation]:
+  shape()
+[RESULT] \test_function: (# of errors: 0) [18:9-15] [Allocation]:
+  shape()
+[RESULT] \test_method: (# of errors: 1) [23:9-15] [Allocation]:
+  shape()
+[RESULT] \test_method: (# of errors: 1) [25:9-15] [Allocation]:
+  shape()
+[FAILURE] \test_method: "[26:3-8]: Unsupported expression: Obj_get"
+[RESULT] \test_class_method: (# of errors: 0) [30:9-15] [Allocation]:
+  shape()
+[RESULT] \test_class_method: (# of errors: 0) [32:9-15] [Allocation]:
+  shape()
+[RESULT] \test_union: (# of errors: 1) [37:9-15] [Allocation]:
+  shape()
+[RESULT] \test_union: (# of errors: 1) [39:9-15] [Allocation]:
+  shape()
+[FAILURE] \test_union: "[42:3-8]: Unsupported expression: Obj_get"
+No errors

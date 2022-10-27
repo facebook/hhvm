@@ -617,8 +617,17 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       try {
         return SQLite::connect(dbData.m_path.native(), dbData.m_writable);
       } catch (SQLiteExc& e) {
+        auto mode = (dbData.m_writable == SQLite::OpenMode::ReadWriteCreate)
+                        ? "open or create"
+                        : "open";
+
         auto exception_str = folly::sformat(
-            "Couldn't open or create native Facts DB.  Key: {} Reason: {}",
+            "Couldn't {} native Facts DB.\n"
+#ifdef FACEBOOK
+            "You may be able to fix this by running 'arc reset facts'\n"
+#endif
+            "Key: {} Reason: {}\n",
+            mode,
             dbData.toDebugString(),
             e.what());
         XLOG(ERR, exception_str);
@@ -667,6 +676,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
 
     db.setSynchronousLevel(SQLite::SynchronousLevel::OFF);
     {
+      XLOGF(INFO, "Trying to open SQLite DB at {}", dbData.m_path.native());
       auto txn = db.begin();
       createSchema(txn);
       rebuildIndices(txn);

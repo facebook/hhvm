@@ -104,7 +104,11 @@ std::string getPermissionsForPath(const fs::path& path) {
   try {
     auto perms = static_cast<typename std::underlying_type<fs::perms>::type>(
         fs::status(path).permissions());
-    return folly::sformat("{:04o}", perms);
+    if (perms == 0xffff) {
+      return "unknown/may not exist";
+    } else {
+      return folly::sformat("{:04o}", perms);
+    }
   } catch (...) {
   }
   return "??";
@@ -144,6 +148,7 @@ std::string getDirectoryTreeInformation(const fs::path& base_path) {
     path = path.parent_path();
   }
 
+  ss << "\n";
   while (!tree.empty()) {
     path = tree.top();
     try {
@@ -158,7 +163,11 @@ std::string getDirectoryTreeInformation(const fs::path& base_path) {
           path.native());
 
       ss << folly::sformat(
-          "({} -> {} {}/{}) ", path.native(), permissions, username, groupname);
+          "({} -> {} {}/{})\n",
+          path.native(),
+          permissions,
+          username,
+          groupname);
     } catch (std::exception& e) {
       XLOGF(
           ERR,

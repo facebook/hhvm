@@ -31,7 +31,7 @@ TRACE_SET_MOD(debugger);
 using namespace Eval;
 
 String HHVM_FUNCTION(hphpd_auth_token) {
-  TRACE(5, "in f_hphpd_auth_token()\n");
+  TRACE(5, "in hphpd_auth_token()\n");
   if (auto proxy = Debugger::GetProxy()) {
     return String(proxy->requestAuthToken());
   }
@@ -40,7 +40,7 @@ String HHVM_FUNCTION(hphpd_auth_token) {
 }
 
 String HHVM_FUNCTION(hphp_debug_session_auth) {
-  TRACE(5, "in f_hphp_debug_session_auth()\n");
+  TRACE(5, "in hphp_debug_session_auth()\n");
   if (auto proxy = Debugger::GetProxy()) {
     return String(proxy->requestSessionAuth());
   } else {
@@ -55,7 +55,7 @@ String HHVM_FUNCTION(hphp_debug_session_auth) {
 
 // Hard breakpoint for the VSDebug extension debugger.
 bool HHVM_FUNCTION(hphp_debug_break, bool condition /* = true */) {
-  TRACE(5, "in f_hphp_debug_break()\n");
+  TRACE(5, "in hphp_debug_break()\n");
   if (!condition || g_context->m_dbgNoBreak) {
     TRACE(5, "bail !%d || !%d || %d\n", RuntimeOption::EnableHphpdDebugger,
           condition, g_context->m_dbgNoBreak);
@@ -77,14 +77,14 @@ bool HHVM_FUNCTION(hphp_debug_break, bool condition /* = true */) {
     return true;
   }
 
-  TRACE(5, "out f_hphp_debug_break()\n");
+  TRACE(5, "out hphp_debug_break()\n");
   return false;
 }
 
 void HHVM_FUNCTION(hphpd_break, bool condition /* = true */) {
-  TRACE(5, "in f_hphpd_break()\n");
-  f_hphp_debug_break(condition);
-  TRACE(5, "out f_hphpd_break()\n");
+  TRACE(5, "in hphpd_break()\n");
+  HHVM_FN(hphp_debug_break)(condition);
+  TRACE(5, "out hphpd_break()\n");
 }
 
 // Quickly determine if a debugger is attached to the current thread.

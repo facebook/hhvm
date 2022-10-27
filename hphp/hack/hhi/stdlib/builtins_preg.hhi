@@ -160,6 +160,7 @@ const int PREG_RECURSION_LIMIT_ERROR = 0;
 const int PREG_BAD_UTF8_ERROR = 0;
 const int PREG_BAD_UTF8_OFFSET_ERROR = 0;
 const int PREG_BAD_REGEX_ERROR = 0;
+const int PREG_JIT_STACKLIMIT_ERROR = 0;
 
 const int PREG_GREP_INVERT = 0;
 const string PCRE_VERSION = '';

@@ -9,6 +9,15 @@
 module ST = Shape_analysis_types
 module SS = Shape_analysis_solver
 module HT = Hips_types
+module PP = Shape_analysis_pretty_printer
+
+let empty_typing_env_for_debugging =
+  Tast_env.tast_env_as_typing_env
+    (Tast_env.empty
+    @@ Provider_context.empty_for_debugging
+         ~popt:ParserOptions.default
+         ~tcopt:TypecheckerOptions.default
+         ~deps_mode:(Typing_deps_mode.InMemoryMode None))
 
 module Intra_shape :
   HT.Intra
@@ -23,6 +32,12 @@ module Intra_shape :
   type inter_constraint = ST.inter_constraint_
 
   type any_constraint = ST.any_constraint
+
+  let debug_any_constraint = function
+    | HT.Intra intra_constr ->
+      PP.show_constraint empty_typing_env_for_debugging intra_constr
+    | HT.Inter inter_constr ->
+      PP.show_inter_constraint empty_typing_env_for_debugging inter_constr
 
   let is_same_entity = ST.equal_entity_
 

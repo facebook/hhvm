@@ -1,0 +1,7 @@
+[RESULT] \test: (# of errors: 0) [6:9-15] [Allocation]:
+  shape()
+[RESULT] \test: (# of errors: 0) [7:9-15] [Allocation]:
+  shape()
+[RESULT] \test: (# of errors: 0) [9:13-19] [Allocation]:
+  shape()
+No errors

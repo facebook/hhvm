@@ -84,7 +84,7 @@ struct c_ExternalThreadEventWaitHandle;
  *
  * Example:
  *
- * Object f_gen_foo(int max_value) {
+ * Object HHVM_FUNCTION(gen_foo, int max_value) {
  *   // validate user input early
  *   if (max_value < 0) {
  *     SystemLib::throwInvalidArgumentExceptionObject(

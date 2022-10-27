@@ -41,10 +41,7 @@ impl<K> Default for Set<'_, K> {
 }
 
 impl<K: ToOcamlRep + Ord> ToOcamlRep for Set<'_, K> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         let len = self.count();
         let mut iter = self.iter().map(|x| x.to_ocamlrep(alloc));
         let (value, _) = ocamlrep::sorted_iter_to_ocaml_set(&mut iter, alloc, len);

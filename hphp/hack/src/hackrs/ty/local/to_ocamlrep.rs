@@ -6,10 +6,7 @@
 use pos::ToOxidized;
 
 impl<R: crate::reason::Reason> ocamlrep::ToOcamlRep for super::ty::Ty<R> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         // This implementation of `to_ocamlrep` (which allocates in an arena,
         // converts to OCaml, then drops the arena) violates a `ToOcamlRep`
         // requirement: we may not drop values after passing them to `alloc.add`

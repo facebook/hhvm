@@ -348,12 +348,12 @@ static bool resolveConstant(const char *p, int64_t len, Variant &cns) {
 
   String cname(p, len, CopyString);
 
-  if (!f_defined(cname)) {
+  if (!HHVM_FN(defined)(cname)) {
     cns = uninit_null();
     return false;
   }
 
-  cns = f_constant(cname);
+  cns = HHVM_FN(constant)(cname);
   return true;
 }
 

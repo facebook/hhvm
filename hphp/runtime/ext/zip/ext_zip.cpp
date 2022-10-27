@@ -31,7 +31,7 @@ static String to_full_path(const String& filename) {
   if (filename.charAt(0) == '/') {
     return filename;
   }
-  return f_getcwd().toString() + String::FromChar('/') + filename;
+  return HHVM_FN(getcwd)().toString() + String::FromChar('/') + filename;
 }
 
 // A wrapper for `zip_open` that prepares a full path

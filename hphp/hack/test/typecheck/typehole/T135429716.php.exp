@@ -1,0 +1,32 @@
+File "T135429716.php", line 22, characters 12-25:
+Invalid return type (Typing[4110])
+  File "T135429716.php", line 21, characters 35-35:
+  Expected `T`
+  File "T135429716.php", line 32, characters 19-21:
+  But got `int`
+  File "T135429716.php", line 7, characters 35-35:
+    via this generic `T`
+File "T135429716.php", line 22, characters 23-24:
+Invalid argument (Typing[4110])
+  File "T135429716.php", line 32, characters 19-21:
+  Expected `int`
+  File "T135429716.php", line 7, characters 27-27:
+    via this generic `T`
+  File "T135429716.php", line 21, characters 27-27:
+  But got `T`
+File "T135429716.php", line 26, characters 12-25:
+Invalid return type (Typing[4110])
+  File "T135429716.php", line 25, characters 36-36:
+  Expected `T`
+  File "T135429716.php", line 35, characters 21-23:
+  But got `int`
+  File "T135429716.php", line 7, characters 35-35:
+    via this generic `T`
+File "T135429716.php", line 26, characters 23-24:
+Invalid argument (Typing[4110])
+  File "T135429716.php", line 35, characters 21-23:
+  Expected `int`
+  File "T135429716.php", line 7, characters 27-27:
+    via this generic `T`
+  File "T135429716.php", line 25, characters 28-28:
+  But got `T`

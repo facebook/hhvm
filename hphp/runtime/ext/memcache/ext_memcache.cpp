@@ -201,7 +201,7 @@ static std::vector<char> memcache_prepare_for_storage(const MemcacheData* data,
     v = var.toString();
   } else {
     flag |= MMC_SERIALIZED;
-    v = f_serialize(var);
+    v = HHVM_FN(serialize)(var);
   }
   std::vector<char> payload;
   size_t value_len = v.length();

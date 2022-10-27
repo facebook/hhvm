@@ -5,7 +5,6 @@
 
 use bumpalo::Bump;
 use ocamlrep::Allocator;
-use ocamlrep::OpaqueValue;
 use ocamlrep::ToOcamlRep;
 
 use super::has_arena::HasArena;
@@ -22,7 +21,7 @@ impl<'a> HasArena<'a> for State<'a> {
 }
 
 impl ToOcamlRep for State<'_> {
-    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         ().to_ocamlrep(alloc)
     }
 }

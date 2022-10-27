@@ -8,7 +8,6 @@ mod decl_mode_smart_constructors_generated;
 
 use bumpalo::Bump;
 use ocamlrep::Allocator;
-use ocamlrep::OpaqueValue;
 use ocamlrep::ToOcamlRep;
 use parser_core_types::lexable_token::LexableToken;
 use parser_core_types::source_text::SourceText;
@@ -257,7 +256,7 @@ where
 }
 
 impl<S> ToOcamlRep for State<'_, '_, S> {
-    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         self.stack().to_ocamlrep(alloc)
     }
 }

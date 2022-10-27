@@ -416,7 +416,7 @@ impl<'s, 'a, A: ocamlrep::Allocator> State<'s, 'a, A> {
 pub unsafe fn input_value<'s, 'a, A: ocamlrep::Allocator>(
     str: &'s [u8],
     alloc: &'a A,
-) -> ocamlrep::OpaqueValue<'a> {
+) -> ocamlrep::Value<'a> {
     let mut state = State::new(alloc, str);
-    ocamlrep::OpaqueValue::from_bits(state.input_val_from_string(str))
+    ocamlrep::Value::from_bits(state.input_val_from_string(str))
 }

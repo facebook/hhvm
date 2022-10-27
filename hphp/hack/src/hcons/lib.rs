@@ -123,10 +123,7 @@ impl<'de, T: Deserialize<'de> + Consable> Deserialize<'de> for Hc<T> {
 }
 
 impl<T: ToOcamlRep + Consable> ToOcamlRep for Hc<T> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         self.0.to_ocamlrep(alloc)
     }
 }

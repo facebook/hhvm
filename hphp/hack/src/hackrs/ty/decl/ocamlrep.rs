@@ -12,10 +12,7 @@ use crate::reason::Reason;
 
 // See comment on definition of `Enforceable`
 impl<P: pos::Pos> ToOcamlRep for Enforceable<P> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         let mut block = alloc.block_with_size(2);
         let pos = self.as_ref().map_or_else(
             || alloc.add(oxidized_by_ref::pos::Pos::none()),
@@ -45,10 +42,7 @@ impl<P: pos::Pos> FromOcamlRep for Enforceable<P> {
 // from other information in the class in hackrs (whereas OCaml stores it
 // redundantly).
 impl<R: Reason> ToOcamlRep for FoldedClass<R> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         // Destructure to help ensure we convert every field.
         let Self {
             name,
@@ -177,7 +171,7 @@ fn shape_field_name_to_ocamlrep<'a, A: ocamlrep::Allocator, P: ToOcamlRep>(
     alloc: &'a A,
     name: &'a TshapeFieldName,
     field_name_pos: &'a ShapeFieldNamePos<P>,
-) -> ocamlrep::OpaqueValue<'a> {
+) -> ocamlrep::Value<'a> {
     let simple_pos = || match field_name_pos {
         ShapeFieldNamePos::Simple(p) => p.to_ocamlrep(alloc),
         ShapeFieldNamePos::ClassConst(..) => panic!("expected ShapeFieldNamePos::Simple"),
@@ -241,10 +235,7 @@ enum OcamlShapeFieldName<P> {
 }
 
 impl<R: Reason> ToOcamlRep for ShapeFieldType<R> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         let mut block = alloc.block_with_size_and_tag(2usize, 0u8);
         let ShapeFieldType {
             optional,
@@ -260,12 +251,9 @@ impl<R: Reason> ToOcamlRep for ShapeFieldType<R> {
 // Hand-written because we represent shape field names differently (see comment
 // on `shape_field_name_to_ocamlrep`) and don't represent TanySentinel.
 impl<R: Reason> ToOcamlRep for Ty_<R> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         match self {
-            Ty_::Tthis => ocamlrep::OpaqueValue::int(0),
+            Ty_::Tthis => ocamlrep::Value::int(0),
             Ty_::Tapply(x) => {
                 let mut block = alloc.block_with_size_and_tag(2usize, 0u8);
                 alloc.set_field(&mut block, 0, alloc.add(&x.0));
@@ -278,7 +266,7 @@ impl<R: Reason> ToOcamlRep for Ty_<R> {
                 alloc.set_field(&mut block, 1, alloc.add(&x.typeconsts));
                 block.build()
             }
-            Ty_::Tmixed => ocamlrep::OpaqueValue::int(1),
+            Ty_::Tmixed => ocamlrep::Value::int(1),
             Ty_::Tlike(x) => {
                 let mut block = alloc.block_with_size_and_tag(1usize, 2u8);
                 alloc.set_field(&mut block, 0, alloc.add(&*x));
@@ -289,9 +277,9 @@ impl<R: Reason> ToOcamlRep for Ty_<R> {
                 alloc.set_field(&mut block, 0, alloc.add(&())); // TanySentinel
                 block.build()
             }
-            Ty_::Terr => ocamlrep::OpaqueValue::int(2),
-            Ty_::Tnonnull => ocamlrep::OpaqueValue::int(3),
-            Ty_::Tdynamic => ocamlrep::OpaqueValue::int(4),
+            Ty_::Terr => ocamlrep::Value::int(2),
+            Ty_::Tnonnull => ocamlrep::Value::int(3),
+            Ty_::Tdynamic => ocamlrep::Value::int(4),
             Ty_::Toption(x) => {
                 let mut block = alloc.block_with_size_and_tag(1usize, 4u8);
                 alloc.set_field(&mut block, 0, alloc.add(&*x));
@@ -315,7 +303,7 @@ impl<R: Reason> ToOcamlRep for Ty_<R> {
             Ty_::Tshape(shape) => {
                 let (shape_kind, shape_field_type_map): &(_, _) = shape;
                 let map = if shape_field_type_map.is_empty() {
-                    ocamlrep::OpaqueValue::int(0)
+                    ocamlrep::Value::int(0)
                 } else {
                     let len = shape_field_type_map.len();
                     let mut iter = shape_field_type_map.iter().map(|(k, v)| {

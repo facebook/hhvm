@@ -12,7 +12,6 @@ use ocamlrep::BlockBuilder;
 pub use ocamlrep::FromOcamlRep;
 pub use ocamlrep::FromOcamlRepIn;
 use ocamlrep::MemoizationCache;
-use ocamlrep::OpaqueValue;
 use ocamlrep::ToOcamlRep;
 pub use ocamlrep::Value;
 
@@ -49,7 +48,7 @@ impl Pool {
     }
 
     #[inline(always)]
-    pub fn add<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> OpaqueValue<'a> {
+    pub fn add<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> Value<'a> {
         value.to_ocamlrep(self)
     }
 }
@@ -69,12 +68,12 @@ impl Allocator for Pool {
 
     #[inline(always)]
     fn block_with_size_and_tag(&self, size: usize, tag: u8) -> BlockBuilder<'_> {
-        let ptr = unsafe { ocamlpool_reserve_block(tag, size) as *mut OpaqueValue<'_> };
-        BlockBuilder::new(ptr as usize, size)
+        let ptr = unsafe { ocamlpool_reserve_block(tag, size) as *mut Value<'_> };
+        BlockBuilder::new(unsafe { std::slice::from_raw_parts_mut(ptr, size) })
     }
 
     #[inline(always)]
-    fn set_field<'a>(&self, block: &mut BlockBuilder<'a>, index: usize, value: OpaqueValue<'a>) {
+    fn set_field<'a>(&self, block: &mut BlockBuilder<'a>, index: usize, value: Value<'a>) {
         assert!(index < block.size());
         unsafe {
             caml_initialize(
@@ -84,7 +83,7 @@ impl Allocator for Pool {
         };
     }
 
-    unsafe fn block_ptr_mut<'a>(&self, block: &mut BlockBuilder<'a>) -> *mut OpaqueValue<'a> {
+    unsafe fn block_ptr_mut<'a>(&self, block: &mut BlockBuilder<'a>) -> *mut Value<'a> {
         block.address() as *mut _
     }
 
@@ -92,16 +91,16 @@ impl Allocator for Pool {
         &'a self,
         ptr: usize,
         size: usize,
-        f: impl FnOnce(&'a Self) -> OpaqueValue<'a>,
-    ) -> OpaqueValue<'a> {
+        f: impl FnOnce(&'a Self) -> Value<'a>,
+    ) -> Value<'a> {
         let bits = self.cache.memoized(ptr, size, || f(self).to_bits());
         // SAFETY: The only memoized values in the cache are those computed in
-        // the closure on the previous line. Since f returns OpaqueValue<'a>, any
-        // cached bits must represent a valid OpaqueValue<'a>,
-        unsafe { OpaqueValue::from_bits(bits) }
+        // the closure on the previous line. Since f returns Value<'a>, any
+        // cached bits must represent a valid Value<'a>,
+        unsafe { Value::from_bits(bits) }
     }
 
-    fn add_root<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> OpaqueValue<'a> {
+    fn add_root<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> Value<'a> {
         self.cache.with_cache(|| value.to_ocamlrep(self))
     }
 }

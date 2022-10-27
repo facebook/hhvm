@@ -12,7 +12,6 @@ use std::num::NonZeroUsize;
 use crate::Allocator;
 use crate::FromError;
 use crate::FromOcamlRep;
-use crate::OpaqueValue;
 use crate::ToOcamlRep;
 use crate::Value;
 
@@ -54,8 +53,8 @@ impl fmt::Debug for UnsafeOcamlPtr {
 }
 
 impl ToOcamlRep for UnsafeOcamlPtr {
-    fn to_ocamlrep<'a, A: Allocator>(&'a self, _alloc: &'a A) -> OpaqueValue<'a> {
-        unsafe { OpaqueValue::from_bits(self.0.get()) }
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, _alloc: &'a A) -> Value<'a> {
+        unsafe { Value::from_bits(self.0.get()) }
     }
 }
 
@@ -108,8 +107,8 @@ impl<T> fmt::Debug for NakedPtr<T> {
 }
 
 impl<T> ToOcamlRep for NakedPtr<T> {
-    fn to_ocamlrep<'a, A: Allocator>(&'a self, _alloc: &'a A) -> OpaqueValue<'a> {
-        unsafe { OpaqueValue::from_bits(self.0 as usize) }
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, _alloc: &'a A) -> Value<'a> {
+        unsafe { Value::from_bits(self.0 as usize) }
     }
 }
 

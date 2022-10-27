@@ -12,12 +12,11 @@ use crate::block::Header;
 use crate::Allocator;
 use crate::BlockBuilder;
 use crate::MemoizationCache;
-use crate::OpaqueValue;
 use crate::ToOcamlRep;
 use crate::Value;
 
 struct Chunk {
-    data: Box<[OpaqueValue<'static>]>,
+    data: Box<[Value<'static>]>,
     index: usize,
 
     /// Pointer to the prev arena segment.
@@ -28,7 +27,7 @@ impl Chunk {
     fn with_capacity(capacity: usize) -> Self {
         Self {
             index: 0,
-            data: vec![OpaqueValue::int(0); capacity].into_boxed_slice(),
+            data: vec![Value::int(0); capacity].into_boxed_slice(),
             prev: None,
         }
     }
@@ -42,7 +41,7 @@ impl Chunk {
     }
 
     #[inline]
-    pub fn alloc(&mut self, requested_size: usize) -> &mut [OpaqueValue<'static>] {
+    pub fn alloc(&mut self, requested_size: usize) -> &mut [Value<'static>] {
         let previous_index = self.index;
         self.index += requested_size;
         &mut self.data[previous_index..self.index]
@@ -91,7 +90,7 @@ impl Arena {
 
     #[inline]
     #[allow(clippy::mut_from_ref)]
-    fn alloc<'a>(&'a self, requested_size: usize) -> &'a mut [OpaqueValue<'a>] {
+    fn alloc<'a>(&'a self, requested_size: usize) -> &'a mut [Value<'a>] {
         if !self.current_chunk.borrow().can_fit(requested_size) {
             let prev_chunk_capacity = self.current_chunk.borrow().capacity();
             let prev_chunk = self.current_chunk.replace(Chunk::with_capacity(max(
@@ -113,15 +112,13 @@ impl Arena {
         // of `chunk` to 'a. This allows callers to hold multiple mutable blocks
         // at once. This is safe because the blocks handed out by Chunk::alloc
         // are non-overlapping, so there is no aliasing.
-        unsafe {
-            std::mem::transmute::<&'_ mut [OpaqueValue<'static>], &'a mut [OpaqueValue<'a>]>(slice)
-        }
+        unsafe { std::mem::transmute::<&'_ mut [Value<'static>], &'a mut [Value<'a>]>(slice) }
     }
 
     /// # Safety
     ///
     /// Must be used only with values allocated by an `ocamlrep::Arena`.
-    pub unsafe fn make_transparent(value: OpaqueValue<'_>) -> Value<'_> {
+    pub unsafe fn make_transparent(value: Value<'_>) -> Value<'_> {
         Value::from_bits(value.to_bits())
     }
 
@@ -150,17 +147,17 @@ impl Allocator for Arena {
         // Safety: We need to make sure that the Header written to index 0 of
         // this slice is never observed as a Value. We guarantee that by not
         // exposing raw Chunk memory--only allocated Values.
-        block[0] = unsafe { OpaqueValue::from_bits(header.to_bits()) };
+        block[0] = unsafe { Value::from_bits(header.to_bits()) };
         let slice = &mut block[1..];
-        BlockBuilder::new(slice.as_ptr() as usize, slice.len())
+        BlockBuilder::new(slice)
     }
 
     #[inline(always)]
-    fn set_field<'a>(&self, block: &mut BlockBuilder<'a>, index: usize, value: OpaqueValue<'a>) {
+    fn set_field<'a>(&self, block: &mut BlockBuilder<'a>, index: usize, value: Value<'a>) {
         unsafe { *self.block_ptr_mut(block).add(index) = value }
     }
 
-    unsafe fn block_ptr_mut<'a>(&self, block: &mut BlockBuilder<'a>) -> *mut OpaqueValue<'a> {
+    unsafe fn block_ptr_mut<'a>(&self, block: &mut BlockBuilder<'a>) -> *mut Value<'a> {
         block.address() as *mut _
     }
 
@@ -168,16 +165,16 @@ impl Allocator for Arena {
         &'a self,
         ptr: usize,
         size: usize,
-        f: impl FnOnce(&'a Self) -> OpaqueValue<'a>,
-    ) -> OpaqueValue<'a> {
+        f: impl FnOnce(&'a Self) -> Value<'a>,
+    ) -> Value<'a> {
         let bits = self.cache.memoized(ptr, size, || f(self).to_bits());
         // SAFETY: The only memoized values in the cache are those computed in
-        // the closure on the previous line. Since f returns OpaqueValue<'a>, any
-        // cached bits must represent a valid OpaqueValue<'a>,
-        unsafe { OpaqueValue::from_bits(bits) }
+        // the closure on the previous line. Since f returns Value<'a>, any
+        // cached bits must represent a valid Value<'a>,
+        unsafe { Value::from_bits(bits) }
     }
 
-    fn add_root<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> OpaqueValue<'a> {
+    fn add_root<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> Value<'a> {
         self.cache.with_cache(|| value.to_ocamlrep(self))
     }
 }
@@ -193,9 +190,9 @@ mod tests {
         let arena = Arena::with_capacity(1000);
 
         let mut block = arena.block_with_size(3);
-        arena.set_field(&mut block, 0, OpaqueValue::int(1));
-        arena.set_field(&mut block, 1, OpaqueValue::int(2));
-        arena.set_field(&mut block, 2, OpaqueValue::int(3));
+        arena.set_field(&mut block, 0, Value::int(1));
+        arena.set_field(&mut block, 1, Value::int(2));
+        arena.set_field(&mut block, 2, Value::int(3));
         let block = block.build();
         // SAFETY: The block was allocated by an `Arena`.
         let block = unsafe { Arena::make_transparent(block) }

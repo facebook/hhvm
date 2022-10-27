@@ -696,10 +696,7 @@ impl<'a> ToOxidized<'a> for NReason {
 }
 
 impl ToOcamlRep for NReason {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-        &'a self,
-        alloc: &'a A,
-    ) -> ocamlrep::OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
         oxidized_by_ref::typing_reason::Reason::Rnone.to_ocamlrep(alloc)
     }
 }

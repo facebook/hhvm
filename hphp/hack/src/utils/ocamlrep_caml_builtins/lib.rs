@@ -25,14 +25,12 @@ impl From<Int64> for i64 {
 }
 
 impl ToOcamlRep for Int64 {
-    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> Value<'a> {
         let mut block = alloc.block_with_size_and_tag(2, CUSTOM_TAG);
         alloc.set_field(&mut block, 0, unsafe {
-            OpaqueValue::from_bits((&caml_int64_ops) as *const CustomOperations as usize)
+            Value::from_bits((&caml_int64_ops) as *const CustomOperations as usize)
         });
-        alloc.set_field(&mut block, 1, unsafe {
-            OpaqueValue::from_bits(self.0 as usize)
-        });
+        alloc.set_field(&mut block, 1, unsafe { Value::from_bits(self.0 as usize) });
         block.build()
     }
 }

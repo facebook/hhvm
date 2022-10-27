@@ -6,11 +6,9 @@
 use std::collections::HashMap;
 use std::fmt;
 use std::fmt::Debug;
-use std::marker::PhantomData;
 use std::ops::Index;
 
 use crate::Allocator;
-use crate::OpaqueValue;
 use crate::Value;
 
 /// Blocks with tags greater than or equal to NO_SCAN_TAG contain binary data,
@@ -31,14 +29,9 @@ pub const DOUBLE_ARRAY_TAG: u8 = 254;
 pub const CUSTOM_TAG: u8 = 255;
 
 /// A recently-allocated, not-yet-finalized Block.
-///
-/// Morally equivalent to a `&'b mut [OpaqueValue<'a>]` slice where `'a: 'b`,
-/// but `Allocator`s may choose to use some non-pointer value (such as an offset
-/// into a `Vec`) as the address.
+#[repr(transparent)]
 pub struct BlockBuilder<'a> {
-    address: usize,
-    size: usize,
-    _phantom: PhantomData<&'a mut [OpaqueValue<'a>]>,
+    fields: &'a mut [Value<'a>],
 }
 
 impl<'a> BlockBuilder<'a> {
@@ -46,35 +39,35 @@ impl<'a> BlockBuilder<'a> {
     /// `BlockBuilder::new` determines the meaning of `BlockBuilder` addresses).
     /// `size` must be greater than 0 and denotes the number of fields in the
     /// block.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `fields.is_empty()`.
     #[inline(always)]
-    pub fn new(address: usize, size: usize) -> Self {
-        if size == 0 {
+    pub fn new(fields: &'a mut [Value<'a>]) -> Self {
+        if fields.is_empty() {
             panic!()
         }
-        BlockBuilder {
-            address,
-            size,
-            _phantom: PhantomData,
-        }
+        Self { fields }
     }
 
-    /// The address passed to `BlockBuilder::new`. May be a pointer or an offset
-    /// (the `Allocator` which invokes `BlockBuilder::new` determines the
-    /// meaning of `BlockBuilder` addresses).
+    /// The address of the field slice passed to `BlockBuilder::new`.
     #[inline(always)]
     pub fn address(&self) -> usize {
-        self.address
+        self.fields.as_ptr() as _
     }
 
     /// The number of fields in this block.
     #[inline(always)]
     pub fn size(&self) -> usize {
-        self.size
+        self.fields.len()
     }
 
+    // TODO(jakebailey): This needs to be marked unsafe. The caller must
+    // initialize all of the fields.
     #[inline(always)]
-    pub fn build(self) -> OpaqueValue<'a> {
-        unsafe { OpaqueValue::from_bits(self.address) }
+    pub fn build(self) -> Value<'a> {
+        unsafe { Value::from_ptr(self.fields.as_ptr()) }
     }
 }
 
@@ -123,8 +116,8 @@ impl<'a> Block<'a> {
     pub(crate) fn clone_with<'b, A: Allocator>(
         self,
         alloc: &'b A,
-        seen: &mut HashMap<usize, OpaqueValue<'b>>,
-    ) -> OpaqueValue<'b> {
+        seen: &mut HashMap<usize, Value<'b>>,
+    ) -> Value<'b> {
         let mut block = alloc.block_with_size_and_tag(self.size(), self.tag());
         match self.as_values() {
             Some(fields) => {

@@ -18,7 +18,6 @@ use ocamlrep::from;
 use ocamlrep::Allocator;
 use ocamlrep::FromError;
 use ocamlrep::FromOcamlRep;
-use ocamlrep::OpaqueValue;
 use ocamlrep::ToOcamlRep;
 use ocamlrep::Value;
 use ocamlrep::CUSTOM_TAG;
@@ -158,23 +157,23 @@ struct CustomBlockOcamlRep<T>(&'static CustomOperations, Rc<T>);
 
 const CUSTOM_BLOCK_SIZE_IN_BYTES: usize = std::mem::size_of::<CustomBlockOcamlRep<()>>();
 const CUSTOM_BLOCK_SIZE_IN_WORDS: usize =
-    CUSTOM_BLOCK_SIZE_IN_BYTES / std::mem::size_of::<OpaqueValue<'_>>();
+    CUSTOM_BLOCK_SIZE_IN_BYTES / std::mem::size_of::<Value<'_>>();
 
 impl<T: CamlSerialize> ToOcamlRep for Custom<T> {
-    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> Value<'a> {
         let ops: &'static CustomOperations = <T as CamlSerialize>::operations();
 
         let mut block = alloc.block_with_size_and_tag(CUSTOM_BLOCK_SIZE_IN_WORDS, CUSTOM_TAG);
 
         // Safety: we don't call any method on `alloc` after this method.
-        let block_ptr: *mut OpaqueValue<'_> = unsafe { alloc.block_ptr_mut(&mut block) };
+        let block_ptr: *mut Value<'_> = unsafe { alloc.block_ptr_mut(&mut block) };
 
         // Safety: `alloc` guarantees that the `block_ptr` returned by
-        // `block_ptr_mut` is aligend to `align_of::<OpaqueValue>()` and valid
+        // `block_ptr_mut` is aligend to `align_of::<Value>()` and valid
         // for reads and writes of `CUSTOM_BLOCK_SIZE_IN_WORDS *
-        // size_of::<OpaqueValue>()` bytes. Since `CustomBlockOcamlRep` has size
-        // `CUSTOM_BLOCK_SIZE_IN_WORDS * size_of::<OpaqueValue>()`, its
-        // alignment is equal to `align_of::<OpaqueValue>()`, and no other
+        // size_of::<Value>()` bytes. Since `CustomBlockOcamlRep` has size
+        // `CUSTOM_BLOCK_SIZE_IN_WORDS * size_of::<Value>()`, its
+        // alignment is equal to `align_of::<Value>()`, and no other
         // reference to our newly-allocated block can exist, it's safe for us to
         // interpret `block_ptr` as a `&mut CustomBlockOcamlRep`.
         let block_ptr = block_ptr as *mut MaybeUninit<CustomBlockOcamlRep<T>>;
@@ -532,7 +531,7 @@ mod test {
     fn custom_block_ocamlrep_size() {
         assert_eq!(
             size_of::<CustomBlockOcamlRep<u8>>(),
-            2 * size_of::<OpaqueValue<'_>>()
+            2 * size_of::<Value<'_>>()
         );
     }
 
@@ -540,7 +539,7 @@ mod test {
     fn custom_block_ocamlrep_align() {
         assert_eq!(
             align_of::<CustomBlockOcamlRep<u8>>(),
-            align_of::<OpaqueValue<'_>>()
+            align_of::<Value<'_>>()
         );
     }
 }

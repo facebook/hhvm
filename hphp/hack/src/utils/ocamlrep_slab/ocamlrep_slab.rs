@@ -20,7 +20,7 @@ use std::fmt::Debug;
 use std::mem;
 
 use bytes::buf::UninitSlice;
-use ocamlrep::OpaqueValue;
+use ocamlrep::Header;
 use ocamlrep::ToOcamlRep;
 use ocamlrep::Value;
 use ocamlrep::NO_SCAN_TAG;
@@ -35,6 +35,46 @@ const SLAB_METADATA_WORDS: usize = 3;
 const SLAB_MAGIC_NUMBER: usize = 0x51A851A8;
 
 const WORD_SIZE: usize = mem::size_of::<OpaqueValue<'_>>();
+
+#[repr(transparent)]
+#[derive(Clone, Copy)]
+struct OpaqueValue<'a>(usize, std::marker::PhantomData<&'a ()>);
+
+impl<'a> OpaqueValue<'a> {
+    fn is_immediate(self) -> bool {
+        self.0 & 1 == 1
+    }
+    fn as_int(self) -> Option<isize> {
+        if self.is_immediate() {
+            Some((self.0 as isize) >> 1)
+        } else {
+            None
+        }
+    }
+    fn as_header(self) -> Header {
+        Header::from_bits(self.0)
+    }
+    unsafe fn from_bits(value: usize) -> OpaqueValue<'a> {
+        OpaqueValue(value, std::marker::PhantomData)
+    }
+    fn to_bits(self) -> usize {
+        self.0
+    }
+    unsafe fn add_ptr_offset(&mut self, diff: isize) {
+        if !self.is_immediate() {
+            self.0 = (self.0 as isize + diff) as usize;
+        }
+    }
+}
+
+impl Debug for OpaqueValue<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.as_int() {
+            Some(x) => write!(f, "{}", x),
+            None => write!(f, "0x{:x}", self.0),
+        }
+    }
+}
 
 // A contiguous memory region holding a tree of OCaml values reachable from a
 // single root value.
@@ -657,7 +697,7 @@ mod test {
         to_slab(&(42, "a".to_string())).unwrap()
     }
 
-    pub fn write_tuple_42_a(slab: &mut Slab<'_>) {
+    pub(super) fn write_tuple_42_a(slab: &mut Slab<'_>) {
         let tuple_slab = alloc_tuple_42_a();
         // Copy everything except the last word, which is an empty padding word
         // which provides space for the slab to be realigned when embedded in a

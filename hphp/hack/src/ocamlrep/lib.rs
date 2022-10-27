@@ -345,7 +345,6 @@ pub use impls::vec_from_ocaml_set_in;
 pub use ocamlrep_derive::FromOcamlRep;
 pub use ocamlrep_derive::FromOcamlRepIn;
 pub use ocamlrep_derive::ToOcamlRep;
-pub use value::OpaqueValue;
 pub use value::Value;
 
 // TODO: find the right forever home for these constants
@@ -374,14 +373,7 @@ pub trait ToOcamlRep {
     /// else `Allocator::memoized` may return incorrect results (this can
     /// generally only be done using internal-mutability types like `RefCell`,
     /// `Mutex`, or atomics, or by using `unsafe`).
-    ///
-    /// Non-immediate `OpaqueValue`s may be either a pointer or an offset into
-    /// some container. The `Allocator` chooses whether values will be
-    /// represented with pointers or offsets, and defines the meaning of those
-    /// offsets. Therefore, implementations of `ToOcamlRep` which return a block
-    /// value *must* return an `OpaqueValue` allocated by `alloc`, and that
-    /// value must *only* reference other values allocated by `alloc`.
-    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> OpaqueValue<'a>;
+    fn to_ocamlrep<'a, A: Allocator>(&'a self, alloc: &'a A) -> Value<'a>;
 }
 
 /// An interface for allocating OCaml values in some allocator-defined memory region.
@@ -402,7 +394,7 @@ pub trait Allocator: Sized {
     ///
     /// Panics if `index` is out of bounds for `block` (i.e., greater than or
     /// equal to the block's size).
-    fn set_field<'a>(&self, block: &mut BlockBuilder<'a>, index: usize, value: OpaqueValue<'a>);
+    fn set_field<'a>(&self, block: &mut BlockBuilder<'a>, index: usize, value: Value<'a>);
 
     /// # Safety
     ///
@@ -414,7 +406,7 @@ pub trait Allocator: Sized {
     /// Intended to be used only in implementations of `Allocator::set_field`
     /// and in conversion-to-OCaml functions requiring access to the raw memory
     /// of a block (e.g., `bytes_to_ocamlrep`).
-    unsafe fn block_ptr_mut<'a>(&self, block: &mut BlockBuilder<'a>) -> *mut OpaqueValue<'a>;
+    unsafe fn block_ptr_mut<'a>(&self, block: &mut BlockBuilder<'a>) -> *mut Value<'a>;
 
     #[inline(always)]
     fn block_with_size(&self, size: usize) -> BlockBuilder<'_> {
@@ -429,15 +421,15 @@ pub trait Allocator: Sized {
     /// overhead of maintaining a cache that comes with it), consider using
     /// `ocamlrep::rc::RcOc` instead of `Rc`.
     #[inline(always)]
-    fn add<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> OpaqueValue<'a> {
+    fn add<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> Value<'a> {
         value.to_ocamlrep(self)
     }
 
     /// Convert the given `Copy` data structure to an OCaml value.
     #[inline(always)]
-    fn add_copy<'a, T: ToOcamlRep + Copy + 'static>(&'a self, value: T) -> OpaqueValue<'a> {
+    fn add_copy<'a, T: ToOcamlRep + Copy + 'static>(&'a self, value: T) -> Value<'a> {
         let value_ref = &value;
-        // SAFETY: add/to_ocamlrep cannot reference `value` in the `OpaqueValue`
+        // SAFETY: add/to_ocamlrep cannot reference `value` in the `Value`
         // they return, and the `Copy + 'static` bounds ensure that we're not
         // working with a reference or Rc which might be invalidated.
         self.add(unsafe { std::mem::transmute::<&'_ T, &'a T>(value_ref) })
@@ -456,8 +448,8 @@ pub trait Allocator: Sized {
         &'a self,
         ptr: usize,
         size_in_bytes: usize,
-        f: impl FnOnce(&'a Self) -> OpaqueValue<'a>,
-    ) -> OpaqueValue<'a>;
+        f: impl FnOnce(&'a Self) -> Value<'a>,
+    ) -> Value<'a>;
 
     /// Convert the given data structure to an OCaml value. Structural sharing
     /// (via references or `Rc`) will be preserved.
@@ -483,7 +475,7 @@ pub trait Allocator: Sized {
     /// # Panics
     ///
     /// `add_root` is not re-entrant, and panics upon attempts to do so.
-    fn add_root<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> OpaqueValue<'a>;
+    fn add_root<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> Value<'a>;
 }
 
 /// A type which can be reconstructed from an OCaml value.

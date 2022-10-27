@@ -1,14 +1,14 @@
 // RUN: %hackc compile-infer %s | FileCheck %s
 // CHECK: attribute source_language = "hack"
 
-// CHECK: define _Hmain(this: *void) : *void {
+// CHECK: define $root.main(this: *void) : *void {
 // CHECK:  n0 = hhbc_print(hack_string("Hello, World!\n"))
 // CHECK:  ret hack_null()
 function main(): void {
   echo "Hello, World!\n";
 }
 
-// CHECK: define _Hcmp(this: *void, $a: *Mixed, $b: *Mixed) : *void {
+// CHECK: define $root.cmp(this: *void, $a: *Mixed, $b: *Mixed) : *void {
 // CHECK: #b0:
 // CHECK:   n0: *Mixed = load &$b
 // CHECK:   n1: *Mixed = load &$a
@@ -32,7 +32,7 @@ function cmp(mixed $a, mixed $b): void {
   }
 }
 
-// CHECK: define _Hret_str(this: *void) : *string {
+// CHECK: define $root.ret_str(this: *void) : *string {
 // CHECK: #b0:
 // CHECK:   n0 = hhbc_is_type_str(hack_string("hello, world\n"))
 // CHECK:   n1 = hhbc_not(n0)
@@ -40,7 +40,7 @@ function cmp(mixed $a, mixed $b): void {
 // CHECK: #b1:
 // CHECK:   prune hack_is_true(n1)
 // CHECK:   n2 = hhbc_verify_failed()
-// CHECK:   ret 0 // unreachable
+// CHECK:   unreachable
 // CHECK: #b2:
 // CHECK:   prune ! hack_is_true(n1)
 // CHECK:   ret hack_string("hello, world\n")
@@ -48,10 +48,10 @@ function ret_str(): string {
   return "hello, world\n";
 }
 
-// CHECK: define _Hbool_call(this: *void) : *void {
+// CHECK: define $root.bool_call(this: *void) : *void {
 // CHECK: #b0:
-// CHECK:   n0 = _Hf_bool(null, hack_bool(false))
-// CHECK:   n1 = _Hf_bool(null, hack_bool(true))
+// CHECK:   n0 = $root.f_bool(null, hack_bool(false))
+// CHECK:   n1 = $root.f_bool(null, hack_bool(true))
 // CHECK:   ret hack_null()
 function bool_call(): void {
   f_bool(false);

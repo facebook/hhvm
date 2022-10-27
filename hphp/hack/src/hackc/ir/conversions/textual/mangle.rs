@@ -6,6 +6,8 @@
 use ir::ClassId;
 use ir::StringInterner;
 
+const TOP_LEVELS_CLASS: &[u8] = b"$root";
+
 /// Used for things that can mangle themselves directly.
 pub(crate) trait Mangle {
     fn mangle(&self) -> String;
@@ -23,7 +25,7 @@ pub(crate) trait MangleClassId {
 
 impl Mangle for [u8] {
     fn mangle(&self) -> String {
-        // [A-Za-z0-9_] -> identity
+        // [A-Za-z0-9_$] -> identity
         // \ -> ::
         // anything else -> $xx
         let mut res = String::with_capacity(self.len());
@@ -32,6 +34,7 @@ impl Mangle for [u8] {
                 || (b'a'..=b'z').contains(&ch)
                 || (b'0'..=b'9').contains(&ch)
                 || (ch == b'_')
+                || (ch == b'$')
             {
                 res.push(ch as char);
             } else if ch == b'\\' {
@@ -48,33 +51,25 @@ impl Mangle for [u8] {
 
 // Classes and functions live in different namespaces.
 
-fn mangle_func_name(func: &[u8]) -> String {
-    format!("_H{}", func.mangle())
-}
-
-fn mangle_class_name(class: &[u8]) -> String {
-    format!("_C{}", class.mangle())
-}
-
 fn mangle_method_name(class: &[u8], method: &[u8]) -> String {
-    format!("_M{}::{}", class.mangle(), method.mangle())
+    format!("{}.{}", class.mangle(), method.mangle())
 }
 
 impl Mangle for ir::FunctionName<'_> {
     fn mangle(&self) -> String {
-        mangle_func_name(self.as_bytes())
+        mangle_method_name(TOP_LEVELS_CLASS, self.as_bytes())
     }
 }
 
 impl MangleId for ir::ClassId {
     fn mangle(&self, strings: &StringInterner) -> String {
-        mangle_class_name(self.as_bytes(strings))
+        self.as_bytes(strings).mangle()
     }
 }
 
 impl MangleId for ir::FunctionId {
     fn mangle(&self, strings: &StringInterner) -> String {
-        mangle_func_name(self.as_bytes(strings))
+        mangle_method_name(TOP_LEVELS_CLASS, self.as_bytes(strings))
     }
 }
 

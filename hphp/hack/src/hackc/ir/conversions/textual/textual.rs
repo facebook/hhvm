@@ -608,7 +608,7 @@ impl<'a> FuncWriter<'a> {
     }
 
     pub(crate) fn unreachable(&mut self) -> Result {
-        writeln!(self.w, "{INDENT}ret 0 // unreachable")?;
+        writeln!(self.w, "{INDENT}unreachable")?;
         Ok(())
     }
 

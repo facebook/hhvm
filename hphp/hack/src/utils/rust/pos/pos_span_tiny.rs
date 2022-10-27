@@ -439,7 +439,7 @@ mod test {
         // Though the span fits nicely into 63-bits, the resulting value is > 2^62 -
         // 1, OCaml's max (signed) int.
         let alloc = ocamlrep::Arena::new();
-        let value = unsafe { ocamlrep::Arena::make_transparent(span.to_ocamlrep(&alloc)) };
+        let value = span.to_ocamlrep(&alloc);
         let span_read_back = PosSpanTiny::from_ocamlrep(value).ok().unwrap();
 
         assert_eq!(span, span_read_back);

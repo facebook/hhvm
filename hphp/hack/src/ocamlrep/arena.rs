@@ -115,23 +115,14 @@ impl Arena {
         unsafe { std::mem::transmute::<&'_ mut [Value<'static>], &'a mut [Value<'a>]>(slice) }
     }
 
-    /// # Safety
-    ///
-    /// Must be used only with values allocated by an `ocamlrep::Arena`.
-    pub unsafe fn make_transparent(value: Value<'_>) -> Value<'_> {
-        Value::from_bits(value.to_bits())
-    }
-
     #[inline(always)]
     pub fn add<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> Value<'a> {
-        // SAFETY: We just allocated this value using `self`, which is an `Arena`.
-        unsafe { Self::make_transparent(value.to_ocamlrep(self)) }
+        value.to_ocamlrep(self)
     }
 
     #[inline(always)]
     pub fn add_root<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> Value<'a> {
-        // SAFETY: We just allocated this value using `self`, which is an `Arena`.
-        unsafe { Self::make_transparent(Allocator::add_root(self, value)) }
+        Allocator::add_root(self, value)
     }
 }
 
@@ -193,11 +184,7 @@ mod tests {
         arena.set_field(&mut block, 0, Value::int(1));
         arena.set_field(&mut block, 1, Value::int(2));
         arena.set_field(&mut block, 2, Value::int(3));
-        let block = block.build();
-        // SAFETY: The block was allocated by an `Arena`.
-        let block = unsafe { Arena::make_transparent(block) }
-            .as_block()
-            .unwrap();
+        let block = block.build().as_block().unwrap();
 
         assert_eq!(block.size(), 3);
         assert_eq!(block[0].as_int().unwrap(), 1);
@@ -209,12 +196,7 @@ mod tests {
     fn test_large_allocs() {
         let arena = Arena::with_capacity(1000);
 
-        let alloc_block = |size| {
-            // SAFETY: The block was allocated by an `Arena`.
-            unsafe { Arena::make_transparent(arena.block_with_size(size).build()) }
-                .as_block()
-                .unwrap()
-        };
+        let alloc_block = |size| arena.block_with_size(size).build().as_block().unwrap();
 
         let max = alloc_block(1000);
         assert_eq!(max.size(), 1000);
@@ -230,12 +212,7 @@ mod tests {
     fn perf_test() {
         let arena = Arena::with_capacity(10_000);
 
-        let alloc_block = |size| {
-            // SAFETY: The block was allocated by an `Arena`.
-            unsafe { Arena::make_transparent(arena.block_with_size(size).build()) }
-                .as_block()
-                .unwrap()
-        };
+        let alloc_block = |size| arena.block_with_size(size).build().as_block().unwrap();
 
         println!("Benchmarks for allocating [1] 200,000 times");
         let now = Instant::now();

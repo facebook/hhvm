@@ -541,86 +541,61 @@ let produce_results
 let embed_entity (ent : HT.entity) : entity_ = Inter ent
 
 let substitute_inter_intra
-    replace (inter_constr : inter_constraint_) (intra_constr : constraint_) :
+    ~forwards (inter_constr : inter_constraint_) (intra_constr : constraint_) :
     constraint_ option =
-  let replace_intra intra_constr replace forwards =
-    match intra_constr with
-    | Marks _
-    | Subsets (_, _) ->
-      None
-    | Static_key (variety, certainty, intra_ent_2, key, ty) ->
-      let (variety, certainty) =
-        if forwards then
-          (Needs, Maybe)
-        else
-          (variety, certainty)
-      in
-      Option.map
-        ~f:(fun x -> Static_key (variety, certainty, x, key, ty))
-        (replace intra_ent_2)
-    | Has_dynamic_key intra_ent_2 ->
-      Option.map ~f:(fun x -> Has_dynamic_key x) (replace intra_ent_2)
+  let replace intra_ent_2 =
+    match inter_constr with
+    | HT.Arg (param_ent, intra_ent_1)
+      when forwards && equal_entity_ intra_ent_1 intra_ent_2 ->
+      Some (embed_entity (HT.Param param_ent))
+    | HT.Arg (param_ent, intra_ent_1)
+      when (not forwards)
+           && equal_entity_ (Inter (HT.Param param_ent)) intra_ent_2 ->
+      Some intra_ent_1
+    | HT.ConstantInitial ent when equal_entity_ ent intra_ent_2 -> Some ent
+    | HT.ConstantIdentifier ident_ent ->
+      let ent = embed_entity (HT.ConstantIdentifier ident_ent) in
+      if equal_entity_ ent intra_ent_2 then
+        Some ent
+      else
+        None
+    | HT.Constant const_ent ->
+      let ent = embed_entity (HT.Constant const_ent) in
+      if equal_entity_ ent intra_ent_2 then
+        Some ent
+      else
+        None
+    | _ -> None
   in
-  match inter_constr with
-  | HT.Arg (param_ent, intra_ent_1) ->
-    let (replace_, forwards) =
-      match replace with
-      | `Backwards replace_ -> (replace_, false)
-      | `Forwards replace_ -> (replace_, true)
-    in
-    let replace intra_ent_2 = replace_ param_ent intra_ent_1 intra_ent_2 in
-    replace_intra intra_constr replace forwards
-  | HT.ConstantInitial ent ->
-    let replace intra_ent_2 =
-      if equal_entity_ ent intra_ent_2 then
-        Some ent
-      else
-        None
-    in
-    replace_intra intra_constr replace false
-  | HT.ConstantIdentifier ident_ent ->
-    let ent = embed_entity (HT.ConstantIdentifier ident_ent) in
-    let replace intra_ent_2 =
-      if equal_entity_ ent intra_ent_2 then
-        Some ent
-      else
-        None
-    in
-    replace_intra intra_constr replace false
-  | HT.Constant const_ent ->
-    let ent = embed_entity (HT.Constant const_ent) in
-    let replace intra_ent_2 =
-      if equal_entity_ ent intra_ent_2 then
-        Some ent
-      else
-        None
-    in
-    replace_intra intra_constr replace false
-  | _ -> Some intra_constr
-
-let replace_backwards
-    (param_ent : HT.param_entity)
-    (intra_ent_1 : entity_)
-    (intra_ent_2 : entity_) : entity =
-  if equal_entity_ (Inter (HT.Param param_ent)) intra_ent_2 then
-    Some intra_ent_1
-  else
+  match intra_constr with
+  | Marks _
+  | Subsets (_, _) ->
     None
+  | Static_key (variety, certainty, intra_ent_2, key, ty) ->
+    let (variety, certainty) =
+      if forwards then
+        (Needs, Maybe)
+      else
+        (variety, certainty)
+    in
+    Option.map
+      ~f:(fun x -> Static_key (variety, certainty, x, key, ty))
+      (replace intra_ent_2)
+  | Has_dynamic_key intra_ent_2 ->
+    Option.map ~f:(fun x -> Has_dynamic_key x) (replace intra_ent_2)
 
-let replace_forwards
-    (param_ent : HT.param_entity)
-    (intra_ent_1 : entity_)
-    (intra_ent_2 : entity_) : entity =
-  if equal_entity_ intra_ent_1 intra_ent_2 then
-    Some (embed_entity (HT.Param param_ent))
-  else
-    None
+let substitute_inter_intra_backwards = substitute_inter_intra ~forwards:false
 
-let substitute_inter_intra_backwards =
-  substitute_inter_intra (`Backwards replace_backwards)
-
-let substitute_inter_intra_forwards =
-  substitute_inter_intra (`Forwards replace_forwards)
+let substitute_inter_intra_forwards inter_constraint any_constraint =
+  (* This is a more honest misdirection than what we had before and is fixed later in the stack. *)
+  let forwards =
+    match inter_constraint with
+    | HT.ConstantIdentifier _
+    | HT.Constant _ ->
+      false
+    | _ -> true
+  in
+  substitute_inter_intra ~forwards inter_constraint any_constraint
 
 let equiv
     (any_constr_list_1 : any_constraint list)

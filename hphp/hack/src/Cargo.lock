@@ -2885,6 +2885,7 @@ name = "ocamlrep_slab"
 version = "0.0.0"
 dependencies = [
  "bytes",
+ "hash",
  "ocamlrep",
  "serde",
 ]

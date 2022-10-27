@@ -9,5 +9,6 @@ path = "ocamlrep_slab.rs"
 
 [dependencies]
 bytes = { version = "1.1", features = ["serde"] }
+hash = { path = "../hash" }
 ocamlrep = { path = "../../ocamlrep" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }

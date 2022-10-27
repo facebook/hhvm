@@ -100,7 +100,8 @@ impl<'a> Block<'a> {
         self.header().tag()
     }
 
-    fn as_value(self) -> Value<'a> {
+    #[inline(always)]
+    pub fn as_value(self) -> Value<'a> {
         unsafe { Value::from_ptr(&self.0[1]) }
     }
 
@@ -110,6 +111,12 @@ impl<'a> Block<'a> {
             return None;
         }
         Some(&self.0[1..])
+    }
+
+    #[inline(always)]
+    pub fn as_int_slice(self) -> &'a [usize] {
+        let slice = &self.0[1..];
+        unsafe { std::slice::from_raw_parts(slice.as_ptr().cast(), slice.len()) }
     }
 
     /// Helper for `Value::clone_with_allocator`.

@@ -4,6 +4,7 @@ import os
 import pathlib
 import sys
 import subprocess
+import typing
 from libfb.py.testutil import BaseFacebookTestCase
 
 # For lldb, until there's a buck-visible library we can use:
@@ -70,12 +71,21 @@ class LLDBTestBase(BaseFacebookTestCase):
         """ Get the topmost frame associated with the current thread """
         return self.thread.GetFrameAtIndex(0)
 
-    def run_command(self, *commands: str) -> str:
-        """ Run one or more LLDB commands in the interpreter """
+    def run_commands(self, commands: typing.List[str], check: bool = True) -> typing.Tuple[int, str]:
+        """ Run one or more LLDB commands in the interpreter.
+
+        Arguments:
+            commands: List of commands (strings) to run
+            check: If True (default), check that each command succeeds before running the next
+
+        Returns:
+            A (status, output) tuple corresponding to the status of the last command ran
+        """
         for command in commands:
             (status, output) = run_lldb_command(self.debugger, command)
-            self.assertEqual(status, 0, output)
-        return output
+            if check:
+                self.assertEqual(status, 0, output)
+        return (status, output)
 
     def run_until_breakpoint(self, breakpoint: str):
         """ Run until the breakpoint given by a function name is hit """
@@ -84,3 +94,4 @@ class LLDBTestBase(BaseFacebookTestCase):
         err = self.process.Continue()
         assert err.Success(), f"Unable to continue to breakpoint {breakpoint}"
         assert self.process.GetSelectedThread().GetStopReason() == lldb.eStopReasonBreakpoint, f"Unable to reach breakpoint at {breakpoint}"
+

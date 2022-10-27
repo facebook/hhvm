@@ -93,7 +93,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _internal_dict, top_module="")
 
     Defining this in this module (in addition to the main hhvm module) allows
     this script to be imported into LLDB separately; LLDB looks for a function with
-    this name as module load time.
+    this name at module load time.
 
     Arguments:
         debugger: Current debugger object

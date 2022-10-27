@@ -10,7 +10,16 @@ import re
 import typing
 
 class Command(abc.ABC):
-        
+
+    """ The name used to call the command """
+    command: str
+
+    """ A short, one-line description of the command """
+    description: str
+
+    """ Additional information to display after the usage """
+    epilog: typing.Optional[str] = None
+
     def __init__(self, debugger: lldb.SBDebugger, _internal_dict):
         self.parser = self.create_parser()
         self.help_string = self.parser.format_help()
@@ -52,24 +61,6 @@ class Command(abc.ABC):
     @abc.abstractmethod
     def __call__(self, debugger: lldb.SBDebugger, command: str, exe_ctx: lldb.SBExecutionContext, result: lldb.SBCommandReturnObject):
         ...
-
-    @property
-    @abc.abstractmethod
-    def command(self) -> str:
-        """ The name used to call the command """
-        ...
-
-    @property
-    @abc.abstractmethod
-    def description(self) -> str:
-        """ A short, one-line description of the command """
-        ...
-
-    @property
-    def epilog(self) -> typing.Optional[str]:
-        """ Additional information to display after the usage """
-        return None
-
 
 #------------------------------------------------------------------------------
 # Memoization.

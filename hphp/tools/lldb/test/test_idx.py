@@ -11,7 +11,7 @@ class IdxCommandTestCase(base.LLDBTestBase):
 
     def test_idx_command_on_fixed_vector(self):
         self.run_until_breakpoint("checkClassReifiedGenericMismatch")
-        output = self.run_command("idx c->m_slotIndex 0")
+        _, output = self.run_commands(["idx c->m_slotIndex 0"])
         self.assertTrue(output, "(unsigned short) *&(tmp) = 0")
 
     def test_idx_helper_on_fixed_vector(self):

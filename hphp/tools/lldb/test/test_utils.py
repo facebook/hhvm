@@ -64,7 +64,7 @@ class UtilsGivenFrameTestCase(base.LLDBTestBase):
         super().setUp(file = "quick/method2.php", interp = True)
 
     def test_nameof_func(self):
-        self.run_command("b lookupObjMethod", "continue", "thread step-out")
+        self.run_commands(["b lookupObjMethod", "continue", "thread step-out"])
         func = self.frame.FindVariable("func")
         name = utils.nameof(func)
         self.assertEqual(name, "B::foo")
@@ -83,13 +83,13 @@ class UtilsGivenFrameTestCase(base.LLDBTestBase):
         self.assertEqual(raw_type.name, "HPHP::Class *")
 
     def test_nameof_objectdata(self):
-        self.run_command("b newObjImpl", "continue", "thread step-out")
+        self.run_commands(["b newObjImpl", "continue", "thread step-out"])
         od = self.thread.return_value
         name = utils.nameof(od)
         self.assertEqual(name, "B")
 
     def test_rawptr(self):
-        self.run_command("b lookupObjMethod", "continue", "thread step-out")
+        self.run_commands(["b lookupObjMethod", "continue", "thread step-out"])
         func = self.frame.FindVariable("func")
         smart_ptr = func.GetChildMemberWithName("m_fullName")
         raw_ptr = utils.rawptr(smart_ptr)

@@ -1,5 +1,5 @@
 <?hh
-
+// T134611333
 class C {
     const dict<string, mixed> DICT = dict["a" => 2];
     // type incorrectly solved to: shape('a' => int)

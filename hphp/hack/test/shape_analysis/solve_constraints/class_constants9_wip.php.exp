@@ -1,0 +1,14 @@
+=== Shape analysis results for class_constants9_wip.php
+Summary after closing and simplifying for \C::DICT:
+[4:9-28] [Constant]:
+  shape('a' => int)
+[4:36-51] [Allocation]:
+  shape('a' => int)
+Summary after closing and simplifying for \D:
+Summary after closing and simplifying for \D::DICT:
+[8:9-28] [Constant]:
+  shape('a' => int, ?'b' => mixed)
+[8:36-51] [Allocation]:
+  shape('a' => int)
+Summary after closing and simplifying for \E:
+Summary after closing and simplifying for \main:

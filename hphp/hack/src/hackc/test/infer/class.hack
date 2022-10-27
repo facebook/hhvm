@@ -1,6 +1,6 @@
 // RUN: %hackc compile-infer %s | FileCheck %s
 
-// CHECK: type static::_CC = {
+// CHECK: type _CC$static = {
 // CHECK: }
 
 // CHECK: type _CC = {
@@ -8,18 +8,11 @@
 
 // CHECK: global static_singleton::_CC
 
-// CHECK: define get_static::_CC() : *static::_CC
-// CHECK:   n0: *static::_CC = load &static_singleton::_CC
-// CHECK:   n1 = raw_ptr_is_null(n0)
-// CHECK:   jmp b2, b1
-// CHECK:   #b2:
-// CHECK:   prune ! n1
-// CHECK:   ret n0
-// CHECK:   #b1:
-// CHECK:   prune n1
-// CHECK:   n2 = alloc_words(0)
-// CHECK:   store &static_singleton::_CC <- n2: *static::_CC
-// CHECK:   ret n2
+// CHECK: define _MC::24init_static() : void {
+// CHECK: #b0:
+// CHECK:   n0 = alloc_words(0)
+// CHECK:   store &static_singleton::_CC <- n0: *_CC$static
+// CHECK:   ret 0
 
 class C {
   public static function cmp(mixed $a, mixed $b): void {

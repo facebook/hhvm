@@ -9,14 +9,9 @@
 //! `(new C())->a` refers to the property "a" of an instance of "C".
 //! `C::$a` refers to the property "$a" of the static class for "C".
 //!
-//! All classes (static or non-static have a "vtable" field which is used to
-//! dispatch to well-known methods (defined in VTableIndex).
-//!
-//! To get the static class singleton call the class `get_static` function which
-//! initializes and returns the cached singleton (see `load_static_class`).
+//! To get the static class singleton call `load_static_class`.
 
 use anyhow::Error;
-use ir::BlockId;
 use log::trace;
 use strum_macros::EnumIter;
 
@@ -39,7 +34,7 @@ pub(crate) struct StaticClassId(pub(crate) ir::ClassId);
 
 impl MangleId for StaticClassId {
     fn mangle(&self, strings: &ir::StringInterner) -> String {
-        format!("static::{}", self.0.mangle(strings))
+        format!("{}$static", self.0.mangle(strings))
     }
 }
 
@@ -57,7 +52,7 @@ pub(crate) fn write_class(
     write_type(w, state, &class, IsStatic::Static)?;
     write_type(w, state, &class, IsStatic::NonStatic)?;
 
-    write_get_static(w, state, &class)?;
+    write_init_static(w, state, &class)?;
 
     let methods = std::mem::take(&mut class.methods);
     for method in methods {
@@ -91,22 +86,15 @@ pub(crate) fn static_ty(class: ir::ClassId, strings: &ir::StringInterner) -> tex
 }
 
 /// For a given class return the Ty for its non-static type.
-fn get_static_name(class: ir::ClassId, strings: &ir::StringInterner) -> String {
-    let cname = class.mangle(strings);
-    format!("get_static::{cname}")
+fn init_static_name(class: ir::ClassId, strings: &ir::StringInterner) -> String {
+    let method = ir::MethodName::new(ffi::Slice::new(b"$init_static"));
+    method.mangle(class, strings)
 }
 
 /// The name of the global singleton for a static class.
-pub(crate) fn static_singleton_name(state: &UnitState, class: &ir::Class<'_>) -> String {
-    let cname = class.name.mangle(&state.strings);
+pub(crate) fn static_singleton_name(class: ir::ClassId, strings: &ir::StringInterner) -> String {
+    let cname = class.mangle(strings);
     format!("static_singleton::{cname}")
-}
-
-/// Returns an iterator to help dynamic allocation of BlockIds.
-fn bid_allocator() -> impl Iterator<Item = BlockId> {
-    std::iter::successors(Some(BlockId::from_usize(1)), |n| {
-        Some(BlockId::from_usize(n.as_usize() + 1))
-    })
 }
 
 /// Write the type for a (class, is_static) with the properties of the class.
@@ -126,75 +114,42 @@ fn write_type(
     Ok(())
 }
 
-/// Build the `get_static` function for a static class.
+/// Build the `init_static` function for a static class.
 ///
 /// Declares globals for:
 ///   - static singleton
-///   - static vtable
-///   - non-static vtable
-/// Writes the `get_static` function itself which initializes the globals and
+/// Writes the `init_static` function itself which initializes the globals and
 /// returns the memoized static singleton.
-fn write_get_static(
+fn write_init_static(
     w: &mut dyn std::io::Write,
     state: &mut UnitState,
     class: &ir::Class<'_>,
 ) -> Result {
     textual::declare_global(
         w,
-        &static_singleton_name(state, class),
+        &static_singleton_name(class.name, &state.strings),
         textual::Ty::Ptr(Box::new(static_ty(class.name, &state.strings))),
     )?;
 
     textual::write_function(
         w,
         &state.strings,
-        &get_static_name(class.name, &state.strings),
+        &init_static_name(class.name, &state.strings),
         &class.src_loc,
         &[],
-        static_ty(class.name, &state.strings),
+        tx_ty!(void),
         |w| {
-            let mut bid_allocator = bid_allocator();
+            let sz = 0; // TODO: properties
+            let p = hack::call_builtin(w, hack::Builtin::AllocWords, [sz])?;
 
-            // Load the class singleton to see if it's already been initialized.
-            let singleton_name = static_singleton_name(state, class);
+            let singleton_name = static_singleton_name(class.name, &state.strings);
             let singleton_expr = textual::Expr::deref(textual::Var::named(singleton_name));
-            let singleton = w.load(static_ty(class.name, &state.strings), singleton_expr)?;
+            w.store(singleton_expr, p, static_ty(class.name, &state.strings))?;
 
-            let bid_uninitialized = bid_allocator.next().unwrap();
-            let bid_initialized = bid_allocator.next().unwrap();
-            let uninitialized = hack::call_builtin(w, hack::Builtin::RawPtrIsNull, [singleton])?;
-            w.jmp(&[bid_initialized, bid_uninitialized], ())?;
-
-            w.write_label(bid_initialized, &[])?;
-            w.prune_not(uninitialized)?;
-            w.ret(singleton)?;
-
-            w.write_label(bid_uninitialized, &[])?;
-            w.prune(uninitialized)?;
-
-            let singleton = get_static_init_static_singleton(w, state, class)?;
-
-            w.ret(singleton)?;
+            w.ret(0)?;
             Ok(())
         },
     )
-}
-
-/// Helper for `write_get_static` - initializes the static class singleton.
-fn get_static_init_static_singleton(
-    w: &mut textual::FuncWriter<'_>,
-    state: &UnitState,
-    class: &ir::Class<'_>,
-) -> Result<textual::Sid> {
-    let sz = class.properties.len();
-
-    let p = hack::call_builtin(w, hack::Builtin::AllocWords, [sz as i64])?;
-
-    let singleton_name = static_singleton_name(state, class);
-    let singleton_expr = textual::Expr::deref(textual::Var::named(singleton_name));
-    w.store(singleton_expr, p, static_ty(class.name, &state.strings))?;
-
-    Ok(p)
 }
 
 fn write_method(
@@ -230,6 +185,10 @@ pub(crate) fn load_static_class(
     class: ir::ClassId,
     strings: &ir::StringInterner,
 ) -> Result<textual::Sid> {
-    let name = get_static_name(class, strings);
-    w.call(&name, ())
+    // Blindly load the static singleton, assuming it's already been initialized.
+    let singleton_name = static_singleton_name(class, strings);
+    let singleton_expr = textual::Expr::deref(textual::Var::named(singleton_name));
+    let value = w.load(static_ty(class, strings), singleton_expr)?;
+    w.call("__sil_lazy_initialize", [value])?;
+    Ok(value)
 }

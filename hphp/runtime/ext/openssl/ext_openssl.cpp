@@ -1907,7 +1907,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
   case EVP_PKEY_RSA2:
     {
       ktype = OPENSSL_KEYTYPE_RSA;
-      RSA *rsa = EVP_PKEY_get0_RSA(pkey);
+      auto rsa = EVP_PKEY_get0_RSA(pkey);
       assertx(rsa);
       const BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp;
       RSA_get0_key(rsa, &n, &e, &d);
@@ -1930,7 +1930,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
   case EVP_PKEY_DSA4:
     {
       ktype = OPENSSL_KEYTYPE_DSA;
-      DSA *dsa = EVP_PKEY_get0_DSA(pkey);
+      auto dsa = EVP_PKEY_get0_DSA(pkey);
       assertx(dsa);
       const BIGNUM *p, *q, *g, *pub_key, *priv_key;
       DSA_get0_pqg(dsa, &p, &q, &g);
@@ -1946,7 +1946,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
   case EVP_PKEY_DH:
     {
       ktype = OPENSSL_KEYTYPE_DH;
-      DH *dh = EVP_PKEY_get0_DH(pkey);
+      auto dh = EVP_PKEY_get0_DH(pkey);
       assertx(dh);
       const BIGNUM *p, *q, *g, *pub_key, *priv_key;
       DH_get0_pqg(dh, &p, &q, &g);

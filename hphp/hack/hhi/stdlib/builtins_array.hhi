@@ -200,7 +200,7 @@ function array_pop(inout $array)[write_props];
 <<__PHPStdLib>>
 function array_push(inout $array, $var, ...$args)[];
 <<__PHPStdLib>>
-function array_rand($input, int $num_req = 1);
+function array_rand($input, int $num_req = 1)[leak_safe];
 <<__PHPStdLib>>
 function array_reduce($input, $callback, $initial = null);
 <<__PHPStdLib>>

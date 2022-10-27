@@ -752,6 +752,11 @@ let widen env widen_concrete_type ty =
      *)
     | (_, Tgeneric ("this", [])) -> ((env, None), ty)
     (* For other abstract types, just widen to the bound, if possible *)
+    | (r, Tnewtype (name, [ty], _))
+      when String.equal name Naming_special_names.Classes.cSupportDyn ->
+      let ((env, err), ty) = widen env ty in
+      let (env, ty) = TUtils.make_supportdyn r env ty in
+      ((env, err), ty)
     | (_, Tdependent (_, ty))
     | (_, Tnewtype (_, _, ty)) ->
       widen env ty

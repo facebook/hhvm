@@ -2820,7 +2820,6 @@ version = "0.0.0"
 dependencies = [
  "bstr 1.0.1",
  "bumpalo",
- "bytes",
  "hash",
  "indexmap",
  "ocamlrep_derive",
@@ -2878,6 +2877,16 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "ocamlrep",
+ "ocamlrep_slab",
+]
+
+[[package]]
+name = "ocamlrep_slab"
+version = "0.0.0"
+dependencies = [
+ "bytes",
+ "ocamlrep",
+ "serde",
 ]
 
 [[package]]
@@ -2983,6 +2992,7 @@ dependencies = [
  "no_pos_hash",
  "ocamlrep",
  "ocamlrep_caml_builtins",
+ "ocamlrep_slab",
  "oxidized",
  "pretty_assertions",
  "relative_path",

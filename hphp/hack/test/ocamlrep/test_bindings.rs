@@ -21,22 +21,17 @@ fn val<T: FromOcamlRep + ToOcamlRep>(value: T) -> usize {
 
 #[no_mangle]
 pub unsafe extern "C" fn convert_to_ocamlrep(value: usize) -> usize {
-    match ocamlrep::slab::OwnedSlab::from_ocaml(value) {
-        Some(slab) => slab.leak().to_bits(),
-        None => value,
-    }
+    let arena = Box::leak(Box::new(ocamlrep::Arena::new()));
+    let value = ocamlrep::Value::from_bits(value);
+    let value = value.clone_with_allocator(arena);
+    value.to_bits()
 }
 
 #[no_mangle]
 pub extern "C" fn realloc_in_ocaml_heap(value: usize) -> usize {
-    let slab = unsafe { ocamlrep::slab::OwnedSlab::from_ocaml(value) };
-    match slab {
-        None => value,
-        Some(slab) => {
-            let pool = unsafe { ocamlrep_ocamlpool::Pool::new() };
-            slab.rebase().value().clone_with_allocator(&pool).to_bits()
-        }
-    }
+    let value = unsafe { ocamlrep::Value::from_bits(value) };
+    let pool = unsafe { ocamlrep_ocamlpool::Pool::new() };
+    value.clone_with_allocator(&pool).to_bits()
 }
 
 // Primitive Tests

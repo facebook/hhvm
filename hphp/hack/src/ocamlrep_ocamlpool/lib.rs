@@ -189,7 +189,7 @@ pub unsafe fn add_to_ambient_pool<T: ToOcamlRep>(value: &T) -> usize {
 /// it. If any other thread interacts with the OCaml runtime or ocamlpool
 /// library during the execution of this function, undefined behavior will
 /// result.
-pub unsafe fn copy_slab_into_ocaml_heap(slab: ocamlrep::slab::SlabReader<'_>) -> usize {
+pub unsafe fn copy_slab_into_ocaml_heap(slab: ocamlrep_slab::SlabReader<'_>) -> usize {
     // Enter an ocamlpool region. Use `Pool` instead of `ocamlpool_enter`
     // directly so that `Pool` will invoke `ocamlpool_leave` in the event of a
     // panic (it does so in its `Drop` implementation).
@@ -201,7 +201,7 @@ pub unsafe fn copy_slab_into_ocaml_heap(slab: ocamlrep::slab::SlabReader<'_>) ->
     let block = ocamlpool_reserve_block(0, size - 1) as *mut usize;
     let block = block.sub(1);
     let block_words = std::slice::from_raw_parts_mut(block, size);
-    let value = ocamlrep::slab::copy_and_rebase_value(slab, block_words);
+    let value = ocamlrep_slab::copy_and_rebase_value(slab, block_words);
     let value = value.to_bits();
 
     // Write the correct GC color to every header in the slab (else values will

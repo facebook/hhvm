@@ -310,7 +310,6 @@ mod value;
 pub mod from;
 pub mod ptr;
 pub mod rc;
-pub mod slab;
 
 pub use arena::Arena;
 pub use block::Block;
@@ -333,7 +332,6 @@ pub use block::STRING_TAG;
 pub use bumpalo::Bump;
 pub use cache::MemoizationCache;
 pub use error::FromError;
-pub use error::SlabIntegrityError;
 pub use impls::bytes_from_ocamlrep;
 pub use impls::bytes_to_ocamlrep;
 pub use impls::sorted_iter_to_ocaml_map;

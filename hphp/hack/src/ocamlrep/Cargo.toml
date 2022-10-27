@@ -10,7 +10,6 @@ path = "lib.rs"
 [dependencies]
 bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
 bumpalo = { version = "3.8", features = ["collections"] }
-bytes = { version = "1.1", features = ["serde"] }
 hash = { path = "../utils/hash" }
 indexmap = { version = "1.9.1", features = ["rayon", "serde-1"] }
 ocamlrep_derive = { path = "../ocamlrep_derive" }

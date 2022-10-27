@@ -239,7 +239,7 @@ impl<'a> OpaqueValue<'a> {
     }
 
     #[inline(always)]
-    pub(crate) fn as_header(self) -> Header {
+    pub fn as_header(self) -> Header {
         Header::from_bits(self.0)
     }
 
@@ -254,7 +254,7 @@ impl<'a> OpaqueValue<'a> {
     }
 
     #[inline(always)]
-    pub(crate) unsafe fn add_ptr_offset(&mut self, diff: isize) {
+    pub unsafe fn add_ptr_offset(&mut self, diff: isize) {
         if !self.is_immediate() {
             self.0 = (self.0 as isize + diff) as usize;
         }

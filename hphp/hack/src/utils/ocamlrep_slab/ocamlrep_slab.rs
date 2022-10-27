@@ -13,6 +13,8 @@
 //! to reflect the slab's new location in memory. This fixup operation is called
 //! "rebasing".
 
+mod error;
+
 use std::cell::RefCell;
 use std::collections::HashSet;
 use std::fmt;
@@ -22,16 +24,16 @@ use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 
 use bytes::buf::UninitSlice;
+use ocamlrep::Allocator;
+use ocamlrep::BlockBuilder;
+use ocamlrep::Header;
+use ocamlrep::MemoizationCache;
+use ocamlrep::OpaqueValue;
+use ocamlrep::ToOcamlRep;
+use ocamlrep::Value;
+use ocamlrep::NO_SCAN_TAG;
 
-use crate::block::Header;
-use crate::block::NO_SCAN_TAG;
-use crate::Allocator;
-use crate::BlockBuilder;
-use crate::MemoizationCache;
-use crate::OpaqueValue;
-use crate::SlabIntegrityError;
-use crate::ToOcamlRep;
-use crate::Value;
+use crate::error::SlabIntegrityError;
 
 // The first three words in a slab are for the base pointer, the offset (in
 // words) of the root value from that base, and the magic number.
@@ -779,8 +781,9 @@ impl Debug for SlabReader<'_> {
 
 #[cfg(test)]
 mod test {
+    use ocamlrep::FromOcamlRep;
+
     use super::*;
-    use crate::FromOcamlRep;
 
     pub const MIN_SIZE_IN_BYTES: usize = (SLAB_METADATA_WORDS + 2) * WORD_SIZE;
 

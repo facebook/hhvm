@@ -43,12 +43,16 @@
 
 }}{{#type:string?}}{{!
 }}{{#field:isNested?}}{{!
-  }}{{#type:isBinaryString?}}{{#field:hasAdapter?}}org.apache.thrift.protocol.TProtocolUtil.readBinaryAsByteBuf(oprot){{/field:hasAdapter?}}{{^field:hasAdapter?}}oprot.readBinary().array(){{/field:hasAdapter?}}{{/type:isBinaryString?}}{{!
-  }}{{^type:isBinaryString?}}oprot.readString(){{/type:isBinaryString?}}{{!
+  }}{{#type:isBinaryString?}}{{#field:hasAdapter?}}org.apache.thrift.protocol.TProtocolUtil.readBinaryAsByteBuf(oprot){{/field:hasAdapter?}}{{^field:hasAdapter?}}oprot.readBinary(){{^type:javaType}}.array(){{/type:javaType}}{{/field:hasAdapter?}}{{/type:isBinaryString?}}{{!
+  }}{{^type:isBinaryString?}}{{!
+    }}oprot.readString({{> Utf8Validation}}){{!
+  }}{{/type:isBinaryString?}}{{!
 }}{{/field:isNested?}}{{!
 }}{{^field:isNested?}}{{!
-  }}{{#type:isBinaryString?}}{{#field:hasAdapter?}}{{#field:type}}{{> BoxedType}}{{/field:type}} {{field:javaName}} = org.apache.thrift.protocol.TProtocolUtil.readBinaryAsByteBuf(oprot);{{/field:hasAdapter?}}{{^field:hasAdapter?}}oprot.readBinary();{{/field:hasAdapter?}}{{/type:isBinaryString?}}{{!
-  }}{{^type:isBinaryString?}}{{> ThriftFieldType}} {{field:javaName}} = oprot.readString();{{/type:isBinaryString?}}{{!
+  }}{{#type:isBinaryString?}}{{#field:type}}{{> BoxedType}}{{/field:type}} {{field:javaName}} = {{#field:hasAdapter?}}org.apache.thrift.protocol.TProtocolUtil.readBinaryAsByteBuf(oprot);{{/field:hasAdapter?}}{{^field:hasAdapter?}}oprot.readBinary(){{^type:javaType}}.array(){{/type:javaType}};{{/field:hasAdapter?}}{{/type:isBinaryString?}}{{!
+  }}{{^type:isBinaryString?}}{{> ThriftFieldType}} {{field:javaName}} = {{!
+    }}oprot.readString({{> Utf8Validation}});{{!
+  }}{{/type:isBinaryString?}}{{!
 }}{{/field:isNested?}}{{!
 }}{{/type:string?}}{{!
 

@@ -16,6 +16,9 @@
 
 package org.apache.thrift.protocol;
 
+import com.facebook.thrift.compatibility.Utf8CodingErrorAction;
+import com.facebook.thrift.util.Utf8Util;
+import io.netty.buffer.Unpooled;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import org.apache.thrift.TException;
@@ -201,5 +204,16 @@ public abstract class TProtocol {
           TProtocolException.INVALID_DATA,
           "Not enough bytes to read the entire message, the data appears to be truncated");
     }
+  }
+
+  protected String readStringReportIfInvalid() {
+    return Utf8Util.readStringReportIfInvalid(Unpooled.wrappedBuffer(readBinary()));
+  }
+
+  public String readString(Utf8CodingErrorAction action) {
+    if (action == Utf8CodingErrorAction.REPORT) {
+      return readStringReportIfInvalid();
+    }
+    throw new RuntimeException("Malformed UTF8 action " + action + " not implemented");
   }
 }

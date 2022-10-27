@@ -105,10 +105,13 @@ jobs:
         - hhvm_clang
         os:
         - ${{ github.event_name == 'pull_request' && '16-core' || 'ubuntu-latest' }}
+        suite:
+        - quick
+        - -x hphp/test/github_excluded_tests slow
     runs-on: ${{matrix.os}}
     steps:
     - uses: actions/checkout@v3
-    - if: github.event_name != 'pull_request'
+    - if: matrix.suite != 'quick'
       run: |
         sudo tee -a /etc/locale.gen << EOF
         de_DE.UTF-8 UTF-8
@@ -136,7 +139,7 @@ jobs:
         zh_CN.GBK GBK
         zh_CN GB2312
         EOF
-    - if: github.event_name != 'pull_request'
+    - if: matrix.suite != 'quick'
       run: sudo dpkg-reconfigure -frontend=noninteractive locales
     - name: Download the ${{matrix.package}}.deb from build-and-run-quick-tests job
       uses: actions/download-artifact@v2
@@ -145,7 +148,7 @@ jobs:
     - run: sudo apt-get install ./${{matrix.package}}.deb
     - run: echo "HHVM_BIN=$(command -v hhvm)" >> "$GITHUB_ENV"
     - run: |
-        "$HHVM_BIN" hphp/test/run.php --repo ${{ github.event_name == 'pull_request' && 'quick' || '-x hphp/test/github_excluded_tests all' }}
+        "$HHVM_BIN" hphp/test/run.php --repo ${{matrix.suite}}
   install-deb-and-run-all-tests:
     needs: build-and-run-quick-tests
     strategy:

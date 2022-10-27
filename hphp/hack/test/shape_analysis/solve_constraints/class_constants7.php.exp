@@ -6,7 +6,7 @@ Summary after closing and simplifying for \C::DICT:
   shape('a' => int)
 Summary after closing and simplifying for \D:
 Summary after closing and simplifying for \D::DICT:
-[10:11-30] [Constant]:
+[8:11-30] [Constant]:
   shape('b' => string)
-[10:38-58] [Allocation]:
+[8:38-58] [Allocation]:
   shape('b' => string)

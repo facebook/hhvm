@@ -27,37 +27,6 @@ module Inter (I : Intra) = struct
       (constraint_map_2 : any_constraint list SMap.t) : bool =
     SMap.equal I.equiv constraint_map_1 constraint_map_2
 
-  let substitute_inter_inter_forwards
-      ~inter_constr_1 (inter_constr_2 : inter_constraint) :
-      inter_constraint option =
-    match (inter_constr_1, inter_constr_2) with
-    | ( Arg (param_entity_left, intra_entity_left),
-        Arg (param_entity_right, intra_entity_right) ) ->
-      if
-        I.is_same_entity
-          (I.embed_entity (Param param_entity_left))
-          intra_entity_right
-      then
-        Some (Arg (param_entity_right, intra_entity_left))
-      else
-        Some inter_constr_2
-    | _ -> None
-  (* TODO(T127947010) Add case for inter-procedural return constraint *)
-
-  let substitute_inter_inter_backwards
-      ~inter_constr_1 (inter_constr_2 : inter_constraint) :
-      inter_constraint option =
-    match (inter_constr_1, inter_constr_2) with
-    | ( Arg (param_entity_left, intra_entity_left),
-        Arg (param_entity_right, intra_entity_right) ) ->
-      if I.is_same_entity intra_entity_left intra_entity_right then
-        Some
-          (Arg (param_entity_right, I.embed_entity (Param param_entity_left)))
-      else
-        Some inter_constr_2
-    | _ -> None
-  (* TODO(T127947010) Add case for inter-procedural return constraint *)
-
   let substitute_inter_any_backwards
       (inter_constr_1 : inter_constraint) (constr : any_constraint) :
       any_constraint option =
@@ -66,10 +35,7 @@ module Inter (I : Intra) = struct
       Option.map
         ~f:(fun x -> Intra x)
         (I.substitute_inter_intra_backwards inter_constr_1 intra_constr)
-    | Inter inter_constr_2 ->
-      Option.map
-        ~f:(fun x -> Inter x)
-        (substitute_inter_inter_backwards ~inter_constr_1 inter_constr_2)
+    | Inter _inter_constr_2 -> None
 
   let substitute_inter_any_forwards
       (inter_constr_1 : inter_constraint) (constr : any_constraint) :
@@ -79,10 +45,7 @@ module Inter (I : Intra) = struct
       Option.map
         ~f:(fun x -> Intra x)
         (I.substitute_inter_intra_forwards inter_constr_1 intra_constr)
-    | Inter inter_constr_2 ->
-      Option.map
-        ~f:(fun x -> Inter x)
-        (substitute_inter_inter_forwards ~inter_constr_1 inter_constr_2)
+    | Inter _ -> None
 
   let string_of_const_ident_ent
       ({ class_name_opt; const_name; _ } : constant_identifier_entity) : string

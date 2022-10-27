@@ -497,44 +497,6 @@ pub fn to_slab<T: ToOcamlRep>(value: &T) -> Option<OwnedSlab> {
 }
 
 /// Copy the slab stored in `src` into `dest`, then fix up the slab's internal
-/// pointers in `dest`.
-///
-/// Padding bytes in `dest` (bytes before the first or after the last aligned
-/// word) will not be modified.
-///
-/// Returns `Err` if `src` does not contain a valid slab.
-///
-/// # Panics
-///
-/// This function will panic if `src` and `dest` have different lengths.
-pub fn copy_slab(src: &[u8], dest: &mut UninitSlice) -> Result<(), SlabIntegrityError> {
-    let dest_addr = dest.as_mut_ptr() as usize;
-
-    // SAFETY: leading_padding does not write from the pointer
-    let new_base = dest_addr + leading_padding(dest.as_mut_ptr(), dest.len());
-
-    let src_slab = Slab::from_bytes(src);
-
-    // SAFETY: UninitSlice expects us to not write unitialized Bytes, or use this to read. This
-    // code actually does read, but only after having initialized the memory by copying into the
-    // UninitSlice.
-    let dest_slab = unsafe { Slab::from_uninit_slice_mut(dest) };
-
-    src_slab.check_initialized()?;
-
-    // memcpy `src_slab` into `dest_slab`. Panic if they differ in length.
-    dest_slab.copy_from_slice(src_slab);
-
-    // Safety: we checked that `src_slab` is a valid slab, and slabs remain
-    // valid after a memcpy (i.e., slabs needing a rebase are still valid).
-    unsafe {
-        dest_slab.rebase_to(new_base);
-    }
-
-    Ok(())
-}
-
-/// Copy the slab stored in `src` into `dest`, then fix up the slab's internal
 /// pointers in `dest`. Return a `Value` referencing the slab root value in
 /// `dest`.
 ///
@@ -603,11 +565,6 @@ impl OwnedSlab {
     pub fn as_reader(&self) -> SlabReader<'_> {
         // SAFETY: `self.0` is a valid Slab
         unsafe { SlabReader::from_slab(&self.0).unwrap() }
-    }
-
-    #[cfg(test)]
-    fn from_slice(slice: &[usize]) -> Result<Self, SlabIntegrityError> {
-        Ok(Self(slab_from_words(slice.into())?))
     }
 
     pub fn rebase(mut self) -> RebasedSlab {
@@ -702,25 +659,8 @@ impl RebasedSlab {
 pub struct SlabReader<'a>(&'a [u8]);
 
 impl<'a> SlabReader<'a> {
-    /// Return a SlabReader for the slab embedded in the given byte slice.
-    ///
-    /// # Safety
-    ///
-    /// The caller must only invoke this function on byte slices which were
-    /// initialized by slab APIs (e.g., `SlabReader::as_bytes`, `copy_slab`).
-    pub unsafe fn from_bytes(bytes: &'a [u8]) -> Result<Self, SlabIntegrityError> {
-        let slab = Slab::from_bytes(bytes);
-        slab.check_initialized()?;
-        Ok(SlabReader(bytes))
-    }
-
-    /// Return a SlabReader for the given slice.
-    ///
-    /// # Safety
-    ///
-    /// The caller must only invoke this function on slices which were
-    /// initialized by slab APIs (e.g., `SlabReader::as_slice`).
-    pub unsafe fn from_words(words: &'a [usize]) -> Result<Self, SlabIntegrityError> {
+    /// Safety: `words` must be a valid slab
+    unsafe fn from_words(words: &'a [usize]) -> Result<Self, SlabIntegrityError> {
         let slab =
             std::slice::from_raw_parts(words.as_ptr() as *const OpaqueValue<'a>, words.len());
         slab.check_initialized()?;
@@ -736,29 +676,8 @@ impl<'a> SlabReader<'a> {
         Self::from_words(words)
     }
 
-    pub fn size_in_words(&self) -> usize {
-        Slab::from_bytes(self.0).len()
-    }
-
-    pub fn size_in_bytes(&self) -> usize {
-        self.size_in_words() * WORD_SIZE
-    }
-
     pub fn value_size_in_words(&self) -> usize {
         Slab::from_bytes(self.0).len() - SLAB_METADATA_WORDS
-    }
-
-    pub fn as_bytes(&self) -> &[u8] {
-        let ptr = Slab::from_bytes(self.0).as_ptr() as *const u8;
-        unsafe { std::slice::from_raw_parts(ptr, self.size_in_bytes()) }
-    }
-
-    pub fn as_slice(&self) -> &[usize] {
-        let slab = Slab::from_bytes(self.0);
-        // SAFETY: `usize` has the same size and alignment as `OpaqueValue`. The
-        // returned slice borrows `self`, so the associated memory will not be
-        // mutated while the slice exists.
-        unsafe { std::slice::from_raw_parts(slab.as_ptr() as *const usize, slab.len()) }
     }
 
     pub fn value(&self) -> Option<Value<'a>> {
@@ -826,30 +745,6 @@ mod test {
             <(isize, String)>::from_ocamlrep(value),
             Ok((42, "a".to_string()))
         );
-    }
-
-    #[test]
-    fn to_and_from_slice() {
-        let tuple_slab = alloc_tuple_42_a();
-        let tuple_reader = tuple_slab.as_reader();
-        let mut bytes = vec![0u8; tuple_reader.size_in_bytes() + WORD_SIZE];
-        // Iterate over all possible alignments for our byte slice, embed the
-        // slab in the slice (with appropriate padding), and attempt to convert
-        // it to a list of usizes and back to an OwnedSlab.
-        for offset in 0..WORD_SIZE {
-            let bytes = &mut bytes[offset..offset + tuple_reader.size_in_bytes()];
-            let slice =
-                unsafe { UninitSlice::from_raw_parts_mut(bytes.as_ptr() as *mut _, bytes.len()) };
-            copy_slab(tuple_reader.as_bytes(), slice).unwrap();
-            unsafe {
-                let reader = SlabReader::from_bytes(bytes).unwrap();
-                let owned_slab = OwnedSlab::from_slice(reader.as_slice()).unwrap();
-                assert_eq!(
-                    <(isize, String)>::from_ocamlrep(owned_slab.rebase().value()),
-                    Ok((42, "a".to_string()))
-                );
-            }
-        }
     }
 }
 

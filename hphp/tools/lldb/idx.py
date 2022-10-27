@@ -2,7 +2,12 @@
 
 import lldb
 import shlex
-import utils
+
+try:
+    # LLDB needs to load this outside of the usual Buck mechanism
+    import utils
+except ModuleNotFoundError:
+    import hhvm_lldb.utils as utils
 
 
 def fixed_vector_at(fv: lldb.SBValue, idx: int, hasher=None):

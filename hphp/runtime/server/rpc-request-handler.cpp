@@ -392,7 +392,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
                 response = Variant::attach(HHVM_FN(json_encode)(funcRet)).toString();
                 break;
               case ReturnEncodeType::Serialize:
-                response = f_serialize(funcRet);
+                response = HHVM_FN(serialize)(funcRet);
                 break;
               case ReturnEncodeType::Internal:
                 response = internal_serialize(funcRet);
@@ -414,7 +414,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
             )
           )).toString();
           break;
-        case 3: response = f_serialize(funcRet); break;
+        case 3: response = HHVM_FN(serialize)(funcRet); break;
       }
       if (serializeFailed) {
         code = 500;

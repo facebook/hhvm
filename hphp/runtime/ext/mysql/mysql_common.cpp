@@ -138,8 +138,8 @@ MYSQL* MySQL::GetConn(const Variant& link_identifier,
     raise_warning("supplied argument is not a valid MySQL-Link resource");
   }
   // Don't return a connection where mysql_real_connect() failed to most
-  // f_mysql_* APIs (the ones that deal with errno where we do want to do this
-  // anyway use MySQL::Get instead) as mysqlclient doesn't support passing
+  // native mysql_* APIs (the ones that deal with errno where we do want to do
+  // this anyway use MySQL::Get instead) as mysqlclient doesn't support passing
   // connections in that state and it can crash.
   if (mySQL && mySQL->m_last_error_set) {
     ret = nullptr;

@@ -219,7 +219,7 @@ Variant HHVM_FUNCTION(hphp_get_timers, bool get_as_float /* = true */) {
 Variant HHVM_FUNCTION(hphp_output_global_state, bool serialize /* = true */) {
   Array r = Array();
   if (serialize) {
-    return f_serialize(r);
+    return HHVM_FN(serialize)(r);
   } else {
     return r;
   }

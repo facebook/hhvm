@@ -70,7 +70,7 @@ struct VariableSerializer {
   static RDS_LOCAL(SerializationLimitWrapper, serializationSizeLimit);
 
   /**
-   * Top level entry function called by f_ functions.
+   * Top level entry function called by native builtins.
    */
   String serialize(const_variant_ref v, bool ret, bool keepCount = false);
   String serialize(const Variant& var, bool ret, bool keepCount = false) {

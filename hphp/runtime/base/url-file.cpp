@@ -99,9 +99,9 @@ bool UrlFile::open(const String& input_url, const String& mode) {
     }
   }
 
-  Variant user = f_parse_url(url, k_PHP_URL_USER);
+  Variant user = HHVM_FN(parse_url)(url, k_PHP_URL_USER);
   if (user.isString()) {
-    Variant pass = f_parse_url(url, k_PHP_URL_PASS);
+    Variant pass = HHVM_FN(parse_url)(url, k_PHP_URL_PASS);
     http.auth(user.toString().c_str(), pass.toString().c_str());
     url = HHVM_FN(preg_replace)(
       s_remove_user_pass_pattern,

@@ -399,7 +399,7 @@ struct Semaphore : SweepableResourceData {
      * them.  Semaphores are one such resource.  The fork manpage reads: "The
      * child does not inherit semaphore adjustments from its parent"
      */
-    if (pid != f_posix_getpid()) {
+    if (pid != HHVM_FN(posix_getpid)()) {
       return;
     }
 
@@ -523,7 +523,7 @@ Variant HHVM_FUNCTION(sem_get,
   auto sem_ptr = req::make<Semaphore>();
   sem_ptr->key   = key;
   sem_ptr->semid = semid;
-  sem_ptr->pid = f_posix_getpid();
+  sem_ptr->pid = HHVM_FN(posix_getpid)();
   sem_ptr->count = 0;
   sem_ptr->auto_release = auto_release;
   return Resource(sem_ptr);

@@ -173,7 +173,7 @@ struct MemcachedData {
         flags = MEMC_VAL_IS_JSON;
         break;
       default:
-        encoded = f_serialize(value);
+        encoded = HHVM_FN(serialize)(value);
         flags = MEMC_VAL_IS_SERIALIZED;
         break;
       }

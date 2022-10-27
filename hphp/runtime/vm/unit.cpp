@@ -348,7 +348,7 @@ void Unit::initialMerge() {
       ent.setStr("path", m_origFilepath->data());
       ent.setInt("index", index);
       if (RuntimeOption::ServerExecutionMode()) {
-        ent.setInt("uptime", f_server_uptime());
+        ent.setInt("uptime", HHVM_FN(server_uptime)());
       }
       StructuredLog::log("hhvm_first_units", ent);
     }

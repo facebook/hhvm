@@ -85,10 +85,6 @@ pub(crate) enum Builtin {
     ///   Bool(n: bool) -> *Mixed
     #[strum(props(Function = "hack_bool"))]
     Bool,
-    /// Gets the `idx` parameter from `params`.
-    ///   GetParam(params: *HackParams, idx: int) -> *Mixed
-    #[strum(props(Function = "get_param"))]
-    GetParam,
     /// Hhbc handlers.  See hphp/doc/bytecode.specification for docs.
     Hhbc(Hhbc),
     /// Turns a raw int into a Mixed.

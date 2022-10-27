@@ -2,8 +2,9 @@
 // CHECK: attribute source_language = "hack"
 
 // CHECK: define $root.main(this: *void) : *void {
-// CHECK:  n0 = $builtins.hhbc_print($builtins.hack_string("Hello, World!\n"))
-// CHECK:  ret $builtins.hack_null()
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hhbc_print($builtins.hack_string("Hello, World!\n"))
+// CHECK:   ret $builtins.hack_null()
 function main(): void {
   echo "Hello, World!\n";
 }
@@ -32,7 +33,16 @@ function cmp(mixed $a, mixed $b): void {
   }
 }
 
-// CHECK: define $root.ret_str(this: *void) : *string {
+// CHECK: define $root.cmp2(this: *void, $a: *HackInt, $b: *HackInt) : *void {
+function cmp2(int $a, int $b): void {
+  if ($a == $b) {
+    echo "equal";
+  } else {
+    echo "unequal";
+  }
+}
+
+// CHECK: define $root.ret_str(this: *void) : *HackString {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_is_type_str($builtins.hack_string("hello, world\n"))
 // CHECK:   n1 = $builtins.hhbc_not(n0)

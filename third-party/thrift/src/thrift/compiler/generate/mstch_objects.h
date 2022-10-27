@@ -37,6 +37,8 @@ namespace compiler {
 class mstch_base;
 struct mstch_context;
 
+constexpr auto kOnInvalidUtf8 = "onInvalidUtf8";
+
 struct mstch_element_position {
   mstch_element_position() = default;
   mstch_element_position(size_t index, size_t size)
@@ -52,6 +54,11 @@ struct field_generator_context {
   const t_field* serialization_prev = nullptr;
   const t_field* serialization_next = nullptr;
   int isset_index = -1;
+};
+
+enum CodingErrorAction {
+  Legacy = 0,
+  Report = 1,
 };
 
 // A factory creating mstch objects wrapping Thrift AST nodes.
@@ -998,6 +1005,11 @@ class mstch_field : public mstch_base {
              &mstch_field::has_structured_annotations},
             {"field:structured_annotations",
              &mstch_field::structured_annotations},
+            {"field:strings_compat?", &mstch_field::is_strings_compat},
+            {"field:coding_error_action_legacy?",
+             &mstch_field::is_coding_error_action_legacy},
+            {"field:coding_error_action_report?",
+             &mstch_field::is_coding_error_action_report},
         });
   }
   mstch::node name() { return field_->get_name(); }
@@ -1023,6 +1035,88 @@ class mstch_field : public mstch_base {
   }
   mstch::node structured_annotations() {
     return mstch_base::structured_annotations(field_);
+  }
+  mstch::node is_strings_compat() { return has_compat_annotation(kStringsUri); }
+  mstch::node is_coding_error_action_legacy() {
+    return has_compat_annotation(
+        kStringsUri,
+        kOnInvalidUtf8,
+        CodingErrorAction::Legacy,
+        CodingErrorAction::Report);
+  }
+  mstch::node is_coding_error_action_report() {
+    return has_compat_annotation(
+        kStringsUri,
+        kOnInvalidUtf8,
+        CodingErrorAction::Report,
+        CodingErrorAction::Report);
+  }
+  bool has_compat_annotation(const char* uri) {
+    if (field_->find_structured_annotation_or_null(uri) != nullptr) {
+      return true;
+    }
+    auto type = field_->get_type();
+    if (type->is_typedef()) {
+      if (t_typedef::get_first_structured_annotation_or_null(type, uri) !=
+          nullptr) {
+        return true;
+      }
+    }
+    if (field_context_ != nullptr && field_context_->strct != nullptr) {
+      if (field_context_->strct->find_structured_annotation_or_null(uri) !=
+          nullptr) {
+        return true;
+      }
+      if (field_context_->strct->program()->find_structured_annotation_or_null(
+              uri) != nullptr) {
+        return true;
+      }
+    }
+    return false;
+  }
+  bool has_compat_annotation(
+      const char* uri,
+      const char* field,
+      CodingErrorAction action,
+      CodingErrorAction def) {
+    auto type = field_->get_type();
+    if (type->is_typedef()) {
+      if (auto annotation =
+              t_typedef::get_first_structured_annotation_or_null(type, uri)) {
+        return has_compat_action(annotation, field, action, def);
+      }
+    }
+    if (auto annotation = field_->find_structured_annotation_or_null(uri)) {
+      return has_compat_action(annotation, field, action, def);
+    }
+    if (field_context_ == nullptr || field_context_->strct == nullptr) {
+      return false;
+    }
+    if (auto annotation =
+            field_context_->strct->find_structured_annotation_or_null(uri)) {
+      return has_compat_action(annotation, field, action, def);
+    }
+    if (auto annotation = field_context_->strct->program()
+                              ->find_structured_annotation_or_null(uri)) {
+      return has_compat_action(annotation, field, action, def);
+    }
+    return false;
+  }
+  bool has_compat_action(
+      const t_const* annotation,
+      const char* field,
+      CodingErrorAction action,
+      CodingErrorAction def) {
+    for (const auto& item : annotation->value()->get_map()) {
+      if (item.first->get_string() == field) {
+        return item.second->get_integer() == action;
+      }
+    }
+    if (action == def && annotation->value()->get_map().size() == 0) {
+      return true;
+    }
+
+    return false;
   }
 
  protected:

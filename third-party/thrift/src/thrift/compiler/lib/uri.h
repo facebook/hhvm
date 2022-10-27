@@ -59,6 +59,9 @@ constexpr auto kScopeEnumUri = "facebook.com/thrift/annotation/Enum";
 constexpr auto kScopeEnumValueUri = "facebook.com/thrift/annotation/EnumValue";
 constexpr auto kScopeConstUri = "facebook.com/thrift/annotation/Const";
 
+// compatibility
+constexpr auto kStringsUri = "facebook.com/thrift/annotation/Strings";
+
 // cpp
 constexpr auto kCppAdapterUri = "facebook.com/thrift/annotation/cpp/Adapter";
 constexpr auto kCppDisableLazyChecksumUri =

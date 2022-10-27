@@ -98,8 +98,7 @@ jobs:
           --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' \
           --print-build-logs \
           "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}" \
-          "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}.rustChannel.cargo" \
-          "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}.rustChannel.rust"
+          "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}.rust"
   install-deb-and-run-all-tests:
     needs: build-and-run-quick-tests
     strategy:

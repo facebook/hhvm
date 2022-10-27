@@ -587,13 +587,7 @@ let substitute_inter_intra
 let substitute_inter_intra_backwards = substitute_inter_intra ~forwards:false
 
 let substitute_inter_intra_forwards inter_constraint any_constraint =
-  (* This is a more honest misdirection than what we had before and is fixed later in the stack. *)
-  let forwards =
-    match inter_constraint with
-    | HT.Constant _ -> false
-    | _ -> true
-  in
-  substitute_inter_intra ~forwards inter_constraint any_constraint
+  substitute_inter_intra ~forwards:true inter_constraint any_constraint
 
 let equiv
     (any_constr_list_1 : any_constraint list)

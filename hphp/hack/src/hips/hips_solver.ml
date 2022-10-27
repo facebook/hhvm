@@ -188,15 +188,15 @@ module Inter (I : Intra) = struct
       | Inter (Constant const_ent) -> const_ent
       | _ -> failwith "Used invalid identifier"
     in
-    let constr_list_forwards =
+    let to_append_at_const_ident =
       List.filter_map
         constr_list_at_const_ent
-        ~f:(substitute_inter_any_forwards (Constant const_ent))
+        ~f:(substitute_inter_any_backwards (Constant const_ent))
     in
     input_constr_list_map
     |> SMap.update
          new_const_ident_string
-         (Option.map ~f:(fun x -> x @ constr_list_forwards))
+         (Option.map ~f:(fun x -> x @ to_append_at_const_ident))
 
   let substitute
       ~base_constraint_map

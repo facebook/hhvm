@@ -126,7 +126,7 @@ stdenv.mkDerivation rec {
       (if isDefaultStdlib then boost else boost.override { inherit stdenv; })
       brotli
       bzip2
-      (curl.override { openssl = openssl_1_1; })
+      curl
       (
         if isDefaultStdlib then
           double-conversion

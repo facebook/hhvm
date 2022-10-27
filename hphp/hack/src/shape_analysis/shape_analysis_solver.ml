@@ -590,9 +590,7 @@ let substitute_inter_intra_forwards inter_constraint any_constraint =
   (* This is a more honest misdirection than what we had before and is fixed later in the stack. *)
   let forwards =
     match inter_constraint with
-    | HT.ConstantIdentifier _
-    | HT.Constant _ ->
-      false
+    | HT.Constant _ -> false
     | _ -> true
   in
   substitute_inter_intra ~forwards inter_constraint any_constraint

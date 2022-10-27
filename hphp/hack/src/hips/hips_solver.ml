@@ -158,25 +158,25 @@ module Inter (I : Intra) = struct
       (constr_list_at_const_ent : any_constraint list)
       (input_constr_list_map : any_constraint list SMap.t) :
       any_constraint list SMap.t =
-    let constr_list_backwards =
+    let to_append_at_current_func =
       List.filter_map
         constr_list_at_const_ent
         ~f:
           (substitute_inter_any_backwards
              (ConstantInitial (const_initial_ent_of constr_list_at_const_ent)))
     in
-    let constr_list_forwards =
+    let to_append_at_const =
       List.filter_map
         current_func_constr_list
-        ~f:(substitute_inter_any_forwards (ConstantIdentifier ident_ent))
+        ~f:(substitute_inter_any_backwards (ConstantIdentifier ident_ent))
     in
     input_constr_list_map
     |> SMap.update
-         new_const_ident_string
-         (Option.map ~f:(fun x -> x @ constr_list_forwards))
-    |> SMap.update
          current_func_id
-         (Option.map ~f:(fun x -> x @ constr_list_backwards))
+         (Option.map ~f:(fun x -> x @ to_append_at_current_func))
+    |> SMap.update
+         new_const_ident_string
+         (Option.map ~f:(fun x -> x @ to_append_at_const))
 
   let propagate_constraints_2
       (constr_list_at_const_ent : any_constraint list)

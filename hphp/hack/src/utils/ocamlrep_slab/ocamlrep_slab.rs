@@ -636,6 +636,31 @@ impl OwnedSlab {
         let slab = self.rebase();
         Box::leak(slab.0).value().unwrap()
     }
+
+    /// Like `OwnedSlab::deserialize`, but without verifying that the serialized
+    /// slab is valid (for situations where that verification would be
+    /// prohibitively expensive and the serialized slab is known to be valid).
+    ///
+    /// # Safety
+    ///
+    /// The serialized value must be a valid slab (e.g., the result of
+    /// `OwnedSlab::serialize`).
+    pub unsafe fn deserialize_unchecked<'de, D: serde::Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Self, D::Error> {
+        let words: Box<[usize]> = serde::Deserialize::deserialize(deserializer)?;
+        let slab = std::mem::transmute::<Box<[usize]>, Box<Slab<'static>>>(words);
+        // Don't do an expensive integrity check, but do look for the magic
+        // number as a sanity check.
+        slab.check_initialized()
+            .map_err(|e| serde::de::Error::custom(format!("invalid slab: {}", e)))?;
+        if slab.base() != 0 {
+            return Err(serde::de::Error::custom(String::from(
+                "invalid slab: serialized slabs must be rebased to 0",
+            )));
+        }
+        Ok(Self(slab))
+    }
 }
 
 impl Debug for OwnedSlab {
@@ -660,12 +685,6 @@ fn deserialize_slab<'de, D: serde::Deserializer<'de>>(
     let slab = slab_from_words(words)
         .map_err(|e| serde::de::Error::custom(format!("invalid slab: {}", e)))?;
     Ok(slab)
-}
-
-pub unsafe fn buf_into_value<'a>(buf: &'a mut [u8]) -> Option<Value<'a>> {
-    let slab = Slab::from_bytes_mut(buf);
-    slab.rebase_to(slab.current_address());
-    slab.value()
 }
 
 fn slab_from_words(words: Box<[usize]>) -> Result<Box<Slab<'static>>, SlabIntegrityError> {

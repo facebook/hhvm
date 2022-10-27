@@ -88,20 +88,22 @@ let
     if suffix == "-dev" then "${major}.${minor}.${patch}-dev${lastModifiedDate}" else "${major}.${minor}.${patch}";
 in
 stdenv.mkDerivation rec {
-  rustChannel = rustChannelOf {
+  passthru = { 
+    rustChannel = rustChannelOf {
 
-    # When the date attribute changes, sha256 should be updated accordingly.
-    #
-    # 1. Export your diff to GitHub;
-    # 2. Wait for an error message about sha256 mismatch from the GitHub
-    #    Actions;
-    # 3. Copy the new sha256 from the error message and paste it here;
-    # 4. Submit the diff and export the diff to GitHub, again.
-    # 5. Ensure no error message about sha256 mismatch from the GitHub Actions.
-    sha256 = "wVnIzrnpYGqiCBtc3k55tw4VW8YLA3WZY0mSac+2yl0=";
+      # When the date attribute changes, sha256 should be updated accordingly.
+      #
+      # 1. Export your diff to GitHub;
+      # 2. Wait for an error message about sha256 mismatch from the GitHub
+      #    Actions;
+      # 3. Copy the new sha256 from the error message and paste it here;
+      # 4. Submit the diff and export the diff to GitHub, again.
+      # 5. Ensure no error message about sha256 mismatch from the GitHub Actions.
+      sha256 = "wVnIzrnpYGqiCBtc3k55tw4VW8YLA3WZY0mSac+2yl0=";
 
-    date = "2022-08-11";
-    channel = "nightly";
+      date = "2022-08-11";
+      channel = "nightly";
+    };
   };
   pname = "hhvm";
   version = builtins.foldl' lib.trivial.id makeVersion versionParts;
@@ -221,8 +223,8 @@ stdenv.mkDerivation rec {
       set(HAVE_SYSTEM_TZDATA_PREFIX "${tzdata}/share/zoneinfo" CACHE PATH "The zoneinfo directory" FORCE)
       set(HAVE_SYSTEM_TZDATA ON CACHE BOOL "Use system zoneinfo" FORCE)
       set(MYSQL_UNIX_SOCK_ADDR "/run/mysqld/mysqld.sock" CACHE FILEPATH "The MySQL unix socket" FORCE)
-      set(CARGO_EXECUTABLE "${rustChannel.cargo}/bin/cargo" CACHE FILEPATH "The nightly cargo" FORCE)
-      set(RUSTC_EXECUTABLE "${rustChannel.rust}/bin/rustc" CACHE FILEPATH "The nightly rustc" FORCE)
+      set(CARGO_EXECUTABLE "${passthru.rustChannel.cargo}/bin/cargo" CACHE FILEPATH "The nightly cargo" FORCE)
+      set(RUSTC_EXECUTABLE "${passthru.rustChannel.rust}/bin/rustc" CACHE FILEPATH "The nightly rustc" FORCE)
       set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "Enable verbose output from Makefile builds" FORCE)
       ${
         lib.optionalString hostPlatform.isMacOS ''

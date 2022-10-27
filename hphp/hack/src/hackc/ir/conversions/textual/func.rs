@@ -7,6 +7,7 @@ use std::str::FromStr;
 
 use anyhow::Error;
 use ascii::AsciiString;
+use ffi::Str;
 use ir::instr::HasLoc;
 use ir::instr::Hhbc;
 use ir::instr::IncDecOp;
@@ -15,6 +16,7 @@ use ir::instr::Special;
 use ir::instr::Terminator;
 use ir::instr::Textual;
 use ir::instr::TextualHackBuiltinParam;
+use ir::unit::ClassName;
 use ir::Block;
 use ir::BlockId;
 use ir::Constant;
@@ -80,7 +82,7 @@ pub(crate) fn write_func(
         .map(|p| {
             let name_bytes = unit_state.strings.lookup_bytes(p.name);
             let name_string = util::escaped_string(name_bytes);
-            (name_string, convert_ty(p.ty.enforced))
+            (name_string, convert_ty(p.ty.enforced, &unit_state.strings))
         })
         .collect_vec();
 
@@ -93,7 +95,10 @@ pub(crate) fn write_func(
         .map(|(name, ty)| (name.as_str(), ty.clone()))
         .collect_vec();
 
-    let ret_ty = convert_ty(std::mem::take(&mut func.return_type.enforced));
+    let ret_ty = convert_ty(
+        std::mem::take(&mut func.return_type.enforced),
+        &unit_state.strings,
+    );
     let span = func.loc(func.loc_id).clone();
     let func_declares =
         textual::write_function(w, &unit_state.strings, name, &span, &params, ret_ty, |w| {
@@ -349,6 +354,7 @@ fn write_call(
         CallDetail::FCallCtor => todo!(),
         CallDetail::FCallFunc => todo!(),
         CallDetail::FCallFuncD { func } => {
+            // foo()
             let target = func.mangle(state.strings);
             state
                 .func_declares
@@ -362,7 +368,25 @@ fn write_call(
             )?
         }
         CallDetail::FCallObjMethod { .. } => todo!(),
-        CallDetail::FCallObjMethodD { .. } => todo!(),
+        CallDetail::FCallObjMethodD { flavor, method } => {
+            // $x->y()
+            if flavor == ir::instr::ObjMethodOp::NullSafe {
+                // Handle this in lowering.
+                todo!();
+            }
+
+            // TODO: need to try to figure out the type.
+            let ty = ClassName::new(Str::new(b"Mixed"));
+            let target = method.mangle(&ty, state.strings);
+            state
+                .func_declares
+                .declare(target.to_string(), FuncDeclKind::External);
+            w.call_virtual(
+                &target,
+                state.lookup_vid(detail.obj(operands)),
+                args.iter().copied().map(|vid| state.lookup_vid(vid)),
+            )?
+        }
     };
     state.set_iid(iid, output);
     Ok(())

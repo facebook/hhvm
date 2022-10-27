@@ -3,12 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ir::StringInterner;
 use ir::TypeConstraintFlags;
 
+use crate::mangle::Mangle as _;
 use crate::textual;
 
-pub(crate) fn convert_ty(ty: ir::EnforceableType) -> textual::Ty {
-    let mut base = convert_base(ty.ty);
+pub(crate) fn convert_ty(ty: ir::EnforceableType, strings: &StringInterner) -> textual::Ty {
+    let mut base = convert_base(ty.ty, strings);
 
     let mut modifiers = ty.modifiers;
 
@@ -28,7 +30,7 @@ pub(crate) fn convert_ty(ty: ir::EnforceableType) -> textual::Ty {
     base
 }
 
-fn convert_base(ty: ir::BaseType) -> textual::Ty {
+fn convert_base(ty: ir::BaseType, strings: &StringInterner) -> textual::Ty {
     use ir::BaseType;
     match ty {
         BaseType::AnyArray => textual::Ty::AnyArray,
@@ -56,8 +58,8 @@ fn convert_base(ty: ir::BaseType) -> textual::Ty {
         BaseType::Vec => textual::Ty::Vec,
         BaseType::VecOrDict => textual::Ty::VecOrDict,
         BaseType::Void => tx_ty!(*void),
-        BaseType::Class(cid) => textual::Ty::Class(cid),
-        BaseType::RawPtr(box base) => textual::Ty::Ptr(Box::new(convert_base(base))),
+        BaseType::Class(cid) => textual::Ty::Ptr(Box::new(textual::Ty::Type(cid.mangle(strings)))),
+        BaseType::RawPtr(box base) => textual::Ty::Ptr(Box::new(convert_base(base, strings))),
         BaseType::RawType(name) => textual::Ty::Type(name),
     }
 }

@@ -16,7 +16,6 @@ class IdxCommandTestCase(base.LLDBTestBase):
 
     def test_idx_helper_on_fixed_vector(self):
         self.run_until_breakpoint("checkClassReifiedGenericMismatch")
-        frame = self.getProcess().GetSelectedThread().GetFrameAtIndex(0)
-        slot_index = frame.FindVariable("c").GetChildMemberWithName("m_slotIndex")
+        slot_index = self.frame.FindVariable("c").GetChildMemberWithName("m_slotIndex")
         val = idx.idx(slot_index, 0)
         self.assertEqual(val.unsigned, 0)

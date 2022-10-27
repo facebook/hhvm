@@ -5,6 +5,12 @@
 import lldb
 import typing
 
+try:
+    # LLDB needs to load this outside of the usual Buck mechanism
+    import utils
+except ModuleNotFoundError:
+    import hhvm_lldb.utils as utils
+
 
 Formatters = []
 
@@ -45,18 +51,7 @@ def pp_StringData(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]
     if val_obj.type.IsPointerType():
         return ''
 
-    addr = val_obj.load_addr
-    if addr == lldb.LLDB_INVALID_ADDRESS:
-        return None
-    addr += val_obj.size
-    m_len = val_obj.children[1].GetChildMemberWithName("m_len").unsigned
-    error = lldb.SBError()
-    # +1 for null terminator, it seems
-    cstring = val_obj.process.ReadCStringFromMemory(addr, m_len + 1, error)
-    if error.Success():
-        return cstring
-    else:
-        print('error: ', error)
+    return utils.string_data_val(val_obj)
 
 
 @format("HPHP::ArrayData")

@@ -17,7 +17,8 @@ hhvm_test_path = os.environ["HHVM_TEST_DIR"]
 scripts_path = os.environ["HHVM_LLDB_SCRIPTS"]
 
 class LLDBTestBase(BaseFacebookTestCase):
-    def setUp(self, file=None):
+    def setUp(self, file=None, interp=False):
+        """ Set up a debugger for each test case instance """
         debugger = lldb.SBDebugger.Create()
         debugger.SetAsync(False)  # Important so that we only stop at our breakpoint, not arbitrary signals
         assert debugger.IsValid(), "Unable to create debugger instance"
@@ -25,10 +26,16 @@ class LLDBTestBase(BaseFacebookTestCase):
         target = debugger.CreateTarget(hhvm_path.as_posix())
         assert target.IsValid(), "Unable to create target"
 
+        hhvm_args = []
+        if file:
+            hhvm_args.extend(["--file", f"{hhvm_test_path}/{file}"])
+        if interp:
+            hhvm_args.extend(["-vEval.Jit=0"])
+
         error = lldb.SBError()
         process = target.Launch(
             debugger.GetListener(),
-            ["--file", f"{hhvm_test_path}/{file}"] if file else None,
+            hhvm_args,
             None, None, None, None, os.getcwd(), 0, True, error)
         assert process.IsValid() and error.Success(), f"Unable to launch process ({get_lldb_object_description(error)})"
         assert process.GetState() == lldb.eStateStopped, "Process is not in Stopped state"
@@ -39,21 +46,41 @@ class LLDBTestBase(BaseFacebookTestCase):
         self.debugger = debugger
 
     def tearDown(self):
+        """ Clean up the debugger """
         lldb.SBDebugger.Destroy(self.debugger)
         self.debugger = None
 
-    def getProcess(self):
-        return self.debugger.GetSelectedTarget().GetProcess()
+    @property
+    def target(self) -> lldb.SBTarget:
+        """ Get the target associated wih the debugger """
+        return self.debugger.GetSelectedTarget()
 
-    def run_command(self, command: str) -> str:
-        (status, output) = run_lldb_command(self.debugger, command)
-        self.assertEqual(status, 0, output)
+    @property
+    def process(self) -> lldb.SBProcess:
+        """ Get the process associated wih the debugger's target """
+        return self.target.GetProcess()
+
+    @property
+    def thread(self) -> lldb.SBThread:
+        """ Get the process associated wih the debugger's target """
+        return self.process.GetSelectedThread()
+
+    @property
+    def frame(self) -> lldb.SBProcess:
+        """ Get the topmost frame associated with the current thread """
+        return self.thread.GetFrameAtIndex(0)
+
+    def run_command(self, *commands: str) -> str:
+        """ Run one or more LLDB commands in the interpreter """
+        for command in commands:
+            (status, output) = run_lldb_command(self.debugger, command)
+            self.assertEqual(status, 0, output)
         return output
 
     def run_until_breakpoint(self, breakpoint: str):
+        """ Run until the breakpoint given by a function name is hit """
         breakpoint = self.debugger.GetSelectedTarget().BreakpointCreateByName(breakpoint)
         self.assertTrue(breakpoint.IsValid(), f"Unable to set breakpoint at {breakpoint}")
-        process = self.getProcess()
-        err = process.Continue()
-        assert err.Success(), f"Unable to reach breakpoint at {breakpoint}"
-        assert process.GetSelectedThread().GetStopReason() == lldb.eStopReasonBreakpoint
+        err = self.process.Continue()
+        assert err.Success(), f"Unable to continue to breakpoint {breakpoint}"
+        assert self.process.GetSelectedThread().GetStopReason() == lldb.eStopReasonBreakpoint, f"Unable to reach breakpoint at {breakpoint}"

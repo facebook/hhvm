@@ -97,6 +97,8 @@ jobs:
   install-deb-and-run-repo-mode-tests:
     needs: build-and-run-quick-tests
     strategy:
+      # Run tests on all OS's and HHVM versions, even if one fails
+      fail-fast: false
       matrix:
         package:
         - hhvm
@@ -147,6 +149,8 @@ jobs:
   install-deb-and-run-all-tests:
     needs: build-and-run-quick-tests
     strategy:
+      # Run tests on all OS's and HHVM versions, even if one fails
+      fail-fast: false
       matrix:
         package:
         - hhvm

@@ -1,0 +1,5 @@
+[RESULT] \dont_invalidate: (# of errors: 0) [9:8-23] [Allocation]:
+  shape('a' => int)
+[RESULT] \dont_invalidate: (# of errors: 0) [12:18-33] [Allocation]:
+  shape('a' => int)
+No errors

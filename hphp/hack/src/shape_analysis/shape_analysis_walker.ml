@@ -100,6 +100,14 @@ let is_cow tast_env ty =
   in
   Tast_env.is_sub_type tast_env ty cow_ty
 
+let disjoint_from_traversable tast_env ty =
+  let open Typing_make_type in
+  let open Typing_reason in
+  let mixed = mixed Rnone in
+  let traversable_top = traversable Rnone mixed in
+  let typing_env = Tast_env.tast_env_as_typing_env tast_env in
+  Typing_subtype.is_type_disjoint typing_env traversable_top ty
+
 let add_key_constraint
     ~(pos : Pos.t)
     ~(origin : int)
@@ -268,7 +276,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let env = List.fold ~init:env ~f:handle_key_value key_value_pairs in
     (env, entity)
   | A.Array_get (((base_ty, _, _) as base), Some ix) ->
-    let (env, base_exp) = expr_ env base in
+    let (env, base_entity) = expr_ env base in
     let (env, _entity_ix) = expr_ env ix in
     let env =
       Option.fold
@@ -281,11 +289,17 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
              ~variety:[Has; Needs]
              ~base_ty
              (ix, ty))
-        base_exp
+        base_entity
     in
     (* TODO(T131709581): Returning the collection is an approximation where we
        identify the the surrounding collection with whatever might be inside. *)
-    (env, base_exp)
+    let entity =
+      if disjoint_from_traversable env.tast_env ty then
+        None
+      else
+        base_entity
+    in
+    (env, entity)
   | A.Lvar (_, lid) ->
     let entity = Env.get_local env lid in
     (env, entity)

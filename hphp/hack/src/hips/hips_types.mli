@@ -75,6 +75,8 @@ module type Intra = sig
   type any_constraint = (intra_constraint, inter_constraint) any_constraint_
   [@@deriving ord]
 
+  val debug_any_constraint : any_constraint -> string
+
   (** Verifies whether an entity is the nth argument of a given function.
       For instance, calling with ("f", 0) and "p" should result in "true",
       if p is the first argument of f, and "false" otherwise. *)

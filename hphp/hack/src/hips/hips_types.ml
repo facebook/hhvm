@@ -51,6 +51,8 @@ module type Intra = sig
   type any_constraint = (intra_constraint, inter_constraint) any_constraint_
   [@@deriving ord]
 
+  val debug_any_constraint : any_constraint -> string
+
   val is_same_entity : intra_entity -> intra_entity -> bool
 
   val embed_entity : entity -> intra_entity

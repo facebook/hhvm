@@ -170,8 +170,32 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
    * _and_ it's required to reuse the same container for performance reasons.
    * otherwise prefer to use `fromVec` or `fromDict`
    */
-  <<__Native>>
-  public static function fromContainer(mixed $dependencies)[]: Awaitable<void>;
+  public static function fromContainer(mixed $dependencies)[]: Awaitable<void> {
+    if ($dependencies is dict<_, _>) {
+      return self::fromDict(
+        \HH\FIXME\UNSAFE_CAST<mixed, dict<arraykey, Awaitable<mixed>>>(
+          $dependencies
+        )
+      );
+    }
+    if ($dependencies is vec<_>) {
+      return self::fromVec(
+        \HH\FIXME\UNSAFE_CAST<mixed, vec<Awaitable<mixed>>>($dependencies)
+      );
+    }
+    if ($dependencies is \ConstMap<_, _>) {
+      return self::fromMap($dependencies);
+    }
+    // can't use `is \ConstVector<_>` here because that also matches Pair
+    if ($dependencies is \HH\Vector<_> || $dependencies is \HH\ImmVector<_>) {
+      return self::fromVector($dependencies);
+    }
+    throw new \InvalidArgumentException(
+      $dependencies is \HH\Container<_>
+        ? "Dependencies cannot be a set-like container or Pair"
+        : "Expected dependencies to be a container"
+    );
+  }
 
   /** Set callback for when a AwaitAllWaitHandle is created
    * @param mixed $callback - A Closure to be called on creation

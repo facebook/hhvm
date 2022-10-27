@@ -1979,7 +1979,7 @@ where
                         acc.push(t);
                         return acc;
                     }
-                    TriviaKind::FixMe | TriviaKind::IgnoreError => {
+                    TriviaKind::FixMe | TriviaKind::IgnoreError | TriviaKind::DelimitedComment => {
                         return acc;
                     }
                     _ => {

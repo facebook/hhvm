@@ -96,12 +96,11 @@ module Inter (I : Intra) = struct
     aux class_name
 
   let find_const_in_current_class
-      (ident_ent : constant_identifier_entity)
+      (qualified_name : string)
       (base_constraint_map : any_constraint list SMap.t) :
       (any_constraint list * string) option =
-    let const_ident_string = string_of_const_ident_ent ident_ent in
-    match SMap.find_opt const_ident_string base_constraint_map with
-    | Some constr_list -> Some (constr_list, const_ident_string)
+    match SMap.find_opt qualified_name base_constraint_map with
+    | Some constr_list -> Some (constr_list, qualified_name)
     | None -> None
 
   (** This function returns as first argument:
@@ -147,7 +146,9 @@ module Inter (I : Intra) = struct
       (any_constraint list * string) option
       * (any_constraint list * string) option =
     let current_class_const =
-      find_const_in_current_class ident_ent constraint_map
+      find_const_in_current_class
+        (string_of_const_ident_ent ident_ent)
+        constraint_map
     in
     let ancestor_class_const =
       Option.bind
@@ -203,6 +204,16 @@ module Inter (I : Intra) = struct
     |> SMap.update
          new_const_ident_string
          (Option.map ~f:(fun x -> x @ to_append_at_const_ident))
+
+  (**
+  example: `"C::DICT_NAME" -> Some ("C", "DICT_NAME")`
+
+  This is silly, but saves memory compared to storing more information in `const` *)
+  let split_const_name (qualified_name : string) : (string * string) option =
+    let matches = Caml.String.split_on_char ':' qualified_name in
+    match matches with
+    | [class_name; _; const_name] -> Some (class_name, const_name)
+    | _ -> None
 
   let substitute
       ~base_constraint_map
@@ -268,7 +279,7 @@ module Inter (I : Intra) = struct
                 constr_list_at_const_ent
                 input_constr_list_map
             | ( Some (constr_list_at_const_ent_1, new_const_ident_string_1),
-                Some (_, new_const_ident_string_2) ) ->
+                Some (_, _new_const_ident_string_2) ) ->
               propagate_const_initializer_and_identifier_constraints
                 ~current_func_constr_list
                 ~current_func_id
@@ -276,10 +287,29 @@ module Inter (I : Intra) = struct
                 new_const_ident_string_1
                 constr_list_at_const_ent_1
                 input_constr_list_map
-              |> propagate_const_inheritance_constraints
-                   constr_list_at_const_ent_1
-                   new_const_ident_string_2
             | (None, None) -> input_constr_list_map)
+          | Constant (_, qualified_name) ->
+            let open Option.Monad_infix in
+            split_const_name qualified_name
+            >>= (fun (class_name, const_name) ->
+                  let current_class_const =
+                    find_const_in_current_class
+                      qualified_name
+                      input_constr_list_map
+                  in
+                  let ancestor_class_const =
+                    find_const_in_ancestors
+                      ~constraint_map:input_constr_list_map
+                      ~const_name
+                      class_name
+                  in
+                  Option.both current_class_const ancestor_class_const)
+            >>| (fun ((constr_list_at_const, _), (_, ancestor_const_name)) ->
+                  input_constr_list_map
+                  |> propagate_const_inheritance_constraints
+                       constr_list_at_const
+                       ancestor_const_name)
+            |> Option.value ~default:input_constr_list_map
           | _ -> input_constr_list_map)
         (* TODO(T127947010) Add case for inter-procedural return constraint *)
       in
@@ -337,18 +367,13 @@ module Inter (I : Intra) = struct
     SMap.update (snd const_ent) append_opt input_constr_map
     |> SMap.update f append_initial_opt
 
-  (** Modifies input_constr_map by adding:
-      i) to the constraints at the key corresponding to the constant const_ent_2
-      in constr_list_at_const_ent_2 (i.e. to constr_list_at_const_ent_2): a subset
-      constraint between the constant const_ent_1 in constr_list_at_const_ent_1,
-      and const_ent_2. *)
   let add_const_inheritance_constraints
-      ~constr_list_at_const_ent_1
-      (constr_list_at_const_ent_2 : any_constraint list)
+      ~(ent1_constraints : any_constraint list)
+      ~(ent2_constraints : any_constraint list)
       (input_constr_map : any_constraint list SMap.t) :
       any_constraint list SMap.t =
-    let const_constraint_1 = const_constraint_of constr_list_at_const_ent_1 in
-    let const_constraint_2 = const_constraint_of constr_list_at_const_ent_2 in
+    let const_constraint_1 = const_constraint_of ent1_constraints in
+    let const_constraint_2 = const_constraint_of ent2_constraints in
     let (const_ent_1, const_ent_2) =
       match (const_constraint_1, const_constraint_2) with
       | (Inter (Constant const_ent_1), Inter (Constant const_ent_2)) ->
@@ -364,18 +389,9 @@ module Inter (I : Intra) = struct
     let append_opt = Option.map ~f:(fun x -> subset_any_constr :: x) in
     SMap.update (snd const_ent_2) append_opt input_constr_map
 
-  (** For a given map, at every key, we iterate through its constant identifier
-      constraints. For a fixed identifier, we modify the map by adding constraints via
-      add_subset_constraints_1 and add_subset_constraints_2:
-      i) a subset constraint between identifier and global/class constant (if undefined,
-      we use inheritance);
-      ii) a subset constraint between the instantiation of a constant (if undefined, we
-      use inheritance) and the identifier;
-      ii) a subset constraint between two constants, in case of inheritance with over-
-      write. *)
   let close_identifier (current_constraint_map : any_constraint list SMap.t) :
       any_constraint list SMap.t =
-    let close
+    let aux
         (f : string)
         (constr_list : any_constraint list)
         (input_constr_map : any_constraint list SMap.t) :
@@ -393,15 +409,12 @@ module Inter (I : Intra) = struct
             input_constr_map_2
             f
         | ( Some (constr_list_at_const_ent_1, _),
-            Some (constr_list_at_const_ent_2, _) ) ->
+            Some (_constr_list_at_const_ent_2, _) ) ->
           add_const_identifier_and_initializer_subset_constraints
             constr_list_at_const_ent_1
             ident_ent
             input_constr_map_2
             f
-          |> add_const_inheritance_constraints
-               ~constr_list_at_const_ent_1
-               constr_list_at_const_ent_2
         | (None, None) -> input_constr_map_2
       in
       let only_identifier (constr : any_constraint) :
@@ -418,7 +431,59 @@ module Inter (I : Intra) = struct
         ~init:input_constr_map
         only_identifier_list
     in
-    SMap.fold close current_constraint_map current_constraint_map
+    SMap.fold aux current_constraint_map current_constraint_map
+
+  (** Add subset constraints for constant overrides.
+
+    ```
+    % Datalog:
+    subset(constant1, constant2) :- overrides(constant1, constant2).
+
+    overrides(constant1, constant2) :-
+      member_of(constant1, class1),
+      inherits_from(class1, class2),
+      constant_name(constant1) == constant_name(constant2).
+    ```
+   *)
+  let add_const_constraints constraint_map const =
+    let open Option.Monad_infix in
+    split_const_name (snd const)
+    >>= (fun (class_name, const_name) ->
+          let current_class_const =
+            find_const_in_current_class (snd const) constraint_map
+          in
+          let ancestor_class_const =
+            find_const_in_ancestors ~constraint_map ~const_name class_name
+          in
+          Option.both current_class_const ancestor_class_const)
+    >>| (fun ((constr_list_in_class, _), (constr_list_in_ancestor, _)) ->
+          add_const_inheritance_constraints
+            ~ent1_constraints:constr_list_in_class
+            ~ent2_constraints:constr_list_in_ancestor
+            constraint_map)
+    |> Option.value ~default:constraint_map
+
+  let close (constraint_map : any_constraint list SMap.t) :
+      any_constraint list SMap.t =
+    let add_constraints_for_key
+        (_key : string)
+        (constr_list : any_constraint list)
+        (constraint_map : any_constraint list SMap.t) :
+        any_constraint list SMap.t =
+      let add_constraints_for_constraint
+          (constraint_map : any_constraint list SMap.t)
+          (constr : any_constraint) : any_constraint list SMap.t =
+        match constr with
+        (* TODO: merge with `close_identifier` function *)
+        | Inter (Constant const) -> add_const_constraints constraint_map const
+        | _ -> constraint_map
+      in
+      List.fold_left
+        ~f:add_constraints_for_constraint
+        ~init:constraint_map
+        constr_list
+    in
+    SMap.fold add_constraints_for_key constraint_map constraint_map
 
   let analyse (base_constraint_map : any_constraint list SMap.t) : solution =
     let deduce_any_list (any_constraint_list : any_constraint list) :
@@ -477,5 +542,6 @@ module Inter (I : Intra) = struct
         else
           analyse_help (completed_iterations + 1) no_dupl_deduced_constraint_map
     in
-    analyse_help 0 (close_identifier base_constraint_map)
+    let closed = base_constraint_map |> close_identifier |> close in
+    analyse_help 0 closed
 end

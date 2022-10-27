@@ -116,6 +116,22 @@ let any_shape_can_flow tast_env ty =
   in
   Tast_env.is_sub_type tast_env shape_top ty
 
+let class_name_of_class_id pos tenv class_id =
+  let open Aast in
+  match class_id with
+  | CIparent -> Tast_env.get_parent_id tenv
+  | CIself -> Tast_env.get_self_id tenv
+  | CIstatic -> Tast_env.get_self_id tenv
+  | CIexpr (_, _, Lvar (_, _)) ->
+    (* TODO(T135268910): handle `classname` / `new $c` *)
+    None
+  | CIexpr (_, _, e) ->
+    failwithpos pos
+    @@ Printf.sprintf
+         "Unexpected class name expression: %s"
+         (Aast_names_utils.expr_name e)
+  | CI (_, id) -> Some id
+
 let add_key_constraint
     ~(pos : Pos.t)
     ~(origin : int)
@@ -509,10 +525,11 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     in
     let env = Env.add_inter_constraint env constr_ in
     (env, Some entity_)
-  | A.Class_const ((_, ident_pos, A.CI class_id), (_, const_name)) ->
-    let entity__ =
-      { HT.ident_pos; HT.class_name_opt = Some (snd class_id); HT.const_name }
+  | A.Class_const ((_, ident_pos, class_id), (_, const_name)) ->
+    let class_name_opt =
+      class_name_of_class_id ident_pos env.tast_env class_id
     in
+    let entity__ = { HT.ident_pos; HT.class_name_opt; HT.const_name } in
     let entity_ = Inter (HT.ConstantIdentifier entity__) in
     let env = dynamic_when_local ~origin:__LINE__ env entity_ in
     let constr_ =

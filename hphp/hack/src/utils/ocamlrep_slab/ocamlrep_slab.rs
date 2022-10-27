@@ -596,24 +596,8 @@ pub struct OwnedSlab(
 );
 
 impl OwnedSlab {
-    pub fn from_value(value: Value<'_>) -> Option<Self> {
-        with_slab_allocator(|alloc| value.clone_with_allocator(alloc))
-    }
-
-    pub unsafe fn from_ocaml(value: usize) -> Option<Self> {
-        Self::from_value(Value::from_bits(value))
-    }
-
     pub fn size_in_bytes(&self) -> usize {
         self.0.len() * WORD_SIZE
-    }
-
-    pub fn as_bytes(&self) -> &[u8] {
-        let ptr = self.0.as_ptr() as *const u8;
-        // SAFETY: should be safe to view the underlying memory as bytes
-        // (although the exact behavior will be dependent on platform
-        // endianness)
-        unsafe { std::slice::from_raw_parts(ptr, self.size_in_bytes()) }
     }
 
     pub fn as_reader(&self) -> SlabReader<'_> {
@@ -630,11 +614,6 @@ impl OwnedSlab {
         // SAFETY: `self.0` is a valid Slab
         unsafe { self.0.rebase_to(self.0.current_address()) };
         RebasedSlab(self.0)
-    }
-
-    pub fn leak(self) -> Value<'static> {
-        let slab = self.rebase();
-        Box::leak(slab.0).value().unwrap()
     }
 
     /// Like `OwnedSlab::deserialize`, but without verifying that the serialized
@@ -728,7 +707,7 @@ impl<'a> SlabReader<'a> {
     /// # Safety
     ///
     /// The caller must only invoke this function on byte slices which were
-    /// initialized by slab APIs (e.g., `OwnedSlab::as_bytes`, `copy_slab`).
+    /// initialized by slab APIs (e.g., `SlabReader::as_bytes`, `copy_slab`).
     pub unsafe fn from_bytes(bytes: &'a [u8]) -> Result<Self, SlabIntegrityError> {
         let slab = Slab::from_bytes(bytes);
         slab.check_initialized()?;
@@ -740,7 +719,7 @@ impl<'a> SlabReader<'a> {
     /// # Safety
     ///
     /// The caller must only invoke this function on slices which were
-    /// initialized by slab APIs (e.g., `OwnedSlab::as_slice`).
+    /// initialized by slab APIs (e.g., `SlabReader::as_slice`).
     pub unsafe fn from_words(words: &'a [usize]) -> Result<Self, SlabIntegrityError> {
         let slab =
             std::slice::from_raw_parts(words.as_ptr() as *const OpaqueValue<'a>, words.len());
@@ -784,11 +763,6 @@ impl<'a> SlabReader<'a> {
 
     pub fn value(&self) -> Option<Value<'a>> {
         Slab::from_bytes(self.0).value()
-    }
-
-    pub fn value_offset_in_bytes(&self) -> usize {
-        leading_padding(self.0.as_ptr(), self.0.len())
-            + Slab::from_bytes(self.0).root_value_offset() * WORD_SIZE
     }
 }
 

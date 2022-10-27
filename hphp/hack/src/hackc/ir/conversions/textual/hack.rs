@@ -6,11 +6,12 @@
 use std::fmt;
 
 use anyhow::Error;
+use once_cell::sync::OnceCell;
 use strum::EnumProperty as _;
 use strum_macros::EnumIter;
 use strum_macros::EnumProperty;
 
-use crate::mangle::MangleClassName;
+use crate::mangle::MangleWithClass as _;
 use crate::textual;
 use crate::textual::Sid;
 
@@ -115,12 +116,17 @@ pub(crate) enum Builtin {
 
 impl fmt::Display for Builtin {
     fn fmt(&self, w: &mut fmt::Formatter<'_>) -> fmt::Result {
+        static DUMMY: OnceCell<ir::StringInterner> = OnceCell::new();
+        let strings = DUMMY.get_or_init(Default::default);
+
         let name = match self {
             Builtin::Hhbc(hhbc) => hhbc.get_str("Function").unwrap(),
             _ => self.get_str("Function").unwrap(),
         };
         let method = ir::MethodName::new(ffi::Str::new(name.as_bytes()));
-        w.write_str(&method.mangle(&BUILTINS_CLASS))
+        // Use a dummy string table - this is fine because builtins will never
+        // be based on the UnitBytesId.
+        w.write_str(&method.mangle(&BUILTINS_CLASS, strings))
     }
 }
 

@@ -18,8 +18,8 @@ use strum_macros::EnumIter;
 use super::func;
 use super::hack;
 use super::textual;
-use crate::mangle::MangleClassId;
-use crate::mangle::MangleId;
+use crate::mangle::Mangle;
+use crate::mangle::MangleWithClass as _;
 use crate::state::UnitState;
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
@@ -32,7 +32,7 @@ pub(crate) enum IsStatic {
 
 pub(crate) struct StaticClassId(pub(crate) ir::ClassId);
 
-impl MangleId for StaticClassId {
+impl Mangle for StaticClassId {
     fn mangle(&self, strings: &ir::StringInterner) -> String {
         format!("{}$static", self.0.mangle(strings))
     }

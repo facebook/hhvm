@@ -32,9 +32,8 @@ use log::trace;
 
 use crate::class;
 use crate::hack;
-use crate::mangle::Mangle;
-use crate::mangle::MangleClassId;
-use crate::mangle::MangleId;
+use crate::mangle::Mangle as _;
+use crate::mangle::MangleWithClass as _;
 use crate::state::FuncDeclKind;
 use crate::state::FuncDecls;
 use crate::state::UnitState;
@@ -58,7 +57,7 @@ pub(crate) fn write_function(
     write_func(
         w,
         state,
-        &function.name.mangle(),
+        &function.name.mangle(&state.strings),
         tx_ty!(*void),
         function.func,
     )

@@ -4278,6 +4278,7 @@ dependencies = [
  "itertools 0.10.3",
  "log",
  "newtype",
+ "once_cell",
  "strum",
  "strum_macros",
 ]

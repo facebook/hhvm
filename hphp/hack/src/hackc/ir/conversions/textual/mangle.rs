@@ -3,27 +3,39 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ir::ClassId;
 use ir::StringInterner;
+
+const TOP_LEVELS_CLASS: &str = "$root";
 
 /// Used for things that can mangle themselves directly.
 pub(crate) trait Mangle {
-    fn mangle(&self) -> String;
-}
-
-/// Used for things that need a StringInterner to mangle themselves.
-pub(crate) trait MangleId {
     fn mangle(&self, strings: &StringInterner) -> String;
 }
 
-/// Used for things that need to be mangled relative to a ClassId.
-pub(crate) trait MangleClassId {
-    fn mangle(&self, class: ClassId, strings: &StringInterner) -> String;
+pub(crate) trait ManglableClass {
+    fn mangle_class(&self, strings: &StringInterner) -> String;
+}
+
+impl ManglableClass for ir::ClassId {
+    fn mangle_class(&self, strings: &StringInterner) -> String {
+        self.mangle(strings)
+    }
+}
+
+impl ManglableClass for &ir::unit::ClassName<'_> {
+    fn mangle_class(&self, strings: &StringInterner) -> String {
+        self.mangle(strings)
+    }
+}
+
+/// Used for things that need to be mangled relative to a Class.
+pub(crate) trait MangleWithClass {
+    fn mangle(&self, class: impl ManglableClass, strings: &StringInterner) -> String;
 }
 
 impl Mangle for [u8] {
-    fn mangle(&self) -> String {
-        // [A-Za-z0-9_] -> identity
+    fn mangle(&self, _strings: &StringInterner) -> String {
+        // [A-Za-z0-9_$] -> identity
         // \ -> ::
         // anything else -> $xx
         let mut res = String::with_capacity(self.len());
@@ -32,6 +44,7 @@ impl Mangle for [u8] {
                 || (b'a'..=b'z').contains(&ch)
                 || (b'0'..=b'9').contains(&ch)
                 || (ch == b'_')
+                || (ch == b'$')
             {
                 res.push(ch as char);
             } else if ch == b'\\' {
@@ -48,44 +61,49 @@ impl Mangle for [u8] {
 
 // Classes and functions live in different namespaces.
 
-fn mangle_func_name(func: &[u8]) -> String {
-    format!("_H{}", func.mangle())
-}
-
-fn mangle_class_name(class: &[u8]) -> String {
-    format!("_C{}", class.mangle())
-}
-
-fn mangle_method_name(class: &[u8], method: &[u8]) -> String {
-    format!("_M{}::{}", class.mangle(), method.mangle())
-}
-
 impl Mangle for ir::FunctionName<'_> {
-    fn mangle(&self) -> String {
-        mangle_func_name(self.as_bytes())
-    }
-}
-
-impl MangleId for ir::ClassId {
     fn mangle(&self, strings: &StringInterner) -> String {
-        mangle_class_name(self.as_bytes(strings))
+        format!("{TOP_LEVELS_CLASS}.{}", self.as_bytes().mangle(strings))
     }
 }
 
-impl MangleId for ir::FunctionId {
+impl Mangle for ir::ClassId {
     fn mangle(&self, strings: &StringInterner) -> String {
-        mangle_func_name(self.as_bytes(strings))
+        self.as_bytes(strings).mangle(strings)
     }
 }
 
-impl MangleClassId for ir::MethodName<'_> {
-    fn mangle(&self, class: ClassId, strings: &StringInterner) -> String {
-        mangle_method_name(class.as_bytes(strings), self.as_bytes())
+impl Mangle for ir::unit::ClassName<'_> {
+    fn mangle(&self, strings: &StringInterner) -> String {
+        self.as_bytes().mangle(strings)
     }
 }
 
-impl MangleClassId for ir::MethodId {
-    fn mangle(&self, class: ClassId, strings: &StringInterner) -> String {
-        mangle_method_name(class.as_bytes(strings), self.as_bytes(strings))
+impl Mangle for ir::FunctionId {
+    fn mangle(&self, strings: &StringInterner) -> String {
+        format!(
+            "{TOP_LEVELS_CLASS}.{}",
+            self.as_bytes(strings).mangle(strings)
+        )
+    }
+}
+
+impl MangleWithClass for ir::MethodName<'_> {
+    fn mangle(&self, class: impl ManglableClass, strings: &StringInterner) -> String {
+        format!(
+            "{}.{}",
+            class.mangle_class(strings),
+            self.as_bytes().mangle(strings)
+        )
+    }
+}
+
+impl MangleWithClass for ir::MethodId {
+    fn mangle(&self, class: impl ManglableClass, strings: &StringInterner) -> String {
+        format!(
+            "{}.{}",
+            class.mangle_class(strings),
+            self.as_bytes(strings).mangle(strings)
+        )
     }
 }

@@ -25,19 +25,16 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
     // strum can support non-string constants we can use that (otherwise we have
     // to do string-parsing at runtime).
     for builtin in Builtin::iter() {
-        let name = builtin.into_str();
+        let name = builtin.to_string();
         match builtin {
-            Builtin::Bool => declare_function(w, &name, &[ty!(bool)], ty!(mixed))?,
-            Builtin::Int => declare_function(w, &name, &[ty!(int)], ty!(mixed))?,
-            Builtin::Null => declare_function(w, &name, &[], ty!(mixed))?,
-            Builtin::String => declare_function(w, &name, &[ty!(string)], ty!(mixed))?,
+            Builtin::Bool => declare_function(w, &name, &[ty!(bool)], ty!(*HackBool))?,
+            Builtin::Int => declare_function(w, &name, &[ty!(int)], ty!(*HackInt))?,
+            Builtin::Null => declare_function(w, &name, &[], ty!(*HackNull))?,
+            Builtin::String => declare_function(w, &name, &[ty!(string)], ty!(*HackString))?,
 
             Builtin::AllocWords => declare_function(w, &name, &[ty!(int)], ty!(*void))?,
             Builtin::BadMethodCall | Builtin::BadProperty => {
                 declare_function(w, &name, &[], ty!(noreturn))?
-            }
-            Builtin::GetParam => {
-                declare_function(w, &name, &[ty!(*HackParam), ty!(int)], ty!(mixed))?
             }
             Builtin::IsTrue => declare_function(w, &name, &[ty!(mixed)], ty!(bool))?,
             Builtin::RawPtrIsNull => declare_function(w, &name, &[ty!(*void)], ty!(bool))?,
@@ -54,7 +51,7 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
 
     for hhbc in Hhbc::iter() {
         let builtin = Builtin::Hhbc(hhbc);
-        let name = builtin.into_str();
+        let name = builtin.to_string();
         match hhbc {
             Hhbc::Add
             | Hhbc::CmpEq

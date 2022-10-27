@@ -1358,8 +1358,18 @@ class Enum(metaclass=EnumMeta):
     def __reduce_ex__(self, proto):
         return type(self), (self.value,)
 
+    def __eq__(self, other):
+        if isinstance(other, Enum):
+            return self is other
+        return self._fbthrift_value_ == other
+
+    def __ne__(self, other):
+        if isinstance(other, Enum):
+            return self is not other
+        return self._fbthrift_value_ != other
+
     def __hash__(self):
-        return hash(self._fbthrift_name_)
+        return hash(self._fbthrift_value_)
 
     @staticmethod
     def __get_metadata__():

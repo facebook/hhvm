@@ -197,6 +197,7 @@ bool canDCE(const IRInstruction& inst) {
   case NewCol:
   case NewPair:
   case NewRFunc:
+  case NewClsMeth:
   case NewRClsMeth:
   case LdRetVal:
   case Mov:
@@ -421,7 +422,6 @@ bool canDCE(const IRInstruction& inst) {
   case LdFuncCached:
   case LookupFuncCached:
   case AllocObj:
-  case NewClsMeth:
   case FuncCred:
   case InitProps:
   case PropTypeRedefineCheck:

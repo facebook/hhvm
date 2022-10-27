@@ -530,8 +530,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "input file names")
     ("input-list", value<std::string>(&po.inputList),
      "file containing list of file names, one per line")
-    ("module", value<std::vector<std::string>>(&po.dirs)->composing(),
-     "DEPRECATED - use --dir instead")
     ("dir", value<std::vector<std::string>>(&po.dirs)->composing(),
      "directories containing all input files")
     ("exclude-dir",
@@ -557,8 +555,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "files to exclude from static content cache")
     ("cfile", value<std::vector<std::string>>(&po.cfiles)->composing(),
      "extra static files forced to include without exclusion checking")
-    ("cmodule", value<std::vector<std::string>>(&po.cdirs)->composing(),
-     "DEPRECATED - use --cdir instead")
     ("cdir", value<std::vector<std::string>>(&po.cdirs)->composing(),
      "extra directories for static files without exclusion checking")
     ("output-dir,o", value<std::string>(&po.outputDir), "output directory")

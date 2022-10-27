@@ -40,6 +40,26 @@ let map_type_refinement (type a) f (r : a class_type_refinement) =
 let map f { cr_types = trs } =
   { cr_types = SMap.map (map_type_refinement f) trs }
 
+let fold_map_type_refinement
+    (type ph acc)
+    (f : acc -> ph ty -> acc * ph ty)
+    (acc : acc)
+    _
+    (r : ph class_type_refinement) =
+  match r with
+  | TRexact ty ->
+    let (acc, ty) = f acc ty in
+    (acc, TRexact ty)
+  | TRloose { tr_lower = ls; tr_upper = us } ->
+    let (acc, ls) = List.fold_map ~f ~init:acc ls in
+    let (acc, us) = List.fold_map ~f ~init:acc us in
+    (acc, TRloose { tr_lower = ls; tr_upper = us })
+
+let fold_map (f : 'acc -> decl_ty -> 'acc * decl_ty) acc { cr_types = trs } :
+    'acc * decl_phase class_refinement =
+  let (acc, trs) = SMap.map_env (fold_map_type_refinement f) acc trs in
+  (acc, { cr_types = trs })
+
 let fold_type_refinement r ~init:acc ~f =
   match r with
   | TRexact ty -> f acc ty

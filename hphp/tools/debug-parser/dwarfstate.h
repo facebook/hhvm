@@ -129,6 +129,7 @@ struct DwarfState {
     bool is64Bit;
     bool isInfo;
     uint8_t version;
+    uint8_t unitType;
     uint8_t addrSize;
     uint64_t abbrevOffset;
     uint64_t typeSignature;
@@ -161,6 +162,7 @@ struct DwarfState {
   struct AttributeSpec {
     uint64_t name{};
     uint64_t form{};
+    int64_t implicit_const{};
 
     explicit operator bool() const {
       return name || form;
@@ -190,6 +192,7 @@ struct DwarfState {
 
   Context getContextAtOffset(GlobalOff off) const;
   Die getDieAtOffset(const Context* context, GlobalOff off) const;
+  Die getCuForDie(Die* die) const;
   Die getNextSibling(Die* die) const;
   Dwarf_Half getTag(Die* die) const;
   std::string tagToString(Dwarf_Half tag) const;
@@ -210,9 +213,15 @@ struct DwarfState {
   uint64_t getAttributeValueSig8(Attribute* attr) const;
   std::vector<Dwarf_Loc> getAttributeValueExprLoc(Attribute* attr) const;
   std::vector<Dwarf_Ranges> getRanges(Attribute* attr) const;
+  std::vector<Dwarf_Ranges> getRngLists(Attribute* attr) const;
 
   // Get a string from the .debug_str section
   folly::StringPiece getStringFromStringSection(uint64_t offset) const;
+  folly::StringPiece getStringFromStringSectionIndirect(
+      uint64_t strOffsetsBase, uint64_t stringOffsetsIdx, bool is64Bit) const;
+
+  uintptr_t readAddrIndirect(uint64_t addrIdx, uint64_t addrSize,
+                             bool sng) const;
 
   template <typename F> void forEachContext(F&& f, bool isInfo) const;
   template <typename F> void forEachContextParallel(F&& f, bool isInfo,
@@ -233,14 +242,16 @@ struct DwarfState {
   static Attribute readAttribute(Die* die, AttributeSpec spec,
                                  folly::StringPiece& sp);
 
-  // Read (bitwise) one object of type T
+  // Read (bitwise) one object of type T, only read `numBytes` into object if
+  // specified
   template <class T>
   static typename std::enable_if<std::is_pod<T>::value, T>::type read(
-      folly::StringPiece& sp) {
-    assert(sp.size() >= sizeof(T));
+      folly::StringPiece& sp, int numBytes=sizeof(T)) {
+    assert(numBytes <= sizeof(T));
+    assert(sp.size() >= numBytes);
     T x;
-    memcpy(&x, sp.data(), sizeof(T));
-    sp.advance(sizeof(T));
+    memcpy(&x, sp.data(), numBytes);
+    sp.advance(numBytes);
     return x;
   }
 private:
@@ -250,11 +261,14 @@ private:
   std::vector<uint64_t> tuContextOffsets;
 
   folly::symbolizer::ElfFile elf;
-  folly::StringPiece debug_info;
-  folly::StringPiece debug_types;
   folly::StringPiece debug_abbrev;
-  folly::StringPiece debug_str;
+  folly::StringPiece debug_addr;
+  folly::StringPiece debug_info;
   folly::StringPiece debug_ranges;
+  folly::StringPiece debug_rnglists;
+  folly::StringPiece debug_str;
+  folly::StringPiece debug_str_offsets;
+  folly::StringPiece debug_types;
 
   // Read a value of "section offset" type, which may be 4 or 8 bytes
   static uint64_t readOffset(folly::StringPiece& sp, bool is64Bit) {

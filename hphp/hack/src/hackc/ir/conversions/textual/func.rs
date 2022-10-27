@@ -7,7 +7,6 @@ use std::str::FromStr;
 
 use anyhow::Error;
 use ascii::AsciiString;
-use hash::HashSet;
 use ir::instr::HasLoc;
 use ir::instr::Hhbc;
 use ir::instr::IncDecOp;
@@ -33,9 +32,10 @@ use log::trace;
 
 use crate::class;
 use crate::hack;
-use crate::mangle::Mangle;
-use crate::mangle::MangleClassId;
-use crate::mangle::MangleId;
+use crate::mangle::Mangle as _;
+use crate::mangle::MangleWithClass as _;
+use crate::state::FuncDeclKind;
+use crate::state::FuncDecls;
 use crate::state::UnitState;
 use crate::textual;
 use crate::textual::Sid;
@@ -57,7 +57,7 @@ pub(crate) fn write_function(
     write_func(
         w,
         state,
-        &function.name.mangle(),
+        &function.name.mangle(&state.strings),
         tx_ty!(*void),
         function.func,
     )
@@ -95,21 +95,27 @@ pub(crate) fn write_func(
 
     let ret_ty = convert_ty(std::mem::take(&mut func.return_type.enforced));
     let span = func.loc(func.loc_id).clone();
-    textual::write_function(w, &unit_state.strings, name, &span, &params, ret_ty, |w| {
-        let func = rewrite_prelude(func);
-        let mut func = rewrite_jmp_ops(func);
-        ir::passes::clean::run(&mut func);
+    let func_declares =
+        textual::write_function(w, &unit_state.strings, name, &span, &params, ret_ty, |w| {
+            let func = rewrite_prelude(func);
+            let mut func = rewrite_jmp_ops(func);
+            ir::passes::clean::run(&mut func);
 
-        let mut state = FuncState::new(&unit_state.strings, &func);
+            let mut state = FuncState::new(&unit_state.strings, &func);
 
-        for bid in func.block_ids() {
-            write_block(w, &mut state, bid)?;
-        }
+            for bid in func.block_ids() {
+                write_block(w, &mut state, bid)?;
+            }
 
-        unit_state.external_funcs.extend(state.external_funcs);
+            Ok(state.func_declares)
+        })?;
 
-        Ok(())
-    })
+    unit_state
+        .func_declares
+        .declare(name, FuncDeclKind::Internal);
+    unit_state.func_declares.merge(func_declares);
+
+    Ok(())
 }
 
 fn write_block(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, bid: BlockId) -> Result {
@@ -327,7 +333,9 @@ fn write_call(
         CallDetail::FCallClsMethodD { clsid, method } => {
             // C::foo()
             let target = method.mangle(clsid, state.strings);
-            state.external_funcs.insert(target.to_string());
+            state
+                .func_declares
+                .declare(target.to_string(), FuncDeclKind::External);
             let this = class::load_static_class(w, clsid, state.strings)?;
             w.call_static(
                 &target,
@@ -342,7 +350,9 @@ fn write_call(
         CallDetail::FCallFunc => todo!(),
         CallDetail::FCallFuncD { func } => {
             let target = func.mangle(state.strings);
-            state.external_funcs.insert(target.to_string());
+            state
+                .func_declares
+                .declare(target.to_string(), FuncDeclKind::External);
             // A top-level function is called like a class static in a special
             // top-level class. Its 'this' pointer is null.
             w.call_static(
@@ -388,7 +398,7 @@ fn write_inc_dec_l<'a>(
 }
 
 pub(crate) struct FuncState<'a> {
-    external_funcs: HashSet<String>,
+    func_declares: FuncDecls,
     func: &'a ir::Func<'a>,
     iid_mapping: ir::InstrIdMap<Sid>,
     pub(crate) strings: &'a StringInterner,
@@ -397,7 +407,7 @@ pub(crate) struct FuncState<'a> {
 impl<'a> FuncState<'a> {
     fn new(strings: &'a StringInterner, func: &'a ir::Func<'a>) -> Self {
         Self {
-            external_funcs: Default::default(),
+            func_declares: Default::default(),
             func,
             iid_mapping: Default::default(),
             strings,

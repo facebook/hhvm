@@ -187,8 +187,12 @@ DwarfState::DwarfState(std::string filename) {
     };
   }
 
+  // DWARF-5 offset tables.
+  getSection(".debug_addr", debug_addr);
+  getSection(".debug_str_offsets", debug_str_offsets);
   getSection(".debug_types", debug_types);
   getSection(".debug_ranges", debug_ranges);
+  getSection(".debug_rnglists", debug_rnglists);
   init();
 }
 
@@ -233,18 +237,30 @@ DwarfState::Context DwarfState::getContextAtOffset(GlobalOff off) const {
   context.size += context.is64Bit ? 12 : 4;
 
   context.version = read<uint16_t>(sp);
-  always_assert(context.version >= 2 && context.version <= 4);
+  always_assert(context.version >= 2 && context.version <= 5);
 
-  context.abbrevOffset = readOffset(sp, context.is64Bit);
-  context.addrSize = read<uint8_t>(sp);
-  always_assert(context.addrSize == 4 || context.addrSize == 8);
-
-  if (context.isInfo) {
-    context.typeSignature = context.typeOffset = 0;
+  if (context.version >= 5) {
+    context.unitType = read<uint8_t>(sp);
+    context.addrSize = read<uint8_t>(sp);
+    context.abbrevOffset = readOffset(sp, context.is64Bit);
   } else {
+    context.unitType = context.isInfo ? DW_UT_compile : DW_UT_type;
+    context.abbrevOffset = readOffset(sp, context.is64Bit);
+    context.addrSize = read<uint8_t>(sp);
+  }
+
+  always_assert(context.unitType == DW_UT_type ||
+                (context.isInfo && context.unitType == DW_UT_compile));
+  always_assert(context.addrSize == 4 || context.addrSize == 8);
+  always_assert(context.abbrevOffset <= debug_abbrev.size());
+
+  if (context.unitType == DW_UT_type) {
     context.typeSignature = read<uint64_t>(sp);
     context.typeOffset = readOffset(sp, context.is64Bit);
     context.typeOffset += context.offset;
+  } else {
+    context.typeSignature = 0;
+    context.typeOffset = 0;
   }
 
   context.firstDie = sp.data() - context.section;
@@ -291,6 +307,12 @@ DwarfState::Die DwarfState::getDieAtOffset(const Context* context,
   return die;
 }
 
+DwarfState::Die DwarfState::getCuForDie(Dwarf_Die die) const {
+  return getDieAtOffset(
+    die->context, { die->context->firstDie, die->context->isInfo }
+  );
+}
+
 DwarfState::Die DwarfState::getNextSibling(Dwarf_Die die) const {
   folly::StringPiece sp = {
     die->context->section + die->offset,
@@ -324,7 +346,13 @@ DwarfState::Die DwarfState::getNextSibling(Dwarf_Die die) const {
 
 DwarfState::AttributeSpec
 DwarfState::readAttributeSpec(folly::StringPiece& sp) {
-  return {readULEB(sp), readULEB(sp)};
+  uint64_t name = readULEB(sp);
+  uint64_t form = readULEB(sp);
+  int64_t implicit_const = 0;
+  if (form == DW_FORM_implicit_const) {
+    implicit_const = readSLEB(sp);
+  }
+  return {name, form, implicit_const};
 }
 
 DwarfState::Attribute DwarfState::readAttribute(Dwarf_Die die,
@@ -355,21 +383,42 @@ DwarfState::Attribute DwarfState::readAttribute(Dwarf_Die die,
     case DW_FORM_exprloc:
       advance(readULEB(sp));
       break;
+    case DW_FORM_addrx1: // fallthrough
     case DW_FORM_data1: // fallthrough
-    case DW_FORM_ref1:
+    case DW_FORM_ref1: // fallthrough
+    case DW_FORM_strx1:
       advance(sizeof(uint8_t));
       break;
+    case DW_FORM_addrx2: // fallthrough
     case DW_FORM_data2: // fallthrough
-    case DW_FORM_ref2:
+    case DW_FORM_ref2: // fallthrough
+    case DW_FORM_strx2:
       advance(sizeof(uint16_t));
       break;
+    case DW_FORM_addrx3: // fallthrough
+    case DW_FORM_strx3:
+      advance(3);
+      break;
+    case DW_FORM_addrx4: // fallthrough
     case DW_FORM_data4: // fallthrough
-    case DW_FORM_ref4:
+    case DW_FORM_ref4: // fallthrough
+    case DW_FORM_strx4: // fallthrough
+    case DW_FORM_ref_sup4:
       advance(sizeof(uint32_t));
       break;
     case DW_FORM_data8: // fallthrough
-    case DW_FORM_ref8:
+    case DW_FORM_ref8: // fallthrough
+    case DW_FORM_ref_sup8:
       advance(sizeof(uint64_t));
+      break;
+    case DW_FORM_data16:
+      advance(16);
+      break;
+    case DW_FORM_addrx: // fallthrough
+    case DW_FORM_loclistx: // fallthrough
+    case DW_FORM_rnglistx: // fallthrough
+    case DW_FORM_strx:
+      readULEB(sp);
       break;
     case DW_FORM_sdata:
       readSLEB(sp);
@@ -395,16 +444,22 @@ DwarfState::Attribute DwarfState::readAttribute(Dwarf_Die die,
         break;
       }
       // fallthrough
+    case DW_FORM_line_strp: // fallthrough
     case DW_FORM_sec_offset: // fallthrough
-    case DW_FORM_strp:
+    case DW_FORM_strp: // fallthrough
+    case DW_FORM_strp_sup:
       advance(die->is64Bit ? 8 : 4);
       break;
     case DW_FORM_string:
       readNullTerminated(sp);
       attrVal.assign(attrVal.data(), sp.data() - 1);
       break;
+    case DW_FORM_implicit_const:
+      break;
     case DW_FORM_indirect: // form is explicitly specified
       always_assert(false);
+    default:
+      always_assert(false); // unknown form
   }
 
   return { spec, die, attrVal };
@@ -416,6 +471,27 @@ folly::StringPiece DwarfState::getStringFromStringSection(
   folly::StringPiece sp(debug_str);
   sp.advance(offset);
   return readNullTerminated(sp);
+}
+
+folly::StringPiece DwarfState::getStringFromStringSectionIndirect(
+    uint64_t strOffsetsBase, uint64_t str_offsets_idx, bool is64Bit) const {
+  folly::StringPiece sp = debug_str_offsets;
+  uint64_t string_offset;
+  if (is64Bit) {
+    sp.advance(strOffsetsBase + str_offsets_idx * sizeof(uint64_t));
+    string_offset = read<uint64_t>(sp);
+  } else {
+    sp.advance(strOffsetsBase + str_offsets_idx * sizeof(uint32_t));
+    string_offset = read<uint32_t>(sp);
+  }
+  return getStringFromStringSection(string_offset);
+}
+
+uintptr_t DwarfState::readAddrIndirect(uint64_t addrIdx, uint64_t addrSize,
+                                       bool sgn) const {
+  folly::StringPiece sp = debug_addr;
+  sp.advance(addrIdx * addrSize);
+  return readAddr(sp, addrSize, sgn);
 }
 
 auto DwarfState::getTag(Dwarf_Die die) const -> Dwarf_Half {
@@ -453,13 +529,56 @@ std::string DwarfState::getAttributeValueString(Dwarf_Attribute attr) const {
 
 folly::StringPiece
 DwarfState::getAttributeValueStringPiece(Dwarf_Attribute attr) const {
-  if (attr->form == DW_FORM_string) {
-    return attr->attrValue;
+  uint64_t strOffsetsBase;
+
+  // strOffsetsBase is stored in the CU, fetch it from there
+  auto cu = getCuForDie(attr->die);
+  forEachAttribute(&cu, [&] (Dwarf_Attribute attr) {
+    if (attr->name != DW_AT_str_offsets_base) return true;
+    strOffsetsBase = getAttributeValueUData(attr);
+    return false;
+  });
+
+  auto sp = attr->attrValue;
+
+  switch (attr->form) {
+    case DW_FORM_string:
+      return sp;
+    case DW_FORM_strp:
+      return getStringFromStringSection(readOffset(sp, attr->die->is64Bit));
+    case DW_FORM_strx1:
+      return getStringFromStringSectionIndirect(
+        strOffsetsBase,
+        read<uint8_t>(sp),
+        attr->die->is64Bit
+      );
+    case DW_FORM_strx2:
+      return getStringFromStringSectionIndirect(
+        strOffsetsBase,
+        read<uint16_t>(sp),
+        attr->die->is64Bit
+      );
+    case DW_FORM_strx3:
+      // Force read() to only read 3 bytes into uint32_t
+      return getStringFromStringSectionIndirect(
+          strOffsetsBase,
+          read<uint32_t>(sp, 3),
+          attr->die->is64Bit
+        );
+    case DW_FORM_strx4:
+      return getStringFromStringSectionIndirect(
+        strOffsetsBase,
+        read<uint32_t>(sp),
+        attr->die->is64Bit
+      );
+    case DW_FORM_strx:
+      return getStringFromStringSectionIndirect(
+        strOffsetsBase,
+        readULEB(sp),
+        attr->die->is64Bit
+      );
   }
-  if (attr->form == DW_FORM_strp) {
-    auto sp = attr->attrValue;
-    return getStringFromStringSection(readOffset(sp, attr->die->is64Bit));
-  }
+
   throw DwarfStateException{
     folly::sformat(
       "Unable to obtain attribute value string: {}-{}",
@@ -490,12 +609,14 @@ bool DwarfState::getAttributeValueFlag(Dwarf_Attribute attr) const {
 uint64_t DwarfState::getAttributeValueUData(Dwarf_Attribute attr) const {
   auto sp = attr->attrValue;
   switch (attr->form) {
-    case DW_FORM_udata:      return readULEB(sp);
-    case DW_FORM_data1:      return read<uint8_t>(sp);
-    case DW_FORM_data2:      return read<uint16_t>(sp);
-    case DW_FORM_data4:      return read<uint32_t>(sp);
-    case DW_FORM_data8:      return read<uint64_t>(sp);
-    case DW_FORM_sec_offset: return readOffset(sp, attr->die->context->is64Bit);
+    case DW_FORM_udata:           return readULEB(sp);
+    case DW_FORM_data1:           return read<uint8_t>(sp);
+    case DW_FORM_data2:           return read<uint16_t>(sp);
+    case DW_FORM_data4:           return read<uint32_t>(sp);
+    case DW_FORM_data8:           return read<uint64_t>(sp);
+    case DW_FORM_sec_offset:      return readOffset(sp, attr->die->context->is64Bit);
+    case DW_FORM_rnglistx:        return readULEB(sp);
+    case DW_FORM_implicit_const:  return readSLEB(sp);
   }
   throw DwarfStateException{
     folly::sformat(
@@ -521,9 +642,38 @@ int64_t DwarfState::getAttributeValueSData(Dwarf_Attribute attr) const {
 }
 
 uintptr_t DwarfState::getAttributeValueAddr(Dwarf_Attribute attr) const {
-  if (attr->form == DW_FORM_addr) {
-    auto sp = attr->attrValue;
-    return readAddr(sp, attr->die->context->addrSize, false);
+  auto sp = attr->attrValue;
+  switch (attr->form) {
+    case DW_FORM_addr:
+      return readAddr(
+        sp,
+        attr->die->context->addrSize,
+        false
+      );
+    case DW_FORM_addrx1:
+      return readAddrIndirect(
+        read<uint8_t>(sp),
+        attr->die->context->addrSize,
+        false
+      );
+    case DW_FORM_addrx2:
+      return readAddrIndirect(
+        read<uint16_t>(sp),
+        attr->die->context->addrSize,
+        false
+      );
+    case DW_FORM_addrx4:
+      return readAddrIndirect(
+        read<uint32_t>(sp),
+        attr->die->context->addrSize,
+        false
+      );
+    case DW_FORM_addrx:
+      return readAddrIndirect(
+        readULEB(sp),
+        attr->die->context->addrSize,
+        false
+      );
   }
   throw DwarfStateException{
     folly::sformat(
@@ -586,8 +736,7 @@ uint64_t DwarfState::getAttributeValueSig8(Dwarf_Attribute attr) const {
   };
 }
 
-auto
-DwarfState::getRanges(Dwarf_Attribute attr) const -> std::vector<Dwarf_Ranges> {
+std::vector<DwarfState::Dwarf_Ranges> DwarfState::getRanges(Dwarf_Attribute attr) const {
   auto const offset = getAttributeValueUData(attr);
   auto range = debug_ranges;
   range.advance(offset);
@@ -600,6 +749,106 @@ DwarfState::getRanges(Dwarf_Attribute attr) const -> std::vector<Dwarf_Ranges> {
     v.push_back(tmp);
   }
   return v;
+}
+
+std::vector<DwarfState::Dwarf_Ranges> DwarfState::getRngLists(Dwarf_Attribute attr) const {
+  uint64_t rnglistBase;
+  uint64_t addrBase;
+
+  // rnglistBase and addrBase are stored in the CU, fetch them from there
+  auto cu = getCuForDie(attr->die);
+  forEachAttribute(&cu, [&] (Dwarf_Attribute attr) {
+    switch (attr->name) {
+      case DW_AT_rnglists_base:
+        rnglistBase = getAttributeValueUData(attr);
+        return true;
+      case DW_AT_addr_base:
+        addrBase = getAttributeValueUData(attr);
+        return true;
+      default:
+        return true;
+    }
+  });
+  assert(rnglistBase);
+  assert(addrBase);
+
+  // Calculate the section offset
+  auto const indexOffset = getAttributeValueUData(attr);
+  auto rnglists = debug_rnglists;
+  rnglists.advance(
+    rnglistBase +
+    indexOffset * (attr->die->is64Bit ? sizeof(uint64_t) : sizeof(uint32_t))
+  );
+  auto const sectionOffset = read<uint32_t>(rnglists);
+
+  // Advance to the section offset which is relative to debug_rnglists
+  rnglists = debug_rnglists;
+  rnglists.advance(rnglistBase + sectionOffset);
+
+  // Collect all ranges
+  std::vector<Dwarf_Ranges> ranges;
+  uintptr_t baseAddr = 0;
+  while (true) {
+    auto debug_addr_sp = debug_addr;
+    debug_addr_sp.advance(addrBase);
+    auto const val = read<uint8_t>(rnglists);
+    switch (val) {
+      case DW_RLE_end_of_list:
+        return ranges;
+      case DW_RLE_base_addressx: {
+        debug_addr_sp.advance(readULEB(rnglists) * cu.context->addrSize);
+        baseAddr = readAddr(debug_addr_sp, cu.context->addrSize, false);
+        break;
+      }
+      case DW_RLE_startx_endx: {
+        auto const startUleb = readULEB(rnglists);
+        debug_addr_sp.advance(startUleb * cu.context->addrSize);
+        auto const start = readAddr(debug_addr_sp, cu.context->addrSize, false);
+
+        auto const endUleb = readULEB(rnglists);
+        debug_addr_sp.advance((endUleb - startUleb) * cu.context->addrSize);
+        auto const end = readAddr(debug_addr_sp, cu.context->addrSize, false);
+
+        ranges.push_back({start, end});
+        break;
+      }
+      case DW_RLE_startx_length: {
+        debug_addr_sp.advance(readULEB(rnglists) * cu.context->addrSize);
+        auto const start = readAddr(debug_addr_sp, cu.context->addrSize, false);
+        auto const length = readULEB(rnglists);
+        ranges.push_back({start, start + length});
+        break;
+      }
+      case DW_RLE_offset_pair: {
+        assert(baseAddr);
+        auto const v1 = baseAddr + readULEB(rnglists);
+        auto const v2 = baseAddr + readULEB(rnglists);
+        ranges.push_back({v1, v2});
+        break;
+      }
+      // Non-split Units
+      case DW_RLE_base_address:
+        debug_addr_sp.advance(readULEB(rnglists) * cu.context->addrSize);
+        baseAddr = readAddr(debug_addr_sp, cu.context->addrSize, false);
+        break;
+      case DW_RLE_start_end: {
+        auto const start = readAddr(rnglists, cu.context->addrSize, false);
+        auto const end = readAddr(rnglists, cu.context->addrSize, false);
+        ranges.push_back({start, end});
+        break;
+      }
+      case DW_RLE_start_length: {
+        auto const start = readAddr(rnglists, cu.context->addrSize, false);
+        auto const length = readULEB(rnglists);
+        ranges.push_back({start, start + length});
+        break;
+      }
+      default:
+        always_assert(false); // unknown RLE
+    }
+  }
+
+  return ranges;
 }
 
 #define DW_TAGS(X)                              \
@@ -737,6 +986,10 @@ DwarfState::getRanges(Dwarf_Attribute attr) const -> std::vector<Dwarf_Ranges> {
   X(DW_FORM_exprloc)                            \
   X(DW_FORM_flag_present)                       \
   X(DW_FORM_strx)                               \
+  X(DW_FORM_strx1)                              \
+  X(DW_FORM_strx2)                              \
+  X(DW_FORM_strx3)                              \
+  X(DW_FORM_strx4)                              \
   X(DW_FORM_addrx)                              \
   X(DW_FORM_ref_sup4)                           \
   X(DW_FORM_ref_sup8)                           \
@@ -747,7 +1000,8 @@ DwarfState::getRanges(Dwarf_Attribute attr) const -> std::vector<Dwarf_Ranges> {
   X(DW_FORM_GNU_addr_index)                     \
   X(DW_FORM_GNU_str_index)                      \
   X(DW_FORM_GNU_ref_alt)                        \
-  X(DW_FORM_GNU_strp_alt)
+  X(DW_FORM_GNU_strp_alt)                       \
+  X(DW_FORM_rnglistx)
 
 #define DW_ATTRIBUTES(X)                        \
   X(DW_AT_sibling)                              \
@@ -1164,7 +1418,7 @@ DwarfState::getRanges(Dwarf_Attribute attr) const -> std::vector<Dwarf_Ranges> {
   X(DW_OP_implicit_value, -1, -3, -4)           \
   X(DW_OP_stack_value)                          \
   X(DW_OP_implicit_pointer, -2, -1)             \
-  X(DW_OP_addrx)                                \
+  X(DW_OP_addrx, -1)                            \
   X(DW_OP_constx)                               \
   X(DW_OP_entry_value)                          \
   X(DW_OP_const_type)                           \
@@ -1260,8 +1514,7 @@ auto DwarfState::getAttributeValueExprLoc(
     };
     auto get = [&] (int sz) -> uint64_t {
       switch (sz) {
-        // -3 and -4 are special handlers for implicit value
-        case -3: return readRaw(loc.lr_number);
+        // -4 and -3 are special handlers for implicit value
         case -4:
           if (loc.lr_number > 8) {
             auto const ret = readRaw(loc.lr_number - 8);
@@ -1269,6 +1522,7 @@ auto DwarfState::getAttributeValueExprLoc(
             return ret;
           }
           return 0;
+        case -3: return readRaw(loc.lr_number);
         case -2: return readOffset(rawData, attr->die->context->is64Bit);
         case -1: return readULEB(rawData);
         case 0: return 0;

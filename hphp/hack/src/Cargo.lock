@@ -4272,11 +4272,13 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "ascii",
+ "ffi",
  "hash",
  "ir",
  "itertools 0.10.3",
  "log",
  "newtype",
+ "once_cell",
  "strum",
  "strum_macros",
 ]

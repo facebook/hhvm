@@ -10,23 +10,28 @@
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
-// This attribute is applied to the static data members to ensure that they are
-// not stripped from the compiled binary, in order to keep them available for
-// use by debuggers at runtime.
+// These attributes are applied to the static data members to ensure that they
+// are not stripped from the compiled binary, in order to keep them available
+// for use by debuggers at runtime.
 //
-// The attribute works by forcing all of the data members (both used and unused
-// ones) into the same section. This stops the linker from stripping the unused
-// data, as it works on a per-section basis and only removes sections if they
-// are entirely unused.
-#define THRIFT_DATA_SECTION [[gnu::section(".rodata.thrift.data")]]
+// The "used" attribute is required to ensure the compiler always emits unused
+// data.
+//
+// The "section" attribute is required to stop the linker from stripping used
+// data. It works by forcing all of the data members (both used and unused ones)
+// into the same section. As the linker strips data on a per-section basis, it
+// is then unable to remove unused data without also removing used data.
+// This has a similar effect to the "retain" attribute, but works with older
+// toolchains.
+#define THRIFT_DATA_MEMBER [[gnu::used]] [[gnu::section(".rodata.thrift.data")]]
 #else
-#define THRIFT_DATA_SECTION
+#define THRIFT_DATA_MEMBER
 #endif
 
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 13> TStructDataStorage<::extra::svc::containerStruct2>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 13> TStructDataStorage<::extra::svc::containerStruct2>::fields_names = {{
   "fieldA",
   "req_fieldA",
   "opt_fieldA",
@@ -41,7 +46,7 @@ THRIFT_DATA_SECTION const std::array<folly::StringPiece, 13> TStructDataStorage<
   "req_fieldE",
   "opt_fieldE",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 13> TStructDataStorage<::extra::svc::containerStruct2>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 13> TStructDataStorage<::extra::svc::containerStruct2>::fields_ids = {{
   1,
   101,
   201,
@@ -56,7 +61,7 @@ THRIFT_DATA_SECTION const std::array<int16_t, 13> TStructDataStorage<::extra::sv
   105,
   205,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 13> TStructDataStorage<::extra::svc::containerStruct2>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 13> TStructDataStorage<::extra::svc::containerStruct2>::fields_types = {{
   TType::T_BOOL,
   TType::T_BOOL,
   TType::T_BOOL,
@@ -71,7 +76,7 @@ THRIFT_DATA_SECTION const std::array<protocol::TType, 13> TStructDataStorage<::e
   TType::T_STRING,
   TType::T_STRING,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 13> TStructDataStorage<::extra::svc::containerStruct2>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 13> TStructDataStorage<::extra::svc::containerStruct2>::storage_names = {{
   "__fbthrift_field_fieldA",
   "__fbthrift_field_req_fieldA",
   "__fbthrift_field_opt_fieldA",
@@ -86,7 +91,7 @@ THRIFT_DATA_SECTION const std::array<folly::StringPiece, 13> TStructDataStorage<
   "__fbthrift_field_req_fieldE",
   "__fbthrift_field_opt_fieldE",
 }};
-THRIFT_DATA_SECTION const std::array<int, 13> TStructDataStorage<::extra::svc::containerStruct2>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 13> TStructDataStorage<::extra::svc::containerStruct2>::isset_indexes = {{
   0,
   -1,
   1,

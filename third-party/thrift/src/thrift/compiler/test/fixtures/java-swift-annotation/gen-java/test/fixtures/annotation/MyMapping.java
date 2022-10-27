@@ -345,8 +345,7 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRING, _iter0.size()));
         for (Map.Entry<String, byte[]> _iter1 : _iter0.entrySet()) {
           oprot.writeString(_iter1.getKey());
-          oprot.writeBinary(java.nio.ByteBuffer.wrap(_iter1.getValue()));
-        }
+          oprot.writeBinary(java.nio.ByteBuffer.wrap(_iter1.getValue()));        }
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }

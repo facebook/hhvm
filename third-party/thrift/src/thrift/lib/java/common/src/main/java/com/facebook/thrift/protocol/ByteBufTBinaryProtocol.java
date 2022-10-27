@@ -16,6 +16,7 @@
 
 package com.facebook.thrift.protocol;
 
+import com.facebook.thrift.util.Utf8Util;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -303,5 +304,10 @@ public final class ByteBufTBinaryProtocol extends ByteBufTProtocol {
   public ByteBuf readBinaryAsSlice() throws TException {
     int size = readI32();
     return byteBuf.readSlice(size);
+  }
+
+  @Override
+  protected String readStringReportIfInvalid() {
+    return Utf8Util.readStringReportIfInvalid(readBinaryAsSlice());
   }
 }

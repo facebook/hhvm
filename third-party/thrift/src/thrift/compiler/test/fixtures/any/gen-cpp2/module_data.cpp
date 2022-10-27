@@ -10,74 +10,79 @@
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
-// This attribute is applied to the static data members to ensure that they are
-// not stripped from the compiled binary, in order to keep them available for
-// use by debuggers at runtime.
+// These attributes are applied to the static data members to ensure that they
+// are not stripped from the compiled binary, in order to keep them available
+// for use by debuggers at runtime.
 //
-// The attribute works by forcing all of the data members (both used and unused
-// ones) into the same section. This stops the linker from stripping the unused
-// data, as it works on a per-section basis and only removes sections if they
-// are entirely unused.
-#define THRIFT_DATA_SECTION [[gnu::section(".rodata.thrift.data")]]
+// The "used" attribute is required to ensure the compiler always emits unused
+// data.
+//
+// The "section" attribute is required to stop the linker from stripping used
+// data. It works by forcing all of the data members (both used and unused ones)
+// into the same section. As the linker strips data on a per-section basis, it
+// is then unable to remove unused data without also removing used data.
+// This has a similar effect to the "retain" attribute, but works with older
+// toolchains.
+#define THRIFT_DATA_MEMBER [[gnu::used]] [[gnu::section(".rodata.thrift.data")]]
 #else
-#define THRIFT_DATA_SECTION
+#define THRIFT_DATA_MEMBER
 #endif
 
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_SECTION const std::array<::cpp2::MyUnion::Type, 1> TEnumDataStorage<::cpp2::MyUnion::Type>::values = {{
+THRIFT_DATA_MEMBER const std::array<::cpp2::MyUnion::Type, 1> TEnumDataStorage<::cpp2::MyUnion::Type>::values = {{
   type::myString,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TEnumDataStorage<::cpp2::MyUnion::Type>::names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TEnumDataStorage<::cpp2::MyUnion::Type>::names = {{
   "myString",
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyStruct>::fields_names = {{
   "myString",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::cpp2::MyStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::MyStruct>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::MyStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::MyStruct>::fields_types = {{
   TType::T_STRING,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyStruct>::storage_names = {{
   "__fbthrift_field_myString",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::cpp2::MyStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::MyStruct>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyUnion>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyUnion>::fields_names = {{
   "myString",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::cpp2::MyUnion>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::MyUnion>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::MyUnion>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::MyUnion>::fields_types = {{
   TType::T_STRING,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyUnion>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyUnion>::storage_names = {{
   "myString",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::cpp2::MyUnion>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::MyUnion>::isset_indexes = {{
   0,
 }};
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyException>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyException>::fields_names = {{
   "myString",
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::cpp2::MyException>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::cpp2::MyException>::fields_ids = {{
   1,
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::MyException>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::MyException>::fields_types = {{
   TType::T_STRING,
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyException>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyException>::storage_names = {{
   "__fbthrift_field_myString",
 }};
-THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::cpp2::MyException>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::MyException>::isset_indexes = {{
   0,
 }};
 

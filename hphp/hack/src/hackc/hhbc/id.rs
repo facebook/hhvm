@@ -15,7 +15,7 @@ use serde::Serialize;
 macro_rules! impl_id {
     ($type: ident) => {
         impl<'arena> $type<'arena> {
-            pub fn new(s: ffi::Str<'arena>) -> Self {
+            pub const fn new(s: ffi::Str<'arena>) -> Self {
                 Self(s)
             }
 

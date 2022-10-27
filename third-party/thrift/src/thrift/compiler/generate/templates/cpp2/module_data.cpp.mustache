@@ -21,29 +21,34 @@
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
-// This attribute is applied to the static data members to ensure that they are
-// not stripped from the compiled binary, in order to keep them available for
-// use by debuggers at runtime.
+// These attributes are applied to the static data members to ensure that they
+// are not stripped from the compiled binary, in order to keep them available
+// for use by debuggers at runtime.
 //
-// The attribute works by forcing all of the data members (both used and unused
-// ones) into the same section. This stops the linker from stripping the unused
-// data, as it works on a per-section basis and only removes sections if they
-// are entirely unused.
-#define THRIFT_DATA_SECTION [[gnu::section(".rodata.thrift.data")]]
+// The "used" attribute is required to ensure the compiler always emits unused
+// data.
+//
+// The "section" attribute is required to stop the linker from stripping used
+// data. It works by forcing all of the data members (both used and unused ones)
+// into the same section. As the linker strips data on a per-section basis, it
+// is then unable to remove unused data without also removing used data.
+// This has a similar effect to the "retain" attribute, but works with older
+// toolchains.
+#define THRIFT_DATA_MEMBER [[gnu::used]] [[gnu::section(".rodata.thrift.data")]]
 #else
-#define THRIFT_DATA_SECTION
+#define THRIFT_DATA_MEMBER
 #endif
 
 namespace apache {
 namespace thrift {
 <%#program:enums%>
 
-THRIFT_DATA_SECTION const std::array<<% > common/namespace_cpp2%><%enum:cpp_name%>, <%enum:size%>> TEnumDataStorage<<% > common/namespace_cpp2%><%enum:cpp_name%>>::values = {{
+THRIFT_DATA_MEMBER const std::array<<% > common/namespace_cpp2%><%enum:cpp_name%>, <%enum:size%>> TEnumDataStorage<<% > common/namespace_cpp2%><%enum:cpp_name%>>::values = {{
 <%#enum:values%><%!
 %>  type::<%enum_value:cpp_name%>,
 <%/enum:values%>
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, <%enum:size%>> TEnumDataStorage<<% > common/namespace_cpp2%><%enum:cpp_name%>>::names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, <%enum:size%>> TEnumDataStorage<<% > common/namespace_cpp2%><%enum:cpp_name%>>::names = {{
 <%#enum:values%><%!
 %>  "<%enum_value:name%>",
 <%/enum:values%>
@@ -52,12 +57,12 @@ THRIFT_DATA_SECTION const std::array<folly::StringPiece, <%enum:size%>> TEnumDat
 <%#program:structs%>
 <%#struct:union?%>
 
-THRIFT_DATA_SECTION const std::array<<%struct:cpp_fullname%>::Type, <%struct:num_union_members%>> TEnumDataStorage<<%struct:cpp_fullname%>::Type>::values = {{
+THRIFT_DATA_MEMBER const std::array<<%struct:cpp_fullname%>::Type, <%struct:num_union_members%>> TEnumDataStorage<<%struct:cpp_fullname%>::Type>::values = {{
 <%#struct:fields%><%!
 %>  type::<%field:cpp_name%>,
 <%/struct:fields%>
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, <%struct:num_union_members%>> TEnumDataStorage<<%struct:cpp_fullname%>::Type>::names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, <%struct:num_union_members%>> TEnumDataStorage<<%struct:cpp_fullname%>::Type>::names = {{
 <%#struct:fields%><%!
 %>  "<%field:name%>",
 <%/struct:fields%>
@@ -66,27 +71,27 @@ THRIFT_DATA_SECTION const std::array<folly::StringPiece, <%struct:num_union_memb
 <%/program:structs%>
 <%#program:structs%>
 
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_names = {{
   <%#struct:fields%>
   "<%field:name%>",
   <%/struct:fields%>
 }};
-THRIFT_DATA_SECTION const std::array<int16_t, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_ids = {{
   <%#struct:fields%>
   <%field:key%>,
   <%/struct:fields%>
 }};
-THRIFT_DATA_SECTION const std::array<protocol::TType, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_types = {{
   <%#struct:fields%><%#field:type%>
   TType::<% > module_types_tcc/struct_type%>,
   <%/field:type%><%/struct:fields%>
 }};
-THRIFT_DATA_SECTION const std::array<folly::StringPiece, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::storage_names = {{
   <%#struct:fields%>
   "<%field:cpp_storage_name%>",
   <%/struct:fields%>
 }};
-THRIFT_DATA_SECTION const std::array<int, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::isset_indexes = {{
   <%#struct:fields%>
   <%#field:has_isset?%><%field:isset_index%><%/field:has_isset?%><%^field:has_isset?%>-1<%/field:has_isset?%>,
   <%/struct:fields%>

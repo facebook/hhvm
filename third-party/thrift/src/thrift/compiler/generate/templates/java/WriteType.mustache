@@ -98,14 +98,19 @@
   }}{{^field:hasAdapterOrWrapper?}}oprot.writeBinary(java.nio.ByteBuffer.wrap(_iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}));{{/field:hasAdapterOrWrapper?}}{{!
   }}{{#field:hasAdapterOrWrapper?}}org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}});{{/field:hasAdapterOrWrapper?}}{{!
   }}{{/type:isBinaryString?}}{{!
-  }}{{^type:isBinaryString?}}oprot.writeString(_iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}});{{/type:isBinaryString?}}
-{{/field:isNested?}}{{!
+  }}{{^type:isBinaryString?}}{{!
+    }}oprot.writeString(_iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}});
+{{/type:isBinaryString?}}{{!
+}}{{/field:isNested?}}{{!
 }}{{^field:isNested?}}{{!
   }}{{#type:isBinaryString?}}{{!
   }}{{^field:hasAdapterOrWrapper?}}oprot.writeBinary({{^type:javaType}}java.nio.ByteBuffer.wrap{{/type:javaType}}({{^struct:isUnion?}}this.{{/struct:isUnion?}}{{field:javaName}}));{{/field:hasAdapterOrWrapper?}}{{!
   }}{{#field:hasAdapterOrWrapper?}}org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, {{field:javaName}});{{/field:hasAdapterOrWrapper?}}{{!
   }}{{/type:isBinaryString?}}{{!
-  }}{{^type:isBinaryString?}}oprot.writeString({{^struct:isUnion?}}{{^field:hasAdapterOrWrapper?}}this.{{/field:hasAdapterOrWrapper?}}{{/struct:isUnion?}}{{field:javaName}});{{/type:isBinaryString?}}{{!
+  }}{{^type:isBinaryString?}}{{!
+    }}oprot.writeString({{^struct:isUnion?}}{{^field:hasAdapterOrWrapper?}}this.{{/field:hasAdapterOrWrapper?}}{{/struct:isUnion?}}{{field:javaName}});{{!
+  }}{{/type:isBinaryString?}}{{!
+
 }}{{/field:isNested?}}{{!
 }}{{/type:string?}}{{!
 

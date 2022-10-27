@@ -54,6 +54,7 @@ pub enum TType {
 impl TryFrom<i8> for TType {
     type Error = anyhow::Error;
 
+    #[inline]
     fn try_from(val: i8) -> Result<Self> {
         let ret = match val {
             0 => TType::Stop,

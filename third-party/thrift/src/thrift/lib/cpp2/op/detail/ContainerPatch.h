@@ -303,6 +303,8 @@ template <typename Patch>
 class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   using Base = BaseContainerPatch<Patch, MapPatch>;
   using T = typename Base::value_type;
+  using P = folly::remove_cvref_t<decltype(*std::declval<Patch>().patch())>;
+  using VP = typename P::mapped_type;
 
  public:
   using Base::apply;
@@ -319,11 +321,13 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   template <typename C = T>
   void put(C&& entries) {
     auto& field = assignOr(*data_.put());
+    auto& patchPrior = *data_.patchPrior();
     for (auto&& entry : entries) {
       auto key = std::forward<decltype(entry)>(entry).first;
       field.insert_or_assign(key, std::forward<decltype(entry)>(entry).second);
       data_.add()->erase(key);
       data_.remove()->erase(key);
+      patchPrior.erase(key);
     }
   }
   template <typename K, typename V>
@@ -331,24 +335,28 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     assignOr(*data_.put()).insert_or_assign(key, std::forward<V>(value));
     data_.add()->erase(key);
     data_.remove()->erase(key);
+    data_.patchPrior()->erase(key);
   }
 
   template <typename C = T>
   void add(C&& entries) {
     auto& field = assignOr(*data_.add());
     for (auto&& entry : entries) {
-      field.insert_or_assign(
-          std::forward<decltype(entry)>(entry).first,
-          std::forward<decltype(entry)>(entry).second);
+      auto key = std::forward<decltype(entry)>(entry).first;
+      field.insert_or_assign(key, std::forward<decltype(entry)>(entry).second);
     }
   }
 
   template <typename C = std::unordered_set<typename T::key_type>>
   void remove(C&& keys) {
     auto& field = assignOr(*data_.add());
+    auto& patchPrior = *data_.patchPrior();
+    auto& patch = *data_.patch();
     for (auto&& key : keys) {
       field.erase(key);
       data_.remove()->insert(key);
+      patchPrior.erase(key);
+      patch.erase(key);
     }
   }
 
@@ -356,29 +364,89 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   void erase(K&& key) {
     assignOr(*data_.add()).erase(key);
     data_.remove()->insert(key);
+    data_.patchPrior()->erase(key);
+    data_.patch()->erase(key);
+  }
+
+  template <typename K = typename T::key_type>
+  FOLLY_NODISCARD VP& patchByKey(K&& key) {
+    // TODO: Return dummy patch for cases when key is slotted for removal
+    return isKeyModifiedOrRemoved(key) ? data_.patch()->operator[](key)
+                                       : data_.patchPrior()->operator[](key);
   }
 
   void apply(T& val) const {
     if (applyAssignOrClear(val)) {
       return;
     }
+    applyPatch(val, *data_.patchPrior());
     val.insert(data_.add()->begin(), data_.add()->end());
     erase_all(val, *data_.remove());
     for (const auto& entry : *data_.put()) {
       val.insert_or_assign(entry.first, entry.second);
     }
+    applyPatch(val, *data_.patch());
   }
 
   template <typename U>
   void merge(U&& next) {
-    if (!mergeAssignAndClear(std::forward<U>(next))) {
-      add(*std::forward<U>(next).toThrift().add());
-      remove(*std::forward<U>(next).toThrift().remove());
-      put(*std::forward<U>(next).toThrift().put());
+    if (mergeAssignAndClear(std::forward<U>(next))) {
+      return;
+    }
+
+    auto nextThrift = std::forward<U>(next).toThrift();
+    if (data_.add()->empty() && data_.put()->empty() &&
+        data_.remove()->empty()) {
+      mergePatches(*data_.patchPrior(), *nextThrift.patchPrior());
+    } else {
+      for (auto&& kv : *nextThrift.patchPrior()) {
+        // Move patches from patchPrior to patchAfter (aka patch) if current map
+        // patch had given key added/remove/put
+        patchByKey(kv.first).merge(kv.second);
+      }
+    }
+    add(*nextThrift.add());
+    remove(*nextThrift.remove());
+    put(*nextThrift.put());
+    mergePatches(*data_.patch(), *nextThrift.patch());
+
+    // Cleanup keys that were removed in the final patch
+    for (const auto& key : *data_.remove()) {
+      data_.patchPrior()->erase(key);
+      if (!isKeyModified(key)) {
+        data_.patch()->erase(key);
+      }
     }
   }
 
  private:
+  template <typename K = typename T::key_type>
+  bool isKeyModified(K&& key) {
+    return data_.add()->find(key) != data_.add()->end() ||
+        data_.put()->find(key) != data_.put()->end();
+  }
+
+  template <typename K = typename T::key_type>
+  bool isKeyModifiedOrRemoved(K&& key) {
+    return isKeyModified(key) ||
+        data_.remove()->find(key) != data_.remove()->end();
+  }
+
+  void applyPatch(T& val, const P& patch) const {
+    for (const auto& p : patch) {
+      auto it = val.find(p.first);
+      if (it != val.end()) {
+        p.second.apply(it->second);
+      }
+    }
+  }
+
+  void mergePatches(P& ourPatch, P& otherPatch) {
+    for (auto&& el : otherPatch) {
+      ourPatch[el.first].merge(el.second);
+    }
+  }
+
   using Base::applyAssignOrClear;
   using Base::assignOr;
   using Base::data_;

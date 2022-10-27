@@ -109,16 +109,21 @@ let add_key_constraint
     (((_, _, key), ty) : T.expr * Typing_defs.locl_ty)
     (env : env)
     entity : env =
+  let add_key key =
+    let ty = Tast_env.fully_expand env.tast_env ty in
+    let add_static_key env variety =
+      let constraint_ = Static_key (variety, certainty, entity, key, ty) in
+      Env.add_constraint env { hack_pos = pos; origin; constraint_ }
+    in
+    List.fold ~f:add_static_key variety ~init:env
+  in
   if is_dict env.tast_env base_ty then
     match key with
-    | A.String str ->
-      let key = Typing_defs.TSFlit_str (Pos_or_decl.none, str) in
-      let ty = Tast_env.fully_expand env.tast_env ty in
-      let add_static_key env variety =
-        let constraint_ = Static_key (variety, certainty, entity, key, ty) in
-        Env.add_constraint env { hack_pos = pos; origin; constraint_ }
-      in
-      List.fold ~f:add_static_key variety ~init:env
+    | A.String str -> add_key (Typing_defs.TSFlit_str (Pos_or_decl.none, str))
+    | A.Class_const ((_, _, A.CI (_, class_name)), (_, const_name)) ->
+      add_key
+        (Typing_defs.TSFclass_const
+           ((Pos_or_decl.none, class_name), (Pos_or_decl.none, const_name)))
     | _ ->
       let constraint_ = Has_dynamic_key entity in
       Env.add_constraint env { hack_pos = pos; origin; constraint_ }
@@ -789,8 +794,20 @@ let program (ctx : Provider_context.t) (tast : Tast.program) =
     | A.Fun fd ->
       let A.{ f_body; f_name = (_, id); f_params; f_ret; _ } = fd.A.fd_fun in
       [(id, callable id tast_env f_params ~return:f_ret f_body)]
-    | A.Class A.{ c_methods; c_name = (_, class_name); c_consts; c_extends; _ }
-      ->
+    | A.Class A.{ c_kind = Ast_defs.Cenum; _ } ->
+      (* There is nothing to analyse in an enum definition *)
+      []
+    | A.Class
+        A.
+          {
+            c_methods;
+            c_name = (_, class_name);
+            c_consts;
+            c_extends;
+            c_kind =
+              Ast_defs.(Cclass Concrete | Cclass Abstract | Cinterface | Ctrait);
+            _;
+          } ->
       let handle_method
           A.{ m_body; m_name = (_, method_name); m_params; m_ret; _ } =
         let id = class_name ^ "::" ^ method_name in

@@ -21,6 +21,7 @@ final class Exception extends \Exception {
       \PREG_BAD_UTF8_ERROR => 'Bad UTF8 error',
       \PREG_BAD_UTF8_OFFSET_ERROR => 'Bad UTF8 offset error',
       \PREG_BAD_REGEX_ERROR => 'Regex failed to compile',
+      \PREG_JIT_STACKLIMIT_ERROR => 'PCRE JIT stack limit error',
     ];
     parent::__construct(
       Str\format(

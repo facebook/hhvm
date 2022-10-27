@@ -455,6 +455,8 @@ let monitor_giving_up_exception _ = ()
 
 let processed_clients _ = ()
 
+let invalid_mercurial_state_transition ~state:_ = ()
+
 let search_symbol_index
     ~query_text:_
     ~max_results:_

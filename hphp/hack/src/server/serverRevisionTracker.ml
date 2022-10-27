@@ -77,6 +77,8 @@ let on_state_enter state_name =
 let on_state_leave root state_name state_metadata =
   match state_name with
   | "hg.update" ->
+    if not tracker_state.is_in_hg_update_state then
+      HackEventLogger.invalid_mercurial_state_transition ~state:state_name;
     tracker_state.is_in_hg_update_state <- false;
     Hh_logger.log "ServerRevisionTracker: leaving hg.update";
     Option.Monad_infix.(
@@ -87,7 +89,10 @@ let on_state_leave root state_name state_metadata =
           | Some true ->
             Hh_logger.log "ServerRevisionTracker: Ignoring merge rev %s" hg_rev
           | _ -> add_query ~hg_rev root))
-  | "hg.transaction" -> tracker_state.is_in_hg_transaction_state <- false
+  | "hg.transaction" ->
+    if not tracker_state.is_in_hg_transaction_state then
+      HackEventLogger.invalid_mercurial_state_transition ~state:state_name;
+    tracker_state.is_in_hg_transaction_state <- false
   | _ -> ()
 
 let is_hg_updating () =

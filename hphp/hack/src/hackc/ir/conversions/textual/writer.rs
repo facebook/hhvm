@@ -34,8 +34,8 @@ pub fn textual_writer(
     }
 
     writeln!(w, "// ----- EXTERNALS -----")?;
-    for external in state.external_funcs {
-        writeln!(w, "declare {}(...): mixed", external)?;
+    for name in state.func_declares.external_funcs() {
+        writeln!(w, "declare {name}(...): mixed")?;
     }
     writeln!(w)?;
 

@@ -415,15 +415,15 @@ pub(crate) fn write_attribute(w: &mut dyn std::io::Write, attr: Attribute) -> Re
     Ok(())
 }
 
-pub(crate) fn write_function(
+pub(crate) fn write_function<R>(
     w: &mut dyn std::io::Write,
     strings: &StringInterner,
     name: &str,
     loc: &SrcLoc,
     params: &[(&str, Ty)],
     ret_ty: Ty,
-    body: impl FnOnce(&mut FuncWriter<'_>) -> Result,
-) -> Result {
+    body: impl FnOnce(&mut FuncWriter<'_>) -> Result<R>,
+) -> Result<R> {
     write_full_loc(w, loc, strings)?;
 
     write!(w, "define {name}(")?;
@@ -442,11 +442,11 @@ pub(crate) fn write_function(
     };
 
     writer.write_label(BlockId::from_usize(0), &[])?;
-    body(&mut writer)?;
+    let result = body(&mut writer)?;
 
     writeln!(w, "}}")?;
     writeln!(w)?;
-    Ok(())
+    Ok(result)
 }
 
 pub(crate) struct FuncWriter<'a> {

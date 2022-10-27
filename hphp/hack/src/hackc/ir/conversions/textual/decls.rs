@@ -25,7 +25,7 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
     // strum can support non-string constants we can use that (otherwise we have
     // to do string-parsing at runtime).
     for builtin in Builtin::iter() {
-        let name = builtin.into_str();
+        let name = builtin.to_string();
         match builtin {
             Builtin::Bool => declare_function(w, &name, &[ty!(bool)], ty!(mixed))?,
             Builtin::Int => declare_function(w, &name, &[ty!(int)], ty!(mixed))?,
@@ -54,7 +54,7 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
 
     for hhbc in Hhbc::iter() {
         let builtin = Builtin::Hhbc(hhbc);
-        let name = builtin.into_str();
+        let name = builtin.to_string();
         match hhbc {
             Hhbc::Add
             | Hhbc::CmpEq

@@ -35,7 +35,7 @@ pub fn textual_writer(
 
     writeln!(w, "// ----- EXTERNALS -----")?;
     for external in state.external_funcs {
-        writeln!(w, "declare {}(HackParams): mixed", external)?;
+        writeln!(w, "declare {}(...): mixed", external)?;
     }
     writeln!(w)?;
 

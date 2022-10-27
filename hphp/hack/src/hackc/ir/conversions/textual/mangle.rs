@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ir::unit::ClassName;
 use ir::ClassId;
 use ir::StringInterner;
 
@@ -16,6 +17,11 @@ pub(crate) trait Mangle {
 /// Used for things that need a StringInterner to mangle themselves.
 pub(crate) trait MangleId {
     fn mangle(&self, strings: &StringInterner) -> String;
+}
+
+/// Used for things that need to be mangled relative to a ClassName.
+pub(crate) trait MangleClassName {
+    fn mangle(&self, class: &ClassName<'_>) -> String;
 }
 
 /// Used for things that need to be mangled relative to a ClassId.
@@ -70,6 +76,12 @@ impl MangleId for ir::ClassId {
 impl MangleId for ir::FunctionId {
     fn mangle(&self, strings: &StringInterner) -> String {
         mangle_method_name(TOP_LEVELS_CLASS, self.as_bytes(strings))
+    }
+}
+
+impl MangleClassName for ir::MethodName<'_> {
+    fn mangle(&self, class: &ClassName<'_>) -> String {
+        mangle_method_name(class.as_bytes(), self.as_bytes())
     }
 }
 

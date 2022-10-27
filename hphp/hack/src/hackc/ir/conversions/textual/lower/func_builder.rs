@@ -5,6 +5,8 @@
 
 //! Helpers for FuncBuilder emitting Textual specific constructs during lowering.
 
+use std::borrow::Cow;
+
 use ir::FuncBuilder;
 use ir::Instr;
 use ir::LocId;
@@ -28,7 +30,7 @@ pub(crate) trait FuncBuilderEx {
 impl<'a> FuncBuilderEx for FuncBuilder<'a> {
     fn hack_builtin(&mut self, builtin: hack::Builtin, args: &[ValueId], loc: LocId) -> Instr {
         use ir::instr::TextualHackBuiltinParam;
-        let target = builtin.into_str();
+        let target = Cow::Owned(builtin.to_string());
         let params = args
             .iter()
             .map(|_| TextualHackBuiltinParam::Value)

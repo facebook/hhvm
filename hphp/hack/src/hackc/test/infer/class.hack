@@ -10,7 +10,7 @@
 
 // CHECK: define C.$init_static() : void {
 // CHECK: #b0:
-// CHECK:   n0 = alloc_words(0)
+// CHECK:   n0 = $builtins.alloc_words(0)
 // CHECK:   store &static_singleton::C <- n0: *C$static
 // CHECK:   ret 0
 

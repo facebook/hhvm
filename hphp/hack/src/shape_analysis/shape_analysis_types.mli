@@ -177,11 +177,12 @@ end
 
 module ConstraintSet : Caml.Set.S with type elt = constraint_
 
-(** A shape result paired with how many analysis errors were encountered while
-    obtaining that result. The error count is intended as a rough measure of
-    confidence in the result. *)
+(** A list of shape results paired with how many analysis errors were
+    encountered while obtaining that result. The error count is intended as a
+    rough measure of confidence in the result. The results within the same list
+    are connected and shouldn't be applied independently. *)
 type analysis_result = {
-  result: shape_result;
+  results: shape_result list;
   error_count: int;
 }
 

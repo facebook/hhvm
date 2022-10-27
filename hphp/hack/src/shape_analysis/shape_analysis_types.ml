@@ -158,7 +158,7 @@ module ConstraintSet = Caml.Set.Make (struct
 end)
 
 type analysis_result = {
-  result: shape_result;
+  results: shape_result list;
   error_count: int;
 }
 

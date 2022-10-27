@@ -41,21 +41,24 @@ include "thrift/lib/thrift/type.thrift"
 @thrift.v1alpha
 package "facebook.com/thrift/type"
 
-// An unordered set of value ids, that can contain *at most one* value
-// of any type.
+/** An unordered set of value ids, that can contain *at most one* value of any type. */
 @thrift.Experimental // TODO(afuller): Adapt!
 typedef set<id.ValueId> AnnotationIds
 
-// An list of definition ids, in the order they were declared in the IDL/AST.
-//
-// Changing the order of definitions is always backward compatible.
+/**
+ * An list of definition ids, in the order they were declared in the IDL/AST.
+ *
+ * Changing the order of definitions is always backward compatible.
+ */
 // TODO(afuller): Add conformance tests to make sure this is true.
 @thrift.Experimental // TODO(afuller): Adapt!
 typedef list<id.DefinitionId> DefinitionIds
 
-// An list of programs ids, in the order they were included in the IDL/AST.
-//
-// Changing the order of include is always backwards compatible.
+/**
+ * An list of programs ids, in the order they were included in the IDL/AST.
+ *
+ * Changing the order of include is always backwards compatible.
+ */
 // TODO(afuller): Add conformance tests to make sure this is true.
 @thrift.Experimental // TODO(afuller): Adapt!
 typedef list<id.ProgramId> IncludeIds
@@ -498,10 +501,10 @@ struct Typedef {
 }
 
 /**
-  * Any Thrift definition.
-  *
-  * Each type must have DefinitionAttrs.
-  */
+ * Any Thrift definition.
+ *
+ * Each type must have DefinitionAttrs.
+ */
 union Definition {
   1: Struct structDef;
   2: Union unionDef;

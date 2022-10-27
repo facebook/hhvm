@@ -41,11 +41,74 @@
                   NIX_CFLAGS_COMPILE
                   CMAKE_TOOLCHAIN_FILE;
               };
+          setupCompilerCache = "/nix/var/sccache/setup-compiler-cache.sh";
         in
         rec {
-          packages.hhvm = pkgs.callPackage ./hhvm.nix {
+          packages.sccache_pr1086 = pkgs.sccache.overrideAttrs (finalAttrs: previousAttrs: rec {
+            version = "pr1086";
+            src = pkgs.fetchFromGitHub {
+              owner = "alessandrod";
+              repo = "sccache";
+              rev = "new-s3";
+              sha256 = "sha256-ExVVFLfQH/Tr++UgtT9fHs+tM0yOp5pIWO0rKTubNFs=";
+            };
+            cargoDeps = previousAttrs.cargoDeps.overrideAttrs (_: {
+              inherit src;
+              outputHash = "sha256-2eahz8z/nBmBM6L6OnrdjLALnVXESMe8cMOGszF22I8=";
+            });
+            meta = previousAttrs.meta // {
+              description = "Patched sccache with working S3 support";
+              homepage = "https://github.com/mozilla/sccache/pull/1086";
+            };
+          });
+
+          packages.hhvm_nocache = pkgs.callPackage ./hhvm.nix {
+            inherit setupCompilerCache;
             lastModifiedDate = self.lastModifiedDate;
           };
+
+          packages.hhvm = packages.hhvm_nocache.overrideAttrs(finalAttrs: previousAttrs: {
+            # Override unpackPhase to create a fixed sourceRoot so that the path
+            # can be cached by sccache
+            unpackPhase = ''
+              if [[ -f ${pkgs.lib.strings.escapeShellArg setupCompilerCache} ]]
+              then
+                runHook preUnpack
+                sourceRoot=/tmp/hhvm-cmake-build
+                cp -pr --reflink=auto -- "$src" "$sourceRoot"
+                cd "$sourceRoot"
+                echo "source root is $sourceRoot"
+                chmod -R u+w -- "$sourceRoot"
+                runHook postUnpack
+              else
+                # The default unpackPhase function, which copies sources to
+                # a directory whose name is different between builds
+                eval unpackPhase
+              fi
+            '';
+
+            # We pass compiler cache settings as a shell script specified by
+            # `setupCompilerCache`, not as derivation attributes, because we don't want
+            # to change the derivation hash changes due to different AWS_SESSION_TOKEN
+            # values.
+            preConfigure = ''
+              if [[ -f ${pkgs.lib.strings.escapeShellArg setupCompilerCache} ]]
+              then
+                . ${pkgs.lib.strings.escapeShellArg setupCompilerCache}
+              fi
+            '';
+
+            postConfigure = ''
+              set -x
+              cat CMakeCache.txt
+              env
+              set +x
+            '';
+
+            postBuild = ''
+              "$RUSTC_WRAPPER" --stop-server
+            '';
+          });
           packages.hhvm_clang = packages.hhvm.override {
             stdenv = pkgs.llvmPackages_14.stdenv;
           };

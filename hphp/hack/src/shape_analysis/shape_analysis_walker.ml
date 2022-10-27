@@ -108,6 +108,14 @@ let disjoint_from_traversable tast_env ty =
   let typing_env = Tast_env.tast_env_as_typing_env tast_env in
   Typing_subtype.is_type_disjoint typing_env traversable_top ty
 
+let any_shape_can_flow tast_env ty =
+  let open Typing_make_type in
+  let open Typing_reason in
+  let shape_top =
+    shape Rnone Typing_defs.Open_shape Typing_defs.TShapeMap.empty
+  in
+  Tast_env.is_sub_type tast_env shape_top ty
+
 let add_key_constraint
     ~(pos : Pos.t)
     ~(origin : int)
@@ -149,7 +157,7 @@ let rec assign
     (pos : Pos.t)
     (origin : int)
     (env : env)
-    ((_, lhs_pos, lval) : T.expr)
+    ((lhs_ty, lhs_pos, lval) : T.expr)
     (rhs : entity)
     (ty_rhs : Typing_defs.locl_ty) : env =
   let decorate origin constraint_ = { hack_pos = pos; origin; constraint_ } in
@@ -197,7 +205,10 @@ let rec assign
   | A.Obj_get (_, _, _, _) ->
     (* Imprecise local handling so that false positives are invalidated *)
     let env =
-      Option.fold ~init:env ~f:(dynamic_when_local ~origin:__LINE__ pos) rhs
+      if any_shape_can_flow env.tast_env lhs_ty then
+        env
+      else
+        Option.fold ~init:env ~f:(dynamic_when_local ~origin:__LINE__ pos) rhs
     in
     not_yet_supported env lhs_pos ("lvalue: " ^ Utils.expr_name lval)
   | _ -> not_yet_supported env lhs_pos ("lvalue: " ^ Utils.expr_name lval)
@@ -344,16 +355,34 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let args = List.map ~f:(fun arg -> (Ast_defs.Pnormal, arg)) args in
     let call_expr = (ty, pos, A.Call (base, targs, args, unpacked)) in
     expr_ env call_expr
-  | A.Call (base, _targs, args, unpacked) ->
+  | A.Call (((base_ty, _, _) as base), _targs, args, unpacked) ->
+    let param_tys =
+      match Typing_defs.get_node base_ty with
+      | Typing_defs.Tfun ft ->
+        List.map
+          ~f:(fun param -> param.Typing_defs.fp_type.Typing_defs.et_type)
+          ft.Typing_defs.ft_params
+      | _ -> []
+    in
     let handle_arg arg_idx env (param_kind, ((_ty, pos, _exp) as arg)) =
       let (env, arg_entity) = expr_ env arg in
+      let param_ty_opt = List.nth param_tys arg_idx in
+      let be_conservative =
+        Option.value_map
+          ~default:true
+          param_ty_opt
+          ~f:(Fn.non @@ any_shape_can_flow env.tast_env)
+      in
       let env =
-        (* During local mode we cannot know what happens to the entity, so we
-           conservatively assume there is a dynamic access. *)
-        Option.fold
-          ~init:env
-          ~f:(dynamic_when_local ~origin:__LINE__)
-          arg_entity
+        if be_conservative then
+          (* During local mode we cannot know what happens to the entity, so we
+             conservatively assume there is a dynamic access. *)
+          Option.fold
+            ~init:env
+            ~f:(dynamic_when_local ~origin:__LINE__)
+            arg_entity
+        else
+          env
       in
       let (env, arg_entity) =
         match param_kind with
@@ -369,12 +398,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
               let arg_entity_ = Env.fresh_var () in
               let arg_entity = Some arg_entity_ in
               let env = Env.set_local env lid arg_entity in
-              let env =
-                Option.fold
-                  ~init:env
-                  ~f:(dynamic_when_local ~origin:__LINE__)
-                  arg_entity
-              in
+              let env = dynamic_when_local ~origin:__LINE__ env arg_entity_ in
               (env, arg_entity)
             | (_, pos, _) ->
               let env = not_yet_supported env pos "inout argument" in
@@ -384,7 +408,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
       in
       match arg_entity with
       | Some arg_entity_ ->
-        let env =
+        begin
           match base with
           | (_, _, A.Id (_, f_id)) when String.equal f_id SN.Hips.inspect ->
             let constraint_ = decorate ~origin:__LINE__ @@ Marks (Debug, pos) in
@@ -402,14 +426,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
             in
             Env.add_inter_constraint env inter_constraint_
           | _ -> env
-        in
-        let env =
-          Option.fold
-            ~init:env
-            ~f:(dynamic_when_local ~origin:__LINE__)
-            arg_entity
-        in
-        env
+        end
       | None -> env
     in
     (* Handle the bast of the call *)

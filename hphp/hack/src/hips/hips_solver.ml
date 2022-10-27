@@ -319,6 +319,16 @@ module Inter (I : Intra) = struct
     SMap.update (snd const_ent) append_opt input_constr_map
     |> SMap.update f append_initial_opt
 
+  let add_const_identifier_constraints ~key constraint_map const_identifier =
+    match find_const const_identifier constraint_map with
+    | Some (constr_list_at_const_ent, _) ->
+      add_const_identifier_and_initializer_subset_constraints
+        constr_list_at_const_ent
+        const_identifier
+        constraint_map
+        key
+    | None -> constraint_map
+
   let add_const_inheritance_constraints
       ~(ent1_constraints : any_constraint list)
       ~(ent2_constraints : any_constraint list)
@@ -340,42 +350,6 @@ module Inter (I : Intra) = struct
     in
     let append_opt = Option.map ~f:(fun x -> subset_any_constr :: x) in
     SMap.update (snd const_ent_2) append_opt input_constr_map
-
-  let close_identifier (current_constraint_map : any_constraint list SMap.t) :
-      any_constraint list SMap.t =
-    let aux
-        (f : string)
-        (constr_list : any_constraint list)
-        (input_constr_map : any_constraint list SMap.t) :
-        any_constraint list SMap.t =
-      let add_constraints
-          (input_constr_map_2 : any_constraint list SMap.t)
-          (ident_ent : constant_identifier_entity) : any_constraint list SMap.t
-          =
-        match find_const ident_ent current_constraint_map with
-        | Some (constr_list_at_const_ent, _) ->
-          add_const_identifier_and_initializer_subset_constraints
-            constr_list_at_const_ent
-            ident_ent
-            input_constr_map_2
-            f
-        | None -> input_constr_map_2
-      in
-      let only_identifier (constr : any_constraint) :
-          constant_identifier_entity option =
-        match constr with
-        | Inter (ConstantIdentifier ident_ent) -> Some ident_ent
-        | _ -> None
-      in
-      let only_identifier_list =
-        List.filter_map ~f:only_identifier constr_list
-      in
-      List.fold_left
-        ~f:add_constraints
-        ~init:input_constr_map
-        only_identifier_list
-    in
-    SMap.fold aux current_constraint_map current_constraint_map
 
   (** Add subset constraints for constant overrides.
 
@@ -407,10 +381,11 @@ module Inter (I : Intra) = struct
             constraint_map)
     |> Option.value ~default:constraint_map
 
+  (* add new interprocedural constraints by examining the cross-join of all constraints *)
   let close (constraint_map : any_constraint list SMap.t) :
       any_constraint list SMap.t =
     let add_constraints_for_key
-        (_key : string)
+        (key : string)
         (constr_list : any_constraint list)
         (constraint_map : any_constraint list SMap.t) :
         any_constraint list SMap.t =
@@ -418,7 +393,8 @@ module Inter (I : Intra) = struct
           (constraint_map : any_constraint list SMap.t)
           (constr : any_constraint) : any_constraint list SMap.t =
         match constr with
-        (* TODO: merge with `close_identifier` function *)
+        | Inter (ConstantIdentifier const_identifier) ->
+          add_const_identifier_constraints ~key constraint_map const_identifier
         | Inter (Constant const) -> add_const_constraints constraint_map const
         | _ -> constraint_map
       in
@@ -486,6 +462,5 @@ module Inter (I : Intra) = struct
         else
           analyse_help (completed_iterations + 1) no_dupl_deduced_constraint_map
     in
-    let closed = base_constraint_map |> close_identifier |> close in
-    analyse_help 0 closed
+    analyse_help 0 (close base_constraint_map)
 end

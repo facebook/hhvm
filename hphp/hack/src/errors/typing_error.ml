@@ -6566,6 +6566,10 @@ and Secondary : sig
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
       }
+    | Override_async of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+      }
     | Override_lsb of {
         pos: Pos_or_decl.t;
         member_name: string;
@@ -6837,6 +6841,10 @@ end = struct
         parent_is_const: bool;
       }
     | Override_final of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+      }
+    | Override_async of {
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
       }
@@ -7290,6 +7298,16 @@ end = struct
     in
     (Error_code.OverrideFinal, reasons, [])
 
+  let override_async pos parent_pos =
+    let reasons =
+      lazy
+        [
+          (pos, "You cannot override this method with a non-async method");
+          (parent_pos, "It was declared as async");
+        ]
+    in
+    (Error_code.OverrideAsync, reasons, [])
+
   let override_lsb pos member_name parent_pos =
     let reasons =
       lazy
@@ -7716,6 +7734,8 @@ end = struct
       Eval_result.single (ifc_policy_mismatch pos policy pos_super policy_super)
     | Override_final { pos; parent_pos } ->
       Eval_result.single (override_final pos parent_pos)
+    | Override_async { pos; parent_pos } ->
+      Eval_result.single (override_async pos parent_pos)
     | Override_lsb { pos; member_name; parent_pos } ->
       Eval_result.single (override_lsb pos member_name parent_pos)
     | Multiple_concrete_defs

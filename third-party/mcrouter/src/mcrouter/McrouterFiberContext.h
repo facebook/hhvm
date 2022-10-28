@@ -62,7 +62,7 @@ using AxonLogWriteFn = std::function<bool(uint16_t, folly::IOBuf)>;
 struct AxonContext {
   AxonLogWriteFn logWriteFn;
   int64_t maxTask{-1};
-  bool isAxonAllDeleteEnabled{false};
+  bool allDelete{false};
 };
 
 template <class RouterInfo>

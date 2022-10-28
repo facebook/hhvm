@@ -1937,9 +1937,9 @@ void ThriftServer::acceptConnection(
   this->acceptConnection(
       fd,
       clientAddr,
-      info,
+      std::move(info),
       new NewConnectionContextHolder(
-          ThriftServer::NewConnectionContext{processor}));
+          ThriftServer::NewConnectionContext{std::move(processor)}));
 }
 
 folly::Optional<ThriftServer::NewConnectionContext>

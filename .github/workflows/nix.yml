@@ -90,7 +90,12 @@ jobs:
         aws-region: us-west-2
     - name: Sign Nix binaries with a private key downloaded from AWS Secrets Manager
       if: steps.configure-aws-credentials.outcome == 'success'
-      run: nix store sign --recursive --key-file <(aws secretsmanager get-secret-value --secret-id hhvm-nix-cache-1 --query SecretString --output text) --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
+      run: nix store sign \
+          --recursive \
+          --key-file <(aws secretsmanager get-secret-value --secret-id hhvm-nix-cache-1 --query SecretString --output text) \
+          --print-build-logs \
+          "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}" \
+          "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}.rust"
     - name: Upload Nix binaries to the binary cache server on S3
       if: steps.configure-aws-credentials.outcome == 'success'
       run: |

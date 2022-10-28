@@ -16,9 +16,9 @@
 
 #pragma once
 
+#include <sys/types.h>
 #include <filesystem>
 #include <string>
-#include <sys/types.h>
 
 #include "hphp/util/sqlite-wrapper.h"
 
@@ -30,7 +30,6 @@ namespace Facts {
  * have.
  */
 struct SQLiteKey {
-
   static SQLiteKey readOnly(std::filesystem::path path);
   static SQLiteKey readWrite(std::filesystem::path path);
   static SQLiteKey
@@ -54,7 +53,7 @@ struct SQLiteKey {
   ::gid_t m_gid;
   ::mode_t m_perms;
 
-private:
+ private:
   SQLiteKey() = delete;
   SQLiteKey(
       std::filesystem::path path,

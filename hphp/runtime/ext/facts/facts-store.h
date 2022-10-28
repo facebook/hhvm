@@ -43,8 +43,9 @@ std::shared_ptr<FactsStore> make_watcher_facts(
  * Create a FactsStore that trusts the DB that `dbHandle` returns, and never
  * modifies it.
  */
-std::shared_ptr<FactsStore>
-make_trusted_facts(std::filesystem::path root, AutoloadDB::Handle dbHandle);
+std::shared_ptr<FactsStore> make_trusted_facts(
+    std::filesystem::path root,
+    AutoloadDB::Handle dbHandle);
 
 } // namespace Facts
 } // namespace HPHP

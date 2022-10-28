@@ -39,8 +39,7 @@ namespace Facts {
  * Instantiated as a thread-local in `t_adb`.
  */
 struct AutoloadDB {
-
-protected:
+ protected:
   AutoloadDB() = default;
   AutoloadDB(const AutoloadDB&) = default;
   AutoloadDB(AutoloadDB&&) noexcept = default;
@@ -48,8 +47,9 @@ protected:
   AutoloadDB& operator=(AutoloadDB&&) noexcept = default;
   virtual ~AutoloadDB() = default;
 
-public:
-  template <typename T> class MultiResult;
+ public:
+  template <typename T>
+  class MultiResult;
 
   /**
    * Function which returns a reference to an AutoloadDB.
@@ -105,18 +105,19 @@ public:
       const std::filesystem::path& path,
       TypeKind kind,
       TypeFlagMask flags) = 0;
-  virtual std::vector<std::filesystem::path>
-  getTypePath(std::string_view type) = 0;
-  virtual std::vector<std::string>
-  getPathTypes(const std::filesystem::path& path) = 0;
+  virtual std::vector<std::filesystem::path> getTypePath(
+      std::string_view type) = 0;
+  virtual std::vector<std::string> getPathTypes(
+      const std::filesystem::path& path) = 0;
 
   /**
    * Return the kind of the given type defined at the given path.
    *
    * If the type is not defined in the given path, return TypeKind::Unknown.
    */
-  virtual KindAndFlags
-  getKindAndFlags(std::string_view type, const std::filesystem::path& path) = 0;
+  virtual KindAndFlags getKindAndFlags(
+      std::string_view type,
+      const std::filesystem::path& path) = 0;
 
   // Inheritance
   virtual void insertBaseType(
@@ -135,8 +136,9 @@ public:
    *
    * Returns [(pathWhereDerivedTypeExtendsBaseType, derivedType)]
    */
-  virtual std::vector<SymbolPath>
-  getDerivedTypes(std::string_view baseType, DeriveKind kind) = 0;
+  virtual std::vector<SymbolPath> getDerivedTypes(
+      std::string_view baseType,
+      DeriveKind kind) = 0;
 
   // Attributes
 
@@ -162,15 +164,16 @@ public:
       const folly::dynamic* attributeValue) = 0;
 
   virtual std::vector<std::string> getAttributesOfType(
-      std::string_view type, const std::filesystem::path& path) = 0;
+      std::string_view type,
+      const std::filesystem::path& path) = 0;
 
   virtual std::vector<std::string> getAttributesOfMethod(
       std::string_view type,
       std::string_view method,
       const std::filesystem::path& path) = 0;
 
-  virtual std::vector<std::string>
-  getAttributesOfFile(const std::filesystem::path& path) = 0;
+  virtual std::vector<std::string> getAttributesOfFile(
+      const std::filesystem::path& path) = 0;
 
   virtual std::vector<folly::dynamic> getTypeAttributeArgs(
       std::string_view type,
@@ -189,44 +192,48 @@ public:
       std::string_view attributeName) = 0;
 
   virtual std::vector<folly::dynamic> getFileAttributeArgs(
-      std::string_view path, std::string_view attributeName) = 0;
+      std::string_view path,
+      std::string_view attributeName) = 0;
 
-  virtual std::vector<SymbolPath>
-  getTypesWithAttribute(std::string_view attributeName) = 0;
-  virtual std::vector<SymbolPath>
-  getTypeAliasesWithAttribute(std::string_view attributeName) = 0;
+  virtual std::vector<SymbolPath> getTypesWithAttribute(
+      std::string_view attributeName) = 0;
+  virtual std::vector<SymbolPath> getTypeAliasesWithAttribute(
+      std::string_view attributeName) = 0;
 
   virtual std::vector<MethodPath> getPathMethods(std::string_view path) = 0;
 
-  virtual std::vector<MethodPath>
-  getMethodsWithAttribute(std::string_view attributeName) = 0;
+  virtual std::vector<MethodPath> getMethodsWithAttribute(
+      std::string_view attributeName) = 0;
 
-  virtual std::vector<std::filesystem::path>
-  getFilesWithAttribute(std::string_view attributeName) = 0;
+  virtual std::vector<std::filesystem::path> getFilesWithAttribute(
+      std::string_view attributeName) = 0;
 
   // Functions
   virtual void insertFunction(
-      std::string_view function, const std::filesystem::path& path) = 0;
-  virtual std::vector<std::filesystem::path>
-  getFunctionPath(std::string_view function) = 0;
-  virtual std::vector<std::string>
-  getPathFunctions(const std::filesystem::path& path) = 0;
+      std::string_view function,
+      const std::filesystem::path& path) = 0;
+  virtual std::vector<std::filesystem::path> getFunctionPath(
+      std::string_view function) = 0;
+  virtual std::vector<std::string> getPathFunctions(
+      const std::filesystem::path& path) = 0;
 
   // Constants
   virtual void insertConstant(
-      std::string_view constant, const std::filesystem::path& path) = 0;
-  virtual std::vector<std::filesystem::path>
-  getConstantPath(std::string_view constant) = 0;
-  virtual std::vector<std::string>
-  getPathConstants(const std::filesystem::path& path) = 0;
+      std::string_view constant,
+      const std::filesystem::path& path) = 0;
+  virtual std::vector<std::filesystem::path> getConstantPath(
+      std::string_view constant) = 0;
+  virtual std::vector<std::string> getPathConstants(
+      const std::filesystem::path& path) = 0;
 
   // Modules
-  virtual void
-  insertModule(std::string_view module, const std::filesystem::path& path) = 0;
-  virtual std::vector<std::filesystem::path>
-  getModulePath(std::string_view module) = 0;
-  virtual std::vector<std::string>
-  getPathModules(const std::filesystem::path& path) = 0;
+  virtual void insertModule(
+      std::string_view module,
+      const std::filesystem::path& path) = 0;
+  virtual std::vector<std::filesystem::path> getModulePath(
+      std::string_view module) = 0;
+  virtual std::vector<std::string> getPathModules(
+      const std::filesystem::path& path) = 0;
 
   /**
    * Return a list of all paths defined in the given root, as absolute paths.
@@ -265,7 +272,8 @@ public:
   /**
    * Lazy generator to return results from the DB.
    */
-  template <typename T> class MultiResult {
+  template <typename T>
+  class MultiResult {
     /**
      * Advance the internal iterator by one step, then check if we're at
      * the end. If we are at the end, return `std::nullopt`. If we
@@ -280,7 +288,7 @@ public:
       using pointer = value_type*;
       using reference = value_type&;
 
-    public:
+     public:
       Iterator(RowFn& rowFn, bool done) : m_rowFn{rowFn}, m_done{done} {
         if (!m_done) {
           m_current = m_rowFn();
@@ -320,15 +328,14 @@ public:
         return !(a == b);
       }
 
-    private:
+     private:
       RowFn& m_rowFn;
       Optional<T> m_current;
       bool m_done{false};
     };
 
-  public:
-    explicit MultiResult(RowFn rowFn) : m_rowFn{std::move(rowFn)} {
-    }
+   public:
+    explicit MultiResult(RowFn rowFn) : m_rowFn{std::move(rowFn)} {}
 
     Iterator begin() {
       return {m_rowFn, false};
@@ -337,7 +344,7 @@ public:
       return {m_rowFn, true};
     }
 
-  private:
+   private:
     RowFn m_rowFn;
   };
 };

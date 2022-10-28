@@ -79,7 +79,8 @@ struct Watcher {
    * will send a Results object describing the change to the given callback.
    */
   virtual void subscribe(
-      const Clock& lastClock, std::function<void(Results&&)> callback) = 0;
+      const Clock& lastClock,
+      std::function<void(Results&&)> callback) = 0;
 };
 
 } // namespace Facts

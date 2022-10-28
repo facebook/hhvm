@@ -47,7 +47,7 @@ namespace Facts {
 namespace Test {
 
 class MockLogWriter : public folly::LogWriter {
-public:
+ public:
   MockLogWriter() {
     // ttyOutput() is called by the constructor of the AsyncLogWriter and
     // generally isn't interesting.

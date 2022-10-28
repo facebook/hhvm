@@ -2060,13 +2060,15 @@ bool HHVM_FUNCTION(openssl_private_decrypt, const String& data,
   switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
-    auto rsa = EVP_PKEY_get1_RSA(pkey);
-    cryptedlen = RSA_private_decrypt(data.size(),
-                                     (unsigned char *)data.data(),
-                                     cryptedbuf,
-                                     rsa,
-                                     padding);
-    RSA_free(rsa);
+    {
+      auto rsa = EVP_PKEY_get1_RSA(pkey);
+      cryptedlen = RSA_private_decrypt(data.size(),
+                                      (unsigned char *)data.data(),
+                                      cryptedbuf,
+                                      rsa,
+                                      padding);
+      RSA_free(rsa);
+    }
     if (cryptedlen != -1) {
       successful = 1;
     }
@@ -2102,13 +2104,15 @@ bool HHVM_FUNCTION(openssl_private_encrypt, const String& data,
   switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
-    auto rsa = EVP_PKEY_get1_RSA(pkey);
-    successful = (RSA_private_encrypt(data.size(),
-                                      (unsigned char *)data.data(),
-                                      cryptedbuf,
-                                      rsa,
-                                      padding) == cryptedlen);
-    RSA_free(rsa);
+    {
+      auto rsa = EVP_PKEY_get1_RSA(pkey);
+      successful = (RSA_private_encrypt(data.size(),
+                                        (unsigned char *)data.data(),
+                                        cryptedbuf,
+                                        rsa,
+                                        padding) == cryptedlen);
+      RSA_free(rsa);
+    }
     break;
   default:
     raise_warning("key type not supported");
@@ -2140,13 +2144,15 @@ bool HHVM_FUNCTION(openssl_public_decrypt, const String& data,
   switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
-    auto rsa = EVP_PKEY_get1_RSA(pkey);
-    cryptedlen = RSA_public_decrypt(data.size(),
-                                    (unsigned char *)data.data(),
-                                    cryptedbuf,
-                                    rsa,
-                                    padding);
-    RSA_free(rsa);
+    {
+      auto rsa = EVP_PKEY_get1_RSA(pkey);
+      cryptedlen = RSA_public_decrypt(data.size(),
+                                      (unsigned char *)data.data(),
+                                      cryptedbuf,
+                                      rsa,
+                                      padding);
+      RSA_free(rsa);
+    }
     if (cryptedlen != -1) {
       successful = 1;
     }
@@ -2182,13 +2188,15 @@ bool HHVM_FUNCTION(openssl_public_encrypt, const String& data,
   switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
-    auto rsa = EVP_PKEY_get1_RSA(pkey);
-    successful = (RSA_public_encrypt(data.size(),
-                                     (unsigned char *)data.data(),
-                                     cryptedbuf,
-                                     rsa,
-                                     padding) == cryptedlen);
-    RSA_free(rsa);
+    {
+      auto rsa = EVP_PKEY_get1_RSA(pkey);
+      successful = (RSA_public_encrypt(data.size(),
+                                      (unsigned char *)data.data(),
+                                      cryptedbuf,
+                                      rsa,
+                                      padding) == cryptedlen);
+      RSA_free(rsa);
+    }
     break;
   default:
     raise_warning("key type not supported");

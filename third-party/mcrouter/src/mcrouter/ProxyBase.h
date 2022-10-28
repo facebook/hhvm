@@ -93,19 +93,6 @@ class ProxyBase {
     return statsContainer_.get();
   }
 
-  template <class T>
-  std::shared_ptr<T> getAxonWriterMap() {
-    return std::static_pointer_cast<T>(axonWriterMap_);
-  }
-
-  void setAxonWriterMap(std::shared_ptr<void> axonWriterMap) {
-    axonWriterMap_ = std::move(axonWriterMap);
-  }
-
-  void resetAxonWriterMap() {
-    axonWriterMap_.reset();
-  }
-
   /** Will let through requests from the above queue if we have capacity */
   virtual void pump() = 0;
 
@@ -173,11 +160,6 @@ class ProxyBase {
   } flushCallback_;
 
   std::unique_ptr<ProxyDestinationMap> destinationMap_;
-
-  /**
-   * Used by AxonLogRoute to avoid circular dependency
-   */
-  std::shared_ptr<void> axonWriterMap_;
 
   /**
    * Incoming request rate limiting.

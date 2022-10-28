@@ -283,18 +283,13 @@ CarbonRouterInstance<RouterInfo>::spinUp() {
       return folly::makeUnexpected(std::string("Failed to create proxy"));
     }
 
-    if (opts_.enable_axonlog && mcrouter::gAxonInitHook &&
-        mcrouter::gAxonInitHookForProxy) {
+    if (opts_.enable_axonlog && mcrouter::gAxonInitHook) {
       try {
         mcrouter::gAxonInitHook(*this, proxyThreads_, threadPrefix);
       } catch (...) {
         return folly::makeUnexpected(folly::sformat(
             "Failed to create SR for Axon proxy {}",
             folly::exceptionStr(std::current_exception())));
-      }
-      for (size_t i = 0; i < opts_.num_proxies; i++) {
-        proxies_[i]->setAxonWriterMap(
-            mcrouter::gAxonInitHookForProxy(getAxonClientManager<void>()));
       }
     }
 
@@ -368,7 +363,6 @@ void CarbonRouterInstance<RouterInfo>::shutdownImpl() noexcept {
     proxyThreads_->join();
   }
   proxyThreads_.reset();
-  resetAxonClientManager();
 }
 
 template <class RouterInfo>

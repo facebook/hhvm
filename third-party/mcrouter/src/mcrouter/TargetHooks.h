@@ -28,9 +28,6 @@ FOLLY_ATTR_WEAK void gAxonInitHook(
     std::shared_ptr<folly::IOThreadPoolExecutor> ioThreadPool,
     const std::string& threadPrefix);
 
-FOLLY_ATTR_WEAK std::shared_ptr<void> gAxonInitHookForProxy(
-    std::shared_ptr<void> axonClientManager);
-
 } // namespace mcrouter
 } // namespace memcache
 } // namespace facebook

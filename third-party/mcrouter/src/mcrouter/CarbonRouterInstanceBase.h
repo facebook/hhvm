@@ -229,15 +229,6 @@ class CarbonRouterInstanceBase {
   }
 
   template <class T>
-  auto getAxonClientManager() {
-    return std::static_pointer_cast<T>(axonClientManager_);
-  }
-
-  void setAxonClientManager(std::shared_ptr<void> axonClientManager) {
-    axonClientManager_ = std::move(axonClientManager);
-  }
-
-  template <class T>
   auto getAxonProxyClientFactory() {
     return std::static_pointer_cast<T>(axonProxyClientFactory_);
   }
@@ -249,10 +240,6 @@ class CarbonRouterInstanceBase {
  protected:
   void resetMetadata() {
     metadata_.reset();
-  }
-
-  void resetAxonClientManager() {
-    axonClientManager_.reset();
   }
 
   void resetAxonProxyClientFactory() {
@@ -336,7 +323,6 @@ class CarbonRouterInstanceBase {
    */
   std::shared_ptr<void> metadata_;
 
-  std::shared_ptr<void> axonClientManager_;
   std::shared_ptr<void> axonProxyClientFactory_;
 };
 

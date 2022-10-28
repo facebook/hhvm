@@ -61,6 +61,7 @@ using AxonProxyWriteFn = std::function<
     bool(uint64_t, folly::F14FastMap<std::string, std::string>&&)>;
 
 struct AxonContext {
+  bool fallbackAsynclog{false};
   bool allDelete{false};
   AxonProxyWriteFn writeProxyFn;
   std::string defaultRegionFilter;

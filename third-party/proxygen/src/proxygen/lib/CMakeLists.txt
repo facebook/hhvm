@@ -188,7 +188,6 @@ add_library(
     stats/ResourceStats.cpp
     transport/PersistentFizzPskCache.cpp
     utils/AsyncTimeoutSet.cpp
-    utils/Base64.cpp
     utils/CryptUtil.cpp
     utils/Exception.cpp
     utils/HTTPTime.cpp

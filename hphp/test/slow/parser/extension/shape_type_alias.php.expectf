@@ -18,7 +18,7 @@ dict(6) {
     string(13) "// paragraphs"
   }
   ["some_bool"]=>
-  vec(11) {
+  vec(12) {
     string(26) "/*
 
   Another paragraph.*/"

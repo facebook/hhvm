@@ -13,6 +13,8 @@ namespace annotation {
 ::apache::thrift::metadata::ThriftMetadata scope_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::detail::md::StructMetadata<Transitive>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<Schema>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Program>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Struct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Union>::gen(metadata);
@@ -24,9 +26,7 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<Function>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<EnumValue>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Const>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<Schema>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<FbthriftInternalEnum>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<Transitive>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Structured>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Interface>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<RootDefinition>::gen(metadata);

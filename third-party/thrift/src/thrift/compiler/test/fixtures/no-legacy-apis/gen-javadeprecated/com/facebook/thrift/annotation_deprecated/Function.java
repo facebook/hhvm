@@ -23,6 +23,9 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * The `function` definition scope.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Function implements TBase, java.io.Serializable, Cloneable, Comparable<Function> {
   private static final TStruct STRUCT_DESC = new TStruct("Function");

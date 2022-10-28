@@ -14,6 +14,23 @@
  * limitations under the License.
  */
 
+/**
+ * Annotations that indicate which IDL definition a structured annotation can
+ * be place on.
+ *
+ * For example:
+ *   include "thrift/annotation/scope.thrift"
+ *
+ *   @scope.Struct
+ *   struct MyStructAnnotation {...}
+ *
+ *   @MyStructAnnotation // Good.
+ *   struct Foo{
+ *     @MyStructAnnotation // Compile-time failure. MyStructAnnotation is not
+ *                         // allowed on fields.
+ *     1: i32 my_field;
+ *   }
+ */
 package "facebook.com/thrift/annotation"
 
 namespace java com.facebook.thrift.annotation_deprecated
@@ -22,90 +39,101 @@ namespace py.asyncio facebook_thrift_asyncio.annotation.scope
 namespace go thrift.annotation.scope
 namespace py thrift.annotation.scope
 
-// Annotations that indicate which IDL definition a structured annotation can
-// be place on.
-//
-// For example:
-//     include "thrift/annotation/scope.thrift"
-//
-//     @scope.Struct
-//     struct MyStructAnnotation {...}
-//
-//     @MyStructAnnotation // Good.
-//     struct Foo{
-//       @MyStructAnnotation // Compile-time failure. MyStructAnnotation is not
-//                           // allowed on fields.
-//       1: i32 my_field;
-//     }
-struct Program {} (thrift.uri = "facebook.com/thrift/annotation/Program")
-struct Struct {} (thrift.uri = "facebook.com/thrift/annotation/Struct")
-struct Union {} (thrift.uri = "facebook.com/thrift/annotation/Union")
-struct Exception {} (thrift.uri = "facebook.com/thrift/annotation/Exception")
-struct Field {} (thrift.uri = "facebook.com/thrift/annotation/Field")
-struct Typedef {} (thrift.uri = "facebook.com/thrift/annotation/Typedef")
-struct Service {} (thrift.uri = "facebook.com/thrift/annotation/Service")
-struct Interaction {} (
-  thrift.uri = "facebook.com/thrift/annotation/Interaction",
-)
-struct Function {} (
-  thrift.uri = "facebook.com/thrift/annotation/Function",
-  hack.name = "TFunction",
-  js.name = "TFunction",
-)
-struct EnumValue {} (thrift.uri = "facebook.com/thrift/annotation/EnumValue")
-struct Const {} (
-  thrift.uri = "facebook.com/thrift/annotation/Const",
-  hack.name = "TConst",
-)
+/**
+ * Indicates that the scope of sibling annotations is transitive.
+ *
+ * For example:
+ *
+ *     @scope.Struct
+ *     @scope.Union
+ *     @scope.Exception
+ *     @scope.Transitive
+ *     struct Structured {}
+ *
+ * Annotating a Thrift struct with @Structured automatically applies
+ * @scope.Struct, @scope.Union and @scope.Exception annotations, i.e.
+ *
+ *     @Structured
+ *     struct MyAnnotation {}
+ *
+ * is equivalent to
+ *
+ *     @scope.Struct
+ *     @scope.Union
+ *     @scope.Exception
+ *     struct MyAnnotation {}
+ *
+ */
+struct Transitive {}
 
-// Indicates that a definition should be included in the runtime schema.
-//
-// See thrift/lib/thrift/schema.thrift
-struct Schema {} (thrift.uri = "facebook.com/thrift/annotation/Schema")
+/**
+ * Indicates that an annotation should be included in the runtime schema.
+ *
+ * See thrift/lib/thrift/schema.thrift
+ */
+struct Schema {}
+
+/**
+ * The Program scope.
+ *
+ * This allows annotations on the `package` definition, which implies the
+ * annotaiton applies to the entire program.
+ */
+struct Program {}
+
+/** The `struct` definition scope. */
+struct Struct {}
+
+/** The `union` definition scope. */
+struct Union {}
+
+/** The `exception` definition scope. */
+struct Exception {}
+
+/** Field declartaions, for example in `struct` or `function` declartions. */
+struct Field {}
+
+/** The `typedef` definition scope. */
+struct Typedef {}
+
+/** The `service` definition scope. */
+struct Service {}
+
+/** The `interaction` definition scope. */
+struct Interaction {}
+
+/** The `function` definition scope. */
+struct Function {} (hack.name = "TFunction", js.name = "TFunction")
+
+/** The Enum value definition scope. */
+struct EnumValue {}
+
+/** The `const` definition scope. */
+struct Const {} (hack.name = "TConst")
 
 // Due to cython bug, we can not use `Enum` as class name directly
 // https://github.com/cython/cython/issues/2474
 struct FbthriftInternalEnum {} (
   thrift.uri = "facebook.com/thrift/annotation/Enum",
 )
+
+/** The `enum` definition scope. */
 typedef FbthriftInternalEnum Enum (thrift.uri = "")
 
-// Indicates that the scope of sibling annotations is transitive.
-//
-// For example:
-//
-//     @scope.Struct
-//     @scope.Union
-//     @scope.Exception
-//     @scope.Transitive
-//     struct Structured {}
-//
-// Annotating a Thrift struct with @Structured automatically applies
-// @scope.Struct, @scope.Union and @scope.Exception annotations, i.e.
-//
-//     @Structured
-//     struct MyAnnotation {}
-//
-// is equivalent to
-//
-//     @scope.Struct
-//     @scope.Union
-//     @scope.Exception
-//     struct MyAnnotation {}
-//
-struct Transitive {} (thrift.uri = "facebook.com/thrift/annotation/Transitive")
-
+/** A scope that includes all 'structured' definitions. */
 @Struct
 @Union
 @Exception
 @Transitive
 struct Structured {}
 
+/** A scope that includes all 'interface' definitions. */
 @Service
 @Interaction
 @Transitive
 struct Interface {} (hack.name = "TInterface")
 
+/** A scope that includes all program-scoped definition. */
 @Structured
 @Interface
 @Typedef
@@ -114,6 +142,7 @@ struct Interface {} (hack.name = "TInterface")
 @Transitive
 struct RootDefinition {}
 
+/** A scope that includes all definitions. */
 @RootDefinition
 @Field
 @Function

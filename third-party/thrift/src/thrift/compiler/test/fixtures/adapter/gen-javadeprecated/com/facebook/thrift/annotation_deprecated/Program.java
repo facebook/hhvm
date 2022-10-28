@@ -23,6 +23,12 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * The Program scope.
+ * 
+ * This allows annotations on the `package` definition, which implies the
+ * annotaiton applies to the entire program.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Program implements TBase, java.io.Serializable, Cloneable, Comparable<Program> {
   private static final TStruct STRUCT_DESC = new TStruct("Program");

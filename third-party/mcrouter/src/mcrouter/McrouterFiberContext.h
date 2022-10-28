@@ -58,11 +58,15 @@ class RequestClass {
 using ExtraDataMap = folly::F14FastMap<std::string, std::string>;
 using ExtraDataCallbackT = std::function<ExtraDataMap()>;
 using AxonLogWriteFn = std::function<bool(uint16_t, folly::IOBuf)>;
+using AxonProxyWriteFn = std::function<
+    bool(uint64_t, folly::F14FastMap<std::string, std::string>&&)>;
 
 struct AxonContext {
-  AxonLogWriteFn logWriteFn;
-  int64_t maxTask{-1};
   bool allDelete{false};
+  bool useProxy{false};
+  int64_t maxTask{-1};
+  AxonLogWriteFn logWriteFn;
+  AxonProxyWriteFn writeProxyFn;
 };
 
 template <class RouterInfo>

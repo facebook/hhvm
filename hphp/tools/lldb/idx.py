@@ -10,6 +10,34 @@ except ModuleNotFoundError:
     import hhvm_lldb.utils as utils
 
 
+def at(ptr: lldb.SBValue, idx: int):
+    """ Access ptr[idx] """
+    return ptr.GetChildAtIndex(idx, lldb.eDynamicDontRunTarget, True)
+
+
+def atomic_low_ptr_vector_at(av: lldb.SBValue, idx: int, hasher=None):
+    """ Get the value at idx in the atomic vector av
+
+    See hphp/util/atomic-vector.h
+
+    Arguments:
+        av: The vector, represented as lldb.SBValue[HPHP::AtomicLowPtrVector]
+        idx: Index to get
+        hasher: (Not yet implemented)
+
+    Returns:
+        av[ix]
+    """
+    assert utils.template_type(av.type) == "HPHP::AtomicLowPtrVector", f"invalid atomic vector of type '{av.type.name}'"
+    size = utils.get(av, 'm_size').unsigned
+
+    if idx < size:
+        unique_ptr = utils.rawptr(utils.get(av, 'm_vals'))
+        return at(unique_ptr, idx)
+    else:
+        return atomic_low_ptr_vector_at(utils.atomic_get(utils.get(av, 'm_next')), idx - size)
+
+
 def fixed_vector_at(fv: lldb.SBValue, idx: int, hasher=None):
     ptr = utils.rawptr(fv.GetChildMemberWithName("m_impl").GetChildMemberWithName("m_sp"))
     return ptr.GetChildAtIndex(idx, lldb.eDynamicDontRunTarget, True)
@@ -18,7 +46,8 @@ def fixed_vector_at(fv: lldb.SBValue, idx: int, hasher=None):
 @utils.memoized
 def idx_accessors():
     return {
-        'HPHP::FixedVector': fixed_vector_at,
+        "HPHP::FixedVector": fixed_vector_at,
+        "HPHP::AtomicLowPtrVector": atomic_low_ptr_vector_at,
     }
 
 

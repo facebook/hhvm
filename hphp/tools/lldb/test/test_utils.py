@@ -95,3 +95,11 @@ class UtilsGivenFrameTestCase(base.LLDBTestBase):
         raw_ptr = utils.rawptr(smart_ptr)
         self.assertTrue(raw_ptr.type.IsPointerType())
         self.assertEqual(raw_ptr.unsigned, 1)
+
+    def test_rawptr_std_unique_ptr(self):
+        self.run_until_breakpoint("lookupObjMethod")
+        s_func_vec = utils.Global("HPHP::Func::s_funcVec", self.target)
+        smart_ptr = utils.get(s_func_vec, "m_vals")
+        self.assertEqual(utils.template_type(smart_ptr.type), "std::unique_ptr")
+        raw_ptr = utils.rawptr(smart_ptr)
+        self.assertEqual(utils.template_type(raw_ptr.type), "HPHP::detail::LowPtrImpl")

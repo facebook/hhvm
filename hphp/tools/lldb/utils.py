@@ -175,8 +175,6 @@ def atomic_get(atomic: lldb.SBValue) -> lldb.SBValue:
 def get(struct: lldb.SBValue, *field_names: str) -> lldb.SBValue:
     """ Get the value of struct.field_names[0][field_names[1]]...
 
-    This is supposed to be semi-equivalent to gdb's struct[field_name] syntax.
-
     Arguments:
         struct: The struct to reach into
         field_names: Name of the fields to extract. If more than one field name is
@@ -186,10 +184,14 @@ def get(struct: lldb.SBValue, *field_names: str) -> lldb.SBValue:
     Returns:
         The value of the field. Throws an assertion is anything goes wrong
         in the retrieval.
+
+    This is supposed to be semi-equivalent to gdb's struct[field_name] syntax.
     """
+
     # Note: You can also do lldb.value(val).<name>
     v = struct.GetChildMemberWithName(field_names[0])
     assert v.IsValid(), f"couldn't find field '{field_names[0]}' in struct with type '{struct.type.name}'"
+
     if len(field_names) == 1:
         return v
     else:
@@ -219,6 +221,7 @@ def rawtype(t: lldb.SBType):
     return t.GetUnqualifiedType().GetCanonicalType()
 
 def destruct(t: str) -> str:
+    """ Drop the class-key from a type name """
     return re.sub(r'^(struct|class|union)\s+', '', t)
 
 def template_type(t: lldb.SBType) -> str:
@@ -240,7 +243,13 @@ def template_type(t: lldb.SBType) -> str:
 # Pointer helpers
 
 
+def nullptr(target: lldb.SBValue):
+    """ Return an SBValue wrapping a pointer to 0 """
+    return target.CreateValueFromExpression("nullptr", "(void *)0")
+
+
 def referenced_value(val: lldb.SBValue) -> lldb.SBValue:
+    """ Get the value referenced by a pointer/reference, or the value itself otherwise """
     if val.type.IsReferenceType() or val.type.IsPointerType():
         return val.Dereference()
     return val
@@ -267,6 +276,10 @@ def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
     name = template_type(val.type)
     ptr = None
 
+    if name == "std::unique_ptr":
+        # This is a synthetic value, so we can just use its synthesized child.
+        # We could also do utils.get(val.GetNonSyntheticValue(), "_M_t", "_M_t", "_M_head_impl")
+        ptr = get(val, "pointer")
     if name == "HPHP::req::ptr" or name == "HPHP::AtomicSharedPtrImpl":
         ptr = get(val, "m_px")
     elif name == "HPHP::LowPtr" or name == "HPHP::detail::LowPtrImpl":
@@ -366,7 +379,15 @@ def nameof(val: lldb.SBValue) -> typing.Optional[str]:
 
 
 def string_data_val(val: lldb.SBValue, keep_case=True):
-    """ Convert an HPHP::StringData[*] to a Python string.  """
+    """ Convert an HPHP::StringData[*] to a Python string
+
+    Arguments:
+        val: A StringData* wrapped by an lldb.SBValue
+        keep_case: If False, lowercase the returned string
+
+    Returns:
+        A Python string that stored by the StringData
+    """
 
     if val.type.IsPointerType():
         val = deref(val)
@@ -385,5 +406,4 @@ def string_data_val(val: lldb.SBValue, keep_case=True):
         print('error: ', error)
 
     return cstring if keep_case else cstring.lower()
-
 

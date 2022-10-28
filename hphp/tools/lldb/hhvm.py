@@ -7,6 +7,7 @@ import lldb
 import sys
 
 import idx
+import lookup
 import pretty
 import sizeof
 import stack
@@ -24,6 +25,7 @@ def __lldb_init_module(debugger, internal_dict):
     """
     top = sys.modules[__name__].__name__
     idx.__lldb_init_module(debugger, internal_dict, top)
+    lookup.__lldb_init_module(debugger, internal_dict, top)
     pretty.__lldb_init_module(debugger, internal_dict, top)
     sizeof.__lldb_init_module(debugger, internal_dict, top)
     stack.__lldb_init_module(debugger, internal_dict, top)

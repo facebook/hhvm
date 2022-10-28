@@ -353,7 +353,7 @@ class MyService_MyInteraction extends \ThriftClientBase {
       }
       else if ($this->output_ is \TCompactProtocolAccelerated)
       {
-        \thrift_protocol_write_compact($this->output_, 'MyInteraction.frobnicate', \TMessageType::CALL, $args, $currentseqid, false);
+        \thrift_protocol_write_compact2($this->output_, 'MyInteraction.frobnicate', \TMessageType::CALL, $args, $currentseqid, false, \TCompactProtocolBase::VERSION);
       }
       else
       {
@@ -409,7 +409,7 @@ class MyService_MyInteraction extends \ThriftClientBase {
       }
       else if ($this->output_ is \TCompactProtocolAccelerated)
       {
-        \thrift_protocol_write_compact($this->output_, 'MyInteraction.ping', \TMessageType::CALL, $args, $currentseqid, true);
+        \thrift_protocol_write_compact2($this->output_, 'MyInteraction.ping', \TMessageType::CALL, $args, $currentseqid, true, \TCompactProtocolBase::VERSION);
       }
       else
       {
@@ -465,7 +465,7 @@ class MyService_MyInteraction extends \ThriftClientBase {
       }
       else if ($this->output_ is \TCompactProtocolAccelerated)
       {
-        \thrift_protocol_write_compact($this->output_, 'MyInteraction.truthify', \TMessageType::CALL, $args, $currentseqid, false);
+        \thrift_protocol_write_compact2($this->output_, 'MyInteraction.truthify', \TMessageType::CALL, $args, $currentseqid, false, \TCompactProtocolBase::VERSION);
       }
       else
       {
@@ -521,7 +521,7 @@ $rpc_options->setInteractionId($this->interactionId);
       }
       else if ($this->output_ is \TCompactProtocolAccelerated)
       {
-        \thrift_protocol_write_compact($this->output_, 'MyInteraction.encode', \TMessageType::CALL, $args, $currentseqid, false);
+        \thrift_protocol_write_compact2($this->output_, 'MyInteraction.encode', \TMessageType::CALL, $args, $currentseqid, false, \TCompactProtocolBase::VERSION);
       }
       else
       {
@@ -591,7 +591,7 @@ class MyService_MyInteractionFast extends \ThriftClientBase {
       }
       else if ($this->output_ is \TCompactProtocolAccelerated)
       {
-        \thrift_protocol_write_compact($this->output_, 'MyInteractionFast.frobnicate', \TMessageType::CALL, $args, $currentseqid, false);
+        \thrift_protocol_write_compact2($this->output_, 'MyInteractionFast.frobnicate', \TMessageType::CALL, $args, $currentseqid, false, \TCompactProtocolBase::VERSION);
       }
       else
       {
@@ -647,7 +647,7 @@ class MyService_MyInteractionFast extends \ThriftClientBase {
       }
       else if ($this->output_ is \TCompactProtocolAccelerated)
       {
-        \thrift_protocol_write_compact($this->output_, 'MyInteractionFast.ping', \TMessageType::CALL, $args, $currentseqid, true);
+        \thrift_protocol_write_compact2($this->output_, 'MyInteractionFast.ping', \TMessageType::CALL, $args, $currentseqid, true, \TCompactProtocolBase::VERSION);
       }
       else
       {
@@ -703,7 +703,7 @@ class MyService_MyInteractionFast extends \ThriftClientBase {
       }
       else if ($this->output_ is \TCompactProtocolAccelerated)
       {
-        \thrift_protocol_write_compact($this->output_, 'MyInteractionFast.truthify', \TMessageType::CALL, $args, $currentseqid, false);
+        \thrift_protocol_write_compact2($this->output_, 'MyInteractionFast.truthify', \TMessageType::CALL, $args, $currentseqid, false, \TCompactProtocolBase::VERSION);
       }
       else
       {
@@ -759,7 +759,7 @@ $rpc_options->setInteractionId($this->interactionId);
       }
       else if ($this->output_ is \TCompactProtocolAccelerated)
       {
-        \thrift_protocol_write_compact($this->output_, 'MyInteractionFast.encode', \TMessageType::CALL, $args, $currentseqid, false);
+        \thrift_protocol_write_compact2($this->output_, 'MyInteractionFast.encode', \TMessageType::CALL, $args, $currentseqid, false, \TCompactProtocolBase::VERSION);
       }
       else
       {
@@ -829,7 +829,7 @@ class MyService_SerialInteraction extends \ThriftClientBase {
       }
       else if ($this->output_ is \TCompactProtocolAccelerated)
       {
-        \thrift_protocol_write_compact($this->output_, 'SerialInteraction.frobnicate', \TMessageType::CALL, $args, $currentseqid, false);
+        \thrift_protocol_write_compact2($this->output_, 'SerialInteraction.frobnicate', \TMessageType::CALL, $args, $currentseqid, false, \TCompactProtocolBase::VERSION);
       }
       else
       {

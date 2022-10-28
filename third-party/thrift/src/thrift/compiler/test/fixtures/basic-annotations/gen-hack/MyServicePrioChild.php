@@ -150,7 +150,7 @@ abstract class MyServicePrioChildAsyncProcessorBase extends MyServicePrioParentA
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'pang', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'pang', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -186,7 +186,7 @@ abstract class MyServicePrioChildAsyncProcessorBase extends MyServicePrioParentA
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -238,7 +238,7 @@ abstract class MyServicePrioChildSyncProcessorBase extends MyServicePrioParentSy
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'pang', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'pang', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -274,7 +274,7 @@ abstract class MyServicePrioChildSyncProcessorBase extends MyServicePrioParentSy
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {

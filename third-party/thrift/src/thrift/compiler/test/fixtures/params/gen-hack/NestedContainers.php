@@ -458,7 +458,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'mapList', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'mapList', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -502,7 +502,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'mapSet', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'mapSet', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -546,7 +546,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'listMap', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'listMap', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -590,7 +590,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'listSet', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'listSet', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -634,7 +634,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'turtles', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'turtles', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -670,7 +670,7 @@ abstract class NestedContainersAsyncProcessorBase extends \ThriftAsyncProcessor 
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -722,7 +722,7 @@ abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'mapList', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'mapList', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -766,7 +766,7 @@ abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'mapSet', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'mapSet', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -810,7 +810,7 @@ abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'listMap', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'listMap', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -854,7 +854,7 @@ abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'listSet', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'listSet', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -898,7 +898,7 @@ abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'turtles', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'turtles', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -934,7 +934,7 @@ abstract class NestedContainersSyncProcessorBase extends \ThriftSyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {

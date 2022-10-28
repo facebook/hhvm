@@ -230,7 +230,7 @@ abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProce
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'getDataByKey0', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'getDataByKey0', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -274,7 +274,7 @@ abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProce
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'getDataByKey1', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'getDataByKey1', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -310,7 +310,7 @@ abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProce
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -362,7 +362,7 @@ abstract class DbMixedStackArgumentsSyncProcessorBase extends \ThriftSyncProcess
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'getDataByKey0', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'getDataByKey0', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -406,7 +406,7 @@ abstract class DbMixedStackArgumentsSyncProcessorBase extends \ThriftSyncProcess
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'getDataByKey1', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'getDataByKey1', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -442,7 +442,7 @@ abstract class DbMixedStackArgumentsSyncProcessorBase extends \ThriftSyncProcess
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {

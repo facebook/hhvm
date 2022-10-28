@@ -38,7 +38,7 @@ ScopedServerInterfaceThread::ScopedServerInterfaceThread(
   // Allow plaintext on loopback so the plaintext clients created by default
   // by the newClient methods can still connect.
   ts->setAllowPlaintextOnLoopback(true);
-  ts->setInterface(move(apf));
+  ts->setInterface(std::move(apf));
   ts->setNumIOWorkerThreads(1);
   ts->setNumCPUWorkerThreads(1);
   auto tf = make_shared<PosixThreadFactory>(PosixThreadFactory::ATTACHED);
@@ -64,11 +64,12 @@ ScopedServerInterfaceThread::ScopedServerInterfaceThread(
     uint16_t port,
     ServerConfigCb configCb)
     : ScopedServerInterfaceThread(
-          move(apf), SocketAddress(host, port), move(configCb)) {}
+          std::move(apf), SocketAddress(host, port), std::move(configCb)) {}
 
 ScopedServerInterfaceThread::ScopedServerInterfaceThread(
     shared_ptr<AsyncProcessorFactory> apf, ServerConfigCb configCb)
-    : ScopedServerInterfaceThread(move(apf), "::1", 0, move(configCb)) {}
+    : ScopedServerInterfaceThread(
+          std::move(apf), "::1", 0, std::move(configCb)) {}
 
 ScopedServerInterfaceThread::ScopedServerInterfaceThread(
     shared_ptr<BaseThriftServer> bts) {

@@ -79,7 +79,7 @@ jobs:
             export SCCACHE_IDLE_TIMEOUT=0
 
             export SCCACHE_ERROR_LOG=/nix/var/sccache/sccache_log.txt
-            export SCCACHE_LOG=info
+            export SCCACHE_LOG=debug
 
             export RUSTC_WRAPPER=%q/bin/sccache
             export CMAKE_C_COMPILER_LAUNCHER="$RUSTC_WRAPPER"

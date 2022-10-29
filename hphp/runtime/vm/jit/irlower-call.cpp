@@ -325,12 +325,12 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
       // Cell. If it expects a specific type, just pass the
       // value. Otherwise pass it as a TypedValue.
       assertx(inst->src(srcNum)->isA(TCell));
-      if (pi.builtinType && !pi.isTakenAsTypedValue()) {
+      if (pi.builtinType() && !pi.isTakenAsTypedValue()) {
         args.ssa(srcNum);
       } else {
         args.typedValue(srcNum);
       }
-    } else if (pi.builtinType && !pi.isTakenAsVariant()) {
+    } else if (pi.builtinType() && !pi.isTakenAsVariant()) {
       // Otherwise the value is passed by value for some types, and by
       // ref for others. The function expects a specific type, so we
       // only need to pass the value. The input could be a Cell, a

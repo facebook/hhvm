@@ -53,8 +53,7 @@ inline Func::ParamInfo::ParamInfo()
 
 template<class SerDe>
 inline void Func::ParamInfo::serde(SerDe& sd) {
-  sd(builtinType)
-    (funcletOff)
+  sd(funcletOff)
     (defaultValue)
     (phpCode)
     (typeConstraint)
@@ -98,6 +97,10 @@ inline bool Func::ParamInfo::isTakenAsTypedValue() const {
 
 inline void Func::ParamInfo::setFlag(Func::ParamInfo::Flags flag) {
   flags |= 1 << static_cast<int32_t>(flag);
+}
+
+inline MaybeDataType Func::ParamInfo::builtinType() const {
+  return isVariadic() ? KindOfVec : typeConstraint.asSystemlibType();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

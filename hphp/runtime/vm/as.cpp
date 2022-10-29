@@ -2393,10 +2393,6 @@ void check_native(AsmState& as, bool is_construct) {
       }
     }
     if (!SystemLib::s_inited) as.fe->attrs |= AttrBuiltin;
-
-    for (auto& pi : as.fe->params) {
-      pi.builtinType = pi.typeConstraint.asSystemlibType();
-    }
   }
 }
 

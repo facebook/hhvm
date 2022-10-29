@@ -155,11 +155,10 @@ struct Func final {
     bool isTakenAsVariant() const;
     bool isTakenAsTypedValue() const;
     void setFlag(Flags flag);
+    MaybeDataType builtinType() const;
 
     template<class SerDe> void serde(SerDe& sd);
 
-    // Typehint for builtins.
-    MaybeDataType builtinType{std::nullopt};
     // Flags as defined by the Flags enum.
     uint8_t flags{0};
     // DV initializer funclet offset.

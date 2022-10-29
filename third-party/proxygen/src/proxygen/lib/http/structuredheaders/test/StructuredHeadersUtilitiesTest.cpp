@@ -118,31 +118,6 @@ TEST_F(StructuredHeadersUtilitiesTest, TestBadBinaryContent) {
   EXPECT_FALSE(isValidEncodedBinaryContent("=aGVsbG8"));
 }
 
-TEST_F(StructuredHeadersUtilitiesTest, Test_DecodeBinaryContent) {
-  std::string input1 = "ZnJ1aXQ=";
-  std::string input2 = "dG9tYXRv";
-  std::string input3 = "ZWdncw==";
-  EXPECT_EQ(decodeBase64(input1), "fruit");
-  EXPECT_EQ(decodeBase64(input2), "tomato");
-  EXPECT_EQ(decodeBase64(input3), "eggs");
-}
-
-TEST_F(StructuredHeadersUtilitiesTest, Test_EncodeBinaryContent) {
-  std::string input1 = "fruit";
-  std::string input2 = "tomato";
-  std::string input3 = "eggs";
-  EXPECT_EQ(encodeBase64(input1), "ZnJ1aXQ=");
-  EXPECT_EQ(encodeBase64(input2), "dG9tYXRv");
-  EXPECT_EQ(encodeBase64(input3), "ZWdncw==");
-}
-
-TEST_F(StructuredHeadersUtilitiesTest, Test_BinaryContentEmpty) {
-  std::string input1 = "";
-  std::string input2 = "";
-  EXPECT_EQ(encodeBase64(input1), "");
-  EXPECT_EQ(decodeBase64(input2), "");
-}
-
 TEST_F(StructuredHeadersUtilitiesTest, TestItemTypeMatchesContentGood) {
   StructuredHeaderItem item;
   item.value = std::string("\"potato\"");

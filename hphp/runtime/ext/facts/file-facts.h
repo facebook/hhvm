@@ -36,10 +36,9 @@ enum class TypeKind {
   Trait = 1 << 3,
   TypeAlias = 1 << 4,
 };
-inline constexpr TypeKindMask kTypeKindAll =
-    static_cast<int>(TypeKind::Class) | static_cast<int>(TypeKind::Interface) |
-    static_cast<int>(TypeKind::Enum) | static_cast<int>(TypeKind::Trait) |
-    static_cast<int>(TypeKind::TypeAlias);
+inline constexpr TypeKindMask kTypeKindAll = static_cast<int>(TypeKind::Class) |
+    static_cast<int>(TypeKind::Interface) | static_cast<int>(TypeKind::Enum) |
+    static_cast<int>(TypeKind::Trait) | static_cast<int>(TypeKind::TypeAlias);
 
 inline constexpr std::string_view kTypeKindClass = "class";
 inline constexpr std::string_view kTypeKindInterface = "interface";
@@ -106,7 +105,6 @@ struct MethodDetails {
 };
 
 struct TypeDetails {
-
   std::string m_name;
   TypeKind m_kind;
   int m_flags{0};
@@ -142,7 +140,6 @@ struct ModuleDetails {
 };
 
 struct FileFacts {
-
   bool isEmpty() const noexcept {
     return m_types.empty() && m_functions.empty() && m_constants.empty();
   }
@@ -159,7 +156,6 @@ struct FileFacts {
  * A string from Watchman representing a point in time.
  */
 struct Clock {
-
   /**
    * True iff this represents an initial load, where all files have changed
    * since this point in time
@@ -191,24 +187,26 @@ struct Clock {
 } // namespace HPHP
 
 namespace folly {
-template <> class FormatValue<HPHP::Facts::Clock> {
-public:
-  explicit FormatValue(HPHP::Facts::Clock v) : m_val(v) {
-  }
+template <>
+class FormatValue<HPHP::Facts::Clock> {
+ public:
+  explicit FormatValue(HPHP::Facts::Clock v) : m_val(v) {}
 
-  template <typename Callback> void format(FormatArg& arg, Callback& cb) const {
+  template <typename Callback>
+  void format(FormatArg& arg, Callback& cb) const {
     format_value::formatString(
         folly::sformat("\"{}|{}\"", m_val.m_clock, m_val.m_mergebase), arg, cb);
   }
 
-private:
+ private:
   const HPHP::Facts::Clock m_val;
 };
 } // namespace folly
 
 namespace std {
 
-template <> struct hash<HPHP::Facts::Attribute> {
+template <>
+struct hash<HPHP::Facts::Attribute> {
   std::size_t operator()(const HPHP::Facts::Attribute& attr) const noexcept {
     return folly::hash::hash_combine(
         std::hash<std::string>{}(attr.m_name),
@@ -216,9 +214,10 @@ template <> struct hash<HPHP::Facts::Attribute> {
   }
 };
 
-template <> struct hash<HPHP::Facts::MethodDetails> {
-  std::size_t
-  operator()(const HPHP::Facts::MethodDetails& method) const noexcept {
+template <>
+struct hash<HPHP::Facts::MethodDetails> {
+  std::size_t operator()(
+      const HPHP::Facts::MethodDetails& method) const noexcept {
     return folly::hash::hash_combine(
         std::hash<std::string>{}(method.m_name),
         folly::hash::hash_range(
@@ -226,7 +225,8 @@ template <> struct hash<HPHP::Facts::MethodDetails> {
   }
 };
 
-template <> struct hash<HPHP::Facts::TypeDetails> {
+template <>
+struct hash<HPHP::Facts::TypeDetails> {
   std::size_t operator()(const HPHP::Facts::TypeDetails& type) const noexcept {
     return folly::hash::hash_combine(
         std::hash<std::string>{}(type.m_name),
@@ -247,8 +247,8 @@ template <> struct hash<HPHP::Facts::TypeDetails> {
 };
 } // namespace std
 
-template <> struct fmt::formatter<HPHP::Facts::Clock> {
-
+template <>
+struct fmt::formatter<HPHP::Facts::Clock> {
   // We don't support any settings within the braces, so nothing to do here.
   constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
     return ctx.end();

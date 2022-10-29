@@ -23,25 +23,25 @@
   template <typename..., typename T = <%field:cpp_storage_type%>>
   <%field:cpp_accessor_attribute%> <%field:field_ref_type%><const T&> <%field:cpp_name%>_ref() const& {
 <% > module_types_h/field_interceptor%>
-    return <%^field:has_isset?%><%field:field_ref_type%><const T&><%/field:has_isset?%>{this-><% > common/field_value%><%#field:intern_boxed_ref?%>, ::apache::thrift::op::getDefault<<%field:cpp_type%>><%/field:intern_boxed_ref?%><%#field:has_isset?%>, __isset.at(<%field:isset_index%>), __isset.bit(<%field:isset_index%>)<%/field:has_isset?%>};
+    return <%^field:has_isset?%><%field:field_ref_type%><const T&><%/field:has_isset?%>{this-><% > common/field_value%><% > module_types_h/field_ref_args%>};
   }
 
   template <typename..., typename T = <%field:cpp_storage_type%>>
   <%field:cpp_accessor_attribute%> <%field:field_ref_type%><const T&&> <%field:cpp_name%>_ref() const&& {
 <% > module_types_h/field_interceptor%>
-    return <%^field:has_isset?%><%field:field_ref_type%><const T&&><%/field:has_isset?%>{static_cast<const T&&>(this-><% > common/field_value%>)<%#field:intern_boxed_ref?%>, ::apache::thrift::op::getDefault<<%field:cpp_type%>><%/field:intern_boxed_ref?%><%#field:has_isset?%>, __isset.at(<%field:isset_index%>), __isset.bit(<%field:isset_index%>)<%/field:has_isset?%>};
+    return <%^field:has_isset?%><%field:field_ref_type%><const T&&><%/field:has_isset?%>{static_cast<const T&&>(this-><% > common/field_value%>)<% > module_types_h/field_ref_args%>};
   }
 
   template <typename..., typename T = <%field:cpp_storage_type%>>
   <%field:cpp_accessor_attribute%> <%field:field_ref_type%><T&> <%field:cpp_name%>_ref() & {
 <% > module_types_h/field_interceptor%>
-    return <%^field:has_isset?%><%field:field_ref_type%><T&><%/field:has_isset?%>{this-><% > common/field_value%><%#field:intern_boxed_ref?%>, ::apache::thrift::op::getDefault<<%field:cpp_type%>><%/field:intern_boxed_ref?%><%#field:has_isset?%>, __isset.at(<%field:isset_index%>), __isset.bit(<%field:isset_index%>)<%/field:has_isset?%>};
+    return <%^field:has_isset?%><%field:field_ref_type%><T&><%/field:has_isset?%>{this-><% > common/field_value%><% > module_types_h/field_ref_args%>};
   }
 
   template <typename..., typename T = <%field:cpp_storage_type%>>
   <%field:cpp_accessor_attribute%> <%field:field_ref_type%><T&&> <%field:cpp_name%>_ref() && {
 <% > module_types_h/field_interceptor%>
-    return <%^field:has_isset?%><%field:field_ref_type%><T&&><%/field:has_isset?%>{static_cast<T&&>(this-><% > common/field_value%>)<%#field:intern_boxed_ref?%>, ::apache::thrift::op::getDefault<<%field:cpp_type%>><%/field:intern_boxed_ref?%><%#field:has_isset?%>, __isset.at(<%field:isset_index%>), __isset.bit(<%field:isset_index%>)<%/field:has_isset?%>};
+    return <%^field:has_isset?%><%field:field_ref_type%><T&&><%/field:has_isset?%>{static_cast<T&&>(this-><% > common/field_value%>)<% > module_types_h/field_ref_args%>};
   }
 <%^struct:legacy_api?%>
  public:
@@ -51,25 +51,25 @@
   template <typename..., typename T = <%field:cpp_storage_type%>>
   <%field:cpp_accessor_attribute%> <%field:field_ref_type%><const T&> <%field:cpp_name%>() const& {
 <% > module_types_h/field_interceptor%>
-    return <%^field:has_isset?%><%field:field_ref_type%><const T&><%/field:has_isset?%>{this-><% > common/field_value%><%#field:intern_boxed_ref?%>, ::apache::thrift::op::getDefault<<%field:cpp_type%>><%/field:intern_boxed_ref?%><%#field:has_isset?%>, __isset.at(<%field:isset_index%>), __isset.bit(<%field:isset_index%>)<%/field:has_isset?%>};
+    return <%^field:has_isset?%><%field:field_ref_type%><const T&><%/field:has_isset?%>{this-><% > common/field_value%><% > module_types_h/field_ref_args%>};
   }
 
   template <typename..., typename T = <%field:cpp_storage_type%>>
   <%field:cpp_accessor_attribute%> <%field:field_ref_type%><const T&&> <%field:cpp_name%>() const&& {
 <% > module_types_h/field_interceptor%>
-    return <%^field:has_isset?%><%field:field_ref_type%><const T&&><%/field:has_isset?%>{static_cast<const T&&>(this-><% > common/field_value%>)<%#field:intern_boxed_ref?%>, ::apache::thrift::op::getDefault<<%field:cpp_type%>><%/field:intern_boxed_ref?%><%#field:has_isset?%>, __isset.at(<%field:isset_index%>), __isset.bit(<%field:isset_index%>)<%/field:has_isset?%>};
+    return <%^field:has_isset?%><%field:field_ref_type%><const T&&><%/field:has_isset?%>{static_cast<const T&&>(this-><% > common/field_value%>)<% > module_types_h/field_ref_args%>};
   }
 
   template <typename..., typename T = <%field:cpp_storage_type%>>
   <%field:cpp_accessor_attribute%> <%field:field_ref_type%><T&> <%field:cpp_name%>() & {
 <% > module_types_h/field_interceptor%>
-    return <%^field:has_isset?%><%field:field_ref_type%><T&><%/field:has_isset?%>{this-><% > common/field_value%><%#field:intern_boxed_ref?%>, ::apache::thrift::op::getDefault<<%field:cpp_type%>><%/field:intern_boxed_ref?%><%#field:has_isset?%>, __isset.at(<%field:isset_index%>), __isset.bit(<%field:isset_index%>)<%/field:has_isset?%>};
+    return <%^field:has_isset?%><%field:field_ref_type%><T&><%/field:has_isset?%>{this-><% > common/field_value%><% > module_types_h/field_ref_args%>};
   }
 
   template <typename..., typename T = <%field:cpp_storage_type%>>
   <%field:cpp_accessor_attribute%> <%field:field_ref_type%><T&&> <%field:cpp_name%>() && {
 <% > module_types_h/field_interceptor%>
-    return <%^field:has_isset?%><%field:field_ref_type%><T&&><%/field:has_isset?%>{static_cast<T&&>(this-><% > common/field_value%>)<%#field:intern_boxed_ref?%>, ::apache::thrift::op::getDefault<<%field:cpp_type%>><%/field:intern_boxed_ref?%><%#field:has_isset?%>, __isset.at(<%field:isset_index%>), __isset.bit(<%field:isset_index%>)<%/field:has_isset?%>};
+    return <%^field:has_isset?%><%field:field_ref_type%><T&&><%/field:has_isset?%>{static_cast<T&&>(this-><% > common/field_value%>)<% > module_types_h/field_ref_args%>};
   }
 <%/field:eligible_for_storage_name_mangling?%>
 <%/field:use_field_ref?%>

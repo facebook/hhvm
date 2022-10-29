@@ -613,7 +613,11 @@ impl Display for FmtTypedValue<'_> {
             TypedValue::Bool(b) => f.write_str(if *b { "true" } else { "false" }),
             TypedValue::Float(v) => write!(f, "{}", v.to_f64()),
             TypedValue::String(v) => FmtEscapedString(strings.lookup_bytes(*v)).fmt(f),
-            TypedValue::LazyClass(_) => todo!("unhandled: {:?}", self.0),
+            TypedValue::LazyClass(lit) => write!(
+                f,
+                "lazy_class {}",
+                FmtEscapedString(strings.lookup_bytes(*lit))
+            ),
             TypedValue::Null => f.write_str("null"),
             TypedValue::Vec(values) => {
                 write!(

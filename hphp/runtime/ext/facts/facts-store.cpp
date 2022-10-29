@@ -59,8 +59,9 @@ namespace {
  * Return a path relative to `root` with the same canonical location as `p`. If
  * `p` does not exist within `root`, return `std::nullopt`.
  */
-Optional<fs::path>
-resolvePathRelativeToRoot(const fs::path& path, const fs::path& root) {
+Optional<fs::path> resolvePathRelativeToRoot(
+    const fs::path& path,
+    const fs::path& root) {
   if (path.is_relative())
     return path;
   if (!fs::exists(path))
@@ -167,7 +168,6 @@ struct KindFilterData {
 };
 
 struct AttributeFilterData {
-
   /**
    * Map from 0-indexed argument position to argument value
    */
@@ -187,9 +187,9 @@ struct AttributeFilterData {
     return filters;
   }
 
-private:
-  static std::pair<StringPtr, ArgMap>
-  createAttrFilterFromShape(const ArrayData* attrShape) {
+ private:
+  static std::pair<StringPtr, ArgMap> createAttrFilterFromShape(
+      const ArrayData* attrShape) {
     assertx(attrShape);
     StringPtr name{nullptr};
     hphp_hash_map<size_t, folly::dynamic> args;
@@ -247,7 +247,6 @@ private:
 };
 
 struct DeriveKindFilterData {
-
   static constexpr DeriveKindFilterData includeEverything() noexcept {
     return {.m_removeExtends = false, .m_removeRequires = false};
   }
@@ -256,8 +255,8 @@ struct DeriveKindFilterData {
     return {.m_removeExtends = true, .m_removeRequires = true};
   }
 
-  static DeriveKindFilterData
-  createFromKeyset(const ArrayData* deriveKindFilter) {
+  static DeriveKindFilterData createFromKeyset(
+      const ArrayData* deriveKindFilter) {
     DeriveKindFilterData filters = DeriveKindFilterData::removeEverything();
     IterateKV(deriveKindFilter, [&](TypedValue k, UNUSED TypedValue v) {
       if (!tvIsString(k)) {
@@ -352,8 +351,8 @@ std::string curthread() {
   return s.str();
 }
 
-std::vector<fs::path>
-removeHashes(std::vector<PathAndOptionalHash>&& pathsWithHashes) {
+std::vector<fs::path> removeHashes(
+    std::vector<PathAndOptionalHash>&& pathsWithHashes) {
   std::vector<fs::path> paths;
   paths.reserve(pathsWithHashes.size());
   for (auto&& pathAndHash : std::move(pathsWithHashes)) {
@@ -462,7 +461,8 @@ Array makeDictOfStringToString(PairContainer&& vector) {
   return ret.toArray();
 }
 
-template <typename F> auto logPerformance(std::string_view name, F&& func) {
+template <typename F>
+auto logPerformance(std::string_view name, F&& func) {
   using namespace std::chrono_literals;
 
   auto t0 = std::chrono::steady_clock::now();
@@ -492,23 +492,20 @@ template <typename F> auto logPerformance(std::string_view name, F&& func) {
 struct FactsStoreImpl final
     : public FactsStore,
       public std::enable_shared_from_this<FactsStoreImpl> {
-
   FactsStoreImpl(
       fs::path root,
       AutoloadDB::Handle dbHandle,
       std::shared_ptr<Watcher> watcher,
       hphp_hash_set<std::string> indexedMethodAttributes)
-      : m_updateExec{1, make_thread_factory("Autoload update")}
-      , m_root{std::move(root)}
-      , m_map{m_root, std::move(dbHandle), std::move(indexedMethodAttributes)}
-      , m_watcher{std::move(watcher)} {
-  }
+      : m_updateExec{1, make_thread_factory("Autoload update")},
+        m_root{std::move(root)},
+        m_map{m_root, std::move(dbHandle), std::move(indexedMethodAttributes)},
+        m_watcher{std::move(watcher)} {}
 
   FactsStoreImpl(fs::path root, AutoloadDB::Handle dbHandle)
-      : m_updateExec{1, make_thread_factory("Autoload update")}
-      , m_root{std::move(root)}
-      , m_map{m_root, std::move(dbHandle)} {
-  }
+      : m_updateExec{1, make_thread_factory("Autoload update")},
+        m_root{std::move(root)},
+        m_map{m_root, std::move(dbHandle)} {}
 
   ~FactsStoreImpl() override {
     m_closing = true;
@@ -744,8 +741,8 @@ struct FactsStoreImpl final
     });
   }
 
-  Array
-  getBaseTypes(const String& derivedType, const Variant& filters) override {
+  Array getBaseTypes(const String& derivedType, const Variant& filters)
+      override {
     return logPerformance(__func__, [&]() {
       return getBaseTypes(
           derivedType,
@@ -754,8 +751,8 @@ struct FactsStoreImpl final
     });
   }
 
-  Array
-  getDerivedTypes(const String& baseType, const Variant& filters) override {
+  Array getDerivedTypes(const String& baseType, const Variant& filters)
+      override {
     return logPerformance(__func__, [&]() {
       return getDerivedTypes(
           baseType,
@@ -765,7 +762,8 @@ struct FactsStoreImpl final
   }
 
   Array getTransitiveDerivedTypes(
-      const String& baseType, const Variant& filters) override {
+      const String& baseType,
+      const Variant& filters) override {
     return logPerformance(__func__, [&]() {
       return getTransitiveDerivedTypes(
           baseType,
@@ -830,8 +828,8 @@ struct FactsStoreImpl final
     });
   }
 
-  Array getTypeAliasAttrArgs(
-      const String& typeAlias, const String& attribute) override {
+  Array getTypeAliasAttrArgs(const String& typeAlias, const String& attribute)
+      override {
     return logPerformance(__func__, [&]() {
       return makeVecOfDynamic(
           m_map.getTypeAliasAttributeArgs(*typeAlias.get(), *attribute.get()));
@@ -959,9 +957,9 @@ struct FactsStoreImpl final
     Clock lastClock = *results.m_lastClock;
     Clock newClock = results.m_newClock;
 
-    auto [alteredPathsAndHashes, deletedPaths] =
-        isFresh ? getFreshDelta(std::move(results))
-                : getIncrementalDelta(std::move(results));
+    auto [alteredPathsAndHashes, deletedPaths] = isFresh
+        ? getFreshDelta(std::move(results))
+        : getIncrementalDelta(std::move(results));
 
     // We need to update the DB if Watchman has restarted or if
     // something's changed on the filesystem. Otherwise, there's no
@@ -979,10 +977,9 @@ struct FactsStoreImpl final
         alteredPathsAndHashes.size(),
         deletedPaths.size());
 
-    auto alteredPathFacts =
-        LIKELY(alteredPathsAndHashes.empty())
-            ? std::vector<folly::Try<FileFacts>>{}
-            : facts_from_paths(m_root, alteredPathsAndHashes);
+    auto alteredPathFacts = LIKELY(alteredPathsAndHashes.empty())
+        ? std::vector<folly::Try<FileFacts>>{}
+        : facts_from_paths(m_root, alteredPathsAndHashes);
 
     std::vector<FileFacts> facts;
     facts.reserve(alteredPathFacts.size());
@@ -1061,7 +1058,6 @@ struct FactsStoreImpl final
 
   std::tuple<std::vector<PathAndOptionalHash>, std::vector<fs::path>>
   getFreshDelta(Watcher::Results&& result) const {
-
     auto allPaths = m_map.getAllPathsWithHashes();
     XLOGF(
         INFO,
@@ -1121,7 +1117,6 @@ struct FactsStoreImpl final
    */
   std::tuple<std::vector<PathAndOptionalHash>, std::vector<fs::path>>
   getIncrementalDelta(Watcher::Results&& result) const {
-
     std::vector<PathAndOptionalHash> alteredPaths;
     std::vector<fs::path> deletedPaths;
     for (auto& pathData : result.m_files) {
@@ -1135,8 +1130,8 @@ struct FactsStoreImpl final
   }
 
   Array getBaseTypes(
-      const String& derivedType, const InheritanceFilterData& filters) {
-
+      const String& derivedType,
+      const InheritanceFilterData& filters) {
     std::vector<Symbol<SymKind::Type>> baseTypes;
 
     auto addBaseTypes = [&](DeriveKind kind) {
@@ -1164,7 +1159,8 @@ struct FactsStoreImpl final
   }
 
   Array getDerivedTypes(
-      const String& baseType, const InheritanceFilterData& filters) {
+      const String& baseType,
+      const InheritanceFilterData& filters) {
     std::vector<Symbol<SymKind::Type>> derivedTypes;
 
     auto addDerivedTypes = [&](DeriveKind kind) {
@@ -1192,7 +1188,8 @@ struct FactsStoreImpl final
   }
 
   Array getTransitiveDerivedTypes(
-      const String& baseType, const InheritanceFilterData& filters) {
+      const String& baseType,
+      const InheritanceFilterData& filters) {
     auto derivedTypeInfo = filterTypesByAttribute(
         m_map.getTransitiveDerivedTypes(
             *baseType.get(),
@@ -1273,7 +1270,8 @@ struct FactsStoreImpl final
    * The Hack type of `kinds` is `keyset<HH\Facts\TypeKind>`.
    */
   std::vector<Symbol<SymKind::Type>> filterByKind(
-      std::vector<Symbol<SymKind::Type>> types, const KindFilterData& kinds) {
+      std::vector<Symbol<SymKind::Type>> types,
+      const KindFilterData& kinds) {
     // Bail out if we aren't filtering on kind
     if (kinds.doesIncludeEverything()) {
       return types;
@@ -1306,7 +1304,8 @@ struct FactsStoreImpl final
    */
   template <typename T>
   std::vector<T> filterTypesByAttribute(
-      std::vector<T> types, const AttributeFilterData& filter) {
+      std::vector<T> types,
+      const AttributeFilterData& filter) {
     return filterTypesByAttribute(
         std::move(types), filter, [](T type) -> Symbol<SymKind::Type> {
           return type;
@@ -1396,8 +1395,9 @@ std::shared_ptr<FactsStore> make_watcher_facts(
   return map;
 }
 
-std::shared_ptr<FactsStore>
-make_trusted_facts(fs::path root, AutoloadDB::Handle dbHandle) {
+std::shared_ptr<FactsStore> make_trusted_facts(
+    fs::path root,
+    AutoloadDB::Handle dbHandle) {
   return std::make_shared<FactsStoreImpl>(std::move(root), std::move(dbHandle));
 }
 

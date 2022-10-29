@@ -23,6 +23,9 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * The `interaction` definition scope.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Interaction implements TBase, java.io.Serializable, Cloneable, Comparable<Interaction> {
   private static final TStruct STRUCT_DESC = new TStruct("Interaction");

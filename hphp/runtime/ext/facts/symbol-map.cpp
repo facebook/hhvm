@@ -129,8 +129,7 @@ getAllSymbolsFromDB(AutoloadDB& db) {
 } // namespace
 
 AutoloadDBVault::AutoloadDBVault(AutoloadDB::Handle dbHandle)
-    : m_dbHandle{std::move(dbHandle)} {
-}
+    : m_dbHandle{std::move(dbHandle)} {}
 
 std::shared_ptr<AutoloadDB> AutoloadDBVault::get() const {
   return m_dbs.withULockPtr([this](auto ulock) {
@@ -149,10 +148,11 @@ SymbolMap::SymbolMap(
     AutoloadDB::Handle dbHandle,
     hphp_hash_set<std::string> indexedMethodAttrs)
     : m_exec{std::make_shared<folly::CPUThreadPoolExecutor>(
-          1, std::make_shared<folly::NamedThreadFactory>("Autoload DB update"))}
-    , m_root{std::move(root)}
-    , m_dbVault{std::move(dbHandle)}
-    , m_indexedMethodAttrs{std::move(indexedMethodAttrs)} {
+          1,
+          std::make_shared<folly::NamedThreadFactory>("Autoload DB update"))},
+      m_root{std::move(root)},
+      m_dbVault{std::move(dbHandle)},
+      m_indexedMethodAttrs{std::move(indexedMethodAttrs)} {
   assertx(m_root.is_absolute());
 }
 
@@ -164,8 +164,8 @@ SymbolMap::~SymbolMap() {
   }
 }
 
-Optional<Symbol<SymKind::Type>>
-SymbolMap::getTypeName(const StringData& typeName) {
+Optional<Symbol<SymKind::Type>> SymbolMap::getTypeName(
+    const StringData& typeName) {
   Symbol<SymKind::Type> type{typeName};
   auto path = getSymbolPath(type);
   if (path == nullptr) {
@@ -244,8 +244,8 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getFileTypes(Path path) {
   return symbolVec;
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getFileTypes(const fs::path& path) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getFileTypes(
+    const fs::path& path) {
   return getFileTypes(Path{path});
 }
 
@@ -257,8 +257,8 @@ std::vector<Symbol<SymKind::Function>> SymbolMap::getFileFunctions(Path path) {
   return symbolVec;
 }
 
-std::vector<Symbol<SymKind::Function>>
-SymbolMap::getFileFunctions(const fs::path& path) {
+std::vector<Symbol<SymKind::Function>> SymbolMap::getFileFunctions(
+    const fs::path& path) {
   return getFileFunctions(Path{path});
 }
 
@@ -270,8 +270,8 @@ std::vector<Symbol<SymKind::Constant>> SymbolMap::getFileConstants(Path path) {
   return symbolVec;
 }
 
-std::vector<Symbol<SymKind::Constant>>
-SymbolMap::getFileConstants(const fs::path& path) {
+std::vector<Symbol<SymKind::Constant>> SymbolMap::getFileConstants(
+    const fs::path& path) {
   return getFileConstants(Path{path});
 }
 
@@ -283,8 +283,8 @@ std::vector<Symbol<SymKind::Module>> SymbolMap::getFileModules(Path path) {
   return symbolVec;
 }
 
-std::vector<Symbol<SymKind::Module>>
-SymbolMap::getFileModules(const fs::path& path) {
+std::vector<Symbol<SymKind::Module>> SymbolMap::getFileModules(
+    const fs::path& path) {
   return getFileModules(Path{path});
 }
 
@@ -303,8 +303,8 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getFileTypeAliases(Path path) {
   return symbolVec;
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getFileTypeAliases(const fs::path& path) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getFileTypeAliases(
+    const fs::path& path) {
   return getFileTypeAliases(Path{path});
 }
 
@@ -356,8 +356,9 @@ SymbolMap::getAllTypeAliases() {
   return results;
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getBaseTypes(Symbol<SymKind::Type> derivedType, DeriveKind kind) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getBaseTypes(
+    Symbol<SymKind::Type> derivedType,
+    DeriveKind kind) {
   auto derivedTypePath = getSymbolPath(derivedType);
   if (derivedTypePath == nullptr) {
     return {};
@@ -402,13 +403,15 @@ SymbolMap::getBaseTypes(Symbol<SymKind::Type> derivedType, DeriveKind kind) {
       });
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getBaseTypes(const StringData& derivedType, DeriveKind kind) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getBaseTypes(
+    const StringData& derivedType,
+    DeriveKind kind) {
   return getBaseTypes(Symbol<SymKind::Type>{derivedType}, kind);
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getDerivedTypes(Symbol<SymKind::Type> baseType, DeriveKind kind) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getDerivedTypes(
+    Symbol<SymKind::Type> baseType,
+    DeriveKind kind) {
   // Return empty results if the given type is undefined
   if (getSymbolPath(baseType) == nullptr) {
     return {};
@@ -453,8 +456,9 @@ SymbolMap::getDerivedTypes(Symbol<SymKind::Type> baseType, DeriveKind kind) {
   return subtypes;
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getDerivedTypes(const StringData& baseType, DeriveKind kind) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getDerivedTypes(
+    const StringData& baseType,
+    DeriveKind kind) {
   return getDerivedTypes(Symbol<SymKind::Type>{baseType}, kind);
 }
 
@@ -509,8 +513,8 @@ SymbolMap::getTransitiveDerivedTypes(
       Symbol<SymKind::Type>{baseType}, kinds, deriveKinds);
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getAttributesOfType(Symbol<SymKind::Type> type) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfType(
+    Symbol<SymKind::Type> type) {
   auto path = getSymbolPath(type);
   if (path == nullptr) {
     return {};
@@ -556,13 +560,13 @@ SymbolMap::getAttributesOfType(Symbol<SymKind::Type> type) {
       });
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getAttributesOfType(const StringData& type) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfType(
+    const StringData& type) {
   return getAttributesOfType(Symbol<SymKind::Type>{type});
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getAttributesOfTypeAlias(Symbol<SymKind::Type> typeAlias) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfTypeAlias(
+    Symbol<SymKind::Type> typeAlias) {
   auto path = getSymbolPath(typeAlias);
   if (path == nullptr) {
     return {};
@@ -608,13 +612,13 @@ SymbolMap::getAttributesOfTypeAlias(Symbol<SymKind::Type> typeAlias) {
       });
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getAttributesOfTypeAlias(const StringData& typeAlias) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfTypeAlias(
+    const StringData& typeAlias) {
   return getAttributesOfTypeAlias(Symbol<SymKind::Type>{typeAlias});
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getTypesWithAttribute(Symbol<SymKind::Type> attr) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getTypesWithAttribute(
+    Symbol<SymKind::Type> attr) {
   using TypeVec = std::vector<Symbol<SymKind::Type>>;
   auto makeVec = [&](auto const& typeDefs) -> TypeVec {
     TypeVec typeVec;
@@ -648,13 +652,13 @@ SymbolMap::getTypesWithAttribute(Symbol<SymKind::Type> attr) {
   return types;
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getTypesWithAttribute(const StringData& attr) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getTypesWithAttribute(
+    const StringData& attr) {
   return getTypesWithAttribute(Symbol<SymKind::Type>{attr});
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getTypeAliasesWithAttribute(Symbol<SymKind::Type> attr) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getTypeAliasesWithAttribute(
+    Symbol<SymKind::Type> attr) {
   using TypeAliasVec = std::vector<Symbol<SymKind::Type>>;
   auto makeVec = [&](auto const& typeAliasDefs) -> TypeAliasVec {
     TypeAliasVec typeAliasVec;
@@ -689,13 +693,14 @@ SymbolMap::getTypeAliasesWithAttribute(Symbol<SymKind::Type> attr) {
   return typeAliases;
 }
 
-std::vector<Symbol<SymKind::Type>>
-SymbolMap::getTypeAliasesWithAttribute(const StringData& attr) {
+std::vector<Symbol<SymKind::Type>> SymbolMap::getTypeAliasesWithAttribute(
+    const StringData& attr) {
   return getTypeAliasesWithAttribute(Symbol<SymKind::Type>{attr});
 }
 
 std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfMethod(
-    Symbol<SymKind::Type> type, Symbol<SymKind::Function> method) {
+    Symbol<SymKind::Type> type,
+    Symbol<SymKind::Function> method) {
   auto path = getSymbolPath(type);
   if (path == nullptr) {
     return {};
@@ -736,13 +741,14 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfMethod(
 }
 
 std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfMethod(
-    const StringData& type, const StringData& method) {
+    const StringData& type,
+    const StringData& method) {
   return getAttributesOfMethod(
       Symbol<SymKind::Type>{type}, Symbol<SymKind::Function>{method});
 }
 
-std::vector<MethodDecl>
-SymbolMap::getMethodsWithAttribute(Symbol<SymKind::Type> attr) {
+std::vector<MethodDecl> SymbolMap::getMethodsWithAttribute(
+    Symbol<SymKind::Type> attr) {
   using MethodVec = std::vector<MethodDecl>;
   auto makeVec = [](auto&& methods) -> MethodVec {
     MethodVec methodVec;
@@ -781,8 +787,8 @@ SymbolMap::getMethodsWithAttribute(Symbol<SymKind::Type> attr) {
   return methods;
 }
 
-std::vector<MethodDecl>
-SymbolMap::getMethodsWithAttribute(const StringData& attr) {
+std::vector<MethodDecl> SymbolMap::getMethodsWithAttribute(
+    const StringData& attr) {
   return getMethodsWithAttribute(Symbol<SymKind::Type>{attr});
 }
 
@@ -863,7 +869,8 @@ std::vector<Path> SymbolMap::getFilesWithAttribute(const StringData& attr) {
 }
 
 std::vector<folly::dynamic> SymbolMap::getTypeAttributeArgs(
-    Symbol<SymKind::Type> type, Symbol<SymKind::Type> attr) {
+    Symbol<SymKind::Type> type,
+    Symbol<SymKind::Type> attr) {
   auto path = getSymbolPath(type);
   if (path == nullptr) {
     return {};
@@ -889,13 +896,15 @@ std::vector<folly::dynamic> SymbolMap::getTypeAttributeArgs(
 }
 
 std::vector<folly::dynamic> SymbolMap::getTypeAttributeArgs(
-    const StringData& type, const StringData& attribute) {
+    const StringData& type,
+    const StringData& attribute) {
   return getTypeAttributeArgs(
       Symbol<SymKind::Type>{type}, Symbol<SymKind::Type>{attribute});
 }
 
 std::vector<folly::dynamic> SymbolMap::getTypeAliasAttributeArgs(
-    Symbol<SymKind::Type> typeAlias, Symbol<SymKind::Type> attr) {
+    Symbol<SymKind::Type> typeAlias,
+    Symbol<SymKind::Type> attr) {
   auto path = getSymbolPath(typeAlias);
   if (path == nullptr) {
     return {};
@@ -921,7 +930,8 @@ std::vector<folly::dynamic> SymbolMap::getTypeAliasAttributeArgs(
 }
 
 std::vector<folly::dynamic> SymbolMap::getTypeAliasAttributeArgs(
-    const StringData& typeAlias, const StringData& attribute) {
+    const StringData& typeAlias,
+    const StringData& attribute) {
   return getTypeAliasAttributeArgs(
       Symbol<SymKind::Type>{typeAlias}, Symbol<SymKind::Type>{attribute});
 }
@@ -964,8 +974,9 @@ std::vector<folly::dynamic> SymbolMap::getMethodAttributeArgs(
       Symbol<SymKind::Type>{attribute});
 }
 
-std::vector<folly::dynamic>
-SymbolMap::getFileAttributeArgs(Path path, Symbol<SymKind::Type> attr) {
+std::vector<folly::dynamic> SymbolMap::getFileAttributeArgs(
+    Path path,
+    Symbol<SymKind::Type> attr) {
   if (path == nullptr) {
     return {};
   }
@@ -987,8 +998,9 @@ SymbolMap::getFileAttributeArgs(Path path, Symbol<SymKind::Type> attr) {
       });
 }
 
-std::vector<folly::dynamic>
-SymbolMap::getFileAttributeArgs(Path path, const StringData& attribute) {
+std::vector<folly::dynamic> SymbolMap::getFileAttributeArgs(
+    Path path,
+    const StringData& attribute) {
   return getFileAttributeArgs(path, Symbol<SymKind::Type>{attribute});
 }
 
@@ -1010,7 +1022,7 @@ TypeKind SymbolMap::getKind(const StringData& type) {
 
 bool SymbolMap::isTypeAbstract(Symbol<SymKind::Type> type) {
   return getKindAndFlags(type).second &
-         static_cast<TypeFlagMask>(TypeFlag::Abstract);
+      static_cast<TypeFlagMask>(TypeFlag::Abstract);
 }
 
 bool SymbolMap::isTypeAbstract(const StringData& type) {
@@ -1019,20 +1031,21 @@ bool SymbolMap::isTypeAbstract(const StringData& type) {
 
 bool SymbolMap::isTypeFinal(Symbol<SymKind::Type> type) {
   return getKindAndFlags(type).second &
-         static_cast<TypeFlagMask>(TypeFlag::Final);
+      static_cast<TypeFlagMask>(TypeFlag::Final);
 }
 
 bool SymbolMap::isTypeFinal(const StringData& type) {
   return isTypeFinal(Symbol<SymKind::Type>{type});
 }
 
-std::pair<TypeKind, TypeFlagMask>
-SymbolMap::getKindAndFlags(Symbol<SymKind::Type> type) {
+std::pair<TypeKind, TypeFlagMask> SymbolMap::getKindAndFlags(
+    Symbol<SymKind::Type> type) {
   return getKindAndFlags(type, getSymbolPath(type));
 }
 
-std::pair<TypeKind, TypeFlagMask>
-SymbolMap::getKindAndFlags(Symbol<SymKind::Type> type, Path path) {
+std::pair<TypeKind, TypeFlagMask> SymbolMap::getKindAndFlags(
+    Symbol<SymKind::Type> type,
+    Path path) {
   if (path == nullptr) {
     return {TypeKind::Unknown, static_cast<TypeFlagMask>(TypeFlag::Empty)};
   }
@@ -1291,7 +1304,9 @@ void SymbolMap::updateDB(
 }
 
 void SymbolMap::updateDBPath(
-    AutoloadDB& db, const fs::path& path, const FileFacts& facts) const {
+    AutoloadDB& db,
+    const fs::path& path,
+    const FileFacts& facts) const {
   assertx(path.is_relative());
 
   // Bail out early if the hex in memory is identical to the hex in the DB
@@ -1305,7 +1320,6 @@ void SymbolMap::updateDBPath(
   db.insertSha1Hex(path, facts.m_sha1hex);
 
   for (auto const& type : facts.m_types) {
-
     db.insertType(type.m_name, path, type.m_kind, type.m_flags);
     for (auto const& baseType : type.m_baseTypes) {
       db.insertBaseType(path, type.m_name, DeriveKind::Extends, baseType);
@@ -1427,7 +1441,9 @@ std::vector<std::pair<Symbol<k>, Path>> SymbolMap::getAllSymbols() {
 
 template <typename Ret, typename ReadFn, typename GetFromDBFn, typename WriteFn>
 Ret SymbolMap::readOrUpdate(
-    ReadFn readFn, GetFromDBFn getFromDBFn, WriteFn writeFn) {
+    ReadFn readFn,
+    GetFromDBFn getFromDBFn,
+    WriteFn writeFn) {
   {
     // Try reading with only a reader lock.
     auto rlock = m_syncedData.rlock();
@@ -1451,7 +1467,8 @@ Ret SymbolMap::readOrUpdate(
   });
 }
 
-template <SymKind k> Path SymbolMap::getSymbolPath(Symbol<k> symbol) {
+template <SymKind k>
+Path SymbolMap::getSymbolPath(Symbol<k> symbol) {
   auto symbolPath = [this](auto const& paths) -> Path {
     if (UNLIKELY(paths.empty())) {
       return Path{nullptr};
@@ -1499,8 +1516,8 @@ template <SymKind k> Path SymbolMap::getSymbolPath(Symbol<k> symbol) {
 }
 
 template <SymKind k>
-typename PathToSymbolsMap<k>::PathSymbolMap::Values
-SymbolMap::getPathSymbols(Path path) {
+typename PathToSymbolsMap<k>::PathSymbolMap::Values SymbolMap::getPathSymbols(
+    Path path) {
   using Symbols = typename PathToSymbolsMap<k>::PathSymbolMap::Values;
 
   return readOrUpdate<Symbols>(
@@ -1548,18 +1565,17 @@ SymbolMap::getPathSymbols(Path path) {
 }
 
 SymbolMap::Data::Data()
-    : m_versions{std::make_shared<PathVersions>()}
-    , m_typePath{m_versions}
-    , m_functionPath{m_versions}
-    , m_constantPath{m_versions}
-    , m_modulePath{m_versions}
-    , m_methodPath{m_versions}
-    , m_inheritanceInfo{m_versions}
-    , m_typeAttrs{m_versions}
-    , m_typeAliasAttrs{m_versions}
-    , m_methodAttrs{m_versions}
-    , m_fileAttrs{m_versions} {
-}
+    : m_versions{std::make_shared<PathVersions>()},
+      m_typePath{m_versions},
+      m_functionPath{m_versions},
+      m_constantPath{m_versions},
+      m_modulePath{m_versions},
+      m_methodPath{m_versions},
+      m_inheritanceInfo{m_versions},
+      m_typeAttrs{m_versions},
+      m_typeAliasAttrs{m_versions},
+      m_methodAttrs{m_versions},
+      m_fileAttrs{m_versions} {}
 
 void SymbolMap::Data::updatePath(
     Path path,

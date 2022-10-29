@@ -128,20 +128,22 @@ void createSchema(SQLiteTxn& txn) {
   // Common DB
 
   // Parent tables
-  txn.exec("CREATE TABLE IF NOT EXISTS all_paths ("
-           " pathid INTEGER PRIMARY KEY,"
-           " path TEXT NOT NULL UNIQUE"
-           ")");
+  txn.exec(
+      "CREATE TABLE IF NOT EXISTS all_paths ("
+      " pathid INTEGER PRIMARY KEY,"
+      " path TEXT NOT NULL UNIQUE"
+      ")");
 
   // Table storing data about Classes, Interfaces, Enums, and Traits
-  txn.exec("CREATE TABLE IF NOT EXISTS type_details ("
-           " typeid INTEGER PRIMARY KEY,"
-           " name TEXT NOT NULL COLLATE NOCASE,"
-           " pathid INTEGER NOT NULL REFERENCES all_paths ON DELETE CASCADE,"
-           " kind_of TEXT NOT NULL,"
-           " flags INTEGER NOT NULL,"
-           " UNIQUE (pathid, name)"
-           ")");
+  txn.exec(
+      "CREATE TABLE IF NOT EXISTS type_details ("
+      " typeid INTEGER PRIMARY KEY,"
+      " name TEXT NOT NULL COLLATE NOCASE,"
+      " pathid INTEGER NOT NULL REFERENCES all_paths ON DELETE CASCADE,"
+      " kind_of TEXT NOT NULL,"
+      " flags INTEGER NOT NULL,"
+      " UNIQUE (pathid, name)"
+      ")");
 
   // Path assocs
 
@@ -151,17 +153,19 @@ void createSchema(SQLiteTxn& txn) {
       " sha1sum TEXT NOT NULL"
       ")");
 
-  txn.exec("CREATE TABLE IF NOT EXISTS function_paths ("
-           " pathid INTEGER NOT NULL REFERENCES all_paths ON DELETE CASCADE,"
-           " function TEXT NOT NULL COLLATE NOCASE,"
-           " UNIQUE (pathid, function)"
-           ")");
+  txn.exec(
+      "CREATE TABLE IF NOT EXISTS function_paths ("
+      " pathid INTEGER NOT NULL REFERENCES all_paths ON DELETE CASCADE,"
+      " function TEXT NOT NULL COLLATE NOCASE,"
+      " UNIQUE (pathid, function)"
+      ")");
 
-  txn.exec("CREATE TABLE IF NOT EXISTS constant_paths ("
-           " pathid INTEGER NOT NULL REFERENCES all_paths ON DELETE CASCADE,"
-           " constant TEXT NOT NULL,"
-           " UNIQUE (pathid, constant)"
-           ")");
+  txn.exec(
+      "CREATE TABLE IF NOT EXISTS constant_paths ("
+      " pathid INTEGER NOT NULL REFERENCES all_paths ON DELETE CASCADE,"
+      " constant TEXT NOT NULL,"
+      " UNIQUE (pathid, constant)"
+      ")");
 
   txn.exec(
       "CREATE TABLE IF NOT EXISTS derived_types ("
@@ -171,76 +175,89 @@ void createSchema(SQLiteTxn& txn) {
       " UNIQUE (derived_id, base_name, kind)"
       ")");
 
-  txn.exec("CREATE TABLE IF NOT EXISTS watchman ("
-           " id INTEGER PRIMARY KEY CHECK (id = 0),"
-           " clock TEXT NULL,"
-           " mergebase TEXT NULL"
-           ")");
+  txn.exec(
+      "CREATE TABLE IF NOT EXISTS watchman ("
+      " id INTEGER PRIMARY KEY CHECK (id = 0),"
+      " clock TEXT NULL,"
+      " mergebase TEXT NULL"
+      ")");
 
-  txn.exec("CREATE TABLE IF NOT EXISTS type_attributes ("
-           " typeid INTEGER NOT NULL REFERENCES type_details ON DELETE CASCADE,"
-           " attribute_name TEXT NOT NULL,"
-           " attribute_position INTEGER NULL,"
-           " attribute_value TEXT NULL,"
-           " UNIQUE (typeid, attribute_name, attribute_position)"
-           ")");
+  txn.exec(
+      "CREATE TABLE IF NOT EXISTS type_attributes ("
+      " typeid INTEGER NOT NULL REFERENCES type_details ON DELETE CASCADE,"
+      " attribute_name TEXT NOT NULL,"
+      " attribute_position INTEGER NULL,"
+      " attribute_value TEXT NULL,"
+      " UNIQUE (typeid, attribute_name, attribute_position)"
+      ")");
 
-  txn.exec("CREATE TABLE IF NOT EXISTS method_attributes ("
-           " typeid INTEGER NOT NULL REFERENCES type_details ON DELETE CASCADE,"
-           " method TEXT NOT NULL,"
-           " attribute_name TEXT NOT NULL,"
-           " attribute_position INTEGER NULL,"
-           " attribute_value TEXT NULL,"
-           " UNIQUE (typeid, method, attribute_name, attribute_position)"
-           ")");
+  txn.exec(
+      "CREATE TABLE IF NOT EXISTS method_attributes ("
+      " typeid INTEGER NOT NULL REFERENCES type_details ON DELETE CASCADE,"
+      " method TEXT NOT NULL,"
+      " attribute_name TEXT NOT NULL,"
+      " attribute_position INTEGER NULL,"
+      " attribute_value TEXT NULL,"
+      " UNIQUE (typeid, method, attribute_name, attribute_position)"
+      ")");
 
-  txn.exec("CREATE TABLE IF NOT EXISTS file_attributes ("
-           " pathid INTEGER NOT NULL REFERENCES all_paths ON DELETE CASCADE,"
-           " attribute_name TEXT NOT NULL,"
-           " attribute_position INTEGER NULL,"
-           " attribute_value TEXT NULL,"
-           " UNIQUE (pathid, attribute_name, attribute_position)"
-           ")");
+  txn.exec(
+      "CREATE TABLE IF NOT EXISTS file_attributes ("
+      " pathid INTEGER NOT NULL REFERENCES all_paths ON DELETE CASCADE,"
+      " attribute_name TEXT NOT NULL,"
+      " attribute_position INTEGER NULL,"
+      " attribute_value TEXT NULL,"
+      " UNIQUE (pathid, attribute_name, attribute_position)"
+      ")");
 
-  txn.exec("CREATE TABLE IF NOT EXISTS file_modules ("
-           " pathid INTEGER NOT NULL REFERENCES all_paths ON DELETE CASCADE,"
-           " module_name TEXT NOT NULL,"
-           " UNIQUE (pathid, module_name)"
-           ")");
+  txn.exec(
+      "CREATE TABLE IF NOT EXISTS file_modules ("
+      " pathid INTEGER NOT NULL REFERENCES all_paths ON DELETE CASCADE,"
+      " module_name TEXT NOT NULL,"
+      " UNIQUE (pathid, module_name)"
+      ")");
 }
 
 void rebuildIndices(SQLiteTxn& txn) {
-
   // Basically copied wholesale from FlibAutoloadMapSQL.php in WWW.
 
   // type_details
-  txn.exec("CREATE INDEX IF NOT EXISTS type_details__name"
-           " ON type_details (name)");
-  txn.exec("CREATE INDEX IF NOT EXISTS type_details__pathid"
-           " ON type_details (pathid)");
+  txn.exec(
+      "CREATE INDEX IF NOT EXISTS type_details__name"
+      " ON type_details (name)");
+  txn.exec(
+      "CREATE INDEX IF NOT EXISTS type_details__pathid"
+      " ON type_details (pathid)");
 
   // function_paths
-  txn.exec("CREATE INDEX IF NOT EXISTS function_paths__pathid"
-           " ON function_paths (pathid)");
-  txn.exec("CREATE INDEX IF NOT EXISTS function_paths__function"
-           " ON function_paths (function)");
+  txn.exec(
+      "CREATE INDEX IF NOT EXISTS function_paths__pathid"
+      " ON function_paths (pathid)");
+  txn.exec(
+      "CREATE INDEX IF NOT EXISTS function_paths__function"
+      " ON function_paths (function)");
 
   // constant_paths
-  txn.exec("CREATE INDEX IF NOT EXISTS constant_paths__pathid"
-           " ON constant_paths (pathid)");
-  txn.exec("CREATE INDEX IF NOT EXISTS constant_paths__constant"
-           " ON constant_paths (constant)");
+  txn.exec(
+      "CREATE INDEX IF NOT EXISTS constant_paths__pathid"
+      " ON constant_paths (pathid)");
+  txn.exec(
+      "CREATE INDEX IF NOT EXISTS constant_paths__constant"
+      " ON constant_paths (constant)");
 
   // derived_types
-  txn.exec("CREATE INDEX IF NOT EXISTS derived_types__base_name"
-           " ON derived_types (base_name)");
-  txn.exec("CREATE INDEX IF NOT EXISTS derived_types__derived_id"
-           " ON derived_types (derived_id)");
+  txn.exec(
+      "CREATE INDEX IF NOT EXISTS derived_types__base_name"
+      " ON derived_types (base_name)");
+  txn.exec(
+      "CREATE INDEX IF NOT EXISTS derived_types__derived_id"
+      " ON derived_types (derived_id)");
 
   // type_attributes
-  txn.exec("CREATE INDEX IF NOT EXISTS "
-           "type_attributes__attribute_name__typeid__attribute_position"
-           " ON type_attributes (attribute_name, typeid, attribute_position)");
+  txn.exec(
+      "CREATE INDEX IF NOT EXISTS "
+      "type_attributes__attribute_name__typeid__attribute_position"
+      " ON type_attributes (attribute_name, typeid, attribute_position)");
 
   // method_attributes
   txn.exec(
@@ -254,13 +271,15 @@ void rebuildIndices(SQLiteTxn& txn) {
       ")");
 
   // file_attributes
-  txn.exec("CREATE INDEX IF NOT EXISTS "
-           "file_attributes__attribute_name__pathid__attribute_position"
-           " ON file_attributes (attribute_name, pathid, attribute_position)");
+  txn.exec(
+      "CREATE INDEX IF NOT EXISTS "
+      "file_attributes__attribute_name__pathid__attribute_position"
+      " ON file_attributes (attribute_name, pathid, attribute_position)");
 
   // file_modules
-  txn.exec("CREATE INDEX IF NOT EXISTS file_modules__module_name"
-           " ON file_modules (module_name)");
+  txn.exec(
+      "CREATE INDEX IF NOT EXISTS file_modules__module_name"
+      " ON file_modules (module_name)");
 }
 
 TypeKind toTypeKind(const std::string_view kind) {
@@ -282,11 +301,10 @@ TypeKind toTypeKind(const std::string_view kind) {
 struct PathStmts {
   explicit PathStmts(SQLite& db)
       : m_insert{db.prepare(
-            "INSERT OR IGNORE INTO all_paths (path) VALUES (@path)")}
-      , m_erase{db.prepare("DELETE FROM all_paths WHERE path = @path")}
-      , m_getAll{db.prepare("SELECT path, sha1sum FROM path_sha1sum"
-                            " JOIN all_paths USING (pathid)")} {
-  }
+            "INSERT OR IGNORE INTO all_paths (path) VALUES (@path)")},
+        m_erase{db.prepare("DELETE FROM all_paths WHERE path = @path")},
+        m_getAll{db.prepare("SELECT path, sha1sum FROM path_sha1sum"
+                            " JOIN all_paths USING (pathid)")} {}
 
   SQLiteStmt m_insert;
   SQLiteStmt m_erase;
@@ -298,11 +316,10 @@ struct Sha1HexStmts {
       : m_insert{db.prepare("INSERT OR REPLACE INTO path_sha1sum VALUES ("
                             " (SELECT pathid FROM all_paths WHERE path=@path),"
                             " @sha1sum"
-                            ")")}
-      , m_get{db.prepare("SELECT sha1sum FROM path_sha1sum"
+                            ")")},
+        m_get{db.prepare("SELECT sha1sum FROM path_sha1sum"
                          " JOIN all_paths USING (pathid)"
-                         " WHERE path = @path")} {
-  }
+                         " WHERE path = @path")} {}
 
   SQLiteStmt m_insert;
   SQLiteStmt m_get;
@@ -318,40 +335,40 @@ struct TypeStmts {
             "  @name,"
             "  @kind_of,"
             "  @flags"
-            " )")}
-      , m_getTypePath{db.prepare("SELECT path FROM type_details"
+            " )")},
+        m_getTypePath{db.prepare("SELECT path FROM type_details"
                                  " JOIN all_paths USING (pathid)"
-                                 " WHERE name=@type")}
-      , m_getPathTypes{db.prepare("SELECT name FROM type_details"
+                                 " WHERE name=@type")},
+        m_getPathTypes{db.prepare("SELECT name FROM type_details"
                                   " JOIN all_paths USING (pathid)"
-                                  " WHERE path=@path")}
-      , m_getKindAndFlags{db.prepare("SELECT kind_of, flags FROM type_details"
+                                  " WHERE path=@path")},
+        m_getKindAndFlags{db.prepare("SELECT kind_of, flags FROM type_details"
                                      " JOIN all_paths USING (pathid)"
                                      " WHERE name=@type"
-                                     " AND path=@path")}
-      , m_insertBaseType{db.prepare(
+                                     " AND path=@path")},
+        m_insertBaseType{db.prepare(
             "INSERT OR IGNORE INTO derived_types (base_name, derived_id, kind)"
             " VALUES ("
             "  @base,"
             "  (SELECT typeid FROM type_details JOIN all_paths USING (pathid)"
             "   WHERE name=@derived AND path=@path),"
             "  @kind"
-            " )")}
-      , m_getBaseTypes{db.prepare("SELECT base_name FROM derived_types"
+            " )")},
+        m_getBaseTypes{db.prepare("SELECT base_name FROM derived_types"
                                   " JOIN type_details AS derived_type ON "
                                   "(derived_type.typeid=derived_id)"
                                   " JOIN all_paths USING (pathid)"
                                   " WHERE derived_type.name = @derived"
                                   " AND path = @path"
-                                  " AND kind = @kind")}
-      , m_getDerivedTypes{db.prepare(
-            "SELECT path, derived_type.name FROM derived_types"
-            " JOIN type_details AS derived_type ON "
-            "(derived_type.typeid=derived_id)"
-            " JOIN all_paths USING (pathid)"
-            " WHERE base_name = @base"
-            " AND kind = @kind")}
-      , m_insertTypeAttribute{db.prepare(
+                                  " AND kind = @kind")},
+        m_getDerivedTypes{
+            db.prepare("SELECT path, derived_type.name FROM derived_types"
+                       " JOIN type_details AS derived_type ON "
+                       "(derived_type.typeid=derived_id)"
+                       " JOIN all_paths USING (pathid)"
+                       " WHERE base_name = @base"
+                       " AND kind = @kind")},
+        m_insertTypeAttribute{db.prepare(
             "INSERT OR IGNORE INTO type_attributes ("
             " typeid,"
             " attribute_name,"
@@ -364,8 +381,8 @@ struct TypeStmts {
             "  @attribute_name,"
             "  @attribute_position,"
             "  @attribute_value"
-            " )")}
-      , m_insertMethodAttribute{db.prepare(
+            " )")},
+        m_insertMethodAttribute{db.prepare(
             "INSERT OR IGNORE INTO method_attributes ("
             " typeid,"
             " method,"
@@ -380,74 +397,73 @@ struct TypeStmts {
             "  @attribute_name,"
             "  @attribute_position,"
             "  @attribute_value"
-            " )")}
-      , m_getTypeAttributes{db.prepare("SELECT DISTINCT attribute_name"
+            " )")},
+        m_getTypeAttributes{db.prepare("SELECT DISTINCT attribute_name"
                                        " FROM type_attributes"
                                        "  JOIN type_details USING (typeid)"
                                        "  JOIN all_paths USING (pathid)"
-                                       " WHERE name=@type AND path = @path")}
-      , m_getMethodAttributes{db.prepare(
+                                       " WHERE name=@type AND path = @path")},
+        m_getMethodAttributes{db.prepare(
             "SELECT DISTINCT attribute_name"
             " FROM method_attributes"
             "  JOIN type_details USING (typeid)"
             "  JOIN all_paths USING (pathid)"
-            " WHERE name=@type AND method=@method AND path = @path")}
-      , m_getTypeAttributeArgs{db.prepare(
-            "SELECT attribute_value"
-            " FROM type_attributes"
-            "  JOIN type_details USING (typeid)"
-            "  JOIN all_paths USING (pathid)"
-            " WHERE name = @type"
-            " AND kind_of <> 'typeAlias'"
-            " AND path = @path"
-            " AND attribute_name = @attribute_name")}
-      , m_getTypeAliasAttributeArgs{db.prepare(
-            "SELECT attribute_value"
-            " FROM type_attributes"
-            "  JOIN type_details USING (typeid)"
-            "  JOIN all_paths USING (pathid)"
-            " WHERE name = @type"
-            " AND kind_of = 'typeAlias'"
-            " AND path = @path"
-            " AND attribute_name = @attribute_name")}
-      , m_getMethodAttributeArgs{db.prepare(
-            "SELECT attribute_value"
-            " FROM method_attributes"
-            "  JOIN type_details USING (typeid)"
-            "  JOIN all_paths USING (pathid)"
-            " WHERE name = @type"
-            " AND method = @method"
-            " AND path = @path"
-            " AND attribute_name = @attribute_name")}
-      , m_getTypesWithAttribute{db.prepare(
-            "SELECT name, path FROM ("
-            " SELECT DISTINCT typeid FROM type_attributes"
-            " WHERE attribute_name = @attribute_name"
-            ")"
-            "  JOIN type_details USING (typeid)"
-            "  JOIN all_paths USING (pathid)"
-            " WHERE kind_of <> 'typeAlias'")}
-      , m_getTypeAliasesWithAttribute{db.prepare(
-            "SELECT name, path FROM ("
-            " SELECT DISTINCT typeid FROM type_attributes"
-            " WHERE attribute_name = @attribute_name"
-            ")"
-            "  JOIN type_details USING (typeid)"
-            "  JOIN all_paths USING (pathid)"
-            " WHERE kind_of = 'typeAlias'")}
-      , m_getMethodsInPath{db.prepare(
-            "SELECT name, method, path FROM type_details"
-            " JOIN method_attributes USING (typeid)"
-            " JOIN all_paths USING (pathid) WHERE path = @path")}
-      , m_getMethodsWithAttribute{db.prepare(
-            "SELECT name, method, path"
-            " FROM type_details"
-            "  JOIN method_attributes USING (typeid)"
-            "  JOIN all_paths USING (pathid)"
-            " WHERE attribute_name = @attribute_name")}
-      , m_getAll{db.prepare("SELECT name, path from type_details JOIN "
-                            "all_paths USING (pathid)")} {
-  }
+            " WHERE name=@type AND method=@method AND path = @path")},
+        m_getTypeAttributeArgs{
+            db.prepare("SELECT attribute_value"
+                       " FROM type_attributes"
+                       "  JOIN type_details USING (typeid)"
+                       "  JOIN all_paths USING (pathid)"
+                       " WHERE name = @type"
+                       " AND kind_of <> 'typeAlias'"
+                       " AND path = @path"
+                       " AND attribute_name = @attribute_name")},
+        m_getTypeAliasAttributeArgs{
+            db.prepare("SELECT attribute_value"
+                       " FROM type_attributes"
+                       "  JOIN type_details USING (typeid)"
+                       "  JOIN all_paths USING (pathid)"
+                       " WHERE name = @type"
+                       " AND kind_of = 'typeAlias'"
+                       " AND path = @path"
+                       " AND attribute_name = @attribute_name")},
+        m_getMethodAttributeArgs{
+            db.prepare("SELECT attribute_value"
+                       " FROM method_attributes"
+                       "  JOIN type_details USING (typeid)"
+                       "  JOIN all_paths USING (pathid)"
+                       " WHERE name = @type"
+                       " AND method = @method"
+                       " AND path = @path"
+                       " AND attribute_name = @attribute_name")},
+        m_getTypesWithAttribute{
+            db.prepare("SELECT name, path FROM ("
+                       " SELECT DISTINCT typeid FROM type_attributes"
+                       " WHERE attribute_name = @attribute_name"
+                       ")"
+                       "  JOIN type_details USING (typeid)"
+                       "  JOIN all_paths USING (pathid)"
+                       " WHERE kind_of <> 'typeAlias'")},
+        m_getTypeAliasesWithAttribute{
+            db.prepare("SELECT name, path FROM ("
+                       " SELECT DISTINCT typeid FROM type_attributes"
+                       " WHERE attribute_name = @attribute_name"
+                       ")"
+                       "  JOIN type_details USING (typeid)"
+                       "  JOIN all_paths USING (pathid)"
+                       " WHERE kind_of = 'typeAlias'")},
+        m_getMethodsInPath{
+            db.prepare("SELECT name, method, path FROM type_details"
+                       " JOIN method_attributes USING (typeid)"
+                       " JOIN all_paths USING (pathid) WHERE path = @path")},
+        m_getMethodsWithAttribute{
+            db.prepare("SELECT name, method, path"
+                       " FROM type_details"
+                       "  JOIN method_attributes USING (typeid)"
+                       "  JOIN all_paths USING (pathid)"
+                       " WHERE attribute_name = @attribute_name")},
+        m_getAll{db.prepare("SELECT name, path from type_details JOIN "
+                            "all_paths USING (pathid)")} {}
 
   SQLiteStmt m_insertDetails;
   SQLiteStmt m_getTypePath;
@@ -484,22 +500,21 @@ struct FileStmts {
             "  @attribute_name,"
             "  @attribute_position,"
             "  @attribute_value"
-            " )")}
-      , m_getFileAttributes{db.prepare("SELECT DISTINCT attribute_name"
+            " )")},
+        m_getFileAttributes{db.prepare("SELECT DISTINCT attribute_name"
                                        " FROM file_attributes"
                                        "  JOIN all_paths USING (pathid)"
-                                       " WHERE path = @path")}
-      , m_getFileAttributeArgs{db.prepare(
-            "SELECT attribute_value"
-            " FROM file_attributes"
-            "  JOIN all_paths USING (pathid)"
-            " WHERE path = @path"
-            " AND attribute_name = @attribute_name")}
-      , m_getFilesWithAttribute{
+                                       " WHERE path = @path")},
+        m_getFileAttributeArgs{
+            db.prepare("SELECT attribute_value"
+                       " FROM file_attributes"
+                       "  JOIN all_paths USING (pathid)"
+                       " WHERE path = @path"
+                       " AND attribute_name = @attribute_name")},
+        m_getFilesWithAttribute{
             db.prepare("SELECT path from all_paths"
                        " JOIN file_attributes USING (pathid)"
-                       " WHERE attribute_name = @attribute_name")} {
-  }
+                       " WHERE attribute_name = @attribute_name")} {}
   SQLiteStmt m_insertFileAttribute;
   SQLiteStmt m_getFileAttributes;
   SQLiteStmt m_getFileAttributeArgs;
@@ -512,16 +527,15 @@ struct FunctionStmts {
             "INSERT OR IGNORE INTO function_paths (function, pathid) VALUES ("
             " @function,"
             " (SELECT pathid FROM all_paths WHERE path=@path)"
-            ")")}
-      , m_getFunctionPath{db.prepare("SELECT path FROM function_paths"
+            ")")},
+        m_getFunctionPath{db.prepare("SELECT path FROM function_paths"
                                      " JOIN all_paths USING (pathid)"
-                                     " WHERE function=@function")}
-      , m_getPathFunctions{db.prepare("SELECT function FROM function_paths"
+                                     " WHERE function=@function")},
+        m_getPathFunctions{db.prepare("SELECT function FROM function_paths"
                                       " JOIN all_paths USING (pathid)"
-                                      " WHERE path=@path")}
-      , m_getAll{db.prepare("SELECT function, path FROM function_paths JOIN "
-                            "all_paths USING (pathid)")} {
-  }
+                                      " WHERE path=@path")},
+        m_getAll{db.prepare("SELECT function, path FROM function_paths JOIN "
+                            "all_paths USING (pathid)")} {}
 
   SQLiteStmt m_insert;
   SQLiteStmt m_getFunctionPath;
@@ -536,16 +550,15 @@ struct ConstantStmts {
             " @constant,"
             " (SELECT pathid FROM all_paths"
             "  WHERE path=@path)"
-            ")")}
-      , m_getConstantPath{db.prepare("SELECT path FROM constant_paths"
+            ")")},
+        m_getConstantPath{db.prepare("SELECT path FROM constant_paths"
                                      " JOIN all_paths USING (pathid)"
-                                     " WHERE constant=@constant")}
-      , m_getPathConstants{db.prepare("SELECT constant FROM constant_paths"
+                                     " WHERE constant=@constant")},
+        m_getPathConstants{db.prepare("SELECT constant FROM constant_paths"
                                       " JOIN all_paths USING (pathid)"
-                                      " WHERE path=@path")}
-      , m_getAll{db.prepare("SELECT constant, path FROM constant_paths JOIN "
-                            "all_paths USING (pathid)")} {
-  }
+                                      " WHERE path=@path")},
+        m_getAll{db.prepare("SELECT constant, path FROM constant_paths JOIN "
+                            "all_paths USING (pathid)")} {}
 
   SQLiteStmt m_insert;
   SQLiteStmt m_getConstantPath;
@@ -559,16 +572,15 @@ struct ModuleStmts {
             "INSERT OR IGNORE INTO file_modules (pathid, module_name) VALUES("
             " (SELECT pathid FROM all_paths WHERE path=@path),"
             " @module_name"
-            ")")}
-      , m_getModulePath{db.prepare("SELECT path FROM file_modules"
+            ")")},
+        m_getModulePath{db.prepare("SELECT path FROM file_modules"
                                    " JOIN all_paths USING (pathid)"
-                                   " WHERE module_name=@module_name")}
-      , m_getPathModules{db.prepare("SELECT module_name FROM file_modules"
+                                   " WHERE module_name=@module_name")},
+        m_getPathModules{db.prepare("SELECT module_name FROM file_modules"
                                     " JOIN all_paths USING (pathid)"
-                                    " WHERE path=@path")}
-      , m_getAll{db.prepare("SELECT module_name,path FROM file_modules "
-                            " JOIN all_paths USING (pathid)")} {
-  }
+                                    " WHERE path=@path")},
+        m_getAll{db.prepare("SELECT module_name,path FROM file_modules "
+                            " JOIN all_paths USING (pathid)")} {}
 
   SQLiteStmt m_insert;
   SQLiteStmt m_getModulePath;
@@ -580,8 +592,8 @@ struct ClockStmts {
   explicit ClockStmts(SQLite& db)
       : m_insert{db.prepare(
             "INSERT OR REPLACE INTO watchman (OID, clock, mergebase)"
-            " VALUES (0, @clock, @mergebase)")}
-      , m_get{db.prepare("SELECT clock, mergebase FROM watchman WHERE OID=0")} {
+            " VALUES (0, @clock, @mergebase)")},
+        m_get{db.prepare("SELECT clock, mergebase FROM watchman WHERE OID=0")} {
   }
   SQLiteStmt m_insert;
   SQLiteStmt m_get;
@@ -589,17 +601,16 @@ struct ClockStmts {
 
 struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
   explicit SQLiteAutoloadDBImpl(SQLite db)
-      : m_db{std::move(db)}
-      , m_txn{m_db.begin()}
-      , m_pathStmts{m_db}
-      , m_sha1HexStmts{m_db}
-      , m_typeStmts{m_db}
-      , m_fileStmts{m_db}
-      , m_functionStmts{m_db}
-      , m_constantStmts{m_db}
-      , m_moduleStmts{m_db}
-      , m_clockStmts{m_db} {
-  }
+      : m_db{std::move(db)},
+        m_txn{m_db.begin()},
+        m_pathStmts{m_db},
+        m_sha1HexStmts{m_db},
+        m_typeStmts{m_db},
+        m_fileStmts{m_db},
+        m_functionStmts{m_db},
+        m_constantStmts{m_db},
+        m_moduleStmts{m_db},
+        m_clockStmts{m_db} {}
 
   // We can't move `m_db` unless it has no outstanding
   // transactions. I've just chosen to solve this by making
@@ -618,8 +629,8 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
         return SQLite::connect(dbData.m_path.native(), dbData.m_writable);
       } catch (SQLiteExc& e) {
         auto mode = (dbData.m_writable == SQLite::OpenMode::ReadWriteCreate)
-                        ? "open or create"
-                        : "open";
+            ? "open or create"
+            : "open";
 
         auto exception_str = folly::sformat(
             "Couldn't {} native Facts DB.\n"
@@ -702,8 +713,8 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     query.step();
   }
 
-  void insertSha1Hex(
-      const fs::path& path, const Optional<std::string>& sha1hex) override {
+  void insertSha1Hex(const fs::path& path, const Optional<std::string>& sha1hex)
+      override {
     assertx(path.is_relative());
     auto query = m_txn.query(m_sha1HexStmts.m_insert);
     query.bindString("@path", path.native());
@@ -771,8 +782,9 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return types;
   }
 
-  KindAndFlags
-  getKindAndFlags(const std::string_view type, const fs::path& path) override {
+  KindAndFlags getKindAndFlags(
+      const std::string_view type,
+      const fs::path& path) override {
     auto query = m_txn.query(m_typeStmts.m_getKindAndFlags);
     query.bindString("@type", type);
     query.bindString("@path", path.native());
@@ -816,8 +828,9 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return types;
   }
 
-  std::vector<SymbolPath>
-  getDerivedTypes(const std::string_view base, DeriveKind kind) override {
+  std::vector<SymbolPath> getDerivedTypes(
+      const std::string_view base,
+      DeriveKind kind) override {
     auto query = m_txn.query(m_typeStmts.m_getDerivedTypes);
     query.bindString("@base", base);
     query.bindInt("@kind", toDBEnum(kind));
@@ -837,7 +850,6 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       const std::string_view attributeName,
       Optional<int> attributePosition,
       const folly::dynamic* attributeValue) override {
-
     std::string attrValueJson;
     auto query = m_txn.query(m_typeStmts.m_insertTypeAttribute);
 
@@ -871,7 +883,6 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       std::string_view attributeName,
       Optional<int> attributePosition,
       const folly::dynamic* attributeValue) override {
-
     std::string attrValueJson;
     auto query = m_txn.query(m_typeStmts.m_insertMethodAttribute);
 
@@ -904,7 +915,6 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       std::string_view attributeName,
       Optional<int> attributePosition,
       const folly::dynamic* attributeValue) override {
-
     std::string attrValueJson;
     auto query = m_txn.query(m_fileStmts.m_insertFileAttribute);
 
@@ -931,7 +941,8 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
   }
 
   std::vector<std::string> getAttributesOfType(
-      const std::string_view type, const fs::path& path) override {
+      const std::string_view type,
+      const fs::path& path) override {
     auto query = m_txn.query(m_typeStmts.m_getTypeAttributes);
     query.bindString("@type", type);
     query.bindString("@path", path.native());
@@ -970,8 +981,8 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return results;
   }
 
-  std::vector<SymbolPath>
-  getTypesWithAttribute(const std::string_view attributeName) override {
+  std::vector<SymbolPath> getTypesWithAttribute(
+      const std::string_view attributeName) override {
     auto query = m_txn.query(m_typeStmts.m_getTypesWithAttribute);
     query.bindString("@attribute_name", attributeName);
     std::vector<SymbolPath> results;
@@ -984,8 +995,8 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return results;
   }
 
-  std::vector<SymbolPath>
-  getTypeAliasesWithAttribute(const std::string_view attributeName) override {
+  std::vector<SymbolPath> getTypeAliasesWithAttribute(
+      const std::string_view attributeName) override {
     auto query = m_txn.query(m_typeStmts.m_getTypeAliasesWithAttribute);
     query.bindString("@attribute_name", attributeName);
     std::vector<SymbolPath> results;
@@ -1012,8 +1023,8 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return results;
   }
 
-  std::vector<MethodPath>
-  getMethodsWithAttribute(std::string_view attributeName) override {
+  std::vector<MethodPath> getMethodsWithAttribute(
+      std::string_view attributeName) override {
     auto query = m_txn.query(m_typeStmts.m_getMethodsWithAttribute);
     query.bindString("@attribute_name", attributeName);
     std::vector<MethodPath> results;
@@ -1027,8 +1038,8 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return results;
   }
 
-  std::vector<fs::path>
-  getFilesWithAttribute(const std::string_view attributeName) override {
+  std::vector<fs::path> getFilesWithAttribute(
+      const std::string_view attributeName) override {
     auto query = m_txn.query(m_fileStmts.m_getFilesWithAttribute);
     query.bindString("@attribute_name", attributeName);
     std::vector<fs::path> results;
@@ -1115,8 +1126,8 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return args;
   }
 
-  void
-  insertFunction(std::string_view function, const fs::path& path) override {
+  void insertFunction(std::string_view function, const fs::path& path)
+      override {
     assertx(path.is_relative());
     auto query = m_txn.query(m_functionStmts.m_insert);
     query.bindString("@function", function);
@@ -1148,8 +1159,8 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return functions;
   }
 
-  void
-  insertConstant(std::string_view constant, const fs::path& path) override {
+  void insertConstant(std::string_view constant, const fs::path& path)
+      override {
     assertx(path.is_relative());
     auto query = m_txn.query(m_constantStmts.m_insert);
     query.bindString("@constant", constant);
@@ -1322,7 +1333,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     }
   }
 
-private:
+ private:
   SQLite m_db;
   SQLiteTxn m_txn;
   PathStmts m_pathStmts;

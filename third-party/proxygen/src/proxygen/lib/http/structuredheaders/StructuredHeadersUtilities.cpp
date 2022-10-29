@@ -10,8 +10,6 @@
 #include <proxygen/lib/http/structuredheaders/StructuredHeadersConstants.h>
 #include <proxygen/lib/http/structuredheaders/StructuredHeadersUtilities.h>
 
-#include <proxygen/lib/utils/Base64.h>
-
 namespace proxygen { namespace StructuredHeaders {
 
 bool isLcAlpha(char c) {
@@ -96,28 +94,6 @@ bool itemTypeMatchesContent(const StructuredHeaderItem& input) {
   }
 
   return false;
-}
-
-std::string decodeBase64(const std::string& encoded) {
-
-  if (encoded.size() == 0) {
-    // special case, to prevent an integer overflow down below.
-    return std::string();
-  }
-
-  int padding = 0;
-  for (auto it = encoded.rbegin();
-       padding < 2 && it != encoded.rend() && *it == '=';
-       ++it) {
-    ++padding;
-  }
-
-  return Base64::decode(encoded, padding);
-}
-
-std::string encodeBase64(const std::string& input) {
-  return Base64::encode(folly::ByteRange(
-      reinterpret_cast<const uint8_t*>(input.c_str()), input.length()));
 }
 
 }} // namespace proxygen::StructuredHeaders

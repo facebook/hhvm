@@ -569,12 +569,14 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
       uint16_t protocolId,
       ManagedStringView&& methodName,
       size_t requestSerializedSize,
-      size_t requestWireSize)
+      size_t requestWireSize,
+      size_t requestMetadataAndPayloadSize)
       : cb_(std::move(cb)),
         protocolId_(protocolId),
         methodName_(std::move(methodName)),
         requestSerializedSize_(requestSerializedSize),
         requestWireSize_(requestWireSize),
+        requestMetadataAndPayloadSize_(requestMetadataAndPayloadSize),
         timeBeginSend_(clock::now()) {}
 
   void onWriteSuccess() noexcept override { timeEndSend_ = clock::now(); }
@@ -585,6 +587,7 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
     RpcSizeStats stats;
     stats.requestSerializedSizeBytes = requestSerializedSize_;
     stats.requestWireSizeBytes = requestWireSize_;
+    stats.requestMetadataAndPayloadSizeBytes = requestMetadataAndPayloadSize_;
     stats.requestLatency = timeEndSend_ - timeBeginSend_;
     stats.responseLatency = clock::now() - timeEndSend_;
     ResponseSerializationHandler handler(protocolId_);
@@ -639,6 +642,7 @@ class RocketClientChannel::SingleRequestSingleResponseCallback final
   ManagedStringView methodName_;
   const size_t requestSerializedSize_;
   const size_t requestWireSize_;
+  const size_t requestMetadataAndPayloadSize_;
   const std::chrono::time_point<clock> timeBeginSend_;
   std::chrono::time_point<clock> timeEndSend_;
 };
@@ -924,6 +928,8 @@ void RocketClientChannel::sendSingleRequestSingleResponse(
   const auto requestSerializedSize = buf->computeChainDataLength();
   auto requestPayload = rocket::pack(metadata, std::move(buf));
   const auto requestWireSize = requestPayload.dataSize();
+  const auto requestMetadataAndPayloadSize =
+      requestPayload.metadataAndDataSize();
   const bool isSync = cb->isSync();
   assert(metadata.protocol_ref());
   assert(metadata.name_ref());
@@ -932,7 +938,8 @@ void RocketClientChannel::sendSingleRequestSingleResponse(
       static_cast<uint16_t>(*metadata.protocol_ref()),
       std::move(*metadata.name_ref()),
       requestSerializedSize,
-      requestWireSize);
+      requestWireSize,
+      requestMetadataAndPayloadSize);
 
   if (isSync && folly::fibers::onFiber()) {
     callback.onResponsePayload(rocket::RocketClient::sendRequestResponseSync(

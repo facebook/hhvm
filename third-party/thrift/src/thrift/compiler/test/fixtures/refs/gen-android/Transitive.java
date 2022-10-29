@@ -21,6 +21,31 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Indicates that the scope of sibling annotations is transitive.
+ * 
+ * For example:
+ * 
+ *     @scope.Struct
+ *     @scope.Union
+ *     @scope.Exception
+ *     @scope.Transitive
+ *     struct Structured {}
+ * 
+ * Annotating a Thrift struct with @Structured automatically applies
+ * @scope.Struct, @scope.Union and @scope.Exception annotations, i.e.
+ * 
+ *     @Structured
+ *     struct MyAnnotation {}
+ * 
+ * is equivalent to
+ * 
+ *     @scope.Struct
+ *     @scope.Union
+ *     @scope.Exception
+ *     struct MyAnnotation {}
+ * 
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Transitive implements TBase, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("Transitive");

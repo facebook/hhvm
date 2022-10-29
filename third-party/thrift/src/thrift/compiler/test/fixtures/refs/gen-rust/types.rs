@@ -151,6 +151,8 @@ pub struct StructWithNonOptionalBox {
 pub struct StructWithInternBox {
     pub field1: crate::types::Empty,
     pub field2: crate::types::MyField,
+    pub field3: crate::types::Empty,
+    pub field4: crate::types::MyField,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -1443,6 +1445,8 @@ impl ::std::default::Default for self::StructWithInternBox {
         Self {
             field1: ::std::default::Default::default(),
             field2: ::std::default::Default::default(),
+            field3: ::std::default::Default::default(),
+            field4: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -1454,6 +1458,8 @@ impl ::std::fmt::Debug for self::StructWithInternBox {
             .debug_struct("StructWithInternBox")
             .field("field1", &self.field1)
             .field("field2", &self.field2)
+            .field("field3", &self.field3)
+            .field("field4", &self.field4)
             .finish()
     }
 }
@@ -1477,6 +1483,12 @@ where
         p.write_field_begin("field2", ::fbthrift::TType::Struct, 2);
         ::fbthrift::Serialize::write(&self.field2, p);
         p.write_field_end();
+        p.write_field_begin("field3", ::fbthrift::TType::Struct, 3);
+        ::fbthrift::Serialize::write(&self.field3, p);
+        p.write_field_end();
+        p.write_field_begin("field4", ::fbthrift::TType::Struct, 4);
+        ::fbthrift::Serialize::write(&self.field4, p);
+        p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -1490,9 +1502,13 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("field1", ::fbthrift::TType::Struct, 1),
             ::fbthrift::Field::new("field2", ::fbthrift::TType::Struct, 2),
+            ::fbthrift::Field::new("field3", ::fbthrift::TType::Struct, 3),
+            ::fbthrift::Field::new("field4", ::fbthrift::TType::Struct, 4),
         ];
         let mut field_field1 = ::std::option::Option::None;
         let mut field_field2 = ::std::option::Option::None;
+        let mut field_field3 = ::std::option::Option::None;
+        let mut field_field4 = ::std::option::Option::None;
         let _ = p.read_struct_begin(|_| ())?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -1500,6 +1516,8 @@ where
                 (::fbthrift::TType::Stop, _) => break,
                 (::fbthrift::TType::Struct, 1) => field_field1 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 2) => field_field2 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 3) => field_field3 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 4) => field_field4 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1508,6 +1526,8 @@ where
         ::std::result::Result::Ok(Self {
             field1: field_field1.unwrap_or_default(),
             field2: field_field2.unwrap_or_default(),
+            field3: field_field3.unwrap_or_default(),
+            field4: field_field4.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }

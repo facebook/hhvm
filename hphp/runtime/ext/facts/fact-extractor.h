@@ -29,8 +29,7 @@ namespace HPHP {
 namespace Facts {
 
 struct Extractor {
-  explicit Extractor(folly::Executor& exec) : m_exec(exec) {
-  }
+  explicit Extractor(folly::Executor& exec) : m_exec(exec) {}
 
   virtual ~Extractor() = default;
 
@@ -38,10 +37,10 @@ struct Extractor {
    * Convert a path/hash tuple representing a file into the JSON-encoded Facts
    * for that file.
    */
-  virtual folly::SemiFuture<std::string>
-  get(const PathAndOptionalHash& PathAndOptionalHash) = 0;
+  virtual folly::SemiFuture<std::string> get(
+      const PathAndOptionalHash& PathAndOptionalHash) = 0;
 
-protected:
+ protected:
   Extractor() = delete;
   Extractor(const Extractor&) = delete;
   Extractor(Extractor&&) noexcept = delete;

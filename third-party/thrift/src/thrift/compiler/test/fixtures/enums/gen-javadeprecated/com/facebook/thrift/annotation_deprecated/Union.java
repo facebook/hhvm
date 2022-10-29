@@ -23,6 +23,9 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * The `union` definition scope.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Union implements TBase, java.io.Serializable, Cloneable, Comparable<Union> {
   private static final TStruct STRUCT_DESC = new TStruct("Union");

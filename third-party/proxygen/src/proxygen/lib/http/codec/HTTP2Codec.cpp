@@ -8,14 +8,14 @@
 
 #include <proxygen/lib/http/codec/HTTP2Codec.h>
 
+#include <folly/base64.h>
 #include <proxygen/lib/http/codec/CodecUtil.h>
 #include <proxygen/lib/http/codec/HTTP2Constants.h>
-#include <proxygen/lib/utils/Base64.h>
 #include <proxygen/lib/utils/Logging.h>
 
 #include <folly/Conv.h>
 #include <folly/Random.h>
-#include <folly/ThreadLocal.h>
+#include <folly/Try.h>
 #include <folly/io/Cursor.h>
 #include <folly/tracing/ScopedTraceSection.h>
 #include <type_traits>
@@ -26,14 +26,6 @@ using namespace folly;
 using std::string;
 
 namespace {
-std::string base64url_encode(ByteRange range) {
-  return proxygen::Base64::urlEncode(range);
-}
-
-std::string base64url_decode(const std::string& str) {
-  return proxygen::Base64::urlDecode(str);
-}
-
 const size_t kDefaultGrowth = 4000;
 constexpr auto kOkhttp2 = "okhttp/2";
 constexpr int kOkhttp2GoawayLogFreq = 1000;
@@ -1143,7 +1135,9 @@ bool HTTP2Codec::onIngressUpgradeMessage(const HTTPMessage& msg) {
     return true;
   }
 
-  auto decoded = base64url_decode(settingsHeader);
+  auto decoded = folly::makeTryWith([&settingsHeader] {
+                   return folly::base64URLDecode(settingsHeader);
+                 }).value_or(std::string());
 
   // Must be well formed Base64Url and not too large
   if (decoded.empty() || decoded.length() > http2::kMaxFramePayloadLength) {
@@ -1700,10 +1694,9 @@ void HTTP2Codec::requestUpgrade(HTTPMessage& request) {
   IOBufQueue writeBuf{IOBufQueue::cacheChainLength()};
   generateDefaultSettings(writeBuf);
   writeBuf.trimStart(http2::kFrameHeaderSize);
-  auto buf = writeBuf.move();
-  buf->coalesce();
+  auto binarySettings = writeBuf.move()->to<std::string>();
   headers.set(http2::kProtocolSettingsHeader,
-              base64url_encode(folly::ByteRange(buf->data(), buf->length())));
+              folly::base64URLEncode(binarySettings));
   bool addSettings = !request.checkForHeaderToken(
       HTTP_HEADER_CONNECTION, http2::kProtocolSettingsHeader.c_str(), false);
   if (addUpgrade && addSettings) {

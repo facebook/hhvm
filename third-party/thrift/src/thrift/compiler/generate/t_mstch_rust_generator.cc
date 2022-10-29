@@ -1473,8 +1473,8 @@ mstch::node rust_mstch_service::rust_all_exceptions() {
   std::map<const t_type*, std::vector<const t_field*>> field_map;
   for (const auto& fun : service_->functions()) {
     for (const auto& fld : fun.get_xceptions()->fields()) {
-      function_map[fld.type()->get_true_type()].push_back(&fun);
-      field_map[fld.type()->get_true_type()].push_back(&fld);
+      function_map[&fld.type().deref()].push_back(&fun);
+      field_map[&fld.type().deref()].push_back(&fld);
     }
   }
 

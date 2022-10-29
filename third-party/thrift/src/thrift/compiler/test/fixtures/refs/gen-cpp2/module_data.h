@@ -199,7 +199,7 @@ template <> struct TStructDataStorage<::cpp2::StructWithNonOptionalBox> {
 };
 
 template <> struct TStructDataStorage<::cpp2::StructWithInternBox> {
-  static constexpr const std::size_t fields_size = 2;
+  static constexpr const std::size_t fields_size = 4;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

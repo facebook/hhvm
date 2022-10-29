@@ -63,28 +63,35 @@ struct Deprecated {
   1: string message;
 }
 
-// Annotate a thrift structured or enum to indicate if ids should not be
-// used. For example, you may want to mark ids as deprecated, or these ids
-// might be reserved for other use cases or annotations.
-//
-// The resolved set of disallowed ids is the union of the values in `ids` and
-// the range of values represented in `id_ranges`. Example:
-//
-//  // These ids are not allowed: 3, 8, half-open ranges [10, 15), [20, 30)
-//  @thrift.ReserveIds{ids = [3, 8], id_ranges = {10: 15, 20: 30}}
-//  struct Foo {
-//    ...
-//    3: i64 f;       // Build failure: 3 cannot be used
-//  }
+/**
+ * Annotate a thrift structured or enum to indicate if ids or values should not be used.
+ *
+ * For example, you may want to mark ids as deprecated, or these ids
+ * might be reserved for other use cases or annotations.
+ *
+ * The resolved set of disallowed ids is the union of the values in `ids` and
+ * the range of values represented in `id_ranges`. Example:
+ *
+ *  // These ids are not allowed: 3, 8, half-open ranges [10, 15), [20, 30)
+ *  @thrift.ReserveIds{ids = [3, 8], id_ranges = {10: 15, 20: 30}}
+ *  struct Foo {
+ *    ...
+ *    3: i64 f; // Build failure: 3 cannot be used
+ *  }
+ */
 @scope.Structured
 @scope.FbthriftInternalEnum
 struct ReserveIds {
-  // Individual ids that cannot be used
+  /** Individual ids that cannot be used. */
   1: list<i32> ids;
-  // Represents ranges of ids that cannot be used. Each (key: value) pair
-  // represents the half-open range [key, value) -- key is included and
-  // value is not.
-  // Example: {10: 15, 20: 30} represents the range [10, 15) and [20, 30)
+
+  /**
+   * Represents ranges of ids that cannot be used.
+   *
+   * Each (key: value) pair represents the half-open range `[key, value)`,
+   * where `key` is included and `value` is not. For example the map
+   * `{10: 15, 20: 30}` represents the union of id/value ranges `[10, 15)` and `[20, 30)`
+   */
   2: map<i32, i32> id_ranges;
 }
 
@@ -112,18 +119,32 @@ struct RequiresBackwardCompatibility {
   1: bool field_name = false;
 }
 
-/** Best-effort disables experimental features. */
+/** Disables testing features. */
+@scope.Program
+@scope.Definition
+struct NoTesting {}
+
+/** Disables experimental features. */
 @scope.Program
 @scope.Definition
 struct NoExperimental {}
 
-/** Best-effort disables @Beta features. */
+/** Disables @Beta features. */
 @NoExperimental // Implies no experimental
 @scope.Transitive
 struct NoBeta {}
 
 /**
- * Best-effort disables @Legacy features.
+ * Indicates a definition/feature must not depend directly on an unreleased
+ * or testing definition/feature.
+ */
+@NoBeta
+@NoTesting
+@scope.Transitive
+struct Released {}
+
+/**
+ * Disables @Legacy features.
  */
 // TODO(ytj): Everyone should be able to test without legacy features. Fix
 // compatibility with legacy reflection and move to @Beta.
@@ -133,7 +154,7 @@ struct NoBeta {}
 struct NoLegacy {}
 
 /**
- * Best-effort disables @Deprecated features.
+ * Disables @Deprecated features.
  *
  * Should only be enabled in `test` versions, as deprecated implies removing
  * the feature will break current usage (otherwise it would be @Legacy or
@@ -148,7 +169,6 @@ struct NoDeprecated {}
 // Thrift feature annotations.
 ////
 
-// TODO(dokwon): Fix code gen and release to Beta.
 /**
  * An annotation that changes the field qualifier from 'none' to 'terse'.
  * A terse field is eligible to skip serialization, when it equals to the
@@ -169,7 +189,7 @@ struct NoDeprecated {}
 @Experimental
 struct TerseWrite {}
 
-// Indicates that a field's value should never be stored on the 'stack'.
+/** Indicates that a field's value should never be stored on the stack. */
 @scope.Field
 @Beta
 struct Box {}
@@ -271,8 +291,11 @@ struct v1test {}
  * Specifies the field where the exception message is stored. The field
  * is used to generate an additional method to get it.
  */
-// TODO: Support in C++, Python, Java.
+// TODO(afuller): Consider allowing this annotation to be placed on the field
+// itself, so the annotation can be used (transitively), without specifying an
+// explicit name. Also, maybe move to api.thrift.
 @scope.Exception
+@Experimental // TODO: Support in C++, Python, Java.
 struct ExceptionMessage {
   1: string field;
 }
@@ -280,9 +303,10 @@ struct ExceptionMessage {
 /**
  * Specifies if the enum is a bitmask.
  */
-// TODO: Support in C++, Python, Java.
 @scope.Enum
+@Experimental // TODO: Support in C++, Python, Java.
 struct BitmaskEnum {}
+
 /**
  * Generates a const of type schema. Struct containing the schema of the
  * annotated type. Optionally specify name to override default
@@ -297,10 +321,10 @@ struct GenerateRuntimeSchema {
   1: string name;
 }
 
-// Indicates that a field's value should never be stored on the 'stack', and that
-// identical values can be shared in immutable contexts.
-// It currently only supports sharing immutable default value.
-//
-// Unlike `@thrift.Box` above, this annotation does not work yet :-).
+/**
+ * Indicates that a field's value should never be stored on the stack, and that
+ * identical values can be shared in immutable contexts.
+ */
 @scope.Field
+@Experimental
 struct InternBox {}

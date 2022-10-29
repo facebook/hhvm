@@ -24,7 +24,7 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 /**
- * Best-effort disables @Deprecated features.
+ * Disables @Deprecated features.
  * 
  * Should only be enabled in `test` versions, as deprecated implies removing
  * the feature will break current usage (otherwise it would be @Legacy or

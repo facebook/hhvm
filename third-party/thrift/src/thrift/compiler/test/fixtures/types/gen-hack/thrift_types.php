@@ -368,6 +368,21 @@ class Deprecated implements \IThriftSyncStruct {
 }
 
 /**
+ * Annotate a thrift structured or enum to indicate if ids or values should not be used.
+ * 
+ * For example, you may want to mark ids as deprecated, or these ids
+ * might be reserved for other use cases or annotations.
+ * 
+ * The resolved set of disallowed ids is the union of the values in `ids` and
+ * the range of values represented in `id_ranges`. Example:
+ * 
+ *  // These ids are not allowed: 3, 8, half-open ranges [10, 15), [20, 30)
+ *  @thrift.ReserveIds{ids = [3, 8], id_ranges = {10: 15, 20: 30}}
+ *  struct Foo {
+ *    ...
+ *    3: i64 f; // Build failure: 3 cannot be used
+ *  }
+ *
  * Original thrift struct:-
  * ReserveIds
  */
@@ -411,11 +426,19 @@ class ReserveIds implements \IThriftSyncStruct {
 
   const int STRUCTURAL_ID = 4105998268635615653;
   /**
+   * Individual ids that cannot be used.
+   * 
    * Original thrift field:-
    * 1: list<i32> ids
    */
   public Vector<int> $ids;
   /**
+   * Represents ranges of ids that cannot be used.
+   * 
+   * Each (key: value) pair represents the half-open range `[key, value)`,
+   * where `key` is included and `value` is not. For example the map
+   * `{10: 15, 20: 30}` represents the union of id/value ranges `[10, 15)` and `[20, 30)`
+   * 
    * Original thrift field:-
    * 2: map<i32, i32> id_ranges
    */
@@ -782,7 +805,87 @@ class RequiresBackwardCompatibility implements \IThriftSyncStruct {
 }
 
 /**
- * Best-effort disables experimental features.
+ * Disables testing features.
+ *
+ * Original thrift struct:-
+ * NoTesting
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/NoTesting'))>>
+class NoTesting implements \IThriftSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'NoTesting';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "thrift.NoTesting",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\Program' => \thrift\annotation\Program::fromShape(
+          shape(
+          )
+        ),
+        '\thrift\annotation\Definition' => \thrift\annotation\Definition::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+  }
+
+}
+
+/**
+ * Disables experimental features.
  *
  * Original thrift struct:-
  * NoExperimental
@@ -862,7 +965,7 @@ class NoExperimental implements \IThriftSyncStruct {
 }
 
 /**
- * Best-effort disables @Beta features.
+ * Disables @Beta features.
  *
  * Original thrift struct:-
  * NoBeta
@@ -942,7 +1045,92 @@ class NoBeta implements \IThriftSyncStruct {
 }
 
 /**
- * Best-effort disables @Legacy features.
+ * Indicates a definition/feature must not depend directly on an unreleased
+ * or testing definition/feature.
+ *
+ * Original thrift struct:-
+ * Released
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/Released'))>>
+class Released implements \IThriftSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Released';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "thrift.Released",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\NoBeta' => \thrift\annotation\NoBeta::fromShape(
+          shape(
+          )
+        ),
+        '\thrift\annotation\NoTesting' => \thrift\annotation\NoTesting::fromShape(
+          shape(
+          )
+        ),
+        '\thrift\annotation\Transitive' => \thrift\annotation\Transitive::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+  }
+
+}
+
+/**
+ * Disables @Legacy features.
  *
  * Original thrift struct:-
  * NoLegacy
@@ -1026,7 +1214,7 @@ class NoLegacy implements \IThriftSyncStruct {
 }
 
 /**
- * Best-effort disables @Deprecated features.
+ * Disables @Deprecated features.
  * 
  * Should only be enabled in `test` versions, as deprecated implies removing
  * the feature will break current usage (otherwise it would be @Legacy or
@@ -1216,6 +1404,8 @@ class TerseWrite implements \IThriftSyncStruct {
 }
 
 /**
+ * Indicates that a field's value should never be stored on the stack.
+ *
  * Original thrift struct:-
  * Box
  */
@@ -2022,6 +2212,10 @@ class ExceptionMessage implements \IThriftSyncStruct {
           shape(
           )
         ),
+        '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
       ],
@@ -2098,6 +2292,10 @@ class BitmaskEnum implements \IThriftSyncStruct {
     return shape(
       'struct' => dict[
         '\thrift\annotation\Enum' => \thrift\annotation\FbthriftInternalEnum::fromShape(
+          shape(
+          )
+        ),
+        '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
           shape(
           )
         ),
@@ -2246,6 +2444,9 @@ class GenerateRuntimeSchema implements \IThriftSyncStruct {
 }
 
 /**
+ * Indicates that a field's value should never be stored on the stack, and that
+ * identical values can be shared in immutable contexts.
+ *
  * Original thrift struct:-
  * InternBox
  */
@@ -2295,6 +2496,10 @@ class InternBox implements \IThriftSyncStruct {
     return shape(
       'struct' => dict[
         '\thrift\annotation\Field' => \thrift\annotation\Field::fromShape(
+          shape(
+          )
+        ),
+        '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
           shape(
           )
         ),

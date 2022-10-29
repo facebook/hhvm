@@ -29,15 +29,13 @@ namespace HPHP {
 namespace Facts {
 
 struct PathToMethodsMap {
-
   using PathMethodMap = LazyTwoWayMap<Path, MethodDecl>;
 
   using Methods = typename PathMethodMap::Values;
   using Paths = typename PathMethodMap::Keys;
 
   explicit PathToMethodsMap(std::shared_ptr<PathVersions> versions)
-      : m_pathMethodMap{std::move(versions)} {
-  }
+      : m_pathMethodMap{std::move(versions)} {}
 
   /**
    * Return information about the locations of a given method, or the methods
@@ -60,7 +58,8 @@ struct PathToMethodsMap {
     return m_pathMethodMap.getValuesForKey(path);
   }
   Methods getPathMethods(
-      Path path, const std::vector<AutoloadDB::MethodPath>& methodsFromDB) {
+      Path path,
+      const std::vector<AutoloadDB::MethodPath>& methodsFromDB) {
     std::vector<MethodDecl> decls;
     decls.reserve(methodsFromDB.size());
     for (auto const& [type, method, path] : methodsFromDB) {
@@ -80,7 +79,7 @@ struct PathToMethodsMap {
     m_pathMethodMap.setValuesForKey(path, std::move(methods));
   }
 
-private:
+ private:
   PathMethodMap m_pathMethodMap;
 };
 

@@ -177,8 +177,7 @@ folly::dynamic parse_json(const std::string& json) {
 ExtractorFactory s_extractorFactory = nullptr;
 
 struct SimpleExtractor final : public Extractor {
-  explicit SimpleExtractor(folly::Executor& exec) : Extractor{exec} {
-  }
+  explicit SimpleExtractor(folly::Executor& exec) : Extractor{exec} {}
 
   ~SimpleExtractor() override = default;
 
@@ -212,7 +211,6 @@ void setExtractorFactory(ExtractorFactory factory) {
 std::vector<folly::Try<FileFacts>> facts_from_paths(
     const std::filesystem::path& root,
     const std::vector<PathAndOptionalHash>& pathsAndHashes) {
-
   folly::CPUThreadPoolExecutor exec{
       std::min(
           RuntimeOption::EvalFactsWorkers,

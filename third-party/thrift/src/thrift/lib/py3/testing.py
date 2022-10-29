@@ -46,4 +46,7 @@ def mock_client(client_klass: Type[Client]) -> mock.AsyncMock:
     with mock.patch("asyncio.iscoroutinefunction", magic):
         client_mock = mock.AsyncMock(client_klass)
         client_mock.__aenter__.return_value = client_mock
+        # When running with Cinder, __aexit__ is not auto patched.
+        # Refering the method name once to ensure it's patched. It's a no-op.
+        client_mock.__aexit__
     return client_mock

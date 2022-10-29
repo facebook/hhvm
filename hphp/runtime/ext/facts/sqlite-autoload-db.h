@@ -16,9 +16,9 @@
 
 #pragma once
 
+#include <sys/types.h>
 #include <filesystem>
 #include <memory>
-#include <sys/types.h>
 
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/sqlite-key.h"
@@ -27,7 +27,7 @@ namespace HPHP {
 namespace Facts {
 
 class SQLiteAutoloadDB : public AutoloadDB {
-public:
+ public:
   /**
    * Return a SQLiteAutoloadDB that can only be read
    */

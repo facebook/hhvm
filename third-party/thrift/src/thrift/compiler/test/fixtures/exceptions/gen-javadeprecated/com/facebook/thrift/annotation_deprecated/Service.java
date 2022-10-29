@@ -23,6 +23,9 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * The `service` definition scope.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Service implements TBase, java.io.Serializable, Cloneable, Comparable<Service> {
   private static final TStruct STRUCT_DESC = new TStruct("Service");

@@ -234,6 +234,14 @@ using EnableIfConst =
 template <typename value_type, typename return_type = value_type>
 using EnableIfNonConst =
     std::enable_if_t<!std::is_const<value_type>::value, return_type>;
+
+template <typename T, typename U>
+using EnableIfImplicit = std::enable_if_t<
+    std::is_same<
+        std::add_const_t<std::remove_reference_t<U>>,
+        std::remove_reference_t<T>>{} &&
+    !(std::is_rvalue_reference<T>{} && std::is_lvalue_reference<U>{})>;
+
 } // namespace detail
 
 // A reference to an unqualified field of the possibly const-qualified type
@@ -267,14 +275,7 @@ class field_ref {
       const uint8_t bit_index = 0) noexcept
       : value_(value), bitref_(is_set, bit_index) {}
 
-  template <
-      typename U,
-      std::enable_if_t<
-          std::is_same<
-              std::add_const_t<std::remove_reference_t<U>>,
-              value_type>{} &&
-              !(std::is_rvalue_reference<T>{} && std::is_lvalue_reference<U>{}),
-          int> = 0>
+  template <typename U, typename = detail::EnableIfImplicit<T, U>>
   FOLLY_ERASE /* implicit */ field_ref(const field_ref<U>& other) noexcept
       : value_(other.value_), bitref_(other.bitref_) {}
 
@@ -505,14 +506,7 @@ class optional_field_ref {
       const uint8_t bit_index = 0) noexcept
       : value_(value), bitref_(is_set, bit_index) {}
 
-  template <
-      typename U,
-      std::enable_if_t<
-          std::is_same<
-              std::add_const_t<std::remove_reference_t<U>>,
-              value_type>{} &&
-              !(std::is_rvalue_reference<T>{} && std::is_lvalue_reference<U>{}),
-          int> = 0>
+  template <typename U, typename = detail::EnableIfImplicit<T, U>>
   FOLLY_ERASE /* implicit */ optional_field_ref(
       const optional_field_ref<U>& other) noexcept
       : value_(other.value_), bitref_(other.bitref_) {}
@@ -855,16 +849,9 @@ class optional_boxed_field_ref {
   FOLLY_ERASE explicit optional_boxed_field_ref(T value) noexcept
       : value_(value) {}
 
-  template <
-      typename U,
-      std::enable_if_t<
-          std::is_same<
-              std::add_const_t<std::remove_reference_t<U>>,
-              std::remove_reference_t<T>>{} &&
-              !(std::is_rvalue_reference<T>{} && std::is_lvalue_reference<U>{}),
-          int> = 0>
-  FOLLY_ERASE /* implicit */ optional_boxed_field_ref(
-      const optional_boxed_field_ref<U>& other) noexcept
+  template <typename U, typename = detail::EnableIfImplicit<T, U>>
+  FOLLY_ERASE /* implicit */
+  optional_boxed_field_ref(const optional_boxed_field_ref<U>& other) noexcept
       : value_(other.value_) {}
 
   template <
@@ -1150,14 +1137,7 @@ class boxed_field_ref {
 
   FOLLY_ERASE explicit boxed_field_ref(T value) noexcept : value_(value) {}
 
-  template <
-      typename U,
-      std::enable_if_t<
-          std::is_same<
-              std::add_const_t<std::remove_reference_t<U>>,
-              std::remove_reference_t<T>>{} &&
-              !(std::is_rvalue_reference<T>{} && std::is_lvalue_reference<U>{}),
-          int> = 0>
+  template <typename U, typename = detail::EnableIfImplicit<T, U>>
   FOLLY_ERASE /* implicit */ boxed_field_ref(
       const boxed_field_ref<U>& other) noexcept
       : value_(other.value_) {}
@@ -1355,6 +1335,8 @@ class intern_boxed_field_ref {
   template <typename U>
   friend class intern_boxed_field_ref;
 
+  // TODO(dokwon): Consider removing `get_default_t` after resolving
+  // dependency issue.
   using get_default_t = std::function<const element_type&()>;
 
  public:
@@ -1380,14 +1362,7 @@ class intern_boxed_field_ref {
       const uint8_t bit_index = 0) noexcept
       : value_(value), get_default_(get_default), bitref_(is_set, bit_index) {}
 
-  template <
-      typename U,
-      std::enable_if_t<
-          std::is_same<
-              std::add_const_t<std::remove_reference_t<U>>,
-              std::remove_reference_t<T>>{} &&
-              !(std::is_rvalue_reference<T>{} && std::is_lvalue_reference<U>{}),
-          int> = 0>
+  template <typename U, typename = detail::EnableIfImplicit<T, U>>
   FOLLY_ERASE /* implicit */ intern_boxed_field_ref(
       const intern_boxed_field_ref<U>& other) noexcept
       : value_(other.value_), bitref_(other.bitref_) {}
@@ -1584,6 +1559,225 @@ bool operator>=(const U& a, intern_boxed_field_ref<T> b) {
   return b <= a;
 }
 
+// A reference to a 'terse' intern boxed field.
+//
+// It currently only supports Thrift structs.
+template <typename T>
+class terse_intern_boxed_field_ref {
+  static_assert(std::is_reference<T>::value, "not a reference");
+  static_assert(
+      detail::is_boxed_value<folly::remove_cvref_t<T>>::value,
+      "not a boxed_value");
+
+  using element_type = typename folly::remove_cvref_t<T>::element_type;
+  using boxed_value_type = std::remove_reference_t<T>;
+
+  static_assert(
+      apache::thrift::is_thrift_struct_v<element_type>, "not a thrift struct.");
+
+  template <typename U>
+  friend class terse_intern_boxed_field_ref;
+
+  // TODO(dokwon): Consider removing `get_default_t` after resolving
+  // dependency issue.
+  using get_default_t = std::function<const element_type&()>;
+
+ public:
+  using value_type = detail::copy_const_t<T, element_type>;
+  using reference_type = detail::copy_reference_t<T, value_type>;
+
+  FOLLY_ERASE terse_intern_boxed_field_ref(
+      T value, get_default_t get_default) noexcept
+      : value_(value), get_default_(get_default) {}
+
+  template <typename U, typename = detail::EnableIfImplicit<T, U>>
+  FOLLY_ERASE /* implicit */ terse_intern_boxed_field_ref(
+      const terse_intern_boxed_field_ref<U>& other) noexcept
+      : value_(other.value_) {}
+
+  template <typename U = value_type>
+  FOLLY_ERASE std::enable_if_t<
+      std::is_assignable<value_type&, U&&>::value,
+      terse_intern_boxed_field_ref&>
+  operator=(U&& value) {
+    value_.mut() = static_cast<U&&>(value);
+    return *this;
+  }
+
+  // Workaround for https://bugs.llvm.org/show_bug.cgi?id=49442
+  FOLLY_ERASE terse_intern_boxed_field_ref&
+  operator=(value_type&& value) noexcept(
+      std::is_nothrow_move_assignable<value_type>::value) {
+    value_.mut() = static_cast<value_type&&>(value);
+    return *this;
+    value.~value_type(); // Force emit destructor...
+  }
+
+  template <typename U>
+  FOLLY_ERASE void copy_from(const terse_intern_boxed_field_ref<U>& other) {
+    value_ = other.value_;
+  }
+
+  template <typename U>
+  FOLLY_ERASE void move_from(terse_intern_boxed_field_ref<U> other) noexcept(
+      std::is_nothrow_assignable<value_type&, std::remove_reference_t<U>&&>::
+          value) {
+    value_ = static_cast<std::remove_reference_t<U>&&>(other.value_);
+  }
+
+  FOLLY_ERASE void reset() noexcept {
+    // reset to the intern intrinsic default.
+    value_ = boxed_value_type::fromStaticConstant(&get_default_());
+  }
+
+  template <typename U = value_type>
+  FOLLY_ERASE detail::EnableIfNonConst<U, reference_type> value() {
+    return static_cast<reference_type>(value_.mut());
+  }
+  template <typename U = value_type>
+  FOLLY_ERASE detail::EnableIfConst<U, reference_type> value() const {
+    return static_cast<reference_type>(value_.value());
+  }
+
+  FOLLY_ERASE reference_type ensure() noexcept {
+    return static_cast<reference_type>(value_.mut());
+  }
+
+  FOLLY_ERASE reference_type operator*() { return value(); }
+  FOLLY_ERASE reference_type operator*() const { return value(); }
+
+  template <typename U = value_type>
+  [[deprecated(
+      "Please use `foo.value().bar()` instead of `foo->bar()` "
+      "since const is not propagated correctly in `operator->` API")]] FOLLY_ERASE
+      detail::EnableIfNonConst<U>*
+      operator->() {
+    return &value_.mut();
+  }
+
+  template <typename U = value_type>
+  FOLLY_ERASE detail::EnableIfConst<U>* operator->() const {
+    return &value_.value();
+  }
+
+  template <typename... Args>
+  FOLLY_ERASE value_type& emplace(Args&&... args) {
+    value_.reset(std::make_unique<value_type>(static_cast<Args&&>(args)...));
+    return value_.mut();
+  }
+
+  template <class U, class... Args>
+  FOLLY_ERASE std::enable_if_t<
+      std::is_constructible<value_type, std::initializer_list<U>&, Args&&...>::
+          value,
+      value_type&>
+  emplace(std::initializer_list<U> ilist, Args&&... args) {
+    value_.reset(
+        std::make_unique<value_type>(ilist, static_cast<Args&&>(args)...));
+    return value_.value();
+  }
+
+ private:
+  boxed_value_type& value_;
+  get_default_t get_default_;
+};
+
+template <typename T1, typename T2>
+bool operator==(
+    terse_intern_boxed_field_ref<T1> a, terse_intern_boxed_field_ref<T2> b) {
+  return *a == *b;
+}
+
+template <typename T1, typename T2>
+bool operator!=(
+    terse_intern_boxed_field_ref<T1> a, terse_intern_boxed_field_ref<T2> b) {
+  return !(a == b);
+}
+
+template <typename T1, typename T2>
+bool operator<(
+    terse_intern_boxed_field_ref<T1> a, terse_intern_boxed_field_ref<T2> b) {
+  return *a < *b;
+}
+
+template <typename T1, typename T2>
+bool operator>(
+    terse_intern_boxed_field_ref<T1> a, terse_intern_boxed_field_ref<T2> b) {
+  return b < a;
+}
+
+template <typename T1, typename T2>
+bool operator<=(
+    terse_intern_boxed_field_ref<T1> a, terse_intern_boxed_field_ref<T2> b) {
+  return !(a > b);
+}
+
+template <typename T1, typename T2>
+bool operator>=(
+    terse_intern_boxed_field_ref<T1> a, terse_intern_boxed_field_ref<T2> b) {
+  return !(a < b);
+}
+
+template <typename T, typename U>
+bool operator==(terse_intern_boxed_field_ref<T> a, const U& b) {
+  return *a == b;
+}
+
+template <typename T, typename U>
+bool operator!=(terse_intern_boxed_field_ref<T> a, const U& b) {
+  return !(a == b);
+}
+
+template <typename T, typename U>
+bool operator==(const U& a, terse_intern_boxed_field_ref<T> b) {
+  return b == a;
+}
+
+template <typename T, typename U>
+bool operator!=(const U& a, terse_intern_boxed_field_ref<T> b) {
+  return b != a;
+}
+
+template <typename T, typename U>
+bool operator<(terse_intern_boxed_field_ref<T> a, const U& b) {
+  return *a < b;
+}
+
+template <typename T, typename U>
+bool operator>(terse_intern_boxed_field_ref<T> a, const U& b) {
+  return *a > b;
+}
+
+template <typename T, typename U>
+bool operator<=(terse_intern_boxed_field_ref<T> a, const U& b) {
+  return !(a > b);
+}
+
+template <typename T, typename U>
+bool operator>=(terse_intern_boxed_field_ref<T> a, const U& b) {
+  return !(a < b);
+}
+
+template <typename T, typename U>
+bool operator<(const U& a, terse_intern_boxed_field_ref<T> b) {
+  return b > a;
+}
+
+template <typename T, typename U>
+bool operator<=(const U& a, terse_intern_boxed_field_ref<T> b) {
+  return b >= a;
+}
+
+template <typename T, typename U>
+bool operator>(const U& a, terse_intern_boxed_field_ref<T> b) {
+  return b < a;
+}
+
+template <typename T, typename U>
+bool operator>=(const U& a, terse_intern_boxed_field_ref<T> b) {
+  return b <= a;
+}
+
 namespace detail {
 
 struct get_pointer_fn {
@@ -1700,14 +1894,7 @@ class required_field_ref {
   FOLLY_ERASE explicit required_field_ref(reference_type value) noexcept
       : value_(value) {}
 
-  template <
-      typename U,
-      std::enable_if_t<
-          std::is_same<
-              std::add_const_t<std::remove_reference_t<U>>,
-              value_type>{} &&
-              !(std::is_rvalue_reference<T>{} && std::is_lvalue_reference<U>{}),
-          int> = 0>
+  template <typename U, typename = detail::EnableIfImplicit<T, U>>
   FOLLY_ERASE /* implicit */ required_field_ref(
       const required_field_ref<U>& other) noexcept
       : value_(other.value_) {}
@@ -2198,14 +2385,7 @@ class terse_field_ref {
 
   FOLLY_ERASE terse_field_ref(reference_type value) noexcept : value_(value) {}
 
-  template <
-      typename U,
-      std::enable_if_t<
-          std::is_same<
-              std::add_const_t<std::remove_reference_t<U>>,
-              value_type>{} &&
-              !(std::is_rvalue_reference<T>{} && std::is_lvalue_reference<U>{}),
-          int> = 0>
+  template <typename U, typename = detail::EnableIfImplicit<T, U>>
   FOLLY_ERASE /* implicit */ terse_field_ref(
       const terse_field_ref<U>& other) noexcept
       : value_(other.value_) {}

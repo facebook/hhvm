@@ -63,12 +63,13 @@ val build_argument_xref_json : Hh_json.json -> Hh_json.json
 
 val build_is_async_json : Ast_defs.fun_kind -> Hh_json.json
 
+(* params come with the string representation for their type *)
 val build_signature_json :
   Provider_context.t ->
   Full_fidelity_source_text.t ->
-  ('a, 'b) Aast.fun_param list ->
+  (('a, 'b) Aast.fun_param * string option) list ->
   Aast.contexts option ->
-  'e Aast.type_hint ->
+  ret_ty:string option ->
   Hh_json.json
 
 val build_type_const_kind_json : Aast.class_typeconst -> Hh_json.json

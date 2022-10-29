@@ -630,6 +630,30 @@ cdef __StructSpec get_reflection__StructWithInternBox():
             },
         ),
     )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=3,
+            name="field3",
+            type=_module_types.Empty,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=4,
+            name="field4",
+            type=_module_types.MyField,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
     return spec
 cdef __StructSpec get_reflection__StructWithRefTypeUnique():
     cdef _module_types.StructWithRefTypeUnique defaults = _module_types.StructWithRefTypeUnique._fbthrift_create(

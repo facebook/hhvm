@@ -110,6 +110,8 @@ class StructWithNonOptionalBox_Builder(thrift.py3.builder.StructBuilder):
 class StructWithInternBox_Builder(thrift.py3.builder.StructBuilder):
     field1: _typing.Any
     field2: _typing.Any
+    field3: _typing.Any
+    field4: _typing.Any
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 

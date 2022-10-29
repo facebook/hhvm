@@ -20,8 +20,10 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<ReserveIds>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Legacy>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<RequiresBackwardCompatibility>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<NoTesting>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<NoExperimental>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<NoBeta>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<Released>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<NoLegacy>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<NoDeprecated>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<TerseWrite>::gen(metadata);

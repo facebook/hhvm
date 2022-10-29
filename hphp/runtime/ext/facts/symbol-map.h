@@ -65,7 +65,6 @@ struct UpdateDBWorkItem {
  * Stores a map from thread to AutoloadDB.
  */
 struct AutoloadDBVault {
-
   AutoloadDBVault(AutoloadDB::Handle handle);
 
   /**
@@ -75,7 +74,7 @@ struct AutoloadDBVault {
    */
   std::shared_ptr<AutoloadDB> get() const;
 
-private:
+ private:
   AutoloadDB::Handle m_dbHandle;
   // Holds one AutoloadDB per thread. Creates an AutoloadDB on the first access.
   mutable folly::Synchronized<
@@ -94,7 +93,6 @@ private:
  * information the DB doesn't have.
  */
 struct SymbolMap {
-
   explicit SymbolMap(
       std::filesystem::path root,
       AutoloadDB::Handle dbHandle,
@@ -160,33 +158,37 @@ struct SymbolMap {
   std::vector<Symbol<SymKind::Type>> getFileTypes(const std::filesystem::path&);
 
   std::vector<Symbol<SymKind::Function>> getFileFunctions(Path path);
-  std::vector<Symbol<SymKind::Function>>
-  getFileFunctions(const std::filesystem::path& path);
+  std::vector<Symbol<SymKind::Function>> getFileFunctions(
+      const std::filesystem::path& path);
 
   std::vector<Symbol<SymKind::Constant>> getFileConstants(Path path);
-  std::vector<Symbol<SymKind::Constant>>
-  getFileConstants(const std::filesystem::path& path);
+  std::vector<Symbol<SymKind::Constant>> getFileConstants(
+      const std::filesystem::path& path);
 
   std::vector<Symbol<SymKind::Module>> getFileModules(Path path);
-  std::vector<Symbol<SymKind::Module>>
-  getFileModules(const std::filesystem::path& path);
+  std::vector<Symbol<SymKind::Module>> getFileModules(
+      const std::filesystem::path& path);
 
   std::vector<Symbol<SymKind::Type>> getFileTypeAliases(Path path);
-  std::vector<Symbol<SymKind::Type>>
-  getFileTypeAliases(const std::filesystem::path& path);
+  std::vector<Symbol<SymKind::Type>> getFileTypeAliases(
+      const std::filesystem::path& path);
 
   /**
    * Return inheritance data about the given type
    */
-  std::vector<Symbol<SymKind::Type>>
-  getBaseTypes(Symbol<SymKind::Type> derivedType, DeriveKind kind);
-  std::vector<Symbol<SymKind::Type>>
-  getBaseTypes(const StringData& derivedType, DeriveKind kind);
+  std::vector<Symbol<SymKind::Type>> getBaseTypes(
+      Symbol<SymKind::Type> derivedType,
+      DeriveKind kind);
+  std::vector<Symbol<SymKind::Type>> getBaseTypes(
+      const StringData& derivedType,
+      DeriveKind kind);
 
-  std::vector<Symbol<SymKind::Type>>
-  getDerivedTypes(Symbol<SymKind::Type> baseType, DeriveKind kind);
-  std::vector<Symbol<SymKind::Type>>
-  getDerivedTypes(const StringData& baseType, DeriveKind kind);
+  std::vector<Symbol<SymKind::Type>> getDerivedTypes(
+      Symbol<SymKind::Type> baseType,
+      DeriveKind kind);
+  std::vector<Symbol<SymKind::Type>> getDerivedTypes(
+      const StringData& baseType,
+      DeriveKind kind);
 
   /**
    * Return all types which transitively extend, implement, or use the given
@@ -213,42 +215,44 @@ struct SymbolMap {
   /**
    * Return the attributes of a type
    */
-  std::vector<Symbol<SymKind::Type>>
-  getAttributesOfType(Symbol<SymKind::Type> type);
-  std::vector<Symbol<SymKind::Type>>
-  getAttributesOfType(const StringData& type);
+  std::vector<Symbol<SymKind::Type>> getAttributesOfType(
+      Symbol<SymKind::Type> type);
+  std::vector<Symbol<SymKind::Type>> getAttributesOfType(
+      const StringData& type);
 
   /**
    * Return the attributes decorating a type alias
    */
-  std::vector<Symbol<SymKind::Type>>
-  getAttributesOfTypeAlias(Symbol<SymKind::Type> typeAlias);
-  std::vector<Symbol<SymKind::Type>>
-  getAttributesOfTypeAlias(const StringData& typeAlias);
+  std::vector<Symbol<SymKind::Type>> getAttributesOfTypeAlias(
+      Symbol<SymKind::Type> typeAlias);
+  std::vector<Symbol<SymKind::Type>> getAttributesOfTypeAlias(
+      const StringData& typeAlias);
 
   /**
    * Return the types decorated with a given attribute
    */
-  std::vector<Symbol<SymKind::Type>>
-  getTypesWithAttribute(Symbol<SymKind::Type> attr);
-  std::vector<Symbol<SymKind::Type>>
-  getTypesWithAttribute(const StringData& attr);
+  std::vector<Symbol<SymKind::Type>> getTypesWithAttribute(
+      Symbol<SymKind::Type> attr);
+  std::vector<Symbol<SymKind::Type>> getTypesWithAttribute(
+      const StringData& attr);
 
   /**
    * Return the type aliases decorated with a given attribute
    */
-  std::vector<Symbol<SymKind::Type>>
-  getTypeAliasesWithAttribute(Symbol<SymKind::Type> attr);
-  std::vector<Symbol<SymKind::Type>>
-  getTypeAliasesWithAttribute(const StringData& attr);
+  std::vector<Symbol<SymKind::Type>> getTypeAliasesWithAttribute(
+      Symbol<SymKind::Type> attr);
+  std::vector<Symbol<SymKind::Type>> getTypeAliasesWithAttribute(
+      const StringData& attr);
 
   /**
    * Return the attributes of a method
    */
   std::vector<Symbol<SymKind::Type>> getAttributesOfMethod(
-      Symbol<SymKind::Type> type, Symbol<SymKind::Function> method);
-  std::vector<Symbol<SymKind::Type>>
-  getAttributesOfMethod(const StringData& type, const StringData& method);
+      Symbol<SymKind::Type> type,
+      Symbol<SymKind::Function> method);
+  std::vector<Symbol<SymKind::Type>> getAttributesOfMethod(
+      const StringData& type,
+      const StringData& method);
 
   /**
    * Return the methods with a given attribute
@@ -292,14 +296,18 @@ struct SymbolMap {
    * check that the type has the given attribute with `getAttributesOfType()`.
    */
   std::vector<folly::dynamic> getTypeAttributeArgs(
-      Symbol<SymKind::Type> type, Symbol<SymKind::Type> attribute);
-  std::vector<folly::dynamic>
-  getTypeAttributeArgs(const StringData& type, const StringData& attribute);
+      Symbol<SymKind::Type> type,
+      Symbol<SymKind::Type> attribute);
+  std::vector<folly::dynamic> getTypeAttributeArgs(
+      const StringData& type,
+      const StringData& attribute);
 
   std::vector<folly::dynamic> getTypeAliasAttributeArgs(
-      Symbol<SymKind::Type> type, Symbol<SymKind::Type> attribute);
+      Symbol<SymKind::Type> type,
+      Symbol<SymKind::Type> attribute);
   std::vector<folly::dynamic> getTypeAliasAttributeArgs(
-      const StringData& type, const StringData& attribute);
+      const StringData& type,
+      const StringData& attribute);
 
   std::vector<folly::dynamic> getMethodAttributeArgs(
       Symbol<SymKind::Type> type,
@@ -310,10 +318,12 @@ struct SymbolMap {
       const StringData& method,
       const StringData& attribute);
 
-  std::vector<folly::dynamic>
-  getFileAttributeArgs(Path path, Symbol<SymKind::Type> attribute);
-  std::vector<folly::dynamic>
-  getFileAttributeArgs(Path path, const StringData& attribute);
+  std::vector<folly::dynamic> getFileAttributeArgs(
+      Path path,
+      Symbol<SymKind::Type> attribute);
+  std::vector<folly::dynamic> getFileAttributeArgs(
+      Path path,
+      const StringData& attribute);
 
   /**
    * Return whether the given type is, for example, a class or interface.
@@ -434,7 +444,6 @@ struct SymbolMap {
   std::shared_ptr<folly::Executor> m_exec;
 
   struct Data {
-
     Data();
 
     /**
@@ -471,7 +480,10 @@ struct SymbolMap {
       using KindAndFlags = std::pair<TypeKind, int>;
 
       void setKindAndFlags(
-          Symbol<SymKind::Type> type, Path path, TypeKind kind, int flags) {
+          Symbol<SymKind::Type> type,
+          Path path,
+          TypeKind kind,
+          int flags) {
         auto& defs = m_map[type];
         for (auto& [existingPath, existingInfo] : defs) {
           if (existingPath == path) {
@@ -482,8 +494,9 @@ struct SymbolMap {
         defs.push_back({path, {kind, flags}});
       }
 
-      Optional<std::pair<TypeKind, int>>
-      getKindAndFlags(Symbol<SymKind::Type> type, Path path) const {
+      Optional<std::pair<TypeKind, int>> getKindAndFlags(
+          Symbol<SymKind::Type> type,
+          Path path) const {
         auto const it = m_map.find(type);
         if (it == m_map.end()) {
           return std::nullopt;
@@ -554,7 +567,7 @@ struct SymbolMap {
     void removePath(Path path);
   };
 
-private:
+ private:
   /**
    * Update the DB on the time interval beginning at `since` and
    * ending at `clock`.
@@ -594,12 +607,15 @@ private:
    * Load information from the DB about who the given `derivedType` inherits.
    */
   void loadBaseTypesFromDB(
-      AutoloadDB& db, Path path, Symbol<SymKind::Type> derivedType);
+      AutoloadDB& db,
+      Path path,
+      Symbol<SymKind::Type> derivedType);
 
   /**
    * Get all symbols of kind k
    */
-  template <SymKind k> std::vector<std::pair<Symbol<k>, Path>> getAllSymbols();
+  template <SymKind k>
+  std::vector<std::pair<Symbol<k>, Path>> getAllSymbols();
 
   /**
    * Helper function to read from and write to m_synchronizedData.
@@ -625,8 +641,9 @@ private:
    * abstract/final bitmask.
    */
   std::pair<TypeKind, TypeFlagMask> getKindAndFlags(Symbol<SymKind::Type> type);
-  std::pair<TypeKind, TypeFlagMask>
-  getKindAndFlags(Symbol<SymKind::Type> type, Path path);
+  std::pair<TypeKind, TypeFlagMask> getKindAndFlags(
+      Symbol<SymKind::Type> type,
+      Path path);
 
   std::atomic<bool> m_useDB = false;
   // Used to prioritize updates over caching. Pending updates increment this

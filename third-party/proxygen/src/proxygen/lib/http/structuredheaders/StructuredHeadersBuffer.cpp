@@ -10,6 +10,8 @@
 
 #include <boost/lexical_cast.hpp>
 #include <cctype>
+#include <folly/Try.h>
+#include <folly/base64.h>
 #include <glog/logging.h>
 
 #include <proxygen/lib/http/structuredheaders/StructuredHeadersUtilities.h>
@@ -143,12 +145,13 @@ DecodeError StructuredHeadersBuffer::parseBinaryContent(
         return handleDecodeError(DecodeError::UNDECODEABLE_BINARY_CONTENT);
       }
 
-      std::string decodedContent = decodeBase64(outputString);
-      if (encodeBase64(decodedContent) != outputString) {
+      auto decodedContent = folly::makeTryWith(
+          [&outputString] { return folly::base64Decode(outputString); });
+      if (decodedContent.hasException()) {
         return handleDecodeError(DecodeError::UNDECODEABLE_BINARY_CONTENT);
       }
 
-      result.value = std::move(decodedContent);
+      result.value = std::move(*decodedContent);
       result.tag = StructuredHeaderItem::Type::BINARYCONTENT;
       return DecodeError::OK;
     } else if (!isValidEncodedBinaryContentChar(current)) {

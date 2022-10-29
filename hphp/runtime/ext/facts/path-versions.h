@@ -31,7 +31,6 @@ namespace Facts {
  * the ones in this map.
  */
 struct PathVersions {
-
   void bumpVersion(Path path) noexcept {
     auto& version = ++m_versionMap[path];
     always_assert(version != 0);

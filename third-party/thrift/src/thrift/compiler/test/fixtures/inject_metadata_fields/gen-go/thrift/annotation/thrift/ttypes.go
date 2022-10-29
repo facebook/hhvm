@@ -341,9 +341,28 @@ func (p *Deprecated) String() string {
   return fmt.Sprintf("Deprecated({Message:%s})", messageVal)
 }
 
+// Annotate a thrift structured or enum to indicate if ids or values should not be used.
+// 
+// For example, you may want to mark ids as deprecated, or these ids
+// might be reserved for other use cases or annotations.
+// 
+// The resolved set of disallowed ids is the union of the values in `ids` and
+// the range of values represented in `id_ranges`. Example:
+// 
+//  // These ids are not allowed: 3, 8, half-open ranges [10, 15), [20, 30)
+//  @thrift.ReserveIds{ids = [3, 8], id_ranges = {10: 15, 20: 30}}
+//  struct Foo {
+//    ...
+//    3: i64 f; // Build failure: 3 cannot be used
+//  }
+// 
 // Attributes:
-//  - Ids
-//  - IdRanges
+//  - Ids: Individual ids that cannot be used.
+//  - IdRanges: Represents ranges of ids that cannot be used.
+// 
+// Each (key: value) pair represents the half-open range `[key, value)`,
+// where `key` is included and `value` is not. For example the map
+// `{10: 15, 20: 30}` represents the union of id/value ranges `[10, 15)` and `[20, 30)`
 type ReserveIds struct {
   Ids []int32 `thrift:"ids,1" db:"ids" json:"ids"`
   IdRanges map[int32]int32 `thrift:"id_ranges,2" db:"id_ranges" json:"id_ranges"`
@@ -773,7 +792,73 @@ func (p *RequiresBackwardCompatibility) String() string {
   return fmt.Sprintf("RequiresBackwardCompatibility({FieldName:%s})", fieldNameVal)
 }
 
-// Best-effort disables experimental features.
+// Disables testing features.
+type NoTesting struct {
+}
+
+func NewNoTesting() *NoTesting {
+  return &NoTesting{}
+}
+
+type NoTestingBuilder struct {
+  obj *NoTesting
+}
+
+func NewNoTestingBuilder() *NoTestingBuilder{
+  return &NoTestingBuilder{
+    obj: NewNoTesting(),
+  }
+}
+
+func (p NoTestingBuilder) Emit() *NoTesting{
+  return &NoTesting{
+  }
+}
+
+func (p *NoTesting) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    if err := iprot.Skip(fieldTypeId); err != nil {
+      return err
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *NoTesting) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("NoTesting"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *NoTesting) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  return fmt.Sprintf("NoTesting({})")
+}
+
+// Disables experimental features.
 type NoExperimental struct {
 }
 
@@ -839,7 +924,7 @@ func (p *NoExperimental) String() string {
   return fmt.Sprintf("NoExperimental({})")
 }
 
-// Best-effort disables @Beta features.
+// Disables @Beta features.
 type NoBeta struct {
 }
 
@@ -905,7 +990,74 @@ func (p *NoBeta) String() string {
   return fmt.Sprintf("NoBeta({})")
 }
 
-// Best-effort disables @Legacy features.
+// Indicates a definition/feature must not depend directly on an unreleased
+// or testing definition/feature.
+type Released struct {
+}
+
+func NewReleased() *Released {
+  return &Released{}
+}
+
+type ReleasedBuilder struct {
+  obj *Released
+}
+
+func NewReleasedBuilder() *ReleasedBuilder{
+  return &ReleasedBuilder{
+    obj: NewReleased(),
+  }
+}
+
+func (p ReleasedBuilder) Emit() *Released{
+  return &Released{
+  }
+}
+
+func (p *Released) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    if err := iprot.Skip(fieldTypeId); err != nil {
+      return err
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *Released) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("Released"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *Released) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  return fmt.Sprintf("Released({})")
+}
+
+// Disables @Legacy features.
 type NoLegacy struct {
 }
 
@@ -971,7 +1123,7 @@ func (p *NoLegacy) String() string {
   return fmt.Sprintf("NoLegacy({})")
 }
 
-// Best-effort disables @Deprecated features.
+// Disables @Deprecated features.
 // 
 // Should only be enabled in `test` versions, as deprecated implies removing
 // the feature will break current usage (otherwise it would be @Legacy or
@@ -1117,6 +1269,7 @@ func (p *TerseWrite) String() string {
   return fmt.Sprintf("TerseWrite({})")
 }
 
+// Indicates that a field's value should never be stored on the stack.
 type Box struct {
 }
 
@@ -2013,6 +2166,8 @@ func (p *GenerateRuntimeSchema) String() string {
   return fmt.Sprintf("GenerateRuntimeSchema({Name:%s})", nameVal)
 }
 
+// Indicates that a field's value should never be stored on the stack, and that
+// identical values can be shared in immutable contexts.
 type InternBox struct {
 }
 

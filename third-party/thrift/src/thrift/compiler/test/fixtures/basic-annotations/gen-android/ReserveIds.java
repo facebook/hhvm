@@ -21,13 +21,39 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Annotate a thrift structured or enum to indicate if ids or values should not be used.
+ * 
+ * For example, you may want to mark ids as deprecated, or these ids
+ * might be reserved for other use cases or annotations.
+ * 
+ * The resolved set of disallowed ids is the union of the values in `ids` and
+ * the range of values represented in `id_ranges`. Example:
+ * 
+ *  // These ids are not allowed: 3, 8, half-open ranges [10, 15), [20, 30)
+ *  @thrift.ReserveIds{ids = [3, 8], id_ranges = {10: 15, 20: 30}}
+ *  struct Foo {
+ *    ...
+ *    3: i64 f; // Build failure: 3 cannot be used
+ *  }
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class ReserveIds implements TBase, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("ReserveIds");
   private static final TField IDS_FIELD_DESC = new TField("ids", TType.LIST, (short)1);
   private static final TField ID_RANGES_FIELD_DESC = new TField("id_ranges", TType.MAP, (short)2);
 
+  /**
+   * Individual ids that cannot be used.
+   */
   public final List<Integer> ids;
+  /**
+   * Represents ranges of ids that cannot be used.
+   * 
+   * Each (key: value) pair represents the half-open range `[key, value)`,
+   * where `key` is included and `value` is not. For example the map
+   * `{10: 15, 20: 30}` represents the union of id/value ranges `[10, 15)` and `[20, 30)`
+   */
   public final Map<Integer,Integer> id_ranges;
   public static final int IDS = 1;
   public static final int ID_RANGES = 2;
@@ -59,6 +85,9 @@ public class ReserveIds implements TBase, java.io.Serializable, Cloneable {
     return new ReserveIds(this);
   }
 
+  /**
+   * Individual ids that cannot be used.
+   */
   public List<Integer> getIds() {
     return this.ids;
   }
@@ -68,6 +97,13 @@ public class ReserveIds implements TBase, java.io.Serializable, Cloneable {
     return this.ids != null;
   }
 
+  /**
+   * Represents ranges of ids that cannot be used.
+   * 
+   * Each (key: value) pair represents the half-open range `[key, value)`,
+   * where `key` is included and `value` is not. For example the map
+   * `{10: 15, 20: 30}` represents the union of id/value ranges `[10, 15)` and `[20, 30)`
+   */
   public Map<Integer,Integer> getId_ranges() {
     return this.id_ranges;
   }

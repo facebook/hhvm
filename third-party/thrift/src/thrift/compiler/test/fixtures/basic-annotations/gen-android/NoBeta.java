@@ -22,7 +22,7 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 /**
- * Best-effort disables @Beta features.
+ * Disables @Beta features.
  */
 @SuppressWarnings({ "unused", "serial" })
 public class NoBeta implements TBase, java.io.Serializable, Cloneable {

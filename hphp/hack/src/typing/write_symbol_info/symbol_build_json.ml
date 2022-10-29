@@ -241,18 +241,13 @@ let build_parameter_json
   JSON_Object fields
 
 let build_signature_json
-    ctx source_text params (ctxs_hints : Aast.contexts option) ret_ty =
+    ctx source_text params (ctxs_hints : Aast.contexts option) ~ret_ty =
   let ctx_hint_to_json ctx_hint =
     JSON_Object [("key", JSON_String (Util.get_context_from_hint ctx ctx_hint))]
   in
   let f (_pos, ctx_hint) = List.map ~f:ctx_hint_to_json ctx_hint in
   let ctxs_hints = Option.map ctxs_hints ~f in
-  let build_param p =
-    let ty =
-      match hint_of_type_hint p.param_type_hint with
-      | None -> None
-      | Some h -> Some (Util.get_type_from_hint ctx h)
-    in
+  let build_param (p, ty) =
     let is_inout =
       match p.param_callconv with
       | Pinout _ -> true
@@ -272,12 +267,7 @@ let build_signature_json
       p.param_user_attributes
   in
   let parameters = List.map params ~f:(fun param -> build_param param) in
-  let return_type_name =
-    match hint_of_type_hint ret_ty with
-    | None -> None
-    | Some h -> Some (Util.get_type_from_hint ctx h)
-  in
-  build_signature_json_nested parameters ctxs_hints return_type_name
+  build_signature_json_nested parameters ctxs_hints ret_ty
 
 let build_reify_kind_json kind =
   let num =

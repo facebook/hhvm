@@ -64,15 +64,13 @@ namespace fs = std::filesystem;
 namespace HPHP {
 
 struct StringData {
-public:
+ public:
   // These two constructions allow implicit construction for convenience
   // in unit tests.
   /* implicit */ StringData(const char* s) : m_impl{s} {};
-  /* implicit */ StringData(std::string&& s) : m_impl{std::move(s)} {
-  }
+  /* implicit */ StringData(std::string&& s) : m_impl{std::move(s)} {}
 
-  explicit StringData(std::string_view s) : m_impl{s} {
-  }
+  explicit StringData(std::string_view s) : m_impl{s} {}
 
   std::string* impl() const {
     return &m_impl;
@@ -103,7 +101,7 @@ public:
     return lower(m_impl) == lower(o.m_impl);
   }
 
-private:
+ private:
   mutable std::string m_impl;
 };
 
@@ -183,17 +181,20 @@ std::ostream& operator<<(std::ostream& os, const StringPtr& s) {
   return os << *s.get()->impl();
 }
 
-template <SymKind k> void PrintTo(const Symbol<k>& symbol, ::std::ostream* os) {
+template <SymKind k>
+void PrintTo(const Symbol<k>& symbol, ::std::ostream* os) {
   *os << symbol.slice();
 }
 
-template <SymKind k> bool operator==(const Symbol<k>& symbol, const char* str) {
+template <SymKind k>
+bool operator==(const Symbol<k>& symbol, const char* str) {
   return symbol.slice() == str;
 }
 
 template <SymKind k, typename T, typename U>
 void PrintTo(
-    const std::tuple<Symbol<k>, Path, T, U>& typeInfo, ::std::ostream* os) {
+    const std::tuple<Symbol<k>, Path, T, U>& typeInfo,
+    ::std::ostream* os) {
   *os << std::get<0>(typeInfo).slice();
 }
 
@@ -207,7 +208,8 @@ void PrintTo(const Path& path, ::std::ostream* os) {
 
 template <SymKind k, typename T, typename U>
 bool operator==(
-    const std::tuple<Symbol<k>, Path, T, U>& typeInfo, const char* str) {
+    const std::tuple<Symbol<k>, Path, T, U>& typeInfo,
+    const char* str) {
   return std::get<0>(typeInfo) == str;
 }
 
@@ -225,7 +227,10 @@ struct MockAutoloadDB : public AutoloadDB {
   MOCK_METHOD(void, commit, (), (override));
 
   MOCK_METHOD(
-      void, insertPath, (const std::filesystem::path& path), (override));
+      void,
+      insertPath,
+      (const std::filesystem::path& path),
+      (override));
   MOCK_METHOD(void, erasePath, (const std::filesystem::path& path), (override));
 
   MOCK_METHOD(
@@ -234,7 +239,10 @@ struct MockAutoloadDB : public AutoloadDB {
       (const std::filesystem::path& path, const Optional<std::string>& sha1hex),
       (override));
   MOCK_METHOD(
-      std::string, getSha1Hex, (const std::filesystem::path& path), (override));
+      std::string,
+      getSha1Hex,
+      (const std::filesystem::path& path),
+      (override));
 
   // Types
   MOCK_METHOD(
@@ -483,7 +491,7 @@ struct MockAutoloadDB : public AutoloadDB {
     ON_CALL(*this, getClock()).WillByDefault(Return(clock_));
   }
 
-private:
+ private:
   Clock clock_;
 };
 
@@ -493,7 +501,8 @@ private:
  */
 struct SymbolMapWrapper {
   SymbolMapWrapper(
-      std::unique_ptr<SymbolMap> m, std::shared_ptr<folly::ManualExecutor> exec)
+      std::unique_ptr<SymbolMap> m,
+      std::shared_ptr<folly::ManualExecutor> exec)
       : m_exec{exec}, m_map{std::move(m)} {
     if (m_exec) {
       m_map->m_exec = m_exec;
@@ -509,8 +518,7 @@ struct SymbolMapWrapper {
   SymbolMapWrapper(const SymbolMapWrapper&) = delete;
   SymbolMapWrapper& operator=(const SymbolMapWrapper&) = delete;
   SymbolMapWrapper(SymbolMapWrapper&& old) noexcept
-      : m_exec{std::move(old.m_exec)}, m_map{std::move(old.m_map)} {
-  }
+      : m_exec{std::move(old.m_exec)}, m_map{std::move(old.m_map)} {}
   SymbolMapWrapper& operator=(SymbolMapWrapper&& old) noexcept = delete;
 
   std::shared_ptr<folly::ManualExecutor> m_exec;
@@ -560,7 +568,7 @@ void update(
 } // namespace
 
 class SymbolMapTest : public ::testing::TestWithParam<bool> {
-protected:
+ protected:
   void SetUp() override {
     m_tmpdir = std::make_unique<folly::test::TemporaryDirectory>(
         folly::test::TemporaryDirectory{"autoload"});
@@ -582,7 +590,7 @@ protected:
       std::shared_ptr<folly::ManualExecutor> exec = nullptr,
       hphp_hash_set<std::string> indexedMethodAttributes = {}) {
     auto dbPath = m_tmpdir->path() /
-                  folly::to<std::string>(
+        folly::to<std::string>(
                       "autoload_", std::hash<std::string>{}(root), "_db.sql3");
     m_wrappers.push_back(SymbolMapWrapper{
         std::make_unique<SymbolMap>(
@@ -601,7 +609,6 @@ protected:
       std::shared_ptr<MockAutoloadDB> db,
       std::shared_ptr<folly::ManualExecutor> exec = nullptr,
       hphp_hash_set<std::string> indexedMethodAttributes = {}) {
-
     m_wrappers.push_back(SymbolMapWrapper{
         std::make_unique<SymbolMap>(
             std::move(root),
@@ -1270,7 +1277,6 @@ TEST_F(SymbolMapTest, GetKind) {
 }
 
 TEST_F(SymbolMapTest, TypeIsAbstractOrFinal) {
-
   FileFacts ff{
       .m_types = {
           {.m_name = "Abstract",

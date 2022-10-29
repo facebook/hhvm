@@ -37,7 +37,10 @@ namespace {
 
 struct MockWatchman final : public Watchman {
   MOCK_METHOD(
-      folly::SemiFuture<folly::dynamic>, query, (folly::dynamic), (override));
+      folly::SemiFuture<folly::dynamic>,
+      query,
+      (folly::dynamic),
+      (override));
 
   MOCK_METHOD(folly::SemiFuture<watchman::Clock>, getClock, (), (override));
 
@@ -137,8 +140,7 @@ TEST(WatchmanWatcherTest, querySinceMergebaseIsNotFresh) {
 
 struct WatchmanFailure : public std::runtime_error {
   explicit WatchmanFailure(std::string msg)
-      : std::runtime_error{std::move(msg)} {
-  }
+      : std::runtime_error{std::move(msg)} {}
 };
 
 TEST(WatchmanWatcherTest, RetryOnFailure) {

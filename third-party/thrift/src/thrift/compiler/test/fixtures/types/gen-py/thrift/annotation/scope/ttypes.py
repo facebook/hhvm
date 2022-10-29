@@ -28,9 +28,191 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'Program', 'Struct', 'Union', 'Exception', 'Field', 'Typedef', 'Service', 'Interaction', 'Function', 'EnumValue', 'Const', 'Schema', 'FbthriftInternalEnum', 'Transitive', 'Structured', 'Interface', 'RootDefinition', 'Definition', 'Enum']
+__all__ = ['UTF8STRINGS', 'Transitive', 'Schema', 'Program', 'Struct', 'Union', 'Exception', 'Field', 'Typedef', 'Service', 'Interaction', 'Function', 'EnumValue', 'Const', 'FbthriftInternalEnum', 'Structured', 'Interface', 'RootDefinition', 'Definition', 'Enum']
+
+class Transitive:
+  """
+  Indicates that the scope of sibling annotations is transitive.
+  
+  For example:
+  
+      @scope.Struct
+      @scope.Union
+      @scope.Exception
+      @scope.Transitive
+      struct Structured {}
+  
+  Annotating a Thrift struct with @Structured automatically applies
+  @scope.Struct, @scope.Union and @scope.Exception annotations, i.e.
+  
+      @Structured
+      struct MyAnnotation {}
+  
+  is equivalent to
+  
+      @scope.Struct
+      @scope.Union
+      @scope.Exception
+      struct MyAnnotation {}
+  
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('Transitive')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.scope.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.Transitive, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.scope.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.Transitive, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class Schema:
+  """
+  Indicates that an annotation should be included in the runtime schema.
+  
+  See thrift/lib/thrift/schema.thrift
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('Schema')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.scope.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.Schema, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.scope.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.Schema, self)
+
+  def _to_py_deprecated(self):
+    return self
 
 class Program:
+  """
+  The Program scope.
+  
+  This allows annotations on the `package` definition, which implies the
+  annotaiton applies to the entire program.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -104,6 +286,9 @@ class Program:
     return self
 
 class Struct:
+  """
+  The `struct` definition scope.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -177,6 +362,9 @@ class Struct:
     return self
 
 class Union:
+  """
+  The `union` definition scope.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -250,6 +438,9 @@ class Union:
     return self
 
 class Exception:
+  """
+  The `exception` definition scope.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -323,6 +514,9 @@ class Exception:
     return self
 
 class Field:
+  """
+  Field declartaions, for example in `struct` or `function` declartions.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -396,6 +590,9 @@ class Field:
     return self
 
 class Typedef:
+  """
+  The `typedef` definition scope.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -469,6 +666,9 @@ class Typedef:
     return self
 
 class Service:
+  """
+  The `service` definition scope.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -542,6 +742,9 @@ class Service:
     return self
 
 class Interaction:
+  """
+  The `interaction` definition scope.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -615,6 +818,9 @@ class Interaction:
     return self
 
 class Function:
+  """
+  The `function` definition scope.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -688,6 +894,9 @@ class Function:
     return self
 
 class EnumValue:
+  """
+  The Enum value definition scope.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -761,6 +970,9 @@ class EnumValue:
     return self
 
 class Const:
+  """
+  The `const` definition scope.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -829,79 +1041,6 @@ class Const:
     import thrift.py3.converter
     py3_types = importlib.import_module("facebook.thrift.annotation.scope.types")
     return thrift.py3.converter.to_py3_struct(py3_types.Const, self)
-
-  def _to_py_deprecated(self):
-    return self
-
-class Schema:
-
-  thrift_spec = None
-  thrift_field_annotations = None
-  thrift_struct_annotations = None
-  @staticmethod
-  def isUnion():
-    return False
-
-  def read(self, iprot):
-    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
-      return
-    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
-      return
-    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
-      return
-    oprot.writeStructBegin('Schema')
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def __repr__(self):
-    L = []
-    padding = ' ' * 4
-    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
-
-  def __eq__(self, other):
-    if not isinstance(other, self.__class__):
-      return False
-
-    return self.__dict__ == other.__dict__ 
-
-  def __ne__(self, other):
-    return not (self == other)
-
-  def __dir__(self):
-    return (
-    )
-
-  # Override the __hash__ function for Python3 - t10434117
-  __hash__ = object.__hash__
-
-  def _to_python(self):
-    import importlib
-    import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.annotation.scope.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.Schema, self)
-
-  def _to_py3(self):
-    import importlib
-    import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.annotation.scope.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.Schema, self)
 
   def _to_py_deprecated(self):
     return self
@@ -979,80 +1118,10 @@ class FbthriftInternalEnum:
   def _to_py_deprecated(self):
     return self
 
-class Transitive:
-
-  thrift_spec = None
-  thrift_field_annotations = None
-  thrift_struct_annotations = None
-  @staticmethod
-  def isUnion():
-    return False
-
-  def read(self, iprot):
-    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
-      return
-    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
-      return
-    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
-      return
-    oprot.writeStructBegin('Transitive')
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def __repr__(self):
-    L = []
-    padding = ' ' * 4
-    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
-
-  def __eq__(self, other):
-    if not isinstance(other, self.__class__):
-      return False
-
-    return self.__dict__ == other.__dict__ 
-
-  def __ne__(self, other):
-    return not (self == other)
-
-  def __dir__(self):
-    return (
-    )
-
-  # Override the __hash__ function for Python3 - t10434117
-  __hash__ = object.__hash__
-
-  def _to_python(self):
-    import importlib
-    import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.annotation.scope.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.Transitive, self)
-
-  def _to_py3(self):
-    import importlib
-    import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.annotation.scope.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.Transitive, self)
-
-  def _to_py_deprecated(self):
-    return self
-
 class Structured:
+  """
+  A scope that includes all 'structured' definitions.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -1126,6 +1195,9 @@ class Structured:
     return self
 
 class Interface:
+  """
+  A scope that includes all 'interface' definitions.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -1199,6 +1271,9 @@ class Interface:
     return self
 
 class RootDefinition:
+  """
+  A scope that includes all program-scoped definition.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -1272,6 +1347,9 @@ class RootDefinition:
     return self
 
 class Definition:
+  """
+  A scope that includes all definitions.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -1345,12 +1423,29 @@ class Definition:
     return self
 
 Enum = FbthriftInternalEnum
+all_structs.append(Transitive)
+Transitive.thrift_spec = (
+)
+
+Transitive.thrift_struct_annotations = {
+}
+Transitive.thrift_field_annotations = {
+}
+
+all_structs.append(Schema)
+Schema.thrift_spec = (
+)
+
+Schema.thrift_struct_annotations = {
+}
+Schema.thrift_field_annotations = {
+}
+
 all_structs.append(Program)
 Program.thrift_spec = (
 )
 
 Program.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/annotation/Program",
 }
 Program.thrift_field_annotations = {
 }
@@ -1360,7 +1455,6 @@ Struct.thrift_spec = (
 )
 
 Struct.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/annotation/Struct",
 }
 Struct.thrift_field_annotations = {
 }
@@ -1370,7 +1464,6 @@ Union.thrift_spec = (
 )
 
 Union.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/annotation/Union",
 }
 Union.thrift_field_annotations = {
 }
@@ -1380,7 +1473,6 @@ Exception.thrift_spec = (
 )
 
 Exception.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/annotation/Exception",
 }
 Exception.thrift_field_annotations = {
 }
@@ -1390,7 +1482,6 @@ Field.thrift_spec = (
 )
 
 Field.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/annotation/Field",
 }
 Field.thrift_field_annotations = {
 }
@@ -1400,7 +1491,6 @@ Typedef.thrift_spec = (
 )
 
 Typedef.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/annotation/Typedef",
 }
 Typedef.thrift_field_annotations = {
 }
@@ -1410,7 +1500,6 @@ Service.thrift_spec = (
 )
 
 Service.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/annotation/Service",
 }
 Service.thrift_field_annotations = {
 }
@@ -1420,7 +1509,6 @@ Interaction.thrift_spec = (
 )
 
 Interaction.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/annotation/Interaction",
 }
 Interaction.thrift_field_annotations = {
 }
@@ -1432,7 +1520,6 @@ Function.thrift_spec = (
 Function.thrift_struct_annotations = {
   "hack.name": "TFunction",
   "js.name": "TFunction",
-  "thrift.uri": "facebook.com/thrift/annotation/Function",
 }
 Function.thrift_field_annotations = {
 }
@@ -1442,7 +1529,6 @@ EnumValue.thrift_spec = (
 )
 
 EnumValue.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/annotation/EnumValue",
 }
 EnumValue.thrift_field_annotations = {
 }
@@ -1453,19 +1539,8 @@ Const.thrift_spec = (
 
 Const.thrift_struct_annotations = {
   "hack.name": "TConst",
-  "thrift.uri": "facebook.com/thrift/annotation/Const",
 }
 Const.thrift_field_annotations = {
-}
-
-all_structs.append(Schema)
-Schema.thrift_spec = (
-)
-
-Schema.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/annotation/Schema",
-}
-Schema.thrift_field_annotations = {
 }
 
 all_structs.append(FbthriftInternalEnum)
@@ -1476,16 +1551,6 @@ FbthriftInternalEnum.thrift_struct_annotations = {
   "thrift.uri": "facebook.com/thrift/annotation/Enum",
 }
 FbthriftInternalEnum.thrift_field_annotations = {
-}
-
-all_structs.append(Transitive)
-Transitive.thrift_spec = (
-)
-
-Transitive.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/annotation/Transitive",
-}
-Transitive.thrift_field_annotations = {
 }
 
 all_structs.append(Structured)

@@ -4395,6 +4395,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 || (text == strip_ns(sn::std_lib_functions::ARRAY_MARK_LEGACY))
                 || (text == sn::std_lib_functions::ARRAY_UNMARK_LEGACY)
                 || (text == strip_ns(sn::std_lib_functions::ARRAY_UNMARK_LEGACY))
+                || (text == sn::pseudo_functions::UNSAFE_CAST)
+                || (text == strip_ns(sn::pseudo_functions::UNSAFE_CAST))
+                || (text == sn::pseudo_functions::UNSAFE_NONNULL_CAST)
+                || (text == strip_ns(sn::pseudo_functions::UNSAFE_NONNULL_CAST))
         };
 
         let is_namey = |self_: &Self, token: &PositionedToken<'a>| -> bool {

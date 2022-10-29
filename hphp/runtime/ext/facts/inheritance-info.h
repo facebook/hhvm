@@ -37,7 +37,6 @@ namespace Facts {
  *                   .m_path="foo.hck"}
  */
 struct EdgeToSupertype {
-
   bool operator==(const EdgeToSupertype& o) const noexcept {
     return m_type == o.m_type && m_kind == o.m_kind && m_path == o.m_path;
   }
@@ -50,7 +49,8 @@ struct EdgeToSupertype {
 } // namespace Facts
 } // namespace HPHP
 
-template <> struct std::hash<HPHP::Facts::EdgeToSupertype> {
+template <>
+struct std::hash<HPHP::Facts::EdgeToSupertype> {
   size_t operator()(const HPHP::Facts::EdgeToSupertype& typeDef) const {
     return folly::hash::hash_combine(
         std::hash<HPHP::Facts::Path>{}(typeDef.m_path),
@@ -68,7 +68,6 @@ namespace Facts {
  * kind of inheritance..
  */
 struct SubtypeQuery {
-
   bool operator==(const SubtypeQuery& o) const noexcept {
     return m_type == o.m_type && m_kind == o.m_kind;
   }
@@ -80,7 +79,8 @@ struct SubtypeQuery {
 } // namespace Facts
 } // namespace HPHP
 
-template <> struct std::hash<HPHP::Facts::SubtypeQuery> {
+template <>
+struct std::hash<HPHP::Facts::SubtypeQuery> {
   size_t operator()(const HPHP::Facts::SubtypeQuery& query) const {
     return folly::hash::hash_combine(
         std::hash<HPHP::Facts::Symbol<HPHP::Facts::SymKind::Type>>{}(
@@ -96,15 +96,13 @@ namespace Facts {
  * Information about which types use, extend, or implement which other types.
  */
 struct InheritanceInfo {
-
   using TypeToBaseTypesMap = LazyTwoWayMap<EdgeToSupertype, SubtypeQuery>;
 
   using TypeDefs = typename TypeToBaseTypesMap::Keys;
   using Types = typename TypeToBaseTypesMap::Values;
 
   explicit InheritanceInfo(std::shared_ptr<PathVersions> versions)
-      : m_baseTypesMap{std::move(versions)} {
-  }
+      : m_baseTypesMap{std::move(versions)} {}
 
   /**
    * Return inheritance data about the given type.
@@ -133,8 +131,9 @@ struct InheritanceInfo {
         std::move(edgesFromDB));
   }
 
-  Optional<TypeDefs>
-  getDerivedTypes(Symbol<SymKind::Type> baseType, DeriveKind kind) const {
+  Optional<TypeDefs> getDerivedTypes(
+      Symbol<SymKind::Type> baseType,
+      DeriveKind kind) const {
     return m_baseTypesMap.getKeysForValue({.m_type = baseType, .m_kind = kind});
   }
 
@@ -166,7 +165,7 @@ struct InheritanceInfo {
         std::move(baseTypes));
   }
 
-private:
+ private:
   TypeToBaseTypesMap m_baseTypesMap;
 };
 

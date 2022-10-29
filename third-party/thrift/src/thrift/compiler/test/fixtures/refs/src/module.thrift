@@ -122,6 +122,12 @@ struct StructWithInternBox {
   1: Empty field1;
   @thrift.InternBox
   2: MyField field2;
+  @thrift.InternBox
+  @thrift.TerseWrite
+  3: Empty field3;
+  @thrift.InternBox
+  @thrift.TerseWrite
+  4: MyField field4;
 }
 
 const StructWithRef kStructWithRef = {

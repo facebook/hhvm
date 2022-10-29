@@ -744,6 +744,7 @@ module Typing = struct
     | InvalidMethCallerReadonlyReturn [@value 4464]
     | AbstractMemberInConcreteClass [@value 4465]
     | TraitNotUsed [@value 4466]
+    | OverrideAsync [@value 4467]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

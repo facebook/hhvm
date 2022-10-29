@@ -23,6 +23,9 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * The `exception` definition scope.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Exception implements TBase, java.io.Serializable, Cloneable, Comparable<Exception> {
   private static final TStruct STRUCT_DESC = new TStruct("Exception");

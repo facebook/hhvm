@@ -2173,7 +2173,22 @@ and simplify_subtype_i
                   env
               | None -> invalid_env env
             end
-        | _ -> default_subtype env))
+        | _ ->
+          (match Env.get_typedef env name_super with
+          | Some { td_super_constraint = Some lower; _ } ->
+            (* For now, this rule only applies to newctx with super
+             * by syntactic restriction - super on newtype is an
+             * unstable feature. *)
+            let try_lower_bound env =
+              let ((env, _ty_err_opt), lower_bound) =
+                (* Using empty_expand_env for now since newctx does not
+                 * have generics so `this` will never be in scope *)
+                Phase.localize ~ety_env:empty_expand_env env lower
+              in
+              simplify_subtype ~subtype_env lty lower_bound env
+            in
+            default_subtype env ||| try_lower_bound
+          | _ -> default_subtype env)))
     | (_, Tunapplied_alias n_sup) ->
       (match ety_sub with
       | ConstraintType _ -> default_subtype env

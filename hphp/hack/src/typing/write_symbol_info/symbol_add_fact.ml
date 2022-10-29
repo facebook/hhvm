@@ -226,6 +226,16 @@ let method_decl con_type decl_id name progress =
   in
   Fact_acc.add_fact Predicate.(Hack MethodDeclaration) json progress
 
+let build_signature ctx source_text params ctxs ret =
+  let hint_to_str_opt h =
+    Option.map (hint_of_type_hint h) ~f:(Util.get_type_from_hint ctx)
+  in
+  let params =
+    List.map params ~f:(fun x -> (x, hint_to_str_opt x.param_type_hint))
+  in
+  let ret_ty = hint_to_str_opt ret in
+  Build_json.build_signature_json ctx source_text params ctxs ~ret_ty
+
 let method_defn ctx source_text meth decl_id progress =
   let tparams =
     List.map
@@ -237,12 +247,8 @@ let method_defn ctx source_text meth decl_id progress =
       [
         ("declaration", Build_json.build_id_json decl_id);
         ( "signature",
-          Build_json.build_signature_json
-            ctx
-            source_text
-            meth.m_params
-            meth.m_ctxs
-            meth.m_ret );
+          build_signature ctx source_text meth.m_params meth.m_ctxs meth.m_ret
+        );
         ("visibility", Build_json.build_visibility_json meth.m_visibility);
         ("isAbstract", JSON_Bool meth.m_abstract);
         ("isAsync", Build_json.build_is_async_json meth.m_fun_kind);
@@ -418,12 +424,8 @@ let func_defn ctx source_text fd decl_id progress =
     @ [
         ("declaration", Build_json.build_id_json decl_id);
         ( "signature",
-          Build_json.build_signature_json
-            ctx
-            source_text
-            elem.f_params
-            elem.f_ctxs
-            elem.f_ret );
+          build_signature ctx source_text elem.f_params elem.f_ctxs elem.f_ret
+        );
         ("isAsync", Build_json.build_is_async_json elem.f_fun_kind);
         ( "attributes",
           Build_json.build_attributes_json_nested

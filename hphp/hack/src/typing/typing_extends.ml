@@ -430,6 +430,14 @@ let check_lateinit parent_class_elt class_elt on_error =
                 parent_is_lateinit = get_ce_lateinit parent_class_elt;
               })
 
+let check_async ft_parent ft_child parent_pos pos on_error =
+  match (get_ft_async ft_parent, get_ft_async ft_child) with
+  | (true, false) ->
+    Errors.add_typing_error
+      Typing_error.(
+        apply_reasons ~on_error @@ Secondary.Override_async { pos; parent_pos })
+  | _ -> ()
+
 let check_xhp_attr_required env parent_class_elt class_elt on_error =
   if not (TypecheckerOptions.check_xhp_attribute (Env.get_tcopt env)) then
     ()
@@ -864,6 +872,12 @@ let check_override
         class_elt.ce_origin
         member_name
         member_kind;
+      check_async
+        ft_parent
+        ft_child
+        (Typing_reason.to_pos r_parent)
+        (Typing_reason.to_pos r_child)
+        on_error;
       check_ambiguous_inheritance
         (check_subtype_methods
            env

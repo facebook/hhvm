@@ -163,6 +163,61 @@ jobs:
     - name: Upload Nix binaries to the binary cache server on S3
       if: steps.configure-aws-credentials.outcome == 'success'
       run: nix copy --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
+  install-deb-and-run-repo-mode-tests:
+    needs: build-and-run-quick-tests
+    strategy:
+      # Run tests on all OS's and HHVM versions, even if one fails
+      fail-fast: false
+      matrix:
+        package:
+        - hhvm
+        - hhvm_clang
+        os:
+        - ${{ github.event_name == 'pull_request' && '16-core' || 'ubuntu-latest' }}
+        suite:
+        - quick
+        - -x hphp/test/github_excluded_tests slow
+    runs-on: ${{matrix.os}}
+    steps:
+    - uses: actions/checkout@v3
+    - if: matrix.suite != 'quick'
+      run: |
+        sudo tee -a /etc/locale.gen << EOF
+        de_DE.UTF-8 UTF-8
+        de_DE ISO-8859-1
+        de_DE@euro ISO-8859-15
+        en_GB.UTF-8 UTF-8
+        en_GB ISO-8859-1
+        en_GB.ISO-8859-15 ISO-8859-15
+        en_US.UTF-8 UTF-8
+        en_US ISO-8859-1
+        en_US.ISO-8859-15 ISO-8859-15
+        es_ES.UTF-8 UTF-8
+        es_ES ISO-8859-1
+        es_ES@euro ISO-8859-15
+        fr_FR.UTF-8 UTF-8
+        fr_FR ISO-8859-1
+        fr_FR@euro ISO-8859-15
+        pt_PT.UTF-8 UTF-8
+        pt_PT ISO-8859-1
+        pt_PT@euro ISO-8859-15
+        tr_TR.UTF-8 UTF-8
+        tr_TR ISO-8859-9
+        zh_CN.UTF-8 UTF-8
+        zh_CN.GB18030 GB18030
+        zh_CN.GBK GBK
+        zh_CN GB2312
+        EOF
+    - if: matrix.suite != 'quick'
+      run: sudo dpkg-reconfigure -frontend=noninteractive locales
+    - name: Download the ${{matrix.package}}.deb from build-and-run-quick-tests job
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{matrix.package}}.deb
+    - run: sudo apt-get install ./${{matrix.package}}.deb
+    - run: echo "HHVM_BIN=$(command -v hhvm)" >> "$GITHUB_ENV"
+    - run: |
+        "$HHVM_BIN" hphp/test/run.php --repo ${{matrix.suite}}
   install-deb-and-run-all-tests:
     needs: build-and-run-quick-tests
     strategy:

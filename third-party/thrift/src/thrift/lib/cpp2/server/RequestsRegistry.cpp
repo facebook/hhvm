@@ -26,10 +26,11 @@ namespace thrift {
 namespace {
 // RequestId storage.
 // Reserve some high bits for future use. Currently the maximum id supported
-// is 10^52, so thrift servers theoretically can generate unique request id
-// for ~12 years, assuming the QPS is ~10 million.
-const size_t kLsbBits = 52;
-const uintptr_t kLsbMask = (1ull << kLsbBits) - 1;
+// is 2^52 (on 64-bit systems), so thrift servers theoretically can generate
+// unique request id for ~12 years, assuming the QPS is ~10 million.
+constexpr size_t kReserveBits = sizeof(uintptr_t) >= 8 ? 12 : 6;
+constexpr size_t kLsbBits = 8 * sizeof(uintptr_t) - kReserveBits;
+constexpr uintptr_t kLsbMask = (1ull << kLsbBits) - 1;
 
 struct RegistryIdManager {
  public:
@@ -41,7 +42,7 @@ struct RegistryIdManager {
     }
 
     auto id = nextId_++;
-    CHECK(id < 4096);
+    CHECK_LT(id, 1ull << kReserveBits); // 4096, if pointers are 64 bits
     return id;
   }
 

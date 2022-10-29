@@ -1566,6 +1566,10 @@ module Secondary : sig
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
       }
+    | Override_async of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+      }
     | Override_lsb of {
         pos: Pos_or_decl.t;
         member_name: string;

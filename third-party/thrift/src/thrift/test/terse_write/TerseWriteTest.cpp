@@ -17,6 +17,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <folly/Traits.h>
@@ -300,6 +301,7 @@ TYPED_TEST_P(TerseWriteSerializerTests, CppRefTerseStruct) {
   obj.unique_int_field_ref() = std::make_unique<int32_t>(1);
   obj.shared_int_field_ref() = std::make_unique<int32_t>(2);
   obj.shared_const_int_field_ref() = std::make_unique<int32_t>(3);
+  obj.intern_boxed_field()->field1() = 4;
 
   auto objs = TypeParam::template serialize<std::string>(obj);
   terse_write::CppRefTerseStruct objd;
@@ -317,12 +319,18 @@ TYPED_TEST_P(TerseWriteSerializerTests, CppRefTerseStruct_Empty) {
   obj.unique_int_field_ref() = std::make_unique<int32_t>(1);
   obj.shared_int_field_ref() = std::make_unique<int32_t>(2);
   obj.shared_const_int_field_ref() = std::make_unique<int32_t>(3);
+  obj.intern_boxed_field()->field1() = 4;
 
   EXPECT_FALSE(apache::thrift::empty(obj));
 
   obj.unique_int_field_ref() = std::make_unique<int32_t>(0);
   obj.shared_int_field_ref() = std::make_unique<int32_t>(0);
   obj.shared_const_int_field_ref() = std::make_unique<int32_t>(0);
+  obj.intern_boxed_field()->field1() = 0;
+
+  EXPECT_TRUE(apache::thrift::empty(obj));
+
+  obj.intern_boxed_field().reset();
 
   EXPECT_TRUE(apache::thrift::empty(obj));
 
@@ -330,6 +338,32 @@ TYPED_TEST_P(TerseWriteSerializerTests, CppRefTerseStruct_Empty) {
   auto emptys = TypeParam::template serialize<std::string>(empty);
 
   EXPECT_EQ(objs, emptys);
+}
+
+TYPED_TEST_P(TerseWriteSerializerTests, TerseInternBoxWithCustomDefault) {
+  terse_write::TerseInternBoxedStructWithCustomDefault obj;
+  terse_write::EmptyStruct empty;
+
+  EXPECT_FALSE(apache::thrift::empty(obj));
+
+  // reset the field to shared default value.
+  obj.intern_boxed_field_with_custom_default().reset();
+
+  EXPECT_FALSE(apache::thrift::empty(obj));
+
+  // clear the field to shared intrinsic default value.
+  apache::thrift::clear(obj);
+
+  EXPECT_TRUE(apache::thrift::empty(obj));
+
+  auto objs = TypeParam::template serialize<std::string>(obj);
+  auto emptys = TypeParam::template serialize<std::string>(empty);
+
+  EXPECT_EQ(objs, emptys);
+
+  terse_write::TerseInternBoxedStructWithCustomDefault objd;
+  TypeParam::template deserialize(objs, objd);
+  EXPECT_EQ(objd, obj);
 }
 
 TYPED_TEST_P(TerseWriteSerializerTests, CustomStringFields) {
@@ -655,6 +689,7 @@ REGISTER_TYPED_TEST_CASE_P(
     CustomStringFieldsDeserialization,
     EmptiableStructField,
     TerseException,
+    TerseInternBoxWithCustomDefault,
     TerseStructWithCustomDefault,
     TerseStructWithCustomDefaultDeserialization,
     TerseStructWithCustomDefaultClearTerseFields,

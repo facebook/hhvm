@@ -1879,6 +1879,26 @@ cdef class StructWithInternBox(thrift.py3.types.Struct):
     def field2(self):
         return self.field2_impl()
 
+    cdef inline field3_impl(self):
+
+        if self.__fbthrift_cached_field3 is None:
+            self.__fbthrift_cached_field3 = Empty._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).field3_ref().ref(), self._cpp_obj))
+        return self.__fbthrift_cached_field3
+
+    @property
+    def field3(self):
+        return self.field3_impl()
+
+    cdef inline field4_impl(self):
+
+        if self.__fbthrift_cached_field4 is None:
+            self.__fbthrift_cached_field4 = MyField._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).field4_ref().ref(), self._cpp_obj))
+        return self.__fbthrift_cached_field4
+
+    @property
+    def field4(self):
+        return self.field4_impl()
+
 
     def __hash__(StructWithInternBox self):
         return super().__hash__()
@@ -1924,7 +1944,7 @@ cdef class StructWithInternBox(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return 2
+        return 4
 
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(StructWithInternBox self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data

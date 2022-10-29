@@ -163,7 +163,7 @@ class BadService_BadInteraction extends \ThriftClientBase {
       }
       else if ($this->output_ is \TCompactProtocolAccelerated)
       {
-        \thrift_protocol_write_compact($this->output_, 'BadInteraction.foo', \TMessageType::CALL, $args, $currentseqid, false);
+        \thrift_protocol_write_compact2($this->output_, 'BadInteraction.foo', \TMessageType::CALL, $args, $currentseqid, false, \TCompactProtocolBase::VERSION);
       }
       else
       {
@@ -229,7 +229,7 @@ abstract class BadServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'bar', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'bar', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -265,7 +265,7 @@ abstract class BadServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -317,7 +317,7 @@ abstract class BadServiceSyncProcessorBase extends \ThriftSyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'bar', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'bar', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -353,7 +353,7 @@ abstract class BadServiceSyncProcessorBase extends \ThriftSyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {

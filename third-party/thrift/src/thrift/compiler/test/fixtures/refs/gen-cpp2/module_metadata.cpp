@@ -338,9 +338,11 @@ StructMetadata<::cpp2::StructWithInternBox>::gen(ThriftMetadata& metadata) {
   module_StructWithInternBox.name() = "module.StructWithInternBox";
   module_StructWithInternBox.is_union() = false;
   static const auto* const
-  module_StructWithInternBox_fields = new std::array<EncodedThriftField, 2>{{
+  module_StructWithInternBox_fields = new std::array<EncodedThriftField, 4>{{
     {1, "field1", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
     {2, "field2", false, std::make_unique<Struct<::cpp2::MyField>>("module.MyField"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {3, "field3", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), *cvStruct("thrift.TerseWrite", {}).cv_struct_ref(), }},
+    {4, "field4", false, std::make_unique<Struct<::cpp2::MyField>>("module.MyField"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), *cvStruct("thrift.TerseWrite", {}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_StructWithInternBox_fields) {
     ::apache::thrift::metadata::ThriftField field;

@@ -23,6 +23,9 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * A scope that includes all program-scoped definition.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class RootDefinition implements TBase, java.io.Serializable, Cloneable, Comparable<RootDefinition> {
   private static final TStruct STRUCT_DESC = new TStruct("RootDefinition");

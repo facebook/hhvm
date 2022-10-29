@@ -5687,8 +5687,9 @@ void t_hack_generator::generate_process_metadata_function(
              << "else if ($output is \\TCompactProtocolAccelerated)\n";
   scope_up(f_service_);
 
-  f_service_ << indent() << "\\thrift_protocol_write_compact($output, '"
-             << function_name << "', $reply_type, $result, $seqid);\n";
+  f_service_ << indent() << "\\thrift_protocol_write_compact2($output, '"
+             << function_name << "', $reply_type, $result, $seqid, "
+             << "false, \\TCompactProtocolBase::VERSION);\n";
 
   scope_down(f_service_);
   f_service_ << indent() << "else\n";
@@ -5839,9 +5840,10 @@ void t_hack_generator::generate_process_function(
              << "else if ($output is \\TCompactProtocolAccelerated)\n";
   scope_up(f_service_);
 
-  f_service_ << indent() << "\\thrift_protocol_write_compact($output, '"
+  f_service_ << indent() << "\\thrift_protocol_write_compact2($output, '"
              << find_hack_name(tfunction)
-             << "', $reply_type, $result, $seqid);\n";
+             << "', $reply_type, $result, $seqid, false, "
+             << "\\TCompactProtocolBase::VERSION);\n";
 
   scope_down(f_service_);
   f_service_ << indent() << "else\n";
@@ -6961,12 +6963,12 @@ void t_hack_generator::_generate_sendImpl(
       << "else if ($this->output_ is \\TCompactProtocolAccelerated)\n";
   scope_up(out);
 
-  out << indent() << "\\thrift_protocol_write_compact($this->output_, '"
+  out << indent() << "\\thrift_protocol_write_compact2($this->output_, '"
       << rpc_function_name << "', "
       << "\\TMessageType::CALL, $args, $currentseqid, "
       << (tfunction->qualifier() == t_function_qualifier::one_way ? "true"
                                                                   : "false")
-      << ");\n";
+      << ", \\TCompactProtocolBase::VERSION);\n";
 
   scope_down(out);
   out << indent() << "else\n";

@@ -2,7 +2,40 @@
 
 import lldb
 import shlex
-import utils
+
+try:
+    # LLDB needs to load this outside of the usual Buck mechanism
+    import utils
+except ModuleNotFoundError:
+    import hhvm_lldb.utils as utils
+
+
+def at(ptr: lldb.SBValue, idx: int):
+    """ Access ptr[idx] """
+    return ptr.GetChildAtIndex(idx, lldb.eDynamicDontRunTarget, True)
+
+
+def atomic_low_ptr_vector_at(av: lldb.SBValue, idx: int, hasher=None):
+    """ Get the value at idx in the atomic vector av
+
+    See hphp/util/atomic-vector.h
+
+    Arguments:
+        av: The vector, represented as lldb.SBValue[HPHP::AtomicLowPtrVector]
+        idx: Index to get
+        hasher: (Not yet implemented)
+
+    Returns:
+        av[ix]
+    """
+    assert utils.template_type(av.type) == "HPHP::AtomicLowPtrVector", f"invalid atomic vector of type '{av.type.name}'"
+    size = utils.get(av, 'm_size').unsigned
+
+    if idx < size:
+        unique_ptr = utils.rawptr(utils.get(av, 'm_vals'))
+        return at(unique_ptr, idx)
+    else:
+        return atomic_low_ptr_vector_at(utils.atomic_get(utils.get(av, 'm_next')), idx - size)
 
 
 def fixed_vector_at(fv: lldb.SBValue, idx: int, hasher=None):
@@ -13,7 +46,8 @@ def fixed_vector_at(fv: lldb.SBValue, idx: int, hasher=None):
 @utils.memoized
 def idx_accessors():
     return {
-        'HPHP::FixedVector': fixed_vector_at,
+        "HPHP::FixedVector": fixed_vector_at,
+        "HPHP::AtomicLowPtrVector": atomic_low_ptr_vector_at,
     }
 
 
@@ -108,7 +142,7 @@ def __lldb_init_module(debugger, _internal_dict, top_module=""):
 
     Defining this in this module (in addition to the main hhvm module) allows
     this script to be imported into LLDB separately; LLDB looks for a function with
-    this name as module load time.
+    this name at module load time.
 
     Arguments:
         debugger: Current debugger object

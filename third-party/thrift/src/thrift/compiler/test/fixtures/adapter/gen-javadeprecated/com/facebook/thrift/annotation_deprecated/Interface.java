@@ -23,6 +23,9 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * A scope that includes all 'interface' definitions.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Interface implements TBase, java.io.Serializable, Cloneable, Comparable<Interface> {
   private static final TStruct STRUCT_DESC = new TStruct("Interface");

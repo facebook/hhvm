@@ -2,6 +2,7 @@
 
 import lldb
 import shlex
+import typing
 
 try:
     # LLDB needs to load this outside of the usual Buck mechanism
@@ -10,12 +11,15 @@ except ModuleNotFoundError:
     import hhvm_lldb.utils as utils
 
 
-def at(ptr: lldb.SBValue, idx: int):
+def at(ptr: lldb.SBValue, idx: int) -> typing.Optional[lldb.SBValue]:
     """ Access ptr[idx] """
-    return ptr.GetChildAtIndex(idx, lldb.eDynamicDontRunTarget, True)
+    val = ptr.GetChildAtIndex(idx, lldb.eDynamicDontRunTarget, True)
+    if not val.IsValid():
+        return None
+    return val
 
 
-def atomic_low_ptr_vector_at(av: lldb.SBValue, idx: int, hasher=None):
+def atomic_low_ptr_vector_at(av: lldb.SBValue, idx: int, hasher=None) -> typing.Optional[lldb.SBValue]:
     """ Get the value at idx in the atomic vector av
 
     See hphp/util/atomic-vector.h
@@ -26,28 +30,80 @@ def atomic_low_ptr_vector_at(av: lldb.SBValue, idx: int, hasher=None):
         hasher: (Not yet implemented)
 
     Returns:
-        av[ix]
+        av[ix] if valid, otherwise None
     """
-    assert utils.template_type(av.type) == "HPHP::AtomicLowPtrVector", f"invalid atomic vector of type '{av.type.name}'"
-    size = utils.get(av, 'm_size').unsigned
+
+    if hasher:
+        # TODO implement
+        raise NotImplementedError("hasher argument currently unused")
+
+    size = utils.get(av, "m_size").unsigned
 
     if idx < size:
-        unique_ptr = utils.rawptr(utils.get(av, 'm_vals'))
+        unique_ptr = utils.rawptr(utils.get(av, "m_vals"))
         return at(unique_ptr, idx)
     else:
         return atomic_low_ptr_vector_at(utils.atomic_get(utils.get(av, 'm_next')), idx - size)
 
 
-def fixed_vector_at(fv: lldb.SBValue, idx: int, hasher=None):
-    ptr = utils.rawptr(fv.GetChildMemberWithName("m_impl").GetChildMemberWithName("m_sp"))
-    return ptr.GetChildAtIndex(idx, lldb.eDynamicDontRunTarget, True)
+def fixed_vector_at(fv: lldb.SBValue, idx: int, hasher=None) -> typing.Optional[lldb.SBValue]:
+    """ Get the value at idx in the fixed vector fv
+
+    See hphp/util/fixed-vector.h
+
+    Arguments:
+        fv: The vector, represented as lldb.SBValue[HPHP::FixedVector]
+        idx: Index to get
+        hasher: (Not yet implemented)
+
+    Returns:
+        fv[ix] if valid, otherwise None
+    """
+    if hasher is not None:
+        # TODO implement
+        raise NotImplementedError("hasher argument currently unused")
+
+    ptr = utils.rawptr(utils.get(fv, "m_impl", "m_sp"))
+    return at(ptr, idx)
+
+
+def compact_vector_at(cv: lldb.SBValue, idx: int, hasher=None) -> typing.Optional[lldb.SBValue]:
+    """ Get the value at idx in the compact vector cv
+
+    Arguments:
+        cv: The vector, repesented as lldb.SBValue[HPHP::CompactVector]
+        idx: Index to get
+        hasher: (Not yet implemented)
+
+    Returns:
+        cv[ix] if in bounds, otherwise None
+
+    See hphp/util/compact-vector.h
+    """
+
+    if hasher is not None:
+        # TODO implement
+        raise NotImplementedError("hasher argument currently unused")
+
+    if utils.get(cv, "m_data").unsigned == 0:  # null ptr
+        return None
+
+    sz = utils.get(cv, "m_data", "m_len").unsigned
+    if idx >= sz:
+        return None
+
+    inner = cv.type.template_argument(0)
+    elems = (utils.get(cv, "m_data").Cast(utils.Type('char').GetPointerType())
+             + utils.get(cv, "elems_offset").Cast(inner.GetPointerType()))
+    return at(elems, idx)
 
 
 @utils.memoized
 def idx_accessors():
     return {
-        "HPHP::FixedVector": fixed_vector_at,
         "HPHP::AtomicLowPtrVector": atomic_low_ptr_vector_at,
+        "HPHP::CompactVector": compact_vector_at,
+        "HPHP::FixedVector": fixed_vector_at,
     }
 
 

@@ -188,9 +188,10 @@ def get(struct: lldb.SBValue, *field_names: str) -> lldb.SBValue:
     This is supposed to be semi-equivalent to gdb's struct[field_name] syntax.
     """
 
+    assert struct.IsValid(), f"invalid struct '{struct.name}'"
     # Note: You can also do lldb.value(val).<name>
     v = struct.GetChildMemberWithName(field_names[0])
-    assert v.IsValid(), f"couldn't find field '{field_names[0]}' in struct with type '{struct.type.name}'"
+    assert v.IsValid(), f"couldn't find field '{field_names[0]}' in struct '{struct.name}' with type '{struct.type.name}'"
 
     if len(field_names) == 1:
         return v
@@ -225,7 +226,7 @@ def destruct(t: str) -> str:
     return re.sub(r'^(struct|class|union)\s+', '', t)
 
 def template_type(t: lldb.SBType) -> str:
-    """Get the unparametrized name of a template type.
+    """Get the unparameterized name of a template type.
 
     Arguments:
         t: type to drop template parameters from
@@ -264,10 +265,6 @@ def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
         Returns:
             The stripped pointer, or None if it's not yet supported
     """
-
-    def wrap(addr: int, ty: lldb.SBType):
-        return val.CreateValueFromAddress("(tmp)", addr, ty).address_of
-
     if val.type.IsPointerType():
         return val
     elif val.type.IsReferenceType():
@@ -290,18 +287,24 @@ def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
         # the m_s field's type, and for AtomicLowPtr, it's an atomic.)
         if storage_type == "HPHP::detail::AtomicStorage":
             ptr = get(ptr, "_M_i")
-        ptr = wrap(ptr.unsigned, inner)
-    elif name == 'HPHP::CompactTaggedPtr':
+        ptr = ptr.Cast(inner.GetPointerType())
+    elif name == "HPHP::CompactTaggedPtr":
         inner = val.type.GetTemplateArgumentType(0)
-        ptr = wrap(get(val, 'm_data').unsigned & 0xffffffffffff, inner)
-    elif name == 'HPHP::CompactSizedPtr':
-        ptr = rawptr(get(val, 'm_data'))
+        addr = get(val, "m_data").unsigned & 0xffffffffffff
+        ptr = val.CreateValueFromAddress("(tmp)", addr, inner.GetPointerType())
+    elif name == "HPHP::CompactSizedPtr":
+        ptr = rawptr(get(val, "m_data"))
+    elif name == "HPHP::LockFreePtrWrapper":
+        ptr = rawptr(get(val, "val"))
+    elif name == "HPHP::TokenOrPtr":
+        compact = get(val, "m_compact")  # HPHP::CompactTaggedPtr
+        data = val.CreateValueFromExpression("(tmp)", str(compact.unsigned >> 2))
+        ptr = rawptr(data.Cast(compact.type.GetPointerType()))  # Stop the recursion by turning into pointer
 
     if ptr is not None:
         return rawptr(ptr)
 
     return None
-
 
 
 def deref(val: lldb.SBValue) -> lldb.SBValue:
@@ -326,7 +329,7 @@ def deref(val: lldb.SBValue) -> lldb.SBValue:
 # Name accessor
 
 
-def _full_func_name(func):
+def _full_func_name(func: lldb.SBValue) -> str:
     attrs = atomic_get(get(func, 'm_attrs', 'm_attrs'))
     if attrs.unsigned & Enum("HPHP::Attr", "AttrIsMethCaller", func.target).unsigned:
         cls = ""
@@ -344,7 +347,7 @@ def nameof(val: lldb.SBValue) -> typing.Optional[str]:
     """ Get the name of various HPHP objects, like functions or classes.
 
     Arguments:
-        val: the value to get the name of
+        val: the value to get the name of (a Func, Class, or ObjectData)
     Returns:
         A Python string, if there is name associated with the object; otherwise None
     """
@@ -407,3 +410,60 @@ def string_data_val(val: lldb.SBValue, keep_case=True):
 
     return cstring if keep_case else cstring.lower()
 
+
+#------------------------------------------------------------------------------
+# Architecture
+
+def arch(target: lldb.SBTarget) -> str:
+    """ Get the current architecture (e.g. "x86_64" or "aarch64") """
+    try:
+        return target.triple.split("-")[0]
+    except Exception:
+        return None
+
+
+def arch_regs(target: lldb.SBTarget) -> typing.Dict[str, str]:
+    """ Get a mapping from common register names to the actual register names
+        as used in either x86 or ARM
+
+    Arguments:
+        target: the target associated with the current debugging session
+
+    Returns:
+        A mapping from register name to register name
+    """
+    a = arch(target)
+
+    # TODO check that this is the architecture string returned from the first part
+    #      of the `arch()` triple when running on ARM
+    if a == 'aarch64':
+        return {
+            'fp': 'x29',
+            'sp': 'sp',
+            'ip': 'pc',
+            'cross_jit_save': ['x19', 'x20', 'x21', 'x22', 'x23',
+                               'x24', 'x25', 'x26', 'x27', 'x28',
+                               'd8', 'd9', 'd10', 'd11', 'd12',
+                               'd13', 'd14', 'd15'
+            ],
+        }
+    else:
+        return {
+            'fp': 'rbp',
+            'sp': 'rsp',
+            'ip': 'rip',
+            'cross_jit_save': ['rbx', 'r12', 'r13', 'r14', 'r15'],
+        }
+
+def reg(name: str, frame: lldb.SBFrame) -> typing.Optional[lldb.SBValue]:
+    """ Get the value of a register given its common name (e.g. "fp", "sp", etc.)
+
+    Arguments:
+        name: Name of the register
+        frame: Current frame
+
+    Returns:
+        The value of the register, wrapped in a lldb.SBValue, or None if unrecognized
+    """
+    name = arch_regs(frame.thread.process.target)[name]
+    return frame.register[name]

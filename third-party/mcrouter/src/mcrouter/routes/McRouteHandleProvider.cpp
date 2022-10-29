@@ -237,45 +237,7 @@ MemcacheRouterInfo::RouteHandlePtr wrapAxonLogRoute(
   if (needAxonlog) {
     checkLogic(
         makeAxonLogRoute, "AxonLogRoute is not implemented for this router");
-    folly::StringPiece axonlogTier;
-    int64_t axonlogBaseId;
-    bool needAxonAllDelete{false};
-    int64_t maxTask{-1};
-    if (auto* jAxonLogTier = json.get_ptr("axonlog_tier")) {
-      axonlogTier = parseString(*jAxonLogTier, "axonlog_tier");
-    } else {
-      throwLogic(
-          "AxonLogRoute over {}: 'axonlog_tier' property is missing",
-          route->routeName());
-    }
-    if (auto* jAxonlogBaseId = json.get_ptr("axonlog_base_id")) {
-      axonlogBaseId = parseInt(
-          *jAxonlogBaseId,
-          "axonlog_base_id",
-          1,
-          std::numeric_limits<int64_t>::max());
-    } else {
-      throwLogic(
-          "AxonLogRoute over {}: 'axonlog_base_id' property is missing",
-          route->routeName());
-    }
-    if (auto* jNeedAxonAllDelete = json.get_ptr("axonlog_all_delete")) {
-      needAxonAllDelete = parseBool(*jNeedAxonAllDelete, "axonlog_all_delete");
-    }
-    if (auto* jMaxAxonTask = json.get_ptr("axonlog_max_task")) {
-      maxTask = parseInt(
-          *jMaxAxonTask,
-          "axonlog_max_task",
-          0,
-          std::numeric_limits<int64_t>::max());
-    }
-    return makeAxonLogRoute(
-        std::move(route),
-        proxy,
-        axonlogTier,
-        axonlogBaseId,
-        needAxonAllDelete,
-        maxTask);
+    return makeAxonLogRoute(std::move(route), proxy, json);
   }
   return route;
 }

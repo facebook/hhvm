@@ -2055,6 +2055,7 @@ let rec check_constant_expr env expr =
          | Aast.Id (_, "static") -> false
          | _ -> true ->
     true
+  | Aast.Upcast (e, _) -> check_constant_expr env e
   | Aast.Unop
       ((Ast_defs.Uplus | Ast_defs.Uminus | Ast_defs.Utild | Ast_defs.Unot), e)
     ->
@@ -2082,7 +2083,9 @@ let rec check_constant_expr env expr =
   | Aast.Call ((_, _, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.AutoimportedFunctions.fun_
          || String.equal cn SN.AutoimportedFunctions.class_meth
-         || String.equal cn SN.StdlibFunctions.array_mark_legacy ->
+         || String.equal cn SN.StdlibFunctions.array_mark_legacy
+         || String.equal cn SN.PseudoFunctions.unsafe_cast
+         || String.equal cn SN.PseudoFunctions.unsafe_nonnull_cast ->
     arg_unpack_unexpected unpacked_element;
     List.for_all el ~f:(fun (_, e) -> check_constant_expr env e)
   | Aast.Tuple el -> List.for_all el ~f:(check_constant_expr env)

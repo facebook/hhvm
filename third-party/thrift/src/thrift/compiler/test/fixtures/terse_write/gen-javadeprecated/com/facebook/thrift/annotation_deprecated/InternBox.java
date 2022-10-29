@@ -23,6 +23,10 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Indicates that a field's value should never be stored on the stack, and that
+ * identical values can be shared in immutable contexts.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class InternBox implements TBase, java.io.Serializable, Cloneable, Comparable<InternBox> {
   private static final TStruct STRUCT_DESC = new TStruct("InternBox");

@@ -91,6 +91,8 @@ struct CppRefTerseStruct {
   2: i32 shared_int_field (py3.hidden);
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   3: i32 shared_const_int_field (py3.hidden);
+  @thrift.InternBox
+  4: MyStruct intern_boxed_field;
 }
 
 struct MixedFieldsStruct {
@@ -212,4 +214,10 @@ struct TerseStructs2 {
 @thrift.TerseWrite
 struct TerseStructs3 {
   3: MyStruct field3;
+}
+
+@thrift.TerseWrite
+struct TerseInternBoxedStructWithCustomDefault {
+  @thrift.InternBox
+  1: MyStructWithCustomDefault intern_boxed_field_with_custom_default;
 }

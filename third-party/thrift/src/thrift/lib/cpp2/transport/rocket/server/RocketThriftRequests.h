@@ -44,9 +44,25 @@ namespace rocket {
 class Payload;
 class RocketServerFrameContext;
 
+class RocketThriftRequest : public ThriftRequestCore {
+ public:
+  RocketThriftRequest(
+      server::ServerConfigs& serverConfigs,
+      RequestRpcMetadata&& metadata,
+      Cpp2ConnContext& connContext,
+      folly::EventBase& evb,
+      RocketServerFrameContext&& context);
+
+  folly::EventBase* getEventBase() noexcept final { return &evb_; }
+
+ protected:
+  folly::EventBase& evb_;
+  RocketServerFrameContext context_;
+};
+
 // Object corresponding to rsocket REQUEST_RESPONSE request (single
 // request-single response) handled by Thrift server
-class ThriftServerRequestResponse final : public ThriftRequestCore {
+class ThriftServerRequestResponse final : public RocketThriftRequest {
  public:
   ThriftServerRequestResponse(
       RequestsRegistry::DebugStub& debugStubToInit,
@@ -76,21 +92,17 @@ class ThriftServerRequestResponse final : public ThriftRequestCore {
       std::unique_ptr<folly::IOBuf> data,
       apache::thrift::MessageChannel::SendCallbackPtr) noexcept override;
 
-  folly::EventBase* getEventBase() noexcept override { return &evb_; }
-
   bool isStream() const override { return false; }
 
   void closeConnection(folly::exception_wrapper ew) noexcept override;
 
  private:
-  folly::EventBase& evb_;
-  RocketServerFrameContext context_;
   const int32_t version_;
 };
 
 // Object corresponding to rsocket REQUEST_FNF request (one-way request) handled
 // by Thrift server
-class ThriftServerRequestFnf final : public ThriftRequestCore {
+class ThriftServerRequestFnf final : public RocketThriftRequest {
  public:
   ThriftServerRequestFnf(
       RequestsRegistry::DebugStub& debugStubToInit,
@@ -122,19 +134,15 @@ class ThriftServerRequestFnf final : public ThriftRequestCore {
       std::unique_ptr<folly::IOBuf> data,
       apache::thrift::MessageChannel::SendCallbackPtr) noexcept override;
 
-  folly::EventBase* getEventBase() noexcept override { return &evb_; }
-
   void closeConnection(folly::exception_wrapper ew) noexcept override;
 
  private:
-  folly::EventBase& evb_;
-  RocketServerFrameContext context_;
   folly::Function<void()> onComplete_;
 };
 
 // Object corresponding to rsocket REQUEST_STREAM request (initial request to
 // establish stream) handled by Thrift server
-class ThriftServerRequestStream final : public ThriftRequestCore {
+class ThriftServerRequestStream final : public RocketThriftRequest {
  public:
   ThriftServerRequestStream(
       RequestsRegistry::DebugStub& debugStubToInit,
@@ -178,15 +186,11 @@ class ThriftServerRequestStream final : public ThriftRequestCore {
       std::unique_ptr<folly::IOBuf>,
       ::apache::thrift::detail::ServerStreamFactory&&) noexcept override;
 
-  folly::EventBase* getEventBase() noexcept override { return &evb_; }
-
   bool isStream() const override { return true; }
 
   void closeConnection(folly::exception_wrapper ew) noexcept override;
 
  private:
-  folly::EventBase& evb_;
-  RocketServerFrameContext context_;
   const int32_t version_;
   RocketStreamClientCallback* clientCallback_;
 
@@ -195,7 +199,7 @@ class ThriftServerRequestStream final : public ThriftRequestCore {
 
 // Object corresponding to rsocket sink (REQUEST_CHANNEL) request (initial
 // request to establish stream) handled by Thrift server
-class ThriftServerRequestSink final : public ThriftRequestCore {
+class ThriftServerRequestSink final : public RocketThriftRequest {
  public:
   ThriftServerRequestSink(
       RequestsRegistry::DebugStub& debugStubToInit,
@@ -239,15 +243,11 @@ class ThriftServerRequestSink final : public ThriftRequestCore {
       SinkServerCallbackPtr) noexcept override;
 #endif
 
-  folly::EventBase* getEventBase() noexcept override { return &evb_; }
-
   bool isSink() const override { return true; }
 
   void closeConnection(folly::exception_wrapper ew) noexcept override;
 
  private:
-  folly::EventBase& evb_;
-  RocketServerFrameContext context_;
   const int32_t version_;
   RocketSinkClientCallback* clientCallback_;
 

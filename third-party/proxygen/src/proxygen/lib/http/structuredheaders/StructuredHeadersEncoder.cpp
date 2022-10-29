@@ -8,6 +8,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/variant.hpp>
+#include <folly/base64.h>
 #include <glog/logging.h>
 #include <proxygen/lib/http/structuredheaders/StructuredHeadersEncoder.h>
 #include <proxygen/lib/http/structuredheaders/StructuredHeadersUtilities.h>
@@ -149,7 +150,7 @@ EncodeError StructuredHeadersEncoder::encodeBinaryContent(
     const std::string& input) {
 
   outputStream_ << "*";
-  outputStream_ << encodeBase64(input);
+  outputStream_ << folly::base64Encode(input);
   outputStream_ << "*";
 
   return EncodeError::OK;

@@ -34,10 +34,21 @@ let collect_attrs_from_ty_sid ?(include_optional = false) env add bag sid =
 
 let rec collect_attrs_from_ty env set ty =
   let (_, ty) = Env.expand_type env ty in
+  let tenv = Tast_env.tast_env_as_typing_env env in
   match get_node ty with
-  | Tunion (ty :: tys) ->
-    let collect = collect_attrs_from_ty env SSet.empty in
-    List.fold (List.map tys ~f:collect) ~init:(collect ty) ~f:SSet.inter
+  | Tunion tys ->
+    (* Filter out dynamic, as we conservatively assume that anything dynamic
+     * has the appropriate required attrs *)
+    let tys =
+      List.filter tys ~f:(fun ty -> not (Typing_utils.is_dynamic tenv ty))
+    in
+    begin
+      match tys with
+      | [] -> set
+      | ty :: tys ->
+        let collect = collect_attrs_from_ty env SSet.empty in
+        List.fold (List.map tys ~f:collect) ~init:(collect ty) ~f:SSet.inter
+    end
   | Tclass ((_, sid), _, _) ->
     collect_attrs_from_ty_sid
       ~include_optional:true

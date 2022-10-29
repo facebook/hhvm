@@ -136,7 +136,7 @@ void helper<ProtocolReader, ProtocolWriter>::process_exn(
             req->includeEnvelope(), func, &oprot, protoSeqId, nullptr, x),
         ctx->getHeader()->getWriteTransforms());
     eb->runInEventBaseThread(
-        [payload = move(payload), request = move(req)]() mutable {
+        [payload = std::move(payload), request = std::move(req)]() mutable {
           if (request->isStream()) {
             request->sendStreamReply(
                 ResponsePayload::create(std::move(payload)),

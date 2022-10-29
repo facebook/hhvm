@@ -1761,6 +1761,7 @@ class cpp_mstch_field : public mstch_field {
         case t_field::e_req::opt_in_req_out:
           return ns + "intern_boxed_field_ref";
         case t_field::e_req::terse:
+          return ns + "terse_intern_boxed_field_ref";
         case t_field::e_req::required:
         case t_field::e_req::optional:
         default:

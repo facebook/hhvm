@@ -34,7 +34,7 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'Beta', 'Experimental', 'Testing', 'Deprecated', 'ReserveIds', 'Legacy', 'RequiresBackwardCompatibility', 'NoExperimental', 'NoBeta', 'NoLegacy', 'NoDeprecated', 'TerseWrite', 'Box', 'Mixin', 'SerializeInFieldIdOrder', 'GenDefaultEnumValue', 'v1', 'v1beta', 'v1alpha', 'v1test', 'ExceptionMessage', 'BitmaskEnum', 'GenerateRuntimeSchema', 'InternBox']
+__all__ = ['UTF8STRINGS', 'Beta', 'Experimental', 'Testing', 'Deprecated', 'ReserveIds', 'Legacy', 'RequiresBackwardCompatibility', 'NoTesting', 'NoExperimental', 'NoBeta', 'Released', 'NoLegacy', 'NoDeprecated', 'TerseWrite', 'Box', 'Mixin', 'SerializeInFieldIdOrder', 'GenDefaultEnumValue', 'v1', 'v1beta', 'v1alpha', 'v1test', 'ExceptionMessage', 'BitmaskEnum', 'GenerateRuntimeSchema', 'InternBox']
 
 class Beta:
   """
@@ -420,9 +420,28 @@ class Deprecated:
 
 class ReserveIds:
   """
+  Annotate a thrift structured or enum to indicate if ids or values should not be used.
+  
+  For example, you may want to mark ids as deprecated, or these ids
+  might be reserved for other use cases or annotations.
+  
+  The resolved set of disallowed ids is the union of the values in `ids` and
+  the range of values represented in `id_ranges`. Example:
+  
+   // These ids are not allowed: 3, 8, half-open ranges [10, 15), [20, 30)
+   @thrift.ReserveIds{ids = [3, 8], id_ranges = {10: 15, 20: 30}}
+   struct Foo {
+     ...
+     3: i64 f; // Build failure: 3 cannot be used
+   }
+  
   Attributes:
-   - ids
-   - id_ranges
+   - ids: Individual ids that cannot be used.
+   - id_ranges: Represents ranges of ids that cannot be used.
+  
+  Each (key: value) pair represents the half-open range `[key, value)`,
+  where `key` is included and `value` is not. For example the map
+  `{10: 15, 20: 30}` represents the union of id/value ranges `[10, 15)` and `[20, 30)`
   """
 
   thrift_spec = None
@@ -803,9 +822,98 @@ class RequiresBackwardCompatibility:
   def _to_py_deprecated(self):
     return self
 
+class NoTesting:
+  """
+  Disables testing features.
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('NoTesting')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.thrift.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.NoTesting, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.thrift.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.NoTesting, self)
+
+  def _to_py_deprecated(self):
+    return self
+
 class NoExperimental:
   """
-  Best-effort disables experimental features.
+  Disables experimental features.
   """
 
   thrift_spec = None
@@ -894,7 +1002,7 @@ class NoExperimental:
 
 class NoBeta:
   """
-  Best-effort disables @Beta features.
+  Disables @Beta features.
   """
 
   thrift_spec = None
@@ -981,9 +1089,99 @@ class NoBeta:
   def _to_py_deprecated(self):
     return self
 
+class Released:
+  """
+  Indicates a definition/feature must not depend directly on an unreleased
+  or testing definition/feature.
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('Released')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.thrift.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.Released, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.thrift.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.Released, self)
+
+  def _to_py_deprecated(self):
+    return self
+
 class NoLegacy:
   """
-  Best-effort disables @Legacy features.
+  Disables @Legacy features.
   """
 
   thrift_spec = None
@@ -1072,7 +1270,7 @@ class NoLegacy:
 
 class NoDeprecated:
   """
-  Best-effort disables @Deprecated features.
+  Disables @Deprecated features.
   
   Should only be enabled in `test` versions, as deprecated implies removing
   the feature will break current usage (otherwise it would be @Legacy or
@@ -1263,6 +1461,9 @@ class TerseWrite:
     return self
 
 class Box:
+  """
+  Indicates that a field's value should never be stored on the stack.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -2325,6 +2526,10 @@ class GenerateRuntimeSchema:
     return self
 
 class InternBox:
+  """
+  Indicates that a field's value should never be stored on the stack, and that
+  identical values can be shared in immutable contexts.
+  """
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -2532,6 +2737,15 @@ def RequiresBackwardCompatibility__setstate__(self, state):
 RequiresBackwardCompatibility.__getstate__ = lambda self: self.__dict__.copy()
 RequiresBackwardCompatibility.__setstate__ = RequiresBackwardCompatibility__setstate__
 
+all_structs.append(NoTesting)
+NoTesting.thrift_spec = (
+)
+
+NoTesting.thrift_struct_annotations = {
+}
+NoTesting.thrift_field_annotations = {
+}
+
 all_structs.append(NoExperimental)
 NoExperimental.thrift_spec = (
 )
@@ -2548,6 +2762,15 @@ NoBeta.thrift_spec = (
 NoBeta.thrift_struct_annotations = {
 }
 NoBeta.thrift_field_annotations = {
+}
+
+all_structs.append(Released)
+Released.thrift_spec = (
+)
+
+Released.thrift_struct_annotations = {
+}
+Released.thrift_field_annotations = {
 }
 
 all_structs.append(NoLegacy)

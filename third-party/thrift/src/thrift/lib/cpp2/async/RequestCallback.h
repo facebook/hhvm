@@ -40,8 +40,11 @@ namespace thrift {
 struct RpcSizeStats {
   RpcSizeStats() = default;
 
-  uint32_t requestSerializedSizeBytes{0};
-  uint32_t requestWireSizeBytes{0};
+  uint32_t requestSerializedSizeBytes{
+      0}; // size of serialized payload without meta data (uncompressed)
+  uint32_t requestWireSizeBytes{0}; // size of data (possibly compressed)
+  uint32_t requestMetadataAndPayloadSizeBytes{
+      0}; // size of meta data (uncompressed) and data (possibly compressed)
   uint32_t responseSerializedSizeBytes{0};
   uint32_t responseWireSizeBytes{0};
 

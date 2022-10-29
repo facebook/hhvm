@@ -102,6 +102,8 @@ cdef class StructWithInternBox_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self):
         yield "field1", self.field1
         yield "field2", self.field2
+        yield "field3", self.field3
+        yield "field4", self.field4
 
 cdef class StructWithRefTypeUnique_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _module_types.StructWithRefTypeUnique

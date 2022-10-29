@@ -180,6 +180,8 @@ TEST_F(ThriftClientTest, SyncCallRequestResponse) {
     auto& stats = response->responseContext.rpcSizeStats;
     EXPECT_LE(1, stats.requestSerializedSizeBytes);
     EXPECT_LE(stats.requestWireSizeBytes, stats.requestSerializedSizeBytes);
+    EXPECT_LE(
+        stats.requestWireSizeBytes, stats.requestMetadataAndPayloadSizeBytes);
     EXPECT_LE(sizeof("123"), stats.responseSerializedSizeBytes);
     EXPECT_LE(stats.responseWireSizeBytes, stats.responseSerializedSizeBytes);
   };

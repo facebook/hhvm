@@ -229,12 +229,12 @@ class CarbonRouterInstanceBase {
   }
 
   template <class T>
-  auto getAxonClientManager() {
-    return std::static_pointer_cast<T>(axonClientManager_);
+  auto getAxonProxyClientFactory() {
+    return std::static_pointer_cast<T>(axonProxyClientFactory_);
   }
 
-  void setAxonClientManager(std::shared_ptr<void> axonClientManager) {
-    axonClientManager_ = std::move(axonClientManager);
+  void setAxonProxyClientFactory(std::shared_ptr<void> clientFactory) {
+    axonProxyClientFactory_ = std::move(clientFactory);
   }
 
  protected:
@@ -242,8 +242,8 @@ class CarbonRouterInstanceBase {
     metadata_.reset();
   }
 
-  void resetAxonClientManager() {
-    axonClientManager_.reset();
+  void resetAxonProxyClientFactory() {
+    axonProxyClientFactory_.reset();
   }
 
   /**
@@ -323,7 +323,7 @@ class CarbonRouterInstanceBase {
    */
   std::shared_ptr<void> metadata_;
 
-  std::shared_ptr<void> axonClientManager_;
+  std::shared_ptr<void> axonProxyClientFactory_;
 };
 
 } // namespace mcrouter

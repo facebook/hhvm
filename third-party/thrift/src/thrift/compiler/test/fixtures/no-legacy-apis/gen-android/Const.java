@@ -21,6 +21,9 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * The `const` definition scope.
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Const implements TBase, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("Const");

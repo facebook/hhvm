@@ -74,9 +74,9 @@ Optional<std::string> getSha1Hash(const folly::dynamic& pathData) {
  * Process the given Watchman results into a type-safe struct. Throw `UpdateExc`
  * if the results don't conform to the structure we expected.
  */
-Watcher::Results
-parseWatchmanResults(Optional<Clock> lastClock, folly::dynamic&& result) {
-
+Watcher::Results parseWatchmanResults(
+    Optional<Clock> lastClock,
+    folly::dynamic&& result) {
   if (result.count("error")) {
     throw UpdateExc{
         folly::sformat("Got a watchman error: {}\n", folly::toJson(result))};
@@ -178,15 +178,13 @@ folly::dynamic addWatchmanSince(folly::dynamic query, const Clock& clock) {
 struct WatchmanWatcher final
     : public Watcher,
       public std::enable_shared_from_this<WatchmanWatcher> {
-
   WatchmanWatcher(
       folly::dynamic queryExpr,
       std::shared_ptr<Watchman> watchmanClient,
       WatchmanWatcherOpts opts)
-      : m_opts{std::move(opts)}
-      , m_queryExpr{addFieldsToQuery(std::move(queryExpr))}
-      , m_watchmanClient{watchmanClient} {
-  }
+      : m_opts{std::move(opts)},
+        m_queryExpr{addFieldsToQuery(std::move(queryExpr))},
+        m_watchmanClient{watchmanClient} {}
 
   ~WatchmanWatcher() override = default;
   WatchmanWatcher(const WatchmanWatcher&) = delete;
@@ -216,7 +214,7 @@ struct WatchmanWatcher final
         });
   }
 
-private:
+ private:
   folly::SemiFuture<Results>
   getChanges(Clock lastClock, folly::dynamic queryExpr, int32_t retries) {
     return queryWatchman(queryExpr, retries)
@@ -227,8 +225,9 @@ private:
         });
   }
 
-  folly::SemiFuture<folly::dynamic>
-  queryWatchman(folly::dynamic queryExpr, int32_t retries) {
+  folly::SemiFuture<folly::dynamic> queryWatchman(
+      folly::dynamic queryExpr,
+      int32_t retries) {
     auto fut = m_watchmanClient->query(queryExpr);
     if (retries == 0) {
       return fut;

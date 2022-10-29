@@ -23,6 +23,11 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Indicates that an annotation should be included in the runtime schema.
+ * 
+ * See thrift/lib/thrift/schema.thrift
+ */
 @SuppressWarnings({ "unused", "serial" })
 public class Schema implements TBase, java.io.Serializable, Cloneable, Comparable<Schema> {
   private static final TStruct STRUCT_DESC = new TStruct("Schema");

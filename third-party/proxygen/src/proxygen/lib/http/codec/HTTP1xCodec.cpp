@@ -10,12 +10,12 @@
 
 #include <folly/Memory.h>
 #include <folly/Random.h>
+#include <folly/base64.h>
 #include <folly/ssl/OpenSSLHash.h>
 #include <proxygen/lib/http/HTTPHeaderSize.h>
 #include <proxygen/lib/http/RFC2616.h>
 #include <proxygen/lib/http/codec/CodecProtocol.h>
 #include <proxygen/lib/http/codec/CodecUtil.h>
-#include <proxygen/lib/utils/Base64.h>
 
 using folly::IOBuf;
 using folly::IOBufQueue;
@@ -343,7 +343,7 @@ constexpr folly::StringPiece kWSMagicString =
 std::string HTTP1xCodec::generateWebsocketKey() const {
   std::array<unsigned char, 16> arr;
   folly::Random::secureRandom(arr.data(), arr.size());
-  return Base64::encode(folly::ByteRange(arr.data(), arr.size()));
+  return folly::base64Encode(std::string_view((char*)arr.data(), arr.size()));
 }
 
 std::string HTTP1xCodec::generateWebsocketAccept(const std::string& key) const {
@@ -354,7 +354,8 @@ std::string HTTP1xCodec::generateWebsocketAccept(const std::string& key) const {
   std::array<unsigned char, 20> arr;
   folly::MutableByteRange accept(arr.data(), arr.size());
   digest.hash_final(accept);
-  return Base64::encode(accept);
+  return folly::base64Encode(
+      std::string_view((char*)accept.data(), accept.size()));
 }
 
 void HTTP1xCodec::serializeWebsocketHeader(IOBufQueue& writeBuf,

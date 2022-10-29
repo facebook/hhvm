@@ -313,7 +313,7 @@ abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'func', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'func', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -357,7 +357,7 @@ abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'func1', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'func1', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -401,7 +401,7 @@ abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'func2', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'func2', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -437,7 +437,7 @@ abstract class Service1AsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -489,7 +489,7 @@ abstract class Service1SyncProcessorBase extends \ThriftSyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'func', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'func', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -533,7 +533,7 @@ abstract class Service1SyncProcessorBase extends \ThriftSyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'func1', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'func1', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -577,7 +577,7 @@ abstract class Service1SyncProcessorBase extends \ThriftSyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'func2', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'func2', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -613,7 +613,7 @@ abstract class Service1SyncProcessorBase extends \ThriftSyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {

@@ -213,7 +213,7 @@ void CurlClient::sendBodyFromFile() {
     unique_ptr<IOBuf> buf = IOBuf::createCombined(kReadSize);
     inputFile_->read((char*)buf->writableData(), kReadSize);
     buf->append(inputFile_->gcount());
-    txn_->sendBody(move(buf));
+    txn_->sendBody(std::move(buf));
   }
   if (!egressPaused_) {
     txn_->sendEOM();

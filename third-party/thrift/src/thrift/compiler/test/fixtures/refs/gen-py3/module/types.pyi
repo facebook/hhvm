@@ -480,16 +480,24 @@ class StructWithInternBox(thrift.py3.types.Struct, _typing.Hashable):
 
     field2: Final[MyField] = ...
 
+    field3: Final[Empty] = ...
+
+    field4: Final[MyField] = ...
+
     def __init__(
         self, *,
         field1: _typing.Optional[Empty]=None,
-        field2: _typing.Optional[MyField]=None
+        field2: _typing.Optional[MyField]=None,
+        field3: _typing.Optional[Empty]=None,
+        field4: _typing.Optional[MyField]=None
     ) -> None: ...
 
     def __call__(
         self, *,
         field1: _typing.Union[Empty, '__NotSet', None]=NOTSET,
-        field2: _typing.Union[MyField, '__NotSet', None]=NOTSET
+        field2: _typing.Union[MyField, '__NotSet', None]=NOTSET,
+        field3: _typing.Union[Empty, '__NotSet', None]=NOTSET,
+        field4: _typing.Union[MyField, '__NotSet', None]=NOTSET
     ) -> StructWithInternBox: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['StructWithInternBox'], bytes]]: ...

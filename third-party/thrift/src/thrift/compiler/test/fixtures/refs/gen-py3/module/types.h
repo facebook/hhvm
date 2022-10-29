@@ -233,6 +233,12 @@ void reset_field<::cpp2::StructWithInternBox>(
     case 1:
       obj.field2_ref().copy_from(default_inst<::cpp2::StructWithInternBox>().field2_ref());
       return;
+    case 2:
+      obj.field3_ref().copy_from(default_inst<::cpp2::StructWithInternBox>().field3_ref());
+      return;
+    case 3:
+      obj.field4_ref().copy_from(default_inst<::cpp2::StructWithInternBox>().field4_ref());
+      return;
   }
 }
 

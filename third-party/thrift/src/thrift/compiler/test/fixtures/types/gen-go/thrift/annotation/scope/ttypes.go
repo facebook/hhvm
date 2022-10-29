@@ -21,12 +21,173 @@ var _ = context.Background
 
 var GoUnusedProtection__ int;
 
+//The `enum` definition scope.
 type Enum = FbthriftInternalEnum
 
 func EnumPtr(v Enum) *Enum { return &v }
 
 func NewEnum() *Enum { return NewFbthriftInternalEnum() }
 
+// Indicates that the scope of sibling annotations is transitive.
+// 
+// For example:
+// 
+//     @scope.Struct
+//     @scope.Union
+//     @scope.Exception
+//     @scope.Transitive
+//     struct Structured {}
+// 
+// Annotating a Thrift struct with @Structured automatically applies
+// @scope.Struct, @scope.Union and @scope.Exception annotations, i.e.
+// 
+//     @Structured
+//     struct MyAnnotation {}
+// 
+// is equivalent to
+// 
+//     @scope.Struct
+//     @scope.Union
+//     @scope.Exception
+//     struct MyAnnotation {}
+// 
+type Transitive struct {
+}
+
+func NewTransitive() *Transitive {
+  return &Transitive{}
+}
+
+type TransitiveBuilder struct {
+  obj *Transitive
+}
+
+func NewTransitiveBuilder() *TransitiveBuilder{
+  return &TransitiveBuilder{
+    obj: NewTransitive(),
+  }
+}
+
+func (p TransitiveBuilder) Emit() *Transitive{
+  return &Transitive{
+  }
+}
+
+func (p *Transitive) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    if err := iprot.Skip(fieldTypeId); err != nil {
+      return err
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *Transitive) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("Transitive"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *Transitive) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  return fmt.Sprintf("Transitive({})")
+}
+
+// Indicates that an annotation should be included in the runtime schema.
+// 
+// See thrift/lib/thrift/schema.thrift
+type Schema struct {
+}
+
+func NewSchema() *Schema {
+  return &Schema{}
+}
+
+type SchemaBuilder struct {
+  obj *Schema
+}
+
+func NewSchemaBuilder() *SchemaBuilder{
+  return &SchemaBuilder{
+    obj: NewSchema(),
+  }
+}
+
+func (p SchemaBuilder) Emit() *Schema{
+  return &Schema{
+  }
+}
+
+func (p *Schema) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    if err := iprot.Skip(fieldTypeId); err != nil {
+      return err
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *Schema) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("Schema"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *Schema) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  return fmt.Sprintf("Schema({})")
+}
+
+// The Program scope.
+// 
+// This allows annotations on the `package` definition, which implies the
+// annotaiton applies to the entire program.
 type Program struct {
 }
 
@@ -92,6 +253,7 @@ func (p *Program) String() string {
   return fmt.Sprintf("Program({})")
 }
 
+// The `struct` definition scope.
 type Struct struct {
 }
 
@@ -157,6 +319,7 @@ func (p *Struct) String() string {
   return fmt.Sprintf("Struct({})")
 }
 
+// The `union` definition scope.
 type Union struct {
 }
 
@@ -222,6 +385,7 @@ func (p *Union) String() string {
   return fmt.Sprintf("Union({})")
 }
 
+// The `exception` definition scope.
 type Exception struct {
 }
 
@@ -287,6 +451,7 @@ func (p *Exception) String() string {
   return fmt.Sprintf("Exception({})")
 }
 
+// Field declartaions, for example in `struct` or `function` declartions.
 type Field struct {
 }
 
@@ -352,6 +517,7 @@ func (p *Field) String() string {
   return fmt.Sprintf("Field({})")
 }
 
+// The `typedef` definition scope.
 type Typedef struct {
 }
 
@@ -417,6 +583,7 @@ func (p *Typedef) String() string {
   return fmt.Sprintf("Typedef({})")
 }
 
+// The `service` definition scope.
 type Service struct {
 }
 
@@ -482,6 +649,7 @@ func (p *Service) String() string {
   return fmt.Sprintf("Service({})")
 }
 
+// The `interaction` definition scope.
 type Interaction struct {
 }
 
@@ -547,6 +715,7 @@ func (p *Interaction) String() string {
   return fmt.Sprintf("Interaction({})")
 }
 
+// The `function` definition scope.
 type Function struct {
 }
 
@@ -612,6 +781,7 @@ func (p *Function) String() string {
   return fmt.Sprintf("Function({})")
 }
 
+// The Enum value definition scope.
 type EnumValue struct {
 }
 
@@ -677,6 +847,7 @@ func (p *EnumValue) String() string {
   return fmt.Sprintf("EnumValue({})")
 }
 
+// The `const` definition scope.
 type Const struct {
 }
 
@@ -740,71 +911,6 @@ func (p *Const) String() string {
   }
 
   return fmt.Sprintf("Const({})")
-}
-
-type Schema struct {
-}
-
-func NewSchema() *Schema {
-  return &Schema{}
-}
-
-type SchemaBuilder struct {
-  obj *Schema
-}
-
-func NewSchemaBuilder() *SchemaBuilder{
-  return &SchemaBuilder{
-    obj: NewSchema(),
-  }
-}
-
-func (p SchemaBuilder) Emit() *Schema{
-  return &Schema{
-  }
-}
-
-func (p *Schema) Read(iprot thrift.Protocol) error {
-  if _, err := iprot.ReadStructBegin(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
-  }
-
-
-  for {
-    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
-    if err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
-    }
-    if fieldTypeId == thrift.STOP { break; }
-    if err := iprot.Skip(fieldTypeId); err != nil {
-      return err
-    }
-    if err := iprot.ReadFieldEnd(); err != nil {
-      return err
-    }
-  }
-  if err := iprot.ReadStructEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
-  }
-  return nil
-}
-
-func (p *Schema) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("Schema"); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
-  if err := oprot.WriteFieldStop(); err != nil {
-    return thrift.PrependError("write field stop error: ", err) }
-  if err := oprot.WriteStructEnd(); err != nil {
-    return thrift.PrependError("write struct stop error: ", err) }
-  return nil
-}
-
-func (p *Schema) String() string {
-  if p == nil {
-    return "<nil>"
-  }
-
-  return fmt.Sprintf("Schema({})")
 }
 
 type FbthriftInternalEnum struct {
@@ -872,71 +978,7 @@ func (p *FbthriftInternalEnum) String() string {
   return fmt.Sprintf("FbthriftInternalEnum({})")
 }
 
-type Transitive struct {
-}
-
-func NewTransitive() *Transitive {
-  return &Transitive{}
-}
-
-type TransitiveBuilder struct {
-  obj *Transitive
-}
-
-func NewTransitiveBuilder() *TransitiveBuilder{
-  return &TransitiveBuilder{
-    obj: NewTransitive(),
-  }
-}
-
-func (p TransitiveBuilder) Emit() *Transitive{
-  return &Transitive{
-  }
-}
-
-func (p *Transitive) Read(iprot thrift.Protocol) error {
-  if _, err := iprot.ReadStructBegin(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
-  }
-
-
-  for {
-    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
-    if err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
-    }
-    if fieldTypeId == thrift.STOP { break; }
-    if err := iprot.Skip(fieldTypeId); err != nil {
-      return err
-    }
-    if err := iprot.ReadFieldEnd(); err != nil {
-      return err
-    }
-  }
-  if err := iprot.ReadStructEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
-  }
-  return nil
-}
-
-func (p *Transitive) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("Transitive"); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
-  if err := oprot.WriteFieldStop(); err != nil {
-    return thrift.PrependError("write field stop error: ", err) }
-  if err := oprot.WriteStructEnd(); err != nil {
-    return thrift.PrependError("write struct stop error: ", err) }
-  return nil
-}
-
-func (p *Transitive) String() string {
-  if p == nil {
-    return "<nil>"
-  }
-
-  return fmt.Sprintf("Transitive({})")
-}
-
+// A scope that includes all 'structured' definitions.
 type Structured struct {
 }
 
@@ -1002,6 +1044,7 @@ func (p *Structured) String() string {
   return fmt.Sprintf("Structured({})")
 }
 
+// A scope that includes all 'interface' definitions.
 type Interface struct {
 }
 
@@ -1067,6 +1110,7 @@ func (p *Interface) String() string {
   return fmt.Sprintf("Interface({})")
 }
 
+// A scope that includes all program-scoped definition.
 type RootDefinition struct {
 }
 
@@ -1132,6 +1176,7 @@ func (p *RootDefinition) String() string {
   return fmt.Sprintf("RootDefinition({})")
 }
 
+// A scope that includes all definitions.
 type Definition struct {
 }
 

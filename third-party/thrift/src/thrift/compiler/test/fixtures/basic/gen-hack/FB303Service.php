@@ -162,7 +162,7 @@ abstract class FB303ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'renamed_rpc', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'renamed_rpc', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -198,7 +198,7 @@ abstract class FB303ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -250,7 +250,7 @@ abstract class FB303ServiceSyncProcessorBase extends \ThriftSyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'renamed_rpc', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'renamed_rpc', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {
@@ -286,7 +286,7 @@ abstract class FB303ServiceSyncProcessorBase extends \ThriftSyncProcessor {
     }
     else if ($output is \TCompactProtocolAccelerated)
     {
-      \thrift_protocol_write_compact($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid);
+      \thrift_protocol_write_compact2($output, 'getThriftServiceMetadata', $reply_type, $result, $seqid, false, \TCompactProtocolBase::VERSION);
     }
     else
     {

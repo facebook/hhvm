@@ -24,7 +24,7 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 /**
- * Best-effort disables @Legacy features.
+ * Disables @Legacy features.
  */
 @SuppressWarnings({ "unused", "serial" })
 public class NoLegacy implements TBase, java.io.Serializable, Cloneable, Comparable<NoLegacy> {

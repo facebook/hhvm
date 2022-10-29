@@ -9,6 +9,159 @@
 namespace thrift\annotation;
 
 /**
+ * Indicates that the scope of sibling annotations is transitive.
+ * 
+ * For example:
+ * 
+ *     @scope.Struct
+ *     @scope.Union
+ *     @scope.Exception
+ *     @scope.Transitive
+ *     struct Structured {}
+ * 
+ * Annotating a Thrift struct with @Structured automatically applies
+ * @scope.Struct, @scope.Union and @scope.Exception annotations, i.e.
+ * 
+ *     @Structured
+ *     struct MyAnnotation {}
+ * 
+ * is equivalent to
+ * 
+ *     @scope.Struct
+ *     @scope.Union
+ *     @scope.Exception
+ *     struct MyAnnotation {}
+ * 
+ *
+ * Original thrift struct:-
+ * Transitive
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/Transitive'))>>
+class Transitive implements \IThriftSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Transitive';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "scope.Transitive",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+/**
+ * Indicates that an annotation should be included in the runtime schema.
+ * 
+ * See thrift/lib/thrift/schema.thrift
+ *
+ * Original thrift struct:-
+ * Schema
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/Schema'))>>
+class Schema implements \IThriftSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Schema';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "scope.Schema",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+/**
+ * The Program scope.
+ * 
+ * This allows annotations on the `package` definition, which implies the
+ * annotaiton applies to the entire program.
+ *
  * Original thrift struct:-
  * Program
  */
@@ -69,6 +222,8 @@ class Program implements \IThriftSyncStruct {
 }
 
 /**
+ * The `struct` definition scope.
+ *
  * Original thrift struct:-
  * Struct
  */
@@ -129,6 +284,8 @@ class Struct implements \IThriftSyncStruct {
 }
 
 /**
+ * The `union` definition scope.
+ *
  * Original thrift struct:-
  * Union
  */
@@ -189,6 +346,8 @@ class Union implements \IThriftSyncStruct {
 }
 
 /**
+ * The `exception` definition scope.
+ *
  * Original thrift struct:-
  * Exception
  */
@@ -249,6 +408,8 @@ class Exception implements \IThriftSyncStruct {
 }
 
 /**
+ * Field declartaions, for example in `struct` or `function` declartions.
+ *
  * Original thrift struct:-
  * Field
  */
@@ -309,6 +470,8 @@ class Field implements \IThriftSyncStruct {
 }
 
 /**
+ * The `typedef` definition scope.
+ *
  * Original thrift struct:-
  * Typedef
  */
@@ -369,6 +532,8 @@ class Typedef implements \IThriftSyncStruct {
 }
 
 /**
+ * The `service` definition scope.
+ *
  * Original thrift struct:-
  * Service
  */
@@ -429,6 +594,8 @@ class Service implements \IThriftSyncStruct {
 }
 
 /**
+ * The `interaction` definition scope.
+ *
  * Original thrift struct:-
  * Interaction
  */
@@ -489,6 +656,8 @@ class Interaction implements \IThriftSyncStruct {
 }
 
 /**
+ * The `function` definition scope.
+ *
  * Original thrift struct:-
  * Function
  */
@@ -549,6 +718,8 @@ class TFunction implements \IThriftSyncStruct {
 }
 
 /**
+ * The Enum value definition scope.
+ *
  * Original thrift struct:-
  * EnumValue
  */
@@ -609,6 +780,8 @@ class EnumValue implements \IThriftSyncStruct {
 }
 
 /**
+ * The `const` definition scope.
+ *
  * Original thrift struct:-
  * Const
  */
@@ -649,66 +822,6 @@ class TConst implements \IThriftSyncStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
         "name" => "scope.Const",
-        "is_union" => false,
-      )
-    );
-  }
-
-  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
-    return shape(
-      'struct' => dict[],
-      'fields' => dict[
-      ],
-    );
-  }
-
-  public function getInstanceKey()[write_props]: string {
-    return \TCompactSerializer::serialize($this);
-  }
-
-}
-
-/**
- * Original thrift struct:-
- * Schema
- */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/Schema'))>>
-class Schema implements \IThriftSyncStruct {
-  use \ThriftSerializationTrait;
-
-  const dict<int, this::TFieldSpec> SPEC = dict[
-  ];
-  const dict<string, int> FIELDMAP = dict[
-  ];
-
-  const type TConstructorShape = shape(
-  );
-
-  const int STRUCTURAL_ID = 957977401221134810;
-
-  public function __construct()[] {
-  }
-
-  public static function withDefaultValues()[]: this {
-    return new static();
-  }
-
-  public static function fromShape(self::TConstructorShape $shape)[]: this {
-    return new static(
-    );
-  }
-
-  public function getName()[]: string {
-    return 'Schema';
-  }
-
-  public function clearTerseFields()[write_props]: void {
-  }
-
-  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return \tmeta_ThriftStruct::fromShape(
-      shape(
-        "name" => "scope.Schema",
         "is_union" => false,
       )
     );
@@ -789,66 +902,8 @@ class FbthriftInternalEnum implements \IThriftSyncStruct {
 }
 
 /**
- * Original thrift struct:-
- * Transitive
- */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/Transitive'))>>
-class Transitive implements \IThriftSyncStruct {
-  use \ThriftSerializationTrait;
-
-  const dict<int, this::TFieldSpec> SPEC = dict[
-  ];
-  const dict<string, int> FIELDMAP = dict[
-  ];
-
-  const type TConstructorShape = shape(
-  );
-
-  const int STRUCTURAL_ID = 957977401221134810;
-
-  public function __construct()[] {
-  }
-
-  public static function withDefaultValues()[]: this {
-    return new static();
-  }
-
-  public static function fromShape(self::TConstructorShape $shape)[]: this {
-    return new static(
-    );
-  }
-
-  public function getName()[]: string {
-    return 'Transitive';
-  }
-
-  public function clearTerseFields()[write_props]: void {
-  }
-
-  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return \tmeta_ThriftStruct::fromShape(
-      shape(
-        "name" => "scope.Transitive",
-        "is_union" => false,
-      )
-    );
-  }
-
-  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
-    return shape(
-      'struct' => dict[],
-      'fields' => dict[
-      ],
-    );
-  }
-
-  public function getInstanceKey()[write_props]: string {
-    return \TCompactSerializer::serialize($this);
-  }
-
-}
-
-/**
+ * A scope that includes all 'structured' definitions.
+ *
  * Original thrift struct:-
  * Structured
  */
@@ -926,6 +981,8 @@ class Structured implements \IThriftSyncStruct {
 }
 
 /**
+ * A scope that includes all 'interface' definitions.
+ *
  * Original thrift struct:-
  * Interface
  */
@@ -999,6 +1056,8 @@ class TInterface implements \IThriftSyncStruct {
 }
 
 /**
+ * A scope that includes all program-scoped definition.
+ *
  * Original thrift struct:-
  * RootDefinition
  */
@@ -1084,6 +1143,8 @@ class RootDefinition implements \IThriftSyncStruct {
 }
 
 /**
+ * A scope that includes all definitions.
+ *
  * Original thrift struct:-
  * Definition
  */

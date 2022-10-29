@@ -400,6 +400,16 @@ void handleStreamError(
 
 } // namespace
 
+RocketThriftRequest::RocketThriftRequest(
+    server::ServerConfigs& serverConfigs,
+    RequestRpcMetadata&& metadata,
+    Cpp2ConnContext& connContext,
+    folly::EventBase& evb,
+    RocketServerFrameContext&& context)
+    : ThriftRequestCore(serverConfigs, std::move(metadata), connContext),
+      evb_(evb),
+      context_(std::move(context)) {}
+
 ThriftServerRequestResponse::ThriftServerRequestResponse(
     RequestsRegistry::DebugStub& debugStubToInit,
     folly::EventBase& evb,
@@ -411,9 +421,12 @@ ThriftServerRequestResponse::ThriftServerRequestResponse(
     rocket::Payload&& debugPayload,
     RocketServerFrameContext&& context,
     int32_t version)
-    : ThriftRequestCore(serverConfigs, std::move(metadata), connContext),
-      evb_(evb),
-      context_(std::move(context)),
+    : RocketThriftRequest(
+          serverConfigs,
+          std::move(metadata),
+          connContext,
+          evb,
+          std::move(context)),
       version_(version) {
   new (&debugStubToInit) RequestsRegistry::DebugStub(
       reqRegistry,
@@ -475,9 +488,12 @@ ThriftServerRequestFnf::ThriftServerRequestFnf(
     rocket::Payload&& debugPayload,
     RocketServerFrameContext&& context,
     folly::Function<void()> onComplete)
-    : ThriftRequestCore(serverConfigs, std::move(metadata), connContext),
-      evb_(evb),
-      context_(std::move(context)),
+    : RocketThriftRequest(
+          serverConfigs,
+          std::move(metadata),
+          connContext,
+          evb,
+          std::move(context)),
       onComplete_(std::move(onComplete)) {
   new (&debugStubToInit) RequestsRegistry::DebugStub(
       reqRegistry,
@@ -531,9 +547,12 @@ ThriftServerRequestStream::ThriftServerRequestStream(
     int32_t version,
     RocketStreamClientCallback* clientCallback,
     std::shared_ptr<AsyncProcessor> cpp2Processor)
-    : ThriftRequestCore(serverConfigs, std::move(metadata), connContext),
-      evb_(evb),
-      context_(std::move(context)),
+    : RocketThriftRequest(
+          serverConfigs,
+          std::move(metadata),
+          connContext,
+          evb,
+          std::move(context)),
       version_(version),
       clientCallback_(clientCallback),
       cpp2Processor_(std::move(cpp2Processor)) {
@@ -641,9 +660,12 @@ ThriftServerRequestSink::ThriftServerRequestSink(
     int32_t version,
     RocketSinkClientCallback* clientCallback,
     std::shared_ptr<AsyncProcessor> cpp2Processor)
-    : ThriftRequestCore(serverConfigs, std::move(metadata), connContext),
-      evb_(evb),
-      context_(std::move(context)),
+    : RocketThriftRequest(
+          serverConfigs,
+          std::move(metadata),
+          connContext,
+          evb,
+          std::move(context)),
       version_(version),
       clientCallback_(clientCallback),
       cpp2Processor_(std::move(cpp2Processor)) {

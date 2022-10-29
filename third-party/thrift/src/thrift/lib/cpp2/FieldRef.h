@@ -234,6 +234,14 @@ using EnableIfConst =
 template <typename value_type, typename return_type = value_type>
 using EnableIfNonConst =
     std::enable_if_t<!std::is_const<value_type>::value, return_type>;
+
+template <typename T, typename U>
+using EnableIfImplicit = std::enable_if_t<
+    std::is_same<
+        std::add_const_t<std::remove_reference_t<U>>,
+        std::remove_reference_t<T>>{} &&
+    !(std::is_rvalue_reference<T>{} && std::is_lvalue_reference<U>{})>;
+
 } // namespace detail
 
 // A reference to an unqualified field of the possibly const-qualified type
@@ -267,14 +275,7 @@ class field_ref {
       const uint8_t bit_index = 0) noexcept
       : value_(value), bitref_(is_set, bit_index) {}
 
-  template <
-      typename U,
-      std::enable_if_t<
-          std::is_same<
-              std::add_const_t<std::remove_reference_t<U>>,
-              value_type>{} &&
-              !(std::is_rvalue_reference<T>{} && std::is_lvalue_reference<U>{}),
-          int> = 0>
+  template <typename U, typename = detail::EnableIfImplicit<T, U>>
   FOLLY_ERASE /* implicit */ field_ref(const field_ref<U>& other) noexcept
       : value_(other.value_), bitref_(other.bitref_) {}
 
@@ -505,14 +506,7 @@ class optional_field_ref {
       const uint8_t bit_index = 0) noexcept
       : value_(value), bitref_(is_set, bit_index) {}
 
-  template <
-      typename U,
-      std::enable_if_t<
-          std::is_same<
-              std::add_const_t<std::remove_reference_t<U>>,
-              value_type>{} &&
-              !(std::is_rvalue_reference<T>{} && std::is_lvalue_reference<U>{}),
-          int> = 0>
+  template <typename U, typename = detail::EnableIfImplicit<T, U>>
   FOLLY_ERASE /* implicit */ optional_field_ref(
       const optional_field_ref<U>& other) noexcept
       : value_(other.value_), bitref_(other.bitref_) {}
@@ -855,16 +849,9 @@ class optional_boxed_field_ref {
   FOLLY_ERASE explicit optional_boxed_field_ref(T value) noexcept
       : value_(value) {}
 
-  template <
-      typename U,
-      std::enable_if_t<
-          std::is_same<
-              std::add_const_t<std::remove_reference_t<U>>,
-              std::remove_reference_t<T>>{} &&
-              !(std::is_rvalue_reference<T>{} && std::is_lvalue_reference<U>{}),
-          int> = 0>
-  FOLLY_ERASE /* implicit */ optional_boxed_field_ref(
-      const optional_boxed_field_ref<U>& other) noexcept
+  template <typename U, typename = detail::EnableIfImplicit<T, U>>
+  FOLLY_ERASE /* implicit */
+  optional_boxed_field_ref(const optional_boxed_field_ref<U>& other) noexcept
       : value_(other.value_) {}
 
   template <
@@ -1150,14 +1137,7 @@ class boxed_field_ref {
 
   FOLLY_ERASE explicit boxed_field_ref(T value) noexcept : value_(value) {}
 
-  template <
-      typename U,
-      std::enable_if_t<
-          std::is_same<
-              std::add_const_t<std::remove_reference_t<U>>,
-              std::remove_reference_t<T>>{} &&
-              !(std::is_rvalue_reference<T>{} && std::is_lvalue_reference<U>{}),
-          int> = 0>
+  template <typename U, typename = detail::EnableIfImplicit<T, U>>
   FOLLY_ERASE /* implicit */ boxed_field_ref(
       const boxed_field_ref<U>& other) noexcept
       : value_(other.value_) {}
@@ -1382,14 +1362,7 @@ class intern_boxed_field_ref {
       const uint8_t bit_index = 0) noexcept
       : value_(value), get_default_(get_default), bitref_(is_set, bit_index) {}
 
-  template <
-      typename U,
-      std::enable_if_t<
-          std::is_same<
-              std::add_const_t<std::remove_reference_t<U>>,
-              std::remove_reference_t<T>>{} &&
-              !(std::is_rvalue_reference<T>{} && std::is_lvalue_reference<U>{}),
-          int> = 0>
+  template <typename U, typename = detail::EnableIfImplicit<T, U>>
   FOLLY_ERASE /* implicit */ intern_boxed_field_ref(
       const intern_boxed_field_ref<U>& other) noexcept
       : value_(other.value_), bitref_(other.bitref_) {}
@@ -1617,14 +1590,7 @@ class terse_intern_boxed_field_ref {
       T value, get_default_t get_default) noexcept
       : value_(value), get_default_(get_default) {}
 
-  template <
-      typename U,
-      std::enable_if_t<
-          std::is_same<
-              std::add_const_t<std::remove_reference_t<U>>,
-              std::remove_reference_t<T>>{} &&
-              !(std::is_rvalue_reference<T>{} && std::is_lvalue_reference<U>{}),
-          int> = 0>
+  template <typename U, typename = detail::EnableIfImplicit<T, U>>
   FOLLY_ERASE /* implicit */ terse_intern_boxed_field_ref(
       const terse_intern_boxed_field_ref<U>& other) noexcept
       : value_(other.value_) {}
@@ -1928,14 +1894,7 @@ class required_field_ref {
   FOLLY_ERASE explicit required_field_ref(reference_type value) noexcept
       : value_(value) {}
 
-  template <
-      typename U,
-      std::enable_if_t<
-          std::is_same<
-              std::add_const_t<std::remove_reference_t<U>>,
-              value_type>{} &&
-              !(std::is_rvalue_reference<T>{} && std::is_lvalue_reference<U>{}),
-          int> = 0>
+  template <typename U, typename = detail::EnableIfImplicit<T, U>>
   FOLLY_ERASE /* implicit */ required_field_ref(
       const required_field_ref<U>& other) noexcept
       : value_(other.value_) {}
@@ -2426,14 +2385,7 @@ class terse_field_ref {
 
   FOLLY_ERASE terse_field_ref(reference_type value) noexcept : value_(value) {}
 
-  template <
-      typename U,
-      std::enable_if_t<
-          std::is_same<
-              std::add_const_t<std::remove_reference_t<U>>,
-              value_type>{} &&
-              !(std::is_rvalue_reference<T>{} && std::is_lvalue_reference<U>{}),
-          int> = 0>
+  template <typename U, typename = detail::EnableIfImplicit<T, U>>
   FOLLY_ERASE /* implicit */ terse_field_ref(
       const terse_field_ref<U>& other) noexcept
       : value_(other.value_) {}

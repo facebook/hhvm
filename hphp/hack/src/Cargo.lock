@@ -3124,6 +3124,7 @@ name = "passes"
 version = "0.0.0"
 dependencies = [
  "analysis",
+ "ffi",
  "hash",
  "ir_core",
  "itertools 0.10.3",
@@ -4275,6 +4276,7 @@ version = "0.0.0"
 dependencies = [
  "hash",
  "ir_core",
+ "print",
 ]
 
 [[package]]

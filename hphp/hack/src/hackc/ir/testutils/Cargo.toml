@@ -10,3 +10,4 @@ path = "lib.rs"
 [dependencies]
 hash = { path = "../../../utils/hash" }
 ir_core = { path = "../ir_core" }
+print = { path = "../print" }

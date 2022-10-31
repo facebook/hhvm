@@ -20,6 +20,7 @@ add_dependencies(mcrouter_deps ragel)
 ExternalProject_Add(
   bundled_mcrouter
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
+  BUILD_ALWAYS ON
   PATCH_COMMAND
     "${CMAKE_COMMAND}" -E create_symlink
     "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter-CMakeLists.txt"

@@ -16,7 +16,7 @@
 
 #include <fstream>
 #include <string>
-#include <unordered_set>
+#include <unordered_map>
 #include <vector>
 
 #include <boost/filesystem.hpp>
@@ -25,10 +25,13 @@
 #include <thrift/compiler/ast/t_include.h>
 #include <thrift/compiler/ast/t_type.h>
 #include <thrift/compiler/generate/t_generator.h>
+#include <thrift/compiler/lib/const_util.h>
+#include <thrift/compiler/lib/schematizer.h>
 
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/ast_types_custom_protocol.h>
+#include <thrift/lib/thrift/gen-cpp2/ast_visitation.h>
 
 namespace apache {
 namespace thrift {
@@ -82,26 +85,28 @@ void t_ast_generator::generate_program() {
   f_out_.open(fname.c_str());
 
   cpp2::AST ast;
-  std::unordered_set<const t_program*> visited;
+  std::unordered_map<const t_program*, apache::thrift::type::ProgramId>
+      program_index;
   const_ast_visitor visitor;
   visitor.add_program_visitor([&](const t_program& program) {
-    if (!visited.insert(&program).second) {
+    if (program_index.count(&program)) {
       return;
     }
 
-    ast.schema()->programs()->emplace_back();
-    auto& schema = ast.schema()->programs()->back();
-    auto id = ast.schema()->programs()->size();
-    // Dummy schematization logic. TODO: connect to schematizer
-    schema.name() = program.name();
+    auto& programs = *ast.schema()->programs();
+    auto pos = programs.size();
+    program_index[&program] =
+        static_cast<apache::thrift::type::ProgramId>(pos + 1);
+    hydrate_const(programs.emplace_back(), *schematizer::gen_schema(program));
 
     for (auto* include : program.get_included_programs()) {
+      // This could invalidate references into `programs`.
       visitor(*include);
+      programs.at(pos).includes().ensure().push_back(program_index.at(include));
     }
 
     // TODO: sourceInfo
     // TODO: languageIncludes
-    (void)id;
   });
   // TODO: other visitors
   visitor(*program_);

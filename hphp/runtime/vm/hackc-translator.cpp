@@ -1049,6 +1049,8 @@ void translateFunctionBody(TranslationState& ts,
     }
   }
 
+  ts.fe->maxStackCells = b.stack_depth;
+
   // finish function
   while (ts.fe->numLocals() < ts.maxUnnamed) {
     ts.fe->allocUnnamedLocal();

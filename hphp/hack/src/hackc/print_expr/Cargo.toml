@@ -10,7 +10,7 @@ path = "lib.rs"
 [dependencies]
 anyhow = "1.0.65"
 bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
-bumpalo = { version = "3.8", features = ["collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"] }
 core_utils_rust = { path = "../../utils/core" }
 emit_type_hint = { path = "../emitter/cargo/emit_type_hint" }
 error = { path = "../error/cargo/error" }

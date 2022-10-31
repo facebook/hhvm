@@ -10,7 +10,7 @@ path = "decl_provider.rs"
 [dependencies]
 arena_deserializer = { path = "../../utils/arena_deserializer" }
 bincode = "1.3.3"
-bumpalo = { version = "3.8", features = ["collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"] }
 direct_decl_parser = { path = "../../parser/api/cargo/direct_decl_parser" }
 hash = { path = "../../utils/hash" }
 oxidized = { path = "../../oxidized" }

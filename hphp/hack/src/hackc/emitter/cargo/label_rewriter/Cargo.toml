@@ -8,7 +8,7 @@ edition = "2021"
 path = "../../label_rewriter.rs"
 
 [dependencies]
-bumpalo = { version = "3.8", features = ["collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"] }
 env = { path = "../env" }
 ffi = { path = "../../../../utils/ffi" }
 hash = { path = "../../../../utils/hash" }

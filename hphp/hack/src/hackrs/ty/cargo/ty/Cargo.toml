@@ -9,7 +9,7 @@ path = "../../ty.rs"
 
 [dependencies]
 arena_collections = { path = "../../../../arena_collections" }
-bumpalo = { version = "3.8", features = ["collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"] }
 eq_modulo_pos = { path = "../../../../utils/eq_modulo_pos" }
 hash = { path = "../../../../utils/hash" }
 hcons = { path = "../../../../hcons" }

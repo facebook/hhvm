@@ -8,6 +8,6 @@ edition = "2021"
 path = "../../mode_parser.rs"
 
 [dependencies]
-bumpalo = { version = "3.8", features = ["collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"] }
 parser_core_types = { path = "../core_types" }
 positioned_by_ref_parser = { path = "../../api/cargo/positioned_by_ref_parser" }

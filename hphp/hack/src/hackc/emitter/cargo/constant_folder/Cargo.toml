@@ -9,7 +9,7 @@ path = "../../constant_folder.rs"
 
 [dependencies]
 ast_scope = { path = "../ast_scope" }
-bumpalo = { version = "3.8", features = ["collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"] }
 env = { path = "../env" }
 ffi = { path = "../../../../utils/ffi" }
 hhbc = { path = "../../../hhbc/cargo/hhbc" }

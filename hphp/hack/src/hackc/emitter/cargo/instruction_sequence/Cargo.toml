@@ -8,7 +8,7 @@ edition = "2021"
 path = "../../instruction_sequence.rs"
 
 [dependencies]
-bumpalo = { version = "3.8", features = ["collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"] }
 emit_opcodes_macro = { path = "../../../hhbc/cargo/emit_opcodes_macro" }
 ffi = { path = "../../../../utils/ffi" }
 hhbc = { path = "../../../hhbc/cargo/hhbc" }

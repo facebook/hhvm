@@ -11,7 +11,7 @@ crate-type = ["lib", "staticlib"]
 [dependencies]
 anyhow = "1.0.65"
 bincode = "1.3.3"
-bumpalo = { version = "3.8", features = ["collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"] }
 compile = { path = "../compile/cargo/compile" }
 cxx = "1.0.76"
 decl_provider = { path = "../decl_provider" }

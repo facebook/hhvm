@@ -254,6 +254,16 @@ class ThriftServerRequestSink final : public RocketThriftRequest {
   const std::shared_ptr<AsyncProcessor> cpp2Processor_;
 };
 
+namespace detail {
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    void,
+    onRocketThriftRequestReceived,
+    const RocketServerConnection&,
+    StreamId,
+    RpcKind,
+    const transport::THeader::StringToStringMap&);
+} // namespace detail
+
 } // namespace rocket
 } // namespace thrift
 } // namespace apache

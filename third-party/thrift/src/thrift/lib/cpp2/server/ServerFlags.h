@@ -33,6 +33,7 @@ THRIFT_FLAG_DECLARE_bool(allow_resource_pools_set_thread_manager_from_executor);
 namespace apache::thrift {
 
 bool useResourcePoolsFlagsSet();
+bool allowResourcePoolsForWildcards();
 
 // This is a temporary solution during resource pools roll out. Once
 // roll out is complete there will be no tests that require this and it

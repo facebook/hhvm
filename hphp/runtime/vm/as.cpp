@@ -2373,7 +2373,7 @@ static StaticString s_native("__Native");
  * attribute map and sets the isNative flag accoringly
  * If the give function is op code implementation, then isNative is not set
  */
-void check_native(AsmState& as, bool is_construct) {
+void check_native(AsmState& as) {
   if (as.fe->userAttributes.count(s_native.get())) {
 
     as.fe->isNative =
@@ -2445,7 +2445,7 @@ void parse_function(AsmState& as) {
   // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
 
-  check_native(as, false);
+  check_native(as);
 
   as.in.expectWs('{');
 
@@ -2513,7 +2513,7 @@ void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
   // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
 
-  check_native(as, name == "__construct");
+  check_native(as);
 
   as.in.expectWs('{');
 

@@ -9,6 +9,8 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
+
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
 // These attributes are applied to the static data members to ensure that they
 // are not stripped from the compiled binary, in order to keep them available
@@ -30,51 +32,6 @@
 
 namespace apache {
 namespace thrift {
-
-THRIFT_DATA_MEMBER const std::array<::cpp2::MyEnum, 5> TEnumDataStorage<::cpp2::MyEnum>::values = {{
-  type::MyValue1,
-  type::MyValue2,
-  type::MyValue3,
-  type::MyValue4,
-  type::MyValue5,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TEnumDataStorage<::cpp2::MyEnum>::names = {{
-  "MyValue1",
-  "MyValue2",
-  "MyValue3",
-  "MyValue4",
-  "MyValue5",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::cpp2::MyUnion::Type, 6> TEnumDataStorage<::cpp2::MyUnion::Type>::values = {{
-  type::myEnum,
-  type::myStruct,
-  type::myDataItem,
-  type::complexNestedStruct,
-  type::longValue,
-  type::intValue,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TEnumDataStorage<::cpp2::MyUnion::Type>::names = {{
-  "myEnum",
-  "myStruct",
-  "myDataItem",
-  "complexNestedStruct",
-  "longValue",
-  "intValue",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::cpp2::MyUnionFloatFieldThrowExp::Type, 4> TEnumDataStorage<::cpp2::MyUnionFloatFieldThrowExp::Type>::values = {{
-  type::myEnum,
-  type::setFloat,
-  type::myDataItem,
-  type::complexNestedStruct,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TEnumDataStorage<::cpp2::MyUnionFloatFieldThrowExp::Type>::names = {{
-  "myEnum",
-  "setFloat",
-  "myDataItem",
-  "complexNestedStruct",
-}};
 
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::MyStructFloatFieldThrowExp>::fields_names = {{
   "myLongField",

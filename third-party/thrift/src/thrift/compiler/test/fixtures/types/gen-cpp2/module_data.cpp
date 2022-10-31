@@ -9,6 +9,8 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
+
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
 // These attributes are applied to the static data members to ensure that they
 // are not stripped from the compiled binary, in order to keep them available
@@ -30,39 +32,6 @@
 
 namespace apache {
 namespace thrift {
-
-THRIFT_DATA_MEMBER const std::array<::apache::thrift::fixtures::types::has_bitwise_ops, 5> TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwise_ops>::values = {{
-  type::none,
-  type::zero,
-  type::one,
-  type::two,
-  type::three,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwise_ops>::names = {{
-  "none",
-  "zero",
-  "one",
-  "two",
-  "three",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::apache::thrift::fixtures::types::is_unscoped, 2> TEnumDataStorage<::apache::thrift::fixtures::types::is_unscoped>::values = {{
-  type::hello,
-  type::world,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::fixtures::types::is_unscoped>::names = {{
-  "hello",
-  "world",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::apache::thrift::fixtures::types::MyForwardRefEnum, 2> TEnumDataStorage<::apache::thrift::fixtures::types::MyForwardRefEnum>::values = {{
-  type::ZERO,
-  type::NONZERO,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::fixtures::types::MyForwardRefEnum>::names = {{
-  "ZERO",
-  "NONZERO",
-}};
 
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::fields_names = {{
   "field",

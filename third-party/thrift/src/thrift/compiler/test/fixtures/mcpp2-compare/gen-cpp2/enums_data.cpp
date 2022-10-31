@@ -9,6 +9,8 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
+
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
 // These attributes are applied to the static data members to ensure that they
 // are not stripped from the compiled binary, in order to keep them available
@@ -30,43 +32,6 @@
 
 namespace apache {
 namespace thrift {
-
-THRIFT_DATA_MEMBER const std::array<::facebook::ns::qwerty::AnEnumA, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumA>::values = {{
-  type::FIELDA,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumA>::names = {{
-  "FIELDA",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::facebook::ns::qwerty::AnEnumB, 2> TEnumDataStorage<::facebook::ns::qwerty::AnEnumB>::values = {{
-  type::FIELDA,
-  type::FIELDB,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::facebook::ns::qwerty::AnEnumB>::names = {{
-  "FIELDA",
-  "FIELDB",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::facebook::ns::qwerty::AnEnumC, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumC>::values = {{
-  type::FIELDC,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumC>::names = {{
-  "FIELDC",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::facebook::ns::qwerty::AnEnumD, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumD>::values = {{
-  type::FIELDD,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumD>::names = {{
-  "FIELDD",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::facebook::ns::qwerty::AnEnumE, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumE>::values = {{
-  type::FIELDA,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumE>::names = {{
-  "FIELDA",
-}};
 
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::ns::qwerty::SomeStruct>::fields_names = {{
   "fieldA",

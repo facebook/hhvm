@@ -15,22 +15,72 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::test::fixtures::enumstrict::EmptyEnum> {
   using type = ::test::fixtures::enumstrict::EmptyEnum;
   static constexpr const std::size_t size = 0;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+  }};
 };
 
 template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyEnum> {
   using type = ::test::fixtures::enumstrict::MyEnum;
   static constexpr const std::size_t size = 2;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::ONE,
+      type::TWO,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "ONE",
+      "TWO",
+  }};
 };
 
 template <> struct TEnumDataStorage<::test::fixtures::enumstrict::MyBigEnum> {
   using type = ::test::fixtures::enumstrict::MyBigEnum;
   static constexpr const std::size_t size = 20;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::UNKNOWN,
+      type::ONE,
+      type::TWO,
+      type::THREE,
+      type::FOUR,
+      type::FIVE,
+      type::SIX,
+      type::SEVEN,
+      type::EIGHT,
+      type::NINE,
+      type::TEN,
+      type::ELEVEN,
+      type::TWELVE,
+      type::THIRTEEN,
+      type::FOURTEEN,
+      type::FIFTEEN,
+      type::SIXTEEN,
+      type::SEVENTEEN,
+      type::EIGHTEEN,
+      type::NINETEEN,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "UNKNOWN",
+      "ONE",
+      "TWO",
+      "THREE",
+      "FOUR",
+      "FIVE",
+      "SIX",
+      "SEVEN",
+      "EIGHT",
+      "NINE",
+      "TEN",
+      "ELEVEN",
+      "TWELVE",
+      "THIRTEEN",
+      "FOURTEEN",
+      "FIFTEEN",
+      "SIXTEEN",
+      "SEVENTEEN",
+      "EIGHTEEN",
+      "NINETEEN",
+  }};
 };
 
 template <> struct TStructDataStorage<::test::fixtures::enumstrict::MyStruct> {

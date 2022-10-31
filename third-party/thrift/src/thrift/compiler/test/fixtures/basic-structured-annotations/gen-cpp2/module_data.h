@@ -15,15 +15,27 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyEnum> {
   using type = ::test::fixtures::basic-structured-annotations::MyEnum;
   static constexpr const std::size_t size = 2;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::UNKNOWN,
+      type::ONE,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "UNKNOWN",
+      "ONE",
+  }};
 };
 
 template <> struct TEnumDataStorage<::test::fixtures::basic-structured-annotations::MyUnion::Type> {
   using type = ::test::fixtures::basic-structured-annotations::MyUnion::Type;
   static constexpr const std::size_t size = 2;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::first,
+      type::second,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "first",
+      "second",
+  }};
 };
 
 template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_inline> {

@@ -15,15 +15,27 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::test::fixtures::tablebased::ExampleEnum> {
   using type = ::test::fixtures::tablebased::ExampleEnum;
   static constexpr const std::size_t size = 2;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::ZERO,
+      type::NONZERO,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "ZERO",
+      "NONZERO",
+  }};
 };
 
 template <> struct TEnumDataStorage<::test::fixtures::tablebased::ExampleUnion::Type> {
   using type = ::test::fixtures::tablebased::ExampleUnion::Type;
   static constexpr const std::size_t size = 2;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::fieldA,
+      type::fieldB,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "fieldA",
+      "fieldB",
+  }};
 };
 
 template <> struct TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct> {

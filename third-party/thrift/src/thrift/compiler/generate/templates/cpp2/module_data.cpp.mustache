@@ -20,6 +20,8 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
+
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
 // These attributes are applied to the static data members to ensure that they
 // are not stripped from the compiled binary, in order to keep them available
@@ -41,34 +43,6 @@
 
 namespace apache {
 namespace thrift {
-<%#program:enums%>
-
-THRIFT_DATA_MEMBER const std::array<<% > common/namespace_cpp2%><%enum:cpp_name%>, <%enum:size%>> TEnumDataStorage<<% > common/namespace_cpp2%><%enum:cpp_name%>>::values = {{
-<%#enum:values%><%!
-%>  type::<%enum_value:cpp_name%>,
-<%/enum:values%>
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, <%enum:size%>> TEnumDataStorage<<% > common/namespace_cpp2%><%enum:cpp_name%>>::names = {{
-<%#enum:values%><%!
-%>  "<%enum_value:name%>",
-<%/enum:values%>
-}};
-<%/program:enums%>
-<%#program:structs%>
-<%#struct:union?%>
-
-THRIFT_DATA_MEMBER const std::array<<%struct:cpp_fullname%>::Type, <%struct:num_union_members%>> TEnumDataStorage<<%struct:cpp_fullname%>::Type>::values = {{
-<%#struct:fields%><%!
-%>  type::<%field:cpp_name%>,
-<%/struct:fields%>
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, <%struct:num_union_members%>> TEnumDataStorage<<%struct:cpp_fullname%>::Type>::names = {{
-<%#struct:fields%><%!
-%>  "<%field:name%>",
-<%/struct:fields%>
-}};
-<%/struct:union?%>
-<%/program:structs%>
 <%#program:structs%>
 
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_names = {{

@@ -15,64 +15,244 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum1> {
   using type = ::test_cpp2::cpp_reflection::enum1;
   static constexpr const std::size_t size = 3;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::field0,
+      type::field1,
+      type::field2,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "field0",
+      "field1",
+      "field2",
+  }};
 };
 
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum2> {
   using type = ::test_cpp2::cpp_reflection::enum2;
   static constexpr const std::size_t size = 3;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::field0_2,
+      type::field1_2,
+      type::field2_2,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "field0_2",
+      "field1_2",
+      "field2_2",
+  }};
 };
 
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum3> {
   using type = ::test_cpp2::cpp_reflection::enum3;
   static constexpr const std::size_t size = 2;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::field0_3,
+      type::field1_3,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "field0_3",
+      "field1_3",
+  }};
 };
 
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::enum_with_special_names> {
   using type = ::test_cpp2::cpp_reflection::enum_with_special_names;
   static constexpr const std::size_t size = 28;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::get,
+      type::getter,
+      type::lists,
+      type::maps,
+      type::name,
+      type::name_to_value,
+      type::names,
+      type::prefix_tree,
+      type::sets,
+      type::setter,
+      type::str,
+      type::strings,
+      type::type,
+      type::value,
+      type::value_to_name,
+      type::values,
+      type::id,
+      type::ids,
+      type::descriptor,
+      type::descriptors,
+      type::key,
+      type::keys,
+      type::annotation,
+      type::annotations,
+      type::member,
+      type::members,
+      type::field,
+      type::fields,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "get",
+      "getter",
+      "lists",
+      "maps",
+      "name",
+      "name_to_value",
+      "names",
+      "prefix_tree",
+      "sets",
+      "setter",
+      "str",
+      "strings",
+      "type",
+      "value",
+      "value_to_name",
+      "values",
+      "id",
+      "ids",
+      "descriptor",
+      "descriptors",
+      "key",
+      "keys",
+      "annotation",
+      "annotations",
+      "member",
+      "members",
+      "field",
+      "fields",
+  }};
 };
 
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::union1::Type> {
   using type = ::test_cpp2::cpp_reflection::union1::Type;
   static constexpr const std::size_t size = 4;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::ui,
+      type::ud,
+      type::us,
+      type::ue,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "ui",
+      "ud",
+      "us",
+      "ue",
+  }};
 };
 
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::union2::Type> {
   using type = ::test_cpp2::cpp_reflection::union2::Type;
   static constexpr const std::size_t size = 4;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::ui_2,
+      type::ud_2,
+      type::us_2,
+      type::ue_2,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "ui_2",
+      "ud_2",
+      "us_2",
+      "ue_2",
+  }};
 };
 
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::union3::Type> {
   using type = ::test_cpp2::cpp_reflection::union3::Type;
   static constexpr const std::size_t size = 4;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::ui_3,
+      type::ud_3,
+      type::us_3,
+      type::ue_3,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "ui_3",
+      "ud_3",
+      "us_3",
+      "ue_3",
+  }};
 };
 
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::unionA::Type> {
   using type = ::test_cpp2::cpp_reflection::unionA::Type;
   static constexpr const std::size_t size = 5;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::i,
+      type::d,
+      type::s,
+      type::e,
+      type::a,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "i",
+      "d",
+      "s",
+      "e",
+      "a",
+  }};
 };
 
 template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::union_with_special_names::Type> {
   using type = ::test_cpp2::cpp_reflection::union_with_special_names::Type;
   static constexpr const std::size_t size = 28;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::get,
+      type::getter,
+      type::lists,
+      type::maps,
+      type::name,
+      type::name_to_value,
+      type::names,
+      type::prefix_tree,
+      type::sets,
+      type::setter,
+      type::str,
+      type::strings,
+      type::type,
+      type::value,
+      type::value_to_name,
+      type::values,
+      type::id,
+      type::ids,
+      type::descriptor,
+      type::descriptors,
+      type::key,
+      type::keys,
+      type::annotation,
+      type::annotations,
+      type::member,
+      type::members,
+      type::field,
+      type::fields,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "get",
+      "getter",
+      "lists",
+      "maps",
+      "name",
+      "name_to_value",
+      "names",
+      "prefix_tree",
+      "sets",
+      "setter",
+      "str",
+      "strings",
+      "type",
+      "value",
+      "value_to_name",
+      "values",
+      "id",
+      "ids",
+      "descriptor",
+      "descriptors",
+      "key",
+      "keys",
+      "annotation",
+      "annotations",
+      "member",
+      "members",
+      "field",
+      "fields",
+  }};
 };
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::union1> {

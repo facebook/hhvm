@@ -9,6 +9,8 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
+
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
 // These attributes are applied to the static data members to ensure that they
 // are not stripped from the compiled binary, in order to keep them available
@@ -30,52 +32,6 @@
 
 namespace apache {
 namespace thrift {
-
-THRIFT_DATA_MEMBER const std::array<::py3::simple::AnEnum, 5> TEnumDataStorage<::py3::simple::AnEnum>::values = {{
-  type::None,
-  type::ONE,
-  type::TWO,
-  type::THREE,
-  type::FOUR,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TEnumDataStorage<::py3::simple::AnEnum>::names = {{
-  "None",
-  "ONE",
-  "TWO",
-  "THREE",
-  "FOUR",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::py3::simple::AnEnumRenamed, 3> TEnumDataStorage<::py3::simple::AnEnumRenamed>::values = {{
-  type::name,
-  type::value,
-  type::normal,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TEnumDataStorage<::py3::simple::AnEnumRenamed>::names = {{
-  "name",
-  "value",
-  "normal",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::py3::simple::Flags, 4> TEnumDataStorage<::py3::simple::Flags>::values = {{
-  type::flag_A,
-  type::flag_B,
-  type::flag_C,
-  type::flag_D,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TEnumDataStorage<::py3::simple::Flags>::names = {{
-  "flag_A",
-  "flag_B",
-  "flag_C",
-  "flag_D",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::py3::simple::BinaryUnion::Type, 1> TEnumDataStorage<::py3::simple::BinaryUnion::Type>::values = {{
-  type::iobuf_val,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TEnumDataStorage<::py3::simple::BinaryUnion::Type>::names = {{
-  "iobuf_val",
-}};
 
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::SimpleException>::fields_names = {{
   "err_code",

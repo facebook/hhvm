@@ -15,50 +15,148 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::some::valid::ns::MyEnumA> {
   using type = ::some::valid::ns::MyEnumA;
   static constexpr const std::size_t size = 3;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::fieldA,
+      type::fieldB,
+      type::fieldC,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "fieldA",
+      "fieldB",
+      "fieldC",
+  }};
 };
 
 template <> struct TEnumDataStorage<::some::valid::ns::AnnotatedEnum> {
   using type = ::some::valid::ns::AnnotatedEnum;
   static constexpr const std::size_t size = 3;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::FIELDA,
+      type::FIELDB,
+      type::FIELDC,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "FIELDA",
+      "FIELDB",
+      "FIELDC",
+  }};
 };
 
 template <> struct TEnumDataStorage<::some::valid::ns::AnnotatedEnum2> {
   using type = ::some::valid::ns::AnnotatedEnum2;
   static constexpr const std::size_t size = 3;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::FIELDA,
+      type::FIELDB,
+      type::FIELDC,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "FIELDA",
+      "FIELDB",
+      "FIELDC",
+  }};
 };
 
 template <> struct TEnumDataStorage<::some::valid::ns::MyEnumB> {
   using type = ::some::valid::ns::MyEnumB;
   static constexpr const std::size_t size = 1;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::AField,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "AField",
+  }};
 };
 
 template <> struct TEnumDataStorage<::some::valid::ns::SimpleUnion::Type> {
   using type = ::some::valid::ns::SimpleUnion::Type;
   static constexpr const std::size_t size = 2;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::intValue,
+      type::stringValue,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "intValue",
+      "stringValue",
+  }};
 };
 
 template <> struct TEnumDataStorage<::some::valid::ns::ComplexUnion::Type> {
   using type = ::some::valid::ns::ComplexUnion::Type;
   static constexpr const std::size_t size = 28;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::intValue,
+      type::opt_intValue,
+      type::stringValue,
+      type::opt_stringValue,
+      type::intValue2,
+      type::intValue3,
+      type::doubelValue,
+      type::boolValue,
+      type::union_list,
+      type::union_set,
+      type::union_map,
+      type::opt_union_map,
+      type::enum_field,
+      type::enum_container,
+      type::a_struct,
+      type::a_set_struct,
+      type::a_union,
+      type::opt_a_union,
+      type::a_union_list,
+      type::a_union_typedef,
+      type::a_union_typedef_list,
+      type::MyBinaryField,
+      type::MyBinaryField2,
+      type::MyBinaryListField4,
+      type::ref_field,
+      type::ref_field2,
+      type::excp_field,
+      type::MyCustomField,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "intValue",
+      "opt_intValue",
+      "stringValue",
+      "opt_stringValue",
+      "intValue2",
+      "intValue3",
+      "doubelValue",
+      "boolValue",
+      "union_list",
+      "union_set",
+      "union_map",
+      "opt_union_map",
+      "enum_field",
+      "enum_container",
+      "a_struct",
+      "a_set_struct",
+      "a_union",
+      "opt_a_union",
+      "a_union_list",
+      "a_union_typedef",
+      "a_union_typedef_list",
+      "MyBinaryField",
+      "MyBinaryField2",
+      "MyBinaryListField4",
+      "ref_field",
+      "ref_field2",
+      "excp_field",
+      "MyCustomField",
+  }};
 };
 
 template <> struct TEnumDataStorage<::some::valid::ns::FloatUnion::Type> {
   using type = ::some::valid::ns::FloatUnion::Type;
   static constexpr const std::size_t size = 2;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::floatSide,
+      type::doubleSide,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "floatSide",
+      "doubleSide",
+  }};
 };
 
 template <> struct TStructDataStorage<::some::valid::ns::Empty> {

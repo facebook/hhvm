@@ -9,6 +9,8 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
+
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
 // These attributes are applied to the static data members to ensure that they
 // are not stripped from the compiled binary, in order to keep them available
@@ -30,107 +32,6 @@
 
 namespace apache {
 namespace thrift {
-
-THRIFT_DATA_MEMBER const std::array<::test::fixtures::enums::Metasyntactic, 5> TEnumDataStorage<::test::fixtures::enums::Metasyntactic>::values = {{
-  type::FOO,
-  type::BAR,
-  type::BAZ,
-  type::BAX,
-  type::Unspecified,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TEnumDataStorage<::test::fixtures::enums::Metasyntactic>::names = {{
-  "FOO",
-  "BAR",
-  "BAZ",
-  "BAX",
-  "Unspecified",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::test::fixtures::enums::MyEnum1, 6> TEnumDataStorage<::test::fixtures::enums::MyEnum1>::values = {{
-  type::ME1_1,
-  type::ME1_2,
-  type::ME1_3,
-  type::ME1_5,
-  type::ME1_6,
-  type::ME1_0,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TEnumDataStorage<::test::fixtures::enums::MyEnum1>::names = {{
-  "ME1_1",
-  "ME1_2",
-  "ME1_3",
-  "ME1_5",
-  "ME1_6",
-  "ME1_0",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::test::fixtures::enums::MyEnum2, 3> TEnumDataStorage<::test::fixtures::enums::MyEnum2>::values = {{
-  type::ME2_0,
-  type::ME2_1,
-  type::ME2_2,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TEnumDataStorage<::test::fixtures::enums::MyEnum2>::names = {{
-  "ME2_0",
-  "ME2_1",
-  "ME2_2",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::test::fixtures::enums::MyEnum3, 6> TEnumDataStorage<::test::fixtures::enums::MyEnum3>::values = {{
-  type::ME3_0,
-  type::ME3_1,
-  type::ME3_N2,
-  type::ME3_N1,
-  type::ME3_9,
-  type::ME3_10,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TEnumDataStorage<::test::fixtures::enums::MyEnum3>::names = {{
-  "ME3_0",
-  "ME3_1",
-  "ME3_N2",
-  "ME3_N1",
-  "ME3_9",
-  "ME3_10",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::test::fixtures::enums::MyEnum4, 5> TEnumDataStorage<::test::fixtures::enums::MyEnum4>::values = {{
-  type::ME4_A,
-  type::ME4_B,
-  type::ME4_C,
-  type::ME4_D,
-  type::Unspecified,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TEnumDataStorage<::test::fixtures::enums::MyEnum4>::names = {{
-  "ME4_A",
-  "ME4_B",
-  "ME4_C",
-  "ME4_D",
-  "Unspecified",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::test::fixtures::enums::MyBitmaskEnum1, 4> TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum1>::values = {{
-  type::ONE,
-  type::TWO,
-  type::FOUR,
-  type::Unspecified,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum1>::names = {{
-  "ONE",
-  "TWO",
-  "FOUR",
-  "Unspecified",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::test::fixtures::enums::MyBitmaskEnum2, 4> TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum2>::values = {{
-  type::ONE,
-  type::TWO,
-  type::FOUR,
-  type::Unspecified,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TEnumDataStorage<::test::fixtures::enums::MyBitmaskEnum2>::names = {{
-  "ONE",
-  "TWO",
-  "FOUR",
-  "Unspecified",
-}};
 
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::enums::SomeStruct>::fields_names = {{
   "reasonable",

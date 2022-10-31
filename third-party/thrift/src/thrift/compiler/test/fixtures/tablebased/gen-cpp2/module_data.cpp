@@ -9,6 +9,8 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
+
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
 // These attributes are applied to the static data members to ensure that they
 // are not stripped from the compiled binary, in order to keep them available
@@ -30,24 +32,6 @@
 
 namespace apache {
 namespace thrift {
-
-THRIFT_DATA_MEMBER const std::array<::test::fixtures::tablebased::ExampleEnum, 2> TEnumDataStorage<::test::fixtures::tablebased::ExampleEnum>::values = {{
-  type::ZERO,
-  type::NONZERO,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::test::fixtures::tablebased::ExampleEnum>::names = {{
-  "ZERO",
-  "NONZERO",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::test::fixtures::tablebased::ExampleUnion::Type, 2> TEnumDataStorage<::test::fixtures::tablebased::ExampleUnion::Type>::values = {{
-  type::fieldA,
-  type::fieldB,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::test::fixtures::tablebased::ExampleUnion::Type>::names = {{
-  "fieldA",
-  "fieldB",
-}};
 
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::fields_names = {{
   "fieldA",

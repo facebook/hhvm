@@ -89,7 +89,9 @@ let compute_results tast_env id params return body =
   let strip_decorations { constraint_; _ } = constraint_ in
   let typing_env = Tast_env.tast_env_as_typing_env tast_env in
   try
-    let (constraints, errors) = SA.callable id tast_env params ~return body in
+    let (constraints, errors) =
+      SA.callable Local id tast_env params ~return body
+    in
     let error_count = List.length errors in
     let successes =
       fst constraints

@@ -1,4 +1,15 @@
-[RESULT] \main: (# of errors: 1) [9:9-26] [Allocation]:
+=== Shape analysis results for method_call.php
+Summary for \C::f:
+[4:64-68] : dynamic
+(Param (([4:21-27], "\\C::f"), 0)) : dynamic
+(Param (([4:32-50], "\\C::f"), 1)) : dynamic
+(Param (([4:55-58], "\\C::f"), 2)) : dynamic
+Summary for \main:
+[9:9-26] [Allocation]:
   shape('w' => string)
-[FAILURE] \main: "[10:3-8]: Unsupported expression: Obj_get"
-No errors
+[7:22-26] : dynamic
+[8:9-24] : dynamic
+(Param (([7:15-16], "\\main"), 0)) : dynamic
+
+Errors:
+"[10:3-8]: Unsupported expression: Obj_get"

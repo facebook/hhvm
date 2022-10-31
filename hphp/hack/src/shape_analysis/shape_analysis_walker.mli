@@ -9,6 +9,7 @@
 open Shape_analysis_types
 
 val callable :
+  mode ->
   Ast_defs.id_ ->
   Tast_env.t ->
   Tast.fun_param list ->
@@ -17,6 +18,7 @@ val callable :
   decorated_constraints * Error.t list
 
 val program :
+  mode ->
   Provider_context.t ->
   Tast.program ->
   (decorated_constraints * Error.t list) SMap.t

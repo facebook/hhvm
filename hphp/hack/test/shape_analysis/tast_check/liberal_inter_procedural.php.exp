@@ -1,19 +1,60 @@
-[RESULT] \test_function: (# of errors: 0) [16:9-15] [Allocation]:
+=== Shape analysis results for liberal_inter_procedural.php
+Summary for \C::m:
+[6:66-70] : dynamic
+(Param (([6:21-26], "\\C::m"), 0)) : dynamic
+(Param (([6:31-50], "\\C::m"), 1)) : dynamic
+(Param (([6:55-60], "\\C::m"), 2)) : dynamic
+Summary for \C::s:
+[8:73-77] : dynamic
+(Param (([8:28-33], "\\C::s"), 0)) : dynamic
+(Param (([8:38-57], "\\C::s"), 1)) : dynamic
+(Param (([8:62-67], "\\C::s"), 2)) : dynamic
+Summary for \D::m:
+[12:66-70] : dynamic
+(Param (([12:21-26], "\\D::m"), 0)) : dynamic
+(Param (([12:31-50], "\\D::m"), 1)) : dynamic
+(Param (([12:55-60], "\\D::m"), 2)) : dynamic
+Summary for \f:
+[3:57-61] : dynamic
+(Param (([3:12-17], "\\f"), 0)) : dynamic
+(Param (([3:22-41], "\\f"), 1)) : dynamic
+(Param (([3:46-51], "\\f"), 2)) : dynamic
+Summary for \test_class_method:
+[30:9-15] [Allocation]:
   shape()
-[RESULT] \test_function: (# of errors: 0) [18:9-15] [Allocation]:
+[32:9-15] [Allocation]:
   shape()
-[RESULT] \test_method: (# of errors: 1) [23:9-15] [Allocation]:
+[29:31-35] : dynamic
+[31:9-15] : dynamic
+(ConstantIdentifier
+   { ident_pos = [33:3-4]; class_name_opt = (Some "\\C"); const_name = "s" }) : dynamic
+Summary for \test_function:
+[16:9-15] [Allocation]:
   shape()
-[RESULT] \test_method: (# of errors: 1) [25:9-15] [Allocation]:
+[18:9-15] [Allocation]:
   shape()
-[FAILURE] \test_method: "[26:3-8]: Unsupported expression: Obj_get"
-[RESULT] \test_class_method: (# of errors: 0) [30:9-15] [Allocation]:
+[15:27-31] : dynamic
+[17:9-15] : dynamic
+Summary for \test_method:
+[23:9-15] [Allocation]:
   shape()
-[RESULT] \test_class_method: (# of errors: 0) [32:9-15] [Allocation]:
+[25:9-15] [Allocation]:
   shape()
-[RESULT] \test_union: (# of errors: 1) [37:9-15] [Allocation]:
+[22:29-33] : dynamic
+[24:9-15] : dynamic
+(Param (([22:22-23], "\\test_method"), 0)) : dynamic
+Summary for \test_union:
+[37:9-15] [Allocation]:
   shape()
-[RESULT] \test_union: (# of errors: 1) [39:9-15] [Allocation]:
+[39:9-15] [Allocation]:
   shape()
-[FAILURE] \test_union: "[42:3-8]: Unsupported expression: Obj_get"
-No errors
+[36:34-38] : dynamic
+[38:9-15] : dynamic
+(Param (([36:21-22], "\\test_union"), 0)) : dynamic
+(Param (([36:27-28], "\\test_union"), 1)) : dynamic
+
+Errors:
+"[26:3-8]: Unsupported expression: Obj_get"
+
+Errors:
+"[42:3-8]: Unsupported expression: Obj_get"

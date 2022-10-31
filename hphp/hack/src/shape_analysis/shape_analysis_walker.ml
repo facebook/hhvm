@@ -32,14 +32,13 @@ let join ~pos ~origin (env : env) (left : entity_) (right : entity_) :
    Currently, local mode is enabled only when we the shape analysis logger is
    enabled.
    *)
-let when_local_mode tast_env ~default f =
-  let tcopt = Tast_env.get_tcopt tast_env |> TypecheckerOptions.log_levels in
-  match SMap.find_opt "shape_analysis" tcopt with
-  | Some level when level > 0 -> f ()
-  | _ -> default
+let when_local_mode mode ~default f =
+  match mode with
+  | Local -> f ()
+  | Global -> default
 
 let dynamic_when_local ~origin pos env entity_ =
-  when_local_mode env.tast_env ~default:env @@ fun () ->
+  when_local_mode env.mode ~default:env @@ fun () ->
   let constraint_ =
     { hack_pos = pos; origin; constraint_ = Has_dynamic_key entity_ }
   in
@@ -231,6 +230,7 @@ let rec assign
 
 and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
   let decorate ~origin constraint_ = { hack_pos = pos; origin; constraint_ } in
+  let mode = env.mode in
   let dynamic_when_local = dynamic_when_local pos in
   match e with
   | A.Int _
@@ -467,7 +467,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     in
     (* Handle the return. *)
     let (env, return_entity) =
-      when_local_mode env.tast_env ~default:(env, None) @@ fun () ->
+      when_local_mode mode ~default:(env, None) @@ fun () ->
       let return_entity_ = Env.fresh_var () in
       let constraint_ =
         decorate ~origin:__LINE__ @@ Has_dynamic_key return_entity_
@@ -545,7 +545,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
   | A.Obj_get (_, _, _, _) ->
     let env = not_yet_supported env pos ("expression: " ^ Utils.expr_name e) in
     (* Imprecise local handling so that false positives are invalidated *)
-    when_local_mode env.tast_env ~default:(env, None) @@ fun () ->
+    when_local_mode mode ~default:(env, None) @@ fun () ->
     let entity_ = Env.fresh_var () in
     let constraint_ = decorate ~origin:__LINE__ @@ Has_dynamic_key entity_ in
     let env = Env.add_constraint env constraint_ in
@@ -709,7 +709,7 @@ and stmt (env : env) ((pos, stmt) : T.stmt) : env =
 
 and block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt
 
-let decl_hint kind tast_env ((ty, hint) : T.type_hint) :
+let decl_hint mode kind tast_env ((ty, hint) : T.type_hint) :
     decorated_constraints * entity =
   let hint_pos = pos_of_hint hint in
   let entity_ =
@@ -742,7 +742,7 @@ let decl_hint kind tast_env ((ty, hint) : T.type_hint) :
       DecoratedConstraintSet.empty
   in
   let constraints =
-    when_local_mode tast_env ~default:constraints @@ fun () ->
+    when_local_mode mode ~default:constraints @@ fun () ->
     let invalidation_constraint =
       decorate ~origin:__LINE__ @@ Has_dynamic_key entity_
     in
@@ -750,7 +750,7 @@ let decl_hint kind tast_env ((ty, hint) : T.type_hint) :
   in
   ((constraints, inter_constraints), Some entity_)
 
-let init_params id tast_env (params : T.fun_param list) :
+let init_params mode id tast_env (params : T.fun_param list) :
     decorated_constraints * entity LMap.t =
   let add_param
       idx
@@ -761,7 +761,7 @@ let init_params id tast_env (params : T.fun_param list) :
       ((intra_constraints, inter_constraints), lmap)
     else
       let ((new_intra_constraints, new_inter_constraints), entity) =
-        decl_hint (`Parameter (id, idx)) tast_env param_type_hint
+        decl_hint mode (`Parameter (id, idx)) tast_env param_type_hint
       in
       let param_lid = Local_id.make_unscoped param_name in
       let lmap = LMap.add param_lid entity lmap in
@@ -782,14 +782,14 @@ let init_params id tast_env (params : T.fun_param list) :
         LMap.empty )
     params
 
-let callable id tast_env params ~return body =
+let callable mode id tast_env params ~return body =
   (* TODO(T130457262): inout parameters should have the entity of their final
      binding flow back into them. *)
   let ((param_intra_constraints, param_inter_constraints), param_env) =
-    init_params id tast_env params
+    init_params mode id tast_env params
   in
   let ((return_intra_constraints, return_inter_constraints), return) =
-    decl_hint `Return tast_env return
+    decl_hint mode `Return tast_env return
   in
   let intra_constraints =
     DecoratedConstraintSet.union
@@ -802,7 +802,7 @@ let callable id tast_env params ~return body =
       param_inter_constraints
   in
   let env =
-    Env.init tast_env intra_constraints inter_constraints param_env ~return
+    Env.init mode tast_env intra_constraints inter_constraints param_env ~return
   in
   let env = block env body.A.fb_ast in
   ((env.constraints, env.inter_constraints), env.errors)
@@ -834,14 +834,14 @@ let initial_constraint_of ~hack_pos (ent : entity_) :
     inter_constraint_ decorated =
   { hack_pos; origin = __LINE__; constraint_ = HT.ConstantInitial ent }
 
-let program (ctx : Provider_context.t) (tast : Tast.program) =
+let program mode (ctx : Provider_context.t) (tast : Tast.program) =
   let def (def : T.def) : (string * (decorated_constraints * Error.t list)) list
       =
     let tast_env = Tast_env.def_env ctx def in
     match def with
     | A.Fun fd ->
       let A.{ f_body; f_name = (_, id); f_params; f_ret; _ } = fd.A.fd_fun in
-      [(id, callable id tast_env f_params ~return:f_ret f_body)]
+      [(id, callable mode id tast_env f_params ~return:f_ret f_body)]
     | A.Class A.{ c_kind = Ast_defs.Cenum; _ } ->
       (* There is nothing to analyse in an enum definition *)
       []
@@ -859,7 +859,7 @@ let program (ctx : Provider_context.t) (tast : Tast.program) =
       let handle_method
           A.{ m_body; m_name = (_, method_name); m_params; m_ret; _ } =
         let id = class_name ^ "::" ^ method_name in
-        (id, callable id tast_env m_params ~return:m_ret m_body)
+        (id, callable mode id tast_env m_params ~return:m_ret m_body)
       in
       let handle_constant A.{ cc_type; cc_id; cc_kind; _ } =
         let id = class_name ^ "::" ^ snd cc_id in
@@ -867,6 +867,7 @@ let program (ctx : Provider_context.t) (tast : Tast.program) =
         let (env, ent) =
           let empty_env =
             Env.init
+              mode
               tast_env
               DecoratedConstraintSet.empty
               DecoratedInterConstraintSet.empty
@@ -919,6 +920,7 @@ let program (ctx : Provider_context.t) (tast : Tast.program) =
           in
           let empty_env =
             Env.init
+              mode
               tast_env
               DecoratedConstraintSet.empty
               DecoratedInterConstraintSet.empty
@@ -937,6 +939,7 @@ let program (ctx : Provider_context.t) (tast : Tast.program) =
       let hint_pos = pos_of_hint cst_type in
       let env =
         Env.init
+          mode
           tast_env
           DecoratedConstraintSet.empty
           DecoratedInterConstraintSet.empty

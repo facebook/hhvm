@@ -1,3 +1,14 @@
-[FAILURE] \instance_write: "[9:15-32]: Unsupported expression: Obj_get"
-[FAILURE] \class_write: "[13:15-29]: Unsupported expression: Class_get"
-No errors
+=== Shape analysis results for prop_read.php
+Summary for \class_write:
+[12:25-29] : dynamic
+[13:7-13] : dynamic
+Summary for \instance_write:
+[8:32-36] : dynamic
+[9:7-13] : dynamic
+(Param (([8:25-26], "\\instance_write"), 0)) : dynamic
+
+Errors:
+"[13:15-29]: Unsupported expression: Class_get"
+
+Errors:
+"[9:15-32]: Unsupported expression: Obj_get"

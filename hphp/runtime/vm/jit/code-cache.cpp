@@ -145,31 +145,29 @@ CodeCache::CodeCache() {
   }
 
 #if USE_JEMALLOC_EXTENT_HOOKS
-  if (use_lowptr) {
-    // in LOWPTR builds, TC must fit below lowArenaMinAddr().  If it doesn't, we
-    // shrink things to make it so.
-    auto const lowArenaStart = lowArenaMinAddr();
-    if (RuntimeOption::ServerExecutionMode()) {
-      Logger::Info("lowArenaMinAddr(): 0x%lx", lowArenaStart);
-    }
-    always_assert_flog(
-      usedBase + (32u << 20) <= lowArenaStart,
-      "brk is too big for LOWPTR build (usedBase = {}, lowArenaStart = {})",
-      usedBase, lowArenaStart
-    );
-
-    if (usedBase + m_totalSize > lowArenaStart) {
-      cutTCSizeTo(lowArenaStart - usedBase - thread_local_size);
-      new (this) CodeCache;
-      return;
-    }
-    always_assert_flog(
-      usedBase + m_totalSize <= lowArenaStart,
-      "computed allocationSize ({}) is too large to fit within "
-      "lowArenaStart ({}), usedBase = {}\n",
-      m_totalSize, lowArenaStart, usedBase
-    );
+  // in LOWPTR builds, TC must fit below lowArenaMinAddr().  If it doesn't, we
+  // shrink things to make it so.
+  auto const lowArenaStart = lowArenaMinAddr();
+  if (RuntimeOption::ServerExecutionMode()) {
+    Logger::Info("lowArenaMinAddr(): 0x%lx", lowArenaStart);
   }
+  always_assert_flog(
+    usedBase + (32u << 20) <= lowArenaStart,
+    "brk is too big for LOWPTR build (usedBase = {}, lowArenaStart = {})",
+    usedBase, lowArenaStart
+  );
+
+  if (usedBase + m_totalSize > lowArenaStart) {
+    cutTCSizeTo(lowArenaStart - usedBase - thread_local_size);
+    new (this) CodeCache;
+    return;
+  }
+  always_assert_flog(
+    usedBase + m_totalSize <= lowArenaStart,
+    "computed allocationSize ({}) is too large to fit within "
+    "lowArenaStart ({}), usedBase = {}\n",
+    m_totalSize, lowArenaStart, usedBase
+  );
 #endif
   auto const allocBase =
     (uintptr_t)mmap(reinterpret_cast<void*>(usedBase), m_totalSize,

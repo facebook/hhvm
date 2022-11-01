@@ -34,8 +34,7 @@
 #if (JEMALLOC_VERSION_MAJOR < 5)
 #  error "jemalloc 5 is required"
 #endif
-#if defined(USE_LOWPTR) && defined(__linux__) \
-  && !defined(USE_JEMALLOC_EXTENT_HOOKS)
+#if defined(__linux__) && !defined(USE_JEMALLOC_EXTENT_HOOKS)
 #  define USE_JEMALLOC_EXTENT_HOOKS 1
 #endif
 #endif

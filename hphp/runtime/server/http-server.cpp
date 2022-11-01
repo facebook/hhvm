@@ -238,7 +238,8 @@ void HttpServer::onServerShutdown() {
 #ifdef USE_JEMALLOC
   shutdown_slab_managers();
 #if USE_JEMALLOC_EXTENT_HOOKS
-  if (use_lowptr && HPHP::alloc::BumpEmergencyMapper::s_emergencyFlag.test()) {
+  if (HPHP::alloc::BumpEmergencyMapper::
+      s_emergencyFlag.load(std::memory_order_acquire)) {
     // Server is shutting down when it almost exhausted low memory.
     if (StructuredLog::enabled()) {
       auto record = StructuredLogEntry{};

@@ -138,7 +138,12 @@ namespace detail {
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     std::unique_ptr<apache::thrift::LoggingEventRegistry>,
     makeLoggingEventRegistry);
-}
+
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    std::vector<folly::IPAddress>,
+    getAllowedIPsForCert,
+    const folly::AsyncTransportCertificate*);
+} // namespace detail
 
 const LoggingEventRegistry& getLoggingEventRegistry();
 

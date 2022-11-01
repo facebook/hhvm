@@ -3995,48 +3995,48 @@ and props_to_env
       log_non_singleton_disj "after simplification" simplified_disj_props;
       try_disj simplified_disj_props
     | TL.IsSubtype (coerce, ty_sub, ty_super) ->
-      begin
-        match (get_tyvar_opt ty_sub, get_tyvar_opt ty_super) with
-        | (Some var_sub, Some var_super) ->
-          let (env, prop1) =
-            add_tyvar_upper_bound_and_close
-              ~coerce
-              (valid env)
-              var_sub
-              ty_super
-              on_error
-          in
-          let (env, prop2) =
-            add_tyvar_lower_bound_and_close
-              ~coerce
-              (valid env)
-              var_super
-              ty_sub
-              on_error
-          in
-          props_to_env env ty_errs remain (prop1 :: prop2 :: props) on_error
-        | (Some var, _) ->
-          let (env, prop) =
-            add_tyvar_upper_bound_and_close
-              ~coerce
-              (valid env)
-              var
-              ty_super
-              on_error
-          in
-          props_to_env env ty_errs remain (prop :: props) on_error
-        | (_, Some var) ->
-          let (env, prop) =
-            add_tyvar_lower_bound_and_close
-              ~coerce
-              (valid env)
-              var
-              ty_sub
-              on_error
-          in
-          props_to_env env ty_errs remain (prop :: props) on_error
-        | _ -> props_to_env env ty_errs (prop :: remain) props on_error
-      end)
+      let (env, ty_sub) = Env.expand_internal_type env ty_sub in
+      let (env, ty_super) = Env.expand_internal_type env ty_super in
+      (match (get_tyvar_opt ty_sub, get_tyvar_opt ty_super) with
+      | (Some var_sub, Some var_super) ->
+        let (env, prop1) =
+          add_tyvar_upper_bound_and_close
+            ~coerce
+            (valid env)
+            var_sub
+            ty_super
+            on_error
+        in
+        let (env, prop2) =
+          add_tyvar_lower_bound_and_close
+            ~coerce
+            (valid env)
+            var_super
+            ty_sub
+            on_error
+        in
+        props_to_env env ty_errs remain (prop1 :: prop2 :: props) on_error
+      | (Some var, _) ->
+        let (env, prop) =
+          add_tyvar_upper_bound_and_close
+            ~coerce
+            (valid env)
+            var
+            ty_super
+            on_error
+        in
+        props_to_env env ty_errs remain (prop :: props) on_error
+      | (_, Some var) ->
+        let (env, prop) =
+          add_tyvar_lower_bound_and_close
+            ~coerce
+            (valid env)
+            var
+            ty_sub
+            on_error
+        in
+        props_to_env env ty_errs remain (prop :: props) on_error
+      | _ -> props_to_env env ty_errs (prop :: remain) props on_error))
 
 (* Given a subtype proposition, resolve conjunctions of subtype assertions
  * of the form #v <: t or t <: #v by adding bounds to #v in env. Close env

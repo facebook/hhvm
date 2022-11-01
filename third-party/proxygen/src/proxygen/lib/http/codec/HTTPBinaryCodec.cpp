@@ -484,7 +484,13 @@ void HTTPBinaryCodec::generateHeader(
     encodeString(msg.getMethodString(), appender);
     encodeString(msg.isSecure() ? "https" : "http", appender);
     encodeString(msg.getHeaders().getSingleOrEmpty(HTTP_HEADER_HOST), appender);
-    encodeString(msg.getPath(), appender);
+
+    std::string pathWithQueryString = msg.getPath();
+    if (!msg.getQueryString().empty()) {
+      pathWithQueryString.append("?");
+      pathWithQueryString.append(msg.getQueryString());
+    }
+    encodeString(pathWithQueryString, appender);
   } else {
     encodeInteger(folly::to<uint64_t>(
                       HTTPBinaryCodec::FramingIndicator::RESPONSE_KNOWN_LENGTH),

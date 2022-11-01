@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Copy js components
+cp -r ../../fbcref/website/src/components src
+
+# Generate API documentation
+# note the .*: --allowlist accepts python regexes
+buck2 run //fbcref/docgen:maker -- \
+  --fbcode-root ../.. \
+  --project-roots .. \
+  --doxyfile ../../fbcref/Doxyfile \
+  --doxygen-output /tmp/doxygen_thrift_output \
+  --website . \
+  --allowlist \
+    'thrift/lib/cpp/TProcessorEventHandler.h' \
+    'thrift/lib/cpp/protocol/TCompactProtocol.*'
+
+# Make the table of contents
+toc=$(cat << EOTOC
+Hooks
+  class/apache/thrift/TProcessorEventHandler
+
+Serialization
+  class/apache/thrift/protocol/TCompactProtocolT
+EOTOC
+)
+python3.6 ../../fbcref/docgen/tocgen.py "$toc" > src/json/toc.json

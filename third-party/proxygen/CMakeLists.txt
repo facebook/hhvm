@@ -19,6 +19,7 @@ get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
 ExternalProject_Add(
   bundled_proxygen
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
+  BUILD_ALWAYS ON
   PATCH_COMMAND
     "${CMAKE_COMMAND}" -E copy
     "${CMAKE_SOURCE_DIR}/CMake/FindBoost.cmake"

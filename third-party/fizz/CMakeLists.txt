@@ -34,6 +34,7 @@ target_link_libraries(fizz_deps INTERFACE ${FIZZ_DEPS} ${OPENSSL_LIBRARIES})
 ExternalProject_Add(
   bundled_fizz
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
+  BUILD_ALWAYS ON
   PATCH_COMMAND
     "${CMAKE_COMMAND}" -E copy
     "${CMAKE_SOURCE_DIR}/CMake/FindLibSodium.cmake"

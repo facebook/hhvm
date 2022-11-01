@@ -17,6 +17,7 @@ get_target_property(re2_INCLUDE_DIR re2 INTERFACE_INCLUDE_DIRECTORIES)
 ExternalProject_Add(
   bundled_squangle
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
+  BUILD_ALWAYS ON
   PATCH_COMMAND
     "${CMAKE_COMMAND}" -E make_directory
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake"

@@ -24,10 +24,6 @@ namespace py.asyncio facebook_thrift_asyncio.annotation.thrift
 namespace go thrift.annotation.thrift
 namespace py thrift.annotation.thrift
 
-////
-// Thrift release state annotations.
-////
-
 /** Indicates a definition/feature may change in incompatible ways. */
 @scope.Program
 @scope.Definition
@@ -198,6 +194,23 @@ struct Box {}
 @scope.Field
 @Beta
 struct Mixin {}
+
+/**
+ * Indicates that a boolean type **may** be 'packed' in memory.
+ *
+ * This allows an implementation to not allocate a full native 'bool' type, and
+ * instead use a single 'isset' bit to store the value.
+ *
+ * All fields that use such a type **must** be 'terse'.
+ */
+// TODO(afuller): Instead of using custom validators consider:
+// - Updating scope annotations to restrict to specific types (in this case bool)
+// - Updating field scope annotations to restrict to specific field types (in this case terse)
+// and/or allow @thrift.TerseWrites to be added to typedefs, and add it transitively to this annotation.
+@scope.Field // TODO(afuller): Validate field is terse and has a boolean type.
+@scope.Typedef // TODO(afuller): Validate the type is boolean.
+@Experimental // TODO(afuller): Pack and/or remove direct access to bool for such fields in all languages.
+struct Bit {}
 
 /**
  * Option to serialize thrift struct in ascending field id order.

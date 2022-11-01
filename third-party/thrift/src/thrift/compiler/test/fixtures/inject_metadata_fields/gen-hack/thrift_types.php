@@ -1379,6 +1379,86 @@ class Mixin implements \IThriftSyncStruct {
 }
 
 /**
+ * Indicates that a boolean type **may** be 'packed' in memory.
+ * 
+ * This allows an implementation to not allocate a full native 'bool' type, and
+ * instead use a single 'isset' bit to store the value.
+ * 
+ * All fields that use such a type **must** be 'terse'.
+ *
+ * Original thrift struct:-
+ * Bit
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/Bit'))>>
+class Bit implements \IThriftSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Bit';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "thrift.Bit",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\Field' => \thrift\annotation\Field::fromShape(
+          shape(
+          )
+        ),
+        '\thrift\annotation\Typedef' => \thrift\annotation\Typedef::fromShape(
+          shape(
+          )
+        ),
+        '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+
+/**
  * Option to serialize thrift struct in ascending field id order.
  * 
  * This can potentially make serialized data size smaller in compact protocol,

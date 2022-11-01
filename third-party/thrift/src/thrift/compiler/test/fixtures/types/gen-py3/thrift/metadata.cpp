@@ -29,6 +29,7 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<TerseWrite>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Box>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Mixin>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<Bit>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<SerializeInFieldIdOrder>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<BitmaskEnum>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<GenDefaultEnumValue>::gen(metadata);

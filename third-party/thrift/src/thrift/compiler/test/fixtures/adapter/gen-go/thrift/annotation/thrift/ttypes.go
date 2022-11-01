@@ -1400,6 +1400,77 @@ func (p *Mixin) String() string {
   return fmt.Sprintf("Mixin({})")
 }
 
+// Indicates that a boolean type **may** be 'packed' in memory.
+// 
+// This allows an implementation to not allocate a full native 'bool' type, and
+// instead use a single 'isset' bit to store the value.
+// 
+// All fields that use such a type **must** be 'terse'.
+type Bit struct {
+}
+
+func NewBit() *Bit {
+  return &Bit{}
+}
+
+type BitBuilder struct {
+  obj *Bit
+}
+
+func NewBitBuilder() *BitBuilder{
+  return &BitBuilder{
+    obj: NewBit(),
+  }
+}
+
+func (p BitBuilder) Emit() *Bit{
+  return &Bit{
+  }
+}
+
+func (p *Bit) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    if err := iprot.Skip(fieldTypeId); err != nil {
+      return err
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *Bit) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("Bit"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *Bit) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  return fmt.Sprintf("Bit({})")
+}
+
 // Option to serialize thrift struct in ascending field id order.
 // 
 // This can potentially make serialized data size smaller in compact protocol,

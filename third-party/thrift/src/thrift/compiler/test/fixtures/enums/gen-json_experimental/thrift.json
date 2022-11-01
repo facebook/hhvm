@@ -35,7 +35,7 @@
         "docstring" : "Indicates a definition/feature may change in incompatible ways.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 32
+        "lineno" : 28
       },
       "Experimental" : {
         "name" : "Experimental",
@@ -60,7 +60,7 @@
         "docstring" : "Indicates a definition/feature should only be used with permission, may only\nwork in specific contexts, and may change in incompatible ways without notice.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 40
+        "lineno" : 36
       },
       "Testing" : {
         "name" : "Testing",
@@ -85,7 +85,7 @@
         "docstring" : "Indicates a definition/feature should only be used in an ephemeral testing\nenviornment.\n\nSuch enviornments only store serialized values temporarly and strictly\ncontrol which versions of Thrift definitions are used, so 'compatibility'\nis not a concern.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 52
+        "lineno" : 48
       },
       "Deprecated" : {
         "name" : "Deprecated",
@@ -119,14 +119,14 @@
           "message" : {
             "name" : "message",
             "key" : 1,
-            "lineno" : 63,
+            "lineno" : 59,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 59
+        "lineno" : 55
       },
       "ReserveIds" : {
         "name" : "ReserveIds",
@@ -154,7 +154,7 @@
             "name" : "ids",
             "docstring" : "Individual ids that cannot be used.\n",
             "key" : 1,
-            "lineno" : 86,
+            "lineno" : 82,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
@@ -165,7 +165,7 @@
             "name" : "id_ranges",
             "docstring" : "Represents ranges of ids that cannot be used.\n\nEach (key: value) pair represents the half-open range `[key, value)`,\nwhere `key` is included and `value` is not. For example the map\n`{10: 15, 20: 30}` represents the union of id/value ranges `[10, 15)` and `[20, 30)`\n",
             "key" : 2,
-            "lineno" : 95,
+            "lineno" : 91,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
@@ -176,7 +176,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 82
+        "lineno" : 78
       },
       "Legacy" : {
         "name" : "Legacy",
@@ -202,14 +202,14 @@
           "message" : {
             "name" : "message",
             "key" : 1,
-            "lineno" : 108,
+            "lineno" : 104,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 105
+        "lineno" : 101
       },
       "RequiresBackwardCompatibility" : {
         "name" : "RequiresBackwardCompatibility",
@@ -236,14 +236,14 @@
             "name" : "field_name",
             "default_value" : 0,
             "key" : 1,
-            "lineno" : 119,
+            "lineno" : 115,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 116
+        "lineno" : 112
       },
       "NoTesting" : {
         "name" : "NoTesting",
@@ -268,7 +268,7 @@
         "docstring" : "Disables testing features.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 123
+        "lineno" : 119
       },
       "NoExperimental" : {
         "name" : "NoExperimental",
@@ -293,7 +293,7 @@
         "docstring" : "Disables experimental features.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 128
+        "lineno" : 124
       },
       "NoBeta" : {
         "name" : "NoBeta",
@@ -317,7 +317,7 @@
         "docstring" : "Disables @Beta features.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 133
+        "lineno" : 129
       },
       "Released" : {
         "name" : "Released",
@@ -348,7 +348,7 @@
         "docstring" : "Indicates a definition/feature must not depend directly on an unreleased\nor testing definition/feature.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 141
+        "lineno" : 137
       },
       "NoLegacy" : {
         "name" : "NoLegacy",
@@ -380,7 +380,7 @@
         "docstring" : "Disables @Legacy features.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 151
+        "lineno" : 147
       },
       "NoDeprecated" : {
         "name" : "NoDeprecated",
@@ -411,7 +411,7 @@
         "docstring" : "Disables @Deprecated features.\n\nShould only be enabled in `test` versions, as deprecated implies removing\nthe feature will break current usage (otherwise it would be @Legacy or\ndeleted)\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 163
+        "lineno" : 159
       },
       "TerseWrite" : {
         "name" : "TerseWrite",
@@ -459,7 +459,7 @@
         "docstring" : "An annotation that changes the field qualifier from 'none' to 'terse'.\nA terse field is eligible to skip serialization, when it equals to the\nintrinsic default value. It also clears to the intrinsic default value\nbefore deserialization to distinguish between if a terse field was skipped\nor missing during serialization. This is different from an unqualified\nfield, as an unqualified field is always serialized regardless of its value,\nand it is not cleared before deserialization.\n\nThe annotation can be only used to annotate an unqualified field, and when\nit is annotating a struct or exception, it changes all unqualified fields to\nterse fields. Note, the annotation can not be used for union.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 185
+        "lineno" : 181
       },
       "Box" : {
         "name" : "Box",
@@ -483,7 +483,7 @@
         "docstring" : "Indicates that a field's value should never be stored on the stack.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 193
+        "lineno" : 189
       },
       "Mixin" : {
         "name" : "Mixin",
@@ -506,7 +506,39 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 198
+        "lineno" : 194
+      },
+      "Bit" : {
+        "name" : "Bit",
+        "structured_annotations": {
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Typedef" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Typedef",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "thrift.Experimental" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Experimental"
+},
+        "value" : {}
+      }
+        },
+        "docstring" : "Indicates that a boolean type **may** be 'packed' in memory.\n\nThis allows an implementation to not allocate a full native 'bool' type, and\ninstead use a single 'isset' bit to store the value.\n\nAll fields that use such a type **must** be 'terse'.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 210
       },
       "SerializeInFieldIdOrder" : {
         "name" : "SerializeInFieldIdOrder",
@@ -530,7 +562,7 @@
         "docstring" : "Option to serialize thrift struct in ascending field id order.\n\nThis can potentially make serialized data size smaller in compact protocol,\nsince compact protocol can write deltas between subsequent field ids.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 208
+        "lineno" : 221
       },
       "BitmaskEnum" : {
         "name" : "BitmaskEnum",
@@ -554,7 +586,7 @@
         "docstring" : "Indicates an enum is a bitmask and should support bit-wise operators.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 215
+        "lineno" : 228
       },
       "GenDefaultEnumValue" : {
         "name" : "GenDefaultEnumValue",
@@ -590,14 +622,14 @@
             "default_value" : "Unspecified",
             "docstring" : "The name to use for the generated enum value.\n\nThis intentionally does **not** use the most common 'zero' enum value name,\n'Default', by default; as, defining a `Default = 0` enum value explicitly\nis a useful means of self-documenting that setting an explicit value is\nnever required. In which case, it is part of the API, and should not be\nremoved in favor of an implicitly generated value.\n\nOn the other hand, 'Unspecified' clearly indicates that the requirements\nare not intrinsic to the enum. In which case, the relevant documentation\nshould be consulted (e.g. the doc strings on the function or field).\n",
             "key" : 1,
-            "lineno" : 247,
+            "lineno" : 260,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 230
+        "lineno" : 243
       },
       "GenEnumSet" : {
         "name" : "GenEnumSet",
@@ -632,14 +664,14 @@
             "name" : "name",
             "docstring" : "If a custom name is not provided, `{EnumName}Set` is used.\n",
             "key" : 1,
-            "lineno" : 276,
+            "lineno" : 289,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 271
+        "lineno" : 284
       },
       "v1" : {
         "name" : "v1",
@@ -656,7 +688,7 @@
         "docstring" : "Enables all released v1 features.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 285
+        "lineno" : 298
       },
       "v1beta" : {
         "name" : "v1beta",
@@ -708,7 +740,7 @@
         "docstring" : "Enables all beta v1 features.\n\nBeta features are guaranteed to *not* break unrelated Thrift features\nso they should be relatively safe to test alongside other beta or\nreleased Thrift features.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 295
+        "lineno" : 308
       },
       "v1alpha" : {
         "name" : "v1alpha",
@@ -746,7 +778,7 @@
         "docstring" : "Enables all experimental v1 features.\n\nUse with *caution* and only with explicit permission. This may enable\nfeatures may change significantly without notice or not work correctly\nin all contexts.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 310
+        "lineno" : 323
       },
       "v1test" : {
         "name" : "v1test",
@@ -784,7 +816,7 @@
         "docstring" : "Enables experimental features, even those that are known to break common\nuse cases.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 320
+        "lineno" : 333
       },
       "ExceptionMessage" : {
         "name" : "ExceptionMessage",
@@ -810,14 +842,14 @@
           "field" : {
             "name" : "field",
             "key" : 1,
-            "lineno" : 336,
+            "lineno" : 349,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 333
+        "lineno" : 346
       },
       "GenerateRuntimeSchema" : {
         "name" : "GenerateRuntimeSchema",
@@ -867,14 +899,14 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 350,
+            "lineno" : 363,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 344
+        "lineno" : 357
       },
       "InternBox" : {
         "name" : "InternBox",
@@ -898,7 +930,7 @@
         "docstring" : "Indicates that a field's value should never be stored on the stack, and that\nidentical values can be shared in immutable contexts.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 357
+        "lineno" : 370
       }
       },
   "source_path" : "thrift/annotation/thrift",

@@ -40,7 +40,7 @@ pub(crate) fn convert_function<'a>(
         .attributes
         .as_ref()
         .iter()
-        .map(|a| convert::convert_attribute(a, &mut unit.strings))
+        .map(|a| convert::convert_attribute(a, &unit.strings))
         .collect();
 
     let function = ir::Function {
@@ -78,7 +78,7 @@ pub(crate) fn convert_method<'a>(
             arguments: attr
                 .arguments
                 .iter()
-                .map(|tv| convert::convert_typed_value(tv, &mut unit.strings))
+                .map(|tv| convert::convert_typed_value(tv, &unit.strings))
                 .collect(),
         })
         .collect();
@@ -125,7 +125,7 @@ fn convert_body<'a>(
             let name = ir::ClassId::new(id);
             let bounds = bounds
                 .iter()
-                .map(|ty| types::convert_type(ty, &mut unit.strings))
+                .map(|ty| types::convert_type(ty, &unit.strings))
                 .collect();
             (name, ir::TParamBounds { bounds })
         })
@@ -153,7 +153,7 @@ fn convert_body<'a>(
         locs,
         num_iters,
         params: Default::default(),
-        return_type: types::convert_maybe_type(return_type_info.as_ref(), &mut unit.strings),
+        return_type: types::convert_maybe_type(return_type_info.as_ref(), &unit.strings),
         shadowed_tparams,
         loc_id: ir::LocId::from_usize(0),
         tparams,
@@ -173,7 +173,7 @@ fn convert_body<'a>(
     }
 
     for decl in decl_vars.as_ref() {
-        let id = ctx.unit.strings.intern_bytes(decl.as_ref());
+        let id = ctx.strings.intern_bytes(decl.as_ref());
         ctx.named_local_lookup.push(LocalId::Named(id));
     }
 
@@ -231,13 +231,13 @@ fn convert_param<'a, 'b>(ctx: &mut Context<'a, 'b>, param: &Param<'a>) -> ir::Pa
         Maybe::Nothing => None,
     };
 
-    let name = ctx.unit.strings.intern_bytes(param.name.as_ref());
+    let name = ctx.strings.intern_bytes(param.name.as_ref());
     ctx.named_local_lookup.push(LocalId::Named(name));
 
     let user_attributes = param
         .user_attributes
         .iter()
-        .map(|a| convert::convert_attribute(a, &mut ctx.unit.strings))
+        .map(|a| convert::convert_attribute(a, ctx.strings))
         .collect();
 
     ir::Param {
@@ -246,7 +246,7 @@ fn convert_param<'a, 'b>(ctx: &mut Context<'a, 'b>, param: &Param<'a>) -> ir::Pa
         is_variadic: param.is_variadic,
         is_inout: param.is_inout,
         is_readonly: param.is_readonly,
-        ty: types::convert_maybe_type(param.type_info.as_ref(), &mut ctx.unit.strings),
+        ty: types::convert_maybe_type(param.type_info.as_ref(), ctx.strings),
         user_attributes,
     }
 }

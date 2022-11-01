@@ -27,7 +27,7 @@ impl<'a, 'b> StringCache<'a, 'b> {
     pub fn lookup_ffi_str(&self, id: UnitBytesId) -> Str<'a> {
         *self.cache.entry(id).or_insert_with(|| {
             let s = self.interner.lookup_bstr(id);
-            Str::new_slice(self.alloc, s)
+            Str::new_slice(self.alloc, &s)
         })
     }
 

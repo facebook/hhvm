@@ -8,7 +8,7 @@ use ir::FuncBuilder;
 use ir::StringInterner;
 use log::trace;
 
-pub(crate) fn lower<'a>(func: Func<'a>, strings: &mut StringInterner) -> Func<'a> {
+pub(crate) fn lower<'a>(func: Func<'a>, strings: &StringInterner) -> Func<'a> {
     trace!(
         "Before Lower: {}",
         ir::print::DisplayFunc(&func, true, strings)

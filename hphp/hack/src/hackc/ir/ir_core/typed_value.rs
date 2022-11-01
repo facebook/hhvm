@@ -169,7 +169,7 @@ mod test {
 
     #[test]
     fn test3() {
-        let mut strings = StringInterner::default();
+        let strings = StringInterner::default();
         let a = TypedValue::Dict(
             [
                 (

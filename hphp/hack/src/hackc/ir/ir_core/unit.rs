@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::sync::Arc;
+
 use ffi::Str;
 pub use hhbc::ClassName;
 pub use hhbc::ConstName;
@@ -84,7 +86,7 @@ pub struct Unit<'a> {
     pub module_use: Option<Str<'a>>,
 
     /// The unit string interning table.
-    pub strings: StringInterner,
+    pub strings: Arc<StringInterner>,
 
     /// The list of all external symbols referenced by this Unit.
     //

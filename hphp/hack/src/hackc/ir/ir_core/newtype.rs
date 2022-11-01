@@ -23,6 +23,7 @@ pub use hhbc::SpecialClsRef;
 pub use hhbc::SrcLoc;
 pub use hhbc::TypeStructResolveOp;
 use newtype::newtype_int;
+use parking_lot::MappedRwLockReadGuard;
 
 use crate::string_intern::StringInterner;
 use crate::UnitBytesId;
@@ -39,19 +40,25 @@ macro_rules! interned_hhbc_id {
                 Self { id }
             }
 
-            pub fn from_hhbc<'a>(id: hhbc::$hhbc<'a>, strings: &mut StringInterner) -> Self {
+            pub fn from_hhbc<'a>(id: hhbc::$hhbc<'a>, strings: &StringInterner) -> Self {
                 Self::new(strings.intern_bytes(id.as_bytes()))
             }
 
-            pub fn from_str(name: &str, strings: &mut StringInterner) -> Self {
+            pub fn from_str(name: &str, strings: &StringInterner) -> Self {
                 Self::new(strings.intern_str(name))
             }
 
-            pub fn as_bytes<'a>(self, strings: &'a StringInterner) -> &'a [u8] {
+            pub fn as_bytes<'a>(
+                self,
+                strings: &'a StringInterner,
+            ) -> MappedRwLockReadGuard<'a, [u8]> {
                 strings.lookup_bytes(self.id)
             }
 
-            pub fn as_bstr<'a>(self, strings: &'a StringInterner) -> &'a BStr {
+            pub fn as_bstr<'a>(
+                self,
+                strings: &'a StringInterner,
+            ) -> MappedRwLockReadGuard<'a, BStr> {
                 strings.lookup_bstr(self.id)
             }
         }

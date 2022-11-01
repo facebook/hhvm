@@ -15,25 +15,25 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, filename: ir::Filename,
         .constants
         .as_ref()
         .iter()
-        .map(|c| crate::constant::convert_constant(c, &mut unit.strings))
+        .map(|c| crate::constant::convert_constant(c, &unit.strings))
         .collect_vec();
 
     let enum_type = cls
         .enum_type
         .as_ref()
-        .map(|ty| types::convert_type(ty, &mut unit.strings))
+        .map(|ty| types::convert_type(ty, &unit.strings))
         .into_option();
 
     let enum_includes = cls
         .enum_includes
         .iter()
-        .map(|name| ir::ClassId::from_hhbc(*name, &mut unit.strings))
+        .map(|name| ir::ClassId::from_hhbc(*name, &unit.strings))
         .collect_vec();
 
     let type_constants = cls
         .type_constants
         .iter()
-        .map(|c| convert_type_constant(c, &mut unit.strings))
+        .map(|c| convert_type_constant(c, &unit.strings))
         .collect();
 
     let ctx_constants = cls.ctx_constants.iter().map(convert_ctx_constant).collect();
@@ -43,7 +43,7 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, filename: ir::Filename,
         .as_ref()
         .iter()
         .map(|hhbc::Requirement { name, kind }| {
-            let name = ir::ClassId::from_hhbc(*name, &mut unit.strings);
+            let name = ir::ClassId::from_hhbc(*name, &unit.strings);
             ir::class::Requirement { name, kind: *kind }
         })
         .collect_vec();
@@ -53,7 +53,7 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, filename: ir::Filename,
         .iter()
         .map(|hhbc::UpperBound { name, bounds }| {
             let tys = (bounds.as_ref().iter())
-                .map(|ty| types::convert_type(ty, &mut unit.strings))
+                .map(|ty| types::convert_type(ty, &unit.strings))
                 .collect_vec();
             (*name, tys)
         })
@@ -63,29 +63,29 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, filename: ir::Filename,
         .attributes
         .as_ref()
         .iter()
-        .map(|a| convert::convert_attribute(a, &mut unit.strings))
+        .map(|a| convert::convert_attribute(a, &unit.strings))
         .collect_vec();
 
     let base = cls
         .base
-        .map(|cls| ir::ClassId::from_hhbc(cls, &mut unit.strings))
+        .map(|cls| ir::ClassId::from_hhbc(cls, &unit.strings))
         .into();
 
     let implements = cls
         .implements
         .as_ref()
         .iter()
-        .map(|interface| ir::ClassId::from_hhbc(*interface, &mut unit.strings))
+        .map(|interface| ir::ClassId::from_hhbc(*interface, &unit.strings))
         .collect_vec();
 
     let properties = cls
         .properties
         .as_ref()
         .iter()
-        .map(|prop| convert_property(prop, &mut unit.strings))
+        .map(|prop| convert_property(prop, &unit.strings))
         .collect_vec();
 
-    let name = ir::ClassId::from_hhbc(cls.name, &mut unit.strings);
+    let name = ir::ClassId::from_hhbc(cls.name, &unit.strings);
 
     unit.classes.push(ir::Class {
         attributes,
@@ -107,14 +107,14 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, filename: ir::Filename,
         uses: cls
             .uses
             .iter()
-            .map(|use_| ir::ClassId::from_hhbc(*use_, &mut unit.strings))
+            .map(|use_| ir::ClassId::from_hhbc(*use_, &unit.strings))
             .collect(),
     });
 }
 
 fn convert_property<'a>(
     prop: &hhbc::Property<'a>,
-    strings: &mut ir::StringInterner,
+    strings: &ir::StringInterner,
 ) -> ir::Property<'a> {
     let attributes = prop
         .attributes
@@ -147,7 +147,7 @@ fn convert_ctx_constant<'a>(ctx: &hhbc::CtxConstant<'a>) -> ir::CtxConstant<'a> 
 
 fn convert_type_constant<'a>(
     tc: &hhbc::TypeConstant<'a>,
-    strings: &mut StringInterner,
+    strings: &StringInterner,
 ) -> ir::TypeConstant<'a> {
     let initializer = tc
         .initializer

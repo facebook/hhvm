@@ -73,7 +73,7 @@ pub(crate) fn write_func(
     func: ir::Func<'_>,
 ) -> Result {
     let func = func.clone();
-    let mut func = crate::lower::lower(func, &mut unit_state.strings);
+    let mut func = crate::lower::lower(func, &unit_state.strings);
     ir::verify::verify_func(&func, &Default::default(), &unit_state.strings)?;
 
     let params = std::mem::take(&mut func.params);
@@ -81,7 +81,7 @@ pub(crate) fn write_func(
         .into_iter()
         .map(|p| {
             let name_bytes = unit_state.strings.lookup_bytes(p.name);
-            let name_string = util::escaped_string(name_bytes);
+            let name_string = util::escaped_string(&name_bytes);
             (name_string, convert_ty(p.ty.enforced, &unit_state.strings))
         })
         .collect_vec();

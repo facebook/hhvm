@@ -43,6 +43,7 @@ module GlobalAccessCheck = Error_codes.GlobalAccessCheck
 (* Recognize common patterns for global access (only writes for now). *)
 type global_access_pattern =
   | Singleton (* Write to a global variable whose value is null *)
+  | Caching (* Write to a global collection when the element is null or does not exist *)
   | CounterIncrement (* Increase a global variable by 1 or -1 *)
   | WriteEmptyOrNull (* Assign null or empty string to a global variable *)
   | WriteLiteral (* Assign a literal to a global variable *)
@@ -851,17 +852,25 @@ let visitor =
         let () = self#on_expr (env, (ctx, fun_name)) re in
         let re_ty = Tast_env.print_ty env (Tast.get_type re) in
         let le_global_opt = get_global_vars_from_expr env ctx le in
+        (* When write to a global variable whose value is null or does not exist:
+           if the written variable is in a collection (e.g. $global[$key] = $val),
+           then it's asumed to be caching; otherwise, it's a singleton. *)
+        let singleton_or_caching =
+          match le with
+          | (_, _, Array_get _) -> Caching
+          | _ -> Singleton
+        in
         let le_pattern =
           match (le_global_opt, bop_opt) with
           | (None, _) -> NoPattern
-          | (Some _, Some Ast_defs.QuestionQuestion) -> Singleton
+          | (Some _, Some Ast_defs.QuestionQuestion) -> singleton_or_caching
           | (Some le_global, _) ->
             if
               SSet.exists
                 (fun v -> SSet.mem v !(ctx.null_global_var_set))
                 le_global
             then
-              Singleton
+              singleton_or_caching
             else
               NoPattern
         in

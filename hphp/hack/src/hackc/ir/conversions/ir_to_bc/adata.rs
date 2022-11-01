@@ -24,7 +24,7 @@ impl<'a> AdataCache<'a> {
     pub(crate) fn intern(
         &mut self,
         tv: Arc<ir::TypedValue>,
-        strings: &StringCache<'a, '_>,
+        strings: &StringCache<'a>,
     ) -> hhbc::AdataId<'a> {
         let idx = self.lookup.entry(tv).or_insert_with_key(|tv| {
             let idx = self.adata.len();

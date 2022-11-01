@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::str::FromStr;
+use std::sync::Arc;
 
 use anyhow::Error;
 use ascii::AsciiString;
@@ -73,7 +74,7 @@ pub(crate) fn write_func(
     func: ir::Func<'_>,
 ) -> Result {
     let func = func.clone();
-    let mut func = crate::lower::lower(func, &unit_state.strings);
+    let mut func = crate::lower::lower(func, Arc::clone(&unit_state.strings));
     ir::verify::verify_func(&func, &Default::default(), &unit_state.strings)?;
 
     let params = std::mem::take(&mut func.params);
@@ -498,23 +499,20 @@ impl<'a> FuncState<'a> {
 
 /// Rewrite the function prelude:
 /// - Convert complex constants into builtins.
-fn rewrite_prelude<'a>(func: ir::Func<'a>) -> ir::Func<'a> {
-    let mut builder = ir::FuncBuilder::with_func(func);
-
+fn rewrite_prelude<'a>(mut func: ir::Func<'a>) -> ir::Func<'a> {
     let mut remap = ir::ValueIdMap::default();
+    ir::FuncBuilder::borrow_func_no_strings(&mut func, |builder| {
+        // Swap out the initial block so we can inject our entry code.
+        let entry_bid = builder.func.alloc_bid(Block::default());
+        builder.func.blocks.swap(Func::ENTRY_BID, entry_bid);
+        builder
+            .func
+            .remap_bids(&[(Func::ENTRY_BID, entry_bid)].into_iter().collect());
 
-    // Swap out the initial block so we can inject our entry code.
-    let entry_bid = builder.func.alloc_bid(Block::default());
-    builder.func.blocks.swap(Func::ENTRY_BID, entry_bid);
-    builder
-        .func
-        .remap_bids(&[(Func::ENTRY_BID, entry_bid)].into_iter().collect());
-
-    builder.start_block(Func::ENTRY_BID);
-    write_constants(&mut remap, &mut builder);
-    builder.emit(Instr::jmp(entry_bid, LocId::NONE));
-
-    let mut func = builder.finish();
+        builder.start_block(Func::ENTRY_BID);
+        write_constants(&mut remap, builder);
+        builder.emit(Instr::jmp(entry_bid, LocId::NONE));
+    });
     func.remap_vids(&remap);
     func
 }

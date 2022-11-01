@@ -73,7 +73,7 @@ impl<'a, 'b> Context<'a, 'b> {
         instrs: &'b [Instruct<'a>],
         unit_state: &'b UnitState<'a>,
     ) -> Self {
-        let mut builder = FuncBuilder::with_func(func);
+        let mut builder = FuncBuilder::with_func(func, Arc::clone(&unit.strings));
         let (label_to_addr, bid_to_addr, addr_to_seq) =
             Sequence::compute(&mut builder, filename, instrs);
 

@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::sync::Arc;
+
 use ffi::Maybe;
 use ffi::Slice;
 use hhbc::Fatal;
@@ -17,7 +19,7 @@ use crate::strings::StringCache;
 /// when converting functions and methods (see `convert_func` in func.rs).
 ///
 pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Unit<'a> {
-    let strings = StringCache::new(alloc, &ir_unit.strings);
+    let strings = StringCache::new(alloc, Arc::clone(&ir_unit.strings));
 
     let mut unit = UnitBuilder::new_in(alloc);
 
@@ -124,7 +126,7 @@ fn convert_symbol_refs<'a>(
 
 pub(crate) fn convert_attributes<'a>(
     attrs: Vec<ir::Attribute<'a>>,
-    strings: &StringCache<'a, '_>,
+    strings: &StringCache<'a>,
 ) -> Slice<'a, hhbc::Attribute<'a>> {
     Slice::fill_iter(
         strings.alloc,
@@ -145,7 +147,7 @@ pub(crate) fn convert_attributes<'a>(
 
 pub(crate) fn convert_typed_value<'a>(
     tv: &ir::TypedValue,
-    strings: &StringCache<'a, '_>,
+    strings: &StringCache<'a>,
 ) -> hhbc::TypedValue<'a> {
     match *tv {
         ir::TypedValue::Uninit => hhbc::TypedValue::Uninit,
@@ -176,7 +178,7 @@ pub(crate) fn convert_typed_value<'a>(
 
 pub(crate) fn convert_array_key<'a>(
     tv: &ir::ArrayKey,
-    strings: &StringCache<'a, '_>,
+    strings: &StringCache<'a>,
 ) -> hhbc::TypedValue<'a> {
     match *tv {
         ir::ArrayKey::Int(v) => hhbc::TypedValue::Int(v),

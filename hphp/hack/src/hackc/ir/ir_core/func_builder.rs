@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::sync::Arc;
+
 use hash::HashMap;
 
 use crate::func::SrcLoc;
@@ -17,10 +19,12 @@ use crate::Instr;
 use crate::InstrId;
 use crate::InstrIdMap;
 use crate::LocId;
+use crate::StringInterner;
 use crate::ValueId;
 
 pub struct FuncBuilder<'a> {
     pub func: Func<'a>,
+    pub strings: Arc<StringInterner>,
     cur_bid: BlockId,
     pub loc_lookup: HashMap<SrcLoc, LocId>,
     pub constant_lookup: HashMap<Constant<'a>, ConstantId>,
@@ -41,17 +45,23 @@ pub struct FuncBuilder<'a> {
 }
 
 impl<'a> FuncBuilder<'a> {
-    pub fn build_func<F>(f: F) -> Func<'a>
+    pub fn build_func<F>(strings: Arc<StringInterner>, f: F) -> Func<'a>
     where
         F: FnOnce(&mut FuncBuilder<'a>),
     {
-        let mut builder = FuncBuilder::with_func(Func::default());
+        let mut builder = FuncBuilder::with_func(Func::default(), strings);
         builder.cur_bid = builder.alloc_bid();
         f(&mut builder);
         builder.finish()
     }
 
-    pub fn with_func(func: Func<'a>) -> Self {
+    /// Create a FuncBuilder to edit a Func. If the caller can guarantee that no
+    /// strings will be created (in an RPO pass which just re-orders blocks, for
+    /// example) then it can create and pass in dummy StringInterner - but after
+    /// the FuncBuilder is finished the StringInterner should be checked (with
+    /// StringInterner::is_empty) that no strings were created (or use
+    /// borrow_func_no_strings() which does this check for you).
+    pub fn with_func(func: Func<'a>, strings: Arc<StringInterner>) -> Self {
         let constant_lookup: HashMap<Constant<'a>, ConstantId> = func
             .constants
             .iter()
@@ -67,24 +77,40 @@ impl<'a> FuncBuilder<'a> {
             .collect();
 
         FuncBuilder {
-            func,
-            cur_bid: BlockId::NONE,
-            loc_lookup,
-            constant_lookup,
             block_rewrite_stopped: false,
             changed: false,
+            constant_lookup,
+            cur_bid: BlockId::NONE,
+            func,
+            loc_lookup,
             replacements: Default::default(),
+            strings,
         }
     }
 
-    pub fn borrow_func<F, R>(borrowed: &mut Func<'a>, f: F) -> R
+    /// Similar to with_func() but borrows the Func instead of owning it.
+    pub fn borrow_func<F, R>(borrowed: &mut Func<'a>, strings: Arc<StringInterner>, f: F) -> R
     where
         F: FnOnce(&mut FuncBuilder<'a>) -> R,
     {
         let func = std::mem::take(borrowed);
-        let mut builder = FuncBuilder::with_func(func);
+        let mut builder = FuncBuilder::with_func(func, strings);
         let r = f(&mut builder);
         *borrowed = builder.finish();
+        r
+    }
+
+    /// Similar to borrow_func() but for a builder that doesn't need the
+    /// StringInterner. A temporary StringInterner is used and checked when the
+    /// handler returns. If any strings were interned during the call a panic is
+    /// raised.
+    pub fn borrow_func_no_strings<F, R>(borrowed: &mut Func<'a>, f: F) -> R
+    where
+        F: FnOnce(&mut FuncBuilder<'a>) -> R,
+    {
+        let tmp_strings = Arc::new(StringInterner::default());
+        let r = Self::borrow_func(borrowed, Arc::clone(&tmp_strings), f);
+        assert!(tmp_strings.is_empty());
         r
     }
 

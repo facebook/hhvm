@@ -3,19 +3,21 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::sync::Arc;
+
 use dashmap::DashMap;
 use ffi::Str;
 use ir::StringInterner;
 use ir::UnitBytesId;
 
-pub(crate) struct StringCache<'a, 'b> {
+pub(crate) struct StringCache<'a> {
     pub alloc: &'a bumpalo::Bump,
     cache: DashMap<UnitBytesId, Str<'a>>,
-    pub interner: &'b StringInterner,
+    pub interner: Arc<StringInterner>,
 }
 
-impl<'a, 'b> StringCache<'a, 'b> {
-    pub fn new(alloc: &'a bumpalo::Bump, interner: &'b StringInterner) -> Self {
+impl<'a> StringCache<'a> {
+    pub fn new(alloc: &'a bumpalo::Bump, interner: Arc<StringInterner>) -> Self {
         let cache = DashMap::with_capacity(interner.len());
         Self {
             alloc,

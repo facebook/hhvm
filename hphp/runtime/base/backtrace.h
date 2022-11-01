@@ -49,22 +49,15 @@ struct c_WaitableWaitHandle;
 struct CompactFrame final {
   CompactFrame(const Func* f = nullptr, int32_t ppc = 0, bool ht = false)
     : func(f)
-    , prevPc(ppc)
-    , hasThis(ht) {}
+    , prevPc(ppc) {}
 
   uint64_t hash() const {
     auto const f = reinterpret_cast<uintptr_t>(func.get());
-    return hash_int64_pair(prevPcAndHasThis, f >> 4);
+    return hash_int64_pair(prevPc, f >> 4);
   }
 
   const LowPtr<const Func> func;
-  union {
-    struct {
-      int32_t prevPc : 31;
-      bool hasThis   : 1;
-    };
-    uint32_t prevPcAndHasThis;
-  };
+  int32_t prevPc;
 };
 
 struct CompactTraceData {

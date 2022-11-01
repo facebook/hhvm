@@ -660,8 +660,7 @@ IMPLEMENT_RESOURCE_ALLOCATION(CompactTrace)
 void CompactTraceData::insert(const BTFrame& frm) {
   m_frames.emplace_back(
     frm.func(),
-    frm.bcOff(),
-    frm.localsAvailable() && frm.func()->hasThisInBody()
+    frm.bcOff()
   );
 }
 

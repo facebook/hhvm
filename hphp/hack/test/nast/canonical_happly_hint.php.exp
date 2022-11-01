@@ -1,0 +1,470 @@
+Errors:
+  [39:26-35] Missing type parameter to `classname`; `classname` is entirely meaningless without one
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-37]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((), (Some ([3:29-33], (Hprim Tvoid)))); 
+        f_name = ([3:10-19], "\\canon_int"); f_tparams = []; f_where_constraints = [];
+        f_params =
+        [{ param_annotation = (); param_type_hint = ((), (Some ([3:20-23], (Hprim Tint)))); 
+           param_is_variadic = false; param_pos = [3:24-26]; param_name = "$x"; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None };
+      fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [5:1-39]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([5:31-35], (Hprim Tvoid)))); 
+         f_name = ([5:10-20], "\\canon_bool"); f_tparams = []; f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([5:21-25], (Hprim Tbool)))); 
+            param_is_variadic = false; param_pos = [5:26-28]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [7:1-41]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([7:33-37], (Hprim Tvoid)))); 
+         f_name = ([7:10-21], "\\canon_float"); f_tparams = []; f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([7:22-27], (Hprim Tfloat)))); 
+            param_is_variadic = false; param_pos = [7:28-30]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [9:1-43]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([9:35-39], (Hprim Tvoid)))); 
+         f_name = ([9:10-22], "\\canon_string"); f_tparams = []; f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([9:23-29], (Hprim Tstring)))); 
+            param_is_variadic = false; param_pos = [9:30-32]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [11:1-57]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([11:49-53], (Hprim Tvoid)))); 
+         f_name = ([11:10-22], "\\canon_darray"); f_tparams = []; f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([11:23-43], (Happly (([11:23-29], "\\HH\\dict"), [([11:30-38], (Hprim Tarraykey)); ([11:39-42], (Hprim Tint))])))));
+            param_is_variadic = false; param_pos = [11:44-46]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [13:1-53]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([13:45-49], (Hprim Tvoid)))); 
+         f_name = ([13:10-22], "\\canon_varray"); f_tparams = []; f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([13:23-39], (Happly (([13:23-29], "\\HH\\vec"), [([13:30-38], (Hprim Tarraykey))]))))); 
+            param_is_variadic = false; param_pos = [13:40-42]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [15:1-74]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([15:66-70], (Hprim Tvoid)))); 
+         f_name = ([15:10-33], "\\canon_varray_or_darray1"); f_tparams = []; 
+         f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([15:34-60], (Hvec_or_dict (None, ([15:51-59], (Hprim Tarraykey))))))); 
+            param_is_variadic = false; param_pos = [15:61-63]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [17:1-78]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([17:70-74], (Hprim Tvoid)))); 
+         f_name = ([17:10-33], "\\canon_varray_or_darray2"); f_tparams = []; 
+         f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([17:34-64], (Hvec_or_dict ((Some ([17:51-59], (Hprim Tarraykey))), ([17:60-63], (Hprim Tint))))))); 
+            param_is_variadic = false; param_pos = [17:65-67]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [19:1-63]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([19:55-59], (Hprim Tvoid)))); 
+         f_name = ([19:10-27], "\\canon_vec_or_dict"); f_tparams = []; 
+         f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([19:28-49], (Hvec_or_dict (None, ([19:40-48], (Hprim Tarraykey))))))); 
+            param_is_variadic = false; param_pos = [19:50-52]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [21:1-68]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([21:60-64], (Hprim Tvoid)))); 
+         f_name = ([21:10-28], "\\canon_vec_or_dict1"); f_tparams = []; 
+         f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([21:29-54], (Hvec_or_dict ((Some ([21:41-49], (Hprim Tarraykey))), ([21:50-53], (Hprim Tint))))))); 
+            param_is_variadic = false; param_pos = [21:55-57]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [23:1-39]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([23:31-35], (Hprim Tvoid)))); 
+         f_name = ([23:10-20], "\\canon_null"); f_tparams = []; f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([23:21-25], (Hprim Tnull)))); 
+            param_is_variadic = false; param_pos = [23:26-28]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [25:1-37]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([25:29-33], (Hprim Tvoid)))); 
+         f_name = ([25:10-19], "\\canon_num"); f_tparams = []; f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([25:20-23], (Hprim Tnum)))); 
+            param_is_variadic = false; param_pos = [25:24-26]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [27:1-47]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([27:39-43], (Hprim Tvoid)))); 
+         f_name = ([27:10-24], "\\canon_resource"); f_tparams = []; f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([27:25-33], (Hprim Tresource)))); 
+            param_is_variadic = false; param_pos = [27:34-36]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [29:1-47]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([29:39-43], (Hprim Tvoid)))); 
+         f_name = ([29:10-24], "\\canon_arraykey"); f_tparams = []; f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([29:25-33], (Hprim Tarraykey)))); 
+            param_is_variadic = false; param_pos = [29:34-36]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [31:1-41]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([31:33-37], (Hprim Tvoid)))); 
+         f_name = ([31:10-21], "\\canon_mixed"); f_tparams = []; f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([31:22-27], Hmixed))); 
+            param_is_variadic = false; param_pos = [31:28-30]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [33:1-45]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([33:37-41], (Hprim Tvoid)))); 
+         f_name = ([33:10-23], "\\canon_nonnull"); f_tparams = []; f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([33:24-31], Hnonnull))); 
+            param_is_variadic = false; param_pos = [33:32-34]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [35:1-45]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([35:37-41], (Hprim Tvoid)))); 
+         f_name = ([35:10-23], "\\canon_dynamic"); f_tparams = []; f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([35:24-31], Hdynamic))); 
+            param_is_variadic = false; param_pos = [35:32-34]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [37:1-45]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([37:37-41], (Hprim Tvoid)))); 
+         f_name = ([37:10-23], "\\canon_nothing"); f_tparams = []; f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([37:24-31], Hnothing))); 
+            param_is_variadic = false; param_pos = [37:32-34]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [39:1-48]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([39:41-45], (Hprim Tvoid)))); 
+         f_name = ([39:10-25], "\\canon_classname"); f_tparams = []; 
+         f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([39:26-35], (Hprim Tstring)))); 
+            param_is_variadic = false; param_pos = [39:36-38]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Class
+     { c_span = [41:1-43:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+       c_name = ([41:7-8], "\\C"); c_tparams = []; c_extends = []; c_uses = []; 
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
+       c_where_constraints = []; c_consts = []; c_typeconsts = []; c_vars = [];
+       c_methods =
+       [{ m_span = [42:3-47]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([42:19-29], "canon_this"); m_tparams = []; m_where_constraints = [];
+          m_params =
+          [{ param_annotation = (); param_type_hint = ((), (Some ([42:30-34], Hthis))); 
+             param_is_variadic = false; param_pos = [42:35-37]; param_name = "$x"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((), (Some ([42:40-44], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None }
+         ];
+       c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+       c_module = None });
+  (Class
+     { c_span = [45:1-47:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+       c_name = ([45:7-8], "\\D"); c_tparams = [{ tp_variance = Invariant; tp_name = ([45:9-10], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+       c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
+       c_reqs = []; c_implements = []; c_where_constraints = []; c_consts = []; 
+       c_typeconsts = []; c_vars = [];
+       c_methods =
+       [{ m_span = [46:3-53]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([46:19-38], "canon_class_typaram"); m_tparams = []; 
+          m_where_constraints = [];
+          m_params =
+          [{ param_annotation = (); param_type_hint = ((), (Some ([46:39-40], (Habstr ("T", []))))); 
+             param_is_variadic = false; param_pos = [46:41-43]; param_name = "$x"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((), (Some ([46:46-50], (Hprim Tvoid)))); m_external = false; 
+          m_doc_comment = None }
+         ];
+       c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+       c_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [49:1-50]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([49:43-47], (Hprim Tvoid)))); 
+         f_name = ([49:10-32], "\\canon_function_typaram");
+         f_tparams = [{ tp_variance = Invariant; tp_name = ([49:33-34], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
+         f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([49:36-37], (Habstr ("T", []))))); 
+            param_is_variadic = false; param_pos = [49:38-40]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None })
+  ]

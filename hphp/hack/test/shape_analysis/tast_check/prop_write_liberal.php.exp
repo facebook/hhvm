@@ -1,7 +1,16 @@
-[RESULT] \instance_write: (# of errors: 1) [9:8-14] [Allocation]:
+=== Shape analysis results for prop_write_liberal.php
+Summary for \class_write:
+[15:8-14] [Allocation]:
   shape()
-[FAILURE] \instance_write: "[11:3-20]: Unsupported lvalue: Obj_get"
-[RESULT] \class_write: (# of errors: 1) [15:8-14] [Allocation]:
+[14:25-29] : dynamic
+Summary for \instance_write:
+[9:8-14] [Allocation]:
   shape()
-[FAILURE] \class_write: "[17:3-17]: Unsupported lvalue: Class_get"
-No errors
+[8:32-36] : dynamic
+(Param (([8:25-26], "\\instance_write"), 0)) : dynamic
+
+Errors:
+"[17:3-17]: Unsupported lvalue: Class_get"
+
+Errors:
+"[11:3-20]: Unsupported lvalue: Obj_get"

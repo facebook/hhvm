@@ -37,7 +37,7 @@ use crate::strings::StringCache;
 pub(crate) fn emit_func<'a>(
     func: &ir::Func<'a>,
     labeler: &mut Labeler,
-    strings: &StringCache<'a, '_>,
+    strings: &StringCache<'a>,
     adata_cache: &mut AdataCache<'a>,
 ) -> (InstrSeq<'a>, Vec<Str<'a>>) {
     let adata_id_map = func
@@ -187,7 +187,7 @@ pub(crate) struct InstrEmitter<'a, 'b> {
     instrs: Vec<Instruct<'a>>,
     labeler: &'b mut Labeler,
     loc_id: ir::LocId,
-    strings: &'b StringCache<'a, 'b>,
+    strings: &'b StringCache<'a>,
     locals: HashMap<LocalId, hhbc::Local>,
     adata_id_map: &'b AdataIdMap<'a>,
 }
@@ -213,7 +213,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
     fn new(
         func: &'b ir::Func<'a>,
         labeler: &'b mut Labeler,
-        strings: &'b StringCache<'a, '_>,
+        strings: &'b StringCache<'a>,
         adata_id_map: &'b AdataIdMap<'a>,
     ) -> Self {
         let locals = Self::prealloc_locals(func);
@@ -698,7 +698,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
 
         trace!(
             "    Instr: {}",
-            ir::print::FmtInstr(self.func, self.strings.interner, iid)
+            ir::print::FmtInstr(self.func, &self.strings.interner, iid)
         );
 
         use ir::Instr;

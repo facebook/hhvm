@@ -31,7 +31,7 @@ type potential_targets = {
   hints_to_modify: Pos.t list;
 }
 
-type mode =
+type command =
   | DumpConstraints
   | DumpDerivedConstraints
   | SimplifyConstraints
@@ -39,7 +39,12 @@ type mode =
   | SolveConstraints
   | CloseConstraints [@deriving eq]
 
+type mode =
+  | Local
+  | Global
+
 type options = {
+  command: command;
   mode: mode;
   verbosity: int;
 }
@@ -123,6 +128,7 @@ type env = {
   return: entity;
   tast_env: Tast_env.t;
   errors: Error.t list;
+  mode: mode;
 }
 
 module PointsToSet = Caml.Set.Make (struct

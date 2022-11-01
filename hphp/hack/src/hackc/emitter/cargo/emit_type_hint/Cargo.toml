@@ -8,7 +8,7 @@ edition = "2021"
 path = "../../emit_type_hint.rs"
 
 [dependencies]
-bumpalo = { version = "3.8", features = ["collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"] }
 error = { path = "../../../error/cargo/error" }
 ffi = { path = "../../../../utils/ffi" }
 hhbc = { path = "../../../hhbc/cargo/hhbc" }

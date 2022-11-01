@@ -246,9 +246,9 @@ mod tests {
     }
 
     // Recursive reference implementation.
-    fn rpo_reference(testcase: &[(&str, Vec<&str>)]) -> String {
+    fn rpo_reference(testcase: &[(&str, Vec<&str>, Vec<&str>)]) -> String {
         let mut cfg: HashMap<&str, Vec<&str>> = HashMap::default();
-        for (b, s) in testcase {
+        for (b, _, s) in testcase {
             cfg.insert(b, s.clone());
         }
 
@@ -264,16 +264,16 @@ mod tests {
     #[test]
     fn rpo() {
         // Define a little CFG with a some branches and loops.
-        let blocks: Vec<(&str, Vec<&str>)> = vec![
-            ("a", vec!["b"]),
-            ("b", vec!["c", "d"]),
-            ("c", vec!["e"]),
-            ("d", vec!["e", "f"]),
-            ("e", vec!["f", "f"]),
-            ("f", vec!["b", "g"]),
-            ("g", vec![]),
-            ("dead", vec!["b", "dead2"]),
-            ("dead2", vec!["dead"]),
+        let blocks: Vec<(&str, Vec<&str>, Vec<&str>)> = vec![
+            ("a", vec![], vec!["b"]),
+            ("b", vec![], vec!["c", "d"]),
+            ("c", vec![], vec!["e"]),
+            ("d", vec![], vec!["e", "f"]),
+            ("e", vec![], vec!["f", "f"]),
+            ("f", vec![], vec!["b", "g"]),
+            ("g", vec![], vec![]),
+            ("dead", vec![], vec!["b", "dead2"]),
+            ("dead2", vec![], vec!["dead"]),
         ];
 
         let mut rng = thread_rng();
@@ -284,7 +284,7 @@ mod tests {
             let mut c = blocks.clone();
             c[1..].shuffle(&mut rng);
 
-            let mut func = testutils::build_test_func(&c);
+            let (mut func, _) = testutils::build_test_func(&c);
             rpo_sort(&mut func);
 
             let order = func
@@ -318,14 +318,14 @@ mod tests {
                 }
                 let mut rsuccessors = successors.clone();
                 rsuccessors.reverse();
-                blocks.push((names[i], successors));
-                rblocks.push((names[i], rsuccessors));
+                blocks.push((names[i], vec![], successors));
+                rblocks.push((names[i], vec![], rsuccessors));
             }
 
-            let mut func = testutils::build_test_func(&blocks);
+            let (mut func, _) = testutils::build_test_func(&blocks);
             rpo_sort(&mut func);
 
-            let mut rfunc = testutils::build_test_func(&rblocks);
+            let (mut rfunc, _) = testutils::build_test_func(&rblocks);
             rpo_sort(&mut rfunc);
 
             fn bname<'a>(func: &'a Func<'_>, bid: BlockId) -> &'a str {

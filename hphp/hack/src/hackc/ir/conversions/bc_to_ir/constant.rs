@@ -10,7 +10,7 @@ use crate::convert;
 
 pub(crate) fn convert_constant<'a>(
     constant: &Constant<'a>,
-    strings: &mut StringInterner,
+    strings: &StringInterner,
 ) -> ir::HackConstant<'a> {
     let Constant {
         name,

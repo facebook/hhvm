@@ -15,8 +15,14 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::facebook::thrift::test::Enum> {
   using type = ::facebook::thrift::test::Enum;
   static constexpr const std::size_t size = 2;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::first,
+      type::second,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "first",
+      "second",
+  }};
 };
 
 template <> struct TStructDataStorage<::facebook::thrift::test::Foo> {

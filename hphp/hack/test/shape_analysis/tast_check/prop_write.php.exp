@@ -1,3 +1,14 @@
-[FAILURE] \instance_write: "[10:3-20]: Unsupported lvalue: Obj_get"
-[FAILURE] \class_write: "[15:3-17]: Unsupported lvalue: Class_get"
-No errors
+=== Shape analysis results for prop_write.php
+Summary for \class_write:
+[13:25-29] : dynamic
+[14:8-14] : dynamic
+Summary for \instance_write:
+[8:32-36] : dynamic
+[9:8-14] : dynamic
+(Param (([8:25-26], "\\instance_write"), 0)) : dynamic
+
+Errors:
+"[15:3-17]: Unsupported lvalue: Class_get"
+
+Errors:
+"[10:3-20]: Unsupported lvalue: Obj_get"

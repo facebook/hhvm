@@ -27,8 +27,16 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<<% > common/namespace_cpp2%><%enum:cpp_name%>> {
   using type = <% > common/namespace_cpp2%><%enum:cpp_name%>;
   static constexpr const std::size_t size = <%enum:size%>;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+<%#enum:values%><%!
+%>      type::<%enum_value:cpp_name%>,
+<%/enum:values%>
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+<%#enum:values%><%!
+%>      "<%enum_value:name%>",
+<%/enum:values%>
+  }};
 };
 <%/program:enums%>
 <%#program:structs%>
@@ -37,8 +45,16 @@ template <> struct TEnumDataStorage<<% > common/namespace_cpp2%><%enum:cpp_name%
 template <> struct TEnumDataStorage<<%struct:cpp_fullname%>::Type> {
   using type = <%struct:cpp_fullname%>::Type;
   static constexpr const std::size_t size = <%struct:num_union_members%>;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+<%#struct:fields%><%!
+%>      type::<%field:cpp_name%>,
+<%/struct:fields%>
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+<%#struct:fields%><%!
+%>      "<%field:name%>",
+<%/struct:fields%>
+  }};
 };
 <%/struct:union?%>
 <%/program:structs%>

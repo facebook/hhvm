@@ -170,7 +170,7 @@ fn write_final_query_m(
         MemberKey::ET(s) => {
             // $a["hello"]
             let key = state.strings.lookup_bytes(s);
-            let key = textual::Expr::hack_string(key);
+            let key = textual::Expr::hack_string(&key as &[u8]);
             w.call("hack_array_get", (base, key, op_name))
         }
         MemberKey::PC => {
@@ -191,7 +191,7 @@ fn write_final_query_m(
             // access.
 
             let key = state.strings.lookup_bytes(prop.id);
-            let key = textual::Expr::hack_string(key);
+            let key = textual::Expr::hack_string(&key as &[u8]);
             w.call("hack_field_get", (base, key, op_name))
         }
         MemberKey::QT(_) => {
@@ -243,7 +243,7 @@ fn write_entry(
         MemberKey::ET(s) => {
             // $a["hello"]
             let key = state.strings.lookup_bytes(s);
-            let key = textual::Expr::hack_string(key);
+            let key = textual::Expr::hack_string(&key as &[u8]);
             w.call("hack_array_entry", (base, key, mode))
         }
         MemberKey::PC => {
@@ -257,7 +257,7 @@ fn write_entry(
         MemberKey::PT(prop) => {
             // $a->hello
             let key = state.strings.lookup_bytes(prop.id);
-            let key = textual::Expr::hack_string(key);
+            let key = textual::Expr::hack_string(&key as &[u8]);
             w.call("hack_field_entry", (base, key, mode))
         }
         MemberKey::QT(_) => {

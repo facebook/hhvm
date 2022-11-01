@@ -34,9 +34,9 @@ impl<'a, T: 'a> Deref for Vec<'a, T> {
 
 impl<'a, T: 'a> IntoIterator for Vec<'a, T> {
     type Item = T;
-    type IntoIter = IntoIter<T>;
+    type IntoIter = IntoIter<'a, T>;
 
-    fn into_iter(self) -> IntoIter<T> {
+    fn into_iter(self) -> IntoIter<'a, T> {
         self.0.into_iter()
     }
 }

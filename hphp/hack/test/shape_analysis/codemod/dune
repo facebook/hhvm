@@ -20,7 +20,7 @@
    --flags
    --union-intersection-type-hints
    --shape-analysis
-   codemod
+   codemod:global
    --error-format
    raw)))
 

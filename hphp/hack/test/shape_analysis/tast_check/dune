@@ -18,9 +18,7 @@
    .php
    --flags
    --union-intersection-type-hints
-   --hh-log-level
-   shape_analysis
-   1
+   --shape-analysis simplify:local
    --error-format
    raw)))
 

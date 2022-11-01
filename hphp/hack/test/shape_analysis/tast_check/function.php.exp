@@ -1,7 +1,10 @@
-[RESULT] \f: (# of errors: 0) [4:8-36] [Allocation]:
+=== Shape analysis results for function.php
+Summary for \f:
+[4:8-36] [Allocation]:
   shape('a' => int, 'b' => bool)
-[RESULT] \f: (# of errors: 0) [10:8-14] [Allocation]:
+[10:8-14] [Allocation]:
   shape()
-[RESULT] \f: (# of errors: 0) [11:8-25] [Allocation]:
+[11:8-25] [Allocation]:
   shape('a' => bool)
-No errors
+[3:22-26] : dynamic
+(Param (([3:12-16], "\\f"), 0)) : dynamic

@@ -9,6 +9,8 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
+
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
 // These attributes are applied to the static data members to ensure that they
 // are not stripped from the compiled binary, in order to keep them available
@@ -30,125 +32,6 @@
 
 namespace apache {
 namespace thrift {
-
-THRIFT_DATA_MEMBER const std::array<::some::valid::ns::MyEnumA, 3> TEnumDataStorage<::some::valid::ns::MyEnumA>::values = {{
-  type::fieldA,
-  type::fieldB,
-  type::fieldC,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TEnumDataStorage<::some::valid::ns::MyEnumA>::names = {{
-  "fieldA",
-  "fieldB",
-  "fieldC",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::some::valid::ns::AnnotatedEnum, 3> TEnumDataStorage<::some::valid::ns::AnnotatedEnum>::values = {{
-  type::FIELDA,
-  type::FIELDB,
-  type::FIELDC,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TEnumDataStorage<::some::valid::ns::AnnotatedEnum>::names = {{
-  "FIELDA",
-  "FIELDB",
-  "FIELDC",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::some::valid::ns::AnnotatedEnum2, 3> TEnumDataStorage<::some::valid::ns::AnnotatedEnum2>::values = {{
-  type::FIELDA,
-  type::FIELDB,
-  type::FIELDC,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TEnumDataStorage<::some::valid::ns::AnnotatedEnum2>::names = {{
-  "FIELDA",
-  "FIELDB",
-  "FIELDC",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::some::valid::ns::MyEnumB, 1> TEnumDataStorage<::some::valid::ns::MyEnumB>::values = {{
-  type::AField,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TEnumDataStorage<::some::valid::ns::MyEnumB>::names = {{
-  "AField",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::some::valid::ns::SimpleUnion::Type, 2> TEnumDataStorage<::some::valid::ns::SimpleUnion::Type>::values = {{
-  type::intValue,
-  type::stringValue,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::some::valid::ns::SimpleUnion::Type>::names = {{
-  "intValue",
-  "stringValue",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::some::valid::ns::ComplexUnion::Type, 28> TEnumDataStorage<::some::valid::ns::ComplexUnion::Type>::values = {{
-  type::intValue,
-  type::opt_intValue,
-  type::stringValue,
-  type::opt_stringValue,
-  type::intValue2,
-  type::intValue3,
-  type::doubelValue,
-  type::boolValue,
-  type::union_list,
-  type::union_set,
-  type::union_map,
-  type::opt_union_map,
-  type::enum_field,
-  type::enum_container,
-  type::a_struct,
-  type::a_set_struct,
-  type::a_union,
-  type::opt_a_union,
-  type::a_union_list,
-  type::a_union_typedef,
-  type::a_union_typedef_list,
-  type::MyBinaryField,
-  type::MyBinaryField2,
-  type::MyBinaryListField4,
-  type::ref_field,
-  type::ref_field2,
-  type::excp_field,
-  type::MyCustomField,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 28> TEnumDataStorage<::some::valid::ns::ComplexUnion::Type>::names = {{
-  "intValue",
-  "opt_intValue",
-  "stringValue",
-  "opt_stringValue",
-  "intValue2",
-  "intValue3",
-  "doubelValue",
-  "boolValue",
-  "union_list",
-  "union_set",
-  "union_map",
-  "opt_union_map",
-  "enum_field",
-  "enum_container",
-  "a_struct",
-  "a_set_struct",
-  "a_union",
-  "opt_a_union",
-  "a_union_list",
-  "a_union_typedef",
-  "a_union_typedef_list",
-  "MyBinaryField",
-  "MyBinaryField2",
-  "MyBinaryListField4",
-  "ref_field",
-  "ref_field2",
-  "excp_field",
-  "MyCustomField",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::some::valid::ns::FloatUnion::Type, 2> TEnumDataStorage<::some::valid::ns::FloatUnion::Type>::values = {{
-  type::floatSide,
-  type::doubleSide,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::some::valid::ns::FloatUnion::Type>::names = {{
-  "floatSide",
-  "doubleSide",
-}};
 
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::some::valid::ns::Empty>::fields_names = {{
 }};

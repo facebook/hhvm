@@ -335,6 +335,17 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_enum& node) {
 
   return schema;
 }
+
+std::unique_ptr<t_const_value> schematizer::gen_schema(const t_program& node) {
+  auto schema = val();
+  schema->set_map();
+  add_definition(*schema, node);
+
+  // The remaining fields are intern IDs and have to be stiched in by the
+  // caller.
+
+  return schema;
+}
 } // namespace compiler
 } // namespace thrift
 } // namespace apache

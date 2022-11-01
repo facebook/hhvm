@@ -8,6 +8,6 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
-bumpalo = { version = "3.8", features = ["collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"] }
 ocamlrep = { path = "../ocamlrep" }
 ocamlrep_slab = { path = "../utils/ocamlrep_slab" }

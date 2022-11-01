@@ -9,7 +9,7 @@ path = "../../options.rs"
 
 [dependencies]
 bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
-bumpalo = { version = "3.8", features = ["collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"] }
 bytecode_printer = { path = "../../../bytecode_printer" }
 hhbc = { path = "../../../hhbc/cargo/hhbc" }
 oxidized = { path = "../../../../oxidized" }

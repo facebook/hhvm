@@ -1174,6 +1174,10 @@ impl Instr {
         Instr::Terminator(Terminator::Jmp(bid, loc))
     }
 
+    pub fn enter(bid: BlockId, loc: LocId) -> Instr {
+        Instr::Terminator(Terminator::Enter(bid, loc))
+    }
+
     pub fn jmp_op(
         cond: ValueId,
         pred: Predicate,

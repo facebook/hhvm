@@ -9,6 +9,8 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
+
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
 // These attributes are applied to the static data members to ensure that they
 // are not stripped from the compiled binary, in order to keep them available
@@ -30,66 +32,6 @@
 
 namespace apache {
 namespace thrift {
-
-THRIFT_DATA_MEMBER const std::array<::cpp2::ComplexUnion::Type, 6> TEnumDataStorage<::cpp2::ComplexUnion::Type>::values = {{
-  type::intValue,
-  type::stringValue,
-  type::intListValue,
-  type::stringListValue,
-  type::typedefValue,
-  type::stringRef,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TEnumDataStorage<::cpp2::ComplexUnion::Type>::names = {{
-  "intValue",
-  "stringValue",
-  "intListValue",
-  "stringListValue",
-  "typedefValue",
-  "stringRef",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::cpp2::ListUnion::Type, 2> TEnumDataStorage<::cpp2::ListUnion::Type>::values = {{
-  type::intListValue,
-  type::stringListValue,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::cpp2::ListUnion::Type>::names = {{
-  "intListValue",
-  "stringListValue",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::cpp2::DataUnion::Type, 2> TEnumDataStorage<::cpp2::DataUnion::Type>::values = {{
-  type::binaryData,
-  type::stringData,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::cpp2::DataUnion::Type>::names = {{
-  "binaryData",
-  "stringData",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::cpp2::ValUnion::Type, 2> TEnumDataStorage<::cpp2::ValUnion::Type>::values = {{
-  type::v1,
-  type::v2,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::cpp2::ValUnion::Type>::names = {{
-  "v1",
-  "v2",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::cpp2::VirtualComplexUnion::Type, 2> TEnumDataStorage<::cpp2::VirtualComplexUnion::Type>::values = {{
-  type::thingOne,
-  type::thingTwo,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::cpp2::VirtualComplexUnion::Type>::names = {{
-  "thingOne",
-  "thingTwo",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::cpp2::NonCopyableUnion::Type, 1> TEnumDataStorage<::cpp2::NonCopyableUnion::Type>::values = {{
-  type::s,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TEnumDataStorage<::cpp2::NonCopyableUnion::Type>::names = {{
-  "s",
-}};
 
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::cpp2::ComplexUnion>::fields_names = {{
   "intValue",

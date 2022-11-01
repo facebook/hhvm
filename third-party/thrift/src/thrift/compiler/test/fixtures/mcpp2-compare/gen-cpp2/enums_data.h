@@ -15,36 +15,58 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumA> {
   using type = ::facebook::ns::qwerty::AnEnumA;
   static constexpr const std::size_t size = 1;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::FIELDA,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "FIELDA",
+  }};
 };
 
 template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumB> {
   using type = ::facebook::ns::qwerty::AnEnumB;
   static constexpr const std::size_t size = 2;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::FIELDA,
+      type::FIELDB,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "FIELDA",
+      "FIELDB",
+  }};
 };
 
 template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumC> {
   using type = ::facebook::ns::qwerty::AnEnumC;
   static constexpr const std::size_t size = 1;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::FIELDC,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "FIELDC",
+  }};
 };
 
 template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumD> {
   using type = ::facebook::ns::qwerty::AnEnumD;
   static constexpr const std::size_t size = 1;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::FIELDD,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "FIELDD",
+  }};
 };
 
 template <> struct TEnumDataStorage<::facebook::ns::qwerty::AnEnumE> {
   using type = ::facebook::ns::qwerty::AnEnumE;
   static constexpr const std::size_t size = 1;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::FIELDA,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "FIELDA",
+  }};
 };
 
 template <> struct TStructDataStorage<::facebook::ns::qwerty::SomeStruct> {

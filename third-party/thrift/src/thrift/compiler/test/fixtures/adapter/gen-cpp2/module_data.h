@@ -15,22 +15,46 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum> {
   using type = ::facebook::thrift::test::ThriftAdaptedEnum;
   static constexpr const std::size_t size = 2;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::Zero,
+      type::One,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "Zero",
+      "One",
+  }};
 };
 
 template <> struct TEnumDataStorage<::facebook::thrift::test::Baz::Type> {
   using type = ::facebook::thrift::test::Baz::Type;
   static constexpr const std::size_t size = 5;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::intField,
+      type::setField,
+      type::mapField,
+      type::binaryField,
+      type::longField,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "intField",
+      "setField",
+      "mapField",
+      "binaryField",
+      "longField",
+  }};
 };
 
 template <> struct TEnumDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion::Type> {
   using type = ::facebook::thrift::test::ThriftAdaptTestUnion::Type;
   static constexpr const std::size_t size = 2;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::delay,
+      type::custom,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "delay",
+      "custom",
+  }};
 };
 
 template <> struct TStructDataStorage<::facebook::thrift::test::MyAnnotation> {

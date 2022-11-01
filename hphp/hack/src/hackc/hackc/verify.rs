@@ -193,28 +193,78 @@ impl IrOpts {
 }
 
 #[derive(Parser, Debug)]
+struct InferOpts {
+    #[clap(flatten)]
+    common: CommonOpts,
+}
+
+impl InferOpts {
+    fn verify_file(&self, path: &Path, content: Vec<u8>, profile: &mut ProfileAcc) -> Result<()> {
+        // For Infer verify we just make sure that the file can compile without
+        // errors.
+        let alloc = bumpalo::Bump::default();
+        let mut compile_profile = compile::Profile::default();
+        let (_env, unit) = compile_php_file(
+            &alloc,
+            path,
+            content,
+            &self.common.single_file_opts,
+            &mut compile_profile,
+        )?;
+        let (ir, bc_to_ir_t) = Timing::time(path, || bc_to_ir::bc_to_ir(&unit, path));
+
+        let (result, textual_t) = Timing::time(path, || {
+            let mut out = Vec::new();
+            textual::textual_writer(&mut out, path, ir)
+        });
+
+        let total_t = compile_profile.codegen_t
+            + compile_profile.parser_profile.total_t
+            + bc_to_ir_t.total()
+            + textual_t.total();
+
+        profile.fold_with(ProfileAcc {
+            total_t: Timing::from_duration(total_t, path),
+            codegen_t: Timing::from_duration(compile_profile.codegen_t, path),
+            parsing_t: Timing::from_duration(compile_profile.parser_profile.parsing_t, path),
+            lowering_t: Timing::from_duration(compile_profile.parser_profile.lowering_t, path),
+            bc_to_ir_t,
+            ..Default::default()
+        });
+
+        result.map_err(|err| VerifyError::CompileError(format!("{err:?}")))
+    }
+}
+
+#[derive(Parser, Debug)]
 enum Mode {
     /// Compile files and save the resulting HHAS and interior hhbc::Unit. Assemble the HHAS files and save the resulting Unit. Compare Unit.
     Assemble(AssembleOpts),
+    Infer(InferOpts),
     Ir(IrOpts),
 }
 
 impl Mode {
     fn common(&self) -> &CommonOpts {
         match self {
-            Mode::Assemble(AssembleOpts { common, .. }) | Mode::Ir(IrOpts { common, .. }) => common,
+            Mode::Assemble(AssembleOpts { common, .. })
+            | Mode::Infer(InferOpts { common, .. })
+            | Mode::Ir(IrOpts { common, .. }) => common,
         }
     }
 
     fn common_mut(&mut self) -> &mut CommonOpts {
         match self {
-            Mode::Assemble(AssembleOpts { common, .. }) | Mode::Ir(IrOpts { common, .. }) => common,
+            Mode::Assemble(AssembleOpts { common, .. })
+            | Mode::Infer(InferOpts { common, .. })
+            | Mode::Ir(IrOpts { common, .. }) => common,
         }
     }
 
     fn verify_file(&self, path: &Path, content: Vec<u8>, profile: &mut ProfileAcc) -> Result<()> {
         match self {
             Mode::Assemble(opts) => opts.verify_file(path, content, profile),
+            Mode::Infer(opts) => opts.verify_file(path, content, profile),
             Mode::Ir(opts) => opts.verify_file(path, content, profile),
         }
     }

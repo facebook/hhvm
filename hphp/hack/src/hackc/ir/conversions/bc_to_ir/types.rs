@@ -13,7 +13,7 @@ use ir::UserType;
 use maplit::hashmap;
 use once_cell::sync::OnceCell;
 
-pub(crate) fn convert_type<'a>(ty: &TypeInfo<'a>, strings: &mut StringInterner) -> UserType {
+pub(crate) fn convert_type<'a>(ty: &TypeInfo<'a>, strings: &StringInterner) -> UserType {
     let user_type = ty.user_type.into_option();
     let name = ty.type_constraint.name.into_option();
     let constraint_ty = if let Some(name) = name {
@@ -48,7 +48,7 @@ pub(crate) fn convert_type<'a>(ty: &TypeInfo<'a>, strings: &mut StringInterner) 
 
 pub(crate) fn convert_maybe_type<'a>(
     ty: Maybe<&TypeInfo<'a>>,
-    strings: &mut StringInterner,
+    strings: &StringInterner,
 ) -> ir::UserType {
     match ty {
         Maybe::Just(ty) => convert_type(ty, strings),
@@ -56,7 +56,7 @@ pub(crate) fn convert_maybe_type<'a>(
     }
 }
 
-fn cvt_constraint_type<'a>(name: Str<'a>, strings: &mut StringInterner) -> BaseType {
+fn cvt_constraint_type<'a>(name: Str<'a>, strings: &StringInterner) -> BaseType {
     use std::collections::HashMap;
     static CONSTRAINT_BY_NAME: OnceCell<HashMap<Str<'static>, BaseType>> = OnceCell::new();
     let constraint_by_name = CONSTRAINT_BY_NAME.get_or_init(|| {

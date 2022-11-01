@@ -227,7 +227,7 @@ impl Display for FmtIdentifierId<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtIdentifierId(id, strings) = *self;
         let id = strings.lookup_bytes(id);
-        FmtIdentifier(id).fmt(f)
+        FmtIdentifier(&id).fmt(f)
     }
 }
 
@@ -476,7 +476,7 @@ impl Display for FmtQuotedStringId<'_> {
             write!(f, "none")
         } else {
             let name = strings.lookup_bytes(id);
-            FmtEscapedString(name).fmt(f)
+            FmtEscapedString(&name).fmt(f)
         }
     }
 }
@@ -611,12 +611,12 @@ impl Display for FmtTypedValue<'_> {
                 write!(f, "{}", v)
             }
             TypedValue::Bool(b) => f.write_str(if *b { "true" } else { "false" }),
+            TypedValue::String(v) => FmtEscapedString(&strings.lookup_bytes(*v)).fmt(f),
             TypedValue::Float(v) => write!(f, "{}", v.to_f64()),
-            TypedValue::String(v) => FmtEscapedString(strings.lookup_bytes(*v)).fmt(f),
             TypedValue::LazyClass(lit) => write!(
                 f,
                 "lazy_class {}",
-                FmtEscapedString(strings.lookup_bytes(*lit))
+                FmtEscapedString(&strings.lookup_bytes(*lit))
             ),
             TypedValue::Null => f.write_str("null"),
             TypedValue::Vec(values) => {
@@ -660,8 +660,8 @@ impl Display for FmtArrayKey<'_> {
             ArrayKey::Int(v) => {
                 write!(f, "{}", v)
             }
-            ArrayKey::String(v) => FmtEscapedString(strings.lookup_bytes(*v)).fmt(f),
-            ArrayKey::LazyClass(v) => FmtEscapedString(strings.lookup_bytes(*v)).fmt(f),
+            ArrayKey::String(v) => FmtEscapedString(&strings.lookup_bytes(*v)).fmt(f),
+            ArrayKey::LazyClass(v) => FmtEscapedString(&strings.lookup_bytes(*v)).fmt(f),
         }
     }
 }

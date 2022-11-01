@@ -300,7 +300,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   std::vector<folly::SocketAddress> addresses_;
 
   //! The server's listening port
-  uint16_t port_ = 0;
+  std::optional<uint16_t> port_;
 
   //! The type of thread manager to create.
   ThreadManagerType threadManagerType_{ThreadManagerType::PRIORITY};
@@ -851,7 +851,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   void setAddresses(std::vector<folly::SocketAddress> addresses) {
     CHECK(!addresses.empty());
     CHECK(configMutable());
-    port_ = 0;
+    port_.reset();
     addresses_ = std::move(addresses);
   }
 
@@ -873,7 +873,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
 
   const std::string getAddressAsString() const {
     return getAddress().isInitialized() ? getAddress().describe()
-                                        : std::to_string(port_);
+                                        : std::to_string(port_.value_or(0));
   }
 
   /**
@@ -885,12 +885,19 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
     addresses_.at(0).reset();
   }
 
+  bool isPortSet() {
+    if (!getAddress().isInitialized()) {
+      return port_.has_value();
+    }
+    return true;
+  }
+
   /**
    * Get the port.
    */
   uint16_t getPort() {
     if (!getAddress().isInitialized()) {
-      return port_;
+      return port_.value_or(0);
     }
     return getAddress().getPort();
   }

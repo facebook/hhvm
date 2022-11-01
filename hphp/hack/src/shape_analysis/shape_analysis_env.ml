@@ -116,7 +116,7 @@ module LEnv = struct
     Cont.Map.map_env refresh_cont [] lenv
 end
 
-let init tast_env constraints inter_constraints bindings ~return =
+let init mode tast_env constraints inter_constraints bindings ~return =
   {
     constraints;
     inter_constraints;
@@ -124,6 +124,7 @@ let init tast_env constraints inter_constraints bindings ~return =
     return;
     tast_env;
     errors = [];
+    mode;
   }
 
 let add_constraint env constraint_ =

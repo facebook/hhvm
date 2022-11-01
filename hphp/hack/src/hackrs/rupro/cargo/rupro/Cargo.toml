@@ -9,7 +9,7 @@ path = "../../rupro.rs"
 
 [dependencies]
 aast_parser = { path = "../../../../parser/cargo/aast_parser" }
-bumpalo = { version = "3.8", features = ["collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"] }
 datastore = { path = "../../../datastore" }
 depgraph_api = { path = "../../../depgraph_api/cargo/depgraph_api" }
 folded_decl_provider = { path = "../../../folded_decl_provider/cargo/folded_decl_provider" }

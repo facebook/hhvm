@@ -8,7 +8,7 @@ edition = "2021"
 path = "../../closure_convert.rs"
 
 [dependencies]
-bumpalo = { version = "3.8", features = ["collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"] }
 env = { path = "../../../emitter/cargo/env" }
 error = { path = "../../../error/cargo/error" }
 global_state = { path = "../../../emitter/cargo/global_state" }

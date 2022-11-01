@@ -1,4 +1,17 @@
-[FAILURE] \C::f: "[15:5-12]: Unsupported expression: Xml"
-[RESULT] \C::g: (# of errors: 0) [19:5-33] [Allocation]:
+=== Shape analysis results for incomplete.php
+Summary for \:div::__construct:
+[9:6-10] : dynamic
+(Param (([5:5-24], "\\:div::__construct"), 0)) : dynamic
+(Param (([6:5-23], "\\:div::__construct"), 1)) : dynamic
+(Param (([7:5-11], "\\:div::__construct"), 2)) : dynamic
+(Param (([8:5-8], "\\:div::__construct"), 3)) : dynamic
+Summary for \C::f:
+[13:28-32] : dynamic
+(Param (([13:21-22], "\\C::f"), 0)) : dynamic
+Summary for \C::g:
+[19:5-33] [Allocation]:
   shape('a' => int, 'b' => bool)
-No errors
+[18:24-28] : dynamic
+
+Errors:
+"[15:5-12]: Unsupported expression: Xml"

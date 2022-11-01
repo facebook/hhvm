@@ -9,6 +9,8 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
+
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
 // These attributes are applied to the static data members to ensure that they
 // are not stripped from the compiled binary, in order to keep them available
@@ -30,31 +32,6 @@
 
 namespace apache {
 namespace thrift {
-
-THRIFT_DATA_MEMBER const std::array<::test::fixtures::patch::MyEnum, 1> TEnumDataStorage<::test::fixtures::patch::MyEnum>::values = {{
-  type::MyValue0,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TEnumDataStorage<::test::fixtures::patch::MyEnum>::names = {{
-  "MyValue0",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::test::fixtures::patch::InnerUnion::Type, 1> TEnumDataStorage<::test::fixtures::patch::InnerUnion::Type>::values = {{
-  type::innerOption,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TEnumDataStorage<::test::fixtures::patch::InnerUnion::Type>::names = {{
-  "innerOption",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::test::fixtures::patch::MyUnion::Type, 3> TEnumDataStorage<::test::fixtures::patch::MyUnion::Type>::values = {{
-  type::option1,
-  type::option2,
-  type::option3,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TEnumDataStorage<::test::fixtures::patch::MyUnion::Type>::names = {{
-  "option1",
-  "option2",
-  "option3",
-}};
 
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::patch::MyData>::fields_names = {{
   "data1",

@@ -20,7 +20,7 @@
    --flags
    --union-intersection-type-hints
    --shape-analysis
-   simplify
+   simplify:global
    --error-format
    raw)))
 

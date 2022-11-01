@@ -9,6 +9,8 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
+
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
 // These attributes are applied to the static data members to ensure that they
 // are not stripped from the compiled binary, in order to keep them available
@@ -30,39 +32,6 @@
 
 namespace apache {
 namespace thrift {
-
-THRIFT_DATA_MEMBER const std::array<::facebook::thrift::test::ThriftAdaptedEnum, 2> TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>::values = {{
-  type::Zero,
-  type::One,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>::names = {{
-  "Zero",
-  "One",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::facebook::thrift::test::Baz::Type, 5> TEnumDataStorage<::facebook::thrift::test::Baz::Type>::values = {{
-  type::intField,
-  type::setField,
-  type::mapField,
-  type::binaryField,
-  type::longField,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TEnumDataStorage<::facebook::thrift::test::Baz::Type>::names = {{
-  "intField",
-  "setField",
-  "mapField",
-  "binaryField",
-  "longField",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::facebook::thrift::test::ThriftAdaptTestUnion::Type, 2> TEnumDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::values = {{
-  type::delay,
-  type::custom,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion::Type>::names = {{
-  "delay",
-  "custom",
-}};
 
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::fields_names = {{
   "signature",

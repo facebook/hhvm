@@ -9,7 +9,7 @@ path = "../../decl_parser.rs"
 
 [dependencies]
 anyhow = "1.0.65"
-bumpalo = { version = "3.8", features = ["collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"] }
 direct_decl_parser = { path = "../../../../parser/api/cargo/direct_decl_parser" }
 file_provider = { path = "../../../file_provider/cargo/file_provider" }
 names = { path = "../../../../naming/names_rust" }

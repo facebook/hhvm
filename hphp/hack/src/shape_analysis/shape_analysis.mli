@@ -18,6 +18,7 @@ val is_shape_like_dict : shape_result -> bool
 val simplify : Typing_env_types.env -> constraint_ list -> shape_result list
 
 val callable :
+  mode ->
   A.id_ ->
   Tast_env.t ->
   Tast.fun_param list ->

@@ -727,6 +727,10 @@ Variant HHVM_FUNCTION(facts_db_path, const String& rootStr) {
   }
 }
 
+int64_t HHVM_FUNCTION(facts_schema_version) {
+  return Facts::kSchemaVersion;
+}
+
 Variant HHVM_FUNCTION(facts_type_to_path, const String& typeName) {
   auto path = Facts::getFactsOrThrow().getTypeFile(typeName);
   if (!path) {
@@ -997,6 +1001,7 @@ void Facts::moduleInit() {
 
   HHVM_NAMED_FE(HH\\Facts\\enabled, HHVM_FN(facts_enabled));
   HHVM_NAMED_FE(HH\\Facts\\db_path, HHVM_FN(facts_db_path));
+  HHVM_NAMED_FE(HH\\Facts\\schema_version, HHVM_FN(facts_schema_version));
   HHVM_NAMED_FE(HH\\Facts\\type_to_path, HHVM_FN(facts_type_to_path));
   HHVM_NAMED_FE(HH\\Facts\\function_to_path, HHVM_FN(facts_function_to_path));
   HHVM_NAMED_FE(HH\\Facts\\constant_to_path, HHVM_FN(facts_constant_to_path));

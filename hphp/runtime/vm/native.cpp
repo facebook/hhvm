@@ -156,7 +156,7 @@ void populateArgs(Registers& regs,
   for (auto i = 0; i < numArgs; ++i) {
     auto const arg = get(i);
     auto const& pi = func->params()[i];
-    auto const type = pi.builtinType;
+    auto const type = pi.builtinType();
     if (func->isInOut(i)) {
       if (auto const iv = builtinInValue(func, i)) {
         *io = *iv;
@@ -319,7 +319,7 @@ void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
     auto const tv = args(i);
 
     auto tc = pi.typeConstraint;
-    auto targetType = pi.builtinType;
+    auto targetType = pi.builtinType();
 
     if (tc.typeName() && interface_supports_arrlike(tc.typeName())) {
       // If we're dealing with an array-like interface, then there's no need to

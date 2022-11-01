@@ -244,13 +244,13 @@ fn convert_call<'a, 'b>(ctx: &mut Context<'a, 'b>, call: &Opcode<'a>) {
             CallDetail::FCallClsMethod { log }
         }
         Opcode::FCallClsMethodD(_, class, method) => {
-            let clsid = ir::ClassId::from_hhbc(class, &mut ctx.unit.strings);
-            let method = ir::MethodId::from_hhbc(method, &mut ctx.unit.strings);
+            let clsid = ir::ClassId::from_hhbc(class, ctx.strings);
+            let method = ir::MethodId::from_hhbc(method, ctx.strings);
             CallDetail::FCallClsMethodD { clsid, method }
         }
         Opcode::FCallClsMethodM(_, _, log, method) => {
             num_args += 1;
-            let method = ir::MethodId::from_hhbc(method, &mut ctx.unit.strings);
+            let method = ir::MethodId::from_hhbc(method, ctx.strings);
             CallDetail::FCallClsMethodM { method, log }
         }
         Opcode::FCallClsMethodS(_, _, clsref) => {
@@ -258,7 +258,7 @@ fn convert_call<'a, 'b>(ctx: &mut Context<'a, 'b>, call: &Opcode<'a>) {
             CallDetail::FCallClsMethodS { clsref }
         }
         Opcode::FCallClsMethodSD(_, _, clsref, method) => {
-            let method = ir::MethodId::from_hhbc(method, &mut ctx.unit.strings);
+            let method = ir::MethodId::from_hhbc(method, ctx.strings);
             CallDetail::FCallClsMethodSD { clsref, method }
         }
         Opcode::FCallCtor(_, _) => CallDetail::FCallCtor,
@@ -267,7 +267,7 @@ fn convert_call<'a, 'b>(ctx: &mut Context<'a, 'b>, call: &Opcode<'a>) {
             CallDetail::FCallFunc
         }
         Opcode::FCallFuncD(_, func) => {
-            let func = FunctionId::from_hhbc(func, &mut ctx.unit.strings);
+            let func = FunctionId::from_hhbc(func, ctx.strings);
             CallDetail::FCallFuncD { func }
         }
         Opcode::FCallObjMethod(_, _, flavor) => {
@@ -275,7 +275,7 @@ fn convert_call<'a, 'b>(ctx: &mut Context<'a, 'b>, call: &Opcode<'a>) {
             CallDetail::FCallObjMethod { flavor }
         }
         Opcode::FCallObjMethodD(_, _, flavor, method) => {
-            let method = ir::MethodId::from_hhbc(method, &mut ctx.unit.strings);
+            let method = ir::MethodId::from_hhbc(method, ctx.strings);
             CallDetail::FCallObjMethodD { flavor, method }
         }
         _ => unreachable!(),
@@ -482,11 +482,11 @@ fn convert_member_key<'a, 'b>(
             (instr::MemberKey::PL, readonly, None, Some(lid))
         }
         hhbc::MemberKey::PT(s, readonly) => {
-            let id = ir::PropId::from_hhbc(s, &mut ctx.unit.strings);
+            let id = ir::PropId::from_hhbc(s, ctx.strings);
             (instr::MemberKey::PT(id), readonly, None, None)
         }
         hhbc::MemberKey::QT(s, readonly) => {
-            let id = ir::PropId::from_hhbc(s, &mut ctx.unit.strings);
+            let id = ir::PropId::from_hhbc(s, ctx.strings);
             (instr::MemberKey::QT(id), readonly, None, None)
         }
         hhbc::MemberKey::W => (instr::MemberKey::W, instr::ReadonlyOp::Any, None, None),
@@ -1152,7 +1152,7 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::CnsE(id) => Action::Constant(Constant::Named(id)),
         Opcode::CreateCl(num_args, class) => {
             let operands = collect_args(ctx, num_args);
-            let clsid = ir::ClassId::from_hhbc(class, &mut ctx.unit.strings);
+            let clsid = ir::ClassId::from_hhbc(class, ctx.strings);
             Action::Push(Instr::Hhbc(Hhbc::CreateCl {
                 operands: operands.into(),
                 clsid,
@@ -1168,7 +1168,7 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::NewStructDict(keys) => {
             let keys: Box<[UnitBytesId]> = keys
                 .iter()
-                .map(|key| ctx.unit.strings.intern_bytes(key.as_ref()))
+                .map(|key| ctx.strings.intern_bytes(key.as_ref()))
                 .collect();
             let values = collect_args(ctx, keys.len() as u32);
             Action::Push(Instr::Hhbc(Hhbc::NewStructDict(keys, values.into(), loc)))

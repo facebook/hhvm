@@ -9,6 +9,8 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
+
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
 // These attributes are applied to the static data members to ensure that they
 // are not stripped from the compiled binary, in order to keep them available
@@ -30,44 +32,6 @@
 
 namespace apache {
 namespace thrift {
-
-THRIFT_DATA_MEMBER const std::array<::test::fixtures::basic::MyEnum, 2> TEnumDataStorage<::test::fixtures::basic::MyEnum>::values = {{
-  type::MyValue1,
-  type::MyValue2,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::test::fixtures::basic::MyEnum>::names = {{
-  "MyValue1",
-  "MyValue2",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::test::fixtures::basic::HackEnum, 2> TEnumDataStorage<::test::fixtures::basic::HackEnum>::values = {{
-  type::Value1,
-  type::Value2,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::test::fixtures::basic::HackEnum>::names = {{
-  "Value1",
-  "Value2",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::test::fixtures::basic::MyUnion::Type, 4> TEnumDataStorage<::test::fixtures::basic::MyUnion::Type>::values = {{
-  type::myEnum,
-  type::myStruct,
-  type::myDataItem,
-  type::floatSet,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TEnumDataStorage<::test::fixtures::basic::MyUnion::Type>::names = {{
-  "myEnum",
-  "myStruct",
-  "myDataItem",
-  "floatSet",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::test::fixtures::basic::UnionToBeRenamed::Type, 1> TEnumDataStorage<::test::fixtures::basic::UnionToBeRenamed::Type>::values = {{
-  type::reserved_field,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TEnumDataStorage<::test::fixtures::basic::UnionToBeRenamed::Type>::names = {{
-  "reserved_field",
-}};
 
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::fields_names = {{
   "MyIntField",

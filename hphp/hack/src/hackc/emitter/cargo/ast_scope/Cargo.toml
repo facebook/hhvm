@@ -8,6 +8,6 @@ edition = "2021"
 path = "../../ast_scope.rs"
 
 [dependencies]
-bumpalo = { version = "3.8", features = ["collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"] }
 hhbc = { path = "../../../hhbc/cargo/hhbc" }
 oxidized = { path = "../../../../oxidized" }

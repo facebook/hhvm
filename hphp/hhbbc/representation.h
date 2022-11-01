@@ -196,13 +196,6 @@ struct Param {
   LSString phpCode;
 
   /*
-   * The type of the arguments for builtin functions, or for HNI
-   * functions with a native implementation.  std::nullopt for
-   * non-builtins.
-   */
-  Optional<DataType> builtinType;
-
-  /*
    * Whether this parameter is passed as inout.
    */
   bool inout: 1;

@@ -8,7 +8,7 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
-bumpalo = { version = "3.8", features = ["collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"] }
 dashmap = { version = "4.0.2", features = ["rayon", "serde"] }
 ffi = { path = "../../../../utils/ffi" }
 hash = { path = "../../../../utils/hash" }

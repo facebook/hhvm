@@ -9,6 +9,8 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
+
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
 // These attributes are applied to the static data members to ensure that they
 // are not stripped from the compiled binary, in order to keep them available
@@ -30,59 +32,6 @@
 
 namespace apache {
 namespace thrift {
-
-THRIFT_DATA_MEMBER const std::array<::cpp2::EmptyEnum, 0> TEnumDataStorage<::cpp2::EmptyEnum>::values = {{
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TEnumDataStorage<::cpp2::EmptyEnum>::names = {{
-}};
-
-THRIFT_DATA_MEMBER const std::array<::cpp2::City, 4> TEnumDataStorage<::cpp2::City>::values = {{
-  type::NYC,
-  type::MPK,
-  type::SEA,
-  type::LON,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TEnumDataStorage<::cpp2::City>::names = {{
-  "NYC",
-  "MPK",
-  "SEA",
-  "LON",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::cpp2::Company, 4> TEnumDataStorage<::cpp2::Company>::values = {{
-  type::FACEBOOK,
-  type::WHATSAPP,
-  type::OCULUS,
-  type::INSTAGRAM,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TEnumDataStorage<::cpp2::Company>::names = {{
-  "FACEBOOK",
-  "WHATSAPP",
-  "OCULUS",
-  "INSTAGRAM",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::cpp2::union1::Type, 2> TEnumDataStorage<::cpp2::union1::Type>::values = {{
-  type::i,
-  type::d,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::cpp2::union1::Type>::names = {{
-  "i",
-  "d",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::cpp2::union2::Type, 4> TEnumDataStorage<::cpp2::union2::Type>::values = {{
-  type::i,
-  type::d,
-  type::s,
-  type::u,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TEnumDataStorage<::cpp2::union2::Type>::names = {{
-  "i",
-  "d",
-  "s",
-  "u",
-}};
 
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TStructDataStorage<::cpp2::Internship>::fields_names = {{
   "weeks",

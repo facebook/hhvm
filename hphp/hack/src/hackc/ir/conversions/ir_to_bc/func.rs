@@ -35,13 +35,13 @@ use crate::strings::StringCache;
 ///
 pub(crate) fn convert_func<'a>(
     mut func: ir::Func<'a>,
-    strings: &StringCache<'a, '_>,
+    strings: &StringCache<'a>,
     adata: &mut AdataCache<'a>,
 ) -> hhbc::Body<'a> {
     // Compute liveness and implicit block parameters.
 
     trace!("-------------------- IR");
-    trace!("{}", ir::print::DisplayFunc(&func, true, strings.interner));
+    trace!("{}", ir::print::DisplayFunc(&func, true, &strings.interner));
     trace!("--------------------");
 
     // Start by inserting stack pushes and pops (which are normally not in the
@@ -51,7 +51,7 @@ pub(crate) fn convert_func<'a>(
 
     trace!(
         "-- after pushes:\n{}",
-        ir::print::DisplayFunc(&func, true, strings.interner)
+        ir::print::DisplayFunc(&func, true, &strings.interner)
     );
 
     // Now emit the instructions.
@@ -139,7 +139,7 @@ pub(crate) fn convert_func<'a>(
 pub(crate) fn convert_function<'a>(
     unit: &mut UnitBuilder<'a>,
     function: ir::Function<'a>,
-    strings: &StringCache<'a, '_>,
+    strings: &StringCache<'a>,
 ) {
     let name = function.name;
     trace!("convert_function {}", name.as_bstr());
@@ -160,7 +160,7 @@ pub(crate) fn convert_function<'a>(
 
 pub(crate) fn convert_method<'a>(
     method: ir::Method<'a>,
-    strings: &StringCache<'a, '_>,
+    strings: &StringCache<'a>,
     adata: &mut AdataCache<'a>,
 ) -> Method<'a> {
     trace!("convert_method {}", method.name.as_bstr());

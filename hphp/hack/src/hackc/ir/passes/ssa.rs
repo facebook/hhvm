@@ -334,7 +334,7 @@ impl<'a> MakeSSA<'a> {
 
     // Step (4).
     fn rewrite_instrs(&mut self, func: &mut Func<'_>) {
-        FuncBuilder::borrow_func(func, |rw| {
+        FuncBuilder::borrow_func_no_strings(func, |rw| {
             for bid in rw.func.block_ids() {
                 let info = &mut self.block_info[bid];
 
@@ -350,7 +350,7 @@ impl<'a> MakeSSA<'a> {
                 // Walk the block and process Local instrs.
                 rw.rewrite_block(bid, self);
             }
-        })
+        });
     }
 }
 
@@ -441,6 +441,8 @@ pub fn run(func: &mut Func<'_>, strings: &StringInterner) -> bool {
 
 #[cfg(test)]
 mod test {
+    use std::sync::Arc;
+
     use ir_core::instr::HasOperands;
     use ir_core::instr::Predicate;
     use ir_core::instr::Terminator;
@@ -455,13 +457,13 @@ mod test {
     #[test]
     fn already_ssa() {
         let loc = LocId::NONE;
-        let mut strings = StringInterner::default();
-        let mut func = FuncBuilder::build_func(|builder| {
+        let strings = Arc::new(StringInterner::default());
+        let mut func = FuncBuilder::build_func(Arc::clone(&strings), |builder| {
             // %0 = call("my_fn", [42])
             // %1 = ret null
             let value = builder.emit_constant(Constant::Int(42));
             let null = builder.emit_constant(Constant::Null);
-            let id = FunctionId::from_str("my_fn", &mut strings);
+            let id = FunctionId::from_str("my_fn", &strings);
             builder.emit(Instr::simple_call(id, &[value], loc));
             builder.emit(Instr::ret(null, loc));
         });
@@ -474,8 +476,8 @@ mod test {
     #[test]
     fn basic() {
         let loc = LocId::NONE;
-        let mut strings = StringInterner::default();
-        let mut func = FuncBuilder::build_func(|builder| {
+        let strings = Arc::new(StringInterner::default());
+        let mut func = FuncBuilder::build_func(Arc::clone(&strings), |builder| {
             // %0 = declare
             // %1 = set(%0, 42)
             // %2 = get(%0)
@@ -486,7 +488,7 @@ mod test {
             builder.emit(Instr::set_var(var, value));
             let null = builder.emit_constant(Constant::Null);
             let value = builder.emit(Instr::get_var(var));
-            let id = FunctionId::from_str("my_fn", &mut strings);
+            let id = FunctionId::from_str("my_fn", &strings);
             builder.emit(Instr::simple_call(id, &[value], loc));
             builder.emit(Instr::ret(null, loc));
         });
@@ -517,8 +519,8 @@ mod test {
     #[test]
     fn diamond() {
         let loc = LocId::NONE;
-        let mut strings = StringInterner::default();
-        let mut func = FuncBuilder::build_func(|builder| {
+        let strings = Arc::new(StringInterner::default());
+        let mut func = FuncBuilder::build_func(Arc::clone(&strings), |builder| {
             //   %0 = declare
             //   %1 = declare
             //   %2 = declare
@@ -583,7 +585,7 @@ mod test {
             let value0 = builder.emit(Instr::get_var(var0));
             let value1 = builder.emit(Instr::get_var(var1));
             let value2 = builder.emit(Instr::get_var(var2));
-            let id = FunctionId::from_str("my_fn", &mut strings);
+            let id = FunctionId::from_str("my_fn", &strings);
             builder.emit(Instr::simple_call(id, &[value0, value1, value2], loc));
             builder.emit(Instr::ret(null, loc));
         });

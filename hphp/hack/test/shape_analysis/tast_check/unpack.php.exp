@@ -1,2 +1,15 @@
-[FAILURE] \main1: "[8:3-14]: Unsupported expression: Obj_get"
-No errors
+=== Shape analysis results for unpack.php
+Summary for \C::splat_m:
+[4:39-43] : dynamic
+Summary for \main1:
+[7:23-27] : dynamic
+[8:18-46] : dynamic
+(Param (([7:16-17], "\\main1"), 0)) : dynamic
+Summary for \main2:
+[13:19-23] : dynamic
+[14:14-42] : dynamic
+Summary for \splat_f:
+[11:30-34] : dynamic
+
+Errors:
+"[8:3-14]: Unsupported expression: Obj_get"

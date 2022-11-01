@@ -11,7 +11,7 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-bumpalo = { version = "3.8", features = ["collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"] }
 direct_decl_parser = { path = "../../../parser/api/cargo/direct_decl_parser" }
 facts_rust = { path = "../facts_rust" }
 hhbc_string_utils = { path = "../../../hackc/utils/cargo/hhbc_string_utils" }

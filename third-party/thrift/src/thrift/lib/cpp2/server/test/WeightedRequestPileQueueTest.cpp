@@ -99,9 +99,9 @@ TEST(WeightedRequestPileQueueTest, ApplyLimits) {
 
   // This should then be rejected
   auto res = queue.enqueue(1, 2);
-  EXPECT_EQ(res, RequestPileQueueAcceptResult::Failed);
+  EXPECT_EQ(res, false);
   res = queue.enqueue(1, 2);
-  EXPECT_EQ(res, RequestPileQueueAcceptResult::Failed);
+  EXPECT_EQ(res, false);
   EXPECT_EQ(queue.size(), 5);
 
   queue.tryDequeue();
@@ -110,11 +110,11 @@ TEST(WeightedRequestPileQueueTest, ApplyLimits) {
   // This will make the weight sum to be 11
   // so should be rejected as well
   res = queue.enqueue(1, 3);
-  EXPECT_EQ(res, RequestPileQueueAcceptResult::Failed);
+  EXPECT_EQ(res, false);
   EXPECT_EQ(queue.size(), 4);
 
   res = queue.enqueue(1, 2);
-  EXPECT_EQ(res, RequestPileQueueAcceptResult::Success);
+  EXPECT_EQ(res, true);
   EXPECT_EQ(queue.size(), 5);
 
   queue.tryDequeue();
@@ -144,9 +144,9 @@ TEST(WeightedRequestPileQueueTest, ApplyLimits) {
 
   // This should then be rejected
   res = queue2.enqueue(1, {2, 2});
-  EXPECT_EQ(res, RequestPileQueueAcceptResult::Failed);
+  EXPECT_EQ(res, false);
   res = queue2.enqueue(1, {2, 2});
-  EXPECT_EQ(res, RequestPileQueueAcceptResult::Failed);
+  EXPECT_EQ(res, false);
   EXPECT_EQ(queue2.size(), 5);
 
   queue2.tryDequeue();
@@ -155,11 +155,11 @@ TEST(WeightedRequestPileQueueTest, ApplyLimits) {
   // This will make the weight sum to be 11
   // so should be rejected as well
   res = queue2.enqueue(1, {3, 3});
-  EXPECT_EQ(res, RequestPileQueueAcceptResult::Failed);
+  EXPECT_EQ(res, false);
   EXPECT_EQ(queue2.size(), 4);
 
   res = queue2.enqueue(1, {2, 2});
-  EXPECT_EQ(res, RequestPileQueueAcceptResult::Success);
+  EXPECT_EQ(res, true);
   EXPECT_EQ(queue2.size(), 5);
 
   queue2.tryDequeue();
@@ -182,49 +182,6 @@ TEST(WeightedRequestPileQueueTest, ApplyLimits) {
   for (int i = 0; i < 1000; ++i) {
     ex.add(task);
   }
-
-  for (int i = 0; i < 1000; ++i) {
-    ex.add(task2);
-  }
-}
-
-TEST(WeightedRequestPileQueueTest, OnlyOneThreadGetsFirst) {
-  // For one dimensional control block
-  WeightedRequestPileQueue<int, true> queue;
-
-  std::atomic<int> counter{0};
-
-  auto task = [&] {
-    auto res = queue.enqueue(1, 100);
-    if (res == RequestPileQueueAcceptResult::FirstSuccess) {
-      counter++;
-    }
-  };
-
-  // For two dimensional control block
-  WeightedRequestPileQueue<int, true, TwoDimensionalControlBlock> queue2;
-
-  // we should let executor destructor run first to
-  // join the threads before we check the counter
-  auto g = folly::makeGuard([&] { EXPECT_EQ(counter.load(), 1); });
-
-  folly::CPUThreadPoolExecutor ex(32);
-  for (int i = 0; i < 1000; ++i) {
-    ex.add(task);
-  }
-
-  std::atomic<int> counter2{0};
-
-  auto task2 = [&] {
-    auto res = queue2.enqueue(1, {100, 100});
-    if (res == RequestPileQueueAcceptResult::FirstSuccess) {
-      counter2++;
-    }
-  };
-
-  // we should let executor destructor run first to
-  // join the threads before we check the counter
-  auto g2 = folly::makeGuard([&] { EXPECT_EQ(counter2.load(), 1); });
 
   for (int i = 0; i < 1000; ++i) {
     ex.add(task2);

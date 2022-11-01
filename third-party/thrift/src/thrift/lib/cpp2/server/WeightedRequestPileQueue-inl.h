@@ -28,11 +28,11 @@ void WeightedRequestPileQueue<T, EnableControl, ControlBlock>::setLimit(
 }
 
 template <typename T, bool EnableControl, typename ControlBlock>
-RequestPileQueueAcceptResult
-WeightedRequestPileQueue<T, EnableControl, ControlBlock>::enqueue(T&& elem) {
+bool WeightedRequestPileQueue<T, EnableControl, ControlBlock>::enqueue(
+    T&& elem) {
   if constexpr (!EnableControl) {
     queue_.enqueue({std::forward<T>(elem), ControlBlock::defaultWeights});
-    return RequestPileQueueAcceptResult::Success;
+    return true;
   } else {
     return enqueue(std::forward<T>(elem), ControlBlock::defaultWeights);
   }
@@ -40,17 +40,16 @@ WeightedRequestPileQueue<T, EnableControl, ControlBlock>::enqueue(T&& elem) {
 
 template <typename T, bool EnableControl, typename ControlBlock>
 template <bool Q, typename>
-RequestPileQueueAcceptResult
-WeightedRequestPileQueue<T, EnableControl, ControlBlock>::enqueue(
+bool WeightedRequestPileQueue<T, EnableControl, ControlBlock>::enqueue(
     T&& elem, Weights weights) {
   auto res = controlBlock_.accept(weights);
-  if (res == RequestPileQueueAcceptResult::Failed) {
-    return RequestPileQueueAcceptResult::Failed;
+  if (!res) {
+    return false;
   }
 
   queue_.enqueue({std::forward<T>(elem), weights});
 
-  return res;
+  return true;
 }
 
 template <typename T, bool EnableControl, typename ControlBlock>

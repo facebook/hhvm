@@ -32,6 +32,22 @@ namespace thrift {
 namespace compiler {
 namespace gen {
 namespace cpp {
+namespace {
+
+const t_type* find_first_type(const t_type& node) {
+  const t_type* result = nullptr;
+  t_typedef::find_type_if(&node, [&result](const t_type* type) {
+    if (type_resolver::find_type(*type) ||
+        type->find_structured_annotation_or_null(kCppStrongTypeUri)) {
+      result = type;
+      return true;
+    }
+    return false;
+  });
+  return result;
+}
+
+} // namespace
 
 const std::string& type_resolver::get_native_type(
     const t_field& field, const t_structured& parent) {
@@ -186,19 +202,6 @@ const t_const* type_resolver::find_nontransitive_adapter(const t_type& node) {
     return node.find_structured_annotation_or_null(kCppAdapterUri);
   }
   return nullptr;
-}
-
-const t_type* type_resolver::find_first_type(const t_type& node) {
-  const t_type* result = nullptr;
-  t_typedef::find_type_if(&node, [&result](const t_type* type) {
-    if (find_type(*type) ||
-        type->find_structured_annotation_or_null(kCppStrongTypeUri)) {
-      result = type;
-      return true;
-    }
-    return false;
-  });
-  return result;
 }
 
 const std::string* type_resolver::find_first_adapter(const t_type& node) {

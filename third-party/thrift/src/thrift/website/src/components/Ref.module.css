@@ -1,0 +1,38 @@
+/**
+ * (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
+ */
+
+h3, h4 {
+  margin-bottom: .3em;
+  padding-left: .5em;
+}
+
+table tr {
+  border-top: 1px solid silver;
+}
+table tr:nth-child(2n) {
+  background: none;
+}
+table th {
+  text-align: left;
+  padding: 0.2em;
+  margin: 0.2em;
+  border: none;
+}
+table td {
+  padding: 0.2em;
+  margin: 0.2em;
+  border: none;
+}
+table p {
+  margin: 0;
+}
+
+.topAlign {
+  vertical-align: top;
+}
+
+.lighthighlight {
+  background-color: rgba(169, 232, 231, 0.2);
+  border-radius: 0.3em;
+}

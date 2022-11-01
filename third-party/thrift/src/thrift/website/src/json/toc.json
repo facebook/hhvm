@@ -1,0 +1,22 @@
+[
+  {
+    "section": "Hooks",
+    "entries": [
+      {
+        "label": "TProcessorEventHandler",
+        "to": "/ref/class/apache/thrift/TProcessorEventHandler"
+      }
+    ],
+    "column": 1
+  },
+  {
+    "section": "Serialization",
+    "entries": [
+      {
+        "label": "TCompactProtocolT",
+        "to": "/ref/class/apache/thrift/protocol/TCompactProtocolT"
+      }
+    ],
+    "column": 3
+  }
+]

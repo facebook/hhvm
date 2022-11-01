@@ -19,10 +19,6 @@ else()
 endif()
 get_filename_component(BOOST_LIBRARY_DIR "${FIRST_LIB}" DIRECTORY)
 
-if("${CMAKE_VERSION}" VERSION_GREATER_EQUAL "3.12.0")
-  set(PARALLEL_FLAG "--parallel")
-endif()
-
 set(FOLLY_CXXFLAGS "-I${JEMALLOC_INCLUDE_DIR} -I${CMAKE_CURRENT_LIST_DIR}/include")
 message(STATUS "FOLLY_CXXFLAGS: ${FOLLY_CXXFLAGS}")
 
@@ -74,7 +70,7 @@ ExternalProject_add(
     -DZSTD_INCLUDE_DIR=${ZSTD_INCLUDE_DIR}
     -DZSTD_LIBRARY_RELEASE=${ZSTD_LIBRARY}
   BUILD_COMMAND
-    ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE} --target folly ${PARALLEL_FLAG}
+    $(MAKE) folly
   INSTALL_COMMAND
 # Prefered, but needs CMake 3.15 or above. Revist when Ubuntu 18.04 support is removed
 #    ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component dev &&

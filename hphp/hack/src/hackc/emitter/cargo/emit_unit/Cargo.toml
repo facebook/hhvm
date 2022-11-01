@@ -35,7 +35,7 @@ ocamlrep = { path = "../../../../ocamlrep" }
 options = { path = "../../../compile/cargo/options" }
 oxidized = { path = "../../../../oxidized" }
 print_expr = { path = "../../../print_expr" }
-regex = "1.5.4"
+regex = "1.6.0"
 scope = { path = "../scope" }
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
 stack_depth = { path = "../../../utils/cargo/stack_depth" }

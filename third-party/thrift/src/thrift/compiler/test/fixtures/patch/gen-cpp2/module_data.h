@@ -15,22 +15,38 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::test::fixtures::patch::MyEnum> {
   using type = ::test::fixtures::patch::MyEnum;
   static constexpr const std::size_t size = 1;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::MyValue0,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "MyValue0",
+  }};
 };
 
 template <> struct TEnumDataStorage<::test::fixtures::patch::InnerUnion::Type> {
   using type = ::test::fixtures::patch::InnerUnion::Type;
   static constexpr const std::size_t size = 1;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::innerOption,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "innerOption",
+  }};
 };
 
 template <> struct TEnumDataStorage<::test::fixtures::patch::MyUnion::Type> {
   using type = ::test::fixtures::patch::MyUnion::Type;
   static constexpr const std::size_t size = 3;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::option1,
+      type::option2,
+      type::option3,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "option1",
+      "option2",
+      "option3",
+  }};
 };
 
 template <> struct TStructDataStorage<::test::fixtures::patch::MyData> {

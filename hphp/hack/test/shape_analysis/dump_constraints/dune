@@ -19,7 +19,7 @@
    --flags
    --union-intersection-type-hints
    --shape-analysis
-   dump
+   dump:global
    --error-format
    raw)))
 

@@ -18,8 +18,7 @@
 
 namespace apache::thrift::server {
 
-RequestPileQueueAcceptResult OneDimensionalControlBlock::accept(
-    Weights weight) {
+bool OneDimensionalControlBlock::accept(Weights weight) {
   DCHECK(weight);
   for (;;) {
     auto oldCounter = counter_.load();
@@ -28,21 +27,16 @@ RequestPileQueueAcceptResult OneDimensionalControlBlock::accept(
     counter += weight;
 
     if (counter > limit_.load()) {
-      return RequestPileQueueAcceptResult::Failed;
+      return false;
     }
 
     if (counter_.compare_exchange_weak(oldCounter, counter)) {
-      if (oldCounter == 0) {
-        return RequestPileQueueAcceptResult::FirstSuccess;
-      } else {
-        return RequestPileQueueAcceptResult::Success;
-      }
+      return true;
     }
   }
 }
 
-RequestPileQueueAcceptResult TwoDimensionalControlBlock::accept(
-    Weights weights) {
+bool TwoDimensionalControlBlock::accept(Weights weights) {
   auto [w1, w2] = weights;
   DCHECK(w1);
   DCHECK(w2);
@@ -58,7 +52,7 @@ RequestPileQueueAcceptResult TwoDimensionalControlBlock::accept(
     counter2 += w2;
 
     if (counter1 > limit1_.load() || counter2 > limit2_.load()) {
-      return RequestPileQueueAcceptResult::Failed;
+      return false;
     }
 
     if (!counter1_.compare_exchange_weak(oldCounter1, counter1)) {
@@ -71,14 +65,7 @@ RequestPileQueueAcceptResult TwoDimensionalControlBlock::accept(
       continue;
     }
 
-    // Here we only check oldCounter2 because we change counter1 then
-    // counter2, when counter2 is set it's guarantee that counter1
-    // has been set. But the other way is not necessarily true
-    if (oldCounter2 == 0) {
-      return RequestPileQueueAcceptResult::FirstSuccess;
-    }
-
-    return RequestPileQueueAcceptResult::Success;
+    return true;
   }
 }
 

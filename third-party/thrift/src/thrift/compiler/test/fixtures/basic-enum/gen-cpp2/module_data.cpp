@@ -9,6 +9,8 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
+
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
 // These attributes are applied to the static data members to ensure that they
 // are not stripped from the compiled binary, in order to keep them available
@@ -30,65 +32,6 @@
 
 namespace apache {
 namespace thrift {
-
-THRIFT_DATA_MEMBER const std::array<::test::fixtures::enumstrict::EmptyEnum, 0> TEnumDataStorage<::test::fixtures::enumstrict::EmptyEnum>::values = {{
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TEnumDataStorage<::test::fixtures::enumstrict::EmptyEnum>::names = {{
-}};
-
-THRIFT_DATA_MEMBER const std::array<::test::fixtures::enumstrict::MyEnum, 2> TEnumDataStorage<::test::fixtures::enumstrict::MyEnum>::values = {{
-  type::ONE,
-  type::TWO,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::test::fixtures::enumstrict::MyEnum>::names = {{
-  "ONE",
-  "TWO",
-}};
-
-THRIFT_DATA_MEMBER const std::array<::test::fixtures::enumstrict::MyBigEnum, 20> TEnumDataStorage<::test::fixtures::enumstrict::MyBigEnum>::values = {{
-  type::UNKNOWN,
-  type::ONE,
-  type::TWO,
-  type::THREE,
-  type::FOUR,
-  type::FIVE,
-  type::SIX,
-  type::SEVEN,
-  type::EIGHT,
-  type::NINE,
-  type::TEN,
-  type::ELEVEN,
-  type::TWELVE,
-  type::THIRTEEN,
-  type::FOURTEEN,
-  type::FIFTEEN,
-  type::SIXTEEN,
-  type::SEVENTEEN,
-  type::EIGHTEEN,
-  type::NINETEEN,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 20> TEnumDataStorage<::test::fixtures::enumstrict::MyBigEnum>::names = {{
-  "UNKNOWN",
-  "ONE",
-  "TWO",
-  "THREE",
-  "FOUR",
-  "FIVE",
-  "SIX",
-  "SEVEN",
-  "EIGHT",
-  "NINE",
-  "TEN",
-  "ELEVEN",
-  "TWELVE",
-  "THIRTEEN",
-  "FOURTEEN",
-  "FIFTEEN",
-  "SIXTEEN",
-  "SEVENTEEN",
-  "EIGHTEEN",
-  "NINETEEN",
-}};
 
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::fields_names = {{
   "myEnum",

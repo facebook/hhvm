@@ -1302,14 +1302,14 @@ Optional<Type> param_target_type(const Func* callee, uint32_t paramIdx) {
     if (!dt) return std::nullopt;
     return TNull | Type(*dt);
   }
-  if (!pi.builtinType) {
+  if (!pi.builtinType()) {
     return tc.isVecOrDict() ? make_optional(TVec|TDict) : std::nullopt;
   }
-  if (pi.builtinType == KindOfObject &&
+  if (pi.builtinType() == KindOfObject &&
       pi.defaultValue.m_type == KindOfNull) {
     return TNullableObj;
   }
-  return Type(*pi.builtinType);
+  return Type(*pi.builtinType());
 }
 
 //////////////////////////////////////////////////////////////////////

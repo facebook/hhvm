@@ -1,7 +1,14 @@
-[RESULT] \test: (# of errors: 0) [6:9-15] [Allocation]:
+=== Shape analysis results for liberal_inout.php
+Summary for \f:
+[3:39-43] : dynamic
+(Param (([3:12-17], "\\f"), 0)) : dynamic
+(Param (([3:28-33], "\\f"), 1)) : dynamic
+Summary for \test:
+[6:9-15] [Allocation]:
   shape()
-[RESULT] \test: (# of errors: 0) [7:9-15] [Allocation]:
+[7:9-15] [Allocation]:
   shape()
-[RESULT] \test: (# of errors: 0) [9:13-19] [Allocation]:
+[9:13-19] [Allocation]:
   shape()
-No errors
+[5:18-22] : dynamic
+[10:13-19] : dynamic

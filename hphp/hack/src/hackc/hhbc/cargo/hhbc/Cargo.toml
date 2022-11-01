@@ -10,7 +10,7 @@ path = "../../lib.rs"
 [dependencies]
 bitflags = "1.3"
 bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
-bumpalo = { version = "3.8", features = ["collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"] }
 emit_opcodes_macro = { path = "../emit_opcodes_macro" }
 ffi = { path = "../../../../utils/ffi" }
 hash = { path = "../../../../utils/hash" }

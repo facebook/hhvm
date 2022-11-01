@@ -52,7 +52,7 @@ use syn::Token;
 ///
 ///     Opcode::ResolveFunc(ref str1) => {
 ///         let str1 =
-///             ir::FunctionId::from_hhbc(*str1, &mut ctx.unit.strings);
+///             ir::FunctionId::from_hhbc(*str1, ctx.strings);
 ///         Action::Push(Instr::Hhbc(Hhbc::ResolveFunc(str1, ctx.loc)))
 ///     }
 ///
@@ -272,7 +272,7 @@ fn parse_convert_simple(
             conv.push(quote_spanned!(span=> let #imm = #converter; ));
         };
 
-        let strings = quote_spanned!(span=> &mut ctx.unit.strings);
+        let strings = quote_spanned!(span=> ctx.strings);
 
         match ty {
             ImmType::OAL(n) if *n == "ClassName" => {

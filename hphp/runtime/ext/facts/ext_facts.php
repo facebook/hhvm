@@ -76,6 +76,12 @@ function enabled()[]: bool;
 function db_path(string $root)[]: ?string;
 
 /**
+ * Return the schema version in use by this hhvm binary.
+ */
+<<__Native>>
+function schema_version()[]: int;
+
+/**
  * Return the only path defining a given symbol.
  *
  * Return `null` if the symbol is not defined, or is defined in more than one

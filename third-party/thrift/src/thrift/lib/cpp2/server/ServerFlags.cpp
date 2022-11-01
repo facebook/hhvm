@@ -46,4 +46,10 @@ bool useResourcePoolsFlagsSet() {
   return (gFlagEnable || thriftFlag) && !gFlagDisable;
 }
 
+bool allowResourcePoolsForWildcards() {
+  static bool gFlagAllow = FLAGS_thrift_allow_resource_pools_for_wildcards;
+  static bool thriftFlag = THRIFT_FLAG(allow_resource_pools_for_wildcards);
+  return gFlagAllow || thriftFlag;
+}
+
 } // namespace apache::thrift

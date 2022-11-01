@@ -28,12 +28,26 @@ def lookup_func(func_id: lldb.SBValue) -> lldb.SBValue:
         result = idx.atomic_low_ptr_vector_at(func_vec, func_id_val)
         assert result.IsValid(), "returned invalid HPHP::Func"
     else:
+        # TODO test this code path
         # LowPtr
         result = utils.rawptr(utils.get(func_id, 'm_id'))
 
     func_ptr = result.Cast(utils.Type('HPHP::Func', target).GetPointerType())
     assert func_ptr.IsValid(), "couldn't return HPHP::Func *"
     return func_ptr
+
+
+def lookup_func_from_frame_pointer(fp: lldb.SBValue) -> lldb.SBValue:
+    """ Get the jitted function pointed to by the given frame pointer.
+
+    Args:
+        fp: Activation record (HPHP::ActRec)
+
+    Returns:
+        func: An SBValue representing a HPHP::Func*
+    """
+    func_id = utils.get(fp, 'm_funcId')
+    return lookup_func(func_id)
 
 
 class LookupCommand(utils.Command):

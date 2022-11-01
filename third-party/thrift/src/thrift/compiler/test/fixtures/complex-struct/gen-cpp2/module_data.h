@@ -15,22 +15,58 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::cpp2::MyEnum> {
   using type = ::cpp2::MyEnum;
   static constexpr const std::size_t size = 5;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::MyValue1,
+      type::MyValue2,
+      type::MyValue3,
+      type::MyValue4,
+      type::MyValue5,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "MyValue1",
+      "MyValue2",
+      "MyValue3",
+      "MyValue4",
+      "MyValue5",
+  }};
 };
 
 template <> struct TEnumDataStorage<::cpp2::MyUnion::Type> {
   using type = ::cpp2::MyUnion::Type;
   static constexpr const std::size_t size = 6;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::myEnum,
+      type::myStruct,
+      type::myDataItem,
+      type::complexNestedStruct,
+      type::longValue,
+      type::intValue,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "myEnum",
+      "myStruct",
+      "myDataItem",
+      "complexNestedStruct",
+      "longValue",
+      "intValue",
+  }};
 };
 
 template <> struct TEnumDataStorage<::cpp2::MyUnionFloatFieldThrowExp::Type> {
   using type = ::cpp2::MyUnionFloatFieldThrowExp::Type;
   static constexpr const std::size_t size = 4;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::myEnum,
+      type::setFloat,
+      type::myDataItem,
+      type::complexNestedStruct,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "myEnum",
+      "setFloat",
+      "myDataItem",
+      "complexNestedStruct",
+  }};
 };
 
 template <> struct TStructDataStorage<::cpp2::MyStructFloatFieldThrowExp> {

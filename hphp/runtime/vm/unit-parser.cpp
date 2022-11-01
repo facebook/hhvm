@@ -261,6 +261,7 @@ CompilerResult hackc_compile(
         break;
       }
     }
+    return hackCResult;
   }
   return res;
 }

@@ -1,5 +1,22 @@
-[RESULT] \dont_invalidate: (# of errors: 0) [9:8-23] [Allocation]:
+=== Shape analysis results for liberal_collection_access.php
+Summary for \dont_invalidate:
+[9:8-23] [Allocation]:
   shape('a' => int)
-[RESULT] \dont_invalidate: (# of errors: 0) [12:18-33] [Allocation]:
+[12:18-33] [Allocation]:
   shape('a' => int)
-No errors
+[8:29-33] : dynamic
+Summary for \invalidate:
+[17:24-28] : dynamic
+[18:8-27] : dynamic
+[18:20-26] : dynamic
+[21:18-33] : dynamic
+[24:28-43] : dynamic
+Summary for \takes_dict:
+[4:46-50] : dynamic
+(Param (([4:21-40], "\\takes_dict"), 0)) : dynamic
+Summary for \takes_int:
+[3:29-33] : dynamic
+(Param (([3:20-23], "\\takes_int"), 0)) : dynamic
+Summary for \takes_tuple:
+[5:54-58] : dynamic
+(Param (([5:22-48], "\\takes_tuple"), 0)) : dynamic

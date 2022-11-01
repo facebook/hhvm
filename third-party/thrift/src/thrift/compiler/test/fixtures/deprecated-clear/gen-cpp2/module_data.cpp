@@ -9,6 +9,8 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
+
 #if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
 // These attributes are applied to the static data members to ensure that they
 // are not stripped from the compiled binary, in order to keep them available
@@ -30,15 +32,6 @@
 
 namespace apache {
 namespace thrift {
-
-THRIFT_DATA_MEMBER const std::array<::apache::thrift::test::MyEnum, 2> TEnumDataStorage<::apache::thrift::test::MyEnum>::values = {{
-  type::ME0,
-  type::ME1,
-}};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::test::MyEnum>::names = {{
-  "ME0",
-  "ME1",
-}};
 
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 13> TStructDataStorage<::apache::thrift::test::StructWithDefaultStruct>::fields_names = {{
   "bool_field",

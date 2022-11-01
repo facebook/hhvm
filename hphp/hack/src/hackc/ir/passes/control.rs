@@ -17,7 +17,9 @@ use newtype::IdVec;
 /// Attempt to merge simple blocks together. Returns true if the Func was
 /// changed.
 pub fn run(func: &mut Func<'_>) -> bool {
-    let mut predecesors = analysis::compute_num_predecessors(
+    let mut changed = false;
+
+    let mut predecessors = analysis::compute_num_predecessors(
         func,
         PredecessorFlags {
             mark_entry_blocks: false,
@@ -25,16 +27,16 @@ pub fn run(func: &mut Func<'_>) -> bool {
         },
     );
 
-    for bid in func.block_ids() {
+    for bid in func.block_ids().rev() {
         let mut instr = std::mem::replace(func.terminator_mut(bid), Terminator::Unreachable);
 
         let edges = instr.edges_mut();
         let successors = edges.len() as u32;
         for edge in edges {
-            let target = forward_edge(func, *edge, successors, &predecesors);
-            if target != *edge {
-                predecesors[*edge] -= 1;
-                predecesors[target] += 1;
+            if let Some(target) = forward_edge(func, *edge, successors, &predecessors) {
+                changed = true;
+                predecessors[*edge] -= 1;
+                predecessors[target] += 1;
                 *edge = target;
             }
         }
@@ -45,28 +47,32 @@ pub fn run(func: &mut Func<'_>) -> bool {
     // Function params
     for idx in 0..func.params.len() {
         if let Some(dv) = func.params[idx].default_value {
-            let target = forward_edge(func, dv.init, 1, &predecesors);
-            if target != dv.init {
-                predecesors[dv.init] -= 1;
-                predecesors[target] += 1;
+            if let Some(target) = forward_edge(func, dv.init, 1, &predecessors) {
+                changed = true;
+                predecessors[dv.init] -= 1;
+                predecessors[target] += 1;
                 func.params[idx].default_value.as_mut().unwrap().init = target;
             }
         }
     }
 
     // Entry Block
-    let target = forward_edge(func, Func::ENTRY_BID, 1, &predecesors);
-    if target != Func::ENTRY_BID {
+    if let Some(target) = forward_edge(func, Func::ENTRY_BID, 1, &predecessors) {
         // Uh oh - we're remapping the ENTRY_BID - this is no good. Instead
         // remap the target and swap the two blocks.
+        changed = true;
         let mut remap = BlockIdMap::default();
         remap.insert(target, Func::ENTRY_BID);
         func.remap_bids(&remap);
         func.blocks.swap(Func::ENTRY_BID, target);
     }
 
-    crate::rpo_sort(func);
-    true
+    if changed {
+        crate::rpo_sort(func);
+        true
+    } else {
+        false
+    }
 }
 
 fn params_eq(a: &[InstrId], b: &[ValueId]) -> bool {
@@ -79,24 +85,22 @@ fn params_eq(a: &[InstrId], b: &[ValueId]) -> bool {
 fn forward_edge(
     func: &Func<'_>,
     mut bid: BlockId,
-    source_successors: u32,
-    predecesors: &IdVec<BlockId, u32>,
-) -> BlockId {
-    // If the target block just contains a jump to another block then jump
+    mut predecessor_successors: u32,
+    predecessors: &IdVec<BlockId, u32>,
+) -> Option<BlockId> {
+    // If the target block (bid) just contains a jump to another block then jump
     // directly to that one instead - but we need to worry about creating a
-    // critical edge. If our predecesor has multiple successors and our target
-    // has multiple predecesors then we can't combine them because that would be
-    // a critical edge.
-
-    if source_successors > 1 {
-        return bid;
-    }
+    // critical edge. If our predecessor has multiple successors and our target
+    // has multiple predecessors then we can't combine them because that would
+    // be a critical edge.
 
     // TODO: Optimize this. Nothing will break if this is too small or too
     // big. Too small means we'll snap through fewer chains. To big means we'll
-    // take longer than necessary to bail on an infinite loop.
+    // take longer than necessary to bail on an infinite loop (which shouldn't
+    // really happen normally).
     const LOOP_CHECK: usize = 100;
 
+    let mut changed = false;
     for _ in 0..LOOP_CHECK {
         let block = func.block(bid);
         if block.iids.len() != 1 {
@@ -135,17 +139,265 @@ fn forward_edge(
             break;
         }
 
-        // Critical edges: If this block has multiple successsors and the target
-        // has multiple predecesors then we can't do this because it would
-        // create a critical edge.  (At this point we know that our source only
-        // has a single successor because either we checked outside the loop or
-        // we're coming from a Jmp or JmpArgs)
-        if predecesors[target] > 1 {
+        // Critical edges: If the predecessor has multiple successors and the
+        // target has multiple predecessors then we can't continue any further
+        // because it would create a critical edge.
+        if predecessor_successors > 1 && predecessors[target] > 1 {
             break;
         }
 
         bid = target;
+        changed = true;
+        // We know that the next time through our predecessor must have had only
+        // a single successor (since we checked for Jmp and JmpArgs above).
+        predecessor_successors = 1;
     }
 
-    bid
+    changed.then_some(bid)
+}
+
+#[cfg(test)]
+mod test {
+    use ir_core::func::DefaultValue;
+    use ir_core::BlockId;
+    use ir_core::Instr;
+    use ir_core::InstrId;
+    use ir_core::Param;
+    use ir_core::StringInterner;
+    use ir_core::UserType;
+
+    fn mk_param<'a>(name: &str, dv: BlockId, strings: &mut StringInterner) -> Param<'a> {
+        Param {
+            name: strings.intern_str(name),
+            is_variadic: false,
+            is_inout: false,
+            is_readonly: false,
+            user_attributes: vec![],
+            ty: UserType::default(),
+            default_value: Some(DefaultValue {
+                init: dv,
+                expr: ffi::Str::new(b"1"),
+            }),
+        }
+    }
+
+    #[test]
+    fn test1() {
+        // Can't forward because 'b' isn't empty.
+        let (mut func, strings) = testutils::build_test_func(&[
+            ("a", vec!["ca"], vec!["b"]),
+            ("b", vec!["cb"], vec!["c"]),
+            ("c", vec!["cc"], vec![]),
+        ]);
+        let expected = func.clone();
+
+        let changed = super::run(&mut func);
+        assert!(!changed);
+
+        testutils::assert_func_struct_eq(&func, &expected, &strings);
+    }
+
+    #[test]
+    fn test2() {
+        let mut strings = StringInterner::default();
+        // 'a' forwards directly to 'c'
+        let mut func = testutils::build_test_func_with_strings(
+            &[
+                ("a", vec!["ca"], vec!["b"]),
+                ("b", vec![], vec!["c"]),
+                ("c", vec!["cc"], vec![]),
+            ],
+            &mut strings,
+        );
+
+        let changed = super::run(&mut func);
+        assert!(changed);
+
+        #[rustfmt::skip]
+        let expected = testutils::build_test_func_with_strings(
+            &[
+                ("a", vec!["ca"], vec!["c"]),
+                ("c", vec!["cc"], vec![])
+            ],
+            &mut strings,
+        );
+        testutils::assert_func_struct_eq(&func, &expected, &strings);
+    }
+
+    #[test]
+    fn test3() {
+        let mut strings = StringInterner::default();
+        // Can't forward because it would create a critical section.
+        let mut func = testutils::build_test_func_with_strings(
+            &[
+                ("a", vec!["ca"], vec!["b", "c"]),
+                ("b", vec![], vec!["d"]),
+                ("c", vec![], vec!["d"]),
+                ("d", vec!["cd"], vec![]),
+            ],
+            &mut strings,
+        );
+        let expected = func.clone();
+
+        let changed = super::run(&mut func);
+        assert!(!changed);
+
+        testutils::assert_func_struct_eq(&func, &expected, &strings);
+    }
+
+    #[test]
+    fn test4() {
+        let mut strings = StringInterner::default();
+        // Expect 'c' to be forwarded directly to 'e'.
+        let mut func = testutils::build_test_func_with_strings(
+            &[
+                ("a", vec!["ca"], vec!["b", "c"]),
+                ("b", vec![], vec!["e"]),
+                ("c", vec![], vec!["d"]),
+                ("d", vec![], vec!["e"]),
+                ("e", vec!["cd"], vec![]),
+            ],
+            &mut strings,
+        );
+
+        let changed = super::run(&mut func);
+        assert!(changed);
+
+        let expected = testutils::build_test_func_with_strings(
+            &[
+                ("a", vec!["ca"], vec!["b", "c"]),
+                ("b", vec![], vec!["e"]),
+                ("c", vec![], vec!["e"]),
+                ("e", vec!["cd"], vec![]),
+            ],
+            &mut strings,
+        );
+        testutils::assert_func_struct_eq(&func, &expected, &strings);
+    }
+
+    #[test]
+    fn test5() {
+        let mut strings = StringInterner::default();
+        // Expect 'entry' to be removed.
+        let mut func = testutils::build_test_func_with_strings(
+            &[
+                ("entry", vec![], vec!["b"]),
+                ("b", vec!["cb"], vec!["c"]),
+                ("c", vec![], vec![]),
+            ],
+            &mut strings,
+        );
+
+        let changed = super::run(&mut func);
+        assert!(changed);
+
+        #[rustfmt::skip]
+        let expected = testutils::build_test_func_with_strings(
+            &[
+                ("b", vec!["cb"], vec!["c"]),
+                ("c", vec![], vec![])
+            ],
+            &mut strings,
+        );
+        testutils::assert_func_struct_eq(&func, &expected, &strings);
+    }
+
+    #[test]
+    fn test6() {
+        let mut strings = StringInterner::default();
+        // We can forward c -> e but still need b -> d -> e because of critedge.
+        let mut func = testutils::build_test_func_with_strings(
+            &[
+                ("a", vec![], vec!["b", "c"]),
+                ("b", vec![], vec!["d", "e"]),
+                ("c", vec![], vec!["d"]),
+                ("d", vec![], vec!["e"]),
+                ("e", vec![], vec![]),
+            ],
+            &mut strings,
+        );
+
+        let changed = super::run(&mut func);
+        assert!(changed);
+
+        let expected = testutils::build_test_func_with_strings(
+            &[
+                ("a", vec![], vec!["b", "c"]),
+                ("b", vec![], vec!["d", "e"]),
+                ("c", vec![], vec!["e"]),
+                ("d", vec![], vec!["e"]),
+                ("e", vec![], vec![]),
+            ],
+            &mut strings,
+        );
+        testutils::assert_func_struct_eq(&func, &expected, &strings);
+    }
+
+    #[test]
+    fn test7() {
+        let mut strings = StringInterner::default();
+        // We expect to skip 'b' and 'c'
+        let mut func = testutils::build_test_func_with_strings(
+            &[
+                ("a", vec![], vec!["b", "c"]),
+                ("b", vec![], vec!["d"]),
+                ("c", vec![], vec!["e"]),
+                ("d", vec![], vec![]),
+                ("e", vec![], vec![]),
+            ],
+            &mut strings,
+        );
+
+        let changed = super::run(&mut func);
+        assert!(changed);
+
+        let expected = testutils::build_test_func_with_strings(
+            &[
+                ("a", vec![], vec!["d", "e"]),
+                ("d", vec![], vec![]),
+                ("e", vec![], vec![]),
+            ],
+            &mut strings,
+        );
+        testutils::assert_func_struct_eq(&func, &expected, &strings);
+    }
+
+    #[test]
+    fn test8() {
+        let mut strings = StringInterner::default();
+        // We expect to skip the entry block.
+        let mut func = testutils::build_test_func_with_strings(
+            &[
+                ("a", vec![], vec!["c"]),
+                ("b", vec![], vec!["c"]),
+                ("c", vec![], vec!["d", "e"]),
+                ("d", vec![], vec![]),
+                ("e", vec![], vec![]),
+            ],
+            &mut strings,
+        );
+        func.params.push(mk_param("x", BlockId(1), &mut strings));
+        *func.instr_mut(InstrId(1)) = Instr::enter(BlockId(2), ir_core::LocId::NONE);
+
+        eprintln!("FUNC:\n{}", print::DisplayFunc(&func, true, &strings));
+
+        let changed = super::run(&mut func);
+        assert!(changed);
+
+        let mut expected = testutils::build_test_func_with_strings(
+            &[
+                ("c", vec![], vec!["d", "e"]),
+                ("b", vec![], vec!["c"]),
+                ("d", vec![], vec![]),
+                ("e", vec![], vec![]),
+            ],
+            &mut strings,
+        );
+        expected
+            .params
+            .push(mk_param("x", BlockId(1), &mut strings));
+        *expected.instr_mut(InstrId(1)) = Instr::enter(BlockId(0), ir_core::LocId::NONE);
+
+        testutils::assert_func_struct_eq(&func, &expected, &strings);
+    }
 }

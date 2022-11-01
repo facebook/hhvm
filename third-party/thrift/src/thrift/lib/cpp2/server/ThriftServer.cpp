@@ -519,7 +519,7 @@ void ThriftServer::setup() {
       if (socket_) {
         ServerBootstrap::bind(std::move(socket_));
       } else if (!getAddress().isInitialized()) {
-        ServerBootstrap::bind(port_);
+        ServerBootstrap::bind(port_.value_or(0));
       } else {
         for (auto& address : addresses_) {
           ServerBootstrap::bind(address);

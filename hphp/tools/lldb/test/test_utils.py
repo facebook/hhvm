@@ -41,8 +41,8 @@ class UtilsGivenTargetTestCase(base.LLDBTestBase):
         self.assertTrue(k_vec_kind.GetName(), "kVecKind")
 
     def test_get(self):
-        s_code = utils.Global("HPHP::jit::tc::g_code", self.target)
-        code_size = utils.get(s_code, "m_threadLocalStart")
+        g_code = utils.Global("HPHP::jit::tc::g_code", self.target)
+        code_size = utils.get(g_code, "m_threadLocalStart")
         self.assertTrue(code_size.IsValid())
 
     def test_rawtype_remove_typedef(self):
@@ -103,3 +103,13 @@ class UtilsGivenFrameTestCase(base.LLDBTestBase):
         self.assertEqual(utils.template_type(smart_ptr.type), "std::unique_ptr")
         raw_ptr = utils.rawptr(smart_ptr)
         self.assertEqual(utils.template_type(raw_ptr.type), "HPHP::detail::LowPtrImpl")
+
+    def test_arch_regs(self):
+        # Make sure we're consistent with what LLDB is telling us are FP, PC, SP,
+        # for both x86 and ARM
+        fp = utils.reg('fp', self.frame)
+        self.assertEqual(fp.unsigned, self.frame.fp)
+        sp = utils.reg('sp', self.frame)
+        self.assertEqual(sp.unsigned, self.frame.sp)
+        ip = utils.reg('ip', self.frame)
+        self.assertEqual(ip.unsigned, self.frame.pc)

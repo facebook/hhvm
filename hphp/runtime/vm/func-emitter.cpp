@@ -356,9 +356,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   std::vector<Func::ParamInfo> fParams;
   for (unsigned i = 0; i < params.size(); ++i) {
     Func::ParamInfo pi = params[i];
-    if (pi.isVariadic()) {
-      pi.builtinType = KindOfVec;
-    }
     fParams.push_back(pi);
     auto const& fromUBs = params[i].upperBounds;
     if (!fromUBs.empty()) {

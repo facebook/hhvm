@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::sync::Arc;
+
 use ir::analysis;
 use ir::instr;
 use ir::instr::HasLocals;
@@ -43,7 +45,7 @@ use crate::strings::StringCache;
 /// pushes up to common locations (so if there's a common push in both targets
 /// of a branch, move the push before the branch).
 ///
-pub(crate) fn run<'a>(func: Func<'a>, strings: &StringCache<'a, '_>) -> Func<'a> {
+pub(crate) fn run<'a>(func: Func<'a>, strings: &StringCache<'a>) -> Func<'a> {
     let liveness = analysis::LiveInstrs::compute(&func);
     trace!("LIVENESS: {liveness:?}");
 
@@ -51,7 +53,7 @@ pub(crate) fn run<'a>(func: Func<'a>, strings: &StringCache<'a, '_>) -> Func<'a>
     trace!("First temporary local is {}", next_temp_idx);
 
     let mut pusher = PushInserter {
-        builder: FuncBuilder::with_func(func),
+        builder: FuncBuilder::with_func(func, Arc::clone(&strings.interner)),
         liveness,
         strings,
         next_temp_idx,
@@ -81,7 +83,7 @@ struct BlockInput {
 struct PushInserter<'a, 'b> {
     builder: FuncBuilder<'a>,
     liveness: analysis::LiveInstrs,
-    strings: &'b StringCache<'a, 'b>,
+    strings: &'b StringCache<'a>,
     next_temp_idx: usize,
     instr_ids: InstrIdMap<ir::LocalId>,
 }
@@ -127,7 +129,7 @@ impl<'a, 'b> PushInserter<'a, 'b> {
         for &iid in &dead_on_entry {
             // This iid is dead on entry to the block - we need to unset it.
             if let Some(lid) = self.consume_temp(iid) {
-                trace!("  UNSET {}", ir::print::FmtLid(lid, self.strings.interner));
+                trace!("  UNSET {}", ir::print::FmtLid(lid, &self.strings.interner));
                 self.builder
                     .emit(Instr::Special(Special::IrToBc(IrToBc::UnsetL(lid))));
             }
@@ -157,7 +159,7 @@ impl<'a, 'b> PushInserter<'a, 'b> {
         trace!(
             "  INSTR {}: {}",
             iid,
-            ir::print::FmtInstr(&self.builder.func, self.strings.interner, iid)
+            ir::print::FmtInstr(&self.builder.func, &self.strings.interner, iid)
         );
 
         let instr = self.builder.func.instr(iid);
@@ -214,7 +216,7 @@ impl<'a, 'b> PushInserter<'a, 'b> {
         trace!(
             "  TERMINATOR {}: {}",
             iid,
-            ir::print::FmtInstr(&self.builder.func, self.strings.interner, iid)
+            ir::print::FmtInstr(&self.builder.func, &self.strings.interner, iid)
         );
 
         self.push_operands(iid);

@@ -34,6 +34,7 @@ class schematizer {
   static std::unique_ptr<t_const_value> gen_schema(const t_service& node);
   static std::unique_ptr<t_const_value> gen_schema(const t_const& node);
   static std::unique_ptr<t_const_value> gen_schema(const t_enum& node);
+  static std::unique_ptr<t_const_value> gen_schema(const t_program& node);
 };
 } // namespace compiler
 } // namespace thrift

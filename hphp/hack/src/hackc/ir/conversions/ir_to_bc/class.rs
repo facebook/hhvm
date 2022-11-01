@@ -15,7 +15,7 @@ pub(crate) fn convert_class<'a>(
     alloc: &'a bumpalo::Bump,
     unit: &mut UnitBuilder<'a>,
     class: ir::Class<'a>,
-    strings: &StringCache<'a, '_>,
+    strings: &StringCache<'a>,
 ) {
     let ir::Class {
         attributes,
@@ -137,10 +137,7 @@ pub(crate) fn convert_class<'a>(
     unit.classes.push(class);
 }
 
-fn convert_property<'a>(
-    src: ir::Property<'a>,
-    strings: &StringCache<'a, '_>,
-) -> hhbc::Property<'a> {
+fn convert_property<'a>(src: ir::Property<'a>, strings: &StringCache<'a>) -> hhbc::Property<'a> {
     hhbc::Property {
         name: src.name,
         flags: src.flags,
@@ -169,7 +166,7 @@ fn convert_ctx_constant<'a>(
 
 fn convert_type_constant<'a>(
     tc: ir::TypeConstant<'a>,
-    strings: &StringCache<'a, '_>,
+    strings: &StringCache<'a>,
 ) -> hhbc::TypeConstant<'a> {
     hhbc::TypeConstant {
         name: tc.name,

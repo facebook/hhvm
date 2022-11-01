@@ -10,7 +10,7 @@ use crate::strings::StringCache;
 
 pub(crate) fn convert_hack_constant<'a>(
     constant: ir::HackConstant<'a>,
-    strings: &StringCache<'a, '_>,
+    strings: &StringCache<'a>,
 ) -> Constant<'a> {
     let ir::HackConstant {
         name,

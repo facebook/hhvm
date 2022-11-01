@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::borrow::Cow;
+use std::sync::Arc;
 
 use hash::HashMap;
 use ir::StringInterner;
@@ -16,11 +17,11 @@ pub(crate) enum FuncDeclKind {
 
 pub(crate) struct UnitState {
     pub(crate) func_declares: FuncDecls,
-    pub(crate) strings: StringInterner,
+    pub(crate) strings: Arc<StringInterner>,
 }
 
 impl UnitState {
-    pub(crate) fn new(strings: StringInterner) -> Self {
+    pub(crate) fn new(strings: Arc<StringInterner>) -> Self {
         Self {
             func_declares: Default::default(),
             strings,

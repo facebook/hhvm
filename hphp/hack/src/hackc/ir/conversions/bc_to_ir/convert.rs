@@ -23,7 +23,7 @@ use ir::StringInterner;
 ///
 pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
     use std::os::unix::ffi::OsStrExt;
-    let mut strings = ir::StringInterner::default();
+    let strings = Arc::new(ir::StringInterner::default());
 
     let filename = ir::Filename(strings.intern_bytes(filename.as_os_str().as_bytes()));
 
@@ -32,7 +32,7 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
     let adata_lookup = unit
         .adata
         .iter()
-        .map(|hhbc::Adata { id, value }| (*id, Arc::new(convert_typed_value(value, &mut strings))))
+        .map(|hhbc::Adata { id, value }| (*id, Arc::new(convert_typed_value(value, &strings))))
         .collect();
 
     let unit_state = UnitState { adata_lookup };
@@ -41,13 +41,13 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
         .constants
         .as_ref()
         .iter()
-        .map(|c| crate::constant::convert_constant(c, &mut strings))
+        .map(|c| crate::constant::convert_constant(c, &strings))
         .collect();
 
     let file_attributes: Vec<_> = unit
         .file_attributes
         .iter()
-        .map(|a| convert_attribute(a, &mut strings))
+        .map(|a| convert_attribute(a, &strings))
         .collect();
 
     let modules: Vec<ir::Module<'a>> = unit
@@ -57,9 +57,9 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
             attributes: module
                 .attributes
                 .iter()
-                .map(|a| convert_attribute(a, &mut strings))
+                .map(|a| convert_attribute(a, &strings))
                 .collect(),
-            name: ir::ClassId::from_hhbc(module.name, &mut strings),
+            name: ir::ClassId::from_hhbc(module.name, &strings),
             src_loc: ir::SrcLoc::from_span(filename, &module.span),
             doc_comment: module.doc_comment.into(),
         })
@@ -119,7 +119,7 @@ pub(crate) struct UnitState<'a> {
 
 pub(crate) fn convert_attribute<'a>(
     attr: &hhbc::Attribute<'a>,
-    strings: &mut StringInterner,
+    strings: &StringInterner,
 ) -> ir::Attribute<'a> {
     let arguments = attr
         .arguments
@@ -151,7 +151,7 @@ fn convert_symbol_refs<'a>(symbol_refs: &hhbc::SymbolRefs<'a>) -> ir::unit::Symb
 
 pub(crate) fn convert_typed_value<'a>(
     tv: &hhbc::TypedValue<'a>,
-    strings: &mut StringInterner,
+    strings: &StringInterner,
 ) -> ir::TypedValue {
     match *tv {
         hhbc::TypedValue::Uninit => ir::TypedValue::Uninit,
@@ -185,7 +185,7 @@ pub(crate) fn convert_typed_value<'a>(
 
 pub(crate) fn convert_array_key<'a>(
     tv: &hhbc::TypedValue<'a>,
-    strings: &mut StringInterner,
+    strings: &StringInterner,
 ) -> ir::ArrayKey {
     match *tv {
         hhbc::TypedValue::Int(v) => ir::ArrayKey::Int(v),

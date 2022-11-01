@@ -1,2 +1,17 @@
-[FAILURE] \main1: "[9:3-8]: Unsupported expression: Obj_get"
-No errors
+=== Shape analysis results for inout_arg.php
+Summary for \C::m:
+[4:49-53] : dynamic
+(Param (([4:27-43], "\\C::m"), 0)) : dynamic
+Summary for \f:
+[12:40-44] : dynamic
+(Param (([12:18-34], "\\f"), 0)) : dynamic
+Summary for \main1:
+[7:23-27] : dynamic
+[8:8-22] : dynamic
+(Param (([7:16-17], "\\main1"), 0)) : dynamic
+Summary for \main2:
+[14:19-23] : dynamic
+[15:8-22] : dynamic
+
+Errors:
+"[9:3-8]: Unsupported expression: Obj_get"

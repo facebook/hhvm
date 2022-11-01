@@ -1,5 +1,11 @@
-[RESULT] \C::f: (# of errors: 0) [5:10-38] [Allocation]:
+=== Shape analysis results for class.php
+Summary for \C::f:
+[5:10-38] [Allocation]:
   shape('a' => int, 'b' => bool)
-[RESULT] \C::g: (# of errors: 0) [13:10-38] [Allocation]:
+[4:31-35] : dynamic
+(Param (([4:21-25], "\\C::f"), 0)) : dynamic
+Summary for \C::g:
+[13:10-38] [Allocation]:
   shape('a' => int, 'b' => bool)
-No errors
+[12:31-35] : dynamic
+(Param (([12:21-25], "\\C::g"), 0)) : dynamic

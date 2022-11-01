@@ -45,7 +45,8 @@ pub fn run(opts: Opts) -> Result<()> {
 
     for path in files {
         let pre_alloc = bumpalo::Bump::default();
-        let unit = compile_php_file(&pre_alloc, &path, &opts.single_file_opts)?;
+        let content = fs::read(&path)?;
+        let unit = compile_php_file(&pre_alloc, &path, &content, &opts.single_file_opts)?;
 
         textual::textual_writer(&mut stdout, &path, unit)?;
     }
@@ -57,17 +58,14 @@ pub fn run(opts: Opts) -> Result<()> {
     Ok(())
 }
 
-fn compile_php_file<'a, 'arena>(
+pub(crate) fn compile_php_file<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     path: &'a Path,
-    //content: Vec<u8>,
+    content: &[u8],
     single_file_opts: &'a SingleFileOpts,
-    //profile: &mut Profile,
 ) -> Result<ir::Unit<'arena>> {
-    let content = fs::read(path)?;
-
     let filepath = RelativePath::make(Prefix::Dummy, path.to_path_buf());
-    let source_text = SourceText::make(RcOc::new(filepath.clone()), &content);
+    let source_text = SourceText::make(RcOc::new(filepath.clone()), content);
     let env = crate::compile::native_env(filepath, single_file_opts);
     let mut profile = Profile::default();
     let decl_arena = bumpalo::Bump::new();

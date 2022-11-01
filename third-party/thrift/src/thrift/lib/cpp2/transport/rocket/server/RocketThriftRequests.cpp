@@ -400,6 +400,16 @@ void handleStreamError(
 
 } // namespace
 
+namespace detail {
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    void,
+    onRocketThriftRequestReceived,
+    const RocketServerConnection&,
+    StreamId,
+    RpcKind,
+    const transport::THeader::StringToStringMap&) {}
+} // namespace detail
+
 RocketThriftRequest::RocketThriftRequest(
     server::ServerConfigs& serverConfigs,
     RequestRpcMetadata&& metadata,
@@ -408,7 +418,13 @@ RocketThriftRequest::RocketThriftRequest(
     RocketServerFrameContext&& context)
     : ThriftRequestCore(serverConfigs, std::move(metadata), connContext),
       evb_(evb),
-      context_(std::move(context)) {}
+      context_(std::move(context)) {
+  detail::onRocketThriftRequestReceived(
+      context_.connection(),
+      context_.streamId(),
+      kind(),
+      getTHeader().getHeaders());
+}
 
 ThriftServerRequestResponse::ThriftServerRequestResponse(
     RequestsRegistry::DebugStub& debugStubToInit,

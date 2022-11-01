@@ -20,7 +20,7 @@
    --flags
    --union-intersection-type-hints
    --shape-analysis
-   solve
+   solve:global
    --error-format
    raw)))
 

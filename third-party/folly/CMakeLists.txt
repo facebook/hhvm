@@ -70,7 +70,7 @@ ExternalProject_add(
     -DZSTD_INCLUDE_DIR=${ZSTD_INCLUDE_DIR}
     -DZSTD_LIBRARY_RELEASE=${ZSTD_LIBRARY}
   BUILD_COMMAND
-    BUILD_COMMAND $(MAKE) folly
+    $(MAKE) folly
   INSTALL_COMMAND
 # Prefered, but needs CMake 3.15 or above. Revist when Ubuntu 18.04 support is removed
 #    ${CMAKE_COMMAND} --install . --config ${CMAKE_BUILD_TYPE} --component dev &&

@@ -1049,6 +1049,8 @@ void translateFunctionBody(TranslationState& ts,
     }
   }
 
+  ts.fe->maxStackCells = b.stack_depth;
+
   // finish function
   while (ts.fe->numLocals() < ts.maxUnnamed) {
     ts.fe->allocUnnamedLocal();
@@ -1059,6 +1061,21 @@ void translateFunctionBody(TranslationState& ts,
   assertx(ts.start.empty());
   assertx(ts.handler.empty());
   ts.maxUnnamed = 0;
+}
+
+static StaticString s_native("__Native");
+
+
+/*
+ * Checks whether the current function is native by looking at the user
+ * attribute map and sets the isNative flag accoringly
+ * If the give function is op code implementation, then isNative is not set
+ */
+void checkNative(TranslationState& ts) {
+  if (ts.fe->userAttributes.count(s_native.get())) {
+    ts.fe->isNative =
+      !(ts.fe->parseNativeAttributes(ts.fe->attrs) & Native::AttrOpCodeImpl);
+  }
 }
 
 void translateCoeffects(TranslationState& ts, const hhbc::Coeffects& coeffects) {
@@ -1163,6 +1180,7 @@ void translateFunction(TranslationState& ts, const hhbc::Function& f) {
   std::tie(ts.fe->retUserType, ts.fe->retTypeConstraint) = retTypeInfo;
   ts.srcLoc = Location::Range{static_cast<int>(f.span.line_begin), -1, static_cast<int>(f.span.line_end), -1};
   translateFunctionBody(ts, f.body, ubs, {}, {}, hasReifiedGenerics);
+  checkNative(ts);
 }
 
 void translateShadowedTParams(TParamNameVec& vec, const Slice<Str>& tpms) {
@@ -1185,7 +1203,8 @@ void translateMethod(TranslationState& ts, const hhbc::Method& m, const UpperBou
   Attr attrs = m.attrs;
   if (!SystemLib::s_inited) attrs |= AttrBuiltin;
 
-  ts.fe = ts.ue->newMethodEmitter(toStaticString(m.name._0), ts.pce);
+  auto const name = toStaticString(m.name._0);
+  ts.fe = ts.ue->newMethodEmitter(name, ts.pce);
   ts.pce->addMethod(ts.fe);
   ts.fe->init(m.span.line_begin, m.span.line_end, attrs, nullptr);
   ts.fe->isGenerator = (bool)(m.flags & hhbc::MethodFlags_IS_GENERATOR);
@@ -1207,11 +1226,11 @@ void translateMethod(TranslationState& ts, const hhbc::Method& m, const UpperBou
     upperBoundsHelper<true>(ts, ubs, classUbs, shadowedTParams,
                             ts.fe->retUpperBounds, retTypeInfo.second, userAttrs);
 
-  // TODO(@voork) checkNative
   ts.srcLoc = Location::Range{static_cast<int>(m.span.line_begin), -1,
                               static_cast<int>(m.span.line_end), -1};
   std::tie(ts.fe->retUserType, ts.fe->retTypeConstraint) = retTypeInfo;
   translateFunctionBody(ts, m.body, ubs, classUbs, shadowedTParams, hasReifiedGenerics);
+  checkNative(ts);
 }
 
 void translateClass(TranslationState& ts, const hhbc::Class& c) {

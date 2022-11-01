@@ -1,3 +1,9 @@
-[RESULT] \f: (# of errors: 0) [7:8-25] [Allocation]:
+=== Shape analysis results for argument_as_dynamic.php
+Summary for \f:
+[7:8-25] [Allocation]:
   shape('b' => bool)
-No errors
+[5:15-19] : dynamic
+[6:8-23] : dynamic
+Summary for \g:
+[3:37-41] : dynamic
+(Param (([3:12-31], "\\g"), 0)) : dynamic

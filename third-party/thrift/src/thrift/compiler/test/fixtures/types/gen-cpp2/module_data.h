@@ -15,22 +15,46 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::apache::thrift::fixtures::types::has_bitwise_ops> {
   using type = ::apache::thrift::fixtures::types::has_bitwise_ops;
   static constexpr const std::size_t size = 5;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::none,
+      type::zero,
+      type::one,
+      type::two,
+      type::three,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "none",
+      "zero",
+      "one",
+      "two",
+      "three",
+  }};
 };
 
 template <> struct TEnumDataStorage<::apache::thrift::fixtures::types::is_unscoped> {
   using type = ::apache::thrift::fixtures::types::is_unscoped;
   static constexpr const std::size_t size = 2;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::hello,
+      type::world,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "hello",
+      "world",
+  }};
 };
 
 template <> struct TEnumDataStorage<::apache::thrift::fixtures::types::MyForwardRefEnum> {
   using type = ::apache::thrift::fixtures::types::MyForwardRefEnum;
   static constexpr const std::size_t size = 2;
-  static const std::array<type, size> values;
-  static const std::array<folly::StringPiece, size> names;
+  static constexpr std::array<type, size> values = {{
+      type::ZERO,
+      type::NONZERO,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "ZERO",
+      "NONZERO",
+  }};
 };
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct> {

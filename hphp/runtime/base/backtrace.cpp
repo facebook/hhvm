@@ -700,11 +700,7 @@ Array CompactTraceData::extract() const {
       auto ctx = m_frames[idx].func->cls();
       if (ctx != nullptr && !f->isClosureBody()) {
         frame.set(s_class, Variant{const_cast<StringData*>(ctx->name())});
-        if (m_frames[idx].hasThis) {
-          frame.set(s_type, s_arrow);
-        } else {
-          frame.set(s_type, s_double_colon);
-        }
+        frame.set(s_type, m_frames[idx].func->isStatic() ? s_double_colon : s_arrow);
       }
     } else {
       auto filepath = const_cast<StringData*>(f->unit()->filepath());

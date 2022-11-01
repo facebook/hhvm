@@ -28,6 +28,9 @@
 #include <openssl/conf.h>
 #include <openssl/pem.h>
 #include <openssl/pkcs12.h>
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+#include <openssl/provider.h>
+#endif
 #include <openssl/rand.h>
 #include <vector>
 
@@ -2217,6 +2220,14 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, Variant& sealed_data,
                                     const Array& pub_key_ids,
                                     const String& method,
                                     Variant& iv) {
+
+// RC4 is only available in legacy providers
+// Note that we must not put `OSSL_PROVIDER_load` in `OpenSSLInitializer`
+// because it cannot be executed before `main` function.
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+  static auto legacy_provider = OSSL_PROVIDER_load(nullptr, "legacy");
+#endif
+
   int nkeys = pub_key_ids.size();
   if (nkeys == 0) {
     raise_warning("Fourth argument to openssl_seal() must be "
@@ -2282,7 +2293,8 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, Variant& sealed_data,
     ret = false;
     goto clean_exit;
   }
-  if (!EVP_EncryptInit_ex(ctx, cipher_type, nullptr, nullptr, nullptr)) {
+  if (!EVP_EncryptInit_ex2(ctx, cipher_type, nullptr, nullptr, nullptr)) {
+    raise_warning("Failed to initialize cipher \"%s\"", method.c_str());
     ret = false;
     goto clean_exit;
   }

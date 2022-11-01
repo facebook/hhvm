@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+#include <thrift/compiler/sema/standard_mutator.h>
+
 #include <functional>
 #include <type_traits>
-#include <thrift/compiler/sema/standard_mutator.h>
 
 #include <thrift/compiler/lib/cpp2/util.h>
 #include <thrift/compiler/lib/schematizer.h>
@@ -169,6 +170,31 @@ void mutate_inject_metadata_fields(
 void set_generated(diagnostic_context&, mutator_context&, t_named& node) {
   if (node.find_structured_annotation_or_null(kSetGeneratedUri)) {
     node.set_generated();
+  }
+}
+
+void set_release_state(diagnostic_context&, mutator_context&, t_named& node) {
+  for (t_release_state state = t_release_state::begin;
+       state != t_release_state::end;
+       state = next(state)) {
+    if (node.find_structured_annotation_or_null(get_release_state_uri(state))) {
+      node.set_release_state(state);
+      return;
+    }
+  }
+}
+
+void inherit_release_state(
+    diagnostic_context& ctx, mutator_context&, t_named& node) {
+  if (node.release_state() != t_release_state::unspecified) {
+    return;
+  }
+  for (int pos = ctx.nodes().size() - 1; pos >= 0; --pos) {
+    const auto* parent = dynamic_cast<const t_named*>(ctx.nodes().at(pos));
+    if (parent != nullptr &&
+        parent->release_state() != t_release_state::unspecified) {
+      node.set_release_state(parent->release_state());
+    }
   }
 }
 
@@ -352,11 +378,13 @@ ast_mutators standard_mutators() {
     initial.add_function_visitor(&remove_param_list_field_qualifiers);
     initial.add_function_visitor(&normalize_return_type);
     initial.add_definition_visitor(&set_generated);
+    initial.add_definition_visitor(&set_release_state);
     initial.add_enum_visitor(&gen_default_enum_values);
   }
 
   {
     auto& main = mutators[standard_mutator_stage::main];
+    main.add_definition_visitor(&inherit_release_state);
     main.add_field_visitor(&mutate_terse_write_annotation_field);
     main.add_struct_visitor(&mutate_terse_write_annotation_structured);
     main.add_exception_visitor(&mutate_terse_write_annotation_structured);

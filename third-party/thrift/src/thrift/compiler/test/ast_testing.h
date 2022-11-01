@@ -60,21 +60,17 @@ class BaseProgramTest : public testing::Test {
 // TODO(afuller): Use to factor out code from moar tests!!
 class BaseVisitorTest : public BaseProgramTest {
  protected:
-  const t_struct& legacy_;
-  const t_struct& deprecated_;
-  const t_struct& beta_;
-  const t_struct& experimental_;
-  const t_struct& testing_;
+  const t_struct& no_testing_;
+  const t_struct& no_experimental_;
+  const t_struct& no_beta_;
   const t_struct& no_legacy_;
   const t_struct& no_deprecated_;
 
   BaseVisitorTest()
       : BaseProgramTest{},
-        legacy_(create_annotation("Legacy")),
-        deprecated_(create_annotation("Deprecated")),
-        beta_(create_annotation("Beta")),
-        experimental_(create_annotation("Experimental")),
-        testing_(create_annotation("Testing")),
+        no_testing_(create_annotation("NoTesting")),
+        no_experimental_(create_annotation("NoExperimental")),
+        no_beta_(create_annotation("NoBeta")),
         no_legacy_(create_annotation("NoLegacy")),
         no_deprecated_(create_annotation("NoDeprecated")) {}
 };

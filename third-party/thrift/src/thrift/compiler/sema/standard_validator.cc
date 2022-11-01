@@ -534,13 +534,14 @@ void validate_enum_value(diagnostic_context& ctx, const t_enum_value& node) {
   }
 }
 
-void validate_const_type_and_value(diagnostic_context& ctx, const t_const& c) {
-  check_const_rec(ctx, c, &c.type().deref(), c.value());
+void validate_const_type_and_value(
+    diagnostic_context& ctx, const t_const& node) {
+  check_const_rec(ctx, node, &node.type().deref(), node.value());
   ctx.check(
-      !c.find_structured_annotation_or_null(kCppAdapterUri) ||
-          ctx.has(context_type::experimental),
+      !node.find_structured_annotation_or_null(kCppAdapterUri) ||
+          node.release_state() <= t_release_state::experimental,
       "Using adapters on const `{}` is only allowed in the experimental mode.",
-      c.name());
+      node.name());
 }
 
 void validate_field_default_value(
@@ -590,10 +591,12 @@ void validate_uri_uniqueness(diagnostic_context& ctx, const t_program& prog) {
 }
 
 void validate_field_id(diagnostic_context& ctx, const t_field& node) {
-  if (node.explicit_id() != node.id() && !ctx.has(context_type::testing)) {
+  if (node.explicit_id() != node.id() &&
+      node.release_state() > t_release_state::testing) {
     ctx.report(
         node,
-        ctx.has(context_type::no_legacy) && !ctx.has(context_type::experimental)
+        ctx.has(context_type::no_legacy) &&
+                node.release_state() > t_release_state::experimental
             ? diagnostic_level::error
             : diagnostic_level::warning,
         "No field id specified for `{}`, resulting protocol may have conflicts "

@@ -8,4 +8,4 @@ edition = "2021"
 path = "../framing.rs"
 
 [dependencies]
-regex = "1.5.4"
+regex = "1.6.0"

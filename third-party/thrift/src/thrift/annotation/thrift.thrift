@@ -24,10 +24,6 @@ namespace py.asyncio facebook_thrift_asyncio.annotation.thrift
 namespace go thrift.annotation.thrift
 namespace py thrift.annotation.thrift
 
-////
-// Thrift release state annotations.
-////
-
 /** Indicates a definition/feature may change in incompatible ways. */
 @scope.Program
 @scope.Definition
@@ -200,6 +196,23 @@ struct Box {}
 struct Mixin {}
 
 /**
+ * Indicates that a boolean type **may** be 'packed' in memory.
+ *
+ * This allows an implementation to not allocate a full native 'bool' type, and
+ * instead use a single 'isset' bit to store the value.
+ *
+ * All fields that use such a type **must** be 'terse'.
+ */
+// TODO(afuller): Instead of using custom validators consider:
+// - Updating scope annotations to restrict to specific types (in this case bool)
+// - Updating field scope annotations to restrict to specific field types (in this case terse)
+// and/or allow @thrift.TerseWrites to be added to typedefs, and add it transitively to this annotation.
+@scope.Field // TODO(afuller): Validate field is terse and has a boolean type.
+@scope.Typedef // TODO(afuller): Validate the type is boolean.
+@Experimental // TODO(afuller): Pack and/or remove direct access to bool for such fields in all languages.
+struct Bit {}
+
+/**
  * Option to serialize thrift struct in ascending field id order.
  *
  * This can potentially make serialized data size smaller in compact protocol,
@@ -208,6 +221,13 @@ struct Mixin {}
 @scope.Struct
 @Experimental // TODO(ytj): Release to Beta.
 struct SerializeInFieldIdOrder {}
+
+/**
+ * Indicates an enum is a bitmask and should support bit-wise operators.
+ */
+@scope.Enum
+@Experimental // TODO: Support in C++, Python, Java.
+struct BitmaskEnum {}
 
 /**
  * Adds a default enum value (0), with the given name, if one is not
@@ -238,6 +258,35 @@ struct GenDefaultEnumValue {
    * should be consulted (e.g. the doc strings on the function or field).
    */
   1: string name = "Unspecified";
+}
+
+/**
+ * Adds a typedef of {enum}Set that is sutable for storing a `packed` set of
+ * values for the annotated enum.
+ *
+ * Any enum with this annotation must only have values between 1 and 32 inclusive.
+ *
+ * For example:
+ *   @thrift.GenEnumSet
+ *   enum Flag {
+ *     Option1 = 1,
+ *     ...
+ *   }
+ *
+ * Generates the equivalent of:
+ *   @cpp.Adapter("::apache::thrift::EnumSetAdapter<::ns::Flag>")
+ *   ...
+ *   typedef i32 FlagSet
+ *
+ * `FlagSet` can then be used like a normal typedef.
+ */
+// TODO(afuller): Implement
+@scope.FbthriftInternalEnum
+@BitmaskEnum
+@scope.Transitive
+struct GenEnumSet {
+  /** If a custom name is not provided, `{EnumName}Set` is used. */
+  1: string name;
 }
 
 ////
@@ -299,13 +348,6 @@ struct v1test {}
 struct ExceptionMessage {
   1: string field;
 }
-
-/**
- * Specifies if the enum is a bitmask.
- */
-@scope.Enum
-@Experimental // TODO: Support in C++, Python, Java.
-struct BitmaskEnum {}
 
 /**
  * Generates a const of type schema. Struct containing the schema of the

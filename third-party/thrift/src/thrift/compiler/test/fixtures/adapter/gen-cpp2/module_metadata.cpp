@@ -601,6 +601,42 @@ StructMetadata<::facebook::thrift::test::CircularStruct>::gen(ThriftMetadata& me
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::facebook::thrift::test::ReorderedStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.ReorderedStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_ReorderedStruct = res.first->second;
+  module_ReorderedStruct.name() = "module.ReorderedStruct";
+  module_ReorderedStruct.is_union() = false;
+  static const auto* const
+  module_ReorderedStruct_fields = new std::array<EncodedThriftField, 1>{{
+    {1, "reordered_dependent_adapted", false, std::make_unique<Typedef>("module.DeclaredAfterStruct", std::make_unique<Struct<::facebook::thrift::test::detail::DeclaredAfterStruct>>("module.DeclaredAfterStruct"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{*cvStruct("cpp.Ref", {{"type", cvInteger(0)}}).cv_struct_ref(), }},
+  }};
+  for (const auto& f : *module_ReorderedStruct_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_ReorderedStruct.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::facebook::thrift::test::detail::DeclaredAfterStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.DeclaredAfterStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_DeclaredAfterStruct = res.first->second;
+  module_DeclaredAfterStruct.name() = "module.DeclaredAfterStruct";
+  module_DeclaredAfterStruct.is_union() = false;
+  module_DeclaredAfterStruct.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString(R"(::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>)")}}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::UnderlyingRenamedStruct>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.RenamedStruct", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {

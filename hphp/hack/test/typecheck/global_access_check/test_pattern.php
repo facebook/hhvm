@@ -44,5 +44,7 @@ class Test {
 
     Foo::$static_dict = HH\Lib\Dict\merge(Foo::$static_dict, dict["0" => 0]); // WriteLiteral,WriteGlobalToGlobal
     Foo::$static_dict = HH\Lib\Dict\merge(Foo::$static_dict, dict["0" => (int)call_mixed(0)]); // NoPattern (call_mixed is unknown)
+    Foo::$static_dict = dict[]; // WriteEmptyOrNUll
+    Foo::$static_dict["1"] ??= 1; // Caching
   }
 }

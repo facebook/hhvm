@@ -53,7 +53,7 @@ positioned_full_trivia_parser = { path = "../parser/api/cargo/positioned_full_tr
 positioned_parser = { path = "../parser/api/cargo/positioned_parser" }
 profile_rust = { path = "../utils/perf/cargo/profile" }
 rayon = "1.2"
-regex = "1.5.4"
+regex = "1.6.0"
 relative_path = { path = "../utils/rust/relative_path" }
 sem_diff = { path = "sem_diff" }
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }

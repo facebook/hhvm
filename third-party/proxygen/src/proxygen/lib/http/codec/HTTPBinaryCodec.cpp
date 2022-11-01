@@ -429,11 +429,20 @@ void HTTPBinaryCodec::onIngressEOF() {
         HTTPException(HTTPException::Direction::INGRESS,
                       fmt::format("Invalid Message: {}", *parseError_)));
   } else {
-    // Case where the sent message only contains control data
-    if (!msg_ && state_ == ParseState::HEADERS_SECTION) {
-      msg_ = std::move(decodeInfo_.msg);
+
+    if (!msg_) {
+      if (state_ == ParseState::HEADERS_SECTION) {
+        // Case where the sent message only contains control data
+        msg_ = std::move(decodeInfo_.msg);
+      } else {
+        callback_->onError(
+            ingressTxnID_,
+            HTTPException(
+                HTTPException::Direction::INGRESS,
+                fmt::format("Message not formed (incomplete binary data)")));
+        return;
+      }
     }
-    CHECK(msg_);
     callback_->onHeadersComplete(ingressTxnID_, std::move(msg_));
     if (msgBody_) {
       callback_->onBody(ingressTxnID_, std::move(msgBody_), 0);
@@ -484,7 +493,13 @@ void HTTPBinaryCodec::generateHeader(
     encodeString(msg.getMethodString(), appender);
     encodeString(msg.isSecure() ? "https" : "http", appender);
     encodeString(msg.getHeaders().getSingleOrEmpty(HTTP_HEADER_HOST), appender);
-    encodeString(msg.getPath(), appender);
+
+    std::string pathWithQueryString = msg.getPath();
+    if (!msg.getQueryString().empty()) {
+      pathWithQueryString.append("?");
+      pathWithQueryString.append(msg.getQueryString());
+    }
+    encodeString(pathWithQueryString, appender);
   } else {
     encodeInteger(folly::to<uint64_t>(
                       HTTPBinaryCodec::FramingIndicator::RESPONSE_KNOWN_LENGTH),

@@ -239,6 +239,8 @@ fn assemble_module<'arena>(
         name,
         span,
         doc_comment,
+        exports: Maybe::Nothing, // TODO: Add parsing
+        imports: Maybe::Nothing, // TODO: Add parsing
     })
 }
 

@@ -242,6 +242,21 @@ struct ForEachField<::facebook::thrift::test::CircularStruct> {
 };
 
 template <>
+struct ForEachField<::facebook::thrift::test::ReorderedStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).reordered_dependent_adapted_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::detail::DeclaredAfterStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  }
+};
+
+template <>
 struct ForEachField<::facebook::thrift::test::UnderlyingRenamedStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {

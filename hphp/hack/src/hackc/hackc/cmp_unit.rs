@@ -22,6 +22,7 @@ use hhbc::Module;
 use hhbc::Opcode;
 use hhbc::Param;
 use hhbc::Property;
+use hhbc::Rule;
 use hhbc::SymbolRefs;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
@@ -790,24 +791,55 @@ fn cmp_method(a: &Method<'_>, b: &Method<'_>) -> Result<()> {
     Ok(())
 }
 
+fn cmp_rule(a: &Rule<'_>, b: &Rule<'_>) -> Result<()> {
+    let Rule {
+        kind: a_kind,
+        name: a_name,
+    } = a;
+    let Rule {
+        kind: b_kind,
+        name: b_name,
+    } = b;
+
+    cmp_eq(a_kind, b_kind).qualified("kind")?;
+    cmp_eq(a_name, b_name).qualified("name")?;
+    Ok(())
+}
+
 fn cmp_module(a: &Module<'_>, b: &Module<'_>) -> Result<()> {
     let Module {
         attributes: a_attributes,
         name: a_name,
         span: a_span,
         doc_comment: a_doc_comment,
+        exports: a_exports,
+        imports: a_imports,
     } = a;
     let Module {
         attributes: b_attributes,
         name: b_name,
         span: b_span,
         doc_comment: b_doc_comment,
+        exports: b_exports,
+        imports: b_imports,
     } = b;
 
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
     cmp_eq(a_span, b_span).qualified("span")?;
     cmp_eq(a_doc_comment, b_doc_comment).qualified("doc_comment")?;
+    cmp_option(
+        a_exports.as_ref().into_option(),
+        b_exports.as_ref().into_option(),
+        |a, b| cmp_slice(a, b, cmp_rule),
+    )
+    .qualified("exports")?;
+    cmp_option(
+        a_imports.as_ref().into_option(),
+        b_imports.as_ref().into_option(),
+        |a, b| cmp_slice(a, b, cmp_rule),
+    )
+    .qualified("imports")?;
     Ok(())
 }
 

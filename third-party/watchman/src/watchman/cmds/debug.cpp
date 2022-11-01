@@ -5,11 +5,15 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <iostream>
+#include <unordered_map>
+
 #include <fmt/chrono.h>
+
 #include <folly/String.h>
 #include <folly/chrono/Conv.h>
 #include <folly/system/Shell.h>
-#include <unordered_map>
+
 #include "watchman/Client.h"
 #include "watchman/InMemoryView.h"
 #include "watchman/LRUCache.h"
@@ -342,6 +346,11 @@ struct DebugStatusCommand : PrettyCommand<DebugStatusCommand> {
       fmt::print("  - state: {}\n", client.state);
       fmt::print("\n");
     }
+    // fmt does not flush, so when the stream is not line buffered the stream
+    // needs to be manually flushed (or else nothing is written to stdout).
+    // eventually this can be fmt::flush instead:
+    // https://github.com/vgc/vgc/issues/519
+    std::cout.flush();
   }
 };
 WATCHMAN_COMMAND(debug_status, DebugStatusCommand);

@@ -669,6 +669,33 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   -1,
 }};
 
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::ReorderedStruct>::fields_names = {{
+  "reordered_dependent_adapted",
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::ReorderedStruct>::fields_ids = {{
+  1,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::ReorderedStruct>::fields_types = {{
+  TType::T_STRUCT,
+}};
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::ReorderedStruct>::storage_names = {{
+  "__fbthrift_field_reordered_dependent_adapted",
+}};
+THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::ReorderedStruct>::isset_indexes = {{
+  -1,
+}};
+
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>::fields_names = {{
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>::fields_ids = {{
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 0> TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>::fields_types = {{
+}};
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>::storage_names = {{
+}};
+THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>::isset_indexes = {{
+}};
+
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::UnderlyingRenamedStruct>::fields_names = {{
   "data",
 }};

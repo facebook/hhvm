@@ -32,6 +32,7 @@ namespace test {
   ::apache::thrift::detail::md::StructMetadata<StructFieldAdaptedStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<CircularAdaptee>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<CircularStruct>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<ReorderedStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MoveOnly>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AlsoMoveOnly>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ApplyAdapter>::gen(metadata);

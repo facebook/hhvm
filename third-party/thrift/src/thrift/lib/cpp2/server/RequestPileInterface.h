@@ -19,11 +19,12 @@
 #include <cstdint>
 #include <optional>
 
+#include <thrift/lib/cpp2/server/RequestCompletionCallback.h>
+
 namespace apache::thrift {
 
 class ServerRequestRejection;
 class ServerRequest;
-struct ServerRequestData;
 
 // The common interface to all request piles. The details of the construction
 // are left to implementations of this interface. A request pile is effectively
@@ -31,10 +32,8 @@ struct ServerRequestData;
 // add requests and remove requests and the request pile implementation handles
 // any prioritization, resource balancing, load limiting etc amongst all the
 // requests it is managing.
-class RequestPileInterface {
+class RequestPileInterface : public RequestCompletionCallback {
  public:
-  virtual ~RequestPileInterface();
-
   // Returns a snapshot of the total of current requests in this request pile.
   // This is only intended for monitoring. This is thread safe.
   virtual uint64_t requestCount() const = 0;
@@ -68,7 +67,7 @@ class RequestPileInterface {
 
   // If a callback was requested this will be called when the request processing
   // has finished.
-  virtual void onRequestFinished(ServerRequestData&);
+  void onRequestFinished(ServerRequestData&) override;
 
   virtual std::string describe() const;
 };

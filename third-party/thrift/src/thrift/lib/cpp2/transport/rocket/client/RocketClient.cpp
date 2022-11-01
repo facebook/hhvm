@@ -237,7 +237,7 @@ void RocketClient::handleRequestResponseFrame(
   switch (frameType) {
     case FrameType::PAYLOAD: {
       PayloadFrame payloadFrame(std::move(frame));
-      if (!payloadFrame.hasNext() || !payloadFrame.hasComplete()) {
+      if (!payloadFrame.hasNext() && !payloadFrame.hasComplete()) {
         return close(makeContractViolation(
             "Client received single response payload without next or "
             "complete flag"));

@@ -1,0 +1,10 @@
+vec(3) {
+  string(6) "global"
+  string(1) "x"
+  string(3) "y.*"
+}
+vec(3) {
+  string(6) "global"
+  string(1) "x"
+  string(3) "y.*"
+}

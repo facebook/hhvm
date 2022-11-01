@@ -261,8 +261,18 @@ gen_adapter_dependency_graph(
       // The adjacency list of a struct is the typedefs named in its fields.
       cpp2::for_each_transitive_field(strct, [&](const t_field* field) {
         const auto* type = field->get_type();
+        // Resolve placeholder typedefs
+        if (auto typedf = dynamic_cast<t_typedef const*>(type)) {
+          if (!named_typedefs.count(typedf)) {
+            type = typedf->get_type();
+          }
+        }
+
         if (dynamic_cast<t_typedef const*>(type)) {
           add_dependency(type, false);
+        } else if (auto struct_field = dynamic_cast<t_struct const*>(type);
+                   struct_field && has_dependent_adapter(*struct_field)) {
+          add_dependency(type, true);
         } else if (auto map = dynamic_cast<t_map const*>(type)) {
           // Container depends on typedefs even if it supports incomplete types
           if (auto* key_type =

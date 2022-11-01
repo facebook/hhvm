@@ -35,25 +35,30 @@ let handler =
       let (pos, _) = m.m_name in
       let vis = m.m_visibility in
       let attr = m.m_user_attributes in
-      match
-        Naming_attributes.mem_pos SN.UserAttributes.uaDynamicallyCallable attr
-      with
-      | Some p ->
-        (if not (Aast.equal_visibility vis Public) then
-          let vis =
-            match vis with
-            | Public -> `public
-            | Private -> `private_
-            | Protected -> `protected
-            | Internal -> `internal
-          in
-          Errors.add_naming_error
-          @@ Naming_error.Illegal_use_of_dynamically_callable
-               { attr_pos = p; meth_pos = pos; vis });
+      let check_reified_callable p =
         if has_reified_generics m.m_tparams then
           Errors.add_nast_check_error
-          @@ Nast_check_error.Dynamically_callable_reified p;
-        ()
+          @@ Nast_check_error.Dynamically_callable_reified p
+      in
+      match
+        ( Naming_attributes.mem_pos SN.UserAttributes.uaDynamicallyCallable attr,
+          vis )
+      with
+      | (Some p, Public)
+      | (Some p, Internal) ->
+        check_reified_callable p
+      | (Some p, _) ->
+        let vis =
+          match vis with
+          | Public -> `public
+          | Private -> `private_
+          | Protected -> `protected
+          | Internal -> `internal
+        in
+        Errors.add_naming_error
+        @@ Naming_error.Illegal_use_of_dynamically_callable
+             { attr_pos = p; meth_pos = pos; vis };
+        check_reified_callable p
       | _ -> ()
 
     method! at_fun_ _ f =

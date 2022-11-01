@@ -318,39 +318,25 @@ class basic_ast_visitor {
 };
 
 enum class context_type {
-  // States of removal.
-  legacy = -2,
-  deprecated = -1,
-
-  // States of release.
-  released = 0, // The default context_type.
-  beta = 1,
-  experimental = 2,
-
-  // Other ~orthogonal context types.
-  testing,
-  no_legacy,
-  no_deprecated,
+  no_testing = static_cast<int>(t_release_state::testing),
+  no_experimental = static_cast<int>(t_release_state::experimental),
+  no_beta = static_cast<int>(t_release_state::beta),
+  no_legacy = static_cast<int>(t_release_state::legacy),
+  no_deprecated = static_cast<int>(t_release_state::deprecated),
 };
 
 constexpr inline const char* getContextTypeUri(context_type type) {
   switch (type) {
-    case context_type::legacy:
-      return "facebook.com/thrift/annotation/Legacy";
-    case context_type::deprecated:
-      return "facebook.com/thrift/annotation/Deprecated";
-    case context_type::beta:
-      return "facebook.com/thrift/annotation/Beta";
-    case context_type::experimental:
-      return "facebook.com/thrift/annotation/Experimental";
-    case context_type::testing:
-      return "facebook.com/thrift/annotation/Testing";
+    case context_type::no_testing:
+      return "facebook.com/thrift/annotation/NoTesting";
+    case context_type::no_beta:
+      return "facebook.com/thrift/annotation/NoBeta";
+    case context_type::no_experimental:
+      return "facebook.com/thrift/annotation/NoExperimental";
     case context_type::no_legacy:
       return "facebook.com/thrift/annotation/NoLegacy";
     case context_type::no_deprecated:
       return "facebook.com/thrift/annotation/NoDeprecated";
-    case context_type::released:
-      break;
   }
   return "";
 }
@@ -364,7 +350,6 @@ class basic_visitor_context {
   bool visiting() const noexcept { return !context_.empty(); }
 
   bool has(context_type type) const {
-    assert(type != context_type::released);
     // Get the uri for the associated annotation.
     const char* uri = getContextTypeUri(type);
     // Search for the context annotation.
@@ -408,6 +393,8 @@ class basic_visitor_context {
     assert(&node == context_.back());
     context_.pop_back();
   }
+
+  const std::vector<node_type*>& nodes() const noexcept { return context_; }
 
  private:
   std::vector<node_type*> context_;

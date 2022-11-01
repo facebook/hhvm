@@ -71,6 +71,11 @@ const config = {
         position: 'left',
         label: 'Docs'
       },
+      {
+        to: 'toc',
+        position: 'left',
+        label: 'API'
+      },
       ...fbInternalOnly([{
         "to": "docs/fb/",
         "label": "Meta Internal",

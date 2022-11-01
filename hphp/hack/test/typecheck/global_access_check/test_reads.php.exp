@@ -22,19 +22,19 @@ File "test_reads.php", line 37, characters 17-25:
 [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
 File "test_reads.php", line 38, characters 16-33:
 [Test::test_method_call]{Test::$static_prop}(int) A global variable is definitely read. (Other[11004])
-File "test_reads.php", line 40, characters 10-23:
-[Test::test_method_call]{\fun_memoized}(Bar) A global variable is definitely read. (Other[11004])
-File "test_reads.php", line 41, characters 10-23:
-[Test::test_method_call]{\fun_memoized}(Bar) A global variable is definitely read. (Other[11004])
-File "test_reads.php", line 42, characters 10-23:
-[Test::test_method_call]{\fun_memoized}(Bar) A global variable is definitely read. (Other[11004])
-File "test_reads.php", line 44, characters 11-24:
-[Test::test_method_call]{\fun_memoized}(Bar) A global variable is definitely read. (Other[11004])
-File "test_reads.php", line 45, characters 7-30:
+File "test_reads.php", line 41, characters 10-29:
+[Test::test_method_call]{\fun_memoized}((function(int $i, string $s): Bar)) A global variable is definitely read. (Other[11004])
+File "test_reads.php", line 42, characters 10-29:
+[Test::test_method_call]{\fun_memoized}((function(int $i, string $s): Bar)) A global variable is definitely read. (Other[11004])
+File "test_reads.php", line 43, characters 10-29:
+[Test::test_method_call]{\fun_memoized}((function(int $i, string $s): Bar)) A global variable is definitely read. (Other[11004])
+File "test_reads.php", line 45, characters 11-30:
+[Test::test_method_call]{\fun_memoized}((function(int $i, string $s): Bar)) A global variable is definitely read. (Other[11004])
+File "test_reads.php", line 46, characters 7-36:
 [Test::test_method_call]{\fun_memoized}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-File "test_reads.php", line 48, characters 12-29:
+File "test_reads.php", line 49, characters 12-29:
 [Test::test_method_call]{Test::$static_prop}(int) A global variable is definitely read. (Other[11004])
-File "test_reads.php", line 55, characters 23-39:
+File "test_reads.php", line 56, characters 23-39:
 [Test::test_loop]{Foo::$static_prop}(int) A global variable is definitely read. (Other[11004])
-File "test_reads.php", line 56, characters 12-20:
+File "test_reads.php", line 57, characters 12-20:
 [Test::test_loop]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])

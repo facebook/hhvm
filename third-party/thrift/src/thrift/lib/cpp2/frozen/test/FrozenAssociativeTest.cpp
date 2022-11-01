@@ -54,11 +54,29 @@ void checkBasicFrozenMap(const Map& map) {
   EXPECT_EQ(map.find(3)->second, fmap.find(3)->second());
   EXPECT_TRUE(fmap.count(2));
   EXPECT_FALSE(fmap.count(8));
+  auto thawed = fmap.thaw();
+  EXPECT_EQ(map.at(3), thawed.at(3));
+  EXPECT_EQ(map.find(3)->second, thawed.find(3)->second);
+  EXPECT_TRUE(thawed.count(2));
+  EXPECT_FALSE(thawed.count(8));
 }
 
-TEST(FrozenMap, Basic) {
-  checkBasicFrozenMap(osquares);
+template <typename T>
+struct FrozenMapBasic : public ::testing::Test {};
+TYPED_TEST_SUITE_P(FrozenMapBasic);
+
+TYPED_TEST_P(FrozenMapBasic, Basic) {
+  checkBasicFrozenMap(TypeParam{osquares.begin(), osquares.end()});
 }
+
+REGISTER_TYPED_TEST_SUITE_P(FrozenMapBasic, Basic);
+using FrozenMapTypes = testing::Types<
+    std::map<int, int>,
+    folly::sorted_vector_map<int, int>,
+    folly::heap_vector_map<int, int>,
+    folly::small_heap_vector_map<int, int>>;
+INSTANTIATE_TYPED_TEST_SUITE_P(
+    FrozenAssociativeTest, FrozenMapBasic, FrozenMapTypes);
 
 TEST(FrozenMap, BasicNonDefaultComparison) {
   std::map<int, int, std::greater<int>> map(osquares.begin(), osquares.end());
@@ -221,8 +239,12 @@ TEST(FrozenMap, Size) {
   EXPECT_LE(frozenSize(roots), (100 * (7 + 4) + 7) / 8 + 8);
 }
 
-TEST(FrozenSet, Full) {
-  std::set<uint32_t> primes{2};
+template <typename T>
+struct FrozenSetFull : public ::testing::Test {};
+TYPED_TEST_SUITE_P(FrozenSetFull);
+
+TYPED_TEST_P(FrozenSetFull, Full) {
+  TypeParam primes{2};
   for (uint32_t i = 3; i < 100; i += 2) {
     bool prime = false;
     for (auto& op : primes) {
@@ -246,6 +268,14 @@ TEST(FrozenSet, Full) {
   EXPECT_EQ(51, *primeAfter50);
   EXPECT_FALSE(fprimes.count(24));
 }
+
+REGISTER_TYPED_TEST_SUITE_P(FrozenSetFull, Full);
+using FrozenSetTypes = testing::Types<
+    std::set<uint32_t>,
+    folly::sorted_vector_set<uint32_t>,
+    folly::heap_vector_set<uint32_t>>;
+INSTANTIATE_TYPED_TEST_SUITE_P(
+    FrozenAssociativeTest, FrozenSetFull, FrozenSetTypes);
 
 namespace {
 template <typename HashSet>

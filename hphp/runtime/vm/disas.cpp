@@ -870,6 +870,32 @@ void print_constant(Output& out, const Constant& cns) {
             member_tv_initializer(cns.val));
 }
 
+void print_ruleset(Output& out, const Module::RuleSet& ruleset) {
+  std::vector<std::string> rules;
+
+  if (ruleset.global_rule) {
+    rules.push_back("global");
+  }
+
+  for (auto nr : ruleset.name_rules) {
+    std::vector<std::string> str_names;
+
+    for (auto& n : nr.names) {
+      str_names.push_back(n->toCppString());
+    }
+
+    if (nr.prefix) {
+      rules.push_back("prefix(" + folly::join(".", str_names) + ")");
+    } else {
+      rules.push_back("exact(" + folly::join(".", str_names) + ")");
+    }
+  }
+
+  std::string str_ruleset;
+  folly::join(",", rules, str_ruleset);
+  out.fmt(str_ruleset);
+}
+
 void print_module(Output& out, const Module& m) {
   out.fmtln(".module{} {} ({},{}) {{",
             opt_attrs(AttrContext::Module, m.attrs, &m.userAttributes),
@@ -877,9 +903,19 @@ void print_module(Output& out, const Module& m) {
             m.line0,
             m.line1);
   if (RuntimeOption::EvalDisassemblerDocComments) {
-    if (m.docComment() && !m.docComment()->empty()) {
-      out.fmtln(".doc {};", escaped_long(m.docComment()));
+    if (m.docComment && !m.docComment->empty()) {
+      out.fmtln(".doc {};", escaped_long(m.docComment));
     }
+  }
+  if (m.exports) {
+    out.fmt(".exports [");
+    print_ruleset(out, *m.exports);
+    out.fmtln("];");
+  }
+  if (m.imports) {
+    out.fmt(".imports [");
+    print_ruleset(out, *m.imports);
+    out.fmtln("];");
   }
   out.fmtln("}}");
   out.nl();

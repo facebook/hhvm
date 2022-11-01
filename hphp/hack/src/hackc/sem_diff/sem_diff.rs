@@ -16,6 +16,7 @@ use hhbc::Function;
 use hhbc::Method;
 use hhbc::Module;
 use hhbc::Param;
+use hhbc::Rule;
 use hhbc::SymbolRefs;
 use hhbc::TypeConstant;
 use hhbc::TypedValue;
@@ -579,6 +580,21 @@ fn sem_diff_method<'arena, 'a>(
     Ok(())
 }
 
+fn sem_diff_rule<'arena>(path: &CodePath<'_>, a: &Rule<'arena>, b: &Rule<'arena>) -> Result<()> {
+    let Rule {
+        kind: a_kind,
+        name: a_name,
+    } = a;
+    let Rule {
+        kind: b_kind,
+        name: b_name,
+    } = b;
+
+    sem_diff_eq(&path.qualified("kind"), a_kind, b_kind)?;
+    sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
+    Ok(())
+}
+
 fn sem_diff_module<'arena>(
     path: &CodePath<'_>,
     a: &Module<'arena>,
@@ -589,18 +605,34 @@ fn sem_diff_module<'arena>(
         name: a_name,
         span: a_span,
         doc_comment: a_doc_comment,
+        exports: a_exports,
+        imports: a_imports,
     } = a;
     let Module {
         attributes: b_attributes,
         name: b_name,
         span: b_span,
         doc_comment: b_doc_comment,
+        exports: b_exports,
+        imports: b_imports,
     } = b;
 
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
     sem_diff_attributes(&path.qualified("attributes"), a_attributes, b_attributes)?;
     sem_diff_eq(&path.qualified("span"), a_span, b_span)?;
     sem_diff_eq(&path.qualified("doc_comment"), a_doc_comment, b_doc_comment)?;
+    sem_diff_option(
+        &path.qualified("exports"),
+        a_exports.as_ref().into_option(),
+        b_exports.as_ref().into_option(),
+        |c, a, b| sem_diff_slice(c, a, b, sem_diff_rule),
+    )?;
+    sem_diff_option(
+        &path.qualified("imports"),
+        a_imports.as_ref().into_option(),
+        b_imports.as_ref().into_option(),
+        |c, a, b| sem_diff_slice(c, a, b, sem_diff_rule),
+    )?;
     Ok(())
 }
 

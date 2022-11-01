@@ -18,6 +18,6 @@ oxidized = { path = "../../../../oxidized" }
 parser_core_types = { path = "../../../../parser/cargo/core_types" }
 proc-macro2 = "1.0.46"
 quote = "1.0"
-regex = "1.5.4"
+regex = "1.6.0"
 relative_path = { path = "../../../../utils/rust/relative_path" }
 syn = { version = "1.0.102", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }

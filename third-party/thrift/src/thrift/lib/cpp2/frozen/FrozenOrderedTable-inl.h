@@ -56,10 +56,19 @@ struct SortedTableLayout : public ArrayLayout<T, Item> {
 
   void thaw(ViewPosition self, T& out) const {
     auto v = view(self);
-    out.clear();
-    apache::thrift::detail::pm::reserve_if_possible(&out, v.size());
-    for (auto it = v.begin(); it != v.end(); ++it) {
-      out.insert(out.end(), it.thaw());
+    if constexpr (HasSortedUniqueCtor<T>::value) {
+      typename T::container_type outBuffer;
+      outBuffer.reserve(v.size());
+      for (auto it = v.begin(); it != v.end(); ++it) {
+        outBuffer.emplace_back(it.thaw());
+      }
+      out = T{folly::sorted_unique, std::move(outBuffer)};
+    } else {
+      out.clear();
+      apache::thrift::detail::pm::reserve_if_possible(&out, v.size());
+      for (auto it = v.begin(); it != v.end(); ++it) {
+        out.insert(out.end(), it.thaw());
+      }
     }
     if constexpr (isOrderedContainer<T>()) {
       DCHECK(containerIsSorted(out));

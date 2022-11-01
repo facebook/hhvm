@@ -24,7 +24,7 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 /**
- * Specifies if the enum is a bitmask.
+ * Indicates an enum is a bitmask and should support bit-wise operators.
  */
 @SuppressWarnings({ "unused", "serial" })
 public class BitmaskEnum implements TBase, java.io.Serializable, Cloneable, Comparable<BitmaskEnum> {

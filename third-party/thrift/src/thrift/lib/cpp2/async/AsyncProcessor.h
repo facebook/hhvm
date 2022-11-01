@@ -511,7 +511,7 @@ class ServerRequest {
 
   // Set this if the request pile should be notified (via
   // RequestPileInterfaceo::onRequestFinished) when the request is completed.
-  void setRequestPileNotification(RequestPileInterface* requestPile) {
+  void setRequestPileNotification(RequestCompletionCallback* requestPile) {
     DCHECK(notifyRequestPile_ == nullptr);
     notifyRequestPile_ = requestPile;
   }
@@ -520,7 +520,7 @@ class ServerRequest {
   // ConcurrencyControllerInterface::onRequestFinished) when the request is
   // completed.
   void setConcurrencyControllerNotification(
-      ConcurrencyControllerInterface* concurrencyController) {
+      RequestCompletionCallback* concurrencyController) {
     DCHECK(notifyConcurrencyController_ == nullptr);
     notifyConcurrencyController_ = concurrencyController;
   }
@@ -569,11 +569,12 @@ class ServerRequest {
     return sr.protocol_;
   }
 
-  static RequestPileInterface* moveRequestPileNotification(ServerRequest& sr) {
+  static RequestCompletionCallback* moveRequestPileNotification(
+      ServerRequest& sr) {
     return std::exchange(sr.notifyRequestPile_, nullptr);
   }
 
-  static ConcurrencyControllerInterface* moveConcurrencyControllerNotification(
+  static RequestCompletionCallback* moveConcurrencyControllerNotification(
       ServerRequest& sr) {
     return std::exchange(sr.notifyConcurrencyController_, nullptr);
   }
@@ -591,8 +592,8 @@ class ServerRequest {
   std::shared_ptr<folly::RequestContext> follyRequestContext_;
   AsyncProcessor* asyncProcessor_;
   const AsyncProcessor::MethodMetadata* methodMetadata_;
-  RequestPileInterface* notifyRequestPile_{nullptr};
-  ConcurrencyControllerInterface* notifyConcurrencyController_{nullptr};
+  RequestCompletionCallback* notifyRequestPile_{nullptr};
+  RequestCompletionCallback* notifyConcurrencyController_{nullptr};
   ServerRequestData requestData_;
   intptr_t queueObserverPayload_;
 };
@@ -1198,8 +1199,8 @@ class HandlerCallbackBase {
       folly::EventBase* eb,
       folly::Executor::KeepAlive<> executor,
       Cpp2RequestContext* reqCtx,
-      RequestPileInterface* notifyRequestPile,
-      ConcurrencyControllerInterface* notifyConcurrencyController,
+      RequestCompletionCallback* notifyRequestPile,
+      RequestCompletionCallback* notifyConcurrencyController,
       ServerRequestData requestData,
       TilePtr&& interaction = {})
       : req_(std::move(req)),
@@ -1318,8 +1319,8 @@ class HandlerCallbackBase {
 
   int32_t protoSeqId_;
 
-  RequestPileInterface* notifyRequestPile_{nullptr};
-  ConcurrencyControllerInterface* notifyConcurrencyController_{nullptr};
+  RequestCompletionCallback* notifyRequestPile_{nullptr};
+  RequestCompletionCallback* notifyConcurrencyController_{nullptr};
   ServerRequestData requestData_;
 };
 
@@ -1355,8 +1356,8 @@ class HandlerCallback : public HandlerCallbackBase {
       folly::EventBase* eb,
       folly::Executor::KeepAlive<> executor,
       Cpp2RequestContext* reqCtx,
-      RequestPileInterface* notifyRequestPile,
-      ConcurrencyControllerInterface* notifyConcurrencyController,
+      RequestCompletionCallback* notifyRequestPile,
+      RequestCompletionCallback* notifyConcurrencyController,
       ServerRequestData requestData,
       TilePtr&& interaction = {});
 
@@ -1401,8 +1402,8 @@ class HandlerCallback<void> : public HandlerCallbackBase {
       folly::EventBase* eb,
       folly::Executor::KeepAlive<> executor,
       Cpp2RequestContext* reqCtx,
-      RequestPileInterface* notifyRequestPile,
-      ConcurrencyControllerInterface* notifyConcurrencyController,
+      RequestCompletionCallback* notifyRequestPile,
+      RequestCompletionCallback* notifyConcurrencyController,
       ServerRequestData requestData,
       TilePtr&& interaction = {});
 
@@ -1738,8 +1739,8 @@ HandlerCallback<T>::HandlerCallback(
     folly::EventBase* eb,
     folly::Executor::KeepAlive<> executor,
     Cpp2RequestContext* reqCtx,
-    RequestPileInterface* notifyRequestPile,
-    ConcurrencyControllerInterface* notifyConcurrencyController,
+    RequestCompletionCallback* notifyRequestPile,
+    RequestCompletionCallback* notifyConcurrencyController,
     ServerRequestData requestData,
     TilePtr&& interaction)
     : HandlerCallbackBase(

@@ -38,6 +38,25 @@ void logTlsNoPeerCertEvent(const ConnectionLoggingContext& context) {
   }
 }
 
+void maybeLogTlsPeerCertEvent(
+    const ConnectionLoggingContext& context,
+    const folly::AsyncTransportCertificate* cert) {
+  DCHECK(context.getWorker() && context.getWorker()->getServer());
+  auto allowedIPs = detail::getAllowedIPsForCert(cert);
+  if (allowedIPs.empty() || context.getPeerAddress() == nullptr ||
+      !context.getPeerAddress()->isFamilyInet()) {
+    return;
+  }
+  if (std::find(
+          allowedIPs.begin(),
+          allowedIPs.end(),
+          context.getPeerAddress()->getIPAddress()) != allowedIPs.end()) {
+    THRIFT_CONNECTION_EVENT(tls.cert_ip_match).log(context);
+  } else {
+    THRIFT_CONNECTION_EVENT(tls.cert_ip_mismatch).log(context);
+  }
+}
+
 void logNonTLSEvent(const ConnectionLoggingContext& context) {
   DCHECK(context.getWorker() && context.getWorker()->getServer());
   auto server = context.getWorker()->getServer();
@@ -93,6 +112,8 @@ void logSetupConnectionEventsOnce(
             protocol == "Fizz/KTLS") {
           if (!transport->getPeerCertificate()) {
             logTlsNoPeerCertEvent(context);
+          } else {
+            maybeLogTlsPeerCertEvent(context, transport->getPeerCertificate());
           }
           logIfPeekingTransport(context, transport);
         } else {

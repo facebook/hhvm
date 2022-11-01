@@ -43,6 +43,7 @@ module GlobalAccessCheck = Error_codes.GlobalAccessCheck
 (* Recognize common patterns for global access (only writes for now). *)
 type global_access_pattern =
   | Singleton (* Write to a global variable whose value is null *)
+  | Caching (* Write to a global collection when the element is null or does not exist *)
   | CounterIncrement (* Increase a global variable by 1 or -1 *)
   | WriteEmptyOrNull (* Assign null or empty string to a global variable *)
   | WriteLiteral (* Assign a literal to a global variable *)
@@ -149,6 +150,31 @@ let get_patterns_from_written_data_srcs srcs =
   else
     GlobalAccessPatternSet.empty
 
+(* The set of safe/non-sensitive functions or classes *)
+let safe_func_ids = SSet.of_list ["\\microtime"; "\\FlibSL\\PHP\\microtime"]
+
+let safe_class_ids = SSet.of_list ["\\Time"]
+
+(* The set of functions whose return value's data sources are
+   the union of the data sources of all its parameters. *)
+let src_from_para_func_ids =
+  SSet.of_list
+    [
+      "\\FlibSL\\Dict\\merge";
+      "\\HH\\Lib\\Dict\\merge";
+      "\\FlibSL\\Keyset\\union";
+      "\\HH\\Lib\\Keyset\\union";
+    ]
+
+(* Functions whose return value is from only its first parameter. *)
+let src_from_first_para_func_ids =
+  SSet.of_list
+    ["\\HH\\idx"; "\\FlibSL\\Dict\\filter_keys"; "\\HH\\Lib\\Dict\\filter_keys"]
+
+(* Functions that check if its first parameter is not null. *)
+let check_non_null_func_ids =
+  SSet.of_list ["\\FlibSL\\C\\contains_key"; "\\HH\\Lib\\C\\contains_key"]
+
 (* The context maintains:
   (1) A hash table from local variables to the corresponding data sources.
   For any local variable, if its data sources contain GlobalReference(s), then
@@ -173,16 +199,6 @@ let current_ctx =
     var_data_src_tbl = ref (Hashtbl.create 0);
     null_global_var_set = ref SSet.empty;
   }
-
-(* The set of safe/non-sensitive functions or classes *)
-let safe_func_ids = SSet.of_list ["\\microtime"; "\\PHP\\microtime"]
-
-let safe_class_ids = SSet.of_list ["\\Time"]
-
-(* The set of functions whose return value's data sources are
-   the union of the data sources of its parameters. *)
-let src_from_para_func_ids =
-  SSet.of_list ["\\Dict\\merge"; "\\HH\\Lib\\Dict\\merge"]
 
 (* Add the key (a variable name) and the value (a set of data srcs) to the table. *)
 let add_var_data_srcs_to_tbl tbl var srcs =
@@ -421,13 +437,27 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
         | _ as s -> s)
       srcs
   in
+  (* For a collection (Varray, ValCollection and List) that uses a list of expressions
+     (e.g. vec[$a, $b] uses the list [$a; $b]), the function get_data_srcs_of_expr_list
+     gets the data source for each expression in the list and do the union; specially,
+     if the list is empty (e.g. vec[]), the data source is NullOrEmpty. *)
   let get_data_srcs_of_expr_list list =
-    List.fold list ~init:DataSourceSet.empty ~f:(fun cur_src_set e ->
-        DataSourceSet.union cur_src_set (get_data_srcs_from_expr env ctx e))
+    if List.length list = 0 then
+      DataSourceSet.singleton NullOrEmpty
+    else
+      List.fold list ~init:DataSourceSet.empty ~f:(fun cur_src_set e ->
+          DataSourceSet.union cur_src_set (get_data_srcs_from_expr env ctx e))
   in
+  (* For a collection (Darray, Shape and KeyValCollection) that uses a list of expression
+     pairs (e.g. dict[0 => $a, 1 => $b] uses the list [(0, $a); (1, $b)]), the function
+     get_data_srcs_of_pair_expr_list gets the data source for the 2nd expression in each
+     pair and do the union; specially, return NullOrEmpty if the list is empty (e.g. dict[]). *)
   let get_data_srcs_of_pair_expr_list list =
-    List.fold list ~init:DataSourceSet.empty ~f:(fun cur_src_set (_, e) ->
-        DataSourceSet.union cur_src_set (get_data_srcs_from_expr env ctx e))
+    if List.length list = 0 then
+      DataSourceSet.singleton NullOrEmpty
+    else
+      List.fold list ~init:DataSourceSet.empty ~f:(fun cur_src_set (_, e) ->
+          DataSourceSet.union cur_src_set (get_data_srcs_from_expr env ctx e))
   in
   match te with
   | Class_get (class_id, expr, Is_prop) ->
@@ -443,39 +473,40 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
       else
         DataSourceSet.singleton (GlobalReference expr_str)
   | Lvar (_, id) ->
-    (match Hashtbl.mem !(ctx.var_data_src_tbl) (Local_id.to_string id) with
-    | true -> Hashtbl.find !(ctx.var_data_src_tbl) (Local_id.to_string id)
-    | false -> DataSourceSet.singleton Unknown)
+    if Hashtbl.mem !(ctx.var_data_src_tbl) (Local_id.to_string id) then
+      Hashtbl.find !(ctx.var_data_src_tbl) (Local_id.to_string id)
+    else
+      DataSourceSet.singleton Unknown
   | Call (((_, _, func_expr) as caller), _, tpl, _) ->
     (match check_func_is_memoized caller env with
     | Some func_name ->
       (* If the called function is memoized, then its return is global. *)
-      (match is_immutable_ty with
-      | true -> DataSourceSet.singleton (GlobalValue func_name)
-      | false -> DataSourceSet.singleton (GlobalReference func_name))
+      if is_immutable_ty then
+        DataSourceSet.singleton (GlobalValue func_name)
+      else
+        DataSourceSet.singleton (GlobalReference func_name)
     | None ->
       (* Otherwise, the function call is treated as a black boxes, except
          for some special function (i.e. idx), the data source of its return
          is assumed to be the same as its first parameter. *)
       (match func_expr with
-      | Id (_, "\\HH\\idx") ->
+      | Id (_, func_id) when SSet.mem func_id src_from_first_para_func_ids ->
         (match tpl with
         | (_, para_expr) :: _ -> get_data_srcs_from_expr env ctx para_expr
         | [] -> DataSourceSet.singleton Unknown)
-      | Id (_, (_ as func_id)) ->
-        (match SSet.mem func_id safe_func_ids with
-        | true -> DataSourceSet.singleton NonSensitive
-        | false ->
-          (match SSet.mem func_id src_from_para_func_ids with
-          | true ->
-            List.fold
-              tpl
-              ~init:DataSourceSet.empty
-              ~f:(fun cur_src_set (_, para_expr) ->
-                DataSourceSet.union
-                  cur_src_set
-                  (get_data_srcs_from_expr env ctx para_expr))
-          | false -> DataSourceSet.singleton Unknown))
+      | Id (_, func_id) ->
+        if SSet.mem func_id safe_func_ids then
+          DataSourceSet.singleton NonSensitive
+        else if SSet.mem func_id src_from_para_func_ids then
+          List.fold
+            tpl
+            ~init:DataSourceSet.empty
+            ~f:(fun cur_src_set (_, para_expr) ->
+              DataSourceSet.union
+                cur_src_set
+                (get_data_srcs_from_expr env ctx para_expr))
+        else
+          DataSourceSet.singleton Unknown
       | Class_const ((_, _, CI (_, class_name)), _) ->
         (* A static method call is safe if the class name is in "safe_class_ids",
            or it starts with "SV_" (i.e. it's a site var). *)
@@ -483,9 +514,10 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
           SSet.mem class_name safe_class_ids
           || Caml.String.starts_with ~prefix:"\\SV_" class_name
         in
-        (match is_class_safe with
-        | true -> DataSourceSet.singleton NonSensitive
-        | false -> DataSourceSet.singleton Unknown)
+        if is_class_safe then
+          DataSourceSet.singleton NonSensitive
+        else
+          DataSourceSet.singleton Unknown
       | _ -> DataSourceSet.singleton Unknown))
   | Darray (_, tpl) -> get_data_srcs_of_pair_expr_list tpl
   | Varray (_, el) -> get_data_srcs_of_expr_list el
@@ -660,13 +692,8 @@ let visitor =
              dictionary, return expr and true (i.e. if branch). *)
           | Unop
               ( Ast_defs.Unot,
-                ( _,
-                  _,
-                  Call
-                    ( (_, _, Id (_, "\\HH\\Lib\\C\\contains_key")),
-                      _,
-                      para_list,
-                      _ ) ) ) ->
+                (_, _, Call ((_, _, Id (_, func_id)), _, para_list, _)) )
+            when SSet.mem func_id check_non_null_func_ids ->
             (match para_list with
             | [] -> None
             | (_, para_expr) :: _ -> Some (para_expr, true))
@@ -678,8 +705,8 @@ let visitor =
             Some (cond_expr, false)
           (* For the condition of format "C\contains_key(expr, $key)" where expr shall be a
              dictionary, return expr and false (i.e. else branch). *)
-          | Call ((_, _, Id (_, "\\HH\\Lib\\C\\contains_key")), _, para_list, _)
-            ->
+          | Call ((_, _, Id (_, func_id)), _, para_list, _)
+            when SSet.mem func_id check_non_null_func_ids ->
             (match para_list with
             | [] -> None
             | (_, para_expr) :: _ -> Some (para_expr, false))
@@ -702,14 +729,14 @@ let visitor =
               ctx_else_branch.null_global_var_set :=
                 SSet.union !(ctx_else_branch.null_global_var_set) vars)
         in
-        (* To do: ideally the condition expression should also be checked.
-           For example, a global read shall be reported if a global varialbe is used;
-           a global write shall be reported if a global variable is passed to a function call
+        (* Check the condition expression and report global reads/writes if any.
+           For example, a global read is reported if a global varialbe is directly used;
+           a global write is reported if a global variable is passed to a function call
            (which is very likely to happen) or it is directly mutated inside the condition
            (which is uncommon but possible). *)
+        super#on_expr (env, (ctx, fun_name)) c;
         (* Check two branches separately, then merge the table of global variables
            and reset the set of nullable variables. *)
-        super#on_expr (env, (ctx, fun_name)) c;
         super#on_block (env, (ctx, fun_name)) b1;
         super#on_block (env, (ctx_else_branch, fun_name)) b2;
         merge_var_data_srcs_tbls
@@ -789,9 +816,9 @@ let visitor =
             (SSet.singleton expr_str)
             (GlobalAccessPatternSet.singleton NoPattern)
             GlobalAccessCheck.DefiniteGlobalRead
-      | Call (func_expr, _, tpl, _) ->
+      | Call (((func_ty, _, _) as func_expr), _, tpl, _) ->
         (* First check if the called function is memoized. *)
-        let func_ty_str = Tast_env.print_ty env ty in
+        let func_ty_str = Tast_env.print_ty env func_ty in
         (match check_func_is_memoized func_expr env with
         | Some memoized_func_name ->
           raise_global_access_error
@@ -821,20 +848,29 @@ let visitor =
                 (GlobalAccessPatternSet.singleton NoPattern)
                 GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall);
         super#on_expr (env, (ctx, fun_name)) te
-      | Binop (Ast_defs.Eq _, le, re) ->
+      | Binop (Ast_defs.Eq bop_opt, le, re) ->
         let () = self#on_expr (env, (ctx, fun_name)) re in
         let re_ty = Tast_env.print_ty env (Tast.get_type re) in
         let le_global_opt = get_global_vars_from_expr env ctx le in
+        (* When write to a global variable whose value is null or does not exist:
+           if the written variable is in a collection (e.g. $global[$key] = $val),
+           then it's asumed to be caching; otherwise, it's a singleton. *)
+        let singleton_or_caching =
+          match le with
+          | (_, _, Array_get _) -> Caching
+          | _ -> Singleton
+        in
         let le_pattern =
-          match le_global_opt with
-          | None -> NoPattern
-          | Some le_global ->
+          match (le_global_opt, bop_opt) with
+          | (None, _) -> NoPattern
+          | (Some _, Some Ast_defs.QuestionQuestion) -> singleton_or_caching
+          | (Some le_global, _) ->
             if
               SSet.exists
                 (fun v -> SSet.mem v !(ctx.null_global_var_set))
                 le_global
             then
-              Singleton
+              singleton_or_caching
             else
               NoPattern
         in
@@ -854,8 +890,7 @@ let visitor =
         else
           let vars_in_le = ref SSet.empty in
           let () = get_vars_in_expr vars_in_le le in
-          match has_global_write_access le with
-          | true ->
+          if has_global_write_access le then (
             if Option.is_some le_global_opt then
               raise_global_access_error
                 env
@@ -869,7 +904,7 @@ let visitor =
               (fun v ->
                 add_var_data_srcs_to_tbl !(ctx.var_data_src_tbl) v re_data_srcs)
               !vars_in_le
-          | false ->
+          ) else
             SSet.iter
               (fun v ->
                 replace_var_data_srcs_in_tbl

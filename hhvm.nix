@@ -87,7 +87,7 @@ let
   makeVersion = major: minor: patch: suffix:
     if suffix == "-dev" then "${major}.${minor}.${patch}-dev${lastModifiedDate}" else "${major}.${minor}.${patch}";
 
-  rustNightly = rustChannelOf {
+  rustChannel = rustChannelOf {
 
     # When the date attribute changes, sha256 should be updated accordingly.
     #
@@ -104,6 +104,7 @@ let
   };
 in
 stdenv.mkDerivation rec {
+  rust = rustChannel.rust;
   pname = "hhvm";
   version = builtins.foldl' lib.trivial.id makeVersion versionParts;
   src = ./.;
@@ -222,8 +223,8 @@ stdenv.mkDerivation rec {
       set(HAVE_SYSTEM_TZDATA_PREFIX "${tzdata}/share/zoneinfo" CACHE PATH "The zoneinfo directory" FORCE)
       set(HAVE_SYSTEM_TZDATA ON CACHE BOOL "Use system zoneinfo" FORCE)
       set(MYSQL_UNIX_SOCK_ADDR "/run/mysqld/mysqld.sock" CACHE FILEPATH "The MySQL unix socket" FORCE)
-      set(CARGO_EXECUTABLE "${rustNightly.cargo}/bin/cargo" CACHE FILEPATH "The nightly cargo" FORCE)
-      set(RUSTC_EXECUTABLE "${rustNightly.rust}/bin/rustc" CACHE FILEPATH "The nightly rustc" FORCE)
+      set(CARGO_EXECUTABLE "${rust}/bin/cargo" CACHE FILEPATH "The nightly cargo" FORCE)
+      set(RUSTC_EXECUTABLE "${rust}/bin/rustc" CACHE FILEPATH "The nightly rustc" FORCE)
       set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "Enable verbose output from Makefile builds" FORCE)
       ${
         lib.optionalString hostPlatform.isMacOS ''

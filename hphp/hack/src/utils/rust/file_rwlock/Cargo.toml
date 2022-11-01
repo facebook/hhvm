@@ -10,7 +10,7 @@ path = "../file_rwlock.rs"
 [dependencies]
 anyhow = "1.0.65"
 fs2 = "0.4"
-libc = "0.2.135"
+libc = "0.2.137"
 serde = { version = "1.0.136", features = ["derive", "rc"] }
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
 thiserror = "1.0.36"

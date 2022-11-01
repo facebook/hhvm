@@ -21,10 +21,11 @@
 #include <memory>
 #include <string_view>
 
+#include <thrift/lib/cpp2/server/RequestCompletionCallback.h>
+
 namespace apache::thrift {
 
 class ServerRequest;
-struct ServerRequestData;
 
 // This common interface to all concurrency controllers. The details of
 // construction are left to implementations and/or factories.
@@ -32,10 +33,8 @@ struct ServerRequestData;
 // The concurrency controller manages the number of active requests and
 // limits it to a specified limit. It is expected to acquire requests from
 // a request pile.
-class ConcurrencyControllerInterface {
+class ConcurrencyControllerInterface : public RequestCompletionCallback {
  public:
-  virtual ~ConcurrencyControllerInterface();
-
   // Set the limit for simultanous requests. 0 indicates unlimites. This is
   // thread safe. If it is increased the concurrency controller must attempt
   // to dispatch more requests to reach the limit. If it is reduced the
@@ -59,7 +58,7 @@ class ConcurrencyControllerInterface {
   using UserData = intptr_t;
 
   // This will be called when the request processing has finished.
-  virtual void onRequestFinished(ServerRequestData&);
+  void onRequestFinished(ServerRequestData&) override;
 
   // Stops the concurrency controller. Stops dispatching new requests. This is
   // thread safe and does not block.

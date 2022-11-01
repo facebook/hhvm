@@ -163,6 +163,20 @@ struct TccStructTraits<::facebook::thrift::test::CircularStruct> {
       apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
+struct TccStructTraits<::facebook::thrift::test::ReorderedStruct> {
+  static void translateFieldName(
+      folly::StringPiece _fname,
+      int16_t& fid,
+      apache::thrift::protocol::TType& _ftype) noexcept;
+};
+template <>
+struct TccStructTraits<::facebook::thrift::test::detail::DeclaredAfterStruct> {
+  static void translateFieldName(
+      folly::StringPiece _fname,
+      int16_t& fid,
+      apache::thrift::protocol::TType& _ftype) noexcept;
+};
+template <>
 struct TccStructTraits<::facebook::thrift::test::UnderlyingRenamedStruct> {
   static void translateFieldName(
       folly::StringPiece _fname,
@@ -5661,6 +5675,234 @@ extern template void CircularStruct::readNoXfer<>(apache::thrift::CompactProtoco
 extern template uint32_t CircularStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
 extern template uint32_t CircularStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 extern template uint32_t CircularStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+template <class Protocol_>
+void ReorderedStruct::readNoXfer(Protocol_* iprot) {
+  __fbthrift_clear_terse_fields();
+
+  apache::thrift::detail::ProtocolReaderStructReadState<Protocol_> _readState;
+
+  _readState.readStructBegin(iprot);
+
+  using apache::thrift::TProtocolException;
+
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          0,
+          1,
+          apache::thrift::protocol::T_STRUCT))) {
+    goto _loop;
+  }
+_readField_reordered_dependent_adapted:
+  {
+    _readState.beforeSubobject(iprot);
+    auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>>();
+    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, ::facebook::thrift::test::DeclaredAfterStruct>::value;
+    ::folly::if_constexpr<hasInplaceToThrift>(
+      [&](auto& field) {
+        ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::detail::DeclaredAfterStruct>::readWithContext(*iprot, ::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>::toThrift(field), _readState);
+      },
+      [&](auto&) {})(*ptr);
+    if (!hasInplaceToThrift) {
+      ::facebook::thrift::test::detail::DeclaredAfterStruct tvalue;
+      ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::detail::DeclaredAfterStruct>::readWithContext(*iprot, tvalue, _readState);
+      *ptr = ::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, 1>(::std::move(tvalue), *this);
+    }
+    this->__fbthrift_field_reordered_dependent_adapted = std::move(ptr);
+    _readState.afterSubobject(iprot);
+    
+  }
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          1,
+          0,
+          apache::thrift::protocol::T_STOP))) {
+    goto _loop;
+  }
+
+_end:
+  _readState.readStructEnd(iprot);
+
+  return;
+
+_loop:
+  _readState.afterAdvanceFailure(iprot);
+  if (_readState.atStop()) {
+    goto _end;
+  }
+  if (iprot->kUsesFieldNames()) {
+    _readState.template fillFieldTraitsFromName<apache::thrift::detail::TccStructTraits<ReorderedStruct>>();
+  }
+
+  switch (_readState.fieldId) {
+    case 1:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_STRUCT))) {
+        goto _readField_reordered_dependent_adapted;
+      } else {
+        goto _skip;
+      }
+    }
+    default:
+    {
+_skip:
+      _readState.skip(iprot);
+      _readState.readFieldEnd(iprot);
+      _readState.readFieldBeginNoInline(iprot);
+      goto _loop;
+    }
+  }
+}
+
+template <class Protocol_>
+uint32_t ReorderedStruct::serializedSize(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("ReorderedStruct");
+  {
+    xfer += prot_->serializedFieldSize("reordered_dependent_adapted", apache::thrift::protocol::T_STRUCT, 1);
+    if (this->__fbthrift_field_reordered_dependent_adapted) {
+      xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>>(*prot_, *this->__fbthrift_field_reordered_dependent_adapted, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::detail::DeclaredAfterStruct>::serializedSize<false>(*prot_, ::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>::toThrift(*this->__fbthrift_field_reordered_dependent_adapted));});
+    } else {
+      xfer += prot_->serializedStructSize("DeclaredAfterStruct");
+      xfer += prot_->serializedSizeStop();
+    }
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t ReorderedStruct::serializedSizeZC(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("ReorderedStruct");
+  {
+    xfer += prot_->serializedFieldSize("reordered_dependent_adapted", apache::thrift::protocol::T_STRUCT, 1);
+    if (this->__fbthrift_field_reordered_dependent_adapted) {
+      xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>>(*prot_, *this->__fbthrift_field_reordered_dependent_adapted, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::detail::DeclaredAfterStruct>::serializedSize<true>(*prot_, ::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>::toThrift(*this->__fbthrift_field_reordered_dependent_adapted));});
+    } else {
+      xfer += prot_->serializedStructSize("DeclaredAfterStruct");
+      xfer += prot_->serializedSizeStop();
+    }
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t ReorderedStruct::write(Protocol_* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->writeStructBegin("ReorderedStruct");
+  bool previousFieldHasValue = true;
+  {
+    constexpr int16_t kPrevFieldId = 0;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 1, kPrevFieldId>(*prot_, "reordered_dependent_adapted", previousFieldHasValue);
+    previousFieldHasValue = true;
+    if (this->__fbthrift_field_reordered_dependent_adapted) {
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::detail::DeclaredAfterStruct>::write(*prot_, ::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>::toThrift(*this->__fbthrift_field_reordered_dependent_adapted));
+    } else {
+      xfer += prot_->writeStructBegin("DeclaredAfterStruct");
+      xfer += prot_->writeStructEnd();
+      xfer += prot_->writeFieldStop();
+    }
+    xfer += prot_->writeFieldEnd();
+  }
+  xfer += prot_->writeFieldStop();
+  xfer += prot_->writeStructEnd();
+  return xfer;
+}
+
+extern template void ReorderedStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t ReorderedStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t ReorderedStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t ReorderedStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template void ReorderedStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t ReorderedStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t ReorderedStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t ReorderedStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+namespace detail {
+
+template <class Protocol_>
+void DeclaredAfterStruct::readNoXfer(Protocol_* iprot) {
+  __fbthrift_clear_terse_fields();
+
+  apache::thrift::detail::ProtocolReaderStructReadState<Protocol_> _readState;
+
+  _readState.readStructBegin(iprot);
+
+  using apache::thrift::TProtocolException;
+
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          0,
+          0,
+          apache::thrift::protocol::T_STOP))) {
+    goto _loop;
+  }
+
+_end:
+  _readState.readStructEnd(iprot);
+
+  return;
+
+_loop:
+  _readState.afterAdvanceFailure(iprot);
+  if (_readState.atStop()) {
+    goto _end;
+  }
+  if (iprot->kUsesFieldNames()) {
+    _readState.template fillFieldTraitsFromName<apache::thrift::detail::TccStructTraits<DeclaredAfterStruct>>();
+  }
+
+  switch (_readState.fieldId) {
+    default:
+    {
+      _readState.skip(iprot);
+      _readState.readFieldEnd(iprot);
+      _readState.readFieldBeginNoInline(iprot);
+      goto _loop;
+    }
+  }
+}
+
+template <class Protocol_>
+uint32_t DeclaredAfterStruct::serializedSize(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("DeclaredAfterStruct");
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t DeclaredAfterStruct::serializedSizeZC(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("DeclaredAfterStruct");
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t DeclaredAfterStruct::write(Protocol_* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->writeStructBegin("DeclaredAfterStruct");
+  xfer += prot_->writeFieldStop();
+  xfer += prot_->writeStructEnd();
+  return xfer;
+}
+
+extern template void DeclaredAfterStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t DeclaredAfterStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t DeclaredAfterStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t DeclaredAfterStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template void DeclaredAfterStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t DeclaredAfterStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t DeclaredAfterStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t DeclaredAfterStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+} // namespace detail
 
 
 template <class Protocol_>

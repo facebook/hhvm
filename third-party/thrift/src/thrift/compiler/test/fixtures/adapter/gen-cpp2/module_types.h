@@ -100,6 +100,7 @@ struct directlyAdapted;
 struct typedefOfAdapted;
 struct field;
 struct field;
+struct reordered_dependent_adapted;
 struct data;
 struct data;
 struct ptr;
@@ -435,6 +436,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(field);
 #define APACHE_THRIFT_ACCESSOR_field
 APACHE_THRIFT_DEFINE_ACCESSOR(field);
 #endif
+#ifndef APACHE_THRIFT_ACCESSOR_reordered_dependent_adapted
+#define APACHE_THRIFT_ACCESSOR_reordered_dependent_adapted
+APACHE_THRIFT_DEFINE_ACCESSOR(reordered_dependent_adapted);
+#endif
 #ifndef APACHE_THRIFT_ACCESSOR_data
 #define APACHE_THRIFT_ACCESSOR_data
 APACHE_THRIFT_DEFINE_ACCESSOR(data);
@@ -566,6 +571,10 @@ class DirectlyAdaptedStruct;
 class StructFieldAdaptedStruct;
 class CircularAdaptee;
 class CircularStruct;
+class ReorderedStruct;
+namespace detail {
+class DeclaredAfterStruct;
+} // namespace detail
 class UnderlyingRenamedStruct;
 class UnderlyingSameNamespaceStruct;
 namespace detail {
@@ -7354,6 +7363,263 @@ class CircularAdaptee final  {
 
 template <class Protocol_>
 unsigned long CircularAdaptee::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+namespace detail {
+class DeclaredAfterStruct final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const char* __fbthrift_thrift_uri();
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static constexpr std::size_t __fbthrift_field_size_v = 0;
+
+  template<class T>
+  using __fbthrift_id = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                   void>;
+
+  template<class T>
+  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                         void>;
+
+  template<class T>
+  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                      void>;
+
+  struct __fbthrift_ordinal_impl {
+#if defined(_MSC_VER) || defined(__clang__)
+    template<class> static constexpr int value = 0;
+#else
+    template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
+    template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
+#endif
+  };
+
+  struct __fbthrift_ordinal_impl_for_non_unique_type {
+    template<class, class, class> struct Impl { static constexpr int value = 0; };
+
+    template<class T> static constexpr int value = Impl<T, T, void>::value;
+  };
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::field_ordinal<
+    std::conditional_t<
+        __fbthrift_ordinal_impl::value<T> != 0,
+        __fbthrift_ordinal_impl,
+        __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
+  >;
+
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = DeclaredAfterStruct;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  DeclaredAfterStruct() {
+  }
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  DeclaredAfterStruct(apache::thrift::FragileConstructor);
+
+  DeclaredAfterStruct(DeclaredAfterStruct&&) = default;
+
+  DeclaredAfterStruct(const DeclaredAfterStruct&) = default;
+
+
+  DeclaredAfterStruct& operator=(DeclaredAfterStruct&&) = default;
+
+  DeclaredAfterStruct& operator=(const DeclaredAfterStruct&) = default;
+
+ public:
+
+  bool operator==(const DeclaredAfterStruct&) const;
+  bool operator<(const DeclaredAfterStruct&) const;
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<DeclaredAfterStruct>;
+  friend void swap(DeclaredAfterStruct& a, DeclaredAfterStruct& b);
+};
+
+template <class Protocol_>
+unsigned long DeclaredAfterStruct::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+} // namespace detail
+
+using DeclaredAfterStruct = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, ::facebook::thrift::test::detail::DeclaredAfterStruct>;
+
+
+class ReorderedStruct final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const char* __fbthrift_thrift_uri();
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
+
+  template<class T>
+  using __fbthrift_id = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                   void,
+                                                   ::apache::thrift::field_id<1>>;
+
+  template<class T>
+  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                         void,
+                                                         ::apache::thrift::type::adapted<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, ::apache::thrift::type::struct_t<::facebook::thrift::test::detail::DeclaredAfterStruct>>>;
+
+  template<class T>
+  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                      void,
+                                                      ::apache::thrift::ident::reordered_dependent_adapted>;
+
+  struct __fbthrift_ordinal_impl {
+#if defined(_MSC_VER) || defined(__clang__)
+    template<class> static constexpr int value = 0;
+    template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::reordered_dependent_adapted> = 1;
+#else
+    template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::reordered_dependent_adapted>) { return 1; }
+    template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
+#endif
+  };
+
+  struct __fbthrift_ordinal_impl_for_non_unique_type {
+    template<class, class, class> struct Impl { static constexpr int value = 0; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, ::apache::thrift::type::struct_t<::facebook::thrift::test::detail::DeclaredAfterStruct>>, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
+
+    template<class T> static constexpr int value = Impl<T, T, void>::value;
+  };
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::field_ordinal<
+    std::conditional_t<
+        __fbthrift_ordinal_impl::value<T> != 0,
+        __fbthrift_ordinal_impl,
+        __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
+  >;
+
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = ReorderedStruct;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  ReorderedStruct() :
+      __fbthrift_field_reordered_dependent_adapted(std::make_unique<::facebook::thrift::test::DeclaredAfterStruct>()) {
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, 1>(*__fbthrift_field_reordered_dependent_adapted, *this);
+  }
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  ReorderedStruct(apache::thrift::FragileConstructor, ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct> reordered_dependent_adapted__arg);
+
+  ReorderedStruct(ReorderedStruct&&) noexcept;
+  ReorderedStruct(const ReorderedStruct& src);
+
+
+  ReorderedStruct& operator=(ReorderedStruct&&) noexcept;
+  ReorderedStruct& operator=(const ReorderedStruct& src);
+ private:
+  ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct> __fbthrift_field_reordered_dependent_adapted;
+
+ public:
+
+  bool operator==(const ReorderedStruct&) const;
+  bool operator<(const ReorderedStruct&) const;
+  template <typename ..., typename T = ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>>
+  FOLLY_ERASE T& reordered_dependent_adapted_ref() & {
+    return __fbthrift_field_reordered_dependent_adapted;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>>
+  FOLLY_ERASE const T& reordered_dependent_adapted_ref() const& {
+    return __fbthrift_field_reordered_dependent_adapted;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>>
+  FOLLY_ERASE T&& reordered_dependent_adapted_ref() && {
+    return static_cast<T&&>(__fbthrift_field_reordered_dependent_adapted);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>>
+  FOLLY_ERASE const T&& reordered_dependent_adapted_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_reordered_dependent_adapted);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>>
+  FOLLY_ERASE T& reordered_dependent_adapted() & {
+    return __fbthrift_field_reordered_dependent_adapted;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>>
+  FOLLY_ERASE const T& reordered_dependent_adapted() const& {
+    return __fbthrift_field_reordered_dependent_adapted;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>>
+  FOLLY_ERASE T&& reordered_dependent_adapted() && {
+    return static_cast<T&&>(__fbthrift_field_reordered_dependent_adapted);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct>>
+  FOLLY_ERASE const T&& reordered_dependent_adapted() const&& {
+    return static_cast<const T&&>(__fbthrift_field_reordered_dependent_adapted);
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<ReorderedStruct>;
+  friend void swap(ReorderedStruct& a, ReorderedStruct& b);
+};
+
+template <class Protocol_>
+unsigned long ReorderedStruct::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;

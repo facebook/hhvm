@@ -847,14 +847,15 @@ let visitor =
                 (GlobalAccessPatternSet.singleton NoPattern)
                 GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall);
         super#on_expr (env, (ctx, fun_name)) te
-      | Binop (Ast_defs.Eq _, le, re) ->
+      | Binop (Ast_defs.Eq bop_opt, le, re) ->
         let () = self#on_expr (env, (ctx, fun_name)) re in
         let re_ty = Tast_env.print_ty env (Tast.get_type re) in
         let le_global_opt = get_global_vars_from_expr env ctx le in
         let le_pattern =
-          match le_global_opt with
-          | None -> NoPattern
-          | Some le_global ->
+          match (le_global_opt, bop_opt) with
+          | (None, _) -> NoPattern
+          | (Some _, Some Ast_defs.QuestionQuestion) -> Singleton
+          | (Some le_global, _) ->
             if
               SSet.exists
                 (fun v -> SSet.mem v !(ctx.null_global_var_set))

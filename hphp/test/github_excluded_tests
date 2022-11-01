@@ -134,6 +134,9 @@ slow/coeffects/closure-inherit-2.php
 # TODO(atry) the CAA record for google.com is flaky (maybe network issue?)
 slow/ext_network/dns_get_record_caa.php
 
+# TODO(atry) another flaky test
+slow/ext_apc/apc_expire.php
+
 # TODO(alexeyt) failures not yet categorized
 slow/coeffects/apc_pure.php
 slow/dom_document/clone.php

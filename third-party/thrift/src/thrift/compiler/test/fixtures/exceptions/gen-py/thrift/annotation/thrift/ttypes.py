@@ -30,7 +30,7 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'Beta', 'Experimental', 'Testing', 'Deprecated', 'ReserveIds', 'Legacy', 'RequiresBackwardCompatibility', 'NoTesting', 'NoExperimental', 'NoBeta', 'Released', 'NoLegacy', 'NoDeprecated', 'TerseWrite', 'Box', 'Mixin', 'SerializeInFieldIdOrder', 'GenDefaultEnumValue', 'v1', 'v1beta', 'v1alpha', 'v1test', 'ExceptionMessage', 'BitmaskEnum', 'GenerateRuntimeSchema', 'InternBox']
+__all__ = ['UTF8STRINGS', 'Beta', 'Experimental', 'Testing', 'Deprecated', 'ReserveIds', 'Legacy', 'RequiresBackwardCompatibility', 'NoTesting', 'NoExperimental', 'NoBeta', 'Released', 'NoLegacy', 'NoDeprecated', 'TerseWrite', 'Box', 'Mixin', 'SerializeInFieldIdOrder', 'BitmaskEnum', 'GenDefaultEnumValue', 'GenEnumSet', 'v1', 'v1beta', 'v1alpha', 'v1test', 'ExceptionMessage', 'GenerateRuntimeSchema', 'InternBox']
 
 class Beta:
   """
@@ -1481,6 +1481,82 @@ class SerializeInFieldIdOrder:
   def _to_py_deprecated(self):
     return self
 
+class BitmaskEnum:
+  """
+  Indicates an enum is a bitmask and should support bit-wise operators.
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('BitmaskEnum')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.thrift.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.BitmaskEnum, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.thrift.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.BitmaskEnum, self)
+
+  def _to_py_deprecated(self):
+    return self
+
 class GenDefaultEnumValue:
   """
   Adds a default enum value (0), with the given name, if one is not
@@ -1585,6 +1661,117 @@ class GenDefaultEnumValue:
     import thrift.py3.converter
     py3_types = importlib.import_module("facebook.thrift.annotation.thrift.types")
     return thrift.py3.converter.to_py3_struct(py3_types.GenDefaultEnumValue, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class GenEnumSet:
+  """
+  Adds a typedef of {enum}Set that is sutable for storing a `packed` set of
+  values for the annotated enum.
+  
+  Any enum with this annotation must only have values between 1 and 32 inclusive.
+  
+  For example:
+    @thrift.GenEnumSet
+    enum Flag {
+      Option1 = 1,
+      ...
+    }
+  
+  Generates the equivalent of:
+    @cpp.Adapter("::apache::thrift::EnumSetAdapter<::ns::Flag>")
+    ...
+    typedef i32 FlagSet
+  
+  `FlagSet` can then be used like a normal typedef.
+  
+  Attributes:
+   - name: If a custom name is not provided, `{EnumName}Set` is used.
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.name = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('GenEnumSet')
+    if self.name != None:
+      oprot.writeFieldBegin('name', TType.STRING, 1)
+      oprot.writeString(self.name.encode('utf-8')) if UTF8STRINGS and not isinstance(self.name, bytes) else oprot.writeString(self.name)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.name is not None:
+      value = pprint.pformat(self.name, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    name=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'name',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.thrift.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.GenEnumSet, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.thrift.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.GenEnumSet, self)
 
   def _to_py_deprecated(self):
     return self
@@ -1997,82 +2184,6 @@ class ExceptionMessage:
   def _to_py_deprecated(self):
     return self
 
-class BitmaskEnum:
-  """
-  Specifies if the enum is a bitmask.
-  """
-
-  thrift_spec = None
-  thrift_field_annotations = None
-  thrift_struct_annotations = None
-  @staticmethod
-  def isUnion():
-    return False
-
-  def read(self, iprot):
-    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
-      return
-    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
-      return
-    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
-      return
-    oprot.writeStructBegin('BitmaskEnum')
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def __repr__(self):
-    L = []
-    padding = ' ' * 4
-    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
-
-  def __eq__(self, other):
-    if not isinstance(other, self.__class__):
-      return False
-
-    return self.__dict__ == other.__dict__ 
-
-  def __ne__(self, other):
-    return not (self == other)
-
-  def __dir__(self):
-    return (
-    )
-
-  # Override the __hash__ function for Python3 - t10434117
-  __hash__ = object.__hash__
-
-  def _to_python(self):
-    import importlib
-    import thrift.python.converter
-    python_types = importlib.import_module("facebook.thrift.annotation.thrift.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.BitmaskEnum, self)
-
-  def _to_py3(self):
-    import importlib
-    import thrift.py3.converter
-    py3_types = importlib.import_module("facebook.thrift.annotation.thrift.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.BitmaskEnum, self)
-
-  def _to_py_deprecated(self):
-    return self
-
 class GenerateRuntimeSchema:
   """
   Generates a const of type schema. Struct containing the schema of the
@@ -2458,6 +2569,15 @@ SerializeInFieldIdOrder.thrift_struct_annotations = {
 SerializeInFieldIdOrder.thrift_field_annotations = {
 }
 
+all_structs.append(BitmaskEnum)
+BitmaskEnum.thrift_spec = (
+)
+
+BitmaskEnum.thrift_struct_annotations = {
+}
+BitmaskEnum.thrift_field_annotations = {
+}
+
 all_structs.append(GenDefaultEnumValue)
 GenDefaultEnumValue.thrift_spec = (
   None, # 0
@@ -2480,6 +2600,29 @@ def GenDefaultEnumValue__setstate__(self, state):
 
 GenDefaultEnumValue.__getstate__ = lambda self: self.__dict__.copy()
 GenDefaultEnumValue.__setstate__ = GenDefaultEnumValue__setstate__
+
+all_structs.append(GenEnumSet)
+GenEnumSet.thrift_spec = (
+  None, # 0
+  (1, TType.STRING, 'name', True, None, 2, ), # 1
+)
+
+GenEnumSet.thrift_struct_annotations = {
+}
+GenEnumSet.thrift_field_annotations = {
+}
+
+def GenEnumSet__init__(self, name=None,):
+  self.name = name
+
+GenEnumSet.__init__ = GenEnumSet__init__
+
+def GenEnumSet__setstate__(self, state):
+  state.setdefault('name', None)
+  self.__dict__ = state
+
+GenEnumSet.__getstate__ = lambda self: self.__dict__.copy()
+GenEnumSet.__setstate__ = GenEnumSet__setstate__
 
 all_structs.append(v1)
 v1.thrift_spec = (
@@ -2539,15 +2682,6 @@ def ExceptionMessage__setstate__(self, state):
 
 ExceptionMessage.__getstate__ = lambda self: self.__dict__.copy()
 ExceptionMessage.__setstate__ = ExceptionMessage__setstate__
-
-all_structs.append(BitmaskEnum)
-BitmaskEnum.thrift_spec = (
-)
-
-BitmaskEnum.thrift_struct_annotations = {
-}
-BitmaskEnum.thrift_field_annotations = {
-}
 
 all_structs.append(GenerateRuntimeSchema)
 GenerateRuntimeSchema.thrift_spec = (

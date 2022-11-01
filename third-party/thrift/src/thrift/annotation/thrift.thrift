@@ -210,6 +210,13 @@ struct Mixin {}
 struct SerializeInFieldIdOrder {}
 
 /**
+ * Indicates an enum is a bitmask and should support bit-wise operators.
+ */
+@scope.Enum
+@Experimental // TODO: Support in C++, Python, Java.
+struct BitmaskEnum {}
+
+/**
  * Adds a default enum value (0), with the given name, if one is not
  * already defined.
  *
@@ -238,6 +245,35 @@ struct GenDefaultEnumValue {
    * should be consulted (e.g. the doc strings on the function or field).
    */
   1: string name = "Unspecified";
+}
+
+/**
+ * Adds a typedef of {enum}Set that is sutable for storing a `packed` set of
+ * values for the annotated enum.
+ *
+ * Any enum with this annotation must only have values between 1 and 32 inclusive.
+ *
+ * For example:
+ *   @thrift.GenEnumSet
+ *   enum Flag {
+ *     Option1 = 1,
+ *     ...
+ *   }
+ *
+ * Generates the equivalent of:
+ *   @cpp.Adapter("::apache::thrift::EnumSetAdapter<::ns::Flag>")
+ *   ...
+ *   typedef i32 FlagSet
+ *
+ * `FlagSet` can then be used like a normal typedef.
+ */
+// TODO(afuller): Implement
+@scope.FbthriftInternalEnum
+@BitmaskEnum
+@scope.Transitive
+struct GenEnumSet {
+  /** If a custom name is not provided, `{EnumName}Set` is used. */
+  1: string name;
 }
 
 ////
@@ -299,13 +335,6 @@ struct v1test {}
 struct ExceptionMessage {
   1: string field;
 }
-
-/**
- * Specifies if the enum is a bitmask.
- */
-@scope.Enum
-@Experimental // TODO: Support in C++, Python, Java.
-struct BitmaskEnum {}
 
 /**
  * Generates a const of type schema. Struct containing the schema of the

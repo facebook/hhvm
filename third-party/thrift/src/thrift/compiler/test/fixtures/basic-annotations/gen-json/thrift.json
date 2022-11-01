@@ -460,8 +460,30 @@
         }
       }
     },
+    "BitmaskEnum" : {
+      "lineno" : 215,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Enum" : {  },
+        "Experimental" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 215,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 217,
+          "column" : 22
+        }
+      }
+    },
     "GenDefaultEnumValue" : {
-      "lineno" : 223,
+      "lineno" : 230,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -477,11 +499,11 @@
           "default_value" : "Unspecified",
           "source_range" : {
             "begin" : {
-              "line" : 240,
+              "line" : 247,
               "column" : 3
             },
             "end" : {
-              "line" : 240,
+              "line" : 247,
               "column" : 34
             }
           }
@@ -489,17 +511,54 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 223,
+          "line" : 230,
           "column" : 1
         },
         "end" : {
-          "line" : 241,
+          "line" : 248,
+          "column" : 2
+        }
+      }
+    },
+    "GenEnumSet" : {
+      "lineno" : 271,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.FbthriftInternalEnum" : {  },
+        "BitmaskEnum" : {  },
+        "scope.Transitive" : {  }
+      },
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 276,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 276,
+              "column" : 18
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 271,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 277,
           "column" : 2
         }
       }
     },
     "v1" : {
-      "lineno" : 249,
+      "lineno" : 285,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -510,17 +569,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 249,
+          "line" : 285,
           "column" : 1
         },
         "end" : {
-          "line" : 250,
+          "line" : 286,
           "column" : 13
         }
       }
     },
     "v1beta" : {
-      "lineno" : 259,
+      "lineno" : 295,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -536,17 +595,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 259,
+          "line" : 295,
           "column" : 1
         },
         "end" : {
-          "line" : 265,
+          "line" : 301,
           "column" : 17
         }
       }
     },
     "v1alpha" : {
-      "lineno" : 274,
+      "lineno" : 310,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -560,17 +619,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 274,
+          "line" : 310,
           "column" : 1
         },
         "end" : {
-          "line" : 278,
+          "line" : 314,
           "column" : 18
         }
       }
     },
     "v1test" : {
-      "lineno" : 284,
+      "lineno" : 320,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -584,17 +643,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 284,
+          "line" : 320,
           "column" : 1
         },
         "end" : {
-          "line" : 288,
+          "line" : 324,
           "column" : 17
         }
       }
     },
     "ExceptionMessage" : {
-      "lineno" : 297,
+      "lineno" : 333,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -608,11 +667,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 300,
+              "line" : 336,
               "column" : 3
             },
             "end" : {
-              "line" : 300,
+              "line" : 336,
               "column" : 19
             }
           }
@@ -620,39 +679,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 297,
+          "line" : 333,
           "column" : 1
         },
         "end" : {
-          "line" : 301,
+          "line" : 337,
           "column" : 2
         }
       }
     },
-    "BitmaskEnum" : {
-      "lineno" : 306,
-      "is_exception" : false,
-      "is_union" : false,
-      "structured_annotations" : {
-        "scope.Enum" : {  },
-        "Experimental" : {  }
-      },
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 306,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 308,
-          "column" : 22
-        }
-      }
-    },
     "GenerateRuntimeSchema" : {
-      "lineno" : 315,
+      "lineno" : 344,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -669,11 +706,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 321,
+              "line" : 350,
               "column" : 3
             },
             "end" : {
-              "line" : 321,
+              "line" : 350,
               "column" : 18
             }
           }
@@ -681,17 +718,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 315,
+          "line" : 344,
           "column" : 1
         },
         "end" : {
-          "line" : 322,
+          "line" : 351,
           "column" : 2
         }
       }
     },
     "InternBox" : {
-      "lineno" : 328,
+      "lineno" : 357,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -703,11 +740,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 328,
+          "line" : 357,
           "column" : 1
         },
         "end" : {
-          "line" : 330,
+          "line" : 359,
           "column" : 20
         }
       }

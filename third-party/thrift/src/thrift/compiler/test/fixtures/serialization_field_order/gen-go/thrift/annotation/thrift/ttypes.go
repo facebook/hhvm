@@ -1469,6 +1469,72 @@ func (p *SerializeInFieldIdOrder) String() string {
   return fmt.Sprintf("SerializeInFieldIdOrder({})")
 }
 
+// Indicates an enum is a bitmask and should support bit-wise operators.
+type BitmaskEnum struct {
+}
+
+func NewBitmaskEnum() *BitmaskEnum {
+  return &BitmaskEnum{}
+}
+
+type BitmaskEnumBuilder struct {
+  obj *BitmaskEnum
+}
+
+func NewBitmaskEnumBuilder() *BitmaskEnumBuilder{
+  return &BitmaskEnumBuilder{
+    obj: NewBitmaskEnum(),
+  }
+}
+
+func (p BitmaskEnumBuilder) Emit() *BitmaskEnum{
+  return &BitmaskEnum{
+  }
+}
+
+func (p *BitmaskEnum) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    if err := iprot.Skip(fieldTypeId); err != nil {
+      return err
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *BitmaskEnum) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("BitmaskEnum"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *BitmaskEnum) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  return fmt.Sprintf("BitmaskEnum({})")
+}
+
 // Adds a default enum value (0), with the given name, if one is not
 // already defined.
 // 
@@ -1596,6 +1662,136 @@ func (p *GenDefaultEnumValue) String() string {
 
   nameVal := fmt.Sprintf("%v", p.Name)
   return fmt.Sprintf("GenDefaultEnumValue({Name:%s})", nameVal)
+}
+
+// Adds a typedef of {enum}Set that is sutable for storing a `packed` set of
+// values for the annotated enum.
+// 
+// Any enum with this annotation must only have values between 1 and 32 inclusive.
+// 
+// For example:
+//   @thrift.GenEnumSet
+//   enum Flag {
+//     Option1 = 1,
+//     ...
+//   }
+// 
+// Generates the equivalent of:
+//   @cpp.Adapter("::apache::thrift::EnumSetAdapter<::ns::Flag>")
+//   ...
+//   typedef i32 FlagSet
+// 
+// `FlagSet` can then be used like a normal typedef.
+// 
+// Attributes:
+//  - Name: If a custom name is not provided, `{EnumName}Set` is used.
+type GenEnumSet struct {
+  Name string `thrift:"name,1" db:"name" json:"name"`
+}
+
+func NewGenEnumSet() *GenEnumSet {
+  return &GenEnumSet{}
+}
+
+
+func (p *GenEnumSet) GetName() string {
+  return p.Name
+}
+type GenEnumSetBuilder struct {
+  obj *GenEnumSet
+}
+
+func NewGenEnumSetBuilder() *GenEnumSetBuilder{
+  return &GenEnumSetBuilder{
+    obj: NewGenEnumSet(),
+  }
+}
+
+func (p GenEnumSetBuilder) Emit() *GenEnumSet{
+  return &GenEnumSet{
+    Name: p.obj.Name,
+  }
+}
+
+func (g *GenEnumSetBuilder) Name(name string) *GenEnumSetBuilder {
+  g.obj.Name = name
+  return g
+}
+
+func (g *GenEnumSet) SetName(name string) *GenEnumSet {
+  g.Name = name
+  return g
+}
+
+func (p *GenEnumSet) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *GenEnumSet)  ReadField1(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadString(); err != nil {
+    return thrift.PrependError("error reading field 1: ", err)
+  } else {
+    p.Name = v
+  }
+  return nil
+}
+
+func (p *GenEnumSet) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("GenEnumSet"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *GenEnumSet) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:name: ", p), err) }
+  if err := oprot.WriteString(string(p.Name)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.name (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:name: ", p), err) }
+  return err
+}
+
+func (p *GenEnumSet) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  nameVal := fmt.Sprintf("%v", p.Name)
+  return fmt.Sprintf("GenEnumSet({Name:%s})", nameVal)
 }
 
 // Enables all released v1 features.
@@ -1983,72 +2179,6 @@ func (p *ExceptionMessage) String() string {
 
   fieldVal := fmt.Sprintf("%v", p.Field)
   return fmt.Sprintf("ExceptionMessage({Field:%s})", fieldVal)
-}
-
-// Specifies if the enum is a bitmask.
-type BitmaskEnum struct {
-}
-
-func NewBitmaskEnum() *BitmaskEnum {
-  return &BitmaskEnum{}
-}
-
-type BitmaskEnumBuilder struct {
-  obj *BitmaskEnum
-}
-
-func NewBitmaskEnumBuilder() *BitmaskEnumBuilder{
-  return &BitmaskEnumBuilder{
-    obj: NewBitmaskEnum(),
-  }
-}
-
-func (p BitmaskEnumBuilder) Emit() *BitmaskEnum{
-  return &BitmaskEnum{
-  }
-}
-
-func (p *BitmaskEnum) Read(iprot thrift.Protocol) error {
-  if _, err := iprot.ReadStructBegin(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
-  }
-
-
-  for {
-    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
-    if err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
-    }
-    if fieldTypeId == thrift.STOP { break; }
-    if err := iprot.Skip(fieldTypeId); err != nil {
-      return err
-    }
-    if err := iprot.ReadFieldEnd(); err != nil {
-      return err
-    }
-  }
-  if err := iprot.ReadStructEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
-  }
-  return nil
-}
-
-func (p *BitmaskEnum) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("BitmaskEnum"); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
-  if err := oprot.WriteFieldStop(); err != nil {
-    return thrift.PrependError("write field stop error: ", err) }
-  if err := oprot.WriteStructEnd(); err != nil {
-    return thrift.PrependError("write struct stop error: ", err) }
-  return nil
-}
-
-func (p *BitmaskEnum) String() string {
-  if p == nil {
-    return "<nil>"
-  }
-
-  return fmt.Sprintf("BitmaskEnum({})")
 }
 
 // Generates a const of type schema. Struct containing the schema of the

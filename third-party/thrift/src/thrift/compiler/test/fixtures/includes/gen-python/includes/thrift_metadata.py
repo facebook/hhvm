@@ -22,7 +22,7 @@ def _fbthrift_gen_metadata_struct_Included(metadata_struct: _fbthrift_metadata.T
     fields = [
         _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I64_TYPE), name="MyIntField", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="includes.Foo")), name="MyTransitiveField", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="transitive.Foo")), name="MyTransitiveField", is_optional=False, structured_annotations=[
         ]),
     ]
     struct_dict = dict(metadata_struct.structs)

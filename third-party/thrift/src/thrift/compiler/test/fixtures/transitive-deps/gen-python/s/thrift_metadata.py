@@ -27,7 +27,7 @@ def _fbthrift_gen_metadata_service_TestService(metadata_struct: _fbthrift_metada
     functions = [
         _fbthrift_metadata.ThriftFunction(name="test", return_type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_VOID_TYPE), arguments=[
         ], exceptions = [
-            _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="s.E")), name="ex", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="c.E")), name="ex", is_optional=False, structured_annotations=[
             ]),
         ], is_oneway=False, structured_annotations=[
         ]),

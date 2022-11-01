@@ -20,9 +20,9 @@ def _fbthrift_gen_metadata_struct_MyStruct(metadata_struct: _fbthrift_metadata.T
     if qualified_name in metadata_struct.structs:
         return metadata_struct
     fields = [
-        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.Included")), name="MyIncludedField", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="includes.Included")), name="MyIncludedField", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.Included")), name="MyOtherIncludedField", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="includes.Included")), name="MyOtherIncludedField", is_optional=False, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=3, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I64_TYPE), name="MyIncludedInt", is_optional=False, structured_annotations=[
         ]),

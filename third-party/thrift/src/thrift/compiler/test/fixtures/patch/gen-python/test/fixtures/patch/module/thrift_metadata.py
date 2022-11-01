@@ -139,9 +139,9 @@ def _fbthrift_gen_metadata_struct_MyStruct(metadata_struct: _fbthrift_metadata.T
         ]),
         _fbthrift_metadata.ThriftField(id=-16, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BOOL_TYPE), name="optBoolVal", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-15, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.TimeStruct")), name="timeVal", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-15, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="standard.TimeStruct")), name="timeVal", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-14, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.DurationStruct")), name="durationVal", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-14, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="standard.DurationStruct")), name="durationVal", is_optional=False, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=-13, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.LateDefStruct")), name="lateStructVal", is_optional=False, structured_annotations=[
         ]),
@@ -324,9 +324,9 @@ def _fbthrift_gen_metadata_struct_MyDataFieldPatch(metadata_struct: _fbthrift_me
     if qualified_name in metadata_struct.structs:
         return metadata_struct
     fields = [
-        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.StringPatch")), name="data1", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.StringPatch")), name="data1", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.I32Patch")), name="data2", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.I32Patch")), name="data2", is_optional=False, structured_annotations=[
         ]),
     ]
     struct_dict = dict(metadata_struct.structs)
@@ -389,7 +389,7 @@ def _fbthrift_gen_metadata_struct_InnerUnionFieldPatch(metadata_struct: _fbthrif
     if qualified_name in metadata_struct.structs:
         return metadata_struct
     fields = [
-        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.BinaryPatch")), name="innerOption", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.BinaryPatch")), name="innerOption", is_optional=False, structured_annotations=[
         ]),
     ]
     struct_dict = dict(metadata_struct.structs)
@@ -451,9 +451,9 @@ def _fbthrift_gen_metadata_struct_MyUnionFieldPatch(metadata_struct: _fbthrift_m
     if qualified_name in metadata_struct.structs:
         return metadata_struct
     fields = [
-        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.StringPatch")), name="option1", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.StringPatch")), name="option1", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.I32Patch")), name="option2", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.I32Patch")), name="option2", is_optional=False, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=3, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.InnerUnionPatch")), name="option3", is_optional=False, structured_annotations=[
         ]),
@@ -579,7 +579,7 @@ def _fbthrift_gen_metadata_struct_MyStructField28Patch(metadata_struct: _fbthrif
         ]),
         _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BOOL_TYPE), name="clear", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=3, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE),valueType=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.I16Patch")))), name="patch", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=3, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE),valueType=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.I16Patch")))), name="patch", is_optional=False, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=7, type=_fbthrift_metadata.ThriftType(t_list=_fbthrift_metadata.ThriftListType(valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I16_TYPE))), name="remove", is_optional=False, structured_annotations=[
         ]),
@@ -654,11 +654,11 @@ def _fbthrift_gen_metadata_struct_MyStructField30Patch(metadata_struct: _fbthrif
         ]),
         _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BOOL_TYPE), name="clear", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=3, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE),valueType=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.StringPatch")))), name="patchPrior", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=3, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE),valueType=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.StringPatch")))), name="patchPrior", is_optional=False, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=5, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE),valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE))), name="add", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=6, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE),valueType=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.StringPatch")))), name="patch", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=6, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE),valueType=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.StringPatch")))), name="patch", is_optional=False, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=7, type=_fbthrift_metadata.ThriftType(t_set=_fbthrift_metadata.ThriftSetType(valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE))), name="remove", is_optional=False, structured_annotations=[
         ]),
@@ -747,11 +747,11 @@ def _fbthrift_gen_metadata_struct_MyStructField31Patch1(metadata_struct: _fbthri
         ]),
         _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BOOL_TYPE), name="clear", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=3, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE),valueType=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.I32Patch")))), name="patchPrior", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=3, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE),valueType=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.I32Patch")))), name="patchPrior", is_optional=False, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=5, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE),valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE))), name="add", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=6, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE),valueType=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.I32Patch")))), name="patch", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=6, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE),valueType=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.I32Patch")))), name="patch", is_optional=False, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=7, type=_fbthrift_metadata.ThriftType(t_set=_fbthrift_metadata.ThriftSetType(valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE))), name="remove", is_optional=False, structured_annotations=[
         ]),
@@ -846,11 +846,11 @@ def _fbthrift_gen_metadata_struct_MyStructField32Patch1(metadata_struct: _fbthri
         ]),
         _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BOOL_TYPE), name="clear", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=3, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE),valueType=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.I32Patch")))), name="patchPrior", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=3, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE),valueType=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.I32Patch")))), name="patchPrior", is_optional=False, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=5, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE),valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE))), name="add", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=6, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE),valueType=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.I32Patch")))), name="patch", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=6, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE),valueType=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.I32Patch")))), name="patch", is_optional=False, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=7, type=_fbthrift_metadata.ThriftType(t_set=_fbthrift_metadata.ThriftSetType(valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE))), name="remove", is_optional=False, structured_annotations=[
         ]),
@@ -906,27 +906,27 @@ def _fbthrift_gen_metadata_struct_MyStructFieldPatch(metadata_struct: _fbthrift_
         ]),
         _fbthrift_metadata.ThriftField(id=-25, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.MyStructField25Patch")), name="optEnumVal", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-24, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.BinaryPatch")), name="optBinaryVal", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-24, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.BinaryPatch")), name="optBinaryVal", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-23, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.StringPatch")), name="optStringVal", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-23, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.StringPatch")), name="optStringVal", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-22, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.DoublePatch")), name="optDoubleVal", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-22, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.DoublePatch")), name="optDoubleVal", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-21, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.FloatPatch")), name="optFloatVal", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-21, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.FloatPatch")), name="optFloatVal", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-20, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.I64Patch")), name="optI64Val", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-20, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.I64Patch")), name="optI64Val", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-19, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.I32Patch")), name="optI32Val", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-19, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.I32Patch")), name="optI32Val", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-18, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.I16Patch")), name="optI16Val", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-18, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.I16Patch")), name="optI16Val", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-17, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.BytePatch")), name="optByteVal", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-17, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.BytePatch")), name="optByteVal", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-16, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.BoolPatch")), name="optBoolVal", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-16, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.BoolPatch")), name="optBoolVal", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-15, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.TimePatch")), name="timeVal", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-15, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.TimePatch")), name="timeVal", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-14, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.DurationPatch")), name="durationVal", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-14, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.DurationPatch")), name="durationVal", is_optional=False, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftField(id=-13, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.LateDefStructPatch")), name="lateStructVal", is_optional=False, structured_annotations=[
         ]),
@@ -936,23 +936,23 @@ def _fbthrift_gen_metadata_struct_MyStructFieldPatch(metadata_struct: _fbthrift_
         ]),
         _fbthrift_metadata.ThriftField(id=-10, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.MyStructField10Patch")), name="enumVal", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-9, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.BinaryPatch")), name="binaryVal", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-9, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.BinaryPatch")), name="binaryVal", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-8, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.StringPatch")), name="stringVal", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-8, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.StringPatch")), name="stringVal", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-7, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.DoublePatch")), name="doubleVal", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-7, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.DoublePatch")), name="doubleVal", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-6, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.FloatPatch")), name="floatVal", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-6, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.FloatPatch")), name="floatVal", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-5, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.I64Patch")), name="i64Val", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-5, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.I64Patch")), name="i64Val", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-4, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.I32Patch")), name="i32Val", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-4, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.I32Patch")), name="i32Val", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-3, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.I16Patch")), name="i16Val", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-3, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.I16Patch")), name="i16Val", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-2, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.BytePatch")), name="byteVal", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-2, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.BytePatch")), name="byteVal", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=-1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.BoolPatch")), name="boolVal", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=-1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.BoolPatch")), name="boolVal", is_optional=False, structured_annotations=[
         ]),
     ]
     struct_dict = dict(metadata_struct.structs)

@@ -28,17 +28,17 @@ def _fbthrift_gen_metadata_service_MyService(metadata_struct: _fbthrift_metadata
     
     functions = [
         _fbthrift_metadata.ThriftFunction(name="query", return_type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_VOID_TYPE), arguments=[
-            _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="service.MyStruct")), name="s", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.MyStruct")), name="s", is_optional=False, structured_annotations=[
             ]),
-            _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="service.Included")), name="i", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="includes.Included")), name="i", is_optional=False, structured_annotations=[
             ]),
         ], exceptions = [
         ], is_oneway=False, structured_annotations=[
         ]),
         _fbthrift_metadata.ThriftFunction(name="has_arg_docs", return_type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_VOID_TYPE), arguments=[
-            _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="service.MyStruct")), name="s", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.MyStruct")), name="s", is_optional=False, structured_annotations=[
             ]),
-            _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="service.Included")), name="i", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="includes.Included")), name="i", is_optional=False, structured_annotations=[
             ]),
         ], exceptions = [
         ], is_oneway=False, structured_annotations=[

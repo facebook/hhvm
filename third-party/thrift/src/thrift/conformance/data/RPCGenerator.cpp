@@ -580,6 +580,51 @@ Test createStreamUndeclaredExceptionTest() {
   return ret;
 }
 
+Test createStreamInitialDeclaredExceptionTest() {
+  Test ret;
+  ret.name() = "StreamInitialDeclaredExceptionTest";
+  ret.tags()->emplace("spec/protocol/interface/#stream-initial-response");
+  ret.tags()->emplace("spec/protocol/interface/rocket#stream-initial-response");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "StreamInitialDeclaredException/Success";
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  rpcTest.clientInstruction()
+      .emplace()
+      .streamInitialDeclaredException_ref()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  rpcTest.serverInstruction()
+      .emplace()
+      .streamInitialDeclaredException_ref()
+      .emplace()
+      .userException()
+      .emplace()
+      .msg() = "world";
+
+  rpcTest.clientTestResult()
+      .emplace()
+      .streamInitialDeclaredException_ref()
+      .emplace()
+      .userException()
+      .emplace()
+      .msg() = "world";
+
+  rpcTest.serverTestResult()
+      .emplace()
+      .streamInitialDeclaredException_ref()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  return ret;
+}
+
 // =================== Sink ===================
 Test createSinkBasicTest() {
   Test ret;
@@ -943,6 +988,7 @@ void addCommonRPCTests(TestSuite& suite) {
   suite.tests()->push_back(createStreamSubsequentCreditsTest());
   suite.tests()->push_back(createStreamDeclaredExceptionTest());
   suite.tests()->push_back(createStreamUndeclaredExceptionTest());
+  suite.tests()->push_back(createStreamInitialDeclaredExceptionTest());
   // =================== Sink ===================
   suite.tests()->push_back(createSinkBasicTest());
   suite.tests()->push_back(createSinkFragmentationTest());

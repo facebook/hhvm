@@ -56,6 +56,7 @@ union ServerTestResult {
   103: StreamCreditTimeoutServerTestResult streamCreditTimeout;
   104: StreamDeclaredExceptionServerTestResult streamDeclaredException;
   105: StreamUndeclaredExceptionServerTestResult streamUndeclaredException;
+  106: StreamInitialDeclaredExceptionServerTestResult streamInitialDeclaredException;
   200: SinkBasicServerTestResult sinkBasic;
   201: SinkChunkTimeoutServerTestResult sinkChunkTimeout;
   300: InteractionConstructorServerTestResult interactionConstructor;
@@ -76,6 +77,7 @@ union ClientTestResult {
   103: StreamCreditTimeoutClientTestResult streamCreditTimeout;
   104: StreamDeclaredExceptionClientTestResult streamDeclaredException;
   105: StreamUndeclaredExceptionClientTestResult streamUndeclaredException;
+  106: StreamInitialDeclaredExceptionClientTestResult streamInitialDeclaredException;
   200: SinkBasicClientTestResult sinkBasic;
   201: SinkChunkTimeoutClientTestResult sinkChunkTimeout;
   300: InteractionConstructorClientTestResult interactionConstructor;
@@ -123,6 +125,10 @@ struct StreamDeclaredExceptionServerTestResult {
 }
 
 struct StreamUndeclaredExceptionServerTestResult {
+  1: Request request;
+}
+
+struct StreamInitialDeclaredExceptionServerTestResult {
   1: Request request;
 }
 
@@ -199,6 +205,12 @@ struct StreamUndeclaredExceptionClientTestResult {
   1: string exceptionMessage;
 }
 
+struct StreamInitialDeclaredExceptionClientTestResult {
+  // TODO(dokwon): Remove @thrift.Box after fixing incomplete type bug.
+  @thrift.Box
+  1: optional UserException userException;
+}
+
 struct SinkBasicClientTestResult {
   1: Response finalResponse;
 }
@@ -229,6 +241,7 @@ union ClientInstruction {
   103: StreamCreditTimeoutClientInstruction streamCreditTimeout;
   104: StreamDeclaredExceptionClientInstruction streamDeclaredException;
   105: StreamUndeclaredExceptionClientInstruction streamUndeclaredException;
+  106: StreamInitialDeclaredExceptionClientInstruction streamInitialDeclaredException;
   200: SinkBasicClientInstruction sinkBasic;
   201: SinkChunkTimeoutClientInstruction sinkChunkTimeout;
   300: InteractionConstructorClientInstruction interactionConstructor;
@@ -249,6 +262,7 @@ union ServerInstruction {
   103: StreamCreditTimeoutServerInstruction streamCreditTimeout;
   104: StreamDeclaredExceptionServerInstruction streamDeclaredException;
   105: StreamUndeclaredExceptionServerInstruction streamUndeclaredException;
+  106: StreamInitialDeclaredExceptionServerInstruction streamInitialDeclaredException;
   200: SinkBasicServerInstruction sinkBasic;
   201: SinkChunkTimeoutServerInstruction sinkChunkTimeout;
   300: InteractionConstructorServerInstruction interactionConstructor;
@@ -300,6 +314,10 @@ struct StreamDeclaredExceptionClientInstruction {
 }
 
 struct StreamUndeclaredExceptionClientInstruction {
+  1: Request request;
+}
+
+struct StreamInitialDeclaredExceptionClientInstruction {
   1: Request request;
 }
 
@@ -378,6 +396,12 @@ struct StreamUndeclaredExceptionServerInstruction {
   1: string exceptionMessage;
 }
 
+struct StreamInitialDeclaredExceptionServerInstruction {
+  // TODO(dokwon): Remove @thrift.Box after fixing incomplete type bug.
+  @thrift.Box
+  1: optional UserException userException;
+}
+
 struct SinkBasicServerInstruction {
   1: Response finalResponse;
   2: i64 bufferSize;
@@ -429,6 +453,9 @@ service RPCConformanceService {
     1: Request req,
   );
   stream<Response> streamUndeclaredException(1: Request req);
+  stream<Response> streamInitialDeclaredException(1: Request req) throws (
+    1: UserException e,
+  );
 
   // =================== Sink ===================
   sink<Request, Response> sinkBasic(1: Request req);

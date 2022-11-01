@@ -164,6 +164,15 @@ class ConformanceVerificationServer
     co_return;
   }
 
+  apache::thrift::ServerStream<Response> streamInitialDeclaredException(
+      std::unique_ptr<Request> req) override {
+    serverResult_.streamInitialDeclaredException_ref().emplace().request() =
+        *req;
+    throw *testCase_.serverInstruction()
+        ->streamInitialDeclaredException_ref()
+        ->userException();
+  }
+
   // =================== Sink ===================
   apache::thrift::SinkConsumer<Request, Response> sinkBasic(
       std::unique_ptr<Request> req) override {

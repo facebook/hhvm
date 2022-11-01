@@ -270,6 +270,21 @@ StreamUndeclaredExceptionClientTestResult runStreamUndeclaredException(
   return testResult;
 }
 
+StreamInitialDeclaredExceptionClientTestResult
+runStreamInitialDeclaredException(
+    RPCConformanceServiceAsyncClient& client,
+    const StreamInitialDeclaredExceptionClientInstruction& instruction) {
+  StreamInitialDeclaredExceptionClientTestResult testResult;
+  folly::coro::blockingWait([&]() -> folly::coro::Task<void> {
+    try {
+      co_await client.co_streamInitialDeclaredException(*instruction.request());
+    } catch (const UserException& e) {
+      testResult.userException() = e;
+    }
+  }());
+  return testResult;
+}
+
 // =================== Sink ===================
 SinkBasicClientTestResult runSinkBasic(
     RPCConformanceServiceAsyncClient& client,
@@ -414,6 +429,11 @@ ClientTestResult runClientSteps(
     case ClientInstruction::Type::streamUndeclaredException:
       result.streamUndeclaredException_ref() = runStreamUndeclaredException(
           client, *clientInstruction.streamUndeclaredException_ref());
+      break;
+    case ClientInstruction::Type::streamInitialDeclaredException:
+      result.streamInitialDeclaredException_ref() =
+          runStreamInitialDeclaredException(
+              client, *clientInstruction.streamInitialDeclaredException_ref());
       break;
     case ClientInstruction::Type::sinkBasic:
       result.sinkBasic_ref() =

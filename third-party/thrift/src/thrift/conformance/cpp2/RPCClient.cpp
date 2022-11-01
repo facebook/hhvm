@@ -242,6 +242,24 @@ StreamUndeclaredExceptionClientTestResult streamUndeclaredExceptionTest(
       }());
 }
 
+StreamInitialDeclaredExceptionClientTestResult
+streamInitialDeclaredExceptionTest(
+    StreamInitialDeclaredExceptionClientInstruction& instruction) {
+  auto client = createClient();
+  return folly::coro::blockingWait(
+      [&]()
+          -> folly::coro::Task<StreamInitialDeclaredExceptionClientTestResult> {
+        StreamInitialDeclaredExceptionClientTestResult result;
+        try {
+          co_await client->co_streamInitialDeclaredException(
+              *instruction.request());
+        } catch (const UserException& e) {
+          result.userException() = e;
+        }
+        co_return result;
+      }());
+}
+
 // =================== Sink ===================
 SinkBasicClientTestResult sinkBasicTest(
     SinkBasicClientInstruction& instruction) {
@@ -365,6 +383,11 @@ int main(int argc, char** argv) {
     case ClientInstruction::Type::streamUndeclaredException:
       result.streamUndeclaredException_ref() = streamUndeclaredExceptionTest(
           *clientInstruction.streamUndeclaredException_ref());
+      break;
+    case ClientInstruction::Type::streamInitialDeclaredException:
+      result.streamInitialDeclaredException_ref() =
+          streamInitialDeclaredExceptionTest(
+              *clientInstruction.streamInitialDeclaredException_ref());
       break;
     case ClientInstruction::Type::sinkBasic:
       result.sinkBasic_ref() =

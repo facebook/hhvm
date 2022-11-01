@@ -2222,6 +2222,8 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, Variant& sealed_data,
                                     Variant& iv) {
 
 // RC4 is only available in legacy providers
+// Note that we must not put `OSSL_PROVIDER_load` in `OpenSSLInitializer`
+// because it cannot be executed before `main` function.
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
   static auto legacy_provider = OSSL_PROVIDER_load(nullptr, "legacy");
 #endif

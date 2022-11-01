@@ -1932,7 +1932,7 @@ let file_attribute ctx mode fa =
 
 let file_attributes ctx mode fal = List.map ~f:(file_attribute ctx mode) fal
 
-let fun_def ctx fd =
+let fun_def_help ctx genv fd =
   let fd =
     if
       Provider_context.get_tcopt ctx |> TypecheckerOptions.substitution_mutation
@@ -1940,12 +1940,6 @@ let fun_def ctx fd =
     then
       Substitution_mutation.mutate_fun_def fd
     else
-      fd
-  in
-  let genv = Env.make_fun_decl_genv ctx fd in
-  let fd =
-    elaborate_namespaces#on_fun_def
-      (Naming_elaborate_namespaces_endo.make_env genv.namespace)
       fd
   in
   let fd = Naming_captures.populate_fun_def fd in
@@ -1965,6 +1959,13 @@ let fun_def ctx fd =
     }
   in
   named_fun_def
+
+let fun_def ctx fd =
+  let genv = Env.make_fun_decl_genv ctx fd in
+  fun_def_help ctx genv
+  @@ elaborate_namespaces#on_fun_def
+       (Naming_elaborate_namespaces_endo.make_env genv.namespace)
+       fd
 
 (**************************************************************************)
 (* Classes *)
@@ -2309,13 +2310,7 @@ let enum_ env enum_name ~in_enum_class ~abstract_enum_class e =
   in
   (Some bound, Some enum)
 
-let class_ ctx c =
-  let env = Env.make_class_env ctx c in
-  let c =
-    elaborate_namespaces#on_class_
-      (Naming_elaborate_namespaces_endo.make_env env.namespace)
-      c
-  in
+let class_help ctx env c =
   let c = Naming_captures.populate_class_ c in
   let where_constraints =
     type_where_constraints env c.Aast.c_where_constraints
@@ -2491,17 +2486,18 @@ let class_ ctx c =
     N.c_docs_url = c.Aast.c_docs_url;
   }
 
+let class_ ctx c =
+  let env = Env.make_class_env ctx c in
+  class_help ctx env
+  @@ elaborate_namespaces#on_class_
+       (Naming_elaborate_namespaces_endo.make_env env.namespace)
+       c
+
 (**************************************************************************)
 (* Typedefs *)
 (**************************************************************************)
 
-let typedef ctx tdef =
-  let env = Env.make_typedef_env ctx tdef in
-  let tdef =
-    elaborate_namespaces#on_typedef
-      (Naming_elaborate_namespaces_endo.make_env env.namespace)
-      tdef
-  in
+let typedef_help ctx env tdef =
   let t_as_constraint = Option.map tdef.Aast.t_as_constraint ~f:(hint env) in
   let t_super_constraint =
     Option.map tdef.Aast.t_super_constraint ~f:(hint env)
@@ -2529,17 +2525,18 @@ let typedef ctx tdef =
     t_docs_url = tdef.Aast.t_docs_url;
   }
 
+let typedef ctx tdef =
+  let env = Env.make_typedef_env ctx tdef in
+  typedef_help ctx env
+  @@ elaborate_namespaces#on_typedef
+       (Naming_elaborate_namespaces_endo.make_env env.namespace)
+       tdef
+
 (**************************************************************************)
 (* Global constants *)
 (**************************************************************************)
 
-let global_const ctx cst =
-  let env = Env.make_const_env ctx cst in
-  let cst =
-    elaborate_namespaces#on_gconst
-      (Naming_elaborate_namespaces_endo.make_env env.namespace)
-      cst
-  in
+let global_const_help env cst =
   let hint = Option.map cst.Aast.cst_type ~f:(hint env) in
   let e = constant_expr env ~in_enum_class:false cst.Aast.cst_value in
   {
@@ -2553,11 +2550,18 @@ let global_const ctx cst =
     cst_emit_id = cst.Aast.cst_emit_id;
   }
 
+let global_const ctx cst =
+  let env = Env.make_const_env ctx cst in
+  global_const_help env
+  @@ elaborate_namespaces#on_gconst
+       (Naming_elaborate_namespaces_endo.make_env env.namespace)
+       cst
+
 (**************************************************************************)
 (* Module declarations *)
 (**************************************************************************)
 
-let module_ ctx module_ =
+let module_help ctx env module_ =
   let tcopts = Provider_context.get_tcopt ctx in
   let allowed_files =
     TypecheckerOptions.allowed_files_for_module_declarations tcopts
@@ -2566,12 +2570,6 @@ let module_ ctx module_ =
     TypecheckerOptions.allow_all_files_for_module_declarations tcopts
   in
   let open Aast in
-  let env = Env.make_module_env ctx module_ in
-  let module_ =
-    elaborate_namespaces#on_module_def
-      (Naming_elaborate_namespaces_endo.make_env env.namespace)
-      module_
-  in
   let module_file = Relative_path.suffix @@ Pos.filename module_.md_span in
   if
     (not allow_all_files)
@@ -2597,6 +2595,13 @@ let module_ ctx module_ =
     md_user_attributes = user_attributes env module_.md_user_attributes;
   }
 
+let module_ ctx module_ =
+  let env = Env.make_module_env ctx module_ in
+  module_help ctx env
+  @@ elaborate_namespaces#on_module_def
+       (Naming_elaborate_namespaces_endo.make_env env.namespace)
+       module_
+
 (**************************************************************************)
 (* The entry point to CHECK the program, and transform the program *)
 (**************************************************************************)
@@ -2611,14 +2616,22 @@ let program ctx ast =
   let top_level_env = ref (Env.make_top_level_env ctx) in
   let rec aux acc def =
     match def with
-    | Aast.Fun f -> N.Fun (fun_def ctx f) :: acc
-    | Aast.Class c -> N.Class (class_ ctx c) :: acc
+    | Aast.Fun f ->
+      let genv = Env.make_fun_decl_genv ctx f in
+      N.Fun (fun_def_help ctx genv f) :: acc
+    | Aast.Class c ->
+      let env = Env.make_class_env ctx c in
+      N.Class (class_help ctx env c) :: acc
     | Aast.Stmt (_, Aast.Noop)
     | Aast.Stmt (_, Aast.Markup _) ->
       acc
     | Aast.Stmt s -> N.Stmt (stmt !top_level_env s) :: acc
-    | Aast.Typedef t -> N.Typedef (typedef ctx t) :: acc
-    | Aast.Constant cst -> N.Constant (global_const ctx cst) :: acc
+    | Aast.Typedef t ->
+      let env = Env.make_typedef_env ctx t in
+      N.Typedef (typedef_help ctx env t) :: acc
+    | Aast.Constant cst ->
+      let env = Env.make_const_env ctx cst in
+      N.Constant (global_const_help env cst) :: acc
     | Aast.Namespace (_ns, aast) -> List.fold_left ~f:aux ~init:[] aast @ acc
     | Aast.NamespaceUse _ -> acc
     | Aast.SetNamespaceEnv nsenv ->
@@ -2626,7 +2639,9 @@ let program ctx ast =
       let genv = { genv with namespace = nsenv } in
       top_level_env := genv;
       acc
-    | Aast.Module md -> N.Module (module_ ctx md) :: acc
+    | Aast.Module md ->
+      let env = Env.make_module_env ctx md in
+      N.Module (module_help ctx env md) :: acc
     | Aast.SetModule sm -> N.SetModule sm :: acc
     (* These are elaborated away in Namespaces.elaborate_toplevel_defs *)
     | Aast.FileAttributes _ -> acc

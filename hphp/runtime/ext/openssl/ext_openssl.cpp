@@ -69,14 +69,6 @@ struct OpenSSLInitializer {
     ERR_load_crypto_strings();
     ERR_load_EVP_strings();
 
-// RC4 is only available in legacy providers
-#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
-	  auto legacy_provider = OSSL_PROVIDER_load(nullptr, "legacy");
-    if (!legacy_provider) {
-      raise_warning("Cannot load legacy OpenSSL providers");
-    }
-#endif
-
     /* Determine default SSL configuration file */
     char *config_filename = getenv("OPENSSL_CONF");
     if (config_filename == nullptr) {
@@ -2228,6 +2220,12 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, Variant& sealed_data,
                                     const Array& pub_key_ids,
                                     const String& method,
                                     Variant& iv) {
+
+// RC4 is only available in legacy providers
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+  static auto legacy_provider = OSSL_PROVIDER_load(nullptr, "legacy");
+#endif
+
   int nkeys = pub_key_ids.size();
   if (nkeys == 0) {
     raise_warning("Fourth argument to openssl_seal() must be "

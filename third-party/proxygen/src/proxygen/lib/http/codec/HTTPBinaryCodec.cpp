@@ -429,11 +429,20 @@ void HTTPBinaryCodec::onIngressEOF() {
         HTTPException(HTTPException::Direction::INGRESS,
                       fmt::format("Invalid Message: {}", *parseError_)));
   } else {
-    // Case where the sent message only contains control data
-    if (!msg_ && state_ == ParseState::HEADERS_SECTION) {
-      msg_ = std::move(decodeInfo_.msg);
+
+    if (!msg_) {
+      if (state_ == ParseState::HEADERS_SECTION) {
+        // Case where the sent message only contains control data
+        msg_ = std::move(decodeInfo_.msg);
+      } else {
+        callback_->onError(
+            ingressTxnID_,
+            HTTPException(
+                HTTPException::Direction::INGRESS,
+                fmt::format("Message not formed (incomplete binary data)")));
+        return;
+      }
     }
-    CHECK(msg_);
     callback_->onHeadersComplete(ingressTxnID_, std::move(msg_));
     if (msgBody_) {
       callback_->onBody(ingressTxnID_, std::move(msgBody_), 0);

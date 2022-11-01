@@ -20,8 +20,6 @@
 
 namespace apache::thrift {
 
-ConcurrencyControllerInterface::~ConcurrencyControllerInterface() {}
-
 void ConcurrencyControllerInterface::onRequestFinished(ServerRequestData&) {
   LOG(FATAL) << "Unimplemented onRequestFinished called";
 }

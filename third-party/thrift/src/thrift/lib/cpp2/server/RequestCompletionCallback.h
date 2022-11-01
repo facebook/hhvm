@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-#include <folly/GLog.h>
-
-#include <thrift/lib/cpp2/server/RequestPileInterface.h>
+#pragma once
 
 namespace apache::thrift {
 
-void RequestPileInterface::onRequestFinished(ServerRequestData&) {
-  LOG(FATAL) << "Unimplemented onRequestFinished called";
-}
+struct ServerRequestData;
 
-std::string RequestPileInterface::describe() const {
-  return typeid(*this).name();
-}
+// A common interface for completion for server requests
+// All the components that will invoke callbacks during request
+// destruction should inherit from this class
+class RequestCompletionCallback {
+ public:
+  virtual ~RequestCompletionCallback() {}
+
+  virtual void onRequestFinished(ServerRequestData&) = 0;
+};
 
 } // namespace apache::thrift

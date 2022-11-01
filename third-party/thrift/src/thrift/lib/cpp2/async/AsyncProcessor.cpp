@@ -624,8 +624,8 @@ HandlerCallback<void>::HandlerCallback(
     folly::EventBase* eb,
     folly::Executor::KeepAlive<> executor,
     Cpp2RequestContext* reqCtx,
-    RequestPileInterface* notifyRequestPile,
-    ConcurrencyControllerInterface* notifyConcurrencyController,
+    RequestCompletionCallback* notifyRequestPile,
+    RequestCompletionCallback* notifyConcurrencyController,
     ServerRequestData requestData,
     TilePtr&& interaction)
     : HandlerCallbackBase(

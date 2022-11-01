@@ -50,7 +50,7 @@ The Thrift server should then perform the method specified in the RequestRpcMeta
 Field | Notes
 :---: | :---:
 Metadata | Compact Protocol serialized [`ResponseRpcMetadata`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/RpcMetadata.thrift) struct
-Data | Thrift serialized result from [Interface Protocol](index.md#response)
+Data | Thrift serialized result from [Interface Protocol](index.md#response) using the serialization protocol specified in [`RequestRpcMetadata`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/RpcMetadata.thrift) struct
 
 ### Declared Exception
 
@@ -96,7 +96,12 @@ Data | Thrift serialized arguments from [Interface Protocol](index.md#request)
 
 ### Stream Initial Response
 
-The initial response for a stream is distinct from [streaming responses](#stream-responses) and it must be sent from the server even if there is no initial response type specified in the IDL. The initial response should be sent using the same format as a regular [Request-Response response](#request-response) with the distinction that the Complete flag must only be set if the payload contains an exception.
+The initial response for a stream is distinct from [streaming responses](#stream-responses) and it must be sent from the server even if there is no initial response type specified in the IDL. The initial response is a [PAYLOAD](https://rsocket.io/about/protocol/#payload-frame-0x0a) frame with the following format:
+
+Field | Notes
+:---: | :---:
+Metadata | Compact Protocol serialized [`ResponseRpcMetadata`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/RpcMetadata.thrift) struct
+Data | Thrift serialized result from [Interface Protocol/Stream Initial Response](index.md#stream-initial-response) using the serialization protocol specified in [`RequestRpcMetadata`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/RpcMetadata.thrift) struct
 
 ### Stream Responses
 
@@ -105,7 +110,7 @@ Once a stream has been established, the server can send stream payloads to the c
 Field | Notes
 :---: | :---:
 Metadata | Compact Protocol serialized [`StreamPayloadMetadata`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/RpcMetadata.thrift) struct
-Data | Thrift serialized result from [Interface Protocol](index.md#response) using the serialization protocol specified in [`RequestRpcMetadata`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/RpcMetadata.thrift) struct
+Data | Thrift serialized result from [Interface Protocol/Stream Payloads](index.md#stream-payloads) using the serialization protocol specified in [`RequestRpcMetadata`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/RpcMetadata.thrift) struct
 
 ### Stream Exception
 
@@ -133,7 +138,12 @@ Data | Thrift serialized arguments from [Interface Protocol](index.md#request)
 
 ### Sink Initial Response
 
-The initial response must be sent from the server even if there is no initial response type specified in the IDL. The initial response should be sent using the same format as a regular [Request-Response response](#request-response) with the distinction that the Complete flag must only be set if the payload contains an exception.
+The initial response must be sent from the server even if there is no initial response type specified in the IDL. The initial response is a [PAYLOAD](https://rsocket.io/about/protocol/#payload-frame-0x0a) frame with the following format:
+
+Field | Notes
+:---: | :---:
+Metadata | Compact Protocol serialized [`ResponseRpcMetadata`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/RpcMetadata.thrift) struct
+Data | Thrift serialized result from [Interface Protocol/Sink Initial Response](index.md#sink-initial-response) using the serialization protocol specified in [`RequestRpcMetadata`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/RpcMetadata.thrift) struct
 
 ### Sink Payloads
 
@@ -142,7 +152,7 @@ Once a sink has been established, the client can send sink payloads to the serve
 Field | Notes
 :---: | :---:
 Metadata | Compact Protocol serialized [`StreamPayloadMetadata`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/RpcMetadata.thrift) struct
-Data | Thrift serialized result from [Interface Protocol](index.md#response) using the serialization protocol specified in [`RequestRpcMetadata`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/RpcMetadata.thrift) struct
+Data | Thrift serialized result from [Interface Protocol/Sink Payloads](index.md#sink-payloads) using the serialization protocol specified in [`RequestRpcMetadata`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/RpcMetadata.thrift) struct
 
 ### Sink Exception
 

@@ -173,6 +173,15 @@ class ConformanceVerificationServer
         ->userException();
   }
 
+  apache::thrift::ServerStream<Response> streamInitialUndeclaredException(
+      std::unique_ptr<Request> req) override {
+    serverResult_.streamInitialUndeclaredException_ref().emplace().request() =
+        *req;
+    throw std::runtime_error(*testCase_.serverInstruction()
+                                  ->streamInitialUndeclaredException_ref()
+                                  ->exceptionMessage());
+  }
+
   // =================== Sink ===================
   apache::thrift::SinkConsumer<Request, Response> sinkBasic(
       std::unique_ptr<Request> req) override {

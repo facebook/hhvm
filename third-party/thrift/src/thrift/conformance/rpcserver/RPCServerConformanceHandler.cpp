@@ -112,6 +112,15 @@ RPCServerConformanceHandler::streamInitialDeclaredException(
       ->userException();
 }
 
+apache::thrift::ServerStream<Response>
+RPCServerConformanceHandler::streamInitialUndeclaredException(
+    std::unique_ptr<Request> req) {
+  result_.streamInitialUndeclaredException_ref().emplace().request() = *req;
+  throw std::runtime_error(*testCase_->serverInstruction()
+                                ->streamInitialUndeclaredException_ref()
+                                ->exceptionMessage());
+}
+
 // =================== Sink ===================
 apache::thrift::SinkConsumer<Request, Response>
 RPCServerConformanceHandler::sinkBasic(std::unique_ptr<Request> req) {

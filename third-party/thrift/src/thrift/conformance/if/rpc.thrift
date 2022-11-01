@@ -57,6 +57,7 @@ union ServerTestResult {
   104: StreamDeclaredExceptionServerTestResult streamDeclaredException;
   105: StreamUndeclaredExceptionServerTestResult streamUndeclaredException;
   106: StreamInitialDeclaredExceptionServerTestResult streamInitialDeclaredException;
+  107: StreamInitialUndeclaredExceptionServerTestResult streamInitialUndeclaredException;
   200: SinkBasicServerTestResult sinkBasic;
   201: SinkChunkTimeoutServerTestResult sinkChunkTimeout;
   300: InteractionConstructorServerTestResult interactionConstructor;
@@ -78,6 +79,7 @@ union ClientTestResult {
   104: StreamDeclaredExceptionClientTestResult streamDeclaredException;
   105: StreamUndeclaredExceptionClientTestResult streamUndeclaredException;
   106: StreamInitialDeclaredExceptionClientTestResult streamInitialDeclaredException;
+  107: StreamInitialUndeclaredExceptionClientTestResult streamInitialUndeclaredException;
   200: SinkBasicClientTestResult sinkBasic;
   201: SinkChunkTimeoutClientTestResult sinkChunkTimeout;
   300: InteractionConstructorClientTestResult interactionConstructor;
@@ -129,6 +131,10 @@ struct StreamUndeclaredExceptionServerTestResult {
 }
 
 struct StreamInitialDeclaredExceptionServerTestResult {
+  1: Request request;
+}
+
+struct StreamInitialUndeclaredExceptionServerTestResult {
   1: Request request;
 }
 
@@ -211,6 +217,10 @@ struct StreamInitialDeclaredExceptionClientTestResult {
   1: optional UserException userException;
 }
 
+struct StreamInitialUndeclaredExceptionClientTestResult {
+  1: string exceptionMessage;
+}
+
 struct SinkBasicClientTestResult {
   1: Response finalResponse;
 }
@@ -242,6 +252,7 @@ union ClientInstruction {
   104: StreamDeclaredExceptionClientInstruction streamDeclaredException;
   105: StreamUndeclaredExceptionClientInstruction streamUndeclaredException;
   106: StreamInitialDeclaredExceptionClientInstruction streamInitialDeclaredException;
+  107: StreamInitialUndeclaredExceptionClientInstruction streamInitialUndeclaredException;
   200: SinkBasicClientInstruction sinkBasic;
   201: SinkChunkTimeoutClientInstruction sinkChunkTimeout;
   300: InteractionConstructorClientInstruction interactionConstructor;
@@ -263,6 +274,7 @@ union ServerInstruction {
   104: StreamDeclaredExceptionServerInstruction streamDeclaredException;
   105: StreamUndeclaredExceptionServerInstruction streamUndeclaredException;
   106: StreamInitialDeclaredExceptionServerInstruction streamInitialDeclaredException;
+  107: StreamInitialUndeclaredExceptionServerInstruction streamInitialUndeclaredException;
   200: SinkBasicServerInstruction sinkBasic;
   201: SinkChunkTimeoutServerInstruction sinkChunkTimeout;
   300: InteractionConstructorServerInstruction interactionConstructor;
@@ -318,6 +330,10 @@ struct StreamUndeclaredExceptionClientInstruction {
 }
 
 struct StreamInitialDeclaredExceptionClientInstruction {
+  1: Request request;
+}
+
+struct StreamInitialUndeclaredExceptionClientInstruction {
   1: Request request;
 }
 
@@ -402,6 +418,10 @@ struct StreamInitialDeclaredExceptionServerInstruction {
   1: optional UserException userException;
 }
 
+struct StreamInitialUndeclaredExceptionServerInstruction {
+  1: string exceptionMessage;
+}
+
 struct SinkBasicServerInstruction {
   1: Response finalResponse;
   2: i64 bufferSize;
@@ -456,6 +476,7 @@ service RPCConformanceService {
   stream<Response> streamInitialDeclaredException(1: Request req) throws (
     1: UserException e,
   );
+  stream<Response> streamInitialUndeclaredException(1: Request req);
 
   // =================== Sink ===================
   sink<Request, Response> sinkBasic(1: Request req);

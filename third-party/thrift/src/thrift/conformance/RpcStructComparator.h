@@ -44,6 +44,14 @@ inline bool equal(
       return stringContains(
           *actual.streamUndeclaredException_ref()->exceptionMessage(),
           *expected.streamUndeclaredException_ref()->exceptionMessage());
+    case ClientTestResult::Type::streamInitialUndeclaredException:
+      if (actual.getType() !=
+          ClientTestResult::Type::streamInitialUndeclaredException) {
+        return false;
+      }
+      return stringContains(
+          *actual.streamInitialUndeclaredException_ref()->exceptionMessage(),
+          *expected.streamInitialUndeclaredException_ref()->exceptionMessage());
     default:
       return actual == expected;
   }

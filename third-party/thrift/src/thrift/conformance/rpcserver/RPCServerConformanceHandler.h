@@ -52,6 +52,9 @@ class RPCServerConformanceHandler
   apache::thrift::ServerStream<Response> streamInitialDeclaredException(
       std::unique_ptr<Request> req) override;
 
+  apache::thrift::ServerStream<Response> streamInitialUndeclaredException(
+      std::unique_ptr<Request> req) override;
+
   // =================== Sink ===================
   apache::thrift::SinkConsumer<Request, Response> sinkBasic(
       std::unique_ptr<Request> req) override;

@@ -40,6 +40,8 @@ use hhbc::Param;
 use hhbc::Property;
 use hhbc::Pseudo;
 use hhbc::Requirement;
+use hhbc::Rule;
+use hhbc::RuleKind;
 use hhbc::Span;
 use hhbc::SrcLoc;
 use hhbc::SymbolRefs;
@@ -597,6 +599,46 @@ fn print_class_def<'arena>(
     newline(w)
 }
 
+fn print_rules(w: &mut dyn Write, rules: &Slice<'_, Rule<'_>>) -> Result<()> {
+    let mut first = true;
+
+    for rule in rules.as_ref().iter() {
+        if first {
+            first = false;
+        } else {
+            w.write_all(b" ")?;
+        }
+
+        match rule.kind {
+            RuleKind::Global => {
+                w.write_all(b"global")?;
+            }
+            RuleKind::Prefix => {
+                write_bytes!(w, "prefix({})", rule.name.unwrap())?;
+            }
+            RuleKind::Exact => {
+                write_bytes!(w, "exact({})", rule.name.unwrap())?;
+            }
+        }
+    }
+
+    Ok(())
+}
+
+fn print_named_rules(
+    w: &mut dyn Write,
+    name: &str,
+    rules: Maybe<&Slice<'_, Rule<'_>>>,
+) -> Result<()> {
+    if let Just(v) = rules {
+        newline(w)?;
+        write!(w, ".{} [", name)?;
+        print_rules(w, v)?;
+        w.write_all(b"] ;")?;
+    }
+    Ok(())
+}
+
 fn print_module_def<'arena>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
@@ -615,8 +657,10 @@ fn print_module_def<'arena>(
     w.write_all(b" ")?;
     print_span(w, &module_def.span)?;
     w.write_all(b" {")?;
-    newline(w)?;
     print_doc_comment(ctx, w, module_def.doc_comment.as_ref())?;
+    print_named_rules(w, "exports", module_def.exports.as_ref())?;
+    print_named_rules(w, "imports", module_def.imports.as_ref())?;
+    newline(w)?;
     w.write_all(b"}")?;
     newline(w)
 }

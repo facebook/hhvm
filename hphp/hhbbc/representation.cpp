@@ -200,7 +200,9 @@ template <typename SerDe> void Module::serde(SerDe& sd) {
   sd(name)
     (srcInfo)
     (attrs)
-    (userAttributes);
+    (userAttributes)
+    (exports)
+    (imports);
 }
 
 template <typename SerDe> void TypeAlias::serde(SerDe& sd) {

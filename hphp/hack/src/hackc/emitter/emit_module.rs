@@ -9,10 +9,29 @@ use ffi::Slice;
 use ffi::Str;
 use hhbc::ClassName;
 use hhbc::Module;
+use hhbc::Rule;
+use hhbc::RuleKind;
 use hhbc::Span;
 use oxidized::ast;
 
 use crate::emit_attribute;
+
+fn emit_rule<'arena>(alloc: &'arena bumpalo::Bump, rule: &ast::Rule) -> Rule<'arena> {
+    match rule {
+        ast::Rule::MDNameGlobal(_) => Rule {
+            kind: RuleKind::Global,
+            name: Maybe::Nothing,
+        },
+        ast::Rule::MDNamePrefix(id) => Rule {
+            kind: RuleKind::Prefix,
+            name: Maybe::Just(Str::new_str(alloc, &id.1)),
+        },
+        ast::Rule::MDNameExact(id) => Rule {
+            kind: RuleKind::Exact,
+            name: Maybe::Just(Str::new_str(alloc, &id.1)),
+        },
+    }
+}
 
 pub fn emit_module<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
@@ -23,11 +42,24 @@ pub fn emit_module<'a, 'arena, 'decl>(
     let name = ClassName::from_ast_name_and_mangle(alloc, &ast_module.name.1);
     let span = Span::from_pos(&ast_module.span);
     let doc_comment = ast_module.doc_comment.clone();
+
     Ok(Module {
         attributes: Slice::fill_iter(alloc, attributes.into_iter()),
         name,
         span,
         doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &c.1))),
+        exports: Maybe::from(
+            ast_module
+                .exports
+                .as_ref()
+                .map(|v| Slice::fill_iter(alloc, v.iter().map(|r| emit_rule(alloc, r)))),
+        ),
+        imports: Maybe::from(
+            ast_module
+                .imports
+                .as_ref()
+                .map(|v| Slice::fill_iter(alloc, v.iter().map(|r| emit_rule(alloc, r)))),
+        ),
     })
 }
 

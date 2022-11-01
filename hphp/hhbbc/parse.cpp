@@ -1054,10 +1054,12 @@ std::unique_ptr<php::Module> parse_module(const Module& m) {
     m.name,
     php::SrcInfo {
       {m.line0, m.line1},
-      m.docComment()
+      m.docComment
     },
     m.attrs | AttrUnique | AttrPersistent,
-    m.userAttributes
+    m.userAttributes,
+    m.exports,
+    m.imports
   });
 }
 

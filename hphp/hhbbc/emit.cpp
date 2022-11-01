@@ -1240,7 +1240,9 @@ void emit_module(UnitEmitter& ue, const php::Module& module) {
     (int)std::get<0>(module.srcInfo.loc),
     (int)std::get<1>(module.srcInfo.loc),
     module.attrs,
-    module.userAttributes
+    module.userAttributes,
+    module.exports,
+    module.imports
   };
   ue.addModule(m);
 }

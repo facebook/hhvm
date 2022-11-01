@@ -1328,9 +1328,6 @@ void translateModule(TranslationState& ts, const hhbc::Module& m) {
   UserAttributeMap userAttrs;
   translateUserAttributes(m.attributes, userAttrs);
 
-  // auto const dc = maybe(b.doc_comment);
-  // if (dc) ts.fe->docComment = makeDocComment(dc.value());
-
   ts.ue->addModule(HPHP::Module{
     toStaticString(m.name._0),
     maybeOrElse(m.doc_comment,
@@ -1339,7 +1336,10 @@ void translateModule(TranslationState& ts, const hhbc::Module& m) {
     static_cast<int>(m.span.line_begin),
     static_cast<int>(m.span.line_end),
     Attr(AttrNone),
-    userAttrs
+    userAttrs,
+    // TODO!
+    HPHP::Module::RuleSet(),
+    HPHP::Module::RuleSet()
   });
 }
 

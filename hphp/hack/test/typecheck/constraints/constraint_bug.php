@@ -8,5 +8,7 @@ KeyedTraversable<Tk, ?Tv> $traversable,
 }
 function testit(mixed $m):void {
   invariant(HH\is_php_array($m), 'hack');
-  $a = darray_filter_falsy($m);
+  // We need to infer nonnull for Tv for this to work, but in most cases
+  // it's better to infer the Tv#1 type, so we need the explicit argument.
+  $a = darray_filter_falsy<_, nonnull>($m);
 }

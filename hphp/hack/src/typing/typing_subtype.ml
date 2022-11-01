@@ -3849,18 +3849,31 @@ and simplify_subtype_arraykey_union ~this_ty ~subtype_env env ty_sub tyl_super =
    It does not preserve the ordering.
  *)
 and simplify_disj env disj =
+  (* even if sub_ty is not a supertype of super_ty, still consider super_ty redunant *)
+  let additional_heuristic ~coerce env _sub_ty super_ty =
+    let nonnull =
+      if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
+        MakeType.supportdyn_nonnull Reason.none
+      else
+        MakeType.nonnull Reason.none
+    in
+    is_sub_type_for_union_i ~coerce env (LoclType nonnull) super_ty
+  in
   let rec add_new_bound ~is_lower ~coerce ~constr ty bounds =
     match bounds with
     | [] -> [(is_lower, ty, constr)]
     | ((is_lower', bound_ty, _) as b) :: bounds ->
-      if
-        is_lower && is_lower' && is_sub_type_for_union_i ~coerce env bound_ty ty
-      then
-        b :: bounds
-      else if
-        is_lower && is_lower' && is_sub_type_for_union_i ~coerce env ty bound_ty
-      then
-        add_new_bound ~is_lower ~coerce ~constr ty bounds
+      if is_lower && is_lower' then
+        if is_sub_type_for_union_i ~coerce env bound_ty ty then
+          b :: bounds
+        else if is_sub_type_for_union_i ~coerce env ty bound_ty then
+          add_new_bound ~is_lower ~coerce ~constr ty bounds
+        else if additional_heuristic ~coerce env bound_ty ty then
+          b :: bounds
+        else if additional_heuristic ~coerce env ty bound_ty then
+          add_new_bound ~is_lower ~coerce ~constr ty bounds
+        else
+          b :: add_new_bound ~is_lower ~coerce ~constr ty bounds
       else if
         (not is_lower)
         && (not is_lower')

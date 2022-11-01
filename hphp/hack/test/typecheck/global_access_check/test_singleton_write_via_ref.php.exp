@@ -13,7 +13,7 @@ File "test_singleton_write_via_ref.php", line 40, characters 7-25:
 File "test_singleton_write_via_ref.php", line 42, characters 7-25:
 [Test::test_method_call]{Foo::$bar}(Baz)<Singleton> A global variable is possibly written via reference. (Other[11002])
 File "test_singleton_write_via_ref.php", line 45, characters 10-23:
-[Test::test_method_call]{\fun_memoized}(Bar) A global variable is definitely read. (Other[11004])
+[Test::test_method_call]{\fun_memoized}((function(): Bar)) A global variable is definitely read. (Other[11004])
 File "test_singleton_write_via_ref.php", line 47, characters 7-25:
 [Test::test_method_call]{\fun_memoized}(Baz)<Singleton> A global variable is possibly written via reference. (Other[11002])
 File "test_singleton_write_via_ref.php", line 49, characters 7-25:

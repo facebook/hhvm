@@ -12,7 +12,7 @@ class Foo {
 function call_mixed(mixed $x): void {}
 
 <<__Memoize>>
-function fun_memoized(): Bar {
+function fun_memoized(int $i, string $s): Bar {
   return new Bar();
 }
 
@@ -37,12 +37,13 @@ class Test {
     call_mixed((Foo::$bar)->prop); // global read
     call_mixed(self::$static_prop); // global read
 
-    $a = fun_memoized(); // global read
-    $b = fun_memoized()->prop + 1; // global read
-    $c = fun_memoized()->prop > 0 ? 1 : -1; // global read
+    $x = new Bar();
+    $a = fun_memoized(1, "a"); // global read
+    $b = fun_memoized(1, "a")->prop + 1; // global read
+    $c = fun_memoized(1, "a")->prop > 0 ? 1 : -1; // global read
 
-    if (!(fun_memoized()->prop > 0)) { // global read
-      fun_memoized()->prop = 1;
+    if (!(fun_memoized(1, "a")->prop > 0)) { // global read
+      fun_memoized(1, "a")->prop = 1;
     }
 
     return self::$static_prop; // global read

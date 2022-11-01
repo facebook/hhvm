@@ -41,11 +41,11 @@ File "global_write.php", line 83, characters 7-21:
 File "global_write.php", line 87, characters 5-16:
 [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "global_write.php", line 89, characters 10-28:
-[Test::test_method_call]{Foo::memoized_lsb}(Bar) A global variable is definitely read. (Other[11004])
+[Test::test_method_call]{Foo::memoized_lsb}((function(): Bar)) A global variable is definitely read. (Other[11004])
 File "global_write.php", line 90, characters 5-16:
 [Test::test_method_call]{Foo::memoized_lsb}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "global_write.php", line 92, characters 10-19:
-[Test::test_method_call]{\memoized}(Bar) A global variable is definitely read. (Other[11004])
+[Test::test_method_call]{\memoized}((function(): Bar)) A global variable is definitely read. (Other[11004])
 File "global_write.php", line 93, characters 5-16:
 [Test::test_method_call]{\memoized}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "global_write.php", line 95, characters 10-29:
@@ -55,7 +55,7 @@ File "global_write.php", line 98, characters 10-29:
 File "global_write.php", line 99, characters 5-19:
 [Test::test_method_call]{Foo::$static_vec_bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "global_write.php", line 103, characters 10-27:
-[Test::test_method_call]{\memoized_vec_int}(vec<int>) A global variable is definitely read. (Other[11004])
+[Test::test_method_call]{\memoized_vec_int}((function(): vec<int>)) A global variable is definitely read. (Other[11004])
 File "global_write.php", line 107, characters 22-30:
 [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
 File "global_write.php", line 108, characters 5-16:

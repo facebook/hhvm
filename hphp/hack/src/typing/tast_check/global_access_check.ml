@@ -816,9 +816,9 @@ let visitor =
             (SSet.singleton expr_str)
             (GlobalAccessPatternSet.singleton NoPattern)
             GlobalAccessCheck.DefiniteGlobalRead
-      | Call (func_expr, _, tpl, _) ->
+      | Call (((func_ty, _, _) as func_expr), _, tpl, _) ->
         (* First check if the called function is memoized. *)
-        let func_ty_str = Tast_env.print_ty env ty in
+        let func_ty_str = Tast_env.print_ty env func_ty in
         (match check_func_is_memoized func_expr env with
         | Some memoized_func_name ->
           raise_global_access_error

@@ -28,6 +28,9 @@
 #include <openssl/conf.h>
 #include <openssl/pem.h>
 #include <openssl/pkcs12.h>
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+#include <openssl/provider.h>
+#endif
 #include <openssl/rand.h>
 #include <vector>
 
@@ -65,6 +68,14 @@ struct OpenSSLInitializer {
     ERR_load_ERR_strings();
     ERR_load_crypto_strings();
     ERR_load_EVP_strings();
+
+// RC4 is only available in legacy providers
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+	  auto legacy_provider = OSSL_PROVIDER_load(nullptr, "legacy");
+    if (!legacy_provider) {
+      raise_warning("Cannot load legacy OpenSSL providers");
+    }
+#endif
 
     /* Determine default SSL configuration file */
     char *config_filename = getenv("OPENSSL_CONF");
@@ -2282,7 +2293,8 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, Variant& sealed_data,
     ret = false;
     goto clean_exit;
   }
-  if (!EVP_EncryptInit_ex(ctx, cipher_type, nullptr, nullptr, nullptr)) {
+  if (!EVP_EncryptInit_ex2(ctx, cipher_type, nullptr, nullptr, nullptr)) {
+    raise_warning("Failed to initialize cipher \"%s\"", method.c_str());
     ret = false;
     goto clean_exit;
   }

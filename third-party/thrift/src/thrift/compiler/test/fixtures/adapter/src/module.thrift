@@ -372,6 +372,15 @@ struct CircularStruct {
 }
 typedef CircularAdaptee AdaptedCircularAdaptee
 
+struct ReorderedStruct {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  1: DeclaredAfterStruct reordered_dependent_adapted;
+}
+@cpp.Adapter{
+  name = "::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>",
+}
+struct DeclaredAfterStruct {}
+
 @cpp.Adapter{
   name = "::apache::thrift::test::TemplatedTestAdapter",
   underlyingName = "UnderlyingRenamedStruct",

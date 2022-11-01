@@ -407,6 +407,30 @@ struct VisitByFieldId<::facebook::thrift::test::CircularStruct> {
 };
 
 template <>
+struct VisitByFieldId<::facebook::thrift::test::ReorderedStruct> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).reordered_dependent_adapted_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::ReorderedStruct");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::facebook::thrift::test::detail::DeclaredAfterStruct> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    default:
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::detail::DeclaredAfterStruct");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::facebook::thrift::test::UnderlyingRenamedStruct> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {

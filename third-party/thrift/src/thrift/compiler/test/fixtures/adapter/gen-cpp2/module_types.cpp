@@ -3232,6 +3232,194 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::facebook::thrift::test::ReorderedStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::ReorderedStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace facebook { namespace thrift { namespace test {
+
+const char* ReorderedStruct::__fbthrift_thrift_uri() {
+  return "facebook.com/thrift/test/ReorderedStruct";
+}
+
+const folly::StringPiece ReorderedStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<ReorderedStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+ReorderedStruct::ReorderedStruct(const ReorderedStruct& srcObj) :
+    __fbthrift_field_reordered_dependent_adapted(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_reordered_dependent_adapted)) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, 1>(*__fbthrift_field_reordered_dependent_adapted, *this);
+}
+
+ReorderedStruct& ReorderedStruct::operator=(const ReorderedStruct& other) {
+  ReorderedStruct tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
+ReorderedStruct::ReorderedStruct(FOLLY_MAYBE_UNUSED ReorderedStruct&& other) noexcept :
+    __fbthrift_field_reordered_dependent_adapted(std::move(other.__fbthrift_field_reordered_dependent_adapted)) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, 1>(*__fbthrift_field_reordered_dependent_adapted, *this);
+}
+
+ReorderedStruct& ReorderedStruct::operator=(FOLLY_MAYBE_UNUSED ReorderedStruct&& other) noexcept {
+    this->__fbthrift_field_reordered_dependent_adapted = std::move(other.__fbthrift_field_reordered_dependent_adapted);
+    return *this;
+}
+
+
+ReorderedStruct::ReorderedStruct(apache::thrift::FragileConstructor, ::std::unique_ptr<::facebook::thrift::test::DeclaredAfterStruct> reordered_dependent_adapted__arg) :
+    __fbthrift_field_reordered_dependent_adapted(std::move(reordered_dependent_adapted__arg)) {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, 1>(*__fbthrift_field_reordered_dependent_adapted, *this);
+}
+
+
+void ReorderedStruct::__fbthrift_clear() {
+  // clear all fields
+}
+
+void ReorderedStruct::__fbthrift_clear_terse_fields() {
+}
+
+bool ReorderedStruct::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool ReorderedStruct::operator==(FOLLY_MAYBE_UNUSED const ReorderedStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if ((!::apache::thrift::detail::pointer_equal(lhs.reordered_dependent_adapted_ref(), rhs.reordered_dependent_adapted_ref()))) {
+    return false;
+  }
+  return true;
+}
+
+bool ReorderedStruct::operator<(FOLLY_MAYBE_UNUSED const ReorderedStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if ((!::apache::thrift::detail::pointer_equal(lhs.reordered_dependent_adapted_ref(), rhs.reordered_dependent_adapted_ref()))) {
+    return ::apache::thrift::detail::pointer_less(lhs.reordered_dependent_adapted_ref(), rhs.reordered_dependent_adapted_ref());
+  }
+  return false;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED ReorderedStruct& a, FOLLY_MAYBE_UNUSED ReorderedStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_reordered_dependent_adapted, b.__fbthrift_field_reordered_dependent_adapted);
+}
+
+template void ReorderedStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ReorderedStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ReorderedStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ReorderedStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ReorderedStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ReorderedStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ReorderedStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ReorderedStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ReorderedStruct,
+        ::apache::thrift::type_class::structure,
+        ::facebook::thrift::test::DeclaredAfterStruct>,
+    "inconsistent use of json option");
+
+}}} // facebook::thrift::test
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::facebook::thrift::test::detail::DeclaredAfterStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace facebook { namespace thrift { namespace test {namespace detail {
+
+
+const char* DeclaredAfterStruct::__fbthrift_thrift_uri() {
+  return "facebook.com/thrift/test/DeclaredAfterStruct";
+}
+
+const folly::StringPiece DeclaredAfterStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<DeclaredAfterStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+
+DeclaredAfterStruct::DeclaredAfterStruct(apache::thrift::FragileConstructor) {}
+
+
+void DeclaredAfterStruct::__fbthrift_clear() {
+  // clear all fields
+}
+
+void DeclaredAfterStruct::__fbthrift_clear_terse_fields() {
+}
+
+bool DeclaredAfterStruct::__fbthrift_is_empty() const {
+  return true;
+}
+
+bool DeclaredAfterStruct::operator==(FOLLY_MAYBE_UNUSED const DeclaredAfterStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
+}
+
+bool DeclaredAfterStruct::operator<(FOLLY_MAYBE_UNUSED const DeclaredAfterStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return false;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED DeclaredAfterStruct& a, FOLLY_MAYBE_UNUSED DeclaredAfterStruct& b) {
+  using ::std::swap;
+}
+
+template void DeclaredAfterStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t DeclaredAfterStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t DeclaredAfterStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t DeclaredAfterStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void DeclaredAfterStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t DeclaredAfterStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t DeclaredAfterStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t DeclaredAfterStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+} // namespace detail
+}}} // facebook::thrift::test
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::facebook::thrift::test::UnderlyingRenamedStruct>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
@@ -4226,6 +4414,7 @@ FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 3, ::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook::thrift::test::StructFieldAdaptedStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::TemplatedTestAdapter, 4, ::facebook::thrift::test::detail::DirectlyAdaptedStruct, ::facebook::thrift::test::StructFieldAdaptedStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::MemberAccessAdapter, 1, ::facebook::thrift::test::CircularAdaptee, ::facebook::thrift::test::CircularStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, 1, ::facebook::thrift::test::detail::DeclaredAfterStruct, ::facebook::thrift::test::ReorderedStruct>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::MoveOnlyAdapter, 1, ::facebook::thrift::test::detail::HeapAllocated, ::facebook::thrift::test::MoveOnly>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::MoveOnlyAdapter, 1, ::std::int64_t, ::facebook::thrift::test::AlsoMoveOnly>();
   ::apache::thrift::adapt_detail::validateFieldAdapter<::apache::thrift::test::CountingAdapter<false, int>, 1, ::std::int64_t, ::facebook::thrift::test::CountingStruct>();

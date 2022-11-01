@@ -376,6 +376,16 @@ void reset_field<::facebook::thrift::test::CircularStruct>(
 }
 
 template<>
+void reset_field<::facebook::thrift::test::ReorderedStruct>(
+    ::facebook::thrift::test::ReorderedStruct& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.reordered_dependent_adapted_ref().reset();
+      return;
+  }
+}
+
+template<>
 void reset_field<::facebook::thrift::test::MoveOnly>(
     ::facebook::thrift::test::MoveOnly& obj, uint16_t index) {
   switch (index) {
@@ -611,6 +621,16 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 template<>
 const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::CircularStruct>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::test::ReorderedStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

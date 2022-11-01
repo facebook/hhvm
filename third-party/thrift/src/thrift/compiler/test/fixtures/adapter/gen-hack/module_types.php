@@ -6665,6 +6665,237 @@ class CircularStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
 
 /**
  * Original thrift struct:-
+ * ReorderedStruct
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/ReorderedStruct'))>>
+class ReorderedStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'reordered_dependent_adapted',
+      'type' => \TType::STRUCT,
+      'class' => \thrift\test\DeclaredAfterStruct::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'reordered_dependent_adapted' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'reordered_dependent_adapted' => ?\thrift\test\DeclaredAfterStruct,
+  );
+
+  const type TShape = shape(
+    ?'reordered_dependent_adapted' => ?\thrift\test\DeclaredAfterStruct::TShape,
+  );
+  const int STRUCTURAL_ID = 2416271555865439268;
+  /**
+   * Original thrift field:-
+   * 1: struct module.DeclaredAfterStruct reordered_dependent_adapted
+   */
+  public ?\thrift\test\DeclaredAfterStruct $reordered_dependent_adapted;
+
+  public function __construct(?\thrift\test\DeclaredAfterStruct $reordered_dependent_adapted = null)[] {
+    $this->reordered_dependent_adapted = $reordered_dependent_adapted;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'reordered_dependent_adapted'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'ReorderedStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.ReorderedStruct",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.DeclaredAfterStruct",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
+                            shape(
+                              "name" => "module.DeclaredAfterStruct",
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "reordered_dependent_adapted",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+        'reordered_dependent_adapted' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Ref' => \thrift\annotation\cpp\Ref::fromShape(
+              shape(
+                "type" => \thrift\annotation\cpp\RefType::Unique,
+              )
+            ),
+          ],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>",
+              )
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'reordered_dependent_adapted') === null ? null : (\thrift\test\DeclaredAfterStruct::__fromShape($shape['reordered_dependent_adapted'])),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'reordered_dependent_adapted' => $this->reordered_dependent_adapted?->__toShape(),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'reordered_dependent_adapted') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\DeclaredAfterStruct>($parsed['reordered_dependent_adapted']));
+      $_tmp1 = \thrift\test\DeclaredAfterStruct::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->reordered_dependent_adapted = $_tmp1;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * DeclaredAfterStruct
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/DeclaredAfterStruct'))>>
+class DeclaredAfterStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const type TShape = shape(
+  );
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'DeclaredAfterStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.DeclaredAfterStruct",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>",
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+  }
+
+}
+
+/**
+ * Original thrift struct:-
  * RenamedStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/RenamedStruct'))>>

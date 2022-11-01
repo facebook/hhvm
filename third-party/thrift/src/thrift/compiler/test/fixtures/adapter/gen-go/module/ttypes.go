@@ -5945,6 +5945,196 @@ func (p *CircularStruct) String() string {
 }
 
 // Attributes:
+//  - ReorderedDependentAdapted
+type ReorderedStruct struct {
+  ReorderedDependentAdapted *DeclaredAfterStruct `thrift:"reordered_dependent_adapted,1" db:"reordered_dependent_adapted" json:"reordered_dependent_adapted"`
+}
+
+func NewReorderedStruct() *ReorderedStruct {
+  return &ReorderedStruct{
+    ReorderedDependentAdapted: NewDeclaredAfterStruct(),
+  }
+}
+
+var ReorderedStruct_ReorderedDependentAdapted_DEFAULT *DeclaredAfterStruct
+func (p *ReorderedStruct) GetReorderedDependentAdapted() *DeclaredAfterStruct {
+  if !p.IsSetReorderedDependentAdapted() {
+    return ReorderedStruct_ReorderedDependentAdapted_DEFAULT
+  }
+  return p.ReorderedDependentAdapted
+}
+func (p *ReorderedStruct) IsSetReorderedDependentAdapted() bool {
+  return p != nil && p.ReorderedDependentAdapted != nil
+}
+
+type ReorderedStructBuilder struct {
+  obj *ReorderedStruct
+}
+
+func NewReorderedStructBuilder() *ReorderedStructBuilder{
+  return &ReorderedStructBuilder{
+    obj: NewReorderedStruct(),
+  }
+}
+
+func (p ReorderedStructBuilder) Emit() *ReorderedStruct{
+  return &ReorderedStruct{
+    ReorderedDependentAdapted: p.obj.ReorderedDependentAdapted,
+  }
+}
+
+func (r *ReorderedStructBuilder) ReorderedDependentAdapted(reorderedDependentAdapted *DeclaredAfterStruct) *ReorderedStructBuilder {
+  r.obj.ReorderedDependentAdapted = reorderedDependentAdapted
+  return r
+}
+
+func (r *ReorderedStruct) SetReorderedDependentAdapted(reorderedDependentAdapted *DeclaredAfterStruct) *ReorderedStruct {
+  r.ReorderedDependentAdapted = reorderedDependentAdapted
+  return r
+}
+
+func (p *ReorderedStruct) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *ReorderedStruct)  ReadField1(iprot thrift.Protocol) error {
+  p.ReorderedDependentAdapted = NewDeclaredAfterStruct()
+  if err := p.ReorderedDependentAdapted.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ReorderedDependentAdapted), err)
+  }
+  return nil
+}
+
+func (p *ReorderedStruct) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("ReorderedStruct"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *ReorderedStruct) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("reordered_dependent_adapted", thrift.STRUCT, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:reordered_dependent_adapted: ", p), err) }
+  if err := p.ReorderedDependentAdapted.Write(oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ReorderedDependentAdapted), err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:reordered_dependent_adapted: ", p), err) }
+  return err
+}
+
+func (p *ReorderedStruct) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  var reorderedDependentAdaptedVal string
+  if p.ReorderedDependentAdapted == nil {
+    reorderedDependentAdaptedVal = "<nil>"
+  } else {
+    reorderedDependentAdaptedVal = fmt.Sprintf("%v", p.ReorderedDependentAdapted)
+  }
+  return fmt.Sprintf("ReorderedStruct({ReorderedDependentAdapted:%s})", reorderedDependentAdaptedVal)
+}
+
+type DeclaredAfterStruct struct {
+}
+
+func NewDeclaredAfterStruct() *DeclaredAfterStruct {
+  return &DeclaredAfterStruct{}
+}
+
+type DeclaredAfterStructBuilder struct {
+  obj *DeclaredAfterStruct
+}
+
+func NewDeclaredAfterStructBuilder() *DeclaredAfterStructBuilder{
+  return &DeclaredAfterStructBuilder{
+    obj: NewDeclaredAfterStruct(),
+  }
+}
+
+func (p DeclaredAfterStructBuilder) Emit() *DeclaredAfterStruct{
+  return &DeclaredAfterStruct{
+  }
+}
+
+func (p *DeclaredAfterStruct) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    if err := iprot.Skip(fieldTypeId); err != nil {
+      return err
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *DeclaredAfterStruct) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("DeclaredAfterStruct"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *DeclaredAfterStruct) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  return fmt.Sprintf("DeclaredAfterStruct({})")
+}
+
+// Attributes:
 //  - Data
 type RenamedStruct struct {
   Data int64 `thrift:"data,1" db:"data" json:"data"`

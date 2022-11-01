@@ -23,7 +23,7 @@ using namespace apache::thrift::server;
 
 TEST(WeightedRequestPileQueueTest, RightOrdering) {
   // For one dimensional control block
-  WeightedRequestPileQueue<int, false> queue1;
+  WeightedRequestPileQueue<int> queue1(false);
 
   for (int i = 0; i < 10; ++i) {
     queue1.enqueue(std::move(i));
@@ -38,7 +38,7 @@ TEST(WeightedRequestPileQueueTest, RightOrdering) {
   auto last = queue1.tryDequeue();
   EXPECT_EQ(last, std::nullopt);
 
-  WeightedRequestPileQueue<int, true> queue2;
+  WeightedRequestPileQueue<int> queue2(true);
 
   for (int i = 0; i < 10; ++i) {
     queue2.enqueue(std::move(i));
@@ -54,7 +54,7 @@ TEST(WeightedRequestPileQueueTest, RightOrdering) {
   EXPECT_EQ(last, std::nullopt);
 
   // For two dimensional control block
-  WeightedRequestPileQueue<int, false, TwoDimensionalControlBlock> queue3;
+  WeightedRequestPileQueue<int, TwoDimensionalControlBlock> queue3(false);
   for (int i = 0; i < 10; ++i) {
     queue3.enqueue(std::move(i));
   }
@@ -68,7 +68,7 @@ TEST(WeightedRequestPileQueueTest, RightOrdering) {
   last = queue3.tryDequeue();
   EXPECT_EQ(last, std::nullopt);
 
-  WeightedRequestPileQueue<int, true, TwoDimensionalControlBlock> queue4;
+  WeightedRequestPileQueue<int, TwoDimensionalControlBlock> queue4(true);
   for (int i = 0; i < 10; ++i) {
     queue4.enqueue(std::move(i));
   }
@@ -84,7 +84,7 @@ TEST(WeightedRequestPileQueueTest, RightOrdering) {
 }
 
 TEST(WeightedRequestPileQueueTest, ApplyLimits) {
-  WeightedRequestPileQueue<int, true> queue;
+  WeightedRequestPileQueue<int> queue(true);
   queue.setLimit(10);
 
   queue.enqueue(1, 2);
@@ -129,7 +129,7 @@ TEST(WeightedRequestPileQueueTest, ApplyLimits) {
   auto task = [&] { queue.enqueue(1, 100); };
 
   // For two dimensional control block
-  WeightedRequestPileQueue<int, true, TwoDimensionalControlBlock> queue2;
+  WeightedRequestPileQueue<int, TwoDimensionalControlBlock> queue2(true);
   queue2.setLimit({10, 10});
 
   queue2.enqueue(1, {2, 2});
@@ -189,9 +189,8 @@ TEST(WeightedRequestPileQueueTest, ApplyLimits) {
 }
 
 TEST(WeightedRequestPileQueueTest, DequeueWithCapacity) {
-  using Queue1 =
-      WeightedRequestPileQueue<int, true, OneDimensionalControlBlock>;
-  Queue1 queue1;
+  using Queue1 = WeightedRequestPileQueue<int, OneDimensionalControlBlock>;
+  Queue1 queue1(true);
   queue1.enqueue(1, 10);
   queue1.enqueue(1, 10);
   queue1.enqueue(1, 10);
@@ -202,9 +201,8 @@ TEST(WeightedRequestPileQueueTest, DequeueWithCapacity) {
       std::get<Queue1::DequeueRejReason>(queue1.tryDequeueWithCapacity(5));
   EXPECT_EQ(res1, Queue1::DequeueRejReason::OverCapacity);
 
-  using Queue2 =
-      WeightedRequestPileQueue<int, true, TwoDimensionalControlBlock>;
-  Queue2 queue2;
+  using Queue2 = WeightedRequestPileQueue<int, TwoDimensionalControlBlock>;
+  Queue2 queue2(true);
   queue2.enqueue(1, {10, 10});
   queue2.enqueue(1, {10, 10});
   queue2.enqueue(1, {10, 10});

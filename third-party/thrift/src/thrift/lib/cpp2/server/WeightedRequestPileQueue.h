@@ -108,10 +108,7 @@ class TwoDimensionalControlBlock {
 // // enqueue an element with weighht == 200
 // // should reject
 // queue.enqueue(1, 200);
-template <
-    typename T,
-    bool EnableControl = false,
-    typename ControlBlock = OneDimensionalControlBlock>
+template <typename T, typename ControlBlock = OneDimensionalControlBlock>
 class WeightedRequestPileQueue {
  public:
   using Weights = typename ControlBlock::Weights;
@@ -128,19 +125,13 @@ class WeightedRequestPileQueue {
 
   using DequeueResult = std::variant<T, DequeueRejReason>;
 
-  // thread-safe
-  // should only be used when EnableControl is true
-  template <
-      bool Q = EnableControl,
-      typename = typename std::enable_if<Q, void>::type>
+  WeightedRequestPileQueue(bool enableControl)
+      : enableControl_(enableControl) {}
+
   void setLimit(Weights limits);
 
   bool enqueue(T&& elem);
 
-  // should only be used when EnableControl is true
-  template <
-      bool Q = EnableControl,
-      typename = typename std::enable_if<Q, void>::type>
   bool enqueue(T&& elem, Weights weights);
 
   // returns an estimate of number of elements in the queue
@@ -155,9 +146,6 @@ class WeightedRequestPileQueue {
   // Only one version of the tryDequeue should be called
   // throughout the object lifetime, or an inconsistency
   // in dequeue order (even loss) could happen
-  template <
-      bool Q = EnableControl,
-      typename = typename std::enable_if<Q, void>::type>
   DequeueResult tryDequeueWithCapacity(Weights capacity) noexcept;
 
  private:
@@ -167,6 +155,7 @@ class WeightedRequestPileQueue {
       /* log2(SegmentSize=1024) */ 10>;
 
   Queue queue_;
+  bool enableControl_{false};
   ControlBlock controlBlock_{};
 
   std::optional<Item> firstElementHolder_;

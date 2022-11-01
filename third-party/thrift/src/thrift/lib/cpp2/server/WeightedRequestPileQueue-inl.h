@@ -20,17 +20,17 @@
 
 namespace apache::thrift::server {
 
-template <typename T, bool EnableControl, typename ControlBlock>
-template <bool Q, typename>
-void WeightedRequestPileQueue<T, EnableControl, ControlBlock>::setLimit(
-    Weights limits) {
+template <typename T, typename ControlBlock>
+void WeightedRequestPileQueue<T, ControlBlock>::setLimit(Weights limits) {
+  if (!enableControl_) {
+    LOG(FATAL) << "setLimit shouldn't be called when enableControl_ is off";
+  }
   controlBlock_.setLimit(limits);
 }
 
-template <typename T, bool EnableControl, typename ControlBlock>
-bool WeightedRequestPileQueue<T, EnableControl, ControlBlock>::enqueue(
-    T&& elem) {
-  if constexpr (!EnableControl) {
+template <typename T, typename ControlBlock>
+bool WeightedRequestPileQueue<T, ControlBlock>::enqueue(T&& elem) {
+  if (!enableControl_) {
     queue_.enqueue({std::forward<T>(elem), ControlBlock::defaultWeights});
     return true;
   } else {
@@ -38,10 +38,12 @@ bool WeightedRequestPileQueue<T, EnableControl, ControlBlock>::enqueue(
   }
 }
 
-template <typename T, bool EnableControl, typename ControlBlock>
-template <bool Q, typename>
-bool WeightedRequestPileQueue<T, EnableControl, ControlBlock>::enqueue(
+template <typename T, typename ControlBlock>
+bool WeightedRequestPileQueue<T, ControlBlock>::enqueue(
     T&& elem, Weights weights) {
+  if (!enableControl_) {
+    LOG(FATAL) << "enqueue(2) shouldn't be called when enableControl_ is off";
+  }
   auto res = controlBlock_.accept(weights);
   if (!res) {
     return false;
@@ -52,11 +54,11 @@ bool WeightedRequestPileQueue<T, EnableControl, ControlBlock>::enqueue(
   return true;
 }
 
-template <typename T, bool EnableControl, typename ControlBlock>
-std::optional<T> WeightedRequestPileQueue<T, EnableControl, ControlBlock>::
-    tryDequeue() noexcept {
+template <typename T, typename ControlBlock>
+std::optional<T>
+WeightedRequestPileQueue<T, ControlBlock>::tryDequeue() noexcept {
   if (auto res = queue_.try_dequeue()) {
-    if constexpr (EnableControl) {
+    if (enableControl_) {
       controlBlock_.onDequeue(res->weight);
     }
     return std::move(res->data);
@@ -64,11 +66,10 @@ std::optional<T> WeightedRequestPileQueue<T, EnableControl, ControlBlock>::
   return std::nullopt;
 }
 
-template <typename T, bool EnableControl, typename ControlBlock>
-template <bool Q, typename>
-typename WeightedRequestPileQueue<T, EnableControl, ControlBlock>::DequeueResult
-WeightedRequestPileQueue<T, EnableControl, ControlBlock>::
-    tryDequeueWithCapacity(Weights capacity) noexcept {
+template <typename T, typename ControlBlock>
+typename WeightedRequestPileQueue<T, ControlBlock>::DequeueResult
+WeightedRequestPileQueue<T, ControlBlock>::tryDequeueWithCapacity(
+    Weights capacity) noexcept {
   std::lock_guard g(dequeueLock_);
   if (firstElementHolder_) {
     if (capacity < firstElementHolder_->weight) {
@@ -92,8 +93,8 @@ WeightedRequestPileQueue<T, EnableControl, ControlBlock>::
   }
 }
 
-template <typename T, bool EnableControl, typename ControlBlock>
-size_t WeightedRequestPileQueue<T, EnableControl, ControlBlock>::size() {
+template <typename T, typename ControlBlock>
+size_t WeightedRequestPileQueue<T, ControlBlock>::size() {
   return queue_.size() + (firstElementHolder_.has_value() ? 1 : 0);
 }
 

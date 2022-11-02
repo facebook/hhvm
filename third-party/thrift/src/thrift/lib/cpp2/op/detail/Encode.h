@@ -18,6 +18,7 @@
 
 #include <utility>
 
+#include <folly/Utility.h>
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
@@ -28,6 +29,11 @@ namespace apache {
 namespace thrift {
 namespace op {
 namespace detail {
+
+template <typename T, typename Tag>
+FOLLY_INLINE_VARIABLE constexpr bool kIsStrongType =
+    std::is_enum<folly::remove_cvref_t<T>>::value&&
+        type::is_a_v<Tag, type::integral_c>;
 
 using apache::thrift::protocol::TType;
 
@@ -100,6 +106,10 @@ struct TypeTagToTType<type::exception_t<Tag>> {
 };
 template <typename Adapter, typename Tag>
 struct TypeTagToTType<type::adapted<Adapter, Tag>> {
+  static constexpr TType value = TypeTagToTType<Tag>::value;
+};
+template <typename T, typename Tag>
+struct TypeTagToTType<type::cpp_type<T, Tag>> {
   static constexpr TType value = TypeTagToTType<Tag>::value;
 };
 
@@ -313,7 +323,15 @@ struct SerializedSize<ZeroCopy, type::map<Key, Value>> {
 
 template <bool ZeroCopy, typename T, typename Tag>
 struct SerializedSize<ZeroCopy, type::cpp_type<T, Tag>>
-    : SerializedSize<ZeroCopy, Tag> {};
+    : SerializedSize<ZeroCopy, Tag> {
+  template <typename Protocol, typename U>
+  uint32_t operator()(Protocol& prot, const U& m) const {
+    auto f = folly::if_constexpr<kIsStrongType<U, Tag>>(
+        [](auto& v) { return static_cast<type::native_type<Tag>>(v); },
+        folly::identity);
+    return SerializedSize<ZeroCopy, Tag>{}(prot, f(m));
+  }
+};
 
 // TODO: Use serializedSize in adapter to optimize.
 template <bool ZeroCopy, typename Adapter, typename Tag>
@@ -485,7 +503,15 @@ struct Encode<type::map<Key, Value>> {
 };
 
 template <typename T, typename Tag>
-struct Encode<type::cpp_type<T, Tag>> : Encode<Tag> {};
+struct Encode<type::cpp_type<T, Tag>> : Encode<Tag> {
+  template <class Protocol, class U>
+  uint32_t operator()(Protocol& prot, const U& m) const {
+    auto f = folly::if_constexpr<kIsStrongType<U, Tag>>(
+        [](auto& v) { return static_cast<type::native_type<Tag>>(v); },
+        folly::identity);
+    return Encode<Tag>::operator()(prot, f(m));
+  }
+};
 
 template <typename Adapter, typename Tag>
 struct Encode<type::adapted<Adapter, Tag>> {
@@ -684,7 +710,20 @@ struct Decode<type::map<Key, Value>> {
 };
 
 template <typename T, typename Tag>
-struct Decode<type::cpp_type<T, Tag>> : Decode<Tag> {};
+struct Decode<type::cpp_type<T, Tag>> : Decode<Tag> {
+  template <class Protocol, class U>
+  std::enable_if_t<kIsStrongType<U, Tag>> operator()(
+      Protocol& prot, U& m) const {
+    type::native_type<Tag> i;
+    Decode<Tag>::operator()(prot, i);
+    m = static_cast<U>(i);
+  }
+  template <class Protocol, class U>
+  std::enable_if_t<!kIsStrongType<U, Tag>> operator()(
+      Protocol& prot, U& m) const {
+    Decode<Tag>::operator()(prot, m);
+  }
+};
 
 // TODO: Use inplace adapter deserialization as optimization.
 template <typename Adapter, typename Tag>

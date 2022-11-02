@@ -139,6 +139,8 @@ void testSerializedSizeContainers() {
           {std::string("foo"), 1}, {std::string("foo"), 2}});
 }
 
+enum class EmptyEnum : std::int16_t {};
+
 template <conformance::StandardProtocol Protocol>
 void testSerializedSizeCppType() {
   SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
@@ -147,6 +149,13 @@ void testSerializedSizeCppType() {
       Protocol,
       type::cpp_type<int, type::i16_t>,
       type_class::integral>((int16_t)1);
+
+  // test strongly typed integer
+  testSerializedSize<
+      Protocol,
+      type::cpp_type<EmptyEnum, type::i16_t>,
+      type_class::integral>(static_cast<EmptyEnum>(1));
+
   {
     // test cpp_type with list
     using T = std::deque<int64_t>;
@@ -322,6 +331,13 @@ void testEncodeCppType() {
     auto result =
         encodeAndParseValue<Protocol, type::cpp_type<int, type::i16_t>>(
             1, TType::T_I16);
+    EXPECT_EQ(result, asValueStruct<type::i16_t>(1));
+  }
+  {
+    // test strongly typed integer
+    auto result =
+        encodeAndParseValue<Protocol, type::cpp_type<EmptyEnum, type::i16_t>>(
+            static_cast<EmptyEnum>(1), TType::T_I16);
     EXPECT_EQ(result, asValueStruct<type::i16_t>(1));
   }
   {
@@ -572,6 +588,11 @@ void testDecodeStruct() {
 template <conformance::StandardProtocol Protocol>
 void testDecodeCppType() {
   SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
+  {
+    // test strongly typed integer
+    testDecode<Protocol, type::cpp_type<EmptyEnum, type::i16_t>>(
+        static_cast<EmptyEnum>(1));
+  }
   {
     // test cpp_type with list
     using T = std::deque<int64_t>;

@@ -10,6 +10,7 @@ path = "lib.rs"
 [dependencies]
 anyhow = "1.0.65"
 ascii = "1.0"
+escaper = { path = "../../../../utils/escaper" }
 ffi = { path = "../../../../utils/ffi" }
 hash = { path = "../../../../utils/hash" }
 ir = { path = "../.." }

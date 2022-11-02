@@ -11,6 +11,9 @@ use anyhow::Result;
 use crate::state::UnitState;
 use crate::textual;
 
+const UNIT_START_MARKER: &str = "TEXTUAL UNIT START";
+const UNIT_END_MARKER: &str = "TEXTUAL UNIT END";
+
 pub fn textual_writer(
     w: &mut dyn std::io::Write,
     path: &Path,
@@ -18,6 +21,10 @@ pub fn textual_writer(
 ) -> Result<()> {
     // steal the StringInterner so we can mutate it while reading the Unit.
     let strings = std::mem::take(&mut unit.strings);
+
+    let escaped_path = escaper::escape(path.display().to_string());
+
+    writeln!(w, "// {} {}", UNIT_START_MARKER, escaped_path)?;
 
     textual::write_attribute(w, textual::Attribute::SourceLanguage("hack".to_string()))?;
     writeln!(w)?;
@@ -37,6 +44,8 @@ pub fn textual_writer(
     for name in state.func_declares.external_funcs() {
         writeln!(w, "declare {name}(...): mixed")?;
     }
+
+    writeln!(w, "// {} {}", UNIT_END_MARKER, escaped_path)?;
     writeln!(w)?;
 
     Ok(())

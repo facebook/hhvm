@@ -29,6 +29,7 @@
 #include <thrift/compiler/lib/schematizer.h>
 
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
+#include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
 #include <thrift/lib/thrift/gen-cpp2/ast_types_custom_protocol.h>
 #include <thrift/lib/thrift/gen-cpp2/ast_visitation.h>
@@ -42,6 +43,16 @@ enum class ast_protocol {
   debug,
 };
 
+template <typename Writer, typename T>
+std::string serialize(const T& val) {
+  folly::IOBufQueue queue;
+  Writer proto;
+  proto.setOutput(&queue);
+  op::encode<type::struct_t<T>>(proto, val);
+  auto buf = queue.move();
+  auto br = buf->coalesce();
+  return std::string(reinterpret_cast<const char*>(br.data()), br.size());
+}
 /**
  * AST generator.
  */
@@ -95,7 +106,7 @@ void t_ast_generator::generate_program() {
       return;
     }
 
-    auto& programs = *ast.schema()->programs();
+    auto& programs = *ast.programs();
     auto pos = programs.size();
     program_index[&program] =
         static_cast<apache::thrift::type::ProgramId>(pos + 1);
@@ -123,7 +134,7 @@ void t_ast_generator::generate_program() {
     if (node.generated()) {                                       \
       return;                                                     \
     }                                                             \
-    auto& definitions = *ast.schema()->definitions();             \
+    auto& definitions = *ast.definitions();                       \
     auto pos = definitions.size();                                \
     definition_index[&node] =                                     \
         static_cast<apache::thrift::type::DefinitionId>(pos + 1); \
@@ -141,12 +152,12 @@ void t_ast_generator::generate_program() {
   THRIFT_ADD_VISITOR(const);
 #undef THRIFT_ADD_VISITOR
   visitor(*program_);
-  auto& defs = ast.schema()->programs()->at(0).definitions().ensure();
+  auto& defs = ast.programs()->at(0).definitions().ensure();
   for (auto& def : program_->definitions()) {
     defs.push_back(definition_index.at(&def));
   }
 
-  f_out_ << debugString(ast);
+  f_out_ << serialize<DebugProtocolWriter>(ast);
   // TODO: JSON
   f_out_.close();
 }

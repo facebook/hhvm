@@ -15,6 +15,7 @@
  */
 
 include "thrift/lib/thrift/schema.thrift"
+include "thrift/lib/thrift/protocol.thrift"
 
 // A lightweight source range that can be resolved into the file name,
 // line and column when the schema is produced from an IDL file.
@@ -50,26 +51,36 @@ union LanguageInclude {
 }
 
 // A thrift schema that corresponds to one or more thrift files.
+@cpp.UseOpEncode
 struct AST {
   /**
-   * The content of the program.
+  * The programs included in the schema, accessible by `ProgramId`.
    * The first program in the program list must be the main file,
    * with (recursively) included programs listed after it.
-   */
-  1: schema.Schema schema;
+  */
+  1: schema.ProgramList programs;
+
+  /** The values, accessible by `ValueId`. */
+  2: list<protocol.Value> values;
+
+  /** The packages, accessible by `PackageId`. */
+  3: schema.PackageList packages;
+
+  /** The definitions, accessible by `DefinitionId`. */
+  4: schema.DefinitionList definitions;
 
   /**
    * Information about the files holding the thrift definitions.
    */
-  2: map<id.ProgramId, SourceInfo> sources;
+  5: map<id.ProgramId, SourceInfo> sources;
 
   /**
    * Information about where each definition is present in the source files.
    */
-  3: map<id.DefinitionId, SourceRange> sourceRanges;
+  6: map<id.DefinitionId, SourceRange> sourceRanges;
 
   /**
    * Additional per-language includes not represented in the schema.
    */
-  4: map<id.ProgramId, list<LanguageInclude>> languageIncludes;
+  7: map<id.ProgramId, list<LanguageInclude>> languageIncludes;
 }

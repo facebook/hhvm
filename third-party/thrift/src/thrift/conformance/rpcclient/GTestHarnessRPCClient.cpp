@@ -182,6 +182,16 @@ class ConformanceVerificationServer
                                   ->exceptionMessage());
   }
 
+  apache::thrift::ServerStream<Response> streamInitialTimeout(
+      std::unique_ptr<Request> req) override {
+    serverResult_.streamInitialTimeout_ref().emplace().request() = *req;
+    std::this_thread::sleep_for(
+        std::chrono::milliseconds(*testCase_.serverInstruction()
+                                       ->streamInitialTimeout_ref()
+                                       ->timeoutMs()));
+    return ServerStream<Response>::createEmpty();
+  }
+
   // =================== Sink ===================
   apache::thrift::SinkConsumer<Request, Response> sinkBasic(
       std::unique_ptr<Request> req) override {

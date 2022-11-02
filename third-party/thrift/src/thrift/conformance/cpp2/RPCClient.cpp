@@ -278,6 +278,27 @@ streamInitialUndeclaredExceptionTest(
       }());
 }
 
+StreamInitialTimeoutClientTestResult streamInitialTimeoutTest(
+    StreamInitialTimeoutClientInstruction& instruction) {
+  auto client = createClient();
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<StreamInitialTimeoutClientTestResult> {
+        StreamInitialTimeoutClientTestResult result;
+        try {
+          co_await client->co_streamInitialTimeout(
+              RpcOptions().setTimeout(
+                  std::chrono::milliseconds(*instruction.timeoutMs())),
+              *instruction.request());
+        } catch (const TTransportException& e) {
+          if (e.getType() ==
+              TTransportException::TTransportExceptionType::TIMED_OUT) {
+            result.timeoutException() = true;
+          }
+        }
+        co_return result;
+      }());
+}
+
 // =================== Sink ===================
 SinkBasicClientTestResult sinkBasicTest(
     SinkBasicClientInstruction& instruction) {
@@ -411,6 +432,10 @@ int main(int argc, char** argv) {
       result.streamInitialUndeclaredException_ref() =
           streamInitialUndeclaredExceptionTest(
               *clientInstruction.streamInitialUndeclaredException_ref());
+      break;
+    case ClientInstruction::Type::streamInitialTimeout:
+      result.streamInitialTimeout_ref() = streamInitialTimeoutTest(
+          *clientInstruction.streamInitialTimeout_ref());
       break;
     case ClientInstruction::Type::sinkBasic:
       result.sinkBasic_ref() =

@@ -666,6 +666,46 @@ Test createStreamInitialUndeclaredExceptionTest() {
   return ret;
 }
 
+Test createStreamInitialTimeoutTest() {
+  Test ret;
+  ret.name() = "StreamInitialTimeoutTest";
+  ret.tags()->emplace("spec/protocol/interface/#client-timeout");
+  ret.tags()->emplace("spec/protocol/interface/#client-detected-exceptions");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "StreamInitialTimeout/Success";
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  auto& clientInstruction = rpcTest.clientInstruction()
+                                .emplace()
+                                .streamInitialTimeout_ref()
+                                .emplace();
+  clientInstruction.request().emplace().data() = "hello";
+  clientInstruction.timeoutMs() = 100;
+
+  rpcTest.serverInstruction()
+      .emplace()
+      .streamInitialTimeout_ref()
+      .emplace()
+      .timeoutMs() = 150;
+
+  rpcTest.clientTestResult()
+      .emplace()
+      .streamInitialTimeout_ref()
+      .emplace()
+      .timeoutException() = true;
+
+  rpcTest.serverTestResult()
+      .emplace()
+      .streamInitialTimeout_ref()
+      .emplace()
+      .request()
+      .emplace()
+      .data() = "hello";
+
+  return ret;
+}
+
 // =================== Sink ===================
 Test createSinkBasicTest() {
   Test ret;
@@ -1074,6 +1114,7 @@ TestSuite createRPCClientTestSuite() {
   // =================== Stream ===================
   suite.tests()->push_back(createStreamChunkTimeoutTest());
   suite.tests()->push_back(createStreamCreditTimeoutTest());
+  suite.tests()->push_back(createStreamInitialTimeoutTest());
   return suite;
 }
 

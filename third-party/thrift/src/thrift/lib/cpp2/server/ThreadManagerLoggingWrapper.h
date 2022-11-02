@@ -27,13 +27,52 @@ class BaseThriftServer;
 // It logs the methods that are of interest to ResourcePool rollout
 // This will only exist temporarily and shall only be used by
 // thrift server team soley
-class ThreadManagerLoggingWrapper : public concurrency::ThreadManager {
+class ThreadManagerLoggingWrapper : public concurrency::PriorityThreadManager {
  public:
   ThreadManagerLoggingWrapper(
       std::shared_ptr<concurrency::ThreadManager> tm,
       const BaseThriftServer* server,
       bool shouldLog = true)
-      : tm_(std::move(tm)), server_(server), shouldLog_(shouldLog) {}
+      : tm_(std::move(tm)), server_(server), shouldLog_(shouldLog) {
+    priorityThreadManager_ = dynamic_cast<PriorityThreadManager*>(tm_.get());
+  }
+
+  // From PriorityThreadManager
+  void addWorker(PRIORITY priority, size_t value) override {
+    CHECK(priorityThreadManager_);
+    priorityThreadManager_->addWorker(priority, value);
+  }
+  void removeWorker(PRIORITY priority, size_t value) override {
+    CHECK(priorityThreadManager_);
+    priorityThreadManager_->removeWorker(priority, value);
+  }
+  size_t workerCount(PRIORITY priority) override {
+    CHECK(priorityThreadManager_);
+    return priorityThreadManager_->workerCount(priority);
+  }
+  size_t pendingTaskCount(PRIORITY priority) const override {
+    CHECK(priorityThreadManager_);
+    return priorityThreadManager_->pendingTaskCount(priority);
+  }
+  size_t idleWorkerCount(PRIORITY priority) const override {
+    CHECK(priorityThreadManager_);
+    return priorityThreadManager_->idleWorkerCount(priority);
+  }
+  folly::Codel* getCodel(PRIORITY priority) override {
+    CHECK(priorityThreadManager_);
+    return priorityThreadManager_->getCodel(priority);
+  }
+  void add(
+      PRIORITY priority,
+      std::shared_ptr<concurrency::Runnable> task,
+      int64_t timeout,
+      int64_t expiration,
+      ThreadManager::Source source) noexcept override {
+    CHECK(priorityThreadManager_);
+    priorityThreadManager_->add(
+        priority, std::move(task), timeout, expiration, source);
+  }
+  uint8_t getNumPriorities() const override { return tm_->getNumPriorities(); }
 
   void add(
       std::shared_ptr<concurrency::Runnable> task,
@@ -159,6 +198,8 @@ class ThreadManagerLoggingWrapper : public concurrency::ThreadManager {
   // logging should only be done once if any as
   // it's quite expensive
   static folly::once_flag recordFlag_;
+  // If the wrapped object is a PriorityThreadManager this will be non-null.
+  concurrency::PriorityThreadManager* priorityThreadManager_{nullptr};
 
   void recordStackTrace(std::string) const;
 };

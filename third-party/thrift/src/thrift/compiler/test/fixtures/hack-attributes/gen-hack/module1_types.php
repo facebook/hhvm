@@ -47,7 +47,7 @@ class MyThriftEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  * MyThriftStruct
  */
 <<ClassAttribute>>
-class MyThriftStruct implements \IThriftSyncStruct {
+class MyThriftStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -181,7 +181,7 @@ class MyThriftStruct implements \IThriftSyncStruct {
  * Original thrift struct:-
  * MySecondThriftStruct
  */
-class MySecondThriftStruct implements \IThriftSyncStruct {
+class MySecondThriftStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -325,7 +325,7 @@ class MySecondThriftStruct implements \IThriftSyncStruct {
  * MyThirdThriftStruct
  */
 <<ApiEnum, JSEnum>>
-class MyThirdThriftStruct implements \IThriftSyncStruct {
+class MyThirdThriftStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -439,7 +439,7 @@ enum UnionTestingEnum: int {
  * Original thrift struct:-
  * UnionTesting
  */
-class UnionTesting implements \IThriftSyncStruct, \IThriftUnion<\test\fixtures\jsenum\UnionTestingEnum> {
+class UnionTesting implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\test\fixtures\jsenum\UnionTestingEnum> {
   use \ThriftUnionSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -623,7 +623,7 @@ enum UnionTestingStructuredEnum: int {
  * Original thrift struct:-
  * UnionTestingStructured
  */
-class UnionTestingStructured implements \IThriftSyncStruct, \IThriftUnion<\test\fixtures\jsenum\UnionTestingStructuredEnum> {
+class UnionTestingStructured implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\test\fixtures\jsenum\UnionTestingStructuredEnum> {
   use \ThriftUnionSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

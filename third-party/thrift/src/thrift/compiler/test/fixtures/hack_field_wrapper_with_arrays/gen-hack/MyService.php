@@ -299,7 +299,7 @@ class MyServiceProcessor extends MyServiceSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class MyService_second_args implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyService_second_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -453,7 +453,7 @@ class MyService_second_args implements \IThriftSyncStruct, \IThriftShapishSyncSt
 
 }
 
-class MyService_second_result extends \ThriftSyncStructWithResult {
+class MyService_second_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = bool;

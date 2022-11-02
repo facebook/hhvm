@@ -13,7 +13,7 @@ namespace namespace_from_package\module;
  * Foo
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/namespace_from_package/module/Foo'))>>
-class Foo implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

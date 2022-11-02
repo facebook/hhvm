@@ -558,7 +558,7 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class PubSubStreamingService_returnstream_args implements \IThriftSyncStruct {
+class PubSubStreamingService_returnstream_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -655,7 +655,7 @@ class PubSubStreamingService_returnstream_args implements \IThriftSyncStruct {
 
 }
 
-class PubSubStreamingService_returnstream_StreamResponse extends \ThriftSyncStructWithResult {
+class PubSubStreamingService_returnstream_StreamResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;
@@ -734,7 +734,7 @@ class PubSubStreamingService_returnstream_StreamResponse extends \ThriftSyncStru
 
 }
 
-class PubSubStreamingService_returnstream_FirstResponse extends \ThriftSyncStructWithoutResult {
+class PubSubStreamingService_returnstream_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -789,7 +789,7 @@ class PubSubStreamingService_returnstream_FirstResponse extends \ThriftSyncStruc
 
 }
 
-class PubSubStreamingService_streamthrows_args implements \IThriftSyncStruct {
+class PubSubStreamingService_streamthrows_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -866,7 +866,7 @@ class PubSubStreamingService_streamthrows_args implements \IThriftSyncStruct {
 
 }
 
-class PubSubStreamingService_streamthrows_StreamResponse extends \ThriftSyncStructWithResult {
+class PubSubStreamingService_streamthrows_StreamResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;
@@ -976,7 +976,7 @@ class PubSubStreamingService_streamthrows_StreamResponse extends \ThriftSyncStru
   }
 }
 
-class PubSubStreamingService_streamthrows_FirstResponse extends \ThriftSyncStructWithoutResult {
+class PubSubStreamingService_streamthrows_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1031,7 +1031,7 @@ class PubSubStreamingService_streamthrows_FirstResponse extends \ThriftSyncStruc
 
 }
 
-class PubSubStreamingService_servicethrows_args implements \IThriftSyncStruct {
+class PubSubStreamingService_servicethrows_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1108,7 +1108,7 @@ class PubSubStreamingService_servicethrows_args implements \IThriftSyncStruct {
 
 }
 
-class PubSubStreamingService_servicethrows_StreamResponse extends \ThriftSyncStructWithResult {
+class PubSubStreamingService_servicethrows_StreamResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;
@@ -1187,7 +1187,7 @@ class PubSubStreamingService_servicethrows_StreamResponse extends \ThriftSyncStr
 
 }
 
-class PubSubStreamingService_servicethrows_FirstResponse extends \ThriftSyncStructWithoutResult {
+class PubSubStreamingService_servicethrows_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1275,7 +1275,7 @@ class PubSubStreamingService_servicethrows_FirstResponse extends \ThriftSyncStru
   }
 }
 
-class PubSubStreamingService_servicethrows2_args implements \IThriftSyncStruct {
+class PubSubStreamingService_servicethrows2_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1352,7 +1352,7 @@ class PubSubStreamingService_servicethrows2_args implements \IThriftSyncStruct {
 
 }
 
-class PubSubStreamingService_servicethrows2_StreamResponse extends \ThriftSyncStructWithResult {
+class PubSubStreamingService_servicethrows2_StreamResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;
@@ -1431,7 +1431,7 @@ class PubSubStreamingService_servicethrows2_StreamResponse extends \ThriftSyncSt
 
 }
 
-class PubSubStreamingService_servicethrows2_FirstResponse extends \ThriftSyncStructWithoutResult {
+class PubSubStreamingService_servicethrows2_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1547,7 +1547,7 @@ class PubSubStreamingService_servicethrows2_FirstResponse extends \ThriftSyncStr
   }
 }
 
-class PubSubStreamingService_boththrows_args implements \IThriftSyncStruct {
+class PubSubStreamingService_boththrows_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1624,7 +1624,7 @@ class PubSubStreamingService_boththrows_args implements \IThriftSyncStruct {
 
 }
 
-class PubSubStreamingService_boththrows_StreamResponse extends \ThriftSyncStructWithResult {
+class PubSubStreamingService_boththrows_StreamResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;
@@ -1734,7 +1734,7 @@ class PubSubStreamingService_boththrows_StreamResponse extends \ThriftSyncStruct
   }
 }
 
-class PubSubStreamingService_boththrows_FirstResponse extends \ThriftSyncStructWithoutResult {
+class PubSubStreamingService_boththrows_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1822,7 +1822,7 @@ class PubSubStreamingService_boththrows_FirstResponse extends \ThriftSyncStructW
   }
 }
 
-class PubSubStreamingService_responseandstreamstreamthrows_args implements \IThriftSyncStruct {
+class PubSubStreamingService_responseandstreamstreamthrows_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1899,7 +1899,7 @@ class PubSubStreamingService_responseandstreamstreamthrows_args implements \IThr
 
 }
 
-class PubSubStreamingService_responseandstreamstreamthrows_StreamResponse extends \ThriftSyncStructWithResult {
+class PubSubStreamingService_responseandstreamstreamthrows_StreamResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;
@@ -2009,7 +2009,7 @@ class PubSubStreamingService_responseandstreamstreamthrows_StreamResponse extend
   }
 }
 
-class PubSubStreamingService_responseandstreamstreamthrows_FirstResponse extends \ThriftSyncStructWithResult {
+class PubSubStreamingService_responseandstreamstreamthrows_FirstResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;
@@ -2088,7 +2088,7 @@ class PubSubStreamingService_responseandstreamstreamthrows_FirstResponse extends
 
 }
 
-class PubSubStreamingService_responseandstreamservicethrows_args implements \IThriftSyncStruct {
+class PubSubStreamingService_responseandstreamservicethrows_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2165,7 +2165,7 @@ class PubSubStreamingService_responseandstreamservicethrows_args implements \ITh
 
 }
 
-class PubSubStreamingService_responseandstreamservicethrows_StreamResponse extends \ThriftSyncStructWithResult {
+class PubSubStreamingService_responseandstreamservicethrows_StreamResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;
@@ -2244,7 +2244,7 @@ class PubSubStreamingService_responseandstreamservicethrows_StreamResponse exten
 
 }
 
-class PubSubStreamingService_responseandstreamservicethrows_FirstResponse extends \ThriftSyncStructWithResult {
+class PubSubStreamingService_responseandstreamservicethrows_FirstResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;
@@ -2354,7 +2354,7 @@ class PubSubStreamingService_responseandstreamservicethrows_FirstResponse extend
   }
 }
 
-class PubSubStreamingService_responseandstreamboththrows_args implements \IThriftSyncStruct {
+class PubSubStreamingService_responseandstreamboththrows_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2431,7 +2431,7 @@ class PubSubStreamingService_responseandstreamboththrows_args implements \IThrif
 
 }
 
-class PubSubStreamingService_responseandstreamboththrows_StreamResponse extends \ThriftSyncStructWithResult {
+class PubSubStreamingService_responseandstreamboththrows_StreamResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;
@@ -2541,7 +2541,7 @@ class PubSubStreamingService_responseandstreamboththrows_StreamResponse extends 
   }
 }
 
-class PubSubStreamingService_responseandstreamboththrows_FirstResponse extends \ThriftSyncStructWithResult {
+class PubSubStreamingService_responseandstreamboththrows_FirstResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;
@@ -2651,7 +2651,7 @@ class PubSubStreamingService_responseandstreamboththrows_FirstResponse extends \
   }
 }
 
-class PubSubStreamingService_returnstreamFast_args implements \IThriftSyncStruct {
+class PubSubStreamingService_returnstreamFast_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2748,7 +2748,7 @@ class PubSubStreamingService_returnstreamFast_args implements \IThriftSyncStruct
 
 }
 
-class PubSubStreamingService_returnstreamFast_StreamResponse extends \ThriftSyncStructWithResult {
+class PubSubStreamingService_returnstreamFast_StreamResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;
@@ -2827,7 +2827,7 @@ class PubSubStreamingService_returnstreamFast_StreamResponse extends \ThriftSync
 
 }
 
-class PubSubStreamingService_returnstreamFast_FirstResponse extends \ThriftSyncStructWithoutResult {
+class PubSubStreamingService_returnstreamFast_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

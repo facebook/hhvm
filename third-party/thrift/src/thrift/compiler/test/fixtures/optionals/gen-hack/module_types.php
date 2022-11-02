@@ -43,7 +43,7 @@ class Animal_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  * Original thrift struct:-
  * Color
  */
-class Color implements \IThriftSyncStruct {
+class Color implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -200,7 +200,7 @@ class Color implements \IThriftSyncStruct {
  * Original thrift struct:-
  * Vehicle
  */
-class Vehicle implements \IThriftSyncStruct {
+class Vehicle implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -390,7 +390,7 @@ class Vehicle implements \IThriftSyncStruct {
  * Original thrift struct:-
  * Person
  */
-class Person implements \IThriftSyncStruct {
+class Person implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

@@ -13,7 +13,7 @@ namespace thrift\annotation\deprecated;
  * SetGenerated
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/SetGenerated'))>>
-class SetGenerated implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class SetGenerated implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -111,7 +111,7 @@ class SetGenerated implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * Transitive
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/Transitive'))>>
-class Transitive implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Transitive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

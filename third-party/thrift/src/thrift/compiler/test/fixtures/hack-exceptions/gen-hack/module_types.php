@@ -41,7 +41,7 @@ class MyEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  * Original thrift exception:-
  * MyException1
  */
-class MyException1 extends \TException implements \IThriftSyncStruct {
+class MyException1 extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -164,7 +164,7 @@ class MyException1 extends \TException implements \IThriftSyncStruct {
  * Original thrift exception:-
  * MyException2
  */
-class MyException2 extends \TException implements \IThriftSyncStruct {
+class MyException2 extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -286,7 +286,7 @@ class MyException2 extends \TException implements \IThriftSyncStruct {
  * Original thrift exception:-
  * MyException3
  */
-class MyException3 extends \TException implements \IThriftSyncStruct {
+class MyException3 extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -408,7 +408,7 @@ class MyException3 extends \TException implements \IThriftSyncStruct {
  * Original thrift exception:-
  * MyException4
  */
-class MyException4 extends \TException implements \IThriftSyncStruct {
+class MyException4 extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -530,7 +530,7 @@ class MyException4 extends \TException implements \IThriftSyncStruct {
  * Original thrift exception:-
  * MyException5
  */
-class MyException5 extends \TException implements \IThriftSyncStruct {
+class MyException5 extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

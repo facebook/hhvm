@@ -5127,7 +5127,8 @@ void t_hack_generator::_generate_php_struct_definition(
   bool is_async = is_async_struct(tstruct);
   const t_result_struct* result_struct =
       dynamic_cast<const t_result_struct*>(tstruct);
-  if (result_struct != nullptr) {
+  bool is_result = result_struct != nullptr;
+  if (is_result) {
     out << " extends \\Thrift" << (is_async ? "Async" : "Sync");
     if (result_struct->getResultReturnType() == "void") {
       out << "StructWithoutResult";
@@ -5138,6 +5139,12 @@ void t_hack_generator::_generate_php_struct_definition(
     out << " implements \\IThriftAsyncStruct";
   } else {
     out << " implements \\IThriftSyncStruct";
+  }
+  if (tstruct->is_exception()) {
+    out << ", \\IThriftExceptionMetadata";
+  } else {
+    out << (is_result ? " implements" : ",");
+    out << " \\IThriftStructMetadata";
   }
 
   // Wrapper is not supported on unions.

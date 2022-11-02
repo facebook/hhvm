@@ -10,7 +10,7 @@
  * Original thrift struct:-
  * MyStruct
  */
-class MyStruct implements \IThriftSyncStruct {
+class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   use MyStructTrait;
@@ -97,7 +97,7 @@ class MyStruct implements \IThriftSyncStruct {
  * Original thrift struct:-
  * MySecondStruct
  */
-class MySecondStruct implements \IThriftSyncStruct {
+class MySecondStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   use MySecondStructTrait;
@@ -184,7 +184,7 @@ class MySecondStruct implements \IThriftSyncStruct {
  * Original thrift struct:-
  * MyThirdStruct
  */
-class MyThirdStruct implements \IThriftSyncStruct {
+class MyThirdStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   use CustomTraitName;
@@ -271,7 +271,7 @@ class MyThirdStruct implements \IThriftSyncStruct {
  * Original thrift struct:-
  * MyFourthStruct
  */
-class MyFourthStruct implements \IThriftSyncStruct {
+class MyFourthStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   use MyFourthStructTrait;
@@ -363,7 +363,7 @@ class MyFourthStruct implements \IThriftSyncStruct {
  * Original thrift struct:-
  * MyFifthStruct
  */
-class MyFifthStruct implements \IThriftSyncStruct {
+class MyFifthStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   use CustomTraitName;
@@ -452,7 +452,7 @@ class MyFifthStruct implements \IThriftSyncStruct {
 
 }
 
-trait MySixthStructTrait implements \IThriftSyncStruct {
+trait MySixthStructTrait implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -535,7 +535,7 @@ trait MySixthStructTrait implements \IThriftSyncStruct {
 
 }
 
-trait MySeventhStructTrait implements \IThriftSyncStruct {
+trait MySeventhStructTrait implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

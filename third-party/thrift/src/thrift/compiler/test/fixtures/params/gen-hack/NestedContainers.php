@@ -953,7 +953,7 @@ class NestedContainersProcessor extends NestedContainersSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class NestedContainers_mapList_args implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class NestedContainers_mapList_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1085,7 +1085,7 @@ class NestedContainers_mapList_args implements \IThriftSyncStruct, \IThriftShapi
 
 }
 
-class NestedContainers_mapList_result extends \ThriftSyncStructWithoutResult {
+class NestedContainers_mapList_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1140,7 +1140,7 @@ class NestedContainers_mapList_result extends \ThriftSyncStructWithoutResult {
 
 }
 
-class NestedContainers_mapSet_args implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class NestedContainers_mapSet_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1272,7 +1272,7 @@ class NestedContainers_mapSet_args implements \IThriftSyncStruct, \IThriftShapis
 
 }
 
-class NestedContainers_mapSet_result extends \ThriftSyncStructWithoutResult {
+class NestedContainers_mapSet_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1327,7 +1327,7 @@ class NestedContainers_mapSet_result extends \ThriftSyncStructWithoutResult {
 
 }
 
-class NestedContainers_listMap_args implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class NestedContainers_listMap_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1459,7 +1459,7 @@ class NestedContainers_listMap_args implements \IThriftSyncStruct, \IThriftShapi
 
 }
 
-class NestedContainers_listMap_result extends \ThriftSyncStructWithoutResult {
+class NestedContainers_listMap_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1514,7 +1514,7 @@ class NestedContainers_listMap_result extends \ThriftSyncStructWithoutResult {
 
 }
 
-class NestedContainers_listSet_args implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class NestedContainers_listSet_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1637,7 +1637,7 @@ class NestedContainers_listSet_args implements \IThriftSyncStruct, \IThriftShapi
 
 }
 
-class NestedContainers_listSet_result extends \ThriftSyncStructWithoutResult {
+class NestedContainers_listSet_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1692,7 +1692,7 @@ class NestedContainers_listSet_result extends \ThriftSyncStructWithoutResult {
 
 }
 
-class NestedContainers_turtles_args implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class NestedContainers_turtles_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1887,7 +1887,7 @@ class NestedContainers_turtles_args implements \IThriftSyncStruct, \IThriftShapi
 
 }
 
-class NestedContainers_turtles_result extends \ThriftSyncStructWithoutResult {
+class NestedContainers_turtles_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

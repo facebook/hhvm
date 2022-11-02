@@ -13,7 +13,7 @@ namespace thrift\annotation\java;
  * Adapter
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/java/Adapter'))>>
-class Adapter implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -169,7 +169,7 @@ class Adapter implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * Wrapper
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/java/Wrapper'))>>
-class Wrapper implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Wrapper implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

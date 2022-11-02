@@ -49,3 +49,11 @@ interface IThriftConstants {
   public static function getAllStructuredAnnotations(
   ): dict<string, dict<string, \IThriftStruct>>;
 }
+
+interface IThriftExceptionMetadata {
+  public static function getExceptionMetadata()[]: \tmeta_ThriftException;
+}
+
+interface IThriftStructMetadata {
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct;
+}

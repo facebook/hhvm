@@ -88,7 +88,7 @@ class apache_thrift_type_standard_StandardProtocol_TEnumStaticMetadata implement
  * DurationStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/Duration'))>>
-class apache_thrift_type_standard_DurationStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class apache_thrift_type_standard_DurationStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -245,7 +245,7 @@ class apache_thrift_type_standard_DurationStruct implements \IThriftSyncStruct, 
  * TimeStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/Time'))>>
-class apache_thrift_type_standard_TimeStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class apache_thrift_type_standard_TimeStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -405,7 +405,7 @@ class apache_thrift_type_standard_TimeStruct implements \IThriftSyncStruct, \ITh
  * FractionStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/Fraction'))>>
-class apache_thrift_type_standard_FractionStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class apache_thrift_type_standard_FractionStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -556,7 +556,7 @@ class apache_thrift_type_standard_FractionStruct implements \IThriftSyncStruct, 
  * UriStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/Uri'))>>
-class apache_thrift_type_standard_UriStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class apache_thrift_type_standard_UriStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -923,7 +923,7 @@ enum apache_thrift_type_standard_TypeUriEnum: int {
  * TypeUri
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/TypeUri'))>>
-class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThriftUnion<apache_thrift_type_standard_TypeUriEnum>, \IThriftShapishSyncStruct {
+class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<apache_thrift_type_standard_TypeUriEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1197,7 +1197,7 @@ enum apache_thrift_type_standard_TypeNameEnum: int {
  * TypeName
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/TypeName'))>>
-class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThriftUnion<apache_thrift_type_standard_TypeNameEnum>, \IThriftShapishSyncStruct {
+class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<apache_thrift_type_standard_TypeNameEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

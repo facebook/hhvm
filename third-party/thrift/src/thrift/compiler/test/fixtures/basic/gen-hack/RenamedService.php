@@ -299,7 +299,7 @@ class RenamedServiceProcessor extends RenamedServiceSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class FooService_simple_rpc_args implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class FooService_simple_rpc_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -375,7 +375,7 @@ class FooService_simple_rpc_args implements \IThriftSyncStruct, \IThriftShapishS
 
 }
 
-class FooService_simple_rpc_result extends \ThriftSyncStructWithoutResult {
+class FooService_simple_rpc_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

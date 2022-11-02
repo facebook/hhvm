@@ -372,7 +372,7 @@ class BadServiceProcessor extends BadServiceSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class BadService_bar_args implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class BadService_bar_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -448,7 +448,7 @@ class BadService_bar_args implements \IThriftSyncStruct, \IThriftShapishSyncStru
 
 }
 
-class BadService_bar_result extends \ThriftSyncStructWithResult {
+class BadService_bar_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;
@@ -544,7 +544,7 @@ class BadService_bar_result extends \ThriftSyncStructWithResult {
 
 }
 
-class BadService_BadInteraction_foo_args implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class BadService_BadInteraction_foo_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -620,7 +620,7 @@ class BadService_BadInteraction_foo_args implements \IThriftSyncStruct, \IThrift
 
 }
 
-class BadService_BadInteraction_foo_result extends \ThriftSyncStructWithoutResult {
+class BadService_BadInteraction_foo_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

@@ -443,7 +443,7 @@ class MyServicePrioParentProcessor extends MyServicePrioParentSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class MyServicePrioParent_ping_args implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyServicePrioParent_ping_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -519,7 +519,7 @@ class MyServicePrioParent_ping_args implements \IThriftSyncStruct, \IThriftShapi
 
 }
 
-class MyServicePrioParent_ping_result extends \ThriftSyncStructWithoutResult {
+class MyServicePrioParent_ping_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -583,7 +583,7 @@ class MyServicePrioParent_ping_result extends \ThriftSyncStructWithoutResult {
 
 }
 
-class MyServicePrioParent_pong_args implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyServicePrioParent_pong_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -659,7 +659,7 @@ class MyServicePrioParent_pong_args implements \IThriftSyncStruct, \IThriftShapi
 
 }
 
-class MyServicePrioParent_pong_result extends \ThriftSyncStructWithoutResult {
+class MyServicePrioParent_pong_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

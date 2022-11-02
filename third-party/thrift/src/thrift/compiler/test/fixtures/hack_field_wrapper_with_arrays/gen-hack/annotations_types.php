@@ -81,7 +81,7 @@ type i64WithWrapper = \MyTypeIntWrapper<\thrift_adapted_types\i64WithWrapper>;
  * Original thrift struct:-
  * structured_annotation_with_default
  */
-class structured_annotation_with_default implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class structured_annotation_with_default implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -207,7 +207,7 @@ class structured_annotation_with_default implements \IThriftSyncStruct, \IThrift
  * Original thrift struct:-
  * structured_annotation_recursive
  */
-class structured_annotation_recursive implements \IThriftAsyncStruct, \IThriftShapishAsyncStruct {
+class structured_annotation_recursive implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -617,7 +617,7 @@ class structured_annotation_recursive implements \IThriftAsyncStruct, \IThriftSh
  * Original thrift struct:-
  * MyStruct
  */
-class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

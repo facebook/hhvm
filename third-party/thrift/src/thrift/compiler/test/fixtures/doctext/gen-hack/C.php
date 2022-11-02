@@ -284,7 +284,7 @@ class CClient extends \ThriftClientBase implements CClientIf {
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class C_f_args implements \IThriftSyncStruct {
+class C_f_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -339,7 +339,7 @@ class C_f_args implements \IThriftSyncStruct {
 
 }
 
-class C_f_result extends \ThriftSyncStructWithoutResult {
+class C_f_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -394,7 +394,7 @@ class C_f_result extends \ThriftSyncStructWithoutResult {
 
 }
 
-class C_thing_args implements \IThriftSyncStruct {
+class C_thing_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -524,7 +524,7 @@ class C_thing_args implements \IThriftSyncStruct {
 
 }
 
-class C_thing_result extends \ThriftSyncStructWithResult {
+class C_thing_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = string;
@@ -634,7 +634,7 @@ class C_thing_result extends \ThriftSyncStructWithResult {
   }
 }
 
-class C_numbers_args implements \IThriftSyncStruct {
+class C_numbers_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -689,7 +689,7 @@ class C_numbers_args implements \IThriftSyncStruct {
 
 }
 
-class C_numbers_StreamResponse extends \ThriftSyncStructWithResult {
+class C_numbers_StreamResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;
@@ -777,7 +777,7 @@ class C_numbers_StreamResponse extends \ThriftSyncStructWithResult {
 
 }
 
-class C_numbers_FirstResponse extends \ThriftSyncStructWithoutResult {
+class C_numbers_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

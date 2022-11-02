@@ -10,7 +10,7 @@
  * Original thrift exception:-
  * FooStreamEx
  */
-class FooStreamEx extends \TException implements \IThriftSyncStruct {
+class FooStreamEx extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -69,7 +69,7 @@ class FooStreamEx extends \TException implements \IThriftSyncStruct {
  * Original thrift exception:-
  * FooEx
  */
-class FooEx extends \TException implements \IThriftSyncStruct {
+class FooEx extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -128,7 +128,7 @@ class FooEx extends \TException implements \IThriftSyncStruct {
  * Original thrift exception:-
  * FooEx2
  */
-class FooEx2 extends \TException implements \IThriftSyncStruct {
+class FooEx2 extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

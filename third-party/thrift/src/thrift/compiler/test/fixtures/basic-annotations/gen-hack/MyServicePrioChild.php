@@ -293,7 +293,7 @@ class MyServicePrioChildProcessor extends MyServicePrioChildSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class MyServicePrioChild_pang_args implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyServicePrioChild_pang_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -369,7 +369,7 @@ class MyServicePrioChild_pang_args implements \IThriftSyncStruct, \IThriftShapis
 
 }
 
-class MyServicePrioChild_pang_result extends \ThriftSyncStructWithoutResult {
+class MyServicePrioChild_pang_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

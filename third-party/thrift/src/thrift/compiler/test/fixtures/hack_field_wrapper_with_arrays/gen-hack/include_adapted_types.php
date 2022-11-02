@@ -15,7 +15,7 @@ namespace thrift_adapted_types {
    * Original thrift struct:-
    * StructWithWrapper
    */
-class StructWithWrapper implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class StructWithWrapper implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
     use \ThriftSerializationTrait;
 
     const dict<int, this::TFieldSpec> SPEC = dict[

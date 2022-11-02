@@ -43,7 +43,7 @@ class Status_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  * FBStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/hack/ns2/FBStruct'))>>
-class FBStruct implements \IThriftSyncStruct {
+class FBStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

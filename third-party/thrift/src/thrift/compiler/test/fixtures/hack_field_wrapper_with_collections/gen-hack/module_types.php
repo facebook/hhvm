@@ -10,7 +10,7 @@
  * Original thrift struct:-
  * AnnotationStruct
  */
-class AnnotationStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class AnnotationStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -107,7 +107,7 @@ class AnnotationStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct 
  * Original thrift struct:-
  * MyStruct
  */
-class MyStruct implements \IThriftSyncStruct, \IThriftShapishAsyncStruct {
+class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -251,7 +251,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishAsyncStruct {
  * Original thrift struct:-
  * MyNestedStruct
  */
-class MyNestedStruct implements \IThriftAsyncStruct, \IThriftShapishAsyncStruct {
+class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -487,7 +487,7 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftShapishAsyncStruct 
  * Original thrift struct:-
  * MyComplexStruct
  */
-class MyComplexStruct implements \IThriftAsyncStruct, \IThriftShapishAsyncStruct {
+class MyComplexStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

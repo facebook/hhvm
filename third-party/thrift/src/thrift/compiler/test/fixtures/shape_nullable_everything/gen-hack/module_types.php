@@ -10,7 +10,7 @@
  * Original thrift struct:-
  * A
  */
-class A implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class A implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -160,7 +160,7 @@ class A implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * Original thrift struct:-
  * B
  */
-class B implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -844,7 +844,7 @@ class B implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * Original thrift struct:-
  * C
  */
-class C implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

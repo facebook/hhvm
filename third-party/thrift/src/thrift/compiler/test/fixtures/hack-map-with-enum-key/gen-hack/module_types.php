@@ -41,7 +41,7 @@ class FooEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  * Original thrift struct:-
  * BarStruct
  */
-class BarStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class BarStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

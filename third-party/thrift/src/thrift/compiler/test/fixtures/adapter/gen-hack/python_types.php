@@ -13,7 +13,7 @@ namespace thrift\annotation\python;
  * Adapter
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/python/Adapter'))>>
-class Adapter implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

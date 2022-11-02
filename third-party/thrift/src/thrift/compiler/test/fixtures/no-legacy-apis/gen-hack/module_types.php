@@ -45,7 +45,7 @@ class MyEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  * MyStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/no-legacy-apis/MyStruct'))>>
-class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -194,7 +194,7 @@ enum MyUnionEnum: int {
  * MyUnion
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/no-legacy-apis/MyUnion'))>>
-class MyUnion implements \IThriftSyncStruct, \IThriftUnion<\fixtures\no-legacy-apis\MyUnionEnum>, \IThriftShapishSyncStruct {
+class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\fixtures\no-legacy-apis\MyUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

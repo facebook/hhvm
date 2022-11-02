@@ -41,7 +41,7 @@ class foo_php_ns_Status_TEnumStaticMetadata implements \IThriftEnumStaticMetadat
  * TestStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/foo/php/ns/TestStruct'))>>
-class foo_php_ns_TestStruct implements \IThriftSyncStruct {
+class foo_php_ns_TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

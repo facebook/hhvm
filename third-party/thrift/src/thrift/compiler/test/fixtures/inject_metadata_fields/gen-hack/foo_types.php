@@ -10,7 +10,7 @@
  * Original thrift struct:-
  * Fields
  */
-class Fields implements \IThriftSyncStruct {
+class Fields implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

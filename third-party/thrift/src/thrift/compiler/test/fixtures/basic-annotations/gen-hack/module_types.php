@@ -43,7 +43,7 @@ class MyEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  * Original thrift struct:-
  * MyStructNestedAnnotation
  */
-class MyStructNestedAnnotation implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStructNestedAnnotation implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -159,7 +159,7 @@ enum MyUnionEnum: int {
  * Original thrift struct:-
  * MyUnion
  */
-class MyUnion implements \IThriftSyncStruct, \IThriftUnion<MyUnionEnum>, \IThriftShapishSyncStruct {
+class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<MyUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -260,7 +260,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftUnion<MyUnionEnum>, \IThrif
  * Original thrift exception:-
  * MyException
  */
-class MyException extends \TException implements \IThriftSyncStruct {
+class MyException extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -335,7 +335,7 @@ class MyException extends \TException implements \IThriftSyncStruct {
  * MyStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/compiler/test/fixtures/basic-annotations/src/module/MyStruct')),\SomeClass(\AnotherClass::class)>>
-class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -789,7 +789,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * Original thrift struct:-
  * SecretStruct
  */
-class SecretStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class SecretStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

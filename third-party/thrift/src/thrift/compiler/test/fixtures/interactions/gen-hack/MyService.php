@@ -860,7 +860,7 @@ class MyService_SerialInteraction extends \ThriftClientBase {
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class MyService_foo_args implements \IThriftSyncStruct {
+class MyService_foo_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -915,7 +915,7 @@ class MyService_foo_args implements \IThriftSyncStruct {
 
 }
 
-class MyService_foo_result extends \ThriftSyncStructWithoutResult {
+class MyService_foo_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -970,7 +970,7 @@ class MyService_foo_result extends \ThriftSyncStructWithoutResult {
 
 }
 
-class MyService_interact_args implements \IThriftSyncStruct {
+class MyService_interact_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1047,7 +1047,7 @@ class MyService_interact_args implements \IThriftSyncStruct {
 
 }
 
-class MyService_interact_result extends \ThriftSyncStructWithoutResult {
+class MyService_interact_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1102,7 +1102,7 @@ class MyService_interact_result extends \ThriftSyncStructWithoutResult {
 
 }
 
-class MyService_interactFast_args implements \IThriftSyncStruct {
+class MyService_interactFast_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1157,7 +1157,7 @@ class MyService_interactFast_args implements \IThriftSyncStruct {
 
 }
 
-class MyService_interactFast_result extends \ThriftSyncStructWithResult {
+class MyService_interactFast_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;
@@ -1236,7 +1236,7 @@ class MyService_interactFast_result extends \ThriftSyncStructWithResult {
 
 }
 
-class MyService_serialize_args implements \IThriftSyncStruct {
+class MyService_serialize_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1291,7 +1291,7 @@ class MyService_serialize_args implements \IThriftSyncStruct {
 
 }
 
-class MyService_serialize_StreamResponse extends \ThriftSyncStructWithResult {
+class MyService_serialize_StreamResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;
@@ -1370,7 +1370,7 @@ class MyService_serialize_StreamResponse extends \ThriftSyncStructWithResult {
 
 }
 
-class MyService_serialize_FirstResponse extends \ThriftSyncStructWithResult {
+class MyService_serialize_FirstResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;
@@ -1449,7 +1449,7 @@ class MyService_serialize_FirstResponse extends \ThriftSyncStructWithResult {
 
 }
 
-class MyService_MyInteraction_frobnicate_args implements \IThriftSyncStruct {
+class MyService_MyInteraction_frobnicate_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1504,7 +1504,7 @@ class MyService_MyInteraction_frobnicate_args implements \IThriftSyncStruct {
 
 }
 
-class MyService_MyInteraction_frobnicate_result extends \ThriftSyncStructWithResult {
+class MyService_MyInteraction_frobnicate_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;
@@ -1614,7 +1614,7 @@ class MyService_MyInteraction_frobnicate_result extends \ThriftSyncStructWithRes
   }
 }
 
-class MyService_MyInteraction_ping_args implements \IThriftSyncStruct {
+class MyService_MyInteraction_ping_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1669,7 +1669,7 @@ class MyService_MyInteraction_ping_args implements \IThriftSyncStruct {
 
 }
 
-class MyService_MyInteraction_truthify_args implements \IThriftSyncStruct {
+class MyService_MyInteraction_truthify_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1724,7 +1724,7 @@ class MyService_MyInteraction_truthify_args implements \IThriftSyncStruct {
 
 }
 
-class MyService_MyInteraction_truthify_StreamResponse extends \ThriftSyncStructWithResult {
+class MyService_MyInteraction_truthify_StreamResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = bool;
@@ -1803,7 +1803,7 @@ class MyService_MyInteraction_truthify_StreamResponse extends \ThriftSyncStructW
 
 }
 
-class MyService_MyInteraction_truthify_FirstResponse extends \ThriftSyncStructWithoutResult {
+class MyService_MyInteraction_truthify_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1858,7 +1858,7 @@ class MyService_MyInteraction_truthify_FirstResponse extends \ThriftSyncStructWi
 
 }
 
-class MyService_MyInteraction_encode_args implements \IThriftSyncStruct {
+class MyService_MyInteraction_encode_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1913,7 +1913,7 @@ class MyService_MyInteraction_encode_args implements \IThriftSyncStruct {
 
 }
 
-class MyService_MyInteraction_encode_FirstResponse extends \ThriftSyncStructWithResult {
+class MyService_MyInteraction_encode_FirstResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = Set<int>;
@@ -2005,7 +2005,7 @@ class MyService_MyInteraction_encode_FirstResponse extends \ThriftSyncStructWith
 
 }
 
-class MyService_MyInteraction_encode_SinkPayload extends \ThriftSyncStructWithResult {
+class MyService_MyInteraction_encode_SinkPayload extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = string;
@@ -2084,7 +2084,7 @@ class MyService_MyInteraction_encode_SinkPayload extends \ThriftSyncStructWithRe
 
 }
 
-class MyService_MyInteraction_encode_FinalResponse extends \ThriftSyncStructWithResult {
+class MyService_MyInteraction_encode_FinalResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = string;
@@ -2164,7 +2164,7 @@ class MyService_MyInteraction_encode_FinalResponse extends \ThriftSyncStructWith
 
 }
 
-class MyService_MyInteractionFast_frobnicate_args implements \IThriftSyncStruct {
+class MyService_MyInteractionFast_frobnicate_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2219,7 +2219,7 @@ class MyService_MyInteractionFast_frobnicate_args implements \IThriftSyncStruct 
 
 }
 
-class MyService_MyInteractionFast_frobnicate_result extends \ThriftSyncStructWithResult {
+class MyService_MyInteractionFast_frobnicate_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;
@@ -2298,7 +2298,7 @@ class MyService_MyInteractionFast_frobnicate_result extends \ThriftSyncStructWit
 
 }
 
-class MyService_MyInteractionFast_ping_args implements \IThriftSyncStruct {
+class MyService_MyInteractionFast_ping_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2353,7 +2353,7 @@ class MyService_MyInteractionFast_ping_args implements \IThriftSyncStruct {
 
 }
 
-class MyService_MyInteractionFast_truthify_args implements \IThriftSyncStruct {
+class MyService_MyInteractionFast_truthify_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2408,7 +2408,7 @@ class MyService_MyInteractionFast_truthify_args implements \IThriftSyncStruct {
 
 }
 
-class MyService_MyInteractionFast_truthify_StreamResponse extends \ThriftSyncStructWithResult {
+class MyService_MyInteractionFast_truthify_StreamResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = bool;
@@ -2487,7 +2487,7 @@ class MyService_MyInteractionFast_truthify_StreamResponse extends \ThriftSyncStr
 
 }
 
-class MyService_MyInteractionFast_truthify_FirstResponse extends \ThriftSyncStructWithoutResult {
+class MyService_MyInteractionFast_truthify_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2542,7 +2542,7 @@ class MyService_MyInteractionFast_truthify_FirstResponse extends \ThriftSyncStru
 
 }
 
-class MyService_MyInteractionFast_encode_args implements \IThriftSyncStruct {
+class MyService_MyInteractionFast_encode_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2597,7 +2597,7 @@ class MyService_MyInteractionFast_encode_args implements \IThriftSyncStruct {
 
 }
 
-class MyService_MyInteractionFast_encode_FirstResponse extends \ThriftSyncStructWithResult {
+class MyService_MyInteractionFast_encode_FirstResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = Set<int>;
@@ -2689,7 +2689,7 @@ class MyService_MyInteractionFast_encode_FirstResponse extends \ThriftSyncStruct
 
 }
 
-class MyService_MyInteractionFast_encode_SinkPayload extends \ThriftSyncStructWithResult {
+class MyService_MyInteractionFast_encode_SinkPayload extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = string;
@@ -2768,7 +2768,7 @@ class MyService_MyInteractionFast_encode_SinkPayload extends \ThriftSyncStructWi
 
 }
 
-class MyService_MyInteractionFast_encode_FinalResponse extends \ThriftSyncStructWithResult {
+class MyService_MyInteractionFast_encode_FinalResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = string;
@@ -2848,7 +2848,7 @@ class MyService_MyInteractionFast_encode_FinalResponse extends \ThriftSyncStruct
 
 }
 
-class MyService_SerialInteraction_frobnicate_args implements \IThriftSyncStruct {
+class MyService_SerialInteraction_frobnicate_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2903,7 +2903,7 @@ class MyService_SerialInteraction_frobnicate_args implements \IThriftSyncStruct 
 
 }
 
-class MyService_SerialInteraction_frobnicate_result extends \ThriftSyncStructWithoutResult {
+class MyService_SerialInteraction_frobnicate_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

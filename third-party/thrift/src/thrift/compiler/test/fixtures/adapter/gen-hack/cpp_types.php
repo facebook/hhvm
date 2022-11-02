@@ -103,7 +103,7 @@ class EnumUnderlyingType_TEnumStaticMetadata implements \IThriftEnumStaticMetada
  * Ref
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/Ref'))>>
-class Ref implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Ref implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -225,7 +225,7 @@ class Ref implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * Lazy
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/Lazy'))>>
-class Lazy implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Lazy implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -342,7 +342,7 @@ class Lazy implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * DisableLazyChecksum
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/DisableLazyChecksum'))>>
-class DisableLazyChecksum implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class DisableLazyChecksum implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -443,7 +443,7 @@ class DisableLazyChecksum implements \IThriftSyncStruct, \IThriftShapishSyncStru
  * Adapter
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/Adapter'))>>
-class Adapter implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -730,7 +730,7 @@ class Adapter implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * PackIsset
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/PackIsset'))>>
-class PackIsset implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class PackIsset implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -847,7 +847,7 @@ class PackIsset implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * MinimizePadding
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/MinimizePadding'))>>
-class MinimizePadding implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MinimizePadding implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -932,7 +932,7 @@ class MinimizePadding implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * TriviallyRelocatable
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/TriviallyRelocatable'))>>
-class TriviallyRelocatable implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class TriviallyRelocatable implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1017,7 +1017,7 @@ class TriviallyRelocatable implements \IThriftSyncStruct, \IThriftShapishSyncStr
  * ScopedEnumAsUnionType
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/ScopedEnumAsUnionType'))>>
-class ScopedEnumAsUnionType implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class ScopedEnumAsUnionType implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1115,7 +1115,7 @@ class ScopedEnumAsUnionType implements \IThriftSyncStruct, \IThriftShapishSyncSt
  * StrongType
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/StrongType'))>>
-class StrongType implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class StrongType implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1217,7 +1217,7 @@ class StrongType implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * FieldInterceptor
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/FieldInterceptor'))>>
-class FieldInterceptor implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class FieldInterceptor implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1384,7 +1384,7 @@ class FieldInterceptor implements \IThriftSyncStruct, \IThriftShapishSyncStruct 
  * UseOpEncode
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/UseOpEncode'))>>
-class UseOpEncode implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class UseOpEncode implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1485,7 +1485,7 @@ class UseOpEncode implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * EnumType
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/EnumType'))>>
-class EnumType implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class EnumType implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

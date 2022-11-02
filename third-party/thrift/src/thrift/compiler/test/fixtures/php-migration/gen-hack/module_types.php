@@ -10,7 +10,7 @@
  * Original thrift struct:-
  * Foo
  */
-class Foo implements \IThriftSyncStruct {
+class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -239,7 +239,7 @@ class Foo implements \IThriftSyncStruct {
  * Original thrift exception:-
  * Baz
  */
-class Baz extends \TException implements \IThriftSyncStruct {
+class Baz extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -423,7 +423,7 @@ class Baz extends \TException implements \IThriftSyncStruct {
  * Original thrift exception:-
  * OptBaz
  */
-class OptBaz extends \TException implements \IThriftSyncStruct {
+class OptBaz extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

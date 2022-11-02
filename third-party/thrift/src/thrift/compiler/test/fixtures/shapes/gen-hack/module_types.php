@@ -47,7 +47,7 @@ enum UnionEnum: int {
  * Original thrift struct:-
  * Union
  */
-class Union implements \IThriftSyncStruct, \IThriftUnion<\test\fixtures\UnionEnum>, \IThriftShapishSyncStruct {
+class Union implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\test\fixtures\UnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -242,7 +242,7 @@ class Union implements \IThriftSyncStruct, \IThriftUnion<\test\fixtures\UnionEnu
  * Original thrift struct:-
  * A
  */
-class A implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class A implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -342,7 +342,7 @@ class A implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * Original thrift struct:-
  * B
  */
-class B implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

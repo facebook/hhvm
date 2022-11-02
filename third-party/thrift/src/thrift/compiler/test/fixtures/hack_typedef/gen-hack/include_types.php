@@ -13,7 +13,7 @@ type MyI32 = int;
  * Original thrift struct:-
  * Foo
  */
-class Foo implements \IThriftSyncStruct {
+class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

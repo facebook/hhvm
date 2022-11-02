@@ -305,7 +305,7 @@ class TestServiceProcessor extends TestServiceSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class TestService_init_args implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class TestService_init_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -408,7 +408,7 @@ class TestService_init_args implements \IThriftSyncStruct, \IThriftShapishSyncSt
 
 }
 
-class TestService_init_result extends \ThriftSyncStructWithResult {
+class TestService_init_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = int;

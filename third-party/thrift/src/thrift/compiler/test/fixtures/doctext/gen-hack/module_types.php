@@ -46,7 +46,7 @@ class B_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  * Original thrift struct:-
  * A
  */
-class A implements \IThriftSyncStruct {
+class A implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -141,7 +141,7 @@ enum UEnum: int {
  * Original thrift struct:-
  * U
  */
-class U implements \IThriftSyncStruct, \IThriftUnion<UEnum> {
+class U implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<UEnum> {
   use \ThriftUnionSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -324,7 +324,7 @@ class U implements \IThriftSyncStruct, \IThriftUnion<UEnum> {
  * Original thrift exception:-
  * Bang
  */
-class Bang extends \TException implements \IThriftSyncStruct {
+class Bang extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

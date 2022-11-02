@@ -10,7 +10,7 @@
  * Original thrift struct:-
  * structured_annotation_included
  */
-class structured_annotation_included implements \IThriftSyncStruct {
+class structured_annotation_included implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

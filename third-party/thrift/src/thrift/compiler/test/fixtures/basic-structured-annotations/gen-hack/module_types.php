@@ -65,7 +65,7 @@ class MyEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  * structured_annotation_inline
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic-structured-annotations/structured_annotation_inline'))>>
-class structured_annotation_inline implements \IThriftSyncStruct {
+class structured_annotation_inline implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -175,7 +175,7 @@ class structured_annotation_inline implements \IThriftSyncStruct {
  * structured_annotation_with_default
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic-structured-annotations/structured_annotation_with_default'))>>
-class structured_annotation_with_default implements \IThriftSyncStruct {
+class structured_annotation_with_default implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -261,7 +261,7 @@ class structured_annotation_with_default implements \IThriftSyncStruct {
  * structured_annotation_recursive
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic-structured-annotations/structured_annotation_recursive'))>>
-class structured_annotation_recursive implements \IThriftSyncStruct {
+class structured_annotation_recursive implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -424,7 +424,7 @@ class structured_annotation_recursive implements \IThriftSyncStruct {
  * structured_annotation_forward
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic-structured-annotations/structured_annotation_forward'))>>
-class structured_annotation_forward implements \IThriftSyncStruct {
+class structured_annotation_forward implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -510,7 +510,7 @@ class structured_annotation_forward implements \IThriftSyncStruct {
  * structured_annotation_nested
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic-structured-annotations/structured_annotation_nested'))>>
-class structured_annotation_nested implements \IThriftSyncStruct {
+class structured_annotation_nested implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -625,7 +625,7 @@ class structured_annotation_nested implements \IThriftSyncStruct {
  * MyStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic-structured-annotations/MyStruct'))>>
-class MyStruct implements \IThriftSyncStruct {
+class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -878,7 +878,7 @@ class MyStruct implements \IThriftSyncStruct {
  * MyException
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic-structured-annotations/MyException'))>>
-class MyException extends \TException implements \IThriftSyncStruct {
+class MyException extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -985,7 +985,7 @@ enum MyUnionEnum: int {
  * MyUnion
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic-structured-annotations/MyUnion'))>>
-class MyUnion implements \IThriftSyncStruct, \IThriftUnion<\fixtures\basic-structured-annotations\MyUnionEnum> {
+class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\fixtures\basic-structured-annotations\MyUnionEnum> {
   use \ThriftUnionSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

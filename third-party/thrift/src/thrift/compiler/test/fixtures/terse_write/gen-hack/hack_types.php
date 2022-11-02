@@ -13,7 +13,7 @@ namespace thrift\annotation\hack;
  * FieldWrapper
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/hack/FieldWrapper'))>>
-class FieldWrapper implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class FieldWrapper implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -131,7 +131,7 @@ class FieldWrapper implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * Wrapper
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/hack/Wrapper'))>>
-class Wrapper implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Wrapper implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -317,7 +317,7 @@ class Wrapper implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * Adapter
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/hack/Adapter'))>>
-class Adapter implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -439,7 +439,7 @@ class Adapter implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * SkipCodegen
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/hack/SkipCodegen'))>>
-class SkipCodegen implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class SkipCodegen implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -561,7 +561,7 @@ class SkipCodegen implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * Name
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/hack/Name'))>>
-class Name implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Name implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -704,7 +704,7 @@ class Name implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * UnionEnumAttributes
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/hack/UnionEnumAttributes'))>>
-class UnionEnumAttributes implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class UnionEnumAttributes implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -842,7 +842,7 @@ class UnionEnumAttributes implements \IThriftSyncStruct, \IThriftShapishSyncStru
  * StructTrait
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/hack/StructTrait'))>>
-class StructTrait implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class StructTrait implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -968,7 +968,7 @@ class StructTrait implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * Attributes
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/hack/Attributes'))>>
-class Attributes implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Attributes implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1101,7 +1101,7 @@ class Attributes implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * StructAsTrait
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/hack/StructAsTrait'))>>
-class StructAsTrait implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class StructAsTrait implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

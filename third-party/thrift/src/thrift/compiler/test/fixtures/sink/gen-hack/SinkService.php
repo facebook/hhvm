@@ -394,7 +394,7 @@ class SinkServiceClient extends \ThriftClientBase implements SinkServiceClientIf
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class SinkService_method_args implements \IThriftSyncStruct {
+class SinkService_method_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -449,7 +449,7 @@ class SinkService_method_args implements \IThriftSyncStruct {
 
 }
 
-class SinkService_method_FirstResponse extends \ThriftSyncStructWithoutResult {
+class SinkService_method_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -504,7 +504,7 @@ class SinkService_method_FirstResponse extends \ThriftSyncStructWithoutResult {
 
 }
 
-class SinkService_method_SinkPayload extends \ThriftSyncStructWithResult {
+class SinkService_method_SinkPayload extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = SinkPayload;
@@ -588,7 +588,7 @@ class SinkService_method_SinkPayload extends \ThriftSyncStructWithResult {
 
 }
 
-class SinkService_method_FinalResponse extends \ThriftSyncStructWithResult {
+class SinkService_method_FinalResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = FinalResponse;
@@ -672,7 +672,7 @@ class SinkService_method_FinalResponse extends \ThriftSyncStructWithResult {
 
 }
 
-class SinkService_methodAndReponse_args implements \IThriftSyncStruct {
+class SinkService_methodAndReponse_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -727,7 +727,7 @@ class SinkService_methodAndReponse_args implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodAndReponse_FirstResponse extends \ThriftSyncStructWithResult {
+class SinkService_methodAndReponse_FirstResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = InitialResponse;
@@ -811,7 +811,7 @@ class SinkService_methodAndReponse_FirstResponse extends \ThriftSyncStructWithRe
 
 }
 
-class SinkService_methodAndReponse_SinkPayload extends \ThriftSyncStructWithResult {
+class SinkService_methodAndReponse_SinkPayload extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = SinkPayload;
@@ -895,7 +895,7 @@ class SinkService_methodAndReponse_SinkPayload extends \ThriftSyncStructWithResu
 
 }
 
-class SinkService_methodAndReponse_FinalResponse extends \ThriftSyncStructWithResult {
+class SinkService_methodAndReponse_FinalResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = FinalResponse;
@@ -979,7 +979,7 @@ class SinkService_methodAndReponse_FinalResponse extends \ThriftSyncStructWithRe
 
 }
 
-class SinkService_methodThrow_args implements \IThriftSyncStruct {
+class SinkService_methodThrow_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1034,7 +1034,7 @@ class SinkService_methodThrow_args implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodThrow_FirstResponse extends \ThriftSyncStructWithoutResult {
+class SinkService_methodThrow_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1122,7 +1122,7 @@ class SinkService_methodThrow_FirstResponse extends \ThriftSyncStructWithoutResu
   }
 }
 
-class SinkService_methodThrow_SinkPayload extends \ThriftSyncStructWithResult {
+class SinkService_methodThrow_SinkPayload extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = SinkPayload;
@@ -1206,7 +1206,7 @@ class SinkService_methodThrow_SinkPayload extends \ThriftSyncStructWithResult {
 
 }
 
-class SinkService_methodThrow_FinalResponse extends \ThriftSyncStructWithResult {
+class SinkService_methodThrow_FinalResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = FinalResponse;
@@ -1290,7 +1290,7 @@ class SinkService_methodThrow_FinalResponse extends \ThriftSyncStructWithResult 
 
 }
 
-class SinkService_methodSinkThrow_args implements \IThriftSyncStruct {
+class SinkService_methodSinkThrow_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1345,7 +1345,7 @@ class SinkService_methodSinkThrow_args implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodSinkThrow_FirstResponse extends \ThriftSyncStructWithoutResult {
+class SinkService_methodSinkThrow_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1400,7 +1400,7 @@ class SinkService_methodSinkThrow_FirstResponse extends \ThriftSyncStructWithout
 
 }
 
-class SinkService_methodSinkThrow_SinkPayload extends \ThriftSyncStructWithResult {
+class SinkService_methodSinkThrow_SinkPayload extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = SinkPayload;
@@ -1515,7 +1515,7 @@ class SinkService_methodSinkThrow_SinkPayload extends \ThriftSyncStructWithResul
   }
 }
 
-class SinkService_methodSinkThrow_FinalResponse extends \ThriftSyncStructWithResult {
+class SinkService_methodSinkThrow_FinalResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = FinalResponse;
@@ -1599,7 +1599,7 @@ class SinkService_methodSinkThrow_FinalResponse extends \ThriftSyncStructWithRes
 
 }
 
-class SinkService_methodFinalThrow_args implements \IThriftSyncStruct {
+class SinkService_methodFinalThrow_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1654,7 +1654,7 @@ class SinkService_methodFinalThrow_args implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodFinalThrow_FirstResponse extends \ThriftSyncStructWithoutResult {
+class SinkService_methodFinalThrow_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1709,7 +1709,7 @@ class SinkService_methodFinalThrow_FirstResponse extends \ThriftSyncStructWithou
 
 }
 
-class SinkService_methodFinalThrow_SinkPayload extends \ThriftSyncStructWithResult {
+class SinkService_methodFinalThrow_SinkPayload extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = SinkPayload;
@@ -1793,7 +1793,7 @@ class SinkService_methodFinalThrow_SinkPayload extends \ThriftSyncStructWithResu
 
 }
 
-class SinkService_methodFinalThrow_FinalResponse extends \ThriftSyncStructWithResult {
+class SinkService_methodFinalThrow_FinalResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = FinalResponse;
@@ -1908,7 +1908,7 @@ class SinkService_methodFinalThrow_FinalResponse extends \ThriftSyncStructWithRe
   }
 }
 
-class SinkService_methodBothThrow_args implements \IThriftSyncStruct {
+class SinkService_methodBothThrow_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1963,7 +1963,7 @@ class SinkService_methodBothThrow_args implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodBothThrow_FirstResponse extends \ThriftSyncStructWithoutResult {
+class SinkService_methodBothThrow_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2018,7 +2018,7 @@ class SinkService_methodBothThrow_FirstResponse extends \ThriftSyncStructWithout
 
 }
 
-class SinkService_methodBothThrow_SinkPayload extends \ThriftSyncStructWithResult {
+class SinkService_methodBothThrow_SinkPayload extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = SinkPayload;
@@ -2133,7 +2133,7 @@ class SinkService_methodBothThrow_SinkPayload extends \ThriftSyncStructWithResul
   }
 }
 
-class SinkService_methodBothThrow_FinalResponse extends \ThriftSyncStructWithResult {
+class SinkService_methodBothThrow_FinalResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = FinalResponse;
@@ -2248,7 +2248,7 @@ class SinkService_methodBothThrow_FinalResponse extends \ThriftSyncStructWithRes
   }
 }
 
-class SinkService_methodFast_args implements \IThriftSyncStruct {
+class SinkService_methodFast_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2303,7 +2303,7 @@ class SinkService_methodFast_args implements \IThriftSyncStruct {
 
 }
 
-class SinkService_methodFast_FirstResponse extends \ThriftSyncStructWithoutResult {
+class SinkService_methodFast_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2358,7 +2358,7 @@ class SinkService_methodFast_FirstResponse extends \ThriftSyncStructWithoutResul
 
 }
 
-class SinkService_methodFast_SinkPayload extends \ThriftSyncStructWithResult {
+class SinkService_methodFast_SinkPayload extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = SinkPayload;
@@ -2442,7 +2442,7 @@ class SinkService_methodFast_SinkPayload extends \ThriftSyncStructWithResult {
 
 }
 
-class SinkService_methodFast_FinalResponse extends \ThriftSyncStructWithResult {
+class SinkService_methodFast_FinalResponse extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = FinalResponse;

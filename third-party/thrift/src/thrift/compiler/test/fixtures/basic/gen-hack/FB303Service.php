@@ -305,7 +305,7 @@ class FB303ServiceProcessor extends FB303ServiceSyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class FB303Service_renamed_rpc implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class FB303Service_renamed_rpc implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -424,7 +424,7 @@ class FB303Service_renamed_rpc implements \IThriftSyncStruct, \IThriftShapishSyn
 
 }
 
-class FB303Service_renamed_rpc_result extends \ThriftSyncStructWithResult {
+class FB303Service_renamed_rpc_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = \fixtures\basic\MyRenamedStruct;

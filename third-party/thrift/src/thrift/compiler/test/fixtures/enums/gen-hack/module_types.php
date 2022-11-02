@@ -289,7 +289,7 @@ class MyBitmaskEnum2_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  * SomeStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/enums/SomeStruct'))>>
-class SomeStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class SomeStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -533,7 +533,7 @@ class SomeStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * MyStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/enums/MyStruct'))>>
-class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

@@ -10,7 +10,7 @@
  * Original thrift struct:-
  * Fields
  */
-class Fields implements \IThriftSyncStruct {
+class Fields implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -95,7 +95,7 @@ class Fields implements \IThriftSyncStruct {
  * Original thrift struct:-
  * FieldsInjectedToEmptyStruct
  */
-class FieldsInjectedToEmptyStruct implements \IThriftSyncStruct {
+class FieldsInjectedToEmptyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -186,7 +186,7 @@ class FieldsInjectedToEmptyStruct implements \IThriftSyncStruct {
  * Original thrift struct:-
  * FieldsInjectedToStruct
  */
-class FieldsInjectedToStruct implements \IThriftSyncStruct {
+class FieldsInjectedToStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -301,7 +301,7 @@ class FieldsInjectedToStruct implements \IThriftSyncStruct {
  * Original thrift struct:-
  * FieldsInjectedWithIncludedStruct
  */
-class FieldsInjectedWithIncludedStruct implements \IThriftSyncStruct {
+class FieldsInjectedWithIncludedStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

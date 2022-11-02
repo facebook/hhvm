@@ -461,7 +461,7 @@ class DbMixedStackArgumentsProcessor extends DbMixedStackArgumentsSyncProcessor 
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class DbMixedStackArguments_getDataByKey0_args implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class DbMixedStackArguments_getDataByKey0_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -565,7 +565,7 @@ class DbMixedStackArguments_getDataByKey0_args implements \IThriftSyncStruct, \I
 
 }
 
-class DbMixedStackArguments_getDataByKey0_result extends \ThriftSyncStructWithResult {
+class DbMixedStackArguments_getDataByKey0_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = string;
@@ -657,7 +657,7 @@ class DbMixedStackArguments_getDataByKey0_result extends \ThriftSyncStructWithRe
 
 }
 
-class DbMixedStackArguments_getDataByKey1_args implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class DbMixedStackArguments_getDataByKey1_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -761,7 +761,7 @@ class DbMixedStackArguments_getDataByKey1_args implements \IThriftSyncStruct, \I
 
 }
 
-class DbMixedStackArguments_getDataByKey1_result extends \ThriftSyncStructWithResult {
+class DbMixedStackArguments_getDataByKey1_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = string;

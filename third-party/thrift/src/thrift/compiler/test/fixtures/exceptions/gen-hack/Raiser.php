@@ -331,7 +331,7 @@ class RaiserClient extends \ThriftClientBase implements RaiserClientIf {
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class Raiser_doBland_args implements \IThriftSyncStruct {
+class Raiser_doBland_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -386,7 +386,7 @@ class Raiser_doBland_args implements \IThriftSyncStruct {
 
 }
 
-class Raiser_doBland_result extends \ThriftSyncStructWithoutResult {
+class Raiser_doBland_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -441,7 +441,7 @@ class Raiser_doBland_result extends \ThriftSyncStructWithoutResult {
 
 }
 
-class Raiser_doRaise_args implements \IThriftSyncStruct {
+class Raiser_doRaise_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -496,7 +496,7 @@ class Raiser_doRaise_args implements \IThriftSyncStruct {
 
 }
 
-class Raiser_doRaise_result extends \ThriftSyncStructWithoutResult {
+class Raiser_doRaise_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -649,7 +649,7 @@ class Raiser_doRaise_result extends \ThriftSyncStructWithoutResult {
   }
 }
 
-class Raiser_get200_args implements \IThriftSyncStruct {
+class Raiser_get200_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -704,7 +704,7 @@ class Raiser_get200_args implements \IThriftSyncStruct {
 
 }
 
-class Raiser_get200_result extends \ThriftSyncStructWithResult {
+class Raiser_get200_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = string;
@@ -783,7 +783,7 @@ class Raiser_get200_result extends \ThriftSyncStructWithResult {
 
 }
 
-class Raiser_get500_args implements \IThriftSyncStruct {
+class Raiser_get500_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -838,7 +838,7 @@ class Raiser_get500_args implements \IThriftSyncStruct {
 
 }
 
-class Raiser_get500_result extends \ThriftSyncStructWithResult {
+class Raiser_get500_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = string;

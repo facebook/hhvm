@@ -72,7 +72,7 @@ type CountingInt = int;
  * MyAnnotation
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/MyAnnotation'))>>
-class MyAnnotation implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyAnnotation implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -195,7 +195,7 @@ class MyAnnotation implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * Foo
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/compiler/test/fixtures/adapter/src/module/Foo'))>>
-class Foo implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1093,7 +1093,7 @@ enum BazEnum: int {
  * Baz
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/Baz'))>>
-class Baz implements \IThriftSyncStruct, \IThriftUnion<\thrift\test\BazEnum>, \IThriftShapishSyncStruct {
+class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\thrift\test\BazEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1705,7 +1705,7 @@ class Baz implements \IThriftSyncStruct, \IThriftUnion<\thrift\test\BazEnum>, \I
  * Bar
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/Bar'))>>
-class Bar implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2276,7 +2276,7 @@ class Bar implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * DirectlyAdapted
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/DirectlyAdapted'))>>
-class DirectlyAdapted implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class DirectlyAdapted implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2405,7 +2405,7 @@ class DirectlyAdapted implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * IndependentDirectlyAdapted
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/IndependentDirectlyAdapted'))>>
-class IndependentDirectlyAdapted implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class IndependentDirectlyAdapted implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2529,7 +2529,7 @@ class IndependentDirectlyAdapted implements \IThriftSyncStruct, \IThriftShapishS
  * StructWithFieldAdapter
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/StructWithFieldAdapter'))>>
-class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2858,7 +2858,7 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftShapishSyncS
  * TerseAdaptedFields
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/TerseAdaptedFields'))>>
-class TerseAdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class TerseAdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -3108,7 +3108,7 @@ class TerseAdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruc
  * B
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/B'))>>
-class B implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -3265,7 +3265,7 @@ class B implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * A
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/A'))>>
-class A implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class A implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -3345,7 +3345,7 @@ class A implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * Config
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/Config'))>>
-class Config implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Config implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -3477,7 +3477,7 @@ class Config implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * MyStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/MyStruct'))>>
-class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -3673,7 +3673,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * AdaptTestStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/AdaptTestStruct'))>>
-class AdaptTestStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -4209,7 +4209,7 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * AdaptTemplatedTestStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/AdaptTemplatedTestStruct'))>>
-class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -5493,7 +5493,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftShapishSyn
  * AdaptTemplatedNestedTestStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/AdaptTemplatedNestedTestStruct'))>>
-class AdaptTemplatedNestedTestStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class AdaptTemplatedNestedTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -5619,7 +5619,7 @@ enum AdaptTestUnionEnum: int {
  * AdaptTestUnion
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/AdaptTestUnion'))>>
-class AdaptTestUnion implements \IThriftSyncStruct, \IThriftUnion<\thrift\test\AdaptTestUnionEnum>, \IThriftShapishSyncStruct {
+class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\thrift\test\AdaptTestUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -5871,7 +5871,7 @@ class AdaptTestUnion implements \IThriftSyncStruct, \IThriftUnion<\thrift\test\A
  * AdaptedStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/AdaptedStruct'))>>
-class AdaptedStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class AdaptedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -5983,7 +5983,7 @@ class AdaptedStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * DirectlyAdaptedStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/DirectlyAdaptedStruct'))>>
-class DirectlyAdaptedStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class DirectlyAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -6101,7 +6101,7 @@ class DirectlyAdaptedStruct implements \IThriftSyncStruct, \IThriftShapishSyncSt
  * StructFieldAdaptedStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/StructFieldAdaptedStruct'))>>
-class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -6383,7 +6383,7 @@ class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftShapishSyn
  * CircularAdaptee
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/CircularAdaptee'))>>
-class CircularAdaptee implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class CircularAdaptee implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -6512,7 +6512,7 @@ class CircularAdaptee implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * CircularStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/CircularStruct'))>>
-class CircularStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class CircularStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -6668,7 +6668,7 @@ class CircularStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * ReorderedStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/ReorderedStruct'))>>
-class ReorderedStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class ReorderedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -6813,7 +6813,7 @@ class ReorderedStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * DeclaredAfterStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/DeclaredAfterStruct'))>>
-class DeclaredAfterStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class DeclaredAfterStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -6899,7 +6899,7 @@ class DeclaredAfterStruct implements \IThriftSyncStruct, \IThriftShapishSyncStru
  * RenamedStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/RenamedStruct'))>>
-class RenamedStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class RenamedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -7018,7 +7018,7 @@ class RenamedStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * SameNamespaceStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/SameNamespaceStruct'))>>
-class SameNamespaceStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class SameNamespaceStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -7138,7 +7138,7 @@ class SameNamespaceStruct implements \IThriftSyncStruct, \IThriftShapishSyncStru
  * HeapAllocated
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/HeapAllocated'))>>
-class HeapAllocated implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class HeapAllocated implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -7225,7 +7225,7 @@ class HeapAllocated implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * MoveOnly
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/MoveOnly'))>>
-class MoveOnly implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MoveOnly implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -7356,7 +7356,7 @@ class MoveOnly implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * AlsoMoveOnly
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/AlsoMoveOnly'))>>
-class AlsoMoveOnly implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class AlsoMoveOnly implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -7479,7 +7479,7 @@ class AlsoMoveOnly implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * ApplyAdapter
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/ApplyAdapter'))>>
-class ApplyAdapter implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class ApplyAdapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -7569,7 +7569,7 @@ class ApplyAdapter implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * TransitiveAdapted
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/TransitiveAdapted'))>>
-class TransitiveAdapted implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class TransitiveAdapted implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -7654,7 +7654,7 @@ class TransitiveAdapted implements \IThriftSyncStruct, \IThriftShapishSyncStruct
  * CountingStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/CountingStruct'))>>
-class CountingStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class CountingStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -7868,7 +7868,7 @@ class CountingStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * Person
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/Person'))>>
-class Person implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Person implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -7990,7 +7990,7 @@ class Person implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * Person2
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/Person2'))>>
-class Person2 implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Person2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

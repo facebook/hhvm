@@ -45,7 +45,7 @@ class MyEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  * MyStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/MyStruct'))>>
-class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -126,7 +126,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * MyStructWithCustomDefault
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/MyStructWithCustomDefault'))>>
-class MyStructWithCustomDefault implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStructWithCustomDefault implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -239,7 +239,7 @@ class MyStructWithCustomDefault implements \IThriftSyncStruct, \IThriftShapishSy
  * StructLevelTerseStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/StructLevelTerseStruct'))>>
-class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -888,7 +888,7 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftShapishSyncS
  * FieldLevelTerseStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/FieldLevelTerseStruct'))>>
-class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2191,7 +2191,7 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftShapishSyncSt
  * TerseStructWithCustomDefault
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/TerseStructWithCustomDefault'))>>
-class TerseStructWithCustomDefault implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class TerseStructWithCustomDefault implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2846,7 +2846,7 @@ class TerseStructWithCustomDefault implements \IThriftSyncStruct, \IThriftShapis
  * AdaptedFields
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/AdaptedFields'))>>
-class AdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class AdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -3121,7 +3121,7 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * WrappedFields
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/WrappedFields'))>>
-class WrappedFields implements \IThriftAsyncStruct, \IThriftShapishAsyncStruct {
+class WrappedFields implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -3266,7 +3266,7 @@ class WrappedFields implements \IThriftAsyncStruct, \IThriftShapishAsyncStruct {
  * TerseException
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/TerseException'))>>
-class TerseException extends \TException implements \IThriftSyncStruct {
+class TerseException extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

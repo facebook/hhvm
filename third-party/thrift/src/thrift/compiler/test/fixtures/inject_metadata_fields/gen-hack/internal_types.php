@@ -13,7 +13,7 @@ namespace thrift\annotation;
  * InjectMetadataFields
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/InjectMetadataFields'))>>
-class InjectMetadataFields implements \IThriftSyncStruct {
+class InjectMetadataFields implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

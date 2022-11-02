@@ -189,7 +189,7 @@ class AdapterServiceClient extends \ThriftClientBase implements AdapterServiceCl
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class AdapterService_count_args implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class AdapterService_count_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -264,7 +264,7 @@ class AdapterService_count_args implements \IThriftSyncStruct, \IThriftShapishSy
 
 }
 
-class AdapterService_count_result extends \ThriftSyncStructWithResult {
+class AdapterService_count_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = \thrift\test\CountingStruct;
@@ -363,7 +363,7 @@ class AdapterService_count_result extends \ThriftSyncStructWithResult {
 
 }
 
-class AdapterService_adaptedTypes_args implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class AdapterService_adaptedTypes_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -485,7 +485,7 @@ class AdapterService_adaptedTypes_args implements \IThriftSyncStruct, \IThriftSh
 
 }
 
-class AdapterService_adaptedTypes_result extends \ThriftSyncStructWithResult {
+class AdapterService_adaptedTypes_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = \thrift\test\HeapAllocated;

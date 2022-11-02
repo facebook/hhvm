@@ -90,7 +90,7 @@ class RenamedEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  * MyStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic/MyStruct'))>>
-class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -405,7 +405,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * MyDataItem
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic/MyDataItem'))>>
-class MyDataItem implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyDataItem implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -493,7 +493,7 @@ enum MyUnionEnum: int {
  * MyUnion
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic/MyUnion'))>>
-class MyUnion implements \IThriftSyncStruct, \IThriftUnion<\fixtures\basic\MyUnionEnum>, \IThriftShapishSyncStruct {
+class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\fixtures\basic\MyUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -786,7 +786,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftUnion<\fixtures\basic\MyUni
  * ReservedKeyword
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic/ReservedKeyword'))>>
-class MyRenamedStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyRenamedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -925,7 +925,7 @@ enum MyRenamedUnionEnum: int {
  * UnionToBeRenamed
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/basic/UnionToBeRenamed'))>>
-class MyRenamedUnion implements \IThriftSyncStruct, \IThriftUnion<\fixtures\basic\MyRenamedUnionEnum>, \IThriftShapishSyncStruct {
+class MyRenamedUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\fixtures\basic\MyRenamedUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

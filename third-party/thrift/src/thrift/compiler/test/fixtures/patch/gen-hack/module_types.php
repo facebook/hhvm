@@ -43,7 +43,7 @@ class MyEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
  * MyData
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyData'))>>
-class MyData implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyData implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -200,7 +200,7 @@ enum InnerUnionEnum: int {
  * InnerUnion
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/InnerUnion'))>>
-class InnerUnion implements \IThriftSyncStruct, \IThriftUnion<\fixtures\patch\InnerUnionEnum>, \IThriftShapishSyncStruct {
+class InnerUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\fixtures\patch\InnerUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -364,7 +364,7 @@ enum MyUnionEnum: int {
  * MyUnion
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyUnion'))>>
-class MyUnion implements \IThriftSyncStruct, \IThriftUnion<\fixtures\patch\MyUnionEnum>, \IThriftShapishSyncStruct {
+class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\fixtures\patch\MyUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -649,7 +649,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftUnion<\fixtures\patch\MyUni
  * MyStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStruct'))>>
-class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2066,7 +2066,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * LateDefStruct
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/LateDefStruct'))>>
-class LateDefStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class LateDefStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2147,7 +2147,7 @@ class LateDefStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * Recursive
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/Recursive'))>>
-class Recursive implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Recursive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2322,7 +2322,7 @@ class Recursive implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * Bar
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/Bar'))>>
-class Bar implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2463,7 +2463,7 @@ class Bar implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * Loop
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/Loop'))>>
-class Loop implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class Loop implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2600,7 +2600,7 @@ class Loop implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * MyDataFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyDataFieldPatch'))>>
-class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2789,7 +2789,7 @@ class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct 
  * MyDataPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyDataPatch'))>>
-class MyDataPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -3097,7 +3097,7 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * InnerUnionFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/InnerUnionFieldPatch'))>>
-class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -3237,7 +3237,7 @@ class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStr
  * InnerUnionPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/InnerUnionPatch'))>>
-class InnerUnionPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -3545,7 +3545,7 @@ class InnerUnionPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * MyUnionFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyUnionFieldPatch'))>>
-class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -3784,7 +3784,7 @@ class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct
  * MyUnionPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyUnionPatch'))>>
-class MyUnionPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -4092,7 +4092,7 @@ class MyUnionPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * MyStructField10Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField10Patch'))>>
-class MyStructField10Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStructField10Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -4253,7 +4253,7 @@ class MyStructField10Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
  * MyStructField25Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField25Patch'))>>
-class MyStructField25Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStructField25Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -4414,7 +4414,7 @@ class MyStructField25Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
  * MyStructField28Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField28Patch'))>>
-class MyStructField28Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStructField28Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -4841,7 +4841,7 @@ class MyStructField28Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
  * MyStructField29Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField29Patch'))>>
-class MyStructField29Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStructField29Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -5122,7 +5122,7 @@ class MyStructField29Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
  * MyStructField30Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField30Patch'))>>
-class MyStructField30Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStructField30Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -5630,7 +5630,7 @@ class MyStructField30Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
  * MyStructField31Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField31Patch'))>>
-class MyStructField31Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStructField31Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -6192,7 +6192,7 @@ class MyStructField31Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
  * MyStructField31Patch1
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField31Patch1'))>>
-class MyStructField31Patch1 implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStructField31Patch1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -6715,7 +6715,7 @@ class MyStructField31Patch1 implements \IThriftSyncStruct, \IThriftShapishSyncSt
  * MyStructField32Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField32Patch'))>>
-class MyStructField32Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStructField32Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -7339,7 +7339,7 @@ class MyStructField32Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
  * MyStructField32Patch1
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField32Patch1'))>>
-class MyStructField32Patch1 implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStructField32Patch1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -7862,7 +7862,7 @@ class MyStructField32Patch1 implements \IThriftSyncStruct, \IThriftShapishSyncSt
  * MyStructFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructFieldPatch'))>>
-class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -9551,7 +9551,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
  * MyStructPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructPatch'))>>
-class MyStructPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -9877,7 +9877,7 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * LateDefStructFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/LateDefStructFieldPatch'))>>
-class LateDefStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class LateDefStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -9966,7 +9966,7 @@ class LateDefStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSync
  * LateDefStructPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/LateDefStructPatch'))>>
-class LateDefStructPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -10274,7 +10274,7 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
  * RecursiveField1Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RecursiveField1Patch'))>>
-class RecursiveField1Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class RecursiveField1Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -10481,7 +10481,7 @@ class RecursiveField1Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
  * RecursiveFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RecursiveFieldPatch'))>>
-class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -10622,7 +10622,7 @@ class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStru
  * RecursivePatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RecursivePatch'))>>
-class RecursivePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -10930,7 +10930,7 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * BarFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/BarFieldPatch'))>>
-class BarFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class BarFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -11080,7 +11080,7 @@ class BarFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * BarPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/BarPatch'))>>
-class BarPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -11388,7 +11388,7 @@ class BarPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * LoopFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/LoopFieldPatch'))>>
-class LoopFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class LoopFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -11529,7 +11529,7 @@ class LoopFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
  * LoopPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/LoopPatch'))>>
-class LoopPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class LoopPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

@@ -632,7 +632,7 @@ class Service1Processor extends Service1SyncProcessor {}
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class Service1_func_args implements \IThriftSyncStruct, \IThriftShapishAsyncStruct {
+class Service1_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -788,7 +788,7 @@ class Service1_func_args implements \IThriftSyncStruct, \IThriftShapishAsyncStru
 
 }
 
-class Service1_func_result extends \ThriftSyncStructWithResult {
+class Service1_func_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = MyStruct;
@@ -893,7 +893,7 @@ class Service1_func_result extends \ThriftSyncStructWithResult {
 
 }
 
-class Service1_func1_args implements \IThriftSyncStruct, \IThriftShapishAsyncStruct {
+class Service1_func1_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1049,7 +1049,7 @@ class Service1_func1_args implements \IThriftSyncStruct, \IThriftShapishAsyncStr
 
 }
 
-class Service1_func1_result extends \ThriftSyncStructWithResult {
+class Service1_func1_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = MyStruct;
@@ -1154,7 +1154,7 @@ class Service1_func1_result extends \ThriftSyncStructWithResult {
 
 }
 
-class Service1_func2_args implements \IThriftAsyncStruct, \IThriftShapishAsyncStruct {
+class Service1_func2_args implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1369,7 +1369,7 @@ class Service1_func2_args implements \IThriftAsyncStruct, \IThriftShapishAsyncSt
 
 }
 
-class Service1_func2_result extends \ThriftAsyncStructWithResult {
+class Service1_func2_result extends \ThriftAsyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = i64WithWrapper;

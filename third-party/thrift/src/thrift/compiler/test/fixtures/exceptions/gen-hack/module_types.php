@@ -10,7 +10,7 @@
  * Original thrift exception:-
  * Fiery
  */
-class Fiery extends \TException implements \IThriftSyncStruct {
+class Fiery extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -95,7 +95,7 @@ class Fiery extends \TException implements \IThriftSyncStruct {
  * Original thrift exception:-
  * Serious
  */
-class Serious extends \TException implements \IThriftSyncStruct {
+class Serious extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -186,7 +186,7 @@ class Serious extends \TException implements \IThriftSyncStruct {
  * Original thrift exception:-
  * ComplexFieldNames
  */
-class ComplexFieldNames extends \TException implements \IThriftSyncStruct {
+class ComplexFieldNames extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -300,7 +300,7 @@ class ComplexFieldNames extends \TException implements \IThriftSyncStruct {
  * Original thrift exception:-
  * CustomFieldNames
  */
-class CustomFieldNames extends \TException implements \IThriftSyncStruct {
+class CustomFieldNames extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -414,7 +414,7 @@ class CustomFieldNames extends \TException implements \IThriftSyncStruct {
  * Original thrift exception:-
  * ExceptionWithPrimitiveField
  */
-class ExceptionWithPrimitiveField extends \TException implements \IThriftSyncStruct {
+class ExceptionWithPrimitiveField extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -523,7 +523,7 @@ class ExceptionWithPrimitiveField extends \TException implements \IThriftSyncStr
  * Original thrift exception:-
  * ExceptionWithStructuredAnnotation
  */
-class ExceptionWithStructuredAnnotation extends \TException implements \IThriftSyncStruct {
+class ExceptionWithStructuredAnnotation extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -643,7 +643,7 @@ class ExceptionWithStructuredAnnotation extends \TException implements \IThriftS
  * Original thrift exception:-
  * Banal
  */
-class Banal extends \TException implements \IThriftSyncStruct {
+class Banal extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

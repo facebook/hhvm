@@ -189,7 +189,7 @@ class SomeServiceClient extends \ThriftClientBase implements SomeServiceClientIf
 
 // HELPER FUNCTIONS AND STRUCTURES
 
-class SomeService_bounce_map_args implements \IThriftSyncStruct {
+class SomeService_bounce_map_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -316,7 +316,7 @@ class SomeService_bounce_map_args implements \IThriftSyncStruct {
 
 }
 
-class SomeService_bounce_map_result extends \ThriftSyncStructWithResult {
+class SomeService_bounce_map_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = Map<int, string>;
@@ -445,7 +445,7 @@ class SomeService_bounce_map_result extends \ThriftSyncStructWithResult {
 
 }
 
-class SomeService_binary_keyed_map_args implements \IThriftSyncStruct {
+class SomeService_binary_keyed_map_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -554,7 +554,7 @@ class SomeService_binary_keyed_map_args implements \IThriftSyncStruct {
 
 }
 
-class SomeService_binary_keyed_map_result extends \ThriftSyncStructWithResult {
+class SomeService_binary_keyed_map_result extends \ThriftSyncStructWithResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const type TResult = Map<string, int>;

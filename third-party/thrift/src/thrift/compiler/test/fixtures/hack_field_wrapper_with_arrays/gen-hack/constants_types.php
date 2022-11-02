@@ -52,7 +52,7 @@ type MyCompany = Company;
  * Original thrift struct:-
  * Internship
  */
-class Internship implements \IThriftAsyncStruct, \IThriftShapishAsyncStruct {
+class Internship implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -424,7 +424,7 @@ class Internship implements \IThriftAsyncStruct, \IThriftShapishAsyncStruct {
  * Original thrift struct:-
  * SWE
  */
-class SWE implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+class SWE implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[

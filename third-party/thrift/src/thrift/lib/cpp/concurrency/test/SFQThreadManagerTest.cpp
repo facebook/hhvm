@@ -112,6 +112,7 @@ TEST_F(SFQThreadManagerTest, FairnessPreemptTest) {
   // Check that task count is 2 for tenantId=1.
   auto sfqTM = dynamic_cast<SFQThreadManager*>(tm.get());
   EXPECT_EQ(2, sfqTM->getTaskCount(es));
+  EXPECT_GE(sfqTM->pendingUpstreamTaskCount(), 3);
   // No tasks have run at this point.
   EXPECT_EQ(0, c0);
   EXPECT_EQ(0, c1);

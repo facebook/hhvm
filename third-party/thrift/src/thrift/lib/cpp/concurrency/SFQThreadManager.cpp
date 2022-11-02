@@ -77,6 +77,16 @@ void SFQThreadManager::initQueues() {
   return getKeepAliveToken(mx);
 }
 
+size_t SFQThreadManager::pendingUpstreamTaskCount() const {
+  std::size_t count = 0;
+  for (std::size_t i = 0; i < fqs_.size(); ++i) {
+    for (std::size_t ii = 0; ii < fqs_[i].size(); ++ii) {
+      count += fqs_[i][ii]->pendingTasks();
+    }
+  }
+  return count;
+}
+
 } // namespace concurrency
 } // namespace thrift
 } // namespace apache

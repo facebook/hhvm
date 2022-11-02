@@ -125,6 +125,8 @@ class SFQThreadManager : public ThreadManagerExecutorAdapter {
   // Return size of tenantQueue for a given priority and tenantId
   size_t getTaskCount(ExecutionScope es);
 
+  size_t pendingUpstreamTaskCount() const override;
+
  private:
   using ExecutorPtr = std::unique_ptr<folly::DefaultKeepAliveExecutor>;
 

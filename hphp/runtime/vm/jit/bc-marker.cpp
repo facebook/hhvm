@@ -62,7 +62,7 @@ SBInvOffset BCMarker::fixupSBOff() const {
     if (fixupFP()->inst()->is(BeginInlining)) {
       return fixupFP()->inst()->extra<BeginInlining>()->sbOffset;
     }
-    assertx(fixupFP()->inst()->is(DefFP, DefFuncEntryFP));
+    assertx(fixupFP()->inst()->is(DefFP, EnterFrame));
     auto const defSP = fp()->inst()->src(0)->inst();
     auto const irSPOff = defSP->extra<DefStackData>()->irSPOff;
     return SBInvOffset{0}.to<IRSPRelOffset>(irSPOff);

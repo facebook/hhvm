@@ -2876,7 +2876,6 @@ X(IncCallCounter,               FuncData);
 X(LogArrayReach,                SinkProfileData);
 X(NewLoggingArray,              LoggingProfileData);
 X(BespokeGet,                   BespokeGetData);
-X(DefFuncEntryFP,               FuncData);
 X(InitFrame,                    FuncData);
 X(Call,                         CallData);
 X(CallBuiltin,                  CallBuiltinData);

@@ -103,6 +103,16 @@ void cgDefFuncPrologueCtx(IRLS& env, const IRInstruction* inst) {
   v << copy{r_func_prologue_ctx(), dstLoc(env, inst, 0).reg()};
 }
 
+void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  v << copy{rvmsp(), dstLoc(env, inst, 0).reg()};
+}
+
+void cgDefFuncEntryPrevFP(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  v << copy{rvmfp(), dstLoc(env, inst, 0).reg()};
+}
+
 void cgStVMFP(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);

@@ -148,7 +148,8 @@ SSATmp* least_common_ancestor(SSATmp* s1, SSATmp* s2) {
 const Func* funcFromFP(const SSATmp* fp) {
   auto const inst = canonical(fp)->inst();
   if (inst->is(DefFP)) return inst->marker().func();
-  if (inst->is(DefFuncEntryFP)) return inst->extra<DefFuncEntryFP>()->func;
+  if (inst->is(DefFuncEntryFP)) return inst->marker().func();
+  if (inst->is(EnterFrame)) return inst->marker().func();
   if (inst->is(BeginInlining)) return inst->extra<BeginInlining>()->func;
   always_assert(false);
 }
@@ -167,15 +168,8 @@ Optional<IRSPRelOffset> offsetOfFrame(const SSATmp *fp) {
   assertx(fp->isA(TFramePtr));
   auto const inst = canonical(fp)->inst();
   if (inst->is(BeginInlining)) return inst->extra<BeginInlining>()->spOffset;
-  auto const resumed = inst->marker().sk().resumeMode() != ResumeMode::None;
-  if (inst->is(DefFP)) {
-    if (resumed) return std::nullopt;
-    return inst->extra<DefFP>()->offset;
-  }
-  if (inst->is(DefFuncEntryFP)) {
-    if (resumed) return std::nullopt;
-    return IRSPRelOffset { 0 };
-  }
+  if (inst->is(DefFP)) return inst->extra<DefFP>()->offset;
+  if (inst->is(EnterFrame)) return IRSPRelOffset { 0 };
   always_assert(false);
 }
 

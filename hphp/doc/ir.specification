@@ -1596,10 +1596,10 @@ To string conversions:
   S2: prologue context
   S3: callee func id
 
-| DefFuncEntryFP<func>, D(FramePtr), NA, NF
+| EnterFrame, D(FramePtr), S(FramePtr) S(FramePtr), NF
 
-  Initializes native portion of the callee's frame at rvmsp(), links it to the
-  previous frame at rvmfp(), and defines the new frame pointer.
+  Initializes native portion of the callee's frame at S0, links it to the
+  previous frame at S1, and defines the new frame pointer.
 
   The function being called is specified in `func'.
 
@@ -1974,6 +1974,14 @@ To string conversions:
 
   May be used only at the beginning of a prologue or a stub used in a prologue
   context.
+
+| DefFuncEntryFP, D(FramePtr), NA, NF
+
+| DefFuncEntryPrevFP, D(FramePtr), NA, NF
+
+  Creates a temporary D representing a callee's and caller's frame pointer.
+
+  May be used only at the beginning of a func entry.
 
 | ConvFuncPrologueFlagsToARFlags, D(Int), S(Int), NF
 

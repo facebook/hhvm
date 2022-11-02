@@ -170,8 +170,11 @@ struct Vframe {
     size_t exclusive{0};
   };
 
-  static constexpr int Root = 0;  // Frame defined by DefFP or DefFuncEntryFP
-  static constexpr int Top = -1;  // Parent of root frame
+  // Frame defined by DefFP, DefFuncEntryFP or Enterfunc
+  static constexpr int Root = 0;
+
+  // Parent of root frame
+  static constexpr int Top = -1;
 
   LowPtr<const Func> func;
   int32_t callOff{-1};

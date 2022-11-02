@@ -51,7 +51,8 @@ inline SSATmp* sp(const IRGS& env) { return env.irb->fs().sp(); }
 inline SSATmp* anyStackRegister(const IRGS& env) {
   if (sp(env)->inst()->is(DefRegSP)) return sp(env);
   assertx(sp(env)->inst()->is(DefFrameRelSP));
-  assertx(sp(env)->inst()->src(0)->inst()->is(DefFP, DefFuncEntryFP));
+  assertx(sp(env)->inst()->src(0)->inst()->is(
+    DefFP, DefFuncEntryFP, EnterFrame));
   return sp(env)->inst()->src(0);
 }
 

@@ -295,7 +295,7 @@ private:
 
 using IFrameID = int32_t;
 
-// Represents the frame defined by DefFP or DefFuncEntryFP.
+// Represents the frame defined by DefFP or EnterFrame.
 constexpr IFrameID kRootIFrameID = std::numeric_limits<IFrameID>::max();
 
 struct IFrame {

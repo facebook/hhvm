@@ -484,14 +484,16 @@ bool canDCE(const IRInstruction& inst) {
   case ReleaseShallow:
   case DecReleaseCheck:
   case DefFP:
-  case DefFuncEntryFP:
   case DefFrameRelSP:
   case DefRegSP:
   case DefFuncPrologueCallee:
   case DefFuncPrologueCtx:
   case DefFuncPrologueFlags:
   case DefFuncPrologueNumArgs:
+  case DefFuncEntryFP:
+  case DefFuncEntryPrevFP:
   case InitFrame:
+  case EnterFrame:
   case Count:
   case VerifyParam:
   case VerifyParamCallable:

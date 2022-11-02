@@ -80,7 +80,10 @@ void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
     // - new native frame will be initialized at rvmsp() and linked to rvmfp()
     // - fp(env) and sp(env) will be backed by the same rvmfp() register
     // - stack base is numSlotsInFrame() away from sp(env)
-    gen(env, DefFuncEntryFP, FuncData { curFunc(env) });
+    gen(env, DefFuncEntryFP);
+    updateMarker(env);
+    auto const callerFP = gen(env, DefFuncEntryPrevFP);
+    gen(env, EnterFrame, fp(env), callerFP);
     updateMarker(env);
 
     assertx(bcSPOff == spOffEmpty(env));

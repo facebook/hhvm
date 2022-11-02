@@ -583,6 +583,7 @@ bool opcodeMayRaise(Opcode opc) {
   case DefFP:
   case DefFrameRelSP:
   case DefFuncEntryFP:
+  case DefFuncEntryPrevFP:
   case DefFuncPrologueCallee:
   case DefFuncPrologueCtx:
   case DefFuncPrologueFlags:
@@ -610,6 +611,7 @@ bool opcodeMayRaise(Opcode opc) {
   case EndCatch:
   case EndGuards:
   case EndInlining:
+  case EnterFrame:
   case EnterPrologue:
   case EnterTCUnwind:
   case EnterTranslation:

@@ -193,7 +193,7 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
         return fpOffset - numSlotsInFrame - numStackElems;
       }
 
-      assertx(fp->inst()->is(DefFP, DefFuncEntryFP));
+      assertx(fp->inst()->is(DefFP, DefFuncEntryFP, EnterFrame));
       auto const sp = inst.marker().sp();
       auto const irSPOff = sp->inst()->extra<DefStackData>()->irSPOff;
       return inst.marker().bcSPOff().to<IRSPRelOffset>(irSPOff);
@@ -681,7 +681,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto const fp = canonical(inst.src(0));
     auto fpInst = fp->inst();
     auto const frame = [&] () -> AliasClass {
-      if (fpInst->is(DefFP, DefFuncEntryFP)) return ALocalAny | AIterAny;
+      if (fpInst->is(DefFP, EnterFrame)) return ALocalAny | AIterAny;
       assertx(fpInst->is(BeginInlining));
       auto const func = fpInst->extra<BeginInlining>()->func;
       auto const nlocals = fpInst->extra<BeginInlining>()->func->numLocals();
@@ -1412,9 +1412,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   }
 
   case DefFP:
+  case DefFuncEntryFP:
     return may_load_store(AFBasePtr, AFBasePtr);
 
-  case DefFuncEntryFP:
+  case EnterFrame:
     return may_load_store(AFBasePtr, AFBasePtr | AFMeta { inst.dst() });
 
   case InitFrame:
@@ -1457,6 +1458,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case BespokeIterLastPos:
   case ConvFuncPrologueFlagsToARFlags:
   case DefFrameRelSP:
+  case DefFuncEntryPrevFP:
   case DefFuncPrologueCallee:
   case DefFuncPrologueCtx:
   case DefFuncPrologueFlags:

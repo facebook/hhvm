@@ -37,5 +37,5 @@ class FilesystemIterator extends DirectoryIterator
   public function rewind(): void;
   public function setFlags(int $flags);
   public function seek(int $position): void;
-  public function __toString();
+  public function __toString(): string;
 }

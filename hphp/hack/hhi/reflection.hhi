@@ -9,7 +9,7 @@
  */
 
 interface Reflector extends IPureStringishObject {
-  public function __toString()[];
+  public function __toString()[]: string;
 }
 
 class Reflection  {
@@ -165,7 +165,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector
   public $name = '';
 
   public function __construct($name)[];
-  public function __toString()[];
+  public function __toString()[]: string;
   public static function export($name, $return = null);
   public function isDisabled()[];
   public function invoke(...$args);
@@ -188,7 +188,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
 
   public static function export(string $class, string $name, bool $return = false);
   public function __construct($class, $name = null)[];
-  public function __toString()[];
+  public function __toString()[]: string;
   public function isPublic()[];
   public function isPrivate()[];
   public function isProtected()[];
@@ -214,7 +214,7 @@ class ReflectionParameter implements Reflector {
   private function __clone();
   public static function export($function, $parameter, $return = null);
   public function __construct($function, $parameter, $info = null)[];
-  public function __toString()[];
+  public function __toString()[]: string;
   public function getName()[];
   public function isPassedByReference()[];
   public function isInOut()[]: bool;
@@ -256,7 +256,7 @@ class ReflectionProperty implements Reflector {
   private function __clone();
   public static function export($class, $name, $return = null);
   public function __construct($class, string $name)[];
-  public function __toString()[];
+  public function __toString()[]: string;
   public function getName()[];
   public function getValue($obj = null)[read_globals];
   public function setValue($obj, $value = null)[globals, write_props];
@@ -283,7 +283,7 @@ class ReflectionExtension implements Reflector {
   private function __clone();
   public static function export($name, $return = false);
   public function __construct($name)[];
-  public function __toString()[];
+  public function __toString()[]: string;
   public function getName()[];
   public function getVersion()[];
   public function getFunctions()[];

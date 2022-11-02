@@ -56,7 +56,7 @@ class AnnotationStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \I
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\deprecated\Transitive' => \thrift\annotation\deprecated\Transitive::fromShape(
+        '\thrift\annotation\Transitive' => \thrift\annotation\Transitive::fromShape(
           shape(
           )
         ),

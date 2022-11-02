@@ -100,8 +100,8 @@ class SplFileInfo {
 
 class SplFileObject extends SplFileInfo
   implements
-    SeekableIterator<string>,
-    RecursiveIterator<SplFileObject> {
+    SeekableIterator<HH\FIXME\POISON_MARKER<string>>,
+    RecursiveIterator<HH\FIXME\POISON_MARKER<string>> {
 
   // Constants
   const int DROP_NEW_LINE = 1;
@@ -117,7 +117,7 @@ class SplFileObject extends SplFileInfo
     ?resource $context = null,
   );
   /** @return string|array violates Iterator interface */
-  public function current();
+  public function current(): HH\FIXME\POISON_MARKER<string>;
   public function eof(): bool;
   public function fflush(): bool;
   public function fgetc(): string;
@@ -166,10 +166,7 @@ class SplFileObject extends SplFileInfo
   public function valid(): bool;
 }
 
-class SplTempFileObject extends SplFileObject
-  implements
-    SeekableIterator<string>,
-    RecursiveIterator<SplTempFileObject> {
+class SplTempFileObject extends SplFileObject {
 
   // Methods
   public function __construct(?int $max_memory = null);

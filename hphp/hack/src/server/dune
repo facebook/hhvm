@@ -462,7 +462,6 @@
   serverFormat
   serverGenPrefetchDir
   serverGenRemoteDecls
-  serverGenRemoteFiles
   serverGenShallowDeclsToDir
   serverIdle
   serverInferTypeBatch
@@ -504,7 +503,6 @@
   lsp
   parsing_service
   remote
-  remote_files_ffi
   security_stubs
   shallow_classes_provider
   direct_decl_parser
@@ -530,7 +528,6 @@
   typing_service_api
   typing_check_job
   utils_core
-  utils_hash
   version
   watchman_utils
   (select

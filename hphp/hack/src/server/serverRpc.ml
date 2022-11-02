@@ -446,7 +446,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (env, ServerGenRemoteDecls.go env genv genv.workers ~incremental:true)
   | GEN_SHALLOW_DECLS_DIR dir ->
     (env, ServerGenShallowDeclsToDir.go env genv genv.workers dir)
-  | GEN_REMOTE_FILES -> (env, ServerGenRemoteFiles.go genv)
   | FUN_DEPS_BATCH positions ->
     (env, ServerFunDepsBatch.go genv.workers positions env)
   | LIST_FILES_WITH_ERRORS -> (env, ServerEnv.list_files env)

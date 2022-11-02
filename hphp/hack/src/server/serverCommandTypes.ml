@@ -421,7 +421,6 @@ type _ t =
   | GEN_REMOTE_DECLS_FULL : unit t
   | GEN_REMOTE_DECLS_INCREMENTAL : unit t
   | GEN_SHALLOW_DECLS_DIR : string -> unit t
-  | GEN_REMOTE_FILES : unit t
   | FUN_DEPS_BATCH : (string * int * int) list -> string list t
   | LIST_FILES_WITH_ERRORS : string list t
   | FILE_DEPENDENTS : string list -> string list t

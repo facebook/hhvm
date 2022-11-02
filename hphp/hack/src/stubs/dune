@@ -135,14 +135,6 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name remote_files_ffi)
-  (wrapped false)
-  (modules
-    remote_files_ffi)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
-
-(library
   (name remote_old_decls_ffi)
   (wrapped false)
   (modules

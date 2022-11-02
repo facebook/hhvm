@@ -384,10 +384,6 @@ let parse_check_args cmd =
         Arg.String (fun x -> set_mode (MODE_GEN_SHALLOW_DECLS_DIR x)),
         " generate a directory of decls and typecheck dependencies to use for prefetching"
         ^ " Usage: --gen-shallow-decls-dir <target_dir>" );
-      ( "--gen-remote-files",
-        Arg.Unit (fun () -> set_mode MODE_GEN_REMOTE_FILES),
-        " populate the remote file store to use for sub1m typechecking"
-        ^ " Usage: --gen-remote-asts <target_dir>" );
       ( "--gen-saved-ignore-type-errors",
         Arg.Set gen_saved_ignore_type_errors,
         " generate a saved state even if there are type errors (default: false)."

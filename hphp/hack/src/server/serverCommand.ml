@@ -54,7 +54,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | GEN_REMOTE_DECLS_FULL -> false
   | GEN_REMOTE_DECLS_INCREMENTAL -> false
   | GEN_SHALLOW_DECLS_DIR _ -> false
-  | GEN_REMOTE_FILES -> false
   | STATS -> false
   | DISCONNECT -> false
   | STATUS_SINGLE _ -> false

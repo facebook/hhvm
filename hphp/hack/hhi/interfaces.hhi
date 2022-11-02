@@ -792,7 +792,7 @@ interface Countable {
 }
 
 interface RecursiveIterator<+Tv> extends Iterator<Tv> {
-  public function getChildren(): this;
+  public function getChildren(): ?this;
   public function hasChildren(): bool;
 }
 

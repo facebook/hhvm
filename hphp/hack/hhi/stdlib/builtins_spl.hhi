@@ -154,8 +154,8 @@ class SplFileObject extends SplFileInfo
     string $enclosure = "\"",
     string $escape = "\\",
   ): void;
-  /* (always) returns null -- violates RecursiveIterator interface */
-  public function getChildren();
+  /* (always) returns null */
+  public function getChildren(): null;
   public function hasChildren(): bool;
   public function key(): int;
   public function next(): void;

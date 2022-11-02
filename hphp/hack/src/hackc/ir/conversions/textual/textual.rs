@@ -407,7 +407,7 @@ pub(crate) enum Attribute {
 pub(crate) fn write_attribute(w: &mut dyn std::io::Write, attr: Attribute) -> Result {
     match attr {
         Attribute::SourceLanguage(lang) => {
-            writeln!(w, "attribute source_language = \"{lang}\"")?;
+            writeln!(w, ".source_language = \"{lang}\"")?;
         }
     }
     Ok(())

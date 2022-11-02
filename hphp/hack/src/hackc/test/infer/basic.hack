@@ -1,5 +1,5 @@
 // RUN: %hackc compile-infer %s | FileCheck %s
-// CHECK: attribute source_language = "hack"
+// CHECK: .source_language = "hack"
 
 // CHECK: define $root.main(this: *void) : *void {
 // CHECK: #b0:

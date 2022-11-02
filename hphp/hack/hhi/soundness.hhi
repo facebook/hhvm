@@ -51,3 +51,10 @@ function UNSAFE_NONNULL_CAST<T as nonnull>(?T $t, ?\HH\FormatString<nothing> $ms
 type TANY_MARKER<T> = T;
 /* Acts as T under current semantics, and ~T under sound dynamic */
 type POISON_MARKER<T> = T;
+
+/**
+ * We haven't written the return type for every function in the codebase yet.
+ * Functions which are still missing return types have this placeholder
+ * instead.
+ */
+type MISSING_RETURN_TYPE = TANY_MARKER<dynamic>;

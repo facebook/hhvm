@@ -94,7 +94,8 @@ struct FmtTy<'a>(&'a Ty);
 impl fmt::Display for FmtTy<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
-            Ty::Bool => write!(f, "bool"),
+            // There's no `bool` type in textual. Use `int` instead
+            Ty::Bool => write!(f, "int"),
             Ty::Int => write!(f, "int"),
             Ty::String => write!(f, "*string"),
             Ty::Type(s) => write!(f, "{s}"),

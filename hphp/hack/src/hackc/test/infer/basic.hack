@@ -67,3 +67,5 @@ function bool_call(): void {
   f_bool(false);
   f_bool(true);
 }
+
+// CHECK: declare $builtins.hack_is_true(*Mixed): int

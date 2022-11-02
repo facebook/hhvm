@@ -86,7 +86,7 @@ class TestFreshInit(common_tests.CommonTests):
                   /* HH_FIXME[4099] We can delete this one */
                   if (/* HH_FIXME[4011] We can delete this one */   $s) {
                     print "hello";
-                  } else {
+                  } else if ($s /* HH_FIXME[4011] We can delete this one */) {
                     print "world";
                   }
                   /* HH_FIXME[4099] We can delete this one */
@@ -111,7 +111,7 @@ class TestFreshInit(common_tests.CommonTests):
                 function foo(?string $s): void {
                   if ($s) {
                     print "hello";
-                  } else {
+                  } else if ($s ) {
                     print "world";
                   }
                   print "done\n";

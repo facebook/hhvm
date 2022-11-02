@@ -117,10 +117,7 @@ let write_patches_to_buffer buf original_content patch_list =
         Buffer.add_string buf patch.text;
         i := char_end
       | Remove _ ->
-        (* We only expect `Remove` to be used with HH_FIXMEs, in which case
-         * char_end will point to the last character. Consequently, we should
-         * increment it by 1 *)
-        i := char_end + 1;
+        i := char_end;
         trim_leading_whitespace := true);
   add_original_content len
 

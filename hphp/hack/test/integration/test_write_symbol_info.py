@@ -47,6 +47,7 @@ from glean.schema.hack.types import (
     TypeConstDefinition,
     TypedefDeclaration,
     TypedefDefinition,
+    TypeInfo,
 )
 from glean.schema.src.types import FileLines
 from hh_paths import hh_server
@@ -170,6 +171,7 @@ max_workers = 2
             "hack.TypeConstDefinition": TypeConstDefinition,
             "hack.TypedefDeclaration": TypedefDeclaration,
             "hack.TypedefDefinition": TypedefDefinition,
+            "hack.TypeInfo": TypeInfo,
             "hack.GlobalNamespaceAlias": GlobalNamespaceAlias,
             "src.FileLines": FileLines,
             "gencode.GenCode": GenCode,

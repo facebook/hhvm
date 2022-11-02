@@ -16,6 +16,7 @@ module Fact_id = Symbol_fact_id
 module Predicate = Symbol_predicate
 module Fact_acc = Symbol_predicate.Fact_acc
 module XRefs = Symbol_xrefs
+module Util = Symbol_json_util
 
 val namespace_decl : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
@@ -194,3 +195,9 @@ val method_occ :
 
 val indexerInputsHash :
   string -> Md5.t list -> Fact_acc.t -> Fact_id.t * Fact_acc.t
+
+val type_info :
+  ty:string ->
+  (Hh_json.json * Util.pos list) list ->
+  Fact_acc.t ->
+  Fact_id.t * Fact_acc.t

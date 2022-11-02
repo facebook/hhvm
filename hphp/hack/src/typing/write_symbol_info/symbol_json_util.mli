@@ -15,6 +15,21 @@ val has_tabs_or_multibyte_codepoints : Full_fidelity_source_text.t -> bool
 
 val get_type_from_hint : Provider_context.t -> Aast.hint -> string
 
+type pos = {
+  start: int;
+  length: int;
+}
+[@@deriving ord]
+
+(* A pretty printer which returns a user friendly
+   type representation, and the list of symbols with
+   their position within the string.
+
+   Currently, only consider class names, but should be
+   extended to other types of symbols *)
+val hint_to_string_and_symbols :
+  Provider_context.t -> Aast.hint -> string * (Aast.class_name * pos list) list
+
 val get_context_from_hint : Provider_context.t -> Aast.hint -> string
 
 (* Values pulled from source code may have quotation marks;

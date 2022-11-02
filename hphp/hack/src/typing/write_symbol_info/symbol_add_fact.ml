@@ -226,15 +226,77 @@ let method_decl con_type decl_id name progress =
   in
   Fact_acc.add_fact Predicate.(Hack MethodDeclaration) json progress
 
-let build_signature ctx source_text params ctxs ret =
-  let hint_to_str_opt h =
-    Option.map (hint_of_type_hint h) ~f:(Util.get_type_from_hint ctx)
+let type_info ~ty sym_pos progress =
+  let json =
+    JSON_Object
+      [
+        ("displayType", Build_json.build_type_json_nested ty);
+        ("xrefs", Build_json.build_hint_xrefs_json sym_pos);
+      ]
   in
-  let params =
-    List.map params ~f:(fun x -> (x, hint_to_str_opt x.param_type_hint))
+  Fact_acc.add_fact Predicate.(Hack TypeInfo) json progress
+
+let class_name_to_target ctx ((_, sid) : Aast.class_name) progress :
+    Hh_json.json option * Fact_acc.t =
+  match ServerSymbolDefinition.get_class_by_name ctx sid with
+  | None -> (None, progress)
+  | Some cls ->
+    let (predicate, container_kind) =
+      let open Ast_defs in
+      match cls.c_kind with
+      | Cclass _ -> (Predicate.ClassDeclaration, "class_")
+      | Cinterface -> (Predicate.InterfaceDeclaration, "interface_")
+      | Ctrait -> (Predicate.TraitDeclaration, "trait")
+      | Cenum
+      | Cenum_class _ ->
+        (Predicate.EnumDeclaration, "enum_")
+    in
+    let (fact_id, progress) =
+      container_decl (Predicate.Hack predicate) sid progress
+    in
+    ( Some
+        (Build_json.build_decl_target_json
+           (Build_json.build_container_decl_json_ref container_kind fact_id)),
+      progress )
+
+let build_signature ctx source_text params ctxs ret progress =
+  let hint_to_str_opt h progress =
+    match hint_of_type_hint h with
+    | None -> (None, None, progress)
+    | Some hint ->
+      let legacy_ty = Util.get_type_from_hint ctx hint in
+      let (ty, sym_pos) = Util.hint_to_string_and_symbols ctx hint in
+      let (decl_json_pos, progress) =
+        List.fold
+          sym_pos
+          ~init:([], progress)
+          ~f:(fun (decl_refs, prog) (decl, pos) ->
+            match class_name_to_target ctx decl prog with
+            | (None, prog) -> (decl_refs, prog)
+            | (Some json, prog) -> ((json, pos) :: decl_refs, prog))
+      in
+      let (fact_id, progress) = type_info ~ty decl_json_pos progress in
+      (Some legacy_ty, Some fact_id, progress)
   in
-  let ret_ty = hint_to_str_opt ret in
-  Build_json.build_signature_json ctx source_text params ctxs ~ret_ty
+  let (params, progress) =
+    List.fold params ~init:([], progress) ~f:(fun (t_params, progress) p ->
+        let (p_ty, fact_id, progress) =
+          hint_to_str_opt p.param_type_hint progress
+        in
+        ((p, fact_id, p_ty) :: t_params, progress))
+  in
+  let params = List.rev params in
+  let (ret_ty, return_info, progress) = hint_to_str_opt ret progress in
+  let signature =
+    Build_json.build_signature_json
+      ctx
+      source_text
+      params
+      ctxs
+      ~ret_ty
+      ~return_info
+  in
+  (signature, progress)
 
 let method_defn ctx source_text meth decl_id progress =
   let tparams =
@@ -242,13 +304,20 @@ let method_defn ctx source_text meth decl_id progress =
       meth.m_tparams
       ~f:(Build_json.build_type_param_json ctx source_text)
   in
+  let (signature, progress) =
+    build_signature
+      ctx
+      source_text
+      meth.m_params
+      meth.m_ctxs
+      meth.m_ret
+      progress
+  in
   let json =
     JSON_Object
       [
         ("declaration", Build_json.build_id_json decl_id);
-        ( "signature",
-          build_signature ctx source_text meth.m_params meth.m_ctxs meth.m_ret
-        );
+        ("signature", signature);
         ("visibility", Build_json.build_visibility_json meth.m_visibility);
         ("isAbstract", JSON_Bool meth.m_abstract);
         ("isAsync", Build_json.build_is_async_json meth.m_fun_kind);
@@ -419,13 +488,14 @@ let func_defn ctx source_text fd decl_id progress =
       ~f:(Build_json.build_type_param_json ctx source_text)
   in
   let (mf, prog) = module_field fd.fd_module fd.fd_internal prog in
+  let (signature, prog) =
+    build_signature ctx source_text elem.f_params elem.f_ctxs elem.f_ret prog
+  in
   let json_fields =
     mf
     @ [
         ("declaration", Build_json.build_id_json decl_id);
-        ( "signature",
-          build_signature ctx source_text elem.f_params elem.f_ctxs elem.f_ret
-        );
+        ("signature", signature);
         ("isAsync", Build_json.build_is_async_json elem.f_fun_kind);
         ( "attributes",
           Build_json.build_attributes_json_nested

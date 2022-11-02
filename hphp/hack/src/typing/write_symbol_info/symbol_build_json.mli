@@ -14,6 +14,7 @@
  *)
 
 module Fact_id = Symbol_fact_id
+module Util = Symbol_json_util
 
 val build_id_json : Fact_id.t -> Hh_json.json
 
@@ -63,13 +64,15 @@ val build_argument_xref_json : Hh_json.json -> Hh_json.json
 
 val build_is_async_json : Ast_defs.fun_kind -> Hh_json.json
 
-(* params come with the string representation for their type *)
+(* params come with the string representation for their type
+   and an option type_xref fact *)
 val build_signature_json :
   Provider_context.t ->
   Full_fidelity_source_text.t ->
-  (('a, 'b) Aast.fun_param * string option) list ->
+  (('a, 'b) Aast.fun_param * Fact_id.t option * string option) list ->
   Aast.contexts option ->
   ret_ty:string option ->
+  return_info:Fact_id.t option ->
   Hh_json.json
 
 val build_type_const_kind_json : Aast.class_typeconst -> Hh_json.json
@@ -83,6 +86,8 @@ val build_type_param_json :
 val build_visibility_json : Aast.visibility -> Hh_json.json
 
 val build_xrefs_json : (Hh_json.json * Pos.t list) Fact_id.Map.t -> Hh_json.json
+
+val build_hint_xrefs_json : (Hh_json.json * Util.pos list) list -> Hh_json.json
 
 val build_class_const_decl_json_ref : Fact_id.t -> Hh_json.json
 

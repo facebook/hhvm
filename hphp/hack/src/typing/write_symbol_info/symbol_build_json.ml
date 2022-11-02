@@ -74,7 +74,7 @@ let build_type_json_nested type_name =
   let ty = Utils.strip_ns type_name in
   JSON_Object [("key", JSON_String ty)]
 
-let build_signature_json_nested parameters ctxs return_type_name =
+let build_signature_json_nested parameters ctxs return_type_name return_info =
   let fields =
     let params = [("parameters", JSON_Array parameters)] in
     let params_return_type =
@@ -82,9 +82,15 @@ let build_signature_json_nested parameters ctxs return_type_name =
       | None -> params
       | Some ty -> ("returns", build_type_json_nested ty) :: params
     in
+    let params_return_info =
+      match return_info with
+      | None -> params_return_type
+      | Some fact_id ->
+        ("returnsTypeInfo", build_id_json fact_id) :: params_return_type
+    in
     match ctxs with
-    | None -> params_return_type
-    | Some ctxs_name -> ("contexts", JSON_Array ctxs_name) :: params_return_type
+    | None -> params_return_info
+    | Some ctxs_name -> ("contexts", JSON_Array ctxs_name) :: params_return_info
   in
   JSON_Object [("key", JSON_Object fields)]
 
@@ -218,7 +224,14 @@ let build_is_async_json fun_kind =
   JSON_Bool is_async
 
 let build_parameter_json
-    source_text param_name param_type_name def_val is_inout is_variadic attrs =
+    source_text
+    param_name
+    param_type_name
+    def_val
+    is_inout
+    is_variadic
+    attrs
+    type_info =
   let fields =
     [
       ("name", build_name_json_nested param_name);
@@ -238,16 +251,26 @@ let build_parameter_json
     | Some expr ->
       ("defaultValue", JSON_String (Util.strip_nested_quotes expr)) :: fields
   in
+  let fields =
+    match type_info with
+    | None -> fields
+    | Some fact_id -> ("typeInfo", build_id_json fact_id) :: fields
+  in
   JSON_Object fields
 
 let build_signature_json
-    ctx source_text params (ctxs_hints : Aast.contexts option) ~ret_ty =
+    ctx
+    source_text
+    params
+    (ctxs_hints : Aast.contexts option)
+    ~ret_ty
+    ~return_info =
   let ctx_hint_to_json ctx_hint =
     JSON_Object [("key", JSON_String (Util.get_context_from_hint ctx ctx_hint))]
   in
   let f (_pos, ctx_hint) = List.map ~f:ctx_hint_to_json ctx_hint in
   let ctxs_hints = Option.map ctxs_hints ~f in
-  let build_param (p, ty) =
+  let build_param (p, type_xref, ty) =
     let is_inout =
       match p.param_callconv with
       | Pinout _ -> true
@@ -265,9 +288,10 @@ let build_signature_json
       is_inout
       p.param_is_variadic
       p.param_user_attributes
+      type_xref
   in
-  let parameters = List.map params ~f:(fun param -> build_param param) in
-  build_signature_json_nested parameters ctxs_hints ret_ty
+  let parameters = List.map params ~f:build_param in
+  build_signature_json_nested parameters ctxs_hints ret_ty return_info
 
 let build_reify_kind_json kind =
   let num =
@@ -338,6 +362,30 @@ let build_xrefs_json (fact_map : XRefs.fact_map) =
         xref :: acc)
       fact_map
       []
+  in
+  JSON_Array xrefs
+
+(* TODO refactor to avoid duplication *)
+let build_hint_xrefs_json sym_pos =
+  let xrefs =
+    List.fold
+      ~f:(fun acc (target_json, pos_list) ->
+        let sorted_pos = Caml.List.sort_uniq Util.compare_pos pos_list in
+        let (rev_byte_spans, _) =
+          List.fold sorted_pos ~init:([], 0) ~f:(fun (spans, last_start) pos ->
+              let start = pos.Util.start in
+              let length = pos.Util.length in
+              let span = build_rel_bytespan_json (start - last_start) length in
+              (span :: spans, start))
+        in
+        let byte_spans = List.rev rev_byte_spans in
+        let xref =
+          JSON_Object
+            [("target", target_json); ("ranges", JSON_Array byte_spans)]
+        in
+        xref :: acc)
+      ~init:[]
+      sym_pos
   in
   JSON_Array xrefs
 

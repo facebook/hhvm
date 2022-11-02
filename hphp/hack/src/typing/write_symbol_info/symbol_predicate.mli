@@ -44,6 +44,7 @@ type hack =
   | FileCall
   | GlobalNamespaceAlias
   | IndexerInputsHash
+  | TypeInfo
 
 type src = FileLines
 

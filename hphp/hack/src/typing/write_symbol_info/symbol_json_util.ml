@@ -26,6 +26,12 @@ let get_type_from_hint ctx h =
   let tcopt = Provider_context.get_tcopt ctx in
   Typing_print.full_decl tcopt (Decl_hint.hint decl_env h)
 
+let get_type_from_hint_strip_ns ctx h =
+  let mode = FileInfo.Mhhi in
+  let decl_env = Decl_env.{ mode; droot = None; droot_member = None; ctx } in
+  let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
+  Typing_print.full_strip_ns_decl env (Decl_hint.hint decl_env h)
+
 (* Replace any codepoints that are not valid UTF-8 with
 the unrepresentable character. *)
 let check_utf8 str =
@@ -130,3 +136,17 @@ let namespace_ast_to_pos_id ns_ast st =
     | _ -> raise Ast_error
   in
   tokens_to_pos_id st ~hd ~tl
+
+type pos = {
+  start: int;
+  length: int;
+}
+[@@deriving ord]
+
+(* TODO complete this *)
+let hint_to_string_and_symbols ctx h =
+  let ty_pp = get_type_from_hint_strip_ns ctx h in
+  match h with
+  | (_, Aast.Happly (class_name, [])) ->
+    (ty_pp, [(class_name, [{ start = 0; length = String.length ty_pp }])])
+  | _ -> (ty_pp, [])

@@ -48,6 +48,7 @@ type hack =
   | FileCall
   | GlobalNamespaceAlias
   | IndexerInputsHash
+  | TypeInfo
 [@@deriving ord]
 
 type src = FileLines [@@deriving ord]
@@ -104,6 +105,7 @@ let hack_to_string = function
   | FileCall -> "FileCall"
   | GlobalNamespaceAlias -> "GlobalNamespaceAlias"
   | IndexerInputsHash -> "IndexerInputsHash"
+  | TypeInfo -> "TypeInfo"
 
 (* List of all predicates, in the order in which they should appear in the JSON.
    This guarantee that facts are introduced before they are referenced. *)
@@ -119,6 +121,7 @@ let ordered_all =
     Hack TraitDeclaration;
     Hack ClassDeclaration;
     Hack EnumDeclaration;
+    Hack TypeInfo;
     Hack Enumerator;
     Hack FunctionDeclaration;
     Hack TypeConstDeclaration;

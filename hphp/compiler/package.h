@@ -44,6 +44,12 @@ namespace hackc {
 
 struct UnitIndex;
 
+struct SymbolRefEdge {
+  const StringData* sym;
+  const StringData* from;
+  const StringData* to;
+};
+
 struct Package {
   Package(const std::string& root,
           coro::TicketExecutor& executor,
@@ -260,7 +266,7 @@ struct Package {
     coro::Task<ParseMetaVec>(const std::vector<std::filesystem::path>&)
   >;
   coro::Task<bool> emit(const UnitIndex&, const EmitCallback&,
-                        const LocalCallback&);
+                        const LocalCallback&, const std::filesystem::path&);
 
 private:
 
@@ -280,6 +286,11 @@ private:
   struct GroupResult {
     Groups m_grouped;
     FileAndSizeVec m_ungrouped;
+  };
+
+  struct OndemandInfo {
+    FileAndSizeVec m_files;
+    std::vector<SymbolRefEdge> m_edges;
   };
 
   // Partition all files specified for this package into groups.
@@ -306,14 +317,15 @@ private:
   void resolveDecls(const UnitIndex&, const FileMetaVec&,
       const std::vector<ParseMeta>&, std::vector<FileData>&, size_t attempts);
 
-  coro::Task<void> emitAll(const EmitCallback&, const UnitIndex&);
-  coro::Task<FileAndSizeVec>
+  coro::Task<void> emitAll(const EmitCallback&, const UnitIndex&,
+                           const std::filesystem::path&);
+  coro::Task<OndemandInfo>
   emitGroups(Groups, const EmitCallback&, const UnitIndex&);
-  coro::Task<FileAndSizeVec>
+  coro::Task<OndemandInfo>
   emitGroup(Group, const EmitCallback&, const UnitIndex&);
 
-  void resolveOnDemand(FileAndSizeVec&, const SymbolRefs&, const UnitIndex&,
-      bool report = false);
+  void resolveOnDemand(OndemandInfo&, const StringData* fromFile,
+      const SymbolRefs&, const UnitIndex&, bool report = false);
 
   std::string m_root;
 

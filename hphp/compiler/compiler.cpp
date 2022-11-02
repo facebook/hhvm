@@ -111,6 +111,7 @@ struct CompilerOptions {
   int logLevel;
   std::string filecache;
   bool coredump;
+  std::string ondemandEdgesPath;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -579,6 +580,9 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "turn on coredump")
     ("compiler-id", "display the git hash for the compiler id")
     ("repo-schema", "display the repo schema id used by this app")
+    ("report-ondemand-edges",
+     value<std::string>(&po.ondemandEdgesPath),
+     "Write parse-on-demand dependency edges to the specified file")
     ;
 
   positional_options_description p;
@@ -1383,7 +1387,8 @@ bool process(const CompilerOptions &po) {
       repo.emplace(outputFile);
     }
 
-    if (!coro::wait(package->emit(*index, emitRemoteUnit, emitLocalUnit))) {
+    if (!coro::wait(package->emit(*index, emitRemoteUnit, emitLocalUnit,
+                                  po.ondemandEdgesPath))) {
       return false;
     }
 

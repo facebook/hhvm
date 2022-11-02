@@ -970,17 +970,24 @@ void Package::resolveDecls(
   assertx(discovered);
 }
 
-void Package::resolveOnDemand(FileAndSizeVec& out,
+void Package::resolveOnDemand(OndemandInfo& out,
+                              const StringData* fromFile,
                               const SymbolRefs& symbolRefs,
                               const UnitIndex& index,
                               bool report) {
-  auto const& onPath = [&] (const std::string& rpath) {
+  auto const& onPath = [&] (const std::string& rpath,
+                            const StringData* sym) {
     if (rpath.empty()) return;
     if (Option::PackageExcludeFiles.count(rpath) > 0 ||
         Option::IsFileExcluded(rpath, Option::PackageExcludePatterns)) {
       // Found symbol in UnitIndex, but the corresponding file was excluded.
       Logger::FVerbose("excluding ondemand file {}", rpath);
       return;
+    }
+
+    auto const toFile = makeStaticString(rpath);
+    if (fromFile != toFile) {
+      out.m_edges.emplace_back(SymbolRefEdge{sym, fromFile, toFile});
     }
 
     auto canon = FileUtil::canonicalize(String(rpath)).toCppString();
@@ -1003,15 +1010,16 @@ void Package::resolveOnDemand(FileAndSizeVec& out,
         m_failed.store(true);
         return;
       }
-      out.emplace_back(FileAndSize{std::move(canon), (size_t)sb.st_size});
+      out.m_files.emplace_back(FileAndSize{std::move(canon), (size_t)sb.st_size});
     }
   };
 
   auto const onMap = [&] (auto const& syms, auto const& sym_to_file) {
     for (auto const& sym : syms) {
-      auto const it = sym_to_file.find(makeStaticString(sym));
+      auto const s = makeStaticString(sym);
+      auto const it = sym_to_file.find(s);
       if (it == sym_to_file.end()) continue;
-      onPath(it->second->rpath);
+      onPath(it->second->rpath, s);
     }
   };
 
@@ -1022,7 +1030,7 @@ void Package::resolveOnDemand(FileAndSizeVec& out,
           auto const rpath = path.compare(0, m_root.length(), m_root) == 0
             ? path.substr(m_root.length())
             : path;
-          onPath(rpath);
+          onPath(rpath, nullptr);
         }
         break;
       case SymbolRef::Class:
@@ -1332,7 +1340,8 @@ bool UnitIndex::containsAnyMissing(
 
 coro::Task<bool> Package::emit(const UnitIndex& index,
                                const EmitCallback& callback,
-                               const LocalCallback& localCallback) {
+                               const LocalCallback& localCallback,
+                               const std::filesystem::path& edgesPath) {
   assertx(callback);
   assertx(localCallback);
 
@@ -1350,14 +1359,14 @@ coro::Task<bool> Package::emit(const UnitIndex& index,
   // and parse-on-demand files.
   UEVec localUEs;
   for (auto& ue : SystemLib::claimRegisteredUnitEmitters()) {
-    FileAndSizeVec ondemand;
-    resolveOnDemand(ondemand, ue->m_symbol_refs, index, true);
-    for (auto const& p : ondemand) {
+    OndemandInfo ondemand;
+    resolveOnDemand(ondemand, ue->m_filepath, ue->m_symbol_refs, index, true);
+    for (auto const& p : ondemand.m_files) {
       addSourceFile(p.m_path);
-      Logger::FVerbose("systemlib unit {} -> {}",
-          ue->m_filepath,
-          p.m_path.string()
-      );
+    }
+    for (auto const& e : ondemand.m_edges) {
+      auto const sym = e.sym ? e.sym : makeStaticString("<include>");
+      Logger::FVerbose("systemlib unit {} -> {} -> {}", e.from, sym, e.to);
     }
     localUEs.emplace_back(std::move(ue));
   }
@@ -1368,31 +1377,98 @@ coro::Task<bool> Package::emit(const UnitIndex& index,
     tasks.emplace_back(std::move(task).scheduleOn(m_executor.sticky()));
   }
   tasks.emplace_back(
-    emitAll(callback, index).scheduleOn(m_executor.sticky())
+    emitAll(callback, index, edgesPath).scheduleOn(m_executor.sticky())
   );
   HPHP_CORO_AWAIT(coro::collectRange(std::move(tasks)));
   HPHP_CORO_RETURN(!m_failed.load());
+}
+
+namespace {
+// Write every ondemand edge to a text file. The file contains
+// enough information to reconstruct a file dependency graph with
+// edges labeled with symbol names.
+//
+// Format:
+//   f <filename>         Defines a file (node)
+//   s <symbol>           Defines a symbol (edge label)
+//   e <from> <to> <sym>  Dependency edge
+//
+// Edges reference files and symbols by index, where indexes are
+// assigned in the order of `f` and `s` lines in the file.
+// For example:
+//
+// a.php
+//   function foo() {}
+// b.php
+//   function test() { foo(); }
+//
+// reports one edge:
+//   f a.php
+//   f b.php
+//   s foo
+//   e 0 1 0
+//
+void saveSymbolRefEdges(std::vector<SymbolRefEdge> edges,
+                        const std::filesystem::path& edgesPath) {
+  auto f = fopen(edgesPath.native().c_str(), "w");
+  if (!f) {
+    Logger::FError("Could not open {} for writing", edgesPath.native());
+    return;
+  }
+  SCOPE_EXIT { fclose(f); };
+  hphp_fast_map<const StringData*, size_t> files;
+  hphp_fast_map<const StringData*, size_t> symbols;
+  for (auto const& e : edges) {
+    auto it = files.find(e.from);
+    if (it == files.end()) {
+      files.insert(std::make_pair(e.from, files.size()));
+      fprintf(f, "f %s\n", e.from->data());
+    }
+    it = files.find(e.to);
+    if (it == files.end()) {
+      files.insert(std::make_pair(e.to, files.size()));
+      fprintf(f, "f %s\n", e.to->data());
+    }
+    it = symbols.find(e.sym);
+    if (it == symbols.end()) {
+      symbols.insert(std::make_pair(e.sym, symbols.size()));
+      auto const sym = e.sym ? e.sym->data() : "<include>";
+      fprintf(f, "s %s\n", sym);
+    }
+    fprintf(f, "e %lu %lu %lu\n", files[e.from], files[e.to], symbols[e.sym]);
+  }
+  Logger::FInfo("Saved ondemand edges to {}", edgesPath.native());
+}
 }
 
 // The actual emit loop. Find the initial set of inputs (from
 // configuration), emit them, enumerate on-demand files from symbol refs,
 // then repeat the process until we have no new files to emit.
 coro::Task<void>
-Package::emitAll(const EmitCallback& callback, const UnitIndex& index) {
+Package::emitAll(const EmitCallback& callback, const UnitIndex& index,
+                 const std::filesystem::path& edgesPath) {
+  auto const logEdges = !edgesPath.native().empty();
+
   // Find the initial set of groups
   auto groups = HPHP_CORO_AWAIT(groupAll(true, true));
 
   // Select the files specified as inputs, collect ondemand file names.
-  FileAndSizeVec ondemand;
+  std::vector<SymbolRefEdge> edges;
+  OndemandInfo ondemand;
   {
     Timer timer{Timer::WallTime, "emitting inputs"};
     ondemand = HPHP_CORO_AWAIT(
       emitGroups(std::move(groups), callback, index)
     );
+    if (logEdges) {
+      edges.insert(
+        edges.end(), ondemand.m_edges.begin(), ondemand.m_edges.end()
+      );
+    }
     m_inputMicros = std::chrono::microseconds{timer.getMicroSeconds()};
   }
 
-  if (ondemand.empty()) {
+  if (ondemand.m_files.empty()) {
     HPHP_CORO_RETURN_VOID;
   }
 
@@ -1400,27 +1476,38 @@ Package::emitAll(const EmitCallback& callback, const UnitIndex& index) {
   // We have ondemand files, so keep emitting until a fix point.
   do {
     assertx(groups.empty());
-    groupFiles(groups, std::move(ondemand));
+    groupFiles(groups, std::move(ondemand.m_files));
     ondemand = HPHP_CORO_AWAIT(
       emitGroups(std::move(groups), callback, index)
     );
-  } while (!ondemand.empty());
+    if (logEdges) {
+      edges.insert(
+        edges.end(), ondemand.m_edges.begin(), ondemand.m_edges.end()
+      );
+    }
+  } while (!ondemand.m_files.empty());
   m_ondemandMicros = std::chrono::microseconds{timer.getMicroSeconds()};
+
+  // Save edge list to a text file, if requested
+  if (logEdges) {
+    saveSymbolRefEdges(std::move(edges), edgesPath);
+  }
+
   HPHP_CORO_RETURN_VOID;
 }
 
 // Emit all of the files in the given group, returning a vector of
 // ondemand files obtained from that group.
-coro::Task<Package::FileAndSizeVec> Package::emitGroups(
+coro::Task<Package::OndemandInfo> Package::emitGroups(
   Groups groups,
   const EmitCallback& callback,
   const UnitIndex& index
 ) {
-  if (groups.empty()) HPHP_CORO_RETURN(FileAndSizeVec{});
+  if (groups.empty()) HPHP_CORO_RETURN(OndemandInfo{});
 
   // Kick off emitting. Each group gets its own sticky ticket (so
   // earlier groups will get scheduling priority over later ones).
-  std::vector<coro::TaskWithExecutor<FileAndSizeVec>> tasks;
+  std::vector<coro::TaskWithExecutor<OndemandInfo>> tasks;
   for (auto& group : groups) {
     tasks.emplace_back(
       emitGroup(std::move(group), callback, index)
@@ -1429,12 +1516,17 @@ coro::Task<Package::FileAndSizeVec> Package::emitGroups(
   }
 
   // Gather the on-demand files and return them
-  FileAndSizeVec ondemand;
-  for (auto& paths : HPHP_CORO_AWAIT(coro::collectRange(std::move(tasks)))) {
-    ondemand.insert(
-      ondemand.end(),
-      std::make_move_iterator(paths.begin()),
-      std::make_move_iterator(paths.end())
+  OndemandInfo ondemand;
+  for (auto& info : HPHP_CORO_AWAIT(coro::collectRange(std::move(tasks)))) {
+    ondemand.m_files.insert(
+      ondemand.m_files.end(),
+      std::make_move_iterator(info.m_files.begin()),
+      std::make_move_iterator(info.m_files.end())
+    );
+    ondemand.m_edges.insert(
+      ondemand.m_edges.end(),
+      std::make_move_iterator(info.m_edges.begin()),
+      std::make_move_iterator(info.m_edges.end())
     );
   }
 
@@ -1443,7 +1535,7 @@ coro::Task<Package::FileAndSizeVec> Package::emitGroups(
 
 // Emit a group, hand off the UnitEmitter or WPI::Key/Value obtained,
 // and return any on-demand files found.
-coro::Task<Package::FileAndSizeVec> Package::emitGroup(
+coro::Task<Package::OndemandInfo> Package::emitGroup(
     Group group,
     const EmitCallback& callback,
     const UnitIndex& index
@@ -1455,7 +1547,7 @@ coro::Task<Package::FileAndSizeVec> Package::emitGroup(
 
   try {
     if (group.m_files.empty()) {
-      HPHP_CORO_RETURN(FileAndSizeVec{});
+      HPHP_CORO_RETURN(OndemandInfo{});
     }
 
     auto const workItems = group.m_files.size();
@@ -1475,16 +1567,18 @@ coro::Task<Package::FileAndSizeVec> Package::emitGroup(
     m_total += workItems;
 
     // Process the outputs
-    FileAndSizeVec ondemand;
-    for (auto& meta : parseMetas) {
-      // The Unit had an ICE and we're configured to treat that as a
-      // fatal error. Here is where we die on it.
+    OndemandInfo ondemand;
+    for (size_t i = 0; i < workItems; i++) {
+      auto const filename = makeStaticString(group.m_files[i].native());
+      auto const& meta = parseMetas[i];
       if (!meta.m_abort.empty()) {
+        // The unit had an ICE and we're configured to treat that as a
+        // fatal error. Here is where we die on it.
         fprintf(stderr, "%s", meta.m_abort.c_str());
         _Exit(1);
       }
       // Resolve any symbol refs into files to parse ondemand
-      resolveOnDemand(ondemand, meta.m_symbol_refs, index);
+      resolveOnDemand(ondemand, filename, meta.m_symbol_refs, index);
     }
     HPHP_CORO_MOVE_RETURN(ondemand);
   } catch (const Exception& e) {
@@ -1504,7 +1598,7 @@ coro::Task<Package::FileAndSizeVec> Package::emitGroup(
     m_failed.store(true);
   }
 
-  HPHP_CORO_RETURN(FileAndSizeVec{});
+  HPHP_CORO_RETURN(OndemandInfo{});
 }
 
 Package::IndexMeta HPHP::summary_of_facts(const hackc::FactsResult& facts) {

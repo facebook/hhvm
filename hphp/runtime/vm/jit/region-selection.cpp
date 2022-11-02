@@ -1082,12 +1082,11 @@ bool check(const RegionDesc& region, std::string& error) {
   for (auto b : region.blocks()) {
     auto bid = b->id();
     SrcKey    lastSk = region.block(bid)->last();
-    OffsetSet validSuccOffsets = lastSk.succOffsets();
-    OffsetSet succOffsets;
+    SrcKey::Set validSuccSrcKeys = lastSk.succSrcKeys();
+    SrcKey::Set succSrcKeys;
 
     for (auto succ : region.succs(bid)) {
       SrcKey succSk = region.block(succ)->start();
-      Offset succOffset = succSk.offset();
 
       // 3) All arcs involve blocks within the region.
       if (blockSet.count(succ) == 0) {
@@ -1108,18 +1107,18 @@ bool check(const RegionDesc& region, std::string& error) {
 
       // 4) For each arc, the bytecode offset of the dst block must
       //    possibly follow the execution of the src block.
-      if (validSuccOffsets.count(succOffset) == 0) {
+      if (validSuccSrcKeys.count(succSk) == 0) {
         return bad(folly::sformat("arc with impossible control flow: {} -> {}",
                                   bid, succ));
       }
 
       // 5) Each block contains at most one successor corresponding to a
       //    given SrcKey.
-      if (succOffsets.count(succOffset) > 0) {
+      if (succSrcKeys.count(succSk) > 0) {
         return bad(folly::sformat("block {} has multiple successors with SK {}",
                                   bid, show(succSk)));
       }
-      succOffsets.insert(succOffset);
+      succSrcKeys.insert(succSk);
     }
     for (auto pred : region.preds(bid)) {
       if (blockSet.count(pred) == 0) {

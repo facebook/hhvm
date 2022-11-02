@@ -48,6 +48,8 @@ struct SrcKey {
   struct StableHasher;
   struct TbbHashCompare;
 
+  using Set = hphp_hash_set<SrcKey, SrcKey::Hasher>;
+
   /*
    * Used for SrcKeys corresponding to the prologue which precedes a function
    * entry source location.
@@ -149,7 +151,7 @@ struct SrcKey {
   /*
    * Get all possible Offsets for the next bytecode.
    */
-  OffsetSet succOffsets() const;
+  Set succSrcKeys() const;
 
   /*
    * Advance the SrcKey to the next instruction.
@@ -219,8 +221,6 @@ struct SrcKey::StableHasher {
     return sk.stableHash();
   }
 };
-
-using SrcKeySet = hphp_hash_set<SrcKey,SrcKey::Hasher>;
 
 ///////////////////////////////////////////////////////////////////////////////
 

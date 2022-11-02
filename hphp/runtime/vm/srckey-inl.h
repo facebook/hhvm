@@ -183,10 +183,15 @@ inline void SrcKey::setOffset(Offset o) {
   m_s.m_offsetOrNumArgs = (uint32_t)o;
 }
 
-inline OffsetSet SrcKey::succOffsets() const {
+inline SrcKey::Set SrcKey::succSrcKeys() const {
   assertx(!prologue());
-  if (funcEntry()) return {entryOffset()};
-  return instrSuccOffsets(pc(), func());
+  if (funcEntry()) return {SrcKey{func(), entryOffset(), ResumeMode::None}};
+
+  SrcKey::Set set;
+  for (auto offset : instrSuccOffsets(pc(), func())) {
+    set.emplace(SrcKey{*this, offset});
+  }
+  return set;
 }
 
 inline void SrcKey::advance(const Func* f) {

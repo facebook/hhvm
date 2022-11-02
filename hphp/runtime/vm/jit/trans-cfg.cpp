@@ -52,8 +52,8 @@ TransIDSet findPredTrans(const RegionDesc& rd, const ProfData* profData) {
 
     FTRACE(5, "findPredTrans: toSmash = {}   srcID = {}\n",
            inBr.toSmash(), srcID);
-    auto srcSuccOffsets = srcRec->lastSrcKey().succOffsets();
-    if (srcSuccOffsets.count(dstSK.offset())) {
+    auto srcSuccSrcKeys = srcRec->lastSrcKey().succSrcKeys();
+    if (srcSuccSrcKeys.count(dstSK)) {
       predSet.insert(srcID);
     } else {
       FTRACE(5, "findPredTrans: WARNING: incoming branch with impossible "

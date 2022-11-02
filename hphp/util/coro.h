@@ -134,6 +134,13 @@ auto collectRange(std::vector<T>&& ts) {
   return folly::coro::collectAllRange(std::move(ts));
 }
 
+// Like collectRange, but will only run up to a fixed number of tasks
+// simultaneously.
+template <typename T>
+auto collectRangeWindowed(std::vector<T>&& ts, std::size_t window) {
+  return folly::coro::collectAllWindowed(std::move(ts), window);
+}
+
 // Given a callable and a set of arguments, store the arguments, then
 // invoke the callable. This is useful if you have a callable which
 // takes params by reference. Passing a temporary will cause crashes
@@ -331,6 +338,11 @@ auto collectRange(std::vector<Task<T>>&& ts) {
 
 inline auto collectRange(std::vector<Task<void>>&&) {
   return Task<void>{};
+}
+
+template <typename T>
+auto collectRangeWindowed(std::vector<Task<T>>&& ts, std::size_t) {
+  return collectRange(std::move(ts));
 }
 
 template <typename F, typename... Args> auto invoke(F&& f, Args&&... args) {

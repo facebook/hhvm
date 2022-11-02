@@ -8050,7 +8050,8 @@ void make_local(IndexData& index) {
   SCOPE_EXIT { php::Func::s_reuser = nullptr; };
 
   // For speed, split up the unit loading into chunks.
-  constexpr size_t kLoadChunkSize = 500;
+  constexpr size_t kLoadChunkSize = 2500;
+  constexpr size_t kMaxConcurrentChunks = 300;
 
   // Chunk everything we need to load:
   struct Chunk {
@@ -8150,7 +8151,12 @@ void make_local(IndexData& index) {
       loadAndParse(std::move(c)).scheduleOn(index.executor->sticky())
     );
   }
-  coro::wait(coro::collectRange(std::move(tasks)));
+  coro::wait(
+    coro::collectRangeWindowed(
+      std::move(tasks),
+      kMaxConcurrentChunks
+    )
+  );
 
   // Done with any extern-worker stuff at this point:
   index.configRef.reset();

@@ -10,7 +10,7 @@
 
 namespace HH {
 function server_warmup_status(): string;
-function execution_context(): string;
+function execution_context()[read_globals]: string;
 
 <<__SupportDynamicType>>
 function array_mark_legacy<T>(T $in, bool $recursive = false)[]: T;

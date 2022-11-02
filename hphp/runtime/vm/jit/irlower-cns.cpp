@@ -327,7 +327,7 @@ void cgInitClsCns(IRLS& env, const IRInstruction* inst) {
   markRDSAccess(v, link.handle());
   auto const args = argGroup(env, inst)
     .addr(rvmtl(), safe_cast<int32_t>(link.handle()))
-    .immPtr(NamedEntity::get(extra->clsName))
+    .immPtr(NamedEntity::getType(extra->clsName))
     .immPtr(extra->clsName)
     .immPtr(extra->cnsName);
 

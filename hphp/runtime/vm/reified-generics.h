@@ -34,7 +34,7 @@ struct StringData;
 ///////////////////////////////////////////////////////////////////////////////
 
 // Returns either newly created or already cached static array
-ArrayData* addToReifiedGenericsTable(const StringData* mangledName,
+ArrayData* addToTypeReifiedGenericsTable(const StringData* mangledName,
                                      ArrayData* tsList);
 
 ///////////////////////////////////////////////////////////////////////////////

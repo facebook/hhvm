@@ -35,7 +35,8 @@ struct RepoGlobalData {
   /*
    * Copy of InitialNamedEntityTableSize for hhbbc to use.
    */
-  uint32_t InitialNamedEntityTableSize = 0;
+  uint32_t InitialTypeTableSize = 0;
+  uint32_t InitialFuncTableSize = 0;
 
   /*
    * Copy of InitialStaticStringTableSize for hhbbc to use.
@@ -180,7 +181,8 @@ struct RepoGlobalData {
   // to serde it before memory manager and family are set up.
 
   template<class SerDe> void serde(SerDe& sd) {
-    sd(InitialNamedEntityTableSize)
+    sd(InitialTypeTableSize)
+      (InitialFuncTableSize)
       (InitialStaticStringTableSize)
       (HardGenericsUB)
       (CheckPropTypeHints)

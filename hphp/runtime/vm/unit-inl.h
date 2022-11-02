@@ -187,15 +187,26 @@ inline size_t Unit::numLitstrs() const {
   return m_litstrs.size();
 }
 
-inline const NamedEntity* Unit::lookupNamedEntityId(Id id) const {
-  return lookupNamedEntityPairId(id).second;
+inline const NamedEntity* Unit::lookupNamedTypeId(Id id) const {
+  return lookupNamedTypePairId(id).second;
 }
 
-inline NamedEntityPair Unit::lookupNamedEntityPairId(Id id) const {
+inline const NamedEntity* Unit::lookupNamedFuncId(Id id) const {
+  return lookupNamedFuncPairId(id).second;
+}
+
+inline NamedEntityPair Unit::lookupNamedTypePairId(Id id) const {
   auto const name = lookupLitstrId(id);
   assertx(name);
   assertx(name->data()[0] != '\\');
-  return { name, NamedEntity::get(name) };
+  return { name, NamedEntity::getType(name) };
+}
+
+inline NamedEntityPair Unit::lookupNamedFuncPairId(Id id) const {
+  auto const name = lookupLitstrId(id);
+  assertx(name);
+  assertx(name->data()[0] != '\\');
+  return { name, NamedEntity::getFunc(name) };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

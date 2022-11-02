@@ -261,8 +261,8 @@ RepoGlobalData get_global_data() {
     RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;
   gd.HackArrCompatSerializeNotices =
     RuntimeOption::EvalHackArrCompatSerializeNotices;
-  gd.InitialNamedEntityTableSize  =
-    RuntimeOption::EvalInitialNamedEntityTableSize;
+  gd.InitialTypeTableSize = RuntimeOption::EvalInitialTypeTableSize;
+  gd.InitialFuncTableSize = RuntimeOption::EvalInitialFuncTableSize;
   gd.InitialStaticStringTableSize =
     RuntimeOption::EvalInitialStaticStringTableSize;
   gd.EmitClsMethPointers = RuntimeOption::EvalEmitClsMethPointers;
@@ -674,8 +674,11 @@ int main(int argc, char** argv) try {
 
   auto const& gd = RepoFile::globalData();
   gd.load(false);
-  if (gd.InitialNamedEntityTableSize) {
-    RO::EvalInitialNamedEntityTableSize  = gd.InitialNamedEntityTableSize;
+  if (gd.InitialTypeTableSize) {
+    RO::EvalInitialTypeTableSize  = gd.InitialTypeTableSize;
+  }
+  if (gd.InitialFuncTableSize) {
+    RO::EvalInitialFuncTableSize  = gd.InitialFuncTableSize;
   }
   if (gd.InitialStaticStringTableSize) {
     RO::EvalInitialStaticStringTableSize = gd.InitialStaticStringTableSize;

@@ -22,7 +22,7 @@ abstract final class ServerUtilServerTests {
     if (self::$request !== null) {
       return self::$request;
     }
-    return fun('http_request');
+    return http_request<>;
   }
 }
 
@@ -298,7 +298,8 @@ function takeoverOldServer($serverPort, $adminPort, $home, $root,
 }
 
 <<__DynamicallyCallable>>
-function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
+function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '',
+                      $host_prefix = 'hphpd.debugger') {
 
   if (is_array($path)) {
     $headers = $path[2] ?? null;
@@ -320,7 +321,7 @@ function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
     $headers = implode(" ", $s);
   }
   $url = "http://$host:$port/$path";
-  $host_name = "hphpd.debugger.".\php_uname('n');
+  $host_name = "$host_prefix.".\php_uname('n');
 
   $LOG_ROOT = ServerUtilServerTests::$LOG_ROOT;
   $test_run_id = ServerUtilServerTests::test_run_id();

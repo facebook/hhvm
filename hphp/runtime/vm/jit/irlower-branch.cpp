@@ -397,7 +397,7 @@ void cgReqBindJmp(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   if (extra->target.funcEntry()) {
-    if (!inst->marker().prologue()) popFrameToFuncEntryRegs(v);
+    if (extra->popFrame) popFrameToFuncEntryRegs(v);
   } else {
     maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->irSPOff);
   }
@@ -443,7 +443,7 @@ void cgReqInterpBBNoTranslate(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   if (extra->target.funcEntry()) {
-    popFrameToFuncEntryRegs(v);
+    if (extra->popFrame) popFrameToFuncEntryRegs(v);
   } else {
     maybe_syncsp(v, inst->marker(), srcLoc(env, inst, 0).reg(), extra->irSPOff);
   }

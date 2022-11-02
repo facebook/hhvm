@@ -328,7 +328,8 @@ void interpOne(IRGS& env,
     auto const rbjData = ReqBindJmpData {
       nextSrcKey(env),
       spOffBCFromStackBase(env),
-      spOffBCFromIRSP(env)
+      spOffBCFromIRSP(env),
+      false /* popFrame */
     };
     gen(env, ReqBindJmp, rbjData, sp(env), fp(env));
   }

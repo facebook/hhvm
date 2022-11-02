@@ -480,7 +480,8 @@ void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc) {
     ReqBindJmpData {
       SrcKey { callee, numArgs, SrcKey::FuncEntryTag {} },
       SBInvOffset { 0 },
-      spOffBCFromIRSP(env)
+      spOffBCFromIRSP(env),
+      false /* popFrame */
     },
     sp(env),
     fp(env)

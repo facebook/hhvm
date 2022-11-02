@@ -1058,16 +1058,21 @@ struct LdTVAuxData : IRExtraData {
 struct ReqBindJmpData : IRExtraData {
   explicit ReqBindJmpData(const SrcKey& target,
                           SBInvOffset invSPOff,
-                          IRSPRelOffset irSPOff)
+                          IRSPRelOffset irSPOff,
+                          bool popFrame)
     : target(target)
     , invSPOff(invSPOff)
     , irSPOff(irSPOff)
-  {}
+    , popFrame(popFrame)
+  {
+    assertx(IMPLIES(popFrame, target.funcEntry()));
+  }
 
   std::string show() const {
     return folly::sformat(
-      "{}, SBInv {}, IRSP {}",
-      showShort(target), invSPOff.offset, irSPOff.offset
+      "{}, SBInv {}, IRSP {}{}",
+      showShort(target), invSPOff.offset, irSPOff.offset,
+      popFrame ? ", popFrame" : ""
     );
   }
 
@@ -1075,17 +1080,23 @@ struct ReqBindJmpData : IRExtraData {
     return folly::hash::hash_combine(
       SrcKey::StableHasher()(target),
       std::hash<int32_t>()(invSPOff.offset),
-      std::hash<int32_t>()(irSPOff.offset)
+      std::hash<int32_t>()(irSPOff.offset),
+      std::hash<bool>()(popFrame)
     );
   }
 
   bool equals(const ReqBindJmpData& o) const {
-    return target == o.target && invSPOff == o.invSPOff && irSPOff == o.irSPOff;
+    return
+      target == o.target &&
+      invSPOff == o.invSPOff &&
+      irSPOff == o.irSPOff &&
+      popFrame == o.popFrame;
   }
 
   SrcKey target;
   SBInvOffset invSPOff;
   IRSPRelOffset irSPOff;
+  bool popFrame;
 };
 
 struct StFrameMetaData : IRExtraData {

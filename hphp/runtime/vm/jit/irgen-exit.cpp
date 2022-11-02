@@ -63,10 +63,14 @@ void exitRequest(IRGS& env, SrcKey target) {
     );
     return;
   }
+  // FIXME: the following assert fails, because prepareInstruction() adds
+  // illegal CheckTypes in the middle of translation exiting to the initial
+  // SrcKey, which may be a func entry
+  // assertx(!target.funcEntry());
   gen(
     env,
     ReqBindJmp,
-    ReqBindJmpData { target, invSP, irSP },
+    ReqBindJmpData { target, invSP, irSP, target.funcEntry() },
     sp(env),
     fp(env)
   );

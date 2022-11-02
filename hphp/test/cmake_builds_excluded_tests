@@ -75,6 +75,7 @@ zend/good/ext/date/tests/sunfuncts.php
 zend/good/ext/xsl/tests/xslt010.php
 
 # TODO(alexeyt) fail due to inability to start watchman
+server/http/tests/basic-multifile.php
 slow/decl-provider/embed_type_decl.php
 slow/dynamic-calls/watchman-callback.php
 slow/dynamic-calls/watchman-callback-notice.php

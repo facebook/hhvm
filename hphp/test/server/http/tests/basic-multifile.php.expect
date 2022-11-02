@@ -1,0 +1,117 @@
+Sandbox: 0 (sandbox0) Version: 0
+--------------------------------------------------------
+string(5) "Child"
+string(5) "Child"
+string(12) "static Child"
+string(12) "static Child"
+string(5) "Child"
+string(12) "static Child"
+string(5) "Child"
+string(5) "Child"
+string(5) "Child"
+--------------------------------------------------------
+
+Sandbox: 1 (sandbox1) Version: 0
+--------------------------------------------------------
+string(5) "Child"
+string(5) "Child"
+string(12) "static Child"
+string(12) "static Child"
+string(5) "Child"
+string(12) "static Child"
+string(5) "Child"
+string(5) "Child"
+string(5) "Child"
+--------------------------------------------------------
+
+Sandbox: 2 (sandbox2) Version: 2
+--------------------------------------------------------
+string(13) "Parent_ via T"
+string(5) "Child"
+string(12) "static Child"
+string(12) "static Child"
+string(5) "Child"
+string(12) "static Child"
+string(5) "Child"
+string(5) "Child"
+string(13) "Parent_ via T"
+--------------------------------------------------------
+
+Sandbox: 0 (sandbox0) Version: 1
+--------------------------------------------------------
+string(7) "Parent_"
+string(5) "Child"
+string(12) "static Child"
+string(12) "static Child"
+string(5) "Child"
+string(12) "static Child"
+string(5) "Child"
+string(5) "Child"
+string(7) "Parent_"
+--------------------------------------------------------
+
+Sandbox: 1 (sandbox1) Version: 0
+--------------------------------------------------------
+string(5) "Child"
+string(5) "Child"
+string(12) "static Child"
+string(12) "static Child"
+string(5) "Child"
+string(12) "static Child"
+string(5) "Child"
+string(5) "Child"
+string(5) "Child"
+--------------------------------------------------------
+
+Sandbox: 2 (sandbox2) Version: 2
+--------------------------------------------------------
+string(13) "Parent_ via T"
+string(5) "Child"
+string(12) "static Child"
+string(12) "static Child"
+string(5) "Child"
+string(12) "static Child"
+string(5) "Child"
+string(5) "Child"
+string(13) "Parent_ via T"
+--------------------------------------------------------
+
+Sandbox: 0 (sandbox0) Version: 2
+--------------------------------------------------------
+string(13) "Parent_ via T"
+string(5) "Child"
+string(12) "static Child"
+string(12) "static Child"
+string(5) "Child"
+string(12) "static Child"
+string(5) "Child"
+string(5) "Child"
+string(13) "Parent_ via T"
+--------------------------------------------------------
+
+Sandbox: 1 (sandbox1) Version: 0
+--------------------------------------------------------
+string(5) "Child"
+string(5) "Child"
+string(12) "static Child"
+string(12) "static Child"
+string(5) "Child"
+string(12) "static Child"
+string(5) "Child"
+string(5) "Child"
+string(5) "Child"
+--------------------------------------------------------
+
+Sandbox: 2 (sandbox2) Version: 2
+--------------------------------------------------------
+string(13) "Parent_ via T"
+string(5) "Child"
+string(12) "static Child"
+string(12) "static Child"
+string(5) "Child"
+string(12) "static Child"
+string(5) "Child"
+string(5) "Child"
+string(13) "Parent_ via T"
+--------------------------------------------------------
+

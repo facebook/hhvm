@@ -363,6 +363,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_typedef& node) {
 
   return schema;
 }
+
 } // namespace compiler
 } // namespace thrift
 } // namespace apache

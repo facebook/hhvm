@@ -87,6 +87,8 @@ void t_ast_generator::generate_program() {
   cpp2::AST ast;
   std::unordered_map<const t_program*, apache::thrift::type::ProgramId>
       program_index;
+  std::unordered_map<const t_named*, apache::thrift::type::DefinitionId>
+      definition_index;
   const_ast_visitor visitor;
   visitor.add_program_visitor([&](const t_program& program) {
     if (program_index.count(&program)) {
@@ -103,13 +105,46 @@ void t_ast_generator::generate_program() {
       // This could invalidate references into `programs`.
       visitor(*include);
       programs.at(pos).includes().ensure().push_back(program_index.at(include));
+      auto& defs = programs.at(pos).definitions().ensure();
+      for (auto& def : include->definitions()) {
+        defs.push_back(definition_index.at(&def));
+      }
     }
 
     // TODO: sourceInfo
     // TODO: languageIncludes
+
+    // Note: have to populate `definitions` after the visitor completes since it
+    // visits the children after this lambda returns.
   });
-  // TODO: other visitors
+
+#define THRIFT_ADD_VISITOR(kind)                                  \
+  visitor.add_##kind##_visitor([&](const t_##kind& node) {        \
+    if (node.generated()) {                                       \
+      return;                                                     \
+    }                                                             \
+    auto& definitions = *ast.schema()->definitions();             \
+    auto pos = definitions.size();                                \
+    definition_index[&node] =                                     \
+        static_cast<apache::thrift::type::DefinitionId>(pos + 1); \
+    hydrate_const(                                                \
+        definitions.emplace_back().kind##Def_ref().ensure(),      \
+        *schematizer::gen_schema(node));                          \
+  })
+  THRIFT_ADD_VISITOR(service);
+  THRIFT_ADD_VISITOR(interaction);
+  THRIFT_ADD_VISITOR(struct);
+  THRIFT_ADD_VISITOR(union);
+  THRIFT_ADD_VISITOR(exception);
+  THRIFT_ADD_VISITOR(typedef);
+  THRIFT_ADD_VISITOR(enum);
+  THRIFT_ADD_VISITOR(const);
+#undef THRIFT_ADD_VISITOR
   visitor(*program_);
+  auto& defs = ast.schema()->programs()->at(0).definitions().ensure();
+  for (auto& def : program_->definitions()) {
+    defs.push_back(definition_index.at(&def));
+  }
 
   f_out_ << debugString(ast);
   // TODO: JSON

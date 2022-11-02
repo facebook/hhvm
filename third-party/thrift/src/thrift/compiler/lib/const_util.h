@@ -19,6 +19,7 @@
 #include <type_traits>
 #include <utility>
 
+#include <folly/FBString.h>
 #include <folly/Traits.h>
 #include <thrift/compiler/ast/t_const_value.h>
 #include <thrift/compiler/ast/t_enum.h>
@@ -47,6 +48,9 @@ std::enable_if_t<std::is_floating_point_v<T>> hydrate_const(
   out = val.get_double();
 }
 inline void hydrate_const(std::string& out, const t_const_value& val) {
+  out = val.get_string();
+}
+inline void hydrate_const(folly::fbstring& out, const t_const_value& val) {
   out = val.get_string();
 }
 template <typename T> // list
@@ -98,6 +102,11 @@ std::enable_if_t<is_thrift_class_v<T>> hydrate_const(
 
     hydrate_const(field_ref.ensure(), *map.at(*meta.name()));
   });
+}
+template <typename T>
+folly::void_t<decltype(std::declval<T>().toThrift())> hydrate_const(
+    T& out, const t_const_value& val) {
+  hydrate_const(out.toThrift(), val);
 }
 } // namespace compiler
 } // namespace thrift

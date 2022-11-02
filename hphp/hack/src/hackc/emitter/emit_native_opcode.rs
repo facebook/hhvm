@@ -39,18 +39,27 @@ pub fn emit_body<'a, 'arena, 'decl>(
 
     body_instrs.and_then(|body_instrs| {
         params.and_then(|params| {
-            return_type_info.map(|rti| Body {
-                body_instrs: Slice::from_vec(emitter.alloc, body_instrs.iter().cloned().collect()),
-                params: Slice::fill_iter(emitter.alloc, params.into_iter().map(|p| p.0)),
-                return_type_info: Just(rti),
-                decl_vars: Default::default(),
-                doc_comment: Default::default(),
-                is_memoize_wrapper: Default::default(),
-                is_memoize_wrapper_lsb: Default::default(),
-                num_iters: Default::default(),
-                shadowed_tparams: Default::default(),
-                stack_depth: Default::default(),
-                upper_bounds: Default::default(),
+            return_type_info.and_then(|rti| {
+                let body_instrs =
+                    Slice::from_vec(emitter.alloc, body_instrs.iter().cloned().collect());
+                let params = Slice::fill_iter(emitter.alloc, params.into_iter().map(|p| p.0));
+                let stack_depth =
+                    stack_depth::compute_stack_depth(params.as_ref(), body_instrs.as_ref())
+                        .map_err(error::Error::from_error)?;
+
+                Ok(Body {
+                    body_instrs,
+                    params,
+                    return_type_info: Just(rti),
+                    decl_vars: Default::default(),
+                    doc_comment: Default::default(),
+                    is_memoize_wrapper: Default::default(),
+                    is_memoize_wrapper_lsb: Default::default(),
+                    num_iters: Default::default(),
+                    shadowed_tparams: Default::default(),
+                    stack_depth,
+                    upper_bounds: Default::default(),
+                })
             })
         })
     })

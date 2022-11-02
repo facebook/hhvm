@@ -420,6 +420,7 @@ pub(crate) fn write_function<R>(
     loc: &SrcLoc,
     params: &[(&str, Ty)],
     ret_ty: Ty,
+    locals: &[(LocalId, Ty)],
     body: impl FnOnce(&mut FuncWriter<'_>) -> Result<R>,
 ) -> Result<R> {
     write_full_loc(w, loc, strings)?;
@@ -431,6 +432,21 @@ pub(crate) fn write_function<R>(
         sep = ", ";
     }
     writeln!(w, ") : {} {{", FmtTy(&ret_ty))?;
+
+    if !locals.is_empty() {
+        let mut sep = "";
+        write!(w, "local ")?;
+        for (lid, ty) in locals {
+            write!(
+                w,
+                "{sep}{name}: {ty}",
+                name = FmtLid(strings, *lid),
+                ty = FmtTy(ty)
+            )?;
+            sep = ", ";
+        }
+        writeln!(w)?;
+    }
 
     let mut writer = FuncWriter {
         cur_loc: loc.clone(),

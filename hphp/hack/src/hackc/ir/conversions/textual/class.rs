@@ -138,6 +138,7 @@ fn write_init_static(
         &class.src_loc,
         &[],
         tx_ty!(void),
+        &[],
         |w| {
             let sz = 0; // TODO: properties
             let p = hack::call_builtin(w, hack::Builtin::AllocWords, [sz])?;

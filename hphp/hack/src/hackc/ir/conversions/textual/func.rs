@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::HashSet;
 use std::str::FromStr;
 use std::sync::Arc;
 
@@ -10,6 +11,7 @@ use anyhow::Error;
 use ascii::AsciiString;
 use ffi::Str;
 use ir::instr::HasLoc;
+use ir::instr::HasLocals;
 use ir::instr::Hhbc;
 use ir::instr::IncDecOp;
 use ir::instr::Predicate;
@@ -78,6 +80,10 @@ pub(crate) fn write_func(
     ir::verify::verify_func(&func, &Default::default(), &unit_state.strings)?;
 
     let params = std::mem::take(&mut func.params);
+    let param_lids = params
+        .iter()
+        .map(|p| LocalId::Named(p.name))
+        .collect::<HashSet<_>>();
     let mut params = params
         .into_iter()
         .map(|p| {
@@ -100,9 +106,33 @@ pub(crate) fn write_func(
         std::mem::take(&mut func.return_type.enforced),
         &unit_state.strings,
     );
+
+    let lids = func
+        .body_instrs()
+        .flat_map(HasLocals::locals)
+        .cloned()
+        .collect::<HashSet<_>>();
+    let locals = lids
+        .into_iter()
+        .filter(|lid| !param_lids.contains(lid))
+        .sorted_by(|x, y| cmp_lid(&unit_state.strings, x, y))
+        .map(|lid| {
+            // TODO(arr): figure out how to provide more precise types
+            let ty = tx_ty!(*void);
+            (lid, ty)
+        })
+        .collect::<Vec<_>>();
+
     let span = func.loc(func.loc_id).clone();
-    let func_declares =
-        textual::write_function(w, &unit_state.strings, name, &span, &params, ret_ty, |w| {
+    let func_declares = textual::write_function(
+        w,
+        &unit_state.strings,
+        name,
+        &span,
+        &params,
+        ret_ty,
+        &locals,
+        |w| {
             let func = rewrite_prelude(func);
             let mut func = rewrite_jmp_ops(func);
             ir::passes::clean::run(&mut func);
@@ -114,7 +144,8 @@ pub(crate) fn write_func(
             }
 
             Ok(state.func_declares)
-        })?;
+        },
+    )?;
 
     unit_state
         .func_declares
@@ -586,4 +617,22 @@ fn rewrite_jmp_ops<'a>(mut func: ir::Func<'a>) -> ir::Func<'a> {
     }
 
     func
+}
+
+/// Compare locals such that named ones go first followed by unnamed ones.
+/// Ordering for named locals is stable and is based on their source names.
+/// Unnamed locals have only their id which may differ accross runs. In which
+/// case the IR would be non-deterministic and hence unstable ordering would be
+/// the least of our concerns.
+fn cmp_lid(strings: &StringInterner, x: &LocalId, y: &LocalId) -> std::cmp::Ordering {
+    match (x, y) {
+        (LocalId::Named(x_bid), LocalId::Named(y_bid)) => {
+            let x_name = strings.lookup_bytes(*x_bid);
+            let y_name = strings.lookup_bytes(*y_bid);
+            x_name.cmp(&y_name)
+        }
+        (LocalId::Named(_), LocalId::Unnamed(_)) => std::cmp::Ordering::Less,
+        (LocalId::Unnamed(_), LocalId::Named(_)) => std::cmp::Ordering::Greater,
+        (LocalId::Unnamed(x_id), LocalId::Unnamed(y_id)) => x_id.cmp(y_id),
+    }
 }

@@ -5,7 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <iostream>
 #include <map>
 #include <optional>
 #include <set>
@@ -108,7 +107,8 @@ class VersionCommand : public PrettyCommand<VersionCommand> {
     // needs to be manually flushed (or else nothing is written to stdout).
     // eventually this can be fmt::flush instead:
     // https://github.com/vgc/vgc/issues/519
-    std::cout.flush();
+    // TODO(T136788014): why doesn't macOS do this for us.
+    fflush(stdout);
   }
 };
 

@@ -5,7 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <iostream>
 #include <unordered_map>
 
 #include <fmt/chrono.h>
@@ -350,7 +349,8 @@ struct DebugStatusCommand : PrettyCommand<DebugStatusCommand> {
     // needs to be manually flushed (or else nothing is written to stdout).
     // eventually this can be fmt::flush instead:
     // https://github.com/vgc/vgc/issues/519
-    std::cout.flush();
+    // TODO(T136788014): why doesn't macOS do this for us.
+    fflush(stdout);
   }
 };
 WATCHMAN_COMMAND(debug_status, DebugStatusCommand);

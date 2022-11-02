@@ -561,6 +561,10 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     emitCalleeRecordFuncCoverage(env, callee);
     emitInitFuncInputs(env, callee, numArgsInclUnpack);
 
+    // Some of the checks above may have failed and it may be illegal to emit
+    // the code below with incorrect inputs (such as not enough args).
+    if (env.irb->inUnreachableState()) return;
+
     auto const hasRdsCache =
       hasConstParamMemoCache(env, callee, objOrClass);
 

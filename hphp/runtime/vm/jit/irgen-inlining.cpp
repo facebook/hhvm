@@ -255,6 +255,15 @@ void beginInlining(IRGS& env,
   for (auto i = 0; i < numTotalInputs; ++i) {
     inputs[numTotalInputs - i - 1] = popCU(env);
   }
+
+  while (entry.trivialDVFuncEntry()) {
+    auto const param = entry.numEntryArgs();
+    assertx(param < numTotalInputs);
+    auto const dv = callee->params()[param].defaultValue;
+    inputs[param] = cns(env, dv);
+    entry = SrcKey{callee, param + 1, SrcKey::FuncEntryTag {}};
+  }
+
   updateMarker(env);
 
   // NB: Now that we've popped the callee's arguments off the stack

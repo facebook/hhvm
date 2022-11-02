@@ -120,6 +120,12 @@ struct IRGS {
    * See irgen-iter-spec for details.
    */
   jit::fast_map<Block*, std::unique_ptr<SpecializedIterator>> iters;
+
+  /*
+   * Func entry inputs:
+   *  - previous (caller's) FP
+   */
+  SSATmp* funcEntryPrevFP{nullptr};
 };
 
 //////////////////////////////////////////////////////////////////////

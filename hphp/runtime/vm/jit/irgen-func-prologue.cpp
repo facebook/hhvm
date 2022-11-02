@@ -467,11 +467,11 @@ void emitSpillFrame(IRGS& env, const Func* callee,
 
   gen(env, InitFrame, FuncData { callee },
       sp(env), arFlags, prologueCtx, calleeId);
+  gen(env, ExitPrologue);
 }
 
-void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc) {
-  gen(env, ExitPrologue);
-
+void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc,
+                     SSATmp* callerFP) {
   // Emit the bindjmp for the function body.
   auto const numArgs = std::min(argc, callee->numNonVariadicParams());
   gen(
@@ -484,7 +484,7 @@ void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc) {
       false /* popFrame */
     },
     sp(env),
-    fp(env)
+    callerFP
   );
 }
 
@@ -539,10 +539,16 @@ void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
   emitCalleeChecks(env, callee, argc, prologueFlags, prologueCtx);
   emitInitFuncInputs(env, callee, argc);
   emitSpillFrame(env, callee, prologueFlags, prologueCtx);
-  emitJmpFuncBody(env, callee, argc);
+  emitJmpFuncBody(env, callee, argc, fp(env));
 }
 
 namespace {
+
+void emitInitScalarDefaultParamLocal(IRGS& env, const Func* callee,
+                                     uint32_t param) {
+  auto const dv = callee->params()[param].defaultValue;
+  gen(env, StLoc, LocalId{param}, fp(env), cns(env, dv));
+}
 
 void emitInitLocalRange(IRGS& env, const Func* callee,
                         uint32_t from, uint32_t to) {
@@ -675,6 +681,14 @@ void emitEnter(IRGS& env, Offset relOffset) {
 void emitFuncEntry(IRGS& env) {
   assertx(curSrcKey(env).funcEntry());
   auto const callee = curFunc(env);
+
+  if (curSrcKey(env).trivialDVFuncEntry()) {
+    assertx(!isInlining(env));
+    auto const param = curSrcKey(env).numEntryArgs();
+    emitInitScalarDefaultParamLocal(env, callee, param);
+    emitJmpFuncBody(env, callee, param + 1, env.funcEntryPrevFP);
+    return;
+  }
 
   emitInitDefaultParamLocals(env, callee, curSrcKey(env).numEntryArgs());
   emitInitClosureLocals(env, callee);

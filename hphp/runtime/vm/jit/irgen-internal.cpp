@@ -82,9 +82,12 @@ void defineFrameAndStack(IRGS& env, SBInvOffset bcSPOff) {
     // - stack base is numSlotsInFrame() away from sp(env)
     gen(env, DefFuncEntryFP);
     updateMarker(env);
-    auto const callerFP = gen(env, DefFuncEntryPrevFP);
-    gen(env, EnterFrame, fp(env), callerFP);
-    updateMarker(env);
+    env.funcEntryPrevFP = gen(env, DefFuncEntryPrevFP);
+
+    if (!curSrcKey(env).trivialDVFuncEntry()) {
+      gen(env, EnterFrame, fp(env), env.funcEntryPrevFP);
+      updateMarker(env);
+    }
 
     assertx(bcSPOff == spOffEmpty(env));
     auto const irSPOff = SBInvOffset { -curFunc(env)->numSlotsInFrame() };

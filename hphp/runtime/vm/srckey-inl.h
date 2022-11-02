@@ -136,6 +136,20 @@ inline bool SrcKey::funcEntry() const {
   return m_s.m_resumeModeAndTags == 4;
 }
 
+inline bool SrcKey::trivialDVFuncEntry() const {
+  if (!funcEntry()) return false;
+  if (numEntryArgs() == func()->numNonVariadicParams()) return false;
+  assertx(numEntryArgs() >= func()->numRequiredParams());
+  auto const& param = func()->params()[numEntryArgs()];
+  if (!param.hasScalarDefaultValue()) return false;
+  if (!param.typeConstraint.alwaysPasses(&param.defaultValue)) return false;
+  return true;
+}
+
+inline bool SrcKey::nonTrivialFuncEntry() const {
+  return funcEntry() && !trivialDVFuncEntry();
+}
+
 inline uint32_t SrcKey::encodeResumeMode(ResumeMode resumeMode) {
   assertx((uint8_t)resumeMode >> kNumModeBits == 0);
   assertx((uint8_t)resumeMode < 3);
@@ -185,7 +199,12 @@ inline void SrcKey::setOffset(Offset o) {
 
 inline SrcKey::Set SrcKey::succSrcKeys() const {
   assertx(!prologue());
-  if (funcEntry()) return {SrcKey{func(), entryOffset(), ResumeMode::None}};
+  if (funcEntry()) {
+    if (trivialDVFuncEntry()) {
+      return {SrcKey{func(), numEntryArgs() + 1, FuncEntryTag {}}};
+    }
+    return {SrcKey{func(), entryOffset(), ResumeMode::None}};
+  }
 
   SrcKey::Set set;
   for (auto offset : instrSuccOffsets(pc(), func())) {

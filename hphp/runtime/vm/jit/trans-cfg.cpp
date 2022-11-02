@@ -117,6 +117,10 @@ TransCFG::TransCFG(FuncId funcId,
   for (auto const dstId : nodes()) {
     auto const rec = profData->transRec(dstId);
     auto const dstSK = rec->srcKey();
+
+    // Make sure we start a new translation at each FuncEntry.
+    if (dstSK.funcEntry()) continue;
+
     auto const dstBlock = rec->region()->entry();
     FTRACE(5, "TransCFG: adding incoming arcs in dstId = {}\n", dstId);
     TransIDSet predIDs = findPredTrans(*rec->region(), profData);

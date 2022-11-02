@@ -174,7 +174,7 @@ bool blockHasUnprocessedPred(
  * hold, emits such type assertions.
  */
 void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
-  if (!sk.funcEntry()) return;
+  assertx(sk.funcEntry());
 
   uint32_t loc = 0;
 
@@ -241,15 +241,17 @@ void emitGuards(irgen::IRGS& irgs,
                 const RegionDesc::Block& block,
                 bool isEntry) {
   auto const sk = block.start();
-  auto& typePreConditions = block.typePreConditions();
-
   if (isEntry) {
     irgen::ringbufferEntry(irgs, Trace::RBTypeTraceletGuards, sk);
+  }
+
+  if (sk.nonTrivialFuncEntry()) {
     emitEntryAssertions(irgs, block.func(), sk);
   }
 
   // Emit type guards/preconditions.
-  for (auto const& preCond : typePreConditions) {
+  assertx(IMPLIES(sk.trivialDVFuncEntry(), block.typePreConditions().empty()));
+  for (auto const& preCond : block.typePreConditions()) {
     auto const type = preCond.type;
     auto const loc  = preCond.location;
     assertx(IMPLIES(type.arrSpec(), irgs.context.kind == TransKind::Live));
@@ -260,14 +262,15 @@ void emitGuards(irgen::IRGS& irgs,
   if (isEntry) {
     irgen::gen(irgs, EndGuards);
 
-    if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage) {
+    if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage &&
+        !sk.trivialDVFuncEntry()) {
       irgen::checkCoverage(irgs);
     }
 
     if (irgs.context.kind == TransKind::Profile) {
       assertx(irgs.context.transIDs.size() == 1);
       auto const transID = *irgs.context.transIDs.begin();
-      if (sk.funcEntry() && !mcgen::retranslateAllEnabled()) {
+      if (sk.nonTrivialFuncEntry() && !mcgen::retranslateAllEnabled()) {
         irgen::checkCold(irgs, transID);
       } else {
         irgen::incProfCounter(irgs, transID);
@@ -277,7 +280,7 @@ void emitGuards(irgen::IRGS& irgs,
     // Increment the count for the latest call for optimized translations if we're
     // going to serialize the profile data.
     if (irgs.context.kind == TransKind::Optimize && isJitSerializing() &&
-        sk.funcEntry() && RuntimeOption::EvalJitPGOOptCodeCallGraph) {
+        sk.nonTrivialFuncEntry() && RuntimeOption::EvalJitPGOOptCodeCallGraph) {
       irgen::gen(irgs, IncCallCounter, FuncData { curFunc(irgs) }, irgen::fp(irgs));
     }
 
@@ -974,7 +977,9 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
   // We shouldn't be inlining profiling translations.
   assertx(irgs.context.kind != TransKind::Profile);
   assertx(calleeRegion->instrSize() <= irgs.budgetBCInstrs);
-  assert_flog(calleeRegion->start() == entry,
+  assert_flog(calleeRegion->start().func() == entry.func() &&
+              calleeRegion->start().funcEntry() && entry.funcEntry() &&
+              calleeRegion->start().numEntryArgs() >= entry.numEntryArgs(),
               "{} != {}", show(calleeRegion->start()), show(entry));
 
   FTRACE(1, "\nstarting inlined call from {} to {} with {} args "

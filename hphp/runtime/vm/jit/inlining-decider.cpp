@@ -621,7 +621,7 @@ RegionDescPtr selectCalleeTracelet(SrcKey entry,
                                    Type ctxType,
                                    std::vector<Type>& inputTypes,
                                    int32_t maxBCInstrs) {
-  assertx(entry.funcEntry());
+  assertx(entry.nonTrivialFuncEntry());
 
   // Set up the RegionContext for the tracelet selector.
   RegionContext ctx{entry, SBInvOffset{0}};
@@ -647,7 +647,7 @@ RegionDescPtr selectCalleeTracelet(SrcKey entry,
 
 TransIDSet findTransIDsForCallee(const ProfData* profData, SrcKey entry,
                                  Type ctxType, std::vector<Type>& inputTypes) {
-  assertx(entry.funcEntry());
+  assertx(entry.nonTrivialFuncEntry());
   auto const idvec = profData->funcProfTransIDs(entry.funcID());
 
   TransIDSet ret;
@@ -682,7 +682,7 @@ RegionDescPtr selectCalleeCFG(SrcKey callerSk, SrcKey entry,
                               Type ctxType, std::vector<Type>& inputTypes,
                               int32_t maxBCInstrs,
                               AnnotationData* annotations) {
-  assertx(entry.funcEntry());
+  assertx(entry.nonTrivialFuncEntry());
   auto const callee = entry.func();
 
   auto const profData = jit::profData();
@@ -802,6 +802,13 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
     if (type == TBottom) return nullptr;
     FTRACE(2, "input {}: {}\n", i + 1, type);
     inputTypes.push_back(type);
+  }
+
+  while (entry.trivialDVFuncEntry()) {
+    auto const param = entry.numEntryArgs();
+    assertx(param < inputTypes.size());
+    inputTypes[param] = Type::cns(callee->params()[param].defaultValue);
+    entry = SrcKey{callee, param + 1, SrcKey::FuncEntryTag {}};
   }
 
   const auto depth = inlineDepth(irgs);

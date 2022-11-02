@@ -126,6 +126,14 @@ struct SrcKey {
   bool funcEntry() const;
   bool hasThis() const;
 
+  // Whether this is a trivial default value initializer func entry, i.e.
+  // the default value is scalar and does not require a runtime type check.
+  bool trivialDVFuncEntry() const;
+
+  // Whether this is a non-trivial func entry, i.e. either it is the main func
+  // entry, or a non-trivial DV func entry.
+  bool nonTrivialFuncEntry() const;
+
   /*
    * Derived accessors.
    */

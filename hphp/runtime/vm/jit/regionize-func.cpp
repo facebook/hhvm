@@ -176,17 +176,36 @@ void sortRegions(RegionVec& regions, const Func* /*func*/, const TransCFG& cfg,
                  const RegionToTransIDsMap& regionToTransIds) {
   if (regions.empty()) return;
 
-  // First, pick the region starting at the lowest bytecode offset.
-  // This will normally correspond to the main function entry (for
-  // normal, regular bytecode), but it may not be for irregular
-  // functions written in hhas (like array_map and array_filter).  If
-  // there multiple regions starting at the lowest bytecode offset,
-  // pick the one with the largest profile weight.
+  RegionVec sorted;
+  RegionSet selected;
+
+  // First, add all trivial DV func entries. They are already sorted by
+  // the number of passed arguments in the ascending order.
+  // This assumes that non-trivial DV func entries are uncommon.
+  for (auto r : regions) {
+    auto const firstTid = getRegionTransIDVec(regionToTransIds, r)[0];
+    auto const firstSk = profData->transRec(firstTid)->srcKey();
+    if (firstSk.trivialDVFuncEntry()) {
+      sorted.push_back(r);
+      selected.insert(r);
+    }
+  }
+
+  if (sorted.size() == regions.size()) {
+    regions = sorted;
+    return;
+  }
+
+  // Second, try to pick the func entry region with the highest profile weight,
+  // as that's the most commonly used entry point. If there is none, pick the
+  // lowest bytecode offset, as that's where we are most likely to recover from
+  // interpreting. Tie them by largest profile weight.
   RegionDescPtr entryRegion = nullptr;
   int64_t maxEntryWeight = -1;
   auto lowestSk = SrcKey {};
   for (const auto& pair : regionToTransIds) {
-    auto r    = pair.first;
+    auto r = pair.first;
+    if (selected.count(r)) continue;
     auto& tids = pair.second;
     auto const firstTid = tids[0];
     auto const firstSk = profData->transRec(firstTid)->srcKey();
@@ -197,6 +216,7 @@ void sortRegions(RegionVec& regions, const Func* /*func*/, const TransCFG& cfg,
       if (firstSk.funcEntry() && !lowestSk.funcEntry()) return true;
       if (!firstSk.funcEntry() && lowestSk.funcEntry()) return false;
       if (!firstSk.funcEntry()) return firstSk.offset() < lowestSk.offset();
+      if (weight != maxEntryWeight) return weight > maxEntryWeight;
       return firstSk.entryOffset() < lowestSk.entryOffset();
     }();
     if (isBetter) {
@@ -207,14 +227,13 @@ void sortRegions(RegionVec& regions, const Func* /*func*/, const TransCFG& cfg,
   }
 
   assertx(entryRegion);
-  RegionVec sorted {entryRegion};
-  RegionSet selected;
+  sorted.push_back(entryRegion);
   selected.insert(entryRegion);
 
   RegionDescPtr region = entryRegion;
   // Select the remaining regions, iteratively picking the most likely
   // region to execute next.
-  for (auto i = 1; i < regions.size(); i++) {
+  for (auto i = sorted.size(); i < regions.size(); i++) {
     int64_t      maxWeight = -1;
     int64_t  maxHeadWeight = -1;
     RegionDescPtr bestNext = nullptr;
@@ -322,8 +341,8 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
         auto sk1 = profData->transRec(tid1)->srcKey();
         auto sk2 = profData->transRec(tid2)->srcKey();
         if (sk1 != sk2) {
-          if (sk2.funcEntry()) return false;
-          if (sk1.funcEntry()) return true;
+          if (sk1.funcEntry() != sk2.funcEntry()) return sk1.funcEntry();
+          if (sk1.funcEntry()) return sk1.numEntryArgs() < sk2.numEntryArgs();
           return sk1.offset() < sk2.offset();
         }
       }

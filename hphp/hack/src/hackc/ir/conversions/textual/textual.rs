@@ -670,7 +670,7 @@ pub(crate) fn write_type(
 }
 
 pub(crate) fn declare_global(w: &mut dyn std::io::Write, name: &str, ty: Ty) -> Result {
-    writeln!(w, "global {name} // {}", FmtTy(&ty))?;
+    writeln!(w, "global {name} : {}", FmtTy(&ty))?;
     writeln!(w)?;
     Ok(())
 }

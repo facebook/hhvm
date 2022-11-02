@@ -165,41 +165,6 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 rpc_options=rpc_options,
             )
     
-        def interact(
-            self,
-            arg: int,
-            *,
-            rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> None:
-            _fbthrift_resp = self._send_request(
-                "MyService",
-                "interact",
-                test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interact_args(
-                    arg=arg,),
-                test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interact_result,
-                rpc_options=rpc_options,
-            )
-    
-        def interactFast(
-            self,
-            *,
-            rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> int:
-            _fbthrift_resp = self._send_request(
-                "MyService",
-                "interactFast",
-                test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interactFast_args(),
-                test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interactFast_result,
-                rpc_options=rpc_options,
-            )
-            # shortcut to success path for non-void returns
-            if _fbthrift_resp.success is not None:
-                return _fbthrift_resp.success
-            raise _fbthrift_python_exceptions.ApplicationError(
-                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
-                "Empty Response",
-            )
-    
 class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.Async", "MyService_MyInteraction.Sync"]):
     @staticmethod
     def __get_thrift_name__() -> str:

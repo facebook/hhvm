@@ -578,7 +578,8 @@ class python_mstch_function : public mstch_function {
   mstch::node async_only() {
     return function_->returns_stream() || function_->returns_sink() ||
         function_->get_returntype()->is_service() ||
-        function_->is_interaction_member();
+        function_->is_interaction_member() ||
+        !function_->returned_interaction().empty();
   }
 
  protected:

@@ -19,10 +19,10 @@
 #include <memory>
 #include <type_traits>
 
+#include <boost/operators.hpp>
+
 #include <folly/CPortability.h>
-#include <folly/lang/Ordering.h>
 #include <thrift/lib/cpp2/Thrift.h>
-#include <thrift/lib/cpp2/op/Compare.h>
 #include <thrift/lib/cpp2/type/AlignedPtr.h>
 
 #ifdef _MSC_VER
@@ -279,7 +279,8 @@ class boxed_ptr {
 
 // 'boxed_value' provides value semantics to the 'boxed_ptr'.
 template <typename T>
-class boxed_value {
+class boxed_value : public boost::totally_ordered<boxed_value<T>>,
+                    public boost::totally_ordered2<boxed_value<T>, T> {
  public:
   using element_type = T;
 
@@ -354,91 +355,24 @@ class boxed_value {
 
   // TODO(dokwon): Add std::nullopt_t comparison when we support optional intern
   // boxed field.
-  folly::ordering compare(const T& rhs) const noexcept {
-    if (has_value()) {
-      return ::apache::thrift::op::compare<T>(value(), rhs);
-    }
-    return folly::ordering::lt;
-  }
-
-  constexpr bool equal(const boxed_value& rhs) const noexcept {
-    // Use pointer comparison for short cut.
-    if (ptr_ == rhs.ptr_) {
-      return true;
-    }
-    if (!rhs.has_value()) {
-      return false;
-    }
-    if (has_value()) {
-      return op::equal<T>(value(), rhs.value());
-    }
-    return rhs.has_value();
-  }
-  folly::ordering compare(const boxed_value& rhs) const noexcept {
-    if (!rhs.has_value()) {
-      return folly::ordering::gt;
-    }
-    if (has_value()) {
-      return ::apache::thrift::op::compare<T>(value(), rhs.value());
-    }
-    return folly::ordering::lt;
-  }
-
-  friend bool operator==(const boxed_value& lhs, const boxed_value& rhs) {
-    return lhs.equal(rhs);
-  }
-  friend bool operator!=(const boxed_value& lhs, const boxed_value& rhs) {
-    return !lhs.equal(rhs);
-  }
-  friend bool operator<(const boxed_value& lhs, const boxed_value& rhs) {
-    return op::detail::is_lt(lhs.compare(rhs));
-  }
-  friend bool operator<=(const boxed_value& lhs, const boxed_value& rhs) {
-    return op::detail::is_lteq(lhs.compare(rhs));
-  }
-  friend bool operator>(const boxed_value& lhs, const boxed_value& rhs) {
-    return op::detail::is_gt(lhs.compare(rhs));
-  }
-  friend bool operator>=(const boxed_value& lhs, const boxed_value& rhs) {
-    return op::detail::is_gteq(lhs.compare(rhs));
-  }
-
-  friend bool operator==(const boxed_value& lhs, const T& rhs) {
-    return op::detail::is_eq(lhs.compare(rhs));
-  }
-  friend bool operator!=(const boxed_value& lhs, const T& rhs) {
-    return op::detail::is_neq(lhs.compare(rhs));
-  }
   friend bool operator<(const boxed_value& lhs, const T& rhs) {
-    return op::detail::is_lt(lhs.compare(rhs));
+    return lhs ? *lhs < rhs : true;
   }
-  friend bool operator<=(const boxed_value& lhs, const T& rhs) {
-    return op::detail::is_lteq(lhs.compare(rhs));
+  friend bool operator==(const boxed_value& lhs, const T& rhs) {
+    return lhs ? *lhs == rhs : false;
   }
   friend bool operator>(const boxed_value& lhs, const T& rhs) {
-    return op::detail::is_gt(lhs.compare(rhs));
+    return lhs ? rhs < *lhs : false;
   }
-  friend bool operator>=(const boxed_value& lhs, const T& rhs) {
-    return op::detail::is_gteq(lhs.compare(rhs));
+  friend bool operator<(const boxed_value& lhs, const boxed_value& rhs) {
+    return rhs ? lhs < *rhs : false;
   }
-
-  friend bool operator==(const T& lhs, const boxed_value& rhs) {
-    return op::detail::is_eq(rhs.compare(lhs));
-  }
-  friend bool operator!=(const T& lhs, const boxed_value& rhs) {
-    return op::detail::is_neq(rhs.compare(lhs));
-  }
-  friend bool operator<(const T& lhs, const boxed_value& rhs) {
-    return op::detail::is_gt(rhs.compare(lhs));
-  }
-  friend bool operator<=(const T& lhs, const boxed_value& rhs) {
-    return op::detail::is_gteq(rhs.compare(lhs));
-  }
-  friend bool operator>(const T& lhs, const boxed_value& rhs) {
-    return op::detail::is_lt(rhs.compare(lhs));
-  }
-  friend bool operator>=(const T& lhs, const boxed_value& rhs) {
-    return op::detail::is_lteq(rhs.compare(lhs));
+  friend bool operator==(const boxed_value& lhs, const boxed_value& rhs) {
+    // Use pointer comparison for short cut.
+    if (lhs.ptr_ == rhs.ptr_) {
+      return true;
+    }
+    return rhs ? lhs == *rhs : false;
   }
 
   boxed_ptr<T> ptr_;

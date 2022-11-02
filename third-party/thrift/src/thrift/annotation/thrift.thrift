@@ -358,6 +358,7 @@ struct ExceptionMessage {
 @scope.Service
 @scope.Const
 @scope.Enum
+@scope.Typedef
 @Experimental
 struct GenerateRuntimeSchema {
   1: string name;

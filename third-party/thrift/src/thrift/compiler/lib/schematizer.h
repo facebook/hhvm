@@ -22,6 +22,7 @@
 #include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/t_structured.h>
+#include <thrift/compiler/ast/t_typedef.h>
 
 namespace apache {
 namespace thrift {
@@ -35,6 +36,7 @@ class schematizer {
   static std::unique_ptr<t_const_value> gen_schema(const t_const& node);
   static std::unique_ptr<t_const_value> gen_schema(const t_enum& node);
   static std::unique_ptr<t_const_value> gen_schema(const t_program& node);
+  static std::unique_ptr<t_const_value> gen_schema(const t_typedef& node);
 };
 } // namespace compiler
 } // namespace thrift

@@ -361,6 +361,14 @@ void generate_const_schema(
       });
 }
 
+void generate_typedef_schema(
+    diagnostic_context& ctx, mutator_context& mCtx, t_typedef& node) {
+  generate_runtime_schema<t_typedef&>(
+      ctx, mCtx, true, "facebook.com/thrift/type/Typedef", node, [&node]() {
+        return schematizer::gen_schema(node);
+      });
+}
+
 void generate_enum_schema(
     diagnostic_context& ctx, mutator_context& mCtx, t_enum& node) {
   generate_runtime_schema<t_enum&>(
@@ -395,6 +403,7 @@ ast_mutators standard_mutators() {
     main.add_service_visitor(&generate_service_schema);
     main.add_const_visitor(&generate_const_schema);
     main.add_enum_visitor(&generate_enum_schema);
+    main.add_typedef_visitor(&generate_typedef_schema);
   }
   add_patch_mutators(mutators);
   return mutators;

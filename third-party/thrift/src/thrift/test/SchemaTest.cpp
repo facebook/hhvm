@@ -310,3 +310,24 @@ TEST(SchemaTest, TypedefFields) {
       field.type()->toThrift().name()->getType(),
       apache::thrift::type::TypeName::Type::i32Type);
 }
+TEST(SchemaTest, Typedef) {
+  //@thrift.GenerateRuntimeSchema
+  // typedef i32 TD
+  facebook::thrift::type::Typedef schema = schema_constants::schemaTD();
+  EXPECT_EQ(*schema.name(), "TD");
+  EXPECT_EQ(*schema.uri(), "facebook.com/thrift/test/schema/TD");
+  EXPECT_EQ(
+      schema.type()->toThrift().name()->getType(),
+      apache::thrift::type::TypeName::Type::i32Type);
+  EXPECT_EQ(schema.attrs()->get_name(), "TD");
+
+  //@thrift.GenerateRuntimeSchema
+  // typedef TD TDTD
+  facebook::thrift::type::Typedef schemaTD = schema_constants::schemaTDTD();
+  EXPECT_EQ(*schemaTD.name(), "TDTD");
+  EXPECT_EQ(*schemaTD.uri(), "facebook.com/thrift/test/schema/TDTD");
+  EXPECT_EQ(
+      schemaTD.type()->toThrift().name()->getType(),
+      apache::thrift::type::TypeName::Type::typedefType);
+  EXPECT_EQ(schemaTD.attrs()->get_name(), "TDTD");
+}

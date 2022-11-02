@@ -20,6 +20,7 @@
 #include <thrift/compiler/ast/t_exception.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_service.h>
+#include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/ast/t_union.h>
 #include <thrift/compiler/lib/schematizer.h>
 
@@ -343,6 +344,22 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_program& node) {
 
   // The remaining fields are intern IDs and have to be stiched in by the
   // caller.
+
+  return schema;
+}
+
+std::unique_ptr<t_const_value> schematizer::gen_schema(const t_typedef& node) {
+  auto schema = val();
+  schema->set_map();
+  add_definition(*schema, node);
+
+  schema->add_map(val("type"), gen_type(*node.type()));
+
+  auto attrs = val();
+  attrs->set_map();
+  attrs->add_map(val("name"), val(node.get_name()));
+  attrs->add_map(val("uri"), val(node.uri()));
+  schema->add_map(val("attrs"), std::move(attrs));
 
   return schema;
 }

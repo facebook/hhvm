@@ -72,9 +72,13 @@ service TestService {
   void primitiveParamsNoReturnEx(1: i32 param0) throws (1: SimpleException ex0);
 }
 
+@thrift.GenerateRuntimeSchema
 typedef i32 TD
 @thrift.GenerateRuntimeSchema
 struct Typedefs {
   1: TD named;
   2: i32 (cpp.type = "uint32_t") unnamed;
 }
+
+@thrift.GenerateRuntimeSchema
+typedef TD TDTD

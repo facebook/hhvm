@@ -601,11 +601,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 363,
+              "line" : 364,
               "column" : 3
             },
             "end" : {
-              "line" : 363,
+              "line" : 364,
               "column" : 18
             }
           }
@@ -617,13 +617,13 @@
           "column" : 1
         },
         "end" : {
-          "line" : 364,
+          "line" : 365,
           "column" : 2
         }
       }
     },
     "InternBox" : {
-      "lineno" : 370,
+      "lineno" : 371,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -631,11 +631,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 370,
+          "line" : 371,
           "column" : 1
         },
         "end" : {
-          "line" : 372,
+          "line" : 373,
           "column" : 20
         }
       }

@@ -886,6 +886,14 @@
 },
         "value" : {}
       },
+          "scope.Typedef" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Typedef",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
           "thrift.Experimental" : {
         "type" : {
   "type" : "struct",
@@ -899,7 +907,7 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 363,
+            "lineno" : 364,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
@@ -930,7 +938,7 @@
         "docstring" : "Indicates that a field's value should never be stored on the stack, and that\nidentical values can be shared in immutable contexts.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 370
+        "lineno" : 371
       }
       },
   "source_path" : "thrift/annotation/thrift",

@@ -6,8 +6,7 @@
 // CHECK: type C = {
 // CHECK: }
 
-// TODO: the type of the global seems wrong
-// CHECK: global static_singleton::C : **C$static
+// CHECK: global static_singleton::C : *C$static
 
 // CHECK: define C.$init_static() : void {
 // CHECK: #b0:

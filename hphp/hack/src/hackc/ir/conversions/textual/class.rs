@@ -128,7 +128,7 @@ fn write_init_static(
     textual::declare_global(
         w,
         &static_singleton_name(class.name, &state.strings),
-        textual::Ty::Ptr(Box::new(static_ty(class.name, &state.strings))),
+        static_ty(class.name, &state.strings),
     )?;
 
     textual::write_function(

@@ -8,6 +8,7 @@ use std::path::Path;
 use anyhow::bail;
 use anyhow::Result;
 
+use crate::decls;
 use crate::state::UnitState;
 use crate::textual;
 
@@ -18,6 +19,7 @@ pub fn textual_writer(
     w: &mut dyn std::io::Write,
     path: &Path,
     mut unit: ir::Unit<'_>,
+    no_builtins: bool,
 ) -> Result<()> {
     // steal the StringInterner so we can mutate it while reading the Unit.
     let strings = std::mem::take(&mut unit.strings);
@@ -43,6 +45,10 @@ pub fn textual_writer(
     writeln!(w, "// ----- EXTERNALS -----")?;
     for name in state.func_declares.external_funcs() {
         writeln!(w, "declare {name}(...): mixed")?;
+    }
+
+    if !no_builtins {
+        decls::write_decls(w)?;
     }
 
     writeln!(w, "// {} {}", UNIT_END_MARKER, escaped_path)?;

@@ -15,7 +15,7 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 /// This is emitted with every SIL file to declare the "standard" definitions
 /// that we use.
 pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
-    writeln!(w, "// ----- BUILTIN DELS STARTS HERE -----")?;
+    writeln!(w, "// ----- BUILTIN DECLS STARTS HERE -----")?;
 
     use textual::declare_function;
     use tx_ty as ty;

@@ -48,11 +48,7 @@ pub fn run(opts: Opts) -> Result<()> {
         let content = fs::read(&path)?;
         let unit = compile_php_file(&pre_alloc, &path, &content, &opts.single_file_opts)?;
 
-        textual::textual_writer(&mut stdout, &path, unit)?;
-    }
-
-    if !opts.no_builtins {
-        textual::write_decls(&mut stdout)?;
+        textual::textual_writer(&mut stdout, &path, unit, opts.no_builtins)?;
     }
 
     Ok(())

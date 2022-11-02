@@ -200,9 +200,7 @@ TEST(RoundRobinRequestPileTest, NormalCases) {
 
   res = limitedPile.enqueue(getRequest(0, 0));
   if (res) {
-    EXPECT_EQ(1, 2);
-  } else {
-    EXPECT_EQ(1, 1);
+    ADD_FAILURE() << "Should have enqueued successfully";
   }
 }
 
@@ -232,6 +230,29 @@ TEST(RoundRobinRequestPileTest, SingleBucket) {
 
   auto [req1, _] = pile.dequeue();
   EXPECT_EQ(req1, std::nullopt);
+
+  opts.numMaxRequests = 1;
+  RoundRobinRequestPile limitedPile(opts);
+
+  auto res = limitedPile.enqueue(getRequest(0, 0));
+  if (res) {
+    ADD_FAILURE() << "Should have enqueued successfully";
+  }
+
+  res = limitedPile.enqueue(getRequest(0, 0));
+  if (!res) {
+    ADD_FAILURE() << "Shouldn't have enqueued successfully";
+  }
+
+  EXPECT_EQ(limitedPile.requestCount(), 1);
+  limitedPile.dequeue();
+  limitedPile.dequeue();
+  EXPECT_EQ(limitedPile.requestCount(), 0);
+
+  res = limitedPile.enqueue(getRequest(0, 0));
+  if (res) {
+    ADD_FAILURE() << "Shouldn't have enqueued successfully";
+  }
 }
 
 TEST(RoundRobinRequestPileTest, requestCount) {
@@ -275,11 +296,13 @@ TEST(RoundRobinRequestPileTest, requestCount) {
 }
 
 /*
-============================================================================
+  WARNING: Benchmark running in DEBUG mode
+  ============================================================================
   [...]er/test/RoundRobinRequestPileTest.cpp     relative  time/iter   iters/s
   ============================================================================
-  DefaultPerf                                                 16.25s    61.52m
-  RoundRobinBehavior                                          11.00s    90.88m
+  DefaultPerf                                                 10.80s    92.56m
+  RoundRobinBehavior                                          10.68s    85.60m
+  WARNING: Benchmark running in DEBUG mode
 */
 BENCHMARK(DefaultPerf) {
   // This benchmark is a simple vanilla case
@@ -336,11 +359,13 @@ BENCHMARK(DefaultPerf) {
 }
 
 /*
-============================================================================
+  WARNING: Benchmark running in DEBUG mode
+  ============================================================================
   [...]er/test/RoundRobinRequestPileTest.cpp     relative  time/iter   iters/s
   ============================================================================
-  DefaultPerf                                                 10.67s    93.69m
-  RoundRobinBehavior                                          11.00s    90.88m
+  DefaultPerf                                                 10.80s    92.56m
+  RoundRobinBehavior                                          10.68s    85.60m
+  WARNING: Benchmark running in DEBUG mode
 */
 BENCHMARK(RoundRobinBehavior) {
   vector<unique_ptr<THeader>> tHeaderStorage;

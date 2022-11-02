@@ -24,6 +24,7 @@
 #include <folly/io/async/AtomicNotificationQueue.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/cpp2/server/RequestPileBase.h>
+#include <thrift/lib/cpp2/server/WeightedRequestPileQueue.h>
 
 namespace apache::thrift {
 
@@ -122,10 +123,8 @@ class RoundRobinRequestPile : public RequestPileBase {
 
   // This is a temporary solution to single bucket case
   // because ReqeustQueue is a MPSC queue
-  using SingleBucketRequestQueue = folly::UMPMCQueue<
-      ServerRequest,
-      /* MayBlock  */ false,
-      /* log2(SegmentSize=1024) */ 10>;
+  using SingleBucketRequestQueue =
+      server::WeightedRequestPileQueue<ServerRequest>;
 
   // the consumer class used by the AtomicNotificationQueue
   class Consumer {
@@ -147,7 +146,9 @@ class RoundRobinRequestPile : public RequestPileBase {
   // we use std::nullopt to signal that a certain priority is
   // using only one bucket - in that case we don't need retrieval queue
   std::unique_ptr<std::optional<RetrievalIndexQueue>[]> retrievalIndexQueues_;
-  std::unique_ptr<SingleBucketRequestQueue[]> singleBucketRequestQueues_;
+
+  std::unique_ptr<std::unique_ptr<SingleBucketRequestQueue>[]>
+      singleBucketRequestQueues_;
 
   ServerRequest dequeueImpl(unsigned pri, unsigned bucket);
 };

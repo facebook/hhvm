@@ -59,17 +59,29 @@ RoundRobinRequestPile::RoundRobinRequestPile(Options opts)
   opts_ = std::move(opts);
   const auto& numBucketsPerPriority = opts_.numBucketsPerPriority;
 
-  requestQueues_.reset(
-      new std::unique_ptr<RequestQueue[]>[numBucketsPerPriority.size()]);
-  retrievalIndexQueues_.reset(
-      new std::optional<RetrievalIndexQueue>[numBucketsPerPriority.size()]);
-  singleBucketRequestQueues_.reset(
-      new SingleBucketRequestQueue[numBucketsPerPriority.size()]);
+  requestQueues_ = std::make_unique<std::unique_ptr<RequestQueue[]>[]>(
+      numBucketsPerPriority.size());
+  retrievalIndexQueues_ =
+      std::make_unique<std::optional<RetrievalIndexQueue>[]>(
+          numBucketsPerPriority.size());
+  singleBucketRequestQueues_ =
+      std::make_unique<std::unique_ptr<SingleBucketRequestQueue>[]>(
+          numBucketsPerPriority.size());
 
   for (unsigned i = 0; i < numBucketsPerPriority.size(); ++i) {
     DCHECK(numBucketsPerPriority.at(i));
 
-    requestQueues_[i].reset(new RequestQueue[numBucketsPerPriority.at(i)]);
+    if (opts_.numMaxRequests) {
+      singleBucketRequestQueues_[i] =
+          std::make_unique<SingleBucketRequestQueue>(true);
+      singleBucketRequestQueues_[i]->setLimit(opts_.numMaxRequests);
+    } else {
+      singleBucketRequestQueues_[i] =
+          std::make_unique<SingleBucketRequestQueue>(false);
+    }
+
+    requestQueues_[i] =
+        std::make_unique<RequestQueue[]>(numBucketsPerPriority.at(i));
 
     if (numBucketsPerPriority.at(i) == 1) {
       // explicitly set it to null
@@ -128,8 +140,12 @@ std::optional<ServerRequestRejection> RoundRobinRequestPile::enqueue(
   // because we currently rely on AtomicNotificationQueue to
   // achieve that.
   if (!retrievalIndexQueues_[pri]) {
-    singleBucketRequestQueues_[pri].enqueue(std::move(request));
-    return std::nullopt;
+    if (singleBucketRequestQueues_[pri]->enqueue(std::move(request))) {
+      return std::nullopt;
+    }
+    ServerRequestRejection rej(AppServerException(
+        "AppServerException", "RequestPile enqueue error : reached max limit"));
+    return rej;
   }
 
   if (opts_.numMaxRequests != 0) {
@@ -163,7 +179,7 @@ std::pair<std::optional<ServerRequest>, std::optional<intptr_t>>
 RoundRobinRequestPile::dequeue() {
   for (unsigned i = 0; i < opts_.numBucketsPerPriority.size(); ++i) {
     if (!retrievalIndexQueues_[i]) {
-      if (auto req = singleBucketRequestQueues_[i].try_dequeue()) {
+      if (auto req = singleBucketRequestQueues_[i]->tryDequeue()) {
         return std::make_pair(std::move(*req), std::nullopt);
       }
     } else {
@@ -179,7 +195,7 @@ uint64_t RoundRobinRequestPile::requestCount() const {
   uint64_t res = 0;
   for (size_t i = 0; i < opts_.numBucketsPerPriority.size(); ++i) {
     if (!retrievalIndexQueues_[i]) {
-      res += singleBucketRequestQueues_[i].size();
+      res += singleBucketRequestQueues_[i]->size();
     } else if (!retrievalIndexQueues_[i]->empty()) {
       for (size_t j = 0; j < opts_.numBucketsPerPriority[i]; ++j) {
         res += requestQueues_[i][j].size();

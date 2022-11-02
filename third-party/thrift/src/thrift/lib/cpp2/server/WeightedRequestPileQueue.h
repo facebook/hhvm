@@ -125,7 +125,9 @@ class WeightedRequestPileQueue {
 
   using DequeueResult = std::variant<T, DequeueRejReason>;
 
-  WeightedRequestPileQueue(bool enableControl)
+  WeightedRequestPileQueue() = default;
+
+  explicit WeightedRequestPileQueue(bool enableControl)
       : enableControl_(enableControl) {}
 
   void setLimit(Weights limits);

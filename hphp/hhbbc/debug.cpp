@@ -346,7 +346,7 @@ std::string client_stats(const extern_worker::Client::Stats& stats) {
     return folly::sformat("{:.2f}%", double(a) / b * 100.0);
   };
 
-  auto const execs = stats.execs.load();
+  auto const execWorkItems = stats.execWorkItems.load();
   auto const allocatedCores = stats.execAllocatedCores.load();
   auto const cpuUsecs = stats.execCpuUsec.load();
   auto const execCalls = stats.execCalls.load();
@@ -354,13 +354,14 @@ std::string client_stats(const extern_worker::Client::Stats& stats) {
   auto const loadCalls = stats.loadCalls.load();
 
   return folly::sformat(
-    "  Execs: {:,} total, {:,} cache-hits ({}), {:,} fallbacks\n"
+    "  Execs: {:,} ({:,}) total, {:,} cache-hits ({}), {:,} fallbacks\n"
     "  Workers: {} usage, {:,} cores ({}/core), {} max used, {} reserved\n"
     "  Blobs: {:,} total, {:,} uploaded ({}), {:,} fallbacks\n"
     "  {:,} downloads ({}), {:,} throttles, (E: {} S: {} L: {}) avg latency\n",
-    execs,
+    execCalls,
+    execWorkItems,
     stats.execCacheHits.load(),
-    pct(stats.execCacheHits.load(), execs),
+    pct(stats.execCacheHits.load(), execCalls),
     stats.execFallbacks.load(),
     usecs(cpuUsecs),
     allocatedCores,

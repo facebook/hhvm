@@ -1024,7 +1024,7 @@ Client::exec(const Job<C>& job,
          requestId.tracePrefix(), job.name(),
          inputs.size());
 
-  m_stats->execs += inputs.size();
+  m_stats->execWorkItems += inputs.size();
   ++m_stats->execCalls;
   SCOPE_EXIT {
     m_stats->execLatencyUsec += std::chrono::duration_cast<
@@ -1258,7 +1258,7 @@ Client::exec(const Job<C>& job,
   auto outputs = HPHP_CORO_AWAIT(coro::invoke(
     [&] () -> coro::Task<std::vector<RefValVec>> {
       if (useFallback) {
-        m_stats->execFallbacks += inputs.size();
+        ++m_stats->execFallbacks;
         auto configRefVals = toRefVals(config);
         auto inputsRefVals = from(inputs)
           | mapped(toRefVals)
@@ -1287,7 +1287,7 @@ Client::exec(const Job<C>& job,
                 // we need to make all of the inputs be from the
                 // fallback executor.
                 if (fallback) {
-                  m_stats->execFallbacks += inputs.size();
+                  ++m_stats->execFallbacks;
                   HPHP_CORO_AWAIT(makeAllFallback());
                 }
                 // Note we calculate the RefVals here within the
@@ -1381,7 +1381,7 @@ Client::exec(const Job<C>& job,
   };
 
   if (optimistic && supportsOptimistic()) {
-    m_stats->optimisticExecs += inputs.size();
+    ++m_stats->optimisticExecs;
   }
 
   if constexpr (hasFini) {

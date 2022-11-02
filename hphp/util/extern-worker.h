@@ -576,8 +576,8 @@ struct Client {
       /* Number of blobs/bytes downloaded (because of a load call). */  \
       X(downloads)                                                      \
       X(bytesDownloaded)                                                \
-      /* Total number of execs attempted (per input). */                \
-      X(execs)                                                          \
+      /* Total number of exec work items attempted. */                  \
+      X(execWorkItems)                                                  \
       /* Execs which hit the result cache */                            \
       X(execCacheHits)                                                  \
       /* Execs which fellback */                                        \

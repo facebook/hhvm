@@ -1634,7 +1634,7 @@ std::string Client::Stats::toString(const std::string& phase,
     return folly::sformat("{:.2f}%", double(a) / b * 100.0);
   };
 
-  auto const execs_ = execs.load();
+  auto const execWorkItems_ = execWorkItems.load();
   auto const allocatedCores = execAllocatedCores.load();
   auto const cpuUsecs = execCpuUsec.load();
   auto const execCalls_ = execCalls.load();
@@ -1643,7 +1643,7 @@ std::string Client::Stats::toString(const std::string& phase,
 
   return folly::sformat(
     "  {}:{}\n"
-    "  Execs: {:,} total, {:,} cache-hits ({}), {:,} optimistically, {:,} fallback\n"
+    "  Execs: {:,} ({:,}) total, {:,} cache-hits ({}), {:,} optimistically, {:,} fallback\n"
     "  Files: {:,} total, {:,} read, {:,} queried, {:,} uploaded ({}), {:,} fallback\n"
     "  Blobs: {:,} total, {:,} queried, {:,} uploaded ({}), {:,} fallback\n"
     "  Cpu: {} usage, {:,} allocated cores ({}/core)\n"
@@ -1652,9 +1652,10 @@ std::string Client::Stats::toString(const std::string& phase,
     "  Avg Latency: {} exec, {} store, {} load",
     phase,
     extra.empty() ? "" : folly::sformat(" {}", extra),
-    execs_,
+    execCalls_,
+    execWorkItems_,
     execCacheHits.load(),
-    pct(execCacheHits.load(), execs_),
+    pct(execCacheHits.load(), execCalls_),
     optimisticExecs.load(),
     execFallbacks.load(),
     files.load(),
@@ -1684,7 +1685,8 @@ std::string Client::Stats::toString(const std::string& phase,
 
 void Client::Stats::logSample(const std::string& phase,
                               StructuredLogEntry& sample) const {
-  sample.setInt(phase + "_total_execs", execs.load());
+  sample.setInt(phase + "_total_execs", execCalls.load());
+  sample.setInt(phase + "_total_exec_work_items", execWorkItems.load());
   sample.setInt(phase + "_cache_hits", execCacheHits.load());
   sample.setInt(phase + "_optimistically", optimisticExecs.load());
   sample.setInt(phase + "_fallbacks", execFallbacks.load());

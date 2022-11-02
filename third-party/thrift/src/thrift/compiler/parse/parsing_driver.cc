@@ -37,7 +37,9 @@ class parsing_terminator : public std::runtime_error {
             "Internal exception used to terminate the parsing process.") {}
 };
 
-class lex_handler_impl : public lex_handler {
+} // namespace
+
+class parsing_driver::lex_handler_impl : public lex_handler {
  private:
   parsing_driver& driver_;
 
@@ -55,182 +57,6 @@ class lex_handler_impl : public lex_handler {
     driver_.doctext = comment{driver_.strip_doctext(text), loc};
   }
 };
-
-} // namespace
-
-parsing_driver::parsing_driver(
-    source_manager& sm,
-    diagnostics_engine& diags,
-    std::string path,
-    parsing_params parse_params)
-    : source_mgr_(sm), diags_(diags), params_(std::move(parse_params)) {
-  program_bundle =
-      std::make_unique<t_program_bundle>(std::make_unique<t_program>(path));
-  program = program_bundle->root_program();
-  scope_cache = program->scope();
-}
-
-/**
- * The default destructor needs to be explicitly defined in the .cc file since
- * it invokes the destructor of parse_ (of type unique_ptr<yy::parser>). It
- * cannot go in the header file since yy::parser is only forward-declared there.
- */
-parsing_driver::~parsing_driver() = default;
-
-void parsing_driver::on_standard_header(
-    source_range range,
-    std::unique_ptr<stmt_attrs> attrs,
-    std::unique_ptr<t_annotations> annotations) {
-  validate_header_location(range.begin);
-  if (attrs && attrs->struct_annotations) {
-    diags_.error(
-        *attrs->struct_annotations->front(),
-        "Structured annotations are not supported for a given entity.");
-  }
-  if (annotations) {
-    diags_.error(
-        annotations->loc, "Annotations are not supported for a given entity.");
-  }
-}
-
-void parsing_driver::on_program_header(
-    source_range range,
-    std::unique_ptr<stmt_attrs> attrs,
-    std::unique_ptr<t_annotations> annotations) {
-  validate_header_location(range.begin);
-  set_program_annotations(std::move(attrs), std::move(annotations), range);
-}
-
-void parsing_driver::on_package(source_range range, fmt::string_view name) {
-  if (mode != parsing_mode::PROGRAM) {
-    return;
-  }
-  if (!program->package().empty()) {
-    diags_.error(range.begin, "Package already specified.");
-  }
-  try {
-    program->set_package(t_package(fmt::to_string(name)));
-  } catch (const std::exception& e) {
-    diags_.error(range.begin, "{}", e.what());
-  }
-}
-
-std::unique_ptr<t_service> parsing_driver::on_service(
-    source_range range,
-    const identifier& name,
-    const identifier& base,
-    std::unique_ptr<t_function_list> functions) {
-  auto find_base_service = [&]() -> const t_service* {
-    if (mode == parsing_mode::PROGRAM && base.str.size() != 0) {
-      auto base_name = fmt::to_string(base.str);
-      if (auto* result = scope_cache->find_service(base_name)) {
-        return result;
-      }
-      if (auto* result =
-              scope_cache->find_service(program->scope_name(base_name))) {
-        return result;
-      }
-      diags_.error(
-          range.begin, "Service \"{}\" has not been defined.", base_name);
-    }
-    return nullptr;
-  };
-  auto service = std::make_unique<t_service>(
-      program, fmt::to_string(name.str), find_base_service());
-  service->set_src_range(range);
-  set_functions(*service, std::move(functions));
-  return service;
-}
-
-std::unique_ptr<t_const_value> parsing_driver::on_const_ref(
-    const identifier& name) {
-  auto name_str = fmt::to_string(name.str);
-  if (const t_const* constant = find_const(name.loc, name_str)) {
-    // Copy const_value to perform isolated mutations
-    auto result = constant->get_value()->clone();
-    // We only want to clone the value, while discarding all real type
-    // information.
-    result->set_ttype({});
-    result->set_is_enum(false);
-    result->set_enum(nullptr);
-    result->set_enum_value(nullptr);
-    return result;
-  }
-
-  // TODO(afuller): Make this an error.
-  if (mode == parsing_mode::PROGRAM) {
-    diags_.warning(
-        name.loc,
-        "The identifier '{}' is not defined yet. Constants and enums should "
-        "be defined before using them as default values.",
-        name.str);
-  }
-  return std::make_unique<t_const_value>(std::move(name_str));
-}
-
-std::unique_ptr<t_const_value> parsing_driver::on_bool_literal(bool value) {
-  auto const_value = std::make_unique<t_const_value>();
-  const_value->set_bool(value);
-  return const_value;
-}
-
-std::unique_ptr<t_const_value> parsing_driver::on_int_literal(
-    source_location loc, int64_t value) {
-  if (mode == parsing_mode::PROGRAM && !params_.allow_64bit_consts &&
-      (value < INT32_MIN || value > INT32_MAX)) {
-    diags_.warning(
-        loc, "64-bit constant {} may not work in all languages", value);
-  }
-  auto node = std::make_unique<t_const_value>();
-  node->set_integer(value);
-  return node;
-}
-
-std::unique_ptr<t_const_value> parsing_driver::on_float_literal(double value) {
-  auto const_value = std::make_unique<t_const_value>();
-  const_value->set_double(value);
-  return const_value;
-}
-
-std::unique_ptr<t_const_value> parsing_driver::on_string_literal(
-    fmt::string_view value) {
-  return std::make_unique<t_const_value>(fmt::to_string(value));
-}
-
-std::unique_ptr<t_const_value> parsing_driver::on_list_literal() {
-  auto const_value = std::make_unique<t_const_value>();
-  const_value->set_list();
-  return const_value;
-}
-
-std::unique_ptr<t_const_value> parsing_driver::on_map_literal() {
-  auto const_value = std::make_unique<t_const_value>();
-  const_value->set_map();
-  return const_value;
-}
-
-std::unique_ptr<t_const_value> parsing_driver::on_struct_literal(
-    source_range range, fmt::string_view name) {
-  auto const_value = std::make_unique<t_const_value>();
-  const_value->set_map();
-  const_value->set_ttype(
-      new_type_ref(fmt::to_string(name), nullptr, range, /*is_const=*/true));
-  return const_value;
-}
-
-int64_t parsing_driver::on_integer(source_range range, sign s, uint64_t value) {
-  constexpr uint64_t max = std::numeric_limits<int64_t>::max();
-  if (s == sign::minus) {
-    if (mode == parsing_mode::PROGRAM && value > max + 1) {
-      diags_.error(range.begin, "integer constant -{} is too small", value);
-    }
-    return -value;
-  }
-  if (mode == parsing_mode::PROGRAM && value > max) {
-    diags_.error(range.begin, "integer constant {} is too large", value);
-  }
-  return value;
-}
 
 std::unique_ptr<t_program_bundle> parsing_driver::parse() {
   std::unique_ptr<t_program_bundle> result;
@@ -869,32 +695,230 @@ std::string parsing_driver::strip_doctext(fmt::string_view text) {
   return clean_up_doctext(str);
 }
 
-const t_const* parsing_driver::find_const(
-    source_location loc, const std::string& name) {
-  validate_not_ambiguous_enum(loc, name);
-  if (const t_const* constant = scope_cache->find_constant(name)) {
-    return constant;
-  }
-  if (const t_const* constant =
-          scope_cache->find_constant(program->scope_name(name))) {
-    validate_not_ambiguous_enum(loc, program->scope_name(name));
-    return constant;
-  }
-  return nullptr;
-}
-
 void parsing_driver::set_parsed_definition() {
   if (mode == parsing_mode::PROGRAM) {
     programs_that_parsed_definition_.insert(program->path());
   }
 }
 
-void parsing_driver::set_program_annotations(
-    std::unique_ptr<stmt_attrs> statement_attrs,
+parsing_driver::parsing_driver(
+    source_manager& sm,
+    diagnostics_engine& diags,
+    std::string path,
+    parsing_params parse_params)
+    : source_mgr_(sm), diags_(diags), params_(std::move(parse_params)) {
+  program_bundle =
+      std::make_unique<t_program_bundle>(std::make_unique<t_program>(path));
+  program = program_bundle->root_program();
+  scope_cache = program->scope();
+}
+
+void parsing_driver::on_standard_header(
+    source_range range,
+    std::unique_ptr<stmt_attrs> attrs,
+    std::unique_ptr<t_annotations> annotations) {
+  validate_header_location(range.begin);
+  if (attrs && attrs->struct_annotations) {
+    diags_.error(
+        *attrs->struct_annotations->front(),
+        "Structured annotations are not supported for a given entity.");
+  }
+  if (annotations) {
+    diags_.error(
+        annotations->loc, "Annotations are not supported for a given entity.");
+  }
+}
+
+void parsing_driver::on_program_header(
+    source_range range,
+    std::unique_ptr<stmt_attrs> attrs,
+    std::unique_ptr<t_annotations> annotations) {
+  validate_header_location(range.begin);
+  set_attributes(*program, std::move(attrs), std::move(annotations), range);
+}
+
+void parsing_driver::on_package(source_range range, fmt::string_view name) {
+  if (mode != parsing_mode::PROGRAM) {
+    return;
+  }
+  if (!program->package().empty()) {
+    diags_.error(range.begin, "Package already specified.");
+  }
+  try {
+    program->set_package(t_package(fmt::to_string(name)));
+  } catch (const std::exception& e) {
+    diags_.error(range.begin, "{}", e.what());
+  }
+}
+
+std::unique_ptr<t_service> parsing_driver::on_service(
+    source_range range,
+    const identifier& name,
+    const identifier& base,
+    std::unique_ptr<t_function_list> functions) {
+  auto find_base_service = [&]() -> const t_service* {
+    if (mode == parsing_mode::PROGRAM && base.str.size() != 0) {
+      auto base_name = fmt::to_string(base.str);
+      if (auto* result = scope_cache->find_service(base_name)) {
+        return result;
+      }
+      if (auto* result =
+              scope_cache->find_service(program->scope_name(base_name))) {
+        return result;
+      }
+      diags_.error(
+          range.begin, "Service \"{}\" has not been defined.", base_name);
+    }
+    return nullptr;
+  };
+  auto service = std::make_unique<t_service>(
+      program, fmt::to_string(name.str), find_base_service());
+  service->set_src_range(range);
+  set_functions(*service, std::move(functions));
+  return service;
+}
+
+std::unique_ptr<t_enum> parsing_driver::on_enum(
+    source_range range, const identifier& name, t_enum_value_list values) {
+  auto enum_node = std::make_unique<t_enum>(program, fmt::to_string(name.str));
+  enum_node->set_src_range(range);
+  enum_node->set_values(std::move(values));
+  return enum_node;
+}
+
+std::unique_ptr<t_enum_value> parsing_driver::on_enum_value(
+    source_range range,
+    std::unique_ptr<stmt_attrs> attrs,
+    const identifier& name,
+    boost::optional<int64_t> value,
     std::unique_ptr<t_annotations> annotations,
-    const source_range& loc) {
-  set_attributes(
-      *program, std::move(statement_attrs), std::move(annotations), loc);
+    boost::optional<comment> doc) {
+  auto enum_value = std::make_unique<t_enum_value>(fmt::to_string(name.str));
+  enum_value->set_src_range(range);
+  set_attributes(*enum_value, std::move(attrs), std::move(annotations), range);
+  if (value) {
+    enum_value->set_value(
+        narrow_int<int32_t>(range.begin, *value, "enum values"));
+  }
+  if (doc) {
+    set_doctext(*enum_value, std::move(doc));
+  }
+  return enum_value;
+}
+
+std::unique_ptr<t_const> parsing_driver::on_const(
+    source_range range,
+    t_type_ref type,
+    const identifier& name,
+    std::unique_ptr<t_const_value> value) {
+  auto constant = std::make_unique<t_const>(
+      program, std::move(type), fmt::to_string(name.str), std::move(value));
+  constant->set_src_range(range);
+  return constant;
+}
+
+std::unique_ptr<t_const_value> parsing_driver::on_const_ref(
+    const identifier& name) {
+  auto find_const =
+      [this](source_location loc, const std::string& name) -> const t_const* {
+    validate_not_ambiguous_enum(loc, name);
+    if (const t_const* constant = scope_cache->find_constant(name)) {
+      return constant;
+    }
+    if (const t_const* constant =
+            scope_cache->find_constant(program->scope_name(name))) {
+      validate_not_ambiguous_enum(loc, program->scope_name(name));
+      return constant;
+    }
+    return nullptr;
+  };
+
+  auto name_str = fmt::to_string(name.str);
+  if (const t_const* constant = find_const(name.loc, name_str)) {
+    // Copy const_value to perform isolated mutations.
+    auto result = constant->get_value()->clone();
+    // We only want to clone the value, while discarding all real type
+    // information.
+    result->set_ttype({});
+    result->set_is_enum(false);
+    result->set_enum(nullptr);
+    result->set_enum_value(nullptr);
+    return result;
+  }
+
+  // TODO(afuller): Make this an error.
+  if (mode == parsing_mode::PROGRAM) {
+    diags_.warning(
+        name.loc,
+        "The identifier '{}' is not defined yet. Constants and enums should "
+        "be defined before using them as default values.",
+        name.str);
+  }
+  return std::make_unique<t_const_value>(std::move(name_str));
+}
+
+std::unique_ptr<t_const_value> parsing_driver::on_bool_literal(bool value) {
+  auto const_value = std::make_unique<t_const_value>();
+  const_value->set_bool(value);
+  return const_value;
+}
+
+std::unique_ptr<t_const_value> parsing_driver::on_int_literal(
+    source_location loc, int64_t value) {
+  if (mode == parsing_mode::PROGRAM && !params_.allow_64bit_consts &&
+      (value < INT32_MIN || value > INT32_MAX)) {
+    diags_.warning(
+        loc, "64-bit constant {} may not work in all languages", value);
+  }
+  auto node = std::make_unique<t_const_value>();
+  node->set_integer(value);
+  return node;
+}
+
+std::unique_ptr<t_const_value> parsing_driver::on_float_literal(double value) {
+  auto const_value = std::make_unique<t_const_value>();
+  const_value->set_double(value);
+  return const_value;
+}
+
+std::unique_ptr<t_const_value> parsing_driver::on_string_literal(
+    fmt::string_view value) {
+  return std::make_unique<t_const_value>(fmt::to_string(value));
+}
+
+std::unique_ptr<t_const_value> parsing_driver::on_list_literal() {
+  auto const_value = std::make_unique<t_const_value>();
+  const_value->set_list();
+  return const_value;
+}
+
+std::unique_ptr<t_const_value> parsing_driver::on_map_literal() {
+  auto const_value = std::make_unique<t_const_value>();
+  const_value->set_map();
+  return const_value;
+}
+
+std::unique_ptr<t_const_value> parsing_driver::on_struct_literal(
+    source_range range, fmt::string_view name) {
+  auto const_value = std::make_unique<t_const_value>();
+  const_value->set_map();
+  const_value->set_ttype(
+      new_type_ref(fmt::to_string(name), nullptr, range, /*is_const=*/true));
+  return const_value;
+}
+
+int64_t parsing_driver::on_integer(source_range range, sign s, uint64_t value) {
+  constexpr uint64_t max = std::numeric_limits<int64_t>::max();
+  if (s == sign::minus) {
+    if (mode == parsing_mode::PROGRAM && value > max + 1) {
+      diags_.error(range.begin, "integer constant -{} is too small", value);
+    }
+    return -value;
+  }
+  if (mode == parsing_mode::PROGRAM && value > max) {
+    diags_.error(range.begin, "integer constant {} is too large", value);
+  }
+  return value;
 }
 
 } // namespace compiler

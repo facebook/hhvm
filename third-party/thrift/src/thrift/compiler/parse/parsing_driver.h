@@ -103,7 +103,6 @@ class parsing_driver : public parser_actions {
       diagnostics_engine& diags,
       std::string path,
       parsing_params parse_params);
-  ~parsing_driver() override;
 
   void on_program() override { clear_doctext(); }
 
@@ -367,44 +366,20 @@ class parsing_driver : public parser_actions {
   std::unique_ptr<t_enum> on_enum(
       source_range range,
       const identifier& name,
-      t_enum_value_list values) override {
-    auto enum_node =
-        std::make_unique<t_enum>(program, fmt::to_string(name.str));
-    enum_node->set_src_range(range);
-    enum_node->set_values(std::move(values));
-    return enum_node;
-  }
-
+      t_enum_value_list values) override;
   std::unique_ptr<t_enum_value> on_enum_value(
       source_range range,
       std::unique_ptr<stmt_attrs> attrs,
       const identifier& name,
-      int64_t* value,
+      boost::optional<int64_t> value,
       std::unique_ptr<t_annotations> annotations,
-      boost::optional<comment> doc) override {
-    auto enum_value = std::make_unique<t_enum_value>(fmt::to_string(name.str));
-    enum_value->set_src_range(range);
-    set_attributes(
-        *enum_value, std::move(attrs), std::move(annotations), range);
-    if (value) {
-      enum_value->set_value(to_enum_value(range.begin, *value));
-    }
-    if (doc) {
-      set_doctext(*enum_value, std::move(doc));
-    }
-    return enum_value;
-  }
+      boost::optional<comment> doc) override;
 
   std::unique_ptr<t_const> on_const(
       source_range range,
       t_type_ref type,
       const identifier& name,
-      std::unique_ptr<t_const_value> value) override {
-    auto constant = std::make_unique<t_const>(
-        program, std::move(type), fmt::to_string(name.str), std::move(value));
-    constant->set_src_range(range);
-    return constant;
-  }
+      std::unique_ptr<t_const_value> value) override;
 
   std::unique_ptr<t_const_value> on_const_ref(const identifier& name) override;
 
@@ -485,35 +460,6 @@ class parsing_driver : public parser_actions {
   void validate_not_ambiguous_enum(
       source_location loc, const std::string& name);
 
-  /**
-   * Clears any previously stored doctext string.
-   * Also prints a warning if we are discarding information.
-   */
-  void clear_doctext();
-
-  /** Returns any doctext previously pushed. */
-  boost::optional<comment> pop_doctext();
-
-  /**
-   * Strips comment chars and aligns leading whitespace on multiline doctext.
-   */
-  std::string strip_doctext(fmt::string_view text);
-
-  /** Updates doctext of given node. */
-  void set_doctext(t_node& node, boost::optional<comment> doctext) const;
-
-  /**
-   * Cleans up text commonly found in doxygen-like comments.
-   *
-   * Warning: if you mix tabs and spaces in a non-uniform way,
-   * you will get what you deserve.
-   */
-  std::string clean_up_doctext(std::string docstring);
-
-  // Populate the annotation on the given node.
-  static void set_annotations(
-      t_node* node, std::unique_ptr<t_annotations> annotations);
-
   std::unique_ptr<t_const> new_struct_annotation(
       std::unique_ptr<t_const_value> const_struct, const source_range& range);
 
@@ -545,13 +491,6 @@ class parsing_driver : public parser_actions {
   void set_functions(
       t_interface& node, std::unique_ptr<t_function_list> functions);
 
-  // Populate the attributes on the given node.
-  void set_attributes(
-      t_named& node,
-      std::unique_ptr<stmt_attrs> attrs,
-      std::unique_ptr<t_annotations> annots,
-      const source_range& loc) const;
-
   // Adds a definition to the program.
   void add_def(std::unique_ptr<t_named> node);
 
@@ -560,17 +499,8 @@ class parsing_driver : public parser_actions {
   t_field_id to_field_id(source_location loc, int64_t value) {
     return narrow_int<t_field_id>(loc, value, "field ids");
   }
-  int32_t to_enum_value(source_location loc, int64_t value) {
-    return narrow_int<int32_t>(loc, value, "enum values");
-  }
-
-  const t_const* find_const(source_location loc, const std::string& name);
 
   void set_parsed_definition();
-  void set_program_annotations(
-      std::unique_ptr<stmt_attrs> statement_attrs,
-      std::unique_ptr<t_annotations> annotations,
-      const source_range& loc);
 
  private:
   source_manager& source_mgr_;
@@ -582,12 +512,43 @@ class parsing_driver : public parser_actions {
 
   std::unordered_set<std::string> programs_that_parsed_definition_;
 
+  class lex_handler_impl;
+
   /**
    * Parse a single .thrift file. The file to parse is stored in params.program.
    */
   void parse_file();
 
   void validate_header_location(source_location loc);
+
+  // Clears any previously stored doctext string and prints a warning if
+  // information is discarded.
+  void clear_doctext();
+
+  // Returns a previously pushed doctext.
+  boost::optional<comment> pop_doctext();
+
+  // Strips comment text and aligns leading whitespace on multiline doctext.
+  std::string strip_doctext(fmt::string_view text);
+
+  // Updates doctext of the given node.
+  void set_doctext(t_node& node, boost::optional<comment> doctext) const;
+
+  // Cleans up text commonly found in doxygen-like comments.
+  //
+  // Warning: mixing tabs and spaces may mess up formatting.
+  std::string clean_up_doctext(std::string docstring);
+
+  // Sets the annotations on the given node.
+  static void set_annotations(
+      t_node* node, std::unique_ptr<t_annotations> annotations);
+
+  // Sets the attributes on the given node.
+  void set_attributes(
+      t_named& node,
+      std::unique_ptr<stmt_attrs> attrs,
+      std::unique_ptr<t_annotations> annots,
+      const source_range& loc) const;
 
   // Adds an unnamed typedef to the program
   // TODO(afuller): Remove the need for these by an explicit t_type_ref node

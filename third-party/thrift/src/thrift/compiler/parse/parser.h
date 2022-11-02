@@ -193,7 +193,7 @@ class parser_actions {
       source_range range,
       std::unique_ptr<stmt_attrs> attrs,
       const identifier& name,
-      int64_t* value,
+      boost::optional<int64_t> value,
       std::unique_ptr<t_annotations> annotations,
       boost::optional<comment> doc) = 0;
 

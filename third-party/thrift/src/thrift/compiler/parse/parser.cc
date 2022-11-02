@@ -734,7 +734,7 @@ class parser {
         range,
         std::move(attrs),
         name,
-        value ? &*value : nullptr,
+        value,
         std::move(annotations),
         std::move(doc));
   }

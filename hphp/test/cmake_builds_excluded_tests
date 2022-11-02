@@ -117,6 +117,9 @@ slow/ext_zlib/zip_stream.php
 slow/ext_zlib/ziparchive_setencryption.php
 zend/good/ext/zip/tests/bug53885.php
 
+# TODO(atry) a flaky test
+slow/ext_apc/apc_expire.php
+
 # TODO(alexeyt) failures not yet categorized
 slow/coeffects/apc_pure.php
 slow/dom_document/clone.php

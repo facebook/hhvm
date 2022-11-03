@@ -505,6 +505,62 @@ bool stressUnitCache() {
 }
 
 /*
+ * Represents whether a unit may require recompilation and for what reason.
+ * NOTE: This enum is used in an order dependent manner. Earlier items are
+ * considered "less severe" than later items: we may not consider a file changed
+ * if just the stat data for the underlying file is different (`STAT`) but we
+ * will always consider a file changed if the current repo options are different
+ * from the options in the cached unit (`REPO_OPTION_DIFF`).
+ */
+enum class UnitChange {
+  /* This unit does not require re-compilation: the file on disk has not
+   * changed **and** none of it's dependencies have changed.
+   */
+  NONE,
+  /* This unit's backing file has potentially been modified according to the
+   * stat data. The dependencies **may** also have changed.
+   */
+  STAT,
+  /* At least one dependency file hash has changed. */
+  DEPS,
+  /* We have decided to stress test the unit cache: *always* consider this
+   * file changed.
+   */
+  STRESS_TEST,
+  /* The repo options between this request and the cached unit differ, so
+   * we should never use the cached bytecode for this unit.
+   */
+  REPO_OPTION_DIFF
+};
+
+/*
+ * Iterate over the dependencies of `u` and check if the hash of any of those
+ * dependencies on disk differs from the hash recorded in the unit.
+ * See `changeReason` for more details. This functions asserts that either:
+ * - `RO::EvalEnableDecl` is false
+ * - `u->deps()` is empty.
+ * If `RO::EvalEnableDecl` is true and `u->deps()` is non-empty, then we are in
+ * an invalid state: tracking declarations despite not having decl driven
+ * bytecode enabled.
+ *
+ * @precondition `u != nullptr`
+ */
+bool anyDepsChanged(
+  const Unit* u,
+  const RepoOptions& options,
+  Stream::Wrapper* wrapper
+) {
+  assertx(u);
+  assertx(RO::EvalEnableDecl || u->deps().empty());
+  for (auto& [file, hash] : u->deps()) {
+    if (getHashForFile(file, wrapper, options.dir()) != hash) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/*
  * Determine whether or not cachedUnit can be used from the cache or requires
  * recompilation from disk.
  *
@@ -533,7 +589,7 @@ bool stressUnitCache() {
  * suited to appear more responsive even after changes that ultimately cause
  * large invalidation fan-out.
  */
-bool isChanged(
+UnitChange changeReason(
   const CachedFilePtr& cachedUnit,
   const struct stat* s,
   const RepoOptions& options,
@@ -543,23 +599,22 @@ bool isChanged(
   // case someone created the file).  This case should only happen if something
   // successfully stat'd the file, but then it was gone by the time we tried to
   // open() it.
-  if (!s) return false;
+  if (!s) return UnitChange::NONE;
   auto const fileChanged = !cachedUnit ||
          cachedUnit->cu.unit == nullptr ||
          timespecCompare(cachedUnit->mtime, s->st_mtim) < 0 ||
          timespecCompare(cachedUnit->ctime, s->st_ctim) < 0 ||
          cachedUnit->ino != s->st_ino ||
-         cachedUnit->devId != s->st_dev ||
-         cachedUnit->repoOptionsHash != options.flags().cacheKeySha1() ||
-         stressUnitCache();
-
-  if (fileChanged) return true;
-  if (auto const u = cachedUnit->cu.unit) {
-    for (auto& [file, hash] : u->deps()) {
-      if (getHashForFile(file, wrapper, options.dir()) != hash) return true;
-    }
-  }
-  return false;
+         cachedUnit->devId != s->st_dev;
+  if (fileChanged) return UnitChange::STAT;
+  if (cachedUnit->cu.unit &&
+      anyDepsChanged(cachedUnit->cu.unit, options, wrapper))
+      return UnitChange::DEPS;
+  if (UNLIKELY(cachedUnit->repoOptionsHash != options.flags().cacheKeySha1()))
+    return UnitChange::REPO_OPTION_DIFF;
+  if (UNLIKELY(stressUnitCache()))
+    return UnitChange::STRESS_TEST;
+  return UnitChange::NONE;
 }
 
 // Returns true if the given unit has no bound path, or it has already
@@ -696,7 +751,8 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
                                  FileLoadFlags& flags,
                                  const struct stat* statInfo,
                                  CachedFilePtr orig,
-                                 bool forPrefetch) {
+                                 bool forPrefetch,
+                                 UnitChange reason) {
   assertx(statInfo);
 
   auto const impl = [&] (bool tryLazy) {
@@ -722,7 +778,19 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
     // contents may not have actually changed. In that case, the hash we
     // just calculated may be the same as the pre-existing Unit's
     // hash. In that case, we just use the old unit.
-    if (orig && orig->cu.unit && loader.sha1() == orig->cu.unit->sha1()) {
+    if (
+      orig &&
+      orig->cu.unit &&
+      loader.sha1() == orig->cu.unit->sha1() &&
+      // Earlier we checked if we think this unit has changed: if we've already
+      // checked the dependencies and they **have** changed, then there's no
+      // need to do so again. If the reason for change was not due to the
+      // dependencies and doesn't *further* require we recompile the unit, then
+      // we check the dependencies here and re-use the original unit if no
+      // dependencies have changed.
+      reason < UnitChange::DEPS &&
+      !anyDepsChanged(orig->cu.unit, options, wrapper)
+    ) {
       return CachedFilePtr{*orig, statInfo};
     }
 
@@ -1158,9 +1226,11 @@ CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
   }
 
   auto forceNewUnit = false;
+  auto changeRes = UnitChange::NONE;
 
   if (auto const tmp = cachedUnit.copy()) {
-    if (!isChanged(tmp, statInfo, options, wrapper)) {
+    changeRes = changeReason(tmp, statInfo, options, wrapper);
+    if (changeRes == UnitChange::NONE) {
       if (forPrefetch || canBeBoundToPath(tmp, rpath)) {
         lock->release();
         flags = FileLoadFlags::kWaited;
@@ -1193,7 +1263,8 @@ CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
       : CachedFilePtr{};
     return createUnitFromFile(rpath, wrapper, &releaseUnit, ent,
                               nativeFuncs, map, options, flags,
-                              statInfo, std::move(orig), forPrefetch);
+                              statInfo, std::move(orig), forPrefetch,
+                              changeRes);
   }();
   if (UNLIKELY(!ptr)) return CachedUnit{};
 
@@ -1259,7 +1330,8 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
       NonRepoUnitCache::const_accessor acc;
       if (cache->find(acc, rpath)) {
         auto const cachedUnit = acc->second.cachedUnit.copy();
-        if (!isChanged(cachedUnit, statInfo, options, wrapper)) {
+        if (changeReason(cachedUnit, statInfo, options, wrapper) ==
+            UnitChange::NONE) {
           if (forPrefetch || canBeBoundToPath(cachedUnit, rpath)) {
             if (ent) ent->setStr("type", "cache_hit_readlock");
             flags = FileLoadFlags::kHitMem;
@@ -1879,8 +1951,10 @@ void prefetchUnit(StringData* requestedPath,
       // Now that we have the lock, check if the path has a Unit
       // already, and if so, has the file has changed since that
       // Unit was created. If not, there's nothing to do.
+      auto changeRes = UnitChange::NONE;
       if (auto const tmp = cachedUnit.copy()) {
-        if (!isChanged(tmp, fileStat.get_pointer(), options, w)) return;
+        changeRes = changeReason(tmp, fileStat.get_pointer(), options, w);
+        if (changeRes == UnitChange::NONE) return;
       }
 
       // The Unit doesn't already exist, or the file has
@@ -1896,7 +1970,7 @@ void prefetchUnit(StringData* requestedPath,
                                   map.get(),
                                   options, flags,
                                   fileStat.get_pointer(),
-                                  std::move(orig), true);
+                                  std::move(orig), true, changeRes);
       }();
 
       // We don't want to prefetch ICE units (they can be

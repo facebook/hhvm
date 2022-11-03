@@ -311,6 +311,19 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
 
   InterfaceKind getInterfaceKind() const { return interfaceKind_; }
 
+  /**
+   * This is intended to be called by the thrift server implementation code.
+   *
+   * Replaces interaction if id is present in map.
+   * Destroys passed-in tile otherwise.
+   */
+  void tryReplaceTile(int64_t id, TilePtr tile) {
+    auto it = tiles_.find(id);
+    if (it != tiles_.end()) {
+      it->second = std::move(tile);
+    }
+  }
+
  private:
   /**
    * Adds interaction to interaction map
@@ -331,16 +344,6 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
     auto ret = std::move(it->second);
     tiles_.erase(it);
     return ret;
-  }
-  /**
-   * Replaces interaction if id is present in map.
-   * Destroys passed-in tile otherwise.
-   */
-  void tryReplaceTile(int64_t id, TilePtr tile) {
-    auto it = tiles_.find(id);
-    if (it != tiles_.end()) {
-      it->second = std::move(tile);
-    }
   }
   /**
    * Gets tile from map

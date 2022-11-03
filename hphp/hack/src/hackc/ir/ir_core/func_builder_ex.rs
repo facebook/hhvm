@@ -3,13 +3,20 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::sync::Arc;
+
 use crate::instr;
+use crate::instr::Hhbc;
+use crate::type_struct::TypeStruct;
 use crate::BaseType;
+use crate::Constant;
 use crate::EnforceableType;
 use crate::FuncBuilder;
 use crate::Instr;
+use crate::IsTypeOp;
 use crate::LocId;
 use crate::TypeConstraintFlags;
+use crate::TypeStructResolveOp;
 use crate::ValueId;
 
 /// Helpers for emitting more complex constructs.
@@ -77,10 +84,6 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
     }
 
     fn is(&mut self, vid: ValueId, ety: &EnforceableType, loc: LocId) -> Instr {
-        use instr::Hhbc;
-
-        use crate::IsTypeOp;
-
         if ety.modifiers == TypeConstraintFlags::NoFlags
             || ety.modifiers == TypeConstraintFlags::ExtendedHint
         {
@@ -88,7 +91,17 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
                 BaseType::AnyArray => todo!(),
                 BaseType::Arraykey => todo!(),
                 BaseType::Bool => todo!(),
-                BaseType::Class(_cid) => todo!(),
+                BaseType::Class(cid) => {
+                    let constant = Constant::Array(Arc::new(
+                        TypeStruct::Unresolved(cid).into_typed_value(&self.strings),
+                    ));
+                    let adata = self.emit_constant(constant);
+                    Instr::Hhbc(Hhbc::IsTypeStructC(
+                        [vid, adata],
+                        TypeStructResolveOp::Resolve,
+                        loc,
+                    ))
+                }
                 BaseType::Classname => todo!(),
                 BaseType::Darray => todo!(),
                 BaseType::Dict => todo!(),

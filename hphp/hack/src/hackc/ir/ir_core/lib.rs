@@ -41,6 +41,7 @@ pub mod module;
 pub mod newtype;
 pub mod string_intern;
 pub mod type_const;
+pub mod type_struct;
 pub mod typed_value;
 pub mod types;
 pub mod unit;

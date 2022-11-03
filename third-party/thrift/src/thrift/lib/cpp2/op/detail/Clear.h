@@ -20,6 +20,7 @@
 
 #include <folly/CPortability.h>
 #include <folly/Portability.h>
+#include <folly/Utility.h>
 #include <folly/io/IOBuf.h>
 #include <folly/memory/SanitizeLeak.h>
 #include <thrift/lib/cpp2/Adapt.h>
@@ -189,8 +190,20 @@ using adapted_field_tag =
 
 // Cache the result of op::create for adapters.
 template <typename Adapter, typename UTag>
-struct GetIntrinsicDefault<type::adapted<Adapter, UTag>>
+struct GetDefault<type::adapted<Adapter, UTag>>
     : CreateDefault<type::adapted<Adapter, UTag>> {};
+template <typename Adapter, typename UTag>
+struct GetIntrinsicDefault<type::adapted<Adapter, UTag>> {
+  using Tag = type::adapted<Adapter, UTag>;
+  const auto& operator()() const {
+    return staticDefault([] {
+      // TODO(dokwon): Consider adding enforcement to striping reference in
+      // 'Adapter::fromThrift' instead of copying.
+      return std::make_unique<type::native_type<Tag>>(
+          Adapter::fromThrift(folly::copy(GetIntrinsicDefault<UTag>{}())));
+    });
+  }
+};
 template <typename Adapter, typename UTag, typename Struct, int16_t id>
 struct GetIntrinsicDefault<adapted_field_tag<Adapter, UTag, Struct, id>> {
   using Tag = adapted_field_tag<Adapter, UTag, Struct, id>;

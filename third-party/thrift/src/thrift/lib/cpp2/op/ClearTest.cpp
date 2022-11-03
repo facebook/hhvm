@@ -154,5 +154,22 @@ TEST(ClearTest, Adapter) {
       true>({}, {{1}}, true);
 }
 
+TEST(ClearTest, Default) {
+  using Tag = type::adapted<
+      TestAdapter,
+      type::struct_t<testset::struct_terse_i64_custom_default>>;
+
+  auto defaultObj = getDefault<Tag>();
+  const auto& intrinsicDefaultObj = getIntrinsicDefault<Tag>();
+
+  EXPECT_FALSE(apache::thrift::adapt_detail::equal<TestAdapter>(
+      defaultObj, intrinsicDefaultObj));
+
+  // TODO(dokwon): Fix op::clear for adapted types with custom default.
+  // clear<Tag>(defaultObj);
+  // EXPECT_TRUE(apache::thrift::adapt_detail::equal<TestAdapter>(
+  //     defaultObj, intrinsicDefaultObj));
+}
+
 } // namespace
 } // namespace apache::thrift::op

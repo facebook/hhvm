@@ -13,12 +13,17 @@ using namespace facebook::fb303;
 namespace proxygen {
 
 TLConnectionStats::TLConnectionStats(const std::string& prefix)
-    : req_(prefix + "_req", SUM, RATE),
-      resp_(prefix + "_resp", SUM, RATE),
-      egressBytes_(prefix + "_egress_bytes", SUM, RATE),
-      ingressBytes_(prefix + "_ingress_bytes", SUM, RATE),
-      egressBodyBytes_(prefix + "_egress_body_bytes", SUM, RATE),
+    : req_(prefix + "_req", SUM, RATE), // RATE used
+      resp_(prefix + "_resp", SUM),
+      egressBytes_(prefix + "_egress_bytes", SUM),
+      ingressBytes_(prefix + "_ingress_bytes", SUM),
+      egressBodyBytes_(
+          prefix + "_egress_body_bytes",
+          SUM,
+          RATE), // RATE is being used for body throughout the code base
+                 // https://www.internalfb.com/code/search?q=repo%3Aall%20gress_body_bytes.rate.60
       ingressBodyBytes_(prefix + "_ingress_body_bytes", SUM, RATE),
+
       responseCodes_(prefix + "_"),
       totalDuration_(prefix + "_conn_duration",
                      100,
@@ -29,7 +34,7 @@ TLConnectionStats::TLConnectionStats(const std::string& prefix)
                      95,
                      99),
       currConns_(prefix + "_conn"),
-      newConns_(prefix + "_new_conn", SUM, RATE) {
+      newConns_(prefix + "_new_conn", SUM) {
 }
 
 void TLConnectionStats::recordConnectionOpen() {

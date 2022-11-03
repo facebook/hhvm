@@ -198,7 +198,7 @@ struct GetIntrinsicDefault<adapted_field_tag<Adapter, UTag, Struct, id>> {
     return staticDefault([] {
       // TODO(afuller): Remove or move this logic to the adapter.
       auto& obj = *new Struct{};
-      folly::annotate_object_leaked(&obj);
+      folly::lsan_ignore_object(&obj);
       apache::thrift::clear(obj);
       return std::make_unique<type::native_type<Tag>>(op::create<Tag>(obj));
     });

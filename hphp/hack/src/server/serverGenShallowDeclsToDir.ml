@@ -129,25 +129,12 @@ let go
                 in
                 (decl_hash_64, marshalled_symbol_to_shallow_decl))
           in
-          let names_and_decl_hashes =
-            get_name_and_decl_hashes_from_decls decls
-          in
           let decls_to_write =
-            List.fold_left
-              ~init:prev_decls_to_write
-              ~f:(fun acc (name, decl_hash) ->
-                let shallow_decl_opt = Shallow_classes_provider.get ctx name in
-                if Option.is_some shallow_decl_opt then
-                  let shallow_decl = Option.value_exn shallow_decl_opt in
-                  List.cons
-                    (* marshal here to avoid OOM *)
-                    (decl_hash, Marshal.to_string (name, shallow_decl) [])
-                    acc
-                else
-                  acc)
-              names_and_decl_hashes
+            List.map decls ~f:(fun (name, decl, decl_hash) ->
+                (decl_hash, Marshal.to_string (name, decl) []))
           in
-          (prev_decls_to_upload @ decls_to_upload, decls_to_write))
+          ( prev_decls_to_upload @ decls_to_upload,
+            prev_decls_to_write @ decls_to_write ))
       fnl
   in
 

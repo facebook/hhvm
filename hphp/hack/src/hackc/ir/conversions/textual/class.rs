@@ -18,6 +18,7 @@ use strum_macros::EnumIter;
 use super::func;
 use super::hack;
 use super::textual;
+use crate::func::MethodInfo;
 use crate::mangle::Mangle;
 use crate::mangle::MangleWithClass as _;
 use crate::state::UnitState;
@@ -171,12 +172,18 @@ fn write_method(
         non_static_ty(class.name, &state.strings)
     };
 
+    let method_info = MethodInfo {
+        class,
+        is_static: method.attrs.is_static(),
+    };
+
     func::write_func(
         w,
         state,
         &method.name.mangle(class.name, &state.strings),
         this_ty,
         method.func,
+        Some(&method_info),
     )
 }
 

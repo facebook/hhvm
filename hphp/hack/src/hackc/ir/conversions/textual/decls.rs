@@ -34,7 +34,10 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
 
             Builtin::AllocWords => declare_function(w, &name, &[ty!(int)], ty!(*void))?,
             Builtin::BadMethodCall | Builtin::BadProperty => {
-                declare_function(w, &name, &[], ty!(noreturn))?
+                declare_function(w, &name, &[], ty!(noreturn))?;
+            }
+            Builtin::GetClass | Builtin::GetStaticClass => {
+                declare_function(w, &name, &[ty!(*void)], ty!(*class))?;
             }
             Builtin::IsTrue => declare_function(w, &name, &[ty!(mixed)], ty!(bool))?,
             Builtin::RawPtrIsNull => declare_function(w, &name, &[ty!(*void)], ty!(bool))?,
@@ -65,9 +68,14 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
             | Hhbc::Modulo
             | Hhbc::Sub => declare_function(w, &name, &[ty!(mixed), ty!(mixed)], ty!(mixed))?,
 
-            Hhbc::Print | Hhbc::IsTypeInt | Hhbc::IsTypeStr | Hhbc::Not => {
-                declare_function(w, &name, &[ty!(mixed)], ty!(mixed))?
+            Hhbc::IsTypeInt | Hhbc::IsTypeNull | Hhbc::IsTypeStr => {
+                declare_function(w, &name, &[ty!(mixed)], ty!(bool))?
             }
+
+            Hhbc::NewObj => declare_function(w, &name, &[ty!(*class)], ty!(mixed))?,
+            Hhbc::NewVec => declare_function(w, &name, &[], ty!(*HackVec))?,
+
+            Hhbc::Print | Hhbc::Not => declare_function(w, &name, &[ty!(mixed)], ty!(mixed))?,
             Hhbc::VerifyFailed => declare_function(w, &name, &[], ty!(noreturn))?,
         }
     }

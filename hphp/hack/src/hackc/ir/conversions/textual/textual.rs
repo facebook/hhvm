@@ -102,6 +102,7 @@ impl fmt::Display for FmtTy<'_> {
             Ty::Ptr(sub) => write!(f, "*{}", FmtTy(sub)),
             Ty::Mixed => f.write_str("*Mixed"),
             Ty::Noreturn => f.write_str("noreturn"),
+            Ty::This => f.write_str("this"),
             Ty::Void => f.write_str("void"),
 
             Ty::AnyArray
@@ -118,7 +119,6 @@ impl fmt::Display for FmtTy<'_> {
             | Ty::Nullable(_)
             | Ty::Num
             | Ty::Resource
-            | Ty::This
             | Ty::Typename
             | Ty::Varray
             | Ty::VarrayOrDarray
@@ -353,6 +353,15 @@ where
     }
 }
 
+impl<T> VarArgs for Box<[T]>
+where
+    T: Into<Expr>,
+{
+    fn into_exprs(self) -> Vec<Expr> {
+        Vec::from(self).into_exprs()
+    }
+}
+
 impl<P1, P2> VarArgs for (P1, P2)
 where
     P1: Into<Expr>,
@@ -511,7 +520,8 @@ impl<'a> FuncWriter<'a> {
         let expr = expr.into();
         match expr {
             Expr::Sid(sid) => Ok(sid),
-            Expr::Call(_, _) | Expr::Const(_) | Expr::Deref(_) | Expr::Index(_, _) => {
+            Expr::Call(target, params) => self.call(&target, params),
+            Expr::Const(_) | Expr::Deref(_) | Expr::Index(_, _) => {
                 todo!("EXPR: {expr:?}")
             }
         }

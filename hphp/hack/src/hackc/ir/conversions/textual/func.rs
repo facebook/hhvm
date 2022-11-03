@@ -7,6 +7,7 @@ use std::collections::HashSet;
 use std::str::FromStr;
 use std::sync::Arc;
 
+use anyhow::anyhow;
 use anyhow::Error;
 use ascii::AsciiString;
 use ffi::Str;
@@ -21,6 +22,7 @@ use ir::instr::TextualHackBuiltinParam;
 use ir::Block;
 use ir::BlockId;
 use ir::ClassName;
+use ir::CollectionType;
 use ir::Constant;
 use ir::ConstantId;
 use ir::Func;
@@ -37,6 +39,7 @@ use log::trace;
 
 use crate::class;
 use crate::hack;
+use crate::lower::func_builder::FuncBuilderEx as _;
 use crate::mangle::Mangle as _;
 use crate::mangle::MangleWithClass as _;
 use crate::state::FuncDeclKind;
@@ -65,6 +68,7 @@ pub(crate) fn write_function(
         &function.name.mangle(&state.strings),
         tx_ty!(*void),
         function.func,
+        None,
     )
 }
 
@@ -74,9 +78,10 @@ pub(crate) fn write_func(
     name: &str,
     this_ty: textual::Ty,
     func: ir::Func<'_>,
+    method_info: Option<&MethodInfo<'_>>,
 ) -> Result {
     let func = func.clone();
-    let mut func = crate::lower::lower(func, Arc::clone(&unit_state.strings));
+    let mut func = crate::lower::lower(func, method_info, Arc::clone(&unit_state.strings));
     ir::verify::verify_func(&func, &Default::default(), &unit_state.strings)?;
 
     let params = std::mem::take(&mut func.params);
@@ -133,11 +138,11 @@ pub(crate) fn write_func(
         ret_ty,
         &locals,
         |w| {
-            let func = rewrite_prelude(func);
+            let func = rewrite_prelude(func, Arc::clone(&unit_state.strings));
             let mut func = rewrite_jmp_ops(func);
             ir::passes::clean::run(&mut func);
 
-            let mut state = FuncState::new(&unit_state.strings, &func);
+            let mut state = FuncState::new(&unit_state.strings, &func, method_info);
 
             for bid in func.block_ids() {
                 write_block(w, &mut state, bid)?;
@@ -189,7 +194,12 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
         Instr::Call(ref call) => write_call(w, state, iid, call)?,
         Instr::Hhbc(Hhbc::CGetL(lid, _)) => write_load_var(w, state, iid, lid)?,
         Instr::Hhbc(Hhbc::IncDecL(lid, op, _)) => write_inc_dec_l(w, state, iid, lid, op)?,
-        Instr::Hhbc(Hhbc::SetL(vid, lid, _)) => write_set_var(w, state, lid, vid)?,
+        Instr::Hhbc(Hhbc::SetL(vid, lid, _)) => {
+            write_set_var(w, state, lid, vid)?;
+            // SetL emits the input as the output.
+            state.copy_iid(iid, vid);
+        }
+        Instr::Hhbc(Hhbc::This(_)) => write_load_this(w, state, iid)?,
         Instr::MemberOp(ref mop) => crate::member_op::write(w, state, iid, mop)?,
         Instr::Special(Special::Textual(Textual::AssertFalse(vid, _))) => {
             // I think "prune_not" means "stop if this expression IS true"...
@@ -271,6 +281,17 @@ fn write_builtin(
 
     let output = w.call(target, params)?;
     state.set_iid(iid, output);
+    Ok(())
+}
+
+fn write_load_this(
+    w: &mut textual::FuncWriter<'_>,
+    state: &mut FuncState<'_>,
+    iid: InstrId,
+) -> Result {
+    let class = state.method_info.unwrap().class;
+    let sid = w.load(class::non_static_ty(class.name, state.strings), "this")?;
+    state.set_iid(iid, sid);
     Ok(())
 }
 
@@ -456,16 +477,22 @@ fn write_inc_dec_l<'a>(
 pub(crate) struct FuncState<'a> {
     func_declares: FuncDecls,
     func: &'a ir::Func<'a>,
-    iid_mapping: ir::InstrIdMap<Sid>,
+    iid_mapping: ir::InstrIdMap<textual::Expr>,
+    method_info: Option<&'a MethodInfo<'a>>,
     pub(crate) strings: &'a StringInterner,
 }
 
 impl<'a> FuncState<'a> {
-    fn new(strings: &'a StringInterner, func: &'a ir::Func<'a>) -> Self {
+    fn new(
+        strings: &'a StringInterner,
+        func: &'a ir::Func<'a>,
+        method_info: Option<&'a MethodInfo<'a>>,
+    ) -> Self {
         Self {
             func_declares: Default::default(),
             func,
             iid_mapping: Default::default(),
+            method_info,
             strings,
         }
     }
@@ -483,7 +510,7 @@ impl<'a> FuncState<'a> {
     pub fn lookup_vid(&self, vid: ValueId) -> textual::Expr {
         use textual::Expr;
         match vid.full() {
-            ir::FullInstrId::Instr(iid) => Expr::Sid(self.lookup_iid(iid)),
+            ir::FullInstrId::Instr(iid) => self.lookup_iid(iid),
             ir::FullInstrId::Constant(c) => {
                 use hack::Builtin;
                 let c = self.func.constant(c);
@@ -510,13 +537,23 @@ impl<'a> FuncState<'a> {
         }
     }
 
-    pub fn lookup_iid(&self, iid: InstrId) -> Sid {
-        *self.iid_mapping.get(&iid).unwrap()
+    pub fn lookup_iid(&self, iid: InstrId) -> textual::Expr {
+        self.iid_mapping
+            .get(&iid)
+            .cloned()
+            .ok_or_else(|| anyhow!("looking for {iid:?}"))
+            .unwrap()
     }
 
-    pub(crate) fn set_iid(&mut self, iid: InstrId, sid: Sid) {
-        let old = self.iid_mapping.insert(iid, sid);
+    pub(crate) fn set_iid(&mut self, iid: InstrId, expr: impl Into<textual::Expr>) {
+        let expr = expr.into();
+        let old = self.iid_mapping.insert(iid, expr);
         assert!(old.is_none());
+    }
+
+    pub(crate) fn copy_iid(&mut self, iid: InstrId, input: ValueId) {
+        let expr = self.lookup_vid(input);
+        self.set_iid(iid, expr);
     }
 
     pub(crate) fn update_loc(&mut self, w: &mut textual::FuncWriter<'_>, loc: LocId) -> Result {
@@ -530,9 +567,9 @@ impl<'a> FuncState<'a> {
 
 /// Rewrite the function prelude:
 /// - Convert complex constants into builtins.
-fn rewrite_prelude<'a>(mut func: ir::Func<'a>) -> ir::Func<'a> {
+fn rewrite_prelude<'a>(mut func: ir::Func<'a>, strings: Arc<StringInterner>) -> ir::Func<'a> {
     let mut remap = ir::ValueIdMap::default();
-    ir::FuncBuilder::borrow_func_no_strings(&mut func, |builder| {
+    ir::FuncBuilder::borrow_func(&mut func, strings, |builder| {
         // Swap out the initial block so we can inject our entry code.
         let entry_bid = builder.func.alloc_bid(Block::default());
         builder.func.blocks.swap(Func::ENTRY_BID, entry_bid);
@@ -549,17 +586,22 @@ fn rewrite_prelude<'a>(mut func: ir::Func<'a>) -> ir::Func<'a> {
 }
 
 fn write_constants(remap: &mut ir::ValueIdMap<ValueId>, builder: &mut ir::FuncBuilder<'_>) {
-    for (lid, constant) in builder.func.constants.iter().enumerate() {
+    // Temporarily steal the constants so we can mutate the func while we
+    // iterate over them.
+    let constants = std::mem::take(&mut builder.func.constants);
+
+    for (lid, constant) in constants.iter().enumerate() {
         let lid = ConstantId::from_usize(lid);
         trace!("    Const {lid}: {constant:?}");
         let src = ValueId::from_constant(lid);
+        let loc = LocId::NONE;
         let vid = match constant {
             Constant::Bool(..)
             | Constant::Double(..)
             | Constant::Int(..)
             | Constant::Null
             | Constant::String(..)
-            | Constant::Uninit => None,
+            | Constant::Uninit => continue,
 
             Constant::Array(..) => todo!(),
             Constant::Dir => todo!(),
@@ -567,12 +609,23 @@ fn write_constants(remap: &mut ir::ValueIdMap<ValueId>, builder: &mut ir::FuncBu
             Constant::FuncCred => todo!(),
             Constant::Method => todo!(),
             Constant::Named(..) => todo!(),
-            Constant::NewCol(..) => todo!(),
+            Constant::NewCol(ty) => match *ty {
+                CollectionType::Vector => {
+                    builder.emit_hack_builtin(hack::Builtin::Hhbc(hack::Hhbc::NewVec), &[], loc)
+                }
+                CollectionType::Map => todo!(),
+                CollectionType::Set => todo!(),
+                CollectionType::Pair => todo!(),
+                CollectionType::ImmVector => todo!(),
+                CollectionType::ImmMap => todo!(),
+                CollectionType::ImmSet => todo!(),
+                _ => unreachable!(),
+            },
         };
-        if let Some(vid) = vid {
-            remap.insert(src, vid);
-        }
+        remap.insert(src, vid);
     }
+
+    builder.func.constants = constants;
 }
 
 /// Convert from a deterministic jump model to a non-deterministic model.
@@ -635,4 +688,9 @@ fn cmp_lid(strings: &StringInterner, x: &LocalId, y: &LocalId) -> std::cmp::Orde
         (LocalId::Unnamed(_), LocalId::Named(_)) => std::cmp::Ordering::Greater,
         (LocalId::Unnamed(x_id), LocalId::Unnamed(y_id)) => x_id.cmp(y_id),
     }
+}
+
+pub(crate) struct MethodInfo<'a> {
+    pub(crate) class: &'a ir::Class<'a>,
+    pub(crate) is_static: bool,
 }

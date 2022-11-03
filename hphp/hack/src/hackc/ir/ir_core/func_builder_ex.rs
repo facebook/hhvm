@@ -119,7 +119,7 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
                 BaseType::RawType(_) => todo!(),
                 BaseType::Resource => todo!(),
                 BaseType::String => Instr::Hhbc(Hhbc::IsTypeC(vid, IsTypeOp::Str, loc)),
-                BaseType::This => todo!(),
+                BaseType::This => Instr::Hhbc(Hhbc::IsLateBoundCls(vid, loc)),
                 BaseType::Typename => todo!(),
                 BaseType::Varray => todo!(),
                 BaseType::VarrayOrDarray => todo!(),

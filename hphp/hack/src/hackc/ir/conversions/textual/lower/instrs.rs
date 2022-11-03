@@ -18,11 +18,15 @@ use ir::LocId;
 use ir::ValueId;
 
 use super::func_builder::FuncBuilderEx as _;
+use crate::func::MethodInfo;
 use crate::hack;
 
 /// Lower individual Instrs in the Func to simpler forms.
-pub(crate) fn lower_instrs<'a>(builder: &mut FuncBuilder<'a>) {
-    let mut lowerer = LowerInstrs { changed: false };
+pub(crate) fn lower_instrs(builder: &mut FuncBuilder<'_>, method_info: Option<&MethodInfo<'_>>) {
+    let mut lowerer = LowerInstrs {
+        changed: false,
+        method_info,
+    };
 
     let mut bid = Func::ENTRY_BID;
     while bid.0 < builder.func.blocks.len() as u32 {
@@ -38,12 +42,12 @@ pub(crate) fn lower_instrs<'a>(builder: &mut FuncBuilder<'a>) {
     }
 }
 
-#[derive(Default)]
-struct LowerInstrs {
+struct LowerInstrs<'a> {
     changed: bool,
+    method_info: Option<&'a MethodInfo<'a>>,
 }
 
-impl LowerInstrs {
+impl LowerInstrs<'_> {
     fn handle_with_builtin(&self, builder: &mut FuncBuilder<'_>, instr: &Instr) -> Instr {
         let builtin = match instr {
             Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Eq, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpEq),
@@ -68,7 +72,9 @@ impl LowerInstrs {
             }
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Keyset, _)) => todo!(),
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::LegacyArrLike, _)) => todo!(),
-            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Null, _)) => todo!(),
+            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Null, _)) => {
+                hack::Builtin::Hhbc(hack::Hhbc::IsTypeNull)
+            }
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Obj, _)) => todo!(),
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Res, _)) => todo!(),
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Scalar, _)) => todo!(),
@@ -77,6 +83,7 @@ impl LowerInstrs {
             }
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Vec, _)) => todo!(),
             Instr::Hhbc(Hhbc::Modulo(..)) => hack::Builtin::Hhbc(hack::Hhbc::Modulo),
+            Instr::Hhbc(Hhbc::NewObjS(..)) => hack::Builtin::Hhbc(hack::Hhbc::NewObj),
             Instr::Hhbc(Hhbc::Not(..)) => hack::Builtin::Hhbc(hack::Hhbc::Not),
             Instr::Hhbc(Hhbc::Print(..)) => hack::Builtin::Hhbc(hack::Hhbc::Print),
             _ => unreachable!("Unhandled Instr: {instr:#?}"),
@@ -99,16 +106,26 @@ impl LowerInstrs {
     }
 }
 
-impl TransformInstr for LowerInstrs {
-    fn apply<'a>(&mut self, _iid: InstrId, instr: Instr, builder: &mut FuncBuilder<'a>) -> Instr {
+impl TransformInstr for LowerInstrs<'_> {
+    fn apply(&mut self, _iid: InstrId, instr: Instr, builder: &mut FuncBuilder<'_>) -> Instr {
         let instr = match instr {
             Instr::Hhbc(
                 Hhbc::CmpOp(..)
                 | Hhbc::IsTypeC(..)
                 | Hhbc::Modulo(..)
+                | Hhbc::NewObjS(..)
                 | Hhbc::Not(..)
                 | Hhbc::Print(..),
             ) => self.handle_with_builtin(builder, &instr),
+            Instr::Hhbc(Hhbc::LateBoundCls(loc)) => {
+                if self.method_info.unwrap().is_static {
+                    let this = builder.emit(Instr::Hhbc(Hhbc::This(loc)));
+                    builder.hack_builtin(hack::Builtin::GetClass, &[this], loc)
+                } else {
+                    let this = builder.emit(Instr::Hhbc(Hhbc::This(loc)));
+                    builder.hack_builtin(hack::Builtin::GetStaticClass, &[this], loc)
+                }
+            }
             Instr::Hhbc(Hhbc::VerifyRetTypeC(vid, loc)) => {
                 self.verify_ret_type_c(builder, vid, loc)
             }

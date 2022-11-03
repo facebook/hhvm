@@ -45,10 +45,16 @@ pub(crate) enum Hhbc {
     CmpSame,
     #[strum(props(Function = "hhbc_is_type_int"))]
     IsTypeInt,
+    #[strum(props(Function = "hhbc_is_type_null"))]
+    IsTypeNull,
     #[strum(props(Function = "hhbc_is_type_str"))]
     IsTypeStr,
     #[strum(props(Function = "hhbc_modulo"))]
     Modulo,
+    #[strum(props(Function = "hhbc_new_obj"))]
+    NewObj,
+    #[strum(props(Function = "hhbc_new_vec"))]
+    NewVec,
     #[strum(props(Function = "hhbc_not"))]
     Not,
     #[strum(props(Function = "hhbc_print"))]
@@ -85,6 +91,12 @@ pub(crate) enum Builtin {
     ///   Bool(n: bool) -> *Mixed
     #[strum(props(Function = "hack_bool"))]
     Bool,
+    /// Returns the Class identifier for the given class.
+    #[strum(props(Function = "hack_get_class"))]
+    GetClass,
+    /// Returns the Class identifier for the given class's static class.
+    #[strum(props(Function = "hack_get_static_class"))]
+    GetStaticClass,
     /// Hhbc handlers.  See hphp/doc/bytecode.specification for docs.
     Hhbc(Hhbc),
     /// Turns a raw int into a Mixed.

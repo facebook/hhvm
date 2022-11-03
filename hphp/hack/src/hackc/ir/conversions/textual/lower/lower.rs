@@ -10,7 +10,13 @@ use ir::FuncBuilder;
 use ir::StringInterner;
 use log::trace;
 
-pub(crate) fn lower<'a>(func: Func<'a>, strings: Arc<StringInterner>) -> Func<'a> {
+use crate::func::MethodInfo;
+
+pub(crate) fn lower<'a>(
+    func: Func<'a>,
+    method_info: Option<&MethodInfo<'_>>,
+    strings: Arc<StringInterner>,
+) -> Func<'a> {
     trace!(
         "Before Lower: {}",
         ir::print::DisplayFunc(&func, true, &strings)
@@ -18,7 +24,7 @@ pub(crate) fn lower<'a>(func: Func<'a>, strings: Arc<StringInterner>) -> Func<'a
     let mut builder = FuncBuilder::with_func(func, Arc::clone(&strings));
 
     // Simplify various Instrs.
-    super::instrs::lower_instrs(&mut builder);
+    super::instrs::lower_instrs(&mut builder, method_info);
 
     let mut func = builder.finish();
     ir::passes::split_critical_edges(&mut func, true);

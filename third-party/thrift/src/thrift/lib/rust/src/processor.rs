@@ -57,6 +57,8 @@ pub trait ReplyState<F>
 where
     F: Framing,
 {
+    type RequestContext;
+
     fn send_reply(&mut self, reply: FramingEncodedFinal<F>);
     fn send_stream_reply(
         &mut self,
@@ -64,6 +66,20 @@ where
         stream: Option<BoxStream<'static, SerializedStreamElement<FramingEncodedFinal<F>>>>,
         protocol_id: ProtocolID,
     ) -> Result<()>;
+    fn set_interaction_processor(
+        &mut self,
+        _processor: Arc<
+            dyn ThriftService<
+                    F,
+                    Handler = (),
+                    RequestContext = Self::RequestContext,
+                    ReplyState = Self,
+                > + ::std::marker::Send
+                + 'static,
+        >,
+    ) -> Result<()> {
+        bail!("Thrift server does not support interactions");
+    }
 }
 
 #[async_trait]

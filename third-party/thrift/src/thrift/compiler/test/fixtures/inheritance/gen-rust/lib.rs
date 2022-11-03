@@ -416,13 +416,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("do_root", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "MyRoot.do_root"));
 
@@ -433,11 +435,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::my_root::DoRootExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::my_root::DoRootError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("MyRoot.do_root"))
             .boxed()
@@ -682,13 +685,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("do_mid", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "MyNode.do_mid"));
 
@@ -699,11 +704,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::my_node::DoMidExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::my_node::DoMidError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("MyNode.do_mid"))
             .boxed()
@@ -981,13 +987,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("do_leaf", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "MyLeaf.do_leaf"));
 
@@ -998,11 +1006,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::my_leaf::DoLeafExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::my_leaf::DoLeafError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("MyLeaf.do_leaf"))
             .boxed()

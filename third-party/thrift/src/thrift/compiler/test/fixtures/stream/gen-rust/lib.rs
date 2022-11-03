@@ -3037,13 +3037,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("returnstream", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call_stream = self.transport()
+            let call_stream = transport
                 .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.returnstream"));
 
@@ -3076,7 +3078,8 @@ pub mod client {
 
                 let initial: ::std::result::Result<(), crate::errors::pub_sub_streaming_service::ReturnstreamError> =
                     ::std::convert::From::from(res);
-                initial.map(move |_| new_stream)
+                let res = initial.map(move |_| new_stream);
+                res
             }
             .instrument(::tracing::info_span!("PubSubStreamingService.returnstream"))
             .boxed()
@@ -3102,13 +3105,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("streamthrows", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call_stream = self.transport()
+            let call_stream = transport
                 .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.streamthrows"));
 
@@ -3141,7 +3146,8 @@ pub mod client {
 
                 let initial: ::std::result::Result<(), crate::errors::pub_sub_streaming_service::StreamthrowsError> =
                     ::std::convert::From::from(res);
-                initial.map(move |_| new_stream)
+                let res = initial.map(move |_| new_stream);
+                res
             }
             .instrument(::tracing::info_span!("PubSubStreamingService.streamthrows"))
             .boxed()
@@ -3167,13 +3173,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("servicethrows", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call_stream = self.transport()
+            let call_stream = transport
                 .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.servicethrows"));
 
@@ -3206,7 +3214,8 @@ pub mod client {
 
                 let initial: ::std::result::Result<(), crate::errors::pub_sub_streaming_service::ServicethrowsError> =
                     ::std::convert::From::from(res);
-                initial.map(move |_| new_stream)
+                let res = initial.map(move |_| new_stream);
+                res
             }
             .instrument(::tracing::info_span!("PubSubStreamingService.servicethrows"))
             .boxed()
@@ -3232,13 +3241,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("servicethrows2", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call_stream = self.transport()
+            let call_stream = transport
                 .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.servicethrows2"));
 
@@ -3271,7 +3282,8 @@ pub mod client {
 
                 let initial: ::std::result::Result<(), crate::errors::pub_sub_streaming_service::Servicethrows2Error> =
                     ::std::convert::From::from(res);
-                initial.map(move |_| new_stream)
+                let res = initial.map(move |_| new_stream);
+                res
             }
             .instrument(::tracing::info_span!("PubSubStreamingService.servicethrows2"))
             .boxed()
@@ -3297,13 +3309,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("boththrows", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call_stream = self.transport()
+            let call_stream = transport
                 .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.boththrows"));
 
@@ -3336,7 +3350,8 @@ pub mod client {
 
                 let initial: ::std::result::Result<(), crate::errors::pub_sub_streaming_service::BoththrowsError> =
                     ::std::convert::From::from(res);
-                initial.map(move |_| new_stream)
+                let res = initial.map(move |_| new_stream);
+                res
             }
             .instrument(::tracing::info_span!("PubSubStreamingService.boththrows"))
             .boxed()
@@ -3362,13 +3377,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("responseandstreamstreamthrows", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call_stream = self.transport()
+            let call_stream = transport
                 .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.responseandstreamstreamthrows"));
 
@@ -3401,7 +3418,8 @@ pub mod client {
 
                 let initial: ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsError> =
                     ::std::convert::From::from(res);
-                initial.map(move |initial| (initial, new_stream))
+                let res = initial.map(move |initial| (initial, new_stream));
+                res
             }
             .instrument(::tracing::info_span!("PubSubStreamingService.responseandstreamstreamthrows"))
             .boxed()
@@ -3427,13 +3445,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("responseandstreamservicethrows", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call_stream = self.transport()
+            let call_stream = transport
                 .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.responseandstreamservicethrows"));
 
@@ -3466,7 +3486,8 @@ pub mod client {
 
                 let initial: ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsError> =
                     ::std::convert::From::from(res);
-                initial.map(move |initial| (initial, new_stream))
+                let res = initial.map(move |initial| (initial, new_stream));
+                res
             }
             .instrument(::tracing::info_span!("PubSubStreamingService.responseandstreamservicethrows"))
             .boxed()
@@ -3492,13 +3513,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("responseandstreamboththrows", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call_stream = self.transport()
+            let call_stream = transport
                 .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.responseandstreamboththrows"));
 
@@ -3531,7 +3554,8 @@ pub mod client {
 
                 let initial: ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsError> =
                     ::std::convert::From::from(res);
-                initial.map(move |initial| (initial, new_stream))
+                let res = initial.map(move |initial| (initial, new_stream));
+                res
             }
             .instrument(::tracing::info_span!("PubSubStreamingService.responseandstreamboththrows"))
             .boxed()
@@ -3559,13 +3583,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("returnstreamFast", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call_stream = self.transport()
+            let call_stream = transport
                 .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "PubSubStreamingService.returnstreamFast"));
 
@@ -3598,7 +3624,8 @@ pub mod client {
 
                 let initial: ::std::result::Result<(), crate::errors::pub_sub_streaming_service::ReturnstreamFastError> =
                     ::std::convert::From::from(res);
-                initial.map(move |_| new_stream)
+                let res = initial.map(move |_| new_stream);
+                res
             }
             .instrument(::tracing::info_span!("PubSubStreamingService.returnstreamFast"))
             .boxed()

@@ -1544,13 +1544,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("ping", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "MyService.ping"));
 
@@ -1561,11 +1563,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::my_service::PingExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::my_service::PingError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("MyService.ping"))
             .boxed()
@@ -1587,13 +1590,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("getRandomData", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "MyService.getRandomData"));
 
@@ -1604,11 +1609,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::my_service::GetRandomDataExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::my_service::GetRandomDataError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("MyService.getRandomData"))
             .boxed()
@@ -1632,13 +1638,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("hasDataById", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "MyService.hasDataById"));
 
@@ -1649,11 +1657,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::my_service::HasDataByIdExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::my_service::HasDataByIdError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("MyService.hasDataById"))
             .boxed()
@@ -1677,13 +1686,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("getDataById", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "MyService.getDataById"));
 
@@ -1694,11 +1705,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::my_service::GetDataByIdExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::my_service::GetDataByIdError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("MyService.getDataById"))
             .boxed()
@@ -1724,13 +1736,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("putDataById", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "MyService.putDataById"));
 
@@ -1741,11 +1755,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::my_service::PutDataByIdExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::my_service::PutDataByIdError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("MyService.putDataById"))
             .boxed()
@@ -1771,13 +1786,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("lobDataById", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "MyService.lobDataById"));
 
@@ -1788,11 +1805,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::my_service::LobDataByIdExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::my_service::LobDataByIdError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("MyService.lobDataById"))
             .boxed()
@@ -1814,13 +1832,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("doNothing", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "MyService.doNothing"));
 
@@ -1831,11 +1851,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::my_service::DoNothingExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::my_service::DoNothingError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("MyService.doNothing"))
             .boxed()
@@ -2479,13 +2500,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("ping", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "MyServicePrioParent.ping"));
 
@@ -2496,11 +2519,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::my_service_prio_parent::PingExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::my_service_prio_parent::PingError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("MyServicePrioParent.ping"))
             .boxed()
@@ -2522,13 +2546,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("pong", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "MyServicePrioParent.pong"));
 
@@ -2539,11 +2565,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::my_service_prio_parent::PongExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::my_service_prio_parent::PongError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("MyServicePrioParent.pong"))
             .boxed()
@@ -2841,13 +2868,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("pang", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "MyServicePrioChild.pang"));
 
@@ -2858,11 +2887,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::my_service_prio_child::PangExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::my_service_prio_child::PangError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("MyServicePrioChild.pang"))
             .boxed()
@@ -3143,13 +3173,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("BadInteraction.foo", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "BadInteraction.foo"));
 
@@ -3160,11 +3192,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::bad_interaction::FooExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::bad_interaction::FooError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("BadInteraction.foo"))
             .boxed()
@@ -3413,13 +3446,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("bar", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "BadService.bar"));
 
@@ -3430,11 +3465,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::bad_service::BarExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::bad_service::BarError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("BadService.bar"))
             .boxed()

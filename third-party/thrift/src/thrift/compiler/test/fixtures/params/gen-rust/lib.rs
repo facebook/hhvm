@@ -648,13 +648,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("mapList", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "NestedContainers.mapList"));
 
@@ -665,11 +667,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::nested_containers::MapListExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::nested_containers::MapListError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("NestedContainers.mapList"))
             .boxed()
@@ -693,13 +696,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("mapSet", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "NestedContainers.mapSet"));
 
@@ -710,11 +715,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::nested_containers::MapSetExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::nested_containers::MapSetError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("NestedContainers.mapSet"))
             .boxed()
@@ -738,13 +744,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("listMap", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "NestedContainers.listMap"));
 
@@ -755,11 +763,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::nested_containers::ListMapExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::nested_containers::ListMapError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("NestedContainers.listMap"))
             .boxed()
@@ -783,13 +792,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("listSet", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "NestedContainers.listSet"));
 
@@ -800,11 +811,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::nested_containers::ListSetExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::nested_containers::ListSetError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("NestedContainers.listSet"))
             .boxed()
@@ -828,13 +840,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("turtles", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "NestedContainers.turtles"));
 
@@ -845,11 +859,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::nested_containers::TurtlesExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::nested_containers::TurtlesError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("NestedContainers.turtles"))
             .boxed()

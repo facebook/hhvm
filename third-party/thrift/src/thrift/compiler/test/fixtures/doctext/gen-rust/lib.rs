@@ -639,13 +639,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("f", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "C.f"));
 
@@ -656,11 +658,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::c::FExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::c::FError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("C.f"))
             .boxed()
@@ -684,13 +687,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("numbers", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call_stream = self.transport()
+            let call_stream = transport
                 .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "C.numbers"));
 
@@ -723,7 +728,8 @@ pub mod client {
 
                 let initial: ::std::result::Result<(), crate::errors::c::NumbersError> =
                     ::std::convert::From::from(res);
-                initial.map(move |_| new_stream)
+                let res = initial.map(move |_| new_stream);
+                res
             }
             .instrument(::tracing::info_span!("C.numbers"))
             .boxed()
@@ -751,13 +757,15 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            let transport = self.transport();
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("thing", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
             };
 
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "C.thing"));
 
@@ -768,11 +776,12 @@ pub mod client {
                 let (res, _de): (::std::result::Result<crate::services::c::ThingExn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err(crate::errors::c::ThingError::ApplicationException(aexn))
-                }
+                };
+                res
             }
             .instrument(::tracing::info_span!("C.thing"))
             .boxed()

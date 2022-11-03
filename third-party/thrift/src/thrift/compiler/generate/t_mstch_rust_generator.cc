@@ -571,6 +571,8 @@ class rust_mstch_function : public mstch_function {
             {"function:docs", &rust_mstch_function::rust_doc},
             {"function:interaction_name",
              &rust_mstch_function::rust_interaction_name},
+            {"function:void_excluding_interaction?",
+             &rust_mstch_function::rust_void_excluding_interaction},
         });
   }
   mstch::node rust_name() {
@@ -639,6 +641,9 @@ class rust_mstch_function : public mstch_function {
       return function_->returned_interaction()->get_name();
     }
     return function_->get_returntype()->get_name();
+  }
+  mstch::node rust_void_excluding_interaction() {
+    return function_->return_type().deref().is_void();
   }
 
  private:

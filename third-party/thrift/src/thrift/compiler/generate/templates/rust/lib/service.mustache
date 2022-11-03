@@ -146,10 +146,10 @@
                 let _ = p.read_struct_begin(|_| ())?;
                 let mut once = false;
                 let mut alt = {{!
-                    }}{{#function:void?}}{{!
+                    }}{{#function:void_excluding_interaction?}}{{!
                         }}Self::Success(()){{!
-                    }}{{/function:void?}}{{!
-                    }}{{^function:void?}}::std::option::Option::None{{/function:void?}}{{!
+                    }}{{/function:void_excluding_interaction?}}{{!
+                    }}{{^function:void_excluding_interaction?}}::std::option::Option::None{{/function:void_excluding_interaction?}}{{!
                 }};
                 loop {
                     let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
@@ -161,18 +161,18 @@
                         (({{#function:return_type}}{{#type:stream_elem_type}}{{>lib/ttype}}{{/type:stream_elem_type}}{{/function:return_type}}, 0i32), false) => {
                             once = true;
                             alt = {{!
-                                }}{{^function:void?}}::std::option::Option::Some({{/function:void?}}{{!
+                                }}{{^function:void_excluding_interaction?}}::std::option::Option::Some({{/function:void_excluding_interaction?}}{{!
                                 }}Self::Success(::fbthrift::Deserialize::read(p)?){{!
-                                }}{{^function:void?}}){{/function:void?}}{{!
+                                }}{{^function:void_excluding_interaction?}}){{/function:void_excluding_interaction?}}{{!
                             }};
                         }{{!
                         }}{{#function:stream_exceptions}}
                         (({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
                             once = true;
                             alt = {{!
-                                }}{{^function:void?}}::std::option::Option::Some({{/function:void?}}{{!
+                                }}{{^function:void_excluding_interaction?}}::std::option::Option::Some({{/function:void_excluding_interaction?}}{{!
                                 }}Self::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?){{!
-                                }}{{^function:void?}}){{/function:void?}}{{!
+                                }}{{^function:void_excluding_interaction?}}){{/function:void_excluding_interaction?}}{{!
                             }};
                         }{{!
                         }}{{/function:stream_exceptions}}
@@ -192,10 +192,10 @@
                     p.read_field_end()?;
                 }
                 p.read_struct_end()?;{{!
-                }}{{#function:void?}}
+                }}{{#function:void_excluding_interaction?}}
                 ::std::result::Result::Ok(alt){{!
-                }}{{/function:void?}}{{!
-                }}{{^function:void?}}
+                }}{{/function:void_excluding_interaction?}}{{!
+                }}{{^function:void_excluding_interaction?}}
                 alt.ok_or_else(||
                     ::fbthrift::ApplicationException::new(
                         ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
@@ -203,7 +203,7 @@
                     )
                     .into(),
                 ){{!
-                }}{{/function:void?}}
+                }}{{/function:void_excluding_interaction?}}
             }
         }
 
@@ -540,10 +540,10 @@
                 let _ = p.read_struct_begin(|_| ())?;
                 let mut once = false;
                 let mut alt = {{!
-                    }}{{#function:void?}}{{!
+                    }}{{#function:void_excluding_interaction?}}{{!
                         }}Self::Success(()){{!
-                    }}{{/function:void?}}{{!
-                    }}{{^function:void?}}::std::option::Option::None{{/function:void?}}{{!
+                    }}{{/function:void_excluding_interaction?}}{{!
+                    }}{{^function:void_excluding_interaction?}}::std::option::Option::None{{/function:void_excluding_interaction?}}{{!
                 }};
                 loop {
                     let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
@@ -555,18 +555,18 @@
                         (({{#function:return_type}}{{>lib/ttype}}{{/function:return_type}}, 0i32), false) => {
                             once = true;
                             alt = {{!
-                                }}{{^function:void?}}::std::option::Option::Some({{/function:void?}}{{!
+                                }}{{^function:void_excluding_interaction?}}::std::option::Option::Some({{/function:void_excluding_interaction?}}{{!
                                 }}Self::Success(::fbthrift::Deserialize::read(p)?){{!
-                                }}{{^function:void?}}){{/function:void?}}{{!
+                                }}{{^function:void_excluding_interaction?}}){{/function:void_excluding_interaction?}}{{!
                             }};
                         }{{!
                         }}{{#function:exceptions}}
                         (({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
                             once = true;
                             alt = {{!
-                                }}{{^function:void?}}::std::option::Option::Some({{/function:void?}}{{!
+                                }}{{^function:void_excluding_interaction?}}::std::option::Option::Some({{/function:void_excluding_interaction?}}{{!
                                 }}Self::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?){{!
-                                }}{{^function:void?}}){{/function:void?}}{{!
+                                }}{{^function:void_excluding_interaction?}}){{/function:void_excluding_interaction?}}{{!
                             }};
                         }{{!
                         }}{{/function:exceptions}}
@@ -586,10 +586,10 @@
                     p.read_field_end()?;
                 }
                 p.read_struct_end()?;{{!
-                }}{{#function:void?}}
+                }}{{#function:void_excluding_interaction?}}
                 ::std::result::Result::Ok(alt){{!
-                }}{{/function:void?}}{{!
-                }}{{^function:void?}}
+                }}{{/function:void_excluding_interaction?}}{{!
+                }}{{^function:void_excluding_interaction?}}
                 alt.ok_or_else(||
                     ::fbthrift::ApplicationException::new(
                         ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
@@ -597,7 +597,7 @@
                     )
                     .into(),
                 ){{!
-                }}{{/function:void?}}
+                }}{{/function:void_excluding_interaction?}}
             }
         }
         {{/function:returns_streams?}}{{!

@@ -83,6 +83,9 @@
             const_cstr! {
                 SERVICE_NAME = "{{service:name}}";
                 METHOD_NAME = "{{service:name}}.{{function:name}}";
+                {{#function:creates_interaction?}}
+                INTERACTION_NAME = "{{function:interaction_name}}";
+                {{/function:creates_interaction?}}
             }
             let args = self::Args_{{service:name}}_{{function:name}} {
                 {{#function:args}}
@@ -91,6 +94,17 @@
                 _phantom: ::std::marker::PhantomData,
             };
 
+            {{#function:creates_interaction?}}
+            let interaction_transport = match self.transport().create_interaction(INTERACTION_NAME.as_cstr()) {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+            };
+            let interaction_impl = {{function:interaction_name}}Impl::<P, T, S>::new(interaction_transport);
+            let transport = interaction_impl.transport();
+            {{/function:creates_interaction?}}{{^function:creates_interaction?}}
+            let transport = self.transport();
+            {{/function:creates_interaction?}}
+
             // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}", &args) {
                 ::std::result::Result::Ok(res) => res,
@@ -98,11 +112,11 @@
             };
 
             {{#function:returns_streams?}}
-            let call_stream = self.transport()
+            let call_stream = transport
                 .call_stream(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call_stream", method = "{{service:name}}.{{function:name}}"));
             {{/function:returns_streams?}}{{^function:returns_streams?}}
-            let call = self.transport()
+            let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
                 .instrument(::tracing::trace_span!("call", function = "{{service:name}}.{{function:name}}"));
             {{/function:returns_streams?}}
@@ -147,12 +161,12 @@
                 let initial: ::std::result::Result<{{>lib/function_stream_first_response_type}}, {{!
                     }}{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error> =
                     ::std::convert::From::from(res);
-                initial.map(move |initial| (initial, new_stream))
+                let res = initial.map(move |initial| (initial, new_stream));
                 {{/function:stream_has_first_response?}}
                 {{^function:stream_has_first_response?}}
                 let initial: ::std::result::Result<(), {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error> =
                     ::std::convert::From::from(res);
-                initial.map(move |_| new_stream)
+                let res = initial.map(move |_| new_stream);
                 {{/function:stream_has_first_response?}}{{!
                 }}{{/function:returns_streams?}}{{^function:returns_streams?}}{{!
 
@@ -167,12 +181,29 @@
                 let (res, _de): (::std::result::Result<{{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn, _>, _) =
                     ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
 
-                match res {
+                let res = match res {
                     ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
                     ::std::result::Result::Err(aexn) =>
                         ::std::result::Result::Err({{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error::ApplicationException(aexn))
-                }
+                };
                 {{/function:returns_streams?}}
+                {{#function:return_type}}{{#function:creates_interaction?}}{{!
+
+                ***********************************
+                **** Add interaction to result ****
+                ***********************************
+
+                }}
+                let interaction_client: crate::client::{{function:interaction_name}}Client = ::std::sync::Arc::new(interaction_impl);
+                {{#type:void?}}
+                res?;
+                ::std::result::Result::Ok(interaction_client)
+                {{/type:void?}}{{^type:void?}}
+                ::std::result::Result::Ok((interaction_client, res?))
+                {{/type:void?}}{{!
+                }}{{/function:creates_interaction?}}{{^function:creates_interaction?}}
+                res
+                {{/function:creates_interaction?}}{{/function:return_type}}
             }
             .instrument(::tracing::info_span!("{{service:name}}.{{function:name}}"))
             .boxed()

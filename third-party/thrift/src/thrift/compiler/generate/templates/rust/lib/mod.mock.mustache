@@ -54,6 +54,9 @@
             arg_{{field:name}}: {{>lib/arg}},{{!
             }}{{/function:args}}
         ) -> {{>lib/client_return_type}} {
+            {{#function:creates_interaction?}}
+            unimplemented!("Mocking interactions is not yet implemented");
+            {{/function:creates_interaction?}}{{^function:creates_interaction?}}
             let mut closure = self.{{function:rust_name}}.closure.lock().unwrap();
             let closure: &mut dyn ::std::ops::FnMut({{!
                 }}{{#function:args}}{{!
@@ -73,6 +76,7 @@
                 }}{{^last?}}, {{/last?}}{{!
                 }}{{/function:args}}{{!
             }})))
+            {{/function:creates_interaction?}}
         }{{!
         }}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
         fn {{function:rust_name}}(

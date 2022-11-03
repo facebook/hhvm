@@ -16,6 +16,18 @@
 
 }}{{!
 }}::futures::future::BoxFuture<'static, ::std::result::Result<{{!
-    }}{{#function:return_type}}{{>lib/type}}{{/function:return_type}}, {{!
-    }}{{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error{{!
+
+    }}{{#function:return_type}}{{!
+        }}{{#function:creates_interaction?}}{{!
+            }}{{#type:void?}}{{!
+                }}crate::client::{{function:interaction_name}}Client{{!
+            }}{{/type:void?}}{{^type:void?}}{{!
+                }}(crate::client::{{function:interaction_name}}Client, {{>lib/type}}){{!
+            }}{{/type:void?}}{{!
+        }}{{/function:creates_interaction?}}{{^function:creates_interaction?}}{{!
+            }}{{>lib/type}}{{!
+        }}{{/function:creates_interaction?}}{{!
+    }}{{/function:return_type}}{{!
+
+    }}, {{program:crate}}::errors::{{service:snake}}::{{function:upcamel}}Error{{!
 }}>>

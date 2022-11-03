@@ -162,8 +162,9 @@ TEST(FieldsTest, UnifiedAPIs) {
   using TypeTag16 = set<struct_t<::test_cpp2::cpp_reflection::structB>>;
   using TypeTag17 =
       map<string_t, struct_t<::test_cpp2::cpp_reflection::structA>>;
-  using TypeTag18 =
-      map<string_t, struct_t<::test_cpp2::cpp_reflection::structB>>;
+  using TypeTag18 = cpp_type<
+      std::unordered_map<std::string, ::test_cpp2::cpp_reflection::structB>,
+      map<string_t, struct_t<::test_cpp2::cpp_reflection::structB>>>;
   using TypeTag19 = map<binary_t, binary_t>;
 
   using FieldTag1 = type::field<TypeTag1, FieldContext<struct3, 2>>;

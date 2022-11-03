@@ -1459,13 +1459,6 @@ service EdenService extends fb303_core.BaseService {
   ) throws (1: EdenError ex);
 
   /**
-   * Returns a list of paths relative to the mountPoint. DEPRECATED!
-   */
-  list<PathString> getBindMounts(1: PathString mountPoint) throws (
-    1: EdenError ex,
-  );
-
-  /**
    * On systems that support bind mounts, establish a bind mount within the
    * repo such that `mountPoint / repoPath` is redirected to `targetPath`.
    * If `repoPath` is already a bind mount managed by eden, this function

@@ -1,6 +1,5 @@
 ---
 state: draft
-sidebar_position: 3
 ---
 
 # Channels
@@ -13,7 +12,7 @@ The concept of a channel does not have any relation to TCP or other connections 
 
 ## Structure
 
-Users of a thrift service typically interact with a “generated client”, which is a native object in each target language on which service methods are called in a strongly-typed way. To avoid confusion, this document will call this “generated client” a *typed client channel*. The typed channel is a friendly interface that allows the target language to typecheck, autocomplete, and otherwise provide developer functionality. It **should** wrap an *untyped client channel*, which is a class responsible for implementing the mechanics of RPC. The typed channel is just responsible for type erasure via serializing the arguments and method info and deserializing the response and for interfacing with the native asynchrony primitives. Following this structure provides the best experience for users of the thrift implementation while minimizing the complexity of the generated code. Further, target language implementations of the *untyped client channel* **should** wrap the [C++ implementation](../../cpp/channel) whenever technically feasible, as direct implementation is involved and carries a significant ongoing maintenance burden.
+Users of a thrift service typically interact with a “generated client”, which is a native object in each target language on which service methods are called in a strongly-typed way. To avoid confusion, this document will call this “generated client” a *typed client channel*. The typed channel is a friendly interface that allows the target language to typecheck, autocomplete, and otherwise provide developer functionality. It **should** wrap an *untyped client channel*, which is a class responsible for implementing the mechanics of RPC. The typed channel is just responsible for type erasure via serializing the arguments and method info and deserializing the response and for interfacing with the native asynchrony primitives. Following this structure provides the best experience for users of the thrift implementation while minimizing the complexity of the generated code. Further, target language implementations of the *untyped client channel* **should** wrap the [C++ implementation](../../languages/cpp/channel) whenever technically feasible, as direct implementation is involved and carries a significant ongoing maintenance burden.
 
 ## Interface
 

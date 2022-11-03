@@ -1,10 +1,9 @@
 ---
-state: draft
+description: Thrift features
 ---
+# Features
 
-# Protocols
-
-How Thrift implementations communicate.
+Thrift features
 
 import DocCardList from '@theme/DocCardList';
 

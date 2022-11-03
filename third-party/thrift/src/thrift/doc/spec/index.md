@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+description: Learn about Thrift Conformance Specification!
 ---
 
 # Specification
@@ -8,8 +8,10 @@ Thrift supports clients/servers/readers/writers/etc, written in different langua
 
 These documents describe the specification that ensures consistent and predictable behavior across Thrift implementations:
 
-- [Interface Definition Language (IDL)](idl.md).
-- [Definitions](definition/index.md)
-- [Protocols](protocol/index.md)
-- [Beta Features](beta/index.md)
-- [Experimental Features](experimental/index.md)
+import DocCardList from '@theme/DocCardList';
+
+<DocCardList />
+
+# Enforcing the spec
+
+To ensure this consistent and predictable behavior, the spec is enforced through a set of [Conformance Tests](../contributions/conformance).

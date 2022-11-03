@@ -69,7 +69,7 @@ const config = {
         type: 'doc',
         docId: 'intro',
         position: 'left',
-        label: 'Docs'
+        label: 'Documentation'
       },
       {
         to: 'toc',
@@ -78,7 +78,7 @@ const config = {
       },
       ...fbInternalOnly([{
         "to": "docs/fb/",
-        "label": "Meta Internal",
+        "label": "Meta Development",
         "position": "left"
       }]),
       // Please keep GitHub link to the right for consistency.

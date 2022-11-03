@@ -1,5 +1,7 @@
 ---
-sidebar_position: 12
+description: Reference information
 ---
 
 # References
+
+API reference information.

@@ -2,9 +2,9 @@
 state: draft
 ---
 
-# Protocols
+# Test Suite
 
-How Thrift implementations communicate.
+Conformance testsuite to enforce Thrift spec.
 
 import DocCardList from '@theme/DocCardList';
 

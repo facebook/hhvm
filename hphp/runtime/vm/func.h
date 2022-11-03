@@ -148,6 +148,7 @@ struct Func final {
 
     bool hasDefaultValue() const;
     bool hasScalarDefaultValue() const;
+    bool hasTrivialDefaultValue() const;
     bool isInOut() const;
     bool isReadonly() const;
     bool isVariadic() const;
@@ -425,6 +426,11 @@ public:
    */
   bool isEntry(Offset offset) const;
   bool isDVEntry(Offset offset) const;
+
+  /*
+   * Has a DV func entry that is non-scalar or requires a runtime type check.
+   */
+  bool hasNonTrivialDVFuncEntry() const;
 
   /*
    * Get the correct entrypoint (whether the main entry or a DV funclet) when

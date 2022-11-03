@@ -71,6 +71,10 @@ inline bool Func::ParamInfo::hasScalarDefaultValue() const {
   return hasDefaultValue() && defaultValue.m_type != KindOfUninit;
 }
 
+inline bool Func::ParamInfo::hasTrivialDefaultValue() const {
+  return hasScalarDefaultValue() && typeConstraint.alwaysPasses(&defaultValue);
+}
+
 inline bool Func::ParamInfo::isInOut() const {
   return flags & (1 << static_cast<int32_t>(Flags::InOut));
 }

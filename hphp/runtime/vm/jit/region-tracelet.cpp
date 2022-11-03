@@ -554,7 +554,8 @@ RegionDescPtr form_region(Env& env) {
 
     if (env.inst.source.funcEntry()) {
       auto const func = curFunc(env);
-      if (func->numRequiredParams() != func->numNonVariadicParams()) {
+      if (env.inst.source.trivialDVFuncEntry() ||
+          func->hasNonTrivialDVFuncEntry()) {
         FTRACE(1, "selectTracelet: tracelet broken after func entry\n");
         break;
       }

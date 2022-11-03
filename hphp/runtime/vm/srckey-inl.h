@@ -140,10 +140,7 @@ inline bool SrcKey::trivialDVFuncEntry() const {
   if (!funcEntry()) return false;
   if (numEntryArgs() == func()->numNonVariadicParams()) return false;
   assertx(numEntryArgs() >= func()->numRequiredParams());
-  auto const& param = func()->params()[numEntryArgs()];
-  if (!param.hasScalarDefaultValue()) return false;
-  if (!param.typeConstraint.alwaysPasses(&param.defaultValue)) return false;
-  return true;
+  return func()->params()[numEntryArgs()].hasTrivialDefaultValue();
 }
 
 inline bool SrcKey::nonTrivialFuncEntry() const {

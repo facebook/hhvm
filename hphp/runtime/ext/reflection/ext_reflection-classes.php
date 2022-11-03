@@ -1334,7 +1334,8 @@ namespace HH {
   );
 
   /**
-   * Retrieves the TypeStructure for a type constant or a type alias.
+   * Retrieves the TypeStructure for a type constant or a type alias. Raises
+   * FATAL error on lookup failure (can't be handled by try/catch)
    *
    * @cls_or_obj    mixed    An instance of a class or the name of a class. If
    *                         @cns_name is null or not provided, then this must

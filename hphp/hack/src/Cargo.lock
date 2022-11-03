@@ -2635,6 +2635,7 @@ dependencies = [
  "rand 0.8.5",
  "relative_path",
  "rusqlite",
+ "serde",
  "slog",
  "typing_deps_hash",
 ]

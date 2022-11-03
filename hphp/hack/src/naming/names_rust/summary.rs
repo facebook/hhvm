@@ -13,11 +13,13 @@ use oxidized_by_ref::direct_decl_parser::Decl;
 use oxidized_by_ref::direct_decl_parser::ParsedFile;
 use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use relative_path::RelativePath;
+use serde::Deserialize;
+use serde::Serialize;
 
 /// Similar to `oxidized::file_info::FileInfo`, but containing only the
 /// information which is necessary to populate the naming table (i.e., omitting
 /// positions). Includes hashes of individual decls.
-#[derive(Clone, Debug, Hash)]
+#[derive(Clone, Debug, Hash, Serialize, Deserialize)]
 pub struct FileSummary {
     pub mode: Option<file_info::Mode>,
     pub hash: FileDeclsHash,
@@ -98,7 +100,7 @@ impl FileSummary {
     }
 }
 
-#[derive(Clone, Debug, Hash)]
+#[derive(Clone, Debug, Hash, Serialize, Deserialize)]
 pub struct DeclSummary {
     pub name_type: file_info::NameType,
     pub symbol: String,

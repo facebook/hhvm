@@ -803,10 +803,20 @@ impl Names {
     /// It will fail if the directory containing that path doesn't exist.
     pub fn build_at_path(
         path: impl AsRef<Path>,
+        faster_not_durable: bool,
         file_summaries: impl IntoIterator<Item = (RelativePath, crate::FileSummary)>,
     ) -> anyhow::Result<Self> {
         let path = path.as_ref();
         let conn = Connection::open(path)?;
+        if faster_not_durable {
+            conn.execute_batch(
+                "PRAGMA journal_mode = OFF;
+            PRAGMA synchronous = OFF;
+            PRAGMA cache_size = 1000000;
+            PRAGMA locking_mode = EXCLUSIVE;
+            PRAGMA temp_store = MEMORY;",
+            )?;
+        }
         let log = slog::Logger::root(slog::Discard, slog::o!());
         let (conn, _save_result) = Self::build(&log, conn, |tx| {
             file_summaries.into_iter().try_for_each(|x| Ok(tx.send(x)?))

@@ -78,7 +78,8 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
 
     fn is(&mut self, vid: ValueId, ety: &EnforceableType, loc: LocId) -> Instr {
         use instr::Hhbc;
-        use instr::IsTypeOp;
+
+        use crate::IsTypeOp;
 
         if ety.modifiers == TypeConstraintFlags::NoFlags
             || ety.modifiers == TypeConstraintFlags::ExtendedHint

@@ -4,8 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Str;
-pub use hhbc::CcParam;
-pub use naming_special_names_rust::coeffects::Ctx;
+
+use crate::CcParam;
+use crate::Ctx;
 
 #[derive(Debug)]
 pub struct CtxConstant<'a> {

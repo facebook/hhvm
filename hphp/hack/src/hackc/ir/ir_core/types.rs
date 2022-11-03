@@ -6,11 +6,11 @@
 use std::fmt;
 
 use ffi::Str;
-pub use hhvm_types_ffi::ffi::TypeConstraintFlags;
 use naming_special_names_rust as naming_special_names;
 
 use crate::newtype::ClassId;
 use crate::StringInterner;
+use crate::TypeConstraintFlags;
 use crate::UnitBytesId;
 
 // As a const fn, given a string removes the leading backslash.

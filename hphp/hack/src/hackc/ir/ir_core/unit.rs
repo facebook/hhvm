@@ -7,20 +7,20 @@ use std::sync::Arc;
 
 use bstr::BString;
 use ffi::Str;
-pub use hhbc::ClassName;
-pub use hhbc::ConstName;
-pub use hhbc::FatalOp;
-pub use hhbc::FunctionName;
-pub use hhbc::IncludePath;
-pub use hhbc::Typedef;
 
 use crate::func::SrcLoc;
 use crate::string_intern::StringInterner;
 use crate::Attribute;
 use crate::Class;
+use crate::ClassName;
+use crate::ConstName;
+use crate::FatalOp;
 use crate::Function;
+use crate::FunctionName;
 use crate::HackConstant;
+use crate::IncludePath;
 use crate::Module;
+use crate::Typedef;
 
 #[derive(Default)]
 pub struct SymbolRefs<'a> {

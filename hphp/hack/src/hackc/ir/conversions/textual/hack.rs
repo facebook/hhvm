@@ -15,8 +15,7 @@ use crate::mangle::MangleWithClass as _;
 use crate::textual;
 use crate::textual::Sid;
 
-const BUILTINS_CLASS: ir::unit::ClassName<'static> =
-    ir::unit::ClassName::new(ffi::Str::new(b"$builtins"));
+const BUILTINS_CLASS: ir::ClassName<'static> = ir::ClassName::new(ffi::Str::new(b"$builtins"));
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
 

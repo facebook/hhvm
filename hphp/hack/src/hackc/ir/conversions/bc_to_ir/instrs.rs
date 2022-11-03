@@ -12,13 +12,13 @@ use hhbc::Opcode;
 use hhbc::Pseudo;
 use ir::instr;
 use ir::instr::CmpOp;
-use ir::instr::FCallArgsFlags;
 use ir::instr::MemberKey;
 use ir::instr::Terminator;
 use ir::print::FmtLocId;
 use ir::print::FmtRawBid;
 use ir::print::FmtRawVid;
 use ir::print::FmtSep;
+use ir::FCallArgsFlags;
 use ir::FunctionId;
 use ir::Instr;
 use ir::LocalId;
@@ -455,7 +455,7 @@ fn convert_member_key<'a, 'b>(
     key: &hhbc::MemberKey<'a>,
 ) -> (
     instr::MemberKey,
-    instr::ReadonlyOp,
+    ir::ReadonlyOp,
     Option<ValueId>,
     Option<LocalId>,
 ) {
@@ -489,7 +489,7 @@ fn convert_member_key<'a, 'b>(
             let id = ir::PropId::from_hhbc(s, ctx.strings);
             (instr::MemberKey::QT(id), readonly, None, None)
         }
-        hhbc::MemberKey::W => (instr::MemberKey::W, instr::ReadonlyOp::Any, None, None),
+        hhbc::MemberKey::W => (instr::MemberKey::W, ir::ReadonlyOp::Any, None, None),
     }
 }
 

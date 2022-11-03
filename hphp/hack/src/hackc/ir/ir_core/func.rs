@@ -4,11 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Str;
-pub use hhbc::FunctionFlags;
-pub use hhbc::FunctionName;
-pub use hhbc::MethodFlags;
-pub use hhbc::MethodName;
-pub use hhbc::Visibility;
 use newtype::newtype_int;
 use newtype::IdVec;
 
@@ -24,14 +19,19 @@ use crate::ClassIdMap;
 use crate::Coeffects;
 use crate::Constant;
 use crate::ConstantId;
+use crate::FunctionFlags;
+use crate::FunctionName;
 use crate::HasEdges;
 use crate::Instr;
 use crate::InstrId;
 use crate::LocId;
+use crate::MethodFlags;
+use crate::MethodName;
 use crate::UnitBytesId;
 use crate::UserType;
 use crate::ValueId;
 use crate::ValueIdMap;
+use crate::Visibility;
 
 #[derive(Copy, Clone, Debug, Default, Hash, Eq, PartialEq)]
 pub struct Filename(pub UnitBytesId);

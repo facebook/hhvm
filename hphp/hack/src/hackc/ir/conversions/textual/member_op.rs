@@ -6,12 +6,12 @@
 use anyhow::Error;
 use ir::instr::BaseOp;
 use ir::instr::FinalOp;
-use ir::instr::MOpMode;
 use ir::instr::MemberKey;
-use ir::instr::QueryMOp;
-use ir::instr::ReadonlyOp;
 use ir::InstrId;
 use ir::LocalId;
+use ir::MOpMode;
+use ir::QueryMOp;
+use ir::ReadonlyOp;
 use ir::ValueId;
 
 use crate::func::FuncState;

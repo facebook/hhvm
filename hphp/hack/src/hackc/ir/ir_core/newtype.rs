@@ -3,25 +3,6 @@
 // Re-export some types in from hhbc so users of `ir` don't have to figure out
 // which random stuff to get from `ir` and which to get elsewhere.
 use bstr::BStr;
-pub use hhbc::BareThisOp;
-pub use hhbc::ClassishKind;
-pub use hhbc::CollectionType;
-pub use hhbc::ContCheckOp;
-pub use hhbc::FCallArgsFlags;
-pub use hhbc::FatalOp;
-pub use hhbc::IncDecOp;
-pub use hhbc::InitPropOp;
-pub use hhbc::IsLogAsDynamicCallOp;
-pub use hhbc::IsTypeOp;
-pub use hhbc::IterId;
-pub use hhbc::MOpMode;
-pub use hhbc::ObjMethodOp;
-pub use hhbc::QueryMOp;
-pub use hhbc::ReadonlyOp;
-pub use hhbc::SetOpOp;
-pub use hhbc::SpecialClsRef;
-pub use hhbc::SrcLoc;
-pub use hhbc::TypeStructResolveOp;
 use newtype::newtype_int;
 use parking_lot::MappedRwLockReadGuard;
 

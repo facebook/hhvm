@@ -5,8 +5,8 @@
 
 use hash::IndexMap;
 use hash::IndexSet;
-pub use hhbc::FloatBits;
 
+use crate::FloatBits;
 use crate::UnitBytesId;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]

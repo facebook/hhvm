@@ -8,12 +8,12 @@ use ir::instr::CmpOp;
 use ir::instr::HasLoc;
 use ir::instr::HasOperands;
 use ir::instr::Hhbc;
-use ir::instr::IsTypeOp;
 use ir::Func;
 use ir::FuncBuilder;
 use ir::FuncBuilderEx as _;
 use ir::Instr;
 use ir::InstrId;
+use ir::IsTypeOp;
 use ir::LocId;
 use ir::ValueId;
 

@@ -4,16 +4,15 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Str;
-pub use hhbc::Span;
-pub use hhbc::TraitReqKind;
 
+use crate::func::SrcLoc;
 use crate::Attr;
 use crate::Attribute;
 use crate::ClassId;
 use crate::CtxConstant;
 use crate::HackConstant;
 use crate::Method;
-use crate::SrcLoc;
+use crate::TraitReqKind;
 use crate::TypeConstant;
 use crate::TypedValue;
 use crate::UserType;

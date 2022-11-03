@@ -16,7 +16,6 @@ use hhbc::Opcode;
 use hhbc::Pseudo;
 use instruction_sequence::InstrSeq;
 use ir::instr;
-use ir::instr::FCallArgsFlags;
 use ir::instr::HasLoc;
 use ir::instr::HasLocals;
 use ir::instr::IrToBc;
@@ -25,6 +24,7 @@ use ir::print::FmtRawVid;
 use ir::print::FmtSep;
 use ir::BlockId;
 use ir::BlockIdMap;
+use ir::FCallArgsFlags;
 use ir::LocalId;
 use itertools::Itertools;
 use log::trace;
@@ -899,7 +899,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
         stack_index: &mut u32,
         locals: &mut impl Iterator<Item = LocalId>,
         key: &instr::MemberKey,
-        readonly: instr::ReadonlyOp,
+        readonly: ir::ReadonlyOp,
     ) -> hhbc::MemberKey<'a> {
         match *key {
             instr::MemberKey::EC => {

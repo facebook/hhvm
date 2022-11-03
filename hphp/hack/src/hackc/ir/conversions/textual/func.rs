@@ -13,18 +13,18 @@ use ffi::Str;
 use ir::instr::HasLoc;
 use ir::instr::HasLocals;
 use ir::instr::Hhbc;
-use ir::instr::IncDecOp;
 use ir::instr::Predicate;
 use ir::instr::Special;
 use ir::instr::Terminator;
 use ir::instr::Textual;
 use ir::instr::TextualHackBuiltinParam;
-use ir::unit::ClassName;
 use ir::Block;
 use ir::BlockId;
+use ir::ClassName;
 use ir::Constant;
 use ir::ConstantId;
 use ir::Func;
+use ir::IncDecOp;
 use ir::Instr;
 use ir::InstrId;
 use ir::LocId;
@@ -305,7 +305,7 @@ fn write_call(
     call: &ir::Call,
 ) -> Result {
     use ir::instr::CallDetail;
-    use ir::instr::FCallArgsFlags;
+    use ir::FCallArgsFlags;
 
     let ir::Call {
         ref operands,
@@ -402,7 +402,7 @@ fn write_call(
         CallDetail::FCallObjMethod { .. } => todo!(),
         CallDetail::FCallObjMethodD { flavor, method } => {
             // $x->y()
-            if flavor == ir::instr::ObjMethodOp::NullSafe {
+            if flavor == ir::ObjMethodOp::NullSafe {
                 // Handle this in lowering.
                 todo!();
             }

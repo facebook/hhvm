@@ -3,11 +3,11 @@
 use std::sync::Arc;
 
 use ffi::Str;
-pub use hhbc::CollectionType;
-pub use hhbc::ConstName;
-pub use hhbc::FloatBits;
 
 use crate::instr::HasOperands;
+use crate::CollectionType;
+use crate::ConstName;
+use crate::FloatBits;
 use crate::TypedValue;
 use crate::ValueId;
 

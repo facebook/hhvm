@@ -18,29 +18,30 @@ use std::fmt::Result;
 use std::fmt::Write;
 
 use ir_core::class::Property;
-use ir_core::class::TraitReqKind;
 use ir_core::instr::BaseOp;
-use ir_core::instr::ContCheckOp;
-use ir_core::instr::FCallArgsFlags;
 use ir_core::instr::FinalOp;
 use ir_core::instr::HasLoc;
 use ir_core::instr::Hhbc;
-use ir_core::instr::IncDecOp;
 use ir_core::instr::IncludeKind;
 use ir_core::instr::IrToBc;
-use ir_core::instr::IsLogAsDynamicCallOp;
-use ir_core::instr::MOpMode;
 use ir_core::instr::MemberKey;
-use ir_core::instr::OODeclExistsOp;
-use ir_core::instr::QueryMOp;
-use ir_core::instr::ReadonlyOp;
-use ir_core::instr::SetRangeOp;
 use ir_core::instr::Special;
-use ir_core::instr::SwitchKind;
 use ir_core::instr::Terminator;
 use ir_core::instr::Tmp;
-use ir_core::string_intern::StringInterner;
+use ir_core::ContCheckOp;
+use ir_core::FCallArgsFlags;
 use ir_core::Fatal;
+use ir_core::IncDecOp;
+use ir_core::IsLogAsDynamicCallOp;
+use ir_core::MOpMode;
+use ir_core::OODeclExistsOp;
+use ir_core::QueryMOp;
+use ir_core::ReadonlyOp;
+use ir_core::SetRangeOp;
+use ir_core::StringInterner;
+use ir_core::SwitchKind;
+use ir_core::TraitReqKind;
+use ir_core::TypeStructResolveOp;
 use ir_core::*;
 
 use crate::formatters::*;
@@ -78,8 +79,8 @@ fn print_binary_op(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func<'_>, op
         Hhbc::Div([lhs, rhs], _) => ("div", " /", lhs, rhs),
         Hhbc::IsTypeStructC([lhs, rhs], op, _) => {
             let op = match op {
-                instr::TypeStructResolveOp::Resolve => " resolve",
-                instr::TypeStructResolveOp::DontResolve => " dont_resolve",
+                TypeStructResolveOp::Resolve => " resolve",
+                TypeStructResolveOp::DontResolve => " dont_resolve",
                 _ => panic!("bad TypeStructResolveOp value"),
             };
             ("is_type_struct_c", op, lhs, rhs)

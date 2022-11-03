@@ -22,7 +22,7 @@ impl ManglableClass for ir::ClassId {
     }
 }
 
-impl ManglableClass for &ir::unit::ClassName<'_> {
+impl ManglableClass for &ir::ClassName<'_> {
     fn mangle_class(&self, strings: &StringInterner) -> String {
         self.mangle(strings)
     }
@@ -73,7 +73,7 @@ impl Mangle for ir::ClassId {
     }
 }
 
-impl Mangle for ir::unit::ClassName<'_> {
+impl Mangle for ir::ClassName<'_> {
     fn mangle(&self, strings: &StringInterner) -> String {
         self.as_bytes().mangle(strings)
     }

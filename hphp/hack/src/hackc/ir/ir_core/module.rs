@@ -5,9 +5,9 @@
 
 use ffi::Str;
 
+use crate::func::SrcLoc;
 use crate::Attribute;
 use crate::ClassId;
-use crate::SrcLoc;
 
 pub struct Module<'a> {
     pub attributes: Vec<Attribute<'a>>,

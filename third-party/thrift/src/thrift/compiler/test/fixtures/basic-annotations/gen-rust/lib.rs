@@ -3707,9 +3707,7 @@ pub mod server {
     pub trait MyService: ::std::marker::Send + ::std::marker::Sync + 'static {
         async fn ping(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service::PingExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service::PingExn> {
             ::std::result::Result::Err(crate::services::my_service::PingExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyService",
@@ -3719,9 +3717,7 @@ pub mod server {
         }
         async fn getRandomData(
             &self,
-        ) -> ::std::result::Result<
-    ::std::string::String,
-    crate::services::my_service::GetRandomDataExn> {
+        ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetRandomDataExn> {
             ::std::result::Result::Err(crate::services::my_service::GetRandomDataExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyService",
@@ -3732,9 +3728,7 @@ pub mod server {
         async fn hasDataById(
             &self,
             _id: ::std::primitive::i64,
-        ) -> ::std::result::Result<
-    ::std::primitive::bool,
-    crate::services::my_service::HasDataByIdExn> {
+        ) -> ::std::result::Result<::std::primitive::bool, crate::services::my_service::HasDataByIdExn> {
             ::std::result::Result::Err(crate::services::my_service::HasDataByIdExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyService",
@@ -3745,9 +3739,7 @@ pub mod server {
         async fn getDataById(
             &self,
             _id: ::std::primitive::i64,
-        ) -> ::std::result::Result<
-    ::std::string::String,
-    crate::services::my_service::GetDataByIdExn> {
+        ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetDataByIdExn> {
             ::std::result::Result::Err(crate::services::my_service::GetDataByIdExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyService",
@@ -3759,9 +3751,7 @@ pub mod server {
             &self,
             _id: ::std::primitive::i64,
             _data: ::std::string::String,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service::PutDataByIdExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service::PutDataByIdExn> {
             ::std::result::Result::Err(crate::services::my_service::PutDataByIdExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyService",
@@ -3773,9 +3763,7 @@ pub mod server {
             &self,
             _id: ::std::primitive::i64,
             _data: ::std::string::String,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service::LobDataByIdExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service::LobDataByIdExn> {
             ::std::result::Result::Err(crate::services::my_service::LobDataByIdExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyService",
@@ -3785,9 +3773,7 @@ pub mod server {
         }
         async fn doNothing(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service::DoNothingExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service::DoNothingExn> {
             ::std::result::Result::Err(crate::services::my_service::DoNothingExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyService",
@@ -3804,26 +3790,20 @@ pub mod server {
     {
         async fn ping(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service::PingExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service::PingExn> {
             (**self).ping(
             ).await
         }
         async fn getRandomData(
             &self,
-        ) -> ::std::result::Result<
-    ::std::string::String,
-    crate::services::my_service::GetRandomDataExn> {
+        ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetRandomDataExn> {
             (**self).getRandomData(
             ).await
         }
         async fn hasDataById(
             &self,
             id: ::std::primitive::i64,
-        ) -> ::std::result::Result<
-    ::std::primitive::bool,
-    crate::services::my_service::HasDataByIdExn> {
+        ) -> ::std::result::Result<::std::primitive::bool, crate::services::my_service::HasDataByIdExn> {
             (**self).hasDataById(
                 id, 
             ).await
@@ -3831,9 +3811,7 @@ pub mod server {
         async fn getDataById(
             &self,
             id: ::std::primitive::i64,
-        ) -> ::std::result::Result<
-    ::std::string::String,
-    crate::services::my_service::GetDataByIdExn> {
+        ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetDataByIdExn> {
             (**self).getDataById(
                 id, 
             ).await
@@ -3842,9 +3820,7 @@ pub mod server {
             &self,
             id: ::std::primitive::i64,
             data: ::std::string::String,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service::PutDataByIdExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service::PutDataByIdExn> {
             (**self).putDataById(
                 id, 
                 data, 
@@ -3854,9 +3830,7 @@ pub mod server {
             &self,
             id: ::std::primitive::i64,
             data: ::std::string::String,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service::LobDataByIdExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service::LobDataByIdExn> {
             (**self).lobDataById(
                 id, 
                 data, 
@@ -3864,9 +3838,7 @@ pub mod server {
         }
         async fn doNothing(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service::DoNothingExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service::DoNothingExn> {
             (**self).doNothing(
             ).await
         }
@@ -4075,10 +4047,11 @@ pub mod server {
     impl<P, H, R, RS> MyServiceProcessor<P, H, R, RS>
     where
         P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
         P::Deserializer: ::std::marker::Send,
         H: MyService,
-        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Sync,
-        RS: ::fbthrift::ReplyState<P::Frame>,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync,
     {
@@ -4608,7 +4581,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type RequestContext = R;
         type ReplyState = RS;
@@ -4701,7 +4674,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type Handler = H;
         type RequestContext = R;
@@ -4768,7 +4741,7 @@ pub mod server {
         H: MyService,
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = F::DecBuf> + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<F> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<F, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         match proto {
             ::fbthrift::ProtocolID::BinaryProtocol => {
@@ -4788,9 +4761,7 @@ pub mod server {
     pub trait MyServicePrioParent: ::std::marker::Send + ::std::marker::Sync + 'static {
         async fn ping(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service_prio_parent::PingExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service_prio_parent::PingExn> {
             ::std::result::Result::Err(crate::services::my_service_prio_parent::PingExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyServicePrioParent",
@@ -4800,9 +4771,7 @@ pub mod server {
         }
         async fn pong(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service_prio_parent::PongExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service_prio_parent::PongExn> {
             ::std::result::Result::Err(crate::services::my_service_prio_parent::PongExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyServicePrioParent",
@@ -4819,17 +4788,13 @@ pub mod server {
     {
         async fn ping(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service_prio_parent::PingExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service_prio_parent::PingExn> {
             (**self).ping(
             ).await
         }
         async fn pong(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service_prio_parent::PongExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service_prio_parent::PongExn> {
             (**self).pong(
             ).await
         }
@@ -4893,10 +4858,11 @@ pub mod server {
     impl<P, H, R, RS> MyServicePrioParentProcessor<P, H, R, RS>
     where
         P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
         P::Deserializer: ::std::marker::Send,
         H: MyServicePrioParent,
-        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Sync,
-        RS: ::fbthrift::ReplyState<P::Frame>,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync,
     {
@@ -5065,7 +5031,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type RequestContext = R;
         type ReplyState = RS;
@@ -5138,7 +5104,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type Handler = H;
         type RequestContext = R;
@@ -5205,7 +5171,7 @@ pub mod server {
         H: MyServicePrioParent,
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = F::DecBuf> + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<F> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<F, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         match proto {
             ::fbthrift::ProtocolID::BinaryProtocol => {
@@ -5225,9 +5191,7 @@ pub mod server {
     pub trait MyServicePrioChild: ::std::marker::Send + ::std::marker::Sync + 'static {
         async fn pang(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service_prio_child::PangExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service_prio_child::PangExn> {
             ::std::result::Result::Err(crate::services::my_service_prio_child::PangExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyServicePrioChild",
@@ -5244,9 +5208,7 @@ pub mod server {
     {
         async fn pang(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service_prio_child::PangExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service_prio_child::PangExn> {
             (**self).pang(
             ).await
         }
@@ -5287,15 +5249,15 @@ pub mod server {
     impl<P, H, R, RS, SS> MyServicePrioChildProcessor<P, H, R, RS, SS>
     where
         P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
         P::Deserializer: ::std::marker::Send,
         H: MyServicePrioChild,
-        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Sync,
-        RS: ::fbthrift::ReplyState<P::Frame>,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync,
         SS: ::fbthrift::ThriftService<P::Frame>,
-        SS::Handler: crate::server::MyServicePrioParent,
-        P::Frame: ::std::marker::Send + 'static,
+        SS::Handler: crate::server::MyServicePrioParent
     {
         pub fn new(service: H, supa: SS) -> Self {
             Self {
@@ -5393,7 +5355,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type RequestContext = R;
         type ReplyState = RS;
@@ -5465,7 +5427,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type Handler = H;
         type RequestContext = R;
@@ -5536,7 +5498,7 @@ pub mod server {
         SS::Handler: crate::server::MyServicePrioParent,
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = F::DecBuf> + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<F> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<F, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         match proto {
             ::fbthrift::ProtocolID::BinaryProtocol => {
@@ -5556,9 +5518,7 @@ pub mod server {
     pub trait BadInteraction: ::std::marker::Send + ::std::marker::Sync + 'static {
         async fn foo(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::bad_interaction::FooExn> {
+        ) -> ::std::result::Result<(), crate::services::bad_interaction::FooExn> {
             ::std::result::Result::Err(crate::services::bad_interaction::FooExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "BadInteraction",
@@ -5575,9 +5535,7 @@ pub mod server {
     {
         async fn foo(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::bad_interaction::FooExn> {
+        ) -> ::std::result::Result<(), crate::services::bad_interaction::FooExn> {
             (**self).foo(
             ).await
         }
@@ -5618,10 +5576,11 @@ pub mod server {
     impl<P, H, R, RS> BadInteractionProcessor<P, H, R, RS>
     where
         P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
         P::Deserializer: ::std::marker::Send,
         H: BadInteraction,
-        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Sync,
-        RS: ::fbthrift::ReplyState<P::Frame>,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync,
     {
@@ -5719,7 +5678,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type RequestContext = R;
         type ReplyState = RS;
@@ -5788,7 +5747,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         // Interactions have () as their handler associated type
         // to make `create_interaction` have a common return type.
@@ -5853,9 +5812,7 @@ pub mod server {
         }
         async fn bar(
             &self,
-        ) -> ::std::result::Result<
-    ::std::primitive::i32,
-    crate::services::bad_service::BarExn> {
+        ) -> ::std::result::Result<::std::primitive::i32, crate::services::bad_service::BarExn> {
             ::std::result::Result::Err(crate::services::bad_service::BarExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "BadService",
@@ -5877,9 +5834,7 @@ pub mod server {
         }
         async fn bar(
             &self,
-        ) -> ::std::result::Result<
-    ::std::primitive::i32,
-    crate::services::bad_service::BarExn> {
+        ) -> ::std::result::Result<::std::primitive::i32, crate::services::bad_service::BarExn> {
             (**self).bar(
             ).await
         }
@@ -5920,10 +5875,11 @@ pub mod server {
     impl<P, H, R, RS> BadServiceProcessor<P, H, R, RS>
     where
         P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
         P::Deserializer: ::std::marker::Send,
         H: BadService,
-        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Sync,
-        RS: ::fbthrift::ReplyState<P::Frame>,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync,
     {
@@ -6027,7 +5983,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type RequestContext = R;
         type ReplyState = RS;
@@ -6102,7 +6058,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type Handler = H;
         type RequestContext = R;
@@ -6169,7 +6125,7 @@ pub mod server {
         H: BadService,
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = F::DecBuf> + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<F> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<F, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         match proto {
             ::fbthrift::ProtocolID::BinaryProtocol => {

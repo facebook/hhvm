@@ -15,7 +15,17 @@
   limitations under the License.
 
 }}{{!
-}}::std::result::Result<
-    {{>lib/server_ok_type}},
-    {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn{{!
+}}::std::result::Result<{{!
+    }}{{#function:return_type}}{{!
+        }}{{#function:creates_interaction?}}{{!
+            }}{{#type:void?}}{{!
+                }}::std::boxed::Box<dyn {{function:interaction_name}}>{{!
+            }}{{/type:void?}}{{^type:void?}}{{!
+                }}(::std::boxed::Box<dyn {{function:interaction_name}}>, {{>lib/server_ok_type}}){{!
+            }}{{/type:void?}}{{!
+        }}{{/function:creates_interaction?}}{{^function:creates_interaction?}}{{!
+            }}{{>lib/server_ok_type}}{{!
+        }}{{/function:creates_interaction?}}{{!
+    }}{{/function:return_type}}{{!
+    }}, {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn{{!
 }}>

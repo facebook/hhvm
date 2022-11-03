@@ -56,4 +56,5 @@ service MyService {
   stream<MyStruct throws (1: MyException e)> streamByIdWithException(1: i64 id);
   MyDataItem, stream<MyStruct> streamByIdWithResponse(1: i64 id);
   performs MyInteraction;
+  MyInteraction startPingInteraction();
 } (rust.request_context)

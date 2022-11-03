@@ -1147,9 +1147,7 @@ pub mod server {
         #[doc = "Function doctext."]
         async fn f(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::c::FExn> {
+        ) -> ::std::result::Result<(), crate::services::c::FExn> {
             ::std::result::Result::Err(crate::services::c::FExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "C",
@@ -1160,10 +1158,8 @@ pub mod server {
         #[doc = "Streaming function"]
         async fn numbers(
             &self,
-        ) -> ::std::result::Result<
-        ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::services::c::NumbersStreamExn>>
-,
-    crate::services::c::NumbersExn> {
+        ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::services::c::NumbersStreamExn>>
+, crate::services::c::NumbersExn> {
             ::std::result::Result::Err(crate::services::c::NumbersExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "C",
@@ -1177,9 +1173,7 @@ pub mod server {
             _a: ::std::primitive::i32,
             _b: ::std::string::String,
             _c: ::std::collections::BTreeSet<::std::primitive::i32>,
-        ) -> ::std::result::Result<
-    ::std::string::String,
-    crate::services::c::ThingExn> {
+        ) -> ::std::result::Result<::std::string::String, crate::services::c::ThingExn> {
             ::std::result::Result::Err(crate::services::c::ThingExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "C",
@@ -1196,18 +1190,14 @@ pub mod server {
     {
         async fn f(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::c::FExn> {
+        ) -> ::std::result::Result<(), crate::services::c::FExn> {
             (**self).f(
             ).await
         }
         async fn numbers(
             &self,
-        ) -> ::std::result::Result<
-        ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::services::c::NumbersStreamExn>>
-,
-    crate::services::c::NumbersExn> {
+        ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::number, crate::services::c::NumbersStreamExn>>
+, crate::services::c::NumbersExn> {
             (**self).numbers(
             ).await
         }
@@ -1216,9 +1206,7 @@ pub mod server {
             a: ::std::primitive::i32,
             b: ::std::string::String,
             c: ::std::collections::BTreeSet<::std::primitive::i32>,
-        ) -> ::std::result::Result<
-    ::std::string::String,
-    crate::services::c::ThingExn> {
+        ) -> ::std::result::Result<::std::string::String, crate::services::c::ThingExn> {
             (**self).thing(
                 a, 
                 b, 
@@ -1323,10 +1311,11 @@ pub mod server {
     impl<P, H, R, RS> CProcessor<P, H, R, RS>
     where
         P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
         P::Deserializer: ::std::marker::Send,
         H: C,
-        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Sync,
-        RS: ::fbthrift::ReplyState<P::Frame>,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync,
     {
@@ -1608,7 +1597,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type RequestContext = R;
         type ReplyState = RS;
@@ -1685,7 +1674,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type Handler = H;
         type RequestContext = R;
@@ -1752,7 +1741,7 @@ pub mod server {
         H: C,
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = F::DecBuf> + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<F> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<F, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         match proto {
             ::fbthrift::ProtocolID::BinaryProtocol => {

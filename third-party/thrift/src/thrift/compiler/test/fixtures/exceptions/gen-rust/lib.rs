@@ -1224,9 +1224,7 @@ pub mod server {
     pub trait Raiser: ::std::marker::Send + ::std::marker::Sync + 'static {
         async fn doBland(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::raiser::DoBlandExn> {
+        ) -> ::std::result::Result<(), crate::services::raiser::DoBlandExn> {
             ::std::result::Result::Err(crate::services::raiser::DoBlandExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "Raiser",
@@ -1236,9 +1234,7 @@ pub mod server {
         }
         async fn doRaise(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::raiser::DoRaiseExn> {
+        ) -> ::std::result::Result<(), crate::services::raiser::DoRaiseExn> {
             ::std::result::Result::Err(crate::services::raiser::DoRaiseExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "Raiser",
@@ -1248,9 +1244,7 @@ pub mod server {
         }
         async fn get200(
             &self,
-        ) -> ::std::result::Result<
-    ::std::string::String,
-    crate::services::raiser::Get200Exn> {
+        ) -> ::std::result::Result<::std::string::String, crate::services::raiser::Get200Exn> {
             ::std::result::Result::Err(crate::services::raiser::Get200Exn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "Raiser",
@@ -1260,9 +1254,7 @@ pub mod server {
         }
         async fn get500(
             &self,
-        ) -> ::std::result::Result<
-    ::std::string::String,
-    crate::services::raiser::Get500Exn> {
+        ) -> ::std::result::Result<::std::string::String, crate::services::raiser::Get500Exn> {
             ::std::result::Result::Err(crate::services::raiser::Get500Exn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "Raiser",
@@ -1279,33 +1271,25 @@ pub mod server {
     {
         async fn doBland(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::raiser::DoBlandExn> {
+        ) -> ::std::result::Result<(), crate::services::raiser::DoBlandExn> {
             (**self).doBland(
             ).await
         }
         async fn doRaise(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::raiser::DoRaiseExn> {
+        ) -> ::std::result::Result<(), crate::services::raiser::DoRaiseExn> {
             (**self).doRaise(
             ).await
         }
         async fn get200(
             &self,
-        ) -> ::std::result::Result<
-    ::std::string::String,
-    crate::services::raiser::Get200Exn> {
+        ) -> ::std::result::Result<::std::string::String, crate::services::raiser::Get200Exn> {
             (**self).get200(
             ).await
         }
         async fn get500(
             &self,
-        ) -> ::std::result::Result<
-    ::std::string::String,
-    crate::services::raiser::Get500Exn> {
+        ) -> ::std::result::Result<::std::string::String, crate::services::raiser::Get500Exn> {
             (**self).get500(
             ).await
         }
@@ -1415,10 +1399,11 @@ pub mod server {
     impl<P, H, R, RS> RaiserProcessor<P, H, R, RS>
     where
         P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
         P::Deserializer: ::std::marker::Send,
         H: Raiser,
-        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Sync,
-        RS: ::fbthrift::ReplyState<P::Frame>,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync,
     {
@@ -1729,7 +1714,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type RequestContext = R;
         type ReplyState = RS;
@@ -1810,7 +1795,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type Handler = H;
         type RequestContext = R;
@@ -1877,7 +1862,7 @@ pub mod server {
         H: Raiser,
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = F::DecBuf> + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<F> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<F, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         match proto {
             ::fbthrift::ProtocolID::BinaryProtocol => {

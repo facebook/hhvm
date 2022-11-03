@@ -664,9 +664,7 @@ pub mod server {
         async fn r#return(
             &self,
             _bar: crate::types::ThereAreNoPascalCaseKeywords,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::foo::ReturnExn> {
+        ) -> ::std::result::Result<(), crate::services::foo::ReturnExn> {
             ::std::result::Result::Err(crate::services::foo::ReturnExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "Foo",
@@ -677,9 +675,7 @@ pub mod server {
         async fn super_(
             &self,
             _bar: crate::types::ThereAreNoPascalCaseKeywords,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::foo::SuperExn> {
+        ) -> ::std::result::Result<(), crate::services::foo::SuperExn> {
             ::std::result::Result::Err(crate::services::foo::SuperExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "Foo",
@@ -697,9 +693,7 @@ pub mod server {
         async fn r#return(
             &self,
             bar: crate::types::ThereAreNoPascalCaseKeywords,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::foo::ReturnExn> {
+        ) -> ::std::result::Result<(), crate::services::foo::ReturnExn> {
             (**self).r#return(
                 bar, 
             ).await
@@ -707,9 +701,7 @@ pub mod server {
         async fn super_(
             &self,
             bar: crate::types::ThereAreNoPascalCaseKeywords,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::foo::SuperExn> {
+        ) -> ::std::result::Result<(), crate::services::foo::SuperExn> {
             (**self).super_(
                 bar, 
             ).await
@@ -784,10 +776,11 @@ pub mod server {
     impl<P, H, R, RS> FooProcessor<P, H, R, RS>
     where
         P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
         P::Deserializer: ::std::marker::Send,
         H: Foo,
-        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Sync,
-        RS: ::fbthrift::ReplyState<P::Frame>,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync,
     {
@@ -958,7 +951,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type RequestContext = R;
         type ReplyState = RS;
@@ -1031,7 +1024,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type Handler = H;
         type RequestContext = R;
@@ -1098,7 +1091,7 @@ pub mod server {
         H: Foo,
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = F::DecBuf> + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<F> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<F, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         match proto {
             ::fbthrift::ProtocolID::BinaryProtocol => {

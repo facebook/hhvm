@@ -1354,9 +1354,7 @@ pub mod server {
         async fn mapList(
             &self,
             _foo: ::std::collections::BTreeMap<::std::primitive::i32, ::std::vec::Vec<::std::primitive::i32>>,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::nested_containers::MapListExn> {
+        ) -> ::std::result::Result<(), crate::services::nested_containers::MapListExn> {
             ::std::result::Result::Err(crate::services::nested_containers::MapListExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "NestedContainers",
@@ -1367,9 +1365,7 @@ pub mod server {
         async fn mapSet(
             &self,
             _foo: ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::nested_containers::MapSetExn> {
+        ) -> ::std::result::Result<(), crate::services::nested_containers::MapSetExn> {
             ::std::result::Result::Err(crate::services::nested_containers::MapSetExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "NestedContainers",
@@ -1380,9 +1376,7 @@ pub mod server {
         async fn listMap(
             &self,
             _foo: ::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>>,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::nested_containers::ListMapExn> {
+        ) -> ::std::result::Result<(), crate::services::nested_containers::ListMapExn> {
             ::std::result::Result::Err(crate::services::nested_containers::ListMapExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "NestedContainers",
@@ -1393,9 +1387,7 @@ pub mod server {
         async fn listSet(
             &self,
             _foo: ::std::vec::Vec<::std::collections::BTreeSet<::std::primitive::i32>>,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::nested_containers::ListSetExn> {
+        ) -> ::std::result::Result<(), crate::services::nested_containers::ListSetExn> {
             ::std::result::Result::Err(crate::services::nested_containers::ListSetExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "NestedContainers",
@@ -1406,9 +1398,7 @@ pub mod server {
         async fn turtles(
             &self,
             _foo: ::std::vec::Vec<::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>>>>,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::nested_containers::TurtlesExn> {
+        ) -> ::std::result::Result<(), crate::services::nested_containers::TurtlesExn> {
             ::std::result::Result::Err(crate::services::nested_containers::TurtlesExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "NestedContainers",
@@ -1426,9 +1416,7 @@ pub mod server {
         async fn mapList(
             &self,
             foo: ::std::collections::BTreeMap<::std::primitive::i32, ::std::vec::Vec<::std::primitive::i32>>,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::nested_containers::MapListExn> {
+        ) -> ::std::result::Result<(), crate::services::nested_containers::MapListExn> {
             (**self).mapList(
                 foo, 
             ).await
@@ -1436,9 +1424,7 @@ pub mod server {
         async fn mapSet(
             &self,
             foo: ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::nested_containers::MapSetExn> {
+        ) -> ::std::result::Result<(), crate::services::nested_containers::MapSetExn> {
             (**self).mapSet(
                 foo, 
             ).await
@@ -1446,9 +1432,7 @@ pub mod server {
         async fn listMap(
             &self,
             foo: ::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>>,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::nested_containers::ListMapExn> {
+        ) -> ::std::result::Result<(), crate::services::nested_containers::ListMapExn> {
             (**self).listMap(
                 foo, 
             ).await
@@ -1456,9 +1440,7 @@ pub mod server {
         async fn listSet(
             &self,
             foo: ::std::vec::Vec<::std::collections::BTreeSet<::std::primitive::i32>>,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::nested_containers::ListSetExn> {
+        ) -> ::std::result::Result<(), crate::services::nested_containers::ListSetExn> {
             (**self).listSet(
                 foo, 
             ).await
@@ -1466,9 +1448,7 @@ pub mod server {
         async fn turtles(
             &self,
             foo: ::std::vec::Vec<::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>>>>,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::nested_containers::TurtlesExn> {
+        ) -> ::std::result::Result<(), crate::services::nested_containers::TurtlesExn> {
             (**self).turtles(
                 foo, 
             ).await
@@ -1627,10 +1607,11 @@ pub mod server {
     impl<P, H, R, RS> NestedContainersProcessor<P, H, R, RS>
     where
         P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
         P::Deserializer: ::std::marker::Send,
         H: NestedContainers,
-        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Sync,
-        RS: ::fbthrift::ReplyState<P::Frame>,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync,
     {
@@ -2017,7 +1998,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type RequestContext = R;
         type ReplyState = RS;
@@ -2102,7 +2083,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type Handler = H;
         type RequestContext = R;
@@ -2169,7 +2150,7 @@ pub mod server {
         H: NestedContainers,
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = F::DecBuf> + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<F> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<F, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         match proto {
             ::fbthrift::ProtocolID::BinaryProtocol => {

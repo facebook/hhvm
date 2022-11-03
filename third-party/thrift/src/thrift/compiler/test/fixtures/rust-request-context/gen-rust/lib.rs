@@ -1766,6 +1766,123 @@ pub mod services {
         }
 
 
+
+        #[derive(Clone, Debug)]
+        pub enum StartPingInteractionExn {
+            #[doc(hidden)]
+            Success(()),
+            ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<::fbthrift::ApplicationException> for StartPingInteractionExn {
+            fn from(exn: ::fbthrift::ApplicationException) -> Self {
+                Self::ApplicationException(exn)
+            }
+        }
+
+        impl ::fbthrift::ExceptionInfo for StartPingInteractionExn {
+            fn exn_name(&self) -> &'static str {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_name called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_name(),
+                }
+            }
+
+            fn exn_value(&self) -> String {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_value called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_value(),
+                }
+            }
+
+            fn exn_is_declared(&self) -> bool {
+                match self {
+                    Self::Success(_) => panic!("ExceptionInfo::exn_is_declared called on Success"),
+                    Self::ApplicationException(aexn) => aexn.exn_is_declared(),
+                }
+            }
+        }
+
+        impl ::fbthrift::ResultInfo for StartPingInteractionExn {
+            fn result_type(&self) -> ::fbthrift::ResultType {
+                match self {
+                    Self::Success(_) => ::fbthrift::ResultType::Return,
+                    Self::ApplicationException(_aexn) => ::fbthrift::ResultType::Exception,
+                }
+            }
+        }
+
+        impl ::fbthrift::GetTType for StartPingInteractionExn {
+            const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+        }
+
+        impl<P> ::fbthrift::Serialize<P> for StartPingInteractionExn
+        where
+            P: ::fbthrift::ProtocolWriter,
+        {
+            fn write(&self, p: &mut P) {
+                if let Self::ApplicationException(aexn) = self {
+                    return aexn.write(p);
+                }
+                p.write_struct_begin("StartPingInteraction");
+                match self {
+                    Self::Success(inner) => {
+                        p.write_field_begin(
+                            "Success",
+                            ::fbthrift::TType::Void,
+                            0i16,
+                        );
+                        inner.write(p);
+                        p.write_field_end();
+                    }
+                    Self::ApplicationException(_aexn) => unreachable!(),
+                }
+                p.write_field_stop();
+                p.write_struct_end();
+            }
+        }
+
+        impl<P> ::fbthrift::Deserialize<P> for StartPingInteractionExn
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            fn read(p: &mut P) -> ::anyhow::Result<Self> {
+                static RETURNS: &[::fbthrift::Field] = &[
+                    ::fbthrift::Field::new("Success", ::fbthrift::TType::Void, 0),
+                ];
+                let _ = p.read_struct_begin(|_| ())?;
+                let mut once = false;
+                let mut alt = Self::Success(());
+                loop {
+                    let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                    match ((fty, fid as ::std::primitive::i32), once) {
+                        ((::fbthrift::TType::Stop, _), _) => {
+                            p.read_field_end()?;
+                            break;
+                        }
+                        ((::fbthrift::TType::Void, 0i32), false) => {
+                            once = true;
+                            alt = Self::Success(::fbthrift::Deserialize::read(p)?);
+                        }
+                        ((ty, _id), false) => p.skip(ty)?,
+                        ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                            ::fbthrift::ApplicationException::new(
+                                ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                                format!(
+                                    "unwanted extra union {} field ty {:?} id {}",
+                                    "StartPingInteractionExn",
+                                    badty,
+                                    badid,
+                                ),
+                            )
+                        )),
+                    }
+                    p.read_field_end()?;
+                }
+                p.read_struct_end()?;
+                ::std::result::Result::Ok(alt)
+            }
+        }
     }
 }
 
@@ -2563,6 +2680,60 @@ pub mod client {
             .instrument(::tracing::info_span!("MyService.streamByIdWithResponse"))
             .boxed()
         }
+
+        fn _startPingInteraction_impl(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
+            use ::const_cstr::const_cstr;
+            use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
+
+            const_cstr! {
+                SERVICE_NAME = "MyService";
+                METHOD_NAME = "MyService.startPingInteraction";
+                INTERACTION_NAME = "MyInteraction";
+            }
+            let args = self::Args_MyService_startPingInteraction {
+                _phantom: ::std::marker::PhantomData,
+            };
+
+            let interaction_transport = match self.transport().create_interaction(INTERACTION_NAME.as_cstr()) {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+            };
+            let interaction_impl = MyInteractionImpl::<P, T, S>::new(interaction_transport);
+            let transport = interaction_impl.transport();
+
+            // need to do call setup outside of async block because T: Transport isn't Send
+            let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("startPingInteraction", &args) {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+            };
+
+            let call = transport
+                .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
+                .instrument(::tracing::trace_span!("call", function = "MyService.startPingInteraction"));
+
+            async move {
+                let reply_env = call.await?;
+
+                let de = P::deserializer(reply_env);
+                let (res, _de): (::std::result::Result<crate::services::my_service::StartPingInteractionExn, _>, _) =
+                    ::fbthrift::help::async_deserialize_response_envelope::<P, _, S>(de).await?;
+
+                let res = match res {
+                    ::std::result::Result::Ok(exn) => ::std::convert::From::from(exn),
+                    ::std::result::Result::Err(aexn) =>
+                        ::std::result::Result::Err(crate::errors::my_service::StartPingInteractionError::ApplicationException(aexn))
+                };
+                let interaction_client: crate::client::MyInteractionClient = ::std::sync::Arc::new(interaction_impl);
+                res?;
+                ::std::result::Result::Ok(interaction_client)
+            }
+            .instrument(::tracing::info_span!("MyService.startPingInteraction"))
+            .boxed()
+        }
     }
 
     pub trait MyService: ::std::marker::Send {
@@ -2614,6 +2785,10 @@ pub mod client {
         fn createMyInteraction(
             &self,
         ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error>;
+
+        fn startPingInteraction(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>>;
     }
 
     pub trait MyServiceExt<T>: MyService
@@ -2665,6 +2840,10 @@ pub mod client {
             arg_id: ::std::primitive::i64,
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::types::MyDataItem, ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::errors::my_service::StreamByIdWithResponseStreamError>>), crate::errors::my_service::StreamByIdWithResponseError>>;
+        fn startPingInteraction_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>>;
     }
 
     struct Args_MyService_ping<'a> {
@@ -2829,6 +3008,20 @@ pub mod client {
         }
     }
 
+    struct Args_MyService_startPingInteraction<'a> {
+        _phantom: ::std::marker::PhantomData<&'a ()>,
+    }
+
+    impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_MyService_startPingInteraction<'a> {
+        #[inline]
+        #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "MyService.startPingInteraction"))]
+        fn write(&self, p: &mut P) {
+            p.write_struct_begin("args");
+            p.write_field_stop();
+            p.write_struct_end();
+        }
+    }
+
     impl<P, T, S> MyService for MyServiceImpl<P, T, S>
     where
         P: ::fbthrift::Protocol,
@@ -2944,6 +3137,14 @@ pub mod client {
                 )
             )
         }
+        fn startPingInteraction(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
+            let rpc_options = T::RpcOptions::default();
+            self._startPingInteraction_impl(
+                rpc_options,
+            )
+        }
     }
 
     impl<P, T, S> MyServiceExt<T> for MyServiceImpl<P, T, S>
@@ -3045,6 +3246,14 @@ pub mod client {
                 rpc_options,
             )
         }
+        fn startPingInteraction_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
+            self._startPingInteraction_impl(
+                rpc_options,
+            )
+        }
     }
 
     impl<'a, S> MyService for S
@@ -3128,6 +3337,12 @@ pub mod client {
             &self,
         ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error> {
             self.as_ref().createMyInteraction()
+        }
+        fn startPingInteraction(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
+            self.as_ref().startPingInteraction(
+            )
         }
     }
 
@@ -3225,6 +3440,14 @@ pub mod client {
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::types::MyDataItem, ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::errors::my_service::StreamByIdWithResponseStreamError>>), crate::errors::my_service::StreamByIdWithResponseError>> {
             <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).streamByIdWithResponse_with_rpc_opts(
                 arg_id,
+                rpc_options,
+            )
+        }
+        fn startPingInteraction_with_rpc_opts(
+            &self,
+            rpc_options: T::RpcOptions,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
+            <Self as ::std::convert::AsRef<dyn MyServiceExt<T>>>::as_ref(self).startPingInteraction_with_rpc_opts(
                 rpc_options,
             )
         }
@@ -3337,9 +3560,7 @@ pub mod server {
     pub trait MyInteraction: ::std::marker::Send + ::std::marker::Sync + 'static {
         async fn ping(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_interaction::PingExn> {
+        ) -> ::std::result::Result<(), crate::services::my_interaction::PingExn> {
             ::std::result::Result::Err(crate::services::my_interaction::PingExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyInteraction",
@@ -3356,9 +3577,7 @@ pub mod server {
     {
         async fn ping(
             &self,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_interaction::PingExn> {
+        ) -> ::std::result::Result<(), crate::services::my_interaction::PingExn> {
             (**self).ping(
             ).await
         }
@@ -3399,10 +3618,11 @@ pub mod server {
     impl<P, H, R, RS> MyInteractionProcessor<P, H, R, RS>
     where
         P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
         P::Deserializer: ::std::marker::Send,
         H: MyInteraction,
-        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Sync,
-        RS: ::fbthrift::ReplyState<P::Frame>,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync,
     {
@@ -3500,7 +3720,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type RequestContext = R;
         type ReplyState = RS;
@@ -3569,7 +3789,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         // Interactions have () as their handler associated type
         // to make `create_interaction` have a common return type.
@@ -3631,9 +3851,7 @@ pub mod server {
         async fn ping(
             &self,
             _request_context: &Self::RequestContext,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service::PingExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service::PingExn> {
             ::std::result::Result::Err(crate::services::my_service::PingExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyService",
@@ -3644,9 +3862,7 @@ pub mod server {
         async fn getRandomData(
             &self,
             _request_context: &Self::RequestContext,
-        ) -> ::std::result::Result<
-    ::std::string::String,
-    crate::services::my_service::GetRandomDataExn> {
+        ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetRandomDataExn> {
             ::std::result::Result::Err(crate::services::my_service::GetRandomDataExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyService",
@@ -3658,9 +3874,7 @@ pub mod server {
             &self,
             _request_context: &Self::RequestContext,
             _id: ::std::primitive::i64,
-        ) -> ::std::result::Result<
-    ::std::primitive::bool,
-    crate::services::my_service::HasDataByIdExn> {
+        ) -> ::std::result::Result<::std::primitive::bool, crate::services::my_service::HasDataByIdExn> {
             ::std::result::Result::Err(crate::services::my_service::HasDataByIdExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyService",
@@ -3672,9 +3886,7 @@ pub mod server {
             &self,
             _request_context: &Self::RequestContext,
             _id: ::std::primitive::i64,
-        ) -> ::std::result::Result<
-    ::std::string::String,
-    crate::services::my_service::GetDataByIdExn> {
+        ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetDataByIdExn> {
             ::std::result::Result::Err(crate::services::my_service::GetDataByIdExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyService",
@@ -3687,9 +3899,7 @@ pub mod server {
             _request_context: &Self::RequestContext,
             _id: ::std::primitive::i64,
             _data: ::std::string::String,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service::PutDataByIdExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service::PutDataByIdExn> {
             ::std::result::Result::Err(crate::services::my_service::PutDataByIdExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyService",
@@ -3702,9 +3912,7 @@ pub mod server {
             _request_context: &Self::RequestContext,
             _id: ::std::primitive::i64,
             _data: ::std::string::String,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service::LobDataByIdExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service::LobDataByIdExn> {
             ::std::result::Result::Err(crate::services::my_service::LobDataByIdExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyService",
@@ -3716,10 +3924,8 @@ pub mod server {
             &self,
             _request_context: &Self::RequestContext,
             _id: ::std::primitive::i64,
-        ) -> ::std::result::Result<
-        ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdStreamExn>>
-,
-    crate::services::my_service::StreamByIdExn> {
+        ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdStreamExn>>
+, crate::services::my_service::StreamByIdExn> {
             ::std::result::Result::Err(crate::services::my_service::StreamByIdExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyService",
@@ -3731,10 +3937,8 @@ pub mod server {
             &self,
             _request_context: &Self::RequestContext,
             _id: ::std::primitive::i64,
-        ) -> ::std::result::Result<
-        ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdWithExceptionStreamExn>>
-,
-    crate::services::my_service::StreamByIdWithExceptionExn> {
+        ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdWithExceptionStreamExn>>
+, crate::services::my_service::StreamByIdWithExceptionExn> {
             ::std::result::Result::Err(crate::services::my_service::StreamByIdWithExceptionExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyService",
@@ -3746,13 +3950,11 @@ pub mod server {
             &self,
             _request_context: &Self::RequestContext,
             _id: ::std::primitive::i64,
-        ) -> ::std::result::Result<
-    (
+        ) -> ::std::result::Result<(
     crate::types::MyDataItem,
     ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdWithResponseStreamExn>>
 )
-,
-    crate::services::my_service::StreamByIdWithResponseExn> {
+, crate::services::my_service::StreamByIdWithResponseExn> {
             ::std::result::Result::Err(crate::services::my_service::StreamByIdWithResponseExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "MyService",
@@ -3765,6 +3967,17 @@ pub mod server {
         ) -> ::anyhow::Result<::std::boxed::Box<dyn MyInteraction>> {
             ::anyhow::bail!("MyService.createMyInteraction not implemented");
         }
+        async fn startPingInteraction(
+            &self,
+            _request_context: &Self::RequestContext,
+        ) -> ::std::result::Result<::std::boxed::Box<dyn MyInteraction>, crate::services::my_service::StartPingInteractionExn> {
+            ::std::result::Result::Err(crate::services::my_service::StartPingInteractionExn::ApplicationException(
+                ::fbthrift::ApplicationException::unimplemented_method(
+                    "MyService",
+                    "startPingInteraction",
+                ),
+            ))
+        }
     }
 
     #[::async_trait::async_trait]
@@ -3775,9 +3988,7 @@ pub mod server {
         async fn ping(
             &self,
             request_context: &Self::RequestContext,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service::PingExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service::PingExn> {
             (**self).ping(
                 request_context, 
             ).await
@@ -3785,9 +3996,7 @@ pub mod server {
         async fn getRandomData(
             &self,
             request_context: &Self::RequestContext,
-        ) -> ::std::result::Result<
-    ::std::string::String,
-    crate::services::my_service::GetRandomDataExn> {
+        ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetRandomDataExn> {
             (**self).getRandomData(
                 request_context, 
             ).await
@@ -3796,9 +4005,7 @@ pub mod server {
             &self,
             request_context: &Self::RequestContext,
             id: ::std::primitive::i64,
-        ) -> ::std::result::Result<
-    ::std::primitive::bool,
-    crate::services::my_service::HasDataByIdExn> {
+        ) -> ::std::result::Result<::std::primitive::bool, crate::services::my_service::HasDataByIdExn> {
             (**self).hasDataById(
                 request_context, 
                 id, 
@@ -3808,9 +4015,7 @@ pub mod server {
             &self,
             request_context: &Self::RequestContext,
             id: ::std::primitive::i64,
-        ) -> ::std::result::Result<
-    ::std::string::String,
-    crate::services::my_service::GetDataByIdExn> {
+        ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetDataByIdExn> {
             (**self).getDataById(
                 request_context, 
                 id, 
@@ -3821,9 +4026,7 @@ pub mod server {
             request_context: &Self::RequestContext,
             id: ::std::primitive::i64,
             data: ::std::string::String,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service::PutDataByIdExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service::PutDataByIdExn> {
             (**self).putDataById(
                 request_context, 
                 id, 
@@ -3835,9 +4038,7 @@ pub mod server {
             request_context: &Self::RequestContext,
             id: ::std::primitive::i64,
             data: ::std::string::String,
-        ) -> ::std::result::Result<
-    (),
-    crate::services::my_service::LobDataByIdExn> {
+        ) -> ::std::result::Result<(), crate::services::my_service::LobDataByIdExn> {
             (**self).lobDataById(
                 request_context, 
                 id, 
@@ -3848,10 +4049,8 @@ pub mod server {
             &self,
             request_context: &Self::RequestContext,
             id: ::std::primitive::i64,
-        ) -> ::std::result::Result<
-        ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdStreamExn>>
-,
-    crate::services::my_service::StreamByIdExn> {
+        ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdStreamExn>>
+, crate::services::my_service::StreamByIdExn> {
             (**self).streamById(
                 request_context, 
                 id, 
@@ -3861,10 +4060,8 @@ pub mod server {
             &self,
             request_context: &Self::RequestContext,
             id: ::std::primitive::i64,
-        ) -> ::std::result::Result<
-        ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdWithExceptionStreamExn>>
-,
-    crate::services::my_service::StreamByIdWithExceptionExn> {
+        ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdWithExceptionStreamExn>>
+, crate::services::my_service::StreamByIdWithExceptionExn> {
             (**self).streamByIdWithException(
                 request_context, 
                 id, 
@@ -3874,13 +4071,11 @@ pub mod server {
             &self,
             request_context: &Self::RequestContext,
             id: ::std::primitive::i64,
-        ) -> ::std::result::Result<
-    (
+        ) -> ::std::result::Result<(
     crate::types::MyDataItem,
     ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdWithResponseStreamExn>>
 )
-,
-    crate::services::my_service::StreamByIdWithResponseExn> {
+, crate::services::my_service::StreamByIdWithResponseExn> {
             (**self).streamByIdWithResponse(
                 request_context, 
                 id, 
@@ -3890,6 +4085,14 @@ pub mod server {
             &self,
         ) -> ::anyhow::Result<::std::boxed::Box<dyn MyInteraction>> {
             (**self).createMyInteraction()
+        }
+        async fn startPingInteraction(
+            &self,
+            request_context: &Self::RequestContext,
+        ) -> ::std::result::Result<::std::boxed::Box<dyn MyInteraction>, crate::services::my_service::StartPingInteractionExn> {
+            (**self).startPingInteraction(
+                request_context, 
+            ).await
         }
     }
 
@@ -4153,14 +4356,38 @@ pub mod server {
         }
     }
 
+    struct Args_MyService_startPingInteraction {
+    }
+    impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_MyService_startPingInteraction {
+        #[inline]
+        #[::tracing::instrument(skip_all, level = "trace", name = "deserialize_args", fields(method = "MyService.startPingInteraction"))]
+        fn read(p: &mut P) -> ::anyhow::Result<Self> {
+            static ARGS: &[::fbthrift::Field] = &[
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), ARGS)?;
+                match (fty, fid as ::std::primitive::i32) {
+                    (::fbthrift::TType::Stop, _) => break,
+                    (fty, _) => p.skip(fty)?,
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            ::std::result::Result::Ok(Self {
+            })
+        }
+    }
+
 
     impl<P, H, R, RS> MyServiceProcessor<P, H, R, RS>
     where
         P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
         P::Deserializer: ::std::marker::Send,
         H: MyService<RequestContext = R>,
-        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Sync,
-        RS: ::fbthrift::ReplyState<P::Frame>,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync,
     {
@@ -4961,6 +5188,81 @@ pub mod server {
         ) -> ::anyhow::Result<::std::boxed::Box<dyn MyInteraction>> {
             self.service.createMyInteraction()
         }
+
+        #[::tracing::instrument(skip_all, fields(method = "MyService.startPingInteraction"))]
+        async fn handle_startPingInteraction<'a>(
+            &'a self,
+            p: &'a mut P::Deserializer,
+            req_ctxt: &R,
+            reply_state: ::std::sync::Arc<::std::sync::Mutex<RS>>,
+            _seqid: ::std::primitive::u32,
+        ) -> ::anyhow::Result<()> {
+            use ::const_cstr::const_cstr;
+            use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
+
+            const_cstr! {
+                SERVICE_NAME = "MyService";
+                METHOD_NAME = "MyService.startPingInteraction";
+            }
+            let mut ctx_stack = req_ctxt.get_context_stack(
+                SERVICE_NAME.as_cstr(),
+                METHOD_NAME.as_cstr(),
+            )?;
+            ::fbthrift::ContextStack::pre_read(&mut ctx_stack)?;
+            let _args: self::Args_MyService_startPingInteraction = ::fbthrift::Deserialize::read(p)?;
+            ::fbthrift::ContextStack::on_read_data(&mut ctx_stack, &::fbthrift::SerializedMessage {
+                protocol: P::PROTOCOL_ID,
+                method_name: METHOD_NAME.as_cstr(),
+                buffer: ::std::marker::PhantomData, // FIXME P::into_buffer(p).reset(),
+            })?;
+            ::fbthrift::ContextStack::post_read(&mut ctx_stack, 0)?;
+
+            let res = ::std::panic::AssertUnwindSafe(
+                self.service.startPingInteraction(
+                    req_ctxt,
+                )
+            )
+            .catch_unwind()
+            .instrument(::tracing::info_span!("service_handler", method = "MyService.startPingInteraction"))
+            .await;
+
+            // nested results - panic catch on the outside, method on the inside
+            let res = match res {
+                ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
+                    ::tracing::info!(method = "MyService.startPingInteraction", "success");
+                    let (interaction_handler, res) = (res, ());
+                    let interaction_processor = ::std::sync::Arc::new(MyInteractionProcessor::<P, ::std::boxed::Box<dyn MyInteraction>, R, RS>::new(interaction_handler));
+                    reply_state.lock().unwrap().set_interaction_processor(interaction_processor);
+                    crate::services::my_service::StartPingInteractionExn::Success(res)
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_service::StartPingInteractionExn::Success(_))) => {
+                    panic!(
+                        "{} attempted to return success via error",
+                        "startPingInteraction",
+                    )
+                }
+                ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
+                    ::tracing::error!(method = "MyService.startPingInteraction", exception = ?exn);
+                    exn
+                }
+                ::std::result::Result::Err(exn) => {
+                    let aexn = ::fbthrift::ApplicationException::handler_panic("MyService.startPingInteraction", exn);
+                    crate::services::my_service::StartPingInteractionExn::ApplicationException(aexn)
+                }
+            };
+
+            let env = ::fbthrift::help::serialize_result_envelope::<P, R, _>(
+                "startPingInteraction",
+                METHOD_NAME.as_cstr(),
+                _seqid,
+                req_ctxt,
+                &mut ctx_stack,
+                res
+            )?;
+            reply_state.lock().unwrap().send_reply(env);
+            Ok(())
+        }
     }
 
     #[::async_trait::async_trait]
@@ -4973,7 +5275,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type RequestContext = R;
         type ReplyState = RS;
@@ -4990,6 +5292,7 @@ pub mod server {
                 b"streamById" => ::std::result::Result::Ok(6usize),
                 b"streamByIdWithException" => ::std::result::Result::Ok(7usize),
                 b"streamByIdWithResponse" => ::std::result::Result::Ok(8usize),
+                b"startPingInteraction" => ::std::result::Result::Ok(10usize),
                 _ => ::std::result::Result::Err(::fbthrift::ApplicationException::unknown_method()),
             }
         }
@@ -5030,6 +5333,9 @@ pub mod server {
                 }
                 8usize => {
                     self.handle_streamByIdWithResponse(_p, _r, _reply_state, _seqid).await
+                }
+                10usize => {
+                    self.handle_startPingInteraction(_p, _r, _reply_state, _seqid).await
                 }
                 bad => panic!(
                     "{}: unexpected method idx {}",
@@ -5080,7 +5386,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type Handler = H;
         type RequestContext = R;
@@ -5147,7 +5453,7 @@ pub mod server {
         H: MyService<RequestContext = R>,
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = F::DecBuf> + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<F> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<F, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         match proto {
             ::fbthrift::ProtocolID::BinaryProtocol => {
@@ -5268,6 +5574,7 @@ pub mod mock {
         pub streamById: r#impl::my_service::streamById<'mock>,
         pub streamByIdWithException: r#impl::my_service::streamByIdWithException<'mock>,
         pub streamByIdWithResponse: r#impl::my_service::streamByIdWithResponse<'mock>,
+        pub startPingInteraction: r#impl::my_service::startPingInteraction<'mock>,
         _marker: ::std::marker::PhantomData<&'mock ()>,
     }
 
@@ -5283,6 +5590,7 @@ pub mod mock {
                 streamById: r#impl::my_service::streamById::unimplemented(),
                 streamByIdWithException: r#impl::my_service::streamByIdWithException::unimplemented(),
                 streamByIdWithResponse: r#impl::my_service::streamByIdWithResponse::unimplemented(),
+                startPingInteraction: r#impl::my_service::startPingInteraction::unimplemented(),
                 _marker: ::std::marker::PhantomData,
             }
         }
@@ -5365,6 +5673,11 @@ pub mod mock {
         fn createMyInteraction(
             &self,
         ) -> ::std::result::Result<crate::client::MyInteractionClient, ::anyhow::Error> {
+            unimplemented!("Mocking interactions is not yet implemented");
+        }
+        fn startPingInteraction(
+            &self,
+        ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {
             unimplemented!("Mocking interactions is not yet implemented");
         }
     }
@@ -5777,6 +6090,51 @@ pub mod mock {
                 }
             }
 
+
+            pub struct startPingInteraction<'mock> {
+                pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
+                    dyn ::std::ops::FnMut() -> ::std::result::Result<
+                        (),
+                        crate::errors::my_service::StartPingInteractionError,
+                    > + ::std::marker::Send + ::std::marker::Sync + 'mock,
+                >>,
+            }
+
+            #[allow(clippy::redundant_closure)]
+            impl<'mock> startPingInteraction<'mock> {
+                pub fn unimplemented() -> Self {
+                    Self {
+                        closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|| panic!(
+                            "{}::{} is not mocked",
+                            "MyService",
+                            "startPingInteraction",
+                        ))),
+                    }
+                }
+
+                pub fn ret(&self, value: ()) {
+                    self.mock(move || value.clone());
+                }
+
+                pub fn mock(&self, mut mock: impl ::std::ops::FnMut() -> () + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || ::std::result::Result::Ok(mock()));
+                }
+
+                pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut() -> ::std::result::Result<(), crate::errors::my_service::StartPingInteractionError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || mock());
+                }
+
+                pub fn throw<E>(&self, exception: E)
+                where
+                    E: ::std::convert::Into<crate::errors::my_service::StartPingInteractionError>,
+                    E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
+                {
+                    let mut closure = self.closure.lock().unwrap();
+                    *closure = ::std::boxed::Box::new(move || ::std::result::Result::Err(exception.clone().into()));
+                }
+            }
         }
     }
 }
@@ -6074,6 +6432,22 @@ pub mod errors {
                         ::std::result::Result::Ok(res),
                     crate::services::my_service::StreamByIdWithResponseStreamExn::ApplicationException(aexn) =>
                         ::std::result::Result::Err(StreamByIdWithResponseStreamError::ApplicationException(aexn)),
+                }
+            }
+        }
+
+        pub type StartPingInteractionError = ::fbthrift::NonthrowingFunctionError;
+
+        impl ::std::convert::From<crate::services::my_service::StartPingInteractionExn> for
+            ::std::result::Result<(), StartPingInteractionError>
+        {
+            fn from(e: crate::services::my_service::StartPingInteractionExn) -> Self {
+                match e {
+                    crate::services::my_service::StartPingInteractionExn::Success(res) => {
+                        ::std::result::Result::Ok(res)
+                    }
+                    crate::services::my_service::StartPingInteractionExn::ApplicationException(aexn) =>
+                        ::std::result::Result::Err(StartPingInteractionError::ApplicationException(aexn)),
                 }
             }
         }

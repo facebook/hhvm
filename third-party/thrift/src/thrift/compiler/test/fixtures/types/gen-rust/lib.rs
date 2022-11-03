@@ -679,9 +679,7 @@ pub mod server {
         async fn bounce_map(
             &self,
             _m: include::types::SomeMap,
-        ) -> ::std::result::Result<
-    include::types::SomeMap,
-    crate::services::some_service::BounceMapExn> {
+        ) -> ::std::result::Result<include::types::SomeMap, crate::services::some_service::BounceMapExn> {
             ::std::result::Result::Err(crate::services::some_service::BounceMapExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "SomeService",
@@ -692,9 +690,7 @@ pub mod server {
         async fn binary_keyed_map(
             &self,
             _r: ::std::vec::Vec<::std::primitive::i64>,
-        ) -> ::std::result::Result<
-    ::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>,
-    crate::services::some_service::BinaryKeyedMapExn> {
+        ) -> ::std::result::Result<::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>, crate::services::some_service::BinaryKeyedMapExn> {
             ::std::result::Result::Err(crate::services::some_service::BinaryKeyedMapExn::ApplicationException(
                 ::fbthrift::ApplicationException::unimplemented_method(
                     "SomeService",
@@ -712,9 +708,7 @@ pub mod server {
         async fn bounce_map(
             &self,
             m: include::types::SomeMap,
-        ) -> ::std::result::Result<
-    include::types::SomeMap,
-    crate::services::some_service::BounceMapExn> {
+        ) -> ::std::result::Result<include::types::SomeMap, crate::services::some_service::BounceMapExn> {
             (**self).bounce_map(
                 m, 
             ).await
@@ -722,9 +716,7 @@ pub mod server {
         async fn binary_keyed_map(
             &self,
             r: ::std::vec::Vec<::std::primitive::i64>,
-        ) -> ::std::result::Result<
-    ::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>,
-    crate::services::some_service::BinaryKeyedMapExn> {
+        ) -> ::std::result::Result<::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>, crate::services::some_service::BinaryKeyedMapExn> {
             (**self).binary_keyed_map(
                 r, 
             ).await
@@ -799,10 +791,11 @@ pub mod server {
     impl<P, H, R, RS> SomeServiceProcessor<P, H, R, RS>
     where
         P: ::fbthrift::Protocol + ::std::marker::Send + ::std::marker::Sync + 'static,
+        P::Frame: ::std::marker::Send + 'static,
         P::Deserializer: ::std::marker::Send,
         H: SomeService,
-        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Sync,
-        RS: ::fbthrift::ReplyState<P::Frame>,
+        R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync,
     {
@@ -973,7 +966,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type RequestContext = R;
         type ReplyState = RS;
@@ -1046,7 +1039,7 @@ pub mod server {
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = ::fbthrift::ProtocolDecoded<P>>
             + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<P::Frame> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<P::Frame, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         type Handler = H;
         type RequestContext = R;
@@ -1113,7 +1106,7 @@ pub mod server {
         H: SomeService,
         R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
         <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Buffer = F::DecBuf> + ::std::marker::Send + ::std::marker::Sync + 'static,
-        RS: ::fbthrift::ReplyState<F> + ::std::marker::Send + ::std::marker::Sync + 'static
+        RS: ::fbthrift::ReplyState<F, RequestContext = R> + ::std::marker::Send + ::std::marker::Sync + 'static
     {
         match proto {
             ::fbthrift::ProtocolID::BinaryProtocol => {

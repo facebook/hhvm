@@ -6,4 +6,4 @@ Summary after closing and simplifying for \bar:
   shape('a' => int)
 Summary after closing and simplifying for \foo:
 [3:17-36] [Return]:
-  shape()
+  shape('b' => int)

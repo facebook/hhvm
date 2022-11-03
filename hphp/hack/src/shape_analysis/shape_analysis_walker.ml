@@ -466,16 +466,15 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
         unpacked
     in
     (* Handle the return. *)
-    let (env, return_entity) =
-      when_local_mode mode ~default:(env, None) @@ fun () ->
-      let return_entity_ = Env.fresh_var () in
+    let return_entity = Env.fresh_var () in
+    let env =
+      when_local_mode mode ~default:env @@ fun () ->
       let constraint_ =
-        decorate ~origin:__LINE__ @@ Has_dynamic_key return_entity_
+        decorate ~origin:__LINE__ @@ Has_dynamic_key return_entity
       in
-      let env = Env.add_constraint env constraint_ in
-      (env, Some return_entity_)
+      Env.add_constraint env constraint_
     in
-    (env, return_entity)
+    (env, Some return_entity)
   | A.Await e -> expr_ env e
   | A.As (e, _ty, _) -> expr_ env e
   | A.Is (e, _ty) ->

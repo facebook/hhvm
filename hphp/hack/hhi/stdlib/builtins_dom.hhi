@@ -133,17 +133,13 @@ class DOMNode {
   public function replaceChild<T as DOMNode>(DOMNode $newchildobj, T $oldchildobj): T;
   public function C14N(bool $exclusive = false,
                        bool $with_comments = false,
-                       /* HH_FIXME[2071] */
-                       ?darray $xpath = null,
-                       /* HH_FIXME[2071] */
-                       ?varray $ns_prefixes = null): string;
+                       ?darray<arraykey, mixed> $xpath = null,
+                       ?varray<mixed> $ns_prefixes = null): string;
   public function C14NFile(string $uri,
                            bool $exclusive = false,
                            bool $with_comments = false,
-                           /* HH_FIXME[2071] */
-                           ?darray $xpath = null,
-                           /* HH_FIXME[2071] */
-                           ?varray $ns_prefixes = null): int;
+                           ?darray<arraykey, mixed> $xpath = null,
+                           ?varray<mixed> $ns_prefixes = null): int;
   public function getNodePath();
 }
 

@@ -14,10 +14,8 @@ type XenonSample = shape(
   'time' => int,
   'timeNano' => int,
   'lastTriggerTimeNano' => int,
-  /* HH_FIXME[2071] */
-  'stack' => varray,
-  /* HH_FIXME[2071] */
-  'phpStack' => varray,
+  'stack' => varray<mixed>,
+  'phpStack' => varray<mixed>,
   'ioWaitSample' => bool,
   'sourceType' => string,
 );

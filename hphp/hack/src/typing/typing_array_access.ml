@@ -1003,9 +1003,7 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
   | (r, Tclass (((_, cn) as id), _, tyl))
     when cn = SN.Collections.cVec
          || cn = SN.Collections.cKeyset
-         || cn = SN.Collections.cVector
-         || cn = SN.Collections.cDict
-         || cn = SN.Collections.cMap ->
+         || cn = SN.Collections.cDict ->
     let (env, params) =
       List.map_env env tyl ~f:(fun env _ty ->
           Env.fresh_type_invariant env expr_pos)

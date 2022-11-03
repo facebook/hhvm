@@ -1,3 +1,9 @@
+File "map_corner_case.php", line 24, characters 5-17:
+Invalid assignment (Typing[4110])
+  File "map_corner_case.php", line 14, characters 10-22:
+  Expected `nothing` because a type could not be determined here
+  File "map_corner_case.php", line 14, characters 27-32:
+  But got `Map<_, _>`
 File "map_corner_case.php", line 25, characters 5-17:
 Invalid assignment (Typing[4110])
   File "map_corner_case.php", line 13, characters 10-22:

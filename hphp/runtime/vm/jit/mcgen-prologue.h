@@ -35,16 +35,9 @@ namespace mcgen {
 
 /*
  * Regenerate all prologues of func that were previously generated.  The
- * prologues are sorted in ascending order of profile counters.  For prologues
- * with corresponding DV funclets, their corresponding DV funclet will be
- * regenerated right after them.  The idea is to generate the function body
- * right after calling this function, so that all prologues are placed right
- * before it, and with the hottest prologues closer to it.
- *
- * Returns true iff the body of the function was included in at least one
- * dvInit translation.
+ * prologues are sorted in ascending order of profile counters.
  */
-bool regeneratePrologues(Func* func, tc::FuncMetaInfo&);
+void regeneratePrologues(Func* func, tc::FuncMetaInfo&);
 
 }}}
 

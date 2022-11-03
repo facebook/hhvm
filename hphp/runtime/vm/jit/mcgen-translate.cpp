@@ -125,23 +125,21 @@ void optimize(tc::FuncMetaInfo& info) {
 
   tracing::Block _{"optimize", [&] { return traceProps(func); }};
 
-  // Regenerate the prologues and DV funclets before the actual function body.
-  auto const includedBody = regeneratePrologues(func, info);
+  // Regenerate the prologues before the actual function body.
+  regeneratePrologues(func, info);
 
   // Regionize func and translate all its regions.
   std::string transCFGAnnot;
-  auto const regions = includedBody ? std::vector<RegionDescPtr>{}
-                                    : regionizeFunc(func, transCFGAnnot);
+  auto const regions = regionizeFunc(func, transCFGAnnot);
   tracing::annotateBlock(
     [&] {
       return tracing::Props{}
-        .add("num_regions", regions.size())
-        .add("included_body", includedBody);
+        .add("num_regions", regions.size());
     }
   );
 
-  FTRACE(4, "Translating {} regions for {} (includedBody={})\n",
-         regions.size(), func->fullName(), includedBody);
+  FTRACE(4, "Translating {} regions for {}\n",
+         regions.size(), func->fullName());
 
   Optional<uint64_t> maxWeight;
   for (auto region : regions) {

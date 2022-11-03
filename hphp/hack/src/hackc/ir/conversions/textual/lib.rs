@@ -51,6 +51,23 @@ macro_rules! tx_ty {
     };
 }
 
+pub static KEEP_GOING: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+// If KEEP_GOING is false then execute a 'todo!' otherwise call the function.
+//
+// Used like:
+//   textual_todo! { w.comment("TODO: Try-Catch Block")? };
+#[allow(unused)]
+macro_rules! textual_todo {
+    ( $($rest:tt)+ ) => {
+        (if $crate::KEEP_GOING.load(std::sync::atomic::Ordering::Acquire) {
+            $($rest)+
+        } else {
+            todo!()
+        })
+    };
+}
+
 mod class;
 mod decls;
 mod func;

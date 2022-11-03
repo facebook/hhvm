@@ -15,6 +15,7 @@ use crate::FuncBuilder;
 use crate::Instr;
 use crate::IsTypeOp;
 use crate::LocId;
+use crate::LocalId;
 use crate::TypeConstraintFlags;
 use crate::TypeStructResolveOp;
 use crate::ValueId;
@@ -49,6 +50,10 @@ pub trait FuncBuilderEx {
     /// Emit an `is` check.  This behaves like `is()` but instead of returning
     /// the final Instr it emits it.
     fn emit_is(&mut self, vid: ValueId, ty: &EnforceableType, loc: LocId) -> ValueId;
+
+    fn todo_fake_instr(&mut self, reason: &str, loc: LocId) -> Instr;
+
+    fn emit_todo_fake_instr(&mut self, reason: &str, loc: LocId) -> ValueId;
 }
 
 impl<'a> FuncBuilderEx for FuncBuilder<'a> {
@@ -88,9 +93,9 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
             || ety.modifiers == TypeConstraintFlags::ExtendedHint
         {
             match ety.ty {
-                BaseType::AnyArray => todo!(),
-                BaseType::Arraykey => todo!(),
-                BaseType::Bool => todo!(),
+                BaseType::AnyArray => self.todo_fake_instr("BaseType::AnyArray", loc),
+                BaseType::Arraykey => self.todo_fake_instr("BaseType::Arraykey", loc),
+                BaseType::Bool => self.todo_fake_instr("BaseType::Bool", loc),
                 BaseType::Class(cid) => {
                     let constant = Constant::Array(Arc::new(
                         TypeStruct::Unresolved(cid).into_typed_value(&self.strings),
@@ -102,38 +107,49 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
                         loc,
                     ))
                 }
-                BaseType::Classname => todo!(),
-                BaseType::Darray => todo!(),
-                BaseType::Dict => todo!(),
-                BaseType::Float => todo!(),
+                BaseType::Classname => self.todo_fake_instr("BaseType::Classname", loc),
+                BaseType::Darray => self.todo_fake_instr("BaseType::Darray", loc),
+                BaseType::Dict => self.todo_fake_instr("BaseType::Dict", loc),
+                BaseType::Float => self.todo_fake_instr("BaseType::Float", loc),
                 BaseType::Int => Instr::Hhbc(Hhbc::IsTypeC(vid, IsTypeOp::Int, loc)),
-                BaseType::Keyset => todo!(),
-                BaseType::Mixed => todo!(),
-                BaseType::None => todo!(),
-                BaseType::Nonnull => todo!(),
-                BaseType::Noreturn => todo!(),
-                BaseType::Nothing => todo!(),
-                BaseType::Null => todo!(),
-                BaseType::Num => todo!(),
-                BaseType::RawPtr(_) => todo!(),
-                BaseType::RawType(_) => todo!(),
-                BaseType::Resource => todo!(),
+                BaseType::Keyset => self.todo_fake_instr("BaseType::Keyset", loc),
+                BaseType::Mixed => self.todo_fake_instr("BaseType::Mixed", loc),
+                BaseType::None => self.todo_fake_instr("BaseType::None", loc),
+                BaseType::Nonnull => self.todo_fake_instr("BaseType::Nonnull", loc),
+                BaseType::Noreturn => self.todo_fake_instr("BaseType::Noreturn", loc),
+                BaseType::Nothing => self.todo_fake_instr("BaseType::Nothing", loc),
+                BaseType::Null => self.todo_fake_instr("BaseType::Null", loc),
+                BaseType::Num => self.todo_fake_instr("BaseType::Num", loc),
+                BaseType::RawPtr(_) => self.todo_fake_instr("BaseType::RawPtr(_)", loc),
+                BaseType::RawType(_) => self.todo_fake_instr("BaseType::RawType(_)", loc),
+                BaseType::Resource => self.todo_fake_instr("BaseType::Resource", loc),
                 BaseType::String => Instr::Hhbc(Hhbc::IsTypeC(vid, IsTypeOp::Str, loc)),
                 BaseType::This => Instr::Hhbc(Hhbc::IsLateBoundCls(vid, loc)),
-                BaseType::Typename => todo!(),
-                BaseType::Varray => todo!(),
-                BaseType::VarrayOrDarray => todo!(),
-                BaseType::Vec => todo!(),
-                BaseType::VecOrDict => todo!(),
-                BaseType::Void => todo!(),
+                BaseType::Typename => self.todo_fake_instr("BaseType::Typename", loc),
+                BaseType::Varray => self.todo_fake_instr("BaseType::Varray", loc),
+                BaseType::VarrayOrDarray => self.todo_fake_instr("BaseType::VarrayOrDarray", loc),
+                BaseType::Vec => self.todo_fake_instr("BaseType::Vec", loc),
+                BaseType::VecOrDict => self.todo_fake_instr("BaseType::VecOrDict", loc),
+                BaseType::Void => self.todo_fake_instr("BaseType::Void", loc),
             }
         } else {
-            todo!("Unhandled modifiers: {:?}", ety.modifiers);
+            self.todo_fake_instr(&format!("Unhandled modifiers: {:?}", ety.modifiers), loc)
         }
     }
 
     fn emit_is(&mut self, vid: ValueId, ty: &EnforceableType, loc: LocId) -> ValueId {
         let instr = self.is(vid, ty, loc);
+        self.emit(instr)
+    }
+
+    fn todo_fake_instr(&mut self, reason: &str, loc: LocId) -> Instr {
+        let id = self.strings.intern_str(reason);
+        let local = LocalId::Named(id);
+        Instr::Hhbc(crate::instr::Hhbc::CGetL(local, loc))
+    }
+
+    fn emit_todo_fake_instr(&mut self, reason: &str, loc: LocId) -> ValueId {
+        let instr = self.todo_fake_instr(reason, loc);
         self.emit(instr)
     }
 }

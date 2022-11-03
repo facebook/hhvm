@@ -36,9 +36,15 @@ pub struct Opts {
     /// Skip emitting 'standard' builtins.
     #[clap(long)]
     no_builtins: bool,
+
+    /// Attempt to keep going instead of panicking on unimplemented code.
+    #[clap(long)]
+    keep_going: bool,
 }
 
 pub fn run(opts: Opts) -> Result<()> {
+    textual::KEEP_GOING.store(opts.keep_going, std::sync::atomic::Ordering::Release);
+
     let files = opts.files.gather_input_files()?;
 
     let mut stdout = io::stdout();

@@ -107,7 +107,7 @@ fn write_type(
 ) -> Result {
     let fields = Vec::new();
     if !class.properties.is_empty() {
-        todo!();
+        textual_todo! { write!(w, "// TODO: class properties")? };
     }
 
     let cname = mangled_class_name(class.name, is_static, &state.strings);

@@ -24,7 +24,9 @@ pub(crate) fn convert_ty(ty: ir::EnforceableType, strings: &StringInterner) -> t
     }
 
     if modifiers != TypeConstraintFlags::NoFlags {
-        todo!("modifiers: {:?}", ty.modifiers);
+        textual_todo! {
+            base = textual::Ty::Type("TODO_NoFlags".to_string());
+        }
     }
 
     base

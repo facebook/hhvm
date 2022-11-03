@@ -69,12 +69,18 @@ fn write_base(
     w: &mut textual::FuncWriter<'_>,
     base_op: &BaseOp,
     locals: &mut impl Iterator<Item = LocalId>,
-    _operands: &mut impl Iterator<Item = ValueId>,
+    operands: &mut impl Iterator<Item = ValueId>,
 ) -> Result<Sid> {
     match *base_op {
-        BaseOp::BaseC { .. } => todo!(),
-        BaseOp::BaseGC { .. } => todo!(),
-        BaseOp::BaseH { .. } => todo!(),
+        BaseOp::BaseC { .. } => {
+            let _ = operands.next();
+            w.write_todo("BaseC")
+        }
+        BaseOp::BaseGC { .. } => {
+            let _ = operands.next();
+            w.write_todo("BaseGC")
+        }
+        BaseOp::BaseH { .. } => w.write_todo("BaseH"),
         BaseOp::BaseL {
             mode: _,
             readonly: _,
@@ -84,7 +90,7 @@ fn write_base(
             let value = textual::Expr::deref(lid);
             w.copy(value)
         }
-        BaseOp::BaseSC { .. } => todo!(),
+        BaseOp::BaseSC { .. } => w.write_todo("BaseSC"),
     }
 }
 
@@ -266,7 +272,7 @@ fn write_entry(
         }
         MemberKey::W => {
             // $a[]
-            todo!();
+            w.write_todo("MemberKey::W")
         }
     }
 }

@@ -196,9 +196,17 @@ impl IrOpts {
 struct InferOpts {
     #[clap(flatten)]
     common: CommonOpts,
+
+    /// Attempt to keep going instead of panicking on unimplemented code.
+    #[clap(long)]
+    keep_going: bool,
 }
 
 impl InferOpts {
+    fn setup(&self) {
+        textual::KEEP_GOING.store(self.keep_going, std::sync::atomic::Ordering::Release);
+    }
+
     fn verify_file(&self, path: &Path, content: Vec<u8>, profile: &mut ProfileAcc) -> Result<()> {
         // For Infer verify we just make sure that the file can compile without
         // errors.
@@ -258,6 +266,13 @@ impl Mode {
             Mode::Assemble(AssembleOpts { common, .. })
             | Mode::Infer(InferOpts { common, .. })
             | Mode::Ir(IrOpts { common, .. }) => common,
+        }
+    }
+
+    fn setup(&self) {
+        match self {
+            Mode::Assemble(_) | Mode::Ir(_) => {}
+            Mode::Infer(opts) => opts.setup(),
         }
     }
 
@@ -548,6 +563,9 @@ fn verify_files(files: &[PathBuf], mode: &Mode) -> anyhow::Result<()> {
 
 pub fn run(mut opts: Opts) -> anyhow::Result<()> {
     let num_threads = opts.mode.common().num_threads;
+
+    opts.mode.setup();
+
     let files = opts
         .mode
         .common_mut()

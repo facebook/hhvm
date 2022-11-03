@@ -163,7 +163,10 @@ pub(crate) fn write_func(
 fn write_block(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, bid: BlockId) -> Result {
     trace!("  Block {bid}");
     let block = state.func.block(bid);
-    assert!(block.tcid == TryCatchId::None);
+
+    if block.tcid != TryCatchId::None {
+        textual_todo! { w.comment("TODO: Try-Catch Block")?; }
+    }
 
     let params = block
         .params
@@ -242,11 +245,55 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
         Instr::Terminator(Terminator::Unreachable) => {
             w.unreachable()?;
         }
-        _ => {
+
+        Instr::Special(Special::Copy(..)) => todo!(),
+        Instr::Special(Special::IrToBc(..)) => todo!(),
+        Instr::Special(Special::Param) => todo!(),
+        Instr::Special(Special::Select(..)) => todo!(),
+        Instr::Special(Special::Tmp(..)) => todo!(),
+        Instr::Special(Special::Tombstone) => todo!(),
+
+        Instr::Terminator(Terminator::CallAsync(..))
+        | Instr::Terminator(Terminator::Exit(..))
+        | Instr::Terminator(Terminator::Fatal(..))
+        | Instr::Terminator(Terminator::IterInit(..))
+        | Instr::Terminator(Terminator::IterNext(..))
+        | Instr::Terminator(Terminator::MemoGet(..))
+        | Instr::Terminator(Terminator::MemoGetEager(..))
+        | Instr::Terminator(Terminator::NativeImpl(..))
+        | Instr::Terminator(Terminator::RetCSuspended(..))
+        | Instr::Terminator(Terminator::RetM(..))
+        | Instr::Terminator(Terminator::SSwitch { .. })
+        | Instr::Terminator(Terminator::Switch { .. })
+        | Instr::Terminator(Terminator::ThrowAsTypeStructException { .. }) => {
+            w.write_todo(&format!("{:?}", instr))?;
+        }
+
+        Instr::Terminator(Terminator::Throw(vid, _)) => {
+            textual_todo! {
+                let expr = state.lookup_vid(vid);
+                w.call("TODO_throw", [expr])?;
+                w.unreachable()?;
+            }
+        }
+
+        Instr::Hhbc(ref hhbc) => {
             // This should only handle instructions that can't be rewritten into
             // a simpler form (like control flow and generic calls). Everything
             // else should be handled in lower().
-            todo!("unhandled instr: {instr:?}");
+            textual_todo! {
+                use ir::instr::HasOperands;
+                let name = format!("TODO_hhbc_{:?}", hhbc);
+                let output = w.call(
+                    &name,
+                    instr
+                        .operands()
+                        .iter()
+                        .map(|vid| state.lookup_vid(*vid))
+                        .collect_vec(),
+                )?;
+                state.set_iid(iid, output);
+            }
         }
     }
 
@@ -339,49 +386,79 @@ fn write_call(
         loc: _,
     } = *call;
 
-    assert!(state.strings.lookup_bytes(context).is_empty());
     assert!(inouts.as_ref().map_or(true, |inouts| inouts.is_empty()));
     assert!(readonly.as_ref().map_or(true, |ro| ro.is_empty()));
     assert!(num_rets < 2);
 
+    let context = state.strings.lookup_bytes(context);
+    if !context.is_empty() {
+        textual_todo! {
+            w.comment("TODO: write_call(Context: {context:?})")?;
+        }
+    }
+
     if flags & FCallArgsFlags::HasUnpack != 0 {
-        todo!();
+        textual_todo! {
+            w.comment("TODO: FCallArgsFlags::HasUnpack")?;
+        }
     }
     if flags & FCallArgsFlags::HasGenerics != 0 {
-        todo!();
+        textual_todo! {
+            w.comment("TODO: FCallArgsFlags::HasGenerics")?;
+        }
     }
     if flags & FCallArgsFlags::LockWhileUnwinding != 0 {
-        todo!();
+        textual_todo! {
+            w.comment("TODO: FCallArgsFlags::LockWhileUnwinding")?;
+        }
     }
     if flags & FCallArgsFlags::SkipRepack != 0 {
-        todo!();
+        textual_todo! {
+            w.comment("TODO: FCallArgsFlags::SkipRepack")?;
+        }
     }
     if flags & FCallArgsFlags::SkipCoeffectsCheck != 0 {
-        todo!();
+        textual_todo! {
+            w.comment("TODO: FCallArgsFlags::SkipCoeffectsCheck")?;
+        }
     }
     if flags & FCallArgsFlags::EnforceMutableReturn != 0 {
         // todo!();
     }
     if flags & FCallArgsFlags::EnforceReadonlyThis != 0 {
-        todo!();
+        textual_todo! {
+            w.comment("TODO: FCallArgsFlags::EnforceReadonlyThis")?;
+        }
     }
     if flags & FCallArgsFlags::ExplicitContext != 0 {
-        todo!();
+        textual_todo! {
+            w.comment("TODO: FCallArgsFlags::ExplicitContext")?;
+        }
     }
     if flags & FCallArgsFlags::HasInOut != 0 {
-        todo!();
+        textual_todo! {
+            w.comment("TODO: FCallArgsFlags::HasInOut")?;
+        }
     }
     if flags & FCallArgsFlags::EnforceInOut != 0 {
-        todo!();
+        textual_todo! {
+            w.comment("TODO: FCallArgsFlags::EnforceInOut")?;
+        }
     }
     if flags & FCallArgsFlags::EnforceReadonly != 0 {
-        todo!();
+        textual_todo! {
+            w.comment("TODO: FCallArgsFlags::EnforceReadonly")?;
+        }
     }
     if flags & FCallArgsFlags::HasAsyncEagerOffset != 0 {
-        todo!();
+        textual_todo! {
+            w.comment("TODO: FCallArgsFlags::HasAsyncEagerOffset")?;
+        }
     }
     if flags & FCallArgsFlags::NumArgsStart != 0 {
-        todo!();
+        textual_todo! {
+            w.comment("TODO: FCallArgsFlags::NumArgsStart")?;
+        }
     }
 
     let args = detail.args(operands);
@@ -403,8 +480,22 @@ fn write_call(
         }
         CallDetail::FCallClsMethodM { .. } => todo!(),
         CallDetail::FCallClsMethodS { .. } => todo!(),
-        CallDetail::FCallClsMethodSD { .. } => todo!(),
-        CallDetail::FCallCtor => todo!(),
+        CallDetail::FCallClsMethodSD { .. } => {
+            textual_todo! { w.call("TODO_FCallClsMethodSD", ())? }
+        }
+        CallDetail::FCallCtor => {
+            textual_todo! {
+                // new $x
+                let ty = ClassName::new(Str::new(b"Mixed"));
+                let target =
+                    ir::MethodName::new(ffi::Slice::new(b"TODO_ctor")).mangle(&ty, state.strings);
+                w.call_virtual(
+                    &target,
+                    state.lookup_vid(detail.obj(operands)),
+                    args.iter().copied().map(|vid| state.lookup_vid(vid)),
+                )?
+            }
+        }
         CallDetail::FCallFunc => todo!(),
         CallDetail::FCallFuncD { func } => {
             // foo()
@@ -425,7 +516,9 @@ fn write_call(
             // $x->y()
             if flavor == ir::ObjMethodOp::NullSafe {
                 // Handle this in lowering.
-                todo!();
+                textual_todo! {
+                    w.comment("TODO: NullSafe")?;
+                }
             }
 
             // TODO: need to try to figure out the type.
@@ -524,7 +617,9 @@ impl<'a> FuncState<'a> {
                     }
                     Constant::Array(..) => todo!(),
                     Constant::Dir => todo!(),
-                    Constant::Double(..) => todo!(),
+                    Constant::Double(..) => textual_todo! {
+                        textual::Expr::call("TODO_Double".to_string(), ())
+                    },
                     Constant::File => todo!(),
                     Constant::FuncCred => todo!(),
                     Constant::Method => todo!(),
@@ -603,22 +698,23 @@ fn write_constants(remap: &mut ir::ValueIdMap<ValueId>, builder: &mut ir::FuncBu
             | Constant::String(..)
             | Constant::Uninit => continue,
 
-            Constant::Array(..) => todo!(),
-            Constant::Dir => todo!(),
-            Constant::File => todo!(),
-            Constant::FuncCred => todo!(),
-            Constant::Method => todo!(),
-            Constant::Named(..) => todo!(),
+            Constant::Array(..)
+            | Constant::Dir
+            | Constant::File
+            | Constant::FuncCred
+            | Constant::Method
+            | Constant::Named(..) => builder.emit_todo_instr(&format!("{constant:?}"), loc),
+
             Constant::NewCol(ty) => match *ty {
                 CollectionType::Vector => {
                     builder.emit_hack_builtin(hack::Builtin::Hhbc(hack::Hhbc::NewVec), &[], loc)
                 }
-                CollectionType::Map => todo!(),
-                CollectionType::Set => todo!(),
-                CollectionType::Pair => todo!(),
-                CollectionType::ImmVector => todo!(),
-                CollectionType::ImmMap => todo!(),
-                CollectionType::ImmSet => todo!(),
+                CollectionType::Map
+                | CollectionType::Set
+                | CollectionType::Pair
+                | CollectionType::ImmVector
+                | CollectionType::ImmMap
+                | CollectionType::ImmSet => builder.emit_todo_instr(&format!("{ty:?}"), loc),
                 _ => unreachable!(),
             },
         };

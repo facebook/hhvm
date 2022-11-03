@@ -25,6 +25,10 @@ pub(crate) trait FuncBuilderEx {
         args: &[ValueId],
         loc: LocId,
     ) -> ValueId;
+
+    fn todo_instr(&mut self, reason: &str, loc: LocId) -> Instr;
+
+    fn emit_todo_instr(&mut self, reason: &str, loc: LocId) -> ValueId;
 }
 
 impl<'a> FuncBuilderEx for FuncBuilder<'a> {
@@ -54,6 +58,19 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
         loc: LocId,
     ) -> ValueId {
         let instr = self.hack_builtin(builtin, args, loc);
+        self.emit(instr)
+    }
+
+    fn todo_instr(&mut self, reason: &str, loc: LocId) -> Instr {
+        textual_todo! {
+            let id = self.strings.intern_str(reason);
+            let local = ir::LocalId::Named(id);
+            Instr::Hhbc(ir::instr::Hhbc::CGetL(local, loc))
+        }
+    }
+
+    fn emit_todo_instr(&mut self, reason: &str, loc: LocId) -> ValueId {
+        let instr = self.todo_instr(reason, loc);
         self.emit(instr)
     }
 }

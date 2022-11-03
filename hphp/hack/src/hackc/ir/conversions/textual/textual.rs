@@ -123,7 +123,11 @@ impl fmt::Display for FmtTy<'_> {
             | Ty::Varray
             | Ty::VarrayOrDarray
             | Ty::Vec
-            | Ty::VecOrDict => todo!("unhandled type: {:?}", self.0),
+            | Ty::VecOrDict => {
+                textual_todo! {
+                    f.write_str(&format!("TODO_{:?}", self.0))
+                }
+            }
         }
     }
 }
@@ -542,6 +546,12 @@ impl<'a> FuncWriter<'a> {
         Ok(())
     }
 
+    pub(crate) fn write_todo(&mut self, msg: &str) -> Result<Sid> {
+        textual_todo! {
+            self.call_static(msg, Expr::null(), ())
+        }
+    }
+
     /// Call the target as a static call (without virtual dispatch).
     pub(crate) fn call_static(
         &mut self,
@@ -599,6 +609,11 @@ impl<'a> FuncWriter<'a> {
         }
         writeln!(self.w, ")")?;
         Ok(dst)
+    }
+
+    pub(crate) fn comment(&mut self, msg: &str) -> Result<()> {
+        writeln!(self.w, "// {msg}")?;
+        Ok(())
     }
 
     pub(crate) fn copy(&mut self, src: impl Into<Expr>) -> Result<Sid> {

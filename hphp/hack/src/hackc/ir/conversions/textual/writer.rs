@@ -32,7 +32,7 @@ pub fn textual_writer(
     writeln!(w)?;
 
     let mut state = UnitState::new(strings);
-    check_fatal(path, &unit.fatal)?;
+    check_fatal(path, unit.fatal.as_ref())?;
 
     for cls in unit.classes {
         crate::class::write_class(w, &mut state, cls)?;
@@ -57,24 +57,22 @@ pub fn textual_writer(
     Ok(())
 }
 
-fn check_fatal(path: &Path, fatal: &ir::FatalOp<'_>) -> Result<()> {
-    match fatal {
-        ir::FatalOp::None => Ok(()),
-        ir::FatalOp::Parse(loc, msg) => {
-            bail!(
-                "Parse error in {}[{}]: {}",
-                path.display(),
-                loc.line_begin,
-                msg.as_bstr()
-            )
-        }
-        ir::FatalOp::Runtime(loc, msg) | ir::FatalOp::RuntimeOmitFrame(loc, msg) => {
-            bail!(
-                "Runtime error in {}[{}]: {}",
-                path.display(),
-                loc.line_begin,
-                msg.as_bstr()
-            )
-        }
+fn check_fatal(path: &Path, fatal: Option<&ir::Fatal>) -> Result<()> {
+    if let Some(fatal) = fatal {
+        let err = match fatal.op {
+            ir::FatalOp::Parse => "Parse",
+            ir::FatalOp::Runtime => "Runtime",
+            ir::FatalOp::RuntimeOmitFrame => "Runtime Omit",
+            _ => unreachable!(),
+        };
+
+        bail!(
+            "{err} error in {}[{}]: {}",
+            path.display(),
+            fatal.loc.line_begin,
+            fatal.message
+        );
     }
+
+    Ok(())
 }

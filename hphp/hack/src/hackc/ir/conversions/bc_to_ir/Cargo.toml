@@ -9,6 +9,7 @@ path = "lib.rs"
 
 [dependencies]
 b2i_macros = { path = "b2i_macros" }
+bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
 ffi = { path = "../../../../utils/ffi" }
 hash = { path = "../../../../utils/hash" }
 hhbc = { path = "../../../hhbc/cargo/hhbc" }

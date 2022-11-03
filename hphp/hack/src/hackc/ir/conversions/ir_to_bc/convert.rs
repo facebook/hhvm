@@ -56,23 +56,18 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
     unit.module_use = ir_unit.module_use.into();
     unit.symbol_refs = convert_symbol_refs(alloc, &ir_unit.symbol_refs);
 
-    match &ir_unit.fatal {
-        ir::FatalOp::None => {}
-        ir::FatalOp::Parse(loc, msg)
-        | ir::FatalOp::Runtime(loc, msg)
-        | ir::FatalOp::RuntimeOmitFrame(loc, msg) => {
-            let op = match ir_unit.fatal {
-                ir::FatalOp::None => unreachable!(),
-                ir::FatalOp::Parse(..) => hhbc::FatalOp::Parse,
-                ir::FatalOp::Runtime(..) => hhbc::FatalOp::Runtime,
-                ir::FatalOp::RuntimeOmitFrame(..) => hhbc::FatalOp::RuntimeOmitFrame,
-            };
-            unit.fatal = Maybe::Just(Fatal {
-                op,
-                loc: loc.to_hhbc(),
-                message: *msg,
-            })
-        }
+    if let Some(ir::Fatal { op, loc, message }) = ir_unit.fatal.as_ref() {
+        let op = match *op {
+            ir::FatalOp::Parse => hhbc::FatalOp::Parse,
+            ir::FatalOp::Runtime => hhbc::FatalOp::Runtime,
+            ir::FatalOp::RuntimeOmitFrame => hhbc::FatalOp::RuntimeOmitFrame,
+            _ => unreachable!(),
+        };
+        unit.fatal = Maybe::Just(Fatal {
+            op,
+            loc: loc.to_hhbc(),
+            message: ffi::Str::new_slice(alloc, message),
+        });
     }
 
     unit

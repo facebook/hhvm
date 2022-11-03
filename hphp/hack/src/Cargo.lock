@@ -298,6 +298,7 @@ name = "bc_to_ir"
 version = "0.0.0"
 dependencies = [
  "b2i_macros",
+ "bstr 1.0.1",
  "ffi",
  "hash",
  "hhbc",

@@ -101,12 +101,8 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
 
     if let Maybe::Just(Fatal { op, loc, message }) = unit.fatal {
         let loc = ir::func::SrcLoc::from_hhbc(filename, &loc);
-        ir_unit.fatal = match op {
-            hhbc::FatalOp::Parse => ir::FatalOp::Parse(loc, message),
-            hhbc::FatalOp::Runtime => ir::FatalOp::Runtime(loc, message),
-            hhbc::FatalOp::RuntimeOmitFrame => ir::FatalOp::RuntimeOmitFrame(loc, message),
-            _ => panic!("bad FatalOp value"),
-        };
+        let message = bstr::BString::from(message.as_ref());
+        ir_unit.fatal = Some(ir::Fatal { op, loc, message });
     }
 
     ir_unit

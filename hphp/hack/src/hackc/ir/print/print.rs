@@ -40,6 +40,7 @@ use ir_core::instr::SwitchKind;
 use ir_core::instr::Terminator;
 use ir_core::instr::Tmp;
 use ir_core::string_intern::StringInterner;
+use ir_core::Fatal;
 use ir_core::*;
 
 use crate::formatters::*;
@@ -447,15 +448,24 @@ fn print_ctx_context(w: &mut dyn Write, ctx: &CtxConstant<'_>) -> Result {
     )
 }
 
-pub(crate) fn print_fatal(w: &mut dyn Write, fatal: &FatalOp<'_>) -> Result {
-    let (what, loc, msg) = match fatal {
-        FatalOp::None => return Ok(()),
-        FatalOp::Parse(loc, msg) => ("parse", loc, msg),
-        FatalOp::Runtime(loc, msg) => ("runtime", loc, msg),
-        FatalOp::RuntimeOmitFrame(loc, msg) => ("runtime_omit_frame", loc, msg),
-    };
+pub(crate) fn print_fatal(w: &mut dyn Write, fatal: Option<&Fatal>) -> Result {
+    if let Some(Fatal { op, loc, message }) = fatal {
+        let what = match *op {
+            ir_core::FatalOp::Parse => "parse",
+            ir_core::FatalOp::Runtime => "runtime",
+            ir_core::FatalOp::RuntimeOmitFrame => "runtime_omit_frame",
+            _ => unreachable!(),
+        };
 
-    writeln!(w, ".fatal {} {} {}\n", FmtLoc(loc), what, FmtQuotedStr(msg))
+        writeln!(
+            w,
+            ".fatal {} {} {}\n",
+            FmtLoc(loc),
+            what,
+            FmtQuotedStr(&ffi::Str::new(message))
+        )?;
+    }
+    Ok(())
 }
 
 pub(crate) fn print_func_body(
@@ -1762,9 +1772,9 @@ fn print_terminator(
         }
         Terminator::Fatal(vid, op, _) => {
             let op = match *op {
-                instr::FatalOp::Parse => "parse",
-                instr::FatalOp::Runtime => "runtime",
-                instr::FatalOp::RuntimeOmitFrame => "runtime_omit_frame",
+                ir_core::FatalOp::Parse => "parse",
+                ir_core::FatalOp::Runtime => "runtime",
+                ir_core::FatalOp::RuntimeOmitFrame => "runtime_omit_frame",
                 _ => panic!("bad FatalOp value"),
             };
             write!(w, "fatal {}, {}", op, FmtVid(func, *vid, verbose, strings))?
@@ -1974,7 +1984,7 @@ pub fn print_unit(w: &mut dyn Write, unit: &Unit<'_>, verbose: bool) -> Result {
         }
     }
 
-    print_fatal(w, &unit.fatal)?;
+    print_fatal(w, unit.fatal.as_ref())?;
 
     Ok(())
 }

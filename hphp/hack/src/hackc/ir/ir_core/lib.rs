@@ -106,5 +106,6 @@ pub use self::types::BaseType;
 pub use self::types::EnforceableType;
 pub use self::types::TypeConstraintFlags;
 pub use self::types::UserType;
+pub use self::unit::Fatal;
 pub use self::unit::FatalOp;
 pub use self::unit::Unit;

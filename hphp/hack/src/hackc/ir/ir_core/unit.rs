@@ -5,9 +5,11 @@
 
 use std::sync::Arc;
 
+use bstr::BString;
 use ffi::Str;
 pub use hhbc::ClassName;
 pub use hhbc::ConstName;
+pub use hhbc::FatalOp;
 pub use hhbc::FunctionName;
 pub use hhbc::IncludePath;
 pub use hhbc::Typedef;
@@ -20,25 +22,21 @@ use crate::Function;
 use crate::HackConstant;
 use crate::Module;
 
-pub enum FatalOp<'a> {
-    None,
-    Parse(SrcLoc, Str<'a>),
-    Runtime(SrcLoc, Str<'a>),
-    RuntimeOmitFrame(SrcLoc, Str<'a>),
-}
-
-impl<'a> std::default::Default for FatalOp<'a> {
-    fn default() -> Self {
-        Self::None
-    }
-}
-
 #[derive(Default)]
 pub struct SymbolRefs<'a> {
     pub classes: Vec<ClassName<'a>>,
     pub constants: Vec<ConstName<'a>>,
     pub functions: Vec<FunctionName<'a>>,
     pub includes: Vec<IncludePath<'a>>,
+}
+
+/// Fields used when a unit had compile-time errors that should be reported
+/// when the unit is loaded.
+#[derive(Debug)]
+pub struct Fatal {
+    pub op: FatalOp,
+    pub loc: SrcLoc,
+    pub message: BString,
 }
 
 /// Unit represents a single parsed file.
@@ -80,7 +78,7 @@ pub struct Unit<'a> {
     //
     // NB: It could be argued that Unit should be an enum with Fatal/Success
     // being two separate variants.
-    pub fatal: FatalOp<'a>,
+    pub fatal: Option<Fatal>,
 
     pub modules: Vec<Module<'a>>,
     pub module_use: Option<Str<'a>>,

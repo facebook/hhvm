@@ -147,11 +147,9 @@ SSATmp* least_common_ancestor(SSATmp* s1, SSATmp* s2) {
 
 const Func* funcFromFP(const SSATmp* fp) {
   auto const inst = canonical(fp)->inst();
-  if (inst->is(DefFP)) return inst->marker().func();
-  if (inst->is(DefFuncEntryFP)) return inst->marker().func();
-  if (inst->is(EnterFrame)) return inst->marker().func();
   if (inst->is(BeginInlining)) return inst->extra<BeginInlining>()->func;
-  always_assert(false);
+  always_assert(inst->is(DefFP, DefFuncEntryFP, EnterFrame));
+  return inst->marker().func();
 }
 
 uint32_t frameDepthIndex(const SSATmp* fp) {

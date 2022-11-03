@@ -21,6 +21,9 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * The uri of an IDL defined type.
+ */
 @SuppressWarnings({ "unused", "serial", "unchecked" })
 public class TypeUri extends TUnion<TypeUri> {
   private static final TStruct STRUCT_DESC = new TStruct("TypeUri");
@@ -133,18 +136,30 @@ public class TypeUri extends TUnion<TypeUri> {
     value_ = __value;
   }
 
+  /**
+   * The unique Thrift URI for this type.
+   */
   public String getUri() {
     return (String) __getValue(URI);
   }
 
+  /**
+   * The unique Thrift URI for this type.
+   */
   public void setUri(String __value) {
     __setValue(URI, __value);
   }
 
+  /**
+   * A prefix of the SHA2-256 hash of the URI.
+   */
   public byte[] getTypeHashPrefixSha2_256() {
     return (byte[]) __getValue(TYPEHASHPREFIXSHA2_256);
   }
 
+  /**
+   * A prefix of the SHA2-256 hash of the URI.
+   */
   public void setTypeHashPrefixSha2_256(byte[] __value) {
     __setValue(TYPEHASHPREFIXSHA2_256, __value);
   }

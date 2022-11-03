@@ -626,26 +626,36 @@ class apache_thrift_type_standard_UriStruct implements \IThriftSyncStruct, \IThr
   );
   const int STRUCTURAL_ID = 4148606449436320454;
   /**
+   * The scheme, if present.
+   * 
    * Original thrift field:-
    * 1: string scheme
    */
   public string $scheme;
   /**
+   * The domain, for example "meta.com" -> ["meta", "com"]
+   * 
    * Original thrift field:-
    * 2: list<string> domain
    */
   public Vector<string> $domain;
   /**
+   * The path, for example "path/to/file" -> ["path", "to", "file"]
+   * 
    * Original thrift field:-
    * 4: list<string> path
    */
   public Vector<string> $path;
   /**
+   * The query args.
+   * 
    * Original thrift field:-
    * 5: map<string, string> query
    */
   public Map<string, string> $query;
   /**
+   * The fragment, if present.
+   * 
    * Original thrift field:-
    * 6: string fragment
    */
@@ -919,6 +929,8 @@ enum apache_thrift_type_standard_TypeUriEnum: int {
 }
 
 /**
+ * The uri of an IDL defined type.
+ *
  * Original thrift struct:-
  * TypeUri
  */
@@ -956,11 +968,15 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
   );
   const int STRUCTURAL_ID = 7962094030226147444;
   /**
+   * The unique Thrift URI for this type.
+   * 
    * Original thrift field:-
    * 1: string uri
    */
   public ?string $uri;
   /**
+   * A prefix of the SHA2-256 hash of the URI.
+   * 
    * Original thrift field:-
    * 2: binary typeHashPrefixSha2_256
    */
@@ -1193,6 +1209,8 @@ enum apache_thrift_type_standard_TypeNameEnum: int {
 }
 
 /**
+ * Uniquely identifies a Thrift type.
+ *
  * Original thrift struct:-
  * TypeName
  */
@@ -1366,86 +1384,120 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
   );
   const int STRUCTURAL_ID = 2966511906547332991;
   /**
+   * True(1) or False(0)
+   * 
    * Original thrift field:-
    * 1: enum standard.Void boolType
    */
   public ?apache_thrift_type_standard_Void $boolType;
   /**
+   * 8-bit signed integer
+   * 
    * Original thrift field:-
    * 2: enum standard.Void byteType
    */
   public ?apache_thrift_type_standard_Void $byteType;
   /**
+   * 16-bit signed integer
+   * 
    * Original thrift field:-
    * 3: enum standard.Void i16Type
    */
   public ?apache_thrift_type_standard_Void $i16Type;
   /**
+   * 32-bit signed integer
+   * 
    * Original thrift field:-
    * 4: enum standard.Void i32Type
    */
   public ?apache_thrift_type_standard_Void $i32Type;
   /**
+   * 64-bit signed integer
+   * 
    * Original thrift field:-
    * 5: enum standard.Void i64Type
    */
   public ?apache_thrift_type_standard_Void $i64Type;
   /**
+   * 32-bit floating point
+   * 
    * Original thrift field:-
    * 6: enum standard.Void floatType
    */
   public ?apache_thrift_type_standard_Void $floatType;
   /**
+   * 64-bit floating point
+   * 
    * Original thrift field:-
    * 7: enum standard.Void doubleType
    */
   public ?apache_thrift_type_standard_Void $doubleType;
   /**
+   * UTF-8 encoded string
+   * 
    * Original thrift field:-
    * 8: enum standard.Void stringType
    */
   public ?apache_thrift_type_standard_Void $stringType;
   /**
+   * Arbitrary byte string
+   * 
    * Original thrift field:-
    * 9: enum standard.Void binaryType
    */
   public ?apache_thrift_type_standard_Void $binaryType;
   /**
+   * 32-bit signed integer, with named values.
+   * 
    * Original thrift field:-
    * 10: struct standard.TypeUri enumType
    */
   public ?apache_thrift_type_standard_TypeUri $enumType;
   /**
+   * `typedef` definition
+   * 
    * Original thrift field:-
    * 17: struct standard.TypeUri typedefType
    */
   public ?apache_thrift_type_standard_TypeUri $typedefType;
   /**
+   * `struct` definition
+   * 
    * Original thrift field:-
    * 11: struct standard.TypeUri structType
    */
   public ?apache_thrift_type_standard_TypeUri $structType;
   /**
+   * `union` definition
+   * 
    * Original thrift field:-
    * 12: struct standard.TypeUri unionType
    */
   public ?apache_thrift_type_standard_TypeUri $unionType;
   /**
+   * `exception` definition
+   * 
    * Original thrift field:-
    * 13: struct standard.TypeUri exceptionType
    */
   public ?apache_thrift_type_standard_TypeUri $exceptionType;
   /**
+   * `list<V>` definition
+   * 
    * Original thrift field:-
    * 14: enum standard.Void listType
    */
   public ?apache_thrift_type_standard_Void $listType;
   /**
+   * `set<K>` definition
+   * 
    * Original thrift field:-
    * 15: enum standard.Void setType
    */
   public ?apache_thrift_type_standard_Void $setType;
   /**
+   * `map<K, V>` definition
+   * 
    * Original thrift field:-
    * 16: enum standard.Void mapType
    */

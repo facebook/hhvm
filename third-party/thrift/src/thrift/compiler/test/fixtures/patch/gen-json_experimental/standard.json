@@ -131,32 +131,32 @@
         "constants" : {
           "Custom" : {
             "name" : "Custom",
-            "lineno" : 292,
+            "lineno" : 300,
             "value" : 0
           },
           "Binary" : {
             "name" : "Binary",
-            "lineno" : 295,
+            "lineno" : 303,
             "value" : 1
           },
           "Compact" : {
             "name" : "Compact",
-            "lineno" : 296,
+            "lineno" : 304,
             "value" : 2
           },
           "Json" : {
             "name" : "Json",
-            "lineno" : 299,
+            "lineno" : 307,
             "value" : 3
           },
           "SimpleJson" : {
             "name" : "SimpleJson",
-            "lineno" : 300,
+            "lineno" : 308,
             "value" : 4
           }
         },
         "docstring" : "The standard Thrift protocols.\n",
-        "lineno" : 291
+        "lineno" : 299
       }
       },
   "structs" :
@@ -253,6 +253,7 @@
         "fields" : {
           "scheme" : {
             "name" : "scheme",
+            "docstring" : "The scheme, if present.\n",
             "key" : 1,
             "lineno" : 226,
             "required" : "opt-in-req-out",
@@ -260,6 +261,7 @@
                   },
           "domain" : {
             "name" : "domain",
+            "docstring" : "The domain, for example \"meta.com\" -> [\"meta\", \"com\"]\n",
             "key" : 2,
             "lineno" : 229,
             "required" : "opt-in-req-out",
@@ -270,6 +272,7 @@
                   },
           "path" : {
             "name" : "path",
+            "docstring" : "The path, for example \"path/to/file\" -> [\"path\", \"to\", \"file\"]\n",
             "key" : 4,
             "lineno" : 232,
             "required" : "opt-in-req-out",
@@ -280,6 +283,7 @@
                   },
           "query" : {
             "name" : "query",
+            "docstring" : "The query args.\n",
             "key" : 5,
             "lineno" : 235,
             "required" : "opt-in-req-out",
@@ -291,6 +295,7 @@
                   },
           "fragment" : {
             "name" : "fragment",
+            "docstring" : "The fragment, if present.\n",
             "key" : 6,
             "lineno" : 238,
             "required" : "opt-in-req-out",
@@ -303,9 +308,11 @@
       },
       "TypeUri" : {
         "name" : "TypeUri",
+        "docstring" : "The uri of an IDL defined type.\n",
         "fields" : {
           "uri" : {
             "name" : "uri",
+            "docstring" : "The unique Thrift URI for this type.\n",
             "key" : 1,
             "lineno" : 244,
             "required" : "opt-in-req-out",
@@ -313,6 +320,7 @@
                   },
           "typeHashPrefixSha2_256" : {
             "name" : "typeHashPrefixSha2_256",
+            "docstring" : "A prefix of the SHA2-256 hash of the URI.\n",
             "key" : 2,
             "lineno" : 246,
             "required" : "opt-in-req-out",
@@ -325,9 +333,11 @@
       },
       "TypeName" : {
         "name" : "TypeName",
+        "docstring" : "Uniquely identifies a Thrift type.\n",
         "fields" : {
           "boolType" : {
             "name" : "boolType",
+            "docstring" : "True(1) or False(0)\n",
             "key" : 1,
             "lineno" : 252,
             "required" : "opt-in-req-out",
@@ -338,6 +348,7 @@
                   },
           "byteType" : {
             "name" : "byteType",
+            "docstring" : "8-bit signed integer\n",
             "key" : 2,
             "lineno" : 255,
             "required" : "opt-in-req-out",
@@ -348,6 +359,7 @@
                   },
           "i16Type" : {
             "name" : "i16Type",
+            "docstring" : "16-bit signed integer\n",
             "key" : 3,
             "lineno" : 258,
             "required" : "opt-in-req-out",
@@ -358,6 +370,7 @@
                   },
           "i32Type" : {
             "name" : "i32Type",
+            "docstring" : "32-bit signed integer\n",
             "key" : 4,
             "lineno" : 261,
             "required" : "opt-in-req-out",
@@ -368,6 +381,7 @@
                   },
           "i64Type" : {
             "name" : "i64Type",
+            "docstring" : "64-bit signed integer\n",
             "key" : 5,
             "lineno" : 264,
             "required" : "opt-in-req-out",
@@ -378,6 +392,7 @@
                   },
           "floatType" : {
             "name" : "floatType",
+            "docstring" : "32-bit floating point\n",
             "key" : 6,
             "lineno" : 267,
             "required" : "opt-in-req-out",
@@ -388,6 +403,7 @@
                   },
           "doubleType" : {
             "name" : "doubleType",
+            "docstring" : "64-bit floating point\n",
             "key" : 7,
             "lineno" : 270,
             "required" : "opt-in-req-out",
@@ -398,6 +414,7 @@
                   },
           "stringType" : {
             "name" : "stringType",
+            "docstring" : "UTF-8 encoded string\n",
             "key" : 8,
             "lineno" : 273,
             "required" : "opt-in-req-out",
@@ -408,6 +425,7 @@
                   },
           "binaryType" : {
             "name" : "binaryType",
+            "docstring" : "Arbitrary byte string\n",
             "key" : 9,
             "lineno" : 276,
             "required" : "opt-in-req-out",
@@ -418,6 +436,7 @@
                   },
           "enumType" : {
             "name" : "enumType",
+            "docstring" : "32-bit signed integer, with named values.\n",
             "key" : 10,
             "lineno" : 279,
             "required" : "opt-in-req-out",
@@ -428,8 +447,9 @@
                   },
           "typedefType" : {
             "name" : "typedefType",
+            "docstring" : "`typedef` definition\n",
             "key" : 17,
-            "lineno" : 281,
+            "lineno" : 282,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -438,8 +458,9 @@
                   },
           "structType" : {
             "name" : "structType",
+            "docstring" : "`struct` definition\n",
             "key" : 11,
-            "lineno" : 282,
+            "lineno" : 284,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -448,8 +469,9 @@
                   },
           "unionType" : {
             "name" : "unionType",
+            "docstring" : "`union` definition\n",
             "key" : 12,
-            "lineno" : 283,
+            "lineno" : 286,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -458,8 +480,9 @@
                   },
           "exceptionType" : {
             "name" : "exceptionType",
+            "docstring" : "`exception` definition\n",
             "key" : 13,
-            "lineno" : 284,
+            "lineno" : 288,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -468,8 +491,9 @@
                   },
           "listType" : {
             "name" : "listType",
+            "docstring" : "`list<V>` definition\n",
             "key" : 14,
-            "lineno" : 285,
+            "lineno" : 291,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -478,8 +502,9 @@
                   },
           "setType" : {
             "name" : "setType",
+            "docstring" : "`set<K>` definition\n",
             "key" : 15,
-            "lineno" : 286,
+            "lineno" : 293,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -488,8 +513,9 @@
                   },
           "mapType" : {
             "name" : "mapType",
+            "docstring" : "`map<K, V>` definition\n",
             "key" : 16,
-            "lineno" : 287,
+            "lineno" : 295,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",

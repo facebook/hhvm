@@ -477,11 +477,11 @@ class UriStruct:
     {scheme}://{domain}/{path}?{query}#{fragment}
   
   Attributes:
-   - scheme
-   - domain
-   - path
-   - query
-   - fragment
+   - scheme: The scheme, if present.
+   - domain: The domain, for example "meta.com" -> ["meta", "com"]
+   - path: The path, for example "path/to/file" -> ["path", "to", "file"]
+   - query: The query args.
+   - fragment: The fragment, if present.
   """
 
   thrift_spec = None
@@ -700,9 +700,11 @@ class UriStruct:
 
 class TypeUri(object):
   """
+  The uri of an IDL defined type.
+  
   Attributes:
-   - uri
-   - typeHashPrefixSha2_256
+   - uri: The unique Thrift URI for this type.
+   - typeHashPrefixSha2_256: A prefix of the SHA2-256 hash of the URI.
   """
 
   thrift_spec = None
@@ -853,24 +855,26 @@ class TypeUri(object):
 
 class TypeName(object):
   """
+  Uniquely identifies a Thrift type.
+  
   Attributes:
-   - boolType
-   - byteType
-   - i16Type
-   - i32Type
-   - i64Type
-   - floatType
-   - doubleType
-   - stringType
-   - binaryType
-   - enumType
-   - typedefType
-   - structType
-   - unionType
-   - exceptionType
-   - listType
-   - setType
-   - mapType
+   - boolType: True(1) or False(0)
+   - byteType: 8-bit signed integer
+   - i16Type: 16-bit signed integer
+   - i32Type: 32-bit signed integer
+   - i64Type: 64-bit signed integer
+   - floatType: 32-bit floating point
+   - doubleType: 64-bit floating point
+   - stringType: UTF-8 encoded string
+   - binaryType: Arbitrary byte string
+   - enumType: 32-bit signed integer, with named values.
+   - typedefType: `typedef` definition
+   - structType: `struct` definition
+   - unionType: `union` definition
+   - exceptionType: `exception` definition
+   - listType: `list<V>` definition
+   - setType: `set<K>` definition
+   - mapType: `map<K, V>` definition
   """
 
   thrift_spec = None

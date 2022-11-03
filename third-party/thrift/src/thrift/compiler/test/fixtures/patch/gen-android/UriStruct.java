@@ -35,10 +35,25 @@ public class UriStruct implements TBase, java.io.Serializable, Cloneable {
   private static final TField QUERY_FIELD_DESC = new TField("query", TType.MAP, (short)5);
   private static final TField FRAGMENT_FIELD_DESC = new TField("fragment", TType.STRING, (short)6);
 
+  /**
+   * The scheme, if present.
+   */
   public final String scheme;
+  /**
+   * The domain, for example "meta.com" -> ["meta", "com"]
+   */
   public final List<String> domain;
+  /**
+   * The path, for example "path/to/file" -> ["path", "to", "file"]
+   */
   public final List<String> path;
+  /**
+   * The query args.
+   */
   public final Map<String,String> query;
+  /**
+   * The fragment, if present.
+   */
   public final String fragment;
   public static final int SCHEME = 1;
   public static final int DOMAIN = 2;
@@ -94,6 +109,9 @@ public class UriStruct implements TBase, java.io.Serializable, Cloneable {
     return new UriStruct(this);
   }
 
+  /**
+   * The scheme, if present.
+   */
   public String getScheme() {
     return this.scheme;
   }
@@ -103,6 +121,9 @@ public class UriStruct implements TBase, java.io.Serializable, Cloneable {
     return this.scheme != null;
   }
 
+  /**
+   * The domain, for example "meta.com" -> ["meta", "com"]
+   */
   public List<String> getDomain() {
     return this.domain;
   }
@@ -112,6 +133,9 @@ public class UriStruct implements TBase, java.io.Serializable, Cloneable {
     return this.domain != null;
   }
 
+  /**
+   * The path, for example "path/to/file" -> ["path", "to", "file"]
+   */
   public List<String> getPath() {
     return this.path;
   }
@@ -121,6 +145,9 @@ public class UriStruct implements TBase, java.io.Serializable, Cloneable {
     return this.path != null;
   }
 
+  /**
+   * The query args.
+   */
   public Map<String,String> getQuery() {
     return this.query;
   }
@@ -130,6 +157,9 @@ public class UriStruct implements TBase, java.io.Serializable, Cloneable {
     return this.query != null;
   }
 
+  /**
+   * The fragment, if present.
+   */
   public String getFragment() {
     return this.fragment;
   }

@@ -222,68 +222,76 @@ typedef string Uri (thrift.uri = "")
 // respectively.
 @thrift.Experimental // TODO(afuller): Adapt.
 struct UriStruct {
-  // The scheme, if present.
+  /** The scheme, if present. */
   1: string scheme;
 
-  // The parsed domain, for example "meta.com" -> ["meta", "com"]
+  /** The domain, for example "meta.com" -> ["meta", "com"] */
   2: DomainLabels domain;
 
-  // The parsed path, for example "path/to/file" -> ["path", "to", "file"]
+  /** The path, for example "path/to/file" -> ["path", "to", "file"] */
   4: PathSegments path;
 
-  // The parsed query args.
+  /** The query args. */
   5: QueryArgs query;
 
-  // The fragment, if present.
+  /** The fragment, if present. */
   6: string fragment;
 } (thrift.uri = "facebook.com/thrift/type/Uri")
 
-// The uri of an IDL defined type.
+/** The uri of an IDL defined type. */
 union TypeUri {
-  // The unique Thrift URI for this type.
+  /** The unique Thrift URI for this type. */
   1: Uri uri;
-  // A prefix of the SHA2-256 hash of the URI.
+  /** A prefix of the SHA2-256 hash of the URI. */
   2: ByteString typeHashPrefixSha2_256;
 }
 
-// Uniquely identifies a Thrift type.
+/** Uniquely identifies a Thrift type. */
 union TypeName {
-  // True(1) or False(0)
+  /** True(1) or False(0) */
   1: Void boolType;
 
-  // 8-bit signed integer
+  /** 8-bit signed integer */
   2: Void byteType;
 
-  // 16-bit signed integer
+  /** 16-bit signed integer */
   3: Void i16Type;
 
-  // 32-bit signed integer
+  /** 32-bit signed integer */
   4: Void i32Type;
 
-  // 64-bit signed integer
+  /** 64-bit signed integer */
   5: Void i64Type;
 
-  // 32-bit floating point
+  /** 32-bit floating point */
   6: Void floatType;
 
-  // 64-bit floating point
+  /** 64-bit floating point */
   7: Void doubleType;
 
-  // UTF-8 encoded string
+  /** UTF-8 encoded string */
   8: Void stringType;
 
-  // Arbitrary byte string
+  /** Arbitrary byte string */
   9: Void binaryType;
 
-  // 32-bit signed integer, with named values.
+  /** 32-bit signed integer, with named values. */
   10: TypeUri enumType;
 
+  /** `typedef` definition */
   17: TypeUri typedefType;
+  /** `struct` definition */
   11: TypeUri structType;
+  /** `union` definition */
   12: TypeUri unionType;
+  /** `exception` definition */
   13: TypeUri exceptionType;
+
+  /** `list<V>` definition */
   14: Void listType;
+  /** `set<K>` definition */
   15: Void setType;
+  /** `map<K, V>` definition */
   16: Void mapType;
 }
 

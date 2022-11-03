@@ -713,11 +713,11 @@ func (p *FractionStruct) String() string {
 //   {scheme}://{domain}/{path}?{query}#{fragment}
 // 
 // Attributes:
-//  - Scheme
-//  - Domain
-//  - Path
-//  - Query
-//  - Fragment
+//  - Scheme: The scheme, if present.
+//  - Domain: The domain, for example "meta.com" -> ["meta", "com"]
+//  - Path: The path, for example "path/to/file" -> ["path", "to", "file"]
+//  - Query: The query args.
+//  - Fragment: The fragment, if present.
 type UriStruct struct {
   Scheme string `thrift:"scheme,1" db:"scheme" json:"scheme"`
   Domain DomainLabels `thrift:"domain,2" db:"domain" json:"domain"`
@@ -1063,9 +1063,11 @@ func (p *UriStruct) String() string {
   return fmt.Sprintf("UriStruct({Scheme:%s Domain:%s Path:%s Query:%s Fragment:%s})", schemeVal, domainVal, pathVal, queryVal, fragmentVal)
 }
 
+// The uri of an IDL defined type.
+// 
 // Attributes:
-//  - Uri
-//  - TypeHashPrefixSha2_256
+//  - Uri: The unique Thrift URI for this type.
+//  - TypeHashPrefixSha2_256: A prefix of the SHA2-256 hash of the URI.
 type TypeUri struct {
   Uri *Uri `thrift:"uri,1,optional" db:"uri" json:"uri,omitempty"`
   TypeHashPrefixSha2_256 ByteString `thrift:"typeHashPrefixSha2_256,2,optional" db:"typeHashPrefixSha2_256" json:"typeHashPrefixSha2_256,omitempty"`
@@ -1254,24 +1256,26 @@ func (p *TypeUri) String() string {
   return fmt.Sprintf("TypeUri({Uri:%s TypeHashPrefixSha2_256:%s})", uriVal, typeHashPrefixSha2_256Val)
 }
 
+// Uniquely identifies a Thrift type.
+// 
 // Attributes:
-//  - BoolType
-//  - ByteType
-//  - I16Type
-//  - I32Type
-//  - I64Type
-//  - FloatType
-//  - DoubleType
-//  - StringType
-//  - BinaryType
-//  - EnumType
-//  - TypedefType
-//  - StructType
-//  - UnionType
-//  - ExceptionType
-//  - ListType
-//  - SetType
-//  - MapType
+//  - BoolType: True(1) or False(0)
+//  - ByteType: 8-bit signed integer
+//  - I16Type: 16-bit signed integer
+//  - I32Type: 32-bit signed integer
+//  - I64Type: 64-bit signed integer
+//  - FloatType: 32-bit floating point
+//  - DoubleType: 64-bit floating point
+//  - StringType: UTF-8 encoded string
+//  - BinaryType: Arbitrary byte string
+//  - EnumType: 32-bit signed integer, with named values.
+//  - TypedefType: `typedef` definition
+//  - StructType: `struct` definition
+//  - UnionType: `union` definition
+//  - ExceptionType: `exception` definition
+//  - ListType: `list<V>` definition
+//  - SetType: `set<K>` definition
+//  - MapType: `map<K, V>` definition
 type TypeName struct {
   BoolType *Void `thrift:"boolType,1,optional" db:"boolType" json:"boolType,omitempty"`
   ByteType *Void `thrift:"byteType,2,optional" db:"byteType" json:"byteType,omitempty"`

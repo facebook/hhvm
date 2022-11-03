@@ -37,10 +37,25 @@ public class UriStruct implements TBase, java.io.Serializable, Cloneable, Compar
   private static final TField QUERY_FIELD_DESC = new TField("query", TType.MAP, (short)5);
   private static final TField FRAGMENT_FIELD_DESC = new TField("fragment", TType.STRING, (short)6);
 
+  /**
+   * The scheme, if present.
+   */
   public String scheme;
+  /**
+   * The domain, for example "meta.com" -> ["meta", "com"]
+   */
   public List<String> domain;
+  /**
+   * The path, for example "path/to/file" -> ["path", "to", "file"]
+   */
   public List<String> path;
+  /**
+   * The query args.
+   */
   public Map<String,String> query;
+  /**
+   * The fragment, if present.
+   */
   public String fragment;
   public static final int SCHEME = 1;
   public static final int DOMAIN = 2;
@@ -167,10 +182,16 @@ public class UriStruct implements TBase, java.io.Serializable, Cloneable, Compar
     return new UriStruct(this);
   }
 
+  /**
+   * The scheme, if present.
+   */
   public String getScheme() {
     return this.scheme;
   }
 
+  /**
+   * The scheme, if present.
+   */
   public UriStruct setScheme(String scheme) {
     this.scheme = scheme;
     return this;
@@ -191,10 +212,16 @@ public class UriStruct implements TBase, java.io.Serializable, Cloneable, Compar
     }
   }
 
+  /**
+   * The domain, for example "meta.com" -> ["meta", "com"]
+   */
   public List<String> getDomain() {
     return this.domain;
   }
 
+  /**
+   * The domain, for example "meta.com" -> ["meta", "com"]
+   */
   public UriStruct setDomain(List<String> domain) {
     this.domain = domain;
     return this;
@@ -215,10 +242,16 @@ public class UriStruct implements TBase, java.io.Serializable, Cloneable, Compar
     }
   }
 
+  /**
+   * The path, for example "path/to/file" -> ["path", "to", "file"]
+   */
   public List<String> getPath() {
     return this.path;
   }
 
+  /**
+   * The path, for example "path/to/file" -> ["path", "to", "file"]
+   */
   public UriStruct setPath(List<String> path) {
     this.path = path;
     return this;
@@ -239,10 +272,16 @@ public class UriStruct implements TBase, java.io.Serializable, Cloneable, Compar
     }
   }
 
+  /**
+   * The query args.
+   */
   public Map<String,String> getQuery() {
     return this.query;
   }
 
+  /**
+   * The query args.
+   */
   public UriStruct setQuery(Map<String,String> query) {
     this.query = query;
     return this;
@@ -263,10 +302,16 @@ public class UriStruct implements TBase, java.io.Serializable, Cloneable, Compar
     }
   }
 
+  /**
+   * The fragment, if present.
+   */
   public String getFragment() {
     return this.fragment;
   }
 
+  /**
+   * The fragment, if present.
+   */
   public UriStruct setFragment(String fragment) {
     this.fragment = fragment;
     return this;

@@ -23,6 +23,9 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
+/**
+ * Uniquely identifies a Thrift type.
+ */
 @SuppressWarnings({ "unused", "serial", "unchecked" })
 public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   private static final TStruct STRUCT_DESC = new TStruct("TypeName");
@@ -696,6 +699,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * True(1) or False(0)
    * 
    * @see Void
    */
@@ -704,6 +708,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * True(1) or False(0)
    * 
    * @see Void
    */
@@ -712,6 +717,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * 8-bit signed integer
    * 
    * @see Void
    */
@@ -720,6 +726,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * 8-bit signed integer
    * 
    * @see Void
    */
@@ -728,6 +735,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * 16-bit signed integer
    * 
    * @see Void
    */
@@ -736,6 +744,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * 16-bit signed integer
    * 
    * @see Void
    */
@@ -744,6 +753,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * 32-bit signed integer
    * 
    * @see Void
    */
@@ -752,6 +762,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * 32-bit signed integer
    * 
    * @see Void
    */
@@ -760,6 +771,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * 64-bit signed integer
    * 
    * @see Void
    */
@@ -768,6 +780,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * 64-bit signed integer
    * 
    * @see Void
    */
@@ -776,6 +789,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * 32-bit floating point
    * 
    * @see Void
    */
@@ -784,6 +798,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * 32-bit floating point
    * 
    * @see Void
    */
@@ -792,6 +807,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * 64-bit floating point
    * 
    * @see Void
    */
@@ -800,6 +816,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * 64-bit floating point
    * 
    * @see Void
    */
@@ -808,6 +825,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * UTF-8 encoded string
    * 
    * @see Void
    */
@@ -816,6 +834,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * UTF-8 encoded string
    * 
    * @see Void
    */
@@ -824,6 +843,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * Arbitrary byte string
    * 
    * @see Void
    */
@@ -832,6 +852,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * Arbitrary byte string
    * 
    * @see Void
    */
@@ -839,47 +860,78 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
     __setValue(BINARYTYPE, __value);
   }
 
+  /**
+   * 32-bit signed integer, with named values.
+   */
   public TypeUri getEnumType() {
     return (TypeUri) __getValue(ENUMTYPE);
   }
 
+  /**
+   * 32-bit signed integer, with named values.
+   */
   public void setEnumType(TypeUri __value) {
     __setValue(ENUMTYPE, __value);
   }
 
+  /**
+   * `typedef` definition
+   */
   public TypeUri getTypedefType() {
     return (TypeUri) __getValue(TYPEDEFTYPE);
   }
 
+  /**
+   * `typedef` definition
+   */
   public void setTypedefType(TypeUri __value) {
     __setValue(TYPEDEFTYPE, __value);
   }
 
+  /**
+   * `struct` definition
+   */
   public TypeUri getStructType() {
     return (TypeUri) __getValue(STRUCTTYPE);
   }
 
+  /**
+   * `struct` definition
+   */
   public void setStructType(TypeUri __value) {
     __setValue(STRUCTTYPE, __value);
   }
 
+  /**
+   * `union` definition
+   */
   public TypeUri getUnionType() {
     return (TypeUri) __getValue(UNIONTYPE);
   }
 
+  /**
+   * `union` definition
+   */
   public void setUnionType(TypeUri __value) {
     __setValue(UNIONTYPE, __value);
   }
 
+  /**
+   * `exception` definition
+   */
   public TypeUri getExceptionType() {
     return (TypeUri) __getValue(EXCEPTIONTYPE);
   }
 
+  /**
+   * `exception` definition
+   */
   public void setExceptionType(TypeUri __value) {
     __setValue(EXCEPTIONTYPE, __value);
   }
 
   /**
+   * `list<V>` definition
    * 
    * @see Void
    */
@@ -888,6 +940,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * `list<V>` definition
    * 
    * @see Void
    */
@@ -896,6 +949,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * `set<K>` definition
    * 
    * @see Void
    */
@@ -904,6 +958,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * `set<K>` definition
    * 
    * @see Void
    */
@@ -912,6 +967,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * `map<K, V>` definition
    * 
    * @see Void
    */
@@ -920,6 +976,7 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   }
 
   /**
+   * `map<K, V>` definition
    * 
    * @see Void
    */

@@ -119,6 +119,10 @@ struct UnorderedFields {
   3: string f3 = "d";
 }
 
+struct CppTemplateListField {
+  1: list<string> (cpp.template = "std::deque") f1 = ["1", "2", "3"];
+}
+
 struct OptionalFields {
   1: optional string f1;
   2: optional set<string> f2;

@@ -184,16 +184,19 @@ using InternSetTag = type::cpp_type<InternSet<KTag>, type::set<KTag>>;
 TEST(CompareTest, InternSet_Dbl) {
   using Tag = InternSetTag<type::double_t>;
   using SetT = type::native_type<Tag>;
-  static_assert(!detail::less_than_comparable_v<Tag>, "");
-  static_assert(!detail::comparable_v<Tag>, "");
+  static_assert(detail::less_than_comparable_v<Tag>, "");
+  static_assert(detail::comparable_v<Tag>, "");
 
   EXPECT_FALSE(identical<Tag>({0.0}, {-0.0}));
   EXPECT_TRUE(equal<Tag>({0.0}, {-0.0}));
+  EXPECT_TRUE(less<Tag>({0}, {1}));
+  EXPECT_FALSE(less<Tag>({0, 1}, {1, 0}));
 
   SetT set{0.0, -0.0};
   EXPECT_EQ(set.size(), 2);
   EXPECT_TRUE(identical<Tag>(set, SetT(set)));
   EXPECT_TRUE(equal<Tag>(set, SetT(set)));
+  EXPECT_FALSE(less<Tag>(set, SetT(set)));
 }
 
 template <
@@ -209,8 +212,8 @@ using InternMapTag =
 TEST(CompareTest, InternMap_Flt) {
   using Tag = InternMapTag<type::float_t, type::float_t>;
   using MapT = type::native_type<Tag>;
-  static_assert(!detail::less_than_comparable_v<Tag>, "");
-  static_assert(!detail::comparable_v<Tag>, "");
+  static_assert(detail::less_than_comparable_v<Tag>, "");
+  static_assert(detail::comparable_v<Tag>, "");
 
   MapT map{{0.0f, 0.0f}, {-0.0f, 0.0f}};
   EXPECT_EQ(map.size(), 2);
@@ -218,11 +221,38 @@ TEST(CompareTest, InternMap_Flt) {
   // identical and equal to a copy of itself.
   EXPECT_TRUE(identical<Tag>(map, MapT(map)));
   EXPECT_TRUE(equal<Tag>(map, MapT(map)));
+  EXPECT_FALSE(less<Tag>(map, MapT(map)));
 
   // Equal, but not identical to a map with equal but not identical values.
   MapT otherMap{{0.0f, 0.0f}, {-0.0f, -0.0f}};
   EXPECT_FALSE(identical<Tag>(map, otherMap));
   EXPECT_TRUE(equal<Tag>(map, otherMap));
+  EXPECT_FALSE(less<Tag>(map, otherMap));
+
+  MapT largerMap{{1.0f, 0.0f}};
+  EXPECT_FALSE(identical<Tag>(map, largerMap));
+  EXPECT_FALSE(equal<Tag>(map, largerMap));
+  EXPECT_TRUE(less<Tag>(map, largerMap));
+}
+
+TEST(CompareTest, Struct) {
+  test::OneOfEach lhs;
+  test::OneOfEach rhs;
+  --*lhs.myStruct()->mySubI64();
+
+  EXPECT_FALSE(op::less<test::OneOfEach>(lhs, lhs));
+  EXPECT_TRUE(op::less<test::OneOfEach>(lhs, rhs));
+}
+
+TEST(CompareTest, UnorderedFields) {
+  {
+    test::CppTemplateListField lhs;
+    test::CppTemplateListField rhs;
+    lhs.f1()->push_front("0");
+
+    EXPECT_FALSE(op::less<test::CppTemplateListField>(lhs, lhs));
+    EXPECT_TRUE(op::less<test::CppTemplateListField>(lhs, rhs));
+  }
 }
 
 } // namespace

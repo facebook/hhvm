@@ -16,12 +16,14 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cmath>
 #include <functional>
 #include <memory>
 #include <unordered_map>
 
 #include <folly/CPortability.h>
+#include <folly/functional/Invoke.h>
 #include <folly/io/IOBuf.h>
 #include <folly/lang/Ordering.h>
 #include <thrift/lib/cpp2/Adapt.h>
@@ -258,6 +260,87 @@ struct CompareWith<
     type::cpp_type<std::unique_ptr<folly::IOBuf>, LUTag>,
     type::cpp_type<std::unique_ptr<folly::IOBuf>, RUTag>>
     : CheckIOBufOp<LUTag, RUTag>, folly::IOBufCompare {};
+
+namespace {
+
+template <class T, class Comp>
+FOLLY_MAYBE_UNUSED bool sortAndLexicographicalCompare(
+    const T& lhs, const T& rhs, Comp&& comp) {
+  std::vector<const typename T::value_type*> l, r;
+  for (const auto& i : lhs) {
+    l.push_back(&i);
+  }
+  for (const auto& i : rhs) {
+    r.push_back(&i);
+  }
+  auto less = [&](const auto* lhsPtr, const auto* rhsPtr) {
+    return comp(*lhsPtr, *rhsPtr);
+  };
+  std::sort(l.begin(), l.end(), less);
+  std::sort(r.begin(), r.end(), less);
+  return std::lexicographical_compare(
+      l.begin(), l.end(), r.begin(), r.end(), less);
+}
+
+} // namespace
+
+template <class T, class E>
+struct ListLessThan {
+  bool operator()(const T& l, const T& r) const {
+    return std::lexicographical_compare(
+        l.begin(), l.end(), r.begin(), r.end(), LessThan<E>{});
+  }
+};
+
+template <class T, class E>
+struct SetLessThan {
+  bool operator()(const T& lhs, const T& rhs) const {
+    return sortAndLexicographicalCompare(lhs, rhs, LessThan<E>{});
+  }
+};
+
+template <class T, class K, class V>
+struct MapLessThan {
+  bool operator()(const T& lhs, const T& rhs) const {
+    auto less = [](const auto& l, const auto& r) {
+      if (LessThan<K>{}(l.first, r.first)) {
+        return true;
+      }
+      if (LessThan<K>{}(r.first, l.first)) {
+        return false;
+      }
+      return LessThan<V>{}(l.second, r.second);
+    };
+    return sortAndLexicographicalCompare(lhs, rhs, less);
+  }
+};
+
+template <typename T, typename E>
+struct LessThan<
+    type::cpp_type<T, type::list<E>>,
+    type::cpp_type<T, type::list<E>>>
+    : std::conditional_t<
+          folly::is_invocable_v<std::less<>, const T&, const T&>,
+          std::less<>,
+          ListLessThan<T, E>> {};
+
+template <typename T, typename E>
+struct LessThan<
+    type::cpp_type<T, type::set<E>>,
+    type::cpp_type<T, type::set<E>>>
+    : std::conditional_t<
+          folly::is_invocable_v<std::less<>, const T&, const T&>,
+          std::less<>,
+          SetLessThan<T, E>> {};
+
+template <typename T, typename K, typename V>
+struct LessThan<
+    type::cpp_type<T, type::map<K, V>>,
+    type::cpp_type<T, type::map<K, V>>>
+    : std::conditional_t<
+          folly::is_invocable_v<std::less<>, const T&, const T&>,
+          std::less<>,
+          MapLessThan<T, K, V>> {};
 
 // Identical for lists.
 template <

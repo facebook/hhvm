@@ -532,8 +532,6 @@ TEST(RuntimeTest, MapCppType) {
   EXPECT_NE(map, otherMap);
   otherMap.put("bar", 2);
   EXPECT_NE(map, otherMap);
-
-  EXPECT_THROW(map < otherMap, std::logic_error);
 }
 
 TEST(RuntimeTest, IntInterOp) {

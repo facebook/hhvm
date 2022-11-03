@@ -8,36 +8,61 @@
  *
  */
 
-function debug_backtrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT, int $limit = 0);
+function debug_backtrace(
+  int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT,
+  int $limit = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function debug_print_backtrace(int $options = 0, int $limit = 0): void { }
 <<__PHPStdLib>>
-function error_get_last();
+function error_get_last(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function error_log(string $message, int $message_type = 0, $destination = null, $extra_headers = null);
+function error_log(
+  string $message,
+  int $message_type = 0,
+  $destination = null,
+  $extra_headers = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function error_reporting($level = null)[leak_safe];
+function error_reporting(
+  $level = null,
+)[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function restore_error_handler();
+function restore_error_handler(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function restore_exception_handler();
+function restore_exception_handler(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function set_error_handler($error_handler, int $error_types = E_ALL);
+function set_error_handler(
+  $error_handler,
+  int $error_types = E_ALL,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function set_exception_handler($exception_handler);
+function set_exception_handler(
+  $exception_handler,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function hphp_set_error_page(string $page);
+function hphp_set_error_page(string $page): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function hphp_throw_fatal_error(string $error_msg)[]: noreturn;
 <<__PHPStdLib>>
-function hphp_clear_unflushed();
+function hphp_clear_unflushed(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function hphp_debug_caller_info()[leak_safe];
+function hphp_debug_caller_info()[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function hphp_debug_backtrace_hash(int $options = 0)[leak_safe]: int;
 <<__PHPStdLib>>
-function trigger_error(string $error_msg, int $error_type = E_USER_NOTICE)[];
+function trigger_error(
+  string $error_msg,
+  int $error_type = E_USER_NOTICE,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function trigger_sampled_error(string $error_msg, int $sample_rate, int $error_type = E_USER_NOTICE)[];
+function trigger_sampled_error(
+  string $error_msg,
+  int $sample_rate,
+  int $error_type = E_USER_NOTICE,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function user_error(string $error_msg, int $error_type = E_USER_NOTICE);
+function user_error(
+  string $error_msg,
+  int $error_type = E_USER_NOTICE,
+): HH\FIXME\MISSING_RETURN_TYPE;

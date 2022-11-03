@@ -8,9 +8,11 @@
  *
  */
 namespace HH {
-  function asio_get_current_context_idx();
-  function asio_get_running_in_context($ctx_idx);
-  function asio_get_running();
+  function asio_get_current_context_idx(): \HH\FIXME\MISSING_RETURN_TYPE;
+  function asio_get_running_in_context(
+    $ctx_idx,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
+  function asio_get_running(): \HH\FIXME\MISSING_RETURN_TYPE;
 }
 namespace HH\Asio {
   function join<T>(Awaitable<T> $awaitable)[]: T;

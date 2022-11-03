@@ -9,132 +9,323 @@
  */
 
 <<__PHPStdLib>>
-function xmlwriter_open_memory();
+function xmlwriter_open_memory(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_open_uri(string $uri);
+function xmlwriter_open_uri(string $uri): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_set_indent_string(resource $xmlwriter, $indentstring);
+function xmlwriter_set_indent_string(
+  resource $xmlwriter,
+  $indentstring,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_set_indent(resource $xmlwriter, bool $indent);
+function xmlwriter_set_indent(
+  resource $xmlwriter,
+  bool $indent,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_start_document(resource $xmlwriter, $version = "1.0", $encoding = null, $standalone = null);
+function xmlwriter_start_document(
+  resource $xmlwriter,
+  $version = "1.0",
+  $encoding = null,
+  $standalone = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_start_element(resource $xmlwriter, string $name);
+function xmlwriter_start_element(
+  resource $xmlwriter,
+  string $name,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_start_element_ns(resource $xmlwriter, $prefix, string $name, $uri);
+function xmlwriter_start_element_ns(
+  resource $xmlwriter,
+  $prefix,
+  string $name,
+  $uri,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_write_element_ns(resource $xmlwriter, $prefix, string $name, $uri, $content = null);
+function xmlwriter_write_element_ns(
+  resource $xmlwriter,
+  $prefix,
+  string $name,
+  $uri,
+  $content = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_write_element(resource $xmlwriter, string $name, $content = null);
+function xmlwriter_write_element(
+  resource $xmlwriter,
+  string $name,
+  $content = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_end_element(resource $xmlwriter);
+function xmlwriter_end_element(
+  resource $xmlwriter,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_full_end_element(resource $xmlwriter);
+function xmlwriter_full_end_element(
+  resource $xmlwriter,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_start_attribute_ns(resource $xmlwriter, string $prefix, string $name, string $uri);
+function xmlwriter_start_attribute_ns(
+  resource $xmlwriter,
+  string $prefix,
+  string $name,
+  string $uri,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_start_attribute(resource $xmlwriter, string $name);
+function xmlwriter_start_attribute(
+  resource $xmlwriter,
+  string $name,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_write_attribute_ns(resource $xmlwriter, string $prefix, string $name, string $uri, string $content);
+function xmlwriter_write_attribute_ns(
+  resource $xmlwriter,
+  string $prefix,
+  string $name,
+  string $uri,
+  string $content,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_write_attribute(resource $xmlwriter, string $name, string $value);
+function xmlwriter_write_attribute(
+  resource $xmlwriter,
+  string $name,
+  string $value,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_end_attribute(resource $xmlwriter);
+function xmlwriter_end_attribute(
+  resource $xmlwriter,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_start_cdata(resource $xmlwriter);
+function xmlwriter_start_cdata(
+  resource $xmlwriter,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_write_cdata(resource $xmlwriter, string $content);
+function xmlwriter_write_cdata(
+  resource $xmlwriter,
+  string $content,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_end_cdata(resource $xmlwriter);
+function xmlwriter_end_cdata(
+  resource $xmlwriter,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_start_comment(resource $xmlwriter);
+function xmlwriter_start_comment(
+  resource $xmlwriter,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_write_comment(resource $xmlwriter, string $content);
+function xmlwriter_write_comment(
+  resource $xmlwriter,
+  string $content,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_end_comment(resource $xmlwriter);
+function xmlwriter_end_comment(
+  resource $xmlwriter,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_end_document(resource $xmlwriter);
+function xmlwriter_end_document(
+  resource $xmlwriter,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_start_pi(resource $xmlwriter, string $target);
+function xmlwriter_start_pi(
+  resource $xmlwriter,
+  string $target,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_write_pi(resource $xmlwriter, string $target, string $content);
+function xmlwriter_write_pi(
+  resource $xmlwriter,
+  string $target,
+  string $content,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_end_pi(resource $xmlwriter);
+function xmlwriter_end_pi(resource $xmlwriter): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_text(resource $xmlwriter, string $content);
+function xmlwriter_text(
+  resource $xmlwriter,
+  string $content,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_write_raw(resource $xmlwriter, string $content);
+function xmlwriter_write_raw(
+  resource $xmlwriter,
+  string $content,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_start_dtd(resource $xmlwriter, string $qualifiedname, $publicid = null, $systemid = null);
+function xmlwriter_start_dtd(
+  resource $xmlwriter,
+  string $qualifiedname,
+  $publicid = null,
+  $systemid = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_write_dtd(resource $xmlwriter, string $name, $publicid = null, $systemid = null, $subset = null);
+function xmlwriter_write_dtd(
+  resource $xmlwriter,
+  string $name,
+  $publicid = null,
+  $systemid = null,
+  $subset = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_start_dtd_element(resource $xmlwriter, string $qualifiedname);
+function xmlwriter_start_dtd_element(
+  resource $xmlwriter,
+  string $qualifiedname,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_write_dtd_element(resource $xmlwriter, string $name, string $content);
+function xmlwriter_write_dtd_element(
+  resource $xmlwriter,
+  string $name,
+  string $content,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_end_dtd_element(resource $xmlwriter);
+function xmlwriter_end_dtd_element(
+  resource $xmlwriter,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_start_dtd_attlist(resource $xmlwriter, string $name);
+function xmlwriter_start_dtd_attlist(
+  resource $xmlwriter,
+  string $name,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_write_dtd_attlist(resource $xmlwriter, string $name, string $content);
+function xmlwriter_write_dtd_attlist(
+  resource $xmlwriter,
+  string $name,
+  string $content,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_end_dtd_attlist(resource $xmlwriter);
+function xmlwriter_end_dtd_attlist(
+  resource $xmlwriter,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_start_dtd_entity(resource $xmlwriter, string $name, bool $isparam);
+function xmlwriter_start_dtd_entity(
+  resource $xmlwriter,
+  string $name,
+  bool $isparam,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_write_dtd_entity(resource $xmlwriter, string $name, string $content, bool $pe = false, string $publicid = "", string $systemid = "", string $ndataid = "");
+function xmlwriter_write_dtd_entity(
+  resource $xmlwriter,
+  string $name,
+  string $content,
+  bool $pe = false,
+  string $publicid = "",
+  string $systemid = "",
+  string $ndataid = "",
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_end_dtd_entity(resource $xmlwriter);
+function xmlwriter_end_dtd_entity(
+  resource $xmlwriter,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_end_dtd(resource $xmlwriter);
+function xmlwriter_end_dtd(resource $xmlwriter): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_flush(resource $xmlwriter, $empty = true);
+function xmlwriter_flush(
+  resource $xmlwriter,
+  $empty = true,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_output_memory(resource $xmlwriter, $flush = true);
+function xmlwriter_output_memory(
+  resource $xmlwriter,
+  $flush = true,
+): HH\FIXME\MISSING_RETURN_TYPE;
 
 class XMLWriter {
   public function __construct();
-  public function openMemory();
-  public function openURI(string $uri);
-  public function setIndentString(string $indentstring);
-  public function setIndent(bool $indent);
-  public function startDocument($version = "1.0", $encoding = null, $standalone = null);
-  public function startElement(string $name);
-  public function startElementNS($prefix, string $name, $uri);
-  public function writeElementNS($prefix, string $name, $uri, $content = null);
-  public function writeElement(string $name, $content = null);
-  public function endElement();
-  public function fullEndElement();
-  public function startAttributeNS(string $prefix, string $name, string $uri);
-  public function startAttribute(string $name);
-  public function writeAttributeNS(string $prefix, string $name, string $uri, string $content);
-  public function writeAttribute(string $name, string $value);
-  public function endAttribute();
-  public function startCData();
-  public function writeCData(string $content);
-  public function endCData();
-  public function startComment();
-  public function writeComment(string $content);
-  public function endComment();
-  public function endDocument();
-  public function startPI(string $target);
-  public function writePI(string $target, string $content);
-  public function endPI();
-  public function text(string $content);
-  public function writeRaw(string $content);
-  public function startDTD(string $qualifiedname, $publicid = null, $systemid = null);
-  public function writeDTD(string $name, $publicid = null, $systemid = null, $subset = null);
-  public function startDTDElement(string $qualifiedname);
-  public function writeDTDElement(string $name, string $content);
-  public function endDTDElement();
-  public function startDTDAttlist(string $name);
-  public function writeDTDAttlist(string $name, string $content);
-  public function endDTDAttlist();
-  public function startDTDEntity(string $name, bool $isparam);
-  public function writeDTDEntity(string $name, string $content, bool $pe = false, string $publicid = "", string $systemid = "", string $ndataid = "");
-  public function endDTDEntity();
-  public function endDTD();
-  public function flush($empty = true);
-  public function outputMemory($flush = true);
+  public function openMemory(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function openURI(string $uri): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setIndentString(
+    string $indentstring,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setIndent(bool $indent): HH\FIXME\MISSING_RETURN_TYPE;
+  public function startDocument(
+    $version = "1.0",
+    $encoding = null,
+    $standalone = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function startElement(string $name): HH\FIXME\MISSING_RETURN_TYPE;
+  public function startElementNS(
+    $prefix,
+    string $name,
+    $uri,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function writeElementNS(
+    $prefix,
+    string $name,
+    $uri,
+    $content = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function writeElement(
+    string $name,
+    $content = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function endElement(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function fullEndElement(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function startAttributeNS(
+    string $prefix,
+    string $name,
+    string $uri,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function startAttribute(string $name): HH\FIXME\MISSING_RETURN_TYPE;
+  public function writeAttributeNS(
+    string $prefix,
+    string $name,
+    string $uri,
+    string $content,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function writeAttribute(
+    string $name,
+    string $value,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function endAttribute(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function startCData(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function writeCData(string $content): HH\FIXME\MISSING_RETURN_TYPE;
+  public function endCData(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function startComment(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function writeComment(string $content): HH\FIXME\MISSING_RETURN_TYPE;
+  public function endComment(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function endDocument(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function startPI(string $target): HH\FIXME\MISSING_RETURN_TYPE;
+  public function writePI(
+    string $target,
+    string $content,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function endPI(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function text(string $content): HH\FIXME\MISSING_RETURN_TYPE;
+  public function writeRaw(string $content): HH\FIXME\MISSING_RETURN_TYPE;
+  public function startDTD(
+    string $qualifiedname,
+    $publicid = null,
+    $systemid = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function writeDTD(
+    string $name,
+    $publicid = null,
+    $systemid = null,
+    $subset = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function startDTDElement(
+    string $qualifiedname,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function writeDTDElement(
+    string $name,
+    string $content,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function endDTDElement(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function startDTDAttlist(string $name): HH\FIXME\MISSING_RETURN_TYPE;
+  public function writeDTDAttlist(
+    string $name,
+    string $content,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function endDTDAttlist(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function startDTDEntity(
+    string $name,
+    bool $isparam,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function writeDTDEntity(
+    string $name,
+    string $content,
+    bool $pe = false,
+    string $publicid = "",
+    string $systemid = "",
+    string $ndataid = "",
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function endDTDEntity(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function endDTD(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function flush($empty = true): HH\FIXME\MISSING_RETURN_TYPE;
+  public function outputMemory($flush = true): HH\FIXME\MISSING_RETURN_TYPE;
 }

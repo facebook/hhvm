@@ -24,13 +24,13 @@ class Transliterator {
   public function createInverse(): ?Transliterator;
   public function getErrorCode(): int;
   public function getErrorMessage(): string;
-  public function getId();
-  public static function listIDs();
+  public function getId(): HH\FIXME\MISSING_RETURN_TYPE;
+  public static function listIDs(): HH\FIXME\MISSING_RETURN_TYPE;
   public function transliterate(
     string $subject,
     int $start = 0,
     int $end = -1,
-  );
+  ): HH\FIXME\MISSING_RETURN_TYPE;
 }
 
 <<__PHPStdLib>>
@@ -60,5 +60,5 @@ function transliterator_transliterate(
   string $subject,
   int $start = 0,
   int $end = -1,
-);
+): HH\FIXME\MISSING_RETURN_TYPE;
 

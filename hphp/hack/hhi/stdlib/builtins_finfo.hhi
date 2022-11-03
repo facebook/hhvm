@@ -19,17 +19,33 @@ const int FILEINFO_PRESERVE_ATIME = 128;
 const int FILEINFO_RAW = 256;
 
 <<__PHPStdLib>>
-function finfo_open(int $options = FILEINFO_NONE, $magic_file = null) {}
+function finfo_open(
+  int $options = FILEINFO_NONE,
+  $magic_file = null,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function finfo_close(resource $finfo);
+function finfo_close(resource $finfo): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function finfo_set_flags(resource $finfo, int $options) {}
+function finfo_set_flags(
+  resource $finfo,
+  int $options,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function finfo_file(resource $finfo, $file_name, int $options = FILEINFO_NONE, $context = null) {}
+function finfo_file(
+  resource $finfo,
+  $file_name,
+  int $options = FILEINFO_NONE,
+  $context = null,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function finfo_buffer(resource $finfo, $string, int $options = FILEINFO_NONE, $context = null);
+function finfo_buffer(
+  resource $finfo,
+  $string,
+  int $options = FILEINFO_NONE,
+  $context = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mime_content_type($filename) {}
+function mime_content_type($filename): HH\FIXME\MISSING_RETURN_TYPE {}
 
 class finfo {
   // Methods

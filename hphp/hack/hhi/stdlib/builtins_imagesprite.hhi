@@ -10,14 +10,34 @@
 
 class ImageSprite {
   public function __construct() { }
-  public function addFile($file, $options = null) { }
-  public function addString($id, $data, $options = null) { }
-  public function addUrl($url, $timeout_ms = 0, $Options = null) { }
-  public function clear($paths = null) { }
-  public function loadDims($block = false) { }
-  public function loadImages($block = false) { }
-  public function output($output_file = null, $format = "png", $quality = 75) { }
-  public function css($css_namespace, $sprite_file = null, $output_file = null, $verbose = false) { }
-  public function getErrors() { }
-  public function mapping() { }
+  public function addFile(
+    $file,
+    $options = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function addString(
+    $id,
+    $data,
+    $options = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function addUrl(
+    $url,
+    $timeout_ms = 0,
+    $Options = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function clear($paths = null): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function loadDims($block = false): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function loadImages($block = false): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function output(
+    $output_file = null,
+    $format = "png",
+    $quality = 75,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function css(
+    $css_namespace,
+    $sprite_file = null,
+    $output_file = null,
+    $verbose = false,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function getErrors(): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function mapping(): HH\FIXME\MISSING_RETURN_TYPE {}
 }

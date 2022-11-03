@@ -106,8 +106,11 @@ class Exception implements Throwable {
   public function toString(): string;
   private function __clone(): void;
 
-  final public static function getTraceOptions()[read_globals];
-  final public static function setTraceOptions($opts)[globals];
+    final public static function getTraceOptions(
+    )[read_globals]: \HH\FIXME\MISSING_RETURN_TYPE;
+    final public static function setTraceOptions(
+      $opts,
+    )[globals]: \HH\FIXME\MISSING_RETURN_TYPE;
 
   /**
    * Actually defined on \__SystemLib\BaseException

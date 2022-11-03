@@ -3,20 +3,20 @@ definition:
  HH\meth_caller
    kind: function
    id: function::HH\meth_caller
-   position: line 89, characters 10-20
-   span: line 89, character 1 - line 89, character 58
+   position: line 89, characters 12-22
+   span: line 89, character 3 - line 92, character 35
    modifiers: 
    params:
      $cls_name
        kind: param
-       position: line 89, characters 29-37
-       span: line 89, character 22 - line 89, character 37
+       position: line 90, characters 12-20
+       span: line 90, character 5 - line 90, character 20
        modifiers: 
 
      $meth_name
        kind: param
-       position: line 89, characters 47-56
-       span: line 89, character 40 - line 89, character 56
+       position: line 91, characters 12-21
+       span: line 91, character 5 - line 91, character 21
        modifiers: 
 
 

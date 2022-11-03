@@ -118,10 +118,13 @@ newtype TypeStructure<T> as shape(
   ?'like' => bool,
 );
 
-/*
- * returns the shape associated with the type constant.
- */
-function type_structure(mixed $cls_or_obj, string $cns_name)[];
+  /*
+   * returns the shape associated with the type constant.
+   */
+  function type_structure(
+    mixed $cls_or_obj,
+    string $cns_name,
+  )[]: \HH\FIXME\MISSING_RETURN_TYPE;
 // becomes:
 // type_structure(C::class or new C, 'type_const_name')
 //   : TypeStructure

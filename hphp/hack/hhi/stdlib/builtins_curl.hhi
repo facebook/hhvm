@@ -600,55 +600,89 @@ const int CURLHSTS_READONLYFILE = 0;
 const int CURLMIMEOPT_FORMESCAPE = 0;
 
 <<__PHPStdLib>>
-function curl_init($url = null)[leak_safe];
+  function curl_init($url = null)[leak_safe]: \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_init_pooled(string $pool_name, $url = null);
+  function curl_init_pooled(
+    string $pool_name,
+    $url = null,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_copy_handle(resource $ch);
+  function curl_copy_handle(resource $ch): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_version(int $uversion = CURLVERSION_NOW);
+  function curl_version(
+    int $uversion = CURLVERSION_NOW,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_setopt(resource $ch, int $option, $value)[write_props];
+  function curl_setopt(
+    resource $ch,
+    int $option,
+    $value,
+  )[write_props]: \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_setopt_array(resource $ch, $options);
+  function curl_setopt_array(
+    resource $ch,
+    $options,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_exec(resource $ch);
+  function curl_exec(resource $ch): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_getinfo(resource $ch, int $opt = 0);
+  function curl_getinfo(
+    resource $ch,
+    int $opt = 0,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_errno(resource $ch);
+  function curl_errno(resource $ch): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_error(resource $ch)[];
+  function curl_error(resource $ch)[]: \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_strerror(int $code);
+  function curl_strerror(int $code): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_close(resource $ch)[leak_safe];
+  function curl_close(resource $ch)[leak_safe]: \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_multi_init();
+  function curl_multi_init(): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_multi_strerror(int $errornum);
+  function curl_multi_strerror(int $errornum): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_multi_add_handle(resource $mh, resource $ch);
+  function curl_multi_add_handle(
+    resource $mh,
+    resource $ch,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_multi_remove_handle(resource $mh, resource $ch);
+  function curl_multi_remove_handle(
+    resource $mh,
+    resource $ch,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_multi_exec(resource $mh, inout int $still_running);
+  function curl_multi_exec(
+    resource $mh,
+    inout int $still_running,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_multi_select(resource $mh, float $timeout = 1.0);
+  function curl_multi_select(
+    resource $mh,
+    float $timeout = 1.0,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function curl_multi_await(resource $mh, float $timeout = 1.0): Awaitable<int>;
 <<__PHPStdLib>>
-function curl_multi_getcontent(resource $ch);
+  function curl_multi_getcontent(resource $ch): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_multi_info_read(resource $mh, inout $msgs_in_queue);
+  function curl_multi_info_read(
+    resource $mh,
+    inout $msgs_in_queue,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_multi_close(resource $mh);
+  function curl_multi_close(resource $mh): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_share_init();
+  function curl_share_init(): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_share_close(resource $sh);
+  function curl_share_close(resource $sh): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function curl_share_setopt(resource $sh, int $option, $value);
+  function curl_share_setopt(
+    resource $sh,
+    int $option,
+    $value,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 
 class CURLFile {
   public string $name = '';

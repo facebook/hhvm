@@ -9,25 +9,41 @@
  */
 
 <<__PHPStdLib>>
-function spl_classes();
+function spl_classes(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function spl_object_hash($obj)[];
+function spl_object_hash($obj)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function hphp_object_pointer($obj);
+function hphp_object_pointer($obj): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function hphp_get_this();
+function hphp_get_this(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function class_implements($obj, bool $autoload = true)[];
+function class_implements(
+  $obj,
+  bool $autoload = true,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function class_parents($obj, bool $autoload = true)[];
+function class_parents(
+  $obj,
+  bool $autoload = true,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function class_uses($obj, bool $autoload = true)[];
+function class_uses(
+  $obj,
+  bool $autoload = true,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function iterator_apply($obj, $func, $params = null);
+function iterator_apply(
+  $obj,
+  $func,
+  $params = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function iterator_count($obj);
+function iterator_count($obj): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function iterator_to_array($obj, bool $use_keys = true);
+function iterator_to_array(
+  $obj,
+  bool $use_keys = true,
+): HH\FIXME\MISSING_RETURN_TYPE;
 
 class SplDoublyLinkedList<T> implements Iterator<T>, ArrayAccess<int, T>, Countable {
   public function bottom(): T;
@@ -199,29 +215,35 @@ class SplPriorityQueue<T> implements Iterator<T>, Countable {
   const int EXTR_BOTH = 3;
   const int EXTR_PRIORITY = 2;
   const int EXTR_DATA = 1;
-  public function compare($a, $b) {}
+  public function compare($a, $b): HH\FIXME\MISSING_RETURN_TYPE {}
   public function count() {}
   public function current() {}
-  public function extract() {}
-  public function insert($value, $priority) {}
-  public function isEmpty() {}
-  public function key() {}
+  public function extract(): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function insert($value, $priority): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function isEmpty(): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function key(): HH\FIXME\MISSING_RETURN_TYPE {}
   public function next(): void {}
-  public function recoverFromCorruption() {}
+  public function recoverFromCorruption(): HH\FIXME\MISSING_RETURN_TYPE {}
   public function rewind(): void {}
-  public function setExtractFlags($flags) {}
-  public function top() {}
+  public function setExtractFlags($flags): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function top(): HH\FIXME\MISSING_RETURN_TYPE {}
   public function valid() {}
 }
 
 interface SplObserver {
-  public function update(SplSubject $SplSubject) {}
+  public function update(
+    SplSubject $SplSubject,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
 }
 
 interface SplSubject {
-  public function attach(SplObserver $SplObserver) {}
-  public function detach(SplObserver $SplObserver) {}
-  public function notify() {}
+  public function attach(
+    SplObserver $SplObserver,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function detach(
+    SplObserver $SplObserver,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function notify(): HH\FIXME\MISSING_RETURN_TYPE {}
 }
 
 class SplType {
@@ -239,7 +261,9 @@ class SplString extends SplType {
 
 class SplEnum extends SplType {
   public function __construct($initial_value, $strict) {}
-  public function getConstList($include_default = false) {}
+  public function getConstList(
+    $include_default = false,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
 }
 
 class SplBool extends SplEnum {

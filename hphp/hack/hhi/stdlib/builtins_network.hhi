@@ -59,78 +59,145 @@ const int LOG_UUCP = 64;
 const int LOG_WARNING = 4;
 
 <<__PHPStdLib>>
-function gethostname()[];
+function gethostname()[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function gethostbyaddr(string $ip_address);
+function gethostbyaddr(string $ip_address): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function gethostbyname(string $hostname);
+function gethostbyname(string $hostname): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function gethostbynamel(string $hostname);
+function gethostbynamel(string $hostname): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function getprotobyname(string $name);
+function getprotobyname(string $name): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function getprotobynumber(int $number);
+function getprotobynumber(int $number): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function getservbyname(string $service, string $protocol);
+function getservbyname(
+  string $service,
+  string $protocol,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function getservbyport(int $port, string $protocol);
+function getservbyport(
+  int $port,
+  string $protocol,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function inet_ntop(string $in_addr)[];
+function inet_ntop(string $in_addr)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function inet_ntop_folly(string $in_addr)[]: ?string;
 <<__PHPStdLib>>
 function inet_ntop_nullable(string $in_addr)[]: ?string;
 <<__PHPStdLib>>
-function inet_pton(string $address)[];
+function inet_pton(string $address)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function ip2long(string $ip_address)[];
+function ip2long(string $ip_address)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function long2ip(string $proper_address)[];
+function long2ip(string $proper_address)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function dns_check_record($host, $type = null);
+function dns_check_record($host, $type = null): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function checkdnsrr(string $host, string $type = "MX");
+function checkdnsrr(
+  string $host,
+  string $type = "MX",
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function dns_get_record(string $hostname, int $type, inout $authns, inout $addtl);
+function dns_get_record(
+  string $hostname,
+  int $type,
+  inout $authns,
+  inout $addtl,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function dns_get_mx($hostname, inout $mxhosts, inout $weights);
+function dns_get_mx(
+  $hostname,
+  inout $mxhosts,
+  inout $weights,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function getmxrr(string $hostname, inout $mxhosts, inout $weight);
+function getmxrr(
+  string $hostname,
+  inout $mxhosts,
+  inout $weight,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fsockopen(string $hostname, int $port, inout $errnum, inout $errstr, float $timeout = 0.0);
+function fsockopen(
+  string $hostname,
+  int $port,
+  inout $errnum,
+  inout $errstr,
+  float $timeout = 0.0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pfsockopen(string $hostname, int $port, inout $errnum, inout $errstr, float $timeout = 0.0);
+function pfsockopen(
+  string $hostname,
+  int $port,
+  inout $errnum,
+  inout $errstr,
+  float $timeout = 0.0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function socket_get_status($stream);
+function socket_get_status($stream): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function socket_set_blocking($stream, $mode);
+function socket_set_blocking($stream, $mode): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function socket_set_timeout($stream, $seconds, $microseconds = 0);
+function socket_set_timeout(
+  $stream,
+  $seconds,
+  $microseconds = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function header(string $str, bool $replace = true, int $http_response_code = 0);
+function header(
+  string $str,
+  bool $replace = true,
+  int $http_response_code = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function http_response_code(int $response_code = 0);
+function http_response_code(
+  int $response_code = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function headers_list()[read_globals];
+function headers_list()[read_globals]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function get_http_request_size();
+function get_http_request_size(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function headers_sent();
+function headers_sent(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function headers_sent_with_file_line(inout $file, inout $line);
+function headers_sent_with_file_line(
+  inout $file,
+  inout $line,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function header_register_callback($callback);
+function header_register_callback($callback): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function header_remove($name = null);
+function header_remove($name = null): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function setcookie(string $name, string $value = "", int $expire = 0, string $path = "", string $domain = "", bool $secure = false, bool $httponly = false);
+function setcookie(
+  string $name,
+  string $value = "",
+  int $expire = 0,
+  string $path = "",
+  string $domain = "",
+  bool $secure = false,
+  bool $httponly = false,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function setrawcookie(string $name, string $value = "", int $expire = 0, string $path = "", string $domain = "", bool $secure = false, bool $httponly = false);
+function setrawcookie(
+  string $name,
+  string $value = "",
+  int $expire = 0,
+  string $path = "",
+  string $domain = "",
+  bool $secure = false,
+  bool $httponly = false,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function define_syslog_variables();
+function define_syslog_variables(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function openlog(string $ident, int $option, int $facility);
+function openlog(
+  string $ident,
+  int $option,
+  int $facility,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function closelog();
+function closelog(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function syslog(int $priority, string $message): bool;

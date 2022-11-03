@@ -1,6 +1,6 @@
 File "pseudofunction_with_signature.php", line 8, characters 15-22:
 Unexpected `inout` annotation for argument (Typing[4183])
-  File "Shapes.hhi", line 40, characters 17-22:
+  File "Shapes.hhi", line 40, characters 19-24:
   This is a normal parameter (does not have `inout`)
 File "pseudofunction_with_signature.php", line 9, characters 3-16:
 The two arguments to `type_structure()` must be:
@@ -21,7 +21,7 @@ Unexpected `inout` annotation for argument (Typing[4183])
   This is a normal parameter (does not have `inout`)
 File "pseudofunction_with_signature.php", line 12, characters 24-31:
 Unexpected `inout` annotation for argument (Typing[4183])
-  File "container_functions.hhi", line 111, characters 43-48:
+  File "container_functions.hhi", line 115, characters 43-48:
   This is a normal parameter (does not have `inout`)
 File "pseudofunction_with_signature.php", line 13, characters 19-26:
 Unexpected `inout` annotation for argument (Typing[4183])
@@ -29,9 +29,9 @@ Unexpected `inout` annotation for argument (Typing[4183])
   This is a normal parameter (does not have `inout`)
 File "pseudofunction_with_signature.php", line 14, characters 23-30:
 Unexpected `inout` annotation for argument (Typing[4183])
-  File "container_functions.hhi", line 109, characters 42-47:
+  File "container_functions.hhi", line 113, characters 42-47:
   This is a normal parameter (does not have `inout`)
 File "pseudofunction_with_signature.php", line 15, characters 24-31:
 Unexpected `inout` annotation for argument (Typing[4183])
-  File "container_functions.hhi", line 111, characters 43-48:
+  File "container_functions.hhi", line 115, characters 43-48:
   This is a normal parameter (does not have `inout`)

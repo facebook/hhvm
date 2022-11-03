@@ -59,14 +59,31 @@ const int FILTER_FLAG_NO_PRIV_RANGE = 0;
 <<__PHPStdLib, __Deprecated('will be removed in a future version of hack')>>
 function filter_has_var(int $type, string $variable_name): bool {}
 <<__PHPStdLib>>
-function filter_id(string $name)[] {}
+function filter_id(string $name)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib, __Deprecated('will be removed in a future version of hack')>>
-function filter_input_array(int $type, mixed $definition = null, bool $add_empty = true) {}
+function filter_input_array(
+  int $type,
+  mixed $definition = null,
+  bool $add_empty = true,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib, __Deprecated('will be removed in a future version of hack')>>
-function filter_input(int $type, string $variable_name, int $filter = FILTER_DEFAULT, mixed $options = null) {}
+function filter_input(
+  int $type,
+  string $variable_name,
+  int $filter = FILTER_DEFAULT,
+  mixed $options = null,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function filter_list()[]: varray<string> {}
 <<__PHPStdLib>>
-function filter_var_array(Container<mixed> $data, mixed $definition = null, bool $add_empty = true)[] {}
+function filter_var_array(
+  Container<mixed> $data,
+  mixed $definition = null,
+  bool $add_empty = true,
+)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function filter_var(mixed $value, int $filter = FILTER_DEFAULT, mixed $options = null)[] {}
+function filter_var(
+  mixed $value,
+  int $filter = FILTER_DEFAULT,
+  mixed $options = null,
+)[]: HH\FIXME\MISSING_RETURN_TYPE {}

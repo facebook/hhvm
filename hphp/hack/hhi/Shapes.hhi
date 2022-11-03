@@ -12,35 +12,35 @@ namespace HH {
 
 abstract final class Shapes {
 
-/**
- * Use `Shapes::idx` to retrieve a field value in a shape, when the key may or may not exist.
- * If `$index` does not exist in the shape, the default value will be returned (`$default`), if one has been set.
- * It behaves similarily to `idx()` for Collections.
- *
- * A few examples:
- * * `Shapes::idx(shape('x' => 123), 'x') // 123`
- * * `Shapes::idx(shape('x' => 123), 'y') // null`
- * * `Shapes::idx(shape('x' => 123), 'y', 456) // 456`
- *
- * * `Shapes::idx(null, 'y', 456) // 456`
- *
- * Use `Shapes::idx` when the key in your shape is optional (e.g., `?x`, in `shape(?'x' => int`).
- * If the key in your shape is always present, access the value directly: `$my_shape['x']`.
- *
- * The second argument, `$index` must always be a literal.
- *
- * @param shape(...) $shape   - shape to search for $index.
- * @param arraykey $index     - Key ($index) to search. Must be a literal!
- * @param mixed $default      - Default value to return if $index does not exist. By default, returns `null`.
- *
- * @return $value              - Value at $index, if it exists, or $default.
- *
- */
-  public static function idx(
-    ?shape(...) $shape,
-    arraykey $index,
-    $default = null,
-  )[];
+    /**
+     * Use `Shapes::idx` to retrieve a field value in a shape, when the key may or may not exist.
+     * If `$index` does not exist in the shape, the default value will be returned (`$default`), if one has been set.
+     * It behaves similarily to `idx()` for Collections.
+     *
+     * A few examples:
+     * * `Shapes::idx(shape('x' => 123), 'x') // 123`
+     * * `Shapes::idx(shape('x' => 123), 'y') // null`
+     * * `Shapes::idx(shape('x' => 123), 'y', 456) // 456`
+     *
+     * * `Shapes::idx(null, 'y', 456) // 456`
+     *
+     * Use `Shapes::idx` when the key in your shape is optional (e.g., `?x`, in `shape(?'x' => int`).
+     * If the key in your shape is always present, access the value directly: `$my_shape['x']`.
+     *
+     * The second argument, `$index` must always be a literal.
+     *
+     * @param shape(...) $shape   - shape to search for $index.
+     * @param arraykey $index     - Key ($index) to search. Must be a literal!
+     * @param mixed $default      - Default value to return if $index does not exist. By default, returns `null`.
+     *
+     * @return $value              - Value at $index, if it exists, or $default.
+     *
+     */
+    public static function idx(
+      ?shape(...) $shape,
+      arraykey $index,
+      $default = null,
+    )[]: \HH\FIXME\MISSING_RETURN_TYPE;
 
   /**
    * Check if a field in shape exists.
@@ -68,15 +68,15 @@ abstract final class Shapes {
     shape(...) $shape
   )[]: dict<arraykey, mixed>;
 
-  /**
-   * Returns the value of the field $index of $shape,
-   * throws if the field is missing.
-   * Use this to access optional fields on shapes.
-   */
-  public static function at(
-    shape(...) $shape,
-    arraykey $index,
-  )[];
+    /**
+     * Returns the value of the field $index of $shape,
+     * throws if the field is missing.
+     * Use this to access optional fields on shapes.
+     */
+    public static function at(
+      shape(...) $shape,
+      arraykey $index,
+    )[]: \HH\FIXME\MISSING_RETURN_TYPE;
 
 }
 

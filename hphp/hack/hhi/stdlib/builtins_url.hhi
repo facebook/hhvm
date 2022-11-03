@@ -21,17 +21,29 @@ const int PHP_QUERY_RFC1738 = 1;
 const int PHP_QUERY_RFC3986 = 2;
 
 <<__PHPStdLib>>
-function base64_decode(string $data, bool $strict = false)[];
+function base64_decode(
+  string $data,
+  bool $strict = false,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function base64_encode(string $data)[]: string;
 <<__PHPStdLib>>
-function get_headers(string $url, int $format = 0);
+function get_headers(
+  string $url,
+  int $format = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function get_meta_tags(string $filename, bool $use_include_path = false);
+function get_meta_tags(
+  string $filename,
+  bool $use_include_path = false,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function http_build_query($formdata, $numeric_prefix = null, string $arg_separator = "", int $enc_type = PHP_QUERY_RFC1738)[]: string;
 <<__PHPStdLib>>
-function parse_url(string $url, int $component = -1);
+function parse_url(
+  string $url,
+  int $component = -1,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function rawurldecode(string $str)[]: string;
 <<__PHPStdLib>>

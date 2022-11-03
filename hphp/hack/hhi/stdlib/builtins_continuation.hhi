@@ -9,12 +9,17 @@
  */
 
 <<__PHPStdLib>>
-function hphp_create_continuation($clsname, $funcname, $origFuncName, $args = null) { }
+function hphp_create_continuation(
+  $clsname,
+  $funcname,
+  $origFuncName,
+  $args = null,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 class DummyContinuation {
   public function __construct() { }
-  public function current() { }
-  public function key() { }
-  public function next() { }
-  public function rewind() { }
-  public function valid() { }
+  public function current(): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function key(): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function next(): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function rewind(): HH\FIXME\MISSING_RETURN_TYPE {}
+  public function valid(): HH\FIXME\MISSING_RETURN_TYPE {}
 }

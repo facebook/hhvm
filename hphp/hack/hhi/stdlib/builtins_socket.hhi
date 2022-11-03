@@ -161,56 +161,153 @@ const int SOCKET_EDQUOT = 0;
 const int SOCKET_ENOMEDIUM = 0;
 const int SOCKET_EMEDIUMTYPE = 0;
 <<__PHPStdLib>>
-function socket_create(int $domain, int $type, int $protocol)[leak_safe] { }
+function socket_create(
+  int $domain,
+  int $type,
+  int $protocol,
+)[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_create_listen(int $port, int $backlog = 128) { }
+function socket_create_listen(
+  int $port,
+  int $backlog = 128,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_create_pair(int $domain, int $type, int $protocol, inout $fd) { }
+function socket_create_pair(
+  int $domain,
+  int $type,
+  int $protocol,
+  inout $fd,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_get_option(resource $socket, int $level, int $optname)[leak_safe] { }
+function socket_get_option(
+  resource $socket,
+  int $level,
+  int $optname,
+)[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_getpeername(resource $socket, inout $address, inout $port)[leak_safe] { }
+function socket_getpeername(
+  resource $socket,
+  inout $address,
+  inout $port,
+)[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_getsockname(resource $socket, inout $address, inout $port)[] { }
+function socket_getsockname(
+  resource $socket,
+  inout $address,
+  inout $port,
+)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_set_block(resource $socket) { }
+function socket_set_block(resource $socket): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_set_nonblock(resource $socket) { }
+function socket_set_nonblock(resource $socket): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_set_option(resource $socket, int $level, int $optname, $optval)[leak_safe] { }
+function socket_set_option(
+  resource $socket,
+  int $level,
+  int $optname,
+  $optval,
+)[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_connect(resource $socket, string $address, int $port = 0) { }
+function socket_connect(
+  resource $socket,
+  string $address,
+  int $port = 0,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_bind(resource $socket, string $address, int $port = 0) { }
+function socket_bind(
+  resource $socket,
+  string $address,
+  int $port = 0,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_listen(resource $socket, int $backlog = 0) { }
+function socket_listen(
+  resource $socket,
+  int $backlog = 0,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_select(inout $read, inout $write, inout $except, $vtv_sec, int $tv_usec = 0)[leak_safe] { }
+function socket_select(
+  inout $read,
+  inout $write,
+  inout $except,
+  $vtv_sec,
+  int $tv_usec = 0,
+)[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_server(string $hostname, int $port, inout $errnum, inout $errstr) { }
+function socket_server(
+  string $hostname,
+  int $port,
+  inout $errnum,
+  inout $errstr,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_accept(resource $socket) { }
+function socket_accept(resource $socket): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_read(resource $socket, int $length, int $type = 0) { }
+function socket_read(
+  resource $socket,
+  int $length,
+  int $type = 0,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_write(resource $socket, string $buffer, int $length = 0) { }
+function socket_write(
+  resource $socket,
+  string $buffer,
+  int $length = 0,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_send(resource $socket, string $buf, int $len, int $flags) { }
+function socket_send(
+  resource $socket,
+  string $buf,
+  int $len,
+  int $flags,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_sendto(resource $socket, string $buf, int $len, int $flags, string $addr, int $port = 0) { }
+function socket_sendto(
+  resource $socket,
+  string $buf,
+  int $len,
+  int $flags,
+  string $addr,
+  int $port = 0,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_recv(resource $socket, inout $buf, int $len, int $flags) { }
+function socket_recv(
+  resource $socket,
+  inout $buf,
+  int $len,
+  int $flags,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_recvfrom(resource $socket, inout $buf, int $len, int $flags, inout $name, inout $port) { }
+function socket_recvfrom(
+  resource $socket,
+  inout $buf,
+  int $len,
+  int $flags,
+  inout $name,
+  inout $port,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_shutdown(resource $socket, int $how = 0) { }
+function socket_shutdown(
+  resource $socket,
+  int $how = 0,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_close(resource $socket)[write_props] { }
+function socket_close(
+  resource $socket,
+)[write_props]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_strerror(int $errnum)[] { }
+function socket_strerror(int $errnum)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_last_error($socket = null)[read_globals] { }
+function socket_last_error(
+  $socket = null,
+)[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function socket_clear_error($socket = null) { }
+function socket_clear_error($socket = null): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function getaddrinfo(string $host, string $port, int $family = 0, int $socktype = 0, int $protocol = 0, int $flags = 0);
+function getaddrinfo(
+  string $host,
+  string $port,
+  int $family = 0,
+  int $socktype = 0,
+  int $protocol = 0,
+  int $flags = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;

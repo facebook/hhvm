@@ -94,10 +94,10 @@ namespace HH {
 <<__Sealed(\MutableMap::class, \MutableSet::class, \MutableVector::class)>>
 interface Collection<Te> extends \ConstCollection<Te>,
                                  \OutputCollection<Te> {
-  /**
-   * Removes all items from the collection.
-   */
-  public function clear()[write_props];
+    /**
+     * Removes all items from the collection.
+     */
+    public function clear()[write_props];
 }
 
 } // namespace HH

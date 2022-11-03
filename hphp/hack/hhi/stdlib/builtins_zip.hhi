@@ -214,4 +214,6 @@ function zip_open(string $filename): mixed; // resource or false
  * Read next entry in a ZIP file archive
  */
 <<__PHPStdLib>>
-function zip_read(resource $zip); // resource or false
+function zip_read(
+  resource $zip,
+): HH\FIXME\MISSING_RETURN_TYPE; // resource or false

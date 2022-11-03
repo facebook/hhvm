@@ -641,63 +641,94 @@ class IntlChar {
   const int HST_LVT_SYLLABLE = 0;
   const int HST_COUNT = 0;
 
-  static public function chr($cp) { }
-  static public function ord($cp) { }
-  static public function hasBinaryProperty($cp, int $prop) { }
-  static public function getIntPropertyValue($cp, int $prop) { }
+  static public function chr($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function ord($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function hasBinaryProperty(
+    $cp,
+    int $prop,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function getIntPropertyValue(
+    $cp,
+    int $prop,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function getIntPropertyMaxValue(int $prop): int { return 0; }
   static public function getIntPropertyMinValue(int $prop): int { return 0; }
-  static public function getNumericValue($cp) { }
+  static public function getNumericValue($cp): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function enumCharTypes((function(int,int,int):void) $cb): void { }
-  static public function getBlockCode($cp) { }
-  static public function charName($cp, int $choice = IntlChar::UNICODE_CHAR_NAME) { }
-  static public function charFromName(string $name, int $choice = IntlChar::UNICODE_CHAR_NAME) { }
+  static public function getBlockCode($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function charName(
+    $cp,
+    int $choice = IntlChar::UNICODE_CHAR_NAME,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function charFromName(
+    string $name,
+    int $choice = IntlChar::UNICODE_CHAR_NAME,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function enumCharNames($start, $limit, (function(int,int,string):void) $cb, int $choice = IntlChar::UNICODE_CHAR_NAME): void { }
-  static public function getPropertyName(int $prop, int $choice = IntlChar::LONG_PROPERTY_NAME) { }
-  static public function getPropertyValueName(int $prop, int $value, int $choice = IntlChar::LONG_PROPERTY_NAME) { }
+  static public function getPropertyName(
+    int $prop,
+    int $choice = IntlChar::LONG_PROPERTY_NAME,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function getPropertyValueName(
+    int $prop,
+    int $value,
+    int $choice = IntlChar::LONG_PROPERTY_NAME,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function getPropertyEnum(string $alias): int { return 0; }
   static public function getPropertyValueEnum(int $prop, string $name): int { return 0; }
-  static public function foldCase($cp, int $options = IntlChar::FOLD_CASE_DEFAULT) { }
-  static public function digit($cp, int $radix = 10) { }
+  static public function foldCase(
+    $cp,
+    int $options = IntlChar::FOLD_CASE_DEFAULT,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function digit(
+    $cp,
+    int $radix = 10,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function forDigit(int $digit, int $radix = 10): int { return 0; }
-  static public function charAge($cp) { }
+  static public function charAge($cp): HH\FIXME\MISSING_RETURN_TYPE {}
   <<__PHPStdLib>> static public function getUnicodeVersion(): darray<arraykey, mixed> { return darray[]; }
-  static public function getFC_NFKC_Closure($cp) { }
-  static public function isUAlphabetic($cp) { }
-  static public function isULowercase($cp) { }
-  static public function isUUppercase($cp) { }
-  static public function isUWhiteSpace($cp) { }
-  static public function islower($cp) { }
-  static public function isupper($cp) { }
-  static public function istitle($cp) { }
-  static public function isdigit($cp) { }
-  static public function isalpha($cp) { }
-  static public function isalnum($cp) { }
-  static public function isxdigit($cp) { }
-  static public function ispunct($cp) { }
-  static public function isgraph($cp) { }
-  static public function isblank($cp) { }
-  static public function isdefined($cp) { }
-  static public function isspace($cp) { }
-  static public function isJavaSpaceChar($cp) { }
-  static public function isWhitespace($cp) { }
-  static public function iscntrl($cp) { }
-  static public function isISOControl($cp) { }
-  static public function isprint($cp) { }
-  static public function isbase($cp) { }
-  static public function isMirrored($cp) { }
-  static public function isIDStart($cp) { }
-  static public function isIDPart($cp) { }
-  static public function isIDIgnorable($cp) { }
-  static public function isJavaIDStart($cp) { }
-  static public function isJavaIDPart($cp) { }
-  static public function charDirection($cp) { }
-  static public function charType($cp) { }
-  static public function getCombiningClass($cp) { }
-  static public function charDigitValue($cp) { }
-  static public function getBidiPairedBracket($cp) { }
-  static public function charMirror($cp) { }
-  static public function tolower($cp) { }
-  static public function toupper($cp) { }
-  static public function totitle($cp) { }
+  static public function getFC_NFKC_Closure(
+    $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isUAlphabetic($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isULowercase($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isUUppercase($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isUWhiteSpace($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function islower($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isupper($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function istitle($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isdigit($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isalpha($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isalnum($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isxdigit($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function ispunct($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isgraph($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isblank($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isdefined($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isspace($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isJavaSpaceChar($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isWhitespace($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function iscntrl($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isISOControl($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isprint($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isbase($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isMirrored($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isIDStart($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isIDPart($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isIDIgnorable($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isJavaIDStart($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function isJavaIDPart($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function charDirection($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function charType($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function getCombiningClass(
+    $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function charDigitValue($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function getBidiPairedBracket(
+    $cp,
+  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function charMirror($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function tolower($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function toupper($cp): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function totitle($cp): HH\FIXME\MISSING_RETURN_TYPE {}
 }

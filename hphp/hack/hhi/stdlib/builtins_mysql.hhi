@@ -100,116 +100,268 @@ const int MYSQL_CLIENT_CR_COMPRESSION_NOT_SUPPORTED = 0;
 // Since no further damage is possible, I added the $conn_attrs parameter
 // instead of creating new functions - jkedgar@fb.com
 <<__PHPStdLib>>
-function mysql_connect(string $server = "", string $username = "", string $password = "", bool $new_link = false, int $client_flags = 0, int $connect_timeout_ms = -1, int $query_timeout_ms = -1, darray<string, string> $conn_attrs = darray[]);
+function mysql_connect(
+  string $server = "",
+  string $username = "",
+  string $password = "",
+  bool $new_link = false,
+  int $client_flags = 0,
+  int $connect_timeout_ms = -1,
+  int $query_timeout_ms = -1,
+  darray<string, string> $conn_attrs = darray[],
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_pconnect(string $server = "", string $username = "", string $password = "", int $client_flags = 0, int $connect_timeout_ms = -1, int $query_timeout_ms = -1, darray<string, string> $conn_attrs = darray[]);
+function mysql_pconnect(
+  string $server = "",
+  string $username = "",
+  string $password = "",
+  int $client_flags = 0,
+  int $connect_timeout_ms = -1,
+  int $query_timeout_ms = -1,
+  darray<string, string> $conn_attrs = darray[],
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_connect_with_db(string $server = "", string $username = "", string $password = "", string $database = "", bool $new_link = false, int $client_flags = 0, int $connect_timeout_ms = -1, int $query_timeout_ms = -1, darray<string, string> $conn_attrs = darray[]);
+function mysql_connect_with_db(
+  string $server = "",
+  string $username = "",
+  string $password = "",
+  string $database = "",
+  bool $new_link = false,
+  int $client_flags = 0,
+  int $connect_timeout_ms = -1,
+  int $query_timeout_ms = -1,
+  darray<string, string> $conn_attrs = darray[],
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_connect_with_ssl(string $server = "", string $username = "", string $password = "", string $database = "", int $client_flags = 0, int $connect_timeout_ms = -1, int $query_timeout_ms = -1, ?MySSLContextProvider $ssl_context = null, darray<string, string> $conn_attrs = darray[]);
+function mysql_connect_with_ssl(
+  string $server = "",
+  string $username = "",
+  string $password = "",
+  string $database = "",
+  int $client_flags = 0,
+  int $connect_timeout_ms = -1,
+  int $query_timeout_ms = -1,
+  ?MySSLContextProvider $ssl_context = null,
+  darray<string, string> $conn_attrs = darray[],
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_pconnect_with_db(string $server = "", string $username = "", string $password = "", string $database = "", int $client_flags = 0, int $connect_timeout_ms = -1, int $query_timeout_ms = -1, darray<string, string> $conn_attrs = darray[]);
+function mysql_pconnect_with_db(
+  string $server = "",
+  string $username = "",
+  string $password = "",
+  string $database = "",
+  int $client_flags = 0,
+  int $connect_timeout_ms = -1,
+  int $query_timeout_ms = -1,
+  darray<string, string> $conn_attrs = darray[],
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_set_charset(string $charset, $link_identifier = null);
+function mysql_set_charset(
+  string $charset,
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_ping($link_identifier = null);
+function mysql_ping($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_escape_string(string $unescaped_string)[];
+function mysql_escape_string(
+  string $unescaped_string,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_real_escape_string(string $unescaped_string, $link_identifier = null);
+function mysql_real_escape_string(
+  string $unescaped_string,
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_client_encoding($link_identifier = null);
+function mysql_client_encoding(
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_close($link_identifier = null);
+function mysql_close($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_errno($link_identifier = null);
+function mysql_errno($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_error($link_identifier = null);
+function mysql_error($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_warning_count($link_identifier = null);
+function mysql_warning_count(
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_get_client_info();
+function mysql_get_client_info(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_get_host_info($link_identifier = null);
+function mysql_get_host_info(
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_get_proto_info($link_identifier = null);
+function mysql_get_proto_info(
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_get_server_info($link_identifier = null);
+function mysql_get_server_info(
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_info($link_identifier = null);
+function mysql_info($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_insert_id($link_identifier = null);
+function mysql_insert_id(
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_stat($link_identifier = null);
+function mysql_stat($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_thread_id($link_identifier = null);
+function mysql_thread_id(
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_create_db(string $db, $link_identifier = null);
+function mysql_create_db(
+  string $db,
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_select_db(string $db, $link_identifier = null);
+function mysql_select_db(
+  string $db,
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_drop_db(string $db, $link_identifier = null);
+function mysql_drop_db(
+  string $db,
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_affected_rows($link_identifier = null);
+function mysql_affected_rows(
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_set_timeout(int $query_timeout_ms = -1, $link_identifier = null);
+function mysql_set_timeout(
+  int $query_timeout_ms = -1,
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_query(string $query, $link_identifier = null);
+function mysql_query(
+  string $query,
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_multi_query(string $query, $link_identifier = null);
+function mysql_multi_query(
+  string $query,
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_next_result($link_identifier = null);
+function mysql_next_result(
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_more_results($link_identifier = null);
+function mysql_more_results(
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_fetch_result($link_identifier = null);
+function mysql_fetch_result(
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_unbuffered_query(string $query, $link_identifier = null);
+function mysql_unbuffered_query(
+  string $query,
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_db_query(string $database, string $query, $link_identifier = null);
+function mysql_db_query(
+  string $database,
+  string $query,
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_list_dbs($link_identifier = null);
+function mysql_list_dbs($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_list_tables(string $database, $link_identifier = null);
+function mysql_list_tables(
+  string $database,
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_list_fields(string $database_name, string $table_name, $link_identifier = null);
+function mysql_list_fields(
+  string $database_name,
+  string $table_name,
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_list_processes($link_identifier = null);
+function mysql_list_processes(
+  $link_identifier = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_db_name(resource $result, $row, $field = null);
+function mysql_db_name(
+  resource $result,
+  $row,
+  $field = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_tablename(resource $result, int $i);
+function mysql_tablename(
+  resource $result,
+  int $i,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_num_fields(resource $result);
+function mysql_num_fields(resource $result): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_num_rows(resource $result);
+function mysql_num_rows(resource $result): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_free_result(resource $result);
+function mysql_free_result(resource $result): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_data_seek(resource $result, int $row);
+function mysql_data_seek(
+  resource $result,
+  int $row,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_fetch_row(resource $result);
+function mysql_fetch_row(resource $result): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_fetch_assoc(resource $result);
+function mysql_fetch_assoc(resource $result): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_fetch_array(resource $result, int $result_type = 3);
+function mysql_fetch_array(
+  resource $result,
+  int $result_type = 3,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_fetch_lengths(resource $result);
+function mysql_fetch_lengths(resource $result): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_fetch_object($result, string $class_name = "stdClass", $params = null);
+function mysql_fetch_object(
+  $result,
+  string $class_name = "stdClass",
+  $params = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_result(resource $result, int $row, $field = null);
+function mysql_result(
+  resource $result,
+  int $row,
+  $field = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_fetch_field(resource $result, int $field = -1);
+function mysql_fetch_field(
+  resource $result,
+  int $field = -1,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_field_seek(resource $result, int $field = 0);
+function mysql_field_seek(
+  resource $result,
+  int $field = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_field_name(resource $result, int $field = 0);
+function mysql_field_name(
+  resource $result,
+  int $field = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_field_table(resource $result, int $field = 0);
+function mysql_field_table(
+  resource $result,
+  int $field = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_field_len(resource $result, int $field = 0);
+function mysql_field_len(
+  resource $result,
+  int $field = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_field_type(resource $result, int $field = 0);
+function mysql_field_type(
+  resource $result,
+  int $field = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_field_flags(resource $result, int $field = 0);
+function mysql_field_flags(
+  resource $result,
+  int $field = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;

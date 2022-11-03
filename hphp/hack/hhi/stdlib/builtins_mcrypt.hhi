@@ -51,76 +51,170 @@ const string MCRYPT_MODE_OFB = 'ofb';
 const string MCRYPT_MODE_STREAM = 'stream';
 
 <<__PHPStdLib>>
-function mcrypt_module_open(string $algorithm, string $algorithm_directory, string $mode, string $mode_directory);
+function mcrypt_module_open(
+  string $algorithm,
+  string $algorithm_directory,
+  string $mode,
+  string $mode_directory,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_module_close(resource $td);
+function mcrypt_module_close(resource $td): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_list_algorithms(string $lib_dir = "");
+function mcrypt_list_algorithms(
+  string $lib_dir = "",
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_list_modes(string $lib_dir = "");
+function mcrypt_list_modes(string $lib_dir = ""): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_module_get_algo_block_size(string $algorithm, string $lib_dir = "");
+function mcrypt_module_get_algo_block_size(
+  string $algorithm,
+  string $lib_dir = "",
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_module_get_algo_key_size(string $algorithm, string $lib_dir = "");
+function mcrypt_module_get_algo_key_size(
+  string $algorithm,
+  string $lib_dir = "",
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_module_get_supported_key_sizes(string $algorithm, string $lib_dir = "");
+function mcrypt_module_get_supported_key_sizes(
+  string $algorithm,
+  string $lib_dir = "",
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_module_is_block_algorithm_mode(string $mode, string $lib_dir = "");
+function mcrypt_module_is_block_algorithm_mode(
+  string $mode,
+  string $lib_dir = "",
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_module_is_block_algorithm(string $algorithm, string $lib_dir = "");
+function mcrypt_module_is_block_algorithm(
+  string $algorithm,
+  string $lib_dir = "",
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_module_is_block_mode(string $mode, string $lib_dir = "");
+function mcrypt_module_is_block_mode(
+  string $mode,
+  string $lib_dir = "",
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_module_self_test(string $algorithm, string $lib_dir = "");
+function mcrypt_module_self_test(
+  string $algorithm,
+  string $lib_dir = "",
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_create_iv(int $size, int $source = 0);
+function mcrypt_create_iv(
+  int $size,
+  int $source = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_encrypt(string $cipher, string $key, string $data, string $mode, $iv = null);
+function mcrypt_encrypt(
+  string $cipher,
+  string $key,
+  string $data,
+  string $mode,
+  $iv = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_decrypt(string $cipher, string $key, string $data, string $mode, $iv = null);
+function mcrypt_decrypt(
+  string $cipher,
+  string $key,
+  string $data,
+  string $mode,
+  $iv = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_cbc(string $cipher, string $key, string $data, $mode, $iv = null);
+function mcrypt_cbc(
+  string $cipher,
+  string $key,
+  string $data,
+  $mode,
+  $iv = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_cfb(string $cipher, string $key, string $data, $mode, $iv = null);
+function mcrypt_cfb(
+  string $cipher,
+  string $key,
+  string $data,
+  $mode,
+  $iv = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_ecb(string $cipher, string $key, string $data, $mode, $iv = null);
+function mcrypt_ecb(
+  string $cipher,
+  string $key,
+  string $data,
+  $mode,
+  $iv = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_ofb(string $cipher, string $key, string $data, $mode, $iv = null);
+function mcrypt_ofb(
+  string $cipher,
+  string $key,
+  string $data,
+  $mode,
+  $iv = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_get_block_size(string $cipher, string $mode);
+function mcrypt_get_block_size(
+  string $cipher,
+  string $mode,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_get_cipher_name(string $cipher);
+function mcrypt_get_cipher_name(string $cipher): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_get_iv_size(string $cipher, string $mode);
+function mcrypt_get_iv_size(
+  string $cipher,
+  string $mode,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_get_key_size(string $cipher, string $module);
+function mcrypt_get_key_size(
+  string $cipher,
+  string $module,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_enc_get_algorithms_name(resource $td);
+function mcrypt_enc_get_algorithms_name(
+  resource $td,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_enc_get_block_size(resource $td);
+function mcrypt_enc_get_block_size(resource $td): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_enc_get_iv_size(resource $td);
+function mcrypt_enc_get_iv_size(resource $td): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_enc_get_key_size(resource $td);
+function mcrypt_enc_get_key_size(resource $td): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_enc_get_modes_name(resource $td);
+function mcrypt_enc_get_modes_name(resource $td): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_enc_get_supported_key_sizes(resource $td);
+function mcrypt_enc_get_supported_key_sizes(
+  resource $td,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_enc_is_block_algorithm_mode(resource $td);
+function mcrypt_enc_is_block_algorithm_mode(
+  resource $td,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_enc_is_block_algorithm(resource $td);
+function mcrypt_enc_is_block_algorithm(
+  resource $td,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_enc_is_block_mode(resource $td);
+function mcrypt_enc_is_block_mode(resource $td): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_enc_self_test(resource $td);
+function mcrypt_enc_self_test(resource $td): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_generic(resource $td, string $data);
+function mcrypt_generic(
+  resource $td,
+  string $data,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_generic_init(resource $td, string $key, string $iv);
+function mcrypt_generic_init(
+  resource $td,
+  string $key,
+  string $iv,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mdecrypt_generic(resource $td, string $data);
+function mdecrypt_generic(
+  resource $td,
+  string $data,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_generic_deinit(resource $td);
+function mcrypt_generic_deinit(resource $td): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mcrypt_generic_end(resource $td);
+function mcrypt_generic_end(resource $td): HH\FIXME\MISSING_RETURN_TYPE;

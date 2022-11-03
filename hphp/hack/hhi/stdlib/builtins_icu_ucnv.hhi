@@ -52,24 +52,53 @@ class UConverter {
   const int IMAP_MAILBOX = 0;
 
   public function __construct(string $toEncoding = "utf-8", string $fromEncoding = "utf-8");
-  public function getSourceEncoding();
-  public function setSourceEncoding(string $encoding);
-  public function getDestinationEncoding();
-  public function setDestinationEncoding(string $encoding);
-  public function getSourceType();
-  public function getDestinationType();
-  public function getSubstChars();
-  public function setSubstChars(string $chars);
-  public function fromUCallback(int $reason, $source, int $codepoint, inout int $error);
-  public function toUCallback(int $reason, $source, $codeunits, inout int $error);
-  public function convert(string $str, bool $reverse = false);
-  static public function transcode(string $str, string $toEncoding, string $fromEncoding, $options = null);
-  public function getErrorCode();
-  public function getErrorMessage();
-  static public function reasonText(int $reason);
-  static public function getAvailable();
-  static public function getAliases(string $encoding);
-  static public function getStandards();
-  static public function getStandardName(string $name, string $standard);
-  static public function getMimeName(string $name);
+  public function getSourceEncoding(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setSourceEncoding(
+    string $encoding,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getDestinationEncoding(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setDestinationEncoding(
+    string $encoding,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getSourceType(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getDestinationType(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getSubstChars(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setSubstChars(string $chars): HH\FIXME\MISSING_RETURN_TYPE;
+  public function fromUCallback(
+    int $reason,
+    $source,
+    int $codepoint,
+    inout int $error,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function toUCallback(
+    int $reason,
+    $source,
+    $codeunits,
+    inout int $error,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function convert(
+    string $str,
+    bool $reverse = false,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  static public function transcode(
+    string $str,
+    string $toEncoding,
+    string $fromEncoding,
+    $options = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getErrorCode(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getErrorMessage(): HH\FIXME\MISSING_RETURN_TYPE;
+  static public function reasonText(int $reason): HH\FIXME\MISSING_RETURN_TYPE;
+  static public function getAvailable(): HH\FIXME\MISSING_RETURN_TYPE;
+  static public function getAliases(
+    string $encoding,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  static public function getStandards(): HH\FIXME\MISSING_RETURN_TYPE;
+  static public function getStandardName(
+    string $name,
+    string $standard,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  static public function getMimeName(
+    string $name,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
 }

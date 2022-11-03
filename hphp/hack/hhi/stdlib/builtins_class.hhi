@@ -10,11 +10,11 @@
 
 namespace {
 <<__PHPStdLib>>
-function get_declared_classes();
+  function get_declared_classes(): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function get_declared_interfaces();
+  function get_declared_interfaces(): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function get_declared_traits();
+  function get_declared_traits(): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function enum_exists(string $enum_name, bool $autoload = true)[]: bool;
 <<__PHPStdLib>>
@@ -26,9 +26,9 @@ function trait_exists(string $trait_name, bool $autoload = true)[]: bool;
 <<__PHPStdLib>>
 function get_class_methods($class_or_object)[]: ?varray_or_darray<string>;
 <<__PHPStdLib>>
-function get_class_vars(string $class_name);
-function get_class(readonly $object)[];
-function get_parent_class($object = null)[];
+  function get_class_vars(string $class_name): \HH\FIXME\MISSING_RETURN_TYPE;
+  function get_class(readonly $object)[]: \HH\FIXME\MISSING_RETURN_TYPE;
+  function get_parent_class($object = null)[]: \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function is_a($class_or_object, string $class_name, bool $allow_string = false)[]: bool;
 <<__PHPStdLib>>

@@ -63,23 +63,32 @@ const int JSON_FB_WARN_KEYSETS = 0;
 const int JSON_FB_FORCE_HACK_ARRAYS = 0;
 
 <<__PHPStdLib>>
-function json_encode(mixed $value, int $options = 0, int $depth = 512)[defaults];
+function json_encode(
+  mixed $value,
+  int $options = 0,
+  int $depth = 512,
+)[defaults]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function json_encode_with_error(
   mixed $value,
   inout ?(int, string) $error,
   int $options = 0,
   int $depth = 512,
-)[defaults];
+)[defaults]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function json_encode_pure(
   mixed $value,
   inout ?(int, string) $error,
   int $options = 0,
   int $depth = 512,
-)[];
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function json_decode(string $json, bool $assoc = false, int $depth = 512, int $options = 0)[];
+function json_decode(
+  string $json,
+  bool $assoc = false,
+  int $depth = 512,
+  int $options = 0,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function json_decode_with_error(
   string $json,
@@ -87,4 +96,4 @@ function json_decode_with_error(
   bool $assoc = false,
   int $depth = 512,
   int $options = 0,
-)[];
+)[]: HH\FIXME\MISSING_RETURN_TYPE;

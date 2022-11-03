@@ -58,181 +58,295 @@ const int GLOB_BRACE   = 1024;
 const int GLOB_ONLYDIR = 8192;
 
 <<__PHPStdLib>>
-function fopen(string $filename, string $mode, bool $use_include_path = false, $context = null);
+function fopen(
+  string $filename,
+  string $mode,
+  bool $use_include_path = false,
+  $context = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function popen(string $command, string $mode): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function fclose(resource $handle): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pclose($handle): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function fseek(
+  resource $handle,
+  int $offset,
+  int $whence = SEEK_SET,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function rewind(resource $handle): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function ftell(resource $handle): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function feof(resource $handle): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function fstat(resource $handle): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function fread(resource $handle, int $length): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function fgetc(resource $handle): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function fgets(
+  resource $handle,
+  int $length = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function fgetss(
+  resource $handle,
+  int $length = 0,
+  string $allowable_tags = "",
+): HH\FIXME\MISSING_RETURN_TYPE;
+function fscanf(
+  resource $handle,
+  string $format,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function fpassthru(resource $handle): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function fwrite(
+  resource $handle,
+  string $data,
+  int $length = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function fputs(
+  resource $handle,
+  string $data,
+  int $length = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function fprintf(
+  resource $handle,
+  string $format,
+  ...$args
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function vfprintf($handle, $format, $args): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function fflush(resource $handle): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function ftruncate(resource $handle, int $size): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function flock(
+  resource $handle,
+  int $operation,
+  inout $wouldblock,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function fputcsv(
+  resource $handle,
+  $fields,
+  string $delimiter = ",",
+  string $enclosure = "\"",
+  string $escape_char = "\\",
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function fgetcsv(
+  resource $handle,
+  int $length = 0,
+  string $delimiter = ",",
+  string $enclosure = "\"",
+  string $escape_char = "\\",
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function file_get_contents(
+  string $filename,
+  bool $use_include_path = false,
+  $context = null,
+  int $offset = 0,
+  int $maxlen = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function file_put_contents(
+  string $filename,
+  $data,
+  int $flags = 0,
+  $context = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function popen(string $command, string $mode);
+function file(
+  string $filename,
+  int $flags = 0,
+  $context = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fclose(resource $handle);
+function readfile(
+  string $filename,
+  bool $use_include_path = false,
+  $context = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pclose($handle);
+function move_uploaded_file(
+  string $filename,
+  string $destination,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fseek(resource $handle, int $offset, int $whence = SEEK_SET);
+function parse_ini_file(
+  string $filename,
+  bool $process_sections = false,
+  int $scanner_mode = INI_SCANNER_NORMAL,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function rewind(resource $handle);
+function parse_ini_string(
+  string $ini,
+  bool $process_sections = false,
+  int $scanner_mode = INI_SCANNER_NORMAL,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function ftell(resource $handle);
+function md5_file(
+  string $filename,
+  bool $raw_output = false,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function feof(resource $handle);
+function sha1_file(
+  string $filename,
+  bool $raw_output = false,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fstat(resource $handle);
+function chmod(string $filename, int $mode): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fread(resource $handle, int $length);
+function chown(string $filename, $user): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fgetc(resource $handle);
+function lchown(string $filename, $user): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fgets(resource $handle, int $length = 0);
+function chgrp(string $filename, $group): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fgetss(resource $handle, int $length = 0, string $allowable_tags = "");
-function fscanf(resource $handle, string $format);
+function lchgrp(string $filename, $group): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fpassthru(resource $handle);
+function touch(
+  string $filename,
+  int $mtime = 0,
+  int $atime = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fwrite(resource $handle, string $data, int $length = 0);
+function copy(
+  string $source,
+  string $dest,
+  $context = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fputs(resource $handle, string $data, int $length = 0);
+function rename(
+  string $oldname,
+  string $newname,
+  $context = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fprintf(resource $handle, string $format, ...$args);
+function umask($mask = null): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function vfprintf($handle, $format, $args);
+function unlink(
+  string $filename,
+  $context = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fflush(resource $handle);
+function link(string $target, string $link): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function ftruncate(resource $handle, int $size);
+function symlink(string $target, string $link): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function flock(resource $handle, int $operation, inout $wouldblock);
+function basename(
+  string $path,
+  string $suffix = "",
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fputcsv(resource $handle, $fields, string $delimiter = ",", string $enclosure = "\"", string $escape_char = "\\");
+function fnmatch(
+  string $pattern,
+  string $filename,
+  int $flags = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fgetcsv(resource $handle, int $length = 0, string $delimiter = ",", string $enclosure = "\"", string $escape_char = "\\");
+function glob(string $pattern, int $flags = 0): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function file_get_contents(string $filename, bool $use_include_path = false, $context = null, int $offset = 0, int $maxlen = 0);
+function tempnam(string $dir, string $prefix): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function file_put_contents(string $filename, $data, int $flags = 0, $context = null);
+function tmpfile(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function file(string $filename, int $flags = 0, $context = null);
+function fileperms(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function readfile(string $filename, bool $use_include_path = false, $context = null);
+function fileinode(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function move_uploaded_file(string $filename, string $destination);
+function filesize(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function parse_ini_file(string $filename, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL);
+function fileowner(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function parse_ini_string(string $ini, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL);
+function filegroup(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function md5_file(string $filename, bool $raw_output = false);
+function fileatime(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function sha1_file(string $filename, bool $raw_output = false);
+function filemtime(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function chmod(string $filename, int $mode);
+function filectime(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function chown(string $filename, $user);
+function filetype(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function lchown(string $filename, $user);
+function linkinfo(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function chgrp(string $filename, $group);
+function is_writable(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function lchgrp(string $filename, $group);
+function is_writeable(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function touch(string $filename, int $mtime = 0, int $atime = 0);
+function is_readable(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function copy(string $source, string $dest, $context = null);
+function is_executable(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function rename(string $oldname, string $newname, $context = null);
+function is_file(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function umask($mask = null);
+function is_dir(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function unlink(string $filename, $context = null);
+function is_link(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function link(string $target, string $link);
+function is_uploaded_file(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function symlink(string $target, string $link);
+function file_exists(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function basename(string $path, string $suffix = "")[];
+function stat(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fnmatch(string $pattern, string $filename, int $flags = 0);
+function lstat(string $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function glob(string $pattern, int $flags = 0);
+function clearstatcache(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function tempnam(string $dir, string $prefix);
+function readlink(string $path): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function tmpfile();
+function realpath(string $path)[read_globals]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fileperms(string $filename);
+function pathinfo(string $path, int $opt = 15): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fileinode(string $filename);
+function disk_free_space(string $directory): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function filesize(string $filename);
+function diskfreespace(string $directory): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fileowner(string $filename);
+function disk_total_space(string $directory): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function filegroup(string $filename);
+function mkdir(
+  string $pathname,
+  int $mode = 0777,
+  bool $recursive = false,
+  $context = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fileatime(string $filename);
+function rmdir(string $dirname, $context = null): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function filemtime(string $filename);
+function dirname(string $path)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function filectime(string $filename);
+function getcwd(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function filetype(string $filename);
+function chdir(string $directory): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function linkinfo(string $filename);
+function chroot(string $directory): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function is_writable(string $filename);
+function dir(string $directory): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function is_writeable(string $filename);
+function opendir(string $path, $context = null): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function is_readable(string $filename);
+function readdir($dir_handle): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function is_executable(string $filename);
+function rewinddir($dir_handle): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function is_file(string $filename);
+function scandir(
+  string $directory,
+  bool $descending = false,
+  $context = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function is_dir(string $filename);
-<<__PHPStdLib>>
-function is_link(string $filename);
-<<__PHPStdLib>>
-function is_uploaded_file(string $filename);
-<<__PHPStdLib>>
-function file_exists(string $filename);
-<<__PHPStdLib>>
-function stat(string $filename);
-<<__PHPStdLib>>
-function lstat(string $filename);
-<<__PHPStdLib>>
-function clearstatcache();
-<<__PHPStdLib>>
-function readlink(string $path);
-<<__PHPStdLib>>
-function realpath(string $path)[read_globals];
-<<__PHPStdLib>>
-function pathinfo(string $path, int $opt = 15);
-<<__PHPStdLib>>
-function disk_free_space(string $directory);
-<<__PHPStdLib>>
-function diskfreespace(string $directory);
-<<__PHPStdLib>>
-function disk_total_space(string $directory);
-<<__PHPStdLib>>
-function mkdir(string $pathname, int $mode = 0777, bool $recursive = false, $context = null);
-<<__PHPStdLib>>
-function rmdir(string $dirname, $context = null);
-<<__PHPStdLib>>
-function dirname(string $path)[];
-<<__PHPStdLib>>
-function getcwd();
-<<__PHPStdLib>>
-function chdir(string $directory);
-<<__PHPStdLib>>
-function chroot(string $directory);
-<<__PHPStdLib>>
-function dir(string $directory);
-<<__PHPStdLib>>
-function opendir(string $path, $context = null);
-<<__PHPStdLib>>
-function readdir($dir_handle);
-<<__PHPStdLib>>
-function rewinddir($dir_handle);
-<<__PHPStdLib>>
-function scandir(string $directory, bool $descending = false, $context = null);
-<<__PHPStdLib>>
-function closedir($dir_handle);
+function closedir($dir_handle): HH\FIXME\MISSING_RETURN_TYPE;

@@ -88,38 +88,67 @@ const int WSDL_CACHE_DISK = 1;
 const int WSDL_CACHE_BOTH = 3;
 
 <<__PHPStdLib>>
-function use_soap_error_handler(bool $handler = true);
+function use_soap_error_handler(
+  bool $handler = true,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function is_soap_fault($fault);
+function is_soap_fault($fault): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function _soap_active_version();
+function _soap_active_version(): HH\FIXME\MISSING_RETURN_TYPE;
 
 class SoapServer {
   public function __construct($wsdl, $options = null);
-  public function setClass(string $name, ...$args);
-  public function setobject($obj);
-  public function addFunction($func);
-  public function getfunctions();
-  public function handle($request = null);
-  public function setpersistence(int $mode);
-  public function fault($code, string $fault, $actor = null, $detail = null, $name = null);
-  public function addSoapHeader($fault);
+  public function setClass(
+    string $name,
+    ...$args
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setobject($obj): HH\FIXME\MISSING_RETURN_TYPE;
+  public function addFunction($func): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getfunctions(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function handle($request = null): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setpersistence(int $mode): HH\FIXME\MISSING_RETURN_TYPE;
+  public function fault(
+    $code,
+    string $fault,
+    $actor = null,
+    $detail = null,
+    $name = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function addSoapHeader($fault): HH\FIXME\MISSING_RETURN_TYPE;
 }
 
 class SoapClient {
   public function __construct($wsdl, $options = null);
-  public function call__($name, $args);
-  public function __soapcall(string $name, $args, $options = null, $input_headers = null);
-  public function __getlastrequest();
-  public function __getlastresponse();
-  public function __getlastrequestheaders();
-  public function __getlastresponseheaders();
-  public function __getFunctions();
-  public function __getTypes();
-  public function __dorequest(string $buf, string $location, string $action, int $version, bool $oneway = false);
-  public function __setcookie(string $name, $value = null);
-  public function __setlocation($new_location = null);
-  public function __setsoapheaders($headers = null);
+  public function call__($name, $args): HH\FIXME\MISSING_RETURN_TYPE;
+  public function __soapcall(
+    string $name,
+    $args,
+    $options = null,
+    $input_headers = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function __getlastrequest(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function __getlastresponse(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function __getlastrequestheaders(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function __getlastresponseheaders(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function __getFunctions(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function __getTypes(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function __dorequest(
+    string $buf,
+    string $location,
+    string $action,
+    int $version,
+    bool $oneway = false,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function __setcookie(
+    string $name,
+    $value = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function __setlocation(
+    $new_location = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function __setsoapheaders(
+    $headers = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
 }
 
 class SoapVar {
@@ -154,6 +183,6 @@ class SoapFault extends Exception {
     $name = null,
     $header = null,
   );
-  public function __toString();
+  public function __toString(): string;
 
 }

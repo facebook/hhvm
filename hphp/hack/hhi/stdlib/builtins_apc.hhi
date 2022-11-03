@@ -9,33 +9,73 @@
  */
 
 <<__PHPStdLib>>
-function apc_add($key, $var, int $ttl = 0, int $bump_ttl = 0) { }
+function apc_add(
+  $key,
+  $var,
+  int $ttl = 0,
+  int $bump_ttl = 0,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apc_add_with_pure_sleep($key, $var, int $ttl = 0, int $bump_ttl = 0)[globals];
+function apc_add_with_pure_sleep(
+  $key,
+  $var,
+  int $ttl = 0,
+  int $bump_ttl = 0,
+)[globals]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function apc_store($key, $var, int $ttl = 0, int $bump_ttl = 0) { }
+function apc_store(
+  $key,
+  $var,
+  int $ttl = 0,
+  int $bump_ttl = 0,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apc_store_with_pure_sleep($key, $var, int $ttl = 0, int $bump_ttl = 0)[globals];
+function apc_store_with_pure_sleep(
+  $key,
+  $var,
+  int $ttl = 0,
+  int $bump_ttl = 0,
+)[globals]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function apc_fetch($key, inout $success) { }
+function apc_fetch($key, inout $success): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apc_fetch_with_pure_wakeup($key, inout $success)[read_globals];
+function apc_fetch_with_pure_wakeup(
+  $key,
+  inout $success,
+)[read_globals]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function apc_delete($key) { }
+function apc_delete($key): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apc_cache_info(string $cache_type = "", bool $limited = false) { }
+function apc_cache_info(
+  string $cache_type = "",
+  bool $limited = false,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apc_clear_cache(string $cache_id = "") { }
+function apc_clear_cache(
+  string $cache_id = "",
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apc_sma_info(bool $limited = false) { }
+function apc_sma_info(bool $limited = false): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apc_inc(string $key, int $step, inout $success) { }
+function apc_inc(
+  string $key,
+  int $step,
+  inout $success,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apc_dec(string $key, int $step, inout $success) { }
+function apc_dec(
+  string $key,
+  int $step,
+  inout $success,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apc_cas(string $key, int $old_cas, int $new_cas) { }
+function apc_cas(
+  string $key,
+  int $old_cas,
+  int $new_cas,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apc_exists($key) { }
+function apc_exists($key): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apc_extend_ttl(string $key, int $ttl): bool;
 <<__PHPStdLib>>

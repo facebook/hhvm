@@ -9,7 +9,7 @@
  */
 
 <<__PHPStdLib>>
-function pdo_drivers();
+function pdo_drivers(): HH\FIXME\MISSING_RETURN_TYPE;
 class PDO {
   const int PARAM_BOOL = 0;
   const int PARAM_NULL = 0;
@@ -100,49 +100,83 @@ class PDO {
   const int HH_MYSQL_ATTR_READ_TIMEOUT = 0;
   const int HH_MYSQL_ATTR_WRITE_TIMEOUT = 0;
   public function __construct(string $dsn, string $username = "", string $password = "", $options = null);
-  public function prepare(string $statement, $options = null);
-  public function beginTransaction();
-  public function inTransaction();
-  public function commit();
-  public function rollBack();
-  public function setAttribute(int $attribute, $value);
-  public function getAttribute(int $attribute);
-  public function exec(string $query);
-  public function lastInsertId(string $seqname = "");
-  public function errorCode();
-  public function errorInfo();
-  public function query(string $sql);
-  public function quote(string $str, int $paramtype = PDO::PARAM_STR);
-  public function __wakeup()[];
-  public function __sleep()[];
-  static public function getAvailableDrivers();
+  public function prepare(
+    string $statement,
+    $options = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function beginTransaction(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function inTransaction(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function commit(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function rollBack(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setAttribute(
+    int $attribute,
+    $value,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getAttribute(int $attribute): HH\FIXME\MISSING_RETURN_TYPE;
+  public function exec(string $query): HH\FIXME\MISSING_RETURN_TYPE;
+  public function lastInsertId(
+    string $seqname = "",
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function errorCode(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function errorInfo(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function query(string $sql): HH\FIXME\MISSING_RETURN_TYPE;
+  public function quote(
+    string $str,
+    int $paramtype = PDO::PARAM_STR,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function __wakeup()[]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function __sleep()[]: HH\FIXME\MISSING_RETURN_TYPE;
+  static public function getAvailableDrivers(): HH\FIXME\MISSING_RETURN_TYPE;
 }
 class PDOStatement {
   public function __construct();
-  public function execute($params = null);
-  public function fetch(int $how = 0, int $orientation = PDO::FETCH_ORI_NEXT, int $offset = 0);
-  public function fetchObject(string $class_name = "", $ctor_args = null);
-  public function fetchColumn(int $column_numner = 0);
-  public function fetchAll(int $how = 0, $class_name = null, $ctor_args = null);
-  public function bindValue($paramno, $param, int $type = PDO::PARAM_STR);
-  public function rowCount();
-  public function errorCode();
-  public function errorInfo();
-  public function setAttribute(int $attribute, $value);
-  public function getAttribute(int $attribute);
-  public function columnCount();
-  public function getColumnMeta(int $column);
-  public function setFetchMode(int $mode, ...$args);
-  public function nextRowset();
-  public function closeCursor();
-  public function debugDumpParams();
-  public function current();
-  public function key();
-  public function next();
-  public function rewind();
-  public function valid();
-  public function __wakeup()[];
-  public function __sleep()[];
+  public function execute($params = null): HH\FIXME\MISSING_RETURN_TYPE;
+  public function fetch(
+    int $how = 0,
+    int $orientation = PDO::FETCH_ORI_NEXT,
+    int $offset = 0,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function fetchObject(
+    string $class_name = "",
+    $ctor_args = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function fetchColumn(
+    int $column_numner = 0,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function fetchAll(
+    int $how = 0,
+    $class_name = null,
+    $ctor_args = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function bindValue(
+    $paramno,
+    $param,
+    int $type = PDO::PARAM_STR,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function rowCount(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function errorCode(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function errorInfo(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setAttribute(
+    int $attribute,
+    $value,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getAttribute(int $attribute): HH\FIXME\MISSING_RETURN_TYPE;
+  public function columnCount(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getColumnMeta(int $column): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setFetchMode(
+    int $mode,
+    ...$args
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function nextRowset(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function closeCursor(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function debugDumpParams(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function current(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function key(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function next(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function rewind(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function valid(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function __wakeup()[]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function __sleep()[]: HH\FIXME\MISSING_RETURN_TYPE;
 }
 class PDOException extends RuntimeException {
   public ?varray $errorInfo = null;

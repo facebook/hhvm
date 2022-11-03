@@ -9,22 +9,36 @@
  */
 
 <<__PHPStdLib>>
-function bzclose(resource $bz);
+function bzclose(resource $bz): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function bzopen($filename, string $mode);
+function bzopen($filename, string $mode): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function bzread(resource $bz, int $length = 1024);
+function bzread(
+  resource $bz,
+  int $length = 1024,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function bzwrite(resource $bz, string $data, int $length = 0);
+function bzwrite(
+  resource $bz,
+  string $data,
+  int $length = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function bzflush(resource $bz);
+function bzflush(resource $bz): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function bzerrstr(resource $bz);
+function bzerrstr(resource $bz): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function bzerror(resource $bz);
+function bzerror(resource $bz): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function bzerrno(resource $bz);
+function bzerrno(resource $bz): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function bzcompress(string $source, int $blocksize = 4, int $workfactor = 0)[];
+function bzcompress(
+  string $source,
+  int $blocksize = 4,
+  int $workfactor = 0,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function bzdecompress(string $source, int $small = 0)[];
+function bzdecompress(
+  string $source,
+  int $small = 0,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;

@@ -53,7 +53,9 @@ const int ASYNC_OP_QUERY = 0;
 
 class AsyncMysqlClient {
   private function __construct() { }
-  static public function setPoolsConnectionLimit(int $limit) { }
+    static public function setPoolsConnectionLimit(
+      int $limit,
+    ): \HH\FIXME\MISSING_RETURN_TYPE {}
   static public function connect(
       string $host,
       int $port,
@@ -167,14 +169,14 @@ class AsyncMysqlConnection {
   ): Awaitable<AsyncMysqlQueryResult>{ }
   public function queryf(HH\FormatString<HH\SQLFormatter> $query, ...$args): Awaitable<AsyncMysqlQueryResult>{ }
   public function queryAsync(\HH\Lib\SQL\Query $query): Awaitable<AsyncMysqlQueryResult>;
-  public function multiQuery(
-    Traversable<string> $query,
-    int $timeout_micros = -1,
-    dict<string, string> $query_attributes = dict[],
-  ) { }
+    public function multiQuery(
+      Traversable<string> $query,
+      int $timeout_micros = -1,
+      dict<string, string> $query_attributes = dict[],
+    ): \HH\FIXME\MISSING_RETURN_TYPE {}
   public function escapeString(string $data): string { }
   public function close(): void { }
-  public function releaseConnection() { }
+    public function releaseConnection(): \HH\FIXME\MISSING_RETURN_TYPE {}
   public function isValid(): bool { }
   public function serverInfo(): string { }
   public function sslSessionReused(): bool { }
@@ -231,12 +233,12 @@ class AsyncMysqlQueryResult extends AsyncMysqlResult {
   public function mapRowsTyped(): Vector<Map<string, mixed>> { }
   public function dictRowsTyped(): vec<dict<string, mixed>> { }
   public function vectorRowsTyped(): Vector<KeyedContainer<int, mixed>> { }
- /* Can't put a return type for rowBlocks as it will ask that the type is
-  * iterable because of the usage and then we can't have the AsyncMysqlRowBlock
-  * implement the Iterable interface because mocks will complain they don't
-  * implemplement the functions in the interface.
-  **/
-  public function rowBlocks() { }
+    /* Can't put a return type for rowBlocks as it will ask that the type is
+     * iterable because of the usage and then we can't have the AsyncMysqlRowBlock
+     * implement the Iterable interface because mocks will complain they don't
+     * implemplement the functions in the interface.
+     **/
+    public function rowBlocks(): \HH\FIXME\MISSING_RETURN_TYPE {}
   public function noIndexUsed() : bool { }
   public function recvGtid(): string { }
   public function responseAttributes(): Map<string, string> { }

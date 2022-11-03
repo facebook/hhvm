@@ -19,9 +19,12 @@ function is_callable($v, bool $syntax = false)[]: bool;
 <<__PHPStdLib>>
 function is_callable_with_name($v, bool $syntax, inout $name)[]: bool;
 <<__Deprecated('Use direct invocation instead.')>>
-function call_user_func_array($function, Container<mixed> $params);
+  function call_user_func_array(
+    $function,
+    Container<mixed> $params,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__Deprecated('Use direct invocation instead.')>>
-function call_user_func($function, ...$args);
+  function call_user_func($function, ...$args): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function register_postsend_function<T>((function(): T) $function): void;
 <<__PHPStdLib>>

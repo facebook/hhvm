@@ -10,16 +10,18 @@
 
 class EncodingDetector {
   public function __construct();
-  public function setText(string $text);
-  public function setDeclaredEncoding(string $text);
-  public function detect();
-  public function detectAll();
+  public function setText(string $text): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setDeclaredEncoding(
+    string $text,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function detect(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function detectAll(): HH\FIXME\MISSING_RETURN_TYPE;
 }
 class EncodingMatch {
   public function __construct();
-  public function isValid();
-  public function getEncoding();
-  public function getConfidence();
-  public function getLanguage();
-  public function getUTF8();
+  public function isValid(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getEncoding(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getConfidence(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getLanguage(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getUTF8(): HH\FIXME\MISSING_RETURN_TYPE;
 }

@@ -34,31 +34,53 @@ function is_object(readonly mixed $var)[]: bool;
 function is_resource(readonly mixed $var)[]: bool;
 function is_null(readonly mixed $var)[]: bool;
 <<__PHPStdLib>>
-function gettype(readonly mixed $v)[];
+  function gettype(readonly mixed $v)[]: \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function get_resource_type(resource $handle)[];
+  function get_resource_type(
+    resource $handle,
+  )[]: \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function print_r($expression, bool $ret = false);
+  function print_r(
+    $expression,
+    bool $ret = false,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function print_r_pure($expression)[];
+  function print_r_pure($expression)[]: \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function var_export($expression, bool $ret = false);
+  function var_export(
+    $expression,
+    bool $ret = false,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function var_export_pure($expression)[];
+  function var_export_pure($expression)[]: \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function var_dump(<<__AcceptDisposable>> readonly mixed $expression, mixed ...$rest);
+  function var_dump(
+    <<__AcceptDisposable>> readonly mixed $expression,
+    mixed ...$rest
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function debug_zval_dump(<<__AcceptDisposable>> $variable);
+  function debug_zval_dump(
+    <<__AcceptDisposable>> $variable,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function serialize($value)[defaults]: string;
 <<__PHPStdLib>>
 function serialize_pure($value)[]: string;
 <<__PHPStdLib>>
-function unserialize(string $str, darray $options = darray[])[defaults];
+  function unserialize(
+    string $str,
+    darray $options = darray[],
+  )[defaults]: \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function unserialize_pure(string $str, darray $options = darray[])[];
+  function unserialize_pure(
+    string $str,
+    darray $options = darray[],
+  )[]: \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function import_request_variables(string $types, string $prefix = "");
+  function import_request_variables(
+    string $types,
+    string $prefix = "",
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 }
 
 namespace HH {

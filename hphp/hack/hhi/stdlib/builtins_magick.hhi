@@ -345,858 +345,1667 @@ const int MW_ZipCompression = 10;
 const int MW_sRGBColorspace = 13;
 
 <<__PHPStdLib>>
-function magickgetcopyright();
+function magickgetcopyright(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magickgethomeurl();
+function magickgethomeurl(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magickgetpackagename();
+function magickgetpackagename(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magickgetquantumdepth();
+function magickgetquantumdepth(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magickgetreleasedate();
+function magickgetreleasedate(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magickgetresourcelimit($resource_type);
+function magickgetresourcelimit($resource_type): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magickgetversion();
+function magickgetversion(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magickgetversionnumber();
+function magickgetversionnumber(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magickgetversionstring();
+function magickgetversionstring(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magickqueryconfigureoption($option);
+function magickqueryconfigureoption($option): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magickqueryconfigureoptions($pattern);
+function magickqueryconfigureoptions($pattern): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magickqueryfonts($pattern);
+function magickqueryfonts($pattern): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magickqueryformats($pattern);
+function magickqueryformats($pattern): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magicksetresourcelimit($resource_type, $limit);
+function magicksetresourcelimit(
+  $resource_type,
+  $limit,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function newdrawingwand();
+function newdrawingwand(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function newmagickwand();
+function newmagickwand(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function newpixeliterator($mgck_wnd);
+function newpixeliterator($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function newpixelregioniterator($mgck_wnd, $x, $y, $columns, $rows);
+function newpixelregioniterator(
+  $mgck_wnd,
+  $x,
+  $y,
+  $columns,
+  $rows,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function newpixelwand($imagemagick_col_str = null);
+function newpixelwand(
+  $imagemagick_col_str = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function newpixelwandarray($num_pxl_wnds);
+function newpixelwandarray($num_pxl_wnds): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function newpixelwands($num_pxl_wnds);
+function newpixelwands($num_pxl_wnds): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function destroydrawingwand($drw_wnd);
+function destroydrawingwand($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function destroymagickwand($mgck_wnd);
+function destroymagickwand($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function destroypixeliterator($pxl_iter);
+function destroypixeliterator($pxl_iter): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function destroypixelwand($pxl_wnd);
+function destroypixelwand($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function destroypixelwandarray($pxl_wnd_array);
+function destroypixelwandarray($pxl_wnd_array): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function destroypixelwands($pxl_wnd_array);
+function destroypixelwands($pxl_wnd_array): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function isdrawingwand($var);
+function isdrawingwand($var): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function ismagickwand($var);
+function ismagickwand($var): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function ispixeliterator($var);
+function ispixeliterator($var): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function ispixelwand($var);
+function ispixelwand($var): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function cleardrawingwand($drw_wnd);
+function cleardrawingwand($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function clearmagickwand($mgck_wnd);
+function clearmagickwand($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function clearpixeliterator($pxl_iter);
+function clearpixeliterator($pxl_iter): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function clearpixelwand($pxl_wnd);
+function clearpixelwand($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function clonedrawingwand($drw_wnd);
+function clonedrawingwand($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function clonemagickwand($mgck_wnd);
+function clonemagickwand($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function wandgetexception($wnd);
+function wandgetexception($wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function wandgetexceptionstring($wnd);
+function wandgetexceptionstring($wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function wandgetexceptiontype($wnd);
+function wandgetexceptiontype($wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function wandhasexception($wnd);
+function wandhasexception($wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawaffine($drw_wnd, $sx, $sy, $rx, $ry, $tx, $ty);
+function drawaffine(
+  $drw_wnd,
+  $sx,
+  $sy,
+  $rx,
+  $ry,
+  $tx,
+  $ty,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawannotation($drw_wnd, $x, $y, $text);
+function drawannotation($drw_wnd, $x, $y, $text): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawarc($drw_wnd, $sx, $sy, $ex, $ey, $sd, $ed);
+function drawarc(
+  $drw_wnd,
+  $sx,
+  $sy,
+  $ex,
+  $ey,
+  $sd,
+  $ed,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawbezier($drw_wnd, $x_y_points_array);
+function drawbezier($drw_wnd, $x_y_points_array): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawcircle($drw_wnd, $ox, $oy, $px, $py);
+function drawcircle(
+  $drw_wnd,
+  $ox,
+  $oy,
+  $px,
+  $py,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawcolor($drw_wnd, $x, $y, $paint_method);
+function drawcolor(
+  $drw_wnd,
+  $x,
+  $y,
+  $paint_method,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawcomment($drw_wnd, $comment);
+function drawcomment($drw_wnd, $comment): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawcomposite($drw_wnd, $composite_operator, $x, $y, $width, $height, $mgck_wnd);
+function drawcomposite(
+  $drw_wnd,
+  $composite_operator,
+  $x,
+  $y,
+  $width,
+  $height,
+  $mgck_wnd,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawellipse($drw_wnd, $ox, $oy, $rx, $ry, $start, $end);
+function drawellipse(
+  $drw_wnd,
+  $ox,
+  $oy,
+  $rx,
+  $ry,
+  $start,
+  $end,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetclippath($drw_wnd);
+function drawgetclippath($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetcliprule($drw_wnd);
+function drawgetcliprule($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetclipunits($drw_wnd);
+function drawgetclipunits($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetexception($drw_wnd);
+function drawgetexception($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetexceptionstring($drw_wnd);
+function drawgetexceptionstring($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetexceptiontype($drw_wnd);
+function drawgetexceptiontype($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetfillalpha($drw_wnd);
+function drawgetfillalpha($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetfillcolor($drw_wnd);
+function drawgetfillcolor($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetfillopacity($drw_wnd);
+function drawgetfillopacity($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetfillrule($drw_wnd);
+function drawgetfillrule($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetfont($drw_wnd);
+function drawgetfont($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetfontfamily($drw_wnd);
+function drawgetfontfamily($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetfontsize($drw_wnd);
+function drawgetfontsize($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetfontstretch($drw_wnd);
+function drawgetfontstretch($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetfontstyle($drw_wnd);
+function drawgetfontstyle($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetfontweight($drw_wnd);
+function drawgetfontweight($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetgravity($drw_wnd);
+function drawgetgravity($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetstrokealpha($drw_wnd);
+function drawgetstrokealpha($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetstrokeantialias($drw_wnd);
+function drawgetstrokeantialias($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetstrokecolor($drw_wnd);
+function drawgetstrokecolor($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetstrokedasharray($drw_wnd);
+function drawgetstrokedasharray($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetstrokedashoffset($drw_wnd);
+function drawgetstrokedashoffset($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetstrokelinecap($drw_wnd);
+function drawgetstrokelinecap($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetstrokelinejoin($drw_wnd);
+function drawgetstrokelinejoin($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetstrokemiterlimit($drw_wnd);
+function drawgetstrokemiterlimit($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetstrokeopacity($drw_wnd);
+function drawgetstrokeopacity($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetstrokewidth($drw_wnd);
+function drawgetstrokewidth($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgettextalignment($drw_wnd);
+function drawgettextalignment($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgettextantialias($drw_wnd);
+function drawgettextantialias($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgettextdecoration($drw_wnd);
+function drawgettextdecoration($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgettextencoding($drw_wnd);
+function drawgettextencoding($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgettextundercolor($drw_wnd);
+function drawgettextundercolor($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawgetvectorgraphics($drw_wnd);
+function drawgetvectorgraphics($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawline($drw_wnd, $sx, $sy, $ex, $ey);
+function drawline($drw_wnd, $sx, $sy, $ex, $ey): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawmatte($drw_wnd, $x, $y, $paint_method);
+function drawmatte(
+  $drw_wnd,
+  $x,
+  $y,
+  $paint_method,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathclose($drw_wnd);
+function drawpathclose($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathcurvetoabsolute($drw_wnd, $x1, $y1, $x2, $y2, $x, $y);
+function drawpathcurvetoabsolute(
+  $drw_wnd,
+  $x1,
+  $y1,
+  $x2,
+  $y2,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpathcurvetoquadraticbezierabsolute(
+  $drw_wnd,
+  $x1,
+  $y1,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpathcurvetoquadraticbezierrelative(
+  $drw_wnd,
+  $x1,
+  $y1,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpathcurvetoquadraticbeziersmoothabsolute(
+  $drw_wnd,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpathcurvetoquadraticbeziersmoothrelative(
+  $drw_wnd,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpathcurvetorelative(
+  $drw_wnd,
+  $x1,
+  $y1,
+  $x2,
+  $y2,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpathcurvetosmoothabsolute(
+  $drw_wnd,
+  $x2,
+  $y2,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpathcurvetosmoothrelative(
+  $drw_wnd,
+  $x2,
+  $y2,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpathellipticarcabsolute(
+  $drw_wnd,
+  $rx,
+  $ry,
+  $x_axis_rotation,
+  $large_arc_flag,
+  $sweep_flag,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpathellipticarcrelative(
+  $drw_wnd,
+  $rx,
+  $ry,
+  $x_axis_rotation,
+  $large_arc_flag,
+  $sweep_flag,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpathfinish($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpathlinetoabsolute(
+  $drw_wnd,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpathlinetohorizontalabsolute(
+  $drw_wnd,
+  $x,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpathlinetohorizontalrelative(
+  $drw_wnd,
+  $x,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpathlinetorelative(
+  $drw_wnd,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpathlinetoverticalabsolute(
+  $drw_wnd,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpathlinetoverticalrelative(
+  $drw_wnd,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpathmovetoabsolute(
+  $drw_wnd,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpathmovetorelative(
+  $drw_wnd,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpathstart($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpoint($drw_wnd, $x, $y): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpolygon(
+  $drw_wnd,
+  $x_y_points_array,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpolyline(
+  $drw_wnd,
+  $x_y_points_array,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawrectangle(
+  $drw_wnd,
+  $x1,
+  $y1,
+  $x2,
+  $y2,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawrender($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawrotate($drw_wnd, $degrees): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawroundrectangle(
+  $drw_wnd,
+  $x1,
+  $y1,
+  $x2,
+  $y2,
+  $rx,
+  $ry,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawscale($drw_wnd, $x, $y): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetclippath($drw_wnd, $clip_path): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetcliprule($drw_wnd, $fill_rule): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetclipunits(
+  $drw_wnd,
+  $clip_path_units,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetfillalpha(
+  $drw_wnd,
+  $fill_opacity,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetfillcolor(
+  $drw_wnd,
+  $fill_pxl_wnd,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetfillopacity(
+  $drw_wnd,
+  $fill_opacity,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetfillpatternurl(
+  $drw_wnd,
+  $fill_url,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetfillrule($drw_wnd, $fill_rule): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetfont($drw_wnd, $font_file): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetfontfamily(
+  $drw_wnd,
+  $font_family,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetfontsize($drw_wnd, $pointsize): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetfontstretch(
+  $drw_wnd,
+  $stretch_type,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetfontstyle($drw_wnd, $style_type): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetfontweight(
+  $drw_wnd,
+  $font_weight,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetgravity($drw_wnd, $gravity_type): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetstrokealpha(
+  $drw_wnd,
+  $stroke_opacity,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetstrokeantialias(
+  $drw_wnd,
+  $stroke_antialias = true,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetstrokecolor(
+  $drw_wnd,
+  $strokecolor_pxl_wnd,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetstrokedasharray(
+  $drw_wnd,
+  $dash_array = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetstrokedashoffset(
+  $drw_wnd,
+  $dash_offset,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetstrokelinecap(
+  $drw_wnd,
+  $line_cap,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetstrokelinejoin(
+  $drw_wnd,
+  $line_join,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetstrokemiterlimit(
+  $drw_wnd,
+  $miterlimit,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetstrokeopacity(
+  $drw_wnd,
+  $stroke_opacity,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetstrokepatternurl(
+  $drw_wnd,
+  $stroke_url,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetstrokewidth(
+  $drw_wnd,
+  $stroke_width,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsettextalignment(
+  $drw_wnd,
+  $align_type,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsettextantialias(
+  $drw_wnd,
+  $text_antialias = true,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsettextdecoration(
+  $drw_wnd,
+  $decoration_type,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsettextencoding(
+  $drw_wnd,
+  $encoding,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsettextundercolor(
+  $drw_wnd,
+  $undercolor_pxl_wnd,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetvectorgraphics(
+  $drw_wnd,
+  $vector_graphics,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawsetviewbox(
+  $drw_wnd,
+  $x1,
+  $y1,
+  $x2,
+  $y2,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawskewx($drw_wnd, $degrees): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawskewy($drw_wnd, $degrees): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawtranslate($drw_wnd, $x, $y): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pushdrawingwand($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpushclippath(
+  $drw_wnd,
+  $clip_path_id,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpushdefs($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpushpattern(
+  $drw_wnd,
+  $pattern_id,
+  $x,
+  $y,
+  $width,
+  $height,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function popdrawingwand($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpopclippath($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpopdefs($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function drawpoppattern($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickadaptivethresholdimage(
+  $mgck_wnd,
+  $width,
+  $height,
+  $offset,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickaddimage($mgck_wnd, $add_wand): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickaddnoiseimage(
+  $mgck_wnd,
+  $noise_type,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickaffinetransformimage(
+  $mgck_wnd,
+  $drw_wnd,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickannotateimage(
+  $mgck_wnd,
+  $drw_wnd,
+  $x,
+  $y,
+  $angle,
+  $text,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickappendimages(
+  $mgck_wnd,
+  $stack_vertical = false,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickaverageimages($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickblackthresholdimage(
+  $mgck_wnd,
+  $threshold_pxl_wnd,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickblurimage(
+  $mgck_wnd,
+  $radius,
+  $sigma,
+  $channel_type = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickborderimage(
+  $mgck_wnd,
+  $bordercolor,
+  $width,
+  $height,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickcharcoalimage(
+  $mgck_wnd,
+  $radius,
+  $sigma,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickchopimage(
+  $mgck_wnd,
+  $width,
+  $height,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickclipimage($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickclippathimage(
+  $mgck_wnd,
+  $pathname,
+  $inside,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickcoalesceimages($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickcolorfloodfillimage(
+  $mgck_wnd,
+  $fillcolor_pxl_wnd,
+  $fuzz,
+  $bordercolor_pxl_wnd,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickcolorizeimage(
+  $mgck_wnd,
+  $colorize,
+  $opacity_pxl_wnd,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickcombineimages(
+  $mgck_wnd,
+  $channel_type,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickcommentimage($mgck_wnd, $comment): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickcompareimages(
+  $mgck_wnd,
+  $reference_wnd,
+  $metric_type,
+  $channel_type = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickcompositeimage(
+  $mgck_wnd,
+  $composite_wnd,
+  $composite_operator,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickconstituteimage(
+  $mgck_wnd,
+  $columns,
+  $rows,
+  $smap,
+  $storage_type,
+  $pixel_array,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickcontrastimage(
+  $mgck_wnd,
+  $sharpen,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickconvolveimage(
+  $mgck_wnd,
+  $kernel_array,
+  $channel_type = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickcropimage(
+  $mgck_wnd,
+  $width,
+  $height,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickcyclecolormapimage(
+  $mgck_wnd,
+  $num_positions,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickdeconstructimages($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickdescribeimage($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickdespeckleimage($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickdrawimage($mgck_wnd, $drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickechoimageblob($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickechoimagesblob($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickedgeimage($mgck_wnd, $radius): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickembossimage(
+  $mgck_wnd,
+  $radius,
+  $sigma,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickenhanceimage($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickequalizeimage($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickevaluateimage(
+  $mgck_wnd,
+  $evaluate_op,
+  $constant,
+  $channel_type = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickflattenimages($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickflipimage($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickflopimage($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickframeimage(
+  $mgck_wnd,
+  $matte_color,
+  $width,
+  $height,
+  $inner_bevel,
+  $outer_bevel,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickfximage(
+  $mgck_wnd,
+  $expression,
+  $channel_type = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgammaimage(
+  $mgck_wnd,
+  $gamma,
+  $channel_type = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgaussianblurimage(
+  $mgck_wnd,
+  $radius,
+  $sigma,
+  $channel_type = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetcharheight(
+  $mgck_wnd,
+  $drw_wnd,
+  $txt,
+  $multiline = false,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetcharwidth(
+  $mgck_wnd,
+  $drw_wnd,
+  $txt,
+  $multiline = false,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetexception($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetexceptionstring($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetexceptiontype($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetfilename($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetformat($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetimage($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetimagebackgroundcolor(
+  $mgck_wnd,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetimageblob($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathcurvetoquadraticbezierabsolute($drw_wnd, $x1, $y1, $x, $y);
+function magickgetimageblueprimary($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathcurvetoquadraticbezierrelative($drw_wnd, $x1, $y1, $x, $y);
+function magickgetimagebordercolor($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathcurvetoquadraticbeziersmoothabsolute($drw_wnd, $x, $y);
+function magickgetimagechannelmean(
+  $mgck_wnd,
+  $channel_type,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathcurvetoquadraticbeziersmoothrelative($drw_wnd, $x, $y);
+function magickgetimagecolormapcolor(
+  $mgck_wnd,
+  $index,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathcurvetorelative($drw_wnd, $x1, $y1, $x2, $y2, $x, $y);
+function magickgetimagecolors($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathcurvetosmoothabsolute($drw_wnd, $x2, $y2, $x, $y);
+function magickgetimagecolorspace($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathcurvetosmoothrelative($drw_wnd, $x2, $y2, $x, $y);
+function magickgetimagecompose($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathellipticarcabsolute($drw_wnd, $rx, $ry, $x_axis_rotation, $large_arc_flag, $sweep_flag, $x, $y);
+function magickgetimagecompression($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathellipticarcrelative($drw_wnd, $rx, $ry, $x_axis_rotation, $large_arc_flag, $sweep_flag, $x, $y);
+function magickgetimagecompressionquality(
+  $mgck_wnd,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathfinish($drw_wnd);
+function magickgetimagedelay($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathlinetoabsolute($drw_wnd, $x, $y);
+function magickgetimagedepth(
+  $mgck_wnd,
+  $channel_type = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathlinetohorizontalabsolute($drw_wnd, $x);
+function magickgetimagedispose($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathlinetohorizontalrelative($drw_wnd, $x);
+function magickgetimageextrema(
+  $mgck_wnd,
+  $channel_type = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathlinetorelative($drw_wnd, $x, $y);
+function magickgetimagefilename($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathlinetoverticalabsolute($drw_wnd, $y);
+function magickgetimageformat($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathlinetoverticalrelative($drw_wnd, $y);
+function magickgetimagegamma($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathmovetoabsolute($drw_wnd, $x, $y);
+function magickgetimagegreenprimary($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathmovetorelative($drw_wnd, $x, $y);
+function magickgetimageheight($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathstart($drw_wnd);
+function magickgetimagehistogram($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpoint($drw_wnd, $x, $y);
+function magickgetimageindex($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpolygon($drw_wnd, $x_y_points_array);
+function magickgetimageinterlacescheme(
+  $mgck_wnd,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpolyline($drw_wnd, $x_y_points_array);
+function magickgetimageiterations($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawrectangle($drw_wnd, $x1, $y1, $x2, $y2);
+function magickgetimagemattecolor($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawrender($drw_wnd);
+function magickgetimagemimetype($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawrotate($drw_wnd, $degrees);
+function magickgetimagepixels(
+  $mgck_wnd,
+  $x_offset,
+  $y_offset,
+  $columns,
+  $rows,
+  $smap,
+  $storage_type,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawroundrectangle($drw_wnd, $x1, $y1, $x2, $y2, $rx, $ry);
+function magickgetimageprofile($mgck_wnd, $name): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawscale($drw_wnd, $x, $y);
+function magickgetimageredprimary($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawsetclippath($drw_wnd, $clip_path);
+function magickgetimagerenderingintent(
+  $mgck_wnd,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawsetcliprule($drw_wnd, $fill_rule);
+function magickgetimageresolution($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawsetclipunits($drw_wnd, $clip_path_units);
+function magickgetimagescene($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawsetfillalpha($drw_wnd, $fill_opacity);
+function magickgetimagesignature($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawsetfillcolor($drw_wnd, $fill_pxl_wnd);
+function magickgetimagesize($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawsetfillopacity($drw_wnd, $fill_opacity);
+function magickgetimagetype($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawsetfillpatternurl($drw_wnd, $fill_url);
+function magickgetimageunits($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawsetfillrule($drw_wnd, $fill_rule);
+function magickgetimagevirtualpixelmethod(
+  $mgck_wnd,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetimagewhitepoint($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawsetfont($drw_wnd, $font_file);
-<<__PHPStdLib>>
-function drawsetfontfamily($drw_wnd, $font_family);
-<<__PHPStdLib>>
-function drawsetfontsize($drw_wnd, $pointsize);
-<<__PHPStdLib>>
-function drawsetfontstretch($drw_wnd, $stretch_type);
-<<__PHPStdLib>>
-function drawsetfontstyle($drw_wnd, $style_type);
-<<__PHPStdLib>>
-function drawsetfontweight($drw_wnd, $font_weight);
-<<__PHPStdLib>>
-function drawsetgravity($drw_wnd, $gravity_type);
-<<__PHPStdLib>>
-function drawsetstrokealpha($drw_wnd, $stroke_opacity);
-<<__PHPStdLib>>
-function drawsetstrokeantialias($drw_wnd, $stroke_antialias = true);
-<<__PHPStdLib>>
-function drawsetstrokecolor($drw_wnd, $strokecolor_pxl_wnd);
-<<__PHPStdLib>>
-function drawsetstrokedasharray($drw_wnd, $dash_array = null);
-<<__PHPStdLib>>
-function drawsetstrokedashoffset($drw_wnd, $dash_offset);
-<<__PHPStdLib>>
-function drawsetstrokelinecap($drw_wnd, $line_cap);
-<<__PHPStdLib>>
-function drawsetstrokelinejoin($drw_wnd, $line_join);
-<<__PHPStdLib>>
-function drawsetstrokemiterlimit($drw_wnd, $miterlimit);
-<<__PHPStdLib>>
-function drawsetstrokeopacity($drw_wnd, $stroke_opacity);
-<<__PHPStdLib>>
-function drawsetstrokepatternurl($drw_wnd, $stroke_url);
-<<__PHPStdLib>>
-function drawsetstrokewidth($drw_wnd, $stroke_width);
-<<__PHPStdLib>>
-function drawsettextalignment($drw_wnd, $align_type);
-<<__PHPStdLib>>
-function drawsettextantialias($drw_wnd, $text_antialias = true);
-<<__PHPStdLib>>
-function drawsettextdecoration($drw_wnd, $decoration_type);
-<<__PHPStdLib>>
-function drawsettextencoding($drw_wnd, $encoding);
-<<__PHPStdLib>>
-function drawsettextundercolor($drw_wnd, $undercolor_pxl_wnd);
-<<__PHPStdLib>>
-function drawsetvectorgraphics($drw_wnd, $vector_graphics);
-<<__PHPStdLib>>
-function drawsetviewbox($drw_wnd, $x1, $y1, $x2, $y2);
-<<__PHPStdLib>>
-function drawskewx($drw_wnd, $degrees);
-<<__PHPStdLib>>
-function drawskewy($drw_wnd, $degrees);
-<<__PHPStdLib>>
-function drawtranslate($drw_wnd, $x, $y);
-<<__PHPStdLib>>
-function pushdrawingwand($drw_wnd);
-<<__PHPStdLib>>
-function drawpushclippath($drw_wnd, $clip_path_id);
-<<__PHPStdLib>>
-function drawpushdefs($drw_wnd);
-<<__PHPStdLib>>
-function drawpushpattern($drw_wnd, $pattern_id, $x, $y, $width, $height);
-<<__PHPStdLib>>
-function popdrawingwand($drw_wnd);
-<<__PHPStdLib>>
-function drawpopclippath($drw_wnd);
-<<__PHPStdLib>>
-function drawpopdefs($drw_wnd);
-<<__PHPStdLib>>
-function drawpoppattern($drw_wnd);
-<<__PHPStdLib>>
-function magickadaptivethresholdimage($mgck_wnd, $width, $height, $offset);
-<<__PHPStdLib>>
-function magickaddimage($mgck_wnd, $add_wand);
-<<__PHPStdLib>>
-function magickaddnoiseimage($mgck_wnd, $noise_type);
-<<__PHPStdLib>>
-function magickaffinetransformimage($mgck_wnd, $drw_wnd);
-<<__PHPStdLib>>
-function magickannotateimage($mgck_wnd, $drw_wnd, $x, $y, $angle, $text);
-<<__PHPStdLib>>
-function magickappendimages($mgck_wnd, $stack_vertical = false);
-<<__PHPStdLib>>
-function magickaverageimages($mgck_wnd);
-<<__PHPStdLib>>
-function magickblackthresholdimage($mgck_wnd, $threshold_pxl_wnd);
-<<__PHPStdLib>>
-function magickblurimage($mgck_wnd, $radius, $sigma, $channel_type = 0);
-<<__PHPStdLib>>
-function magickborderimage($mgck_wnd, $bordercolor, $width, $height);
-<<__PHPStdLib>>
-function magickcharcoalimage($mgck_wnd, $radius, $sigma);
-<<__PHPStdLib>>
-function magickchopimage($mgck_wnd, $width, $height, $x, $y);
-<<__PHPStdLib>>
-function magickclipimage($mgck_wnd);
-<<__PHPStdLib>>
-function magickclippathimage($mgck_wnd, $pathname, $inside);
-<<__PHPStdLib>>
-function magickcoalesceimages($mgck_wnd);
-<<__PHPStdLib>>
-function magickcolorfloodfillimage($mgck_wnd, $fillcolor_pxl_wnd, $fuzz, $bordercolor_pxl_wnd, $x, $y);
-<<__PHPStdLib>>
-function magickcolorizeimage($mgck_wnd, $colorize, $opacity_pxl_wnd);
-<<__PHPStdLib>>
-function magickcombineimages($mgck_wnd, $channel_type);
-<<__PHPStdLib>>
-function magickcommentimage($mgck_wnd, $comment);
-<<__PHPStdLib>>
-function magickcompareimages($mgck_wnd, $reference_wnd, $metric_type, $channel_type = 0);
-<<__PHPStdLib>>
-function magickcompositeimage($mgck_wnd, $composite_wnd, $composite_operator, $x, $y);
-<<__PHPStdLib>>
-function magickconstituteimage($mgck_wnd, $columns, $rows, $smap, $storage_type, $pixel_array);
-<<__PHPStdLib>>
-function magickcontrastimage($mgck_wnd, $sharpen);
-<<__PHPStdLib>>
-function magickconvolveimage($mgck_wnd, $kernel_array, $channel_type = 0);
-<<__PHPStdLib>>
-function magickcropimage($mgck_wnd, $width, $height, $x, $y);
-<<__PHPStdLib>>
-function magickcyclecolormapimage($mgck_wnd, $num_positions);
-<<__PHPStdLib>>
-function magickdeconstructimages($mgck_wnd);
-<<__PHPStdLib>>
-function magickdescribeimage($mgck_wnd);
-<<__PHPStdLib>>
-function magickdespeckleimage($mgck_wnd);
-<<__PHPStdLib>>
-function magickdrawimage($mgck_wnd, $drw_wnd);
-<<__PHPStdLib>>
-function magickechoimageblob($mgck_wnd);
-<<__PHPStdLib>>
-function magickechoimagesblob($mgck_wnd);
-<<__PHPStdLib>>
-function magickedgeimage($mgck_wnd, $radius);
-<<__PHPStdLib>>
-function magickembossimage($mgck_wnd, $radius, $sigma);
-<<__PHPStdLib>>
-function magickenhanceimage($mgck_wnd);
-<<__PHPStdLib>>
-function magickequalizeimage($mgck_wnd);
-<<__PHPStdLib>>
-function magickevaluateimage($mgck_wnd, $evaluate_op, $constant, $channel_type = 0);
-<<__PHPStdLib>>
-function magickflattenimages($mgck_wnd);
-<<__PHPStdLib>>
-function magickflipimage($mgck_wnd);
-<<__PHPStdLib>>
-function magickflopimage($mgck_wnd);
-<<__PHPStdLib>>
-function magickframeimage($mgck_wnd, $matte_color, $width, $height, $inner_bevel, $outer_bevel);
-<<__PHPStdLib>>
-function magickfximage($mgck_wnd, $expression, $channel_type = 0);
-<<__PHPStdLib>>
-function magickgammaimage($mgck_wnd, $gamma, $channel_type = 0);
-<<__PHPStdLib>>
-function magickgaussianblurimage($mgck_wnd, $radius, $sigma, $channel_type = 0);
-<<__PHPStdLib>>
-function magickgetcharheight($mgck_wnd, $drw_wnd, $txt, $multiline = false);
-<<__PHPStdLib>>
-function magickgetcharwidth($mgck_wnd, $drw_wnd, $txt, $multiline = false);
-<<__PHPStdLib>>
-function magickgetexception($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetexceptionstring($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetexceptiontype($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetfilename($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetformat($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimage($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagebackgroundcolor($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimageblob($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimageblueprimary($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagebordercolor($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagechannelmean($mgck_wnd, $channel_type);
-<<__PHPStdLib>>
-function magickgetimagecolormapcolor($mgck_wnd, $index);
-<<__PHPStdLib>>
-function magickgetimagecolors($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagecolorspace($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagecompose($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagecompression($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagecompressionquality($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagedelay($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagedepth($mgck_wnd, $channel_type = 0);
-<<__PHPStdLib>>
-function magickgetimagedispose($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimageextrema($mgck_wnd, $channel_type = 0);
-<<__PHPStdLib>>
-function magickgetimagefilename($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimageformat($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagegamma($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagegreenprimary($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimageheight($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagehistogram($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimageindex($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimageinterlacescheme($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimageiterations($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagemattecolor($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagemimetype($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagepixels($mgck_wnd, $x_offset, $y_offset, $columns, $rows, $smap, $storage_type);
-<<__PHPStdLib>>
-function magickgetimageprofile($mgck_wnd, $name);
-<<__PHPStdLib>>
-function magickgetimageredprimary($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagerenderingintent($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimageresolution($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagescene($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagesignature($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagesize($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagetype($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimageunits($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagevirtualpixelmethod($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagewhitepoint($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagewidth($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetimagesblob($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetinterlacescheme($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetmaxtextadvance($mgck_wnd, $drw_wnd, $txt, $multiline = false);
-<<__PHPStdLib>>
-function magickgetmimetype($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetnumberimages($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetsamplingfactors($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetsize($mgck_wnd);
-<<__PHPStdLib>>
-function magickgetstringheight($mgck_wnd, $drw_wnd, $txt, $multiline = false);
-<<__PHPStdLib>>
-function magickgetstringwidth($mgck_wnd, $drw_wnd, $txt, $multiline = false);
-<<__PHPStdLib>>
-function magickgettextascent($mgck_wnd, $drw_wnd, $txt, $multiline = false);
-<<__PHPStdLib>>
-function magickgettextdescent($mgck_wnd, $drw_wnd, $txt, $multiline = false);
-<<__PHPStdLib>>
-function magickgetwandsize($mgck_wnd);
-<<__PHPStdLib>>
-function magickhasnextimage($mgck_wnd);
-<<__PHPStdLib>>
-function magickhaspreviousimage($mgck_wnd);
-<<__PHPStdLib>>
-function magickimplodeimage($mgck_wnd, $amount);
-<<__PHPStdLib>>
-function magicklabelimage($mgck_wnd, $label);
-<<__PHPStdLib>>
-function magicklevelimage($mgck_wnd, $black_point, $gamma, $white_point, $channel_type = 0);
-<<__PHPStdLib>>
-function magickmagnifyimage($mgck_wnd);
-<<__PHPStdLib>>
-function magickmapimage($mgck_wnd, $map_wand, $dither);
-<<__PHPStdLib>>
-function magickmattefloodfillimage($mgck_wnd, $opacity, $fuzz, $bordercolor_pxl_wnd, $x, $y);
-<<__PHPStdLib>>
-function magickmedianfilterimage($mgck_wnd, $radius);
-<<__PHPStdLib>>
-function magickminifyimage($mgck_wnd);
-<<__PHPStdLib>>
-function magickmodulateimage($mgck_wnd, $brightness, $saturation, $hue);
-<<__PHPStdLib>>
-function magickmontageimage($mgck_wnd, $drw_wnd, $tile_geometry, $thumbnail_geometry, $montage_mode, $frame);
-<<__PHPStdLib>>
-function magickmorphimages($mgck_wnd, $number_frames);
-<<__PHPStdLib>>
-function magickmosaicimages($mgck_wnd);
-<<__PHPStdLib>>
-function magickmotionblurimage($mgck_wnd, $radius, $sigma, $angle);
-<<__PHPStdLib>>
-function magicknegateimage($mgck_wnd, $only_the_gray = false, $channel_type = 0);
-<<__PHPStdLib>>
-function magicknewimage($mgck_wnd, $width, $height, $imagemagick_col_str = null);
-<<__PHPStdLib>>
-function magicknextimage($mgck_wnd);
-<<__PHPStdLib>>
-function magicknormalizeimage($mgck_wnd);
-<<__PHPStdLib>>
-function magickoilpaintimage($mgck_wnd, $radius);
-<<__PHPStdLib>>
-function magickpaintopaqueimage($mgck_wnd, $target_pxl_wnd, $fill_pxl_wnd, $fuzz = 0.0);
-<<__PHPStdLib>>
-function magickpainttransparentimage($mgck_wnd, $target, $opacity = MW_TransparentOpacity, $fuzz = 0.0);
-<<__PHPStdLib>>
-function magickpingimage($mgck_wnd, $filename);
-<<__PHPStdLib>>
-function magickposterizeimage($mgck_wnd, $levels, $dither);
-<<__PHPStdLib>>
-function magickpreviewimages($mgck_wnd, $preview);
-<<__PHPStdLib>>
-function magickpreviousimage($mgck_wnd);
-<<__PHPStdLib>>
-function magickprofileimage($mgck_wnd, $name, $profile = null);
-<<__PHPStdLib>>
-function magickquantizeimage($mgck_wnd, $number_colors, $colorspace_type, $treedepth, $dither, $measure_error);
-<<__PHPStdLib>>
-function magickquantizeimages($mgck_wnd, $number_colors, $colorspace_type, $treedepth, $dither, $measure_error);
-<<__PHPStdLib>>
-function magickqueryfontmetrics($mgck_wnd, $drw_wnd, $txt, $multiline = false);
-<<__PHPStdLib>>
-function magickradialblurimage($mgck_wnd, $angle);
-<<__PHPStdLib>>
-function magickraiseimage($mgck_wnd, $width, $height, $x, $y, $raise);
-<<__PHPStdLib>>
-function magickreadimage($mgck_wnd, $filename);
-<<__PHPStdLib>>
-function magickreadimageblob($mgck_wnd, $blob);
-<<__PHPStdLib>>
-function magickreadimagefile($mgck_wnd, $handle);
-<<__PHPStdLib>>
-function magickreadimages($mgck_wnd, $img_filenames_array);
-<<__PHPStdLib>>
-function magickreducenoiseimage($mgck_wnd, $radius);
-<<__PHPStdLib>>
-function magickremoveimage($mgck_wnd);
-<<__PHPStdLib>>
-function magickremoveimageprofile($mgck_wnd, $name);
-<<__PHPStdLib>>
-function magickremoveimageprofiles($mgck_wnd);
-<<__PHPStdLib>>
-function magickresampleimage($mgck_wnd, $x_resolution, $y_resolution, $filter_type, $blur);
-<<__PHPStdLib>>
-function magickresetiterator($mgck_wnd);
-<<__PHPStdLib>>
-function magickresizeimage($mgck_wnd, $columns, $rows, $filter_type, $blur);
-<<__PHPStdLib>>
-function magickrollimage($mgck_wnd, $x_offset, $y_offset);
-<<__PHPStdLib>>
-function magickrotateimage($mgck_wnd, $background, $degrees);
-<<__PHPStdLib>>
-function magicksampleimage($mgck_wnd, $columns, $rows);
-<<__PHPStdLib>>
-function magickscaleimage($mgck_wnd, $columns, $rows);
-<<__PHPStdLib>>
-function magickseparateimagechannel($mgck_wnd, $channel_type);
-<<__PHPStdLib>>
-function magicksetcompressionquality($mgck_wnd, $quality);
-<<__PHPStdLib>>
-function magicksetfilename($mgck_wnd, $filename = null);
-<<__PHPStdLib>>
-function magicksetfirstiterator($mgck_wnd);
-<<__PHPStdLib>>
-function magicksetformat($mgck_wnd, $format);
-<<__PHPStdLib>>
-function magicksetimage($mgck_wnd, $replace_wand);
-<<__PHPStdLib>>
-function magicksetimagebackgroundcolor($mgck_wnd, $background_pxl_wnd);
-<<__PHPStdLib>>
-function magicksetimagebias($mgck_wnd, $bias);
-<<__PHPStdLib>>
-function magicksetimageblueprimary($mgck_wnd, $x, $y);
-<<__PHPStdLib>>
-function magicksetimagebordercolor($mgck_wnd, $border_pxl_wnd);
-<<__PHPStdLib>>
-function magicksetimagecolormapcolor($mgck_wnd, $index, $mapcolor_pxl_wnd);
-<<__PHPStdLib>>
-function magicksetimagecolorspace($mgck_wnd, $colorspace_type);
-<<__PHPStdLib>>
-function magicksetimagecompose($mgck_wnd, $composite_operator);
-<<__PHPStdLib>>
-function magicksetimagecompression($mgck_wnd, $compression_type);
-<<__PHPStdLib>>
-function magicksetimagecompressionquality($mgck_wnd, $quality);
-<<__PHPStdLib>>
-function magicksetimagedelay($mgck_wnd, $delay);
-<<__PHPStdLib>>
-function magicksetimagedepth($mgck_wnd, $depth, $channel_type = 0);
-<<__PHPStdLib>>
-function magicksetimagedispose($mgck_wnd, $dispose_type);
-<<__PHPStdLib>>
-function magicksetimagefilename($mgck_wnd, $filename = null);
-<<__PHPStdLib>>
-function magicksetimageformat($mgck_wnd, $format);
-<<__PHPStdLib>>
-function magicksetimagegamma($mgck_wnd, $gamma);
-<<__PHPStdLib>>
-function magicksetimagegreenprimary($mgck_wnd, $x, $y);
-<<__PHPStdLib>>
-function magicksetimageindex($mgck_wnd, $index);
-<<__PHPStdLib>>
-function magicksetimageinterlacescheme($mgck_wnd, $interlace_type);
-<<__PHPStdLib>>
-function magicksetimageiterations($mgck_wnd, $iterations);
-<<__PHPStdLib>>
-function magicksetimagemattecolor($mgck_wnd, $matte_pxl_wnd);
-<<__PHPStdLib>>
-function magicksetimageoption($mgck_wnd, $format, $key, $value);
-<<__PHPStdLib>>
-function magicksetimagepixels($mgck_wnd, $x_offset, $y_offset, $columns, $rows, $smap, $storage_type, $pixel_array);
-<<__PHPStdLib>>
-function magicksetimageprofile($mgck_wnd, $name, $profile);
-<<__PHPStdLib>>
-function magicksetimageredprimary($mgck_wnd, $x, $y);
-<<__PHPStdLib>>
-function magicksetimagerenderingintent($mgck_wnd, $rendering_intent);
-<<__PHPStdLib>>
-function magicksetimageresolution($mgck_wnd, $x_resolution, $y_resolution);
-<<__PHPStdLib>>
-function magicksetimagescene($mgck_wnd, $scene);
-<<__PHPStdLib>>
-function magicksetimagetype($mgck_wnd, $image_type);
-<<__PHPStdLib>>
-function magicksetimageunits($mgck_wnd, $resolution_type);
-<<__PHPStdLib>>
-function magicksetimagevirtualpixelmethod($mgck_wnd, $virtual_pixel_method);
-<<__PHPStdLib>>
-function magicksetimagewhitepoint($mgck_wnd, $x, $y);
-<<__PHPStdLib>>
-function magicksetinterlacescheme($mgck_wnd, $interlace_type);
-<<__PHPStdLib>>
-function magicksetlastiterator($mgck_wnd);
-<<__PHPStdLib>>
-function magicksetpassphrase($mgck_wnd, $passphrase);
-<<__PHPStdLib>>
-function magicksetresolution($mgck_wnd, $x_resolution, $y_resolution);
-<<__PHPStdLib>>
-function magicksetsamplingfactors($mgck_wnd, $number_factors, $sampling_factors);
-<<__PHPStdLib>>
-function magicksetsize($mgck_wnd, $columns, $rows);
-<<__PHPStdLib>>
-function magicksetwandsize($mgck_wnd, $columns, $rows);
-<<__PHPStdLib>>
-function magicksharpenimage($mgck_wnd, $radius, $sigma, $channel_type = 0);
-<<__PHPStdLib>>
-function magickshaveimage($mgck_wnd, $columns, $rows);
-<<__PHPStdLib>>
-function magickshearimage($mgck_wnd, $background, $x_shear, $y_shear);
-<<__PHPStdLib>>
-function magicksolarizeimage($mgck_wnd, $threshold);
-<<__PHPStdLib>>
-function magickspliceimage($mgck_wnd, $width, $height, $x, $y);
-<<__PHPStdLib>>
-function magickspreadimage($mgck_wnd, $radius);
-<<__PHPStdLib>>
-function magicksteganoimage($mgck_wnd, $watermark_wand, $offset);
-<<__PHPStdLib>>
-function magickstereoimage($mgck_wnd, $offset_wand);
-<<__PHPStdLib>>
-function magickstripimage($mgck_wnd);
-<<__PHPStdLib>>
-function magickswirlimage($mgck_wnd, $degrees);
-<<__PHPStdLib>>
-function magicktextureimage($mgck_wnd, $texture_wand);
-<<__PHPStdLib>>
-function magickthresholdimage($mgck_wnd, $threshold, $channel_type = 0);
-<<__PHPStdLib>>
-function magicktintimage($mgck_wnd, $tint_pxl_wnd, $opacity_pxl_wnd);
-<<__PHPStdLib>>
-function magicktransformimage($mgck_wnd, $crop, $geometry);
-<<__PHPStdLib>>
-function magicktrimimage($mgck_wnd, $fuzz);
-<<__PHPStdLib>>
-function magickunsharpmaskimage($mgck_wnd, $radius, $sigma, $amount, $threshold, $channel_type = 0);
-<<__PHPStdLib>>
-function magickwaveimage($mgck_wnd, $amplitude, $wave_length);
-<<__PHPStdLib>>
-function magickwhitethresholdimage($mgck_wnd, $threshold_pxl_wnd);
-<<__PHPStdLib>>
-function magickwriteimage($mgck_wnd, $filename);
-<<__PHPStdLib>>
-function magickwriteimagefile($mgck_wnd, $handle);
-<<__PHPStdLib>>
-function magickwriteimages($mgck_wnd, $filename = "", $join_images = false);
-<<__PHPStdLib>>
-function magickwriteimagesfile($mgck_wnd, $handle);
-<<__PHPStdLib>>
-function pixelgetalpha($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetalphaquantum($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetblack($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetblackquantum($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetblue($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetbluequantum($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetcolorasstring($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetcolorcount($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetcyan($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetcyanquantum($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetexception($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetexceptionstring($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetexceptiontype($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetgreen($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetgreenquantum($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetindex($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetmagenta($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetmagentaquantum($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetopacity($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetopacityquantum($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetquantumcolor($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetred($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetredquantum($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetyellow($pxl_wnd);
-<<__PHPStdLib>>
-function pixelgetyellowquantum($pxl_wnd);
-<<__PHPStdLib>>
-function pixelsetalpha($pxl_wnd, $alpha);
-<<__PHPStdLib>>
-function pixelsetalphaquantum($pxl_wnd, $alpha);
-<<__PHPStdLib>>
-function pixelsetblack($pxl_wnd, $black);
-<<__PHPStdLib>>
-function pixelsetblackquantum($pxl_wnd, $black);
-<<__PHPStdLib>>
-function pixelsetblue($pxl_wnd, $blue);
-<<__PHPStdLib>>
-function pixelsetbluequantum($pxl_wnd, $blue);
-<<__PHPStdLib>>
-function pixelsetcolor($pxl_wnd, $imagemagick_col_str);
-<<__PHPStdLib>>
-function pixelsetcolorcount($pxl_wnd, $count);
-<<__PHPStdLib>>
-function pixelsetcyan($pxl_wnd, $cyan);
-<<__PHPStdLib>>
-function pixelsetcyanquantum($pxl_wnd, $cyan);
-<<__PHPStdLib>>
-function pixelsetgreen($pxl_wnd, $green);
-<<__PHPStdLib>>
-function pixelsetgreenquantum($pxl_wnd, $green);
-<<__PHPStdLib>>
-function pixelsetindex($pxl_wnd, $index);
-<<__PHPStdLib>>
-function pixelsetmagenta($pxl_wnd, $magenta);
-<<__PHPStdLib>>
-function pixelsetmagentaquantum($pxl_wnd, $magenta);
-<<__PHPStdLib>>
-function pixelsetopacity($pxl_wnd, $opacity);
-<<__PHPStdLib>>
-function pixelsetopacityquantum($pxl_wnd, $opacity);
-<<__PHPStdLib>>
-function pixelsetquantumcolor($pxl_wnd, $red, $green, $blue, $opacity = 0.0);
-<<__PHPStdLib>>
-function pixelsetred($pxl_wnd, $red);
-<<__PHPStdLib>>
-function pixelsetredquantum($pxl_wnd, $red);
-<<__PHPStdLib>>
-function pixelsetyellow($pxl_wnd, $yellow);
-<<__PHPStdLib>>
-function pixelsetyellowquantum($pxl_wnd, $yellow);
-<<__PHPStdLib>>
-function pixelgetiteratorexception($pxl_iter);
-<<__PHPStdLib>>
-function pixelgetiteratorexceptionstring($pxl_iter);
-<<__PHPStdLib>>
-function pixelgetiteratorexceptiontype($pxl_iter);
-<<__PHPStdLib>>
-function pixelgetnextiteratorrow($pxl_iter);
-<<__PHPStdLib>>
-function pixelresetiterator($pxl_iter);
-<<__PHPStdLib>>
-function pixelsetiteratorrow($pxl_iter, $row);
-<<__PHPStdLib>>
-function pixelsynciterator($pxl_iter);
+function magickgetimagewidth($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetimagesblob($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetinterlacescheme($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetmaxtextadvance(
+  $mgck_wnd,
+  $drw_wnd,
+  $txt,
+  $multiline = false,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetmimetype($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetnumberimages($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetsamplingfactors($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetsize($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetstringheight(
+  $mgck_wnd,
+  $drw_wnd,
+  $txt,
+  $multiline = false,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetstringwidth(
+  $mgck_wnd,
+  $drw_wnd,
+  $txt,
+  $multiline = false,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgettextascent(
+  $mgck_wnd,
+  $drw_wnd,
+  $txt,
+  $multiline = false,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgettextdescent(
+  $mgck_wnd,
+  $drw_wnd,
+  $txt,
+  $multiline = false,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickgetwandsize($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickhasnextimage($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickhaspreviousimage($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickimplodeimage($mgck_wnd, $amount): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicklabelimage($mgck_wnd, $label): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicklevelimage(
+  $mgck_wnd,
+  $black_point,
+  $gamma,
+  $white_point,
+  $channel_type = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickmagnifyimage($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickmapimage(
+  $mgck_wnd,
+  $map_wand,
+  $dither,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickmattefloodfillimage(
+  $mgck_wnd,
+  $opacity,
+  $fuzz,
+  $bordercolor_pxl_wnd,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickmedianfilterimage(
+  $mgck_wnd,
+  $radius,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickminifyimage($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickmodulateimage(
+  $mgck_wnd,
+  $brightness,
+  $saturation,
+  $hue,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickmontageimage(
+  $mgck_wnd,
+  $drw_wnd,
+  $tile_geometry,
+  $thumbnail_geometry,
+  $montage_mode,
+  $frame,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickmorphimages(
+  $mgck_wnd,
+  $number_frames,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickmosaicimages($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickmotionblurimage(
+  $mgck_wnd,
+  $radius,
+  $sigma,
+  $angle,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicknegateimage(
+  $mgck_wnd,
+  $only_the_gray = false,
+  $channel_type = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicknewimage(
+  $mgck_wnd,
+  $width,
+  $height,
+  $imagemagick_col_str = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicknextimage($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicknormalizeimage($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickoilpaintimage($mgck_wnd, $radius): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickpaintopaqueimage(
+  $mgck_wnd,
+  $target_pxl_wnd,
+  $fill_pxl_wnd,
+  $fuzz = 0.0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickpainttransparentimage(
+  $mgck_wnd,
+  $target,
+  $opacity = MW_TransparentOpacity,
+  $fuzz = 0.0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickpingimage($mgck_wnd, $filename): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickposterizeimage(
+  $mgck_wnd,
+  $levels,
+  $dither,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickpreviewimages(
+  $mgck_wnd,
+  $preview,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickpreviousimage($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickprofileimage(
+  $mgck_wnd,
+  $name,
+  $profile = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickquantizeimage(
+  $mgck_wnd,
+  $number_colors,
+  $colorspace_type,
+  $treedepth,
+  $dither,
+  $measure_error,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickquantizeimages(
+  $mgck_wnd,
+  $number_colors,
+  $colorspace_type,
+  $treedepth,
+  $dither,
+  $measure_error,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickqueryfontmetrics(
+  $mgck_wnd,
+  $drw_wnd,
+  $txt,
+  $multiline = false,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickradialblurimage(
+  $mgck_wnd,
+  $angle,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickraiseimage(
+  $mgck_wnd,
+  $width,
+  $height,
+  $x,
+  $y,
+  $raise,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickreadimage($mgck_wnd, $filename): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickreadimageblob($mgck_wnd, $blob): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickreadimagefile($mgck_wnd, $handle): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickreadimages(
+  $mgck_wnd,
+  $img_filenames_array,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickreducenoiseimage(
+  $mgck_wnd,
+  $radius,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickremoveimage($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickremoveimageprofile(
+  $mgck_wnd,
+  $name,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickremoveimageprofiles($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickresampleimage(
+  $mgck_wnd,
+  $x_resolution,
+  $y_resolution,
+  $filter_type,
+  $blur,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickresetiterator($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickresizeimage(
+  $mgck_wnd,
+  $columns,
+  $rows,
+  $filter_type,
+  $blur,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickrollimage(
+  $mgck_wnd,
+  $x_offset,
+  $y_offset,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickrotateimage(
+  $mgck_wnd,
+  $background,
+  $degrees,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksampleimage(
+  $mgck_wnd,
+  $columns,
+  $rows,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickscaleimage(
+  $mgck_wnd,
+  $columns,
+  $rows,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickseparateimagechannel(
+  $mgck_wnd,
+  $channel_type,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetcompressionquality(
+  $mgck_wnd,
+  $quality,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetfilename(
+  $mgck_wnd,
+  $filename = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetfirstiterator($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetformat($mgck_wnd, $format): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimage(
+  $mgck_wnd,
+  $replace_wand,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagebackgroundcolor(
+  $mgck_wnd,
+  $background_pxl_wnd,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagebias($mgck_wnd, $bias): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimageblueprimary(
+  $mgck_wnd,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagebordercolor(
+  $mgck_wnd,
+  $border_pxl_wnd,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagecolormapcolor(
+  $mgck_wnd,
+  $index,
+  $mapcolor_pxl_wnd,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagecolorspace(
+  $mgck_wnd,
+  $colorspace_type,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagecompose(
+  $mgck_wnd,
+  $composite_operator,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagecompression(
+  $mgck_wnd,
+  $compression_type,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagecompressionquality(
+  $mgck_wnd,
+  $quality,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagedelay($mgck_wnd, $delay): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagedepth(
+  $mgck_wnd,
+  $depth,
+  $channel_type = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagedispose(
+  $mgck_wnd,
+  $dispose_type,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagefilename(
+  $mgck_wnd,
+  $filename = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimageformat(
+  $mgck_wnd,
+  $format,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagegamma($mgck_wnd, $gamma): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagegreenprimary(
+  $mgck_wnd,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimageindex($mgck_wnd, $index): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimageinterlacescheme(
+  $mgck_wnd,
+  $interlace_type,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimageiterations(
+  $mgck_wnd,
+  $iterations,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagemattecolor(
+  $mgck_wnd,
+  $matte_pxl_wnd,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimageoption(
+  $mgck_wnd,
+  $format,
+  $key,
+  $value,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagepixels(
+  $mgck_wnd,
+  $x_offset,
+  $y_offset,
+  $columns,
+  $rows,
+  $smap,
+  $storage_type,
+  $pixel_array,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimageprofile(
+  $mgck_wnd,
+  $name,
+  $profile,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimageredprimary(
+  $mgck_wnd,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagerenderingintent(
+  $mgck_wnd,
+  $rendering_intent,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimageresolution(
+  $mgck_wnd,
+  $x_resolution,
+  $y_resolution,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagescene($mgck_wnd, $scene): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagetype(
+  $mgck_wnd,
+  $image_type,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimageunits(
+  $mgck_wnd,
+  $resolution_type,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagevirtualpixelmethod(
+  $mgck_wnd,
+  $virtual_pixel_method,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetimagewhitepoint(
+  $mgck_wnd,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetinterlacescheme(
+  $mgck_wnd,
+  $interlace_type,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetlastiterator($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetpassphrase(
+  $mgck_wnd,
+  $passphrase,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetresolution(
+  $mgck_wnd,
+  $x_resolution,
+  $y_resolution,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetsamplingfactors(
+  $mgck_wnd,
+  $number_factors,
+  $sampling_factors,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetsize(
+  $mgck_wnd,
+  $columns,
+  $rows,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksetwandsize(
+  $mgck_wnd,
+  $columns,
+  $rows,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksharpenimage(
+  $mgck_wnd,
+  $radius,
+  $sigma,
+  $channel_type = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickshaveimage(
+  $mgck_wnd,
+  $columns,
+  $rows,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickshearimage(
+  $mgck_wnd,
+  $background,
+  $x_shear,
+  $y_shear,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksolarizeimage(
+  $mgck_wnd,
+  $threshold,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickspliceimage(
+  $mgck_wnd,
+  $width,
+  $height,
+  $x,
+  $y,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickspreadimage($mgck_wnd, $radius): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicksteganoimage(
+  $mgck_wnd,
+  $watermark_wand,
+  $offset,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickstereoimage(
+  $mgck_wnd,
+  $offset_wand,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickstripimage($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickswirlimage($mgck_wnd, $degrees): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicktextureimage(
+  $mgck_wnd,
+  $texture_wand,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickthresholdimage(
+  $mgck_wnd,
+  $threshold,
+  $channel_type = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicktintimage(
+  $mgck_wnd,
+  $tint_pxl_wnd,
+  $opacity_pxl_wnd,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicktransformimage(
+  $mgck_wnd,
+  $crop,
+  $geometry,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magicktrimimage($mgck_wnd, $fuzz): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickunsharpmaskimage(
+  $mgck_wnd,
+  $radius,
+  $sigma,
+  $amount,
+  $threshold,
+  $channel_type = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickwaveimage(
+  $mgck_wnd,
+  $amplitude,
+  $wave_length,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickwhitethresholdimage(
+  $mgck_wnd,
+  $threshold_pxl_wnd,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickwriteimage($mgck_wnd, $filename): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickwriteimagefile(
+  $mgck_wnd,
+  $handle,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickwriteimages(
+  $mgck_wnd,
+  $filename = "",
+  $join_images = false,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function magickwriteimagesfile(
+  $mgck_wnd,
+  $handle,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetalpha($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetalphaquantum($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetblack($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetblackquantum($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetblue($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetbluequantum($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetcolorasstring($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetcolorcount($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetcyan($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetcyanquantum($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetexception($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetexceptionstring($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetexceptiontype($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetgreen($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetgreenquantum($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetindex($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetmagenta($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetmagentaquantum($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetopacity($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetopacityquantum($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetquantumcolor($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetred($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetredquantum($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetyellow($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetyellowquantum($pxl_wnd): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetalpha($pxl_wnd, $alpha): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetalphaquantum($pxl_wnd, $alpha): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetblack($pxl_wnd, $black): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetblackquantum($pxl_wnd, $black): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetblue($pxl_wnd, $blue): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetbluequantum($pxl_wnd, $blue): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetcolor(
+  $pxl_wnd,
+  $imagemagick_col_str,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetcolorcount($pxl_wnd, $count): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetcyan($pxl_wnd, $cyan): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetcyanquantum($pxl_wnd, $cyan): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetgreen($pxl_wnd, $green): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetgreenquantum($pxl_wnd, $green): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetindex($pxl_wnd, $index): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetmagenta($pxl_wnd, $magenta): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetmagentaquantum(
+  $pxl_wnd,
+  $magenta,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetopacity($pxl_wnd, $opacity): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetopacityquantum(
+  $pxl_wnd,
+  $opacity,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetquantumcolor(
+  $pxl_wnd,
+  $red,
+  $green,
+  $blue,
+  $opacity = 0.0,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetred($pxl_wnd, $red): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetredquantum($pxl_wnd, $red): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetyellow($pxl_wnd, $yellow): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetyellowquantum(
+  $pxl_wnd,
+  $yellow,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetiteratorexception($pxl_iter): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetiteratorexceptionstring(
+  $pxl_iter,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetiteratorexceptiontype(
+  $pxl_iter,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelgetnextiteratorrow($pxl_iter): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelresetiterator($pxl_iter): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsetiteratorrow($pxl_iter, $row): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function pixelsynciterator($pxl_iter): HH\FIXME\MISSING_RETURN_TYPE;

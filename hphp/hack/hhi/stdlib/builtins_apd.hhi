@@ -9,20 +9,35 @@
  */
 
 <<__PHPStdLib>>
-function override_function($name, $args, $code) { }
+function override_function(
+  $name,
+  $args,
+  $code,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function rename_function($orig_name, $new_name) { }
+function rename_function(
+  $orig_name,
+  $new_name,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apd_set_browser_trace() { }
+function apd_set_browser_trace(): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apd_set_pprof_trace($dumpdir = null, $frament = null) { }
+function apd_set_pprof_trace(
+  $dumpdir = null,
+  $frament = null,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apd_set_session_trace_socket($ip_or_filename, $domain, $port, $mask) { }
+function apd_set_session_trace_socket(
+  $ip_or_filename,
+  $domain,
+  $port,
+  $mask,
+): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apd_stop_trace() { }
+function apd_stop_trace(): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apd_breakpoint() { }
+function apd_breakpoint(): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apd_continue() { }
+function apd_continue(): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apd_echo($output) { }
+function apd_echo($output): HH\FIXME\MISSING_RETURN_TYPE {}

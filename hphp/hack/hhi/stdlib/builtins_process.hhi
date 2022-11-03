@@ -12,58 +12,100 @@ const int WNOHANG   = 0b001;
 const int WUNTRACED = 0b010;
 
 <<__PHPStdLib>>
-function pcntl_alarm(int $seconds);
+function pcntl_alarm(int $seconds): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_exec(string $path, $args = null, $envs = null);
+function pcntl_exec(
+  string $path,
+  $args = null,
+  $envs = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_fork();
+function pcntl_fork(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_getpriority(int $pid = 0, int $process_identifier = 0);
+function pcntl_getpriority(
+  int $pid = 0,
+  int $process_identifier = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_setpriority(int $priority, int $pid = 0, int $process_identifier = 0);
+function pcntl_setpriority(
+  int $priority,
+  int $pid = 0,
+  int $process_identifier = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_signal(int $signo, $handler, bool $restart_syscalls = true);
+function pcntl_signal(
+  int $signo,
+  $handler,
+  bool $restart_syscalls = true,
+): HH\FIXME\MISSING_RETURN_TYPE;
 
 <<__PHPStdLib>>
-function pcntl_wait(inout $status, int $options = 0);
+function pcntl_wait(
+  inout $status,
+  int $options = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_waitpid(int $pid, inout $status, int $options = 0);
+function pcntl_waitpid(
+  int $pid,
+  inout $status,
+  int $options = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_wexitstatus(int $status);
+function pcntl_wexitstatus(int $status): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_wifexited(int $status);
+function pcntl_wifexited(int $status): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_wifsignaled(int $status);
+function pcntl_wifsignaled(int $status): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_wifstopped(int $status);
+function pcntl_wifstopped(int $status): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_wstopsig(int $status);
+function pcntl_wstopsig(int $status): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_wtermsig(int $status);
+function pcntl_wtermsig(int $status): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pcntl_signal_dispatch();
+function pcntl_signal_dispatch(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function shell_exec(string $cmd);
+function shell_exec(string $cmd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function exec(string $command, inout $output, inout $return_var);
+function exec(
+  string $command,
+  inout $output,
+  inout $return_var,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function passthru(string $command, inout $return_var);
+function passthru(
+  string $command,
+  inout $return_var,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function system(string $command, inout $return_var);
+function system(
+  string $command,
+  inout $return_var,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function proc_open(string $cmd, darray<int, mixed> $descriptorspec, inout $pipes, $cwd = null, $env = null, $other_options = null);
+function proc_open(
+  string $cmd,
+  darray<int, mixed> $descriptorspec,
+  inout $pipes,
+  $cwd = null,
+  $env = null,
+  $other_options = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function proc_terminate(resource $process, int $signal = 0);
+function proc_terminate(
+  resource $process,
+  int $signal = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function proc_close(resource $process);
+function proc_close(resource $process): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function proc_get_status(resource $process);
+function proc_get_status(resource $process): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function proc_nice(int $increment);
+function proc_nice(int $increment): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function escapeshellarg(string $arg)[];
+function escapeshellarg(string $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function escapeshellcmd(string $command);
+function escapeshellcmd(string $command): HH\FIXME\MISSING_RETURN_TYPE;
 
 const int SIGABRT = 6;
 const int SIGALRM = 14;

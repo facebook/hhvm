@@ -36,53 +36,86 @@ const int SETPROFILE_FLAGS_THIS_OBJECT__MAY_BREAK = 32;
 const int PREG_FB__PRIVATE__HSL_IMPL = (1 << 29);
 
 <<__PHPStdLib>>
-function fb_serialize($thing, int $options = 0)[];
+  function fb_serialize(
+    $thing,
+    int $options = 0,
+  )[]: \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fb_unserialize($thing, inout $success, int $options = 0);
+  function fb_unserialize(
+    $thing,
+    inout $success,
+    int $options = 0,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fb_compact_serialize($thing, int $options = 0)[];
+  function fb_compact_serialize(
+    $thing,
+    int $options = 0,
+  )[]: \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fb_compact_unserialize($thing, inout $success, inout $errcode);
+  function fb_compact_unserialize(
+    $thing,
+    inout $success,
+    inout $errcode,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fb_intercept2(string $name, $handler);
+  function fb_intercept2(
+    string $name,
+    $handler,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fb_rename_function(string $orig_func_name, string $new_func_name);
+  function fb_rename_function(
+    string $orig_func_name,
+    string $new_func_name,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fb_utf8ize(inout $input);
+  function fb_utf8ize(inout $input): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fb_utf8_strlen(string $input)[];
+  function fb_utf8_strlen(string $input)[]: \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fb_utf8_substr(string $str, int $start, int $length = PHP_INT_MAX)[];
+  function fb_utf8_substr(
+    string $str,
+    int $start,
+    int $length = PHP_INT_MAX,
+  )[]: \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fb_get_code_coverage(bool $flush);
+  function fb_get_code_coverage(bool $flush): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fb_enable_code_coverage();
+  function fb_enable_code_coverage(): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fb_disable_code_coverage();
+  function fb_disable_code_coverage(): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xhprof_enable(int $flags = 0, $args = null);
+  function xhprof_enable(
+    int $flags = 0,
+    $args = null,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xhprof_disable();
+  function xhprof_disable(): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xhprof_network_enable();
+  function xhprof_network_enable(): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xhprof_network_disable();
+  function xhprof_network_disable(): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xhprof_frame_begin(string $name);
+  function xhprof_frame_begin(string $name): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xhprof_frame_end();
+  function xhprof_frame_end(): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xhprof_sample_enable();
+  function xhprof_sample_enable(): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xhprof_sample_disable();
+  function xhprof_sample_disable(): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fb_output_compression(bool $new_value);
+  function fb_output_compression(
+    bool $new_value,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fb_set_exit_callback($function);
+  function fb_set_exit_callback($function): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fb_get_last_flush_size();
+  function fb_get_last_flush_size(): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fb_setprofile($callback, int $flags = SETPROFILE_FLAGS_DEFAULT, vec<string> $functions = vec[]);
+  function fb_setprofile(
+    $callback,
+    int $flags = SETPROFILE_FLAGS_DEFAULT,
+    vec<string> $functions = vec[],
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 
 function fb_call_user_func_async(string $initialDoc,
                                  mixed $function,
@@ -94,7 +127,8 @@ function fb_gen_user_func(string $initialDoc,
 
 namespace HH {
 <<__PHPStdLib>>
-function disable_code_coverage_with_frequency();
+  function disable_code_coverage_with_frequency(
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function non_crypto_md5_upper(string $str)[]: int;
 <<__PHPStdLib>>
@@ -114,7 +148,7 @@ function int_mul_overflow(int $a, int $b): int;
  */
 function int_mul_add_overflow(int $a, int $b, int $bias): int;
 
-function enable_function_coverage();
+  function enable_function_coverage(): \HH\FIXME\MISSING_RETURN_TYPE;
 
-function collect_function_coverage();
+  function collect_function_coverage(): \HH\FIXME\MISSING_RETURN_TYPE;
 } // HH namespace

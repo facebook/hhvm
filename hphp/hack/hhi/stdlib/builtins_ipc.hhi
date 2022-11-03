@@ -9,43 +9,84 @@
  */
 
 <<__PHPStdLib>>
-function ftok(string $pathname, string $proj);
+function ftok(string $pathname, string $proj): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function msg_get_queue(int $key, int $perms = 0666);
+function msg_get_queue(
+  int $key,
+  int $perms = 0666,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function msg_queue_exists(int $key);
+function msg_queue_exists(int $key): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function msg_send(resource $queue, int $msgtype, $message, bool $serialize,
-                  bool $blocking, inout $errorcode);
+function msg_send(
+  resource $queue,
+  int $msgtype,
+  $message,
+  bool $serialize,
+  bool $blocking,
+  inout $errorcode,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function msg_receive(resource $queue, int $desiredmsgtype, inout $msgtype,
-                     int $maxsize, inout $message, bool $unserialize,
-                     int $flags, inout $errorcode);
+function msg_receive(
+  resource $queue,
+  int $desiredmsgtype,
+  inout $msgtype,
+  int $maxsize,
+  inout $message,
+  bool $unserialize,
+  int $flags,
+  inout $errorcode,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function msg_remove_queue(resource $queue);
+function msg_remove_queue(resource $queue): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function msg_set_queue(resource $queue, $data);
+function msg_set_queue(resource $queue, $data): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function msg_stat_queue(resource $queue);
+function msg_stat_queue(resource $queue): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function sem_acquire(resource $sem_identifier, bool $nowait = false);
+function sem_acquire(
+  resource $sem_identifier,
+  bool $nowait = false,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function sem_get(int $key, int $max_acquire = 1, int $perm = 0666, bool $auto_release = true);
+function sem_get(
+  int $key,
+  int $max_acquire = 1,
+  int $perm = 0666,
+  bool $auto_release = true,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function sem_release(resource $sem_identifier);
+function sem_release(resource $sem_identifier): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function sem_remove(resource $sem_identifier);
+function sem_remove(resource $sem_identifier): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function shm_attach(int $shm_key, int $shm_size = 10000, int $shm_flag = 0666);
+function shm_attach(
+  int $shm_key,
+  int $shm_size = 10000,
+  int $shm_flag = 0666,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function shm_detach(int $shm_identifier);
+function shm_detach(int $shm_identifier): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function shm_remove(int $shm_identifier);
+function shm_remove(int $shm_identifier): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function shm_get_var(int $shm_identifier, int $variable_key);
+function shm_get_var(
+  int $shm_identifier,
+  int $variable_key,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function shm_has_var(int $shm_identifier, int $variable_key);
+function shm_has_var(
+  int $shm_identifier,
+  int $variable_key,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function shm_put_var(int $shm_identifier, int $variable_key, $variable);
+function shm_put_var(
+  int $shm_identifier,
+  int $variable_key,
+  $variable,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function shm_remove_var(int $shm_identifier, int $variable_key);
+function shm_remove_var(
+  int $shm_identifier,
+  int $variable_key,
+): HH\FIXME\MISSING_RETURN_TYPE;

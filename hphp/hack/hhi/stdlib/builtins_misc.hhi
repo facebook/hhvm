@@ -26,37 +26,54 @@ namespace {
 const float INF = 0.0;
 const float NAN = 0.0;
 <<__PHPStdLib>>
-function connection_aborted();
+  function connection_aborted(): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function connection_status();
+  function connection_status(): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function connection_timeout();
+  function connection_timeout(): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function constant(string $name);
+  function constant(string $name): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function defined(string $name, bool $autoload = true);
+  function defined(
+    string $name,
+    bool $autoload = true,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function get_browser($user_agent = null, $return_array = false);
+  function get_browser(
+    $user_agent = null,
+    $return_array = false,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function ignore_user_abort(bool $setting = false);
+  function ignore_user_abort(
+    bool $setting = false,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pack(string $format, ...$args)[];
+  function pack(string $format, ...$args)[]: \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function sleep(int $seconds);
+  function sleep(int $seconds): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function usleep(int $micro_seconds);
+  function usleep(int $micro_seconds): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function time_nanosleep(int $seconds, int $nanoseconds);
+  function time_nanosleep(
+    int $seconds,
+    int $nanoseconds,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function time_sleep_until(float $timestamp);
+  function time_sleep_until(float $timestamp): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function uniqid(string $prefix = "", bool $more_entropy = false);
+  function uniqid(
+    string $prefix = "",
+    bool $more_entropy = false,
+  ): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function unpack(string $format, string $data)[];
+  function unpack(
+    string $format,
+    string $data,
+  )[]: \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function sys_getloadavg();
+  function sys_getloadavg(): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function hphp_process_abort($magic);
+  function hphp_process_abort($magic): \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function hphp_to_string($v)[];
+  function hphp_to_string($v)[]: \HH\FIXME\MISSING_RETURN_TYPE;
 }

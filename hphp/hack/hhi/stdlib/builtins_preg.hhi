@@ -9,14 +9,18 @@
  */
 
 <<__PHPStdLib>>
-function preg_grep(string $pattern, varray_or_darray $input, int $flags = 0)[];
+function preg_grep(
+  string $pattern,
+  varray_or_darray $input,
+  int $flags = 0,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function preg_grep_with_error(
   string $pattern,
   varray_or_darray $input,
   inout ?int $error,
   int $flags = 0,
-)[];
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 /*
  * `preg_match` can actually return false if the regex fails to compile.
  * However, most code has no need to consider this possibility because their
@@ -50,8 +54,12 @@ function preg_match_with_matches_and_error(
   int $offset = 0,
 )[]: int;
 <<__PHPStdLib>>
-function preg_match_all(string $pattern, string $subject,
-                        int $flags = 0, int $offset = 0)[];
+function preg_match_all(
+  string $pattern,
+  string $subject,
+  int $flags = 0,
+  int $offset = 0,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function preg_match_all_with_error(
   string $pattern,
@@ -59,10 +67,15 @@ function preg_match_all_with_error(
   inout ?int $error,
   int $flags = 0,
   int $offset = 0,
-)[];
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function preg_match_all_with_matches(string $pattern, string $subject, inout $matches,
-                                     int $flags = 0, int $offset = 0)[];
+function preg_match_all_with_matches(
+  string $pattern,
+  string $subject,
+  inout $matches,
+  int $flags = 0,
+  int $offset = 0,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function preg_match_all_with_matches_and_error(
   string $pattern,
@@ -71,9 +84,14 @@ function preg_match_all_with_matches_and_error(
   inout ?int $error,
   int $flags = 0,
   int $offset = 0,
-)[];
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function preg_replace($pattern, $replacement, $subject, int $limit = -1)[];
+function preg_replace(
+  $pattern,
+  $replacement,
+  $subject,
+  int $limit = -1,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function preg_replace_with_error(
   $pattern,
@@ -81,10 +99,15 @@ function preg_replace_with_error(
   $subject,
   inout ?int $error,
   int $limit = -1,
-)[];
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function preg_replace_with_count($pattern, $replacement, $subject, int $limit,
-                                 inout ?int $count)[];
+function preg_replace_with_count(
+  $pattern,
+  $replacement,
+  $subject,
+  int $limit,
+  inout ?int $count,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function preg_replace_with_count_and_error(
   $pattern,
@@ -93,7 +116,7 @@ function preg_replace_with_count_and_error(
   int $limit,
   inout ?int $count,
   inout ?int $error,
-)[];
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function preg_replace_callback(
   mixed $pattern,
@@ -101,7 +124,7 @@ function preg_replace_callback(
   mixed $subject,
   int $limit,
   inout ?int $count,
-)[ctx $callback];
+)[ctx $callback]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function preg_replace_callback_with_error(
   mixed $pattern,
@@ -110,10 +133,14 @@ function preg_replace_callback_with_error(
   int $limit,
   inout ?int $count,
   inout ?int $error,
-)[ctx $callback];
+)[ctx $callback]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function preg_replace_callback_array($patterns_and_callbacks, $subject,
-                                     int $limit, inout ?int $count)[defaults];
+function preg_replace_callback_array(
+  $patterns_and_callbacks,
+  $subject,
+  int $limit,
+  inout ?int $count,
+)[defaults]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function preg_replace_callback_array_with_error(
   $patterns_and_callbacks,
@@ -121,9 +148,14 @@ function preg_replace_callback_array_with_error(
   int $limit,
   inout ?int $count,
   inout ?int $error,
-)[defaults];
+)[defaults]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function preg_split(string $pattern, string $subject, $limit = -1, int $flags = 0)[];
+function preg_split(
+  string $pattern,
+  string $subject,
+  $limit = -1,
+  int $flags = 0,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function preg_split_with_error(
   string $pattern,
@@ -131,19 +163,38 @@ function preg_split_with_error(
   inout ?int $error,
   $limit = -1,
   int $flags = 0,
-)[];
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function preg_quote(string $str, $delimiter = null)[];
+function preg_quote(
+  string $str,
+  $delimiter = null,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function ereg_replace(string $pattern, string $replacement, string $str);
+function ereg_replace(
+  string $pattern,
+  string $replacement,
+  string $str,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function eregi_replace(string $pattern, string $replacement, string $str);
+function eregi_replace(
+  string $pattern,
+  string $replacement,
+  string $str,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__Deprecated('Use explode() or preg_split().'), __PHPStdLib>>
-function split(string $pattern, string $str, int $limit = -1);
+function split(
+  string $pattern,
+  string $str,
+  int $limit = -1,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function spliti(string $pattern, string $str, int $limit = -1);
+function spliti(
+  string $pattern,
+  string $str,
+  int $limit = -1,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function sql_regcase(string $str);
+function sql_regcase(string $str): HH\FIXME\MISSING_RETURN_TYPE;
 
 const int PREG_PATTERN_ORDER = 0;
 const int PREG_SET_ORDER = 0;

@@ -59,10 +59,21 @@ const int DOM_VALIDATION_ERR = 16;
 
 class DOMXPath {
   public function __construct($doc);
-  public function evaluate(string $expr, $context = null);
-  public function query(string $expr, $context = null);
-  public function registerNamespace(string $prefix, string $uri);
-  public function registerPHPFunctions($funcs = null);
+  public function evaluate(
+    string $expr,
+    $context = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function query(
+    string $expr,
+    $context = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function registerNamespace(
+    string $prefix,
+    string $uri,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function registerPHPFunctions(
+    $funcs = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
 }
 
 class DOMNodeList<+Tnode as DOMNode> implements IteratorAggregate<Tnode> {
@@ -167,39 +178,84 @@ class DOMDocument extends DOMNode {
 
   // methods
   public function __construct($version = null, $encoding = null);
-  public function createAttribute(string $name);
-  public function createAttributeNS(string $namespaceuri, string $qualifiedname);
-  public function createCDATASection(string $data);
-  public function createComment(string $data);
-  public function createDocumentFragment();
-  public function createElement(string $name, $value = null);
-  public function createElementNS(string $namespaceuri, string $qualifiedname, $value = null);
-  public function createEntityReference(string $name);
-  public function createProcessingInstruction(string $target, $data = null);
-  public function createTextNode(string $data);
-  public function getElementById(string $elementid);
+  public function createAttribute(string $name): HH\FIXME\MISSING_RETURN_TYPE;
+  public function createAttributeNS(
+    string $namespaceuri,
+    string $qualifiedname,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function createCDATASection(
+    string $data,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function createComment(string $data): HH\FIXME\MISSING_RETURN_TYPE;
+  public function createDocumentFragment(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function createElement(
+    string $name,
+    $value = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function createElementNS(
+    string $namespaceuri,
+    string $qualifiedname,
+    $value = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function createEntityReference(
+    string $name,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function createProcessingInstruction(
+    string $target,
+    $data = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function createTextNode(string $data): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getElementById(
+    string $elementid,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getElementsByTagName(string $name): DOMNodeList<DOMElement>;
   public function getElementsByTagNameNS(
     string $namespaceuri,
     string $localname,
   ): DOMNodeList<DOMElement>;
-  public function importNode($importednode, bool $deep = false);
-  public function load($filename, $options = 0);
-  public function loadHTML($source, $options = 0);
-  public function loadHTMLFile($filename, $options = 0);
-  public function loadXML($source, $options = 0);
-  public function normalizeDocument();
-  public function registerNodeClass(string $baseclass, string $extendedclass);
-  public function relaxNGValidate(string $filename);
-  public function relaxNGValidateSource(string $source);
-  public function save(string $file, int $options = 0);
-  public function saveHTML($node = null);
-  public function saveHTMLFile(string $file);
-  public function saveXML($node = null, int $options = 0);
-  public function schemaValidate(string $filename);
-  public function schemaValidateSource(string $source);
-  public function validate();
-  public function xinclude(int $options = 0);
+  public function importNode(
+    $importednode,
+    bool $deep = false,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function load($filename, $options = 0): HH\FIXME\MISSING_RETURN_TYPE;
+  public function loadHTML(
+    $source,
+    $options = 0,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function loadHTMLFile(
+    $filename,
+    $options = 0,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function loadXML($source, $options = 0): HH\FIXME\MISSING_RETURN_TYPE;
+  public function normalizeDocument(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function registerNodeClass(
+    string $baseclass,
+    string $extendedclass,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function relaxNGValidate(
+    string $filename,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function relaxNGValidateSource(
+    string $source,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function save(
+    string $file,
+    int $options = 0,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function saveHTML($node = null): HH\FIXME\MISSING_RETURN_TYPE;
+  public function saveHTMLFile(string $file): HH\FIXME\MISSING_RETURN_TYPE;
+  public function saveXML(
+    $node = null,
+    int $options = 0,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function schemaValidate(
+    string $filename,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function schemaValidateSource(
+    string $source,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function validate(): HH\FIXME\MISSING_RETURN_TYPE;
+  public function xinclude(int $options = 0): HH\FIXME\MISSING_RETURN_TYPE;
 }
 
 class DOMElement extends DOMNode {
@@ -213,24 +269,53 @@ class DOMElement extends DOMNode {
 
   // methods
   public function __construct(string $name, $value = null, $namespaceuri = null);
-  public function getAttribute(string $name);
-  public function getAttributeNode(string $name);
-  public function getAttributeNodeNS(string $namespaceuri, string $localname);
-  public function getAttributeNS(string $namespaceuri, string $localname);
+  public function getAttribute(string $name): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getAttributeNode(string $name): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getAttributeNodeNS(
+    string $namespaceuri,
+    string $localname,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getAttributeNS(
+    string $namespaceuri,
+    string $localname,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getElementsByTagName(string $name): DOMNodeList<DOMElement>;
   public function getElementsByTagNameNS(string $namespaceuri, string $localname): DOMNodeList<DOMElement>;
-  public function hasAttribute(string $name);
-  public function hasAttributeNS(string $namespaceuri, string $localname);
-  public function removeAttribute(string $name);
-  public function removeAttributeNode($oldattr);
-  public function removeAttributeNS(string $namespaceuri, string $localname);
-  public function setAttribute(string $name, string $value);
-  public function setAttributeNode($newattr);
-  public function setAttributeNodeNS($newattr);
-  public function setAttributeNS(string $namespaceuri, string $name, string $value);
-  public function setIDAttribute(string $name, bool $isid);
-  public function setIDAttributeNode($idattr, bool $isid);
-  public function setIDAttributeNS(string $namespaceuri, string $localname, bool $isid);
+  public function hasAttribute(string $name): HH\FIXME\MISSING_RETURN_TYPE;
+  public function hasAttributeNS(
+    string $namespaceuri,
+    string $localname,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function removeAttribute(string $name): HH\FIXME\MISSING_RETURN_TYPE;
+  public function removeAttributeNode($oldattr): HH\FIXME\MISSING_RETURN_TYPE;
+  public function removeAttributeNS(
+    string $namespaceuri,
+    string $localname,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setAttribute(
+    string $name,
+    string $value,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setAttributeNode($newattr): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setAttributeNodeNS($newattr): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setAttributeNS(
+    string $namespaceuri,
+    string $name,
+    string $value,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setIDAttribute(
+    string $name,
+    bool $isid,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setIDAttributeNode(
+    $idattr,
+    bool $isid,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setIDAttributeNS(
+    string $namespaceuri,
+    string $localname,
+    bool $isid,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
 }
 
 class DOMAttr extends DOMNode {
@@ -328,4 +413,4 @@ function dom_import_simplexml(SimpleXMLElement $node): ?DOMElement;
 function simplexml_import_dom(
   DOMNode $node,
   string $class_name = 'SimpleXMLElement',
-);
+): HH\FIXME\MISSING_RETURN_TYPE;

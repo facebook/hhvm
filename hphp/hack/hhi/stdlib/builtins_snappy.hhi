@@ -9,9 +9,9 @@
  */
 
 <<__PHPStdLib>>
-function sncompress(string $data)[];
+function sncompress(string $data)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function snuncompress(string $data)[];
+function snuncompress(string $data)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function snappy_compress(string $data)[]: mixed;
 <<__PHPStdLib>>

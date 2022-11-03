@@ -154,17 +154,37 @@ final class AsyncGeneratorWaitHandle<<<__RequireDynamic>> +Tk, <<__RequireDynami
 <<__Sealed(StaticWaitHandle::class, WaitableWaitHandle::class),
 __SupportDynamicType>>
 abstract class Awaitable<<<__RequireDynamic>> +T> {
-  public static function setOnIOWaitEnterCallback(?(function(): void) $callback) {}
-  public static function setOnIOWaitExitCallback(?(function(): void) $callback) {}
-  public static function setOnJoinCallback(?(function(WaitableWaitHandle<mixed>): void) $callback) {}
+    public static function setOnIOWaitEnterCallback(
+      ?(function(): void) $callback,
+    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    public static function setOnIOWaitExitCallback(
+      ?(function(): void) $callback,
+    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    public static function setOnJoinCallback(
+      ?(function(WaitableWaitHandle<mixed>): void) $callback,
+    ): \HH\FIXME\MISSING_RETURN_TYPE {}
 }
 
 <<__Sealed(AsyncFunctionWaitHandle::class, AsyncGeneratorWaitHandle::class), __SupportDynamicType>>
 abstract class ResumableWaitHandle<<<__RequireDynamic>> +T> extends WaitableWaitHandle<T> {
-  public static function setOnCreateCallback(?(function(AsyncFunctionWaitHandle<mixed>, WaitableWaitHandle<mixed>): void) $callback) {}
-  public static function setOnAwaitCallback(?(function(AsyncFunctionWaitHandle<mixed>, WaitableWaitHandle<mixed>): void) $callback) {}
-  public static function setOnSuccessCallback(?(function(AsyncFunctionWaitHandle<mixed>, mixed): void) $callback) {}
-  public static function setOnFailCallback(?(function(AsyncFunctionWaitHandle<mixed>, \Exception): void) $callback) {}
+    public static function setOnCreateCallback(
+      ?(function(
+        AsyncFunctionWaitHandle<mixed>,
+        WaitableWaitHandle<mixed>,
+      ): void) $callback,
+    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    public static function setOnAwaitCallback(
+      ?(function(
+        AsyncFunctionWaitHandle<mixed>,
+        WaitableWaitHandle<mixed>,
+      ): void) $callback,
+    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    public static function setOnSuccessCallback(
+      ?(function(AsyncFunctionWaitHandle<mixed>, mixed): void) $callback,
+    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    public static function setOnFailCallback(
+      ?(function(AsyncFunctionWaitHandle<mixed>, \Exception): void) $callback,
+    ): \HH\FIXME\MISSING_RETURN_TYPE {}
 }
 
 <<__SupportDynamicType>>
@@ -192,7 +212,12 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
 <<__SupportDynamicType>> // TODO: determine whether it's safe to mark this as unconditionally supporting dynamic
 final class ConditionWaitHandle<T> extends WaitableWaitHandle<T> {
   public static function create(Awaitable<void> $child): ConditionWaitHandle<T> {}
-  public static function setOnCreateCallback(?(function(ConditionWaitHandle<T>, WaitableWaitHandle<void>): void) $callback) {}
+    public static function setOnCreateCallback(
+      ?(function(
+        ConditionWaitHandle<T>,
+        WaitableWaitHandle<void>,
+      ): void) $callback,
+    ): \HH\FIXME\MISSING_RETURN_TYPE {}
   public function succeed(T $result): void {}
   public function fail(\Exception $exception): void {}
 }
@@ -207,15 +232,28 @@ final class RescheduleWaitHandle extends WaitableWaitHandle<void> {
 <<__SupportDynamicType>>
 final class SleepWaitHandle extends WaitableWaitHandle<void> {
   public static function create(int $usecs): SleepWaitHandle {}
-  public static function setOnCreateCallback(?(function(SleepWaitHandle): void) $callback) {}
-  public static function setOnSuccessCallback(?(function(SleepWaitHandle): void) $callback) {}
+    public static function setOnCreateCallback(
+      ?(function(SleepWaitHandle): void) $callback,
+    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    public static function setOnSuccessCallback(
+      ?(function(SleepWaitHandle): void) $callback,
+    ): \HH\FIXME\MISSING_RETURN_TYPE {}
 }
 
 <<__SupportDynamicType>>
 final class ExternalThreadEventWaitHandle<<<__RequireDynamic>> +T> extends WaitableWaitHandle<T> {
-  public static function setOnCreateCallback(?(function(ExternalThreadEventWaitHandle<mixed>): void) $callback) {}
-  public static function setOnSuccessCallback(?(function(ExternalThreadEventWaitHandle<mixed>, mixed): void) $callback) {}
-  public static function setOnFailCallback(?(function(ExternalThreadEventWaitHandle<mixed>, \Exception): void) $callback) {}
+    public static function setOnCreateCallback(
+      ?(function(ExternalThreadEventWaitHandle<mixed>): void) $callback,
+    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    public static function setOnSuccessCallback(
+      ?(function(ExternalThreadEventWaitHandle<mixed>, mixed): void) $callback,
+    ): \HH\FIXME\MISSING_RETURN_TYPE {}
+    public static function setOnFailCallback(
+      ?(function(
+        ExternalThreadEventWaitHandle<mixed>,
+        \Exception,
+      ): void) $callback,
+    ): \HH\FIXME\MISSING_RETURN_TYPE {}
 }
 
 function is_class(mixed $arg)[]: bool;

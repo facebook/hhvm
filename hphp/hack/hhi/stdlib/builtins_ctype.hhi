@@ -9,24 +9,24 @@
  */
 
 <<__PHPStdLib>>
-function ctype_alnum($text)[] { }
+function ctype_alnum($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_alpha($text)[] { }
+function ctype_alpha($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_cntrl($text)[] { }
+function ctype_cntrl($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_digit($text)[] { }
+function ctype_digit($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_graph($text)[] { }
+function ctype_graph($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_lower($text)[] { }
+function ctype_lower($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_print($text)[] { }
+function ctype_print($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_punct($text)[] { }
+function ctype_punct($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_space($text)[] { }
+function ctype_space($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_upper($text)[] { }
+function ctype_upper($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function ctype_xdigit($text)[] { }
+function ctype_xdigit($text)[]: HH\FIXME\MISSING_RETURN_TYPE {}

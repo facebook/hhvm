@@ -15,24 +15,65 @@ const int ICONV_MIME_DECODE_STRICT = 0b001;
 const int ICONV_MIME_DECODE_CONTINUE_ON_ERROR = 0b010;
 
 <<__PHPStdLib>>
-function iconv_mime_encode(string $field_name, string $field_value, $preferences = null);
+function iconv_mime_encode(
+  string $field_name,
+  string $field_value,
+  $preferences = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function iconv_mime_decode(string $encoded_string, int $mode = 0, $charset = null);
+function iconv_mime_decode(
+  string $encoded_string,
+  int $mode = 0,
+  $charset = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function iconv_mime_decode_headers(string $encoded_headers, int $mode = 0, $charset = null);
+function iconv_mime_decode_headers(
+  string $encoded_headers,
+  int $mode = 0,
+  $charset = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function iconv_get_encoding(string $type = "all");
+function iconv_get_encoding(
+  string $type = "all",
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function iconv_set_encoding(string $type, string $charset);
+function iconv_set_encoding(
+  string $type,
+  string $charset,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function iconv(string $in_charset, string $out_charset, string $str);
+function iconv(
+  string $in_charset,
+  string $out_charset,
+  string $str,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function iconv_strlen(string $str, $charset = null);
+function iconv_strlen(
+  string $str,
+  $charset = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function iconv_strpos(string $haystack, string $needle, int $offset = 0, $charset = null);
+function iconv_strpos(
+  string $haystack,
+  string $needle,
+  int $offset = 0,
+  $charset = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function iconv_strrpos(string $haystack, string $needle, $charset = null);
+function iconv_strrpos(
+  string $haystack,
+  string $needle,
+  $charset = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function iconv_substr(string $str, int $offset, int $length = PHP_INT_MAX, $charset = null);
+function iconv_substr(
+  string $str,
+  int $offset,
+  int $length = PHP_INT_MAX,
+  $charset = null,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function ob_iconv_handler(string $contents, int $status);
+function ob_iconv_handler(
+  string $contents,
+  int $status,
+): HH\FIXME\MISSING_RETURN_TYPE;

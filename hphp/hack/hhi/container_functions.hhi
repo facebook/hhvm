@@ -20,9 +20,13 @@ namespace {
 function array_key_exists(readonly mixed $key, readonly ?KeyedContainer<arraykey, mixed> $search)[]: bool;
 
 <<__PHPStdLib>>
-function array_sum/*<T>*/(readonly /*Container<T>*/ $input)[]/*: num*/;
+  function array_sum/*<T>*/(
+    readonly /*Container<T>*/ $input,
+  )[]/*: num*/: \HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function array_product/*<T>*/(readonly /*Container<T>*/ $input)[]/*: num*/;
+  function array_product/*<T>*/(
+    readonly /*Container<T>*/ $input,
+  )[]/*: num*/: \HH\FIXME\MISSING_RETURN_TYPE;
 
 <<__PHPStdLib>>
 function sort<T as Container<mixed>>(

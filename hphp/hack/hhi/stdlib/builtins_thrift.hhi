@@ -11,18 +11,60 @@
 const int THRIFT_MARK_LEGACY_ARRAYS = 1 << 0;
 
 <<__PHPStdLib>>
-function thrift_protocol_write_binary($transportobj, string $method_name, int $msgtype, $request_struct, int $seqid, bool $strict_write, bool $oneway = false);
+function thrift_protocol_write_binary(
+  $transportobj,
+  string $method_name,
+  int $msgtype,
+  $request_struct,
+  int $seqid,
+  bool $strict_write,
+  bool $oneway = false,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function thrift_protocol_read_binary($transportobj, string $obj_typename, bool $strict_read, int $options = 0);
+function thrift_protocol_read_binary(
+  $transportobj,
+  string $obj_typename,
+  bool $strict_read,
+  int $options = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function thrift_protocol_set_compact_version(int $version)[leak_safe];
+function thrift_protocol_set_compact_version(
+  int $version,
+)[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function thrift_protocol_write_compact($transportobj, string $method_name, int $msgtype, $request_struct, int $seqid, bool $oneway = false);
+function thrift_protocol_write_compact(
+  $transportobj,
+  string $method_name,
+  int $msgtype,
+  $request_struct,
+  int $seqid,
+  bool $oneway = false,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function thrift_protocol_write_compact2($transportobj, string $method_name, int $msgtype, $request_struct, int $seqid, bool $oneway = false, int $version = 2);
+function thrift_protocol_write_compact2(
+  $transportobj,
+  string $method_name,
+  int $msgtype,
+  $request_struct,
+  int $seqid,
+  bool $oneway = false,
+  int $version = 2,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function thrift_protocol_read_compact($transportobj, string $obj_typename, int $options = 0);
+function thrift_protocol_read_compact(
+  $transportobj,
+  string $obj_typename,
+  int $options = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function thrift_protocol_read_compact_struct($transportobj, string $obj_typename, int $options = 0);
+function thrift_protocol_read_compact_struct(
+  $transportobj,
+  string $obj_typename,
+  int $options = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function thrift_protocol_read_binary_struct($transportobj, string $obj_typename, int $options = 0);
+function thrift_protocol_read_binary_struct(
+  $transportobj,
+  string $obj_typename,
+  int $options = 0,
+): HH\FIXME\MISSING_RETURN_TYPE;

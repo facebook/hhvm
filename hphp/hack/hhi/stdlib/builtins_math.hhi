@@ -32,98 +32,112 @@ const float M_LNPI = 1.14472988584940017414;
 const float M_EULER = 0.57721566490153286061;
 
 <<__PHPStdLib>>
-function pi()[];
+function pi()[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function min($value, ...$args)[];
+function min($value, ...$args)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function max($value, ...$args)[];
+function max($value, ...$args)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function abs($number)[];
+function abs($number)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function is_finite(float $val)[];
+function is_finite(float $val)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function is_infinite(float $val)[];
+function is_infinite(float $val)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function is_nan(float $val)[]: bool;
 <<__PHPStdLib>>
-function ceil($value)[];
+function ceil($value)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function floor($value)[]: float;
 <<__PHPStdLib>>
-function round($val, int $precision = 0, int $mode = 1)[];
+function round(
+  $val,
+  int $precision = 0,
+  int $mode = 1,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function deg2rad(float $number)[];
+function deg2rad(float $number)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function rad2deg(float $number)[];
+function rad2deg(float $number)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function decbin($number)[];
+function decbin($number)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function decoct($number)[];
+function decoct($number)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function bindec($binary_string)[];
+function bindec($binary_string)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function hexdec($hex_string)[];
+function hexdec($hex_string)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function octdec($octal_string)[];
+function octdec($octal_string)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function base_convert($number, int $frombase, int $tobase)[];
+function base_convert(
+  $number,
+  int $frombase,
+  int $tobase,
+)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pow($base, $exp)[];
+function pow($base, $exp)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function exp(float $arg)[];
+function exp(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function expm1(float $arg)[];
+function expm1(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function log10(float $arg)[];
+function log10(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function log1p(float $number)[];
+function log1p(float $number)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function log(float $arg, float $base = 0.0)[];
+function log(float $arg, float $base = 0.0)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function cos(float $arg)[];
+function cos(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function cosh(float $arg)[];
+function cosh(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function sin(float $arg)[];
+function sin(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function sinh(float $arg)[];
+function sinh(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function tan(float $arg)[];
+function tan(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function tanh(float $arg)[];
+function tanh(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function acos(float $arg)[];
+function acos(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function acosh(float $arg)[];
+function acosh(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function asin(float $arg)[];
+function asin(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function asinh(float $arg)[];
+function asinh(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function atan(float $arg)[];
+function atan(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function atanh(float $arg)[];
+function atanh(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function atan2(float $y, float $x)[];
+function atan2(float $y, float $x)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function hypot(float $x, float $y)[];
+function hypot(float $x, float $y)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fmod(float $x, float $y)[];
+function fmod(float $x, float $y)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function sqrt(float $arg)[];
+function sqrt(float $arg)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function getrandmax()[];
+function getrandmax()[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function srand($seed = null);
+function srand($seed = null): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function rand(int $min = 0, $max = -1 /* getrandmax */ );
+function rand(
+  int $min = 0,
+  $max = -1, /* getrandmax */
+): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mt_getrandmax()[];
+function mt_getrandmax()[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mt_srand($seed = null);
+function mt_srand($seed = null): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mt_rand(int $min = 0, $max = -1 /* mt_getrandmax */ )[leak_safe];
+function mt_rand(
+  int $min = 0,
+  $max = -1, /* mt_getrandmax */
+)[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function lcg_value();
+function lcg_value(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function intdiv(int $numerator, int $denominator)[]: int;

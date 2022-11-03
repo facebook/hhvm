@@ -32,6 +32,7 @@
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/base/req-heap-sanitizer.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -2030,6 +2031,10 @@ void RuntimeOption::Load(
       DumpPreciseProfData = false;
     }
     EvalJitPGOUseAddrCountedCheck &= addr_encodes_persistency;
+    if (EvalSanitizeReqHeap) {
+      HeapObjectSanitizer::install_signal_handler();
+    }
+
     HardwareCounter::Init(EvalProfileHWEnable,
                           url_decode(EvalProfileHWEvents.data(),
                                      EvalProfileHWEvents.size()).toCppString(),

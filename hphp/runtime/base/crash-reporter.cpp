@@ -97,7 +97,7 @@ static void bt_timeout_handler(int sig) {
   abort();
 }
 
-static void bt_handler(int sigin, siginfo_t* info, void* args) {
+void bt_handler(int sigin, siginfo_t* info, void* args) {
   auto tid = Process::GetThreadPid();
   pid_t expected{};
   if (CrashingThread.compare_exchange_strong(expected, tid,
@@ -369,12 +369,6 @@ void install_crash_reporter() {
   // bt_handler.  Don't install our handler when running with tsan.
   if (use_tsan) return;
 
-#ifdef _MSC_VER
-  signal(SIGILL,  bt_handler);
-  signal(SIGFPE,  bt_handler);
-  signal(SIGSEGV, bt_handler);
-  signal(SIGABRT, bt_handler);
-#else
   struct sigaction sa{};
   struct sigaction osa;
   sigemptyset(&sa.sa_mask);
@@ -390,9 +384,11 @@ void install_crash_reporter() {
   CHECK_ERR(sigaction(SIGBUS,  &sa, &osa));
   CHECK_ERR(sigaction(SIGILL,  &sa, &osa));
   CHECK_ERR(sigaction(SIGFPE,  &sa, &osa));
-  CHECK_ERR(sigaction(SIGSEGV, &sa, &osa));
+  if (!RO::EvalSanitizeReqHeap) {
+    // SIGSEGV is handled by the request heap sanitizer when it is enabled.
+    CHECK_ERR(sigaction(SIGSEGV, &sa, &osa));
+  }
   CHECK_ERR(sigaction(SIGABRT, &sa, &osa));
-#endif
 }
 
 //////////////////////////////////////////////////////////////////////

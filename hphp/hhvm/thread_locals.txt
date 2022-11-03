@@ -5,6 +5,7 @@
 HPHP::s_numaNode
 HPHP::s_readline
 HPHP::tl_heap_id
+HPHP::tl_heap_sanitizer
 HPHP::AsioSession::s_current
 HPHP::ServerStats::s_logger
 HPHP::s_hugeRange

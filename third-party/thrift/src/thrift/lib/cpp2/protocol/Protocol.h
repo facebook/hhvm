@@ -25,6 +25,8 @@
 #include <string>
 #include <vector>
 
+#include <glog/logging.h>
+
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
 #include <thrift/lib/cpp/Thrift.h>
@@ -127,13 +129,15 @@ inline bool validate_bool(uint8_t value) {
       : invalid);
   return value;
 invalid:
-  CHECK(false) << "invalid bool value";
+  LOG(FATAL) << "invalid bool value";
 #else
   // Store in a volatile variable to prevent the compiler from optimizing the
   // check away.
   volatile uint8_t volatileByte = value;
   uint8_t byte = volatileByte;
-  CHECK(byte == 0 || byte == 1) << "invalid bool value";
+  if (!(byte == 0 || byte == 1)) {
+    LOG(FATAL) << "invalid bool value";
+  }
   return byte != 0;
 #endif
 }

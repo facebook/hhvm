@@ -239,6 +239,20 @@ struct Get<void, void> {
   }
 };
 
+// Helper to get adapter type from Thrift type tag.
+template <typename Tag>
+struct get_adapter {
+  static_assert(sizeof(Tag) == 0, "Not adapter.");
+};
+template <typename UTag, typename Context>
+struct get_adapter<type::field<UTag, Context>> : get_adapter<UTag> {};
+template <typename Adapter, typename UTag>
+struct get_adapter<type::adapted<Adapter, UTag>> {
+  using type = Adapter;
+};
+template <typename Tag>
+using get_adapter_t = typename get_adapter<Tag>::type;
+
 } // namespace detail
 
 } // namespace op

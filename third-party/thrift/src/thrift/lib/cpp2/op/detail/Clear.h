@@ -192,6 +192,30 @@ using adapted_field_tag =
 template <typename Adapter, typename UTag>
 struct GetDefault<type::adapted<Adapter, UTag>>
     : CreateDefault<type::adapted<Adapter, UTag>> {};
+template <typename Adapter, typename UTag, typename Struct, int16_t id>
+struct GetDefault<
+    type::field<type::adapted<Adapter, UTag>, FieldContext<Struct, id>>> {
+  using Tag =
+      type::field<type::adapted<Adapter, UTag>, FieldContext<Struct, id>>;
+  template <typename AdapterT = Adapter>
+  const adapt_detail::
+      if_not_field_adapter<AdapterT, type::native_type<UTag>, Struct>&
+      operator()() const {
+    return GetDefault<type::adapted<Adapter, UTag>>{}();
+  }
+
+  template <typename AdapterT = Adapter>
+  const adapt_detail::
+      FromThriftFieldIdType<AdapterT, id, type::native_type<UTag>, Struct>&
+      operator()() const {
+    return staticDefault([] {
+      // TODO(afuller): Remove or move this logic to the adapter.
+      auto& obj = *new Struct{};
+      folly::annotate_object_leaked(&obj);
+      return std::make_unique<type::native_type<Tag>>(op::create<Tag>(obj));
+    });
+  }
+};
 template <typename Adapter, typename UTag>
 struct GetIntrinsicDefault<type::adapted<Adapter, UTag>> {
   using Tag = type::adapted<Adapter, UTag>;
@@ -207,13 +231,27 @@ struct GetIntrinsicDefault<type::adapted<Adapter, UTag>> {
 template <typename Adapter, typename UTag, typename Struct, int16_t id>
 struct GetIntrinsicDefault<adapted_field_tag<Adapter, UTag, Struct, id>> {
   using Tag = adapted_field_tag<Adapter, UTag, Struct, id>;
-  const auto& operator()() const {
+  template <typename AdapterT = Adapter>
+  const adapt_detail::
+      if_not_field_adapter<AdapterT, type::native_type<UTag>, Struct>&
+      operator()() const {
+    return GetIntrinsicDefault<type::adapted<Adapter, UTag>>{}();
+  }
+
+  template <typename AdapterT = Adapter>
+  const adapt_detail::
+      FromThriftFieldIdType<AdapterT, id, type::native_type<UTag>, Struct>&
+      operator()() const {
     return staticDefault([] {
       // TODO(afuller): Remove or move this logic to the adapter.
       auto& obj = *new Struct{};
       folly::lsan_ignore_object(&obj);
       apache::thrift::clear(obj);
-      return std::make_unique<type::native_type<Tag>>(op::create<Tag>(obj));
+      auto adapted = AdapterT::fromThriftField(
+          folly::copy(GetIntrinsicDefault<UTag>{}()),
+          FieldContext<Struct, id>{obj});
+      adapt_detail::construct<Adapter, id>(adapted, obj);
+      return std::make_unique<type::native_type<Tag>>(std::move(adapted));
     });
   }
 };
@@ -244,6 +282,8 @@ struct IsEmpty<adapted_field_tag<Adapter, UTag, Struct, id>> {
 };
 
 // TODO(dokwon): Support field_ref types.
+template <typename Tag, typename Context>
+struct GetDefault<type::field<Tag, Context>> : GetDefault<Tag> {};
 template <typename Tag, typename Context>
 struct GetIntrinsicDefault<type::field<Tag, Context>>
     : GetIntrinsicDefault<Tag> {};

@@ -154,22 +154,47 @@ TEST(ClearTest, Adapter) {
       true>({}, {{1}}, true);
 }
 
-TEST(ClearTest, Default) {
-  using Tag = type::adapted<
-      TestAdapter,
-      type::struct_t<testset::struct_terse_i64_custom_default>>;
-
+template <typename Tag, bool IsFieldAdapter = false>
+void test_custom_default() {
+  using Adapter = detail::get_adapter_t<Tag>;
   auto defaultObj = getDefault<Tag>();
   const auto& intrinsicDefaultObj = getIntrinsicDefault<Tag>();
 
-  EXPECT_FALSE(apache::thrift::adapt_detail::equal<TestAdapter>(
+  EXPECT_FALSE(apache::thrift::adapt_detail::equal<Adapter>(
       defaultObj, intrinsicDefaultObj));
+
+  // The default of a field with field adapter is constructed with the default
+  // parent struct. Meanwhile, the intrinsic default of a field with field
+  // adapter is constructed with the intrinsic default parent struct.
+  if constexpr (IsFieldAdapter) {
+    EXPECT_EQ(*defaultObj.meta, "meta");
+    EXPECT_EQ(*intrinsicDefaultObj.meta, "");
+  }
 
   // TODO(dokwon): Fix op::clear for adapted types with custom default.
   // clear<Tag>(defaultObj);
-  // EXPECT_TRUE(apache::thrift::adapt_detail::equal<TestAdapter>(
+  // EXPECT_TRUE(apache::thrift::adapt_detail::equal<Adapter>(
   //     defaultObj, intrinsicDefaultObj));
 }
 
+TEST(ClearTest, CustomDefaultTypeAdapter) {
+  using Tag = type::adapted<
+      TestAdapter,
+      type::struct_t<testset::struct_terse_i64_custom_default>>;
+  using FieldTag = type::field<Tag, FieldContext<TestStructWithContext, 1>>;
+
+  test_custom_default<Tag>();
+  test_custom_default<FieldTag>();
+}
+
+TEST(ClearTest, CustomDefaultFieldAdapter) {
+  using Tag = type::field<
+      type::adapted<
+          FieldAdapterWithContext,
+          type::struct_t<testset::struct_terse_i64_custom_default>>,
+      FieldContext<TestStructWithContext, 1>>;
+
+  test_custom_default<Tag, true>();
+}
 } // namespace
 } // namespace apache::thrift::op

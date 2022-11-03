@@ -8,11 +8,13 @@ server/fastcgi/tests/httpsTest.php
 server/fastcgi/tests/invalid.php
 server/fastcgi/tests/runTest1.php
 server/http/tests/apache_proxygen_headers.php
+server/http/tests/basic-multifile.php
 server/http/tests/client_blocking_read_test.php
 server/http/tests/codeCoverageTest.php
 server/http/tests/get_headers_secure_dv_array.php
 server/http/tests/globalDocumentTest.php
 server/http/tests/method.php
+server/http/tests/rename-multifile.php
 server/http/tests/requesIdTest.php
 server/http/tests/rqtrace.php
 server/http/tests/runTest1.php
@@ -75,8 +77,6 @@ zend/good/ext/date/tests/sunfuncts.php
 zend/good/ext/xsl/tests/xslt010.php
 
 # TODO(alexeyt) fail due to inability to start watchman
-server/http/tests/basic-multifile.php
-server/http/tests/rename-multifile.php
 slow/decl-provider/embed_type_decl.php
 slow/dynamic-calls/watchman-callback.php
 slow/dynamic-calls/watchman-callback-notice.php
@@ -117,7 +117,26 @@ slow/ext_zlib/zip_stream.php
 slow/ext_zlib/ziparchive_setencryption.php
 zend/good/ext/zip/tests/bug53885.php
 
-# TODO(atry) a flaky test
+# TODO(alexeyt) failures related to localization but apparently not just missing locale
+zend/good/ext/intl/tests/formatter_format_currency2.php
+zend/good/ext/intl/tests/formatter_get_locale_variant2.php
+zend/good/ext/intl/tests/formatter_get_set_pattern.php
+zend/good/ext/intl/tests/formatter_get_set_symbol2.php
+zend/good/ext/intl/tests/grapheme.php
+zend/good/ext/intl/tests/locale_filter_matches3.php
+zend/good/ext/intl/tests/locale_get_display_language.php
+zend/good/ext/intl/tests/locale_get_primary_language.php
+zend/good/ext/intl/tests/locale_lookup_variant2.php
+zend/good/ext/intl/tests/msgfmt_millisecond_dates.php
+zend/good/ext/mbstring/tests/mb_ereg_replace_variation1.php
+
+# TODO(atry) failed in repo mode
+slow/coeffects/closure-inherit-2.php
+
+# TODO(atry) the CAA record for google.com is flaky (maybe network issue?)
+slow/ext_network/dns_get_record_caa.php
+
+# TODO(atry) another flaky test
 slow/ext_apc/apc_expire.php
 
 # TODO(alexeyt) failures not yet categorized
@@ -126,12 +145,16 @@ slow/dom_document/clone.php
 slow/ext_hsl/execve_execvpe.php
 slow/ext_hsl/execve_execvpe_lightprocess.php
 slow/ext_hsl/str_locale_compare.php
+slow/ext_hsl/ext_os_sockets.php
 slow/ext_icu/date_pattern_gen.php
+slow/ext_icu/ucsdet.php
 slow/ext_icu/uspoof.php
+slow/ext_imagick/php_imagick_tests/009_properties.php
 slow/ext_intl/numberformat_other.php
 slow/ext_string/htmlspecialchars.php
 slow/ext_posix/ext_posix.php
 slow/ext_process/no_stdin.php
+slow/file/1684.php
 slow/implicit-context/inaccessible-1.php
 slow/implicit-context/memo-dynamic-1.php
 slow/included-enum-modify.php
@@ -141,6 +164,9 @@ slow/program_functions/config_overrides.php
 slow/program_functions/tier_overrides_default.php
 slow/program_functions/tier_overrides_tier.php
 slow/xhp/xhpchild.php
+zend/good/ext/curl/tests/curl_basic_007.php
+zend/good/ext/dom/tests/bug43364.php
+zend/good/ext/gmp/tests/gmp_cmp.php
 zend/good/ext/intl/tests/spoofchecker_001.php
 zend/good/ext/intl/tests/spoofchecker_004.php
 zend/good/ext/intl/tests/breakiter_preceding_basic.php
@@ -148,6 +174,9 @@ zend/good/ext/intl/tests/formatter_get_set_text_attribute.php
 zend/good/ext/gmp/tests/bug50175.php
 zend/good/ext/mbstring/bug28220.php
 zend/good/ext/sqlite3/tests/sqlite3_22_loadextension.php
+zend/good/ext/standard/tests/file/006_variation2.php
+zend/good/ext/standard/tests/file/chmod_basic.php
+zend/good/ext/standard/tests/general_functions/bug41518.php
 zend/good/ext/standard/tests/network/gethostbynamel_basic1.php
 zend/good/ext/xmlreader/tests/008.php
 zend/good/ext/xsl/tests/bug53965.php

@@ -578,10 +578,10 @@ class Connection {
 };
 
 template <>
-DbQueryResult Connection::query(Query&& query);
+DbQueryResult Connection::query(Query&& args);
 
 template <>
-DbQueryResult Connection::query(Query&& query, QueryOptions&& options);
+DbQueryResult Connection::query(Query&& args, QueryOptions&& options);
 
 template <typename... Args>
 DbQueryResult Connection::query(Args&&... args) {
@@ -592,7 +592,7 @@ DbQueryResult Connection::query(Args&&... args) {
 template <>
 std::shared_ptr<QueryOperation> Connection::beginQuery(
     std::unique_ptr<Connection> conn,
-    Query&& query);
+    Query&& args);
 
 template <typename... Args>
 std::shared_ptr<QueryOperation> Connection::beginQuery(
@@ -604,7 +604,7 @@ std::shared_ptr<QueryOperation> Connection::beginQuery(
 
 template <>
 [[deprecated("Replaced by the SemiFuture APIs")]] folly::Future<DbQueryResult>
-Connection::queryFuture(std::unique_ptr<Connection> conn, Query&& query);
+Connection::queryFuture(std::unique_ptr<Connection> conn, Query&& args);
 
 template <typename... Args>
 [[deprecated("Replaced by the SemiFuture APIs")]] folly::Future<DbQueryResult>

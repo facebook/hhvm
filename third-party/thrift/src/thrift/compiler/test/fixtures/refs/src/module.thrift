@@ -130,6 +130,23 @@ struct StructWithInternBox {
   4: MyField field4;
 }
 
+struct AdaptedStructWithInternBox {
+  @cpp.Adapter{name = "::my::Adapter1"}
+  @thrift.InternBox
+  1: Empty field1;
+  @cpp.Adapter{name = "::my::Adapter1"}
+  @thrift.InternBox
+  2: MyField field2;
+  @cpp.Adapter{name = "::my::Adapter1"}
+  @thrift.InternBox
+  @thrift.TerseWrite
+  3: Empty field3;
+  @cpp.Adapter{name = "::my::Adapter1"}
+  @thrift.InternBox
+  @thrift.TerseWrite
+  4: MyField field4;
+}
+
 const StructWithRef kStructWithRef = {
   "def_field": {},
   "opt_field": {},

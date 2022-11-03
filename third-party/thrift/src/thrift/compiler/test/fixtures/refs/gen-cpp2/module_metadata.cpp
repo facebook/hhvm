@@ -356,6 +356,33 @@ StructMetadata<::cpp2::StructWithInternBox>::gen(ThriftMetadata& metadata) {
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::cpp2::AdaptedStructWithInternBox>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.AdaptedStructWithInternBox", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_AdaptedStructWithInternBox = res.first->second;
+  module_AdaptedStructWithInternBox.name() = "module.AdaptedStructWithInternBox";
+  module_AdaptedStructWithInternBox.is_union() = false;
+  static const auto* const
+  module_AdaptedStructWithInternBox_fields = new std::array<EncodedThriftField, 4>{{
+    {1, "field1", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter1)")}}).cv_struct_ref(), *cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {2, "field2", false, std::make_unique<Struct<::cpp2::MyField>>("module.MyField"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter1)")}}).cv_struct_ref(), *cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {3, "field3", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter1)")}}).cv_struct_ref(), *cvStruct("thrift.InternBox", {}).cv_struct_ref(), *cvStruct("thrift.TerseWrite", {}).cv_struct_ref(), }},
+    {4, "field4", false, std::make_unique<Struct<::cpp2::MyField>>("module.MyField"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter1)")}}).cv_struct_ref(), *cvStruct("thrift.InternBox", {}).cv_struct_ref(), *cvStruct("thrift.TerseWrite", {}).cv_struct_ref(), }},
+  }};
+  for (const auto& f : *module_AdaptedStructWithInternBox_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_AdaptedStructWithInternBox.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::cpp2::StructWithRefTypeUnique>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.StructWithRefTypeUnique", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {

@@ -138,6 +138,17 @@ struct ForEachField<::cpp2::StructWithInternBox> {
 };
 
 template <>
+struct ForEachField<::cpp2::AdaptedStructWithInternBox> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).field1_ref()...);
+    f(1, static_cast<T&&>(t).field2_ref()...);
+    f(2, static_cast<T&&>(t).field3_ref()...);
+    f(3, static_cast<T&&>(t).field4_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::cpp2::StructWithRefTypeUnique> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {

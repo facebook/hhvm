@@ -1701,6 +1701,183 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::cpp2::AdaptedStructWithInternBox>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::cpp2::AdaptedStructWithInternBox>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace cpp2 {
+
+const folly::StringPiece AdaptedStructWithInternBox::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<AdaptedStructWithInternBox>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+AdaptedStructWithInternBox::AdaptedStructWithInternBox(const AdaptedStructWithInternBox& srcObj) :
+    __fbthrift_field_field1(srcObj.__fbthrift_field_field1),
+    __fbthrift_field_field2(srcObj.__fbthrift_field_field2),
+    __fbthrift_field_field3(srcObj.__fbthrift_field_field3),
+    __fbthrift_field_field4(srcObj.__fbthrift_field_field4),
+    __isset(srcObj.__isset) {
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(*__fbthrift_field_field1, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(*__fbthrift_field_field2, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(*__fbthrift_field_field3, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 4>(*__fbthrift_field_field4, *this);
+}
+
+AdaptedStructWithInternBox& AdaptedStructWithInternBox::operator=(const AdaptedStructWithInternBox& other) {
+  AdaptedStructWithInternBox tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
+AdaptedStructWithInternBox::AdaptedStructWithInternBox(FOLLY_MAYBE_UNUSED AdaptedStructWithInternBox&& other) noexcept :
+    __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
+    __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
+    __fbthrift_field_field3(std::move(other.__fbthrift_field_field3)),
+    __fbthrift_field_field4(std::move(other.__fbthrift_field_field4)),
+    __isset(other.__isset) {
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(*__fbthrift_field_field1, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(*__fbthrift_field_field2, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(*__fbthrift_field_field3, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 4>(*__fbthrift_field_field4, *this);
+}
+
+AdaptedStructWithInternBox& AdaptedStructWithInternBox::operator=(FOLLY_MAYBE_UNUSED AdaptedStructWithInternBox&& other) noexcept {
+    this->__fbthrift_field_field1 = std::move(other.__fbthrift_field_field1);
+    this->__fbthrift_field_field2 = std::move(other.__fbthrift_field_field2);
+    this->__fbthrift_field_field3 = std::move(other.__fbthrift_field_field3);
+    this->__fbthrift_field_field4 = std::move(other.__fbthrift_field_field4);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+AdaptedStructWithInternBox::AdaptedStructWithInternBox(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::cpp2::Empty, AdaptedStructWithInternBox>> field1__arg, ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>> field2__arg, ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::cpp2::Empty, AdaptedStructWithInternBox>> field3__arg, ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::cpp2::MyField, AdaptedStructWithInternBox>> field4__arg) :
+    __fbthrift_field_field1(std::move(field1__arg)),
+    __fbthrift_field_field2(std::move(field2__arg)),
+    __fbthrift_field_field3(std::move(field3__arg)),
+    __fbthrift_field_field4(std::move(field4__arg)) {
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(*__fbthrift_field_field1, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(*__fbthrift_field_field2, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(*__fbthrift_field_field3, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 4>(*__fbthrift_field_field4, *this);
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+}
+
+
+void AdaptedStructWithInternBox::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_field2 = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>());
+  this->__fbthrift_field_field4 = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::cpp2::MyField, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::cpp2::MyField, AdaptedStructWithInternBox>>());
+  __isset = {};
+}
+
+void AdaptedStructWithInternBox::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_field4 = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::cpp2::MyField, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::cpp2::MyField, AdaptedStructWithInternBox>>());
+}
+
+bool AdaptedStructWithInternBox::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool AdaptedStructWithInternBox::operator==(FOLLY_MAYBE_UNUSED const AdaptedStructWithInternBox& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field1_ref() == rhs.field1_ref())) {
+    return false;
+  }
+  if (!(lhs.field2_ref() == rhs.field2_ref())) {
+    return false;
+  }
+  if (!(lhs.field3_ref() == rhs.field3_ref())) {
+    return false;
+  }
+  if (!(lhs.field4_ref() == rhs.field4_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool AdaptedStructWithInternBox::operator<(FOLLY_MAYBE_UNUSED const AdaptedStructWithInternBox& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field1_ref() == rhs.field1_ref())) {
+    return lhs.field1_ref() < rhs.field1_ref();
+  }
+  if (!(lhs.field2_ref() == rhs.field2_ref())) {
+    return lhs.field2_ref() < rhs.field2_ref();
+  }
+  if (!(lhs.field3_ref() == rhs.field3_ref())) {
+    return lhs.field3_ref() < rhs.field3_ref();
+  }
+  if (!(lhs.field4_ref() == rhs.field4_ref())) {
+    return lhs.field4_ref() < rhs.field4_ref();
+  }
+  return false;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED AdaptedStructWithInternBox& a, FOLLY_MAYBE_UNUSED AdaptedStructWithInternBox& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_field1, b.__fbthrift_field_field1);
+  swap(a.__fbthrift_field_field2, b.__fbthrift_field_field2);
+  swap(a.__fbthrift_field_field3, b.__fbthrift_field_field3);
+  swap(a.__fbthrift_field_field4, b.__fbthrift_field_field4);
+  swap(a.__isset, b.__isset);
+}
+
+template void AdaptedStructWithInternBox::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t AdaptedStructWithInternBox::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t AdaptedStructWithInternBox::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t AdaptedStructWithInternBox::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void AdaptedStructWithInternBox::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t AdaptedStructWithInternBox::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t AdaptedStructWithInternBox::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t AdaptedStructWithInternBox::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        AdaptedStructWithInternBox,
+        ::apache::thrift::type_class::structure,
+        ::cpp2::Empty>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        AdaptedStructWithInternBox,
+        ::apache::thrift::type_class::structure,
+        ::cpp2::MyField>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        AdaptedStructWithInternBox,
+        ::apache::thrift::type_class::structure,
+        ::cpp2::Empty>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        AdaptedStructWithInternBox,
+        ::apache::thrift::type_class::structure,
+        ::cpp2::MyField>,
+    "inconsistent use of json option");
+
+} // cpp2
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::cpp2::StructWithRefTypeUnique>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
@@ -2361,5 +2538,9 @@ template uint32_t StructWithString::serializedSizeZC<>(apache::thrift::CompactPr
 
 namespace cpp2 { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::cpp2::Empty, ::cpp2::AdaptedStructWithInternBox>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 2, ::cpp2::MyField, ::cpp2::AdaptedStructWithInternBox>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 3, ::cpp2::Empty, ::cpp2::AdaptedStructWithInternBox>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 4, ::cpp2::MyField, ::cpp2::AdaptedStructWithInternBox>();
 }
 }} // cpp2

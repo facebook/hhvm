@@ -92,6 +92,13 @@ cdef class StructWithInternBox_Builder(thrift.py3.builder.StructBuilder):
     cdef public object field4
 
 
+cdef class AdaptedStructWithInternBox_Builder(thrift.py3.builder.StructBuilder):
+    cdef public object field1
+    cdef public object field2
+    cdef public object field3
+    cdef public object field4
+
+
 cdef class StructWithRefTypeUnique_Builder(thrift.py3.builder.StructBuilder):
     cdef public object def_field
     cdef public object opt_field

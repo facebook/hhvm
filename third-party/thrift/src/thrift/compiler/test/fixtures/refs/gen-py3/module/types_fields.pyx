@@ -571,6 +571,63 @@ cdef class __StructWithInternBox_FieldsSetter(__StructFieldsSetter):
 
 
 @__cython.auto_pickle(False)
+cdef class __AdaptedStructWithInternBox_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __AdaptedStructWithInternBox_FieldsSetter _fbthrift_create(_module_types.cAdaptedStructWithInternBox* struct_cpp_obj):
+        cdef __AdaptedStructWithInternBox_FieldsSetter __fbthrift_inst = __AdaptedStructWithInternBox_FieldsSetter.__new__(__AdaptedStructWithInternBox_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        __fbthrift_inst._setters[__cstring_view(<const char*>"field1")] = __AdaptedStructWithInternBox_FieldsSetter._set_field_0
+        __fbthrift_inst._setters[__cstring_view(<const char*>"field2")] = __AdaptedStructWithInternBox_FieldsSetter._set_field_1
+        __fbthrift_inst._setters[__cstring_view(<const char*>"field3")] = __AdaptedStructWithInternBox_FieldsSetter._set_field_2
+        __fbthrift_inst._setters[__cstring_view(<const char*>"field4")] = __AdaptedStructWithInternBox_FieldsSetter._set_field_3
+        return __fbthrift_inst
+
+    cdef void set_field(__AdaptedStructWithInternBox_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __AdaptedStructWithInternBox_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+    cdef void _set_field_0(self, _fbthrift_value) except *:
+        # for field field1
+        if _fbthrift_value is None:
+            __reset_field[_module_types.cAdaptedStructWithInternBox](deref(self._struct_cpp_obj), 0)
+            return
+        if not isinstance(_fbthrift_value, _module_types.Empty):
+            raise TypeError(f'field1 is not a { _module_types.Empty !r}.')
+        deref(self._struct_cpp_obj).field1_ref().assign(deref((<_module_types.Empty?> _fbthrift_value)._cpp_obj))
+
+    cdef void _set_field_1(self, _fbthrift_value) except *:
+        # for field field2
+        if _fbthrift_value is None:
+            __reset_field[_module_types.cAdaptedStructWithInternBox](deref(self._struct_cpp_obj), 1)
+            return
+        if not isinstance(_fbthrift_value, _module_types.MyField):
+            raise TypeError(f'field2 is not a { _module_types.MyField !r}.')
+        deref(self._struct_cpp_obj).field2_ref().assign(deref((<_module_types.MyField?> _fbthrift_value)._cpp_obj))
+
+    cdef void _set_field_2(self, _fbthrift_value) except *:
+        # for field field3
+        if _fbthrift_value is None:
+            __reset_field[_module_types.cAdaptedStructWithInternBox](deref(self._struct_cpp_obj), 2)
+            return
+        if not isinstance(_fbthrift_value, _module_types.Empty):
+            raise TypeError(f'field3 is not a { _module_types.Empty !r}.')
+        deref(self._struct_cpp_obj).field3_ref().assign(deref((<_module_types.Empty?> _fbthrift_value)._cpp_obj))
+
+    cdef void _set_field_3(self, _fbthrift_value) except *:
+        # for field field4
+        if _fbthrift_value is None:
+            __reset_field[_module_types.cAdaptedStructWithInternBox](deref(self._struct_cpp_obj), 3)
+            return
+        if not isinstance(_fbthrift_value, _module_types.MyField):
+            raise TypeError(f'field4 is not a { _module_types.MyField !r}.')
+        deref(self._struct_cpp_obj).field4_ref().assign(deref((<_module_types.MyField?> _fbthrift_value)._cpp_obj))
+
+
+@__cython.auto_pickle(False)
 cdef class __StructWithRefTypeUnique_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod

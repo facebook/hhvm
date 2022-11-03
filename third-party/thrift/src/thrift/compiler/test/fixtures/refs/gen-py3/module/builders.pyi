@@ -116,6 +116,15 @@ class StructWithInternBox_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 
 
+class AdaptedStructWithInternBox_Builder(thrift.py3.builder.StructBuilder):
+    field1: _typing.Any
+    field2: _typing.Any
+    field3: _typing.Any
+    field4: _typing.Any
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
+
+
 class StructWithRefTypeUnique_Builder(thrift.py3.builder.StructBuilder):
     def_field: _typing.Any
     opt_field: _typing.Any

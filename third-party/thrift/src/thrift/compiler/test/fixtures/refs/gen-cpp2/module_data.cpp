@@ -365,6 +365,37 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::StructWit
   -1,
 }};
 
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::AdaptedStructWithInternBox>::fields_names = {{
+  "field1",
+  "field2",
+  "field3",
+  "field4",
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 4> TStructDataStorage<::cpp2::AdaptedStructWithInternBox>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 4> TStructDataStorage<::cpp2::AdaptedStructWithInternBox>::fields_types = {{
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+}};
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::AdaptedStructWithInternBox>::storage_names = {{
+  "__fbthrift_field_field1",
+  "__fbthrift_field_field2",
+  "__fbthrift_field_field3",
+  "__fbthrift_field_field4",
+}};
+THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::AdaptedStructWithInternBox>::isset_indexes = {{
+  0,
+  1,
+  -1,
+  -1,
+}};
+
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithRefTypeUnique>::fields_names = {{
   "def_field",
   "opt_field",

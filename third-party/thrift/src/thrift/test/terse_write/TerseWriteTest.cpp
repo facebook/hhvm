@@ -344,15 +344,26 @@ TYPED_TEST_P(TerseWriteSerializerTests, TerseInternBoxWithCustomDefault) {
   terse_write::TerseInternBoxedStructWithCustomDefault obj;
   terse_write::EmptyStruct empty;
 
+  const auto& objc = obj;
+
   EXPECT_FALSE(apache::thrift::empty(obj));
 
   // reset the field to shared default value.
   obj.intern_boxed_field_with_custom_default().reset();
+  obj.intern_boxed_field_with_custom_default_adapted().reset();
+
+  EXPECT_EQ(objc.intern_boxed_field_with_custom_default()->field1(), 1);
+  EXPECT_EQ(
+      objc.intern_boxed_field_with_custom_default_adapted()->value.field1(), 1);
 
   EXPECT_FALSE(apache::thrift::empty(obj));
 
   // clear the field to shared intrinsic default value.
   apache::thrift::clear(obj);
+
+  EXPECT_EQ(objc.intern_boxed_field_with_custom_default()->field1(), 0);
+  EXPECT_EQ(
+      objc.intern_boxed_field_with_custom_default_adapted()->value.field1(), 0);
 
   EXPECT_TRUE(apache::thrift::empty(obj));
 

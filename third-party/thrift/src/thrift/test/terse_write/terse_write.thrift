@@ -19,6 +19,8 @@ include "thrift/annotation/thrift.thrift"
 
 cpp_include "thrift/test/AdapterTest.h"
 
+package "facebook.com/thrift/test"
+
 namespace cpp2 apache.thrift.test.terse_write
 namespace py3 apache.thrift.test.terse_write
 
@@ -122,6 +124,9 @@ struct MyStructWithCustomDefault {
   1: i32 field1 = 1;
 }
 
+@cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+typedef MyStructWithCustomDefault MyStructWithCustomDefaultAdapted
+
 @thrift.TerseWrite
 struct TerseStructWithCustomDefault {
   1: bool bool_field = true;
@@ -220,4 +225,8 @@ struct TerseStructs3 {
 struct TerseInternBoxedStructWithCustomDefault {
   @thrift.InternBox
   1: MyStructWithCustomDefault intern_boxed_field_with_custom_default;
+  @thrift.InternBox
+  2: MyStructWithCustomDefaultAdapted intern_boxed_field_with_custom_default_adapted (
+    py3.hidden,
+  );
 }

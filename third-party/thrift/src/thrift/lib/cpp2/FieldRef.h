@@ -1329,9 +1329,6 @@ class intern_boxed_field_ref {
   using element_type = typename folly::remove_cvref_t<T>::element_type;
   using boxed_value_type = std::remove_reference_t<T>;
 
-  static_assert(
-      apache::thrift::is_thrift_struct_v<element_type>, "not a thrift struct.");
-
   template <typename U>
   friend class intern_boxed_field_ref;
 
@@ -1571,9 +1568,6 @@ class terse_intern_boxed_field_ref {
 
   using element_type = typename folly::remove_cvref_t<T>::element_type;
   using boxed_value_type = std::remove_reference_t<T>;
-
-  static_assert(
-      apache::thrift::is_thrift_struct_v<element_type>, "not a thrift struct.");
 
   template <typename U>
   friend class terse_intern_boxed_field_ref;

@@ -1,0 +1,9 @@
+=== Shape analysis results for return3_wip.php
+Summary after closing and simplifying for \bar:
+[10:17-36] [Return]:
+  shape()
+[11:10-16] [Allocation]:
+  shape()
+Summary after closing and simplifying for \foo:
+[4:17-36] [Return]:
+  shape()

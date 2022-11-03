@@ -42,3 +42,35 @@ TEST(CompactProtocolTest, writeInvalidBool) {
       },
       "Check failed");
 }
+
+TEST(CompactProtocolTest, writeStringExactly2GB) {
+  auto w = CompactProtocolWriter();
+  auto q = folly::IOBufQueue();
+  w.setOutput(&q);
+  std::string monster((uint32_t)1 << 31, 'x');
+  EXPECT_THROW(w.writeString(monster), TProtocolException);
+}
+
+TEST(CompactProtocolTest, writeStringExceeds2GB) {
+  auto w = CompactProtocolWriter();
+  auto q = folly::IOBufQueue();
+  w.setOutput(&q);
+  std::string monster(((uint32_t)1 << 31) + 100, 'x');
+  EXPECT_THROW(w.writeString(monster), TProtocolException);
+}
+
+TEST(CompactProtocolTest, writeStringExactly4GB) {
+  auto w = CompactProtocolWriter();
+  auto q = folly::IOBufQueue();
+  w.setOutput(&q);
+  std::string monster((uint64_t)1 << 32, 'x');
+  EXPECT_THROW(w.writeString(monster), TProtocolException);
+}
+
+TEST(CompactProtocolTest, writeStringExceeds4GB) {
+  auto w = CompactProtocolWriter();
+  auto q = folly::IOBufQueue();
+  w.setOutput(&q);
+  std::string monster(((uint64_t)1 << 32) + 100, 'x');
+  EXPECT_THROW(w.writeString(monster), TProtocolException);
+}

@@ -165,7 +165,8 @@ inline uint32_t BinaryProtocolWriter::writeBinary(folly::StringPiece str) {
 }
 
 inline uint32_t BinaryProtocolWriter::writeBinary(folly::ByteRange v) {
-  uint32_t size = folly::to_narrow(v.size());
+  auto size = v.size();
+  checkBinarySize(size);
   uint32_t result = writeI32((int32_t)size);
   out_.push(v.data(), size);
   return result + size;
@@ -187,14 +188,19 @@ inline uint32_t BinaryProtocolWriter::writeRaw(const folly::IOBuf& str) {
   return writeBinaryImpl<false>(str);
 }
 
-template <bool kWriteSize>
-inline uint32_t BinaryProtocolWriter::writeBinaryImpl(const folly::IOBuf& str) {
-  size_t size = str.computeChainDataLength();
-  // leave room for size
-  uint32_t limit = std::numeric_limits<uint32_t>::max() - serializedSizeI32();
+inline void BinaryProtocolWriter::checkBinarySize(uint64_t size) {
+  // We can't deserialize binary/string over 2GB, enforing the same limit on
+  // serializing for consistency
+  constexpr uint64_t limit = std::numeric_limits<int32_t>::max();
   if (size > limit) {
     TProtocolException::throwExceededSizeLimit(size, limit);
   }
+}
+
+template <bool kWriteSize>
+inline uint32_t BinaryProtocolWriter::writeBinaryImpl(const folly::IOBuf& str) {
+  size_t size = str.computeChainDataLength();
+  checkBinarySize(size);
   uint32_t result = kWriteSize ? writeI32((int32_t)size) : 0;
   if (sharing_ != SHARE_EXTERNAL_BUFFER && !str.isManaged()) {
     const auto growth = size - out_.length();

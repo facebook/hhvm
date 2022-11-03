@@ -159,6 +159,7 @@ class BinaryProtocolWriter : public detail::ProtocolBase {
   void rewind(uint32_t n);
 
  private:
+  static void checkBinarySize(uint64_t size);
   template <bool kWriteSize>
   FOLLY_ERASE uint32_t writeBinaryImpl(const folly::IOBuf& str);
 

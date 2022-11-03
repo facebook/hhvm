@@ -201,6 +201,7 @@ class CompactProtocolWriter : public detail::ProtocolBase {
   int16_t lastWrittenFieldId_{-1};
 
   uint32_t writeCollectionBegin(int8_t elemType, int32_t size);
+  static void checkBinarySize(uint64_t size);
   template <bool kWriteSize>
   FOLLY_ERASE uint32_t writeBinaryImpl(const folly::IOBuf& str);
 

@@ -60,4 +60,36 @@ TEST_F(BinaryProtocolTest, writeInvalidBool) {
       "Check failed");
 }
 
+TEST_F(BinaryProtocolTest, writeStringExactly2GB) {
+  auto w = BinaryProtocolWriter();
+  auto q = folly::IOBufQueue();
+  w.setOutput(&q);
+  std::string monster((uint32_t)1 << 31, 'x');
+  EXPECT_THROW(w.writeString(monster), TProtocolException);
+}
+
+TEST_F(BinaryProtocolTest, writeStringExceeds2GB) {
+  auto w = BinaryProtocolWriter();
+  auto q = folly::IOBufQueue();
+  w.setOutput(&q);
+  std::string monster(((uint32_t)1 << 31) + 100, 'x');
+  EXPECT_THROW(w.writeString(monster), TProtocolException);
+}
+
+TEST_F(BinaryProtocolTest, writeStringExactly4GB) {
+  auto w = BinaryProtocolWriter();
+  auto q = folly::IOBufQueue();
+  w.setOutput(&q);
+  std::string monster((uint64_t)1 << 32, 'x');
+  EXPECT_THROW(w.writeString(monster), TProtocolException);
+}
+
+TEST_F(BinaryProtocolTest, writeStringExceeds4GB) {
+  auto w = BinaryProtocolWriter();
+  auto q = folly::IOBufQueue();
+  w.setOutput(&q);
+  std::string monster(((uint64_t)1 << 32) + 100, 'x');
+  EXPECT_THROW(w.writeString(monster), TProtocolException);
+}
+
 } // namespace

@@ -424,28 +424,62 @@ void validate_union_field_attributes(
 
 void validate_boxed_field_attributes(
     diagnostic_context& ctx, const t_field& node) {
-  if (gen::cpp::find_ref_type(node) != gen::cpp::reference_type::boxed) {
+  if (gen::cpp::find_ref_type(node) == gen::cpp::reference_type::none) {
     return;
   }
 
-  ctx.check(
-      dynamic_cast<const t_union*>(ctx.parent()) ||
-          node.qualifier() == t_field_qualifier::optional ||
-          node.has_annotation("cpp.box"),
-      "The `thrift.box` annotation can only be used with optional fields. "
-      "Make sure `{}` is optional.",
-      node.name());
+  bool ref = node.has_annotation({
+                 "cpp.ref",
+                 "cpp2.ref",
+                 "cpp.ref_type",
+                 "cpp2.ref_type",
+             }) ||
+      node.find_structured_annotation_or_null(kCppRefUri);
 
-  ctx.check(
-      !node.has_annotation({
-          "cpp.ref",
-          "cpp2.ref",
-          "cpp.ref_type",
-          "cpp2.ref_type",
-      }),
-      "The `cpp.box` annotation cannot be combined with the `cpp.ref` or "
-      "`cpp.ref_type` annotations. Remove one of the annotations from `{}`.",
-      node.name());
+  bool box = node.has_annotation({
+                 "cpp.box",
+                 "thrift.box",
+             }) ||
+      node.find_structured_annotation_or_null(kBoxUri);
+
+  bool intern_box = node.find_structured_annotation_or_null(kInternBoxUri);
+
+  if (ref + box + intern_box > 1) {
+    ctx.error(
+        node,
+        "The {} annotation cannot be combined with the other reference annotations. "
+        "Only annotate a single reference annotations from `{}`.",
+        intern_box ? "`@thrift.InternBox`"
+            : box  ? "`@thrift.Box`"
+                   : "`@cpp.Ref`",
+        node.name());
+  }
+
+  if (box) {
+    ctx.check(
+        dynamic_cast<const t_union*>(ctx.parent()) ||
+            node.qualifier() == t_field_qualifier::optional ||
+            node.has_annotation("cpp.box"),
+        "The `thrift.box` annotation can only be used with optional fields. "
+        "Make sure `{}` is optional.",
+        node.name());
+  }
+
+  if (intern_box) {
+    ctx.check(
+        node.type()->is_struct(),
+        "The `@thrift.InternBox` annotation can only be used with a struct field.");
+    // TODO(dokwon): Add support for custom defaults and remove this check.
+    ctx.check(
+        !node.get_value(),
+        "The `@thrift.InternBox` annotation currently does not support a field with custom default.");
+    ctx.check(
+        node.qualifier() == t_field_qualifier::none ||
+            node.qualifier() == t_field_qualifier::terse,
+        "The `@thrift.InternBox` annotation can only be used with unqualified or terse fields."
+        " Make sure `{}` is unqualified or annotated with `@thrift.TerseWrite`.",
+        node.name());
+  }
 }
 
 // Checks the attributes of a mixin field.

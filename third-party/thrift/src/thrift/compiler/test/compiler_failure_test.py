@@ -1461,8 +1461,28 @@ class CompilerFailureTest(unittest.TestCase):
             "foo.thrift",
             textwrap.dedent(
                 """\
+                include "thrift/annotation/cpp.thrift"
+                include "thrift/annotation/thrift.thrift"
+
+                struct MyStruct {
+                    1: i32 field1 = 1;
+                }
+
                 struct A {
-                    1: optional i64 field (cpp.ref, thrift.box)
+                    1: optional i64 field (cpp.ref, thrift.box);
+                    @thrift.Box
+                    @thrift.InternBox
+                    2: optional i64 field2;
+                    @thrift.InternBox
+                    3: MyStruct field3 = {"field1" : 1};
+                    @cpp.Ref
+                    @thrift.Box
+                    @thrift.InternBox
+                    @thrift.TerseWrite
+                    4: MyStruct field4;
+                    @thrift.InternBox
+                    @thrift.TerseWrite
+                    5: MyStruct field5;
                 }
                 """
             ),
@@ -1474,10 +1494,18 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(
             err,
             textwrap.dedent(
-                "[WARNING:foo.thrift:2] cpp.box and thrift.box are deprecated. Please use @thrift.Box annotation instead in `field`.\n"
-                "[ERROR:foo.thrift:2] The `cpp.box` annotation cannot be combined "
-                "with the `cpp.ref` or `cpp.ref_type` annotations. Remove one of the "
-                "annotations from `field`.\n"
+                "[WARNING:foo.thrift:9] cpp.box and thrift.box are deprecated. Please use @thrift.Box annotation instead in `field`.\n"
+                "[ERROR:foo.thrift:9] The `@thrift.Box` annotation cannot be combined with the other reference annotations."
+                " Only annotate a single reference annotations from `field`.\n"
+                "[ERROR:foo.thrift:10] The `@thrift.InternBox` annotation cannot be combined with the other reference annotations."
+                " Only annotate a single reference annotations from `field2`.\n"
+                "[ERROR:foo.thrift:10] The `@thrift.InternBox` annotation can only be used with a struct field.\n"
+                "[ERROR:foo.thrift:10] The `@thrift.InternBox` annotation can only be used with unqualified or terse fields."
+                " Make sure `field2` is unqualified or annotated with `@thrift.TerseWrite`.\n"
+                "[ERROR:foo.thrift:13] The `@thrift.InternBox` annotation currently does not support a field with custom default.\n"
+                "[ERROR:foo.thrift:15] The `@thrift.InternBox` annotation cannot be combined with the other reference annotations."
+                " Only annotate a single reference annotations from `field4`.\n"
+                "[ERROR:foo.thrift:15] The `thrift.box` annotation can only be used with optional fields. Make sure `field4` is optional.\n"
             ),
         )
 

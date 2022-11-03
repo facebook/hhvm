@@ -1604,13 +1604,13 @@ StructWithInternBox::StructWithInternBox(apache::thrift::FragileConstructor, ::a
 
 void StructWithInternBox::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_field2 = ::apache::thrift::detail::boxed_value<::cpp2::MyField>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::cpp2::MyField>());
-  this->__fbthrift_field_field4 = ::apache::thrift::detail::boxed_value<::cpp2::MyField>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::cpp2::MyField>());
+  this->__fbthrift_field_field2 = ::apache::thrift::detail::boxed_value<::cpp2::MyField>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>());
+  this->__fbthrift_field_field4 = ::apache::thrift::detail::boxed_value<::cpp2::MyField>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>());
   __isset = {};
 }
 
 void StructWithInternBox::__fbthrift_clear_terse_fields() {
-  this->__fbthrift_field_field4 = ::apache::thrift::detail::boxed_value<::cpp2::MyField>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::cpp2::MyField>());
+  this->__fbthrift_field_field4 = ::apache::thrift::detail::boxed_value<::cpp2::MyField>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::cpp2::MyField>>());
 }
 
 bool StructWithInternBox::__fbthrift_is_empty() const {
@@ -1781,13 +1781,13 @@ AdaptedStructWithInternBox::AdaptedStructWithInternBox(apache::thrift::FragileCo
 
 void AdaptedStructWithInternBox::__fbthrift_clear() {
   // clear all fields
-  this->__fbthrift_field_field2 = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>());
-  this->__fbthrift_field_field4 = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::cpp2::MyField, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::cpp2::MyField, AdaptedStructWithInternBox>>());
+  this->__fbthrift_field_field2 = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::cpp2::MyField, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<2>, AdaptedStructWithInternBox>>());
+  this->__fbthrift_field_field4 = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::cpp2::MyField, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<4>, AdaptedStructWithInternBox>>());
   __isset = {};
 }
 
 void AdaptedStructWithInternBox::__fbthrift_clear_terse_fields() {
-  this->__fbthrift_field_field4 = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::cpp2::MyField, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::cpp2::MyField, AdaptedStructWithInternBox>>());
+  this->__fbthrift_field_field4 = ::apache::thrift::detail::boxed_value<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::cpp2::MyField, AdaptedStructWithInternBox>>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<4>, AdaptedStructWithInternBox>>());
 }
 
 bool AdaptedStructWithInternBox::__fbthrift_is_empty() const {

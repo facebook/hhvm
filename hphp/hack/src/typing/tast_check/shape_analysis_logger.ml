@@ -13,6 +13,24 @@ module SA = Shape_analysis
 module SAC = Shape_analysis_codemod
 module Env = Tast_env
 
+type logger_mode =
+  | LogLocally
+  | LogScuba
+  | LogCodemod of { atomic: bool }  (** 'atomic' is described in D40008464 *)
+
+let parse_logger_mode_exn typing_env =
+  let level_int =
+    Typing_env.get_tcopt typing_env
+    |> TypecheckerOptions.log_levels
+    |> SMap.find_opt "shape_analysis"
+  in
+  match Option.value_exn level_int with
+  | 1 -> LogLocally
+  | 2 -> LogScuba
+  | 3 -> LogCodemod { atomic = false }
+  | 4 -> LogCodemod { atomic = true }
+  | n -> failwith @@ Printf.sprintf "Unrecognized logger mode %d" n
+
 let channel_opt = ref None
 
 let get_channel () =
@@ -72,18 +90,12 @@ let log_events_as_codemod typing_env : log list -> unit =
   List.iter ~f:(fun result ->
       Either.iter ~first:log_success ~second:Fn.ignore result.result)
 
-let shape_analysis_log_level typing_env =
-  Typing_env.get_tcopt typing_env
-  |> TypecheckerOptions.log_levels
-  |> SMap.find_opt "shape_analysis"
-
 let log_events tast_env =
   let typing_env = Tast_env.tast_env_as_typing_env tast_env in
-  match shape_analysis_log_level typing_env with
-  | Some 1 -> log_events_locally typing_env
-  | Some 2 -> Shape_analysis_scuba.log_events_remotely typing_env
-  | Some (3 | 4) -> log_events_as_codemod typing_env
-  | _ -> Fn.const ()
+  match parse_logger_mode_exn typing_env with
+  | LogLocally -> log_events_locally typing_env
+  | LogScuba -> Shape_analysis_scuba.log_events_remotely typing_env
+  | LogCodemod _ -> log_events_as_codemod typing_env
 
 let compute_results tast_env id params return body =
   let strip_decorations { constraint_; _ } = constraint_ in
@@ -101,8 +113,8 @@ let compute_results tast_env id params return body =
       |> List.filter ~f:SA.is_shape_like_dict
     in
     let successes =
-      match shape_analysis_log_level typing_env with
-      | Some 4 ->
+      match parse_logger_mode_exn typing_env with
+      | LogCodemod { atomic = true } ->
         if List.is_empty successes then
           []
         else

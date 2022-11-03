@@ -56,6 +56,7 @@ const StaticString
   s_double_colon("::");
 
 namespace {
+
 const size_t
   s_file_idx(0),
   s_line_idx(1),
@@ -66,8 +67,23 @@ const size_t
   s_type_idx(6),
   s_metadata_idx(7);
 
-static const StaticString s_stableIdentifier("HPHP::createBacktrace");
+const StaticString s_stableIdentifier("HPHP::createBacktrace");
+
+RuntimeStruct* runtimeStructForBacktraceFrame() {
+  static const RuntimeStruct::FieldIndexVector s_structFields = {
+    {s_file_idx, s_file},
+    {s_line_idx, s_line},
+    {s_function_idx, s_function},
+    {s_args_idx, s_args},
+    {s_class_idx, s_class},
+    {s_object_idx, s_object},
+    {s_type_idx, s_type},
+    {s_metadata_idx, s_metadata},
+  };
+  return RuntimeStruct::registerRuntimeStruct(s_stableIdentifier, s_structFields);
 }
+
+} // namespace
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -186,7 +202,7 @@ BTFrame getARFromWHImpl(
   return BTFrame::regular(fp, 0);
 }
 
-}
+} // namespace
 
 BTFrame getARFromWH(
   c_WaitableWaitHandle* currentWaitHandle,
@@ -314,29 +330,18 @@ BTFrame getPrevActRec(
   return initBTFrameAt(jitReturnAddr, BTFrame::regular(prevFP, prevBcOff));
 }
 
-}
+} // namespace backtrace_detail
 
 using namespace backtrace_detail;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 Array createBacktrace(const BacktraceArgs& btArgs) {
-  static const RuntimeStruct::FieldIndexVector s_structFields = {
-    {s_file_idx, s_file},
-    {s_line_idx, s_line},
-    {s_function_idx, s_function},
-    {s_args_idx, s_args},
-    {s_class_idx, s_class},
-    {s_object_idx, s_object},
-    {s_type_idx, s_type},
-    {s_metadata_idx, s_metadata},
-  };
-  static auto const s_runtimeStruct =
-    RuntimeStruct::registerRuntimeStruct(s_stableIdentifier, s_structFields);
-
   if (btArgs.isCompact()) {
     return createCompactBacktrace(btArgs.m_skipTop)->extract();
   }
+
+  static auto const s_runtimeStruct = runtimeStructForBacktraceFrame();
 
   auto bt = Array::CreateVec();
   folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
@@ -665,10 +670,13 @@ void CompactTraceData::insert(const BTFrame& frm) {
 }
 
 Array CompactTraceData::extract() const {
+  static auto const s_runtimeStruct = runtimeStructForBacktraceFrame();
+
   VecInit aInit(m_frames.size());
+
   for (int idx = 0; idx < m_frames.size(); ++idx) {
     auto const prev = idx < m_frames.size() - 1 ? &m_frames[idx + 1] : nullptr;
-    DictInit frame(6);
+    StructDictInit frame(s_runtimeStruct, 6);
     if (prev && !prev->func->isBuiltin()) {
       auto const prevFunc = prev->func;
       auto const prevUnit = prevFunc->unit();
@@ -678,8 +686,8 @@ Array CompactTraceData::extract() const {
       }
 
       auto const prevPc = prev->prevPc;
-      frame.set(s_file, StrNR(prevFile).asString());
-      frame.set(s_line, prevFunc->getLineNumber(prevPc));
+      frame.set(s_file_idx, s_file, StrNR(prevFile).asString());
+      frame.set(s_line_idx, s_line, prevFunc->getLineNumber(prevPc));
     }
 
     auto const f = m_frames[idx].func;
@@ -692,21 +700,23 @@ Array CompactTraceData::extract() const {
       else funcname = s_include;
     }
 
-    frame.set(s_function, funcname);
+    frame.set(s_function_idx, s_function, funcname);
 
     if (!funcname.same(s_include)) {
       // Closures have an m_this but they aren't in object context.
       auto ctx = m_frames[idx].func->cls();
       if (ctx != nullptr && !f->isClosureBody()) {
-        frame.set(s_class, Variant{const_cast<StringData*>(ctx->name())});
-        frame.set(s_type, m_frames[idx].func->isStatic() ? s_double_colon : s_arrow);
+        frame.set(s_class_idx, s_class,
+                  Variant{const_cast<StringData*>(ctx->name())});
+        frame.set(s_type_idx, s_type,
+                  m_frames[idx].func->isStatic() ? s_double_colon : s_arrow);
       }
     } else {
       auto filepath = const_cast<StringData*>(f->unit()->filepath());
-      frame.set(s_args, make_vec_array(filepath));
+      frame.set(s_args_idx, s_args, make_vec_array(filepath));
     }
 
-    aInit.append(frame.toVariant());
+    aInit.append(frame.toArray());
   }
 
   return aInit.toArray();
@@ -719,4 +729,4 @@ Array CompactTrace::extract() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-} // HPHP
+} // namespace HPHP

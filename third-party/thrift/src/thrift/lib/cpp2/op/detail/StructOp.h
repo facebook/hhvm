@@ -35,6 +35,8 @@ namespace detail {
 
 template <typename T, typename Tag = type::infer_tag<T>>
 struct StructuredOp : BaseOp<Tag> {
+  using NameList = std::array<std::string, op::size_v<T>>;
+  using size_type = typename NameList::size_type;
   using Base = BaseOp<Tag>;
   using Base::check_found;
   using Base::ref;
@@ -95,6 +97,48 @@ struct StructuredOp : BaseOp<Tag> {
       }));
     }
     return result;
+  }
+
+  static Ptr getByName(void* s, const std::string& name) {
+    return get(s, FieldId{0}, 0, ret(type::string_t{}, name));
+  }
+
+  static size_type& pos(std::any& i) {
+    if (!i.has_value()) {
+      i = size_type{};
+    }
+    return std::any_cast<size_type&>(i);
+  }
+
+  static Ptr next(T& self, IterType type, size_type& itr) {
+    if (itr == op::size_v<T>) {
+      return {};
+    }
+
+    static const NameList& kNames = *([]() {
+      auto result = std::make_unique<NameList>();
+      op::for_each_ordinal<T>([&](auto ord) {
+        (*result)[type::toPosition(ord)] = op::get_name_v<decltype(ord), T>;
+      });
+      return result.release();
+    })();
+
+    const std::string& name = kNames[itr++];
+    switch (type) {
+      case IterType::Key:
+        return ret(type::string_t{}, name);
+      case IterType::Value:
+        return getByName(&self, name);
+      case IterType::Default:
+        unimplemented();
+    }
+  }
+
+  static Ptr next(void* s, IterType type, std::any& i) {
+    if (type == IterType::Default) {
+      unimplemented(); // TODO(afuller): Key-value pair?
+    }
+    return next(ref(s), type, pos(i));
   }
 
   template <typename Id>

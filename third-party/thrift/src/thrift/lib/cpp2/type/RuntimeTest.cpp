@@ -264,6 +264,20 @@ TEST(RuntimeTest, DynStruct) {
   EXPECT_EQ(data.scheme(), "http");
   data.scheme() = "ftp";
   EXPECT_EQ(obj["scheme"], "ftp");
+
+  obj["domain"] = Value::of<type::list<type::string_t>>({"facebook", "com"});
+
+  EXPECT_THAT(
+      obj.keys(),
+      ::testing::ElementsAre("scheme", "domain", "path", "query", "fragment"));
+  EXPECT_THAT(
+      obj.values(),
+      ::testing::ElementsAre(
+          "ftp",
+          ::testing::ElementsAre("facebook", "com"),
+          ::testing::IsEmpty(),
+          ::testing::IsEmpty(),
+          ""));
 }
 
 TEST(RuntimeTest, MapAdd) {

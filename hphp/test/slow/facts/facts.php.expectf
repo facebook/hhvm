@@ -254,6 +254,47 @@ SOME_CONSTANT => constants.inc
 Getting all type aliases
 SomeTypeAlias => type_aliases.inc
 TypeAliasWithAttr => type_aliases.inc
+
+Getting all types or type aliases
+AbstractFinalClass => derived-class.inc
+AnnoyingNS\TerribleClass => attribute-namespace.inc
+AppleThenBanana => attribute-classes.inc
+AppleThenCarrot => attribute-classes.inc
+BananaThenApple => attribute-classes.inc
+BaseClass => base-class.inc
+BaseClassForAttributeFiltering => attribute-classes.inc
+C1 => types-with-kinds.inc
+ClassWithMethodAttrs => attribute-classes.inc
+ClassWithTwoAttrs => attribute-classes.inc
+DerivedClass => derived-class.inc
+DontIndexThisMethodAttr => attribute-classes.inc
+E1 => types-with-kinds.inc
+FinalClassUsesTRequireClass => derived-class.inc
+FinalClassUsesTRequireClassB => derived-class.inc
+I1 => types-with-kinds.inc
+IBase => base-class.inc
+IBaseForAttributeFiltering => attribute-classes.inc
+IRequireExtendsBaseClass => derived-class.inc
+IimplementsIRequireExtendsBaseClass => derived-class.inc
+NoArgAttr => attribute-classes.inc
+NoArgFileAttr => attribute-classes.inc
+NoArgMethodAttr => attribute-classes.inc
+SomeEnum => base-class.inc
+SomeTypeAlias => type_aliases.inc
+T1 => types-with-kinds.inc
+TImplementsIBase => derived-class.inc
+TRequireClassFinalClass => derived-class.inc
+TRequireClassFinalClassB => derived-class.inc
+TRequireExtendsBaseClass => derived-class.inc
+TRequireExtendsBaseClassAndRequireImplementsIBase => derived-class.inc
+TRequireImplementsAndImplementsIBase => derived-class.inc
+TRequireImplementsIBase => derived-class.inc
+TwoArgAttr => attribute-classes.inc
+TwoArgFileAttr => attribute-classes.inc
+TwoArgMethodAttr => attribute-classes.inc
+TypeAliasAttr => type_aliases.inc
+TypeAliasWithAttr => type_aliases.inc
+UsesTRequireImplementsIBase => derived-class.inc
 Facts in attribute-classes.inc:
   modules:
   types:
@@ -913,6 +954,47 @@ SOME_CONSTANT => constants.inc
 Getting all type aliases
 SomeTypeAlias => type_aliases.inc
 TypeAliasWithAttr => type_aliases.inc
+
+Getting all types or type aliases
+AbstractFinalClass => derived-class.inc
+AnnoyingNS\TerribleClass => attribute-namespace.inc
+AppleThenBanana => attribute-classes.inc
+AppleThenCarrot => attribute-classes.inc
+BananaThenApple => attribute-classes.inc
+BaseClass => base-class.inc
+BaseClassForAttributeFiltering => attribute-classes.inc
+C1 => types-with-kinds.inc
+ClassWithMethodAttrs => attribute-classes.inc
+ClassWithTwoAttrs => attribute-classes.inc
+DerivedClass => derived-class.inc
+DontIndexThisMethodAttr => attribute-classes.inc
+E1 => types-with-kinds.inc
+FinalClassUsesTRequireClass => derived-class.inc
+FinalClassUsesTRequireClassB => derived-class.inc
+I1 => types-with-kinds.inc
+IBase => base-class.inc
+IBaseForAttributeFiltering => attribute-classes.inc
+IRequireExtendsBaseClass => derived-class.inc
+IimplementsIRequireExtendsBaseClass => derived-class.inc
+NoArgAttr => attribute-classes.inc
+NoArgFileAttr => attribute-classes.inc
+NoArgMethodAttr => attribute-classes.inc
+SomeEnum => base-class.inc
+SomeTypeAlias => type_aliases.inc
+T1 => types-with-kinds.inc
+TImplementsIBase => derived-class.inc
+TRequireClassFinalClass => derived-class.inc
+TRequireClassFinalClassB => derived-class.inc
+TRequireExtendsBaseClass => derived-class.inc
+TRequireExtendsBaseClassAndRequireImplementsIBase => derived-class.inc
+TRequireImplementsAndImplementsIBase => derived-class.inc
+TRequireImplementsIBase => derived-class.inc
+TwoArgAttr => attribute-classes.inc
+TwoArgFileAttr => attribute-classes.inc
+TwoArgMethodAttr => attribute-classes.inc
+TypeAliasAttr => type_aliases.inc
+TypeAliasWithAttr => type_aliases.inc
+UsesTRequireImplementsIBase => derived-class.inc
 Facts in attribute-classes.inc:
   modules:
   types:

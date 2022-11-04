@@ -82,6 +82,12 @@ function db_path(string $root)[]: ?string;
 function schema_version()[]: int;
 
 /**
+ * Blocks until Facts is synchronized as of when the call was intiated.
+ */
+<<__Native>>
+function sync(): void;
+
+/**
  * Return the only path defining a given symbol.
  *
  * Return `null` if the symbol is not defined, or is defined in more than one
@@ -99,6 +105,8 @@ function function_to_path(string $function_name)[]: ?string;
 function constant_to_path(string $constant_name)[]: ?string;
 <<__Native>>
 function type_alias_to_path(string $type_alias_name)[]: ?string;
+<<__Native>>
+function type_or_type_alias_to_path(string $type_name)[]: ?string;
 
 /**
  * Return all the symbols defined in the given path.

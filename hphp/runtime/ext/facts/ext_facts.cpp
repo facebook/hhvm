@@ -693,6 +693,10 @@ bool HHVM_FUNCTION(facts_enabled) {
   return AutoloadHandler::s_instance->getFacts() != nullptr;
 }
 
+void HHVM_FUNCTION(facts_sync) {
+  Facts::getFactsOrThrow().ensureUpdated();
+}
+
 Variant HHVM_FUNCTION(facts_db_path, const String& rootStr) {
   // Turn rootStr into an absolute path.
   auto root = [&]() -> Optional<fs::path> {
@@ -733,6 +737,17 @@ int64_t HHVM_FUNCTION(facts_schema_version) {
 
 Variant HHVM_FUNCTION(facts_type_to_path, const String& typeName) {
   auto path = Facts::getFactsOrThrow().getTypeFile(typeName);
+  if (!path) {
+    return Variant{Variant::NullInit{}};
+  } else {
+    return Variant{*path};
+  }
+}
+
+Variant HHVM_FUNCTION(
+    facts_type_or_type_alias_to_path,
+    const String& typeName) {
+  auto path = Facts::getFactsOrThrow().getTypeOrTypeAliasFile(typeName);
   if (!path) {
     return Variant{Variant::NullInit{}};
   } else {
@@ -1002,7 +1017,11 @@ void Facts::moduleInit() {
   HHVM_NAMED_FE(HH\\Facts\\enabled, HHVM_FN(facts_enabled));
   HHVM_NAMED_FE(HH\\Facts\\db_path, HHVM_FN(facts_db_path));
   HHVM_NAMED_FE(HH\\Facts\\schema_version, HHVM_FN(facts_schema_version));
+  HHVM_NAMED_FE(HH\\Facts\\sync, HHVM_FN(facts_sync));
   HHVM_NAMED_FE(HH\\Facts\\type_to_path, HHVM_FN(facts_type_to_path));
+  HHVM_NAMED_FE(
+      HH\\Facts\\type_or_type_alias_to_path,
+      HHVM_FN(facts_type_or_type_alias_to_path));
   HHVM_NAMED_FE(HH\\Facts\\function_to_path, HHVM_FN(facts_function_to_path));
   HHVM_NAMED_FE(HH\\Facts\\constant_to_path, HHVM_FN(facts_constant_to_path));
   HHVM_NAMED_FE(HH\\Facts\\module_to_path, HHVM_FN(facts_module_to_path));

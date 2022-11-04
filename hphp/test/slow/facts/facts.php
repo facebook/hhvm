@@ -700,6 +700,16 @@ function facts(): void {
     ($alias) ==> HH\Facts\type_alias_to_path($alias),
   );
 
+  $get_all(
+    "types or type aliases",
+    () ==>
+      HH\Lib\Dict\merge(
+          HH\Facts\all_types(),
+          HH\Facts\all_type_aliases(),
+    ),
+    ($type) ==> HH\Facts\type_or_type_alias_to_path($type),
+  );
+
   print_extracted_facts(
     vec[
       'attribute-classes.inc',

@@ -145,8 +145,8 @@ class t_program : public t_named {
     return interactions_;
   }
 
-  void add_cpp_include(std::string path) {
-    cpp_includes_.push_back(std::move(path));
+  void add_language_include(std::string language, std::string path) {
+    language_includes_[std::move(language)].push_back(std::move(path));
   }
 
   /**
@@ -191,8 +191,20 @@ class t_program : public t_named {
     return namespaces_;
   }
 
-  // Only used in t_cpp_generator
-  const std::vector<std::string>& cpp_includes() const { return cpp_includes_; }
+  const std::unordered_map<std::string, std::vector<std::string>>&
+  language_includes() const {
+    return language_includes_;
+  }
+
+  // TODO: replace all callsites and remove
+  const std::vector<std::string>& cpp_includes() const {
+    if (language_includes_.count("cpp")) {
+      return language_includes_.at("cpp");
+    }
+    static const std::vector<std::string>& kEmpty =
+        *new std::vector<std::string>;
+    return kEmpty;
+  }
 
   /**
    * Outputs a reference to the namespace corresponding to the
@@ -289,7 +301,7 @@ class t_program : public t_named {
   std::string path_; // initialized in ctor init-list
   std::string include_prefix_;
   std::map<std::string, std::string> namespaces_;
-  std::vector<std::string> cpp_includes_;
+  std::unordered_map<std::string, std::vector<std::string>> language_includes_;
   std::shared_ptr<t_scope> scope_;
 
   t_program(std::string path, std::shared_ptr<t_scope> scope)

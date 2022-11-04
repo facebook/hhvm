@@ -123,12 +123,14 @@ class parsing_driver : public parser_actions {
 
   void on_cpp_include(source_range, fmt::string_view str) override {
     if (mode == parsing_mode::PROGRAM) {
-      program->add_cpp_include(fmt::to_string(str));
+      program->add_language_include("cpp", fmt::to_string(str));
     }
   }
 
-  void on_hs_include(source_range, fmt::string_view) override {
-    // Do nothing. This syntax is handled by the hs compiler.
+  void on_hs_include(source_range, fmt::string_view str) override {
+    if (mode == parsing_mode::PROGRAM) {
+      program->add_language_include("hs", fmt::to_string(str));
+    }
   }
 
   void on_namespace(const identifier& language, fmt::string_view ns) override {

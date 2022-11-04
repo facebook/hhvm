@@ -2545,13 +2545,15 @@ mstch::array t_mstch_cpp2_generator::get_namespace_array(
 
 mstch::array t_mstch_cpp2_generator::cpp_includes(const t_program* program) {
   mstch::array a;
-  for (auto include : program->cpp_includes()) {
-    mstch::map cpp_include;
-    if (include.at(0) != '<') {
-      include = "\"" + include + "\"";
+  if (program->language_includes().count("cpp")) {
+    for (auto include : program->language_includes().at("cpp")) {
+      mstch::map cpp_include;
+      if (include.at(0) != '<') {
+        include = fmt::format("\"{}\"", include);
+      }
+      cpp_include.emplace("cpp_include", std::move(include));
+      a.push_back(std::move(cpp_include));
     }
-    cpp_include.emplace("cpp_include", std::string(include));
-    a.push_back(cpp_include);
   }
   return a;
 }

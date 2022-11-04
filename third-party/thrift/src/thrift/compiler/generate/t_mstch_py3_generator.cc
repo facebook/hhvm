@@ -177,8 +177,10 @@ class py3_mstch_program : public mstch_program {
 
   mstch::node getCppIncludes() {
     mstch::array a;
-    for (const auto& include : program_->cpp_includes()) {
-      a.push_back(include);
+    if (program_->language_includes().count("cpp")) {
+      for (const auto& include : program_->language_includes().at("cpp")) {
+        a.push_back(include);
+      }
     }
     return a;
   }

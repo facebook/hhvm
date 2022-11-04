@@ -177,9 +177,7 @@ module Inter (I : Intra) = struct
     | [class_name; _; const_name] -> Some (class_name, const_name)
     | _ -> None
 
-  let substitute
-      ~base_constraint_map
-      (argument_constraint_map : any_constraint list SMap.t) :
+  let substitute (constraint_map : any_constraint list SMap.t) :
       any_constraint list SMap.t =
     let substitute_any_list
         (current_func_id : string)
@@ -194,7 +192,7 @@ module Inter (I : Intra) = struct
         | Inter inter_constr ->
           (match inter_constr with
           | Arg (((_, f), f_idx), intra_ent) ->
-            let constr_list_at = SMap.find_opt f base_constraint_map in
+            let constr_list_at = SMap.find_opt f constraint_map in
             let param_constr : inter_constraint =
               match constr_list_at with
               | Some constr_list_at_ ->
@@ -230,7 +228,7 @@ module Inter (I : Intra) = struct
                  current_func_id
                  (Option.map ~f:(fun x -> x @ constr_list_backwards))
           | ConstantIdentifier ident_ent ->
-            (match find_const ident_ent argument_constraint_map with
+            (match find_const ident_ent constraint_map with
             | Some (constr_list_at_const_ent, new_const_ident_string) ->
               propagate_const_initializer_and_identifier_constraints
                 ~current_func_constr_list
@@ -270,10 +268,7 @@ module Inter (I : Intra) = struct
         ~init:input_constr_list_map2
         current_func_constr_list
     in
-    SMap.fold
-      substitute_any_list
-      argument_constraint_map
-      argument_constraint_map
+    SMap.fold substitute_any_list constraint_map constraint_map
 
   (** Modifies input_constr_map by adding:
       i) to the constraints at the key corresponding to the constant const_ent
@@ -440,9 +435,7 @@ module Inter (I : Intra) = struct
       if Int.equal completed_iterations I.max_iteration then
         Divergent argument_constraint_map
       else
-        let substituted_constraint_map =
-          substitute ~base_constraint_map argument_constraint_map
-        in
+        let substituted_constraint_map = substitute argument_constraint_map in
         let deduced_constraint_map =
           SMap.map deduce_any_list substituted_constraint_map
         in

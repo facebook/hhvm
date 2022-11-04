@@ -169,7 +169,7 @@ inline uint32_t BinaryProtocolWriter::writeBinary(folly::ByteRange v) {
   checkBinarySize(size);
   uint32_t result = writeI32((int32_t)size);
   out_.push(v.data(), size);
-  return result + size;
+  return static_cast<uint32_t>(result + size);
 }
 
 inline uint32_t BinaryProtocolWriter::writeBinary(

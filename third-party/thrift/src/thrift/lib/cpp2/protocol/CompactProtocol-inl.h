@@ -318,7 +318,7 @@ inline uint32_t CompactProtocolWriter::writeBinary(folly::ByteRange str) {
   checkBinarySize(size);
   uint32_t result = apache::thrift::util::writeVarint(out_, (int32_t)size);
   out_.push(str.data(), size);
-  return result + size;
+  return static_cast<uint32_t>(result + size);
 }
 
 inline uint32_t CompactProtocolWriter::writeBinary(

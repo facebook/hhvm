@@ -26,7 +26,9 @@
 using namespace apache::thrift::util;
 
 FOLLY_CREATE_QUAL_INVOKER_SUITE(write_unrolled, writeVarintUnrolled);
+#ifdef __BMI2__
 FOLLY_CREATE_QUAL_INVOKER_SUITE(write_bmi2, writeVarintBMI2);
+#endif
 
 template <typename Case, typename Fn>
 void bench_write(size_t iters, Fn fn, Case) {
@@ -48,12 +50,17 @@ void bench_write(size_t iters, Fn fn, Case) {
 
 #define BM_WRITE_LOOP(kind) \
   BENCHMARK_NAMED_PARAM(bench_write, kind##_unrolled, write_unrolled, kind())
+
+#ifdef __BMI2__
 #define BM_REL_WRITE_BMI2(kind) \
   BENCHMARK_RELATIVE_NAMED_PARAM(bench_write, kind##_bmi2, write_bmi2, kind())
 
 #define BM_WRITE(kind) \
   BM_WRITE_LOOP(kind)  \
   BM_REL_WRITE_BMI2(kind)
+#else
+#define BM_WRITE(kind) BM_WRITE_LOOP(kind)
+#endif
 
 BM_WRITE(u8_any)
 BM_WRITE(u16_any)
@@ -93,7 +100,11 @@ void bench_read(size_t iters, Case) {
     auto ints = Case::gen();
     c.ensure(ints.size() * 10);
     for (auto v : ints) {
+#ifdef __BMI2__
       writeVarintBMI2(c, v);
+#else
+      writeVarintUnrolled(c, v);
+#endif
     }
   }
   folly::io::Cursor rcursor(iobufQueue.front());

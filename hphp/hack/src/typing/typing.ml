@@ -4453,7 +4453,10 @@ and expr_
     (* Match Obj_get dynamic instance property access behavior *)
     let (env, tm, _) = expr env m in
     let ty =
-      if TUtils.is_dynamic env cty then
+      if
+        TUtils.is_dynamic env cty
+        || TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+      then
         MakeType.dynamic (Reason.Rwitness p)
       else
         Typing_utils.mk_tany env p

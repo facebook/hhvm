@@ -8240,6 +8240,9 @@ and class_expr
         ((env, Option.merge ty_err1 ty_err2 ~f:Typing_error.both), (ty, Ok ty))
       | (_, Tunapplied_alias _) ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
+      (* We allow a call through a string in dynamic check mode, as string <:D dynamic *)
+      | (r, Tprim Tstring) when env.in_support_dynamic_type_method_check ->
+        ((env, None), (MakeType.dynamic r, Ok (MakeType.dynamic r)))
       | ( _,
           ( Tany _ | Tnonnull | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _
           | Ttuple _ | Tnewtype _ | Tdependent _ | Tshape _ | Taccess _ | Tneg _

@@ -450,7 +450,7 @@ TEST_F(HTTPBinaryCodecTest, testOnIngressSuccessForControlData) {
   EXPECT_EQ(callback.msg->getURL(), "/");
 }
 
-TEST_F(HTTPBinaryCodecTest, testOnIngressFailure) {
+TEST_F(HTTPBinaryCodecTest, testOnIngressFailureMalformedMessage) {
   // Format is `..GET.https.www.example.com./hello.txt..user-agent.curl/7.16.3
   // libcurl/7.16.3 OpenSSL/0.9.7l
   // zlib/1.2.3.host.www.example.com.accept-language.en, mi` where the last `.`
@@ -481,6 +481,24 @@ TEST_F(HTTPBinaryCodecTest, testOnIngressFailure) {
   // Check onError was called with the correct error
   EXPECT_EQ(std::string(callback.lastParseError.get()->what()),
             "Invalid Message: Failure to parse: headerValue");
+}
+
+TEST_F(HTTPBinaryCodecTest, testOnIngressFailureIncompleteMessage) {
+  // Message is incomplete and has only 1 byte
+  const std::vector<uint8_t> binaryInvalidHTTPMessage{0x00};
+  auto binaryInvalidHTTPMessageIOBuf =
+      folly::IOBuf::wrapBuffer(folly::ByteRange(
+          binaryInvalidHTTPMessage.data(), binaryInvalidHTTPMessage.size()));
+  folly::io::Cursor cursor(binaryInvalidHTTPMessageIOBuf.get());
+
+  FakeHTTPCodecCallback callback;
+  downstreamBinaryCodec_->setCallback(&callback);
+  downstreamBinaryCodec_->onIngress(*binaryInvalidHTTPMessageIOBuf);
+  downstreamBinaryCodec_->onIngressEOF();
+
+  // Check onError was called with the correct error
+  EXPECT_EQ(std::string(callback.lastParseError.get()->what()),
+            "Message not formed (incomplete binary data)");
 }
 
 TEST_F(HTTPBinaryCodecTest, testGenerateHeaders) {

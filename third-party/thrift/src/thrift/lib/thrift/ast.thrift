@@ -40,19 +40,16 @@ struct SourceInfo {
   // means that the first line consists of 10 code units including newline and
   // the second line is 5 code units and doesn't have a newlne.
   2: list<i32> lineOffsets;
-}
 
-/**
- * Per-language include statements.
- */
-union LanguageInclude {
-  1: string cppInclude;
-  2: string hsInclude;
+  /**
+   * Per-language include statements.
+   */
+  3: map<string, list<id.ValueId>> languageIncludes;
 }
 
 // A thrift schema that corresponds to one or more thrift files.
 @cpp.UseOpEncode
-struct AST {
+struct Ast {
   /**
   * The programs included in the schema, accessible by `ProgramId`.
    * The first program in the program list must be the main file,
@@ -78,9 +75,4 @@ struct AST {
    * Information about where each definition is present in the source files.
    */
   6: map<id.DefinitionId, SourceRange> sourceRanges;
-
-  /**
-   * Additional per-language includes not represented in the schema.
-   */
-  7: map<id.ProgramId, list<LanguageInclude>> languageIncludes;
 }

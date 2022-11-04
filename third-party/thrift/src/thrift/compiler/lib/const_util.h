@@ -26,6 +26,7 @@
 #include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/t_structured.h>
 #include <thrift/lib/cpp2/visitation/for_each.h>
+#include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
 
 namespace apache {
 namespace thrift {
@@ -108,6 +109,46 @@ folly::void_t<decltype(std::declval<T>().toThrift())> hydrate_const(
     T& out, const t_const_value& val) {
   hydrate_const(out.toThrift(), val);
 }
+
+// Assigns a t_const_value to a Value.
+// Currently only uses bool/i64/double/string/list/map.
+// TODO: allow increasing type fidelity.
+inline protocol::Value const_to_value(const t_const_value& val) {
+  protocol::Value ret;
+  switch (val.get_type()) {
+    case t_const_value::CV_BOOL:
+      ret.emplace_bool();
+      ret.as_bool() = val.get_bool();
+      break;
+    case t_const_value::CV_INTEGER:
+      ret.emplace_i64();
+      ret.as_i64() = val.get_integer();
+      break;
+    case t_const_value::CV_DOUBLE:
+      ret.emplace_double();
+      ret.as_double() = val.get_double();
+      break;
+    case t_const_value::CV_STRING:
+      ret.emplace_string();
+      ret.as_string() = val.get_string();
+      break;
+    case t_const_value::CV_MAP:
+      ret.emplace_map();
+      for (const auto& map_elem : val.get_map()) {
+        ret.as_map().emplace(
+            const_to_value(*map_elem.first), const_to_value(*map_elem.second));
+      }
+      break;
+    case t_const_value::CV_LIST:
+      ret.emplace_list();
+      for (const auto& list_elem : val.get_list()) {
+        ret.as_list().push_back(const_to_value(*list_elem));
+      }
+      break;
+  }
+  return ret;
+}
+
 } // namespace compiler
 } // namespace thrift
 } // namespace apache

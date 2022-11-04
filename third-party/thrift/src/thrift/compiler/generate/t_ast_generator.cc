@@ -28,6 +28,7 @@
 #include <thrift/compiler/lib/const_util.h>
 #include <thrift/compiler/lib/schematizer.h>
 
+#include <thrift/lib/cpp/util/VarintUtils.h>
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
@@ -37,6 +38,7 @@
 namespace apache {
 namespace thrift {
 namespace compiler {
+namespace {
 
 enum class ast_protocol {
   json,
@@ -53,6 +55,14 @@ std::string serialize(const T& val) {
   auto br = buf->coalesce();
   return std::string(reinterpret_cast<const char*>(br.data()), br.size());
 }
+
+template <typename Id>
+Id positionToId(size_t pos) {
+  return Id{util::zigzagToI64(pos + 1)};
+}
+
+} // namespace
+
 /**
  * AST generator.
  */
@@ -95,11 +105,18 @@ void t_ast_generator::generate_program() {
   std::string fname = fmt::format("{}/{}.ast", get_out_dir(), program_->name());
   f_out_.open(fname.c_str());
 
-  cpp2::AST ast;
+  cpp2::Ast ast;
   std::unordered_map<const t_program*, apache::thrift::type::ProgramId>
       program_index;
   std::unordered_map<const t_named*, apache::thrift::type::DefinitionId>
       definition_index;
+  auto intern_value = [&](const t_const_value& val) {
+    // TODO: deduplication
+    auto& values = ast.values().ensure();
+    auto ret = positionToId<apache::thrift::type::ValueId>(values.size());
+    values.push_back(const_to_value(val));
+    return ret;
+  };
   const_ast_visitor visitor;
   visitor.add_program_visitor([&](const t_program& program) {
     if (program_index.count(&program)) {
@@ -108,8 +125,8 @@ void t_ast_generator::generate_program() {
 
     auto& programs = *ast.programs();
     auto pos = programs.size();
-    program_index[&program] =
-        static_cast<apache::thrift::type::ProgramId>(pos + 1);
+    auto program_id = positionToId<apache::thrift::type::ProgramId>(pos);
+    program_index[&program] = program_id;
     hydrate_const(programs.emplace_back(), *schematizer::gen_schema(program));
 
     for (auto* include : program.get_included_programs()) {
@@ -122,25 +139,32 @@ void t_ast_generator::generate_program() {
       }
     }
 
-    // TODO: sourceInfo
-    // TODO: languageIncludes
+    cpp2::SourceInfo info;
+    for (const auto& [lang, incs] : program.language_includes()) {
+      for (const auto& inc : incs) {
+        info.languageIncludes()[lang].push_back(
+            intern_value(t_const_value(inc)));
+      }
+    }
+    // TODO: rest of sourceInfo
+    ast.sources()[program_id] = std::move(info);
 
     // Note: have to populate `definitions` after the visitor completes since it
     // visits the children after this lambda returns.
   });
 
-#define THRIFT_ADD_VISITOR(kind)                                  \
-  visitor.add_##kind##_visitor([&](const t_##kind& node) {        \
-    if (node.generated()) {                                       \
-      return;                                                     \
-    }                                                             \
-    auto& definitions = *ast.definitions();                       \
-    auto pos = definitions.size();                                \
-    definition_index[&node] =                                     \
-        static_cast<apache::thrift::type::DefinitionId>(pos + 1); \
-    hydrate_const(                                                \
-        definitions.emplace_back().kind##Def_ref().ensure(),      \
-        *schematizer::gen_schema(node));                          \
+#define THRIFT_ADD_VISITOR(kind)                               \
+  visitor.add_##kind##_visitor([&](const t_##kind& node) {     \
+    if (node.generated()) {                                    \
+      return;                                                  \
+    }                                                          \
+    auto& definitions = *ast.definitions();                    \
+    auto pos = definitions.size();                             \
+    definition_index[&node] =                                  \
+        positionToId<apache::thrift::type::DefinitionId>(pos); \
+    hydrate_const(                                             \
+        definitions.emplace_back().kind##Def_ref().ensure(),   \
+        *schematizer::gen_schema(node));                       \
   })
   THRIFT_ADD_VISITOR(service);
   THRIFT_ADD_VISITOR(interaction);

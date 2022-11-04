@@ -58,3 +58,14 @@ TEST(ConstUtilTest, HydrateConst) {
   EXPECT_EQ(s.unionField()->listField_ref()->size(), 1);
   EXPECT_EQ(*s.enumField(), cpp2::E::B);
 }
+
+TEST(ConstUtilTest, ConstToValue) {
+  auto str = val("foo");
+  EXPECT_EQ(const_to_value(*str).as_string(), "foo");
+
+  auto map = val();
+  map->set_map();
+  map->add_map(val("answer"), val(42));
+  auto value = const_to_value(*map);
+  EXPECT_EQ(value.as_map().at(const_to_value(*val("answer"))).as_i64(), 42);
+}

@@ -1953,12 +1953,13 @@ class cpp_mstch_field : public mstch_field {
   mstch::node terse_struct() {
     const auto* ttype = field_->type()->get_true_type();
     return (ttype->is_struct() || ttype->is_exception()) &&
-        field_->qualifier() == t_field_qualifier::terse;
+        !ttype->is_union() && field_->qualifier() == t_field_qualifier::terse;
   }
 
   mstch::node terse_not_struct() {
     const auto* ttype = field_->type()->get_true_type();
-    return !ttype->is_struct() && !ttype->is_exception() &&
+    return ((!ttype->is_struct() && !ttype->is_exception()) ||
+            ttype->is_union()) &&
         field_->qualifier() == t_field_qualifier::terse;
   }
 

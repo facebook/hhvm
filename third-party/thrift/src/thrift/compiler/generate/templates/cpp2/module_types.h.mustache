@@ -105,7 +105,9 @@ class <%#struct:exception?%>FOLLY_EXPORT <%/struct:exception?%><%struct:cpp_unde
 <% > module_types_h/reflection%>
 
   void __fbthrift_clear();
+<%^struct:union?%>
   void __fbthrift_clear_terse_fields();
+<%/struct:union?%>
   bool __fbthrift_is_empty() const;
   <%#struct:exception?%>
   static constexpr ::apache::thrift::ExceptionKind __fbthrift_cpp2_gen_exception_kind =

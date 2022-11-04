@@ -541,7 +541,7 @@ void StructLevelTerseStruct::__fbthrift_clear_terse_fields() {
   this->__fbthrift_field_list_field.clear();
   this->__fbthrift_field_set_field.clear();
   this->__fbthrift_field_map_field.clear();
-  ::apache::thrift::detail::st::clear_terse_fields(this->__fbthrift_field_union_field);
+  ::apache::thrift::clear(this->__fbthrift_field_union_field);
 }
 
 bool StructLevelTerseStruct::__fbthrift_is_empty() const {
@@ -968,7 +968,7 @@ void FieldLevelTerseStruct::__fbthrift_clear_terse_fields() {
   this->__fbthrift_field_terse_list_field.clear();
   this->__fbthrift_field_terse_set_field.clear();
   this->__fbthrift_field_terse_map_field.clear();
-  ::apache::thrift::detail::st::clear_terse_fields(this->__fbthrift_field_terse_union_field);
+  ::apache::thrift::clear(this->__fbthrift_field_terse_union_field);
 }
 
 bool FieldLevelTerseStruct::__fbthrift_is_empty() const {

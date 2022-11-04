@@ -28,6 +28,7 @@ from apache.thrift.test.terse_write.terse_write.thrift_types import (
     MyEnum,
     MyStruct,
     MyStructWithCustomDefault,
+    MyUnion,
     TerseStructs,
     TerseStructs1,
     TerseStructs2,
@@ -279,6 +280,7 @@ class SerializerTests(unittest.TestCase):
             set_field={1},
             map_field={1: 1},
             struct_field=MyStruct(field1=1),
+            union_field=MyUnion(struct_field=MyStruct(field1=1)),
         )
         empty = EmptyStruct()
         for proto in Protocol:
@@ -306,6 +308,7 @@ class SerializerTests(unittest.TestCase):
             set_field=set(),
             map_field={},
             struct_field=MyStruct(field1=0),
+            union_field=MyUnion(),
         )
         for proto in Protocol:
             encoded = serialize(obj, protocol=proto)

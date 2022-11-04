@@ -275,7 +275,6 @@ class MyUnion final  {
   >;
 
   void __fbthrift_clear();
-  void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
 
  public:

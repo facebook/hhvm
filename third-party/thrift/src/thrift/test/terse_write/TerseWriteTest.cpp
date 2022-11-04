@@ -59,6 +59,7 @@ void assign_fields(T& obj) {
   obj.set_field() = {1};
   obj.map_field() = std::map<int32_t, int32_t>{{1, 1}};
   obj.struct_field()->field1() = 1;
+  obj.union_field()->struct_field_ref().emplace().field1() = 1;
 }
 
 template <typename T>
@@ -79,6 +80,7 @@ void assign_fields_with_intrinsic_default(T& obj) {
   obj.set_field()->clear();
   obj.map_field()->clear();
   obj.struct_field()->field1() = 0;
+  apache::thrift::clear(*obj.union_field());
 }
 
 template <typename T>
@@ -99,6 +101,7 @@ void expect_assigned(const T& obj) {
   EXPECT_FALSE(obj.set_field()->empty());
   EXPECT_FALSE(obj.map_field()->empty());
   EXPECT_EQ(obj.struct_field()->field1(), 1);
+  EXPECT_EQ(obj.union_field()->struct_field_ref()->field1(), 1);
 }
 
 template <typename T>
@@ -119,6 +122,10 @@ void expect_intrinsic_default(const T& obj) {
   EXPECT_TRUE(obj.set_field()->empty());
   EXPECT_TRUE(obj.map_field()->empty());
   EXPECT_TRUE(apache::thrift::empty(*obj.struct_field()));
+  if constexpr (!std::is_same<terse_write::TerseStructWithCustomDefault, T>::
+                    value) {
+    EXPECT_TRUE(apache::thrift::empty(*obj.union_field()));
+  }
 }
 
 TYPED_TEST_CASE_P(TerseWriteTests);

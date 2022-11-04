@@ -35,6 +35,7 @@ struct StructLevelTerseStruct {
   12: set<i32> set_field;
   13: map<i32, i32> map_field;
   14: terse_write.MyStruct struct_field;
+  15: terse_write.MyUnion union_field;
 }
 
 struct FieldLevelTerseStruct {
@@ -67,4 +68,6 @@ struct FieldLevelTerseStruct {
   13: map<i32, i32> map_field;
   @thrift.TerseWrite
   14: terse_write.MyStruct struct_field;
+  @thrift.TerseWrite
+  15: terse_write.MyUnion union_field;
 }

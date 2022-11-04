@@ -1440,13 +1440,14 @@ uint32_t StructLevelTerseStruct::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::MyStruct>::write(*prot_, this->__fbthrift_field_struct_field);
     rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::MyUnion>>(this->__fbthrift_field_union_field))) {
     constexpr int16_t kPrevFieldId = 14;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 15, kPrevFieldId>(*prot_, "union_field", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::MyUnion>::write(*prot_, this->__fbthrift_field_union_field);
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -2565,13 +2566,14 @@ uint32_t FieldLevelTerseStruct::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::facebook::thrift::test::terse_write::MyStruct>::write(*prot_, this->__fbthrift_field_terse_struct_field);
     rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
   }
-  {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::MyUnion>>(this->__fbthrift_field_terse_union_field))) {
     constexpr int16_t kPrevFieldId = 14;
-    uint32_t xfer_before_field_begin = xfer;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 29, kPrevFieldId>(*prot_, "terse_union_field", previousFieldHasValue);
-    uint32_t xfer_after_field_begin = xfer;
+    previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::facebook::thrift::test::terse_write::MyUnion>::write(*prot_, this->__fbthrift_field_terse_union_field);
-    rewindIfEmptyStructField(*prot_, previousFieldHasValue, xfer, xfer_after_field_begin, xfer_before_field_begin);
+    xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   {
     constexpr int16_t kPrevFieldId = 29;

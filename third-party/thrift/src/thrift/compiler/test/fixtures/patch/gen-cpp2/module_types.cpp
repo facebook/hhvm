@@ -608,7 +608,7 @@ void MyStruct::__fbthrift_clear_terse_fields() {
   this->__fbthrift_field_binaryVal = apache::thrift::StringTraits<folly::IOBuf>::fromStringLiteral("");
   this->__fbthrift_field_enumVal = ::test::fixtures::patch::MyEnum();
   ::apache::thrift::detail::st::clear_terse_fields(this->__fbthrift_field_structVal);
-  ::apache::thrift::detail::st::clear_terse_fields(this->__fbthrift_field_unionVal);
+  ::apache::thrift::clear(this->__fbthrift_field_unionVal);
   ::apache::thrift::detail::st::clear_terse_fields(this->__fbthrift_field_durationVal);
   ::apache::thrift::detail::st::clear_terse_fields(this->__fbthrift_field_timeVal);
   this->__fbthrift_field_listMap.clear();

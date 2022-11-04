@@ -548,24 +548,25 @@ size_t writeField(
 template <class Protocol_>
 size_t writeTerseField(
     Protocol_* iprot, const FieldInfo& fieldInfo, const ThriftValue& value) {
-  // For all non-struct terse field, check whether the field is empty or not
-  // before serialization.
-  if (fieldInfo.typeInfo->type != protocol::TType::T_STRUCT) {
-    if (isTerseFieldSet(value, fieldInfo)) {
-      return writeField(iprot, fieldInfo, value);
-    }
-    return 0;
-  }
   // For a struct terse field, skip the empty check for the field, and rewind
   // buffer if the struct field is emtpy.
-  size_t xfer_before_field_begin = 0;
-  size_t written = iprot->writeFieldBegin(
-      fieldInfo.name, fieldInfo.typeInfo->type, fieldInfo.id);
-  size_t xfer_after_field_begin = written;
-  written += write(iprot, *fieldInfo.typeInfo, value);
-  rewindIfEmptyStructField(
-      *iprot, written, xfer_after_field_begin, xfer_before_field_begin);
-  return written;
+  if (fieldInfo.typeInfo->type == protocol::TType::T_STRUCT &&
+      !static_cast<const StructInfo*>(fieldInfo.typeInfo->typeExt)->unionExt) {
+    size_t xfer_before_field_begin = 0;
+    size_t written = iprot->writeFieldBegin(
+        fieldInfo.name, fieldInfo.typeInfo->type, fieldInfo.id);
+    size_t xfer_after_field_begin = written;
+    written += write(iprot, *fieldInfo.typeInfo, value);
+    rewindIfEmptyStructField(
+        *iprot, written, xfer_after_field_begin, xfer_before_field_begin);
+    return written;
+  }
+  // For all non-struct terse field, check whether the field is empty or not
+  // before serialization.
+  if (isTerseFieldSet(value, fieldInfo)) {
+    return writeField(iprot, fieldInfo, value);
+  }
+  return 0;
 }
 
 template <class Protocol_>

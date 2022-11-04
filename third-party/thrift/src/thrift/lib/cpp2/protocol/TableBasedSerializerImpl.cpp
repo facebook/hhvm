@@ -207,6 +207,11 @@ bool isTerseFieldSet(const ThriftValue& value, const FieldInfo& info) {
   switch (info.typeInfo->type) {
     case protocol::TType::T_STRUCT: {
       const auto& structInfo = *static_cast<const StructInfo*>(typeInfoExt);
+      // union.
+      if (structInfo.unionExt != nullptr) {
+        return getActiveId(value.object, structInfo) != 0;
+      }
+      // struct and exception.
       for (std::int16_t index = 0; index < structInfo.numFields; index++) {
         const auto& fieldInfo = structInfo.fieldInfos[index];
         if (hasFieldValue(value.object, fieldInfo, structInfo)) {

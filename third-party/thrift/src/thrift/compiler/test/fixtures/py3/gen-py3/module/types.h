@@ -115,16 +115,6 @@ void reset_field<::py3::simple::SimpleStruct>(
 }
 
 template<>
-void reset_field<::py3::simple::HiddenException>(
-    ::py3::simple::HiddenException& obj, uint16_t index) {
-  switch (index) {
-    case 0:
-      obj.test_ref().copy_from(default_inst<::py3::simple::HiddenException>().test_ref());
-      return;
-  }
-}
-
-template<>
 void reset_field<::py3::simple::ComplexStruct>(
     ::py3::simple::ComplexStruct& obj, uint16_t index) {
   switch (index) {
@@ -191,16 +181,6 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 template<>
 const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::py3::simple::SimpleStruct>::namesmap() {
-  static const folly::Indestructible<NamesMap> map {
-    {
-    }
-  };
-  return *map;
-}
-
-template<>
-const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
-    ::py3::simple::HiddenException>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

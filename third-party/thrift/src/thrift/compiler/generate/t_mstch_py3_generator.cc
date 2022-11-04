@@ -126,6 +126,12 @@ bool is_func_supported(bool no_stream, const t_function* func) {
       !func->get_returntype()->is_service();
 }
 
+bool is_hidden(const t_type& node) {
+  return node.generated() ||
+      gen::cpp::type_resolver::is_directly_adapted(node) ||
+      node.has_annotation("py3.hidden");
+}
+
 class py3_mstch_program : public mstch_program {
  public:
   py3_mstch_program(
@@ -156,6 +162,8 @@ class py3_mstch_program : public mstch_program {
             {"program:py_deprecated_module_path",
              &py3_mstch_program::py_deprecated_module_path},
             {"program:filtered_structs", &py3_mstch_program::filtered_objects},
+            {"program:filtered_typedefs",
+             &py3_mstch_program::filtered_typedefs},
         });
     gather_included_program_namespaces();
     visit_types_for_services_and_interactions();
@@ -326,8 +334,7 @@ class py3_mstch_program : public mstch_program {
 
   void visit_types_for_objects() {
     for (auto* object : program_->objects()) {
-      if (object->generated() ||
-          gen::cpp::type_resolver::is_directly_adapted(*object)) {
+      if (is_hidden(*object)) {
         continue;
       }
       for (const auto& field : object->fields()) {
@@ -345,7 +352,11 @@ class py3_mstch_program : public mstch_program {
 
   void visit_types_for_typedefs() {
     for (const auto* typedef_def : program_->typedefs()) {
+      if (is_hidden(*typedef_def) || is_hidden(*typedef_def->get_true_type())) {
+        continue;
+      }
       visit_type(typedef_def->get_type());
+      typedefs_.push_back(typedef_def);
     }
   }
 
@@ -372,6 +383,8 @@ class py3_mstch_program : public mstch_program {
         objects_, *context_.struct_factory, context_.struct_cache, id);
   }
 
+  mstch::node filtered_typedefs() { return make_mstch_typedefs(typedefs_); }
+
   std::vector<const t_type*> containers_;
   std::map<std::string, const t_type*> moveContainers_;
   std::vector<const t_type*> customTemplates_;
@@ -383,7 +396,8 @@ class py3_mstch_program : public mstch_program {
   std::vector<const t_type*> responseAndStreamTypes_;
   std::map<std::string, const t_type*> streamTypes_;
   std::map<std::string, const t_type*> streamExceptions_;
-  std::vector<t_struct*> objects_;
+  std::vector<const t_struct*> objects_;
+  std::vector<const t_typedef*> typedefs_;
 };
 
 class py3_mstch_service : public mstch_service {

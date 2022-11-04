@@ -799,9 +799,9 @@ Mapping.register({{> types/cython_python_type}})
 {{/program:containerTypes}}{{!
 }}{{#program:constants}}
 {{#constant:value}}{{> types/constant_value}}{{/constant:value}}{{/program:constants}}{{!
-}}{{#program:typedefs}}
+}}{{#program:filtered_typedefs}}
 {{typedef:name}} = {{#typedef:type}}{{> types/python_type}}{{/typedef:type}}
-{{/program:typedefs}}
+{{/program:filtered_typedefs}}
 {{#program:has_stream?}}
 
 {{#program:stream_types}}

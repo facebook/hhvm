@@ -164,9 +164,9 @@ class {{> types/cython_python_type}}({{> types/pep484_containers}}, _typing.Hash
 {{constant:name}}: {{> types/python_type}} = ...
 {{/constant:type}}
 {{/program:constants}}
-{{#program:typedefs}}
+{{#program:filtered_typedefs}}
 {{typedef:name}} = {{#typedef:type}}{{> types/python_type}}{{/typedef:type}}
-{{/program:typedefs}}
+{{/program:filtered_typedefs}}
 {{#program:has_stream?}}
 
 {{#program:stream_types}}

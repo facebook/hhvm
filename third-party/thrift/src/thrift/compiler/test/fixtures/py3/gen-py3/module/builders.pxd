@@ -35,10 +35,6 @@ cdef class SimpleStruct_Builder(thrift.py3.builder.StructBuilder):
     cdef public pfloat smaller_real
 
 
-cdef class HiddenException_Builder(thrift.py3.builder.StructBuilder):
-    cdef public pint test
-
-
 cdef class ComplexStruct_Builder(thrift.py3.builder.StructBuilder):
     cdef public object structOne
     cdef public object structTwo

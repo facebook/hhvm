@@ -8868,7 +8868,6 @@ AnIntegerEnum2 = List__i32._fbthrift_create(constant_shared_ptr(cAnIntegerEnum2(
 constEnumA = MyEnumA(<int> (cconstEnumA()))
 constEnumB = MyEnumA(<int> (cconstEnumB()))
 AStruct = _includes_types.AStruct
-CustomProtocolType = bytes
 simpleTypeDef = int
 containerTypeDef = Map__i16_string
 complexContainerTypeDef = List__Map__i16_string

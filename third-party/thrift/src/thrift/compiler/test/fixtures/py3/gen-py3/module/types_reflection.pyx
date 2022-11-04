@@ -172,31 +172,6 @@ cdef __StructSpec get_reflection__SimpleStruct():
         ),
     )
     return spec
-cdef __StructSpec get_reflection__HiddenException():
-    cdef _module_types.HiddenException defaults = _module_types.HiddenException._fbthrift_create(
-        constant_shared_ptr[_module_types.cHiddenException](
-            default_inst[_module_types.cHiddenException]()
-        )
-    )
-    cdef __StructSpec spec = __StructSpec._fbthrift_create(
-        name="HiddenException",
-        kind=__StructType.EXCEPTION,
-        annotations={
-            """py3.hidden""": """1""",        },
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=1,
-            name="test",
-            type=int,
-            kind=__NumberType.I16,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
-    )
-    return spec
 cdef __StructSpec get_reflection__ComplexStruct():
     cdef _module_types.ComplexStruct defaults = _module_types.ComplexStruct._fbthrift_create(
         constant_shared_ptr[_module_types.cComplexStruct](

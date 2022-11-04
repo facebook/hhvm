@@ -20,8 +20,6 @@ cdef __StructSpec get_reflection__OptionalRefStruct()
 
 cdef __StructSpec get_reflection__SimpleStruct()
 
-cdef __StructSpec get_reflection__HiddenException()
-
 cdef __StructSpec get_reflection__ComplexStruct()
 
 cdef __StructSpec get_reflection__BinaryUnion()

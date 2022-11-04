@@ -28,12 +28,6 @@ cdef class SimpleStruct_Builder(thrift.py3.builder.StructBuilder):
         yield "real", self.real
         yield "smaller_real", self.smaller_real
 
-cdef class HiddenException_Builder(thrift.py3.builder.StructBuilder):
-    _struct_type = _module_types.HiddenException
-
-    def __iter__(self):
-        yield "test", self.test
-
 cdef class ComplexStruct_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _module_types.ComplexStruct
 

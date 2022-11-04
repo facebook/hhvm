@@ -80,6 +80,24 @@ struct AdaptTestStruct {
   10: binary binary_data;
 }
 
+struct MyStruct {
+  1: i64 field1;
+}
+
+struct ComparisonTestStruct {
+  @cpp.Adapter{name = "::apache::thrift::test::NonComparableWrapperAdapter"}
+  1: MyStruct non_comparable_adapted_type;
+
+  // TODO(dokwon): Support non-comparable adapted type for @thrift.Box.
+  // @cpp.Adapter{name = "::apache::thrift::test::NonComparableWrapperAdapter"}
+  // @thrift.Box
+  // 2: optional MyStruct box_non_comparable_adapted_type;
+
+  @cpp.Adapter{name = "::apache::thrift::test::NonComparableWrapperAdapter"}
+  @thrift.InternBox
+  3: MyStruct intern_box_non_comparable_adapted_type;
+}
+
 enum ThriftAdaptedEnum {
   Zero = 0,
   One = 1,

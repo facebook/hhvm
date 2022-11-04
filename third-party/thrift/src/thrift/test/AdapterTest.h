@@ -289,4 +289,21 @@ struct VariableAdapter {
   }
 };
 
+template <typename T>
+struct NonComparableWrapper {
+  T value;
+};
+
+struct NonComparableWrapperAdapter {
+  template <typename T>
+  static NonComparableWrapper<T> fromThrift(T value) {
+    return {value};
+  }
+
+  template <typename Wrapper>
+  static auto&& toThrift(Wrapper&& wrapper) {
+    return std::forward<Wrapper>(wrapper).value;
+  }
+};
+
 } // namespace apache::thrift::test

@@ -33,6 +33,7 @@
 
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/Thrift.h>
+#include <thrift/lib/cpp2/op/Compare.h>
 
 namespace apache {
 namespace thrift {

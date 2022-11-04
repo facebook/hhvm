@@ -1619,16 +1619,16 @@ bool StructWithInternBox::__fbthrift_is_empty() const {
 
 bool StructWithInternBox::operator==(FOLLY_MAYBE_UNUSED const StructWithInternBox& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
+  if (!::apache::thrift::op::equal<::apache::thrift::type::struct_t<::cpp2::Empty>>(*lhs.__fbthrift_field_field1, *rhs.__fbthrift_field_field1)) {
     return false;
   }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
+  if (!::apache::thrift::op::equal<::apache::thrift::type::struct_t<::cpp2::MyField>>(*lhs.__fbthrift_field_field2, *rhs.__fbthrift_field_field2)) {
     return false;
   }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
+  if (!::apache::thrift::op::equal<::apache::thrift::type::struct_t<::cpp2::Empty>>(*lhs.__fbthrift_field_field3, *rhs.__fbthrift_field_field3)) {
     return false;
   }
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
+  if (!::apache::thrift::op::equal<::apache::thrift::type::struct_t<::cpp2::MyField>>(*lhs.__fbthrift_field_field4, *rhs.__fbthrift_field_field4)) {
     return false;
   }
   return true;
@@ -1636,17 +1636,17 @@ bool StructWithInternBox::operator==(FOLLY_MAYBE_UNUSED const StructWithInternBo
 
 bool StructWithInternBox::operator<(FOLLY_MAYBE_UNUSED const StructWithInternBox& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return lhs.field1_ref() < rhs.field1_ref();
+  if (!::apache::thrift::op::equal<::apache::thrift::type::struct_t<::cpp2::Empty>>(*lhs.__fbthrift_field_field1, *rhs.__fbthrift_field_field1)) {
+    return ::apache::thrift::op::less<::apache::thrift::type::struct_t<::cpp2::Empty>>(*lhs.__fbthrift_field_field1, *rhs.__fbthrift_field_field1);
   }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return lhs.field2_ref() < rhs.field2_ref();
+  if (!::apache::thrift::op::equal<::apache::thrift::type::struct_t<::cpp2::MyField>>(*lhs.__fbthrift_field_field2, *rhs.__fbthrift_field_field2)) {
+    return ::apache::thrift::op::less<::apache::thrift::type::struct_t<::cpp2::MyField>>(*lhs.__fbthrift_field_field2, *rhs.__fbthrift_field_field2);
   }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return lhs.field3_ref() < rhs.field3_ref();
+  if (!::apache::thrift::op::equal<::apache::thrift::type::struct_t<::cpp2::Empty>>(*lhs.__fbthrift_field_field3, *rhs.__fbthrift_field_field3)) {
+    return ::apache::thrift::op::less<::apache::thrift::type::struct_t<::cpp2::Empty>>(*lhs.__fbthrift_field_field3, *rhs.__fbthrift_field_field3);
   }
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return lhs.field4_ref() < rhs.field4_ref();
+  if (!::apache::thrift::op::equal<::apache::thrift::type::struct_t<::cpp2::MyField>>(*lhs.__fbthrift_field_field4, *rhs.__fbthrift_field_field4)) {
+    return ::apache::thrift::op::less<::apache::thrift::type::struct_t<::cpp2::MyField>>(*lhs.__fbthrift_field_field4, *rhs.__fbthrift_field_field4);
   }
   return false;
 }
@@ -1796,16 +1796,16 @@ bool AdaptedStructWithInternBox::__fbthrift_is_empty() const {
 
 bool AdaptedStructWithInternBox::operator==(FOLLY_MAYBE_UNUSED const AdaptedStructWithInternBox& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::Empty>>>(*lhs.__fbthrift_field_field1, *rhs.__fbthrift_field_field1)) {
     return false;
   }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::MyField>>>(*lhs.__fbthrift_field_field2, *rhs.__fbthrift_field_field2)) {
     return false;
   }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::Empty>>>(*lhs.__fbthrift_field_field3, *rhs.__fbthrift_field_field3)) {
     return false;
   }
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::MyField>>>(*lhs.__fbthrift_field_field4, *rhs.__fbthrift_field_field4)) {
     return false;
   }
   return true;
@@ -1813,17 +1813,17 @@ bool AdaptedStructWithInternBox::operator==(FOLLY_MAYBE_UNUSED const AdaptedStru
 
 bool AdaptedStructWithInternBox::operator<(FOLLY_MAYBE_UNUSED const AdaptedStructWithInternBox& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field1_ref() == rhs.field1_ref())) {
-    return lhs.field1_ref() < rhs.field1_ref();
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::Empty>>>(*lhs.__fbthrift_field_field1, *rhs.__fbthrift_field_field1)) {
+    return ::apache::thrift::op::less<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::Empty>>>(*lhs.__fbthrift_field_field1, *rhs.__fbthrift_field_field1);
   }
-  if (!(lhs.field2_ref() == rhs.field2_ref())) {
-    return lhs.field2_ref() < rhs.field2_ref();
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::MyField>>>(*lhs.__fbthrift_field_field2, *rhs.__fbthrift_field_field2)) {
+    return ::apache::thrift::op::less<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::MyField>>>(*lhs.__fbthrift_field_field2, *rhs.__fbthrift_field_field2);
   }
-  if (!(lhs.field3_ref() == rhs.field3_ref())) {
-    return lhs.field3_ref() < rhs.field3_ref();
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::Empty>>>(*lhs.__fbthrift_field_field3, *rhs.__fbthrift_field_field3)) {
+    return ::apache::thrift::op::less<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::Empty>>>(*lhs.__fbthrift_field_field3, *rhs.__fbthrift_field_field3);
   }
-  if (!(lhs.field4_ref() == rhs.field4_ref())) {
-    return lhs.field4_ref() < rhs.field4_ref();
+  if (!::apache::thrift::op::equal<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::MyField>>>(*lhs.__fbthrift_field_field4, *rhs.__fbthrift_field_field4)) {
+    return ::apache::thrift::op::less<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::cpp2::MyField>>>(*lhs.__fbthrift_field_field4, *rhs.__fbthrift_field_field4);
   }
   return false;
 }

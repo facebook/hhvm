@@ -17,8 +17,10 @@
 %><%
 // Computes lhs.{field} < rhs.{field}, assuming lhs.{field} != rhs.{field}.
 %><%#field:cpp_ref?%><%
+  // TODO(dokwon): Support nested adapter neq_less.
+  // TODO(dokwon): Support @thrift.Box and @cpp.Adapter.
   %><%#field:intern_boxed_ref?%><%!
-    %>lhs.<%field:cpp_name%>_ref() < rhs.<%field:cpp_name%>_ref()<%
+    %>::apache::thrift::op::less<<%field:type_tag%>>(*lhs.<%field:cpp_storage_name%>, *rhs.<%field:cpp_storage_name%>)<%
   %><%/field:intern_boxed_ref?%><%!
   %><%^field:intern_boxed_ref?%><%!
     %>::apache::thrift::detail::pointer_less(lhs.<%field:cpp_name%>_ref(), rhs.<%field:cpp_name%>_ref())<%

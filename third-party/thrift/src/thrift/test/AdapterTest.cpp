@@ -780,6 +780,24 @@ TEST(AdaptTest, ComposedAdapter) {
   EXPECT_EQ(*obj2.double_wrapped_integer()->meta, "foo");
 }
 
+TEST(AdaptTest, ComparisonTestStruct) {
+  auto obj = basic::ComparisonTestStruct();
+  auto s = basic::MyStruct();
+  s.field1() = 1;
+
+  obj.non_comparable_adapted_type() = {s};
+  obj.intern_box_non_comparable_adapted_type() = {s};
+
+  auto serialized = CompactSerializer::serialize<std::string>(obj);
+  auto obj2 = basic::ComparisonTestStruct();
+  CompactSerializer::deserialize(serialized, obj2);
+
+  // It uses 'Adapter::toThrift(lhs) == Adapter::toThrift(rhs)' for comparison.
+  EXPECT_EQ(obj, obj2);
+  EXPECT_FALSE(obj < obj2);
+  EXPECT_FALSE(obj > obj2);
+}
+
 TEST(AdaptTest, TransitiveAdapter) {
   basic::TransitiveAdapted obj;
   EXPECT_EQ(obj.value, basic::detail::TransitiveAdapted{});

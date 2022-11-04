@@ -610,6 +610,18 @@ void process_init(const Options& o,
     config["Eval"]["CoeffectEnforcementLevels"][name] = value;
   }
 
+  // These need to be set before RO::Load, because it triggers the
+  // table resizing.
+  if (gd.InitialTypeTableSize) {
+    RO::EvalInitialTypeTableSize  = gd.InitialTypeTableSize;
+  }
+  if (gd.InitialFuncTableSize) {
+    RO::EvalInitialFuncTableSize  = gd.InitialFuncTableSize;
+  }
+  if (gd.InitialStaticStringTableSize) {
+    RO::EvalInitialStaticStringTableSize = gd.InitialStaticStringTableSize;
+  }
+
   RO::Load(ini, config);
   RO::RepoAuthoritative                     = false;
   RO::EvalJit                               = false;
@@ -674,15 +686,6 @@ int main(int argc, char** argv) try {
 
   auto const& gd = RepoFile::globalData();
   gd.load(false);
-  if (gd.InitialTypeTableSize) {
-    RO::EvalInitialTypeTableSize  = gd.InitialTypeTableSize;
-  }
-  if (gd.InitialFuncTableSize) {
-    RO::EvalInitialFuncTableSize  = gd.InitialFuncTableSize;
-  }
-  if (gd.InitialStaticStringTableSize) {
-    RO::EvalInitialStaticStringTableSize = gd.InitialStaticStringTableSize;
-  }
 
   process_init(options, gd, true);
   SCOPE_EXIT { process_exit(); };

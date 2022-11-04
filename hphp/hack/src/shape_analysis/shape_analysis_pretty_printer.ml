@@ -49,11 +49,11 @@ let show_constraint env =
   | Subsets (sub, sup) -> show_entity sub ^ " ⊆ " ^ show_entity sup
 
 let show_inter_constraint _ = function
-  | HT.Arg (((_, f_id), arg_idx), ent) ->
+  | HT.ArgLike (((_, f_id), arg_idx), ent) ->
     Format.asprintf
-      "Arg(%s, %s, %s)"
+      "ArgLike(%s, %s, %s)"
       f_id
-      (HT.show_param_index arg_idx)
+      (HT.show_param_like_index arg_idx)
       (show_entity ent)
   | HT.Constant const ->
     Format.asprintf "Constant %s" (HT.show_const_entity const)
@@ -63,8 +63,8 @@ let show_inter_constraint _ = function
     Format.asprintf
       "ConstantIdentifier %s"
       (HT.show_constant_identifier_entity ident)
-  | HT.Param param ->
-    Format.asprintf "Parameter %s" (HT.show_param_entity param)
+  | HT.ParamLike param ->
+    Format.asprintf "ParamLike %s" (HT.show_param_like_entity param)
   | HT.ClassExtends ident ->
     Format.asprintf "Extends %s " (HT.show_class_identifier_entity ident)
 

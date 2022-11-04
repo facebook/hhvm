@@ -2,10 +2,10 @@
 Summary for \C::f:
 [5:10-38] [Allocation]:
   shape('a' => int, 'b' => bool)
-(Param (([4:21-25], "\\C::f"), (Index 0))) : dynamic
-(Param (([4:31-35], "\\C::f"), Return)) : dynamic
+(ParamLike (([4:21-25], "\\C::f"), (Index 0))) : dynamic
+(ParamLike (([4:31-35], "\\C::f"), Return)) : dynamic
 Summary for \C::g:
 [13:10-38] [Allocation]:
   shape('a' => int, 'b' => bool)
-(Param (([12:21-25], "\\C::g"), (Index 0))) : dynamic
-(Param (([12:31-35], "\\C::g"), Return)) : dynamic
+(ParamLike (([12:21-25], "\\C::g"), (Index 0))) : dynamic
+(ParamLike (([12:31-35], "\\C::g"), Return)) : dynamic

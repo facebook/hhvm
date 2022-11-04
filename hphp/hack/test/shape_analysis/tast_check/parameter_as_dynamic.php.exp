@@ -2,5 +2,5 @@
 Summary for \f:
 [5:3-20] [Allocation]:
   shape('b' => bool)
-(Param (([3:12-31], "\\f"), (Index 0))) : dynamic
-(Param (([3:37-41], "\\f"), Return)) : dynamic
+(ParamLike (([3:12-31], "\\f"), (Index 0))) : dynamic
+(ParamLike (([3:37-41], "\\f"), Return)) : dynamic

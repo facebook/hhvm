@@ -2,4 +2,4 @@
 Summary for \f:
 [6:10-38] : dynamic
 [6:22-37] : dynamic
-(Param (([3:15-34], "\\f"), Return)) : dynamic
+(ParamLike (([3:15-34], "\\f"), Return)) : dynamic

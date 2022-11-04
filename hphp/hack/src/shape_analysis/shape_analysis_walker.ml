@@ -440,7 +440,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
             (* TODO: inout parameters need special treatment inter-procedurally *)
             let inter_constraint_ =
               decorate ~origin:__LINE__
-              @@ HT.Arg (((pos, f_id), HT.Index arg_idx), arg_entity_)
+              @@ HT.ArgLike (((pos, f_id), HT.Index arg_idx), arg_entity_)
             in
             Env.add_inter_constraint env inter_constraint_
           | _ -> env
@@ -475,7 +475,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
       | (_, _, A.Id (_, f_id)) when not @@ String.equal f_id SN.Hips.inspect ->
         let constraint_ =
           decorate ~origin:__LINE__
-          @@ HT.Arg (((pos, f_id), HT.Return), return_entity)
+          @@ HT.ArgLike (((pos, f_id), HT.Return), return_entity)
         in
         Env.add_inter_constraint env constraint_
       | _ -> env
@@ -726,8 +726,8 @@ let decl_hint mode kind tast_env ((ty, hint) : T.type_hint) :
   let hint_pos = pos_of_hint hint in
   let entity_ =
     match kind with
-    | `Parameter (id, idx) -> Inter (HT.Param ((hint_pos, id), idx))
-    | `Return id -> Inter (HT.Param ((hint_pos, id), HT.Return))
+    | `Parameter (id, idx) -> Inter (HT.ParamLike ((hint_pos, id), idx))
+    | `Return id -> Inter (HT.ParamLike ((hint_pos, id), HT.Return))
   in
   let decorate ~origin constraint_ =
     { hack_pos = hint_pos; origin; constraint_ }
@@ -737,11 +737,11 @@ let decl_hint mode kind tast_env ((ty, hint) : T.type_hint) :
     | `Parameter (id, idx) ->
       DecoratedInterConstraintSet.singleton
       @@ decorate ~origin:__LINE__
-      @@ HT.Param ((hint_pos, id), idx)
+      @@ HT.ParamLike ((hint_pos, id), idx)
     | `Return id ->
       DecoratedInterConstraintSet.singleton
       @@ decorate ~origin:__LINE__
-      @@ HT.Param ((hint_pos, id), HT.Return)
+      @@ HT.ParamLike ((hint_pos, id), HT.Return)
   in
   let kind =
     match kind with

@@ -3,4 +3,4 @@ Summary for \f:
 [5:8-25] [Allocation]:
   shape('b' => bool)
 [4:8-23] : dynamic
-(Param (([3:15-34], "\\f"), Return)) : dynamic
+(ParamLike (([3:15-34], "\\f"), Return)) : dynamic

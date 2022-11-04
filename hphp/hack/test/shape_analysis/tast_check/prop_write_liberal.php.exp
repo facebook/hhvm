@@ -2,12 +2,12 @@
 Summary for \class_write:
 [15:8-14] [Allocation]:
   shape()
-(Param (([14:25-29], "\\class_write"), Return)) : dynamic
+(ParamLike (([14:25-29], "\\class_write"), Return)) : dynamic
 Summary for \instance_write:
 [9:8-14] [Allocation]:
   shape()
-(Param (([8:25-26], "\\instance_write"), (Index 0))) : dynamic
-(Param (([8:32-36], "\\instance_write"), Return)) : dynamic
+(ParamLike (([8:25-26], "\\instance_write"), (Index 0))) : dynamic
+(ParamLike (([8:32-36], "\\instance_write"), Return)) : dynamic
 
 Errors:
 "[17:3-17]: Unsupported lvalue: Class_get"

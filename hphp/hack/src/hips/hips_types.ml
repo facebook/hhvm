@@ -17,17 +17,17 @@ type constant_identifier_entity = {
 }
 [@@deriving ord, show { with_path = false }]
 
-type param_index =
+type param_like_index =
   | Index of int
   | Return
 [@@deriving eq, ord, show { with_path = false }]
 
-type param_entity = A.id * param_index [@@deriving ord, show]
+type param_like_entity = A.id * param_like_index [@@deriving ord, show]
 
 type class_identifier_entity = A.id [@@deriving ord, show]
 
 type entity =
-  | Param of param_entity
+  | ParamLike of param_like_entity
   | Constant of const_entity
   | ConstantIdentifier of constant_identifier_entity
 [@@deriving ord, show { with_path = false }]
@@ -38,11 +38,11 @@ type ('a, 'b) any_constraint_ =
 [@@deriving ord]
 
 type 'a inter_constraint_ =
-  | Arg of param_entity * 'a
+  | ArgLike of param_like_entity * 'a
   | Constant of const_entity
   | ConstantInitial of 'a
   | ConstantIdentifier of constant_identifier_entity
-  | Param of param_entity
+  | ParamLike of param_like_entity
   | ClassExtends of class_identifier_entity
 [@@deriving ord]
 
@@ -79,8 +79,8 @@ end
 
 let equal_entity (ent1 : entity) (ent2 : entity) : bool =
   match (ent1, ent2) with
-  | (Param ((_, f_id), f_idx), Param ((_, g_id), g_idx)) ->
-    String.equal f_id g_id && equal_param_index f_idx g_idx
+  | (ParamLike ((_, f_id), f_idx), ParamLike ((_, g_id), g_idx)) ->
+    String.equal f_id g_id && equal_param_like_index f_idx g_idx
   | (Constant (pos1, id1), Constant (pos2, id2)) ->
     A.equal_pos pos1 pos2 && String.equal id1 id2
   | ( ConstantIdentifier

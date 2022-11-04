@@ -458,7 +458,7 @@ let produce_results
     let add entity acc =
       match entity with
       | Literal pos
-      | Inter (HT.Param ((pos, _), _)) ->
+      | Inter (HT.ParamLike ((pos, _), _)) ->
         Pos.Set.add pos acc
       | Variable _
       | Inter (HT.Constant _)
@@ -496,7 +496,7 @@ let produce_results
     let add_entity (entity, key, ty) pos_map =
       match entity with
       | Literal pos
-      | Inter (HT.Param ((pos, _), _))
+      | Inter (HT.ParamLike ((pos, _), _))
       | Inter (HT.Constant (pos, _))
       | Inter (HT.ConstantIdentifier { HT.ident_pos = pos; _ }) ->
         Pos.Map.update pos (update_entity entity key ty) pos_map
@@ -550,12 +550,12 @@ let substitute_inter_intra
     constraint_ option =
   let replace intra_ent_2 =
     match inter_constr with
-    | HT.Arg (param_ent, intra_ent_1)
+    | HT.ArgLike (param_ent, intra_ent_1)
       when forwards && equal_entity_ intra_ent_1 intra_ent_2 ->
-      Some (embed_entity (HT.Param param_ent))
-    | HT.Arg (param_ent, intra_ent_1)
+      Some (embed_entity (HT.ParamLike param_ent))
+    | HT.ArgLike (param_ent, intra_ent_1)
       when (not forwards)
-           && equal_entity_ (Inter (HT.Param param_ent)) intra_ent_2 ->
+           && equal_entity_ (Inter (HT.ParamLike param_ent)) intra_ent_2 ->
       Some intra_ent_1
     | HT.ConstantInitial ent when equal_entity_ ent intra_ent_2 -> Some ent
     | HT.ConstantIdentifier ident_ent ->

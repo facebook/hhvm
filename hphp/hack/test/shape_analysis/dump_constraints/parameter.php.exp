@@ -1,6 +1,6 @@
 === Shape analysis results for parameter.php
 Constraints for \f:
    3: Parameter at [3:12-31]
-   3: Parameter (([3:12-31], "\\f"), (Index 0))
-   3: Parameter (([3:41-45], "\\f"), Return)
+   3: ParamLike (([3:12-31], "\\f"), (Index 0))
+   3: ParamLike (([3:41-45], "\\f"), Return)
 

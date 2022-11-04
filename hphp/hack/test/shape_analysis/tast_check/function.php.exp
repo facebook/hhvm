@@ -6,5 +6,5 @@ Summary for \f:
   shape()
 [11:8-25] [Allocation]:
   shape('a' => bool)
-(Param (([3:12-16], "\\f"), (Index 0))) : dynamic
-(Param (([3:22-26], "\\f"), Return)) : dynamic
+(ParamLike (([3:12-16], "\\f"), (Index 0))) : dynamic
+(ParamLike (([3:22-26], "\\f"), Return)) : dynamic

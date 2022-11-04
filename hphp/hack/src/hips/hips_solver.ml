@@ -191,7 +191,7 @@ module Inter (I : Intra) = struct
         | Intra _ -> input_constr_list_map
         | Inter inter_constr ->
           (match inter_constr with
-          | Arg (((_, f), f_idx), intra_ent) ->
+          | ArgLike (((_, f), f_idx), intra_ent) ->
             let constr_list_at = SMap.find_opt f constraint_map in
             let param_constr : inter_constraint =
               match constr_list_at with
@@ -199,14 +199,15 @@ module Inter (I : Intra) = struct
                 let param_ent_opt =
                   List.find
                     ~f:(function
-                      | Inter (Param ((_, g), g_idx)) ->
+                      | Inter (ParamLike ((_, g), g_idx)) ->
                         String.equal f g
-                        && Hips_types.equal_param_index f_idx g_idx
+                        && Hips_types.equal_param_like_index f_idx g_idx
                       | _ -> false)
                     constr_list_at_
                 in
                 (match param_ent_opt with
-                | Some (Inter (Param param_ent)) -> Arg (param_ent, intra_ent)
+                | Some (Inter (ParamLike param_ent)) ->
+                  ArgLike (param_ent, intra_ent)
                 | _ -> failwith "Used invalid function identifier")
               | None -> failwith "Used invalid function identifier"
             in

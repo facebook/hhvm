@@ -17,17 +17,17 @@ type constant_identifier_entity = {
 }
 [@@deriving ord, show { with_path = false }]
 
-type param_index =
+type param_like_index =
   | Index of int
   | Return
 [@@deriving eq, ord, show { with_path = false }]
 
-type param_entity = A.id * param_index [@@deriving ord, show]
+type param_like_entity = A.id * param_like_index [@@deriving ord, show]
 
 type class_identifier_entity = A.id [@@deriving ord, show]
 
 type entity =
-  | Param of param_entity
+  | ParamLike of param_like_entity
   | Constant of const_entity
   | ConstantIdentifier of constant_identifier_entity
 [@@deriving ord, show]
@@ -38,9 +38,9 @@ type ('a, 'b) any_constraint_ =
 [@@deriving ord]
 
 type 'a inter_constraint_ =
-  | Arg of param_entity * 'a
-      (** Captures function calls, e.g. "Arg (f, 0, p)" denotes a call of "f" with
-        "p" as first argument, "f(p, ...)". *)
+  | ArgLike of param_like_entity * 'a
+      (** Captures function calls, e.g. "ArgLike (f, Index 0, p)" denotes a call of "f" with
+        "p" as first argument, "f(p, ...)". "ArgLike(f, Return, p)" denotes the return value of "f" *)
   | Constant of const_entity
       (** Captures global constant entities, e.g. "const dict<string, mixed> DICT". *)
   | ConstantInitial of 'a
@@ -50,10 +50,10 @@ type 'a inter_constraint_ =
       (** Captures global and class constant identifier entities e.g. the "DICT" part in
         "DICT['b'];", which identifies a global constant "const dict<string, mixed>
         DICT". For class constants, the optional string specifies the class name.  *)
-  | Param of param_entity
-      (** Captures function parameter entities, e.g. "$x" and "$y" in "function
-        f(int $x, bool $y)". This constraint is used for function call constraint
-        substitution, where it interacts with "Arg of param_entity * 'a". *)
+  | ParamLike of param_like_entity
+      (** Captures function parameter entities and return values, e.g. "$x", "$y", and "$r"
+      in "function $r = f(int $x, bool $y)". This constraint is used for function call constraint
+        substitution, where it interacts with "ArgLike of param_like_entity * 'a". *)
   | ClassExtends of class_identifier_entity
       (** Captures single class inheritance, e.g. the position and the name "C" in
       "class D extends C" *)
@@ -64,19 +64,19 @@ type 'a inter_constraint_ =
     shape-like-dict analysis and the detection of function upcasts to dynamic. *)
 module type Intra = sig
   (** This entity type models "p" in inter-procedural constraints of the shape
-      "Arg("f", 0, p)" and "Ret("f", p)" *)
+      "ArgLike("f", 0, p)" and "Ret("f", p)" *)
   type intra_entity
 
   (** Intra-procedural constraint type, e.g. Has_static_key(p, 'a', int) *)
   type intra_constraint
 
-  (** Inter-procedural constraints type, e.g. "Arg("f", 1, q)" for f(_, q, _).
+  (** Inter-procedural constraints type, e.g. "ArgLike("f", 1, q)" for f(_, q, _).
       TODO(T127947010): Add inter-procedural return type, e.g. "Ret(f, p)", if
       the function f returns p. *)
   type inter_constraint = intra_entity inter_constraint_
 
   (** The union of inter- and intra-procedural constraint types. For example,
-      "Intra Has_static_key(f0, 'a', int)" or "Inter Arg("f", 1, p)". *)
+      "Intra Has_static_key(f0, 'a', int)" or "Inter ArgLike("f", 1, p)". *)
   type any_constraint = (intra_constraint, inter_constraint) any_constraint_
   [@@deriving ord]
 

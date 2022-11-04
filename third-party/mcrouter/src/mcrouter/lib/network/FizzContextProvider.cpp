@@ -45,8 +45,7 @@ FizzContextAndVerifier createClientFizzContextAndVerifier(
   auto ctx = std::make_shared<fizz::client::FizzClientContext>();
   ctx->setSupportedVersions({fizz::ProtocolVersion::tls_1_3});
   ctx->setPskCache(SESSION_CACHE);
-  // Thrift's Rocket transport requires an ALPN
-  ctx->setSupportedAlpns({"rs"});
+
   if (!certData.empty() && !keyData.empty()) {
     auto cert =
         fizz::CertUtils::makeSelfCert(std::move(certData), std::move(keyData));

@@ -333,9 +333,6 @@ std::shared_ptr<SSLContext> createClientSSLContext(
 #if FOLLY_OPENSSL_IS_110
     SSL_CTX_set_security_level(context->getSSLCtx(), 0);
 #endif
-  } else {
-    // Thrift's Rocket transport requires an ALPN
-    context->setAdvertisedNextProtocols({"rs"});
   }
 #endif
   // note we use setCipherSuites instead of setClientOptions since client

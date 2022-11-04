@@ -142,6 +142,80 @@ StructMetadata<::py3::simple::SimpleStruct>::gen(ThriftMetadata& metadata) {
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::py3::simple::GeneratedStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.GeneratedStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_GeneratedStruct = res.first->second;
+  module_GeneratedStruct.name() = "module.GeneratedStruct";
+  module_GeneratedStruct.is_union() = false;
+  static const auto* const
+  module_GeneratedStruct_fields = new std::array<EncodedThriftField, 1>{{
+    {1, "the", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_GeneratedStruct_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_GeneratedStruct.fields()->push_back(std::move(field));
+  }
+  module_GeneratedStruct.structured_annotations()->push_back(*cvStruct("meta.SetGenerated", {}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::py3::simple::detail::AdaptedUnion>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.AdaptedUnion", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_AdaptedUnion = res.first->second;
+  module_AdaptedUnion.name() = "module.AdaptedUnion";
+  module_AdaptedUnion.is_union() = true;
+  static const auto* const
+  module_AdaptedUnion_fields = new std::array<EncodedThriftField, 1>{{
+    {1, "best", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_AdaptedUnion_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_AdaptedUnion.fields()->push_back(std::move(field));
+  }
+  module_AdaptedUnion.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString(R"(Adapter)")}}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::py3::simple::HiddenException>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.HiddenException", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_HiddenException = res.first->second;
+  module_HiddenException.name() = "module.HiddenException";
+  module_HiddenException.is_union() = false;
+  static const auto* const
+  module_HiddenException_fields = new std::array<EncodedThriftField, 1>{{
+    {1, "test", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_HiddenException_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_HiddenException.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::ComplexStruct>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.ComplexStruct", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
@@ -240,6 +314,26 @@ void ExceptionMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& meta
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     module_SimpleException.fields()->push_back(std::move(field));
+  }
+}
+void ExceptionMetadata<::py3::simple::HiddenException>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.exceptions()->emplace("module.HiddenException", ::apache::thrift::metadata::ThriftException{});
+  if (!res.second) {
+    return;
+  }
+  ::apache::thrift::metadata::ThriftException& module_HiddenException = res.first->second;
+  module_HiddenException.name() = "module.HiddenException";
+  static const auto* const
+  module_HiddenException_fields = new std::array<EncodedThriftField, 1>{{
+    {1, "test", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_HiddenException_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    module_HiddenException.fields()->push_back(std::move(field));
   }
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::py3::simple::SimpleService>>::gen_get_five(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {

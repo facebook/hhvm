@@ -9,6 +9,8 @@
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 
+#include "thrift/annotation/gen-py3cpp/cpp_types.h"
+#include "thrift/annotation/gen-py3cpp/meta_types.h"
 
 namespace apache {
 namespace thrift {
@@ -23,6 +25,9 @@ struct big_int;
 struct real;
 struct smaller_real;
 struct hidden_field;
+struct the;
+struct best;
+struct test;
 struct structOne;
 struct structTwo;
 struct an_integer;
@@ -75,6 +80,18 @@ APACHE_THRIFT_DEFINE_ACCESSOR(smaller_real);
 #ifndef APACHE_THRIFT_ACCESSOR_hidden_field
 #define APACHE_THRIFT_ACCESSOR_hidden_field
 APACHE_THRIFT_DEFINE_ACCESSOR(hidden_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_the
+#define APACHE_THRIFT_ACCESSOR_the
+APACHE_THRIFT_DEFINE_ACCESSOR(the);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_best
+#define APACHE_THRIFT_ACCESSOR_best
+APACHE_THRIFT_DEFINE_ACCESSOR(best);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_test
+#define APACHE_THRIFT_ACCESSOR_test
+APACHE_THRIFT_DEFINE_ACCESSOR(test);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_structOne
 #define APACHE_THRIFT_ACCESSOR_structOne
@@ -285,6 +302,11 @@ namespace py3 { namespace simple {
 class SimpleException;
 class OptionalRefStruct;
 class SimpleStruct;
+class GeneratedStruct;
+namespace detail {
+class AdaptedUnion;
+} // namespace detail
+class HiddenException;
 class ComplexStruct;
 class BinaryUnion;
 class BinaryUnionStruct;
@@ -300,263 +322,6 @@ using ::apache::thrift::detail::operator>=;
 
 typedef std::unique_ptr<folly::IOBuf> IOBufPtr;
 typedef folly::IOBuf IOBuf;
-typedef foo::Bar foo_bar;
-
-class FOLLY_EXPORT SimpleException : public virtual apache::thrift::TException {
- private:
-  friend struct ::apache::thrift::detail::st::struct_private_access;
-  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
-
-  //  used by a static_assert in the corresponding source
-  static constexpr bool __fbthrift_cpp2_gen_json = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-
-  void __fbthrift_clear();
-  void __fbthrift_clear_terse_fields();
-  bool __fbthrift_is_empty() const;
-  static constexpr ::apache::thrift::ExceptionKind __fbthrift_cpp2_gen_exception_kind =
-         ::apache::thrift::ExceptionKind::UNSPECIFIED;
-  static constexpr ::apache::thrift::ExceptionSafety __fbthrift_cpp2_gen_exception_safety =
-         ::apache::thrift::ExceptionSafety::UNSPECIFIED;
-  static constexpr ::apache::thrift::ExceptionBlame __fbthrift_cpp2_gen_exception_blame =
-         ::apache::thrift::ExceptionBlame::UNSPECIFIED;
-
- public:
-  using __fbthrift_cpp2_type = SimpleException;
-  static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-
-
- public:
-
-  SimpleException();
-
-  // FragileConstructor for use in initialization lists only.
-  [[deprecated("This constructor is deprecated")]]
-  SimpleException(apache::thrift::FragileConstructor, ::std::int16_t err_code__arg);
-
-  SimpleException(SimpleException&&) noexcept;
-
-  SimpleException(const SimpleException& src);
-
-
-  SimpleException& operator=(SimpleException&&) noexcept;
-  SimpleException& operator=(const SimpleException& src);
-
-  ~SimpleException() override;
-
- private:
-  ::std::int16_t __fbthrift_field_err_code;
- private:
-  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
-
- public:
-
-  bool operator==(const SimpleException&) const;
-  bool operator<(const SimpleException&) const;
-
-  template <typename..., typename T = ::std::int16_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> err_code_ref() const& {
-    return {this->__fbthrift_field_err_code, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::int16_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> err_code_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_err_code), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::int16_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> err_code_ref() & {
-    return {this->__fbthrift_field_err_code, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::int16_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> err_code_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_err_code), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::int16_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> err_code() const& {
-    return {this->__fbthrift_field_err_code, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::int16_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> err_code() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_err_code), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::int16_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> err_code() & {
-    return {this->__fbthrift_field_err_code, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::std::int16_t>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> err_code() && {
-    return {static_cast<T&&>(this->__fbthrift_field_err_code), __isset.at(0), __isset.bit(0)};
-  }
-
-  ::std::int16_t get_err_code() const {
-    return __fbthrift_field_err_code;
-  }
-
-  [[deprecated("Use `FOO.err_code_ref() = BAR;` instead of `FOO.set_err_code(BAR);`")]]
-  ::std::int16_t& set_err_code(::std::int16_t err_code_) {
-    err_code_ref() = err_code_;
-    return __fbthrift_field_err_code;
-  }
-
-  template <class Protocol_>
-  unsigned long read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t serializedSize(Protocol_ const* prot_) const;
-  template <class Protocol_>
-  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
-  template <class Protocol_>
-  uint32_t write(Protocol_* prot_) const;
-
-  const char* what() const noexcept override {
-    return "::py3::simple::SimpleException";
-  }
-
- private:
-  template <class Protocol_>
-  void readNoXfer(Protocol_* iprot);
-
-  friend class ::apache::thrift::Cpp2Ops<SimpleException>;
-  friend void swap(SimpleException& a, SimpleException& b);
-};
-
-template <class Protocol_>
-unsigned long SimpleException::read(Protocol_* iprot) {
-  auto _xferStart = iprot->getCursorPosition();
-  readNoXfer(iprot);
-  return iprot->getCursorPosition() - _xferStart;
-}
-
-
-class OptionalRefStruct final  {
- private:
-  friend struct ::apache::thrift::detail::st::struct_private_access;
-  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
-
-  //  used by a static_assert in the corresponding source
-  static constexpr bool __fbthrift_cpp2_gen_json = false;
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-
-  void __fbthrift_clear();
-  void __fbthrift_clear_terse_fields();
-  bool __fbthrift_is_empty() const;
-
- public:
-  using __fbthrift_cpp2_type = OptionalRefStruct;
-  static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-
-
- public:
-
-  OptionalRefStruct() {
-  }
-  // FragileConstructor for use in initialization lists only.
-  [[deprecated("This constructor is deprecated")]]
-  OptionalRefStruct(apache::thrift::FragileConstructor, ::py3::simple::IOBufPtr optional_blob__arg);
-
-  OptionalRefStruct(OptionalRefStruct&&) noexcept;
-  OptionalRefStruct(const OptionalRefStruct& src);
-
-
-  OptionalRefStruct& operator=(OptionalRefStruct&&) noexcept;
-  OptionalRefStruct& operator=(const OptionalRefStruct& src);
- private:
-  ::py3::simple::IOBufPtr __fbthrift_field_optional_blob;
- private:
-  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
-
- public:
-
-  bool operator==(const OptionalRefStruct&) const;
-  bool operator<(const OptionalRefStruct&) const;
-
-  template <typename..., typename T = ::py3::simple::IOBufPtr>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> optional_blob_ref() const& {
-    return {this->__fbthrift_field_optional_blob, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::py3::simple::IOBufPtr>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> optional_blob_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optional_blob), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::py3::simple::IOBufPtr>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> optional_blob_ref() & {
-    return {this->__fbthrift_field_optional_blob, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::py3::simple::IOBufPtr>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> optional_blob_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optional_blob), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::py3::simple::IOBufPtr>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> optional_blob() const& {
-    return {this->__fbthrift_field_optional_blob, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::py3::simple::IOBufPtr>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> optional_blob() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_optional_blob), __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::py3::simple::IOBufPtr>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> optional_blob() & {
-    return {this->__fbthrift_field_optional_blob, __isset.at(0), __isset.bit(0)};
-  }
-
-  template <typename..., typename T = ::py3::simple::IOBufPtr>
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> optional_blob() && {
-    return {static_cast<T&&>(this->__fbthrift_field_optional_blob), __isset.at(0), __isset.bit(0)};
-  }
-
-  const ::py3::simple::IOBufPtr* get_optional_blob() const& {
-    return optional_blob_ref() ? std::addressof(__fbthrift_field_optional_blob) : nullptr;
-  }
-
-  ::py3::simple::IOBufPtr* get_optional_blob() & {
-    return optional_blob_ref() ? std::addressof(__fbthrift_field_optional_blob) : nullptr;
-  }
-  ::py3::simple::IOBufPtr* get_optional_blob() && = delete;
-
-  template <typename T_OptionalRefStruct_optional_blob_struct_setter = ::py3::simple::IOBufPtr>
-  [[deprecated("Use `FOO.optional_blob_ref() = BAR;` instead of `FOO.set_optional_blob(BAR);`")]]
-  ::py3::simple::IOBufPtr& set_optional_blob(T_OptionalRefStruct_optional_blob_struct_setter&& optional_blob_) {
-    optional_blob_ref() = std::forward<T_OptionalRefStruct_optional_blob_struct_setter>(optional_blob_);
-    return __fbthrift_field_optional_blob;
-  }
-
-  template <class Protocol_>
-  unsigned long read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t serializedSize(Protocol_ const* prot_) const;
-  template <class Protocol_>
-  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
-  template <class Protocol_>
-  uint32_t write(Protocol_* prot_) const;
-
- private:
-  template <class Protocol_>
-  void readNoXfer(Protocol_* iprot);
-
-  friend class ::apache::thrift::Cpp2Ops<OptionalRefStruct>;
-  friend void swap(OptionalRefStruct& a, OptionalRefStruct& b);
-};
-
-template <class Protocol_>
-unsigned long OptionalRefStruct::read(Protocol_* iprot) {
-  auto _xferStart = iprot->getCursorPosition();
-  readNoXfer(iprot);
-  return iprot->getCursorPosition() - _xferStart;
-}
-
 
 class SimpleStruct final  {
  private:
@@ -1043,6 +808,730 @@ class SimpleStruct final  {
 
 template <class Protocol_>
 unsigned long SimpleStruct::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+typedef ::apache::thrift::adapt_detail::adapted_t<Adapter, ::py3::simple::SimpleStruct> AdaptedTypeDef;
+typedef ::py3::simple::SimpleStruct HiddenTypeDef;
+
+namespace detail {
+class AdaptedUnion final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+
+  void __fbthrift_clear();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = AdaptedUnion;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    true;
+
+
+ public:
+  enum Type : int {
+    __EMPTY__ = 0,
+    best = 1,
+  } ;
+
+  AdaptedUnion()
+      : type_(folly::to_underlying(Type::__EMPTY__)) {}
+
+  AdaptedUnion(AdaptedUnion&& rhs) noexcept
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    if (this == &rhs) { return; }
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
+      case Type::best:
+      {
+        set_best(std::move(rhs.value_.best));
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    apache::thrift::clear(rhs);
+  }
+
+  AdaptedUnion(const AdaptedUnion& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    if (this == &rhs) { return; }
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
+      case Type::best:
+      {
+        set_best(rhs.value_.best);
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+  }
+
+  AdaptedUnion& operator=(AdaptedUnion&& rhs) noexcept {
+    if (this == &rhs) { return *this; }
+    __fbthrift_clear();
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
+      case Type::best:
+      {
+        set_best(std::move(rhs.value_.best));
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    apache::thrift::clear(rhs);
+    return *this;
+  }
+
+  AdaptedUnion& operator=(const AdaptedUnion& rhs) {
+    if (this == &rhs) { return *this; }
+    __fbthrift_clear();
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
+      case Type::best:
+      {
+        set_best(rhs.value_.best);
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    return *this;
+  }
+
+  ~AdaptedUnion() {
+    apache::thrift::clear(*this);
+  }
+
+  union storage_type {
+    ::std::int16_t best;
+
+    storage_type() {}
+    ~storage_type() {}
+  } ;
+
+  bool operator==(const AdaptedUnion&) const;
+  bool operator<(const AdaptedUnion&) const;
+
+  ::std::int16_t& set_best(::std::int16_t t = ::std::int16_t()) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::best);
+    ::new (std::addressof(value_.best)) ::std::int16_t(t);
+    return value_.best;
+  }
+
+  ::std::int16_t const& get_best() const {
+    if (getType() != Type::best) {
+      ::apache::thrift::detail::throw_on_bad_field_access();
+    }
+    return value_.best;
+  }
+
+  ::std::int16_t& mutable_best() {
+    assert(getType() == Type::best);
+    return value_.best;
+  }
+
+  ::std::int16_t move_best() {
+    assert(getType() == Type::best);
+    return std::move(value_.best);
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> best_ref() const& {
+    return {value_.best, type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> best_ref() const&& {
+    return {std::move(value_.best), type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> best_ref() & {
+    return {value_.best, type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> best_ref() && {
+    return {std::move(value_.best), type_, folly::to_underlying(Type::best), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  Type getType() const { return static_cast<Type>(type_); }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+ protected:
+  template <class T>
+  void destruct(T &val) {
+    (&val)->~T();
+  }
+
+  storage_type value_;
+  std::underlying_type_t<Type> type_;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<AdaptedUnion>;
+  friend void swap(AdaptedUnion& a, AdaptedUnion& b);
+};
+
+template <class Protocol_>
+unsigned long AdaptedUnion::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+} // namespace detail
+
+using AdaptedUnion = ::apache::thrift::adapt_detail::adapted_t<Adapter, ::py3::simple::detail::AdaptedUnion>;
+
+typedef ::py3::simple::AdaptedUnion ImplicitlyHiddenTypeDef;
+typedef foo::Bar foo_bar;
+
+class FOLLY_EXPORT SimpleException : public virtual apache::thrift::TException {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+  static constexpr ::apache::thrift::ExceptionKind __fbthrift_cpp2_gen_exception_kind =
+         ::apache::thrift::ExceptionKind::UNSPECIFIED;
+  static constexpr ::apache::thrift::ExceptionSafety __fbthrift_cpp2_gen_exception_safety =
+         ::apache::thrift::ExceptionSafety::UNSPECIFIED;
+  static constexpr ::apache::thrift::ExceptionBlame __fbthrift_cpp2_gen_exception_blame =
+         ::apache::thrift::ExceptionBlame::UNSPECIFIED;
+
+ public:
+  using __fbthrift_cpp2_type = SimpleException;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  SimpleException();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  SimpleException(apache::thrift::FragileConstructor, ::std::int16_t err_code__arg);
+
+  SimpleException(SimpleException&&) noexcept;
+
+  SimpleException(const SimpleException& src);
+
+
+  SimpleException& operator=(SimpleException&&) noexcept;
+  SimpleException& operator=(const SimpleException& src);
+
+  ~SimpleException() override;
+
+ private:
+  ::std::int16_t __fbthrift_field_err_code;
+ private:
+  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const SimpleException&) const;
+  bool operator<(const SimpleException&) const;
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> err_code_ref() const& {
+    return {this->__fbthrift_field_err_code, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> err_code_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_err_code), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> err_code_ref() & {
+    return {this->__fbthrift_field_err_code, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> err_code_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_err_code), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> err_code() const& {
+    return {this->__fbthrift_field_err_code, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> err_code() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_err_code), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> err_code() & {
+    return {this->__fbthrift_field_err_code, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> err_code() && {
+    return {static_cast<T&&>(this->__fbthrift_field_err_code), __isset.at(0), __isset.bit(0)};
+  }
+
+  ::std::int16_t get_err_code() const {
+    return __fbthrift_field_err_code;
+  }
+
+  [[deprecated("Use `FOO.err_code_ref() = BAR;` instead of `FOO.set_err_code(BAR);`")]]
+  ::std::int16_t& set_err_code(::std::int16_t err_code_) {
+    err_code_ref() = err_code_;
+    return __fbthrift_field_err_code;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+  const char* what() const noexcept override {
+    return "::py3::simple::SimpleException";
+  }
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<SimpleException>;
+  friend void swap(SimpleException& a, SimpleException& b);
+};
+
+template <class Protocol_>
+unsigned long SimpleException::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class OptionalRefStruct final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = OptionalRefStruct;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  OptionalRefStruct() {
+  }
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  OptionalRefStruct(apache::thrift::FragileConstructor, ::py3::simple::IOBufPtr optional_blob__arg);
+
+  OptionalRefStruct(OptionalRefStruct&&) noexcept;
+  OptionalRefStruct(const OptionalRefStruct& src);
+
+
+  OptionalRefStruct& operator=(OptionalRefStruct&&) noexcept;
+  OptionalRefStruct& operator=(const OptionalRefStruct& src);
+ private:
+  ::py3::simple::IOBufPtr __fbthrift_field_optional_blob;
+ private:
+  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const OptionalRefStruct&) const;
+  bool operator<(const OptionalRefStruct&) const;
+
+  template <typename..., typename T = ::py3::simple::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> optional_blob_ref() const& {
+    return {this->__fbthrift_field_optional_blob, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::py3::simple::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> optional_blob_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_optional_blob), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::py3::simple::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> optional_blob_ref() & {
+    return {this->__fbthrift_field_optional_blob, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::py3::simple::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> optional_blob_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_optional_blob), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::py3::simple::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> optional_blob() const& {
+    return {this->__fbthrift_field_optional_blob, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::py3::simple::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> optional_blob() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_optional_blob), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::py3::simple::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> optional_blob() & {
+    return {this->__fbthrift_field_optional_blob, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::py3::simple::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> optional_blob() && {
+    return {static_cast<T&&>(this->__fbthrift_field_optional_blob), __isset.at(0), __isset.bit(0)};
+  }
+
+  const ::py3::simple::IOBufPtr* get_optional_blob() const& {
+    return optional_blob_ref() ? std::addressof(__fbthrift_field_optional_blob) : nullptr;
+  }
+
+  ::py3::simple::IOBufPtr* get_optional_blob() & {
+    return optional_blob_ref() ? std::addressof(__fbthrift_field_optional_blob) : nullptr;
+  }
+  ::py3::simple::IOBufPtr* get_optional_blob() && = delete;
+
+  template <typename T_OptionalRefStruct_optional_blob_struct_setter = ::py3::simple::IOBufPtr>
+  [[deprecated("Use `FOO.optional_blob_ref() = BAR;` instead of `FOO.set_optional_blob(BAR);`")]]
+  ::py3::simple::IOBufPtr& set_optional_blob(T_OptionalRefStruct_optional_blob_struct_setter&& optional_blob_) {
+    optional_blob_ref() = std::forward<T_OptionalRefStruct_optional_blob_struct_setter>(optional_blob_);
+    return __fbthrift_field_optional_blob;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<OptionalRefStruct>;
+  friend void swap(OptionalRefStruct& a, OptionalRefStruct& b);
+};
+
+template <class Protocol_>
+unsigned long OptionalRefStruct::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class GeneratedStruct final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = GeneratedStruct;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  GeneratedStruct() :
+      __fbthrift_field_the() {
+  }
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  GeneratedStruct(apache::thrift::FragileConstructor, ::std::int16_t the__arg);
+
+  GeneratedStruct(GeneratedStruct&&) = default;
+
+  GeneratedStruct(const GeneratedStruct&) = default;
+
+
+  GeneratedStruct& operator=(GeneratedStruct&&) = default;
+
+  GeneratedStruct& operator=(const GeneratedStruct&) = default;
+ private:
+  ::std::int16_t __fbthrift_field_the;
+ private:
+  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const GeneratedStruct&) const;
+  bool operator<(const GeneratedStruct&) const;
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> the_ref() const& {
+    return {this->__fbthrift_field_the, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> the_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_the), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> the_ref() & {
+    return {this->__fbthrift_field_the, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> the_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_the), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> the() const& {
+    return {this->__fbthrift_field_the, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> the() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_the), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> the() & {
+    return {this->__fbthrift_field_the, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> the() && {
+    return {static_cast<T&&>(this->__fbthrift_field_the), __isset.at(0), __isset.bit(0)};
+  }
+
+  ::std::int16_t get_the() const {
+    return __fbthrift_field_the;
+  }
+
+  [[deprecated("Use `FOO.the_ref() = BAR;` instead of `FOO.set_the(BAR);`")]]
+  ::std::int16_t& set_the(::std::int16_t the_) {
+    the_ref() = the_;
+    return __fbthrift_field_the;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<GeneratedStruct>;
+  friend void swap(GeneratedStruct& a, GeneratedStruct& b);
+};
+
+template <class Protocol_>
+unsigned long GeneratedStruct::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class FOLLY_EXPORT HiddenException : public virtual apache::thrift::TException {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+  static constexpr ::apache::thrift::ExceptionKind __fbthrift_cpp2_gen_exception_kind =
+         ::apache::thrift::ExceptionKind::UNSPECIFIED;
+  static constexpr ::apache::thrift::ExceptionSafety __fbthrift_cpp2_gen_exception_safety =
+         ::apache::thrift::ExceptionSafety::SAFE;
+  static constexpr ::apache::thrift::ExceptionBlame __fbthrift_cpp2_gen_exception_blame =
+         ::apache::thrift::ExceptionBlame::UNSPECIFIED;
+
+ public:
+  using __fbthrift_cpp2_type = HiddenException;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  HiddenException();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  HiddenException(apache::thrift::FragileConstructor, ::std::int16_t test__arg);
+
+  HiddenException(HiddenException&&) noexcept;
+
+  HiddenException(const HiddenException& src);
+
+
+  HiddenException& operator=(HiddenException&&) noexcept;
+  HiddenException& operator=(const HiddenException& src);
+
+  ~HiddenException() override;
+
+ private:
+  ::std::int16_t __fbthrift_field_test;
+ private:
+  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const HiddenException&) const;
+  bool operator<(const HiddenException&) const;
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> test_ref() const& {
+    return {this->__fbthrift_field_test, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> test_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_test), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> test_ref() & {
+    return {this->__fbthrift_field_test, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> test_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_test), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> test() const& {
+    return {this->__fbthrift_field_test, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> test() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_test), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> test() & {
+    return {this->__fbthrift_field_test, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> test() && {
+    return {static_cast<T&&>(this->__fbthrift_field_test), __isset.at(0), __isset.bit(0)};
+  }
+
+  ::std::int16_t get_test() const {
+    return __fbthrift_field_test;
+  }
+
+  [[deprecated("Use `FOO.test_ref() = BAR;` instead of `FOO.set_test(BAR);`")]]
+  ::std::int16_t& set_test(::std::int16_t test_) {
+    test_ref() = test_;
+    return __fbthrift_field_test;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+  const char* what() const noexcept override {
+    return "::py3::simple::HiddenException";
+  }
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<HiddenException>;
+  friend void swap(HiddenException& a, HiddenException& b);
+};
+
+template <class Protocol_>
+unsigned long HiddenException::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;
@@ -1946,6 +2435,31 @@ unsigned long BinaryUnionStruct::read(Protocol_* iprot) {
 }} // py3::simple
 
 namespace apache { namespace thrift {
+
+template <> struct TEnumDataStorage<::py3::simple::detail::AdaptedUnion::Type>;
+
+template <> struct TEnumTraits<::py3::simple::detail::AdaptedUnion::Type> {
+  using type = ::py3::simple::detail::AdaptedUnion::Type;
+
+  static constexpr std::size_t const size = 1;
+  static folly::Range<type const*> const values;
+  static folly::Range<folly::StringPiece const*> const names;
+
+  static bool findName(type value, folly::StringPiece* out) noexcept;
+  static bool findValue(folly::StringPiece name, type* out) noexcept;
+
+#if FOLLY_HAS_STRING_VIEW
+  static bool findName(type value, std::string_view* out) noexcept {
+    folly::StringPiece outp;
+    return findName(value, &outp) && ((*out = outp), true);
+  }
+#endif
+  static char const* findName(type value) noexcept {
+    folly::StringPiece ret;
+    (void)findName(value, &ret);
+    return ret.data();
+  }
+};
 
 template <> struct TEnumDataStorage<::py3::simple::BinaryUnion::Type>;
 

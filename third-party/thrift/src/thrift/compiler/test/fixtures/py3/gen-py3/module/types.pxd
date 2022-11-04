@@ -41,6 +41,8 @@ from thrift.py3.common cimport (
     MetadataBox as __MetadataBox,
 )
 from folly.optional cimport cOptional as __cOptional
+cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
+cimport facebook.thrift.annotation.deprecated.meta.types as _facebook_thrift_annotation_deprecated_meta_types
 
 cimport module.types_fields as _fbthrift_types_fields
 
@@ -131,6 +133,18 @@ cdef extern from "thrift/compiler/test/fixtures/py3/src/gen-py3cpp/module_types_
         __field_ref[float] smaller_real_ref "smaller_real_ref" ()
 
 
+    cdef cppclass cHiddenException "::py3::simple::HiddenException"(cTException):
+        cHiddenException() except +
+        cHiddenException(const cHiddenException&) except +
+        bint operator==(cHiddenException&)
+        bint operator!=(cHiddenException&)
+        bint operator<(cHiddenException&)
+        bint operator>(cHiddenException&)
+        bint operator<=(cHiddenException&)
+        bint operator>=(cHiddenException&)
+        __field_ref[cint16_t] test_ref "test_ref" ()
+
+
     cdef cppclass cComplexStruct "::py3::simple::ComplexStruct":
         cComplexStruct() except +
         cComplexStruct(const cComplexStruct&) except +
@@ -204,6 +218,16 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cSimpleStruct])
+
+
+
+cdef class HiddenException(thrift.py3.exceptions.GeneratedError):
+    cdef shared_ptr[cHiddenException] _cpp_obj
+    cdef _fbthrift_types_fields.__HiddenException_FieldsSetter _fields_setter
+    cdef inline object test_impl(self)
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cHiddenException])
 
 
 

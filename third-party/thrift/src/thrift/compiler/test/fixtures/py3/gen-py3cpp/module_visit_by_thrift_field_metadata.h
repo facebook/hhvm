@@ -67,6 +67,45 @@ struct VisitByFieldId<::py3::simple::SimpleStruct> {
 };
 
 template <>
+struct VisitByFieldId<::py3::simple::GeneratedStruct> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).the_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::py3::simple::GeneratedStruct");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::py3::simple::detail::AdaptedUnion> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).best_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::py3::simple::detail::AdaptedUnion");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::py3::simple::HiddenException> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).test_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::py3::simple::HiddenException");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::py3::simple::ComplexStruct> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {

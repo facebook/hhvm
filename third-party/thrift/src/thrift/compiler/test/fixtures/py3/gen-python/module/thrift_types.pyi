@@ -18,6 +18,10 @@ import folly.iobuf as _fbthrift_iobuf
 import fbcode.thrift.python.types as _fbthrift_python_types
 import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
 
+import facebook.thrift.annotation.cpp.thrift_types
+
+import facebook.thrift.annotation.deprecated.meta.thrift_types
+
 
 class AnEnum(_fbthrift_python_types.Enum, int):
     NOTSET: AnEnum = ...
@@ -115,6 +119,58 @@ class SimpleStruct(_fbthrift_python_types.Struct):
     def _to_python(self) -> SimpleStruct: ...
     def _to_py3(self) -> "module.types.SimpleStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.SimpleStruct": ...  # type: ignore
+
+
+class GeneratedStruct(_fbthrift_python_types.Struct):
+    the: _typing.Final[int] = ...
+    def __init__(
+        self, *,
+        the: _typing.Optional[int]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        the: _typing.Optional[int]=...
+    ) -> GeneratedStruct: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
+    def _to_python(self) -> GeneratedStruct: ...
+    def _to_py3(self) -> "module.types.GeneratedStruct": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.GeneratedStruct": ...  # type: ignore
+
+
+class AdaptedUnion(_fbthrift_python_types.Union):
+    best: _typing.Final[int] = ...
+    def __init__(
+        self, *,
+        best: _typing.Optional[int]=...
+    ) -> None: ...
+
+
+    class Type(enum.Enum):
+        EMPTY: AdaptedUnion.Type = ...
+        best: AdaptedUnion.Type = ...
+
+    @classmethod
+    def fromValue(cls, value: _typing.Union[None, int]) -> AdaptedUnion: ...
+    value: _typing.Final[_typing.Union[None, int]]
+    type: Type
+    def get_type(self) -> Type:...
+    def _to_python(self) -> AdaptedUnion: ...
+    def _to_py3(self) -> "module.types.AdaptedUnion": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.AdaptedUnion": ...  # type: ignore
+
+
+class HiddenException(_fbthrift_python_exceptions.GeneratedError):
+    test: _typing.Final[int] = ...
+    def __init__(
+        self, *,
+        test: _typing.Optional[int]=...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
+    def _to_python(self) -> HiddenException: ...
+    def _to_py3(self) -> "module.types.HiddenException": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.HiddenException": ...  # type: ignore
 
 
 class ComplexStruct(_fbthrift_python_types.Struct):
@@ -229,6 +285,9 @@ ANOTHER_CONST_MAP: _typing.Dict[AnEnumRenamed, int] = ...
 
 IOBufPtr = _fbthrift_iobuf.IOBuf
 IOBuf = _fbthrift_iobuf.IOBuf
+AdaptedTypeDef = SimpleStruct
+HiddenTypeDef = SimpleStruct
+ImplicitlyHiddenTypeDef = AdaptedUnion
 foo_bar = bytes
 
 

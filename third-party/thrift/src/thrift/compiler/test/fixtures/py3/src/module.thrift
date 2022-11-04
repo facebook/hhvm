@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/meta.thrift"
+
 namespace cpp2 py3.simple
 
 typedef binary (cpp2.type = "std::unique_ptr<folly::IOBuf>", py3.iobuf) IOBufPtr
@@ -59,6 +62,26 @@ struct SimpleStruct {
   // The next field should not show up anywhere in the generated code.
   8: i16 hidden_field (py3.hidden);
 }
+
+@cpp.Adapter{name = "Adapter"}
+typedef SimpleStruct AdaptedTypeDef
+typedef SimpleStruct HiddenTypeDef (py3.hidden)
+
+@meta.SetGenerated
+struct GeneratedStruct {
+  1: i16 the;
+}
+
+@cpp.Adapter{name = "Adapter"}
+union AdaptedUnion {
+  1: i16 best;
+}
+
+safe exception HiddenException {
+  1: i16 test;
+} (py3.hidden)
+
+typedef AdaptedUnion ImplicitlyHiddenTypeDef
 
 typedef binary (cpp.type = "foo::Bar") foo_bar
 

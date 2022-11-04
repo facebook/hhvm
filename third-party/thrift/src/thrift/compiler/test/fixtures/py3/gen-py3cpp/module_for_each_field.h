@@ -45,6 +45,30 @@ struct ForEachField<::py3::simple::SimpleStruct> {
 };
 
 template <>
+struct ForEachField<::py3::simple::GeneratedStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).the_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::py3::simple::detail::AdaptedUnion> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).best_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::py3::simple::HiddenException> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).test_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::py3::simple::ComplexStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {

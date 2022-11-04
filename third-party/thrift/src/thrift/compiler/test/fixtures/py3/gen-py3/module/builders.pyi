@@ -10,6 +10,10 @@ import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.builder
 
+import facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
+import facebook.thrift.annotation.cpp.builders as _facebook_thrift_annotation_cpp_builders
+import facebook.thrift.annotation.deprecated.meta.types as _facebook_thrift_annotation_deprecated_meta_types
+import facebook.thrift.annotation.deprecated.meta.builders as _facebook_thrift_annotation_deprecated_meta_builders
 
 import module.types as _module_types
 
@@ -34,6 +38,12 @@ class SimpleStruct_Builder(thrift.py3.builder.StructBuilder):
     big_int: _typing.Optional[int]
     real: _typing.Optional[float]
     smaller_real: _typing.Optional[float]
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
+
+
+class HiddenException_Builder(thrift.py3.builder.StructBuilder):
+    test: _typing.Optional[int]
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 

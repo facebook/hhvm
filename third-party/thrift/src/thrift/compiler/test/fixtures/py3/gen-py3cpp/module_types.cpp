@@ -483,6 +483,295 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::py3::simple::GeneratedStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::py3::simple::GeneratedStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace py3 { namespace simple {
+
+const folly::StringPiece GeneratedStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<GeneratedStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+
+GeneratedStruct::GeneratedStruct(apache::thrift::FragileConstructor, ::std::int16_t the__arg) :
+    __fbthrift_field_the(std::move(the__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void GeneratedStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_the = ::std::int16_t();
+  __isset = {};
+}
+
+void GeneratedStruct::__fbthrift_clear_terse_fields() {
+}
+
+bool GeneratedStruct::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool GeneratedStruct::operator==(FOLLY_MAYBE_UNUSED const GeneratedStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.the_ref() == rhs.the_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool GeneratedStruct::operator<(FOLLY_MAYBE_UNUSED const GeneratedStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.the_ref() == rhs.the_ref())) {
+    return lhs.the_ref() < rhs.the_ref();
+  }
+  return false;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED GeneratedStruct& a, FOLLY_MAYBE_UNUSED GeneratedStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_the, b.__fbthrift_field_the);
+  swap(a.__isset, b.__isset);
+}
+
+template void GeneratedStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t GeneratedStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t GeneratedStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t GeneratedStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void GeneratedStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t GeneratedStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t GeneratedStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t GeneratedStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}} // py3::simple
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::py3::simple::detail::AdaptedUnion>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::py3::simple::detail::AdaptedUnion>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift {
+
+constexpr std::size_t const TEnumTraits<::py3::simple::detail::AdaptedUnion::Type>::size;
+folly::Range<::py3::simple::detail::AdaptedUnion::Type const*> const TEnumTraits<::py3::simple::detail::AdaptedUnion::Type>::values = folly::range(TEnumDataStorage<::py3::simple::detail::AdaptedUnion::Type>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::py3::simple::detail::AdaptedUnion::Type>::names = folly::range(TEnumDataStorage<::py3::simple::detail::AdaptedUnion::Type>::names);
+
+bool TEnumTraits<::py3::simple::detail::AdaptedUnion::Type>::findName(type value, folly::StringPiece* out) noexcept {
+  return ::apache::thrift::detail::st::enum_find_name(value, out);
+}
+
+bool TEnumTraits<::py3::simple::detail::AdaptedUnion::Type>::findValue(folly::StringPiece name, type* out) noexcept {
+  return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+}} // apache::thrift
+namespace py3 { namespace simple {namespace detail {
+
+
+const folly::StringPiece AdaptedUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<AdaptedUnion>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+void AdaptedUnion::__fbthrift_clear() {
+  // clear all fields
+  if (getType() == Type::__EMPTY__) { return; }
+  switch(getType()) {
+    case Type::best:
+      destruct(value_.best);
+      break;
+    default:
+      assert(false);
+      break;
+  }
+  type_ = folly::to_underlying(Type::__EMPTY__);
+}
+
+bool AdaptedUnion::__fbthrift_is_empty() const {
+  return getType() == Type::__EMPTY__;
+}
+
+bool AdaptedUnion::operator==(const AdaptedUnion& rhs) const {
+  if (getType() != rhs.getType()) { return false; }
+  switch(getType()) {
+    case Type::best:
+      return value_.best == rhs.value_.best;
+    default:
+      return true;
+  }
+}
+
+bool AdaptedUnion::operator<(FOLLY_MAYBE_UNUSED const AdaptedUnion& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (lhs.getType() != rhs.getType()) {
+    return lhs.getType() < rhs.getType();
+  }
+  switch (lhs.getType()) {
+    case Type::best:
+      return lhs.value_.best < rhs.value_.best;
+    default:
+      return false;
+  }
+}
+
+void swap(AdaptedUnion& a, AdaptedUnion& b) {
+  AdaptedUnion temp(std::move(a));
+  a = std::move(b);
+  b = std::move(temp);
+}
+
+template void AdaptedUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t AdaptedUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t AdaptedUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t AdaptedUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void AdaptedUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t AdaptedUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t AdaptedUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t AdaptedUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+} // namespace detail
+}} // py3::simple
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::py3::simple::HiddenException>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::py3::simple::HiddenException>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace py3 { namespace simple {
+
+const folly::StringPiece HiddenException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<HiddenException>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+HiddenException::HiddenException(const HiddenException&) = default;
+HiddenException& HiddenException::operator=(const HiddenException&) = default;
+HiddenException::HiddenException() :
+      __fbthrift_field_test() {
+}
+
+
+HiddenException::~HiddenException() {}
+
+HiddenException::HiddenException(FOLLY_MAYBE_UNUSED HiddenException&& other) noexcept :
+    __fbthrift_field_test(std::move(other.__fbthrift_field_test)),
+    __isset(other.__isset) {
+}
+
+HiddenException& HiddenException::operator=(FOLLY_MAYBE_UNUSED HiddenException&& other) noexcept {
+    this->__fbthrift_field_test = std::move(other.__fbthrift_field_test);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+HiddenException::HiddenException(apache::thrift::FragileConstructor, ::std::int16_t test__arg) :
+    __fbthrift_field_test(std::move(test__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void HiddenException::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_test = ::std::int16_t();
+  __isset = {};
+}
+
+void HiddenException::__fbthrift_clear_terse_fields() {
+}
+
+bool HiddenException::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool HiddenException::operator==(FOLLY_MAYBE_UNUSED const HiddenException& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.test_ref() == rhs.test_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool HiddenException::operator<(FOLLY_MAYBE_UNUSED const HiddenException& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.test_ref() == rhs.test_ref())) {
+    return lhs.test_ref() < rhs.test_ref();
+  }
+  return false;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED HiddenException& a, FOLLY_MAYBE_UNUSED HiddenException& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_test, b.__fbthrift_field_test);
+  swap(a.__isset, b.__isset);
+}
+
+template void HiddenException::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t HiddenException::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t HiddenException::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t HiddenException::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void HiddenException::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t HiddenException::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t HiddenException::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t HiddenException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}} // py3::simple
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::py3::simple::ComplexStruct>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
@@ -884,5 +1173,6 @@ static_assert(
 
 namespace py3 { namespace simple { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+  ::apache::thrift::adapt_detail::validateAdapter<Adapter, ::py3::simple::detail::AdaptedUnion>();
 }
 }}} // py3::simple

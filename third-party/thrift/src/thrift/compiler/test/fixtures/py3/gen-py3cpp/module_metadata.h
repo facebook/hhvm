@@ -10,6 +10,8 @@
 
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types.h"
+#include "thrift/annotation/gen-py3cpp/cpp_metadata.h"
+#include "thrift/annotation/gen-py3cpp/meta_metadata.h"
 
 namespace py3 {
 namespace simple {
@@ -60,6 +62,21 @@ class StructMetadata<::py3::simple::SimpleStruct> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
+class StructMetadata<::py3::simple::GeneratedStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::py3::simple::detail::AdaptedUnion> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::py3::simple::HiddenException> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
 class StructMetadata<::py3::simple::ComplexStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
@@ -76,6 +93,11 @@ class StructMetadata<::py3::simple::BinaryUnionStruct> {
 };
 template <>
 class ExceptionMetadata<::py3::simple::SimpleException> {
+ public:
+  static void gen(ThriftMetadata& metadata);
+};
+template <>
+class ExceptionMetadata<::py3::simple::HiddenException> {
  public:
   static void gen(ThriftMetadata& metadata);
 };

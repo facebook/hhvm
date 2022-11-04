@@ -14,6 +14,20 @@ namespace thrift {
 namespace detail {
 
 template <>
+struct VisitUnion<::py3::simple::detail::AdaptedUnion> {
+
+  template <typename F, typename T>
+  decltype(auto) operator()(FOLLY_MAYBE_UNUSED F&& f, T&& t) const {
+    using Union = std::remove_reference_t<T>;
+    switch (t.getType()) {
+    case Union::Type::best:
+      return f(0, *static_cast<T&&>(t).best_ref());
+    case Union::Type::__EMPTY__:
+      return decltype(f(0, *static_cast<T&&>(t).best_ref()))();
+    }
+  }
+};
+template <>
 struct VisitUnion<::py3::simple::BinaryUnion> {
 
   template <typename F, typename T>

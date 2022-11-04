@@ -14,6 +14,10 @@ import fbcode.thrift.python.types as _fbthrift_python_types
 import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
 
 
+import facebook.thrift.annotation.cpp.thrift_types
+
+import facebook.thrift.annotation.deprecated.meta.thrift_types
+
 
 class SimpleException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
@@ -189,6 +193,126 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
         py_deprecated_types = importlib.import_module("module.ttypes")
         import thrift.util.converter
         return thrift.util.converter.to_py_struct(py_deprecated_types.SimpleStruct, self)
+
+
+class GeneratedStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "the",  # name
+            _fbthrift_python_types.typeinfo_i16,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.GeneratedStruct"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return None
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_GeneratedStruct()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.GeneratedStruct, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.GeneratedStruct, self)
+
+
+class AdaptedUnion(metaclass=_fbthrift_python_types.UnionMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "best",  # name
+            _fbthrift_python_types.typeinfo_i16,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.AdaptedUnion"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return None
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_AdaptedUnion()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.AdaptedUnion, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedUnion, self)
+
+
+class HiddenException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "test",  # name
+            _fbthrift_python_types.typeinfo_i16,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.HiddenException"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return None
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__exception_HiddenException()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.HiddenException, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.HiddenException, self)
 
 
 class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
@@ -453,6 +577,12 @@ def _fbthrift_metadata__struct_OptionalRefStruct():
     return module.thrift_metadata.gen_metadata_struct_OptionalRefStruct()
 def _fbthrift_metadata__struct_SimpleStruct():
     return module.thrift_metadata.gen_metadata_struct_SimpleStruct()
+def _fbthrift_metadata__struct_GeneratedStruct():
+    return module.thrift_metadata.gen_metadata_struct_GeneratedStruct()
+def _fbthrift_metadata__struct_AdaptedUnion():
+    return module.thrift_metadata.gen_metadata_struct_AdaptedUnion()
+def _fbthrift_metadata__exception_HiddenException():
+    return module.thrift_metadata.gen_metadata_exception_HiddenException()
 def _fbthrift_metadata__struct_ComplexStruct():
     return module.thrift_metadata.gen_metadata_struct_ComplexStruct()
 def _fbthrift_metadata__struct_BinaryUnion():
@@ -464,6 +594,9 @@ _fbthrift_all_structs = [
     SimpleException,
     OptionalRefStruct,
     SimpleStruct,
+    GeneratedStruct,
+    AdaptedUnion,
+    HiddenException,
     ComplexStruct,
     BinaryUnion,
     BinaryUnionStruct,
@@ -503,6 +636,9 @@ ANOTHER_CONST_MAP = _fbthrift_python_types.Map(_fbthrift_python_types.EnumTypeIn
 
 IOBufPtr = _fbthrift_iobuf.IOBuf
 IOBuf = _fbthrift_iobuf.IOBuf
+AdaptedTypeDef = SimpleStruct
+HiddenTypeDef = SimpleStruct
+ImplicitlyHiddenTypeDef = AdaptedUnion
 foo_bar = bytes
 
 

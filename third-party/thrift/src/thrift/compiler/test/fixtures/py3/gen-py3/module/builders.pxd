@@ -10,6 +10,10 @@ cimport folly.iobuf as _fbthrift_iobuf
 
 cimport thrift.py3.builder
 
+cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
+cimport facebook.thrift.annotation.cpp.builders as _facebook_thrift_annotation_cpp_builders
+cimport facebook.thrift.annotation.deprecated.meta.types as _facebook_thrift_annotation_deprecated_meta_types
+cimport facebook.thrift.annotation.deprecated.meta.builders as _facebook_thrift_annotation_deprecated_meta_builders
 
 cimport module.types as _module_types
 
@@ -29,6 +33,10 @@ cdef class SimpleStruct_Builder(thrift.py3.builder.StructBuilder):
     cdef public pint big_int
     cdef public pfloat real
     cdef public pfloat smaller_real
+
+
+cdef class HiddenException_Builder(thrift.py3.builder.StructBuilder):
+    cdef public pint test
 
 
 cdef class ComplexStruct_Builder(thrift.py3.builder.StructBuilder):

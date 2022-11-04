@@ -14,6 +14,8 @@ from typing_extensions import Final
 
 import sys
 import itertools
+import facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
+import facebook.thrift.annotation.deprecated.meta.types as _facebook_thrift_annotation_deprecated_meta_types
 
 
 __property__ = property
@@ -162,6 +164,30 @@ class SimpleStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_python(self) -> "module.thrift_types.SimpleStruct": ...   # type: ignore
     def _to_py3(self) -> SimpleStruct: ...
     def _to_py_deprecated(self) -> "module.ttypes.SimpleStruct": ...   # type: ignore
+
+class HiddenException(thrift.py3.exceptions.GeneratedError, _typing.Hashable):
+    class __fbthrift_IsSet:
+        test: bool
+        pass
+
+    test: Final[int] = ...
+
+    def __init__(
+        self, *,
+        test: _typing.Optional[int]=None
+    ) -> None: ...
+
+    def __hash__(self) -> int: ...
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+    def __lt__(self, other: 'HiddenException') -> bool: ...
+    def __gt__(self, other: 'HiddenException') -> bool: ...
+    def __le__(self, other: 'HiddenException') -> bool: ...
+    def __ge__(self, other: 'HiddenException') -> bool: ...
+
+    def _to_python(self) -> "module.thrift_types.HiddenException": ...   # type: ignore
+    def _to_py3(self) -> HiddenException: ...
+    def _to_py_deprecated(self) -> "module.ttypes.HiddenException": ...   # type: ignore
 
 class ComplexStruct(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
@@ -668,4 +694,7 @@ A_CONST_MAP: Map__string_SimpleStruct = ...
 ANOTHER_CONST_MAP: Map__AnEnumRenamed_i32 = ...
 IOBufPtr = _fbthrift_iobuf.IOBuf
 IOBuf = _fbthrift_iobuf.IOBuf
+AdaptedTypeDef = SimpleStruct
+HiddenTypeDef = SimpleStruct
+ImplicitlyHiddenTypeDef = AdaptedUnion
 foo_bar = bytes

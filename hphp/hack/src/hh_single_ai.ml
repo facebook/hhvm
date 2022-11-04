@@ -92,7 +92,11 @@ let parse_options () =
   let no_builtins = ref false in
   let ai_options = ref None in
   let set_ai_options x =
-    ai_options := Some (Ai_options.prepare ~server:false x)
+    let options = Ai_options.prepare ~server:false x in
+    match !ai_options with
+    | None -> ai_options := Some options
+    | Some existing ->
+      ai_options := Some (Ai_options.merge_for_unit_tests existing options)
   in
   let error_format = ref Errors.Highlighted in
   let check_xhp_attribute = ref false in

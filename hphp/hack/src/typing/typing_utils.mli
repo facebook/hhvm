@@ -465,9 +465,6 @@ val try_strip_dynamic_from_union :
   Typing_defs.locl_ty list ->
   Typing_defs.locl_ty option
 
-val is_dynamic_or_intersection :
-  Typing_env_types.env -> Typing_defs.locl_ty -> bool
-
 (* If input is dynamic | t or t | dynamic then return t,
  * otherwise return type unchanged. *)
 val strip_dynamic :

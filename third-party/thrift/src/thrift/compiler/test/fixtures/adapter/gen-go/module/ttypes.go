@@ -32,6 +32,58 @@ var _ = scope3.GoUnusedProtection__
 var _ = hack4.GoUnusedProtection__
 var GoUnusedProtection__ int;
 
+type Color int64
+const (
+  Color_UNKNOWN Color = 0
+  Color_RED Color = 1
+  Color_GREEN Color = 2
+  Color_BLUE Color = 3
+)
+
+var ColorToName = map[Color]string {
+  Color_UNKNOWN: "UNKNOWN",
+  Color_RED: "RED",
+  Color_GREEN: "GREEN",
+  Color_BLUE: "BLUE",
+}
+
+var ColorToValue = map[string]Color {
+  "UNKNOWN": Color_UNKNOWN,
+  "RED": Color_RED,
+  "GREEN": Color_GREEN,
+  "BLUE": Color_BLUE,
+}
+
+var ColorNames = []string {
+  "UNKNOWN",
+  "RED",
+  "GREEN",
+  "BLUE",
+}
+
+var ColorValues = []Color {
+  Color_UNKNOWN,
+  Color_RED,
+  Color_GREEN,
+  Color_BLUE,
+}
+
+func (p Color) String() string {
+  if v, ok := ColorToName[p]; ok {
+    return v
+  }
+  return "<UNSET>"
+}
+
+func ColorFromString(s string) (Color, error) {
+  if v, ok := ColorToValue[s]; ok {
+    return v, nil
+  }
+  return Color(0), fmt.Errorf("not a valid Color string")
+}
+
+func ColorPtr(v Color) *Color { return &v }
+
 type ThriftAdaptedEnum int64
 const (
   ThriftAdaptedEnum_Zero ThriftAdaptedEnum = 0
@@ -198,17 +250,25 @@ func CountingIntPtr(v CountingInt) *CountingInt { return &v }
 
 // Attributes:
 //  - Signature
+//  - Color
 type MyAnnotation struct {
   Signature string `thrift:"signature,1" db:"signature" json:"signature"`
+  Color Color `thrift:"color,2" db:"color" json:"color"`
 }
 
 func NewMyAnnotation() *MyAnnotation {
-  return &MyAnnotation{}
+  return &MyAnnotation{
+    Color: 1,
+  }
 }
 
 
 func (p *MyAnnotation) GetSignature() string {
   return p.Signature
+}
+
+func (p *MyAnnotation) GetColor() Color {
+  return p.Color
 }
 type MyAnnotationBuilder struct {
   obj *MyAnnotation
@@ -223,6 +283,7 @@ func NewMyAnnotationBuilder() *MyAnnotationBuilder{
 func (p MyAnnotationBuilder) Emit() *MyAnnotation{
   return &MyAnnotation{
     Signature: p.obj.Signature,
+    Color: p.obj.Color,
   }
 }
 
@@ -231,8 +292,18 @@ func (m *MyAnnotationBuilder) Signature(signature string) *MyAnnotationBuilder {
   return m
 }
 
+func (m *MyAnnotationBuilder) Color(color Color) *MyAnnotationBuilder {
+  m.obj.Color = color
+  return m
+}
+
 func (m *MyAnnotation) SetSignature(signature string) *MyAnnotation {
   m.Signature = signature
+  return m
+}
+
+func (m *MyAnnotation) SetColor(color Color) *MyAnnotation {
+  m.Color = color
   return m
 }
 
@@ -251,6 +322,10 @@ func (p *MyAnnotation) Read(iprot thrift.Protocol) error {
     switch fieldId {
     case 1:
       if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
         return err
       }
     default:
@@ -277,10 +352,21 @@ func (p *MyAnnotation)  ReadField1(iprot thrift.Protocol) error {
   return nil
 }
 
+func (p *MyAnnotation)  ReadField2(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI32(); err != nil {
+    return thrift.PrependError("error reading field 2: ", err)
+  } else {
+    temp := Color(v)
+    p.Color = temp
+  }
+  return nil
+}
+
 func (p *MyAnnotation) Write(oprot thrift.Protocol) error {
   if err := oprot.WriteStructBegin("MyAnnotation"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
   if err := oprot.WriteFieldStop(); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
   if err := oprot.WriteStructEnd(); err != nil {
@@ -298,13 +384,24 @@ func (p *MyAnnotation) writeField1(oprot thrift.Protocol) (err error) {
   return err
 }
 
+func (p *MyAnnotation) writeField2(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("color", thrift.I32, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:color: ", p), err) }
+  if err := oprot.WriteI32(int32(p.Color)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.color (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:color: ", p), err) }
+  return err
+}
+
 func (p *MyAnnotation) String() string {
   if p == nil {
     return "<nil>"
   }
 
   signatureVal := fmt.Sprintf("%v", p.Signature)
-  return fmt.Sprintf("MyAnnotation({Signature:%s})", signatureVal)
+  colorVal := fmt.Sprintf("%v", p.Color)
+  return fmt.Sprintf("MyAnnotation({Signature:%s Color:%s})", signatureVal, colorVal)
 }
 
 // Attributes:

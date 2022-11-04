@@ -14,6 +14,32 @@
 
 namespace apache { namespace thrift {
 
+constexpr std::size_t const TEnumTraits<::facebook::thrift::test::Color>::size;
+folly::Range<::facebook::thrift::test::Color const*> const TEnumTraits<::facebook::thrift::test::Color>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::Color>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::thrift::test::Color>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::Color>::names);
+
+bool TEnumTraits<::facebook::thrift::test::Color>::findName(type value, folly::StringPiece* out) noexcept {
+  return ::apache::thrift::detail::st::enum_find_name(value, out);
+}
+
+bool TEnumTraits<::facebook::thrift::test::Color>::findValue(folly::StringPiece name, type* out) noexcept {
+  return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+}} // apache::thrift
+
+namespace facebook { namespace thrift { namespace test {
+#ifndef ANDROID
+FOLLY_PUSH_WARNING
+FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
+const _Color_EnumMapFactory::ValuesToNamesMapType _Color_VALUES_TO_NAMES = _Color_EnumMapFactory::makeValuesToNamesMap();
+const _Color_EnumMapFactory::NamesToValuesMapType _Color_NAMES_TO_VALUES = _Color_EnumMapFactory::makeNamesToValuesMap();
+FOLLY_POP_WARNING
+#endif
+}}} // facebook::thrift::test
+
+namespace apache { namespace thrift {
+
 constexpr std::size_t const TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::size;
 folly::Range<::facebook::thrift::test::ThriftAdaptedEnum const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::values = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum>::names = folly::range(TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>::names);
@@ -74,25 +100,30 @@ MyAnnotation::MyAnnotation(const MyAnnotation&) = default;
 MyAnnotation& MyAnnotation::operator=(const MyAnnotation&) = default;
 MyAnnotation::MyAnnotation(FOLLY_MAYBE_UNUSED MyAnnotation&& other) noexcept :
     __fbthrift_field_signature(std::move(other.__fbthrift_field_signature)),
+    __fbthrift_field_color(std::move(other.__fbthrift_field_color)),
     __isset(other.__isset) {
 }
 
 MyAnnotation& MyAnnotation::operator=(FOLLY_MAYBE_UNUSED MyAnnotation&& other) noexcept {
     this->__fbthrift_field_signature = std::move(other.__fbthrift_field_signature);
+    this->__fbthrift_field_color = std::move(other.__fbthrift_field_color);
     __isset = other.__isset;
     return *this;
 }
 
 
-MyAnnotation::MyAnnotation(apache::thrift::FragileConstructor, ::std::string signature__arg) :
-    __fbthrift_field_signature(std::move(signature__arg)) {
+MyAnnotation::MyAnnotation(apache::thrift::FragileConstructor, ::std::string signature__arg, ::facebook::thrift::test::Color color__arg) :
+    __fbthrift_field_signature(std::move(signature__arg)),
+    __fbthrift_field_color(std::move(color__arg)) {
   __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
 }
 
 
 void MyAnnotation::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_signature = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_color = ::facebook::thrift::test::Color();
   __isset = {};
 }
 
@@ -108,6 +139,9 @@ bool MyAnnotation::operator==(FOLLY_MAYBE_UNUSED const MyAnnotation& rhs) const 
   if (!(lhs.signature_ref() == rhs.signature_ref())) {
     return false;
   }
+  if (!(lhs.color_ref() == rhs.color_ref())) {
+    return false;
+  }
   return true;
 }
 
@@ -116,6 +150,9 @@ bool MyAnnotation::operator<(FOLLY_MAYBE_UNUSED const MyAnnotation& rhs) const {
   if (!(lhs.signature_ref() == rhs.signature_ref())) {
     return lhs.signature_ref() < rhs.signature_ref();
   }
+  if (!(lhs.color_ref() == rhs.color_ref())) {
+    return lhs.color_ref() < rhs.color_ref();
+  }
   return false;
 }
 
@@ -123,6 +160,7 @@ bool MyAnnotation::operator<(FOLLY_MAYBE_UNUSED const MyAnnotation& rhs) const {
 void swap(FOLLY_MAYBE_UNUSED MyAnnotation& a, FOLLY_MAYBE_UNUSED MyAnnotation& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_signature, b.__fbthrift_field_signature);
+  swap(a.__fbthrift_field_color, b.__fbthrift_field_color);
   swap(a.__isset, b.__isset);
 }
 

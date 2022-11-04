@@ -25,6 +25,16 @@ import my
 UTF8STRINGS: bool
 
 
+class Color(int):
+    UNKNOWN: __T.ClassVar[Color]
+    RED: __T.ClassVar[Color]
+    GREEN: __T.ClassVar[Color]
+    BLUE: __T.ClassVar[Color]
+
+    _VALUES_TO_NAMES: __T.ClassVar[__T.Dict[Color, str]]
+    _NAMES_TO_VALUES: __T.ClassVar[__T.Dict[str, Color]]
+
+
 class ThriftAdaptedEnum(int):
     Zero: __T.ClassVar[ThriftAdaptedEnum]
     One: __T.ClassVar[ThriftAdaptedEnum]
@@ -40,7 +50,8 @@ class MyAnnotation:
 
     def __init__(
         self,
-        signature: __T.Optional[str] = ...
+        signature: __T.Optional[str] = ...,
+        color: Color = ...
     ) -> None:
         ...
 
@@ -48,6 +59,10 @@ class MyAnnotation:
     def signature(self) -> str: ...
     @signature.setter
     def signature(self, value: __T.Optional[str]) -> None: ...
+    @__property__
+    def color(self) -> Color: ...
+    @color.setter
+    def color(self, value: Color) -> None: ...
 
 
     def isUnion(self) -> bool: ...

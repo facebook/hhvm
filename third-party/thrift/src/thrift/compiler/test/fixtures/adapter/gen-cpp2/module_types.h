@@ -20,6 +20,7 @@ namespace apache {
 namespace thrift {
 namespace ident {
 struct signature;
+struct color;
 struct intField;
 struct optionalIntField;
 struct intFieldWithDefault;
@@ -115,6 +116,10 @@ namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_signature
 #define APACHE_THRIFT_ACCESSOR_signature
 APACHE_THRIFT_DEFINE_ACCESSOR(signature);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_color
+#define APACHE_THRIFT_ACCESSOR_color
+APACHE_THRIFT_DEFINE_ACCESSOR(color);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_intField
 #define APACHE_THRIFT_ACCESSOR_intField
@@ -483,6 +488,15 @@ APACHE_THRIFT_DEFINE_ACCESSOR(name);
 // BEGIN declare_enums
 namespace facebook { namespace thrift { namespace test {
 
+enum class Color {
+  UNKNOWN = 0,
+  RED = 1,
+  GREEN = 2,
+  BLUE = 3,
+};
+
+
+
 enum class ThriftAdaptedEnum {
   Zero = 0,
   One = 1,
@@ -493,11 +507,41 @@ enum class ThriftAdaptedEnum {
 }}} // facebook::thrift::test
 
 namespace std {
+template<> struct hash<::facebook::thrift::test::Color> :
+  ::apache::thrift::detail::enum_hash<::facebook::thrift::test::Color> {};
 template<> struct hash<::facebook::thrift::test::ThriftAdaptedEnum> :
   ::apache::thrift::detail::enum_hash<::facebook::thrift::test::ThriftAdaptedEnum> {};
 } // std
 
 namespace apache { namespace thrift {
+
+
+template <> struct TEnumDataStorage<::facebook::thrift::test::Color>;
+
+template <> struct TEnumTraits<::facebook::thrift::test::Color> {
+  using type = ::facebook::thrift::test::Color;
+
+  static constexpr std::size_t const size = 4;
+  static folly::Range<type const*> const values;
+  static folly::Range<folly::StringPiece const*> const names;
+
+  static bool findName(type value, folly::StringPiece* out) noexcept;
+  static bool findValue(folly::StringPiece name, type* out) noexcept;
+
+#if FOLLY_HAS_STRING_VIEW
+  static bool findName(type value, std::string_view* out) noexcept {
+    folly::StringPiece outp;
+    return findName(value, &outp) && ((*out = outp), true);
+  }
+#endif
+  static char const* findName(type value) noexcept {
+    folly::StringPiece ret;
+    (void)findName(value, &ret);
+    return ret.data();
+  }
+  static constexpr type min() { return type::UNKNOWN; }
+  static constexpr type max() { return type::BLUE; }
+};
 
 
 template <> struct TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum>;
@@ -532,6 +576,13 @@ template <> struct TEnumTraits<::facebook::thrift::test::ThriftAdaptedEnum> {
 
 namespace facebook { namespace thrift { namespace test {
 
+using _Color_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<Color>;
+#ifndef ANDROID
+[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
+extern const _Color_EnumMapFactory::ValuesToNamesMapType _Color_VALUES_TO_NAMES;
+[[deprecated("use apache::thrift::TEnumTraits")]]
+extern const _Color_EnumMapFactory::NamesToValuesMapType _Color_NAMES_TO_VALUES;
+#endif
 using _ThriftAdaptedEnum_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<ThriftAdaptedEnum>;
 #ifndef ANDROID
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
@@ -2957,32 +3008,39 @@ class MyAnnotation final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static constexpr std::size_t __fbthrift_field_size_v = 1;
+  static constexpr std::size_t __fbthrift_field_size_v = 2;
 
   template<class T>
   using __fbthrift_id = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                    void,
-                                                   ::apache::thrift::field_id<1>>;
+                                                   ::apache::thrift::field_id<1>,
+                                                   ::apache::thrift::field_id<2>>;
 
   template<class T>
   using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                          void,
-                                                         ::apache::thrift::type::string_t>;
+                                                         ::apache::thrift::type::string_t,
+                                                         ::apache::thrift::type::enum_t<::facebook::thrift::test::Color>>;
 
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                       void,
-                                                      ::apache::thrift::ident::signature>;
+                                                      ::apache::thrift::ident::signature,
+                                                      ::apache::thrift::ident::color>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::signature> = 1;
+    template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::color> = 2;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::signature>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::color>) { return 2; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -2990,6 +3048,7 @@ class MyAnnotation final  {
   struct __fbthrift_ordinal_impl_for_non_unique_type {
     template<class, class, class> struct Impl { static constexpr int value = 0; };
     template<class T> struct Impl<::apache::thrift::type::string_t, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
+    template<class T> struct Impl<::apache::thrift::type::enum_t<::facebook::thrift::test::Color>, T, std::enable_if_t<sizeof(T) != -2>> { static constexpr int value = 2; };
 
     template<class T> static constexpr int value = Impl<T, T, void>::value;
   };
@@ -3013,11 +3072,12 @@ class MyAnnotation final  {
 
  public:
 
-  MyAnnotation() {
+  MyAnnotation() :
+      __fbthrift_field_color(static_cast<::facebook::thrift::test::Color>( ::facebook::thrift::test::Color::RED)) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  MyAnnotation(apache::thrift::FragileConstructor, ::std::string signature__arg);
+  MyAnnotation(apache::thrift::FragileConstructor, ::std::string signature__arg, ::facebook::thrift::test::Color color__arg);
 
   MyAnnotation(MyAnnotation&&) noexcept;
 
@@ -3029,7 +3089,9 @@ class MyAnnotation final  {
  private:
   ::std::string __fbthrift_field_signature;
  private:
-  apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  ::facebook::thrift::test::Color __fbthrift_field_color;
+ private:
+  apache::thrift::detail::isset_bitset<2, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -3076,6 +3138,46 @@ class MyAnnotation final  {
     return {static_cast<T&&>(this->__fbthrift_field_signature), __isset.at(0), __isset.bit(0)};
   }
 
+  template <typename..., typename T = ::facebook::thrift::test::Color>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> color_ref() const& {
+    return {this->__fbthrift_field_color, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::Color>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> color_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_color), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::Color>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> color_ref() & {
+    return {this->__fbthrift_field_color, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::Color>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> color_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_color), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::Color>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> color() const& {
+    return {this->__fbthrift_field_color, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::Color>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> color() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_color), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::Color>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> color() & {
+    return {this->__fbthrift_field_color, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::Color>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> color() && {
+    return {static_cast<T&&>(this->__fbthrift_field_color), __isset.at(1), __isset.bit(1)};
+  }
+
   const ::std::string& get_signature() const& {
     return __fbthrift_field_signature;
   }
@@ -3089,6 +3191,16 @@ class MyAnnotation final  {
   ::std::string& set_signature(T_MyAnnotation_signature_struct_setter&& signature_) {
     signature_ref() = std::forward<T_MyAnnotation_signature_struct_setter>(signature_);
     return __fbthrift_field_signature;
+  }
+
+  ::facebook::thrift::test::Color get_color() const {
+    return __fbthrift_field_color;
+  }
+
+  [[deprecated("Use `FOO.color_ref() = BAR;` instead of `FOO.set_color(BAR);`")]]
+  ::facebook::thrift::test::Color& set_color(::facebook::thrift::test::Color color_) {
+    color_ref() = color_;
+    return __fbthrift_field_color;
   }
 
   template <class Protocol_>

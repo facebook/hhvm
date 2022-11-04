@@ -25,19 +25,23 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
 
     @ThriftConstructor
     public MyAnnotation(
-        @com.facebook.swift.codec.ThriftField(value=1, name="signature", requiredness=Requiredness.NONE) final String signature
+        @com.facebook.swift.codec.ThriftField(value=1, name="signature", requiredness=Requiredness.NONE) final String signature,
+        @com.facebook.swift.codec.ThriftField(value=2, name="color", requiredness=Requiredness.NONE) final test.fixtures.adapter.Color color
     ) {
         this.signature = signature;
+        this.color = color;
     }
     
     @ThriftConstructor
     protected MyAnnotation() {
       this.signature = null;
+      this.color = test.fixtures.adapter.Color.RED;
     }
     
     public static class Builder {
     
         private String signature = null;
+        private test.fixtures.adapter.Color color = test.fixtures.adapter.Color.RED;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="signature", requiredness=Requiredness.NONE)
         public Builder setSignature(String signature) {
@@ -47,15 +51,25 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
     
         public String getSignature() { return signature; }
     
+            @com.facebook.swift.codec.ThriftField(value=2, name="color", requiredness=Requiredness.NONE)
+        public Builder setColor(test.fixtures.adapter.Color color) {
+            this.color = color;
+            return this;
+        }
+    
+        public test.fixtures.adapter.Color getColor() { return color; }
+    
         public Builder() { }
         public Builder(MyAnnotation other) {
             this.signature = other.signature;
+            this.color = other.color;
         }
     
         @ThriftConstructor
         public MyAnnotation build() {
             MyAnnotation result = new MyAnnotation (
-                this.signature
+                this.signature,
+                this.color
             );
             return result;
         }
@@ -68,10 +82,16 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
     private final String signature;
     public static final int _SIGNATURE = 1;
     private static final TField SIGNATURE_FIELD_DESC = new TField("signature", TType.STRING, (short)1);
+        private final test.fixtures.adapter.Color color;
+    public static final int _COLOR = 2;
+    private static final TField COLOR_FIELD_DESC = new TField("color", TType.I32, (short)2);
     static {
       NAMES_TO_IDS.put("signature", 1);
       THRIFT_NAMES_TO_IDS.put("signature", 1);
       FIELD_METADATA.put(1, SIGNATURE_FIELD_DESC);
+      NAMES_TO_IDS.put("color", 2);
+      THRIFT_NAMES_TO_IDS.put("color", 2);
+      FIELD_METADATA.put(2, COLOR_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
         new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/MyAnnotation"), 
         MyAnnotation.class, MyAnnotation::read0));
@@ -81,10 +101,16 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
     @com.facebook.swift.codec.ThriftField(value=1, name="signature", requiredness=Requiredness.NONE)
     public String getSignature() { return signature; }
     
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=2, name="color", requiredness=Requiredness.NONE)
+    public test.fixtures.adapter.Color getColor() { return color; }
+    
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("signature", signature);
+        helper.add("color", color);
         return helper.toString();
     }
     
@@ -101,13 +127,15 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
     
         return
             Objects.equals(signature, other.signature) &&
+            Objects.equals(color, other.color) &&
             true;
     }
     
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
-            signature
+            signature,
+            color
         });
     }
     
@@ -132,6 +160,14 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
             TProtocolUtil.skip(oprot, __field.type);
           }
           break;
+        case _COLOR:
+          if (__field.type == TType.I32) {
+            test.fixtures.adapter.Color color = test.fixtures.adapter.Color.fromInteger(oprot.readI32());
+            builder.setColor(color);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(oprot, __field.type);
           break;
@@ -149,6 +185,9 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
         oprot.writeString(this.signature);
         oprot.writeFieldEnd();
       }
+      oprot.writeFieldBegin(COLOR_FIELD_DESC);
+      oprot.writeI32(this.color == null ? 0 : this.color.getValue());
+      oprot.writeFieldEnd();
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }

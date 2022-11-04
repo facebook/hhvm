@@ -27,9 +27,16 @@ import com.facebook.thrift.protocol.*;
 public class MyAnnotation implements TBase, java.io.Serializable, Cloneable, Comparable<MyAnnotation> {
   private static final TStruct STRUCT_DESC = new TStruct("MyAnnotation");
   private static final TField SIGNATURE_FIELD_DESC = new TField("signature", TType.STRING, (short)1);
+  private static final TField COLOR_FIELD_DESC = new TField("color", TType.I32, (short)2);
 
   public String signature;
+  /**
+   * 
+   * @see Color
+   */
+  public Color color;
   public static final int SIGNATURE = 1;
+  public static final int COLOR = 2;
 
   // isset id assignments
 
@@ -39,6 +46,8 @@ public class MyAnnotation implements TBase, java.io.Serializable, Cloneable, Com
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
     tmpMetaDataMap.put(SIGNATURE, new FieldMetaData("signature", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.STRING)));
+    tmpMetaDataMap.put(COLOR, new FieldMetaData("color", TFieldRequirementType.DEFAULT, 
+        new FieldValueMetaData(TType.I32)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
 
@@ -47,16 +56,21 @@ public class MyAnnotation implements TBase, java.io.Serializable, Cloneable, Com
   }
 
   public MyAnnotation() {
+    this.color = test.fixtures.adapter.Color.RED;
+
   }
 
   public MyAnnotation(
-      String signature) {
+      String signature,
+      Color color) {
     this();
     this.signature = signature;
+    this.color = color;
   }
 
   public static class Builder {
     private String signature;
+    private Color color;
 
     public Builder() {
     }
@@ -66,9 +80,15 @@ public class MyAnnotation implements TBase, java.io.Serializable, Cloneable, Com
       return this;
     }
 
+    public Builder setColor(final Color color) {
+      this.color = color;
+      return this;
+    }
+
     public MyAnnotation build() {
       MyAnnotation result = new MyAnnotation();
       result.setSignature(this.signature);
+      result.setColor(this.color);
       return result;
     }
   }
@@ -83,6 +103,9 @@ public class MyAnnotation implements TBase, java.io.Serializable, Cloneable, Com
   public MyAnnotation(MyAnnotation other) {
     if (other.isSetSignature()) {
       this.signature = TBaseHelper.deepCopy(other.signature);
+    }
+    if (other.isSetColor()) {
+      this.color = TBaseHelper.deepCopy(other.color);
     }
   }
 
@@ -114,6 +137,38 @@ public class MyAnnotation implements TBase, java.io.Serializable, Cloneable, Com
     }
   }
 
+  /**
+   * 
+   * @see Color
+   */
+  public Color getColor() {
+    return this.color;
+  }
+
+  /**
+   * 
+   * @see Color
+   */
+  public MyAnnotation setColor(Color color) {
+    this.color = color;
+    return this;
+  }
+
+  public void unsetColor() {
+    this.color = null;
+  }
+
+  // Returns true if field color is set (has been assigned a value) and false otherwise
+  public boolean isSetColor() {
+    return this.color != null;
+  }
+
+  public void setColorIsSet(boolean __value) {
+    if (!__value) {
+      this.color = null;
+    }
+  }
+
   public void setFieldValue(int fieldID, Object __value) {
     switch (fieldID) {
     case SIGNATURE:
@@ -121,6 +176,14 @@ public class MyAnnotation implements TBase, java.io.Serializable, Cloneable, Com
         unsetSignature();
       } else {
         setSignature((String)__value);
+      }
+      break;
+
+    case COLOR:
+      if (__value == null) {
+        unsetColor();
+      } else {
+        setColor((Color)__value);
       }
       break;
 
@@ -133,6 +196,9 @@ public class MyAnnotation implements TBase, java.io.Serializable, Cloneable, Com
     switch (fieldID) {
     case SIGNATURE:
       return getSignature();
+
+    case COLOR:
+      return getColor();
 
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
@@ -151,12 +217,14 @@ public class MyAnnotation implements TBase, java.io.Serializable, Cloneable, Com
 
     if (!TBaseHelper.equalsNobinary(this.isSetSignature(), that.isSetSignature(), this.signature, that.signature)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.isSetColor(), that.isSetColor(), this.color, that.color)) { return false; }
+
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {signature});
+    return Arrays.deepHashCode(new Object[] {signature, color});
   }
 
   @Override
@@ -176,6 +244,14 @@ public class MyAnnotation implements TBase, java.io.Serializable, Cloneable, Com
       return lastComparison;
     }
     lastComparison = TBaseHelper.compareTo(signature, other.signature);
+    if (lastComparison != 0) { 
+      return lastComparison;
+    }
+    lastComparison = Boolean.valueOf(isSetColor()).compareTo(other.isSetColor());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    lastComparison = TBaseHelper.compareTo(color, other.color);
     if (lastComparison != 0) { 
       return lastComparison;
     }
@@ -200,6 +276,13 @@ public class MyAnnotation implements TBase, java.io.Serializable, Cloneable, Com
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
+        case COLOR:
+          if (__field.type == TType.I32) {
+            this.color = Color.findByValue(iprot.readI32());
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -220,6 +303,11 @@ public class MyAnnotation implements TBase, java.io.Serializable, Cloneable, Com
     if (this.signature != null) {
       oprot.writeFieldBegin(SIGNATURE_FIELD_DESC);
       oprot.writeString(this.signature);
+      oprot.writeFieldEnd();
+    }
+    if (this.color != null) {
+      oprot.writeFieldBegin(COLOR_FIELD_DESC);
+      oprot.writeI32(this.color == null ? 0 : this.color.getValue());
       oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();
@@ -250,6 +338,25 @@ public class MyAnnotation implements TBase, java.io.Serializable, Cloneable, Com
       sb.append("null");
     } else {
       sb.append(TBaseHelper.toString(this.getSignature(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("color");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getColor() == null) {
+      sb.append("null");
+    } else {
+      String color_name = this.getColor() == null ? "null" : this.getColor().name();
+      if (color_name != null) {
+        sb.append(color_name);
+        sb.append(" (");
+      }
+      sb.append(this.getColor());
+      if (color_name != null) {
+        sb.append(")");
+      }
     }
     first = false;
     sb.append(newLine + TBaseHelper.reduceIndent(indentStr));

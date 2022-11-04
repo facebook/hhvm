@@ -18,6 +18,7 @@ struct ForEachField<::facebook::thrift::test::MyAnnotation> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).signature_ref()...);
+    f(1, static_cast<T&&>(t).color_ref()...);
   }
 };
 

@@ -281,6 +281,20 @@ _readField_signature:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           1,
+          2,
+          apache::thrift::protocol::T_I32))) {
+    goto _loop;
+  }
+_readField_color:
+  {
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::Color>::readWithContext(*iprot, this->__fbthrift_field_color, _readState);
+    
+  }
+ this->__isset.set(1, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          2,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _loop;
@@ -309,6 +323,14 @@ _loop:
         goto _skip;
       }
     }
+    case 2:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32))) {
+        goto _readField_color;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -328,6 +350,10 @@ uint32_t MyAnnotation::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("signature", apache::thrift::protocol::T_STRING, 1);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->__fbthrift_field_signature);
   }
+  {
+    xfer += prot_->serializedFieldSize("color", apache::thrift::protocol::T_I32, 2);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::Color>::serializedSize<false>(*prot_, this->__fbthrift_field_color);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -339,6 +365,10 @@ uint32_t MyAnnotation::serializedSizeZC(Protocol_ const* prot_) const {
   {
     xfer += prot_->serializedFieldSize("signature", apache::thrift::protocol::T_STRING, 1);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->__fbthrift_field_signature);
+  }
+  {
+    xfer += prot_->serializedFieldSize("color", apache::thrift::protocol::T_I32, 2);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::Color>::serializedSize<false>(*prot_, this->__fbthrift_field_color);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -354,6 +384,13 @@ uint32_t MyAnnotation::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, 1, kPrevFieldId>(*prot_, "signature", previousFieldHasValue);
     previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->__fbthrift_field_signature);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 1;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 2, kPrevFieldId>(*prot_, "color", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::facebook::thrift::test::Color>::write(*prot_, this->__fbthrift_field_color);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

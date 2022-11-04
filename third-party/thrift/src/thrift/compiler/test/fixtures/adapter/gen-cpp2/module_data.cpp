@@ -33,20 +33,25 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::fields_names = {{
   "signature",
+  "color",
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 2> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::fields_ids = {{
   1,
+  2,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 2> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::fields_types = {{
   TType::T_STRING,
+  TType::T_I32,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::storage_names = {{
   "__fbthrift_field_signature",
+  "__fbthrift_field_color",
 }};
-THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::isset_indexes = {{
   0,
+  1,
 }};
 
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 11> TStructDataStorage<::facebook::thrift::test::Foo>::fields_names = {{

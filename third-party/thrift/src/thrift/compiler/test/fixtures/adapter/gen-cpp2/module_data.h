@@ -12,6 +12,23 @@
 
 namespace apache { namespace thrift {
 
+template <> struct TEnumDataStorage<::facebook::thrift::test::Color> {
+  using type = ::facebook::thrift::test::Color;
+  static constexpr const std::size_t size = 4;
+  static constexpr std::array<type, size> values = {{
+      type::UNKNOWN,
+      type::RED,
+      type::GREEN,
+      type::BLUE,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "UNKNOWN",
+      "RED",
+      "GREEN",
+      "BLUE",
+  }};
+};
+
 template <> struct TEnumDataStorage<::facebook::thrift::test::ThriftAdaptedEnum> {
   using type = ::facebook::thrift::test::ThriftAdaptedEnum;
   static constexpr const std::size_t size = 2;
@@ -58,7 +75,7 @@ template <> struct TEnumDataStorage<::facebook::thrift::test::ThriftAdaptTestUni
 };
 
 template <> struct TStructDataStorage<::facebook::thrift::test::MyAnnotation> {
-  static constexpr const std::size_t fields_size = 1;
+  static constexpr const std::size_t fields_size = 2;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

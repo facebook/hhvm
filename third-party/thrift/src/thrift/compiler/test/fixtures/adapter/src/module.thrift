@@ -38,6 +38,13 @@ typedef list<StringWithAdapter> ListWithElemAdapter
 @cpp.Adapter{name = '::my::Adapter2'}
 typedef ListWithElemAdapter ListWithElemAdapter_withAdapter
 
+enum Color {
+  UNKNOWN = 0,
+  RED = 1,
+  GREEN = 2,
+  BLUE = 3,
+}
+
 @python.Adapter{
   name = "my.module.Adapter2",
   typeHint = "my.another.module.AdaptedType2[]",
@@ -45,10 +52,11 @@ typedef ListWithElemAdapter ListWithElemAdapter_withAdapter
 @scope.Transitive
 struct MyAnnotation {
   1: string signature;
+  2: Color color = Color.RED;
 }
 
 @cpp.Adapter{name = "::my::Adapter1"}
-@MyAnnotation{signature = "MyI64"}
+@MyAnnotation{signature = "MyI64", color = Color.GREEN}
 typedef i64 MyI64
 
 typedef MyI64 DoubleTypedefI64

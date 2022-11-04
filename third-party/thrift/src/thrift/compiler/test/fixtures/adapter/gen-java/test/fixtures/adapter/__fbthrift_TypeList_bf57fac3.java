@@ -11,7 +11,7 @@ import com.facebook.thrift.type.TypeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class __fbthrift_TypeList_41b06774 implements TypeList {
+public class __fbthrift_TypeList_bf57fac3 implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
@@ -49,6 +49,7 @@ public class __fbthrift_TypeList_41b06774 implements TypeList {
     list.add(new TypeList.TypeMapping("facebook.com/thrift/test/CountingStruct", "test.fixtures.adapter.CountingStruct"));
     list.add(new TypeList.TypeMapping("facebook.com/thrift/test/Person", "test.fixtures.adapter.Person"));
     list.add(new TypeList.TypeMapping("facebook.com/thrift/test/Person2", "test.fixtures.adapter.Person2"));
+    list.add(new TypeList.TypeMapping("facebook.com/thrift/test/Color", "test.fixtures.adapter.Color"));
     list.add(new TypeList.TypeMapping("facebook.com/thrift/test/ThriftAdaptedEnum", "test.fixtures.adapter.ThriftAdaptedEnum"));
   }
 

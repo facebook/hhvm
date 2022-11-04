@@ -10,6 +10,42 @@ namespace thrift\test;
 
 /**
  * Original thrift enum:-
+ * Color
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/Color'))>>
+enum Color: int {
+  UNKNOWN = 0;
+  RED = 1;
+  GREEN = 2;
+  BLUE = 3;
+}
+
+class Color_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
+  public static function getEnumMetadata()[]: \tmeta_ThriftEnum {
+    return \tmeta_ThriftEnum::fromShape(
+      shape(
+        "name" => "module.Color",
+        "elements" => dict[
+          0 => "UNKNOWN",
+          1 => "RED",
+          2 => "GREEN",
+          3 => "BLUE",
+        ],
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
+    return shape(
+      'enum' => dict[],
+      'constants' => dict[
+      ],
+    );
+  }
+}
+
+/**
+ * Original thrift enum:-
  * ThriftAdaptedEnum
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/ThriftAdaptedEnum'))>>
@@ -80,27 +116,41 @@ class MyAnnotation implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
       'var' => 'signature',
       'type' => \TType::STRING,
     ),
+    2 => shape(
+      'var' => 'color',
+      'type' => \TType::I32,
+      'enum' => \thrift\test\Color::class,
+    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'signature' => 1,
+    'color' => 2,
   ];
 
   const type TConstructorShape = shape(
     ?'signature' => ?string,
+    ?'color' => ?\thrift\test\Color,
   );
 
   const type TShape = shape(
     'signature' => string,
+    ?'color' => ?\thrift\test\Color,
   );
-  const int STRUCTURAL_ID = 8000450631971332689;
+  const int STRUCTURAL_ID = 4648320388473985046;
   /**
    * Original thrift field:-
    * 1: string signature
    */
   public string $signature;
+  /**
+   * Original thrift field:-
+   * 2: enum module.Color color
+   */
+  public ?\thrift\test\Color $color;
 
-  public function __construct(?string $signature = null)[] {
+  public function __construct(?string $signature = null, ?\thrift\test\Color $color = null)[] {
     $this->signature = $signature ?? '';
+    $this->color = $color ?? \thrift\test\Color::RED;
   }
 
   public static function withDefaultValues()[]: this {
@@ -110,6 +160,7 @@ class MyAnnotation implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   public static function fromShape(self::TConstructorShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'signature'),
+      Shapes::idx($shape, 'color'),
     );
   }
 
@@ -134,6 +185,21 @@ class MyAnnotation implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
                 )
               ),
               "name" => "signature",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_enum" => \tmeta_ThriftEnumType::fromShape(
+                    shape(
+                      "name" => "module.Color",
+                    )
+                  ),
+                )
+              ),
+              "name" => "color",
             )
           ),
         ],
@@ -164,12 +230,14 @@ class MyAnnotation implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       $shape['signature'],
+      Shapes::idx($shape, 'color'),
     );
   }
 
   public function __toShape()[]: self::TShape {
     return shape(
       'signature' => $this->signature,
+      'color' => $this->color,
     );
   }
   public function getInstanceKey()[write_props]: string {
@@ -185,6 +253,9 @@ class MyAnnotation implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
 
     if (idx($parsed, 'signature') !== null) {
       $this->signature = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['signature']);
+    }
+    if (idx($parsed, 'color') !== null) {
+      $this->color = \thrift\test\Color::coerce(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\Color>($parsed['color']));
     }
   }
 
@@ -888,6 +959,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
             '\thrift\test\MyAnnotation' => \thrift\test\MyAnnotation::fromShape(
               shape(
                 "signature" => "MyI64",
+                "color" => \thrift\test\Color::GREEN,
               )
             ),
           ],
@@ -915,6 +987,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
             '\thrift\test\MyAnnotation' => \thrift\test\MyAnnotation::fromShape(
               shape(
                 "signature" => "MyI64",
+                "color" => \thrift\test\Color::GREEN,
               )
             ),
           ],
@@ -1596,6 +1669,7 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
             '\thrift\test\MyAnnotation' => \thrift\test\MyAnnotation::fromShape(
               shape(
                 "signature" => "MyI64",
+                "color" => \thrift\test\Color::GREEN,
               )
             ),
           ],

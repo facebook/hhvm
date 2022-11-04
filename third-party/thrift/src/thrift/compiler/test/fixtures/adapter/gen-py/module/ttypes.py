@@ -41,7 +41,27 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'ThriftAdaptedEnum', 'MyAnnotation', 'Foo', 'Baz', 'Bar', 'DirectlyAdapted', 'IndependentDirectlyAdapted', 'StructWithFieldAdapter', 'TerseAdaptedFields', 'B', 'A', 'Config', 'MyStruct', 'AdaptTestStruct', 'AdaptTemplatedTestStruct', 'AdaptTemplatedNestedTestStruct', 'AdaptTestUnion', 'AdaptedStruct', 'DirectlyAdaptedStruct', 'StructFieldAdaptedStruct', 'CircularAdaptee', 'CircularStruct', 'ReorderedStruct', 'DeclaredAfterStruct', 'RenamedStruct', 'SameNamespaceStruct', 'HeapAllocated', 'MoveOnly', 'AlsoMoveOnly', 'ApplyAdapter', 'TransitiveAdapted', 'CountingStruct', 'Person', 'Person2', 'SetWithAdapter', 'StringWithAdapter', 'ListWithElemAdapter', 'ListWithElemAdapter_withAdapter', 'MyI64', 'DoubleTypedefI64', 'MyI32', 'FooWithAdapter', 'StructWithAdapter', 'UnionWithAdapter', 'AdaptedA', 'DurationMs', 'AdaptedBool', 'AdaptedByte', 'AdaptedShort', 'AdaptedInteger', 'AdaptedLong', 'AdaptedDouble', 'AdaptedString', 'DoubleTypedefBool', 'CustomProtocolType', 'IndirectionString', 'AdaptedEnum', 'AdaptedTypedef', 'TypedefOfDirect', 'AdaptedCircularAdaptee', 'CountingInt']
+__all__ = ['UTF8STRINGS', 'Color', 'ThriftAdaptedEnum', 'MyAnnotation', 'Foo', 'Baz', 'Bar', 'DirectlyAdapted', 'IndependentDirectlyAdapted', 'StructWithFieldAdapter', 'TerseAdaptedFields', 'B', 'A', 'Config', 'MyStruct', 'AdaptTestStruct', 'AdaptTemplatedTestStruct', 'AdaptTemplatedNestedTestStruct', 'AdaptTestUnion', 'AdaptedStruct', 'DirectlyAdaptedStruct', 'StructFieldAdaptedStruct', 'CircularAdaptee', 'CircularStruct', 'ReorderedStruct', 'DeclaredAfterStruct', 'RenamedStruct', 'SameNamespaceStruct', 'HeapAllocated', 'MoveOnly', 'AlsoMoveOnly', 'ApplyAdapter', 'TransitiveAdapted', 'CountingStruct', 'Person', 'Person2', 'SetWithAdapter', 'StringWithAdapter', 'ListWithElemAdapter', 'ListWithElemAdapter_withAdapter', 'MyI64', 'DoubleTypedefI64', 'MyI32', 'FooWithAdapter', 'StructWithAdapter', 'UnionWithAdapter', 'AdaptedA', 'DurationMs', 'AdaptedBool', 'AdaptedByte', 'AdaptedShort', 'AdaptedInteger', 'AdaptedLong', 'AdaptedDouble', 'AdaptedString', 'DoubleTypedefBool', 'CustomProtocolType', 'IndirectionString', 'AdaptedEnum', 'AdaptedTypedef', 'TypedefOfDirect', 'AdaptedCircularAdaptee', 'CountingInt']
+
+class Color:
+  UNKNOWN = 0
+  RED = 1
+  GREEN = 2
+  BLUE = 3
+
+  _VALUES_TO_NAMES = {
+    0: "UNKNOWN",
+    1: "RED",
+    2: "GREEN",
+    3: "BLUE",
+  }
+
+  _NAMES_TO_VALUES = {
+    "UNKNOWN": 0,
+    "RED": 1,
+    "GREEN": 2,
+    "BLUE": 3,
+  }
 
 class ThriftAdaptedEnum:
   Zero = 0
@@ -61,6 +81,7 @@ class MyAnnotation:
   """
   Attributes:
    - signature
+   - color
   """
 
   thrift_spec = None
@@ -88,6 +109,11 @@ class MyAnnotation:
           self.signature = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
         else:
           iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.I32:
+          self.color = iprot.readI32()
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -104,6 +130,10 @@ class MyAnnotation:
     if self.signature != None:
       oprot.writeFieldBegin('signature', TType.STRING, 1)
       oprot.writeString(self.signature.encode('utf-8')) if UTF8STRINGS and not isinstance(self.signature, bytes) else oprot.writeString(self.signature)
+      oprot.writeFieldEnd()
+    if self.color != None:
+      oprot.writeFieldBegin('color', TType.I32, 2)
+      oprot.writeI32(self.color)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -122,6 +152,14 @@ class MyAnnotation:
       json_obj = loads(json)
     if 'signature' in json_obj and json_obj['signature'] is not None:
       self.signature = json_obj['signature']
+    if 'color' in json_obj and json_obj['color'] is not None:
+      self.color = json_obj['color']
+      if not self.color in Color._VALUES_TO_NAMES:
+        msg = 'Integer value ''%s'' is not a recognized value of enum type Color' % self.color
+        if relax_enum_validation:
+            warnings.warn(msg)
+        else:
+            raise TProtocolException(TProtocolException.INVALID_DATA, msg)
 
   def __repr__(self):
     L = []
@@ -130,6 +168,10 @@ class MyAnnotation:
       value = pprint.pformat(self.signature, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    signature=%s' % (value))
+    if self.color is not None:
+      value = pprint.pformat(self.color, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    color=%s' % (value))
     return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
 
   def __eq__(self, other):
@@ -144,6 +186,7 @@ class MyAnnotation:
   def __dir__(self):
     return (
       'signature',
+      'color',
     )
 
   # Override the __hash__ function for Python3 - t10434117
@@ -5117,6 +5160,7 @@ all_structs.append(MyAnnotation)
 MyAnnotation.thrift_spec = (
   None, # 0
   (1, TType.STRING, 'signature', True, None, 2, ), # 1
+  (2, TType.I32, 'color', Color,   1, 2, ), # 2
 )
 
 MyAnnotation.thrift_struct_annotations = {
@@ -5124,13 +5168,15 @@ MyAnnotation.thrift_struct_annotations = {
 MyAnnotation.thrift_field_annotations = {
 }
 
-def MyAnnotation__init__(self, signature=None,):
+def MyAnnotation__init__(self, signature=None, color=MyAnnotation.thrift_spec[2][4],):
   self.signature = signature
+  self.color = color
 
 MyAnnotation.__init__ = MyAnnotation__init__
 
 def MyAnnotation__setstate__(self, state):
   state.setdefault('signature', None)
+  state.setdefault('color',   1)
   self.__dict__ = state
 
 MyAnnotation.__getstate__ = lambda self: self.__dict__.copy()

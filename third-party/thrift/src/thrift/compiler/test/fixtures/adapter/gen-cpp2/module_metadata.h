@@ -33,6 +33,11 @@ namespace detail {
 namespace md {
 
 template <>
+class EnumMetadata<::facebook::thrift::test::Color> {
+ public:
+  static void gen(ThriftMetadata& metadata);
+};
+template <>
 class EnumMetadata<::facebook::thrift::test::ThriftAdaptedEnum> {
  public:
   static void gen(ThriftMetadata& metadata);

@@ -20,6 +20,17 @@ namespace py3 {
 
 template<>
 const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+    ::facebook::thrift::test::Color>::namesmap() {
+  static const folly::Indestructible<NamesMap> pairs {
+    {
+    }
+  };
+  return *pairs;
+}
+
+
+template<>
+const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::facebook::thrift::test::ThriftAdaptedEnum>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {
@@ -56,6 +67,9 @@ void reset_field<::facebook::thrift::test::MyAnnotation>(
   switch (index) {
     case 0:
       obj.signature_ref().copy_from(default_inst<::facebook::thrift::test::MyAnnotation>().signature_ref());
+      return;
+    case 1:
+      obj.color_ref().copy_from(default_inst<::facebook::thrift::test::MyAnnotation>().color_ref());
       return;
   }
 }

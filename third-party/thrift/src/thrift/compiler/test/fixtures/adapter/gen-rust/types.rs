@@ -63,6 +63,7 @@ pub type CountingInt = ::std::primitive::i64;
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MyAnnotation {
     pub signature: ::std::string::String,
+    pub color: crate::types::Color,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -472,6 +473,128 @@ pub struct Person2 {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct Color(pub ::std::primitive::i32);
+
+impl Color {
+    pub const UNKNOWN: Self = Color(0i32);
+    pub const RED: Self = Color(1i32);
+    pub const GREEN: Self = Color(2i32);
+    pub const BLUE: Self = Color(3i32);
+}
+
+impl ::fbthrift::ThriftEnum for Color {
+    fn enumerate() -> &'static [(Self, &'static str)] {
+        &[
+            (Self::UNKNOWN, "UNKNOWN"),
+            (Self::RED, "RED"),
+            (Self::GREEN, "GREEN"),
+            (Self::BLUE, "BLUE"),
+        ]
+    }
+
+    fn variants() -> &'static [&'static str] {
+        &[
+            "UNKNOWN",
+            "RED",
+            "GREEN",
+            "BLUE",
+        ]
+    }
+
+    fn variant_values() -> &'static [Self] {
+        &[
+            Self::UNKNOWN,
+            Self::RED,
+            Self::GREEN,
+            Self::BLUE,
+        ]
+    }
+}
+
+impl ::std::default::Default for Color {
+    fn default() -> Self {
+        Self(::fbthrift::__UNKNOWN_ID)
+    }
+}
+
+impl<'a> ::std::convert::From<&'a Color> for ::std::primitive::i32 {
+    #[inline]
+    fn from(x: &'a Color) -> Self {
+        x.0
+    }
+}
+
+impl ::std::convert::From<Color> for ::std::primitive::i32 {
+    #[inline]
+    fn from(x: Color) -> Self {
+        x.0
+    }
+}
+
+impl ::std::convert::From<::std::primitive::i32> for Color {
+    #[inline]
+    fn from(x: ::std::primitive::i32) -> Self {
+        Self(x)
+    }
+}
+
+impl ::std::fmt::Display for Color {
+    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        static VARIANTS_BY_NUMBER: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
+            ("UNKNOWN", 0),
+            ("RED", 1),
+            ("GREEN", 2),
+            ("BLUE", 3),
+        ];
+        ::fbthrift::help::enum_display(VARIANTS_BY_NUMBER, fmt, self.0)
+    }
+}
+
+impl ::std::fmt::Debug for Color {
+    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(fmt, "Color::{}", self)
+    }
+}
+
+impl ::std::str::FromStr for Color {
+    type Err = ::anyhow::Error;
+
+    fn from_str(string: &::std::primitive::str) -> ::std::result::Result<Self, Self::Err> {
+        static VARIANTS_BY_NAME: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
+            ("BLUE", 3),
+            ("GREEN", 2),
+            ("RED", 1),
+            ("UNKNOWN", 0),
+        ];
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "Color").map(Self)
+    }
+}
+
+impl ::fbthrift::GetTType for Color {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+
+impl<P> ::fbthrift::Serialize<P> for Color
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn write(&self, p: &mut P) {
+        p.write_i32(self.into())
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for Color
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct ThriftAdaptedEnum(pub ::std::primitive::i32);
 
 impl ThriftAdaptedEnum {
@@ -613,6 +736,7 @@ impl ::std::default::Default for self::MyAnnotation {
     fn default() -> Self {
         Self {
             signature: ::std::default::Default::default(),
+            color: crate::types::Color::RED,
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -623,6 +747,7 @@ impl ::std::fmt::Debug for self::MyAnnotation {
         formatter
             .debug_struct("MyAnnotation")
             .field("signature", &self.signature)
+            .field("color", &self.color)
             .finish()
     }
 }
@@ -649,6 +774,9 @@ where
         p.write_field_begin("signature", ::fbthrift::TType::String, 1);
         ::fbthrift::Serialize::write(&self.signature, p);
         p.write_field_end();
+        p.write_field_begin("color", ::fbthrift::TType::I32, 2);
+        ::fbthrift::Serialize::write(&self.color, p);
+        p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -660,15 +788,18 @@ where
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("color", ::fbthrift::TType::I32, 2),
             ::fbthrift::Field::new("signature", ::fbthrift::TType::String, 1),
         ];
         let mut field_signature = ::std::option::Option::None;
+        let mut field_color = ::std::option::Option::None;
         let _ = p.read_struct_begin(|_| ())?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
                 (::fbthrift::TType::String, 1) => field_signature = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 2) => field_color = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -676,6 +807,7 @@ where
         p.read_struct_end()?;
         ::std::result::Result::Ok(Self {
             signature: field_signature.unwrap_or_default(),
+            color: field_color.unwrap_or(crate::types::Color::RED),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }

@@ -290,7 +290,8 @@ let derive_definitely_has_static_accesses adjacency_table static_accesses =
     static_key(needs, Certainty, E, Key, Ty) :- static_key_base(needs, Certainty, E, Key, Ty).
     static_key(needs, Certainty, F, Key, Ty) :- static_key(needs, Certainty, E, Key, Ty), subsets(F,E).
 *)
-let derive_disjunctive_static_accesses adjacency_table variety static_accesses =
+let derive_disjunctive_static_accesses adjacency_table direction static_accesses
+    =
   let open StaticAccess.Set in
   let rec close_upwards ~delta ~acc =
     if is_empty delta then
@@ -300,9 +301,11 @@ let derive_disjunctive_static_accesses adjacency_table variety static_accesses =
         Hashtbl.find adjacency_table e
         |> Option.value_map ~default:empty ~f:(fun adjacency ->
                let adjacency =
-                 match variety with
-                 | Has -> adjacency.forwards
-                 | Needs -> adjacency.backwards
+                 match direction with
+                 | `Forwards -> adjacency.forwards
+                 | `Backwards -> adjacency.backwards
+                 | `ForwardsAndBackwards ->
+                   EntitySet.union adjacency.forwards adjacency.backwards
                in
                EntitySet.fold (fun e -> add (e, k, ty)) adjacency empty)
       in
@@ -368,7 +371,7 @@ let deduce (constraints : constraint_ list) : constraint_ list =
   let maybe_has_static_accesses =
     derive_disjunctive_static_accesses
       adjacency_table
-      Has
+      `Forwards
       (StaticAccess.Set.union
          maybe_has_static_accesses
          definitely_has_static_accesses)
@@ -385,7 +388,7 @@ let deduce (constraints : constraint_ list) : constraint_ list =
   let definitely_needs_static_accesses =
     derive_disjunctive_static_accesses
       adjacency_table
-      Needs
+      `Backwards (* TODO(T136668856): consider `ForwardsAndBackwards here *)
       definitely_needs_static_accesses
   in
 
@@ -393,7 +396,7 @@ let deduce (constraints : constraint_ list) : constraint_ list =
   let maybe_needs_static_accesses =
     derive_disjunctive_static_accesses
       adjacency_table
-      Needs
+      `ForwardsAndBackwards
       maybe_needs_static_accesses
   in
 
@@ -505,7 +508,9 @@ let produce_results
     let add_known_keys = add_known_keys in
     forward_static_shape_results
     |> add_known_keys maybe_has_static_accesses ~is_optional:true
+    |> add_known_keys maybe_needs_static_accesses ~is_optional:true
     |> add_known_keys definitely_has_static_accesses ~is_optional:false
+    (* TODO(T136668856): consider add_known_keys definitely_needs_static_accesses here *)
   in
 
   let backward_static_shape_results =

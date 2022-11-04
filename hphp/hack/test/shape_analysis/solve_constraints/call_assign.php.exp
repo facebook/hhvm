@@ -6,4 +6,4 @@ Summary after closing and simplifying for \g:
 [7:12-30] [Parameter]:
   shape(?'a' => int)
 [9:11-13] [Debug]:
-  shape('b' => bool)
+  shape(?'a' => int, 'b' => bool)

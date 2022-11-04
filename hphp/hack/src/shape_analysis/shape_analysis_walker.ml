@@ -313,7 +313,9 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
              ~pos
              ~origin:__LINE__
              ~certainty:Definite
-             ~variety:[Has; Needs]
+             ~variety:
+               [Has; Needs]
+               (*TODO(T136668856): consider only generating a `Needs` constraint here, and propagating `Needs` forward *)
              ~base_ty
              (ix, ty))
         base_entity

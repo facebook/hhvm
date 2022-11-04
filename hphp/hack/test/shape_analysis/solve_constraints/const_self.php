@@ -3,6 +3,6 @@
 class Foo {
     const dict<string, string> DICT = dict["a" => "2"]; // expect ?'b' key
     public static function foo(): void {
-      self::DICT['b'];
+      self::DICT['b'];  // out of bounds T136763758
     }
 }

@@ -6,6 +6,6 @@ class TheParent {
 
 class TheChild extends TheParent {
     public static function foo(): void {
-      parent::DICT['b'];
+      parent::DICT['b'];  // out of bounds T136763758
     }
 }

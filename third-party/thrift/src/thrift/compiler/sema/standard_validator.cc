@@ -467,7 +467,7 @@ void validate_boxed_field_attributes(
 
   if (intern_box) {
     ctx.check(
-        node.type()->is_struct(),
+        node.type()->get_true_type()->is_struct(),
         "The `@thrift.InternBox` annotation can only be used with a struct field.");
     // TODO(dokwon): Add support for custom defaults and remove this check.
     ctx.check(

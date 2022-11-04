@@ -1,0 +1,33 @@
+{
+  "errors":[
+    {
+      "descr":"This use of `HH\\FIXME\\UNSAFE_CAST` is redundant since the type of the expression is a subtype of the type being cast to. Please remove this cast.",
+      "severity":"error",
+      "path":"test_quickfix_redundant_unsafe_cast.php",
+      "line":7,
+      "start":18,
+      "end":58,
+      "code":5647,
+      "bypass_changed_lines":false,
+      "original":"HH\\FIXME\\UNSAFE_CAST<mixed, arraykey>($x)",
+      "replacement":"$x",
+      "start_offset":112,
+      "width":41
+    },
+    {
+      "descr":"The input type to `HH\\FIXME\\UNSAFE_CAST` should be as specific as possible. Consider using `?int` instead.",
+      "severity":"error",
+      "path":"test_quickfix_redundant_unsafe_cast.php",
+      "line":11,
+      "start":39,
+      "end":43,
+      "code":5636,
+      "bypass_changed_lines":false,
+      "original":"mixed",
+      "replacement":"?int",
+      "start_offset":245,
+      "width":5
+    }
+  ],
+  "version":" Wed Dec 31 16:00:00 1969"
+}

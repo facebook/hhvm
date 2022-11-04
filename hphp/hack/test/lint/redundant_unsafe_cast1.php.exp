@@ -1,0 +1,14 @@
+File "redundant_unsafe_cast1.php", line 11, characters 3-46:
+This use of `HH\FIXME\UNSAFE_CAST` is redundant since the type of the expression is a subtype of the type being cast to. Please remove this cast. (Lint[5647])
+File "redundant_unsafe_cast1.php", line 12, characters 3-41:
+This use of `HH\FIXME\UNSAFE_CAST` is redundant since the type of the expression is a subtype of the type being cast to. Please remove this cast. (Lint[5647])
+File "redundant_unsafe_cast1.php", line 13, characters 3-33:
+This use of `HH\FIXME\UNSAFE_CAST` is redundant since the type of the expression is a subtype of the type being cast to. Please remove this cast. (Lint[5647])
+File "redundant_unsafe_cast1.php", line 14, characters 3-42:
+This use of `HH\FIXME\UNSAFE_CAST` is redundant since the type of the expression is a subtype of the type being cast to. Please remove this cast. (Lint[5647])
+File "redundant_unsafe_cast1.php", line 15, characters 3-42:
+This use of `HH\FIXME\UNSAFE_CAST` is redundant since the type of the expression is a subtype of the type being cast to. Please remove this cast. (Lint[5647])
+File "redundant_unsafe_cast1.php", line 16, characters 3-50:
+This use of `HH\FIXME\UNSAFE_CAST` is redundant since the type of the expression is a subtype of the type being cast to. Please remove this cast. (Lint[5647])
+File "redundant_unsafe_cast1.php", line 17, characters 3-41:
+This use of `HH\FIXME\UNSAFE_CAST` is redundant since the type of the expression is a subtype of the type being cast to. Please remove this cast. (Lint[5647])

@@ -104,4 +104,6 @@ module Codes = struct
   let unconditional_recursion = 5645
 
   let branch_return_same_value = 5646
+
+  let redundant_unsafe_cast = 5647
 end

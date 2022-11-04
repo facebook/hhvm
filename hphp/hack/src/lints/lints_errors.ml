@@ -390,6 +390,19 @@ let duplicate_property pos ~class_name ~prop_name ~class_names =
            class_names)
     ^ "): all instances will be aliased at runtime")
 
+let redundant_unsafe_cast hole_pos expr_pos =
+  let msg =
+    "This use of `HH\\FIXME\\UNSAFE_CAST` is redundant since the type of the expression is a subtype of the type being cast to. Please remove this cast."
+  in
+  let autofix =
+    let path = Pos.filename (Pos.to_absolute hole_pos) in
+    let lines = Errors.read_lines path in
+    let content = String.concat ~sep:"\n" lines in
+    let modified = Pos.get_text_from_pos ~content expr_pos in
+    Some (modified, hole_pos)
+  in
+  Lints.add ~autofix Codes.redundant_unsafe_cast Lint_error hole_pos msg
+
 let loose_unsafe_cast_lower_bound p ty_str_opt =
   let msg =
     "The input type to `HH\\FIXME\\UNSAFE_CAST` should be as specific as possible."

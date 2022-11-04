@@ -50,7 +50,11 @@ let show_constraint env =
 
 let show_inter_constraint _ = function
   | HT.Arg (((_, f_id), arg_idx), ent) ->
-    Format.asprintf "Arg(%s, %i, %s)" f_id arg_idx (show_entity ent)
+    Format.asprintf
+      "Arg(%s, %s, %s)"
+      f_id
+      (HT.show_param_index arg_idx)
+      (show_entity ent)
   | HT.Constant const ->
     Format.asprintf "Constant %s" (HT.show_const_entity const)
   | HT.ConstantInitial inst ->

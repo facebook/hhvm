@@ -1,12 +1,12 @@
 === Shape analysis results for new.php
 Summary for \C::__construct:
-[4:56-60] : dynamic
-(Param (([4:31-50], "\\C::__construct"), 0)) : dynamic
+(Param (([4:31-50], "\\C::__construct"), (Index 0))) : dynamic
+(Param (([4:56-60], "\\C::__construct"), Return)) : dynamic
 Summary for \f:
 [8:9-15] [Allocation]:
   shape()
-[7:15-19] : dynamic
 [9:9-15] : dynamic
+(Param (([7:15-19], "\\f"), Return)) : dynamic
 (ConstantIdentifier
    { ident_pos = [10:7-8]; class_name_opt = (Some "\\C");
      const_name = "__construct" }) : dynamic

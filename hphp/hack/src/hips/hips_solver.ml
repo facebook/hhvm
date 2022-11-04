@@ -200,7 +200,8 @@ module Inter (I : Intra) = struct
                   List.find
                     ~f:(function
                       | Inter (Param ((_, g), g_idx)) ->
-                        String.equal f g && Int.equal f_idx g_idx
+                        String.equal f g
+                        && Hips_types.equal_param_index f_idx g_idx
                       | _ -> false)
                     constr_list_at_
                 in

@@ -1,15 +1,15 @@
 === Shape analysis results for unpack.php
 Summary for \C::splat_m:
-[4:39-43] : dynamic
+(Param (([4:39-43], "\\C::splat_m"), Return)) : dynamic
 Summary for \main1:
-[7:23-27] : dynamic
 [8:18-46] : dynamic
-(Param (([7:16-17], "\\main1"), 0)) : dynamic
+(Param (([7:16-17], "\\main1"), (Index 0))) : dynamic
+(Param (([7:23-27], "\\main1"), Return)) : dynamic
 Summary for \main2:
-[13:19-23] : dynamic
 [14:14-42] : dynamic
+(Param (([13:19-23], "\\main2"), Return)) : dynamic
 Summary for \splat_f:
-[11:30-34] : dynamic
+(Param (([11:30-34], "\\splat_f"), Return)) : dynamic
 
 Errors:
 "[8:3-14]: Unsupported expression: Obj_get"

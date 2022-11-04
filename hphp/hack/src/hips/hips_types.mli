@@ -17,7 +17,12 @@ type constant_identifier_entity = {
 }
 [@@deriving ord, show { with_path = false }]
 
-type param_entity = A.id * int [@@deriving ord, show]
+type param_index =
+  | Index of int
+  | Return
+[@@deriving eq, ord, show { with_path = false }]
+
+type param_entity = A.id * param_index [@@deriving ord, show]
 
 type class_identifier_entity = A.id [@@deriving ord, show]
 

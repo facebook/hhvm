@@ -2,5 +2,5 @@
 Summary for \f:
 [5:8-25] [Allocation]:
   shape('b' => bool)
-[3:15-34] : dynamic
 [4:8-23] : dynamic
+(Param (([3:15-34], "\\f"), Return)) : dynamic

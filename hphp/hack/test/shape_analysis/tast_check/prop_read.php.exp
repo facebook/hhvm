@@ -1,11 +1,11 @@
 === Shape analysis results for prop_read.php
 Summary for \class_write:
-[12:25-29] : dynamic
 [13:7-13] : dynamic
+(Param (([12:25-29], "\\class_write"), Return)) : dynamic
 Summary for \instance_write:
-[8:32-36] : dynamic
 [9:7-13] : dynamic
-(Param (([8:25-26], "\\instance_write"), 0)) : dynamic
+(Param (([8:25-26], "\\instance_write"), (Index 0))) : dynamic
+(Param (([8:32-36], "\\instance_write"), Return)) : dynamic
 
 Errors:
 "[13:15-29]: Unsupported expression: Class_get"

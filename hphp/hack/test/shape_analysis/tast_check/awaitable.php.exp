@@ -1,4 +1,4 @@
 === Shape analysis results for awaitable.php
 Summary for \f:
-[3:21-51] : dynamic
 [5:10-16] : dynamic
+(Param (([3:21-51], "\\f"), Return)) : dynamic

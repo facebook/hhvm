@@ -12,5 +12,6 @@ Constraints for \main:
    { ident_pos = [6:3-7]; class_name_opt = None; const_name = "\\DICT" }) : shape('b' => mixed)
    6: ? SK (ConstantIdentifier
    { ident_pos = [6:3-7]; class_name_opt = None; const_name = "\\DICT" }) : shape('b' => mixed)
+   5: Parameter (([5:18-22], "\\main"), Return)
    6: ConstantIdentifier { ident_pos = [6:3-7]; class_name_opt = None; const_name = "\\DICT" }
 

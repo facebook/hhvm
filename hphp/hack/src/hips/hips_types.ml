@@ -17,7 +17,12 @@ type constant_identifier_entity = {
 }
 [@@deriving ord, show { with_path = false }]
 
-type param_entity = A.id * int [@@deriving ord, show]
+type param_index =
+  | Index of int
+  | Return
+[@@deriving eq, ord, show { with_path = false }]
+
+type param_entity = A.id * param_index [@@deriving ord, show]
 
 type class_identifier_entity = A.id [@@deriving ord, show]
 
@@ -75,7 +80,7 @@ end
 let equal_entity (ent1 : entity) (ent2 : entity) : bool =
   match (ent1, ent2) with
   | (Param ((_, f_id), f_idx), Param ((_, g_id), g_idx)) ->
-    String.equal f_id g_id && Int.equal f_idx g_idx
+    String.equal f_id g_id && equal_param_index f_idx g_idx
   | (Constant (pos1, id1), Constant (pos2, id2)) ->
     A.equal_pos pos1 pos2 && String.equal id1 id2
   | ( ConstantIdentifier

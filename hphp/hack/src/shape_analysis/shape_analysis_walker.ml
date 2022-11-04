@@ -438,7 +438,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
             (* TODO: inout parameters need special treatment inter-procedurally *)
             let inter_constraint_ =
               decorate ~origin:__LINE__
-              @@ HT.Arg (((pos, f_id), arg_idx), arg_entity_)
+              @@ HT.Arg (((pos, f_id), HT.Index arg_idx), arg_entity_)
             in
             Env.add_inter_constraint env inter_constraint_
           | _ -> env
@@ -467,6 +467,17 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     in
     (* Handle the return. *)
     let return_entity = Env.fresh_var () in
+    let env =
+      match base with
+      (* TODO: handle function calls through variables *)
+      | (_, _, A.Id (_, f_id)) when not @@ String.equal f_id SN.Hips.inspect ->
+        let constraint_ =
+          decorate ~origin:__LINE__
+          @@ HT.Arg (((pos, f_id), HT.Return), return_entity)
+        in
+        Env.add_inter_constraint env constraint_
+      | _ -> env
+    in
     let env =
       when_local_mode mode ~default:env @@ fun () ->
       let constraint_ =
@@ -714,7 +725,7 @@ let decl_hint mode kind tast_env ((ty, hint) : T.type_hint) :
   let entity_ =
     match kind with
     | `Parameter (id, idx) -> Inter (HT.Param ((hint_pos, id), idx))
-    | `Return -> Literal hint_pos
+    | `Return id -> Inter (HT.Param ((hint_pos, id), HT.Return))
   in
   let decorate ~origin constraint_ =
     { hack_pos = hint_pos; origin; constraint_ }
@@ -725,12 +736,15 @@ let decl_hint mode kind tast_env ((ty, hint) : T.type_hint) :
       DecoratedInterConstraintSet.singleton
       @@ decorate ~origin:__LINE__
       @@ HT.Param ((hint_pos, id), idx)
-    | `Return -> DecoratedInterConstraintSet.empty
+    | `Return id ->
+      DecoratedInterConstraintSet.singleton
+      @@ decorate ~origin:__LINE__
+      @@ HT.Param ((hint_pos, id), HT.Return)
   in
   let kind =
     match kind with
     | `Parameter _ -> Parameter
-    | `Return -> Return
+    | `Return _ -> Return
   in
   let constraints =
     if might_be_dict tast_env ty then
@@ -752,7 +766,7 @@ let decl_hint mode kind tast_env ((ty, hint) : T.type_hint) :
 let init_params mode id tast_env (params : T.fun_param list) :
     decorated_constraints * entity LMap.t =
   let add_param
-      idx
+      (idx : int)
       ((intra_constraints, inter_constraints), lmap)
       A.{ param_name; param_type_hint; param_is_variadic; _ } =
     if param_is_variadic then
@@ -760,7 +774,7 @@ let init_params mode id tast_env (params : T.fun_param list) :
       ((intra_constraints, inter_constraints), lmap)
     else
       let ((new_intra_constraints, new_inter_constraints), entity) =
-        decl_hint mode (`Parameter (id, idx)) tast_env param_type_hint
+        decl_hint mode (`Parameter (id, HT.Index idx)) tast_env param_type_hint
       in
       let param_lid = Local_id.make_unscoped param_name in
       let lmap = LMap.add param_lid entity lmap in
@@ -788,7 +802,7 @@ let callable mode id tast_env params ~return body =
     init_params mode id tast_env params
   in
   let ((return_intra_constraints, return_inter_constraints), return) =
-    decl_hint mode `Return tast_env return
+    decl_hint mode (`Return id) tast_env return
   in
   let intra_constraints =
     DecoratedConstraintSet.union

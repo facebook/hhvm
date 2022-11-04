@@ -2,5 +2,5 @@
 Summary for \f:
 [6:3-20] [Allocation]:
   shape('key' => int)
-[3:15-19] : dynamic
 [5:3-19] : dynamic
+(Param (([3:15-19], "\\f"), Return)) : dynamic

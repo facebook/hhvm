@@ -4,19 +4,19 @@ Summary for \dont_invalidate:
   shape('a' => int)
 [12:18-33] [Allocation]:
   shape('a' => int)
-[8:29-33] : dynamic
+(Param (([8:29-33], "\\dont_invalidate"), Return)) : dynamic
 Summary for \invalidate:
-[17:24-28] : dynamic
 [18:8-27] : dynamic
 [18:20-26] : dynamic
 [21:18-33] : dynamic
 [24:28-43] : dynamic
+(Param (([17:24-28], "\\invalidate"), Return)) : dynamic
 Summary for \takes_dict:
-[4:46-50] : dynamic
-(Param (([4:21-40], "\\takes_dict"), 0)) : dynamic
+(Param (([4:21-40], "\\takes_dict"), (Index 0))) : dynamic
+(Param (([4:46-50], "\\takes_dict"), Return)) : dynamic
 Summary for \takes_int:
-[3:29-33] : dynamic
-(Param (([3:20-23], "\\takes_int"), 0)) : dynamic
+(Param (([3:20-23], "\\takes_int"), (Index 0))) : dynamic
+(Param (([3:29-33], "\\takes_int"), Return)) : dynamic
 Summary for \takes_tuple:
-[5:54-58] : dynamic
-(Param (([5:22-48], "\\takes_tuple"), 0)) : dynamic
+(Param (([5:22-48], "\\takes_tuple"), (Index 0))) : dynamic
+(Param (([5:54-58], "\\takes_tuple"), Return)) : dynamic

@@ -1,10 +1,10 @@
 === Shape analysis results for idx2.php
 Constraints for \idx_ife:
    3: Parameter at [3:18-37]
-   4: (Param (([3:18-37], "\\idx_ife"), 0)) ⊆ ?2
-   4: (Param (([3:42-46], "\\idx_ife"), 1)) ⊆ ?1
-   4: (Param (([3:18-37], "\\idx_ife"), 0)) ⊆ ?4
-   4: (Param (([3:42-46], "\\idx_ife"), 1)) ⊆ ?3
+   4: (Param (([3:18-37], "\\idx_ife"), (Index 0))) ⊆ ?2
+   4: (Param (([3:42-46], "\\idx_ife"), (Index 1))) ⊆ ?1
+   4: (Param (([3:18-37], "\\idx_ife"), (Index 0))) ⊆ ?4
+   4: (Param (([3:42-46], "\\idx_ife"), (Index 1))) ⊆ ?3
    4: ?1 ⊆ ?5
    4: ?2 ⊆ ?6
    4: ?3 ⊆ ?5
@@ -25,6 +25,7 @@ Constraints for \idx_ife:
   12: ? SK ?4 : shape('c2' => mixed)
   13: ! SK ?4 : shape(?'d2' => mixed)
   13: ? SK ?4 : shape(?'d2' => mixed)
-   3: Parameter (([3:18-37], "\\idx_ife"), 0)
-   3: Parameter (([3:42-46], "\\idx_ife"), 1)
+   3: Parameter (([3:18-37], "\\idx_ife"), (Index 0))
+   3: Parameter (([3:42-46], "\\idx_ife"), (Index 1))
+   3: Parameter (([3:52-56], "\\idx_ife"), Return)
 

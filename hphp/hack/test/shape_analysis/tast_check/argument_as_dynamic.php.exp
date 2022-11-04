@@ -2,8 +2,8 @@
 Summary for \f:
 [7:8-25] [Allocation]:
   shape('b' => bool)
-[5:15-19] : dynamic
 [6:8-23] : dynamic
+(Param (([5:15-19], "\\f"), Return)) : dynamic
 Summary for \g:
-[3:37-41] : dynamic
-(Param (([3:12-31], "\\g"), 0)) : dynamic
+(Param (([3:12-31], "\\g"), (Index 0))) : dynamic
+(Param (([3:37-41], "\\g"), Return)) : dynamic

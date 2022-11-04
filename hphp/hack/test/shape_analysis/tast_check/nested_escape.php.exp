@@ -1,8 +1,8 @@
 === Shape analysis results for nested_escape.php
 Summary for \escapes_via_return:
-[3:32-42] : dynamic
 [4:14-20] : dynamic
+(Param (([3:32-42], "\\escapes_via_return"), Return)) : dynamic
 Summary for \influenced_via_param:
-[7:63-67] : dynamic
 [8:12-18] : dynamic
-(Param (([7:31-55], "\\influenced_via_param"), 0)) : dynamic
+(Param (([7:31-55], "\\influenced_via_param"), (Index 0))) : dynamic
+(Param (([7:63-67], "\\influenced_via_param"), Return)) : dynamic

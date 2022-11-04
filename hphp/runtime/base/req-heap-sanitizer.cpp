@@ -139,6 +139,7 @@ void HeapObjectSanitizer::install_signal_handler() {
   sigaction(SIGSEGV, &sa, &oldHandler);
 }
 
+#ifdef __x86_64__
 void
 HeapObjectSanitizer::access_handler(int signo, siginfo_t* info, void* extra) {
   auto ctx = (ucontext_t *)extra;
@@ -285,5 +286,10 @@ HeapObjectSanitizer::access_handler(int signo, siginfo_t* info, void* extra) {
   signal(signo, SIG_DFL);
   raise(signo);
 }
+#else // __x86_64__
+void HeapObjectSanitizer::access_handler(int, siginfo_t*, void*) {
+  assertx(false && "port me");
+}
+#endif // __x86_64__
 
 }

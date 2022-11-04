@@ -49,6 +49,8 @@ type global_access_pattern =
   | WriteLiteral (* Assign a literal to a global variable *)
   | WriteGlobalToGlobal (* Assign a global variable to another one *)
   | WriteNonSensitive (* Write non-sensitive data to a global variable *)
+  | SuperGlobalWrite (* Global write via super global functions *)
+  | SuperGlobalRead (* Global read via super global functions *)
   | NoPattern (* No pattern above is recognized *)
 [@@deriving eq, ord, show { with_path = false }]
 
@@ -174,6 +176,192 @@ let src_from_first_para_func_ids =
 (* Functions that check if its first parameter is not null. *)
 let check_non_null_func_ids =
   SSet.of_list ["\\FlibSL\\C\\contains_key"; "\\HH\\Lib\\C\\contains_key"]
+
+(* The type to represent the super global classes under www/flib/core/superglobals. *)
+type super_global_class_detail = {
+  (* global_variable is None if the corresponding super global variable is not fixed,
+     but is given as the parameter of get/set methods, e.g. in GlobalVARIABLES. *)
+  global_variable: string option;
+  global_write_methods: SSet.t;
+  global_read_methods: SSet.t;
+}
+
+(* Map from super global class names to the corresponding details. *)
+let super_global_class_map : super_global_class_detail SMap.t =
+  SMap.of_list
+    [
+      ( "\\GlobalCOOKIE",
+        {
+          global_variable = Some "$_COOKIE";
+          global_write_methods =
+            SSet.of_list
+              [
+                "redactCookieSuperglobal";
+                "overrideCookieSuperglobalForEmulation";
+                "setForCookieMonsterInternalTest";
+              ];
+          global_read_methods =
+            SSet.of_list
+              [
+                "getInitialKeys";
+                "getCopy_COOKIE_MONSTER_INTERNAL_ONLY";
+                "getCopyForEmulation";
+              ];
+        } );
+      ( "\\GlobalENV",
+        {
+          global_variable = Some "$_ENV";
+          global_write_methods = SSet.of_list ["set_ENV_DO_NOT_USE"; "set"];
+          global_read_methods =
+            SSet.of_list
+              ["getCopy_DO_NOT_USE"; "get"; "getReadonly"; "idx"; "idxReadonly"];
+        } );
+      ( "\\GlobalFILES",
+        {
+          global_variable = Some "$_FILES";
+          global_write_methods = SSet.of_list ["set_FILES_DO_NOT_USE"; "set"];
+          global_read_methods =
+            SSet.of_list ["getCopy_DO_NOT_USE"; "get"; "getReadonly"; "idx"];
+        } );
+      ( "\\GlobalGET",
+        {
+          global_variable = Some "$_GET";
+          global_write_methods = SSet.of_list ["set_GET_DO_NOT_USE"; "set"];
+          global_read_methods =
+            SSet.of_list
+              ["getCopy_DO_NOT_USE"; "get"; "getReadonly"; "idx"; "idxReadonly"];
+        } );
+      ( "\\GlobalPOST",
+        {
+          global_variable = Some "$_POST";
+          global_write_methods = SSet.of_list ["set_POST_DO_NOT_USE"; "set"];
+          global_read_methods =
+            SSet.of_list
+              ["getCopy_DO_NOT_USE"; "get"; "getReadonly"; "idx"; "idxReadonly"];
+        } );
+      ( "\\GlobalREQUEST",
+        {
+          global_variable = Some "$_REQUEST";
+          global_write_methods =
+            SSet.of_list
+              [
+                "set_REQUEST_DO_NOT_USE";
+                "set";
+                "redactCookiesFromRequestSuperglobal";
+              ];
+          global_read_methods =
+            SSet.of_list ["getCopy_DO_NOT_USE"; "get"; "getReadonly"; "idx"];
+        } );
+      ( "\\GlobalSERVER",
+        {
+          global_variable = Some "$_SERVER";
+          global_write_methods = SSet.of_list ["set_SERVER_DO_NOT_USE"; "set"];
+          global_read_methods =
+            SSet.of_list
+              [
+                "getCopy_DO_NOT_USE";
+                "getDocumentRoot";
+                "getPHPRoot";
+                "getPHPSelf";
+                "getRequestTime";
+                "getParentRequestTime";
+                "getRequestTimeFloat";
+                "getParentRequestTimeFloat";
+                "getScriptName";
+                "getServerAddress";
+                "getArgv";
+                "getArgc";
+                "getHTTPAuthorization";
+                "getHTTPHost";
+                "getHTTPReferer_DO_NOT_USE";
+                "getHTTPUserAgent";
+                "getRequestMethod";
+                "getSecFetchDest";
+                "getSecFetchMode";
+                "getSecFetchSite";
+                "getSecFetchUser";
+                "getXFBLSD";
+                "getTFBENV";
+                "getRequestURIString";
+                "getRequestURI_UNSAFE_TO_LOG";
+                "getServerName";
+                "getUserName";
+                "getLocalCanaryID";
+                "getInterestingIniKeys";
+                "idx";
+                "idxReadonly";
+                "get";
+                "getReadonly";
+                "idxString_UNSAFE";
+                "idxArgv";
+              ];
+        } );
+      (* GlobalSESSION is not implemented and hence omitted. *)
+      ( "\\GlobalVARIABLES",
+        {
+          (* The global variable is not fixed but given as the methods's parameter. *)
+          global_variable = None;
+          global_write_methods = SSet.of_list ["set"];
+          global_read_methods =
+            SSet.of_list ["idxReadonly"; "idx"; "get"; "getReadonly"];
+        } );
+    ]
+
+(* Given an expression, check if it's a call of static method from some super global class.
+   If so, raise the global read/write error, and return true; otherwise, return false. *)
+let check_super_global_method expr env external_fun_name =
+  match expr with
+  | Call
+      ( ( func_ty,
+          pos,
+          Class_const ((_, _, CI (_, class_name)), (_, method_name)) ),
+        _,
+        tpl,
+        _ ) ->
+    (* Check if the class is a super global class *)
+    (match SMap.find_opt class_name super_global_class_map with
+    | Some class_detail ->
+      (* Check if the method is write or read or not recognized. *)
+      let error_code_pattern_opt =
+        if SSet.mem method_name class_detail.global_write_methods then
+          Some (GlobalAccessCheck.DefiniteGlobalWrite, SuperGlobalWrite)
+        else if SSet.mem method_name class_detail.global_read_methods then
+          Some (GlobalAccessCheck.DefiniteGlobalRead, SuperGlobalRead)
+        else
+          None
+      in
+      if Option.is_some error_code_pattern_opt then (
+        let func_ty_str = Tast_env.print_ty env func_ty in
+        let (error_code, pattern) = Option.get error_code_pattern_opt in
+        let default_global_var_name = "$_" in
+        let global_var_name =
+          match class_detail.global_variable with
+          | Some var_name -> var_name
+          | None ->
+            (* If the super global class does not have fixed global var name,
+               then the 1st parameter of those get/set methods is assumed to
+               be the global var; and if it's a string literal, we simply use
+               it, otherwise we don't know and use default name. *)
+            (match tpl with
+            | (_, (_, _, para_expr)) :: _ ->
+              (match para_expr with
+              | String s -> "$" ^ s
+              | _ -> default_global_var_name)
+            | [] -> default_global_var_name)
+        in
+        raise_global_access_error
+          env
+          pos
+          external_fun_name
+          ("superglobal " ^ func_ty_str)
+          (SSet.singleton global_var_name)
+          (GlobalAccessPatternSet.singleton pattern)
+          error_code;
+        true
+      ) else
+        false
+    | _ -> false)
+  | _ -> false
 
 (* The context maintains:
   (1) A hash table from local variables to the corresponding data sources.
@@ -817,20 +1005,23 @@ let visitor =
             (GlobalAccessPatternSet.singleton NoPattern)
             GlobalAccessCheck.DefiniteGlobalRead
       | Call (((func_ty, _, _) as func_expr), _, tpl, _) ->
-        (* First check if the called function is memoized. *)
-        let func_ty_str = Tast_env.print_ty env func_ty in
-        (match check_func_is_memoized func_expr env with
-        | Some memoized_func_name ->
-          raise_global_access_error
-            env
-            p
-            fun_name
-            func_ty_str
-            (SSet.singleton memoized_func_name)
-            (GlobalAccessPatternSet.singleton NoPattern)
-            GlobalAccessCheck.DefiniteGlobalRead
-        | None -> ());
-        (* Check if a global variable is used as the parameter. *)
+        (* First check if the called functions is from super globals. *)
+        let is_super_global_call = check_super_global_method e env fun_name in
+        (if not is_super_global_call then
+          (* If not super global, then check if the function is memoized. *)
+          let func_ty_str = Tast_env.print_ty env func_ty in
+          match check_func_is_memoized func_expr env with
+          | Some memoized_func_name ->
+            raise_global_access_error
+              env
+              p
+              fun_name
+              func_ty_str
+              (SSet.singleton memoized_func_name)
+              (GlobalAccessPatternSet.singleton NoPattern)
+              GlobalAccessCheck.DefiniteGlobalRead
+          | None -> ());
+        (* Lastly, check if a global variable is used as the parameter. *)
         List.iter tpl ~f:(fun (pk, ((ty, pos, _) as expr)) ->
             let e_global_opt =
               match pk with

@@ -65,22 +65,29 @@ const config = {
         alt: 'Facebook Thrift Logo',
         src: 'img/logo.svg'
       },
-      items: [{
-        type: 'doc',
-        docId: 'intro',
-        position: 'left',
-        label: 'Documentation'
-      },
-      {
-        to: 'toc',
-        position: 'left',
-        label: 'API'
-      },
-      ...fbInternalOnly([{
-        "to": "docs/fb/",
-        "label": "Meta Development",
-        "position": "left"
-      }]),
+      items: [
+        {
+          type: 'doc',
+          docId: 'intro',
+          position: 'left',
+          label: 'Documentation'
+        },
+        {
+          position: 'left',
+          label: 'API',
+          items: [ // This generates a dropdown menu for API
+            {
+              to: 'toc',
+              label: 'C++',
+            }
+          ]
+        },
+        ...fbInternalOnly([{
+          "to": "docs/fb/",
+          "label": "Meta Development",
+          "position": "left"
+        }
+      ]),
       // Please keep GitHub link to the right for consistency.
       {
         href: 'https://github.com/facebook/fbthrift',

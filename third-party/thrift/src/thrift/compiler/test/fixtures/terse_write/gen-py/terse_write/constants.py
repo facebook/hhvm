@@ -21,5 +21,5 @@ import thrift.annotation.hack.ttypes
 import thrift.annotation.thrift.ttypes
 
 
-from .ttypes import UTF8STRINGS, MyEnum, MyStruct, MyStructWithCustomDefault, StructLevelTerseStruct, FieldLevelTerseStruct, TerseStructWithCustomDefault, AdaptedFields, WrappedFields, TerseException, MyInteger
+from .ttypes import UTF8STRINGS, MyEnum, MyStruct, MyUnion, MyStructWithCustomDefault, StructLevelTerseStruct, FieldLevelTerseStruct, TerseStructWithCustomDefault, AdaptedFields, WrappedFields, TerseException, MyInteger
 

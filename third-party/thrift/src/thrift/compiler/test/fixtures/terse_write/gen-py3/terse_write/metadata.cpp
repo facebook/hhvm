@@ -16,6 +16,7 @@ namespace terse_write {
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
   ::apache::thrift::detail::md::EnumMetadata<MyEnum>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyStruct>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<MyUnion>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyStructWithCustomDefault>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<StructLevelTerseStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<FieldLevelTerseStruct>::gen(metadata);

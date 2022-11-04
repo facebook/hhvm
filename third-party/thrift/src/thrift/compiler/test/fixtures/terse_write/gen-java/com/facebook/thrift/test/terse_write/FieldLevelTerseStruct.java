@@ -39,6 +39,7 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
         @com.facebook.swift.codec.ThriftField(value=12, name="terse_set_field", requiredness=Requiredness.TERSE) final Set<Short> terseSetField,
         @com.facebook.swift.codec.ThriftField(value=13, name="terse_map_field", requiredness=Requiredness.TERSE) final Map<Short, Short> terseMapField,
         @com.facebook.swift.codec.ThriftField(value=14, name="terse_struct_field", requiredness=Requiredness.TERSE) final com.facebook.thrift.test.terse_write.MyStruct terseStructField,
+        @com.facebook.swift.codec.ThriftField(value=29, name="terse_union_field", requiredness=Requiredness.TERSE) final com.facebook.thrift.test.terse_write.MyUnion terseUnionField,
         @com.facebook.swift.codec.ThriftField(value=15, name="bool_field", requiredness=Requiredness.NONE) final boolean boolField,
         @com.facebook.swift.codec.ThriftField(value=16, name="byte_field", requiredness=Requiredness.NONE) final byte byteField,
         @com.facebook.swift.codec.ThriftField(value=17, name="short_field", requiredness=Requiredness.NONE) final short shortField,
@@ -52,7 +53,8 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
         @com.facebook.swift.codec.ThriftField(value=25, name="list_field", requiredness=Requiredness.NONE) final List<Short> listField,
         @com.facebook.swift.codec.ThriftField(value=26, name="set_field", requiredness=Requiredness.NONE) final Set<Short> setField,
         @com.facebook.swift.codec.ThriftField(value=27, name="map_field", requiredness=Requiredness.NONE) final Map<Short, Short> mapField,
-        @com.facebook.swift.codec.ThriftField(value=28, name="struct_field", requiredness=Requiredness.NONE) final com.facebook.thrift.test.terse_write.MyStruct structField
+        @com.facebook.swift.codec.ThriftField(value=28, name="struct_field", requiredness=Requiredness.NONE) final com.facebook.thrift.test.terse_write.MyStruct structField,
+        @com.facebook.swift.codec.ThriftField(value=30, name="union_field", requiredness=Requiredness.NONE) final com.facebook.thrift.test.terse_write.MyUnion unionField
     ) {
         this.terseBoolField = terseBoolField;
         this.terseByteField = terseByteField;
@@ -68,6 +70,7 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
         this.terseSetField = terseSetField;
         this.terseMapField = terseMapField;
         this.terseStructField = terseStructField;
+        this.terseUnionField = terseUnionField;
         this.boolField = boolField;
         this.byteField = byteField;
         this.shortField = shortField;
@@ -82,6 +85,7 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
         this.setField = setField;
         this.mapField = mapField;
         this.structField = structField;
+        this.unionField = unionField;
     }
     
     @ThriftConstructor
@@ -100,6 +104,7 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
       this.terseSetField = com.facebook.thrift.util.IntrinsicDefaults.defaultSet();
       this.terseMapField = com.facebook.thrift.util.IntrinsicDefaults.defaultMap();
       this.terseStructField = com.facebook.thrift.test.terse_write.MyStruct.defaultInstance();
+      this.terseUnionField = com.facebook.thrift.test.terse_write.MyUnion.defaultInstance();
       this.boolField = false;
       this.byteField = 0;
       this.shortField = 0;
@@ -114,6 +119,7 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
       this.setField = null;
       this.mapField = null;
       this.structField = null;
+      this.unionField = null;
     }
     
     public static class Builder {
@@ -132,6 +138,7 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
         private Set<Short> terseSetField = com.facebook.thrift.util.IntrinsicDefaults.defaultSet();
         private Map<Short, Short> terseMapField = com.facebook.thrift.util.IntrinsicDefaults.defaultMap();
         private com.facebook.thrift.test.terse_write.MyStruct terseStructField = com.facebook.thrift.test.terse_write.MyStruct.defaultInstance();
+        private com.facebook.thrift.test.terse_write.MyUnion terseUnionField = com.facebook.thrift.test.terse_write.MyUnion.defaultInstance();
         private boolean boolField = false;
         private byte byteField = 0;
         private short shortField = 0;
@@ -146,6 +153,7 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
         private Set<Short> setField = null;
         private Map<Short, Short> mapField = null;
         private com.facebook.thrift.test.terse_write.MyStruct structField = null;
+        private com.facebook.thrift.test.terse_write.MyUnion unionField = null;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="terse_bool_field", requiredness=Requiredness.TERSE)
         public Builder setTerseBoolField(boolean terseBoolField) {
@@ -259,6 +267,14 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
     
         public com.facebook.thrift.test.terse_write.MyStruct getTerseStructField() { return terseStructField; }
     
+            @com.facebook.swift.codec.ThriftField(value=29, name="terse_union_field", requiredness=Requiredness.TERSE)
+        public Builder setTerseUnionField(com.facebook.thrift.test.terse_write.MyUnion terseUnionField) {
+            this.terseUnionField = terseUnionField;
+            return this;
+        }
+    
+        public com.facebook.thrift.test.terse_write.MyUnion getTerseUnionField() { return terseUnionField; }
+    
             @com.facebook.swift.codec.ThriftField(value=15, name="bool_field", requiredness=Requiredness.NONE)
         public Builder setBoolField(boolean boolField) {
             this.boolField = boolField;
@@ -371,6 +387,14 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
     
         public com.facebook.thrift.test.terse_write.MyStruct getStructField() { return structField; }
     
+            @com.facebook.swift.codec.ThriftField(value=30, name="union_field", requiredness=Requiredness.NONE)
+        public Builder setUnionField(com.facebook.thrift.test.terse_write.MyUnion unionField) {
+            this.unionField = unionField;
+            return this;
+        }
+    
+        public com.facebook.thrift.test.terse_write.MyUnion getUnionField() { return unionField; }
+    
         public Builder() { }
         public Builder(FieldLevelTerseStruct other) {
             this.terseBoolField = other.terseBoolField;
@@ -387,6 +411,7 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
             this.terseSetField = other.terseSetField;
             this.terseMapField = other.terseMapField;
             this.terseStructField = other.terseStructField;
+            this.terseUnionField = other.terseUnionField;
             this.boolField = other.boolField;
             this.byteField = other.byteField;
             this.shortField = other.shortField;
@@ -401,6 +426,7 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
             this.setField = other.setField;
             this.mapField = other.mapField;
             this.structField = other.structField;
+            this.unionField = other.unionField;
         }
     
         @ThriftConstructor
@@ -420,6 +446,7 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
                 this.terseSetField,
                 this.terseMapField,
                 this.terseStructField,
+                this.terseUnionField,
                 this.boolField,
                 this.byteField,
                 this.shortField,
@@ -433,7 +460,8 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
                 this.listField,
                 this.setField,
                 this.mapField,
-                this.structField
+                this.structField,
+                this.unionField
             );
             return result;
         }
@@ -485,6 +513,9 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
         private final com.facebook.thrift.test.terse_write.MyStruct terseStructField;
     public static final int _TERSE_STRUCT_FIELD = 14;
     private static final TField TERSE_STRUCT_FIELD_FIELD_DESC = new TField("terse_struct_field", TType.STRUCT, (short)14);
+        private final com.facebook.thrift.test.terse_write.MyUnion terseUnionField;
+    public static final int _TERSE_UNION_FIELD = 29;
+    private static final TField TERSE_UNION_FIELD_FIELD_DESC = new TField("terse_union_field", TType.STRUCT, (short)29);
         private final boolean boolField;
     public static final int _BOOL_FIELD = 15;
     private static final TField BOOL_FIELD_FIELD_DESC = new TField("bool_field", TType.BOOL, (short)15);
@@ -527,6 +558,9 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
         private final com.facebook.thrift.test.terse_write.MyStruct structField;
     public static final int _STRUCT_FIELD = 28;
     private static final TField STRUCT_FIELD_FIELD_DESC = new TField("struct_field", TType.STRUCT, (short)28);
+        private final com.facebook.thrift.test.terse_write.MyUnion unionField;
+    public static final int _UNION_FIELD = 30;
+    private static final TField UNION_FIELD_FIELD_DESC = new TField("union_field", TType.STRUCT, (short)30);
     static {
       NAMES_TO_IDS.put("terseBoolField", 1);
       THRIFT_NAMES_TO_IDS.put("terse_bool_field", 1);
@@ -570,6 +604,9 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
       NAMES_TO_IDS.put("terseStructField", 14);
       THRIFT_NAMES_TO_IDS.put("terse_struct_field", 14);
       FIELD_METADATA.put(14, TERSE_STRUCT_FIELD_FIELD_DESC);
+      NAMES_TO_IDS.put("terseUnionField", 29);
+      THRIFT_NAMES_TO_IDS.put("terse_union_field", 29);
+      FIELD_METADATA.put(29, TERSE_UNION_FIELD_FIELD_DESC);
       NAMES_TO_IDS.put("boolField", 15);
       THRIFT_NAMES_TO_IDS.put("bool_field", 15);
       FIELD_METADATA.put(15, BOOL_FIELD_FIELD_DESC);
@@ -612,6 +649,9 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
       NAMES_TO_IDS.put("structField", 28);
       THRIFT_NAMES_TO_IDS.put("struct_field", 28);
       FIELD_METADATA.put(28, STRUCT_FIELD_FIELD_DESC);
+      NAMES_TO_IDS.put("unionField", 30);
+      THRIFT_NAMES_TO_IDS.put("union_field", 30);
+      FIELD_METADATA.put(30, UNION_FIELD_FIELD_DESC);
       com.facebook.thrift.type.TypeRegistry.add(new com.facebook.thrift.type.Type(
         new com.facebook.thrift.type.UniversalName("facebook.com/thrift/test/terse_write/FieldLevelTerseStruct"), 
         FieldLevelTerseStruct.class, FieldLevelTerseStruct::read0));
@@ -687,6 +727,11 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
     public com.facebook.thrift.test.terse_write.MyStruct getTerseStructField() { return terseStructField; }
     
     
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=29, name="terse_union_field", requiredness=Requiredness.TERSE)
+    public com.facebook.thrift.test.terse_write.MyUnion getTerseUnionField() { return terseUnionField; }
+    
+    
     
     @com.facebook.swift.codec.ThriftField(value=15, name="bool_field", requiredness=Requiredness.NONE)
     public boolean isBoolField() { return boolField; }
@@ -756,6 +801,11 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
     @com.facebook.swift.codec.ThriftField(value=28, name="struct_field", requiredness=Requiredness.NONE)
     public com.facebook.thrift.test.terse_write.MyStruct getStructField() { return structField; }
     
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=30, name="union_field", requiredness=Requiredness.NONE)
+    public com.facebook.thrift.test.terse_write.MyUnion getUnionField() { return unionField; }
+    
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -773,6 +823,7 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
         helper.add("terseSetField", terseSetField);
         helper.add("terseMapField", terseMapField);
         helper.add("terseStructField", terseStructField);
+        helper.add("terseUnionField", terseUnionField);
         helper.add("boolField", boolField);
         helper.add("byteField", byteField);
         helper.add("shortField", shortField);
@@ -787,6 +838,7 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
         helper.add("setField", setField);
         helper.add("mapField", mapField);
         helper.add("structField", structField);
+        helper.add("unionField", unionField);
         return helper.toString();
     }
     
@@ -816,6 +868,7 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
             Objects.equals(terseSetField, other.terseSetField) &&
             Objects.equals(terseMapField, other.terseMapField) &&
             Objects.equals(terseStructField, other.terseStructField) &&
+            Objects.equals(terseUnionField, other.terseUnionField) &&
             Objects.equals(boolField, other.boolField) &&
             Objects.equals(byteField, other.byteField) &&
             Objects.equals(shortField, other.shortField) &&
@@ -830,6 +883,7 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
             Objects.equals(setField, other.setField) &&
             Objects.equals(mapField, other.mapField) &&
             Objects.equals(structField, other.structField) &&
+            Objects.equals(unionField, other.unionField) &&
             true;
     }
     
@@ -850,6 +904,7 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
             terseSetField,
             terseMapField,
             terseStructField,
+            terseUnionField,
             boolField,
             byteField,
             shortField,
@@ -863,7 +918,8 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
             listField,
             setField,
             mapField,
-            structField
+            structField,
+            unionField
         });
     }
     
@@ -1023,6 +1079,14 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
             TProtocolUtil.skip(oprot, __field.type);
           }
           break;
+        case _TERSE_UNION_FIELD:
+          if (__field.type == TType.STRUCT) {
+            com.facebook.thrift.test.terse_write.MyUnion terseUnionField = com.facebook.thrift.test.terse_write.MyUnion.read0(oprot);
+            builder.setTerseUnionField(terseUnionField);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
         case _BOOL_FIELD:
           if (__field.type == TType.BOOL) {
             boolean boolField = oprot.readBool();
@@ -1166,6 +1230,14 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
             TProtocolUtil.skip(oprot, __field.type);
           }
           break;
+        case _UNION_FIELD:
+          if (__field.type == TType.STRUCT) {
+            com.facebook.thrift.test.terse_write.MyUnion unionField = com.facebook.thrift.test.terse_write.MyUnion.read0(oprot);
+            builder.setUnionField(unionField);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(oprot, __field.type);
           break;
@@ -1283,6 +1355,16 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
         } else {
           p.rollback(structStart);
         }    
+      java.util.Objects.requireNonNull(terseUnionField, "terseUnionField must not be null");
+      structStart = p.mark();
+        oprot.writeFieldBegin(TERSE_UNION_FIELD_FIELD_DESC);
+        pos = p.mark();
+        this.terseUnionField.write0(oprot);
+        if (p.mark() - pos > p.getEmptyStructSize()) {
+          p.writeFieldEnd();    
+        } else {
+          p.rollback(structStart);
+        }    
       oprot.writeFieldBegin(BOOL_FIELD_FIELD_DESC);
       oprot.writeBool(this.boolField);
       oprot.writeFieldEnd();
@@ -1351,6 +1433,11 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
       if (structField != null) {
         oprot.writeFieldBegin(STRUCT_FIELD_FIELD_DESC);
         this.structField.write0(oprot);
+        oprot.writeFieldEnd();
+      }
+      if (unionField != null) {
+        oprot.writeFieldBegin(UNION_FIELD_FIELD_DESC);
+        this.unionField.write0(oprot);
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();

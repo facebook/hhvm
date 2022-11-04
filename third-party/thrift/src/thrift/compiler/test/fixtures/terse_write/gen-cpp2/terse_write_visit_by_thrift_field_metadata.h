@@ -25,6 +25,45 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::MyStruct> {
 };
 
 template <>
+struct VisitByFieldId<::facebook::thrift::test::terse_write::MyUnion> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).bool_field_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).byte_field_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).short_field_ref());
+    case 4:
+      return f(3, static_cast<T&&>(t).int_field_ref());
+    case 5:
+      return f(4, static_cast<T&&>(t).long_field_ref());
+    case 6:
+      return f(5, static_cast<T&&>(t).float_field_ref());
+    case 7:
+      return f(6, static_cast<T&&>(t).double_field_ref());
+    case 8:
+      return f(7, static_cast<T&&>(t).string_field_ref());
+    case 9:
+      return f(8, static_cast<T&&>(t).binary_field_ref());
+    case 10:
+      return f(9, static_cast<T&&>(t).enum_field_ref());
+    case 11:
+      return f(10, static_cast<T&&>(t).list_field_ref());
+    case 12:
+      return f(11, static_cast<T&&>(t).set_field_ref());
+    case 13:
+      return f(12, static_cast<T&&>(t).map_field_ref());
+    case 14:
+      return f(13, static_cast<T&&>(t).struct_field_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::terse_write::MyUnion");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::facebook::thrift::test::terse_write::MyStructWithCustomDefault> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
@@ -70,6 +109,8 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::StructLevelTerseStr
       return f(12, static_cast<T&&>(t).map_field_ref());
     case 14:
       return f(13, static_cast<T&&>(t).struct_field_ref());
+    case 15:
+      return f(14, static_cast<T&&>(t).union_field_ref());
     default:
       throwInvalidThriftId(fieldId, "::facebook::thrift::test::terse_write::StructLevelTerseStruct");
     }
@@ -109,34 +150,38 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::FieldLevelTerseStru
       return f(12, static_cast<T&&>(t).terse_map_field_ref());
     case 14:
       return f(13, static_cast<T&&>(t).terse_struct_field_ref());
+    case 29:
+      return f(14, static_cast<T&&>(t).terse_union_field_ref());
     case 15:
-      return f(14, static_cast<T&&>(t).bool_field_ref());
+      return f(15, static_cast<T&&>(t).bool_field_ref());
     case 16:
-      return f(15, static_cast<T&&>(t).byte_field_ref());
+      return f(16, static_cast<T&&>(t).byte_field_ref());
     case 17:
-      return f(16, static_cast<T&&>(t).short_field_ref());
+      return f(17, static_cast<T&&>(t).short_field_ref());
     case 18:
-      return f(17, static_cast<T&&>(t).int_field_ref());
+      return f(18, static_cast<T&&>(t).int_field_ref());
     case 19:
-      return f(18, static_cast<T&&>(t).long_field_ref());
+      return f(19, static_cast<T&&>(t).long_field_ref());
     case 20:
-      return f(19, static_cast<T&&>(t).float_field_ref());
+      return f(20, static_cast<T&&>(t).float_field_ref());
     case 21:
-      return f(20, static_cast<T&&>(t).double_field_ref());
+      return f(21, static_cast<T&&>(t).double_field_ref());
     case 22:
-      return f(21, static_cast<T&&>(t).string_field_ref());
+      return f(22, static_cast<T&&>(t).string_field_ref());
     case 23:
-      return f(22, static_cast<T&&>(t).binary_field_ref());
+      return f(23, static_cast<T&&>(t).binary_field_ref());
     case 24:
-      return f(23, static_cast<T&&>(t).enum_field_ref());
+      return f(24, static_cast<T&&>(t).enum_field_ref());
     case 25:
-      return f(24, static_cast<T&&>(t).list_field_ref());
+      return f(25, static_cast<T&&>(t).list_field_ref());
     case 26:
-      return f(25, static_cast<T&&>(t).set_field_ref());
+      return f(26, static_cast<T&&>(t).set_field_ref());
     case 27:
-      return f(26, static_cast<T&&>(t).map_field_ref());
+      return f(27, static_cast<T&&>(t).map_field_ref());
     case 28:
-      return f(27, static_cast<T&&>(t).struct_field_ref());
+      return f(28, static_cast<T&&>(t).struct_field_ref());
+    case 30:
+      return f(29, static_cast<T&&>(t).union_field_ref());
     default:
       throwInvalidThriftId(fieldId, "::facebook::thrift::test::terse_write::FieldLevelTerseStruct");
     }

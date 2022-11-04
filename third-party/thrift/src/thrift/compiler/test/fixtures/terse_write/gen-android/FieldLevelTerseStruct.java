@@ -38,6 +38,7 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
   private static final TField TERSE_SET_FIELD_FIELD_DESC = new TField("terse_set_field", TType.SET, (short)12);
   private static final TField TERSE_MAP_FIELD_FIELD_DESC = new TField("terse_map_field", TType.MAP, (short)13);
   private static final TField TERSE_STRUCT_FIELD_FIELD_DESC = new TField("terse_struct_field", TType.STRUCT, (short)14);
+  private static final TField TERSE_UNION_FIELD_FIELD_DESC = new TField("terse_union_field", TType.STRUCT, (short)29);
   private static final TField BOOL_FIELD_FIELD_DESC = new TField("bool_field", TType.BOOL, (short)15);
   private static final TField BYTE_FIELD_FIELD_DESC = new TField("byte_field", TType.BYTE, (short)16);
   private static final TField SHORT_FIELD_FIELD_DESC = new TField("short_field", TType.I16, (short)17);
@@ -52,6 +53,7 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
   private static final TField SET_FIELD_FIELD_DESC = new TField("set_field", TType.SET, (short)26);
   private static final TField MAP_FIELD_FIELD_DESC = new TField("map_field", TType.MAP, (short)27);
   private static final TField STRUCT_FIELD_FIELD_DESC = new TField("struct_field", TType.STRUCT, (short)28);
+  private static final TField UNION_FIELD_FIELD_DESC = new TField("union_field", TType.STRUCT, (short)30);
 
   public final Boolean terse_bool_field;
   public final Byte terse_byte_field;
@@ -71,6 +73,7 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
   public final Set<Short> terse_set_field;
   public final Map<Short,Short> terse_map_field;
   public final MyStruct terse_struct_field;
+  public final MyUnion terse_union_field;
   public final Boolean bool_field;
   public final Byte byte_field;
   public final Short short_field;
@@ -89,6 +92,7 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
   public final Set<Short> set_field;
   public final Map<Short,Short> map_field;
   public final MyStruct struct_field;
+  public final MyUnion union_field;
   public static final int TERSE_BOOL_FIELD = 1;
   public static final int TERSE_BYTE_FIELD = 2;
   public static final int TERSE_SHORT_FIELD = 3;
@@ -103,6 +107,7 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
   public static final int TERSE_SET_FIELD = 12;
   public static final int TERSE_MAP_FIELD = 13;
   public static final int TERSE_STRUCT_FIELD = 14;
+  public static final int TERSE_UNION_FIELD = 29;
   public static final int BOOL_FIELD = 15;
   public static final int BYTE_FIELD = 16;
   public static final int SHORT_FIELD = 17;
@@ -117,6 +122,7 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
   public static final int SET_FIELD = 26;
   public static final int MAP_FIELD = 27;
   public static final int STRUCT_FIELD = 28;
+  public static final int UNION_FIELD = 30;
 
   public FieldLevelTerseStruct(
       Boolean terse_bool_field,
@@ -133,6 +139,7 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
       Set<Short> terse_set_field,
       Map<Short,Short> terse_map_field,
       MyStruct terse_struct_field,
+      MyUnion terse_union_field,
       Boolean bool_field,
       Byte byte_field,
       Short short_field,
@@ -146,7 +153,8 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
       List<Short> list_field,
       Set<Short> set_field,
       Map<Short,Short> map_field,
-      MyStruct struct_field) {
+      MyStruct struct_field,
+      MyUnion union_field) {
     this.terse_bool_field = terse_bool_field;
     this.terse_byte_field = terse_byte_field;
     this.terse_short_field = terse_short_field;
@@ -161,6 +169,7 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
     this.terse_set_field = terse_set_field;
     this.terse_map_field = terse_map_field;
     this.terse_struct_field = terse_struct_field;
+    this.terse_union_field = terse_union_field;
     this.bool_field = bool_field;
     this.byte_field = byte_field;
     this.short_field = short_field;
@@ -175,6 +184,7 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
     this.set_field = set_field;
     this.map_field = map_field;
     this.struct_field = struct_field;
+    this.union_field = union_field;
   }
 
   /**
@@ -251,6 +261,11 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
     } else {
       this.terse_struct_field = null;
     }
+    if (other.isSetTerse_union_field()) {
+      this.terse_union_field = TBaseHelper.deepCopy(other.terse_union_field);
+    } else {
+      this.terse_union_field = null;
+    }
     if (other.isSetBool_field()) {
       this.bool_field = TBaseHelper.deepCopy(other.bool_field);
     } else {
@@ -320,6 +335,11 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
       this.struct_field = TBaseHelper.deepCopy(other.struct_field);
     } else {
       this.struct_field = null;
+    }
+    if (other.isSetUnion_field()) {
+      this.union_field = TBaseHelper.deepCopy(other.union_field);
+    } else {
+      this.union_field = null;
     }
   }
 
@@ -457,6 +477,15 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
     return this.terse_struct_field != null;
   }
 
+  public MyUnion getTerse_union_field() {
+    return this.terse_union_field;
+  }
+
+  // Returns true if field terse_union_field is set (has been assigned a value) and false otherwise
+  public boolean isSetTerse_union_field() {
+    return this.terse_union_field != null;
+  }
+
   public Boolean isBool_field() {
     return this.bool_field;
   }
@@ -587,6 +616,15 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
     return this.struct_field != null;
   }
 
+  public MyUnion getUnion_field() {
+    return this.union_field;
+  }
+
+  // Returns true if field union_field is set (has been assigned a value) and false otherwise
+  public boolean isSetUnion_field() {
+    return this.union_field != null;
+  }
+
   @Override
   public boolean equals(Object _that) {
     if (_that == null)
@@ -625,6 +663,8 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
 
     if (!TBaseHelper.equalsNobinary(this.isSetTerse_struct_field(), that.isSetTerse_struct_field(), this.terse_struct_field, that.terse_struct_field)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.isSetTerse_union_field(), that.isSetTerse_union_field(), this.terse_union_field, that.terse_union_field)) { return false; }
+
     if (!TBaseHelper.equalsNobinary(this.isSetBool_field(), that.isSetBool_field(), this.bool_field, that.bool_field)) { return false; }
 
     if (!TBaseHelper.equalsNobinary(this.isSetByte_field(), that.isSetByte_field(), this.byte_field, that.byte_field)) { return false; }
@@ -653,12 +693,14 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
 
     if (!TBaseHelper.equalsNobinary(this.isSetStruct_field(), that.isSetStruct_field(), this.struct_field, that.struct_field)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.isSetUnion_field(), that.isSetUnion_field(), this.union_field, that.union_field)) { return false; }
+
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {terse_bool_field, terse_byte_field, terse_short_field, terse_int_field, terse_long_field, terse_float_field, terse_double_field, terse_string_field, terse_binary_field, terse_enum_field, terse_list_field, terse_set_field, terse_map_field, terse_struct_field, bool_field, byte_field, short_field, int_field, long_field, float_field, double_field, string_field, binary_field, enum_field, list_field, set_field, map_field, struct_field});
+    return Arrays.deepHashCode(new Object[] {terse_bool_field, terse_byte_field, terse_short_field, terse_int_field, terse_long_field, terse_float_field, terse_double_field, terse_string_field, terse_binary_field, terse_enum_field, terse_list_field, terse_set_field, terse_map_field, terse_struct_field, terse_union_field, bool_field, byte_field, short_field, int_field, long_field, float_field, double_field, string_field, binary_field, enum_field, list_field, set_field, map_field, struct_field, union_field});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -681,6 +723,7 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
     Set<Short> tmp_terse_set_field = null;
     Map<Short,Short> tmp_terse_map_field = null;
     MyStruct tmp_terse_struct_field = null;
+    MyUnion tmp_terse_union_field = null;
     Boolean tmp_bool_field = null;
     Byte tmp_byte_field = null;
     Short tmp_short_field = null;
@@ -695,6 +738,7 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
     Set<Short> tmp_set_field = null;
     Map<Short,Short> tmp_map_field = null;
     MyStruct tmp_struct_field = null;
+    MyUnion tmp_union_field = null;
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -778,15 +822,15 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
         case TERSE_LIST_FIELD:
           if (__field.type == TType.LIST) {
             {
-              TList _list13 = iprot.readListBegin();
-              tmp_terse_list_field = new ArrayList<Short>(Math.max(0, _list13.size));
-              for (int _i14 = 0; 
-                   (_list13.size < 0) ? iprot.peekList() : (_i14 < _list13.size); 
-                   ++_i14)
+              TList _list26 = iprot.readListBegin();
+              tmp_terse_list_field = new ArrayList<Short>(Math.max(0, _list26.size));
+              for (int _i27 = 0; 
+                   (_list26.size < 0) ? iprot.peekList() : (_i27 < _list26.size); 
+                   ++_i27)
               {
-                Short _elem15;
-                _elem15 = iprot.readI16();
-                tmp_terse_list_field.add(_elem15);
+                Short _elem28;
+                _elem28 = iprot.readI16();
+                tmp_terse_list_field.add(_elem28);
               }
               iprot.readListEnd();
             }
@@ -797,15 +841,15 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
         case TERSE_SET_FIELD:
           if (__field.type == TType.SET) {
             {
-              TSet _set16 = iprot.readSetBegin();
-              tmp_terse_set_field = new HashSet<Short>(Math.max(0, 2*_set16.size));
-              for (int _i17 = 0; 
-                   (_set16.size < 0) ? iprot.peekSet() : (_i17 < _set16.size); 
-                   ++_i17)
+              TSet _set29 = iprot.readSetBegin();
+              tmp_terse_set_field = new HashSet<Short>(Math.max(0, 2*_set29.size));
+              for (int _i30 = 0; 
+                   (_set29.size < 0) ? iprot.peekSet() : (_i30 < _set29.size); 
+                   ++_i30)
               {
-                Short _elem18;
-                _elem18 = iprot.readI16();
-                tmp_terse_set_field.add(_elem18);
+                Short _elem31;
+                _elem31 = iprot.readI16();
+                tmp_terse_set_field.add(_elem31);
               }
               iprot.readSetEnd();
             }
@@ -816,17 +860,17 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
         case TERSE_MAP_FIELD:
           if (__field.type == TType.MAP) {
             {
-              TMap _map19 = iprot.readMapBegin();
-              tmp_terse_map_field = new HashMap<Short,Short>(Math.max(0, 2*_map19.size));
-              for (int _i20 = 0; 
-                   (_map19.size < 0) ? iprot.peekMap() : (_i20 < _map19.size); 
-                   ++_i20)
+              TMap _map32 = iprot.readMapBegin();
+              tmp_terse_map_field = new HashMap<Short,Short>(Math.max(0, 2*_map32.size));
+              for (int _i33 = 0; 
+                   (_map32.size < 0) ? iprot.peekMap() : (_i33 < _map32.size); 
+                   ++_i33)
               {
-                Short _key21;
-                Short _val22;
-                _key21 = iprot.readI16();
-                _val22 = iprot.readI16();
-                tmp_terse_map_field.put(_key21, _val22);
+                Short _key34;
+                Short _val35;
+                _key34 = iprot.readI16();
+                _val35 = iprot.readI16();
+                tmp_terse_map_field.put(_key34, _val35);
               }
               iprot.readMapEnd();
             }
@@ -837,6 +881,14 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
         case TERSE_STRUCT_FIELD:
           if (__field.type == TType.STRUCT) {
             tmp_terse_struct_field = MyStruct.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case TERSE_UNION_FIELD:
+          if (__field.type == TType.STRUCT) {
+            tmp_terse_union_field = new MyUnion();
+            tmp_terse_union_field.read(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -914,15 +966,15 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
         case LIST_FIELD:
           if (__field.type == TType.LIST) {
             {
-              TList _list23 = iprot.readListBegin();
-              tmp_list_field = new ArrayList<Short>(Math.max(0, _list23.size));
-              for (int _i24 = 0; 
-                   (_list23.size < 0) ? iprot.peekList() : (_i24 < _list23.size); 
-                   ++_i24)
+              TList _list36 = iprot.readListBegin();
+              tmp_list_field = new ArrayList<Short>(Math.max(0, _list36.size));
+              for (int _i37 = 0; 
+                   (_list36.size < 0) ? iprot.peekList() : (_i37 < _list36.size); 
+                   ++_i37)
               {
-                Short _elem25;
-                _elem25 = iprot.readI16();
-                tmp_list_field.add(_elem25);
+                Short _elem38;
+                _elem38 = iprot.readI16();
+                tmp_list_field.add(_elem38);
               }
               iprot.readListEnd();
             }
@@ -933,15 +985,15 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
         case SET_FIELD:
           if (__field.type == TType.SET) {
             {
-              TSet _set26 = iprot.readSetBegin();
-              tmp_set_field = new HashSet<Short>(Math.max(0, 2*_set26.size));
-              for (int _i27 = 0; 
-                   (_set26.size < 0) ? iprot.peekSet() : (_i27 < _set26.size); 
-                   ++_i27)
+              TSet _set39 = iprot.readSetBegin();
+              tmp_set_field = new HashSet<Short>(Math.max(0, 2*_set39.size));
+              for (int _i40 = 0; 
+                   (_set39.size < 0) ? iprot.peekSet() : (_i40 < _set39.size); 
+                   ++_i40)
               {
-                Short _elem28;
-                _elem28 = iprot.readI16();
-                tmp_set_field.add(_elem28);
+                Short _elem41;
+                _elem41 = iprot.readI16();
+                tmp_set_field.add(_elem41);
               }
               iprot.readSetEnd();
             }
@@ -952,17 +1004,17 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
         case MAP_FIELD:
           if (__field.type == TType.MAP) {
             {
-              TMap _map29 = iprot.readMapBegin();
-              tmp_map_field = new HashMap<Short,Short>(Math.max(0, 2*_map29.size));
-              for (int _i30 = 0; 
-                   (_map29.size < 0) ? iprot.peekMap() : (_i30 < _map29.size); 
-                   ++_i30)
+              TMap _map42 = iprot.readMapBegin();
+              tmp_map_field = new HashMap<Short,Short>(Math.max(0, 2*_map42.size));
+              for (int _i43 = 0; 
+                   (_map42.size < 0) ? iprot.peekMap() : (_i43 < _map42.size); 
+                   ++_i43)
               {
-                Short _key31;
-                Short _val32;
-                _key31 = iprot.readI16();
-                _val32 = iprot.readI16();
-                tmp_map_field.put(_key31, _val32);
+                Short _key44;
+                Short _val45;
+                _key44 = iprot.readI16();
+                _val45 = iprot.readI16();
+                tmp_map_field.put(_key44, _val45);
               }
               iprot.readMapEnd();
             }
@@ -973,6 +1025,14 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
         case STRUCT_FIELD:
           if (__field.type == TType.STRUCT) {
             tmp_struct_field = MyStruct.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case UNION_FIELD:
+          if (__field.type == TType.STRUCT) {
+            tmp_union_field = new MyUnion();
+            tmp_union_field.read(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -1001,6 +1061,7 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
       ,tmp_terse_set_field
       ,tmp_terse_map_field
       ,tmp_terse_struct_field
+      ,tmp_terse_union_field
       ,tmp_bool_field
       ,tmp_byte_field
       ,tmp_short_field
@@ -1015,6 +1076,7 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
       ,tmp_set_field
       ,tmp_map_field
       ,tmp_struct_field
+      ,tmp_union_field
     );
     _that.validate();
     return _that;
@@ -1078,8 +1140,8 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
       oprot.writeFieldBegin(TERSE_LIST_FIELD_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I16, this.terse_list_field.size()));
-        for (Short _iter33 : this.terse_list_field)        {
-          oprot.writeI16(_iter33);
+        for (Short _iter46 : this.terse_list_field)        {
+          oprot.writeI16(_iter46);
         }
         oprot.writeListEnd();
       }
@@ -1089,8 +1151,8 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
       oprot.writeFieldBegin(TERSE_SET_FIELD_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.I16, this.terse_set_field.size()));
-        for (Short _iter34 : this.terse_set_field)        {
-          oprot.writeI16(_iter34);
+        for (Short _iter47 : this.terse_set_field)        {
+          oprot.writeI16(_iter47);
         }
         oprot.writeSetEnd();
       }
@@ -1100,9 +1162,9 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
       oprot.writeFieldBegin(TERSE_MAP_FIELD_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.I16, TType.I16, this.terse_map_field.size()));
-        for (Map.Entry<Short, Short> _iter35 : this.terse_map_field.entrySet())        {
-          oprot.writeI16(_iter35.getKey());
-          oprot.writeI16(_iter35.getValue());
+        for (Map.Entry<Short, Short> _iter48 : this.terse_map_field.entrySet())        {
+          oprot.writeI16(_iter48.getKey());
+          oprot.writeI16(_iter48.getValue());
         }
         oprot.writeMapEnd();
       }
@@ -1167,8 +1229,8 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
       oprot.writeFieldBegin(LIST_FIELD_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I16, this.list_field.size()));
-        for (Short _iter36 : this.list_field)        {
-          oprot.writeI16(_iter36);
+        for (Short _iter49 : this.list_field)        {
+          oprot.writeI16(_iter49);
         }
         oprot.writeListEnd();
       }
@@ -1178,8 +1240,8 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
       oprot.writeFieldBegin(SET_FIELD_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.I16, this.set_field.size()));
-        for (Short _iter37 : this.set_field)        {
-          oprot.writeI16(_iter37);
+        for (Short _iter50 : this.set_field)        {
+          oprot.writeI16(_iter50);
         }
         oprot.writeSetEnd();
       }
@@ -1189,9 +1251,9 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
       oprot.writeFieldBegin(MAP_FIELD_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.I16, TType.I16, this.map_field.size()));
-        for (Map.Entry<Short, Short> _iter38 : this.map_field.entrySet())        {
-          oprot.writeI16(_iter38.getKey());
-          oprot.writeI16(_iter38.getValue());
+        for (Map.Entry<Short, Short> _iter51 : this.map_field.entrySet())        {
+          oprot.writeI16(_iter51.getKey());
+          oprot.writeI16(_iter51.getValue());
         }
         oprot.writeMapEnd();
       }
@@ -1200,6 +1262,16 @@ public class FieldLevelTerseStruct implements TBase, java.io.Serializable, Clone
     if (this.struct_field != null) {
       oprot.writeFieldBegin(STRUCT_FIELD_FIELD_DESC);
       this.struct_field.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.terse_union_field != null) {
+      oprot.writeFieldBegin(TERSE_UNION_FIELD_FIELD_DESC);
+      this.terse_union_field.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.union_field != null) {
+      oprot.writeFieldBegin(UNION_FIELD_FIELD_DESC);
+      this.union_field.write(oprot);
       oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();

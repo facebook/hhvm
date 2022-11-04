@@ -44,6 +44,87 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::terse_write::MyStruct>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 14> TStructDataStorage<::facebook::thrift::test::terse_write::MyUnion>::fields_names = {{
+  "bool_field",
+  "byte_field",
+  "short_field",
+  "int_field",
+  "long_field",
+  "float_field",
+  "double_field",
+  "string_field",
+  "binary_field",
+  "enum_field",
+  "list_field",
+  "set_field",
+  "map_field",
+  "struct_field",
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 14> TStructDataStorage<::facebook::thrift::test::terse_write::MyUnion>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 14> TStructDataStorage<::facebook::thrift::test::terse_write::MyUnion>::fields_types = {{
+  TType::T_BOOL,
+  TType::T_BYTE,
+  TType::T_I16,
+  TType::T_I32,
+  TType::T_I64,
+  TType::T_FLOAT,
+  TType::T_DOUBLE,
+  TType::T_STRING,
+  TType::T_STRING,
+  TType::T_I32,
+  TType::T_LIST,
+  TType::T_SET,
+  TType::T_MAP,
+  TType::T_STRUCT,
+}};
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 14> TStructDataStorage<::facebook::thrift::test::terse_write::MyUnion>::storage_names = {{
+  "bool_field",
+  "byte_field",
+  "short_field",
+  "int_field",
+  "long_field",
+  "float_field",
+  "double_field",
+  "string_field",
+  "binary_field",
+  "enum_field",
+  "list_field",
+  "set_field",
+  "map_field",
+  "struct_field",
+}};
+THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::facebook::thrift::test::terse_write::MyUnion>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+}};
+
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::fields_names = {{
   "field1",
 }};
@@ -60,7 +141,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   0,
 }};
 
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 14> TStructDataStorage<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 15> TStructDataStorage<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::fields_names = {{
   "bool_field",
   "byte_field",
   "short_field",
@@ -75,8 +156,9 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 14> TStructDataStorage<:
   "set_field",
   "map_field",
   "struct_field",
+  "union_field",
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 14> TStructDataStorage<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 15> TStructDataStorage<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::fields_ids = {{
   1,
   2,
   3,
@@ -91,8 +173,9 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 14> TStructDataStorage<::facebook::
   12,
   13,
   14,
+  15,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 14> TStructDataStorage<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 15> TStructDataStorage<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::fields_types = {{
   TType::T_BOOL,
   TType::T_BYTE,
   TType::T_I16,
@@ -107,8 +190,9 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 14> TStructDataStorage<::fa
   TType::T_SET,
   TType::T_MAP,
   TType::T_STRUCT,
+  TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 14> TStructDataStorage<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 15> TStructDataStorage<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::storage_names = {{
   "__fbthrift_field_bool_field",
   "__fbthrift_field_byte_field",
   "__fbthrift_field_short_field",
@@ -123,8 +207,10 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 14> TStructDataStorage<:
   "__fbthrift_field_set_field",
   "__fbthrift_field_map_field",
   "__fbthrift_field_struct_field",
+  "__fbthrift_field_union_field",
 }};
-THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 15> TStructDataStorage<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::isset_indexes = {{
+  -1,
   -1,
   -1,
   -1,
@@ -141,7 +227,7 @@ THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::facebook::thri
   -1,
 }};
 
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 28> TStructDataStorage<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::fields_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 30> TStructDataStorage<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::fields_names = {{
   "terse_bool_field",
   "terse_byte_field",
   "terse_short_field",
@@ -156,6 +242,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 28> TStructDataStorage<:
   "terse_set_field",
   "terse_map_field",
   "terse_struct_field",
+  "terse_union_field",
   "bool_field",
   "byte_field",
   "short_field",
@@ -170,8 +257,9 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 28> TStructDataStorage<:
   "set_field",
   "map_field",
   "struct_field",
+  "union_field",
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 28> TStructDataStorage<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::fields_ids = {{
+THRIFT_DATA_MEMBER const std::array<int16_t, 30> TStructDataStorage<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::fields_ids = {{
   1,
   2,
   3,
@@ -186,6 +274,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 28> TStructDataStorage<::facebook::
   12,
   13,
   14,
+  29,
   15,
   16,
   17,
@@ -200,8 +289,9 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 28> TStructDataStorage<::facebook::
   26,
   27,
   28,
+  30,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 28> TStructDataStorage<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::fields_types = {{
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 30> TStructDataStorage<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::fields_types = {{
   TType::T_BOOL,
   TType::T_BYTE,
   TType::T_I16,
@@ -215,6 +305,7 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 28> TStructDataStorage<::fa
   TType::T_LIST,
   TType::T_SET,
   TType::T_MAP,
+  TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_BOOL,
   TType::T_BYTE,
@@ -230,8 +321,9 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 28> TStructDataStorage<::fa
   TType::T_SET,
   TType::T_MAP,
   TType::T_STRUCT,
+  TType::T_STRUCT,
 }};
-THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 28> TStructDataStorage<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::storage_names = {{
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 30> TStructDataStorage<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::storage_names = {{
   "__fbthrift_field_terse_bool_field",
   "__fbthrift_field_terse_byte_field",
   "__fbthrift_field_terse_short_field",
@@ -246,6 +338,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 28> TStructDataStorage<:
   "__fbthrift_field_terse_set_field",
   "__fbthrift_field_terse_map_field",
   "__fbthrift_field_terse_struct_field",
+  "__fbthrift_field_terse_union_field",
   "__fbthrift_field_bool_field",
   "__fbthrift_field_byte_field",
   "__fbthrift_field_short_field",
@@ -260,8 +353,10 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 28> TStructDataStorage<:
   "__fbthrift_field_set_field",
   "__fbthrift_field_map_field",
   "__fbthrift_field_struct_field",
+  "__fbthrift_field_union_field",
 }};
-THRIFT_DATA_MEMBER const std::array<int, 28> TStructDataStorage<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::isset_indexes = {{
+THRIFT_DATA_MEMBER const std::array<int, 30> TStructDataStorage<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::isset_indexes = {{
+  -1,
   -1,
   -1,
   -1,
@@ -290,6 +385,7 @@ THRIFT_DATA_MEMBER const std::array<int, 28> TStructDataStorage<::facebook::thri
   11,
   12,
   13,
+  14,
 }};
 
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 14> TStructDataStorage<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>::fields_names = {{

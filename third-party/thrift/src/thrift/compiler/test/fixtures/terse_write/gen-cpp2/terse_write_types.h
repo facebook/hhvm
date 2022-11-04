@@ -16,6 +16,20 @@
 namespace apache {
 namespace thrift {
 namespace ident {
+struct bool_field;
+struct byte_field;
+struct short_field;
+struct int_field;
+struct long_field;
+struct float_field;
+struct double_field;
+struct string_field;
+struct binary_field;
+struct enum_field;
+struct list_field;
+struct set_field;
+struct map_field;
+struct struct_field;
 struct field1;
 struct bool_field;
 struct byte_field;
@@ -31,6 +45,7 @@ struct list_field;
 struct set_field;
 struct map_field;
 struct struct_field;
+struct union_field;
 struct terse_bool_field;
 struct terse_byte_field;
 struct terse_short_field;
@@ -45,6 +60,7 @@ struct terse_list_field;
 struct terse_set_field;
 struct terse_map_field;
 struct terse_struct_field;
+struct terse_union_field;
 struct bool_field;
 struct byte_field;
 struct short_field;
@@ -59,6 +75,7 @@ struct list_field;
 struct set_field;
 struct map_field;
 struct struct_field;
+struct union_field;
 struct bool_field;
 struct byte_field;
 struct short_field;
@@ -80,6 +97,62 @@ struct field1;
 struct msg;
 } // namespace ident
 namespace detail {
+#ifndef APACHE_THRIFT_ACCESSOR_bool_field
+#define APACHE_THRIFT_ACCESSOR_bool_field
+APACHE_THRIFT_DEFINE_ACCESSOR(bool_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_byte_field
+#define APACHE_THRIFT_ACCESSOR_byte_field
+APACHE_THRIFT_DEFINE_ACCESSOR(byte_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_short_field
+#define APACHE_THRIFT_ACCESSOR_short_field
+APACHE_THRIFT_DEFINE_ACCESSOR(short_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_int_field
+#define APACHE_THRIFT_ACCESSOR_int_field
+APACHE_THRIFT_DEFINE_ACCESSOR(int_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_long_field
+#define APACHE_THRIFT_ACCESSOR_long_field
+APACHE_THRIFT_DEFINE_ACCESSOR(long_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_float_field
+#define APACHE_THRIFT_ACCESSOR_float_field
+APACHE_THRIFT_DEFINE_ACCESSOR(float_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_double_field
+#define APACHE_THRIFT_ACCESSOR_double_field
+APACHE_THRIFT_DEFINE_ACCESSOR(double_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_string_field
+#define APACHE_THRIFT_ACCESSOR_string_field
+APACHE_THRIFT_DEFINE_ACCESSOR(string_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_binary_field
+#define APACHE_THRIFT_ACCESSOR_binary_field
+APACHE_THRIFT_DEFINE_ACCESSOR(binary_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_enum_field
+#define APACHE_THRIFT_ACCESSOR_enum_field
+APACHE_THRIFT_DEFINE_ACCESSOR(enum_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_list_field
+#define APACHE_THRIFT_ACCESSOR_list_field
+APACHE_THRIFT_DEFINE_ACCESSOR(list_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_set_field
+#define APACHE_THRIFT_ACCESSOR_set_field
+APACHE_THRIFT_DEFINE_ACCESSOR(set_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_map_field
+#define APACHE_THRIFT_ACCESSOR_map_field
+APACHE_THRIFT_DEFINE_ACCESSOR(map_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_struct_field
+#define APACHE_THRIFT_ACCESSOR_struct_field
+APACHE_THRIFT_DEFINE_ACCESSOR(struct_field);
+#endif
 #ifndef APACHE_THRIFT_ACCESSOR_field1
 #define APACHE_THRIFT_ACCESSOR_field1
 APACHE_THRIFT_DEFINE_ACCESSOR(field1);
@@ -140,6 +213,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(map_field);
 #define APACHE_THRIFT_ACCESSOR_struct_field
 APACHE_THRIFT_DEFINE_ACCESSOR(struct_field);
 #endif
+#ifndef APACHE_THRIFT_ACCESSOR_union_field
+#define APACHE_THRIFT_ACCESSOR_union_field
+APACHE_THRIFT_DEFINE_ACCESSOR(union_field);
+#endif
 #ifndef APACHE_THRIFT_ACCESSOR_terse_bool_field
 #define APACHE_THRIFT_ACCESSOR_terse_bool_field
 APACHE_THRIFT_DEFINE_ACCESSOR(terse_bool_field);
@@ -196,6 +273,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(terse_map_field);
 #define APACHE_THRIFT_ACCESSOR_terse_struct_field
 APACHE_THRIFT_DEFINE_ACCESSOR(terse_struct_field);
 #endif
+#ifndef APACHE_THRIFT_ACCESSOR_terse_union_field
+#define APACHE_THRIFT_ACCESSOR_terse_union_field
+APACHE_THRIFT_DEFINE_ACCESSOR(terse_union_field);
+#endif
 #ifndef APACHE_THRIFT_ACCESSOR_bool_field
 #define APACHE_THRIFT_ACCESSOR_bool_field
 APACHE_THRIFT_DEFINE_ACCESSOR(bool_field);
@@ -251,6 +332,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(map_field);
 #ifndef APACHE_THRIFT_ACCESSOR_struct_field
 #define APACHE_THRIFT_ACCESSOR_struct_field
 APACHE_THRIFT_DEFINE_ACCESSOR(struct_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_union_field
+#define APACHE_THRIFT_ACCESSOR_union_field
+APACHE_THRIFT_DEFINE_ACCESSOR(union_field);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_bool_field
 #define APACHE_THRIFT_ACCESSOR_bool_field
@@ -397,6 +482,7 @@ extern const _MyEnum_EnumMapFactory::NamesToValuesMapType _MyEnum_NAMES_TO_VALUE
 // BEGIN forward_declare
 namespace facebook { namespace thrift { namespace test { namespace terse_write {
 class MyStruct;
+class MyUnion;
 class MyStructWithCustomDefault;
 class StructLevelTerseStruct;
 class FieldLevelTerseStruct;
@@ -512,6 +598,1291 @@ class MyStruct final  {
 
 template <class Protocol_>
 unsigned long MyStruct::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class MyUnion final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const char* __fbthrift_thrift_uri();
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static constexpr std::size_t __fbthrift_field_size_v = 14;
+
+  template<class T>
+  using __fbthrift_id = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                   void,
+                                                   ::apache::thrift::field_id<1>,
+                                                   ::apache::thrift::field_id<2>,
+                                                   ::apache::thrift::field_id<3>,
+                                                   ::apache::thrift::field_id<4>,
+                                                   ::apache::thrift::field_id<5>,
+                                                   ::apache::thrift::field_id<6>,
+                                                   ::apache::thrift::field_id<7>,
+                                                   ::apache::thrift::field_id<8>,
+                                                   ::apache::thrift::field_id<9>,
+                                                   ::apache::thrift::field_id<10>,
+                                                   ::apache::thrift::field_id<11>,
+                                                   ::apache::thrift::field_id<12>,
+                                                   ::apache::thrift::field_id<13>,
+                                                   ::apache::thrift::field_id<14>>;
+
+  template<class T>
+  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                         void,
+                                                         ::apache::thrift::type::bool_t,
+                                                         ::apache::thrift::type::byte_t,
+                                                         ::apache::thrift::type::i16_t,
+                                                         ::apache::thrift::type::i32_t,
+                                                         ::apache::thrift::type::i64_t,
+                                                         ::apache::thrift::type::float_t,
+                                                         ::apache::thrift::type::double_t,
+                                                         ::apache::thrift::type::string_t,
+                                                         ::apache::thrift::type::binary_t,
+                                                         ::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::MyEnum>,
+                                                         ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
+                                                         ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
+                                                         ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
+                                                         ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::MyStruct>>;
+
+  template<class T>
+  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                      void,
+                                                      ::apache::thrift::ident::bool_field,
+                                                      ::apache::thrift::ident::byte_field,
+                                                      ::apache::thrift::ident::short_field,
+                                                      ::apache::thrift::ident::int_field,
+                                                      ::apache::thrift::ident::long_field,
+                                                      ::apache::thrift::ident::float_field,
+                                                      ::apache::thrift::ident::double_field,
+                                                      ::apache::thrift::ident::string_field,
+                                                      ::apache::thrift::ident::binary_field,
+                                                      ::apache::thrift::ident::enum_field,
+                                                      ::apache::thrift::ident::list_field,
+                                                      ::apache::thrift::ident::set_field,
+                                                      ::apache::thrift::ident::map_field,
+                                                      ::apache::thrift::ident::struct_field>;
+
+  struct __fbthrift_ordinal_impl {
+#if defined(_MSC_VER) || defined(__clang__)
+    template<class> static constexpr int value = 0;
+    template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::bool_field> = 1;
+    template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
+    template<> static constexpr int value<::apache::thrift::ident::byte_field> = 2;
+    template<> static constexpr int value<::apache::thrift::field_id<3>> = 3;
+    template<> static constexpr int value<::apache::thrift::ident::short_field> = 3;
+    template<> static constexpr int value<::apache::thrift::field_id<4>> = 4;
+    template<> static constexpr int value<::apache::thrift::ident::int_field> = 4;
+    template<> static constexpr int value<::apache::thrift::field_id<5>> = 5;
+    template<> static constexpr int value<::apache::thrift::ident::long_field> = 5;
+    template<> static constexpr int value<::apache::thrift::field_id<6>> = 6;
+    template<> static constexpr int value<::apache::thrift::ident::float_field> = 6;
+    template<> static constexpr int value<::apache::thrift::field_id<7>> = 7;
+    template<> static constexpr int value<::apache::thrift::ident::double_field> = 7;
+    template<> static constexpr int value<::apache::thrift::field_id<8>> = 8;
+    template<> static constexpr int value<::apache::thrift::ident::string_field> = 8;
+    template<> static constexpr int value<::apache::thrift::field_id<9>> = 9;
+    template<> static constexpr int value<::apache::thrift::ident::binary_field> = 9;
+    template<> static constexpr int value<::apache::thrift::field_id<10>> = 10;
+    template<> static constexpr int value<::apache::thrift::ident::enum_field> = 10;
+    template<> static constexpr int value<::apache::thrift::field_id<11>> = 11;
+    template<> static constexpr int value<::apache::thrift::ident::list_field> = 11;
+    template<> static constexpr int value<::apache::thrift::field_id<12>> = 12;
+    template<> static constexpr int value<::apache::thrift::ident::set_field> = 12;
+    template<> static constexpr int value<::apache::thrift::field_id<13>> = 13;
+    template<> static constexpr int value<::apache::thrift::ident::map_field> = 13;
+    template<> static constexpr int value<::apache::thrift::field_id<14>> = 14;
+    template<> static constexpr int value<::apache::thrift::ident::struct_field> = 14;
+#else
+    template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::bool_field>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::byte_field>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<3>>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::short_field>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<4>>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::int_field>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<5>>) { return 5; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::long_field>) { return 5; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<6>>) { return 6; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::float_field>) { return 6; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<7>>) { return 7; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::double_field>) { return 7; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<8>>) { return 8; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::string_field>) { return 8; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<9>>) { return 9; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::binary_field>) { return 9; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<10>>) { return 10; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::enum_field>) { return 10; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<11>>) { return 11; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::list_field>) { return 11; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<12>>) { return 12; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::set_field>) { return 12; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<13>>) { return 13; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::map_field>) { return 13; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<14>>) { return 14; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::struct_field>) { return 14; }
+    template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
+#endif
+  };
+
+  struct __fbthrift_ordinal_impl_for_non_unique_type {
+    template<class, class, class> struct Impl { static constexpr int value = 0; };
+    template<class T> struct Impl<::apache::thrift::type::bool_t, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
+    template<class T> struct Impl<::apache::thrift::type::byte_t, T, std::enable_if_t<sizeof(T) != -2>> { static constexpr int value = 2; };
+    template<class T> struct Impl<::apache::thrift::type::i16_t, T, std::enable_if_t<sizeof(T) != -3>> { static constexpr int value = 3; };
+    template<class T> struct Impl<::apache::thrift::type::i32_t, T, std::enable_if_t<sizeof(T) != -4>> { static constexpr int value = 4; };
+    template<class T> struct Impl<::apache::thrift::type::i64_t, T, std::enable_if_t<sizeof(T) != -5>> { static constexpr int value = 5; };
+    template<class T> struct Impl<::apache::thrift::type::float_t, T, std::enable_if_t<sizeof(T) != -6>> { static constexpr int value = 6; };
+    template<class T> struct Impl<::apache::thrift::type::double_t, T, std::enable_if_t<sizeof(T) != -7>> { static constexpr int value = 7; };
+    template<class T> struct Impl<::apache::thrift::type::string_t, T, std::enable_if_t<sizeof(T) != -8>> { static constexpr int value = 8; };
+    template<class T> struct Impl<::apache::thrift::type::binary_t, T, std::enable_if_t<sizeof(T) != -9>> { static constexpr int value = 9; };
+    template<class T> struct Impl<::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::MyEnum>, T, std::enable_if_t<sizeof(T) != -10>> { static constexpr int value = 10; };
+    template<class T> struct Impl<::apache::thrift::type::list<::apache::thrift::type::i16_t>, T, std::enable_if_t<sizeof(T) != -11>> { static constexpr int value = 11; };
+    template<class T> struct Impl<::apache::thrift::type::set<::apache::thrift::type::i16_t>, T, std::enable_if_t<sizeof(T) != -12>> { static constexpr int value = 12; };
+    template<class T> struct Impl<::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>, T, std::enable_if_t<sizeof(T) != -13>> { static constexpr int value = 13; };
+    template<class T> struct Impl<::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::MyStruct>, T, std::enable_if_t<sizeof(T) != -14>> { static constexpr int value = 14; };
+
+    template<class T> static constexpr int value = Impl<T, T, void>::value;
+  };
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::field_ordinal<
+    std::conditional_t<
+        __fbthrift_ordinal_impl::value<T> != 0,
+        __fbthrift_ordinal_impl,
+        __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
+  >;
+
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = MyUnion;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    true;
+
+
+ public:
+  enum Type : int {
+    __EMPTY__ = 0,
+    bool_field = 1,
+    byte_field = 2,
+    short_field = 3,
+    int_field = 4,
+    long_field = 5,
+    float_field = 6,
+    double_field = 7,
+    string_field = 8,
+    binary_field = 9,
+    enum_field = 10,
+    list_field = 11,
+    set_field = 12,
+    map_field = 13,
+    struct_field = 14,
+  } ;
+
+  MyUnion()
+      : type_(folly::to_underlying(Type::__EMPTY__)) {}
+
+  MyUnion(MyUnion&& rhs) noexcept
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    if (this == &rhs) { return; }
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
+      case Type::bool_field:
+      {
+        set_bool_field(std::move(rhs.value_.bool_field));
+        break;
+      }
+      case Type::byte_field:
+      {
+        set_byte_field(std::move(rhs.value_.byte_field));
+        break;
+      }
+      case Type::short_field:
+      {
+        set_short_field(std::move(rhs.value_.short_field));
+        break;
+      }
+      case Type::int_field:
+      {
+        set_int_field(std::move(rhs.value_.int_field));
+        break;
+      }
+      case Type::long_field:
+      {
+        set_long_field(std::move(rhs.value_.long_field));
+        break;
+      }
+      case Type::float_field:
+      {
+        set_float_field(std::move(rhs.value_.float_field));
+        break;
+      }
+      case Type::double_field:
+      {
+        set_double_field(std::move(rhs.value_.double_field));
+        break;
+      }
+      case Type::string_field:
+      {
+        set_string_field(std::move(rhs.value_.string_field));
+        break;
+      }
+      case Type::binary_field:
+      {
+        set_binary_field(std::move(rhs.value_.binary_field));
+        break;
+      }
+      case Type::enum_field:
+      {
+        set_enum_field(std::move(rhs.value_.enum_field));
+        break;
+      }
+      case Type::list_field:
+      {
+        set_list_field(std::move(rhs.value_.list_field));
+        break;
+      }
+      case Type::set_field:
+      {
+        set_set_field(std::move(rhs.value_.set_field));
+        break;
+      }
+      case Type::map_field:
+      {
+        set_map_field(std::move(rhs.value_.map_field));
+        break;
+      }
+      case Type::struct_field:
+      {
+        set_struct_field(std::move(rhs.value_.struct_field));
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    apache::thrift::clear(rhs);
+  }
+
+  MyUnion(const MyUnion& rhs)
+      : type_(folly::to_underlying(Type::__EMPTY__)) {
+    if (this == &rhs) { return; }
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
+      case Type::bool_field:
+      {
+        set_bool_field(rhs.value_.bool_field);
+        break;
+      }
+      case Type::byte_field:
+      {
+        set_byte_field(rhs.value_.byte_field);
+        break;
+      }
+      case Type::short_field:
+      {
+        set_short_field(rhs.value_.short_field);
+        break;
+      }
+      case Type::int_field:
+      {
+        set_int_field(rhs.value_.int_field);
+        break;
+      }
+      case Type::long_field:
+      {
+        set_long_field(rhs.value_.long_field);
+        break;
+      }
+      case Type::float_field:
+      {
+        set_float_field(rhs.value_.float_field);
+        break;
+      }
+      case Type::double_field:
+      {
+        set_double_field(rhs.value_.double_field);
+        break;
+      }
+      case Type::string_field:
+      {
+        set_string_field(rhs.value_.string_field);
+        break;
+      }
+      case Type::binary_field:
+      {
+        set_binary_field(rhs.value_.binary_field);
+        break;
+      }
+      case Type::enum_field:
+      {
+        set_enum_field(rhs.value_.enum_field);
+        break;
+      }
+      case Type::list_field:
+      {
+        set_list_field(rhs.value_.list_field);
+        break;
+      }
+      case Type::set_field:
+      {
+        set_set_field(rhs.value_.set_field);
+        break;
+      }
+      case Type::map_field:
+      {
+        set_map_field(rhs.value_.map_field);
+        break;
+      }
+      case Type::struct_field:
+      {
+        set_struct_field(rhs.value_.struct_field);
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+  }
+
+  MyUnion& operator=(MyUnion&& rhs) noexcept {
+    if (this == &rhs) { return *this; }
+    __fbthrift_clear();
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
+      case Type::bool_field:
+      {
+        set_bool_field(std::move(rhs.value_.bool_field));
+        break;
+      }
+      case Type::byte_field:
+      {
+        set_byte_field(std::move(rhs.value_.byte_field));
+        break;
+      }
+      case Type::short_field:
+      {
+        set_short_field(std::move(rhs.value_.short_field));
+        break;
+      }
+      case Type::int_field:
+      {
+        set_int_field(std::move(rhs.value_.int_field));
+        break;
+      }
+      case Type::long_field:
+      {
+        set_long_field(std::move(rhs.value_.long_field));
+        break;
+      }
+      case Type::float_field:
+      {
+        set_float_field(std::move(rhs.value_.float_field));
+        break;
+      }
+      case Type::double_field:
+      {
+        set_double_field(std::move(rhs.value_.double_field));
+        break;
+      }
+      case Type::string_field:
+      {
+        set_string_field(std::move(rhs.value_.string_field));
+        break;
+      }
+      case Type::binary_field:
+      {
+        set_binary_field(std::move(rhs.value_.binary_field));
+        break;
+      }
+      case Type::enum_field:
+      {
+        set_enum_field(std::move(rhs.value_.enum_field));
+        break;
+      }
+      case Type::list_field:
+      {
+        set_list_field(std::move(rhs.value_.list_field));
+        break;
+      }
+      case Type::set_field:
+      {
+        set_set_field(std::move(rhs.value_.set_field));
+        break;
+      }
+      case Type::map_field:
+      {
+        set_map_field(std::move(rhs.value_.map_field));
+        break;
+      }
+      case Type::struct_field:
+      {
+        set_struct_field(std::move(rhs.value_.struct_field));
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    apache::thrift::clear(rhs);
+    return *this;
+  }
+
+  MyUnion& operator=(const MyUnion& rhs) {
+    if (this == &rhs) { return *this; }
+    __fbthrift_clear();
+    switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
+      case Type::bool_field:
+      {
+        set_bool_field(rhs.value_.bool_field);
+        break;
+      }
+      case Type::byte_field:
+      {
+        set_byte_field(rhs.value_.byte_field);
+        break;
+      }
+      case Type::short_field:
+      {
+        set_short_field(rhs.value_.short_field);
+        break;
+      }
+      case Type::int_field:
+      {
+        set_int_field(rhs.value_.int_field);
+        break;
+      }
+      case Type::long_field:
+      {
+        set_long_field(rhs.value_.long_field);
+        break;
+      }
+      case Type::float_field:
+      {
+        set_float_field(rhs.value_.float_field);
+        break;
+      }
+      case Type::double_field:
+      {
+        set_double_field(rhs.value_.double_field);
+        break;
+      }
+      case Type::string_field:
+      {
+        set_string_field(rhs.value_.string_field);
+        break;
+      }
+      case Type::binary_field:
+      {
+        set_binary_field(rhs.value_.binary_field);
+        break;
+      }
+      case Type::enum_field:
+      {
+        set_enum_field(rhs.value_.enum_field);
+        break;
+      }
+      case Type::list_field:
+      {
+        set_list_field(rhs.value_.list_field);
+        break;
+      }
+      case Type::set_field:
+      {
+        set_set_field(rhs.value_.set_field);
+        break;
+      }
+      case Type::map_field:
+      {
+        set_map_field(rhs.value_.map_field);
+        break;
+      }
+      case Type::struct_field:
+      {
+        set_struct_field(rhs.value_.struct_field);
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    return *this;
+  }
+
+  ~MyUnion() {
+    apache::thrift::clear(*this);
+  }
+
+  union storage_type {
+    bool bool_field;
+    ::std::int8_t byte_field;
+    ::std::int16_t short_field;
+    ::std::int32_t int_field;
+    ::std::int64_t long_field;
+    float float_field;
+    double double_field;
+    ::std::string string_field;
+    ::std::string binary_field;
+    ::facebook::thrift::test::terse_write::MyEnum enum_field;
+    ::std::vector<::std::int16_t> list_field;
+    ::std::set<::std::int16_t> set_field;
+    ::std::map<::std::int16_t, ::std::int16_t> map_field;
+    ::facebook::thrift::test::terse_write::MyStruct struct_field;
+
+    storage_type() {}
+    ~storage_type() {}
+  } ;
+
+  bool operator==(const MyUnion&) const;
+  bool operator<(const MyUnion&) const;
+
+  bool& set_bool_field(bool t = bool()) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::bool_field);
+    ::new (std::addressof(value_.bool_field)) bool(t);
+    return value_.bool_field;
+  }
+
+  ::std::int8_t& set_byte_field(::std::int8_t t = ::std::int8_t()) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::byte_field);
+    ::new (std::addressof(value_.byte_field)) ::std::int8_t(t);
+    return value_.byte_field;
+  }
+
+  ::std::int16_t& set_short_field(::std::int16_t t = ::std::int16_t()) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::short_field);
+    ::new (std::addressof(value_.short_field)) ::std::int16_t(t);
+    return value_.short_field;
+  }
+
+  ::std::int32_t& set_int_field(::std::int32_t t = ::std::int32_t()) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::int_field);
+    ::new (std::addressof(value_.int_field)) ::std::int32_t(t);
+    return value_.int_field;
+  }
+
+  ::std::int64_t& set_long_field(::std::int64_t t = ::std::int64_t()) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::long_field);
+    ::new (std::addressof(value_.long_field)) ::std::int64_t(t);
+    return value_.long_field;
+  }
+
+  float& set_float_field(float t = float()) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::float_field);
+    ::new (std::addressof(value_.float_field)) float(t);
+    return value_.float_field;
+  }
+
+  double& set_double_field(double t = double()) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::double_field);
+    ::new (std::addressof(value_.double_field)) double(t);
+    return value_.double_field;
+  }
+
+  ::std::string& set_string_field(::std::string const &t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::string_field);
+    ::new (std::addressof(value_.string_field)) ::std::string(t);
+    return value_.string_field;
+  }
+
+  ::std::string& set_string_field(::std::string&& t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::string_field);
+    ::new (std::addressof(value_.string_field)) ::std::string(std::move(t));
+    return value_.string_field;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_string_field(T&&... t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::string_field);
+    ::new (std::addressof(value_.string_field)) ::std::string(std::forward<T>(t)...);
+    return value_.string_field;
+  }
+
+  ::std::string& set_binary_field(::std::string const &t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::binary_field);
+    ::new (std::addressof(value_.binary_field)) ::std::string(t);
+    return value_.binary_field;
+  }
+
+  ::std::string& set_binary_field(::std::string&& t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::binary_field);
+    ::new (std::addressof(value_.binary_field)) ::std::string(std::move(t));
+    return value_.binary_field;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::std::string& set_binary_field(T&&... t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::binary_field);
+    ::new (std::addressof(value_.binary_field)) ::std::string(std::forward<T>(t)...);
+    return value_.binary_field;
+  }
+
+  ::facebook::thrift::test::terse_write::MyEnum& set_enum_field(::facebook::thrift::test::terse_write::MyEnum t = ::facebook::thrift::test::terse_write::MyEnum()) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::enum_field);
+    ::new (std::addressof(value_.enum_field)) ::facebook::thrift::test::terse_write::MyEnum(t);
+    return value_.enum_field;
+  }
+
+  ::std::vector<::std::int16_t>& set_list_field(::std::vector<::std::int16_t> const &t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::list_field);
+    ::new (std::addressof(value_.list_field)) ::std::vector<::std::int16_t>(t);
+    return value_.list_field;
+  }
+
+  ::std::vector<::std::int16_t>& set_list_field(::std::vector<::std::int16_t>&& t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::list_field);
+    ::new (std::addressof(value_.list_field)) ::std::vector<::std::int16_t>(std::move(t));
+    return value_.list_field;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::vector<::std::int16_t>, T...>> ::std::vector<::std::int16_t>& set_list_field(T&&... t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::list_field);
+    ::new (std::addressof(value_.list_field)) ::std::vector<::std::int16_t>(std::forward<T>(t)...);
+    return value_.list_field;
+  }
+
+  ::std::set<::std::int16_t>& set_set_field(::std::set<::std::int16_t> const &t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::set_field);
+    ::new (std::addressof(value_.set_field)) ::std::set<::std::int16_t>(t);
+    return value_.set_field;
+  }
+
+  ::std::set<::std::int16_t>& set_set_field(::std::set<::std::int16_t>&& t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::set_field);
+    ::new (std::addressof(value_.set_field)) ::std::set<::std::int16_t>(std::move(t));
+    return value_.set_field;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::set<::std::int16_t>, T...>> ::std::set<::std::int16_t>& set_set_field(T&&... t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::set_field);
+    ::new (std::addressof(value_.set_field)) ::std::set<::std::int16_t>(std::forward<T>(t)...);
+    return value_.set_field;
+  }
+
+  ::std::map<::std::int16_t, ::std::int16_t>& set_map_field(::std::map<::std::int16_t, ::std::int16_t> const &t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::map_field);
+    ::new (std::addressof(value_.map_field)) ::std::map<::std::int16_t, ::std::int16_t>(t);
+    return value_.map_field;
+  }
+
+  ::std::map<::std::int16_t, ::std::int16_t>& set_map_field(::std::map<::std::int16_t, ::std::int16_t>&& t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::map_field);
+    ::new (std::addressof(value_.map_field)) ::std::map<::std::int16_t, ::std::int16_t>(std::move(t));
+    return value_.map_field;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::map<::std::int16_t, ::std::int16_t>, T...>> ::std::map<::std::int16_t, ::std::int16_t>& set_map_field(T&&... t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::map_field);
+    ::new (std::addressof(value_.map_field)) ::std::map<::std::int16_t, ::std::int16_t>(std::forward<T>(t)...);
+    return value_.map_field;
+  }
+
+  ::facebook::thrift::test::terse_write::MyStruct& set_struct_field(::facebook::thrift::test::terse_write::MyStruct const &t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::struct_field);
+    ::new (std::addressof(value_.struct_field)) ::facebook::thrift::test::terse_write::MyStruct(t);
+    return value_.struct_field;
+  }
+
+  ::facebook::thrift::test::terse_write::MyStruct& set_struct_field(::facebook::thrift::test::terse_write::MyStruct&& t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::struct_field);
+    ::new (std::addressof(value_.struct_field)) ::facebook::thrift::test::terse_write::MyStruct(std::move(t));
+    return value_.struct_field;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<::facebook::thrift::test::terse_write::MyStruct, T...>> ::facebook::thrift::test::terse_write::MyStruct& set_struct_field(T&&... t) {
+    __fbthrift_clear();
+    type_ = folly::to_underlying(Type::struct_field);
+    ::new (std::addressof(value_.struct_field)) ::facebook::thrift::test::terse_write::MyStruct(std::forward<T>(t)...);
+    return value_.struct_field;
+  }
+
+  bool const& get_bool_field() const {
+    if (getType() != Type::bool_field) {
+      ::apache::thrift::detail::throw_on_bad_field_access();
+    }
+    return value_.bool_field;
+  }
+
+  ::std::int8_t const& get_byte_field() const {
+    if (getType() != Type::byte_field) {
+      ::apache::thrift::detail::throw_on_bad_field_access();
+    }
+    return value_.byte_field;
+  }
+
+  ::std::int16_t const& get_short_field() const {
+    if (getType() != Type::short_field) {
+      ::apache::thrift::detail::throw_on_bad_field_access();
+    }
+    return value_.short_field;
+  }
+
+  ::std::int32_t const& get_int_field() const {
+    if (getType() != Type::int_field) {
+      ::apache::thrift::detail::throw_on_bad_field_access();
+    }
+    return value_.int_field;
+  }
+
+  ::std::int64_t const& get_long_field() const {
+    if (getType() != Type::long_field) {
+      ::apache::thrift::detail::throw_on_bad_field_access();
+    }
+    return value_.long_field;
+  }
+
+  float const& get_float_field() const {
+    if (getType() != Type::float_field) {
+      ::apache::thrift::detail::throw_on_bad_field_access();
+    }
+    return value_.float_field;
+  }
+
+  double const& get_double_field() const {
+    if (getType() != Type::double_field) {
+      ::apache::thrift::detail::throw_on_bad_field_access();
+    }
+    return value_.double_field;
+  }
+
+  ::std::string const& get_string_field() const {
+    if (getType() != Type::string_field) {
+      ::apache::thrift::detail::throw_on_bad_field_access();
+    }
+    return value_.string_field;
+  }
+
+  ::std::string const& get_binary_field() const {
+    if (getType() != Type::binary_field) {
+      ::apache::thrift::detail::throw_on_bad_field_access();
+    }
+    return value_.binary_field;
+  }
+
+  ::facebook::thrift::test::terse_write::MyEnum const& get_enum_field() const {
+    if (getType() != Type::enum_field) {
+      ::apache::thrift::detail::throw_on_bad_field_access();
+    }
+    return value_.enum_field;
+  }
+
+  ::std::vector<::std::int16_t> const& get_list_field() const {
+    if (getType() != Type::list_field) {
+      ::apache::thrift::detail::throw_on_bad_field_access();
+    }
+    return value_.list_field;
+  }
+
+  ::std::set<::std::int16_t> const& get_set_field() const {
+    if (getType() != Type::set_field) {
+      ::apache::thrift::detail::throw_on_bad_field_access();
+    }
+    return value_.set_field;
+  }
+
+  ::std::map<::std::int16_t, ::std::int16_t> const& get_map_field() const {
+    if (getType() != Type::map_field) {
+      ::apache::thrift::detail::throw_on_bad_field_access();
+    }
+    return value_.map_field;
+  }
+
+  ::facebook::thrift::test::terse_write::MyStruct const& get_struct_field() const {
+    if (getType() != Type::struct_field) {
+      ::apache::thrift::detail::throw_on_bad_field_access();
+    }
+    return value_.struct_field;
+  }
+
+  bool& mutable_bool_field() {
+    assert(getType() == Type::bool_field);
+    return value_.bool_field;
+  }
+
+  ::std::int8_t& mutable_byte_field() {
+    assert(getType() == Type::byte_field);
+    return value_.byte_field;
+  }
+
+  ::std::int16_t& mutable_short_field() {
+    assert(getType() == Type::short_field);
+    return value_.short_field;
+  }
+
+  ::std::int32_t& mutable_int_field() {
+    assert(getType() == Type::int_field);
+    return value_.int_field;
+  }
+
+  ::std::int64_t& mutable_long_field() {
+    assert(getType() == Type::long_field);
+    return value_.long_field;
+  }
+
+  float& mutable_float_field() {
+    assert(getType() == Type::float_field);
+    return value_.float_field;
+  }
+
+  double& mutable_double_field() {
+    assert(getType() == Type::double_field);
+    return value_.double_field;
+  }
+
+  ::std::string& mutable_string_field() {
+    assert(getType() == Type::string_field);
+    return value_.string_field;
+  }
+
+  ::std::string& mutable_binary_field() {
+    assert(getType() == Type::binary_field);
+    return value_.binary_field;
+  }
+
+  ::facebook::thrift::test::terse_write::MyEnum& mutable_enum_field() {
+    assert(getType() == Type::enum_field);
+    return value_.enum_field;
+  }
+
+  ::std::vector<::std::int16_t>& mutable_list_field() {
+    assert(getType() == Type::list_field);
+    return value_.list_field;
+  }
+
+  ::std::set<::std::int16_t>& mutable_set_field() {
+    assert(getType() == Type::set_field);
+    return value_.set_field;
+  }
+
+  ::std::map<::std::int16_t, ::std::int16_t>& mutable_map_field() {
+    assert(getType() == Type::map_field);
+    return value_.map_field;
+  }
+
+  ::facebook::thrift::test::terse_write::MyStruct& mutable_struct_field() {
+    assert(getType() == Type::struct_field);
+    return value_.struct_field;
+  }
+
+  bool move_bool_field() {
+    assert(getType() == Type::bool_field);
+    return std::move(value_.bool_field);
+  }
+
+  ::std::int8_t move_byte_field() {
+    assert(getType() == Type::byte_field);
+    return std::move(value_.byte_field);
+  }
+
+  ::std::int16_t move_short_field() {
+    assert(getType() == Type::short_field);
+    return std::move(value_.short_field);
+  }
+
+  ::std::int32_t move_int_field() {
+    assert(getType() == Type::int_field);
+    return std::move(value_.int_field);
+  }
+
+  ::std::int64_t move_long_field() {
+    assert(getType() == Type::long_field);
+    return std::move(value_.long_field);
+  }
+
+  float move_float_field() {
+    assert(getType() == Type::float_field);
+    return std::move(value_.float_field);
+  }
+
+  double move_double_field() {
+    assert(getType() == Type::double_field);
+    return std::move(value_.double_field);
+  }
+
+  ::std::string move_string_field() {
+    assert(getType() == Type::string_field);
+    return std::move(value_.string_field);
+  }
+
+  ::std::string move_binary_field() {
+    assert(getType() == Type::binary_field);
+    return std::move(value_.binary_field);
+  }
+
+  ::facebook::thrift::test::terse_write::MyEnum move_enum_field() {
+    assert(getType() == Type::enum_field);
+    return std::move(value_.enum_field);
+  }
+
+  ::std::vector<::std::int16_t> move_list_field() {
+    assert(getType() == Type::list_field);
+    return std::move(value_.list_field);
+  }
+
+  ::std::set<::std::int16_t> move_set_field() {
+    assert(getType() == Type::set_field);
+    return std::move(value_.set_field);
+  }
+
+  ::std::map<::std::int16_t, ::std::int16_t> move_map_field() {
+    assert(getType() == Type::map_field);
+    return std::move(value_.map_field);
+  }
+
+  ::facebook::thrift::test::terse_write::MyStruct move_struct_field() {
+    assert(getType() == Type::struct_field);
+    return std::move(value_.struct_field);
+  }
+
+  template <typename..., typename T = bool>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> bool_field_ref() const& {
+    return {value_.bool_field, type_, folly::to_underlying(Type::bool_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = bool>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> bool_field_ref() const&& {
+    return {std::move(value_.bool_field), type_, folly::to_underlying(Type::bool_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = bool>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> bool_field_ref() & {
+    return {value_.bool_field, type_, folly::to_underlying(Type::bool_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = bool>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> bool_field_ref() && {
+    return {std::move(value_.bool_field), type_, folly::to_underlying(Type::bool_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> byte_field_ref() const& {
+    return {value_.byte_field, type_, folly::to_underlying(Type::byte_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> byte_field_ref() const&& {
+    return {std::move(value_.byte_field), type_, folly::to_underlying(Type::byte_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> byte_field_ref() & {
+    return {value_.byte_field, type_, folly::to_underlying(Type::byte_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> byte_field_ref() && {
+    return {std::move(value_.byte_field), type_, folly::to_underlying(Type::byte_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> short_field_ref() const& {
+    return {value_.short_field, type_, folly::to_underlying(Type::short_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> short_field_ref() const&& {
+    return {std::move(value_.short_field), type_, folly::to_underlying(Type::short_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> short_field_ref() & {
+    return {value_.short_field, type_, folly::to_underlying(Type::short_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> short_field_ref() && {
+    return {std::move(value_.short_field), type_, folly::to_underlying(Type::short_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> int_field_ref() const& {
+    return {value_.int_field, type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> int_field_ref() const&& {
+    return {std::move(value_.int_field), type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> int_field_ref() & {
+    return {value_.int_field, type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> int_field_ref() && {
+    return {std::move(value_.int_field), type_, folly::to_underlying(Type::int_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T = ::std::int64_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> long_field_ref() const& {
+    return {value_.long_field, type_, folly::to_underlying(Type::long_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::int64_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> long_field_ref() const&& {
+    return {std::move(value_.long_field), type_, folly::to_underlying(Type::long_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::int64_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> long_field_ref() & {
+    return {value_.long_field, type_, folly::to_underlying(Type::long_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::int64_t>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> long_field_ref() && {
+    return {std::move(value_.long_field), type_, folly::to_underlying(Type::long_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T = float>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> float_field_ref() const& {
+    return {value_.float_field, type_, folly::to_underlying(Type::float_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = float>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> float_field_ref() const&& {
+    return {std::move(value_.float_field), type_, folly::to_underlying(Type::float_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = float>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> float_field_ref() & {
+    return {value_.float_field, type_, folly::to_underlying(Type::float_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = float>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> float_field_ref() && {
+    return {std::move(value_.float_field), type_, folly::to_underlying(Type::float_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T = double>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> double_field_ref() const& {
+    return {value_.double_field, type_, folly::to_underlying(Type::double_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = double>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> double_field_ref() const&& {
+    return {std::move(value_.double_field), type_, folly::to_underlying(Type::double_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = double>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> double_field_ref() & {
+    return {value_.double_field, type_, folly::to_underlying(Type::double_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = double>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> double_field_ref() && {
+    return {std::move(value_.double_field), type_, folly::to_underlying(Type::double_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> string_field_ref() const& {
+    return {value_.string_field, type_, folly::to_underlying(Type::string_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> string_field_ref() const&& {
+    return {std::move(value_.string_field), type_, folly::to_underlying(Type::string_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> string_field_ref() & {
+    return {value_.string_field, type_, folly::to_underlying(Type::string_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> string_field_ref() && {
+    return {std::move(value_.string_field), type_, folly::to_underlying(Type::string_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> binary_field_ref() const& {
+    return {value_.binary_field, type_, folly::to_underlying(Type::binary_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> binary_field_ref() const&& {
+    return {std::move(value_.binary_field), type_, folly::to_underlying(Type::binary_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> binary_field_ref() & {
+    return {value_.binary_field, type_, folly::to_underlying(Type::binary_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> binary_field_ref() && {
+    return {std::move(value_.binary_field), type_, folly::to_underlying(Type::binary_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> enum_field_ref() const& {
+    return {value_.enum_field, type_, folly::to_underlying(Type::enum_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> enum_field_ref() const&& {
+    return {std::move(value_.enum_field), type_, folly::to_underlying(Type::enum_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> enum_field_ref() & {
+    return {value_.enum_field, type_, folly::to_underlying(Type::enum_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyEnum>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> enum_field_ref() && {
+    return {std::move(value_.enum_field), type_, folly::to_underlying(Type::enum_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T = ::std::vector<::std::int16_t>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> list_field_ref() const& {
+    return {value_.list_field, type_, folly::to_underlying(Type::list_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::int16_t>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> list_field_ref() const&& {
+    return {std::move(value_.list_field), type_, folly::to_underlying(Type::list_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::int16_t>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> list_field_ref() & {
+    return {value_.list_field, type_, folly::to_underlying(Type::list_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::vector<::std::int16_t>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> list_field_ref() && {
+    return {std::move(value_.list_field), type_, folly::to_underlying(Type::list_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T = ::std::set<::std::int16_t>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> set_field_ref() const& {
+    return {value_.set_field, type_, folly::to_underlying(Type::set_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::set<::std::int16_t>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> set_field_ref() const&& {
+    return {std::move(value_.set_field), type_, folly::to_underlying(Type::set_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::set<::std::int16_t>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> set_field_ref() & {
+    return {value_.set_field, type_, folly::to_underlying(Type::set_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::set<::std::int16_t>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> set_field_ref() && {
+    return {std::move(value_.set_field), type_, folly::to_underlying(Type::set_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> map_field_ref() const& {
+    return {value_.map_field, type_, folly::to_underlying(Type::map_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> map_field_ref() const&& {
+    return {std::move(value_.map_field), type_, folly::to_underlying(Type::map_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> map_field_ref() & {
+    return {value_.map_field, type_, folly::to_underlying(Type::map_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::std::map<::std::int16_t, ::std::int16_t>>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> map_field_ref() && {
+    return {std::move(value_.map_field), type_, folly::to_underlying(Type::map_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> struct_field_ref() const& {
+    return {value_.struct_field, type_, folly::to_underlying(Type::struct_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> struct_field_ref() const&& {
+    return {std::move(value_.struct_field), type_, folly::to_underlying(Type::struct_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> struct_field_ref() & {
+    return {value_.struct_field, type_, folly::to_underlying(Type::struct_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyStruct>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> struct_field_ref() && {
+    return {std::move(value_.struct_field), type_, folly::to_underlying(Type::struct_field), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  Type getType() const { return static_cast<Type>(type_); }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+ protected:
+  template <class T>
+  void destruct(T &val) {
+    (&val)->~T();
+  }
+
+  storage_type value_;
+  std::underlying_type_t<Type> type_;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<MyUnion>;
+  friend void swap(MyUnion& a, MyUnion& b);
+};
+
+template <class Protocol_>
+unsigned long MyUnion::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;
@@ -692,7 +2063,7 @@ class StructLevelTerseStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static constexpr std::size_t __fbthrift_field_size_v = 14;
+  static constexpr std::size_t __fbthrift_field_size_v = 15;
 
   template<class T>
   using __fbthrift_id = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -710,7 +2081,8 @@ class StructLevelTerseStruct final  {
                                                    ::apache::thrift::field_id<11>,
                                                    ::apache::thrift::field_id<12>,
                                                    ::apache::thrift::field_id<13>,
-                                                   ::apache::thrift::field_id<14>>;
+                                                   ::apache::thrift::field_id<14>,
+                                                   ::apache::thrift::field_id<15>>;
 
   template<class T>
   using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -728,7 +2100,8 @@ class StructLevelTerseStruct final  {
                                                          ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
                                                          ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
                                                          ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
-                                                         ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::MyStruct>>;
+                                                         ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::MyStruct>,
+                                                         ::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::MyUnion>>;
 
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -746,7 +2119,8 @@ class StructLevelTerseStruct final  {
                                                       ::apache::thrift::ident::list_field,
                                                       ::apache::thrift::ident::set_field,
                                                       ::apache::thrift::ident::map_field,
-                                                      ::apache::thrift::ident::struct_field>;
+                                                      ::apache::thrift::ident::struct_field,
+                                                      ::apache::thrift::ident::union_field>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
@@ -779,6 +2153,8 @@ class StructLevelTerseStruct final  {
     template<> static constexpr int value<::apache::thrift::ident::map_field> = 13;
     template<> static constexpr int value<::apache::thrift::field_id<14>> = 14;
     template<> static constexpr int value<::apache::thrift::ident::struct_field> = 14;
+    template<> static constexpr int value<::apache::thrift::field_id<15>> = 15;
+    template<> static constexpr int value<::apache::thrift::ident::union_field> = 15;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
@@ -809,6 +2185,8 @@ class StructLevelTerseStruct final  {
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::map_field>) { return 13; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<14>>) { return 14; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::struct_field>) { return 14; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<15>>) { return 15; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::union_field>) { return 15; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -829,6 +2207,7 @@ class StructLevelTerseStruct final  {
     template<class T> struct Impl<::apache::thrift::type::set<::apache::thrift::type::i16_t>, T, std::enable_if_t<sizeof(T) != -12>> { static constexpr int value = 12; };
     template<class T> struct Impl<::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>, T, std::enable_if_t<sizeof(T) != -13>> { static constexpr int value = 13; };
     template<class T> struct Impl<::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::MyStruct>, T, std::enable_if_t<sizeof(T) != -14>> { static constexpr int value = 14; };
+    template<class T> struct Impl<::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::MyUnion>, T, std::enable_if_t<sizeof(T) != -15>> { static constexpr int value = 15; };
 
     template<class T> static constexpr int value = Impl<T, T, void>::value;
   };
@@ -856,7 +2235,7 @@ class StructLevelTerseStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  StructLevelTerseStruct(apache::thrift::FragileConstructor, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::terse_write::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::terse_write::MyStruct struct_field__arg);
+  StructLevelTerseStruct(apache::thrift::FragileConstructor, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::terse_write::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::terse_write::MyStruct struct_field__arg, ::facebook::thrift::test::terse_write::MyUnion union_field__arg);
 
   StructLevelTerseStruct(StructLevelTerseStruct&&) noexcept;
 
@@ -896,6 +2275,8 @@ class StructLevelTerseStruct final  {
   ::std::map<::std::int16_t, ::std::int16_t> __fbthrift_field_map_field;
  private:
   ::facebook::thrift::test::terse_write::MyStruct __fbthrift_field_struct_field;
+ private:
+  ::facebook::thrift::test::terse_write::MyUnion __fbthrift_field_union_field;
 
  public:
 
@@ -1462,6 +2843,46 @@ class StructLevelTerseStruct final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_struct_field)};
   }
 
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> union_field_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_union_field};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> union_field_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_union_field)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> union_field_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_union_field};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> union_field_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_union_field)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> union_field() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_union_field};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> union_field() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_union_field)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> union_field() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_union_field};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> union_field() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_union_field)};
+  }
+
   bool get_bool_field() const {
     return __fbthrift_field_bool_field;
   }
@@ -1607,6 +3028,15 @@ class StructLevelTerseStruct final  {
     struct_field_ref() = std::forward<T_StructLevelTerseStruct_struct_field_struct_setter>(struct_field_);
     return __fbthrift_field_struct_field;
   }
+  const ::facebook::thrift::test::terse_write::MyUnion& get_union_field() const&;
+  ::facebook::thrift::test::terse_write::MyUnion get_union_field() &&;
+
+  template <typename T_StructLevelTerseStruct_union_field_struct_setter = ::facebook::thrift::test::terse_write::MyUnion>
+  [[deprecated("Use `FOO.union_field_ref() = BAR;` instead of `FOO.set_union_field(BAR);`")]]
+  ::facebook::thrift::test::terse_write::MyUnion& set_union_field(T_StructLevelTerseStruct_union_field_struct_setter&& union_field_) {
+    union_field_ref() = std::forward<T_StructLevelTerseStruct_union_field_struct_setter>(union_field_);
+    return __fbthrift_field_union_field;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1642,7 +3072,7 @@ class FieldLevelTerseStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static constexpr std::size_t __fbthrift_field_size_v = 28;
+  static constexpr std::size_t __fbthrift_field_size_v = 30;
 
   template<class T>
   using __fbthrift_id = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -1661,6 +3091,7 @@ class FieldLevelTerseStruct final  {
                                                    ::apache::thrift::field_id<12>,
                                                    ::apache::thrift::field_id<13>,
                                                    ::apache::thrift::field_id<14>,
+                                                   ::apache::thrift::field_id<29>,
                                                    ::apache::thrift::field_id<15>,
                                                    ::apache::thrift::field_id<16>,
                                                    ::apache::thrift::field_id<17>,
@@ -1674,7 +3105,8 @@ class FieldLevelTerseStruct final  {
                                                    ::apache::thrift::field_id<25>,
                                                    ::apache::thrift::field_id<26>,
                                                    ::apache::thrift::field_id<27>,
-                                                   ::apache::thrift::field_id<28>>;
+                                                   ::apache::thrift::field_id<28>,
+                                                   ::apache::thrift::field_id<30>>;
 
   template<class T>
   using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -1693,6 +3125,7 @@ class FieldLevelTerseStruct final  {
                                                          ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
                                                          ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
                                                          ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::MyStruct>,
+                                                         ::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::MyUnion>,
                                                          ::apache::thrift::type::bool_t,
                                                          ::apache::thrift::type::byte_t,
                                                          ::apache::thrift::type::i16_t,
@@ -1706,7 +3139,8 @@ class FieldLevelTerseStruct final  {
                                                          ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
                                                          ::apache::thrift::type::set<::apache::thrift::type::i16_t>,
                                                          ::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>,
-                                                         ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::MyStruct>>;
+                                                         ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::MyStruct>,
+                                                         ::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::MyUnion>>;
 
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -1725,6 +3159,7 @@ class FieldLevelTerseStruct final  {
                                                       ::apache::thrift::ident::terse_set_field,
                                                       ::apache::thrift::ident::terse_map_field,
                                                       ::apache::thrift::ident::terse_struct_field,
+                                                      ::apache::thrift::ident::terse_union_field,
                                                       ::apache::thrift::ident::bool_field,
                                                       ::apache::thrift::ident::byte_field,
                                                       ::apache::thrift::ident::short_field,
@@ -1738,7 +3173,8 @@ class FieldLevelTerseStruct final  {
                                                       ::apache::thrift::ident::list_field,
                                                       ::apache::thrift::ident::set_field,
                                                       ::apache::thrift::ident::map_field,
-                                                      ::apache::thrift::ident::struct_field>;
+                                                      ::apache::thrift::ident::struct_field,
+                                                      ::apache::thrift::ident::union_field>;
 
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
@@ -1771,34 +3207,38 @@ class FieldLevelTerseStruct final  {
     template<> static constexpr int value<::apache::thrift::ident::terse_map_field> = 13;
     template<> static constexpr int value<::apache::thrift::field_id<14>> = 14;
     template<> static constexpr int value<::apache::thrift::ident::terse_struct_field> = 14;
-    template<> static constexpr int value<::apache::thrift::field_id<15>> = 15;
-    template<> static constexpr int value<::apache::thrift::ident::bool_field> = 15;
-    template<> static constexpr int value<::apache::thrift::field_id<16>> = 16;
-    template<> static constexpr int value<::apache::thrift::ident::byte_field> = 16;
-    template<> static constexpr int value<::apache::thrift::field_id<17>> = 17;
-    template<> static constexpr int value<::apache::thrift::ident::short_field> = 17;
-    template<> static constexpr int value<::apache::thrift::field_id<18>> = 18;
-    template<> static constexpr int value<::apache::thrift::ident::int_field> = 18;
-    template<> static constexpr int value<::apache::thrift::field_id<19>> = 19;
-    template<> static constexpr int value<::apache::thrift::ident::long_field> = 19;
-    template<> static constexpr int value<::apache::thrift::field_id<20>> = 20;
-    template<> static constexpr int value<::apache::thrift::ident::float_field> = 20;
-    template<> static constexpr int value<::apache::thrift::field_id<21>> = 21;
-    template<> static constexpr int value<::apache::thrift::ident::double_field> = 21;
-    template<> static constexpr int value<::apache::thrift::field_id<22>> = 22;
-    template<> static constexpr int value<::apache::thrift::ident::string_field> = 22;
-    template<> static constexpr int value<::apache::thrift::field_id<23>> = 23;
-    template<> static constexpr int value<::apache::thrift::ident::binary_field> = 23;
-    template<> static constexpr int value<::apache::thrift::field_id<24>> = 24;
-    template<> static constexpr int value<::apache::thrift::ident::enum_field> = 24;
-    template<> static constexpr int value<::apache::thrift::field_id<25>> = 25;
-    template<> static constexpr int value<::apache::thrift::ident::list_field> = 25;
-    template<> static constexpr int value<::apache::thrift::field_id<26>> = 26;
-    template<> static constexpr int value<::apache::thrift::ident::set_field> = 26;
-    template<> static constexpr int value<::apache::thrift::field_id<27>> = 27;
-    template<> static constexpr int value<::apache::thrift::ident::map_field> = 27;
-    template<> static constexpr int value<::apache::thrift::field_id<28>> = 28;
-    template<> static constexpr int value<::apache::thrift::ident::struct_field> = 28;
+    template<> static constexpr int value<::apache::thrift::field_id<29>> = 15;
+    template<> static constexpr int value<::apache::thrift::ident::terse_union_field> = 15;
+    template<> static constexpr int value<::apache::thrift::field_id<15>> = 16;
+    template<> static constexpr int value<::apache::thrift::ident::bool_field> = 16;
+    template<> static constexpr int value<::apache::thrift::field_id<16>> = 17;
+    template<> static constexpr int value<::apache::thrift::ident::byte_field> = 17;
+    template<> static constexpr int value<::apache::thrift::field_id<17>> = 18;
+    template<> static constexpr int value<::apache::thrift::ident::short_field> = 18;
+    template<> static constexpr int value<::apache::thrift::field_id<18>> = 19;
+    template<> static constexpr int value<::apache::thrift::ident::int_field> = 19;
+    template<> static constexpr int value<::apache::thrift::field_id<19>> = 20;
+    template<> static constexpr int value<::apache::thrift::ident::long_field> = 20;
+    template<> static constexpr int value<::apache::thrift::field_id<20>> = 21;
+    template<> static constexpr int value<::apache::thrift::ident::float_field> = 21;
+    template<> static constexpr int value<::apache::thrift::field_id<21>> = 22;
+    template<> static constexpr int value<::apache::thrift::ident::double_field> = 22;
+    template<> static constexpr int value<::apache::thrift::field_id<22>> = 23;
+    template<> static constexpr int value<::apache::thrift::ident::string_field> = 23;
+    template<> static constexpr int value<::apache::thrift::field_id<23>> = 24;
+    template<> static constexpr int value<::apache::thrift::ident::binary_field> = 24;
+    template<> static constexpr int value<::apache::thrift::field_id<24>> = 25;
+    template<> static constexpr int value<::apache::thrift::ident::enum_field> = 25;
+    template<> static constexpr int value<::apache::thrift::field_id<25>> = 26;
+    template<> static constexpr int value<::apache::thrift::ident::list_field> = 26;
+    template<> static constexpr int value<::apache::thrift::field_id<26>> = 27;
+    template<> static constexpr int value<::apache::thrift::ident::set_field> = 27;
+    template<> static constexpr int value<::apache::thrift::field_id<27>> = 28;
+    template<> static constexpr int value<::apache::thrift::ident::map_field> = 28;
+    template<> static constexpr int value<::apache::thrift::field_id<28>> = 29;
+    template<> static constexpr int value<::apache::thrift::ident::struct_field> = 29;
+    template<> static constexpr int value<::apache::thrift::field_id<30>> = 30;
+    template<> static constexpr int value<::apache::thrift::ident::union_field> = 30;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
@@ -1829,34 +3269,38 @@ class FieldLevelTerseStruct final  {
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::terse_map_field>) { return 13; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<14>>) { return 14; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::terse_struct_field>) { return 14; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<15>>) { return 15; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::bool_field>) { return 15; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<16>>) { return 16; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::byte_field>) { return 16; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<17>>) { return 17; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::short_field>) { return 17; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<18>>) { return 18; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::int_field>) { return 18; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<19>>) { return 19; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::long_field>) { return 19; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<20>>) { return 20; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::float_field>) { return 20; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<21>>) { return 21; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::double_field>) { return 21; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<22>>) { return 22; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::string_field>) { return 22; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<23>>) { return 23; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::binary_field>) { return 23; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<24>>) { return 24; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::enum_field>) { return 24; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<25>>) { return 25; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::list_field>) { return 25; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<26>>) { return 26; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::set_field>) { return 26; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<27>>) { return 27; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::map_field>) { return 27; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<28>>) { return 28; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::struct_field>) { return 28; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<29>>) { return 15; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::terse_union_field>) { return 15; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<15>>) { return 16; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::bool_field>) { return 16; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<16>>) { return 17; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::byte_field>) { return 17; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<17>>) { return 18; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::short_field>) { return 18; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<18>>) { return 19; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::int_field>) { return 19; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<19>>) { return 20; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::long_field>) { return 20; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<20>>) { return 21; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::float_field>) { return 21; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<21>>) { return 22; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::double_field>) { return 22; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<22>>) { return 23; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::string_field>) { return 23; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<23>>) { return 24; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::binary_field>) { return 24; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<24>>) { return 25; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::enum_field>) { return 25; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<25>>) { return 26; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::list_field>) { return 26; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<26>>) { return 27; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::set_field>) { return 27; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<27>>) { return 28; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::map_field>) { return 28; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<28>>) { return 29; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::struct_field>) { return 29; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<30>>) { return 30; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::union_field>) { return 30; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
   };
@@ -1877,20 +3321,22 @@ class FieldLevelTerseStruct final  {
     template<class T> struct Impl<::apache::thrift::type::set<::apache::thrift::type::i16_t>, T, std::enable_if_t<sizeof(T) != -12>> { static constexpr int value = 12; };
     template<class T> struct Impl<::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>, T, std::enable_if_t<sizeof(T) != -13>> { static constexpr int value = 13; };
     template<class T> struct Impl<::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::MyStruct>, T, std::enable_if_t<sizeof(T) != -14>> { static constexpr int value = 14; };
-    template<class T> struct Impl<::apache::thrift::type::bool_t, T, std::enable_if_t<sizeof(T) != -15>> { static constexpr int value = 15; };
-    template<class T> struct Impl<::apache::thrift::type::byte_t, T, std::enable_if_t<sizeof(T) != -16>> { static constexpr int value = 16; };
-    template<class T> struct Impl<::apache::thrift::type::i16_t, T, std::enable_if_t<sizeof(T) != -17>> { static constexpr int value = 17; };
-    template<class T> struct Impl<::apache::thrift::type::i32_t, T, std::enable_if_t<sizeof(T) != -18>> { static constexpr int value = 18; };
-    template<class T> struct Impl<::apache::thrift::type::i64_t, T, std::enable_if_t<sizeof(T) != -19>> { static constexpr int value = 19; };
-    template<class T> struct Impl<::apache::thrift::type::float_t, T, std::enable_if_t<sizeof(T) != -20>> { static constexpr int value = 20; };
-    template<class T> struct Impl<::apache::thrift::type::double_t, T, std::enable_if_t<sizeof(T) != -21>> { static constexpr int value = 21; };
-    template<class T> struct Impl<::apache::thrift::type::string_t, T, std::enable_if_t<sizeof(T) != -22>> { static constexpr int value = 22; };
-    template<class T> struct Impl<::apache::thrift::type::binary_t, T, std::enable_if_t<sizeof(T) != -23>> { static constexpr int value = 23; };
-    template<class T> struct Impl<::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::MyEnum>, T, std::enable_if_t<sizeof(T) != -24>> { static constexpr int value = 24; };
-    template<class T> struct Impl<::apache::thrift::type::list<::apache::thrift::type::i16_t>, T, std::enable_if_t<sizeof(T) != -25>> { static constexpr int value = 25; };
-    template<class T> struct Impl<::apache::thrift::type::set<::apache::thrift::type::i16_t>, T, std::enable_if_t<sizeof(T) != -26>> { static constexpr int value = 26; };
-    template<class T> struct Impl<::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>, T, std::enable_if_t<sizeof(T) != -27>> { static constexpr int value = 27; };
-    template<class T> struct Impl<::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::MyStruct>, T, std::enable_if_t<sizeof(T) != -28>> { static constexpr int value = 28; };
+    template<class T> struct Impl<::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::MyUnion>, T, std::enable_if_t<sizeof(T) != -15>> { static constexpr int value = 15; };
+    template<class T> struct Impl<::apache::thrift::type::bool_t, T, std::enable_if_t<sizeof(T) != -16>> { static constexpr int value = 16; };
+    template<class T> struct Impl<::apache::thrift::type::byte_t, T, std::enable_if_t<sizeof(T) != -17>> { static constexpr int value = 17; };
+    template<class T> struct Impl<::apache::thrift::type::i16_t, T, std::enable_if_t<sizeof(T) != -18>> { static constexpr int value = 18; };
+    template<class T> struct Impl<::apache::thrift::type::i32_t, T, std::enable_if_t<sizeof(T) != -19>> { static constexpr int value = 19; };
+    template<class T> struct Impl<::apache::thrift::type::i64_t, T, std::enable_if_t<sizeof(T) != -20>> { static constexpr int value = 20; };
+    template<class T> struct Impl<::apache::thrift::type::float_t, T, std::enable_if_t<sizeof(T) != -21>> { static constexpr int value = 21; };
+    template<class T> struct Impl<::apache::thrift::type::double_t, T, std::enable_if_t<sizeof(T) != -22>> { static constexpr int value = 22; };
+    template<class T> struct Impl<::apache::thrift::type::string_t, T, std::enable_if_t<sizeof(T) != -23>> { static constexpr int value = 23; };
+    template<class T> struct Impl<::apache::thrift::type::binary_t, T, std::enable_if_t<sizeof(T) != -24>> { static constexpr int value = 24; };
+    template<class T> struct Impl<::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::MyEnum>, T, std::enable_if_t<sizeof(T) != -25>> { static constexpr int value = 25; };
+    template<class T> struct Impl<::apache::thrift::type::list<::apache::thrift::type::i16_t>, T, std::enable_if_t<sizeof(T) != -26>> { static constexpr int value = 26; };
+    template<class T> struct Impl<::apache::thrift::type::set<::apache::thrift::type::i16_t>, T, std::enable_if_t<sizeof(T) != -27>> { static constexpr int value = 27; };
+    template<class T> struct Impl<::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>, T, std::enable_if_t<sizeof(T) != -28>> { static constexpr int value = 28; };
+    template<class T> struct Impl<::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::MyStruct>, T, std::enable_if_t<sizeof(T) != -29>> { static constexpr int value = 29; };
+    template<class T> struct Impl<::apache::thrift::type::union_t<::facebook::thrift::test::terse_write::MyUnion>, T, std::enable_if_t<sizeof(T) != -30>> { static constexpr int value = 30; };
 
     template<class T> static constexpr int value = Impl<T, T, void>::value;
   };
@@ -1918,7 +3364,7 @@ class FieldLevelTerseStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  FieldLevelTerseStruct(apache::thrift::FragileConstructor, bool terse_bool_field__arg, ::std::int8_t terse_byte_field__arg, ::std::int16_t terse_short_field__arg, ::std::int32_t terse_int_field__arg, ::std::int64_t terse_long_field__arg, float terse_float_field__arg, double terse_double_field__arg, ::std::string terse_string_field__arg, ::std::string terse_binary_field__arg, ::facebook::thrift::test::terse_write::MyEnum terse_enum_field__arg, ::std::vector<::std::int16_t> terse_list_field__arg, ::std::set<::std::int16_t> terse_set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> terse_map_field__arg, ::facebook::thrift::test::terse_write::MyStruct terse_struct_field__arg, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::terse_write::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::terse_write::MyStruct struct_field__arg);
+  FieldLevelTerseStruct(apache::thrift::FragileConstructor, bool terse_bool_field__arg, ::std::int8_t terse_byte_field__arg, ::std::int16_t terse_short_field__arg, ::std::int32_t terse_int_field__arg, ::std::int64_t terse_long_field__arg, float terse_float_field__arg, double terse_double_field__arg, ::std::string terse_string_field__arg, ::std::string terse_binary_field__arg, ::facebook::thrift::test::terse_write::MyEnum terse_enum_field__arg, ::std::vector<::std::int16_t> terse_list_field__arg, ::std::set<::std::int16_t> terse_set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> terse_map_field__arg, ::facebook::thrift::test::terse_write::MyStruct terse_struct_field__arg, ::facebook::thrift::test::terse_write::MyUnion terse_union_field__arg, bool bool_field__arg, ::std::int8_t byte_field__arg, ::std::int16_t short_field__arg, ::std::int32_t int_field__arg, ::std::int64_t long_field__arg, float float_field__arg, double double_field__arg, ::std::string string_field__arg, ::std::string binary_field__arg, ::facebook::thrift::test::terse_write::MyEnum enum_field__arg, ::std::vector<::std::int16_t> list_field__arg, ::std::set<::std::int16_t> set_field__arg, ::std::map<::std::int16_t, ::std::int16_t> map_field__arg, ::facebook::thrift::test::terse_write::MyStruct struct_field__arg, ::facebook::thrift::test::terse_write::MyUnion union_field__arg);
 
   FieldLevelTerseStruct(FieldLevelTerseStruct&&) noexcept;
 
@@ -1959,6 +3405,8 @@ class FieldLevelTerseStruct final  {
  private:
   ::facebook::thrift::test::terse_write::MyStruct __fbthrift_field_terse_struct_field;
  private:
+  ::facebook::thrift::test::terse_write::MyUnion __fbthrift_field_terse_union_field;
+ private:
   bool __fbthrift_field_bool_field;
  private:
   ::std::int8_t __fbthrift_field_byte_field;
@@ -1987,7 +3435,9 @@ class FieldLevelTerseStruct final  {
  private:
   ::facebook::thrift::test::terse_write::MyStruct __fbthrift_field_struct_field;
  private:
-  apache::thrift::detail::isset_bitset<14, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  ::facebook::thrift::test::terse_write::MyUnion __fbthrift_field_union_field;
+ private:
+  apache::thrift::detail::isset_bitset<15, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -2554,6 +4004,46 @@ class FieldLevelTerseStruct final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_struct_field)};
   }
 
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_union_field_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_union_field};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_union_field_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_union_field)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_union_field_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_union_field};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_union_field_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_union_field)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> terse_union_field() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_terse_union_field};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> terse_union_field() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_terse_union_field)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> terse_union_field() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_terse_union_field};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> terse_union_field() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_terse_union_field)};
+  }
+
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> bool_field_ref() const& {
     return {this->__fbthrift_field_bool_field, __isset.at(0), __isset.bit(0)};
@@ -3114,6 +4604,46 @@ class FieldLevelTerseStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_struct_field), __isset.at(13), __isset.bit(13)};
   }
 
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> union_field_ref() const& {
+    return {this->__fbthrift_field_union_field, __isset.at(14), __isset.bit(14)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> union_field_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_union_field), __isset.at(14), __isset.bit(14)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> union_field_ref() & {
+    return {this->__fbthrift_field_union_field, __isset.at(14), __isset.bit(14)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> union_field_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_union_field), __isset.at(14), __isset.bit(14)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> union_field() const& {
+    return {this->__fbthrift_field_union_field, __isset.at(14), __isset.bit(14)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> union_field() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_union_field), __isset.at(14), __isset.bit(14)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> union_field() & {
+    return {this->__fbthrift_field_union_field, __isset.at(14), __isset.bit(14)};
+  }
+
+  template <typename..., typename T = ::facebook::thrift::test::terse_write::MyUnion>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> union_field() && {
+    return {static_cast<T&&>(this->__fbthrift_field_union_field), __isset.at(14), __isset.bit(14)};
+  }
+
   bool get_terse_bool_field() const {
     return __fbthrift_field_terse_bool_field;
   }
@@ -3258,6 +4788,15 @@ class FieldLevelTerseStruct final  {
   ::facebook::thrift::test::terse_write::MyStruct& set_terse_struct_field(T_FieldLevelTerseStruct_terse_struct_field_struct_setter&& terse_struct_field_) {
     terse_struct_field_ref() = std::forward<T_FieldLevelTerseStruct_terse_struct_field_struct_setter>(terse_struct_field_);
     return __fbthrift_field_terse_struct_field;
+  }
+  const ::facebook::thrift::test::terse_write::MyUnion& get_terse_union_field() const&;
+  ::facebook::thrift::test::terse_write::MyUnion get_terse_union_field() &&;
+
+  template <typename T_FieldLevelTerseStruct_terse_union_field_struct_setter = ::facebook::thrift::test::terse_write::MyUnion>
+  [[deprecated("Use `FOO.terse_union_field_ref() = BAR;` instead of `FOO.set_terse_union_field(BAR);`")]]
+  ::facebook::thrift::test::terse_write::MyUnion& set_terse_union_field(T_FieldLevelTerseStruct_terse_union_field_struct_setter&& terse_union_field_) {
+    terse_union_field_ref() = std::forward<T_FieldLevelTerseStruct_terse_union_field_struct_setter>(terse_union_field_);
+    return __fbthrift_field_terse_union_field;
   }
 
   bool get_bool_field() const {
@@ -3404,6 +4943,15 @@ class FieldLevelTerseStruct final  {
   ::facebook::thrift::test::terse_write::MyStruct& set_struct_field(T_FieldLevelTerseStruct_struct_field_struct_setter&& struct_field_) {
     struct_field_ref() = std::forward<T_FieldLevelTerseStruct_struct_field_struct_setter>(struct_field_);
     return __fbthrift_field_struct_field;
+  }
+  const ::facebook::thrift::test::terse_write::MyUnion& get_union_field() const&;
+  ::facebook::thrift::test::terse_write::MyUnion get_union_field() &&;
+
+  template <typename T_FieldLevelTerseStruct_union_field_struct_setter = ::facebook::thrift::test::terse_write::MyUnion>
+  [[deprecated("Use `FOO.union_field_ref() = BAR;` instead of `FOO.set_union_field(BAR);`")]]
+  ::facebook::thrift::test::terse_write::MyUnion& set_union_field(T_FieldLevelTerseStruct_union_field_struct_setter&& union_field_) {
+    union_field_ref() = std::forward<T_FieldLevelTerseStruct_union_field_struct_setter>(union_field_);
+    return __fbthrift_field_union_field;
   }
 
   template <class Protocol_>
@@ -4981,3 +6529,31 @@ unsigned long TerseException::read(Protocol_* iprot) {
 
 
 }}}} // facebook::thrift::test::terse_write
+
+namespace apache { namespace thrift {
+
+template <> struct TEnumDataStorage<::facebook::thrift::test::terse_write::MyUnion::Type>;
+
+template <> struct TEnumTraits<::facebook::thrift::test::terse_write::MyUnion::Type> {
+  using type = ::facebook::thrift::test::terse_write::MyUnion::Type;
+
+  static constexpr std::size_t const size = 14;
+  static folly::Range<type const*> const values;
+  static folly::Range<folly::StringPiece const*> const names;
+
+  static bool findName(type value, folly::StringPiece* out) noexcept;
+  static bool findValue(folly::StringPiece name, type* out) noexcept;
+
+#if FOLLY_HAS_STRING_VIEW
+  static bool findName(type value, std::string_view* out) noexcept {
+    folly::StringPiece outp;
+    return findName(value, &outp) && ((*out = outp), true);
+  }
+#endif
+  static char const* findName(type value) noexcept {
+    folly::StringPiece ret;
+    (void)findName(value, &ret);
+    return ret.data();
+  }
+};
+}} // apache::thrift

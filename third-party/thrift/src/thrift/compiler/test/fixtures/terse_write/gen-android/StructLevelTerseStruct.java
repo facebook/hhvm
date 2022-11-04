@@ -38,6 +38,7 @@ public class StructLevelTerseStruct implements TBase, java.io.Serializable, Clon
   private static final TField SET_FIELD_FIELD_DESC = new TField("set_field", TType.SET, (short)12);
   private static final TField MAP_FIELD_FIELD_DESC = new TField("map_field", TType.MAP, (short)13);
   private static final TField STRUCT_FIELD_FIELD_DESC = new TField("struct_field", TType.STRUCT, (short)14);
+  private static final TField UNION_FIELD_FIELD_DESC = new TField("union_field", TType.STRUCT, (short)15);
 
   public final Boolean bool_field;
   public final Byte byte_field;
@@ -57,6 +58,7 @@ public class StructLevelTerseStruct implements TBase, java.io.Serializable, Clon
   public final Set<Short> set_field;
   public final Map<Short,Short> map_field;
   public final MyStruct struct_field;
+  public final MyUnion union_field;
   public static final int BOOL_FIELD = 1;
   public static final int BYTE_FIELD = 2;
   public static final int SHORT_FIELD = 3;
@@ -71,6 +73,7 @@ public class StructLevelTerseStruct implements TBase, java.io.Serializable, Clon
   public static final int SET_FIELD = 12;
   public static final int MAP_FIELD = 13;
   public static final int STRUCT_FIELD = 14;
+  public static final int UNION_FIELD = 15;
 
   public StructLevelTerseStruct(
       Boolean bool_field,
@@ -86,7 +89,8 @@ public class StructLevelTerseStruct implements TBase, java.io.Serializable, Clon
       List<Short> list_field,
       Set<Short> set_field,
       Map<Short,Short> map_field,
-      MyStruct struct_field) {
+      MyStruct struct_field,
+      MyUnion union_field) {
     this.bool_field = bool_field;
     this.byte_field = byte_field;
     this.short_field = short_field;
@@ -101,6 +105,7 @@ public class StructLevelTerseStruct implements TBase, java.io.Serializable, Clon
     this.set_field = set_field;
     this.map_field = map_field;
     this.struct_field = struct_field;
+    this.union_field = union_field;
   }
 
   /**
@@ -176,6 +181,11 @@ public class StructLevelTerseStruct implements TBase, java.io.Serializable, Clon
       this.struct_field = TBaseHelper.deepCopy(other.struct_field);
     } else {
       this.struct_field = null;
+    }
+    if (other.isSetUnion_field()) {
+      this.union_field = TBaseHelper.deepCopy(other.union_field);
+    } else {
+      this.union_field = null;
     }
   }
 
@@ -313,6 +323,15 @@ public class StructLevelTerseStruct implements TBase, java.io.Serializable, Clon
     return this.struct_field != null;
   }
 
+  public MyUnion getUnion_field() {
+    return this.union_field;
+  }
+
+  // Returns true if field union_field is set (has been assigned a value) and false otherwise
+  public boolean isSetUnion_field() {
+    return this.union_field != null;
+  }
+
   @Override
   public boolean equals(Object _that) {
     if (_that == null)
@@ -351,12 +370,14 @@ public class StructLevelTerseStruct implements TBase, java.io.Serializable, Clon
 
     if (!TBaseHelper.equalsNobinary(this.isSetStruct_field(), that.isSetStruct_field(), this.struct_field, that.struct_field)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.isSetUnion_field(), that.isSetUnion_field(), this.union_field, that.union_field)) { return false; }
+
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {bool_field, byte_field, short_field, int_field, long_field, float_field, double_field, string_field, binary_field, enum_field, list_field, set_field, map_field, struct_field});
+    return Arrays.deepHashCode(new Object[] {bool_field, byte_field, short_field, int_field, long_field, float_field, double_field, string_field, binary_field, enum_field, list_field, set_field, map_field, struct_field, union_field});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -379,6 +400,7 @@ public class StructLevelTerseStruct implements TBase, java.io.Serializable, Clon
     Set<Short> tmp_set_field = null;
     Map<Short,Short> tmp_map_field = null;
     MyStruct tmp_struct_field = null;
+    MyUnion tmp_union_field = null;
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -462,15 +484,15 @@ public class StructLevelTerseStruct implements TBase, java.io.Serializable, Clon
         case LIST_FIELD:
           if (__field.type == TType.LIST) {
             {
-              TList _list0 = iprot.readListBegin();
-              tmp_list_field = new ArrayList<Short>(Math.max(0, _list0.size));
-              for (int _i1 = 0; 
-                   (_list0.size < 0) ? iprot.peekList() : (_i1 < _list0.size); 
-                   ++_i1)
+              TList _list13 = iprot.readListBegin();
+              tmp_list_field = new ArrayList<Short>(Math.max(0, _list13.size));
+              for (int _i14 = 0; 
+                   (_list13.size < 0) ? iprot.peekList() : (_i14 < _list13.size); 
+                   ++_i14)
               {
-                Short _elem2;
-                _elem2 = iprot.readI16();
-                tmp_list_field.add(_elem2);
+                Short _elem15;
+                _elem15 = iprot.readI16();
+                tmp_list_field.add(_elem15);
               }
               iprot.readListEnd();
             }
@@ -481,15 +503,15 @@ public class StructLevelTerseStruct implements TBase, java.io.Serializable, Clon
         case SET_FIELD:
           if (__field.type == TType.SET) {
             {
-              TSet _set3 = iprot.readSetBegin();
-              tmp_set_field = new HashSet<Short>(Math.max(0, 2*_set3.size));
-              for (int _i4 = 0; 
-                   (_set3.size < 0) ? iprot.peekSet() : (_i4 < _set3.size); 
-                   ++_i4)
+              TSet _set16 = iprot.readSetBegin();
+              tmp_set_field = new HashSet<Short>(Math.max(0, 2*_set16.size));
+              for (int _i17 = 0; 
+                   (_set16.size < 0) ? iprot.peekSet() : (_i17 < _set16.size); 
+                   ++_i17)
               {
-                Short _elem5;
-                _elem5 = iprot.readI16();
-                tmp_set_field.add(_elem5);
+                Short _elem18;
+                _elem18 = iprot.readI16();
+                tmp_set_field.add(_elem18);
               }
               iprot.readSetEnd();
             }
@@ -500,17 +522,17 @@ public class StructLevelTerseStruct implements TBase, java.io.Serializable, Clon
         case MAP_FIELD:
           if (__field.type == TType.MAP) {
             {
-              TMap _map6 = iprot.readMapBegin();
-              tmp_map_field = new HashMap<Short,Short>(Math.max(0, 2*_map6.size));
-              for (int _i7 = 0; 
-                   (_map6.size < 0) ? iprot.peekMap() : (_i7 < _map6.size); 
-                   ++_i7)
+              TMap _map19 = iprot.readMapBegin();
+              tmp_map_field = new HashMap<Short,Short>(Math.max(0, 2*_map19.size));
+              for (int _i20 = 0; 
+                   (_map19.size < 0) ? iprot.peekMap() : (_i20 < _map19.size); 
+                   ++_i20)
               {
-                Short _key8;
-                Short _val9;
-                _key8 = iprot.readI16();
-                _val9 = iprot.readI16();
-                tmp_map_field.put(_key8, _val9);
+                Short _key21;
+                Short _val22;
+                _key21 = iprot.readI16();
+                _val22 = iprot.readI16();
+                tmp_map_field.put(_key21, _val22);
               }
               iprot.readMapEnd();
             }
@@ -521,6 +543,14 @@ public class StructLevelTerseStruct implements TBase, java.io.Serializable, Clon
         case STRUCT_FIELD:
           if (__field.type == TType.STRUCT) {
             tmp_struct_field = MyStruct.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case UNION_FIELD:
+          if (__field.type == TType.STRUCT) {
+            tmp_union_field = new MyUnion();
+            tmp_union_field.read(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -549,6 +579,7 @@ public class StructLevelTerseStruct implements TBase, java.io.Serializable, Clon
       ,tmp_set_field
       ,tmp_map_field
       ,tmp_struct_field
+      ,tmp_union_field
     );
     _that.validate();
     return _that;
@@ -612,8 +643,8 @@ public class StructLevelTerseStruct implements TBase, java.io.Serializable, Clon
       oprot.writeFieldBegin(LIST_FIELD_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I16, this.list_field.size()));
-        for (Short _iter10 : this.list_field)        {
-          oprot.writeI16(_iter10);
+        for (Short _iter23 : this.list_field)        {
+          oprot.writeI16(_iter23);
         }
         oprot.writeListEnd();
       }
@@ -623,8 +654,8 @@ public class StructLevelTerseStruct implements TBase, java.io.Serializable, Clon
       oprot.writeFieldBegin(SET_FIELD_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.I16, this.set_field.size()));
-        for (Short _iter11 : this.set_field)        {
-          oprot.writeI16(_iter11);
+        for (Short _iter24 : this.set_field)        {
+          oprot.writeI16(_iter24);
         }
         oprot.writeSetEnd();
       }
@@ -634,9 +665,9 @@ public class StructLevelTerseStruct implements TBase, java.io.Serializable, Clon
       oprot.writeFieldBegin(MAP_FIELD_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.I16, TType.I16, this.map_field.size()));
-        for (Map.Entry<Short, Short> _iter12 : this.map_field.entrySet())        {
-          oprot.writeI16(_iter12.getKey());
-          oprot.writeI16(_iter12.getValue());
+        for (Map.Entry<Short, Short> _iter25 : this.map_field.entrySet())        {
+          oprot.writeI16(_iter25.getKey());
+          oprot.writeI16(_iter25.getValue());
         }
         oprot.writeMapEnd();
       }
@@ -645,6 +676,11 @@ public class StructLevelTerseStruct implements TBase, java.io.Serializable, Clon
     if (this.struct_field != null) {
       oprot.writeFieldBegin(STRUCT_FIELD_FIELD_DESC);
       this.struct_field.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.union_field != null) {
+      oprot.writeFieldBegin(UNION_FIELD_FIELD_DESC);
+      this.union_field.write(oprot);
       oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();

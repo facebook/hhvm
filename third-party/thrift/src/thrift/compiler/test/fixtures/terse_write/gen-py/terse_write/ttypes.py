@@ -36,7 +36,7 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'MyEnum', 'MyStruct', 'MyStructWithCustomDefault', 'StructLevelTerseStruct', 'FieldLevelTerseStruct', 'TerseStructWithCustomDefault', 'AdaptedFields', 'WrappedFields', 'TerseException', 'MyInteger']
+__all__ = ['UTF8STRINGS', 'MyEnum', 'MyStruct', 'MyUnion', 'MyStructWithCustomDefault', 'StructLevelTerseStruct', 'FieldLevelTerseStruct', 'TerseStructWithCustomDefault', 'AdaptedFields', 'WrappedFields', 'TerseException', 'MyInteger']
 
 class MyEnum:
   ME0 = 0
@@ -134,6 +134,578 @@ class MyStruct:
     import thrift.py3.converter
     py3_types = importlib.import_module("facebook.thrift.test.terse_write.types")
     return thrift.py3.converter.to_py3_struct(py3_types.MyStruct, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class MyUnion(object):
+  """
+  Attributes:
+   - bool_field
+   - byte_field
+   - short_field
+   - int_field
+   - long_field
+   - float_field
+   - double_field
+   - string_field
+   - binary_field
+   - enum_field
+   - list_field
+   - set_field
+   - map_field
+   - struct_field
+  """
+
+  thrift_spec = None
+  __init__ = None
+
+  __EMPTY__ = 0
+  BOOL_FIELD = 1
+  BYTE_FIELD = 2
+  SHORT_FIELD = 3
+  INT_FIELD = 4
+  LONG_FIELD = 5
+  FLOAT_FIELD = 6
+  DOUBLE_FIELD = 7
+  STRING_FIELD = 8
+  BINARY_FIELD = 9
+  ENUM_FIELD = 10
+  LIST_FIELD = 11
+  SET_FIELD = 12
+  MAP_FIELD = 13
+  STRUCT_FIELD = 14
+  
+  @staticmethod
+  def isUnion():
+    return True
+
+  def get_bool_field(self):
+    assert self.field == 1
+    return self.value
+
+  def get_byte_field(self):
+    assert self.field == 2
+    return self.value
+
+  def get_short_field(self):
+    assert self.field == 3
+    return self.value
+
+  def get_int_field(self):
+    assert self.field == 4
+    return self.value
+
+  def get_long_field(self):
+    assert self.field == 5
+    return self.value
+
+  def get_float_field(self):
+    assert self.field == 6
+    return self.value
+
+  def get_double_field(self):
+    assert self.field == 7
+    return self.value
+
+  def get_string_field(self):
+    assert self.field == 8
+    return self.value
+
+  def get_binary_field(self):
+    assert self.field == 9
+    return self.value
+
+  def get_enum_field(self):
+    assert self.field == 10
+    return self.value
+
+  def get_list_field(self):
+    assert self.field == 11
+    return self.value
+
+  def get_set_field(self):
+    assert self.field == 12
+    return self.value
+
+  def get_map_field(self):
+    assert self.field == 13
+    return self.value
+
+  def get_struct_field(self):
+    assert self.field == 14
+    return self.value
+
+  def set_bool_field(self, value):
+    self.field = 1
+    self.value = value
+
+  def set_byte_field(self, value):
+    self.field = 2
+    self.value = value
+
+  def set_short_field(self, value):
+    self.field = 3
+    self.value = value
+
+  def set_int_field(self, value):
+    self.field = 4
+    self.value = value
+
+  def set_long_field(self, value):
+    self.field = 5
+    self.value = value
+
+  def set_float_field(self, value):
+    self.field = 6
+    self.value = value
+
+  def set_double_field(self, value):
+    self.field = 7
+    self.value = value
+
+  def set_string_field(self, value):
+    self.field = 8
+    self.value = value
+
+  def set_binary_field(self, value):
+    self.field = 9
+    self.value = value
+
+  def set_enum_field(self, value):
+    self.field = 10
+    self.value = value
+
+  def set_list_field(self, value):
+    self.field = 11
+    self.value = value
+
+  def set_set_field(self, value):
+    self.field = 12
+    self.value = value
+
+  def set_map_field(self, value):
+    self.field = 13
+    self.value = value
+
+  def set_struct_field(self, value):
+    self.field = 14
+    self.value = value
+
+  def getType(self):
+    return self.field
+
+  def __repr__(self):
+    value = pprint.pformat(self.value)
+    member = ''
+    if self.field == 1:
+      padding = ' ' * 11
+      value = padding.join(value.splitlines(True))
+      member = '\n    %s=%s' % ('bool_field', value)
+    if self.field == 2:
+      padding = ' ' * 11
+      value = padding.join(value.splitlines(True))
+      member = '\n    %s=%s' % ('byte_field', value)
+    if self.field == 3:
+      padding = ' ' * 12
+      value = padding.join(value.splitlines(True))
+      member = '\n    %s=%s' % ('short_field', value)
+    if self.field == 4:
+      padding = ' ' * 10
+      value = padding.join(value.splitlines(True))
+      member = '\n    %s=%s' % ('int_field', value)
+    if self.field == 5:
+      padding = ' ' * 11
+      value = padding.join(value.splitlines(True))
+      member = '\n    %s=%s' % ('long_field', value)
+    if self.field == 6:
+      padding = ' ' * 12
+      value = padding.join(value.splitlines(True))
+      member = '\n    %s=%s' % ('float_field', value)
+    if self.field == 7:
+      padding = ' ' * 13
+      value = padding.join(value.splitlines(True))
+      member = '\n    %s=%s' % ('double_field', value)
+    if self.field == 8:
+      padding = ' ' * 13
+      value = padding.join(value.splitlines(True))
+      member = '\n    %s=%s' % ('string_field', value)
+    if self.field == 9:
+      padding = ' ' * 13
+      value = padding.join(value.splitlines(True))
+      member = '\n    %s=%s' % ('binary_field', value)
+    if self.field == 10:
+      padding = ' ' * 11
+      value = padding.join(value.splitlines(True))
+      member = '\n    %s=%s' % ('enum_field', value)
+    if self.field == 11:
+      padding = ' ' * 11
+      value = padding.join(value.splitlines(True))
+      member = '\n    %s=%s' % ('list_field', value)
+    if self.field == 12:
+      padding = ' ' * 10
+      value = padding.join(value.splitlines(True))
+      member = '\n    %s=%s' % ('set_field', value)
+    if self.field == 13:
+      padding = ' ' * 10
+      value = padding.join(value.splitlines(True))
+      member = '\n    %s=%s' % ('map_field', value)
+    if self.field == 14:
+      padding = ' ' * 13
+      value = padding.join(value.splitlines(True))
+      member = '\n    %s=%s' % ('struct_field', value)
+    return "%s(%s)" % (self.__class__.__name__, member)
+
+  def read(self, iprot):
+    self.field = 0
+    self.value = None
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, True], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, True], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+
+      if fid == 1:
+        if ftype == TType.BOOL:
+          _fbthrift_bool_field = iprot.readBool()
+          assert self.field == 0 and self.value is None
+          self.set_bool_field(_fbthrift_bool_field)
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.BYTE:
+          _fbthrift_byte_field = iprot.readByte()
+          assert self.field == 0 and self.value is None
+          self.set_byte_field(_fbthrift_byte_field)
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.I16:
+          _fbthrift_short_field = iprot.readI16()
+          assert self.field == 0 and self.value is None
+          self.set_short_field(_fbthrift_short_field)
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.I32:
+          _fbthrift_int_field = iprot.readI32()
+          assert self.field == 0 and self.value is None
+          self.set_int_field(_fbthrift_int_field)
+        else:
+          iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.I64:
+          _fbthrift_long_field = iprot.readI64()
+          assert self.field == 0 and self.value is None
+          self.set_long_field(_fbthrift_long_field)
+        else:
+          iprot.skip(ftype)
+      elif fid == 6:
+        if ftype == TType.FLOAT:
+          _fbthrift_float_field = iprot.readFloat()
+          assert self.field == 0 and self.value is None
+          self.set_float_field(_fbthrift_float_field)
+        else:
+          iprot.skip(ftype)
+      elif fid == 7:
+        if ftype == TType.DOUBLE:
+          _fbthrift_double_field = iprot.readDouble()
+          assert self.field == 0 and self.value is None
+          self.set_double_field(_fbthrift_double_field)
+        else:
+          iprot.skip(ftype)
+      elif fid == 8:
+        if ftype == TType.STRING:
+          _fbthrift_string_field = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+          assert self.field == 0 and self.value is None
+          self.set_string_field(_fbthrift_string_field)
+        else:
+          iprot.skip(ftype)
+      elif fid == 9:
+        if ftype == TType.STRING:
+          _fbthrift_binary_field = iprot.readString()
+          assert self.field == 0 and self.value is None
+          self.set_binary_field(_fbthrift_binary_field)
+        else:
+          iprot.skip(ftype)
+      elif fid == 10:
+        if ftype == TType.I32:
+          _fbthrift_enum_field = iprot.readI32()
+          assert self.field == 0 and self.value is None
+          self.set_enum_field(_fbthrift_enum_field)
+        else:
+          iprot.skip(ftype)
+      elif fid == 11:
+        if ftype == TType.LIST:
+          _fbthrift_list_field = []
+          (_etype3, _size0) = iprot.readListBegin()
+          if _size0 >= 0:
+            for _i4 in range(_size0):
+              _elem5 = iprot.readI16()
+              _fbthrift_list_field.append(_elem5)
+          else: 
+            while iprot.peekList():
+              _elem6 = iprot.readI16()
+              _fbthrift_list_field.append(_elem6)
+          iprot.readListEnd()
+          assert self.field == 0 and self.value is None
+          self.set_list_field(_fbthrift_list_field)
+        else:
+          iprot.skip(ftype)
+      elif fid == 12:
+        if ftype == TType.SET:
+          _fbthrift_set_field = set()
+          (_etype10, _size7) = iprot.readSetBegin()
+          if _size7 >= 0:
+            for _i11 in range(_size7):
+              _elem12 = iprot.readI16()
+              _fbthrift_set_field.add(_elem12)
+          else: 
+            while iprot.peekSet():
+              _elem13 = iprot.readI16()
+              _fbthrift_set_field.add(_elem13)
+          iprot.readSetEnd()
+          assert self.field == 0 and self.value is None
+          self.set_set_field(_fbthrift_set_field)
+        else:
+          iprot.skip(ftype)
+      elif fid == 13:
+        if ftype == TType.MAP:
+          _fbthrift_map_field = {}
+          (_ktype15, _vtype16, _size14 ) = iprot.readMapBegin() 
+          if _size14 >= 0:
+            for _i18 in range(_size14):
+              _key19 = iprot.readI16()
+              _val20 = iprot.readI16()
+              _fbthrift_map_field[_key19] = _val20
+          else: 
+            while iprot.peekMap():
+              _key21 = iprot.readI16()
+              _val22 = iprot.readI16()
+              _fbthrift_map_field[_key21] = _val22
+          iprot.readMapEnd()
+          assert self.field == 0 and self.value is None
+          self.set_map_field(_fbthrift_map_field)
+        else:
+          iprot.skip(ftype)
+      elif fid == 14:
+        if ftype == TType.STRUCT:
+          _fbthrift_struct_field = MyStruct()
+          _fbthrift_struct_field.read(iprot)
+          assert self.field == 0 and self.value is None
+          self.set_struct_field(_fbthrift_struct_field)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, True], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, True], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeUnionBegin('MyUnion')
+    if self.field == 1:
+      oprot.writeFieldBegin('bool_field', TType.BOOL, 1)
+      bool_field = self.value
+      oprot.writeBool(bool_field)
+      oprot.writeFieldEnd()
+    if self.field == 2:
+      oprot.writeFieldBegin('byte_field', TType.BYTE, 2)
+      byte_field = self.value
+      oprot.writeByte(byte_field)
+      oprot.writeFieldEnd()
+    if self.field == 3:
+      oprot.writeFieldBegin('short_field', TType.I16, 3)
+      short_field = self.value
+      oprot.writeI16(short_field)
+      oprot.writeFieldEnd()
+    if self.field == 4:
+      oprot.writeFieldBegin('int_field', TType.I32, 4)
+      int_field = self.value
+      oprot.writeI32(int_field)
+      oprot.writeFieldEnd()
+    if self.field == 5:
+      oprot.writeFieldBegin('long_field', TType.I64, 5)
+      long_field = self.value
+      oprot.writeI64(long_field)
+      oprot.writeFieldEnd()
+    if self.field == 6:
+      oprot.writeFieldBegin('float_field', TType.FLOAT, 6)
+      float_field = self.value
+      oprot.writeFloat(float_field)
+      oprot.writeFieldEnd()
+    if self.field == 7:
+      oprot.writeFieldBegin('double_field', TType.DOUBLE, 7)
+      double_field = self.value
+      oprot.writeDouble(double_field)
+      oprot.writeFieldEnd()
+    if self.field == 8:
+      oprot.writeFieldBegin('string_field', TType.STRING, 8)
+      string_field = self.value
+      oprot.writeString(string_field.encode('utf-8')) if UTF8STRINGS and not isinstance(string_field, bytes) else oprot.writeString(string_field)
+      oprot.writeFieldEnd()
+    if self.field == 9:
+      oprot.writeFieldBegin('binary_field', TType.STRING, 9)
+      binary_field = self.value
+      oprot.writeString(binary_field)
+      oprot.writeFieldEnd()
+    if self.field == 10:
+      oprot.writeFieldBegin('enum_field', TType.I32, 10)
+      enum_field = self.value
+      oprot.writeI32(enum_field)
+      oprot.writeFieldEnd()
+    if self.field == 11:
+      oprot.writeFieldBegin('list_field', TType.LIST, 11)
+      list_field = self.value
+      oprot.writeListBegin(TType.I16, len(list_field))
+      for iter23 in list_field:
+        oprot.writeI16(iter23)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.field == 12:
+      oprot.writeFieldBegin('set_field', TType.SET, 12)
+      set_field = self.value
+      oprot.writeSetBegin(TType.I16, len(set_field))
+      for iter24 in set_field:
+        oprot.writeI16(iter24)
+      oprot.writeSetEnd()
+      oprot.writeFieldEnd()
+    if self.field == 13:
+      oprot.writeFieldBegin('map_field', TType.MAP, 13)
+      map_field = self.value
+      oprot.writeMapBegin(TType.I16, TType.I16, len(map_field))
+      for kiter25,viter26 in map_field.items():
+        oprot.writeI16(kiter25)
+        oprot.writeI16(viter26)
+      oprot.writeMapEnd()
+      oprot.writeFieldEnd()
+    if self.field == 14:
+      oprot.writeFieldBegin('struct_field', TType.STRUCT, 14)
+      struct_field = self.value
+      struct_field.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeUnionEnd()
+  
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    self.field = 0
+    self.value = None
+    obj = json
+    if is_text:
+      obj = loads(json)
+    if not isinstance(obj, dict) or len(obj) > 1:
+      raise TProtocolException(TProtocolException.INVALID_DATA, 'Can not parse')
+    
+    if 'bool_field' in obj:
+      _fbthrift_bool_field = obj['bool_field']
+      self.set_bool_field(_fbthrift_bool_field)
+    if 'byte_field' in obj:
+      _fbthrift_byte_field = obj['byte_field']
+      if _fbthrift_byte_field > 0x7f or _fbthrift_byte_field < -0x80:
+        raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+      self.set_byte_field(_fbthrift_byte_field)
+    if 'short_field' in obj:
+      _fbthrift_short_field = obj['short_field']
+      if _fbthrift_short_field > 0x7fff or _fbthrift_short_field < -0x8000:
+        raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+      self.set_short_field(_fbthrift_short_field)
+    if 'int_field' in obj:
+      _fbthrift_int_field = obj['int_field']
+      if _fbthrift_int_field > 0x7fffffff or _fbthrift_int_field < -0x80000000:
+        raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+      self.set_int_field(_fbthrift_int_field)
+    if 'long_field' in obj:
+      _fbthrift_long_field = long(obj['long_field'])
+      self.set_long_field(_fbthrift_long_field)
+    if 'float_field' in obj:
+      _fbthrift_float_field = float(obj['float_field'])
+      self.set_float_field(_fbthrift_float_field)
+    if 'double_field' in obj:
+      _fbthrift_double_field = float(obj['double_field'])
+      self.set_double_field(_fbthrift_double_field)
+    if 'string_field' in obj:
+      _fbthrift_string_field = obj['string_field']
+      self.set_string_field(_fbthrift_string_field)
+    if 'binary_field' in obj:
+      _fbthrift_binary_field = obj['binary_field']
+      self.set_binary_field(_fbthrift_binary_field)
+    if 'enum_field' in obj:
+      _fbthrift_enum_field = obj['enum_field']
+      if not _fbthrift_enum_field in MyEnum._VALUES_TO_NAMES:
+        msg = 'Integer value ''%s'' is not a recognized value of enum type MyEnum' % _fbthrift_enum_field
+        if relax_enum_validation:
+            warnings.warn(msg)
+        else:
+            raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+      self.set_enum_field(_fbthrift_enum_field)
+    if 'list_field' in obj:
+      _fbthrift_list_field = []
+      for _tmp_e27 in obj['list_field']:
+        if _tmp_e27 > 0x7fff or _tmp_e27 < -0x8000:
+          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+        _fbthrift_list_field.append(_tmp_e27)
+      self.set_list_field(_fbthrift_list_field)
+    if 'set_field' in obj:
+      _fbthrift_set_field = set_cls()
+      for _tmp_e28 in obj['set_field']:
+        if _tmp_e28 > 0x7fff or _tmp_e28 < -0x8000:
+          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+        _fbthrift_set_field.add(_tmp_e28)
+      self.set_set_field(_fbthrift_set_field)
+    if 'map_field' in obj:
+      _fbthrift_map_field = dict_cls()
+      for _tmp_k29, _tmp_v30 in obj['map_field'].items():
+        _tmp_kp31 = int(_tmp_k29)
+        if _tmp_kp31 > 0x7fff or _tmp_kp31 < -0x8000:
+          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds the limit in key ' + _tmp_k29)
+        if _tmp_v30 > 0x7fff or _tmp_v30 < -0x8000:
+          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+        _fbthrift_map_field[_tmp_kp31] = _tmp_v30
+      self.set_map_field(_fbthrift_map_field)
+    if 'struct_field' in obj:
+      _fbthrift_struct_field = MyStruct()
+      _fbthrift_struct_field.readFromJson(obj['struct_field'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.set_struct_field(_fbthrift_struct_field)
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.terse_write.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.MyUnion, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.terse_write.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.MyUnion, self)
 
   def _to_py_deprecated(self):
     return self
@@ -262,6 +834,7 @@ class StructLevelTerseStruct:
    - set_field
    - map_field
    - struct_field
+   - union_field
   """
 
   thrift_spec = None
@@ -337,47 +910,47 @@ class StructLevelTerseStruct:
       elif fid == 11:
         if ftype == TType.LIST:
           self.list_field = []
-          (_etype3, _size0) = iprot.readListBegin()
-          if _size0 >= 0:
-            for _i4 in range(_size0):
-              _elem5 = iprot.readI16()
-              self.list_field.append(_elem5)
+          (_etype35, _size32) = iprot.readListBegin()
+          if _size32 >= 0:
+            for _i36 in range(_size32):
+              _elem37 = iprot.readI16()
+              self.list_field.append(_elem37)
           else: 
             while iprot.peekList():
-              _elem6 = iprot.readI16()
-              self.list_field.append(_elem6)
+              _elem38 = iprot.readI16()
+              self.list_field.append(_elem38)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 12:
         if ftype == TType.SET:
           self.set_field = set()
-          (_etype10, _size7) = iprot.readSetBegin()
-          if _size7 >= 0:
-            for _i11 in range(_size7):
-              _elem12 = iprot.readI16()
-              self.set_field.add(_elem12)
+          (_etype42, _size39) = iprot.readSetBegin()
+          if _size39 >= 0:
+            for _i43 in range(_size39):
+              _elem44 = iprot.readI16()
+              self.set_field.add(_elem44)
           else: 
             while iprot.peekSet():
-              _elem13 = iprot.readI16()
-              self.set_field.add(_elem13)
+              _elem45 = iprot.readI16()
+              self.set_field.add(_elem45)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
       elif fid == 13:
         if ftype == TType.MAP:
           self.map_field = {}
-          (_ktype15, _vtype16, _size14 ) = iprot.readMapBegin() 
-          if _size14 >= 0:
-            for _i18 in range(_size14):
-              _key19 = iprot.readI16()
-              _val20 = iprot.readI16()
-              self.map_field[_key19] = _val20
+          (_ktype47, _vtype48, _size46 ) = iprot.readMapBegin() 
+          if _size46 >= 0:
+            for _i50 in range(_size46):
+              _key51 = iprot.readI16()
+              _val52 = iprot.readI16()
+              self.map_field[_key51] = _val52
           else: 
             while iprot.peekMap():
-              _key21 = iprot.readI16()
-              _val22 = iprot.readI16()
-              self.map_field[_key21] = _val22
+              _key53 = iprot.readI16()
+              _val54 = iprot.readI16()
+              self.map_field[_key53] = _val54
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -385,6 +958,12 @@ class StructLevelTerseStruct:
         if ftype == TType.STRUCT:
           self.struct_field = MyStruct()
           self.struct_field.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 15:
+        if ftype == TType.STRUCT:
+          self.union_field = MyUnion()
+          self.union_field.read(iprot)
         else:
           iprot.skip(ftype)
       else:
@@ -443,28 +1022,32 @@ class StructLevelTerseStruct:
     if self.list_field != None:
       oprot.writeFieldBegin('list_field', TType.LIST, 11)
       oprot.writeListBegin(TType.I16, len(self.list_field))
-      for iter23 in self.list_field:
-        oprot.writeI16(iter23)
+      for iter55 in self.list_field:
+        oprot.writeI16(iter55)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.set_field != None:
       oprot.writeFieldBegin('set_field', TType.SET, 12)
       oprot.writeSetBegin(TType.I16, len(self.set_field))
-      for iter24 in self.set_field:
-        oprot.writeI16(iter24)
+      for iter56 in self.set_field:
+        oprot.writeI16(iter56)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.map_field != None:
       oprot.writeFieldBegin('map_field', TType.MAP, 13)
       oprot.writeMapBegin(TType.I16, TType.I16, len(self.map_field))
-      for kiter25,viter26 in self.map_field.items():
-        oprot.writeI16(kiter25)
-        oprot.writeI16(viter26)
+      for kiter57,viter58 in self.map_field.items():
+        oprot.writeI16(kiter57)
+        oprot.writeI16(viter58)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.struct_field != None:
       oprot.writeFieldBegin('struct_field', TType.STRUCT, 14)
       self.struct_field.write(oprot)
+      oprot.writeFieldEnd()
+    if self.union_field != None:
+      oprot.writeFieldBegin('union_field', TType.STRUCT, 15)
+      self.union_field.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -515,28 +1098,31 @@ class StructLevelTerseStruct:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
     if 'list_field' in json_obj and json_obj['list_field'] is not None:
       self.list_field = []
-      for _tmp_e27 in json_obj['list_field']:
-        if _tmp_e27 > 0x7fff or _tmp_e27 < -0x8000:
+      for _tmp_e59 in json_obj['list_field']:
+        if _tmp_e59 > 0x7fff or _tmp_e59 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.list_field.append(_tmp_e27)
+        self.list_field.append(_tmp_e59)
     if 'set_field' in json_obj and json_obj['set_field'] is not None:
       self.set_field = set_cls()
-      for _tmp_e28 in json_obj['set_field']:
-        if _tmp_e28 > 0x7fff or _tmp_e28 < -0x8000:
+      for _tmp_e60 in json_obj['set_field']:
+        if _tmp_e60 > 0x7fff or _tmp_e60 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.set_field.add(_tmp_e28)
+        self.set_field.add(_tmp_e60)
     if 'map_field' in json_obj and json_obj['map_field'] is not None:
       self.map_field = dict_cls()
-      for _tmp_k29, _tmp_v30 in json_obj['map_field'].items():
-        _tmp_kp31 = int(_tmp_k29)
-        if _tmp_kp31 > 0x7fff or _tmp_kp31 < -0x8000:
-          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds the limit in key ' + _tmp_k29)
-        if _tmp_v30 > 0x7fff or _tmp_v30 < -0x8000:
+      for _tmp_k61, _tmp_v62 in json_obj['map_field'].items():
+        _tmp_kp63 = int(_tmp_k61)
+        if _tmp_kp63 > 0x7fff or _tmp_kp63 < -0x8000:
+          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds the limit in key ' + _tmp_k61)
+        if _tmp_v62 > 0x7fff or _tmp_v62 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.map_field[_tmp_kp31] = _tmp_v30
+        self.map_field[_tmp_kp63] = _tmp_v62
     if 'struct_field' in json_obj and json_obj['struct_field'] is not None:
       self.struct_field = MyStruct()
       self.struct_field.readFromJson(json_obj['struct_field'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+    if 'union_field' in json_obj and json_obj['union_field'] is not None:
+      self.union_field = MyUnion()
+      self.union_field.readFromJson(json_obj['union_field'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
 
   def __repr__(self):
     L = []
@@ -597,6 +1183,10 @@ class StructLevelTerseStruct:
       value = pprint.pformat(self.struct_field, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    struct_field=%s' % (value))
+    if self.union_field is not None:
+      value = pprint.pformat(self.union_field, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    union_field=%s' % (value))
     return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
 
   def __eq__(self, other):
@@ -624,6 +1214,7 @@ class StructLevelTerseStruct:
       'set_field',
       'map_field',
       'struct_field',
+      'union_field',
     )
 
   # Override the __hash__ function for Python3 - t10434117
@@ -661,6 +1252,7 @@ class FieldLevelTerseStruct:
    - terse_set_field
    - terse_map_field
    - terse_struct_field
+   - terse_union_field
    - bool_field
    - byte_field
    - short_field
@@ -675,6 +1267,7 @@ class FieldLevelTerseStruct:
    - set_field
    - map_field
    - struct_field
+   - union_field
   """
 
   thrift_spec = None
@@ -750,47 +1343,47 @@ class FieldLevelTerseStruct:
       elif fid == 11:
         if ftype == TType.LIST:
           self.terse_list_field = []
-          (_etype35, _size32) = iprot.readListBegin()
-          if _size32 >= 0:
-            for _i36 in range(_size32):
-              _elem37 = iprot.readI16()
-              self.terse_list_field.append(_elem37)
+          (_etype67, _size64) = iprot.readListBegin()
+          if _size64 >= 0:
+            for _i68 in range(_size64):
+              _elem69 = iprot.readI16()
+              self.terse_list_field.append(_elem69)
           else: 
             while iprot.peekList():
-              _elem38 = iprot.readI16()
-              self.terse_list_field.append(_elem38)
+              _elem70 = iprot.readI16()
+              self.terse_list_field.append(_elem70)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 12:
         if ftype == TType.SET:
           self.terse_set_field = set()
-          (_etype42, _size39) = iprot.readSetBegin()
-          if _size39 >= 0:
-            for _i43 in range(_size39):
-              _elem44 = iprot.readI16()
-              self.terse_set_field.add(_elem44)
+          (_etype74, _size71) = iprot.readSetBegin()
+          if _size71 >= 0:
+            for _i75 in range(_size71):
+              _elem76 = iprot.readI16()
+              self.terse_set_field.add(_elem76)
           else: 
             while iprot.peekSet():
-              _elem45 = iprot.readI16()
-              self.terse_set_field.add(_elem45)
+              _elem77 = iprot.readI16()
+              self.terse_set_field.add(_elem77)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
       elif fid == 13:
         if ftype == TType.MAP:
           self.terse_map_field = {}
-          (_ktype47, _vtype48, _size46 ) = iprot.readMapBegin() 
-          if _size46 >= 0:
-            for _i50 in range(_size46):
-              _key51 = iprot.readI16()
-              _val52 = iprot.readI16()
-              self.terse_map_field[_key51] = _val52
+          (_ktype79, _vtype80, _size78 ) = iprot.readMapBegin() 
+          if _size78 >= 0:
+            for _i82 in range(_size78):
+              _key83 = iprot.readI16()
+              _val84 = iprot.readI16()
+              self.terse_map_field[_key83] = _val84
           else: 
             while iprot.peekMap():
-              _key53 = iprot.readI16()
-              _val54 = iprot.readI16()
-              self.terse_map_field[_key53] = _val54
+              _key85 = iprot.readI16()
+              _val86 = iprot.readI16()
+              self.terse_map_field[_key85] = _val86
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -798,6 +1391,12 @@ class FieldLevelTerseStruct:
         if ftype == TType.STRUCT:
           self.terse_struct_field = MyStruct()
           self.terse_struct_field.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 29:
+        if ftype == TType.STRUCT:
+          self.terse_union_field = MyUnion()
+          self.terse_union_field.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 15:
@@ -853,47 +1452,47 @@ class FieldLevelTerseStruct:
       elif fid == 25:
         if ftype == TType.LIST:
           self.list_field = []
-          (_etype58, _size55) = iprot.readListBegin()
-          if _size55 >= 0:
-            for _i59 in range(_size55):
-              _elem60 = iprot.readI16()
-              self.list_field.append(_elem60)
+          (_etype90, _size87) = iprot.readListBegin()
+          if _size87 >= 0:
+            for _i91 in range(_size87):
+              _elem92 = iprot.readI16()
+              self.list_field.append(_elem92)
           else: 
             while iprot.peekList():
-              _elem61 = iprot.readI16()
-              self.list_field.append(_elem61)
+              _elem93 = iprot.readI16()
+              self.list_field.append(_elem93)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 26:
         if ftype == TType.SET:
           self.set_field = set()
-          (_etype65, _size62) = iprot.readSetBegin()
-          if _size62 >= 0:
-            for _i66 in range(_size62):
-              _elem67 = iprot.readI16()
-              self.set_field.add(_elem67)
+          (_etype97, _size94) = iprot.readSetBegin()
+          if _size94 >= 0:
+            for _i98 in range(_size94):
+              _elem99 = iprot.readI16()
+              self.set_field.add(_elem99)
           else: 
             while iprot.peekSet():
-              _elem68 = iprot.readI16()
-              self.set_field.add(_elem68)
+              _elem100 = iprot.readI16()
+              self.set_field.add(_elem100)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
       elif fid == 27:
         if ftype == TType.MAP:
           self.map_field = {}
-          (_ktype70, _vtype71, _size69 ) = iprot.readMapBegin() 
-          if _size69 >= 0:
-            for _i73 in range(_size69):
-              _key74 = iprot.readI16()
-              _val75 = iprot.readI16()
-              self.map_field[_key74] = _val75
+          (_ktype102, _vtype103, _size101 ) = iprot.readMapBegin() 
+          if _size101 >= 0:
+            for _i105 in range(_size101):
+              _key106 = iprot.readI16()
+              _val107 = iprot.readI16()
+              self.map_field[_key106] = _val107
           else: 
             while iprot.peekMap():
-              _key76 = iprot.readI16()
-              _val77 = iprot.readI16()
-              self.map_field[_key76] = _val77
+              _key108 = iprot.readI16()
+              _val109 = iprot.readI16()
+              self.map_field[_key108] = _val109
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -901,6 +1500,12 @@ class FieldLevelTerseStruct:
         if ftype == TType.STRUCT:
           self.struct_field = MyStruct()
           self.struct_field.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 30:
+        if ftype == TType.STRUCT:
+          self.union_field = MyUnion()
+          self.union_field.read(iprot)
         else:
           iprot.skip(ftype)
       else:
@@ -959,23 +1564,23 @@ class FieldLevelTerseStruct:
     if self.terse_list_field != None:
       oprot.writeFieldBegin('terse_list_field', TType.LIST, 11)
       oprot.writeListBegin(TType.I16, len(self.terse_list_field))
-      for iter78 in self.terse_list_field:
-        oprot.writeI16(iter78)
+      for iter110 in self.terse_list_field:
+        oprot.writeI16(iter110)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.terse_set_field != None:
       oprot.writeFieldBegin('terse_set_field', TType.SET, 12)
       oprot.writeSetBegin(TType.I16, len(self.terse_set_field))
-      for iter79 in self.terse_set_field:
-        oprot.writeI16(iter79)
+      for iter111 in self.terse_set_field:
+        oprot.writeI16(iter111)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.terse_map_field != None:
       oprot.writeFieldBegin('terse_map_field', TType.MAP, 13)
       oprot.writeMapBegin(TType.I16, TType.I16, len(self.terse_map_field))
-      for kiter80,viter81 in self.terse_map_field.items():
-        oprot.writeI16(kiter80)
-        oprot.writeI16(viter81)
+      for kiter112,viter113 in self.terse_map_field.items():
+        oprot.writeI16(kiter112)
+        oprot.writeI16(viter113)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.terse_struct_field != None:
@@ -1025,28 +1630,36 @@ class FieldLevelTerseStruct:
     if self.list_field != None:
       oprot.writeFieldBegin('list_field', TType.LIST, 25)
       oprot.writeListBegin(TType.I16, len(self.list_field))
-      for iter82 in self.list_field:
-        oprot.writeI16(iter82)
+      for iter114 in self.list_field:
+        oprot.writeI16(iter114)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.set_field != None:
       oprot.writeFieldBegin('set_field', TType.SET, 26)
       oprot.writeSetBegin(TType.I16, len(self.set_field))
-      for iter83 in self.set_field:
-        oprot.writeI16(iter83)
+      for iter115 in self.set_field:
+        oprot.writeI16(iter115)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.map_field != None:
       oprot.writeFieldBegin('map_field', TType.MAP, 27)
       oprot.writeMapBegin(TType.I16, TType.I16, len(self.map_field))
-      for kiter84,viter85 in self.map_field.items():
-        oprot.writeI16(kiter84)
-        oprot.writeI16(viter85)
+      for kiter116,viter117 in self.map_field.items():
+        oprot.writeI16(kiter116)
+        oprot.writeI16(viter117)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.struct_field != None:
       oprot.writeFieldBegin('struct_field', TType.STRUCT, 28)
       self.struct_field.write(oprot)
+      oprot.writeFieldEnd()
+    if self.terse_union_field != None:
+      oprot.writeFieldBegin('terse_union_field', TType.STRUCT, 29)
+      self.terse_union_field.write(oprot)
+      oprot.writeFieldEnd()
+    if self.union_field != None:
+      oprot.writeFieldBegin('union_field', TType.STRUCT, 30)
+      self.union_field.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -1097,28 +1710,31 @@ class FieldLevelTerseStruct:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
     if 'terse_list_field' in json_obj and json_obj['terse_list_field'] is not None:
       self.terse_list_field = []
-      for _tmp_e86 in json_obj['terse_list_field']:
-        if _tmp_e86 > 0x7fff or _tmp_e86 < -0x8000:
+      for _tmp_e118 in json_obj['terse_list_field']:
+        if _tmp_e118 > 0x7fff or _tmp_e118 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.terse_list_field.append(_tmp_e86)
+        self.terse_list_field.append(_tmp_e118)
     if 'terse_set_field' in json_obj and json_obj['terse_set_field'] is not None:
       self.terse_set_field = set_cls()
-      for _tmp_e87 in json_obj['terse_set_field']:
-        if _tmp_e87 > 0x7fff or _tmp_e87 < -0x8000:
+      for _tmp_e119 in json_obj['terse_set_field']:
+        if _tmp_e119 > 0x7fff or _tmp_e119 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.terse_set_field.add(_tmp_e87)
+        self.terse_set_field.add(_tmp_e119)
     if 'terse_map_field' in json_obj and json_obj['terse_map_field'] is not None:
       self.terse_map_field = dict_cls()
-      for _tmp_k88, _tmp_v89 in json_obj['terse_map_field'].items():
-        _tmp_kp90 = int(_tmp_k88)
-        if _tmp_kp90 > 0x7fff or _tmp_kp90 < -0x8000:
-          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds the limit in key ' + _tmp_k88)
-        if _tmp_v89 > 0x7fff or _tmp_v89 < -0x8000:
+      for _tmp_k120, _tmp_v121 in json_obj['terse_map_field'].items():
+        _tmp_kp122 = int(_tmp_k120)
+        if _tmp_kp122 > 0x7fff or _tmp_kp122 < -0x8000:
+          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds the limit in key ' + _tmp_k120)
+        if _tmp_v121 > 0x7fff or _tmp_v121 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.terse_map_field[_tmp_kp90] = _tmp_v89
+        self.terse_map_field[_tmp_kp122] = _tmp_v121
     if 'terse_struct_field' in json_obj and json_obj['terse_struct_field'] is not None:
       self.terse_struct_field = MyStruct()
       self.terse_struct_field.readFromJson(json_obj['terse_struct_field'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+    if 'terse_union_field' in json_obj and json_obj['terse_union_field'] is not None:
+      self.terse_union_field = MyUnion()
+      self.terse_union_field.readFromJson(json_obj['terse_union_field'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'bool_field' in json_obj and json_obj['bool_field'] is not None:
       self.bool_field = json_obj['bool_field']
     if 'byte_field' in json_obj and json_obj['byte_field'] is not None:
@@ -1153,28 +1769,31 @@ class FieldLevelTerseStruct:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
     if 'list_field' in json_obj and json_obj['list_field'] is not None:
       self.list_field = []
-      for _tmp_e91 in json_obj['list_field']:
-        if _tmp_e91 > 0x7fff or _tmp_e91 < -0x8000:
+      for _tmp_e123 in json_obj['list_field']:
+        if _tmp_e123 > 0x7fff or _tmp_e123 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.list_field.append(_tmp_e91)
+        self.list_field.append(_tmp_e123)
     if 'set_field' in json_obj and json_obj['set_field'] is not None:
       self.set_field = set_cls()
-      for _tmp_e92 in json_obj['set_field']:
-        if _tmp_e92 > 0x7fff or _tmp_e92 < -0x8000:
+      for _tmp_e124 in json_obj['set_field']:
+        if _tmp_e124 > 0x7fff or _tmp_e124 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.set_field.add(_tmp_e92)
+        self.set_field.add(_tmp_e124)
     if 'map_field' in json_obj and json_obj['map_field'] is not None:
       self.map_field = dict_cls()
-      for _tmp_k93, _tmp_v94 in json_obj['map_field'].items():
-        _tmp_kp95 = int(_tmp_k93)
-        if _tmp_kp95 > 0x7fff or _tmp_kp95 < -0x8000:
-          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds the limit in key ' + _tmp_k93)
-        if _tmp_v94 > 0x7fff or _tmp_v94 < -0x8000:
+      for _tmp_k125, _tmp_v126 in json_obj['map_field'].items():
+        _tmp_kp127 = int(_tmp_k125)
+        if _tmp_kp127 > 0x7fff or _tmp_kp127 < -0x8000:
+          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds the limit in key ' + _tmp_k125)
+        if _tmp_v126 > 0x7fff or _tmp_v126 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.map_field[_tmp_kp95] = _tmp_v94
+        self.map_field[_tmp_kp127] = _tmp_v126
     if 'struct_field' in json_obj and json_obj['struct_field'] is not None:
       self.struct_field = MyStruct()
       self.struct_field.readFromJson(json_obj['struct_field'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+    if 'union_field' in json_obj and json_obj['union_field'] is not None:
+      self.union_field = MyUnion()
+      self.union_field.readFromJson(json_obj['union_field'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
 
   def __repr__(self):
     L = []
@@ -1235,6 +1854,10 @@ class FieldLevelTerseStruct:
       value = pprint.pformat(self.terse_struct_field, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    terse_struct_field=%s' % (value))
+    if self.terse_union_field is not None:
+      value = pprint.pformat(self.terse_union_field, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    terse_union_field=%s' % (value))
     if self.bool_field is not None:
       value = pprint.pformat(self.bool_field, indent=0)
       value = padding.join(value.splitlines(True))
@@ -1291,6 +1914,10 @@ class FieldLevelTerseStruct:
       value = pprint.pformat(self.struct_field, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    struct_field=%s' % (value))
+    if self.union_field is not None:
+      value = pprint.pformat(self.union_field, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    union_field=%s' % (value))
     return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
 
   def __eq__(self, other):
@@ -1332,6 +1959,8 @@ class FieldLevelTerseStruct:
       'set_field',
       'map_field',
       'struct_field',
+      'terse_union_field',
+      'union_field',
     )
 
   # Override the __hash__ function for Python3 - t10434117
@@ -1444,47 +2073,47 @@ class TerseStructWithCustomDefault:
       elif fid == 11:
         if ftype == TType.LIST:
           self.list_field = []
-          (_etype99, _size96) = iprot.readListBegin()
-          if _size96 >= 0:
-            for _i100 in range(_size96):
-              _elem101 = iprot.readI16()
-              self.list_field.append(_elem101)
+          (_etype131, _size128) = iprot.readListBegin()
+          if _size128 >= 0:
+            for _i132 in range(_size128):
+              _elem133 = iprot.readI16()
+              self.list_field.append(_elem133)
           else: 
             while iprot.peekList():
-              _elem102 = iprot.readI16()
-              self.list_field.append(_elem102)
+              _elem134 = iprot.readI16()
+              self.list_field.append(_elem134)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 12:
         if ftype == TType.SET:
           self.set_field = set()
-          (_etype106, _size103) = iprot.readSetBegin()
-          if _size103 >= 0:
-            for _i107 in range(_size103):
-              _elem108 = iprot.readI16()
-              self.set_field.add(_elem108)
+          (_etype138, _size135) = iprot.readSetBegin()
+          if _size135 >= 0:
+            for _i139 in range(_size135):
+              _elem140 = iprot.readI16()
+              self.set_field.add(_elem140)
           else: 
             while iprot.peekSet():
-              _elem109 = iprot.readI16()
-              self.set_field.add(_elem109)
+              _elem141 = iprot.readI16()
+              self.set_field.add(_elem141)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
       elif fid == 13:
         if ftype == TType.MAP:
           self.map_field = {}
-          (_ktype111, _vtype112, _size110 ) = iprot.readMapBegin() 
-          if _size110 >= 0:
-            for _i114 in range(_size110):
-              _key115 = iprot.readI16()
-              _val116 = iprot.readI16()
-              self.map_field[_key115] = _val116
+          (_ktype143, _vtype144, _size142 ) = iprot.readMapBegin() 
+          if _size142 >= 0:
+            for _i146 in range(_size142):
+              _key147 = iprot.readI16()
+              _val148 = iprot.readI16()
+              self.map_field[_key147] = _val148
           else: 
             while iprot.peekMap():
-              _key117 = iprot.readI16()
-              _val118 = iprot.readI16()
-              self.map_field[_key117] = _val118
+              _key149 = iprot.readI16()
+              _val150 = iprot.readI16()
+              self.map_field[_key149] = _val150
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -1550,23 +2179,23 @@ class TerseStructWithCustomDefault:
     if self.list_field != None:
       oprot.writeFieldBegin('list_field', TType.LIST, 11)
       oprot.writeListBegin(TType.I16, len(self.list_field))
-      for iter119 in self.list_field:
-        oprot.writeI16(iter119)
+      for iter151 in self.list_field:
+        oprot.writeI16(iter151)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.set_field != None:
       oprot.writeFieldBegin('set_field', TType.SET, 12)
       oprot.writeSetBegin(TType.I16, len(self.set_field))
-      for iter120 in self.set_field:
-        oprot.writeI16(iter120)
+      for iter152 in self.set_field:
+        oprot.writeI16(iter152)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.map_field != None:
       oprot.writeFieldBegin('map_field', TType.MAP, 13)
       oprot.writeMapBegin(TType.I16, TType.I16, len(self.map_field))
-      for kiter121,viter122 in self.map_field.items():
-        oprot.writeI16(kiter121)
-        oprot.writeI16(viter122)
+      for kiter153,viter154 in self.map_field.items():
+        oprot.writeI16(kiter153)
+        oprot.writeI16(viter154)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.struct_field != None:
@@ -1622,25 +2251,25 @@ class TerseStructWithCustomDefault:
             raise TProtocolException(TProtocolException.INVALID_DATA, msg)
     if 'list_field' in json_obj and json_obj['list_field'] is not None:
       self.list_field = []
-      for _tmp_e123 in json_obj['list_field']:
-        if _tmp_e123 > 0x7fff or _tmp_e123 < -0x8000:
+      for _tmp_e155 in json_obj['list_field']:
+        if _tmp_e155 > 0x7fff or _tmp_e155 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.list_field.append(_tmp_e123)
+        self.list_field.append(_tmp_e155)
     if 'set_field' in json_obj and json_obj['set_field'] is not None:
       self.set_field = set_cls()
-      for _tmp_e124 in json_obj['set_field']:
-        if _tmp_e124 > 0x7fff or _tmp_e124 < -0x8000:
+      for _tmp_e156 in json_obj['set_field']:
+        if _tmp_e156 > 0x7fff or _tmp_e156 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.set_field.add(_tmp_e124)
+        self.set_field.add(_tmp_e156)
     if 'map_field' in json_obj and json_obj['map_field'] is not None:
       self.map_field = dict_cls()
-      for _tmp_k125, _tmp_v126 in json_obj['map_field'].items():
-        _tmp_kp127 = int(_tmp_k125)
-        if _tmp_kp127 > 0x7fff or _tmp_kp127 < -0x8000:
-          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds the limit in key ' + _tmp_k125)
-        if _tmp_v126 > 0x7fff or _tmp_v126 < -0x8000:
+      for _tmp_k157, _tmp_v158 in json_obj['map_field'].items():
+        _tmp_kp159 = int(_tmp_k157)
+        if _tmp_kp159 > 0x7fff or _tmp_kp159 < -0x8000:
+          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds the limit in key ' + _tmp_k157)
+        if _tmp_v158 > 0x7fff or _tmp_v158 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.map_field[_tmp_kp127] = _tmp_v126
+        self.map_field[_tmp_kp159] = _tmp_v158
     if 'struct_field' in json_obj and json_obj['struct_field'] is not None:
       self.struct_field = MyStructWithCustomDefault()
       self.struct_field.readFromJson(json_obj['struct_field'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
@@ -2134,6 +2763,92 @@ MyStruct.thrift_struct_annotations = {
 MyStruct.thrift_field_annotations = {
 }
 
+all_structs.append(MyUnion)
+MyUnion.thrift_spec = (
+  None, # 0
+  (1, TType.BOOL, 'bool_field', None, None, 2, ), # 1
+  (2, TType.BYTE, 'byte_field', None, None, 2, ), # 2
+  (3, TType.I16, 'short_field', None, None, 2, ), # 3
+  (4, TType.I32, 'int_field', None, None, 2, ), # 4
+  (5, TType.I64, 'long_field', None, None, 2, ), # 5
+  (6, TType.FLOAT, 'float_field', None, None, 2, ), # 6
+  (7, TType.DOUBLE, 'double_field', None, None, 2, ), # 7
+  (8, TType.STRING, 'string_field', True, None, 2, ), # 8
+  (9, TType.STRING, 'binary_field', False, None, 2, ), # 9
+  (10, TType.I32, 'enum_field', MyEnum, None, 2, ), # 10
+  (11, TType.LIST, 'list_field', (TType.I16,None), None, 2, ), # 11
+  (12, TType.SET, 'set_field', (TType.I16,None), None, 2, ), # 12
+  (13, TType.MAP, 'map_field', (TType.I16,None,TType.I16,None), None, 2, ), # 13
+  (14, TType.STRUCT, 'struct_field', [MyStruct, MyStruct.thrift_spec, False], None, 2, ), # 14
+)
+
+MyUnion.thrift_struct_annotations = {
+}
+MyUnion.thrift_field_annotations = {
+}
+
+def MyUnion__init__(self, bool_field=None, byte_field=None, short_field=None, int_field=None, long_field=None, float_field=None, double_field=None, string_field=None, binary_field=None, enum_field=None, list_field=None, set_field=None, map_field=None, struct_field=None,):
+  self.field = 0
+  self.value = None
+  if bool_field is not None:
+    assert self.field == 0 and self.value is None
+    self.field = 1
+    self.value = bool_field
+  if byte_field is not None:
+    assert self.field == 0 and self.value is None
+    self.field = 2
+    self.value = byte_field
+  if short_field is not None:
+    assert self.field == 0 and self.value is None
+    self.field = 3
+    self.value = short_field
+  if int_field is not None:
+    assert self.field == 0 and self.value is None
+    self.field = 4
+    self.value = int_field
+  if long_field is not None:
+    assert self.field == 0 and self.value is None
+    self.field = 5
+    self.value = long_field
+  if float_field is not None:
+    assert self.field == 0 and self.value is None
+    self.field = 6
+    self.value = float_field
+  if double_field is not None:
+    assert self.field == 0 and self.value is None
+    self.field = 7
+    self.value = double_field
+  if string_field is not None:
+    assert self.field == 0 and self.value is None
+    self.field = 8
+    self.value = string_field
+  if binary_field is not None:
+    assert self.field == 0 and self.value is None
+    self.field = 9
+    self.value = binary_field
+  if enum_field is not None:
+    assert self.field == 0 and self.value is None
+    self.field = 10
+    self.value = enum_field
+  if list_field is not None:
+    assert self.field == 0 and self.value is None
+    self.field = 11
+    self.value = list_field
+  if set_field is not None:
+    assert self.field == 0 and self.value is None
+    self.field = 12
+    self.value = set_field
+  if map_field is not None:
+    assert self.field == 0 and self.value is None
+    self.field = 13
+    self.value = map_field
+  if struct_field is not None:
+    assert self.field == 0 and self.value is None
+    self.field = 14
+    self.value = struct_field
+
+MyUnion.__init__ = MyUnion__init__
+
 all_structs.append(MyStructWithCustomDefault)
 MyStructWithCustomDefault.thrift_spec = (
   None, # 0
@@ -2174,6 +2889,7 @@ StructLevelTerseStruct.thrift_spec = (
   (12, TType.SET, 'set_field', (TType.I16,None), None, 3, ), # 12
   (13, TType.MAP, 'map_field', (TType.I16,None,TType.I16,None), None, 3, ), # 13
   (14, TType.STRUCT, 'struct_field', [MyStruct, MyStruct.thrift_spec, False], None, 3, ), # 14
+  (15, TType.STRUCT, 'union_field', [MyUnion, MyUnion.thrift_spec, True], None, 3, ), # 15
 )
 
 StructLevelTerseStruct.thrift_struct_annotations = {
@@ -2181,7 +2897,7 @@ StructLevelTerseStruct.thrift_struct_annotations = {
 StructLevelTerseStruct.thrift_field_annotations = {
 }
 
-def StructLevelTerseStruct__init__(self, bool_field=None, byte_field=None, short_field=None, int_field=None, long_field=None, float_field=None, double_field=None, string_field=None, binary_field=None, enum_field=None, list_field=None, set_field=None, map_field=None, struct_field=None,):
+def StructLevelTerseStruct__init__(self, bool_field=None, byte_field=None, short_field=None, int_field=None, long_field=None, float_field=None, double_field=None, string_field=None, binary_field=None, enum_field=None, list_field=None, set_field=None, map_field=None, struct_field=None, union_field=None,):
   self.bool_field = bool_field
   self.byte_field = byte_field
   self.short_field = short_field
@@ -2196,6 +2912,7 @@ def StructLevelTerseStruct__init__(self, bool_field=None, byte_field=None, short
   self.set_field = set_field
   self.map_field = map_field
   self.struct_field = struct_field
+  self.union_field = union_field
 
 StructLevelTerseStruct.__init__ = StructLevelTerseStruct__init__
 
@@ -2214,6 +2931,7 @@ def StructLevelTerseStruct__setstate__(self, state):
   state.setdefault('set_field', None)
   state.setdefault('map_field', None)
   state.setdefault('struct_field', None)
+  state.setdefault('union_field', None)
   self.__dict__ = state
 
 StructLevelTerseStruct.__getstate__ = lambda self: self.__dict__.copy()
@@ -2250,6 +2968,8 @@ FieldLevelTerseStruct.thrift_spec = (
   (26, TType.SET, 'set_field', (TType.I16,None), None, 2, ), # 26
   (27, TType.MAP, 'map_field', (TType.I16,None,TType.I16,None), None, 2, ), # 27
   (28, TType.STRUCT, 'struct_field', [MyStruct, MyStruct.thrift_spec, False], None, 2, ), # 28
+  (29, TType.STRUCT, 'terse_union_field', [MyUnion, MyUnion.thrift_spec, True], None, 3, ), # 29
+  (30, TType.STRUCT, 'union_field', [MyUnion, MyUnion.thrift_spec, True], None, 2, ), # 30
 )
 
 FieldLevelTerseStruct.thrift_struct_annotations = {
@@ -2257,7 +2977,7 @@ FieldLevelTerseStruct.thrift_struct_annotations = {
 FieldLevelTerseStruct.thrift_field_annotations = {
 }
 
-def FieldLevelTerseStruct__init__(self, terse_bool_field=None, terse_byte_field=None, terse_short_field=None, terse_int_field=None, terse_long_field=None, terse_float_field=None, terse_double_field=None, terse_string_field=None, terse_binary_field=None, terse_enum_field=None, terse_list_field=None, terse_set_field=None, terse_map_field=None, terse_struct_field=None, bool_field=None, byte_field=None, short_field=None, int_field=None, long_field=None, float_field=None, double_field=None, string_field=None, binary_field=None, enum_field=None, list_field=None, set_field=None, map_field=None, struct_field=None,):
+def FieldLevelTerseStruct__init__(self, terse_bool_field=None, terse_byte_field=None, terse_short_field=None, terse_int_field=None, terse_long_field=None, terse_float_field=None, terse_double_field=None, terse_string_field=None, terse_binary_field=None, terse_enum_field=None, terse_list_field=None, terse_set_field=None, terse_map_field=None, terse_struct_field=None, terse_union_field=None, bool_field=None, byte_field=None, short_field=None, int_field=None, long_field=None, float_field=None, double_field=None, string_field=None, binary_field=None, enum_field=None, list_field=None, set_field=None, map_field=None, struct_field=None, union_field=None,):
   self.terse_bool_field = terse_bool_field
   self.terse_byte_field = terse_byte_field
   self.terse_short_field = terse_short_field
@@ -2272,6 +2992,7 @@ def FieldLevelTerseStruct__init__(self, terse_bool_field=None, terse_byte_field=
   self.terse_set_field = terse_set_field
   self.terse_map_field = terse_map_field
   self.terse_struct_field = terse_struct_field
+  self.terse_union_field = terse_union_field
   self.bool_field = bool_field
   self.byte_field = byte_field
   self.short_field = short_field
@@ -2286,6 +3007,7 @@ def FieldLevelTerseStruct__init__(self, terse_bool_field=None, terse_byte_field=
   self.set_field = set_field
   self.map_field = map_field
   self.struct_field = struct_field
+  self.union_field = union_field
 
 FieldLevelTerseStruct.__init__ = FieldLevelTerseStruct__init__
 
@@ -2304,6 +3026,7 @@ def FieldLevelTerseStruct__setstate__(self, state):
   state.setdefault('terse_set_field', None)
   state.setdefault('terse_map_field', None)
   state.setdefault('terse_struct_field', None)
+  state.setdefault('terse_union_field', None)
   state.setdefault('bool_field', None)
   state.setdefault('byte_field', None)
   state.setdefault('short_field', None)
@@ -2318,6 +3041,7 @@ def FieldLevelTerseStruct__setstate__(self, state):
   state.setdefault('set_field', None)
   state.setdefault('map_field', None)
   state.setdefault('struct_field', None)
+  state.setdefault('union_field', None)
   self.__dict__ = state
 
 FieldLevelTerseStruct.__getstate__ = lambda self: self.__dict__.copy()

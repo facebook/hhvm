@@ -27,6 +27,23 @@ enum MyEnum {
 
 struct MyStruct {}
 
+union MyUnion {
+  1: bool bool_field;
+  2: byte byte_field;
+  3: i16 short_field;
+  4: i32 int_field;
+  5: i64 long_field;
+  6: float float_field;
+  7: double double_field;
+  8: string string_field;
+  9: binary binary_field;
+  10: MyEnum enum_field;
+  11: list<i16> list_field;
+  12: set<i16> set_field;
+  13: map<i16, i16> map_field;
+  14: MyStruct struct_field;
+}
+
 struct MyStructWithCustomDefault {
   1: i64 field1 = 1;
 }
@@ -47,6 +64,7 @@ struct StructLevelTerseStruct {
   12: set<i16> set_field;
   13: map<i16, i16> map_field;
   14: MyStruct struct_field;
+  15: MyUnion union_field;
 }
 
 struct FieldLevelTerseStruct {
@@ -79,6 +97,8 @@ struct FieldLevelTerseStruct {
   13: map<i16, i16> terse_map_field;
   @thrift.TerseWrite
   14: MyStruct terse_struct_field;
+  @thrift.TerseWrite
+  29: MyUnion terse_union_field;
 
   // non-terse-write fields
   15: bool bool_field;
@@ -95,6 +115,7 @@ struct FieldLevelTerseStruct {
   26: set<i16> set_field;
   27: map<i16, i16> map_field;
   28: MyStruct struct_field;
+  30: MyUnion union_field;
 }
 
 @thrift.TerseWrite

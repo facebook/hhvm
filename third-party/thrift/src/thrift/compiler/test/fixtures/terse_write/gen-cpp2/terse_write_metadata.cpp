@@ -50,6 +50,43 @@ StructMetadata<::facebook::thrift::test::terse_write::MyStruct>::gen(ThriftMetad
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::facebook::thrift::test::terse_write::MyUnion>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("terse_write.MyUnion", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& terse_write_MyUnion = res.first->second;
+  terse_write_MyUnion.name() = "terse_write.MyUnion";
+  terse_write_MyUnion.is_union() = true;
+  static const auto* const
+  terse_write_MyUnion_fields = new std::array<EncodedThriftField, 14>{{
+    {1, "bool_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
+    {2, "byte_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
+    {3, "short_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}},
+    {4, "int_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
+    {5, "long_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
+    {6, "float_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{}},
+    {7, "double_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{}},
+    {8, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
+    {9, "binary_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
+    {10, "enum_field", false, std::make_unique<Enum<::facebook::thrift::test::terse_write::MyEnum>>("terse_write.MyEnum"), std::vector<ThriftConstStruct>{}},
+    {11, "list_field", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{}},
+    {12, "set_field", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{}},
+    {13, "map_field", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{}},
+    {14, "struct_field", false, std::make_unique<Struct<::facebook::thrift::test::terse_write::MyStruct>>("terse_write.MyStruct"), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *terse_write_MyUnion_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    terse_write_MyUnion.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("terse_write.MyStructWithCustomDefault", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
@@ -83,7 +120,7 @@ StructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::g
   terse_write_StructLevelTerseStruct.name() = "terse_write.StructLevelTerseStruct";
   terse_write_StructLevelTerseStruct.is_union() = false;
   static const auto* const
-  terse_write_StructLevelTerseStruct_fields = new std::array<EncodedThriftField, 14>{{
+  terse_write_StructLevelTerseStruct_fields = new std::array<EncodedThriftField, 15>{{
     {1, "bool_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {2, "byte_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
     {3, "short_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}},
@@ -98,6 +135,7 @@ StructMetadata<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::g
     {12, "set_field", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{}},
     {13, "map_field", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{}},
     {14, "struct_field", false, std::make_unique<Struct<::facebook::thrift::test::terse_write::MyStruct>>("terse_write.MyStruct"), std::vector<ThriftConstStruct>{}},
+    {15, "union_field", false, std::make_unique<Union<::facebook::thrift::test::terse_write::MyUnion>>("terse_write.MyUnion"), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *terse_write_StructLevelTerseStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -121,7 +159,7 @@ StructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::ge
   terse_write_FieldLevelTerseStruct.name() = "terse_write.FieldLevelTerseStruct";
   terse_write_FieldLevelTerseStruct.is_union() = false;
   static const auto* const
-  terse_write_FieldLevelTerseStruct_fields = new std::array<EncodedThriftField, 28>{{
+  terse_write_FieldLevelTerseStruct_fields = new std::array<EncodedThriftField, 30>{{
     {1, "terse_bool_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{*cvStruct("thrift.TerseWrite", {}).cv_struct_ref(), }},
     {2, "terse_byte_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{*cvStruct("thrift.TerseWrite", {}).cv_struct_ref(), }},
     {3, "terse_short_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{*cvStruct("thrift.TerseWrite", {}).cv_struct_ref(), }},
@@ -136,6 +174,7 @@ StructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::ge
     {12, "terse_set_field", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("thrift.TerseWrite", {}).cv_struct_ref(), }},
     {13, "terse_map_field", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("thrift.TerseWrite", {}).cv_struct_ref(), }},
     {14, "terse_struct_field", false, std::make_unique<Struct<::facebook::thrift::test::terse_write::MyStruct>>("terse_write.MyStruct"), std::vector<ThriftConstStruct>{*cvStruct("thrift.TerseWrite", {}).cv_struct_ref(), }},
+    {29, "terse_union_field", false, std::make_unique<Union<::facebook::thrift::test::terse_write::MyUnion>>("terse_write.MyUnion"), std::vector<ThriftConstStruct>{*cvStruct("thrift.TerseWrite", {}).cv_struct_ref(), }},
     {15, "bool_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {16, "byte_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
     {17, "short_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}},
@@ -150,6 +189,7 @@ StructMetadata<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::ge
     {26, "set_field", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{}},
     {27, "map_field", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{}},
     {28, "struct_field", false, std::make_unique<Struct<::facebook::thrift::test::terse_write::MyStruct>>("terse_write.MyStruct"), std::vector<ThriftConstStruct>{}},
+    {30, "union_field", false, std::make_unique<Union<::facebook::thrift::test::terse_write::MyUnion>>("terse_write.MyUnion"), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *terse_write_FieldLevelTerseStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;

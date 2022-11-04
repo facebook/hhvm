@@ -31,6 +31,11 @@ class StructMetadata<::facebook::thrift::test::terse_write::MyStruct> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
+class StructMetadata<::facebook::thrift::test::terse_write::MyUnion> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
 class StructMetadata<::facebook::thrift::test::terse_write::MyStructWithCustomDefault> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);

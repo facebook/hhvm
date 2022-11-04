@@ -462,15 +462,15 @@ public class TerseStructWithCustomDefault implements TBase, java.io.Serializable
         case LIST_FIELD:
           if (__field.type == TType.LIST) {
             {
-              TList _list39 = iprot.readListBegin();
-              tmp_list_field = new ArrayList<Short>(Math.max(0, _list39.size));
-              for (int _i40 = 0; 
-                   (_list39.size < 0) ? iprot.peekList() : (_i40 < _list39.size); 
-                   ++_i40)
+              TList _list52 = iprot.readListBegin();
+              tmp_list_field = new ArrayList<Short>(Math.max(0, _list52.size));
+              for (int _i53 = 0; 
+                   (_list52.size < 0) ? iprot.peekList() : (_i53 < _list52.size); 
+                   ++_i53)
               {
-                Short _elem41;
-                _elem41 = iprot.readI16();
-                tmp_list_field.add(_elem41);
+                Short _elem54;
+                _elem54 = iprot.readI16();
+                tmp_list_field.add(_elem54);
               }
               iprot.readListEnd();
             }
@@ -481,15 +481,15 @@ public class TerseStructWithCustomDefault implements TBase, java.io.Serializable
         case SET_FIELD:
           if (__field.type == TType.SET) {
             {
-              TSet _set42 = iprot.readSetBegin();
-              tmp_set_field = new HashSet<Short>(Math.max(0, 2*_set42.size));
-              for (int _i43 = 0; 
-                   (_set42.size < 0) ? iprot.peekSet() : (_i43 < _set42.size); 
-                   ++_i43)
+              TSet _set55 = iprot.readSetBegin();
+              tmp_set_field = new HashSet<Short>(Math.max(0, 2*_set55.size));
+              for (int _i56 = 0; 
+                   (_set55.size < 0) ? iprot.peekSet() : (_i56 < _set55.size); 
+                   ++_i56)
               {
-                Short _elem44;
-                _elem44 = iprot.readI16();
-                tmp_set_field.add(_elem44);
+                Short _elem57;
+                _elem57 = iprot.readI16();
+                tmp_set_field.add(_elem57);
               }
               iprot.readSetEnd();
             }
@@ -500,17 +500,17 @@ public class TerseStructWithCustomDefault implements TBase, java.io.Serializable
         case MAP_FIELD:
           if (__field.type == TType.MAP) {
             {
-              TMap _map45 = iprot.readMapBegin();
-              tmp_map_field = new HashMap<Short,Short>(Math.max(0, 2*_map45.size));
-              for (int _i46 = 0; 
-                   (_map45.size < 0) ? iprot.peekMap() : (_i46 < _map45.size); 
-                   ++_i46)
+              TMap _map58 = iprot.readMapBegin();
+              tmp_map_field = new HashMap<Short,Short>(Math.max(0, 2*_map58.size));
+              for (int _i59 = 0; 
+                   (_map58.size < 0) ? iprot.peekMap() : (_i59 < _map58.size); 
+                   ++_i59)
               {
-                Short _key47;
-                Short _val48;
-                _key47 = iprot.readI16();
-                _val48 = iprot.readI16();
-                tmp_map_field.put(_key47, _val48);
+                Short _key60;
+                Short _val61;
+                _key60 = iprot.readI16();
+                _val61 = iprot.readI16();
+                tmp_map_field.put(_key60, _val61);
               }
               iprot.readMapEnd();
             }
@@ -612,8 +612,8 @@ public class TerseStructWithCustomDefault implements TBase, java.io.Serializable
       oprot.writeFieldBegin(LIST_FIELD_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I16, this.list_field.size()));
-        for (Short _iter49 : this.list_field)        {
-          oprot.writeI16(_iter49);
+        for (Short _iter62 : this.list_field)        {
+          oprot.writeI16(_iter62);
         }
         oprot.writeListEnd();
       }
@@ -623,8 +623,8 @@ public class TerseStructWithCustomDefault implements TBase, java.io.Serializable
       oprot.writeFieldBegin(SET_FIELD_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.I16, this.set_field.size()));
-        for (Short _iter50 : this.set_field)        {
-          oprot.writeI16(_iter50);
+        for (Short _iter63 : this.set_field)        {
+          oprot.writeI16(_iter63);
         }
         oprot.writeSetEnd();
       }
@@ -634,9 +634,9 @@ public class TerseStructWithCustomDefault implements TBase, java.io.Serializable
       oprot.writeFieldBegin(MAP_FIELD_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.I16, TType.I16, this.map_field.size()));
-        for (Map.Entry<Short, Short> _iter51 : this.map_field.entrySet())        {
-          oprot.writeI16(_iter51.getKey());
-          oprot.writeI16(_iter51.getValue());
+        for (Map.Entry<Short, Short> _iter64 : this.map_field.entrySet())        {
+          oprot.writeI16(_iter64.getKey());
+          oprot.writeI16(_iter64.getValue());
         }
         oprot.writeMapEnd();
       }

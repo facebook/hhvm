@@ -11,12 +11,13 @@ import com.facebook.thrift.type.TypeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class __fbthrift_TypeList_38bbd581 implements TypeList {
+public class __fbthrift_TypeList_5d5a805a implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
   static {
     list.add(new TypeList.TypeMapping("facebook.com/thrift/test/terse_write/MyStruct", "com.facebook.thrift.test.terse_write.MyStruct"));
+    list.add(new TypeList.TypeMapping("facebook.com/thrift/test/terse_write/MyUnion", "com.facebook.thrift.test.terse_write.MyUnion"));
     list.add(new TypeList.TypeMapping("facebook.com/thrift/test/terse_write/MyStructWithCustomDefault", "com.facebook.thrift.test.terse_write.MyStructWithCustomDefault"));
     list.add(new TypeList.TypeMapping("facebook.com/thrift/test/terse_write/StructLevelTerseStruct", "com.facebook.thrift.test.terse_write.StructLevelTerseStruct"));
     list.add(new TypeList.TypeMapping("facebook.com/thrift/test/terse_write/FieldLevelTerseStruct", "com.facebook.thrift.test.terse_write.FieldLevelTerseStruct"));

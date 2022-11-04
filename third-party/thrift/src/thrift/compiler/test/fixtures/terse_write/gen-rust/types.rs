@@ -18,6 +18,25 @@ pub struct MyStruct {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
+#[derive(Clone, PartialEq, Debug)]
+pub enum MyUnion {
+    bool_field(::std::primitive::bool),
+    byte_field(::std::primitive::i8),
+    short_field(::std::primitive::i16),
+    int_field(::std::primitive::i32),
+    long_field(::std::primitive::i64),
+    float_field(::std::primitive::f32),
+    double_field(::std::primitive::f64),
+    string_field(::std::string::String),
+    binary_field(::std::vec::Vec<::std::primitive::u8>),
+    enum_field(crate::types::MyEnum),
+    list_field(::std::vec::Vec<::std::primitive::i16>),
+    set_field(::std::collections::BTreeSet<::std::primitive::i16>),
+    map_field(::std::collections::BTreeMap<::std::primitive::i16, ::std::primitive::i16>),
+    struct_field(crate::types::MyStruct),
+    UnknownField(::std::primitive::i32),
+}
+
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MyStructWithCustomDefault {
     pub field1: ::std::primitive::i64,
@@ -45,6 +64,7 @@ pub struct StructLevelTerseStruct {
     pub set_field: ::std::collections::BTreeSet<::std::primitive::i16>,
     pub map_field: ::std::collections::BTreeMap<::std::primitive::i16, ::std::primitive::i16>,
     pub struct_field: crate::types::MyStruct,
+    pub union_field: crate::types::MyUnion,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -69,6 +89,7 @@ pub struct FieldLevelTerseStruct {
     pub terse_set_field: ::std::collections::BTreeSet<::std::primitive::i16>,
     pub terse_map_field: ::std::collections::BTreeMap<::std::primitive::i16, ::std::primitive::i16>,
     pub terse_struct_field: crate::types::MyStruct,
+    pub terse_union_field: crate::types::MyUnion,
     pub bool_field: ::std::primitive::bool,
     pub byte_field: ::std::primitive::i8,
     pub short_field: ::std::primitive::i16,
@@ -83,6 +104,7 @@ pub struct FieldLevelTerseStruct {
     pub set_field: ::std::collections::BTreeSet<::std::primitive::i16>,
     pub map_field: ::std::collections::BTreeMap<::std::primitive::i16, ::std::primitive::i16>,
     pub struct_field: crate::types::MyStruct,
+    pub union_field: crate::types::MyUnion,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -343,6 +365,209 @@ where
 }
 
 
+
+impl ::std::default::Default for MyUnion {
+    fn default() -> Self {
+        Self::UnknownField(-1)
+    }
+}
+
+impl ::fbthrift::GetTType for MyUnion {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::MyUnion {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/terse_write/MyUnion"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for MyUnion
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("MyUnion");
+        match self {
+            Self::bool_field(inner) => {
+                p.write_field_begin("bool_field", ::fbthrift::TType::Bool, 1);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::byte_field(inner) => {
+                p.write_field_begin("byte_field", ::fbthrift::TType::Byte, 2);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::short_field(inner) => {
+                p.write_field_begin("short_field", ::fbthrift::TType::I16, 3);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::int_field(inner) => {
+                p.write_field_begin("int_field", ::fbthrift::TType::I32, 4);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::long_field(inner) => {
+                p.write_field_begin("long_field", ::fbthrift::TType::I64, 5);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::float_field(inner) => {
+                p.write_field_begin("float_field", ::fbthrift::TType::Float, 6);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::double_field(inner) => {
+                p.write_field_begin("double_field", ::fbthrift::TType::Double, 7);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::string_field(inner) => {
+                p.write_field_begin("string_field", ::fbthrift::TType::String, 8);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::binary_field(inner) => {
+                p.write_field_begin("binary_field", ::fbthrift::TType::String, 9);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::enum_field(inner) => {
+                p.write_field_begin("enum_field", ::fbthrift::TType::I32, 10);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::list_field(inner) => {
+                p.write_field_begin("list_field", ::fbthrift::TType::List, 11);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::set_field(inner) => {
+                p.write_field_begin("set_field", ::fbthrift::TType::Set, 12);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::map_field(inner) => {
+                p.write_field_begin("map_field", ::fbthrift::TType::Map, 13);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::struct_field(inner) => {
+                p.write_field_begin("struct_field", ::fbthrift::TType::Struct, 14);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::UnknownField(_) => {}
+        }
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for MyUnion
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("binary_field", ::fbthrift::TType::String, 9),
+            ::fbthrift::Field::new("bool_field", ::fbthrift::TType::Bool, 1),
+            ::fbthrift::Field::new("byte_field", ::fbthrift::TType::Byte, 2),
+            ::fbthrift::Field::new("double_field", ::fbthrift::TType::Double, 7),
+            ::fbthrift::Field::new("enum_field", ::fbthrift::TType::I32, 10),
+            ::fbthrift::Field::new("float_field", ::fbthrift::TType::Float, 6),
+            ::fbthrift::Field::new("int_field", ::fbthrift::TType::I32, 4),
+            ::fbthrift::Field::new("list_field", ::fbthrift::TType::List, 11),
+            ::fbthrift::Field::new("long_field", ::fbthrift::TType::I64, 5),
+            ::fbthrift::Field::new("map_field", ::fbthrift::TType::Map, 13),
+            ::fbthrift::Field::new("set_field", ::fbthrift::TType::Set, 12),
+            ::fbthrift::Field::new("short_field", ::fbthrift::TType::I16, 3),
+            ::fbthrift::Field::new("string_field", ::fbthrift::TType::String, 8),
+            ::fbthrift::Field::new("struct_field", ::fbthrift::TType::Struct, 14),
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        let mut once = false;
+        let mut alt = ::std::option::Option::None;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32, once) {
+                (::fbthrift::TType::Stop, _, _) => break,
+                (::fbthrift::TType::Bool, 1, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::bool_field(::fbthrift::Deserialize::read(p)?));
+                }
+                (::fbthrift::TType::Byte, 2, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::byte_field(::fbthrift::Deserialize::read(p)?));
+                }
+                (::fbthrift::TType::I16, 3, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::short_field(::fbthrift::Deserialize::read(p)?));
+                }
+                (::fbthrift::TType::I32, 4, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::int_field(::fbthrift::Deserialize::read(p)?));
+                }
+                (::fbthrift::TType::I64, 5, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::long_field(::fbthrift::Deserialize::read(p)?));
+                }
+                (::fbthrift::TType::Float, 6, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::float_field(::fbthrift::Deserialize::read(p)?));
+                }
+                (::fbthrift::TType::Double, 7, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::double_field(::fbthrift::Deserialize::read(p)?));
+                }
+                (::fbthrift::TType::String, 8, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::string_field(::fbthrift::Deserialize::read(p)?));
+                }
+                (::fbthrift::TType::String, 9, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::binary_field(::fbthrift::Deserialize::read(p)?));
+                }
+                (::fbthrift::TType::I32, 10, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::enum_field(::fbthrift::Deserialize::read(p)?));
+                }
+                (::fbthrift::TType::List, 11, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::list_field(::fbthrift::Deserialize::read(p)?));
+                }
+                (::fbthrift::TType::Set, 12, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::set_field(::fbthrift::Deserialize::read(p)?));
+                }
+                (::fbthrift::TType::Map, 13, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::map_field(::fbthrift::Deserialize::read(p)?));
+                }
+                (::fbthrift::TType::Struct, 14, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::struct_field(::fbthrift::Deserialize::read(p)?));
+                }
+                (fty, _, false) => p.skip(fty)?,
+                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                    format!(
+                        "unwanted extra union {} field ty {:?} id {}",
+                        "MyUnion",
+                        badty,
+                        badid,
+                    ),
+                ))),
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(alt.unwrap_or_default())
+    }
+}
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::MyStructWithCustomDefault {
     fn default() -> Self {
@@ -435,6 +660,7 @@ impl ::std::default::Default for self::StructLevelTerseStruct {
             set_field: ::std::default::Default::default(),
             map_field: ::std::default::Default::default(),
             struct_field: ::std::default::Default::default(),
+            union_field: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -458,6 +684,7 @@ impl ::std::fmt::Debug for self::StructLevelTerseStruct {
             .field("set_field", &self.set_field)
             .field("map_field", &self.map_field)
             .field("struct_field", &self.struct_field)
+            .field("union_field", &self.union_field)
             .finish()
     }
 }
@@ -523,6 +750,9 @@ where
         p.write_field_begin("struct_field", ::fbthrift::TType::Struct, 14);
         ::fbthrift::Serialize::write(&self.struct_field, p);
         p.write_field_end();
+        p.write_field_begin("union_field", ::fbthrift::TType::Struct, 15);
+        ::fbthrift::Serialize::write(&self.union_field, p);
+        p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -548,6 +778,7 @@ where
             ::fbthrift::Field::new("short_field", ::fbthrift::TType::I16, 3),
             ::fbthrift::Field::new("string_field", ::fbthrift::TType::String, 8),
             ::fbthrift::Field::new("struct_field", ::fbthrift::TType::Struct, 14),
+            ::fbthrift::Field::new("union_field", ::fbthrift::TType::Struct, 15),
         ];
         let mut field_bool_field = ::std::option::Option::None;
         let mut field_byte_field = ::std::option::Option::None;
@@ -563,6 +794,7 @@ where
         let mut field_set_field = ::std::option::Option::None;
         let mut field_map_field = ::std::option::Option::None;
         let mut field_struct_field = ::std::option::Option::None;
+        let mut field_union_field = ::std::option::Option::None;
         let _ = p.read_struct_begin(|_| ())?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -582,6 +814,7 @@ where
                 (::fbthrift::TType::Set, 12) => field_set_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Map, 13) => field_map_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 14) => field_struct_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 15) => field_union_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -602,6 +835,7 @@ where
             set_field: field_set_field.unwrap_or_default(),
             map_field: field_map_field.unwrap_or_default(),
             struct_field: field_struct_field.unwrap_or_default(),
+            union_field: field_union_field.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
@@ -626,6 +860,7 @@ impl ::std::default::Default for self::FieldLevelTerseStruct {
             terse_set_field: ::std::default::Default::default(),
             terse_map_field: ::std::default::Default::default(),
             terse_struct_field: ::std::default::Default::default(),
+            terse_union_field: ::std::default::Default::default(),
             bool_field: ::std::default::Default::default(),
             byte_field: ::std::default::Default::default(),
             short_field: ::std::default::Default::default(),
@@ -640,6 +875,7 @@ impl ::std::default::Default for self::FieldLevelTerseStruct {
             set_field: ::std::default::Default::default(),
             map_field: ::std::default::Default::default(),
             struct_field: ::std::default::Default::default(),
+            union_field: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -663,6 +899,7 @@ impl ::std::fmt::Debug for self::FieldLevelTerseStruct {
             .field("terse_set_field", &self.terse_set_field)
             .field("terse_map_field", &self.terse_map_field)
             .field("terse_struct_field", &self.terse_struct_field)
+            .field("terse_union_field", &self.terse_union_field)
             .field("bool_field", &self.bool_field)
             .field("byte_field", &self.byte_field)
             .field("short_field", &self.short_field)
@@ -677,6 +914,7 @@ impl ::std::fmt::Debug for self::FieldLevelTerseStruct {
             .field("set_field", &self.set_field)
             .field("map_field", &self.map_field)
             .field("struct_field", &self.struct_field)
+            .field("union_field", &self.union_field)
             .finish()
     }
 }
@@ -742,6 +980,9 @@ where
         p.write_field_begin("terse_struct_field", ::fbthrift::TType::Struct, 14);
         ::fbthrift::Serialize::write(&self.terse_struct_field, p);
         p.write_field_end();
+        p.write_field_begin("terse_union_field", ::fbthrift::TType::Struct, 29);
+        ::fbthrift::Serialize::write(&self.terse_union_field, p);
+        p.write_field_end();
         p.write_field_begin("bool_field", ::fbthrift::TType::Bool, 15);
         ::fbthrift::Serialize::write(&self.bool_field, p);
         p.write_field_end();
@@ -784,6 +1025,9 @@ where
         p.write_field_begin("struct_field", ::fbthrift::TType::Struct, 28);
         ::fbthrift::Serialize::write(&self.struct_field, p);
         p.write_field_end();
+        p.write_field_begin("union_field", ::fbthrift::TType::Struct, 30);
+        ::fbthrift::Serialize::write(&self.union_field, p);
+        p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -823,6 +1067,8 @@ where
             ::fbthrift::Field::new("terse_short_field", ::fbthrift::TType::I16, 3),
             ::fbthrift::Field::new("terse_string_field", ::fbthrift::TType::String, 8),
             ::fbthrift::Field::new("terse_struct_field", ::fbthrift::TType::Struct, 14),
+            ::fbthrift::Field::new("terse_union_field", ::fbthrift::TType::Struct, 29),
+            ::fbthrift::Field::new("union_field", ::fbthrift::TType::Struct, 30),
         ];
         let mut field_terse_bool_field = ::std::option::Option::None;
         let mut field_terse_byte_field = ::std::option::Option::None;
@@ -838,6 +1084,7 @@ where
         let mut field_terse_set_field = ::std::option::Option::None;
         let mut field_terse_map_field = ::std::option::Option::None;
         let mut field_terse_struct_field = ::std::option::Option::None;
+        let mut field_terse_union_field = ::std::option::Option::None;
         let mut field_bool_field = ::std::option::Option::None;
         let mut field_byte_field = ::std::option::Option::None;
         let mut field_short_field = ::std::option::Option::None;
@@ -852,6 +1099,7 @@ where
         let mut field_set_field = ::std::option::Option::None;
         let mut field_map_field = ::std::option::Option::None;
         let mut field_struct_field = ::std::option::Option::None;
+        let mut field_union_field = ::std::option::Option::None;
         let _ = p.read_struct_begin(|_| ())?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -871,6 +1119,7 @@ where
                 (::fbthrift::TType::Set, 12) => field_terse_set_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Map, 13) => field_terse_map_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 14) => field_terse_struct_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 29) => field_terse_union_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Bool, 15) => field_bool_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Byte, 16) => field_byte_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::I16, 17) => field_short_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
@@ -885,6 +1134,7 @@ where
                 (::fbthrift::TType::Set, 26) => field_set_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Map, 27) => field_map_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 28) => field_struct_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 30) => field_union_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -905,6 +1155,7 @@ where
             terse_set_field: field_terse_set_field.unwrap_or_default(),
             terse_map_field: field_terse_map_field.unwrap_or_default(),
             terse_struct_field: field_terse_struct_field.unwrap_or_default(),
+            terse_union_field: field_terse_union_field.unwrap_or_default(),
             bool_field: field_bool_field.unwrap_or_default(),
             byte_field: field_byte_field.unwrap_or_default(),
             short_field: field_short_field.unwrap_or_default(),
@@ -919,6 +1170,7 @@ where
             set_field: field_set_field.unwrap_or_default(),
             map_field: field_map_field.unwrap_or_default(),
             struct_field: field_struct_field.unwrap_or_default(),
+            union_field: field_union_field.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }

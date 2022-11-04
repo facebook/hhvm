@@ -25,8 +25,60 @@ template <> struct TEnumDataStorage<::facebook::thrift::test::terse_write::MyEnu
   }};
 };
 
+template <> struct TEnumDataStorage<::facebook::thrift::test::terse_write::MyUnion::Type> {
+  using type = ::facebook::thrift::test::terse_write::MyUnion::Type;
+  static constexpr const std::size_t size = 14;
+  static constexpr std::array<type, size> values = {{
+      type::bool_field,
+      type::byte_field,
+      type::short_field,
+      type::int_field,
+      type::long_field,
+      type::float_field,
+      type::double_field,
+      type::string_field,
+      type::binary_field,
+      type::enum_field,
+      type::list_field,
+      type::set_field,
+      type::map_field,
+      type::struct_field,
+  }};
+  static constexpr std::array<folly::StringPiece, size> names = {{
+      "bool_field",
+      "byte_field",
+      "short_field",
+      "int_field",
+      "long_field",
+      "float_field",
+      "double_field",
+      "string_field",
+      "binary_field",
+      "enum_field",
+      "list_field",
+      "set_field",
+      "map_field",
+      "struct_field",
+  }};
+};
+
 template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::MyStruct> {
   static constexpr const std::size_t fields_size = 0;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
+
+ private:
+  // The following fields describe internal storage metadata, and are private to
+  // prevent user logic from accessing them, but they can be inspected by
+  // debuggers.
+  static const std::array<folly::StringPiece, fields_size> storage_names;
+  // -1 if the field has no isset.
+  static const std::array<int, fields_size> isset_indexes;
+};
+
+template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::MyUnion> {
+  static constexpr const std::size_t fields_size = 14;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -56,7 +108,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::MyS
 };
 
 template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::StructLevelTerseStruct> {
-  static constexpr const std::size_t fields_size = 14;
+  static constexpr const std::size_t fields_size = 15;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -71,7 +123,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::Str
 };
 
 template <> struct TStructDataStorage<::facebook::thrift::test::terse_write::FieldLevelTerseStruct> {
-  static constexpr const std::size_t fields_size = 28;
+  static constexpr const std::size_t fields_size = 30;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

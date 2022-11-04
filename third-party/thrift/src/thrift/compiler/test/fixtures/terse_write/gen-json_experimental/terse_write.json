@@ -11,7 +11,7 @@
         "name": "MyInteger",
         "type": "i32",
         "is_exception": false,
-        "lineno": 118
+        "lineno": 139
       }
   },
   "enumerations" :
@@ -41,6 +41,128 @@
         "is_union" : false,
         "lineno" : 28
       },
+      "MyUnion" : {
+        "name" : "MyUnion",
+        "fields" : {
+          "bool_field" : {
+            "name" : "bool_field",
+            "key" : 1,
+            "lineno" : 31,
+            "required" : "opt-in-req-out",
+            "type" : "bool"
+                  },
+          "byte_field" : {
+            "name" : "byte_field",
+            "key" : 2,
+            "lineno" : 32,
+            "required" : "opt-in-req-out",
+            "type" : "byte"
+                  },
+          "short_field" : {
+            "name" : "short_field",
+            "key" : 3,
+            "lineno" : 33,
+            "required" : "opt-in-req-out",
+            "type" : "i16"
+                  },
+          "int_field" : {
+            "name" : "int_field",
+            "key" : 4,
+            "lineno" : 34,
+            "required" : "opt-in-req-out",
+            "type" : "i32"
+                  },
+          "long_field" : {
+            "name" : "long_field",
+            "key" : 5,
+            "lineno" : 35,
+            "required" : "opt-in-req-out",
+            "type" : "i64"
+                  },
+          "float_field" : {
+            "name" : "float_field",
+            "key" : 6,
+            "lineno" : 36,
+            "required" : "opt-in-req-out",
+            "type" : "float"
+                  },
+          "double_field" : {
+            "name" : "double_field",
+            "key" : 7,
+            "lineno" : 37,
+            "required" : "opt-in-req-out",
+            "type" : "double"
+                  },
+          "string_field" : {
+            "name" : "string_field",
+            "key" : 8,
+            "lineno" : 38,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  },
+          "binary_field" : {
+            "name" : "binary_field",
+            "key" : 9,
+            "lineno" : 39,
+            "required" : "opt-in-req-out",
+            "type" : "binary"
+                  },
+          "enum_field" : {
+            "name" : "enum_field",
+            "key" : 10,
+            "lineno" : 40,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "enum",
+  "name" : "MyEnum"
+}
+                  },
+          "list_field" : {
+            "name" : "list_field",
+            "key" : 11,
+            "lineno" : 41,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i16"
+}
+                  },
+          "set_field" : {
+            "name" : "set_field",
+            "key" : 12,
+            "lineno" : 42,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "set",
+  "inner_type" : "i16"
+}
+                  },
+          "map_field" : {
+            "name" : "map_field",
+            "key" : 13,
+            "lineno" : 43,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "map",
+  "key_type" : "i16",
+  "value_type" : "i16"
+}
+                  },
+          "struct_field" : {
+            "name" : "struct_field",
+            "key" : 14,
+            "lineno" : 44,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "MyStruct"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : true,
+        "lineno" : 30
+      },
       "MyStructWithCustomDefault" : {
         "name" : "MyStructWithCustomDefault",
         "fields" : {
@@ -48,14 +170,14 @@
             "name" : "field1",
             "default_value" : 1,
             "key" : 1,
-            "lineno" : 31,
+            "lineno" : 48,
             "required" : "opt-in-req-out",
             "type" : "i64"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 30
+        "lineno" : 47
       },
       "StructLevelTerseStruct" : {
         "name" : "StructLevelTerseStruct",
@@ -73,61 +195,61 @@
           "bool_field" : {
             "name" : "bool_field",
             "key" : 1,
-            "lineno" : 36,
+            "lineno" : 53,
             "type" : "bool"
                   },
           "byte_field" : {
             "name" : "byte_field",
             "key" : 2,
-            "lineno" : 37,
+            "lineno" : 54,
             "type" : "byte"
                   },
           "short_field" : {
             "name" : "short_field",
             "key" : 3,
-            "lineno" : 38,
+            "lineno" : 55,
             "type" : "i16"
                   },
           "int_field" : {
             "name" : "int_field",
             "key" : 4,
-            "lineno" : 39,
+            "lineno" : 56,
             "type" : "i32"
                   },
           "long_field" : {
             "name" : "long_field",
             "key" : 5,
-            "lineno" : 40,
+            "lineno" : 57,
             "type" : "i64"
                   },
           "float_field" : {
             "name" : "float_field",
             "key" : 6,
-            "lineno" : 41,
+            "lineno" : 58,
             "type" : "float"
                   },
           "double_field" : {
             "name" : "double_field",
             "key" : 7,
-            "lineno" : 42,
+            "lineno" : 59,
             "type" : "double"
                   },
           "string_field" : {
             "name" : "string_field",
             "key" : 8,
-            "lineno" : 43,
+            "lineno" : 60,
             "type" : "string"
                   },
           "binary_field" : {
             "name" : "binary_field",
             "key" : 9,
-            "lineno" : 44,
+            "lineno" : 61,
             "type" : "binary"
                   },
           "enum_field" : {
             "name" : "enum_field",
             "key" : 10,
-            "lineno" : 45,
+            "lineno" : 62,
             "type" : {
   "type" : "enum",
   "name" : "MyEnum"
@@ -136,7 +258,7 @@
           "list_field" : {
             "name" : "list_field",
             "key" : 11,
-            "lineno" : 46,
+            "lineno" : 63,
             "type" : {
   "type" : "list",
   "inner_type" : "i16"
@@ -145,7 +267,7 @@
           "set_field" : {
             "name" : "set_field",
             "key" : 12,
-            "lineno" : 47,
+            "lineno" : 64,
             "type" : {
   "type" : "set",
   "inner_type" : "i16"
@@ -154,7 +276,7 @@
           "map_field" : {
             "name" : "map_field",
             "key" : 13,
-            "lineno" : 48,
+            "lineno" : 65,
             "type" : {
   "type" : "map",
   "key_type" : "i16",
@@ -164,16 +286,25 @@
           "struct_field" : {
             "name" : "struct_field",
             "key" : 14,
-            "lineno" : 49,
+            "lineno" : 66,
             "type" : {
   "type" : "struct",
   "name" : "MyStruct"
+}
+                  },
+          "union_field" : {
+            "name" : "union_field",
+            "key" : 15,
+            "lineno" : 67,
+            "type" : {
+  "type" : "struct",
+  "name" : "MyUnion"
 }
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 34
+        "lineno" : 51
       },
       "FieldLevelTerseStruct" : {
         "name" : "FieldLevelTerseStruct",
@@ -181,7 +312,7 @@
           "terse_bool_field" : {
             "name" : "terse_bool_field",
             "key" : 1,
-            "lineno" : 54,
+            "lineno" : 72,
             "type" : "bool"
             ,
             "structured_annotations": {
@@ -198,7 +329,7 @@
           "terse_byte_field" : {
             "name" : "terse_byte_field",
             "key" : 2,
-            "lineno" : 56,
+            "lineno" : 74,
             "type" : "byte"
             ,
             "structured_annotations": {
@@ -215,7 +346,7 @@
           "terse_short_field" : {
             "name" : "terse_short_field",
             "key" : 3,
-            "lineno" : 58,
+            "lineno" : 76,
             "type" : "i16"
             ,
             "structured_annotations": {
@@ -232,7 +363,7 @@
           "terse_int_field" : {
             "name" : "terse_int_field",
             "key" : 4,
-            "lineno" : 60,
+            "lineno" : 78,
             "type" : "i32"
             ,
             "structured_annotations": {
@@ -249,7 +380,7 @@
           "terse_long_field" : {
             "name" : "terse_long_field",
             "key" : 5,
-            "lineno" : 62,
+            "lineno" : 80,
             "type" : "i64"
             ,
             "structured_annotations": {
@@ -266,7 +397,7 @@
           "terse_float_field" : {
             "name" : "terse_float_field",
             "key" : 6,
-            "lineno" : 64,
+            "lineno" : 82,
             "type" : "float"
             ,
             "structured_annotations": {
@@ -283,7 +414,7 @@
           "terse_double_field" : {
             "name" : "terse_double_field",
             "key" : 7,
-            "lineno" : 66,
+            "lineno" : 84,
             "type" : "double"
             ,
             "structured_annotations": {
@@ -300,7 +431,7 @@
           "terse_string_field" : {
             "name" : "terse_string_field",
             "key" : 8,
-            "lineno" : 68,
+            "lineno" : 86,
             "type" : "string"
             ,
             "structured_annotations": {
@@ -317,7 +448,7 @@
           "terse_binary_field" : {
             "name" : "terse_binary_field",
             "key" : 9,
-            "lineno" : 70,
+            "lineno" : 88,
             "type" : "binary"
             ,
             "structured_annotations": {
@@ -334,7 +465,7 @@
           "terse_enum_field" : {
             "name" : "terse_enum_field",
             "key" : 10,
-            "lineno" : 72,
+            "lineno" : 90,
             "type" : {
   "type" : "enum",
   "name" : "MyEnum"
@@ -354,7 +485,7 @@
           "terse_list_field" : {
             "name" : "terse_list_field",
             "key" : 11,
-            "lineno" : 74,
+            "lineno" : 92,
             "type" : {
   "type" : "list",
   "inner_type" : "i16"
@@ -374,7 +505,7 @@
           "terse_set_field" : {
             "name" : "terse_set_field",
             "key" : 12,
-            "lineno" : 76,
+            "lineno" : 94,
             "type" : {
   "type" : "set",
   "inner_type" : "i16"
@@ -394,7 +525,7 @@
           "terse_map_field" : {
             "name" : "terse_map_field",
             "key" : 13,
-            "lineno" : 78,
+            "lineno" : 96,
             "type" : {
   "type" : "map",
   "key_type" : "i16",
@@ -415,7 +546,7 @@
           "terse_struct_field" : {
             "name" : "terse_struct_field",
             "key" : 14,
-            "lineno" : 80,
+            "lineno" : 98,
             "type" : {
   "type" : "struct",
   "name" : "MyStruct"
@@ -432,73 +563,93 @@
           }
                 }
           },
+          "terse_union_field" : {
+            "name" : "terse_union_field",
+            "key" : 29,
+            "lineno" : 100,
+            "type" : {
+  "type" : "struct",
+  "name" : "MyUnion"
+}
+            ,
+            "structured_annotations": {
+              "thrift.TerseWrite" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "TerseWrite",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : {}
+          }
+                }
+          },
           "bool_field" : {
             "name" : "bool_field",
             "key" : 15,
-            "lineno" : 84,
+            "lineno" : 104,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   },
           "byte_field" : {
             "name" : "byte_field",
             "key" : 16,
-            "lineno" : 85,
+            "lineno" : 105,
             "required" : "opt-in-req-out",
             "type" : "byte"
                   },
           "short_field" : {
             "name" : "short_field",
             "key" : 17,
-            "lineno" : 86,
+            "lineno" : 106,
             "required" : "opt-in-req-out",
             "type" : "i16"
                   },
           "int_field" : {
             "name" : "int_field",
             "key" : 18,
-            "lineno" : 87,
+            "lineno" : 107,
             "required" : "opt-in-req-out",
             "type" : "i32"
                   },
           "long_field" : {
             "name" : "long_field",
             "key" : 19,
-            "lineno" : 88,
+            "lineno" : 108,
             "required" : "opt-in-req-out",
             "type" : "i64"
                   },
           "float_field" : {
             "name" : "float_field",
             "key" : 20,
-            "lineno" : 89,
+            "lineno" : 109,
             "required" : "opt-in-req-out",
             "type" : "float"
                   },
           "double_field" : {
             "name" : "double_field",
             "key" : 21,
-            "lineno" : 90,
+            "lineno" : 110,
             "required" : "opt-in-req-out",
             "type" : "double"
                   },
           "string_field" : {
             "name" : "string_field",
             "key" : 22,
-            "lineno" : 91,
+            "lineno" : 111,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "binary_field" : {
             "name" : "binary_field",
             "key" : 23,
-            "lineno" : 92,
+            "lineno" : 112,
             "required" : "opt-in-req-out",
             "type" : "binary"
                   },
           "enum_field" : {
             "name" : "enum_field",
             "key" : 24,
-            "lineno" : 93,
+            "lineno" : 113,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -508,7 +659,7 @@
           "list_field" : {
             "name" : "list_field",
             "key" : 25,
-            "lineno" : 94,
+            "lineno" : 114,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
@@ -518,7 +669,7 @@
           "set_field" : {
             "name" : "set_field",
             "key" : 26,
-            "lineno" : 95,
+            "lineno" : 115,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "set",
@@ -528,7 +679,7 @@
           "map_field" : {
             "name" : "map_field",
             "key" : 27,
-            "lineno" : 96,
+            "lineno" : 116,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
@@ -539,17 +690,27 @@
           "struct_field" : {
             "name" : "struct_field",
             "key" : 28,
-            "lineno" : 97,
+            "lineno" : 117,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyStruct"
 }
+                  },
+          "union_field" : {
+            "name" : "union_field",
+            "key" : 30,
+            "lineno" : 118,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "MyUnion"
+}
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 52
+        "lineno" : 70
       },
       "TerseStructWithCustomDefault" : {
         "name" : "TerseStructWithCustomDefault",
@@ -568,70 +729,70 @@
             "name" : "bool_field",
             "default_value" : 1,
             "key" : 1,
-            "lineno" : 102,
+            "lineno" : 123,
             "type" : "bool"
                   },
           "byte_field" : {
             "name" : "byte_field",
             "default_value" : 1,
             "key" : 2,
-            "lineno" : 103,
+            "lineno" : 124,
             "type" : "byte"
                   },
           "short_field" : {
             "name" : "short_field",
             "default_value" : 2,
             "key" : 3,
-            "lineno" : 104,
+            "lineno" : 125,
             "type" : "i16"
                   },
           "int_field" : {
             "name" : "int_field",
             "default_value" : 3,
             "key" : 4,
-            "lineno" : 105,
+            "lineno" : 126,
             "type" : "i32"
                   },
           "long_field" : {
             "name" : "long_field",
             "default_value" : 4,
             "key" : 5,
-            "lineno" : 106,
+            "lineno" : 127,
             "type" : "i64"
                   },
           "float_field" : {
             "name" : "float_field",
             "default_value" : 5,
             "key" : 6,
-            "lineno" : 107,
+            "lineno" : 128,
             "type" : "float"
                   },
           "double_field" : {
             "name" : "double_field",
             "default_value" : 6,
             "key" : 7,
-            "lineno" : 108,
+            "lineno" : 129,
             "type" : "double"
                   },
           "string_field" : {
             "name" : "string_field",
             "default_value" : "7",
             "key" : 8,
-            "lineno" : 109,
+            "lineno" : 130,
             "type" : "string"
                   },
           "binary_field" : {
             "name" : "binary_field",
             "default_value" : "8",
             "key" : 9,
-            "lineno" : 110,
+            "lineno" : 131,
             "type" : "binary"
                   },
           "enum_field" : {
             "name" : "enum_field",
             "default_value" : 1,
             "key" : 10,
-            "lineno" : 111,
+            "lineno" : 132,
             "type" : {
   "type" : "enum",
   "name" : "MyEnum"
@@ -641,7 +802,7 @@
             "name" : "list_field",
             "default_value" : [1],
             "key" : 11,
-            "lineno" : 112,
+            "lineno" : 133,
             "type" : {
   "type" : "list",
   "inner_type" : "i16"
@@ -651,7 +812,7 @@
             "name" : "set_field",
             "default_value" : [1],
             "key" : 12,
-            "lineno" : 113,
+            "lineno" : 134,
             "type" : {
   "type" : "set",
   "inner_type" : "i16"
@@ -661,7 +822,7 @@
             "name" : "map_field",
             "default_value" : {"1" : 1},
             "key" : 13,
-            "lineno" : 114,
+            "lineno" : 135,
             "type" : {
   "type" : "map",
   "key_type" : "i16",
@@ -671,7 +832,7 @@
           "struct_field" : {
             "name" : "struct_field",
             "key" : 14,
-            "lineno" : 115,
+            "lineno" : 136,
             "type" : {
   "type" : "struct",
   "name" : "MyStructWithCustomDefault"
@@ -680,7 +841,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 100
+        "lineno" : 121
       },
       "AdaptedFields" : {
         "name" : "AdaptedFields",
@@ -698,13 +859,13 @@
           "field1" : {
             "name" : "field1",
             "key" : 1,
-            "lineno" : 124,
+            "lineno" : 145,
             "type" : "i32"
                   },
           "field2" : {
             "name" : "field2",
             "key" : 2,
-            "lineno" : 125,
+            "lineno" : 146,
             "type" : "i32"
             ,
             "structured_annotations": {
@@ -729,7 +890,7 @@
           "field3" : {
             "name" : "field3",
             "key" : 3,
-            "lineno" : 128,
+            "lineno" : 149,
             "type" : "i32"
             ,
             "structured_annotations": {
@@ -746,7 +907,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 122
+        "lineno" : 143
       },
       "WrappedFields" : {
         "name" : "WrappedFields",
@@ -765,7 +926,7 @@
             "name" : "field1",
             "default_value" : 7,
             "key" : 1,
-            "lineno" : 134,
+            "lineno" : 155,
             "type" : "i32"
             ,
             "structured_annotations": {
@@ -782,7 +943,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 132
+        "lineno" : 153
       },
       "TerseException" : {
         "name" : "TerseException",
@@ -800,13 +961,13 @@
           "msg" : {
             "name" : "msg",
             "key" : 1,
-            "lineno" : 140,
+            "lineno" : 161,
             "type" : "string"
                   }
         },
         "is_exception" : true,
         "is_union" : false,
-        "lineno" : 138
+        "lineno" : 159
       }
       },
   "source_path" : "thrift/compiler/test/fixtures/terse_write/src/terse_write",

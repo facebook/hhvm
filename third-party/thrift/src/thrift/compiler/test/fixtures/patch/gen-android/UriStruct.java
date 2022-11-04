@@ -22,9 +22,11 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 /**
- * The 'parsed' form of a `Uri`.
+ * A decoded URI.
  * 
  *   {scheme}://{domain}/{path}?{query}#{fragment}
+ * 
+ * @see Uri For the encoded version.
  */
 @SuppressWarnings({ "unused", "serial" })
 public class UriStruct implements TBase, java.io.Serializable, Cloneable {

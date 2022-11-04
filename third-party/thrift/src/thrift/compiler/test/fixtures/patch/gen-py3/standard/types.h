@@ -31,6 +31,17 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 template<>
 const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
+    ::apache::thrift::type::JsonType>::namesmap() {
+  static const folly::Indestructible<NamesMap> pairs {
+    {
+    }
+  };
+  return *pairs;
+}
+
+
+template<>
+const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
     ::apache::thrift::type::StandardProtocol>::namesmap() {
   static const folly::Indestructible<NamesMap> pairs {
     {

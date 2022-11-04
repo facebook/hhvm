@@ -193,7 +193,7 @@ typedef list<string> DomainLabels
 typedef string QueryString
 
 /**
- * A parsed QueryString.
+ * A decoded QueryString.
  *
  * Considered 'simple' if no key or value contains a equal('=') or
  * ampersand('&').
@@ -213,9 +213,11 @@ typedef map<string, string> QueryArgs
 typedef string Uri (thrift.uri = "")
 
 /**
- * The 'parsed' form of a `Uri`.
+ * A decoded URI.
  *
  *   {scheme}://{domain}/{path}?{query}#{fragment}
+ *
+ * @see Uri For the encoded version.
  */
 // TODO(afuller): Add adapters and native classes, e.g. BasicUri, Uri,
 // and UriView, which use std::basic_string, std::string, std::string_view
@@ -237,6 +239,80 @@ struct UriStruct {
   /** The fragment, if present. */
   6: string fragment;
 } (thrift.uri = "facebook.com/thrift/type/Uri")
+
+/** An encoded JSON definition, as defined by https://www.json.org. */
+@thrift.Experimental // TODO(afuller): Adapt!
+typedef string JsonString
+
+/** A decoded JSON definition, as defined by https://www.json.org. */
+@thrift.Experimental // TODO(afuller): Adapt!
+typedef JsonValue Json
+
+/** The types availible in JSON, as defined by https://www.json.org. */
+enum JsonType {
+  Null = 0,
+  Bool = 1,
+  Number = 2,
+  String = 4,
+  Array = 5,
+  Object = 6,
+}
+
+/**
+ * A decoded JSON Value.
+ *
+ * Considered 'normal' if all contained `floatValue` are not representable
+ * losslessly in `intValue`.
+ *
+ * Note: This type is wire compatibile with `dynamic.Dynamic`, for all valid
+ * JSON values.
+ *
+ * @see JsonString For the encoded version.
+ */
+@thrift.Experimental // TODO(afuller): Adapt!
+union JsonValue {
+  /** JSON "true" and "false" values represented as a boolean value. */
+  1: bool boolValue;
+
+  /**
+   * A JSON number represented as an integer value.
+   *
+   * @see #floatValue
+   */
+  2: i64 intValue;
+
+  /**
+   * A floating point approximation of a JSON number.
+   *
+   * JSON does not specify a limit on the range or percision of numbers, so
+   * a 64-bit flating point value is use to approximate any numbers that cannot
+   * be represented losslessly in `intValue`.
+   *
+   * Any `floatValue` that can be represented losslessly in `intValue`, *should*
+   * be stored there.
+   *
+   * @see #intValue
+   */
+  3: double floatValue;
+
+  /** A JSON string value. */
+  4: string stringValue;
+
+  /** A JSON array value. */
+  @thrift.Box
+  5: JsonArray arrayValue;
+
+  /** A JSON object value. */
+  @thrift.Box
+  6: JsonObject objectValue;
+} (cpp.frozen2_exclude, py3.hidden)
+
+/** A decoded JSON object. */
+@thrift.Experimental // TODO(afuller): Adapt!
+typedef map<string, JsonValue> JsonObject (py3.hidden)
+
+/** A decoded JSON array. */
+typedef list<JsonValue> JsonArray (py3.hidden)
 
 /** The uri of an IDL defined type. */
 union TypeUri {

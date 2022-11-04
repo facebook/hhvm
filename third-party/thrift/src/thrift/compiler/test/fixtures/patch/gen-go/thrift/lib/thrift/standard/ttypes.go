@@ -63,6 +63,69 @@ func VoidFromString(s string) (Void, error) {
 
 func VoidPtr(v Void) *Void { return &v }
 
+//The types availible in JSON, as defined by https://www.json.org.
+type JsonType int64
+const (
+  JsonType_Null JsonType = 0
+  JsonType_Bool JsonType = 1
+  JsonType_Number JsonType = 2
+  JsonType_String JsonType = 4
+  JsonType_Array JsonType = 5
+  JsonType_Object JsonType = 6
+)
+
+var JsonTypeToName = map[JsonType]string {
+  JsonType_Null: "Null",
+  JsonType_Bool: "Bool",
+  JsonType_Number: "Number",
+  JsonType_String: "String",
+  JsonType_Array: "Array",
+  JsonType_Object: "Object",
+}
+
+var JsonTypeToValue = map[string]JsonType {
+  "Null": JsonType_Null,
+  "Bool": JsonType_Bool,
+  "Number": JsonType_Number,
+  "String": JsonType_String,
+  "Array": JsonType_Array,
+  "Object": JsonType_Object,
+}
+
+var JsonTypeNames = []string {
+  "Null",
+  "Bool",
+  "Number",
+  "String",
+  "Array",
+  "Object",
+}
+
+var JsonTypeValues = []JsonType {
+  JsonType_Null,
+  JsonType_Bool,
+  JsonType_Number,
+  JsonType_String,
+  JsonType_Array,
+  JsonType_Object,
+}
+
+func (p JsonType) String() string {
+  if v, ok := JsonTypeToName[p]; ok {
+    return v
+  }
+  return "<UNSET>"
+}
+
+func JsonTypeFromString(s string) (JsonType, error) {
+  if v, ok := JsonTypeToValue[s]; ok {
+    return v, nil
+  }
+  return JsonType(0), fmt.Errorf("not a valid JsonType string")
+}
+
+func JsonTypePtr(v JsonType) *JsonType { return &v }
+
 //The standard Thrift protocols.
 type StandardProtocol int64
 const (
@@ -212,7 +275,7 @@ type QueryString = string
 
 func QueryStringPtr(v QueryString) *QueryString { return &v }
 
-//A parsed QueryString.
+//A decoded QueryString.
 //
 //Considered 'simple' if no key or value contains a equal('=') or
 //ampersand('&').
@@ -228,6 +291,28 @@ func QueryArgs_Ptr(v QueryArgs_) *QueryArgs_ { return &v }
 type Uri = string
 
 func UriPtr(v Uri) *Uri { return &v }
+
+//An encoded JSON definition, as defined by https://www.json.org.
+type JsonString = string
+
+func JsonStringPtr(v JsonString) *JsonString { return &v }
+
+//A decoded JSON definition, as defined by https://www.json.org.
+type Json = JsonValue
+
+func JsonPtr(v Json) *Json { return &v }
+
+func NewJson() *Json { return NewJsonValue() }
+
+//A decoded JSON object.
+type JsonObject = map[string]*JsonValue
+
+func JsonObjectPtr(v JsonObject) *JsonObject { return &v }
+
+//A decoded JSON array.
+type JsonArray = []*JsonValue
+
+func JsonArrayPtr(v JsonArray) *JsonArray { return &v }
 
 // A fixed-length span of time, represented as a signed count of seconds and
 // nanoseconds (nanos).
@@ -708,9 +793,11 @@ func (p *FractionStruct) String() string {
   return fmt.Sprintf("FractionStruct({Numerator:%s Denominator:%s})", numeratorVal, denominatorVal)
 }
 
-// The 'parsed' form of a `Uri`.
+// A decoded URI.
 // 
 //   {scheme}://{domain}/{path}?{query}#{fragment}
+// 
+// @see Uri For the encoded version.
 // 
 // Attributes:
 //  - Scheme: The scheme, if present.
@@ -1061,6 +1148,493 @@ func (p *UriStruct) String() string {
   queryVal := fmt.Sprintf("%v", p.Query)
   fragmentVal := fmt.Sprintf("%v", p.Fragment)
   return fmt.Sprintf("UriStruct({Scheme:%s Domain:%s Path:%s Query:%s Fragment:%s})", schemeVal, domainVal, pathVal, queryVal, fragmentVal)
+}
+
+// A decoded JSON Value.
+// 
+// Considered 'normal' if all contained `floatValue` are not representable
+// losslessly in `intValue`.
+// 
+// Note: This type is wire compatibile with `dynamic.Dynamic`, for all valid
+// JSON values.
+// 
+// @see JsonString For the encoded version.
+// 
+// Attributes:
+//  - BoolValue: JSON "true" and "false" values represented as a boolean value.
+//  - IntValue: A JSON number represented as an integer value.
+// 
+// @see #floatValue
+//  - FloatValue: A floating point approximation of a JSON number.
+// 
+// JSON does not specify a limit on the range or percision of numbers, so
+// a 64-bit flating point value is use to approximate any numbers that cannot
+// be represented losslessly in `intValue`.
+// 
+// Any `floatValue` that can be represented losslessly in `intValue`, *should*
+// be stored there.
+// 
+// @see #intValue
+//  - StringValue: A JSON string value.
+//  - ArrayValue: A JSON array value.
+//  - ObjectValue: A JSON object value.
+type JsonValue struct {
+  BoolValue *bool `thrift:"boolValue,1,optional" db:"boolValue" json:"boolValue,omitempty"`
+  IntValue *int64 `thrift:"intValue,2,optional" db:"intValue" json:"intValue,omitempty"`
+  FloatValue *float64 `thrift:"floatValue,3,optional" db:"floatValue" json:"floatValue,omitempty"`
+  StringValue *string `thrift:"stringValue,4,optional" db:"stringValue" json:"stringValue,omitempty"`
+  ArrayValue []*JsonValue `thrift:"arrayValue,5,optional" db:"arrayValue" json:"arrayValue,omitempty"`
+  ObjectValue map[string]*JsonValue `thrift:"objectValue,6,optional" db:"objectValue" json:"objectValue,omitempty"`
+}
+
+func NewJsonValue() *JsonValue {
+  return &JsonValue{}
+}
+
+var JsonValue_BoolValue_DEFAULT bool
+func (p *JsonValue) GetBoolValue() bool {
+  if !p.IsSetBoolValue() {
+    return JsonValue_BoolValue_DEFAULT
+  }
+  return *p.BoolValue
+}
+var JsonValue_IntValue_DEFAULT int64
+func (p *JsonValue) GetIntValue() int64 {
+  if !p.IsSetIntValue() {
+    return JsonValue_IntValue_DEFAULT
+  }
+  return *p.IntValue
+}
+var JsonValue_FloatValue_DEFAULT float64
+func (p *JsonValue) GetFloatValue() float64 {
+  if !p.IsSetFloatValue() {
+    return JsonValue_FloatValue_DEFAULT
+  }
+  return *p.FloatValue
+}
+var JsonValue_StringValue_DEFAULT string
+func (p *JsonValue) GetStringValue() string {
+  if !p.IsSetStringValue() {
+    return JsonValue_StringValue_DEFAULT
+  }
+  return *p.StringValue
+}
+var JsonValue_ArrayValue_DEFAULT []*JsonValue
+
+func (p *JsonValue) GetArrayValue() []*JsonValue {
+  return p.ArrayValue
+}
+var JsonValue_ObjectValue_DEFAULT map[string]*JsonValue
+
+func (p *JsonValue) GetObjectValue() map[string]*JsonValue {
+  return p.ObjectValue
+}
+func (p *JsonValue) CountSetFieldsJsonValue() int {
+  count := 0
+  if (p.IsSetBoolValue()) {
+    count++
+  }
+  if (p.IsSetIntValue()) {
+    count++
+  }
+  if (p.IsSetFloatValue()) {
+    count++
+  }
+  if (p.IsSetStringValue()) {
+    count++
+  }
+  if (p.IsSetArrayValue()) {
+    count++
+  }
+  if (p.IsSetObjectValue()) {
+    count++
+  }
+  return count
+
+}
+
+func (p *JsonValue) IsSetBoolValue() bool {
+  return p != nil && p.BoolValue != nil
+}
+
+func (p *JsonValue) IsSetIntValue() bool {
+  return p != nil && p.IntValue != nil
+}
+
+func (p *JsonValue) IsSetFloatValue() bool {
+  return p != nil && p.FloatValue != nil
+}
+
+func (p *JsonValue) IsSetStringValue() bool {
+  return p != nil && p.StringValue != nil
+}
+
+func (p *JsonValue) IsSetArrayValue() bool {
+  return p != nil && p.ArrayValue != nil
+}
+
+func (p *JsonValue) IsSetObjectValue() bool {
+  return p != nil && p.ObjectValue != nil
+}
+
+type JsonValueBuilder struct {
+  obj *JsonValue
+}
+
+func NewJsonValueBuilder() *JsonValueBuilder{
+  return &JsonValueBuilder{
+    obj: NewJsonValue(),
+  }
+}
+
+func (p JsonValueBuilder) Emit() *JsonValue{
+  return &JsonValue{
+    BoolValue: p.obj.BoolValue,
+    IntValue: p.obj.IntValue,
+    FloatValue: p.obj.FloatValue,
+    StringValue: p.obj.StringValue,
+    ArrayValue: p.obj.ArrayValue,
+    ObjectValue: p.obj.ObjectValue,
+  }
+}
+
+func (j *JsonValueBuilder) BoolValue(boolValue *bool) *JsonValueBuilder {
+  j.obj.BoolValue = boolValue
+  return j
+}
+
+func (j *JsonValueBuilder) IntValue(intValue *int64) *JsonValueBuilder {
+  j.obj.IntValue = intValue
+  return j
+}
+
+func (j *JsonValueBuilder) FloatValue(floatValue *float64) *JsonValueBuilder {
+  j.obj.FloatValue = floatValue
+  return j
+}
+
+func (j *JsonValueBuilder) StringValue(stringValue *string) *JsonValueBuilder {
+  j.obj.StringValue = stringValue
+  return j
+}
+
+func (j *JsonValueBuilder) ArrayValue(arrayValue []*JsonValue) *JsonValueBuilder {
+  j.obj.ArrayValue = arrayValue
+  return j
+}
+
+func (j *JsonValueBuilder) ObjectValue(objectValue map[string]*JsonValue) *JsonValueBuilder {
+  j.obj.ObjectValue = objectValue
+  return j
+}
+
+func (j *JsonValue) SetBoolValue(boolValue *bool) *JsonValue {
+  j.BoolValue = boolValue
+  return j
+}
+
+func (j *JsonValue) SetIntValue(intValue *int64) *JsonValue {
+  j.IntValue = intValue
+  return j
+}
+
+func (j *JsonValue) SetFloatValue(floatValue *float64) *JsonValue {
+  j.FloatValue = floatValue
+  return j
+}
+
+func (j *JsonValue) SetStringValue(stringValue *string) *JsonValue {
+  j.StringValue = stringValue
+  return j
+}
+
+func (j *JsonValue) SetArrayValue(arrayValue []*JsonValue) *JsonValue {
+  j.ArrayValue = arrayValue
+  return j
+}
+
+func (j *JsonValue) SetObjectValue(objectValue map[string]*JsonValue) *JsonValue {
+  j.ObjectValue = objectValue
+  return j
+}
+
+func (p *JsonValue) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    case 3:
+      if err := p.ReadField3(iprot); err != nil {
+        return err
+      }
+    case 4:
+      if err := p.ReadField4(iprot); err != nil {
+        return err
+      }
+    case 5:
+      if err := p.ReadField5(iprot); err != nil {
+        return err
+      }
+    case 6:
+      if err := p.ReadField6(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *JsonValue)  ReadField1(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadBool(); err != nil {
+    return thrift.PrependError("error reading field 1: ", err)
+  } else {
+    p.BoolValue = &v
+  }
+  return nil
+}
+
+func (p *JsonValue)  ReadField2(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI64(); err != nil {
+    return thrift.PrependError("error reading field 2: ", err)
+  } else {
+    p.IntValue = &v
+  }
+  return nil
+}
+
+func (p *JsonValue)  ReadField3(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadDouble(); err != nil {
+    return thrift.PrependError("error reading field 3: ", err)
+  } else {
+    p.FloatValue = &v
+  }
+  return nil
+}
+
+func (p *JsonValue)  ReadField4(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadString(); err != nil {
+    return thrift.PrependError("error reading field 4: ", err)
+  } else {
+    p.StringValue = &v
+  }
+  return nil
+}
+
+func (p *JsonValue)  ReadField5(iprot thrift.Protocol) error {
+  _, size, err := iprot.ReadListBegin()
+  if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+  }
+  tSlice := make([]*JsonValue, 0, size)
+  p.ArrayValue =  tSlice
+  for i := 0; i < size; i ++ {
+    _elem6 := NewJsonValue()
+    if err := _elem6.Read(iprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem6), err)
+    }
+    p.ArrayValue = append(p.ArrayValue, _elem6)
+  }
+  if err := iprot.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+  }
+  return nil
+}
+
+func (p *JsonValue)  ReadField6(iprot thrift.Protocol) error {
+  _, _, size, err := iprot.ReadMapBegin()
+  if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+  }
+  tMap := make(map[string]*JsonValue, size)
+  p.ObjectValue =  tMap
+  for i := 0; i < size; i ++ {
+    var _key7 string
+    if v, err := iprot.ReadString(); err != nil {
+      return thrift.PrependError("error reading field 0: ", err)
+    } else {
+      _key7 = v
+    }
+    _val8 := NewJsonValue()
+    if err := _val8.Read(iprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _val8), err)
+    }
+    p.ObjectValue[_key7] = _val8
+  }
+  if err := iprot.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+  }
+  return nil
+}
+
+func (p *JsonValue) Write(oprot thrift.Protocol) error {
+  if c := p.CountSetFieldsJsonValue(); c > 1 {
+    return fmt.Errorf("%T write union: no more than one field must be set (%d set).", p, c)
+  }
+  if err := oprot.WriteStructBegin("JsonValue"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
+  if err := p.writeField3(oprot); err != nil { return err }
+  if err := p.writeField4(oprot); err != nil { return err }
+  if err := p.writeField5(oprot); err != nil { return err }
+  if err := p.writeField6(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *JsonValue) writeField1(oprot thrift.Protocol) (err error) {
+  if p.IsSetBoolValue() {
+    if err := oprot.WriteFieldBegin("boolValue", thrift.BOOL, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:boolValue: ", p), err) }
+    if err := oprot.WriteBool(bool(*p.BoolValue)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.boolValue (1) field write error: ", p), err) }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:boolValue: ", p), err) }
+  }
+  return err
+}
+
+func (p *JsonValue) writeField2(oprot thrift.Protocol) (err error) {
+  if p.IsSetIntValue() {
+    if err := oprot.WriteFieldBegin("intValue", thrift.I64, 2); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:intValue: ", p), err) }
+    if err := oprot.WriteI64(int64(*p.IntValue)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.intValue (2) field write error: ", p), err) }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 2:intValue: ", p), err) }
+  }
+  return err
+}
+
+func (p *JsonValue) writeField3(oprot thrift.Protocol) (err error) {
+  if p.IsSetFloatValue() {
+    if err := oprot.WriteFieldBegin("floatValue", thrift.DOUBLE, 3); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:floatValue: ", p), err) }
+    if err := oprot.WriteDouble(float64(*p.FloatValue)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.floatValue (3) field write error: ", p), err) }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 3:floatValue: ", p), err) }
+  }
+  return err
+}
+
+func (p *JsonValue) writeField4(oprot thrift.Protocol) (err error) {
+  if p.IsSetStringValue() {
+    if err := oprot.WriteFieldBegin("stringValue", thrift.STRING, 4); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 4:stringValue: ", p), err) }
+    if err := oprot.WriteString(string(*p.StringValue)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.stringValue (4) field write error: ", p), err) }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 4:stringValue: ", p), err) }
+  }
+  return err
+}
+
+func (p *JsonValue) writeField5(oprot thrift.Protocol) (err error) {
+  if p.IsSetArrayValue() {
+    if err := oprot.WriteFieldBegin("arrayValue", thrift.LIST, 5); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 5:arrayValue: ", p), err) }
+    if err := oprot.WriteListBegin(thrift.STRUCT, len(p.ArrayValue)); err != nil {
+      return thrift.PrependError("error writing list begin: ", err)
+    }
+    for _, v := range p.ArrayValue {
+      if err := v.Write(oprot); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", v), err)
+      }
+    }
+    if err := oprot.WriteListEnd(); err != nil {
+      return thrift.PrependError("error writing list end: ", err)
+    }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 5:arrayValue: ", p), err) }
+  }
+  return err
+}
+
+func (p *JsonValue) writeField6(oprot thrift.Protocol) (err error) {
+  if p.IsSetObjectValue() {
+    if err := oprot.WriteFieldBegin("objectValue", thrift.MAP, 6); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 6:objectValue: ", p), err) }
+    if err := oprot.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(p.ObjectValue)); err != nil {
+      return thrift.PrependError("error writing map begin: ", err)
+    }
+    for k, v := range p.ObjectValue {
+      if err := oprot.WriteString(string(k)); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err) }
+      if err := v.Write(oprot); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", v), err)
+      }
+    }
+    if err := oprot.WriteMapEnd(); err != nil {
+      return thrift.PrependError("error writing map end: ", err)
+    }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 6:objectValue: ", p), err) }
+  }
+  return err
+}
+
+func (p *JsonValue) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  var boolValueVal string
+  if p.BoolValue == nil {
+    boolValueVal = "<nil>"
+  } else {
+    boolValueVal = fmt.Sprintf("%v", *p.BoolValue)
+  }
+  var intValueVal string
+  if p.IntValue == nil {
+    intValueVal = "<nil>"
+  } else {
+    intValueVal = fmt.Sprintf("%v", *p.IntValue)
+  }
+  var floatValueVal string
+  if p.FloatValue == nil {
+    floatValueVal = "<nil>"
+  } else {
+    floatValueVal = fmt.Sprintf("%v", *p.FloatValue)
+  }
+  var stringValueVal string
+  if p.StringValue == nil {
+    stringValueVal = "<nil>"
+  } else {
+    stringValueVal = fmt.Sprintf("%v", *p.StringValue)
+  }
+  arrayValueVal := fmt.Sprintf("%v", p.ArrayValue)
+  objectValueVal := fmt.Sprintf("%v", p.ObjectValue)
+  return fmt.Sprintf("JsonValue({BoolValue:%s IntValue:%s FloatValue:%s StringValue:%s ArrayValue:%s ObjectValue:%s})", boolValueVal, intValueVal, floatValueVal, stringValueVal, arrayValueVal, objectValueVal)
 }
 
 // The uri of an IDL defined type.

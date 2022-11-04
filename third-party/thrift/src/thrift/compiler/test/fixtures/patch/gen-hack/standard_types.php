@@ -37,6 +37,48 @@ class apache_thrift_type_standard_Void_TEnumStaticMetadata implements \IThriftEn
 }
 
 /**
+ * The types availible in JSON, as defined by https://www.json.org.
+ * 
+ * Original thrift enum:-
+ * JsonType
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/JsonType'))>>
+enum apache_thrift_type_standard_JsonType: int {
+  Null = 0;
+  Bool = 1;
+  Number = 2;
+  String = 4;
+  Array = 5;
+  Object = 6;
+}
+
+class apache_thrift_type_standard_JsonType_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
+  public static function getEnumMetadata()[]: \tmeta_ThriftEnum {
+    return tmeta_ThriftEnum::fromShape(
+      shape(
+        "name" => "standard.JsonType",
+        "elements" => dict[
+          0 => "Null",
+          1 => "Bool",
+          2 => "Number",
+          4 => "String",
+          5 => "Array",
+          6 => "Object",
+        ],
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
+    return shape(
+      'enum' => dict[],
+      'constants' => dict[
+      ],
+    );
+  }
+}
+
+/**
  * The standard Thrift protocols.
  * 
  * Original thrift enum:-
@@ -548,9 +590,11 @@ class apache_thrift_type_standard_FractionStruct implements \IThriftSyncStruct, 
 }
 
 /**
- * The 'parsed' form of a `Uri`.
+ * A decoded URI.
  * 
  *   {scheme}://{domain}/{path}?{query}#{fragment}
+ * 
+ * @see Uri For the encoded version.
  *
  * Original thrift struct:-
  * UriStruct
@@ -917,6 +961,634 @@ class apache_thrift_type_standard_UriStruct implements \IThriftSyncStruct, \IThr
     }
     if (idx($parsed, 'fragment') !== null) {
       $this->fragment = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['fragment']);
+    }
+  }
+
+}
+
+enum apache_thrift_type_standard_JsonValueEnum: int {
+  _EMPTY_ = 0;
+  boolValue = 1;
+  intValue = 2;
+  floatValue = 3;
+  stringValue = 4;
+  arrayValue = 5;
+  objectValue = 6;
+}
+
+/**
+ * A decoded JSON Value.
+ * 
+ * Considered 'normal' if all contained `floatValue` are not representable
+ * losslessly in `intValue`.
+ * 
+ * Note: This type is wire compatibile with `dynamic.Dynamic`, for all valid
+ * JSON values.
+ * 
+ * @see JsonString For the encoded version.
+ *
+ * Original thrift struct:-
+ * JsonValue
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/JsonValue'))>>
+class apache_thrift_type_standard_JsonValue implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<apache_thrift_type_standard_JsonValueEnum>, \IThriftShapishSyncStruct {
+  use \ThriftUnionSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'boolValue',
+      'union' => true,
+      'type' => \TType::BOOL,
+    ),
+    2 => shape(
+      'var' => 'intValue',
+      'union' => true,
+      'type' => \TType::I64,
+    ),
+    3 => shape(
+      'var' => 'floatValue',
+      'union' => true,
+      'type' => \TType::DOUBLE,
+    ),
+    4 => shape(
+      'var' => 'stringValue',
+      'union' => true,
+      'type' => \TType::STRING,
+    ),
+    5 => shape(
+      'var' => 'arrayValue',
+      'union' => true,
+      'type' => \TType::LST,
+      'etype' => \TType::STRUCT,
+      'elem' => shape(
+        'type' => \TType::STRUCT,
+        'class' => apache_thrift_type_standard_JsonValue::class,
+      ),
+      'format' => 'collection',
+    ),
+    6 => shape(
+      'var' => 'objectValue',
+      'union' => true,
+      'type' => \TType::MAP,
+      'ktype' => \TType::STRING,
+      'vtype' => \TType::STRUCT,
+      'key' => shape(
+        'type' => \TType::STRING,
+      ),
+      'val' => shape(
+        'type' => \TType::STRUCT,
+        'class' => apache_thrift_type_standard_JsonValue::class,
+      ),
+      'format' => 'collection',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'boolValue' => 1,
+    'intValue' => 2,
+    'floatValue' => 3,
+    'stringValue' => 4,
+    'arrayValue' => 5,
+    'objectValue' => 6,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'boolValue' => ?bool,
+    ?'intValue' => ?int,
+    ?'floatValue' => ?float,
+    ?'stringValue' => ?string,
+    ?'arrayValue' => ?Vector<apache_thrift_type_standard_JsonValue>,
+    ?'objectValue' => ?Map<string, apache_thrift_type_standard_JsonValue>,
+  );
+
+  const type TShape = shape(
+    ?'boolValue' => ?bool,
+    ?'intValue' => ?int,
+    ?'floatValue' => ?float,
+    ?'stringValue' => ?string,
+    ?'arrayValue' => ?vec<apache_thrift_type_standard_JsonValue::TShape>,
+    ?'objectValue' => ?dict<string, apache_thrift_type_standard_JsonValue::TShape>,
+    ...
+  );
+  const int STRUCTURAL_ID = 6265749941402743957;
+  /**
+   * JSON "true" and "false" values represented as a boolean value.
+   * 
+   * Original thrift field:-
+   * 1: bool boolValue
+   */
+  public ?bool $boolValue;
+  /**
+   * A JSON number represented as an integer value.
+   * 
+   * @see #floatValue
+   * 
+   * Original thrift field:-
+   * 2: i64 intValue
+   */
+  public ?int $intValue;
+  /**
+   * A floating point approximation of a JSON number.
+   * 
+   * JSON does not specify a limit on the range or percision of numbers, so
+   * a 64-bit flating point value is use to approximate any numbers that cannot
+   * be represented losslessly in `intValue`.
+   * 
+   * Any `floatValue` that can be represented losslessly in `intValue`, *should*
+   * be stored there.
+   * 
+   * @see #intValue
+   * 
+   * Original thrift field:-
+   * 3: double floatValue
+   */
+  public ?float $floatValue;
+  /**
+   * A JSON string value.
+   * 
+   * Original thrift field:-
+   * 4: string stringValue
+   */
+  public ?string $stringValue;
+  /**
+   * A JSON array value.
+   * 
+   * Original thrift field:-
+   * 5: list<struct standard.JsonValue> arrayValue
+   */
+  public ?Vector<apache_thrift_type_standard_JsonValue> $arrayValue;
+  /**
+   * A JSON object value.
+   * 
+   * Original thrift field:-
+   * 6: map<string, struct standard.JsonValue> objectValue
+   */
+  public ?Map<string, apache_thrift_type_standard_JsonValue> $objectValue;
+  protected apache_thrift_type_standard_JsonValueEnum $_type = apache_thrift_type_standard_JsonValueEnum::_EMPTY_;
+
+  public function __construct(?bool $boolValue = null, ?int $intValue = null, ?float $floatValue = null, ?string $stringValue = null, ?Vector<apache_thrift_type_standard_JsonValue> $arrayValue = null, ?Map<string, apache_thrift_type_standard_JsonValue> $objectValue = null)[] {
+    $this->_type = apache_thrift_type_standard_JsonValueEnum::_EMPTY_;
+    if ($boolValue !== null) {
+      $this->boolValue = $boolValue;
+      $this->_type = apache_thrift_type_standard_JsonValueEnum::boolValue;
+    }
+    if ($intValue !== null) {
+      $this->intValue = $intValue;
+      $this->_type = apache_thrift_type_standard_JsonValueEnum::intValue;
+    }
+    if ($floatValue !== null) {
+      $this->floatValue = $floatValue;
+      $this->_type = apache_thrift_type_standard_JsonValueEnum::floatValue;
+    }
+    if ($stringValue !== null) {
+      $this->stringValue = $stringValue;
+      $this->_type = apache_thrift_type_standard_JsonValueEnum::stringValue;
+    }
+    if ($arrayValue !== null) {
+      $this->arrayValue = $arrayValue;
+      $this->_type = apache_thrift_type_standard_JsonValueEnum::arrayValue;
+    }
+    if ($objectValue !== null) {
+      $this->objectValue = $objectValue;
+      $this->_type = apache_thrift_type_standard_JsonValueEnum::objectValue;
+    }
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'boolValue'),
+      Shapes::idx($shape, 'intValue'),
+      Shapes::idx($shape, 'floatValue'),
+      Shapes::idx($shape, 'stringValue'),
+      Shapes::idx($shape, 'arrayValue'),
+      Shapes::idx($shape, 'objectValue'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'JsonValue';
+  }
+
+  public function getType()[]: apache_thrift_type_standard_JsonValueEnum {
+    return $this->_type;
+  }
+
+  public function reset()[write_props]: void {
+    switch ($this->_type) {
+      case apache_thrift_type_standard_JsonValueEnum::boolValue:
+        $this->boolValue = null;
+        break;
+      case apache_thrift_type_standard_JsonValueEnum::intValue:
+        $this->intValue = null;
+        break;
+      case apache_thrift_type_standard_JsonValueEnum::floatValue:
+        $this->floatValue = null;
+        break;
+      case apache_thrift_type_standard_JsonValueEnum::stringValue:
+        $this->stringValue = null;
+        break;
+      case apache_thrift_type_standard_JsonValueEnum::arrayValue:
+        $this->arrayValue = null;
+        break;
+      case apache_thrift_type_standard_JsonValueEnum::objectValue:
+        $this->objectValue = null;
+        break;
+      case apache_thrift_type_standard_JsonValueEnum::_EMPTY_:
+        break;
+    }
+    $this->_type = apache_thrift_type_standard_JsonValueEnum::_EMPTY_;
+  }
+
+  public function set_boolValue(bool $boolValue)[write_props]: this {
+    $this->reset();
+    $this->_type = apache_thrift_type_standard_JsonValueEnum::boolValue;
+    $this->boolValue = $boolValue;
+    return $this;
+  }
+
+  public function get_boolValue()[]: ?bool {
+    return $this->boolValue;
+  }
+
+  public function getx_boolValue()[]: bool {
+    invariant(
+      $this->_type === apache_thrift_type_standard_JsonValueEnum::boolValue,
+      'get_boolValue called on an instance of JsonValue whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->boolValue as nonnull;
+  }
+
+  public function set_intValue(int $intValue)[write_props]: this {
+    $this->reset();
+    $this->_type = apache_thrift_type_standard_JsonValueEnum::intValue;
+    $this->intValue = $intValue;
+    return $this;
+  }
+
+  public function get_intValue()[]: ?int {
+    return $this->intValue;
+  }
+
+  public function getx_intValue()[]: int {
+    invariant(
+      $this->_type === apache_thrift_type_standard_JsonValueEnum::intValue,
+      'get_intValue called on an instance of JsonValue whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->intValue as nonnull;
+  }
+
+  public function set_floatValue(float $floatValue)[write_props]: this {
+    $this->reset();
+    $this->_type = apache_thrift_type_standard_JsonValueEnum::floatValue;
+    $this->floatValue = $floatValue;
+    return $this;
+  }
+
+  public function get_floatValue()[]: ?float {
+    return $this->floatValue;
+  }
+
+  public function getx_floatValue()[]: float {
+    invariant(
+      $this->_type === apache_thrift_type_standard_JsonValueEnum::floatValue,
+      'get_floatValue called on an instance of JsonValue whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->floatValue as nonnull;
+  }
+
+  public function set_stringValue(string $stringValue)[write_props]: this {
+    $this->reset();
+    $this->_type = apache_thrift_type_standard_JsonValueEnum::stringValue;
+    $this->stringValue = $stringValue;
+    return $this;
+  }
+
+  public function get_stringValue()[]: ?string {
+    return $this->stringValue;
+  }
+
+  public function getx_stringValue()[]: string {
+    invariant(
+      $this->_type === apache_thrift_type_standard_JsonValueEnum::stringValue,
+      'get_stringValue called on an instance of JsonValue whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->stringValue as nonnull;
+  }
+
+  public function set_arrayValue(Vector<apache_thrift_type_standard_JsonValue> $arrayValue)[write_props]: this {
+    $this->reset();
+    $this->_type = apache_thrift_type_standard_JsonValueEnum::arrayValue;
+    $this->arrayValue = $arrayValue;
+    return $this;
+  }
+
+  public function get_arrayValue()[]: ?Vector<apache_thrift_type_standard_JsonValue> {
+    return $this->arrayValue;
+  }
+
+  public function getx_arrayValue()[]: Vector<apache_thrift_type_standard_JsonValue> {
+    invariant(
+      $this->_type === apache_thrift_type_standard_JsonValueEnum::arrayValue,
+      'get_arrayValue called on an instance of JsonValue whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->arrayValue as nonnull;
+  }
+
+  public function set_objectValue(Map<string, apache_thrift_type_standard_JsonValue> $objectValue)[write_props]: this {
+    $this->reset();
+    $this->_type = apache_thrift_type_standard_JsonValueEnum::objectValue;
+    $this->objectValue = $objectValue;
+    return $this;
+  }
+
+  public function get_objectValue()[]: ?Map<string, apache_thrift_type_standard_JsonValue> {
+    return $this->objectValue;
+  }
+
+  public function getx_objectValue()[]: Map<string, apache_thrift_type_standard_JsonValue> {
+    invariant(
+      $this->_type === apache_thrift_type_standard_JsonValueEnum::objectValue,
+      'get_objectValue called on an instance of JsonValue whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->objectValue as nonnull;
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "standard.JsonValue",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "boolValue",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "intValue",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_DOUBLE_TYPE,
+                )
+              ),
+              "name" => "floatValue",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 4,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "stringValue",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 5,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "standard.JsonArray",
+                      "underlyingType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                            shape(
+                              "name" => "standard.JsonArray",
+                              "underlyingType" => tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_list" => tmeta_ThriftListType::fromShape(
+                                    shape(
+                                      "valueType" => tmeta_ThriftType::fromShape(
+                                        shape(
+                                          "t_struct" => tmeta_ThriftStructType::fromShape(
+                                            shape(
+                                              "name" => "standard.JsonValue",
+                                            )
+                                          ),
+                                        )
+                                      ),
+                                    )
+                                  ),
+                                )
+                              ),
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "arrayValue",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 6,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "standard.JsonObject",
+                      "underlyingType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                            shape(
+                              "name" => "standard.JsonObject",
+                              "underlyingType" => tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_map" => tmeta_ThriftMapType::fromShape(
+                                    shape(
+                                      "keyType" => tmeta_ThriftType::fromShape(
+                                        shape(
+                                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                        )
+                                      ),
+                                      "valueType" => tmeta_ThriftType::fromShape(
+                                        shape(
+                                          "t_struct" => tmeta_ThriftStructType::fromShape(
+                                            shape(
+                                              "name" => "standard.JsonValue",
+                                            )
+                                          ),
+                                        )
+                                      ),
+                                    )
+                                  ),
+                                )
+                              ),
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "objectValue",
+            )
+          ),
+        ],
+        "is_union" => true,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+        'arrayValue' => shape(
+          'field' => dict[
+            '\thrift\annotation\Box' => \thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'objectValue' => shape(
+          'field' => dict[
+            '\thrift\annotation\Box' => \thrift\annotation\Box::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[
+            '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
+              shape(
+              )
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'boolValue'),
+      Shapes::idx($shape, 'intValue'),
+      Shapes::idx($shape, 'floatValue'),
+      Shapes::idx($shape, 'stringValue'),
+      Shapes::idx($shape, 'arrayValue') === null ? null : ((new Vector($shape['arrayValue']))->map(
+        $val0 ==> apache_thrift_type_standard_JsonValue::__fromShape($val0),
+      )),
+      Shapes::idx($shape, 'objectValue') === null ? null : ((new Map($shape['objectValue']))->map(
+        $val1 ==> apache_thrift_type_standard_JsonValue::__fromShape($val1),
+      )),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'boolValue' => $this->boolValue,
+      'intValue' => $this->intValue,
+      'floatValue' => $this->floatValue,
+      'stringValue' => $this->stringValue,
+      'arrayValue' => $this->arrayValue?->map(
+        ($_val0) ==> $_val0->__toShape(),
+      )
+        |> $$ === null ? null : vec($$),
+      'objectValue' => $this->objectValue?->map(
+        ($_val0) ==> $_val0->__toShape(),
+      )
+        |> $$ === null ? null : dict($$),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $this->_type = apache_thrift_type_standard_JsonValueEnum::_EMPTY_;
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'boolValue') !== null) {
+      $this->boolValue = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['boolValue']);
+      $this->_type = apache_thrift_type_standard_JsonValueEnum::boolValue;
+    }
+    if (idx($parsed, 'intValue') !== null) {
+      $this->intValue = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['intValue']);
+      $this->_type = apache_thrift_type_standard_JsonValueEnum::intValue;
+    }
+    if (idx($parsed, 'floatValue') !== null) {
+      $this->floatValue = HH\FIXME\UNSAFE_CAST<mixed, float>($parsed['floatValue']);
+      $this->_type = apache_thrift_type_standard_JsonValueEnum::floatValue;
+    }
+    if (idx($parsed, 'stringValue') !== null) {
+      $this->stringValue = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['stringValue']);
+      $this->_type = apache_thrift_type_standard_JsonValueEnum::stringValue;
+    }
+    if (idx($parsed, 'arrayValue') !== null) {
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<apache_thrift_type_standard_JsonValue>>($parsed['arrayValue']);
+      $_container4 = Vector {};
+      foreach($_json3 as $_key1 => $_value2) {
+        $_elem5 = apache_thrift_type_standard_JsonValue::withDefaultValues();
+        $_tmp6 = \json_encode($_value2);
+        $_tmp7 = apache_thrift_type_standard_JsonValue::withDefaultValues();
+        $_tmp7->readFromJson($_tmp6);
+        $_elem5 = $_tmp7;
+        $_container4 []= $_elem5;
+      }
+      $this->arrayValue = $_container4;
+      $this->_type = apache_thrift_type_standard_JsonValueEnum::arrayValue;
+    }
+    if (idx($parsed, 'objectValue') !== null) {
+      $_json11 = HH\FIXME\UNSAFE_CAST<mixed, Map<string, apache_thrift_type_standard_JsonValue>>($parsed['objectValue']);
+      $_container12 = Map {};
+      foreach($_json11 as $_key9 => $_value10) {
+        $_value13 = apache_thrift_type_standard_JsonValue::withDefaultValues();
+        $_tmp14 = \json_encode($_value10);
+        $_tmp15 = apache_thrift_type_standard_JsonValue::withDefaultValues();
+        $_tmp15->readFromJson($_tmp14);
+        $_value13 = $_tmp15;
+        $_container12[$_key9] = $_value13;
+      }
+      $this->objectValue = $_container12;
+      $this->_type = apache_thrift_type_standard_JsonValueEnum::objectValue;
     }
   }
 

@@ -64,6 +64,9 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/standard_types.h" namespace "::apac
     cdef cppclass cVoid "::apache::thrift::type::Void":
         pass
 
+    cdef cppclass cJsonType "::apache::thrift::type::JsonType":
+        pass
+
     cdef cppclass cStandardProtocol "::apache::thrift::type::StandardProtocol":
         pass
 
@@ -72,6 +75,10 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/standard_types.h" namespace "::apac
 
 
 cdef class Void(thrift.py3.types.CompiledEnum):
+    pass
+
+
+cdef class JsonType(thrift.py3.types.CompiledEnum):
     pass
 
 

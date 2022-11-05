@@ -57,10 +57,8 @@ impl<'a> FuncBuilder<'a> {
 
     /// Create a FuncBuilder to edit a Func. If the caller can guarantee that no
     /// strings will be created (in an RPO pass which just re-orders blocks, for
-    /// example) then it can create and pass in dummy StringInterner - but after
-    /// the FuncBuilder is finished the StringInterner should be checked (with
-    /// StringInterner::is_empty) that no strings were created (or use
-    /// borrow_func_no_strings() which does this check for you).
+    /// example) then it can create and pass in a
+    /// StringInterner::read_only().
     pub fn with_func(func: Func<'a>, strings: Arc<StringInterner>) -> Self {
         let constant_lookup: HashMap<Constant<'a>, ConstantId> = func
             .constants
@@ -108,10 +106,8 @@ impl<'a> FuncBuilder<'a> {
     where
         F: FnOnce(&mut FuncBuilder<'a>) -> R,
     {
-        let tmp_strings = Arc::new(StringInterner::default());
-        let r = Self::borrow_func(borrowed, Arc::clone(&tmp_strings), f);
-        assert!(tmp_strings.is_empty());
-        r
+        let tmp_strings = Arc::new(StringInterner::read_only());
+        Self::borrow_func(borrowed, Arc::clone(&tmp_strings), f)
     }
 
     pub fn add_loc(&mut self, loc: SrcLoc) -> LocId {

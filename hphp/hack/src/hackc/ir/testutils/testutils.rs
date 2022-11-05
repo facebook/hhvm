@@ -40,8 +40,8 @@ pub fn build_test_func_with_strings<'a>(
     // Create a function whose CFG matches testcase.
     let loc = LocId::NONE;
 
-    let tmp_strings = Arc::new(StringInterner::default());
-    let func = FuncBuilder::build_func(Arc::clone(&tmp_strings), |fb| {
+    let tmp_strings = Arc::new(StringInterner::read_only());
+    FuncBuilder::build_func(Arc::clone(&tmp_strings), |fb| {
         let mut name_to_bid = HashMap::with_capacity_and_hasher(testcase.len(), Default::default());
         for (i, (name, _, _)) in testcase.iter().enumerate() {
             name_to_bid.insert(
@@ -81,9 +81,7 @@ pub fn build_test_func_with_strings<'a>(
             };
             fb.emit(terminator);
         }
-    });
-    assert!(tmp_strings.is_empty());
-    func
+    })
 }
 
 /// Structurally compare two Funcs.

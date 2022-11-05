@@ -35,9 +35,17 @@ newtype_int!(UnitBytesId, u32, UnitBytesIdMap, UnitBytesIdSet);
 #[derive(Default)]
 pub struct StringInterner {
     values: RwLock<IndexSet<Vec<u8>>>,
+    read_only: bool,
 }
 
 impl StringInterner {
+    pub fn read_only() -> StringInterner {
+        StringInterner {
+            values: Default::default(),
+            read_only: true,
+        }
+    }
+
     pub fn intern_bytes<'b>(&self, s: impl Into<Cow<'b, [u8]>>) -> UnitBytesId {
         let s = s.into();
         // We could use an upgradable_read() - but there's only one of those
@@ -47,6 +55,7 @@ impl StringInterner {
             return UnitBytesId::from_usize(index);
         }
         drop(values);
+        assert!(!self.read_only);
         let mut values = self.values.write();
         UnitBytesId::from_usize(if let Some(index) = values.get_index_of(s.as_ref()) {
             index
@@ -73,8 +82,20 @@ impl StringInterner {
     }
 
     pub fn lookup_bytes<'a>(&'a self, id: UnitBytesId) -> MappedRwLockReadGuard<'a, [u8]> {
+        assert!(id != UnitBytesId::NONE);
         let values = self.values.read();
         RwLockReadGuard::map(values, |values| -> &[u8] { &values[id.as_usize()] })
+    }
+
+    pub fn lookup_bytes_or_none<'a>(
+        &'a self,
+        id: UnitBytesId,
+    ) -> Option<MappedRwLockReadGuard<'a, [u8]>> {
+        if id == UnitBytesId::NONE {
+            None
+        } else {
+            Some(self.lookup_bytes(id))
+        }
     }
 
     pub fn lookup_bstr<'a>(&'a self, id: UnitBytesId) -> MappedRwLockReadGuard<'a, BStr> {

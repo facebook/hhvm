@@ -76,3 +76,38 @@ union TestCaseUnion {
   2: rpc.RpcTestCase rpc;
   3: patch_data.PatchOpTestCase objectPatch;
 }
+
+/**
+ * A feature being tracked for a Thrift release.
+ *
+ * For example:
+ *
+ *   name: Any
+ *   description: >
+ *     A type that can contain any Thrift value (including void), even when the
+ *     type is not known at gen-, compile- or even run-time.
+ *   tags: [features/#Any]
+ *   release: 1
+ *
+ */
+struct Feature {
+  /** The name of the feature. */
+  1: string name;
+
+  /** A short description of the feature. */
+  2: string description;
+
+  /**
+   * The tags that roll up into this feature.
+   *
+   * For example: feature/MyFeature
+   */
+  3: set<string> tags;
+
+  /**
+   * The (target) Thrift release for this feature.
+   *
+   * Thrift release numbers are strictly monotonic integers.
+   */
+  4: i32 release;
+}

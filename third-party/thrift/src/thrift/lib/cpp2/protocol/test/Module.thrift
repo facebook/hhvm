@@ -88,10 +88,10 @@ struct DebugHashedAssociative {
   ) value;
 }
 
+typedef set<i64> (cpp.template = "folly::F14FastSet") F14SetI64
+
 struct DebugSortedAssociative {
-  1: map<i64, set<i64>> (
-    cpp.type = "folly::F14FastMap<int64_t, folly::F14FastSet<int64_t>>",
-  ) value;
+  1: map<i64, F14SetI64> (cpp.template = "folly::F14FastMap") value;
 }
 
 struct DebugList {

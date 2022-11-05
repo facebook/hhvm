@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-namespace cpp2 apache.thrift.test
+package "apache.org/thrift/test"
 
 cpp_include "<unordered_set>"
 cpp_include "<unordered_map>"

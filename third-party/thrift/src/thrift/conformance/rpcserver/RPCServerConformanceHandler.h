@@ -77,7 +77,7 @@ class RPCServerConformanceHandler
     }
     folly::coro::Task<void> co_onTermination() override {
       switch (testCase_.serverInstruction()->getType()) {
-        case ServerInstruction::interactionTermination:
+        case ServerInstruction::Type::interactionTermination:
           result_.interactionTermination_ref().ensure().terminationReceived() =
               true;
           break;

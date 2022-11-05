@@ -169,13 +169,13 @@ RPCServerConformanceHandler::sinkChunkTimeout(std::unique_ptr<Request> req) {
 std::unique_ptr<RPCServerConformanceHandler::BasicInteractionIf>
 RPCServerConformanceHandler::createBasicInteraction() {
   switch (testCase_->serverInstruction()->getType()) {
-    case ServerInstruction::interactionConstructor:
+    case ServerInstruction::Type::interactionConstructor:
       result_.interactionConstructor_ref().emplace().constructorCalled() = true;
       break;
-    case ServerInstruction::interactionPersistsState:
+    case ServerInstruction::Type::interactionPersistsState:
       result_.interactionPersistsState_ref().emplace();
       break;
-    case ServerInstruction::interactionTermination:
+    case ServerInstruction::Type::interactionTermination:
       result_.interactionTermination_ref().emplace();
       break;
     default:
@@ -190,14 +190,14 @@ apache::thrift::
     RPCServerConformanceHandler::basicInteractionFactoryFunction(
         int32_t initialSum) {
   switch (testCase_->serverInstruction()->getType()) {
-    case ServerInstruction::interactionFactoryFunction:
+    case ServerInstruction::Type::interactionFactoryFunction:
       result_.interactionFactoryFunction_ref().emplace().initialSum() =
           initialSum;
       break;
-    case ServerInstruction::interactionPersistsState:
+    case ServerInstruction::Type::interactionPersistsState:
       result_.interactionPersistsState_ref().emplace();
       break;
-    case ServerInstruction::interactionTermination:
+    case ServerInstruction::Type::interactionTermination:
       result_.interactionTermination_ref().emplace();
       break;
     default:

@@ -226,7 +226,7 @@ class ConformanceVerificationServer
     }
     folly::coro::Task<void> co_onTermination() override {
       switch (testCase_.serverInstruction()->getType()) {
-        case ServerInstruction::interactionTermination:
+        case ServerInstruction::Type::interactionTermination:
           serverResult_.interactionTermination_ref()
               .ensure()
               .terminationReceived() = true;
@@ -244,15 +244,15 @@ class ConformanceVerificationServer
 
   std::unique_ptr<BasicInteractionIf> createBasicInteraction() override {
     switch (testCase_.serverInstruction()->getType()) {
-      case ServerInstruction::interactionConstructor:
+      case ServerInstruction::Type::interactionConstructor:
         serverResult_.interactionConstructor_ref()
             .emplace()
             .constructorCalled() = true;
         break;
-      case ServerInstruction::interactionPersistsState:
+      case ServerInstruction::Type::interactionPersistsState:
         serverResult_.interactionPersistsState_ref().emplace();
         break;
-      case ServerInstruction::interactionTermination:
+      case ServerInstruction::Type::interactionTermination:
         serverResult_.interactionTermination_ref().emplace();
         break;
       default:
@@ -265,14 +265,14 @@ class ConformanceVerificationServer
   apache::thrift::TileAndResponse<BasicInteractionIf, void>
   basicInteractionFactoryFunction(int32_t initialSum) override {
     switch (testCase_.serverInstruction()->getType()) {
-      case ServerInstruction::interactionFactoryFunction:
+      case ServerInstruction::Type::interactionFactoryFunction:
         serverResult_.interactionFactoryFunction_ref().emplace().initialSum() =
             initialSum;
         break;
-      case ServerInstruction::interactionPersistsState:
+      case ServerInstruction::Type::interactionPersistsState:
         serverResult_.interactionPersistsState_ref().emplace();
         break;
-      case ServerInstruction::interactionTermination:
+      case ServerInstruction::Type::interactionTermination:
         serverResult_.interactionTermination_ref().emplace();
         break;
       default:

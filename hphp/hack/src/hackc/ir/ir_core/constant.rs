@@ -2,13 +2,12 @@
 
 use std::sync::Arc;
 
-use ffi::Str;
-
 use crate::instr::HasOperands;
 use crate::CollectionType;
 use crate::ConstName;
 use crate::FloatBits;
 use crate::TypedValue;
+use crate::UnitBytesId;
 use crate::ValueId;
 
 /// A constant value.
@@ -25,7 +24,7 @@ pub enum Constant<'a> {
     Named(ConstName<'a>),
     NewCol(CollectionType),
     Null,
-    String(Str<'a>),
+    String(UnitBytesId),
     Uninit,
 }
 

@@ -248,7 +248,7 @@ impl Display for FmtConstant<'_, '_> {
             Constant::Named(name) => write!(f, "constant({})", FmtIdentifier(name.as_bytes())),
             Constant::NewCol(k) => write!(f, "new_col({:?})", k),
             Constant::Null => write!(f, "null"),
-            Constant::String(value) => FmtQuotedStr(value).fmt(f),
+            Constant::String(value) => FmtQuotedStringId(*value, strings).fmt(f),
             Constant::Uninit => write!(f, "uninit"),
         }
     }

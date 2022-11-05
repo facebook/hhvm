@@ -612,7 +612,8 @@ impl<'a> FuncState<'a> {
                     Constant::Int(i) => hack::expr_builtin(Builtin::Int, [Expr::int(*i)]),
                     Constant::Null => hack::expr_builtin(Builtin::Null, ()),
                     Constant::String(s) => {
-                        let s = util::escaped_string(s);
+                        let s = self.strings.lookup_bstr(*s);
+                        let s = util::escaped_string(&s);
                         hack::expr_builtin(Builtin::String, [Expr::string(s)])
                     }
                     Constant::Array(..) => todo!(),

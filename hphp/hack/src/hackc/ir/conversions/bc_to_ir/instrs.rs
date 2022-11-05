@@ -1115,7 +1115,6 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::Shl => simple!(Hhbc::Shl),
         Opcode::Shr => simple!(Hhbc::Shr),
         Opcode::Silence => simple!(Hhbc::Silence),
-        Opcode::String => simple!(Constant::String),
         Opcode::Sub => simple!(Hhbc::Sub),
         Opcode::This => simple!(Hhbc::This),
         Opcode::Throw => simple!(Terminator::Throw),
@@ -1176,6 +1175,10 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::PopC => {
             ctx.pop();
             Action::None
+        }
+        Opcode::String(value) => {
+            let s1 = Constant::String(ctx.strings.intern_bytes(value.as_ref()));
+            Action::Constant(s1)
         }
     };
 

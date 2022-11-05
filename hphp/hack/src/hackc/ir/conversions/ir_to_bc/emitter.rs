@@ -735,7 +735,10 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 Constant::Named(name) => Opcode::CnsE(*name),
                 Constant::NewCol(k) => Opcode::NewCol(*k),
                 Constant::Null => Opcode::Null,
-                Constant::String(v) => Opcode::String(*v),
+                Constant::String(v) => {
+                    let s = self.strings.lookup_ffi_str(*v);
+                    Opcode::String(s)
+                }
                 Constant::Uninit => Opcode::NullUninit,
             }
         };

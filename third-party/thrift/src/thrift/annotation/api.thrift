@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/scope.thrift"
+include "thrift/annotation/thrift.thrift"
 
 package "facebook.com/thrift/annotation/api"
 
@@ -24,7 +25,7 @@ namespace go thrift.annotation.api
 namespace py thrift.annotation.api
 
 /**
- * Indicates a field is ignored if sent as input.
+ * Indicates a field is ignored if sent as an input parameter.
  *
  * For example, life-cycle timestamps fields like `createTime` and `modifyTime`
  * should always be output-only, as they are set as side-effects of CRUD
@@ -32,6 +33,37 @@ namespace py thrift.annotation.api
  */
 @scope.Field
 struct OutputOnly {}
+
+/**
+ * Indicates a field is never returned as an output parameter.
+ *
+ * For example, a field with secret or sensitive information that should never
+ * leave the server could use this annotation:
+ *
+ *   struct AsemetricKeys {
+ *     @api.Immutable
+ *     @api.Unique
+ *     1: string name;
+ *
+ *     // The public key data.
+ *     @api.Unique
+ *     2: binary publicKey;
+ *
+ *     // The private key data.
+ *     @api.InputOnly
+ *     3: binary privateKey;
+ *
+ *     // True if a `privateKey` has been set.
+ *     @api.OuputOnly
+ *     4: bool hasPrivateKey;
+ *   }
+ *
+ * In this case, both publicKey and privateKey can still be set/updated and
+ * `hasPrivateKey` can be used to indicate presence, if needed.
+ */
+@thrift.Testing // TODO(afuller): Enforce with conformance tests before releasing, even to experimental.
+@scope.Field
+struct InputOnly {}
 
 /**
  * Indicates a field cannot change after creation.

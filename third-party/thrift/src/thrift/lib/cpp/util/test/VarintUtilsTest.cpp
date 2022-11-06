@@ -22,6 +22,10 @@
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp/util/test/VarintUtilsTestUtil.h>
 
+#ifndef __BMI2__
+#define writeVarintBMI2 writeVarintUnrolled
+#endif
+
 using namespace apache::thrift::util;
 using namespace apache::thrift::util::detail;
 

@@ -181,7 +181,7 @@ template <size_t... I, typename F>
 void for_each_ordinal_impl(F&& f, std::index_sequence<I...>) {
   // This doesn't use fold expression (from C++17) as this file is used in
   // C++14 environment as well.
-  int unused[] = {(f(type::detail::pos_to_ordinal<I>{}), 0)...};
+  int unused[] = {0, (f(type::detail::pos_to_ordinal<I>{}), 0)...};
   static_cast<void>(unused);
 }
 

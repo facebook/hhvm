@@ -12,10 +12,10 @@ use crate::BaseType;
 use crate::Constant;
 use crate::EnforceableType;
 use crate::FuncBuilder;
+use crate::FunctionId;
 use crate::Instr;
 use crate::IsTypeOp;
 use crate::LocId;
-use crate::LocalId;
 use crate::TypeConstraintFlags;
 use crate::TypeStructResolveOp;
 use crate::ValueId;
@@ -143,9 +143,9 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
     }
 
     fn todo_fake_instr(&mut self, reason: &str, loc: LocId) -> Instr {
-        let id = self.strings.intern_str(reason);
-        let local = LocalId::Named(id);
-        Instr::Hhbc(crate::instr::Hhbc::CGetL(local, loc))
+        let op = self.emit_constant(Constant::String(self.strings.intern_str(reason)));
+        let fid = FunctionId::from_str("todo", &self.strings);
+        Instr::simple_call(fid, &[op], loc)
     }
 
     fn emit_todo_fake_instr(&mut self, reason: &str, loc: LocId) -> ValueId {

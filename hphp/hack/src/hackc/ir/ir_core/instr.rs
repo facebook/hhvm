@@ -10,6 +10,7 @@ use macros::HasLocals;
 use macros::HasOperands;
 use newtype::newtype_int;
 use smallvec::SmallVec;
+use strum_macros::Display;
 
 use crate::BareThisOp;
 use crate::BlockId;
@@ -398,7 +399,7 @@ impl HasEdges for MemoGetEager {
     }
 }
 
-#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands, Display)]
 pub enum Hhbc {
     AKExists([ValueId; 2], LocId),
     Add([ValueId; 2], LocId),

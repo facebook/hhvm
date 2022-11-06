@@ -139,6 +139,11 @@ pub(crate) fn write_func(
         &locals,
         |w| {
             let func = rewrite_prelude(func, Arc::clone(&unit_state.strings));
+            trace!(
+                "After Rewrite Prelude: {}",
+                ir::print::DisplayFunc(&func, true, &unit_state.strings)
+            );
+
             let mut func = rewrite_jmp_ops(func);
             ir::passes::clean::run(&mut func);
 
@@ -283,7 +288,7 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
             // else should be handled in lower().
             textual_todo! {
                 use ir::instr::HasOperands;
-                let name = format!("TODO_hhbc_{:?}", hhbc);
+                let name = format!("TODO_hhbc_{}", hhbc);
                 let output = w.call(
                     &name,
                     instr
@@ -390,10 +395,12 @@ fn write_call(
     assert!(readonly.as_ref().map_or(true, |ro| ro.is_empty()));
     assert!(num_rets < 2);
 
-    let context = state.strings.lookup_bytes(context);
-    if !context.is_empty() {
-        textual_todo! {
-            w.comment("TODO: write_call(Context: {context:?})")?;
+    let context = state.strings.lookup_bytes_or_none(context);
+    if let Some(context) = context {
+        if !context.is_empty() {
+            textual_todo! {
+                w.comment("TODO: write_call(Context: {context:?})")?;
+            }
         }
     }
 
@@ -682,16 +689,13 @@ fn rewrite_prelude<'a>(mut func: ir::Func<'a>, strings: Arc<StringInterner>) -> 
 }
 
 fn write_constants(remap: &mut ir::ValueIdMap<ValueId>, builder: &mut ir::FuncBuilder<'_>) {
-    // Temporarily steal the constants so we can mutate the func while we
-    // iterate over them.
-    let constants = std::mem::take(&mut builder.func.constants);
-
-    for (lid, constant) in constants.iter().enumerate() {
+    // Steal the contents of the "complex" constants first. We need to do this
+    // because we may create more constants during lowering (but don't create
+    // more complex ones!).
+    let mut constants = Vec::default();
+    for (lid, constant) in builder.func.constants.iter_mut().enumerate() {
         let lid = ConstantId::from_usize(lid);
-        trace!("    Const {lid}: {constant:?}");
-        let src = ValueId::from_constant(lid);
-        let loc = LocId::NONE;
-        let vid = match constant {
+        match constant {
             Constant::Bool(..)
             | Constant::Double(..)
             | Constant::Int(..)
@@ -704,9 +708,34 @@ fn write_constants(remap: &mut ir::ValueIdMap<ValueId>, builder: &mut ir::FuncBu
             | Constant::File
             | Constant::FuncCred
             | Constant::Method
+            | Constant::Named(..)
+            | Constant::NewCol(..) => {
+                let constant = std::mem::replace(constant, Constant::Uninit);
+                constants.push((lid, constant));
+            }
+        }
+    }
+
+    for (lid, constant) in constants.into_iter() {
+        trace!("    Const {lid}: {constant:?}");
+        let src = ValueId::from_constant(lid);
+        let loc = LocId::NONE;
+        let vid = match constant {
+            Constant::Bool(..)
+            | Constant::Double(..)
+            | Constant::Int(..)
+            | Constant::Null
+            | Constant::String(..)
+            | Constant::Uninit => unreachable!(),
+
+            Constant::Array(..)
+            | Constant::Dir
+            | Constant::File
+            | Constant::FuncCred
+            | Constant::Method
             | Constant::Named(..) => builder.emit_todo_instr(&format!("{constant:?}"), loc),
 
-            Constant::NewCol(ty) => match *ty {
+            Constant::NewCol(ty) => match ty {
                 CollectionType::Vector => {
                     builder.emit_hack_builtin(hack::Builtin::Hhbc(hack::Hhbc::NewVec), &[], loc)
                 }
@@ -721,8 +750,6 @@ fn write_constants(remap: &mut ir::ValueIdMap<ValueId>, builder: &mut ir::FuncBu
         };
         remap.insert(src, vid);
     }
-
-    builder.func.constants = constants;
 }
 
 /// Convert from a deterministic jump model to a non-deterministic model.

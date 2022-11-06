@@ -63,9 +63,8 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
 
     fn todo_instr(&mut self, reason: &str, loc: LocId) -> Instr {
         textual_todo! {
-            let id = self.strings.intern_str(reason);
-            let local = ir::LocalId::Named(id);
-            Instr::Hhbc(ir::instr::Hhbc::CGetL(local, loc))
+            use ir::FuncBuilderEx;
+            self.todo_fake_instr(reason, loc)
         }
     }
 

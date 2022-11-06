@@ -1,0 +1,307 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-10:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((), (Some ([3:49-53], (Hprim Tvoid)))); 
+        f_name = ([3:10-37], "\\wilcard_hint_shape_toplevel"); f_tparams = []; 
+        f_where_constraints = [];
+        f_params =
+        [{ param_annotation = (); param_type_hint = ((), (Some ([3:38-43], Hmixed))); 
+           param_is_variadic = false; param_pos = [3:44-46]; param_name = "$x"; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([4:6-28],
+            (Expr
+               ((), [4:6-27],
+                (As (((), [4:6-8], (Lvar ([4:6-8], $x))),
+                   ([4:12-27],
+                    (Hshape
+                       { nsi_allows_unknown_fields = false;
+                         nsi_field_map = [{ sfi_optional = false; sfi_hint = ([4:25-26], (Happly (([4:25-26], "_"), []))); sfi_name = (SFlit_str ([4:18-21], "y")) }] })),
+                   false)))));
+            ([5:6-40],
+             (Expr
+                ((), [5:6-39],
+                 (As (((), [5:6-8], (Lvar ([5:6-8], $x))),
+                    ([5:12-39],
+                     (Hshape
+                        { nsi_allows_unknown_fields = false;
+                          nsi_field_map =
+                          [{ sfi_optional = false; sfi_hint = ([5:25-28], (Hprim Tint)); sfi_name = (SFlit_str ([5:18-21], "y")) };
+                            { sfi_optional = false; sfi_hint = ([5:37-38], (Happly (([5:37-38], "_"), []))); sfi_name = (SFlit_str ([5:30-33], "z")) }]
+                          })),
+                    false)))));
+            ([6:6-43],
+             (Expr
+                ((), [6:6-42],
+                 (As (((), [6:6-8], (Lvar ([6:6-8], $x))),
+                    ([6:12-42],
+                     (Hshape
+                        { nsi_allows_unknown_fields = false;
+                          nsi_field_map =
+                          [{ sfi_optional = false; sfi_hint = ([6:25-26], (Happly (([6:25-26], "_"), []))); sfi_name = (SFlit_str ([6:18-21], "y")) };
+                            { sfi_optional = false; sfi_hint = ([6:35-41], (Hprim Tstring)); sfi_name = (SFlit_str ([6:28-31], "z")) }]
+                          })),
+                    false)))));
+            ([7:6-38],
+             (Expr
+                ((), [7:6-37],
+                 (As (((), [7:6-8], (Lvar ([7:6-8], $x))),
+                    ([7:12-37],
+                     (Hshape
+                        { nsi_allows_unknown_fields = false;
+                          nsi_field_map =
+                          [{ sfi_optional = false; sfi_hint = ([7:25-26], (Happly (([7:25-26], "_"), []))); sfi_name = (SFlit_str ([7:18-21], "y")) };
+                            { sfi_optional = false; sfi_hint = ([7:35-36], (Happly (([7:35-36], "_"), []))); sfi_name = (SFlit_str ([7:28-31], "z")) }]
+                          })),
+                    false)))));
+            ([8:6-42],
+             (Expr
+                ((), [8:6-41],
+                 (As (((), [8:6-8], (Lvar ([8:6-8], $x))),
+                    ([8:12-41],
+                     (Hshape
+                        { nsi_allows_unknown_fields = false;
+                          nsi_field_map =
+                          [{ sfi_optional = false;
+                             sfi_hint =
+                             ([8:25-40],
+                              (Hshape
+                                 { nsi_allows_unknown_fields = false;
+                                   nsi_field_map = [{ sfi_optional = false; sfi_hint = ([8:38-39], (Happly (([8:38-39], "_"), []))); sfi_name = (SFlit_str ([8:31-34], "z")) }] }));
+                             sfi_name = (SFlit_str ([8:18-21], "y")) }
+                            ]
+                          })),
+                    false)))));
+            ([9:6-52],
+             (Expr
+                ((), [9:6-51],
+                 (As (((), [9:6-8], (Lvar ([9:6-8], $x))),
+                    ([9:12-51],
+                     (Hshape
+                        { nsi_allows_unknown_fields = false;
+                          nsi_field_map =
+                          [{ sfi_optional = false; sfi_hint = ([9:25-26], (Happly (([9:25-26], "_"), []))); sfi_name = (SFlit_str ([9:18-21], "y")) };
+                            { sfi_optional = false;
+                              sfi_hint =
+                              ([9:35-50],
+                               (Hshape
+                                  { nsi_allows_unknown_fields = false;
+                                    nsi_field_map = [{ sfi_optional = false; sfi_hint = ([9:48-49], (Happly (([9:48-49], "_"), []))); sfi_name = (SFlit_str ([9:41-44], "z")) }] }));
+                              sfi_name = (SFlit_str ([9:28-31], "w")) }
+                            ]
+                          })),
+                    false)))))
+            ]
+          };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None };
+      fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [12:1-23:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([12:48-52], (Hprim Tvoid)))); 
+         f_name = ([12:10-36], "\\wildcard_hint_shape_nested"); f_tparams = []; 
+         f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([12:37-42], Hmixed))); 
+            param_is_variadic = false; param_pos = [12:43-45]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([13:6-33],
+             (Expr
+                ((), [13:6-32],
+                 (Is (((), [13:6-8], (Lvar ([13:6-8], $x))),
+                    ([13:12-32],
+                     (Hshape
+                        { nsi_allows_unknown_fields = false;
+                          nsi_field_map =
+                          [{ sfi_optional = false; sfi_hint = ([13:25-31], (Happly (([13:25-28], "\\HH\\vec"), [([13:29-30], (Happly (([13:29-30], "_"), [])))])));
+                             sfi_name = (SFlit_str ([13:18-21], "x")) }
+                            ]
+                          }))
+                    )))));
+             ([14:6-47],
+              (Expr
+                 ((), [14:6-46],
+                  (Is (((), [14:6-8], (Lvar ([14:6-8], $x))),
+                     ([14:12-46],
+                      (Hshape
+                         { nsi_allows_unknown_fields = false;
+                           nsi_field_map =
+                           [{ sfi_optional = false;
+                              sfi_hint =
+                              ([14:25-45],
+                               (Hshape
+                                  { nsi_allows_unknown_fields = false;
+                                    nsi_field_map =
+                                    [{ sfi_optional = false; sfi_hint = ([14:38-44], (Happly (([14:38-41], "\\HH\\vec"), [([14:42-43], (Happly (([14:42-43], "_"), [])))])));
+                                       sfi_name = (SFlit_str ([14:31-34], "y")) }
+                                      ]
+                                    }));
+                              sfi_name = (SFlit_str ([14:18-21], "x")) }
+                             ]
+                           }))
+                     )))));
+             ([15:6-37],
+              (Expr
+                 ((), [15:6-36],
+                  (Is (((), [15:6-8], (Lvar ([15:6-8], $x))),
+                     ([15:12-36],
+                      (Hshape
+                         { nsi_allows_unknown_fields = false;
+                           nsi_field_map =
+                           [{ sfi_optional = false;
+                              sfi_hint = ([15:25-35], (Happly (([15:25-29], "\\HH\\dict"), [([15:30-31], (Happly (([15:30-31], "_"), []))); ([15:33-34], (Happly (([15:33-34], "_"), [])))])));
+                              sfi_name = (SFlit_str ([15:18-21], "x")) }
+                             ]
+                           }))
+                     )))));
+             ([16:6-49],
+              (Expr
+                 ((), [16:6-48],
+                  (Is (((), [16:6-8], (Lvar ([16:6-8], $x))),
+                     ([16:12-48],
+                      (Hshape
+                         { nsi_allows_unknown_fields = false;
+                           nsi_field_map =
+                           [{ sfi_optional = false; sfi_hint = ([16:25-28], (Hprim Tint)); sfi_name = (SFlit_str ([16:18-21], "x")) };
+                             { sfi_optional = false;
+                               sfi_hint = ([16:37-47], (Happly (([16:37-41], "\\HH\\dict"), [([16:42-43], (Happly (([16:42-43], "_"), []))); ([16:45-46], (Happly (([16:45-46], "_"), [])))])));
+                               sfi_name = (SFlit_str ([16:30-33], "y")) }
+                             ]
+                           }))
+                     )))));
+             ([17:6-51],
+              (Expr
+                 ((), [17:6-50],
+                  (Is (((), [17:6-8], (Lvar ([17:6-8], $x))),
+                     ([17:12-50],
+                      (Hshape
+                         { nsi_allows_unknown_fields = false;
+                           nsi_field_map =
+                           [{ sfi_optional = false;
+                              sfi_hint =
+                              ([17:25-49],
+                               (Hshape
+                                  { nsi_allows_unknown_fields = false;
+                                    nsi_field_map =
+                                    [{ sfi_optional = false;
+                                       sfi_hint = ([17:38-48], (Happly (([17:38-42], "\\HH\\dict"), [([17:43-44], (Happly (([17:43-44], "_"), []))); ([17:46-47], (Happly (([17:46-47], "_"), [])))])));
+                                       sfi_name = (SFlit_str ([17:31-34], "y")) }
+                                      ]
+                                    }));
+                              sfi_name = (SFlit_str ([17:18-21], "x")) }
+                             ]
+                           }))
+                     )))));
+             ([18:6-33],
+              (Expr
+                 ((), [18:6-32],
+                  (As (((), [18:6-8], (Lvar ([18:6-8], $x))),
+                     ([18:12-32],
+                      (Hshape
+                         { nsi_allows_unknown_fields = false;
+                           nsi_field_map =
+                           [{ sfi_optional = false; sfi_hint = ([18:25-31], (Happly (([18:25-28], "\\HH\\vec"), [([18:29-30], (Happly (([18:29-30], "_"), [])))])));
+                              sfi_name = (SFlit_str ([18:18-21], "x")) }
+                             ]
+                           })),
+                     false)))));
+             ([19:6-47],
+              (Expr
+                 ((), [19:6-46],
+                  (As (((), [19:6-8], (Lvar ([19:6-8], $x))),
+                     ([19:12-46],
+                      (Hshape
+                         { nsi_allows_unknown_fields = false;
+                           nsi_field_map =
+                           [{ sfi_optional = false;
+                              sfi_hint =
+                              ([19:25-45],
+                               (Hshape
+                                  { nsi_allows_unknown_fields = false;
+                                    nsi_field_map =
+                                    [{ sfi_optional = false; sfi_hint = ([19:38-44], (Happly (([19:38-41], "\\HH\\vec"), [([19:42-43], (Happly (([19:42-43], "_"), [])))])));
+                                       sfi_name = (SFlit_str ([19:31-34], "y")) }
+                                      ]
+                                    }));
+                              sfi_name = (SFlit_str ([19:18-21], "x")) }
+                             ]
+                           })),
+                     false)))));
+             ([20:6-37],
+              (Expr
+                 ((), [20:6-36],
+                  (As (((), [20:6-8], (Lvar ([20:6-8], $x))),
+                     ([20:12-36],
+                      (Hshape
+                         { nsi_allows_unknown_fields = false;
+                           nsi_field_map =
+                           [{ sfi_optional = false;
+                              sfi_hint = ([20:25-35], (Happly (([20:25-29], "\\HH\\dict"), [([20:30-31], (Happly (([20:30-31], "_"), []))); ([20:33-34], (Happly (([20:33-34], "_"), [])))])));
+                              sfi_name = (SFlit_str ([20:18-21], "x")) }
+                             ]
+                           })),
+                     false)))));
+             ([21:6-49],
+              (Expr
+                 ((), [21:6-48],
+                  (As (((), [21:6-8], (Lvar ([21:6-8], $x))),
+                     ([21:12-48],
+                      (Hshape
+                         { nsi_allows_unknown_fields = false;
+                           nsi_field_map =
+                           [{ sfi_optional = false; sfi_hint = ([21:25-28], (Hprim Tint)); sfi_name = (SFlit_str ([21:18-21], "x")) };
+                             { sfi_optional = false;
+                               sfi_hint = ([21:37-47], (Happly (([21:37-41], "\\HH\\dict"), [([21:42-43], (Happly (([21:42-43], "_"), []))); ([21:45-46], (Happly (([21:45-46], "_"), [])))])));
+                               sfi_name = (SFlit_str ([21:30-33], "y")) }
+                             ]
+                           })),
+                     false)))));
+             ([22:6-51],
+              (Expr
+                 ((), [22:6-50],
+                  (As (((), [22:6-8], (Lvar ([22:6-8], $x))),
+                     ([22:12-50],
+                      (Hshape
+                         { nsi_allows_unknown_fields = false;
+                           nsi_field_map =
+                           [{ sfi_optional = false;
+                              sfi_hint =
+                              ([22:25-49],
+                               (Hshape
+                                  { nsi_allows_unknown_fields = false;
+                                    nsi_field_map =
+                                    [{ sfi_optional = false;
+                                       sfi_hint = ([22:38-48], (Happly (([22:38-42], "\\HH\\dict"), [([22:43-44], (Happly (([22:43-44], "_"), []))); ([22:46-47], (Happly (([22:46-47], "_"), [])))])));
+                                       sfi_name = (SFlit_str ([22:31-34], "y")) }
+                                      ]
+                                    }));
+                              sfi_name = (SFlit_str ([22:18-21], "x")) }
+                             ]
+                           })),
+                     false)))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None })
+  ]

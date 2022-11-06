@@ -1,0 +1,104 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((), (Some ([3:29-33], (Hprim Tvoid)))); 
+        f_name = ([3:10-25], "\\wildcard_varray"); f_tparams = []; f_where_constraints = []; 
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([4:3-20], (Expr ((), [4:3-19], (Binop ((Eq None), ((), [4:3-5], (Lvar ([4:3-5], $x))), ((), [4:8-19], (Varray ((Some ((), ([4:15-16], (Happly (([4:15-16], "_"), []))))), []))))))))] };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None };
+      fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [7:1-9:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([7:26-30], (Hprim Tvoid)))); 
+         f_name = ([7:10-22], "\\wildcard_vec"); f_tparams = []; f_where_constraints = []; 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([8:3-17],
+             (Expr ((), [8:3-16], (Binop ((Eq None), ((), [8:3-5], (Lvar ([8:3-5], $x))), ((), [8:8-16], (ValCollection (Vec, (Some ((), ([8:12-13], (Happly (([8:12-13], "_"), []))))), []))))))))]
+           };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [11:1-13:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([11:29-33], (Hprim Tvoid)))); 
+         f_name = ([11:10-25], "\\wildcard_keyset"); f_tparams = []; 
+         f_where_constraints = []; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([12:3-20],
+             (Expr
+                ((), [12:3-19], (Binop ((Eq None), ((), [12:3-5], (Lvar ([12:3-5], $x))), ((), [12:8-19], (ValCollection (Keyset, (Some ((), ([12:15-16], (Happly (([12:15-16], "_"), []))))), []))))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [15:1-17:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([15:29-33], (Hprim Tvoid)))); 
+         f_name = ([15:10-25], "\\wildcard_darray"); f_tparams = []; 
+         f_where_constraints = []; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([16:3-23],
+             (Expr
+                ((), [16:3-22],
+                 (Binop ((Eq None), ((), [16:3-5], (Lvar ([16:3-5], $x))),
+                    ((), [16:8-22], (Darray ((Some (((), ([16:15-16], (Happly (([16:15-16], "_"), [])))), ((), ([16:18-19], (Happly (([16:18-19], "_"), [])))))), []))))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [19:1-21:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([19:27-31], (Hprim Tvoid)))); 
+         f_name = ([19:10-23], "\\wildcard_dict"); f_tparams = []; f_where_constraints = []; 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([20:3-21],
+             (Expr
+                ((), [20:3-20],
+                 (Binop ((Eq None), ((), [20:3-5], (Lvar ([20:3-5], $x))),
+                    ((), [20:8-20], (KeyValCollection (Dict, (Some (((), ([20:13-14], (Happly (([20:13-14], "_"), [])))), ((), ([20:16-17], (Happly (([20:16-17], "_"), [])))))), []))))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None })
+  ]

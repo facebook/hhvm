@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8ab2922785fb751c76af2c2b312a049d>>
+// @generated SignedSource<<0c91d4df6a2303f306a26e873b9d838f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -611,6 +611,13 @@ arena_deserializer::impl_deserialize_in_arena!(TypedefVisibility);
          nude = true;
          visit_prefix = "on_";
          ancestors = ["Visitors_runtime.reduce_base"]
+       }),
+    (visitors
+       {
+         variety = "mapreduce";
+         nude = true;
+         visit_prefix = "on_";
+         ancestors = ["Visitors_runtime.mapreduce_base"]
        }),
     (visitors
        {

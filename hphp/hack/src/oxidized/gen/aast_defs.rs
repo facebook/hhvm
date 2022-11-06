@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bb8fff2dc42c496a3938a8df06034d27>>
+// @generated SignedSource<<39938e8c1b7905354d84abcad96759fd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2508,6 +2508,15 @@ pub struct Enum_ {
          visit_prefix = "on_";
          ancestors =
            ["Visitors_runtime.map"; "Aast_defs_visitors_ancestors.map"]
+       }),
+    (visitors
+       {
+         variety = "mapreduce";
+         nude = true;
+         visit_prefix = "on_";
+         ancestors =
+           ["Visitors_runtime.mapreduce";
+           "Aast_defs_visitors_ancestors.mapreduce"]
        }),
     (visitors
        {

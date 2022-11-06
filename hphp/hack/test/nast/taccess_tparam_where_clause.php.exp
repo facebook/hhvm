@@ -1,0 +1,50 @@
+[(Class
+    { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Abstract); 
+      c_name = ([3:16-17], "\\C"); c_tparams = []; c_extends = []; c_uses = []; 
+      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
+      c_where_constraints = []; c_consts = [];
+      c_typeconsts =
+      [{ c_tconst_user_attributes = []; c_tconst_name = ([4:23-25], "TA"); 
+         c_tconst_kind = (TCAbstract { c_atc_as_constraint = None; c_atc_super_constraint = None; c_atc_default = None }); 
+         c_tconst_span = [4:3-26]; c_tconst_doc_comment = None; c_tconst_is_ctx = false }
+        ];
+      c_vars = []; c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+      c_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [7:1-10:18]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([7:61-65], (Hprim Tvoid)))); 
+         f_name = ([7:10-37], "\\taccess_tparam_where_clause");
+         f_tparams =
+         [{ tp_variance = Invariant; tp_name = ([7:38-40], "T1"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
+           { tp_variance = Invariant; tp_name = ([7:42-44], "T2"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+         f_where_constraints =
+         [(([9:3-5], (Habstr ("T1", []))), Constraint_as, ([9:9-10], (Happly (([9:9-10], "\\C"), []))));
+           (([10:3-5], (Habstr ("T2", []))), Constraint_as, ([10:9-15], (Haccess (([10:9-11], (Habstr ("T1", []))), [([10:13-15], "TA")]))))];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([7:46-48], (Habstr ("T1", []))))); 
+            param_is_variadic = false; param_pos = [7:49-51]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None };
+           { param_annotation = (); param_type_hint = ((), (Some ([7:53-55], (Habstr ("T2", []))))); 
+             param_is_variadic = false; param_pos = [7:56-58]; param_name = "$y"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None })
+  ]

@@ -1,0 +1,103 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-13:13]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((), (Some ([13:6-10], (Hprim Tvoid)))); 
+        f_name = ([3:10-33], "\\disallowed_case_aliases"); f_tparams = []; 
+        f_where_constraints = [];
+        f_params =
+        [{ param_annotation = (); param_type_hint = ((), (Some ([4:3-6], (Happly (([4:3-6], "\\Int"), []))))); 
+           param_is_variadic = false; param_pos = [4:7-9]; param_name = "$_"; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+           param_user_attributes = []; param_visibility = None };
+          { param_annotation = (); param_type_hint = ((), (Some ([5:3-7], (Happly (([5:3-7], "\\Bool"), []))))); 
+            param_is_variadic = false; param_pos = [5:8-10]; param_name = "$_"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None };
+          { param_annotation = (); param_type_hint = ((), (Some ([6:3-8], (Happly (([6:3-8], "\\Float"), []))))); 
+            param_is_variadic = false; param_pos = [6:9-11]; param_name = "$_"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None };
+          { param_annotation = (); param_type_hint = ((), (Some ([7:3-9], (Happly (([7:3-9], "\\String"), []))))); 
+            param_is_variadic = false; param_pos = [7:10-12]; param_name = "$_"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None };
+          { param_annotation = (); param_type_hint = ((), (Some ([8:3-9], (Happly (([8:3-9], "\\DArray"), []))))); 
+            param_is_variadic = false; param_pos = [8:10-12]; param_name = "$_"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None };
+          { param_annotation = (); param_type_hint = ((), (Some ([9:3-9], (Happly (([9:3-9], "\\VArray"), []))))); 
+            param_is_variadic = false; param_pos = [9:10-12]; param_name = "$_"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None };
+          { param_annotation = (); param_type_hint = ((), (Some ([10:3-19], (Happly (([10:3-19], "\\Varray_or_darray"), []))))); 
+            param_is_variadic = false; param_pos = [10:20-22]; param_name = "$_"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None };
+          { param_annotation = (); param_type_hint = ((), (Some ([11:3-14], (Happly (([11:3-14], "\\Vec_or_dict"), []))))); 
+            param_is_variadic = false; param_pos = [11:15-17]; param_name = "$_"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None };
+          { param_annotation = (); param_type_hint = ((), (Some ([12:3-7], (Happly (([12:3-7], "\\This"), []))))); 
+            param_is_variadic = false; param_pos = [12:8-10]; param_name = "$_"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None };
+      fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [16:1-25:13]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([25:6-10], (Hprim Tvoid)))); 
+         f_name = ([16:10-30], "\\allowed_case_aliases"); f_tparams = []; 
+         f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([17:3-7], (Happly (([17:3-7], "\\Null"), []))))); 
+            param_is_variadic = false; param_pos = [17:8-10]; param_name = "$_"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None };
+           { param_annotation = (); param_type_hint = ((), (Some ([18:3-7], (Happly (([18:3-7], "\\Void"), []))))); 
+             param_is_variadic = false; param_pos = [18:8-10]; param_name = "$_"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None };
+           { param_annotation = (); param_type_hint = ((), (Some ([19:3-6], (Happly (([19:3-6], "\\Num"), []))))); 
+             param_is_variadic = false; param_pos = [19:7-9]; param_name = "$_"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None };
+           { param_annotation = (); param_type_hint = ((), (Some ([20:3-11], (Happly (([20:3-11], "\\Resource"), []))))); 
+             param_is_variadic = false; param_pos = [20:12-14]; param_name = "$_"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None };
+           { param_annotation = (); param_type_hint = ((), (Some ([21:3-11], (Happly (([21:3-11], "\\Arraykey"), []))))); 
+             param_is_variadic = false; param_pos = [21:12-14]; param_name = "$_"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None };
+           { param_annotation = (); param_type_hint = ((), (Some ([22:3-8], (Happly (([22:3-8], "\\Mixed"), []))))); 
+             param_is_variadic = false; param_pos = [22:9-11]; param_name = "$_"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None };
+           { param_annotation = (); param_type_hint = ((), (Some ([23:3-10], (Happly (([23:3-10], "\\Nonnull"), []))))); 
+             param_is_variadic = false; param_pos = [23:11-13]; param_name = "$_"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None };
+           { param_annotation = (); param_type_hint = ((), (Some ([24:3-10], (Happly (([24:3-10], "\\Nothing"), []))))); 
+             param_is_variadic = false; param_pos = [24:11-13]; param_name = "$_"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None })
+  ]

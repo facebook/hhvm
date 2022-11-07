@@ -26,6 +26,8 @@ void t_enum::set_values(t_enum_value_list values) {
   values_.clear();
   values_raw_.clear();
   constants_.clear();
+  value_map_.clear();
+  unused_ = t_enum::default_unused;
   for (auto& value : values) {
     append(std::move(value));
   }
@@ -53,12 +55,22 @@ void t_enum::append_value(std::unique_ptr<t_enum_value> enum_value) {
 }
 
 const t_enum_value* t_enum::find_value(int32_t value) const {
-  for (const auto& ev : values_) {
-    if (ev->get_value() == value) {
-      return ev.get();
-    }
+  auto itr = value_map_.find(value);
+  if (itr != value_map_.end()) {
+    return itr->second;
   }
   return nullptr;
+}
+
+void t_enum::update_unused(int32_t val) {
+  if (unused_ != val) {
+    return;
+  }
+  // Find next unused value in O(NlnN) worst case total time.
+  for (auto itr = value_map_.upper_bound(unused_++);
+       itr != value_map_.end() && itr->first == unused_;
+       ++itr, ++unused_) {
+  }
 }
 
 } // namespace compiler

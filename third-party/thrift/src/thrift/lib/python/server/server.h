@@ -203,36 +203,41 @@ class PythonAsyncProcessor : public apache::thrift::AsyncProcessor {
     apache::thrift::ContextStack::UniquePtr ctxStack =
         preProcessRequest<ProtocolIn_, ProtocolOut_>(serializedRequest, ctx);
 
-    auto callback = std::make_unique<
-        apache::thrift::HandlerCallback<std::unique_ptr<::folly::IOBuf>>>(
-        std::move(req),
-        std::move(ctxStack),
-        return_serialized<ProtocolIn_, ProtocolOut_>,
-        throw_wrapped<ProtocolIn_, ProtocolOut_>,
-        ctx->getProtoSeqId(),
-        eb,
-        tm,
-        ctx);
     folly::via(
         this->executor,
         [this,
          prot,
          ctx,
-         callback = std::move(callback),
+         eb,
+         tm,
+         req = std::move(req),
+         ctxStack = std::move(ctxStack),
          serializedRequest = std::move(serializedRequest)]() mutable {
-          auto [promise, future] =
-              folly::makePromiseContract<std::unique_ptr<folly::IOBuf>>();
-          handlePythonServerCallback(
-              prot.protocolType(),
-              ctx,
-              std::move(promise),
-              std::move(serializedRequest));
-          std::move(future)
-              .via(this->executor)
-              .thenTry([callback = std::move(callback)](
-                           folly::Try<std::unique_ptr<folly::IOBuf>>&& t) {
-                callback->complete(std::move(t));
-              });
+          if (req && req->getShouldStartProcessing()) {
+            auto callback = std::make_unique<apache::thrift::HandlerCallback<
+                std::unique_ptr<::folly::IOBuf>>>(
+                std::move(req),
+                std::move(ctxStack),
+                return_serialized<ProtocolIn_, ProtocolOut_>,
+                throw_wrapped<ProtocolIn_, ProtocolOut_>,
+                ctx->getProtoSeqId(),
+                eb,
+                tm,
+                ctx);
+            auto [promise, future] =
+                folly::makePromiseContract<std::unique_ptr<folly::IOBuf>>();
+            handlePythonServerCallback(
+                prot.protocolType(),
+                ctx,
+                std::move(promise),
+                std::move(serializedRequest));
+            std::move(future)
+                .via(this->executor)
+                .thenTry([callback = std::move(callback)](
+                             folly::Try<std::unique_ptr<folly::IOBuf>>&& t) {
+                  callback->complete(std::move(t));
+                });
+          }
         });
   }
 
@@ -249,26 +254,31 @@ class PythonAsyncProcessor : public apache::thrift::AsyncProcessor {
     apache::thrift::ContextStack::UniquePtr ctxStack =
         preProcessRequest<ProtocolIn_, ProtocolOut_>(serializedRequest, ctx);
 
-    auto callback = std::make_unique<apache::thrift::HandlerCallbackBase>(
-        std::move(req), std::move(ctxStack), nullptr, eb, tm, ctx);
-
     folly::via(
         this->executor,
         [this,
          prot,
          ctx,
-         callback = std::move(callback),
+         eb,
+         tm,
+         req = std::move(req),
+         ctxStack = std::move(ctxStack),
          serializedRequest = std::move(serializedRequest)]() mutable {
-          auto [promise, future] = folly::makePromiseContract<folly::Unit>();
-          handlePythonServerCallbackOneway(
-              prot.protocolType(),
-              ctx,
-              std::move(promise),
-              std::move(serializedRequest));
-          std::move(future)
-              .via(this->executor)
-              .thenTry([callback = std::move(callback)](
-                           folly::Try<folly::Unit>&& /* t */) {});
+          if (req && req->getShouldStartProcessing()) {
+            auto callback =
+                std::make_unique<apache::thrift::HandlerCallbackBase>(
+                    std::move(req), std::move(ctxStack), nullptr, eb, tm, ctx);
+            auto [promise, future] = folly::makePromiseContract<folly::Unit>();
+            handlePythonServerCallbackOneway(
+                prot.protocolType(),
+                ctx,
+                std::move(promise),
+                std::move(serializedRequest));
+            std::move(future)
+                .via(this->executor)
+                .thenTry([callback = std::move(callback)](
+                             folly::Try<folly::Unit>&& /* t */) {});
+          }
         });
   }
 

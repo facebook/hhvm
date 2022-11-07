@@ -25,11 +25,17 @@ import com.facebook.thrift.server.RpcServerHandler;
 import com.facebook.thrift.server.ServerTransport;
 import com.facebook.thrift.util.SPINiftyMetrics;
 import io.rsocket.core.RSocketServer;
+import io.rsocket.frame.FrameLengthCodec;
 import io.rsocket.frame.decoder.PayloadDecoder;
 import java.net.SocketAddress;
 import reactor.core.publisher.Mono;
 
 public class RSocketServerTransport implements ServerTransport {
+
+  private static final int MAX_FRAME_SIZE =
+      Integer.parseInt(
+          System.getProperty(
+              "thrift.rsocket-max-frame-size", String.valueOf(FrameLengthCodec.FRAME_LENGTH_MASK)));
 
   private ReactorServerCloseable closable;
 
@@ -46,6 +52,7 @@ public class RSocketServerTransport implements ServerTransport {
       SPINiftyMetrics metrics = new SPINiftyMetrics();
 
       return RSocketServer.create(new ThriftSocketAcceptor(rpcServerHandler))
+          .fragment(MAX_FRAME_SIZE)
           .payloadDecoder(PayloadDecoder.ZERO_COPY)
           .bind(new ReactorServerTransport(socketAddress, config, metrics))
           .map(RSocketServerTransport::new);

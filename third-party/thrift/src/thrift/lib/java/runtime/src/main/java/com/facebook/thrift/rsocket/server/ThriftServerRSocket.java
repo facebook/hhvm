@@ -121,8 +121,7 @@ public class ThriftServerRSocket implements RSocket {
       serializeStreamMetadata(responsePayload, metadata);
       serializeResponse(requestPayload, responsePayload, data);
 
-      return createPayload(
-          alloc, responsePayload.getStreamPayloadMetadata().getCompression(), data, metadata);
+      return createPayload(alloc, null, data, metadata);
     } catch (Throwable t) {
       if (data != null && data.refCnt() > 0) {
         data.release();
@@ -189,7 +188,11 @@ public class ThriftServerRSocket implements RSocket {
 
   private static void serializeStreamMetadata(
       ServerResponsePayload responsePayload, ByteBuf metadata) {
-    ProtocolUtil.writeCompact(responsePayload.getStreamPayloadMetadata()::write0, metadata);
+    if (responsePayload.getResponseRpcMetadata() != null) {
+      ProtocolUtil.writeCompact(responsePayload.getResponseRpcMetadata()::write0, metadata);
+    } else {
+      ProtocolUtil.writeCompact(responsePayload.getStreamPayloadMetadata()::write0, metadata);
+    }
   }
 
   private static void serializeResponse(

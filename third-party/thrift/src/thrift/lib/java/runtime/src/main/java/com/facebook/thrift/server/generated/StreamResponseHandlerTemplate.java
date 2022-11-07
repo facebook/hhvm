@@ -30,43 +30,56 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
+import org.apache.thrift.ErrorBlame;
+import org.apache.thrift.ErrorClassification;
+import org.apache.thrift.PayloadAppUnknownExceptionMetdata;
+import org.apache.thrift.PayloadDeclaredExceptionMetadata;
+import org.apache.thrift.PayloadExceptionMetadata;
+import org.apache.thrift.PayloadExceptionMetadataBase;
 import org.apache.thrift.PayloadMetadata;
 import org.apache.thrift.PayloadResponseMetadata;
-import org.apache.thrift.RequestRpcMetadata;
+import org.apache.thrift.ResponseRpcMetadata;
 import org.apache.thrift.StreamPayloadMetadata;
 import org.apache.thrift.TApplicationException;
 import org.apache.thrift.TBaseException;
 import org.apache.thrift.protocol.TField;
-import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.SynchronousSink;
 
 @SuppressWarnings({"rawtypes", "deprecation"})
 abstract class StreamResponseHandlerTemplate<T> {
+  private static final Logger logger = LoggerFactory.getLogger(StreamResponseHandlerTemplate.class);
   private static final Class[] NO_KNOWN_EXCEPTIONS = new Class[0];
-
   private final SingleRequestStreamResponseDelegate<T> delegate;
   private final List<Reader> readers;
   private final String name;
-  private final Class<? extends TBaseException>[] knownExceptions;
+  private final Class<? extends TBaseException>[] functionExceptions;
+  private final Class<? extends TBaseException>[] streamExceptions;
+  private final Integer[] functionExceptionIds;
+  private final Integer[] streamExceptionIds;
 
-  @SafeVarargs
   @SuppressWarnings({"unchecked"})
   public StreamResponseHandlerTemplate(
       SingleRequestStreamResponseDelegate<T> delegate,
       List<Reader> readers,
       String name,
-      Class<? extends TBaseException>... knownExceptions) {
+      Class<? extends TBaseException>[] functionExceptions,
+      Integer[] functionExceptionIds,
+      Class<? extends TBaseException>[] streamExceptions,
+      Integer[] streamExceptionIds) {
     this.delegate = delegate;
     this.readers = readers;
     this.name = name;
-    this.knownExceptions = knownExceptions == null ? NO_KNOWN_EXCEPTIONS : knownExceptions;
+    this.functionExceptions = functionExceptions == null ? NO_KNOWN_EXCEPTIONS : functionExceptions;
+    this.functionExceptionIds = functionExceptionIds;
+    this.streamExceptions = streamExceptions == null ? NO_KNOWN_EXCEPTIONS : streamExceptions;
+    this.streamExceptionIds = streamExceptionIds;
   }
 
-  protected abstract BiConsumer<T, SynchronousSink<ServerResponsePayload>> getStreamResponseHandler(
+  protected abstract StreamHandler<T> getStreamResponseHandler(
       ServerRequestPayload requestPayload, ContextChain chain);
 
   protected abstract boolean isFirstResponseEmpty();
@@ -74,47 +87,101 @@ abstract class StreamResponseHandlerTemplate<T> {
   @SuppressWarnings("unused")
   public final Flux<ServerResponsePayload> handleStream(
       ServerRequestPayload requestPayload, ContextChain chain) {
-    chain.preRead();
-    List<Object> data = requestPayload.getData(readers);
+    final StreamHandler<T> handler = getStreamResponseHandler(requestPayload, chain);
+    try {
+      chain.preRead();
+      List<Object> data = requestPayload.getData(readers);
+      chain.postRead(data);
 
-    chain.postRead(data);
+      Flux<T> stream = delegate.apply(data);
 
-    Flux<T> stream = delegate.apply(data);
+      if (RpcResources.isForceExecutionOffEventLoop()) {
+        stream = stream.subscribeOn(RpcResources.getOffLoopScheduler());
+      }
 
-    if (RpcResources.isForceExecutionOffEventLoop()) {
-      stream = stream.subscribeOn(RpcResources.getOffLoopScheduler());
+      Flux<ServerResponsePayload> responseFlux =
+          stream
+              .handle(handler)
+              .onErrorResume(
+                  throwable -> handleException(throwable, name, requestPayload, chain, handler));
+
+      if (isFirstResponseEmpty()) {
+        responseFlux =
+            Mono.fromSupplier(() -> createEmptyFirstResponse(requestPayload))
+                .concatWith(responseFlux);
+        handler.firstResponseProcessed = true;
+      }
+
+      return responseFlux;
+    } catch (Throwable t) {
+      logger.warn("Can not handle stream", t);
+      return handleException(t, name, requestPayload, chain, handler);
     }
-
-    Flux<ServerResponsePayload> responseFlux =
-        stream
-            .handle(getStreamResponseHandler(requestPayload, chain))
-            .switchIfEmpty(handleEmpty(requestPayload.getRequestRpcMetadata(), chain))
-            .onErrorResume(throwable -> handleException(throwable, name, requestPayload, chain));
-
-    if (isFirstResponseEmpty()) {
-      responseFlux =
-          Mono.fromSupplier(() -> createEmptyFirstResponse(requestPayload))
-              .concatWith(responseFlux);
-    }
-
-    return responseFlux;
-  }
-
-  private ServerResponsePayload createEmptyFirstResponse(ServerRequestPayload requestPayload) {
-    StreamPayloadMetadata streamPayloadMetadata = createStreamPayloadMetadata(requestPayload);
-    return ServerResponsePayload.create(Writers.emptyStruct(), null, streamPayloadMetadata, false);
   }
 
   private int isKnownException(Throwable t) {
     if (t instanceof ThriftSerializable) {
       Class<? extends Throwable> aClass = t.getClass();
-      for (int i = 0; i < knownExceptions.length; i++) {
-        if (aClass == knownExceptions[i]) {
-          return i + 1;
+      for (int i = 0; i < functionExceptions.length; i++) {
+        if (aClass == functionExceptions[i]) {
+          return functionExceptionIds[i];
+        }
+      }
+      for (int i = 0; i < streamExceptions.length; i++) {
+        if (aClass == streamExceptions[i]) {
+          return streamExceptionIds[i];
         }
       }
     }
     return -1;
+  }
+
+  private Flux<ServerResponsePayload> handleException(
+      Throwable throwable,
+      String name,
+      ServerRequestPayload requestPayload,
+      ContextChain chain,
+      StreamHandler handler) {
+    int fieldId = isKnownException(throwable);
+    if (fieldId == -1) {
+      return handleUnknownException(
+          throwable, name, requestPayload, chain, handler.isFirstResponseProcessed());
+    }
+    return handleKnownException(
+        throwable, requestPayload, chain, fieldId, handler.isFirstResponseProcessed());
+  }
+
+  private Flux<ServerResponsePayload> handleKnownException(
+      Throwable throwable,
+      ServerRequestPayload requestPayload,
+      ContextChain chain,
+      int fieldId,
+      boolean streamException) {
+    Writer knownExceptionWriter = createKnownExceptionWriter(throwable, chain, fieldId);
+    if (streamException) {
+      return Flux.just(
+          ServerResponsePayload.createWithTApplicationException(
+              knownExceptionWriter,
+              null,
+              createStreamMetadataDeclaredException(requestPayload),
+              true));
+    }
+    return Flux.just(
+        ServerResponsePayload.createWithTApplicationException(
+            knownExceptionWriter, createRpcMetadataDeclaredException(requestPayload), null, false));
+  }
+
+  protected static ResponseRpcMetadata createResponseRpcMetadata(
+      ServerRequestPayload requestPayload) {
+    return new ResponseRpcMetadata.Builder()
+        .setPayloadMetadata(
+            PayloadMetadata.fromResponseMetadata(new PayloadResponseMetadata.Builder().build()))
+        .build();
+  }
+
+  private ServerResponsePayload createEmptyFirstResponse(ServerRequestPayload requestPayload) {
+    ResponseRpcMetadata metadata = createResponseRpcMetadata(requestPayload);
+    return ServerResponsePayload.create(Writers.emptyStruct(), metadata, null, true);
   }
 
   private Writer createKnownExceptionWriter(Throwable t, ContextChain chain, final int fieldId) {
@@ -134,32 +201,25 @@ abstract class StreamResponseHandlerTemplate<T> {
     };
   }
 
-  private Mono<ServerResponsePayload> handleEmpty(
-      RequestRpcMetadata requestRpcMetadata, ContextChain chain) {
-    return Mono.fromSupplier(
-        () -> {
-          TApplicationException tApplicationException =
-              new TApplicationException(
-                  TApplicationException.MISSING_RESULT, "method " + name + " returned null");
-
-          return RpcPayloadUtil.fromTApplicationException(
-              tApplicationException, requestRpcMetadata, chain);
-        });
+  private Writer createUnknownExceptionWriter(TApplicationException t, ContextChain chain) {
+    return protocol -> {
+      try {
+        chain.preWriteException(t);
+        chain.undeclaredUserException(t);
+        t.write(protocol);
+        chain.postWriteException(t);
+      } catch (Throwable e) {
+        throw Exceptions.propagate(e);
+      }
+    };
   }
 
-  private Publisher<? extends ServerResponsePayload> handleException(
-      Throwable throwable, String name, ServerRequestPayload requestPayload, ContextChain chain) {
-
-    int fieldId = isKnownException(throwable);
-    if (fieldId == -1) {
-      return handleUnknownException(throwable, name, requestPayload, chain);
-    } else {
-      return handleKnownException(throwable, requestPayload, chain, fieldId);
-    }
-  }
-
-  private Publisher<? extends ServerResponsePayload> handleUnknownException(
-      Throwable throwable, String name, ServerRequestPayload requestPayload, ContextChain chain) {
+  private Flux<ServerResponsePayload> handleUnknownException(
+      Throwable throwable,
+      String name,
+      ServerRequestPayload requestPayload,
+      ContextChain chain,
+      boolean streamException) {
     String errorMessage =
         String.format(
             "Internal error processing %s: %s",
@@ -167,18 +227,26 @@ abstract class StreamResponseHandlerTemplate<T> {
     TApplicationException exception =
         new TApplicationException(TApplicationException.INTERNAL_ERROR, errorMessage);
     exception.initCause(throwable);
-    ServerResponsePayload serverResponsePayload =
-        RpcPayloadUtil.fromTApplicationException(
-            exception, requestPayload.getRequestRpcMetadata(), chain);
-    return Mono.just(serverResponsePayload);
-  }
 
-  private Publisher<? extends ServerResponsePayload> handleKnownException(
-      Throwable throwable, ServerRequestPayload requestPayload, ContextChain chain, int fieldId) {
-    Writer knownExceptionWriter = createKnownExceptionWriter(throwable, chain, fieldId);
-    return Mono.just(
-        RpcPayloadUtil.createServerResponsePayload(
-            requestPayload, knownExceptionWriter, throwable.getMessage()));
+    Writer unknownExceptionWriter = createUnknownExceptionWriter(exception, chain);
+
+    if (streamException) {
+      return Flux.just(
+          ServerResponsePayload.createWithTApplicationException(
+              unknownExceptionWriter,
+              null,
+              createStreamMetadataUndeclaredException(
+                  requestPayload, throwable.getClass().getName(), throwable.getMessage()),
+              true));
+    }
+
+    return Flux.just(
+        ServerResponsePayload.createWithTApplicationException(
+            unknownExceptionWriter,
+            createRpcMetadataUndeclaredException(
+                requestPayload, throwable.getClass().getName(), throwable.getMessage()),
+            null,
+            false));
   }
 
   protected static Map<String, byte[]> convertOtherData(Map<String, String> otherData) {
@@ -191,6 +259,88 @@ abstract class StreamResponseHandlerTemplate<T> {
       }
       return converted;
     }
+  }
+
+  private static StreamPayloadMetadata createStreamMetadataDeclaredException(
+      ServerRequestPayload requestPayload) {
+    return new StreamPayloadMetadata.Builder()
+        .setOtherMetadata(
+            convertOtherData(requestPayload.getRequestRpcMetadata().getOtherMetadata()))
+        .setPayloadMetadata(
+            PayloadMetadata.fromExceptionMetadata(
+                new PayloadExceptionMetadataBase.Builder()
+                    .setMetadata(
+                        PayloadExceptionMetadata.fromDeclaredException(
+                            new PayloadDeclaredExceptionMetadata.Builder()
+                                .setErrorClassification(
+                                    new ErrorClassification.Builder()
+                                        .setBlame(ErrorBlame.SERVER)
+                                        .build())
+                                .build()))
+                    .build()))
+        .build();
+  }
+
+  private static StreamPayloadMetadata createStreamMetadataUndeclaredException(
+      ServerRequestPayload requestPayload, String name, String msg) {
+    return new StreamPayloadMetadata.Builder()
+        .setOtherMetadata(
+            convertOtherData(requestPayload.getRequestRpcMetadata().getOtherMetadata()))
+        .setPayloadMetadata(
+            PayloadMetadata.fromExceptionMetadata(
+                new PayloadExceptionMetadataBase.Builder()
+                    .setNameUtf8(name)
+                    .setWhatUtf8(msg)
+                    .setMetadata(
+                        PayloadExceptionMetadata.fromAppUnknownException(
+                            new PayloadAppUnknownExceptionMetdata.Builder()
+                                .setErrorClassification(
+                                    new ErrorClassification.Builder()
+                                        .setBlame(ErrorBlame.SERVER)
+                                        .build())
+                                .build()))
+                    .build()))
+        .build();
+  }
+
+  private static ResponseRpcMetadata createRpcMetadataDeclaredException(
+      ServerRequestPayload requestPayload) {
+    return new ResponseRpcMetadata.Builder()
+        .setOtherMetadata(requestPayload.getRequestRpcMetadata().getOtherMetadata())
+        .setPayloadMetadata(
+            PayloadMetadata.fromExceptionMetadata(
+                new PayloadExceptionMetadataBase.Builder()
+                    .setMetadata(
+                        PayloadExceptionMetadata.fromDeclaredException(
+                            new PayloadDeclaredExceptionMetadata.Builder()
+                                .setErrorClassification(
+                                    new ErrorClassification.Builder()
+                                        .setBlame(ErrorBlame.SERVER)
+                                        .build())
+                                .build()))
+                    .build()))
+        .build();
+  }
+
+  private static ResponseRpcMetadata createRpcMetadataUndeclaredException(
+      ServerRequestPayload requestPayload, String name, String msg) {
+    return new ResponseRpcMetadata.Builder()
+        .setOtherMetadata(requestPayload.getRequestRpcMetadata().getOtherMetadata())
+        .setPayloadMetadata(
+            PayloadMetadata.fromExceptionMetadata(
+                new PayloadExceptionMetadataBase.Builder()
+                    .setNameUtf8(name)
+                    .setWhatUtf8(msg)
+                    .setMetadata(
+                        PayloadExceptionMetadata.fromAppUnknownException(
+                            new PayloadAppUnknownExceptionMetdata.Builder()
+                                .setErrorClassification(
+                                    new ErrorClassification.Builder()
+                                        .setBlame(ErrorBlame.SERVER)
+                                        .build())
+                                .build()))
+                    .build()))
+        .build();
   }
 
   protected static StreamPayloadMetadata createStreamPayloadMetadata(

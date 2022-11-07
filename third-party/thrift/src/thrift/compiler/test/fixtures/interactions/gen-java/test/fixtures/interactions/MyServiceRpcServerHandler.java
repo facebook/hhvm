@@ -65,7 +65,12 @@ public class MyServiceRpcServerHandler
       _first_ResponseWriterFactory_serialize,
       _ResponseWriterFactory_serialize,
       _serializeReaders,
-      "serialize"    );
+      "serialize",
+      new Class[]{  },
+      new Integer[]{  },
+      new Class[]{  },
+      new Integer[]{  }
+    );
 
 
   }

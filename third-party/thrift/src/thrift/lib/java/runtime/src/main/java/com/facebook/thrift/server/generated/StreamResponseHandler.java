@@ -21,10 +21,9 @@ import com.facebook.thrift.payload.Reader;
 import com.facebook.thrift.payload.ServerRequestPayload;
 import com.facebook.thrift.payload.ServerResponsePayload;
 import com.facebook.thrift.payload.Writer;
+import com.facebook.thrift.util.Writers;
 import java.util.List;
-import java.util.function.BiConsumer;
-import org.apache.thrift.PayloadMetadata;
-import org.apache.thrift.PayloadResponseMetadata;
+import org.apache.thrift.ResponseRpcMetadata;
 import org.apache.thrift.StreamPayloadMetadata;
 import org.apache.thrift.TBaseException;
 import reactor.core.publisher.SynchronousSink;
@@ -33,14 +32,23 @@ import reactor.core.publisher.SynchronousSink;
 public class StreamResponseHandler<T> extends StreamResponseHandlerTemplate<T> {
   private final ResponseWriterFactory responseWriterFactory;
 
-  @SafeVarargs
   public StreamResponseHandler(
       SingleRequestStreamResponseDelegate<T> delegate,
       ResponseWriterFactory responseWriterFactory,
       List<Reader> readers,
       String name,
-      Class<? extends TBaseException>... knownExceptions) {
-    super(delegate, readers, name, knownExceptions);
+      Class<? extends TBaseException>[] functionExceptions,
+      Integer[] functionExceptionIds,
+      Class<? extends TBaseException>[] streamExceptions,
+      Integer[] streamExceptionIds) {
+    super(
+        delegate,
+        readers,
+        name,
+        functionExceptions,
+        functionExceptionIds,
+        streamExceptions,
+        streamExceptionIds);
     this.responseWriterFactory = responseWriterFactory;
   }
 
@@ -50,48 +58,36 @@ public class StreamResponseHandler<T> extends StreamResponseHandlerTemplate<T> {
   }
 
   @Override
-  protected BiConsumer<T, SynchronousSink<ServerResponsePayload>> getStreamResponseHandler(
+  protected StreamHandler getStreamResponseHandler(
       ServerRequestPayload requestPayload, ContextChain chain) {
     return new InnerStreamResponseHandler<>(requestPayload, chain, responseWriterFactory);
   }
 
-  private static class InnerStreamResponseHandler<T>
-      implements BiConsumer<T, SynchronousSink<ServerResponsePayload>> {
-
-    private final ServerRequestPayload requestPayload;
-
-    private final ContextChain chain;
-
-    private final ResponseWriterFactory responseWriterFactory;
+  private static class InnerStreamResponseHandler<T> extends StreamHandler<T> {
 
     public InnerStreamResponseHandler(
         ServerRequestPayload requestPayload,
         ContextChain chain,
         ResponseWriterFactory responseWriterFactory) {
-      this.requestPayload = requestPayload;
-      this.chain = chain;
-      this.responseWriterFactory = responseWriterFactory;
+      super(requestPayload, chain, responseWriterFactory);
     }
 
     @Override
     public void accept(T data, SynchronousSink<ServerResponsePayload> sink) {
       Writer writer = responseWriterFactory.createResponseWriter(data, chain, requestPayload);
       doHandle(writer, sink);
+      firstResponseProcessed = true;
     }
 
     private void doHandle(Writer writer, SynchronousSink<ServerResponsePayload> sink) {
-      StreamPayloadMetadata metadata = createStreamPayloadMetadata();
+      StreamPayloadMetadata metadata = createStreamPayloadMetadata(requestPayload);
       ServerResponsePayload payload = ServerResponsePayload.create(writer, null, metadata, true);
       sink.next(payload);
     }
 
-    private StreamPayloadMetadata createStreamPayloadMetadata() {
-      return new StreamPayloadMetadata.Builder()
-          .setOtherMetadata(
-              convertOtherData(requestPayload.getRequestRpcMetadata().getOtherMetadata()))
-          .setPayloadMetadata(
-              PayloadMetadata.fromResponseMetadata(PayloadResponseMetadata.defaultInstance()))
-          .build();
+    private ServerResponsePayload createEmptyFirstResponse(ServerRequestPayload requestPayload) {
+      ResponseRpcMetadata metadata = createResponseRpcMetadata(requestPayload);
+      return ServerResponsePayload.create(Writers.emptyStruct(), metadata, null, true);
     }
   }
 }

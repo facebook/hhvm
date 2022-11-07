@@ -23,7 +23,7 @@ import com.facebook.thrift.payload.ServerRequestPayload;
 import com.facebook.thrift.payload.ServerResponsePayload;
 import com.facebook.thrift.payload.Writer;
 import java.util.List;
-import java.util.function.BiConsumer;
+import org.apache.thrift.ResponseRpcMetadata;
 import org.apache.thrift.StreamPayloadMetadata;
 import org.apache.thrift.TBaseException;
 import reactor.core.publisher.SynchronousSink;
@@ -34,15 +34,24 @@ public final class StreamWithFirstResponseHandler<T, K>
   private final ResponseWriterFactory firstResponseWriterFactory;
   private final ResponseWriterFactory responseWriterFactory;
 
-  @SafeVarargs
   public StreamWithFirstResponseHandler(
       SingleRequestStreamResponseDelegate<StreamResponse<T, K>> delegate,
       ResponseWriterFactory firstResponseWriterFactory,
       ResponseWriterFactory responseWriterFactory,
       List<Reader> readers,
       String name,
-      Class<? extends TBaseException>... knownExceptions) {
-    super(delegate, readers, name, knownExceptions);
+      Class<? extends TBaseException>[] functionExceptions,
+      Integer[] functionExceptionIds,
+      Class<? extends TBaseException>[] streamExceptions,
+      Integer[] streamExceptionIds) {
+    super(
+        delegate,
+        readers,
+        name,
+        functionExceptions,
+        functionExceptionIds,
+        streamExceptions,
+        streamExceptionIds);
     this.firstResponseWriterFactory = firstResponseWriterFactory;
     this.responseWriterFactory = responseWriterFactory;
   }
@@ -53,33 +62,23 @@ public final class StreamWithFirstResponseHandler<T, K>
   }
 
   @Override
-  protected BiConsumer<StreamResponse<T, K>, SynchronousSink<ServerResponsePayload>>
-      getStreamResponseHandler(ServerRequestPayload requestPayload, ContextChain chain) {
+  protected StreamHandler getStreamResponseHandler(
+      ServerRequestPayload requestPayload, ContextChain chain) {
     return new InnerStreamResponseHandler<>(
         requestPayload, chain, firstResponseWriterFactory, responseWriterFactory);
   }
 
-  private static class InnerStreamResponseHandler<T, K>
-      implements BiConsumer<StreamResponse<T, K>, SynchronousSink<ServerResponsePayload>> {
-    private boolean firstResponseProcessed = false;
-
-    private final ServerRequestPayload requestPayload;
-
-    private final ContextChain chain;
+  private class InnerStreamResponseHandler<T> extends StreamHandler<StreamResponse<T, K>> {
 
     private final ResponseWriterFactory firstResponseWriterFactory;
-
-    private final ResponseWriterFactory responseWriterFactory;
 
     public InnerStreamResponseHandler(
         ServerRequestPayload requestPayload,
         ContextChain chain,
         ResponseWriterFactory firstResponseWriterFactory,
         ResponseWriterFactory responseWriterFactory) {
-      this.requestPayload = requestPayload;
-      this.chain = chain;
+      super(requestPayload, chain, responseWriterFactory);
       this.firstResponseWriterFactory = firstResponseWriterFactory;
-      this.responseWriterFactory = responseWriterFactory;
     }
 
     @Override
@@ -90,11 +89,11 @@ public final class StreamWithFirstResponseHandler<T, K>
       } else {
         handleFirst(streamResponse, sink);
       }
+      firstResponseProcessed = true;
     }
 
     private void handleFirst(
         StreamResponse<T, K> streamResponse, SynchronousSink<ServerResponsePayload> sink) {
-      firstResponseProcessed = true;
       T firstResponse = streamResponse.getFirstResponse();
       if (firstResponse == null) {
         sink.error(new NullPointerException("the first response must not be null"));
@@ -109,7 +108,7 @@ public final class StreamWithFirstResponseHandler<T, K>
         StreamResponse<T, K> streamResponse, SynchronousSink<ServerResponsePayload> sink) {
       K data = streamResponse.getData();
       if (data == null) {
-        sink.error(new NullPointerException("the response is must not be null"));
+        sink.error(new NullPointerException("the response must not be null"));
       } else {
         Writer writer = responseWriterFactory.createResponseWriter(data, chain, requestPayload);
         doHandle(writer, sink);
@@ -117,9 +116,15 @@ public final class StreamWithFirstResponseHandler<T, K>
     }
 
     private void doHandle(Writer writer, SynchronousSink<ServerResponsePayload> sink) {
-      StreamPayloadMetadata metadata = createStreamPayloadMetadata(requestPayload);
-      ServerResponsePayload payload = ServerResponsePayload.create(writer, null, metadata, true);
-      sink.next(payload);
+      if (firstResponseProcessed) {
+        StreamPayloadMetadata metadata = createStreamPayloadMetadata(requestPayload);
+        ServerResponsePayload payload = ServerResponsePayload.create(writer, null, metadata, true);
+        sink.next(payload);
+      } else {
+        ResponseRpcMetadata metadata = createResponseRpcMetadata(requestPayload);
+        ServerResponsePayload payload = ServerResponsePayload.create(writer, metadata, null, true);
+        sink.next(payload);
+      }
     }
   }
 }

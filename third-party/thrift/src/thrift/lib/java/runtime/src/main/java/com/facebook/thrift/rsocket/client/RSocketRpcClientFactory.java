@@ -26,6 +26,7 @@ import com.facebook.thrift.util.RpcClientUtils;
 import com.facebook.thrift.util.resources.RpcResources;
 import io.netty.channel.EventLoopGroup;
 import io.rsocket.core.RSocketConnector;
+import io.rsocket.frame.FrameLengthCodec;
 import io.rsocket.frame.decoder.PayloadDecoder;
 import java.net.SocketAddress;
 import reactor.core.publisher.Mono;
@@ -33,7 +34,8 @@ import reactor.core.publisher.Mono;
 public class RSocketRpcClientFactory implements RpcClientFactory {
   private static final int MAX_FRAME_SIZE =
       Integer.parseInt(
-          System.getProperty("thrift.rsocket-max-frame-size", String.valueOf((1 << 24) - 1)));
+          System.getProperty(
+              "thrift.rsocket-max-frame-size", String.valueOf(FrameLengthCodec.FRAME_LENGTH_MASK)));
 
   static {
     ReactorHooks.init();

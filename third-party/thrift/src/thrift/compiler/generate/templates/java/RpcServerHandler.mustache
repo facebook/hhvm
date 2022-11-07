@@ -86,9 +86,11 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
       _delegate_{{function:javaName}},
       _ResponseWriterFactory_{{function:javaName}},
       _{{function:javaName}}Readers,
-      "{{function:javaName}}"{{#function:exceptions?}},
-      {{#function:exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}.class{{^last?}}, {{/last?}}{{/function:exceptions}}
-      {{/function:exceptions?}}
+      "{{function:javaName}}",
+      new Class[]{ {{#function:exceptions?}}{{#function:exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}.class{{^last?}},{{/last?}}{{/function:exceptions}}{{/function:exceptions?}} },
+      new Integer[]{ {{#function:exceptions?}}{{#function:exceptions}}{{field:key}}{{^last?}},{{/last?}}{{/function:exceptions}}{{/function:exceptions?}} },
+      new Class[]{ {{#function:stream_exceptions?}}{{#function:stream_exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}.class{{^last?}},{{/last?}}{{/function:stream_exceptions}}{{/function:stream_exceptions?}} },
+      new Integer[]{ {{#function:stream_exceptions?}}{{#function:stream_exceptions}}{{field:key}}{{^last?}},{{/last?}}{{/function:stream_exceptions}}{{/function:stream_exceptions?}} }
     );
     {{/function:stream_has_first_response?}}
     {{#function:stream_has_first_response?}}
@@ -97,9 +99,11 @@ public class {{service:javaCapitalName}}RpcServerHandler {{#service:extends}} ex
       _first_ResponseWriterFactory_{{function:javaName}},
       _ResponseWriterFactory_{{function:javaName}},
       _{{function:javaName}}Readers,
-      "{{function:javaName}}"{{#function:exceptions?}},
-      {{#function:exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}.class{{^last?}}, {{/last?}}{{/function:exceptions}}
-      {{/function:exceptions?}}
+      "{{function:javaName}}",
+      new Class[]{ {{#function:exceptions?}}{{#function:exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}.class{{^last?}},{{/last?}}{{/function:exceptions}}{{/function:exceptions?}} },
+      new Integer[]{ {{#function:exceptions?}}{{#function:exceptions}}{{field:key}}{{^last?}},{{/last?}}{{/function:exceptions}}{{/function:exceptions?}} },
+      new Class[]{ {{#function:stream_exceptions?}}{{#function:stream_exceptions}}{{#field:type}}{{> BoxedType}}{{/field:type}}.class{{^last?}},{{/last?}}{{/function:stream_exceptions}}{{/function:stream_exceptions?}} },
+      new Integer[]{ {{#function:stream_exceptions?}}{{#function:stream_exceptions}}{{field:key}}{{^last?}},{{/last?}}{{/function:stream_exceptions}}{{/function:stream_exceptions?}} }
     );
     {{/function:stream_has_first_response?}}
 

@@ -81,7 +81,12 @@ public class PubSubStreamingServiceRpcServerHandler
       _delegate_returnstream,
       _ResponseWriterFactory_returnstream,
       _returnstreamReaders,
-      "returnstream"    );
+      "returnstream",
+      new Class[]{  },
+      new Integer[]{  },
+      new Class[]{  },
+      new Integer[]{  }
+    );
 
     _methodMap.put("streamthrows", this);
     _streamthrowsReaders = _create_streamthrows_request_readers();
@@ -97,7 +102,12 @@ public class PubSubStreamingServiceRpcServerHandler
       _delegate_streamthrows,
       _ResponseWriterFactory_streamthrows,
       _streamthrowsReaders,
-      "streamthrows"    );
+      "streamthrows",
+      new Class[]{  },
+      new Integer[]{  },
+      new Class[]{ test.fixtures.stream.FooStreamEx.class },
+      new Integer[]{ 1 }
+    );
 
     _methodMap.put("servicethrows", this);
     _servicethrowsReaders = _create_servicethrows_request_readers();
@@ -114,7 +124,10 @@ public class PubSubStreamingServiceRpcServerHandler
       _ResponseWriterFactory_servicethrows,
       _servicethrowsReaders,
       "servicethrows",
-      test.fixtures.stream.FooEx.class
+      new Class[]{ test.fixtures.stream.FooEx.class },
+      new Integer[]{ 1 },
+      new Class[]{  },
+      new Integer[]{  }
     );
 
     _methodMap.put("servicethrows2", this);
@@ -132,7 +145,10 @@ public class PubSubStreamingServiceRpcServerHandler
       _ResponseWriterFactory_servicethrows2,
       _servicethrows2Readers,
       "servicethrows2",
-      test.fixtures.stream.FooEx.class, test.fixtures.stream.FooEx2.class
+      new Class[]{ test.fixtures.stream.FooEx.class,test.fixtures.stream.FooEx2.class },
+      new Integer[]{ 1,2 },
+      new Class[]{  },
+      new Integer[]{  }
     );
 
     _methodMap.put("boththrows", this);
@@ -150,7 +166,10 @@ public class PubSubStreamingServiceRpcServerHandler
       _ResponseWriterFactory_boththrows,
       _boththrowsReaders,
       "boththrows",
-      test.fixtures.stream.FooEx.class
+      new Class[]{ test.fixtures.stream.FooEx.class },
+      new Integer[]{ 1 },
+      new Class[]{ test.fixtures.stream.FooStreamEx.class },
+      new Integer[]{ 1 }
     );
 
     _methodMap.put("responseandstreamstreamthrows", this);
@@ -168,7 +187,12 @@ public class PubSubStreamingServiceRpcServerHandler
       _first_ResponseWriterFactory_responseandstreamstreamthrows,
       _ResponseWriterFactory_responseandstreamstreamthrows,
       _responseandstreamstreamthrowsReaders,
-      "responseandstreamstreamthrows"    );
+      "responseandstreamstreamthrows",
+      new Class[]{  },
+      new Integer[]{  },
+      new Class[]{ test.fixtures.stream.FooStreamEx.class },
+      new Integer[]{ 1 }
+    );
 
     _methodMap.put("responseandstreamservicethrows", this);
     _responseandstreamservicethrowsReaders = _create_responseandstreamservicethrows_request_readers();
@@ -186,7 +210,10 @@ public class PubSubStreamingServiceRpcServerHandler
       _ResponseWriterFactory_responseandstreamservicethrows,
       _responseandstreamservicethrowsReaders,
       "responseandstreamservicethrows",
-      test.fixtures.stream.FooEx.class
+      new Class[]{ test.fixtures.stream.FooEx.class },
+      new Integer[]{ 1 },
+      new Class[]{  },
+      new Integer[]{  }
     );
 
     _methodMap.put("responseandstreamboththrows", this);
@@ -205,7 +232,10 @@ public class PubSubStreamingServiceRpcServerHandler
       _ResponseWriterFactory_responseandstreamboththrows,
       _responseandstreamboththrowsReaders,
       "responseandstreamboththrows",
-      test.fixtures.stream.FooEx.class
+      new Class[]{ test.fixtures.stream.FooEx.class },
+      new Integer[]{ 1 },
+      new Class[]{ test.fixtures.stream.FooStreamEx.class },
+      new Integer[]{ 1 }
     );
 
     _methodMap.put("returnstreamFast", this);
@@ -223,7 +253,12 @@ public class PubSubStreamingServiceRpcServerHandler
       _delegate_returnstreamFast,
       _ResponseWriterFactory_returnstreamFast,
       _returnstreamFastReaders,
-      "returnstreamFast"    );
+      "returnstreamFast",
+      new Class[]{  },
+      new Integer[]{  },
+      new Class[]{  },
+      new Integer[]{  }
+    );
 
 
   }

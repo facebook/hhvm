@@ -204,15 +204,17 @@ public class RpcServerUtils {
         throw new IllegalArgumentException("unknown transport type: " + transportType);
     }
 
+    final int port = config.getPort() == 0 ? RpcServerUtils.findFreePort() : config.getPort();
+
     if (config.isEnableUDS()) {
       return transportFactory.createServerTransport(
           new DomainSocketAddress(config.getUdsPath()), rpcServerHandler);
     } else if (config.isBindAddressEnabled()) {
       return transportFactory.createServerTransport(
-          new InetSocketAddress(config.getBindAddress(), config.getPort()), rpcServerHandler);
+          new InetSocketAddress(config.getBindAddress(), port), rpcServerHandler);
     } else {
       return transportFactory.createServerTransport(
-          new InetSocketAddress("localhost", config.getPort()), rpcServerHandler);
+          new InetSocketAddress("localhost", port), rpcServerHandler);
     }
   }
 

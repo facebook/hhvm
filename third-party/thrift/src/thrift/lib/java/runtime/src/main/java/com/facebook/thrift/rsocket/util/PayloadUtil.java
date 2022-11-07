@@ -33,6 +33,10 @@ public final class PayloadUtil {
     return ByteBufPayload.create(data, metadata);
   }
 
+  public static Payload createPayload(final ByteBuf data, final ByteBuf metadata) {
+    return ByteBufPayload.create(data, metadata);
+  }
+
   public static ByteBuf getData(
       final ByteBufAllocator alloc, final CompressionAlgorithm algorithm, final Payload payload) {
     return payload.sliceData();

@@ -4,11 +4,15 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::ffi::OsStr;
+use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
+use std::sync::Mutex;
 
 use anyhow::bail;
 use anyhow::Result;
+
+pub type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
 
 /// Took this from https://docs.rs/once_cell/latest/once_cell/index.html#lazily-compiled-regex
 /// with this macro we can avoid re-initializing regexes, which are expensive to do

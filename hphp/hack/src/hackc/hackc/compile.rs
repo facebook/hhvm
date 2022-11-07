@@ -48,6 +48,7 @@ use tempdir::TempDir;
 use ty::reason::NReason;
 use ty::reason::Reason;
 
+use crate::util::SyncWrite;
 use crate::FileOpts;
 
 #[derive(Parser, Debug)]
@@ -72,8 +73,6 @@ pub(crate) struct SingleFileOpts {
     #[clap(long = "verbose", parse(from_occurrences))]
     pub(crate) verbosity: isize,
 }
-
-type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
 
 pub fn run(opts: &mut Opts) -> Result<()> {
     if opts.single_file_opts.verbosity > 1 {

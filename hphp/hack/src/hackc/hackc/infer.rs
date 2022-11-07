@@ -5,9 +5,9 @@
 
 use std::fs;
 use std::io;
-//use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
+use std::sync::Mutex;
 
 use anyhow::Result;
 use clap::Parser;
@@ -15,10 +15,12 @@ use compile::Profile;
 use decl_provider::SelfProvider;
 use ocamlrep::rc::RcOc;
 use parser_core_types::source_text::SourceText;
+use rayon::prelude::*;
 use relative_path::Prefix;
 use relative_path::RelativePath;
 
 use crate::compile::SingleFileOpts;
+use crate::util::SyncWrite;
 use crate::FileOpts;
 
 #[derive(Parser, Debug)]
@@ -45,29 +47,51 @@ pub struct Opts {
 pub fn run(opts: Opts) -> Result<()> {
     textual::KEEP_GOING.store(opts.keep_going, std::sync::atomic::Ordering::Release);
 
+    let writer: SyncWrite = match &opts.output_file {
+        None => Mutex::new(Box::new(io::stdout())),
+        Some(output_file) => Mutex::new(Box::new(fs::File::create(output_file)?)),
+    };
+
     let files = opts.files.gather_input_files()?;
 
-    for path in files {
-        let status = safe_compile_php_file(&path, &opts);
-        match status {
-            Err(err) if opts.keep_going => {
-                eprintln!("Failed to compile {}: {}", path.display(), err);
-            }
-            other => other?,
-        }
+    if opts.keep_going {
+        files
+            .into_par_iter()
+            .for_each(|path| match process_single_file(&path, &opts, &writer) {
+                Ok(_) => (),
+                Err(err) => {
+                    eprintln!("Failed to compile {}: {}", path.display(), err)
+                }
+            })
+    } else {
+        files
+            .into_par_iter()
+            .try_for_each(|path| process_single_file(&path, &opts, &writer))?
     }
 
     Ok(())
 }
 
-fn safe_compile_php_file(path: &Path, opts: &Opts) -> Result<()> {
+fn process_single_file(path: &Path, opts: &Opts, writer: &SyncWrite) -> Result<()> {
+    match convert_single_file(path, opts) {
+        Ok(textual) => writer
+            .lock()
+            .unwrap()
+            .write_all(&textual)
+            .map_err(|e| e.into()),
+        Err(err) => Err(err),
+    }
+}
+
+fn convert_single_file(path: &Path, opts: &Opts) -> Result<Vec<u8>> {
     let content = fs::read(&path)?;
 
     let action = || {
         let pre_alloc = bumpalo::Bump::default();
         build_ir(&pre_alloc, path, &content, &opts.single_file_opts).and_then(|unit| {
-            let mut stdout = io::stdout();
-            textual::textual_writer(&mut stdout, path, unit, opts.no_builtins)
+            let mut output = Vec::new();
+            textual::textual_writer(&mut output, path, unit, opts.no_builtins)?;
+            Ok(output)
         })
     };
 

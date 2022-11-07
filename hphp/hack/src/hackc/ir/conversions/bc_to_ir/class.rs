@@ -122,7 +122,7 @@ fn convert_property<'a>(
         .map(|a| convert::convert_attribute(a, strings))
         .collect_vec();
     ir::Property {
-        name: prop.name,
+        name: ir::PropId::from_hhbc(prop.name, strings),
         flags: prop.flags,
         attributes,
         visibility: prop.visibility,

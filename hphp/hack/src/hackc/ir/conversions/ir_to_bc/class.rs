@@ -139,7 +139,7 @@ pub(crate) fn convert_class<'a>(
 
 fn convert_property<'a>(src: ir::Property<'a>, strings: &StringCache<'a>) -> hhbc::Property<'a> {
     hhbc::Property {
-        name: src.name,
+        name: strings.lookup_prop_name(src.name),
         flags: src.flags,
         attributes: convert::convert_attributes(src.attributes, strings),
         visibility: src.visibility,

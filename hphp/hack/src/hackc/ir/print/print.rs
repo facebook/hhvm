@@ -1741,7 +1741,7 @@ fn print_property(w: &mut dyn Write, property: &Property<'_>, strings: &StringIn
     writeln!(
         w,
         "  {} {}{}",
-        FmtIdentifier(property.name.as_bytes()),
+        FmtIdentifierId(property.name.id, strings),
         FmtAttr(property.flags),
         FmtSep::new(" <", ", ", ">", property.attributes.iter(), |w, attr| {
             write!(

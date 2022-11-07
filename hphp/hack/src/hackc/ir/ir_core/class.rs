@@ -12,6 +12,7 @@ use crate::ClassId;
 use crate::CtxConstant;
 use crate::HackConstant;
 use crate::Method;
+use crate::PropId;
 use crate::TraitReqKind;
 use crate::TypeConstant;
 use crate::TypedValue;
@@ -65,7 +66,7 @@ pub struct Class<'a> {
 
 #[derive(Clone, Debug)]
 pub struct Property<'arena> {
-    pub name: hhbc::PropName<'arena>,
+    pub name: PropId,
     pub flags: Attr,
     pub attributes: Vec<Attribute<'arena>>,
     pub visibility: hhbc::Visibility,

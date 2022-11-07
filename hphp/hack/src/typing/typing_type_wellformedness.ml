@@ -154,7 +154,8 @@ and hint_ ~in_signature env p h_ =
   | Hnothing ->
     []
   | Hoption (_, Hprim Tnull) ->
-    [Typing_error.(primary @@ Primary.Option_null p)]
+    Lint.option_null p;
+    []
   | Hoption (_, Hprim Tvoid) ->
     [
       Typing_error.(
@@ -166,7 +167,9 @@ and hint_ ~in_signature env p h_ =
         primary
         @@ Primary.Option_return_only_typehint { pos = p; kind = `noreturn });
     ]
-  | Hoption (_, Hmixed) -> [Typing_error.(primary @@ Primary.Option_mixed p)]
+  | Hoption (_, Hmixed) ->
+    Lint.option_mixed p;
+    []
   | Hvec_or_dict (ty1, ty2) -> hint_opt env ty1 @ hint env ty2
   | Htuple hl
   | Hunion hl

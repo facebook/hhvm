@@ -345,7 +345,7 @@ module Typing = struct
     (* | NullableParameterDEPRECATED [@value 4065] *)
     | OptionReturnOnlyTypehint [@value 4066]
     | ObjectString [@value 4067]
-    | OptionMixed [@value 4068]
+    (* | OptionMixedDEPRECATED [@value 4068] *)
     (* | OverflowDEPRECATED [@value 4069] *)
     | OverrideFinal [@value 4070]
     | OverridePerTrait [@value 4071]
@@ -572,7 +572,7 @@ module Typing = struct
     | UnserializableType [@value 4292]
     (* | InconsistentMutabilityDEPRECATED [@value 4293] *)
     (* | InvalidMutabilityFlavorInAssignmentDEPRECATED [@value 4294] *)
-    | OptionNull [@value 4295]
+    (* | OptionNullDEPRECATED [@value 4295] *)
     | UnknownObjectMember [@value 4296]
     | UnknownType [@value 4297]
     | InvalidArrayKeyRead [@value 4298]

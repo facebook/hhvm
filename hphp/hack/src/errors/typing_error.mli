@@ -1306,8 +1306,6 @@ module Primary : sig
         pos: Pos.t;
         null_witness: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Option_mixed of Pos.t
-    | Option_null of Pos.t
     | Declared_covariant of {
         pos: Pos.t;
         param_pos: Pos.t;

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<36e1333531376fab7153d3cdb7e9b09e>>
+// @generated SignedSource<<504210fa10d6f5e3d5e05b768f39873a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -305,7 +305,6 @@ pub enum Typing {
     NullMemberRead = 4064,
     OptionReturnOnlyTypehint = 4066,
     ObjectString = 4067,
-    OptionMixed = 4068,
     OverrideFinal = 4070,
     OverridePerTrait = 4071,
     AbstractCall = 4073,
@@ -431,7 +430,6 @@ pub enum Typing {
     InvalidMoveTarget = 4288,
     UnexpectedTy = 4291,
     UnserializableType = 4292,
-    OptionNull = 4295,
     UnknownObjectMember = 4296,
     UnknownType = 4297,
     InvalidArrayKeyRead = 4298,

@@ -2557,8 +2557,6 @@ module Primary = struct
         pos: Pos.t;
         null_witness: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Option_mixed of Pos.t
-    | Option_null of Pos.t
     | Declared_covariant of {
         pos: Pos.t;
         param_pos: Pos.t;
@@ -5428,18 +5426,6 @@ module Primary = struct
       null_witness,
       [] )
 
-  let option_mixed pos =
-    ( Error_code.OptionMixed,
-      lazy (pos, "`?mixed` is a redundant typehint - just use `mixed`"),
-      lazy [],
-      [] )
-
-  let option_null pos =
-    ( Error_code.OptionNull,
-      lazy (pos, "`?null` is a redundant typehint - just use `null`"),
-      lazy [],
-      [] )
-
   let declared_covariant pos1 pos2 emsg =
     let reason =
       Lazy.map emsg ~f:(fun emsg ->
@@ -6148,8 +6134,6 @@ module Primary = struct
     | Non_class_member { pos; member_name; elt; ty_name; decl_pos } ->
       non_class_member pos member_name elt (Lazy.force ty_name) decl_pos
     | Null_container { pos; null_witness } -> null_container pos null_witness
-    | Option_mixed pos -> option_mixed pos
-    | Option_null pos -> option_null pos
     | Declared_covariant { pos; param_pos; msgs } ->
       declared_covariant param_pos pos msgs
     | Declared_contravariant { pos; param_pos; msgs } ->

@@ -99,3 +99,17 @@ let sealed_not_subtype verb parent_pos parent_name child_name child_kind =
     ^ verb
     ^ " "
     ^ Markdown_lite.md_codify parent_name)
+
+let option_mixed pos =
+  add
+    (Codes.to_enum Codes.OptionMixed)
+    Lint_warning
+    pos
+    "`?mixed` is a redundant typehint - just use `mixed`"
+
+let option_null pos =
+  add
+    (Codes.to_enum Codes.OptionNull)
+    Lint_warning
+    pos
+    "`?null` is a redundant typehint - just use `null`"

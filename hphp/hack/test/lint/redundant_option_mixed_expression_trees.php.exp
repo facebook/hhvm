@@ -1,0 +1,2 @@
+File "redundant_option_mixed_expression_trees.php", line 6, characters 15-20:
+`?mixed` is a redundant typehint - just use `mixed` (Lint[5008])

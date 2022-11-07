@@ -1,0 +1,12 @@
+File "redundant_option_mixed.php", line 3, characters 7-7:
+redundant_option_mixed.php only declares `C`, it should be named C.php instead. (Lint[5564])
+File "redundant_option_mixed.php", line 3, characters 9-9:
+The generic parameter `T` could be marked covariant or contravariant. Consider prefixing it with `+` or `-` (Lint[5639])
+File "redundant_option_mixed.php", line 5, characters 12-12:
+The generic parameter `T` is unused. (Lint[5624])
+File "redundant_option_mixed.php", line 7, characters 12-12:
+The generic parameter `T` is unused. (Lint[5624])
+File "redundant_option_mixed.php", line 8, characters 5-10:
+`?mixed` is a redundant typehint - just use `mixed` (Lint[5008])
+File "redundant_option_mixed.php", line 10, characters 9-14:
+`?mixed` is a redundant typehint - just use `mixed` (Lint[5008])

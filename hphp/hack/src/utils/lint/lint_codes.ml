@@ -14,6 +14,8 @@ type t =
   | ShapeIdxRequiredField [@value 5005]
   | OptClosedShapeIdxMissingField [@value 5006]
   | SealedNotSubtype [@value 5007]
+  | OptionMixed [@value 5008]
+  | OptionNull [@value 5009]
 (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 [@@deriving enum]
 

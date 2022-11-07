@@ -27,6 +27,10 @@ import java.util.stream.Collectors;
 import org.apache.thrift.ProtocolId;
 import org.apache.thrift.conformance.ClientInstruction;
 import org.apache.thrift.conformance.ClientTestResult;
+import org.apache.thrift.conformance.InteractionConstructorClientInstruction;
+import org.apache.thrift.conformance.InteractionConstructorClientTestResult;
+import org.apache.thrift.conformance.InteractionFactoryFunctionClientInstruction;
+import org.apache.thrift.conformance.InteractionPersistsStateClientInstruction;
 import org.apache.thrift.conformance.RPCConformanceService;
 import org.apache.thrift.conformance.Request;
 import org.apache.thrift.conformance.RequestResponseBasicClientInstruction;
@@ -36,6 +40,7 @@ import org.apache.thrift.conformance.RequestResponseDeclaredExceptionClientTestR
 import org.apache.thrift.conformance.RequestResponseNoArgVoidResponseClientInstruction;
 import org.apache.thrift.conformance.RequestResponseNoArgVoidResponseClientTestResult;
 import org.apache.thrift.conformance.RequestResponseTimeoutClientInstruction;
+import org.apache.thrift.conformance.RequestResponseTimeoutClientTestResult;
 import org.apache.thrift.conformance.RequestResponseUndeclaredExceptionClientInstruction;
 import org.apache.thrift.conformance.RequestResponseUndeclaredExceptionClientTestResult;
 import org.apache.thrift.conformance.RpcTestCase;
@@ -45,11 +50,20 @@ import org.apache.thrift.conformance.SinkChunkTimeoutClientInstruction;
 import org.apache.thrift.conformance.StreamBasicClientInstruction;
 import org.apache.thrift.conformance.StreamBasicClientTestResult;
 import org.apache.thrift.conformance.StreamChunkTimeoutClientInstruction;
-import org.apache.thrift.conformance.StreamChunkTimeoutClientTestResult;
 import org.apache.thrift.conformance.StreamCreditTimeoutClientInstruction;
+import org.apache.thrift.conformance.StreamDeclaredExceptionClientInstruction;
+import org.apache.thrift.conformance.StreamDeclaredExceptionClientTestResult;
+import org.apache.thrift.conformance.StreamInitialDeclaredExceptionClientInstruction;
+import org.apache.thrift.conformance.StreamInitialDeclaredExceptionClientTestResult;
 import org.apache.thrift.conformance.StreamInitialResponseClientInstruction;
 import org.apache.thrift.conformance.StreamInitialResponseClientTestResult;
+import org.apache.thrift.conformance.StreamInitialTimeoutClientInstruction;
+import org.apache.thrift.conformance.StreamInitialUndeclaredExceptionClientInstruction;
+import org.apache.thrift.conformance.StreamInitialUndeclaredExceptionClientTestResult;
+import org.apache.thrift.conformance.StreamUndeclaredExceptionClientInstruction;
+import org.apache.thrift.conformance.StreamUndeclaredExceptionClientTestResult;
 import org.apache.thrift.conformance.UserException;
+import org.apache.thrift.transport.TTransportException;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -120,7 +134,7 @@ public class RpcClientConformanceHandler {
       RequestResponseDeclaredExceptionClientInstruction instruction) {
     return client
         .requestResponseDeclaredException(instruction.getRequest())
-        .cast(ClientTestResult.class)
+        .thenReturn(ClientTestResult.defaultInstance())
         .onErrorResume(
             t ->
                 Mono.just(
@@ -143,7 +157,7 @@ public class RpcClientConformanceHandler {
       RequestResponseUndeclaredExceptionClientInstruction instruction) {
     return client
         .requestResponseUndeclaredException(instruction.getRequest())
-        .cast(ClientTestResult.class)
+        .thenReturn(ClientTestResult.defaultInstance())
         .onErrorResume(
             t ->
                 Mono.just(
@@ -153,42 +167,37 @@ public class RpcClientConformanceHandler {
                             .build())));
   }
 
+  private boolean isTTransportException(Throwable t) {
+    return (t instanceof TTransportException
+        && ((TTransportException) t).getType() == TTransportException.TIMED_OUT);
+  }
+
+  public Mono<ClientTestResult> testRequestResponseTimeout(
+      RequestResponseTimeoutClientInstruction instruction) {
+    RpcOptions rpcOptions =
+        new RpcOptions.Builder().setClientTimeoutMs((int) instruction.getTimeoutMs()).build();
+
+    return client
+        .requestResponseTimeout(instruction.getRequest(), rpcOptions)
+        .map(r -> ClientTestResult.defaultInstance())
+        .onErrorResume(
+            t ->
+                Mono.just(
+                    ClientTestResult.fromRequestResponseTimeout(
+                        new RequestResponseTimeoutClientTestResult.Builder()
+                            .setTimeoutException(isTTransportException(t))
+                            .build())));
+  }
+
   public Mono<ClientTestResult> testStreamBasic(StreamBasicClientInstruction instruction) {
     return client
         .streamBasic(instruction.getRequest())
+        .limitRate(10, 3)
         .collectList()
         .map(
             r ->
                 ClientTestResult.fromStreamBasic(
                     new StreamBasicClientTestResult.Builder().setStreamPayloads(r).build()));
-  }
-
-  public Mono<ClientTestResult> testStreamChunkTimeout(
-      StreamChunkTimeoutClientInstruction instruction) {
-    RpcOptions rpcOptions =
-        new RpcOptions.Builder().setClientTimeoutMs((int) instruction.getChunkTimeoutMs()).build();
-
-    return client
-        .streamChunkTimeout(instruction.getRequest(), rpcOptions)
-        .collectList()
-        .map(
-            r ->
-                ClientTestResult.fromStreamChunkTimeout(
-                    new StreamChunkTimeoutClientTestResult.Builder()
-                        .setStreamPayloads(r)
-                        .setChunkTimeoutException(true)
-                        .build()));
-  }
-
-  public Mono<ClientTestResult> testSinkBasic(SinkBasicClientInstruction instruction) {
-    Publisher<Request> publisher = Flux.fromIterable(instruction.getSinkPayloads());
-
-    return client
-        .sinkBasic(instruction.getRequest(), publisher)
-        .map(
-            r ->
-                ClientTestResult.fromSinkBasic(
-                    new SinkBasicClientTestResult.Builder().setFinalResponse(r).build()));
   }
 
   public Mono<ClientTestResult> testStreamInitialResponse(
@@ -209,18 +218,129 @@ public class RpcClientConformanceHandler {
                         .build()));
   }
 
-  public Mono<ClientTestResult> testRequestResponseTimeout(
-      RequestResponseTimeoutClientInstruction instruction) {
-    return null;
+  public Mono<ClientTestResult> testStreamDeclaredException(
+      StreamDeclaredExceptionClientInstruction instruction) {
+    return client
+        .streamDeclaredException(instruction.getRequest())
+        .last()
+        .map(r -> ClientTestResult.defaultInstance())
+        .onErrorResume(
+            t ->
+                Mono.just(
+                    ClientTestResult.fromStreamDeclaredException(
+                        new StreamDeclaredExceptionClientTestResult.Builder()
+                            .setUserException((UserException) t)
+                            .build())));
   }
 
-  public Mono<ClientTestResult> testSinkChunkTimeout(
-      SinkChunkTimeoutClientInstruction instruction) {
-    return null;
+  public Mono<ClientTestResult> testStreamUndeclaredException(
+      StreamUndeclaredExceptionClientInstruction instruction) {
+    return client
+        .streamUndeclaredException(instruction.getRequest())
+        .last()
+        .map(r -> ClientTestResult.defaultInstance())
+        .onErrorResume(
+            t ->
+                Mono.just(
+                    ClientTestResult.fromStreamUndeclaredException(
+                        new StreamUndeclaredExceptionClientTestResult.Builder()
+                            .setExceptionMessage(t.getMessage())
+                            .build())));
+  }
+
+  public Mono<ClientTestResult> testStreamInitialDeclaredException(
+      StreamInitialDeclaredExceptionClientInstruction instruction) {
+    return client
+        .streamInitialDeclaredException(instruction.getRequest())
+        .last()
+        .map(r -> ClientTestResult.defaultInstance())
+        .onErrorResume(
+            t ->
+                Mono.just(
+                    ClientTestResult.fromStreamInitialDeclaredException(
+                        new StreamInitialDeclaredExceptionClientTestResult.Builder()
+                            .setUserException((UserException) t)
+                            .build())));
+  }
+
+  public Mono<ClientTestResult> testStreamInitialUndeclaredException(
+      StreamInitialUndeclaredExceptionClientInstruction instruction) {
+    return client
+        .streamInitialUndeclaredException(instruction.getRequest())
+        .last()
+        .map(r -> ClientTestResult.defaultInstance())
+        .onErrorResume(
+            t ->
+                Mono.just(
+                    ClientTestResult.fromStreamInitialUndeclaredException(
+                        new StreamInitialUndeclaredExceptionClientTestResult.Builder()
+                            .setExceptionMessage(t.getMessage())
+                            .build())));
+  }
+
+  public Mono<ClientTestResult> testSinkBasic(SinkBasicClientInstruction instruction) {
+    Publisher<Request> publisher = Flux.fromIterable(instruction.getSinkPayloads());
+
+    return client
+        .sinkBasic(instruction.getRequest(), publisher)
+        .map(
+            r ->
+                ClientTestResult.fromSinkBasic(
+                    new SinkBasicClientTestResult.Builder().setFinalResponse(r).build()));
+  }
+
+  public Mono<ClientTestResult> testStreamChunkTimeout(
+      StreamChunkTimeoutClientInstruction instruction) {
+    throw new RuntimeException("Not supported");
   }
 
   public Mono<ClientTestResult> testStreamCreditTimeout(
       StreamCreditTimeoutClientInstruction instruction) {
-    return null;
+    throw new RuntimeException("Not supported");
+  }
+
+  public Mono<ClientTestResult> testStreamInitialTimeout(
+      StreamInitialTimeoutClientInstruction instruction) {
+    throw new RuntimeException("Not supported");
+  }
+
+  public Mono<ClientTestResult> testSinkChunkTimeout(
+      SinkChunkTimeoutClientInstruction instruction) {
+    throw new RuntimeException("Not supported");
+  }
+
+  public Mono<ClientTestResult> testInteractionConstructor(
+      InteractionConstructorClientInstruction instruction) {
+    return client
+        .createBasicInteraction()
+        .init()
+        .thenReturn(
+            ClientTestResult.fromInteractionConstructor(
+                new InteractionConstructorClientTestResult.Builder().build()));
+  }
+
+  public Mono<ClientTestResult> testInteractionFactoryFunction(
+      InteractionFactoryFunctionClientInstruction instruction) {
+    //    return client
+    //            .basicInteractionFactoryFunction(instruction.getInitialSum())
+    //            .thenReturn(ClientTestResult.fromInteractionFactoryFunction(new
+    // InteractionFactoryFunctionClientTestResult.Builder().build()));
+    throw new RuntimeException("Not supported");
+  }
+
+  public Mono<ClientTestResult> testInteractionPersistsState(
+      InteractionPersistsStateClientInstruction instruction) {
+    RPCConformanceService.Reactive.BasicInteraction interaction = client.createBasicInteraction();
+
+    //    return interaction
+    //            .init()
+    //            .thenReturn(instruction.getValuesToAdd())
+    //            .flatMapIterable(i -> i)
+    //            .map(i  -> interaction.add(i))
+    //            .flatMap(i->i)
+    //            .collectList()
+    //            .map(list->ClientTestResult.fromInteractionPersistsState(new
+    // InteractionPersistsStateClientTestResult.Builder().setResponses(list.stream().collect(Collectors.toList())).build()));
+    throw new RuntimeException("Not supported");
   }
 }

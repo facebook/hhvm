@@ -808,11 +808,11 @@ impl CallDetail {
     pub fn obj(&self, operands: &[ValueId]) -> ValueId {
         match self {
             CallDetail::FCallCtor
-            | CallDetail::FCallClsMethodD { .. }
-            | CallDetail::FCallClsMethodM { .. }
             | CallDetail::FCallObjMethodD { .. }
             | CallDetail::FCallObjMethod { .. } => operands[0],
             CallDetail::FCallClsMethod { .. }
+            | CallDetail::FCallClsMethodD { .. }
+            | CallDetail::FCallClsMethodM { .. }
             | CallDetail::FCallClsMethodS { .. }
             | CallDetail::FCallClsMethodSD { .. }
             | CallDetail::FCallFunc

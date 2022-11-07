@@ -32,6 +32,7 @@ namespace py thrift.annotation.api
  * operations.
  */
 @scope.Field
+@scope.Schema
 struct OutputOnly {}
 
 /**
@@ -63,6 +64,7 @@ struct OutputOnly {}
  */
 @thrift.Testing // TODO(afuller): Enforce with conformance tests before releasing, even to experimental.
 @scope.Field
+@scope.Schema
 struct InputOnly {}
 
 /**
@@ -74,6 +76,7 @@ struct InputOnly {}
  * to delete and re-create the 'resource' or 'row' itself.
  */
 @scope.Field
+@scope.Schema
 struct Immutable {}
 
 /**
@@ -84,4 +87,5 @@ struct Immutable {}
  * containing universe, collection, or table.
  */
 @scope.Field
+@scope.Schema
 struct Unique {}

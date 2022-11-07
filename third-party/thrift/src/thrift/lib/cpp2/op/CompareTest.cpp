@@ -246,6 +246,22 @@ TEST(CompareTest, Struct) {
 
 TEST(CompareTest, UnorderedFields) {
   {
+    test::UnorderedFields lhs;
+    test::UnorderedFields rhs;
+    --lhs.f1()->at("c");
+
+    EXPECT_FALSE(detail::StructLessThan{}(lhs, lhs));
+    EXPECT_TRUE(detail::StructLessThan{}(lhs, rhs));
+  }
+  {
+    test::UnorderedFields lhs;
+    test::UnorderedFields rhs;
+    rhs.f2()->insert("d");
+
+    EXPECT_FALSE(detail::StructLessThan{}(lhs, lhs));
+    EXPECT_TRUE(detail::StructLessThan{}(lhs, rhs));
+  }
+  {
     test::CppTemplateListField lhs;
     test::CppTemplateListField rhs;
     lhs.f1()->push_front("0");

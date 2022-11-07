@@ -23,10 +23,12 @@
 #include <unordered_map>
 
 #include <folly/CPortability.h>
+#include <folly/Optional.h>
 #include <folly/functional/Invoke.h>
 #include <folly/io/IOBuf.h>
 #include <folly/lang/Ordering.h>
 #include <thrift/lib/cpp2/Adapt.h>
+#include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/op/Hash.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
@@ -483,6 +485,54 @@ struct LessThan<type::adapted<Adapter, Tag>> {
   template <typename T1, typename T2 = T1>
   constexpr bool operator()(const T1& lhs, const T2& rhs) const {
     return ::apache::thrift::adapt_detail::less<Adapter>(lhs, rhs);
+  }
+};
+
+struct StructLessThan {
+  template <class T>
+  bool operator()(const T& lhs, const T& rhs) const {
+    folly::Optional<bool> result;
+    for_each_ordinal<T>([&](auto ord) {
+      if (result.has_value()) {
+        return;
+      }
+
+      using Ord = decltype(ord);
+      using Tag = get_type_tag<Ord, T>;
+      const auto* lhsValue = getValueOrNull(get<Ord>(lhs));
+      const auto* rhsValue = getValueOrNull(get<Ord>(rhs));
+
+      if (lhsValue == rhsValue) {
+        return;
+      }
+
+      if (lhsValue == nullptr) {
+        result = true;
+        return;
+      }
+
+      if (rhsValue == nullptr) {
+        result = false;
+        return;
+      }
+
+      LessThan<Tag> less;
+      if (less(*lhsValue, *rhsValue)) {
+        result = true;
+        return;
+      }
+
+      if (less(*rhsValue, *lhsValue)) {
+        result = false;
+        return;
+      }
+    });
+
+    if (result.has_value()) {
+      return *result;
+    }
+
+    return false;
   }
 };
 

@@ -35,6 +35,7 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include "hphp/util/hash-map.h"
 
 namespace HPHP {
 
@@ -124,12 +125,25 @@ struct CacheManager {
     s_logger = std::move(logger);
   }
  private:
-  using CacheMap = std::map<std::string, std::unique_ptr<CacheData>>;
+  using CacheMap = hphp_fast_string_map<std::unique_ptr<CacheData>>;
 
   template<class F>
   bool existsHelper(const std::string& name, F fn) const;
 
-  void addDirectories(const std::string& name);
+  // Inserts a CacheData into all internal indices. This includes
+  // the hash table of all full paths, as well as the child directory
+  // list of the parent directory. That may require recursively
+  // creating and adding a new CacheData for the parent directory,
+  // and for its parent, and so on to the root.
+  void addEntryToIndices(std::unique_ptr<CacheData> cd);
+
+  // For logging and serialization purposes, we want to output the
+  // entries in a consistent sorted order, rather than whatever order
+  // the hashmap has them. This provides a common entry for that.
+  // The result is a temp item containing raw pointers, so use
+  // immediately because any operation that replaces CacheData
+  // entries will invalidate them.
+  std::vector<const CacheData*> getSortedEntries() const;
 
   std::unique_ptr<MmapFile> m_mmap_file;
   uint64_t m_entry_counter{ 0 };
@@ -140,4 +154,3 @@ struct CacheManager {
 };
 
 }  // namespace HPHP
-

@@ -34,7 +34,7 @@ let rec get_enforced_type env class_def_opt ty =
         | None -> default ()
         | Some e -> get_enforced_type env None e.te_base)
     end
-  | Tapply ((pos, name), tyargs) ->
+  | Tapply ((_pos, name), tyargs) ->
     begin
       match Env.get_class_or_typedef env name with
       | Some (Env.ClassResult _class_info) ->
@@ -43,11 +43,7 @@ let rec get_enforced_type env class_def_opt ty =
           ty
         (* Generic types are not enforced at their type arguments *)
         else
-          mk
-            ( Reason.Rnone,
-              Tapply
-                ( (pos, name),
-                  List.map tyargs ~f:(fun _ -> mk (Reason.Rnone, Terr)) ) )
+          default ()
       | Some (Env.TypedefResult typedef_info) ->
         (* Enforcement "sees through" type aliases and newtype, but does not instantiate generic arguments *)
         (* The same is true of newtypes *)
@@ -71,7 +67,13 @@ let rec get_enforced_type env class_def_opt ty =
                   match cstr with
                   | Ast_defs.Constraint_as
                   | Ast_defs.Constraint_eq ->
-                    Some (get_enforced_type env class_def_opt ty)
+                    (* Do not follow bounds that are themselves generic parameters
+                     * as HHVM doesn't enforce these *)
+                    begin
+                      match get_node ty with
+                      | Tgeneric _ -> None
+                      | _ -> Some (get_enforced_type env class_def_opt ty)
+                    end
                   | Ast_defs.Constraint_super -> None)
             in
             begin
@@ -101,6 +103,10 @@ let rec get_enforced_type env class_def_opt ty =
     let ety = get_enforced_type env class_def_opt t in
     MakeType.nullable_decl Reason.Rnone ety
   | Tlike t -> get_enforced_type env class_def_opt t
+  (* Special case for intersections, as these are used to describe partial enforcement *)
+  | Tintersection tys ->
+    let tys = List.map tys ~f:(get_enforced_type env class_def_opt) in
+    MakeType.intersection (get_reason ty) tys
   | Tshape _
   | Ttuple _ ->
     MakeType.nonnull Reason.Rnone

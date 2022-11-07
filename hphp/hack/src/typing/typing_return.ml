@@ -180,9 +180,42 @@ let make_return_type
         (env, { et_type; et_enforced = Unenforced })
       ) else
         let et_enforced = Typing_enforceability.get_enforcement env dty in
-        (match et_enforced with
-        | Unenforced -> Typing_log.log_pessimise_return env hint_pos None
-        | Enforced -> ());
+        let et_enforced =
+          match et_enforced with
+          | Unenforced ->
+            Typing_log.log_pessimise_return env hint_pos None;
+            (* Return type is not fully enforced according to the naive check
+             * in Typing_enforceability. Let's now ask for what type it is actually
+             * enforced at. If this is a subtype of the Hack type, then we can
+             * treat the return type as fully enforced.
+             * Example: return type is declared to be (~E & arraykey)
+             * for enum E : int as int
+             * get_enforced_type (~E & arraykey) is int
+             * Now since int <:D (~E & arraykey) it suffices to treat
+             * the return type as fully enforced.
+             *)
+            if not (TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) then
+              Unenforced
+            else
+              let enforced_type =
+                Typing_partial_enforcement.get_enforced_type
+                  env
+                  (Env.get_self_class env)
+                  dty
+              in
+              let is_sub_type =
+                Typing_phase.is_sub_type_decl
+                  ~coerce:(Some Typing_logic.CoerceToDynamic)
+                  env
+                  enforced_type
+                  dty
+              in
+              if is_sub_type then
+                Enforced
+              else
+                Unenforced
+          | Enforced -> Enforced
+        in
         let ((env, ty_err_opt), et_type) =
           Typing_phase.localize ~ety_env env dty
         in

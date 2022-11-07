@@ -43,6 +43,8 @@ pub(crate) enum Hhbc {
     CmpNeq,
     #[strum(props(Function = "hhbc_cmp_same"))]
     CmpSame,
+    #[strum(props(Function = "hhbc_exit"))]
+    Exit,
     #[strum(props(Function = "hhbc_is_type_int"))]
     IsTypeInt,
     #[strum(props(Function = "hhbc_is_type_null"))]

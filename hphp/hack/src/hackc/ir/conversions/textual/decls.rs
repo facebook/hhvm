@@ -68,6 +68,8 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
             | Hhbc::Modulo
             | Hhbc::Sub => declare_function(w, &name, &[ty!(mixed), ty!(mixed)], ty!(mixed))?,
 
+            Hhbc::Exit => declare_function(w, &name, &[ty!(mixed)], ty!(noreturn))?,
+
             Hhbc::IsTypeInt | Hhbc::IsTypeNull | Hhbc::IsTypeStr => {
                 declare_function(w, &name, &[ty!(mixed)], ty!(bool))?
             }

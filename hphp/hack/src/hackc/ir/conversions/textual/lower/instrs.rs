@@ -8,6 +8,7 @@ use ir::instr::CmpOp;
 use ir::instr::HasLoc;
 use ir::instr::HasOperands;
 use ir::instr::Hhbc;
+use ir::instr::Terminator;
 use ir::Func;
 use ir::FuncBuilder;
 use ir::FuncBuilderEx as _;
@@ -48,7 +49,7 @@ struct LowerInstrs<'a> {
 }
 
 impl LowerInstrs<'_> {
-    fn handle_with_builtin(&self, builder: &mut FuncBuilder<'_>, instr: &Instr) -> Instr {
+    fn handle_with_builtin(&self, builder: &mut FuncBuilder<'_>, instr: &Instr) -> Option<Instr> {
         let builtin = match instr {
             Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Eq, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpEq),
             Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Gt, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpGt),
@@ -86,9 +87,10 @@ impl LowerInstrs<'_> {
             Instr::Hhbc(Hhbc::NewObjS(..)) => hack::Builtin::Hhbc(hack::Hhbc::NewObj),
             Instr::Hhbc(Hhbc::Not(..)) => hack::Builtin::Hhbc(hack::Hhbc::Not),
             Instr::Hhbc(Hhbc::Print(..)) => hack::Builtin::Hhbc(hack::Hhbc::Print),
-            _ => unreachable!("Unhandled Instr: {instr:#?}"),
+            Instr::Hhbc(Hhbc::Sub(..)) => hack::Builtin::Hhbc(hack::Hhbc::Sub),
+            _ => return None,
         };
-        builder.hack_builtin(builtin, instr.operands(), instr.loc_id())
+        Some(builder.hack_builtin(builtin, instr.operands(), instr.loc_id()))
     }
 
     fn verify_ret_type_c(&self, builder: &mut FuncBuilder<'_>, vid: ValueId, loc: LocId) -> Instr {
@@ -108,15 +110,12 @@ impl LowerInstrs<'_> {
 
 impl TransformInstr for LowerInstrs<'_> {
     fn apply(&mut self, _iid: InstrId, instr: Instr, builder: &mut FuncBuilder<'_>) -> Instr {
+        if let Some(instr) = self.handle_with_builtin(builder, &instr) {
+            self.changed = true;
+            return instr;
+        }
+
         let instr = match instr {
-            Instr::Hhbc(
-                Hhbc::CmpOp(..)
-                | Hhbc::IsTypeC(..)
-                | Hhbc::Modulo(..)
-                | Hhbc::NewObjS(..)
-                | Hhbc::Not(..)
-                | Hhbc::Print(..),
-            ) => self.handle_with_builtin(builder, &instr),
             Instr::Hhbc(Hhbc::LateBoundCls(loc)) => {
                 if self.method_info.unwrap().is_static {
                     let this = builder.emit(Instr::Hhbc(Hhbc::This(loc)));
@@ -125,6 +124,11 @@ impl TransformInstr for LowerInstrs<'_> {
                     let this = builder.emit(Instr::Hhbc(Hhbc::This(loc)));
                     builder.hack_builtin(hack::Builtin::GetStaticClass, &[this], loc)
                 }
+            }
+            Instr::Terminator(Terminator::Exit(..)) => {
+                let builtin = hack::Builtin::Hhbc(hack::Hhbc::Exit);
+                builder.emit_hack_builtin(builtin, instr.operands(), instr.loc_id());
+                Instr::unreachable()
             }
             Instr::Hhbc(Hhbc::VerifyRetTypeC(vid, loc)) => {
                 self.verify_ret_type_c(builder, vid, loc)

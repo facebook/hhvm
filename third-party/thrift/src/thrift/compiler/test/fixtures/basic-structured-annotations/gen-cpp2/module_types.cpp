@@ -120,14 +120,7 @@ bool structured_annotation_inline::operator==(FOLLY_MAYBE_UNUSED const structure
 }
 
 bool structured_annotation_inline::operator<(FOLLY_MAYBE_UNUSED const structured_annotation_inline& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.count_ref() == rhs.count_ref())) {
-    return lhs.count_ref() < rhs.count_ref();
-  }
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return lhs.name_ref() < rhs.name_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -224,11 +217,7 @@ bool structured_annotation_with_default::operator==(FOLLY_MAYBE_UNUSED const str
 }
 
 bool structured_annotation_with_default::operator<(FOLLY_MAYBE_UNUSED const structured_annotation_with_default& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return lhs.name_ref() < rhs.name_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -351,17 +340,7 @@ bool structured_annotation_recursive::operator==(FOLLY_MAYBE_UNUSED const struct
 }
 
 bool structured_annotation_recursive::operator<(FOLLY_MAYBE_UNUSED const structured_annotation_recursive& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return lhs.name_ref() < rhs.name_ref();
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.recurse_ref(), rhs.recurse_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.recurse_ref(), rhs.recurse_ref());
-  }
-  if (!(lhs.forward_ref() == rhs.forward_ref())) {
-    return lhs.forward_ref() < rhs.forward_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::test::fixtures::basic-structured-annotations::structured_annotation_forward& structured_annotation_recursive::get_forward() const& {
@@ -466,11 +445,7 @@ bool structured_annotation_forward::operator==(FOLLY_MAYBE_UNUSED const structur
 }
 
 bool structured_annotation_forward::operator<(FOLLY_MAYBE_UNUSED const structured_annotation_forward& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.count_ref() == rhs.count_ref())) {
-    return lhs.count_ref() < rhs.count_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -574,14 +549,7 @@ bool structured_annotation_nested::operator==(FOLLY_MAYBE_UNUSED const structure
 }
 
 bool structured_annotation_nested::operator<(FOLLY_MAYBE_UNUSED const structured_annotation_nested& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.name_ref() == rhs.name_ref())) {
-    return lhs.name_ref() < rhs.name_ref();
-  }
-  if (!(lhs.nest_ref() == rhs.nest_ref())) {
-    return lhs.nest_ref() < rhs.nest_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::test::fixtures::basic-structured-annotations::structured_annotation_with_default& structured_annotation_nested::get_nest() const& {
@@ -716,20 +684,7 @@ bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.annotated_field_ref() == rhs.annotated_field_ref())) {
-    return lhs.annotated_field_ref() < rhs.annotated_field_ref();
-  }
-  if (!(lhs.annotated_type_ref() == rhs.annotated_type_ref())) {
-    return lhs.annotated_type_ref() < rhs.annotated_type_ref();
-  }
-  if (!(lhs.annotated_recursive_ref() == rhs.annotated_recursive_ref())) {
-    return lhs.annotated_recursive_ref() < rhs.annotated_recursive_ref();
-  }
-  if (!(lhs.annotated_nested_ref() == rhs.annotated_nested_ref())) {
-    return lhs.annotated_nested_ref() < rhs.annotated_nested_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -834,11 +789,7 @@ bool MyException::operator==(FOLLY_MAYBE_UNUSED const MyException& rhs) const {
 }
 
 bool MyException::operator<(FOLLY_MAYBE_UNUSED const MyException& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.context_ref() == rhs.context_ref())) {
-    return lhs.context_ref() < rhs.context_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -940,18 +891,7 @@ bool MyUnion::operator==(const MyUnion& rhs) const {
 }
 
 bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::first:
-      return lhs.value_.first < rhs.value_.first;
-    case Type::second:
-      return lhs.value_.second < rhs.value_.second;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 void swap(MyUnion& a, MyUnion& b) {

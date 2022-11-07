@@ -73,11 +73,7 @@ bool Foo::operator==(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
 }
 
 bool Foo::operator<(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.MyInt_ref() == rhs.MyInt_ref())) {
-    return lhs.MyInt_ref() < rhs.MyInt_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

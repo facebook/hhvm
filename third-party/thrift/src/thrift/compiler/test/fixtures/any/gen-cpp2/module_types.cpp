@@ -117,11 +117,7 @@ bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.myString_ref() == rhs.myString_ref())) {
-    return lhs.myString_ref() < rhs.myString_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -218,16 +214,7 @@ bool MyUnion::operator==(const MyUnion& rhs) const {
 }
 
 bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::myString:
-      return lhs.value_.myString < rhs.value_.myString;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 void swap(MyUnion& a, MyUnion& b) {
@@ -328,11 +315,7 @@ bool MyException::operator==(FOLLY_MAYBE_UNUSED const MyException& rhs) const {
 }
 
 bool MyException::operator<(FOLLY_MAYBE_UNUSED const MyException& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.myString_ref() == rhs.myString_ref())) {
-    return lhs.myString_ref() < rhs.myString_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

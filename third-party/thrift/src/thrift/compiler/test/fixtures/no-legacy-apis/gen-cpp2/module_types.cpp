@@ -114,14 +114,7 @@ bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.myIntField_ref() == rhs.myIntField_ref())) {
-    return lhs.myIntField_ref() < rhs.myIntField_ref();
-  }
-  if (!(lhs.myStringField_ref() == rhs.myStringField_ref())) {
-    return lhs.myStringField_ref() < rhs.myStringField_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -224,18 +217,7 @@ bool MyUnion::operator==(const MyUnion& rhs) const {
 }
 
 bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::myEnum:
-      return lhs.value_.myEnum < rhs.value_.myEnum;
-    case Type::myDataItem:
-      return lhs.value_.myDataItem < rhs.value_.myDataItem;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 void swap(MyUnion& a, MyUnion& b) {

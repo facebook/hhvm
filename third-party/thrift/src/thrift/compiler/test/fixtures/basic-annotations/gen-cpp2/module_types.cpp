@@ -492,38 +492,7 @@ bool YourStruct::operator==(FOLLY_MAYBE_UNUSED const YourStruct& rhs) const {
 }
 
 bool YourStruct::operator<(FOLLY_MAYBE_UNUSED const YourStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.majorVer_ref() == rhs.majorVer_ref())) {
-    return lhs.majorVer_ref() < rhs.majorVer_ref();
-  }
-  if (!(lhs.package_ref() == rhs.package_ref())) {
-    return lhs.package_ref() < rhs.package_ref();
-  }
-  if (!(lhs.annotation_with_quote_ref() == rhs.annotation_with_quote_ref())) {
-    return lhs.annotation_with_quote_ref() < rhs.annotation_with_quote_ref();
-  }
-  if (!(lhs.class__ref() == rhs.class__ref())) {
-    return lhs.class__ref() < rhs.class__ref();
-  }
-  if (!(lhs.annotation_with_trailing_comma_ref() == rhs.annotation_with_trailing_comma_ref())) {
-    return lhs.annotation_with_trailing_comma_ref() < rhs.annotation_with_trailing_comma_ref();
-  }
-  if (!(lhs.empty_annotations_ref() == rhs.empty_annotations_ref())) {
-    return lhs.empty_annotations_ref() < rhs.empty_annotations_ref();
-  }
-  if (!(lhs.my_enum_ref() == rhs.my_enum_ref())) {
-    return lhs.my_enum_ref() < rhs.my_enum_ref();
-  }
-  if (!(lhs.cpp_type_annotation_ref() == rhs.cpp_type_annotation_ref())) {
-    return lhs.cpp_type_annotation_ref() < rhs.cpp_type_annotation_ref();
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::StaticCast>(lhs.__fbthrift_field_my_union, rhs.__fbthrift_field_my_union)) {
-    return ::apache::thrift::adapt_detail::less<::StaticCast>(lhs.__fbthrift_field_my_union, rhs.__fbthrift_field_my_union);
-  }
-  if (!(lhs.my_id_ref() == rhs.my_id_ref())) {
-    return lhs.my_id_ref() < rhs.my_id_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const std::deque<std::string>& YourStruct::get_cpp_type_annotation() const& {

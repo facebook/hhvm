@@ -69,6 +69,14 @@ struct GetValueOrNull {
   auto* operator()(union_field_ref<T&> field_ref) const {
     return field_ref.has_value() ? &field_ref.value() : nullptr;
   }
+  template <typename T>
+  auto* operator()(terse_intern_boxed_field_ref<T&> field_ref) const {
+    return &field_ref.value();
+  }
+  template <typename T>
+  auto* operator()(intern_boxed_field_ref<T&> field_ref) const {
+    return &field_ref.value();
+  }
 
 #ifdef THRIFT_HAS_OPTIONAL
   template <typename T>

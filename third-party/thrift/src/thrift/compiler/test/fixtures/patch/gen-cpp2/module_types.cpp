@@ -118,14 +118,7 @@ bool MyData::operator==(FOLLY_MAYBE_UNUSED const MyData& rhs) const {
 }
 
 bool MyData::operator<(FOLLY_MAYBE_UNUSED const MyData& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.data1_ref() == rhs.data1_ref())) {
-    return lhs.data1_ref() < rhs.data1_ref();
-  }
-  if (!(lhs.data2_ref() == rhs.data2_ref())) {
-    return lhs.data2_ref() < rhs.data2_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -224,17 +217,7 @@ bool InnerUnion::operator==(const InnerUnion& rhs) const {
 }
 
 bool InnerUnion::operator<(FOLLY_MAYBE_UNUSED const InnerUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::innerOption:
-    return !apache::thrift::StringTraits<std::string>::isEqual(value_.innerOption, rhs.value_.innerOption) &&
-      apache::thrift::StringTraits<std::string>::isLess(value_.innerOption, rhs.value_.innerOption);
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 void swap(InnerUnion& a, InnerUnion& b) {
@@ -340,20 +323,7 @@ bool MyUnion::operator==(const MyUnion& rhs) const {
 }
 
 bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::option1:
-      return lhs.value_.option1 < rhs.value_.option1;
-    case Type::option2:
-      return lhs.value_.option2 < rhs.value_.option2;
-    case Type::option3:
-      return lhs.value_.option3 < rhs.value_.option3;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 void swap(MyUnion& a, MyUnion& b) {
@@ -752,104 +722,7 @@ bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.boolVal_ref() == rhs.boolVal_ref())) {
-    return lhs.boolVal_ref() < rhs.boolVal_ref();
-  }
-  if (!(lhs.byteVal_ref() == rhs.byteVal_ref())) {
-    return lhs.byteVal_ref() < rhs.byteVal_ref();
-  }
-  if (!(lhs.i16Val_ref() == rhs.i16Val_ref())) {
-    return lhs.i16Val_ref() < rhs.i16Val_ref();
-  }
-  if (!(lhs.i32Val_ref() == rhs.i32Val_ref())) {
-    return lhs.i32Val_ref() < rhs.i32Val_ref();
-  }
-  if (!(lhs.i64Val_ref() == rhs.i64Val_ref())) {
-    return lhs.i64Val_ref() < rhs.i64Val_ref();
-  }
-  if (!(lhs.floatVal_ref() == rhs.floatVal_ref())) {
-    return lhs.floatVal_ref() < rhs.floatVal_ref();
-  }
-  if (!(lhs.doubleVal_ref() == rhs.doubleVal_ref())) {
-    return lhs.doubleVal_ref() < rhs.doubleVal_ref();
-  }
-  if (!(lhs.stringVal_ref() == rhs.stringVal_ref())) {
-    return lhs.stringVal_ref() < rhs.stringVal_ref();
-  }
-  if (!apache::thrift::StringTraits<folly::IOBuf>::isEqual(lhs.__fbthrift_field_binaryVal, rhs.__fbthrift_field_binaryVal)) {
-    return apache::thrift::StringTraits<folly::IOBuf>::isLess(lhs.__fbthrift_field_binaryVal, rhs.__fbthrift_field_binaryVal);
-  }
-  if (!(lhs.enumVal_ref() == rhs.enumVal_ref())) {
-    return lhs.enumVal_ref() < rhs.enumVal_ref();
-  }
-  if (!(lhs.structVal_ref() == rhs.structVal_ref())) {
-    return lhs.structVal_ref() < rhs.structVal_ref();
-  }
-  if (!(lhs.unionVal_ref() == rhs.unionVal_ref())) {
-    return lhs.unionVal_ref() < rhs.unionVal_ref();
-  }
-  if (!(lhs.lateStructVal_ref() == rhs.lateStructVal_ref())) {
-    return lhs.lateStructVal_ref() < rhs.lateStructVal_ref();
-  }
-  if (!(lhs.durationVal_ref() == rhs.durationVal_ref())) {
-    return lhs.durationVal_ref() < rhs.durationVal_ref();
-  }
-  if (!(lhs.timeVal_ref() == rhs.timeVal_ref())) {
-    return lhs.timeVal_ref() < rhs.timeVal_ref();
-  }
-  if (!(lhs.optBoolVal_ref() == rhs.optBoolVal_ref())) {
-    return lhs.optBoolVal_ref() < rhs.optBoolVal_ref();
-  }
-  if (!(lhs.optByteVal_ref() == rhs.optByteVal_ref())) {
-    return lhs.optByteVal_ref() < rhs.optByteVal_ref();
-  }
-  if (!(lhs.optI16Val_ref() == rhs.optI16Val_ref())) {
-    return lhs.optI16Val_ref() < rhs.optI16Val_ref();
-  }
-  if (!(lhs.optI32Val_ref() == rhs.optI32Val_ref())) {
-    return lhs.optI32Val_ref() < rhs.optI32Val_ref();
-  }
-  if (!(lhs.optI64Val_ref() == rhs.optI64Val_ref())) {
-    return lhs.optI64Val_ref() < rhs.optI64Val_ref();
-  }
-  if (!(lhs.optFloatVal_ref() == rhs.optFloatVal_ref())) {
-    return lhs.optFloatVal_ref() < rhs.optFloatVal_ref();
-  }
-  if (!(lhs.optDoubleVal_ref() == rhs.optDoubleVal_ref())) {
-    return lhs.optDoubleVal_ref() < rhs.optDoubleVal_ref();
-  }
-  if (!(lhs.optStringVal_ref() == rhs.optStringVal_ref())) {
-    return lhs.optStringVal_ref() < rhs.optStringVal_ref();
-  }
-  if (lhs.optBinaryVal_ref().has_value() != rhs.optBinaryVal_ref().has_value() || (lhs.optBinaryVal_ref().has_value() && !apache::thrift::StringTraits<folly::IOBuf>::isEqual(lhs.__fbthrift_field_optBinaryVal, rhs.__fbthrift_field_optBinaryVal))) {
-    return !lhs.optBinaryVal_ref().has_value() || (rhs.optBinaryVal_ref().has_value() && apache::thrift::StringTraits<folly::IOBuf>::isLess(lhs.__fbthrift_field_optBinaryVal, rhs.__fbthrift_field_optBinaryVal));
-  }
-  if (!(lhs.optEnumVal_ref() == rhs.optEnumVal_ref())) {
-    return lhs.optEnumVal_ref() < rhs.optEnumVal_ref();
-  }
-  if (!(lhs.optStructVal_ref() == rhs.optStructVal_ref())) {
-    return lhs.optStructVal_ref() < rhs.optStructVal_ref();
-  }
-  if (!(lhs.optLateStructVal_ref() == rhs.optLateStructVal_ref())) {
-    return lhs.optLateStructVal_ref() < rhs.optLateStructVal_ref();
-  }
-  if (!(lhs.optListVal_ref() == rhs.optListVal_ref())) {
-    return lhs.optListVal_ref() < rhs.optListVal_ref();
-  }
-  if (!(lhs.optSetVal_ref() == rhs.optSetVal_ref())) {
-    return lhs.optSetVal_ref() < rhs.optSetVal_ref();
-  }
-  if (!(lhs.optMapVal_ref() == rhs.optMapVal_ref())) {
-    return lhs.optMapVal_ref() < rhs.optMapVal_ref();
-  }
-  if (!(lhs.listMap_ref() == rhs.listMap_ref())) {
-    return lhs.listMap_ref() < rhs.listMap_ref();
-  }
-  if (!(lhs.mapMap_ref() == rhs.mapMap_ref())) {
-    return lhs.mapMap_ref() < rhs.mapMap_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::test::fixtures::patch::MyData& MyStruct::get_structVal() const& {
@@ -1093,8 +966,7 @@ bool LateDefStruct::operator==(FOLLY_MAYBE_UNUSED const LateDefStruct& rhs) cons
 }
 
 bool LateDefStruct::operator<(FOLLY_MAYBE_UNUSED const LateDefStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -1185,11 +1057,7 @@ bool Recursive::operator==(FOLLY_MAYBE_UNUSED const Recursive& rhs) const {
 }
 
 bool Recursive::operator<(FOLLY_MAYBE_UNUSED const Recursive& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.nodes_ref() == rhs.nodes_ref())) {
-    return lhs.nodes_ref() < rhs.nodes_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::map<::std::string, ::test::fixtures::patch::Recursive>& Recursive::get_nodes() const& {
@@ -1298,11 +1166,7 @@ bool Bar::operator==(FOLLY_MAYBE_UNUSED const Bar& rhs) const {
 }
 
 bool Bar::operator<(FOLLY_MAYBE_UNUSED const Bar& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.loop_ref(), rhs.loop_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.loop_ref(), rhs.loop_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -1400,11 +1264,7 @@ bool Loop::operator==(FOLLY_MAYBE_UNUSED const Loop& rhs) const {
 }
 
 bool Loop::operator<(FOLLY_MAYBE_UNUSED const Loop& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.bar_ref() == rhs.bar_ref())) {
-    return lhs.bar_ref() < rhs.bar_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::test::fixtures::patch::Bar& Loop::get_bar() const& {
@@ -1537,14 +1397,7 @@ bool MyDataFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyDataFieldPatc
 }
 
 bool MyDataFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyDataFieldPatchStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::StringPatchAdapter>(lhs.__fbthrift_field_data1, rhs.__fbthrift_field_data1)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::StringPatchAdapter>(lhs.__fbthrift_field_data1, rhs.__fbthrift_field_data1);
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::NumberPatchAdapter>(lhs.__fbthrift_field_data2, rhs.__fbthrift_field_data2)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::NumberPatchAdapter>(lhs.__fbthrift_field_data2, rhs.__fbthrift_field_data2);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -1712,23 +1565,7 @@ bool MyDataPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyDataPatchStruct& r
 }
 
 bool MyDataPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyDataPatchStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.assign_ref(), rhs.assign_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.assign_ref(), rhs.assign_ref());
-  }
-  if (!(lhs.clear_ref() == rhs.clear_ref())) {
-    return lhs.clear_ref() < rhs.clear_ref();
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior);
-  }
-  if (!(lhs.ensure_ref() == rhs.ensure_ref())) {
-    return lhs.ensure_ref() < rhs.ensure_ref();
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::test::fixtures::patch::MyData& MyDataPatchStruct::get_ensure() const& {
@@ -1872,11 +1709,7 @@ bool InnerUnionFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const InnerUnionF
 }
 
 bool InnerUnionFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const InnerUnionFieldPatchStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::BinaryPatchAdapter>(lhs.__fbthrift_field_innerOption, rhs.__fbthrift_field_innerOption)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::BinaryPatchAdapter>(lhs.__fbthrift_field_innerOption, rhs.__fbthrift_field_innerOption);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2037,23 +1870,7 @@ bool InnerUnionPatchStruct::operator==(FOLLY_MAYBE_UNUSED const InnerUnionPatchS
 }
 
 bool InnerUnionPatchStruct::operator<(FOLLY_MAYBE_UNUSED const InnerUnionPatchStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.assign_ref(), rhs.assign_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.assign_ref(), rhs.assign_ref());
-  }
-  if (!(lhs.clear_ref() == rhs.clear_ref())) {
-    return lhs.clear_ref() < rhs.clear_ref();
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior);
-  }
-  if (!(lhs.ensure_ref() == rhs.ensure_ref())) {
-    return lhs.ensure_ref() < rhs.ensure_ref();
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::test::fixtures::patch::InnerUnion& InnerUnionPatchStruct::get_ensure() const& {
@@ -2221,17 +2038,7 @@ bool MyUnionFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyUnionFieldPa
 }
 
 bool MyUnionFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyUnionFieldPatchStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::StringPatchAdapter>(lhs.__fbthrift_field_option1, rhs.__fbthrift_field_option1)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::StringPatchAdapter>(lhs.__fbthrift_field_option1, rhs.__fbthrift_field_option1);
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::NumberPatchAdapter>(lhs.__fbthrift_field_option2, rhs.__fbthrift_field_option2)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::NumberPatchAdapter>(lhs.__fbthrift_field_option2, rhs.__fbthrift_field_option2);
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::UnionPatchAdapter>(lhs.__fbthrift_field_option3, rhs.__fbthrift_field_option3)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::UnionPatchAdapter>(lhs.__fbthrift_field_option3, rhs.__fbthrift_field_option3);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2406,23 +2213,7 @@ bool MyUnionPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyUnionPatchStruct&
 }
 
 bool MyUnionPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyUnionPatchStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.assign_ref(), rhs.assign_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.assign_ref(), rhs.assign_ref());
-  }
-  if (!(lhs.clear_ref() == rhs.clear_ref())) {
-    return lhs.clear_ref() < rhs.clear_ref();
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior);
-  }
-  if (!(lhs.ensure_ref() == rhs.ensure_ref())) {
-    return lhs.ensure_ref() < rhs.ensure_ref();
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::test::fixtures::patch::MyUnion& MyUnionPatchStruct::get_ensure() const& {
@@ -2547,14 +2338,7 @@ bool MyStructField10PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructFie
 }
 
 bool MyStructField10PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField10PatchStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.assign_ref() == rhs.assign_ref())) {
-    return lhs.assign_ref() < rhs.assign_ref();
-  }
-  if (!(lhs.clear_ref() == rhs.clear_ref())) {
-    return lhs.clear_ref() < rhs.clear_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2644,14 +2428,7 @@ bool MyStructField25PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructFie
 }
 
 bool MyStructField25PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField25PatchStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.assign_ref() == rhs.assign_ref())) {
-    return lhs.assign_ref() < rhs.assign_ref();
-  }
-  if (!(lhs.clear_ref() == rhs.clear_ref())) {
-    return lhs.clear_ref() < rhs.clear_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -2792,6 +2569,10 @@ bool MyStructField28PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructFie
     return false;
   }
   return true;
+}
+
+bool MyStructField28PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField28PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<::std::int16_t>* MyStructField28PatchStruct::get_assign() const& {
@@ -2962,20 +2743,7 @@ bool MyStructField29PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructFie
 }
 
 bool MyStructField29PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField29PatchStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.assign_ref() == rhs.assign_ref())) {
-    return lhs.assign_ref() < rhs.assign_ref();
-  }
-  if (!(lhs.clear_ref() == rhs.clear_ref())) {
-    return lhs.clear_ref() < rhs.clear_ref();
-  }
-  if (!(lhs.remove_ref() == rhs.remove_ref())) {
-    return lhs.remove_ref() < rhs.remove_ref();
-  }
-  if (!(lhs.add_ref() == rhs.add_ref())) {
-    return lhs.add_ref() < rhs.add_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::set<::std::string>* MyStructField29PatchStruct::get_assign() const& {
@@ -3150,6 +2918,10 @@ bool MyStructField30PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructFie
     return false;
   }
   return true;
+}
+
+bool MyStructField30PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField30PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::map<::std::string, ::std::string>* MyStructField30PatchStruct::get_assign() const& {
@@ -3357,6 +3129,10 @@ bool MyStructField31PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructFie
   return true;
 }
 
+bool MyStructField31PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField31PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
 const ::std::vector<::std::map<::std::string, ::std::int32_t>>* MyStructField31PatchStruct::get_assign() const& {
   return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
 }
@@ -3553,6 +3329,10 @@ bool MyStructField31Patch1Struct::operator==(FOLLY_MAYBE_UNUSED const MyStructFi
     return false;
   }
   return true;
+}
+
+bool MyStructField31Patch1Struct::operator<(FOLLY_MAYBE_UNUSED const MyStructField31Patch1Struct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::map<::std::string, ::std::int32_t>* MyStructField31Patch1Struct::get_assign() const& {
@@ -3768,6 +3548,10 @@ bool MyStructField32PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructFie
   return true;
 }
 
+bool MyStructField32PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField32PatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
 const ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>* MyStructField32PatchStruct::get_assign() const& {
   return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
 }
@@ -3979,6 +3763,10 @@ bool MyStructField32Patch1Struct::operator==(FOLLY_MAYBE_UNUSED const MyStructFi
     return false;
   }
   return true;
+}
+
+bool MyStructField32Patch1Struct::operator<(FOLLY_MAYBE_UNUSED const MyStructField32Patch1Struct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::map<::std::string, ::std::int32_t>* MyStructField32Patch1Struct::get_assign() const& {
@@ -4523,6 +4311,10 @@ bool MyStructFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructField
   return true;
 }
 
+bool MyStructFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructFieldPatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
 
 void swap(FOLLY_MAYBE_UNUSED MyStructFieldPatchStruct& a, FOLLY_MAYBE_UNUSED MyStructFieldPatchStruct& b) {
   using ::std::swap;
@@ -4897,6 +4689,10 @@ bool MyStructPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructPatchStruc
   return true;
 }
 
+bool MyStructPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructPatchStruct& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
 const ::test::fixtures::patch::MyStruct& MyStructPatchStruct::get_ensure() const& {
   return __fbthrift_field_ensure;
 }
@@ -5005,8 +4801,7 @@ bool LateDefStructFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const LateDefS
 }
 
 bool LateDefStructFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const LateDefStructFieldPatchStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -5155,23 +4950,7 @@ bool LateDefStructPatchStruct::operator==(FOLLY_MAYBE_UNUSED const LateDefStruct
 }
 
 bool LateDefStructPatchStruct::operator<(FOLLY_MAYBE_UNUSED const LateDefStructPatchStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.assign_ref(), rhs.assign_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.assign_ref(), rhs.assign_ref());
-  }
-  if (!(lhs.clear_ref() == rhs.clear_ref())) {
-    return lhs.clear_ref() < rhs.clear_ref();
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior);
-  }
-  if (!(lhs.ensure_ref() == rhs.ensure_ref())) {
-    return lhs.ensure_ref() < rhs.ensure_ref();
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::test::fixtures::patch::LateDefStruct& LateDefStructPatchStruct::get_ensure() const& {
@@ -5311,14 +5090,7 @@ bool RecursiveField1PatchStruct::operator==(FOLLY_MAYBE_UNUSED const RecursiveFi
 }
 
 bool RecursiveField1PatchStruct::operator<(FOLLY_MAYBE_UNUSED const RecursiveField1PatchStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.assign_ref() == rhs.assign_ref())) {
-    return lhs.assign_ref() < rhs.assign_ref();
-  }
-  if (!(lhs.clear_ref() == rhs.clear_ref())) {
-    return lhs.clear_ref() < rhs.clear_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::map<::std::string, ::test::fixtures::patch::Recursive>* RecursiveField1PatchStruct::get_assign() const& {
@@ -5435,11 +5207,7 @@ bool RecursiveFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const RecursiveFie
 }
 
 bool RecursiveFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const RecursiveFieldPatchStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::AssignPatchAdapter>(lhs.__fbthrift_field_nodes, rhs.__fbthrift_field_nodes)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::AssignPatchAdapter>(lhs.__fbthrift_field_nodes, rhs.__fbthrift_field_nodes);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -5600,23 +5368,7 @@ bool RecursivePatchStruct::operator==(FOLLY_MAYBE_UNUSED const RecursivePatchStr
 }
 
 bool RecursivePatchStruct::operator<(FOLLY_MAYBE_UNUSED const RecursivePatchStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.assign_ref(), rhs.assign_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.assign_ref(), rhs.assign_ref());
-  }
-  if (!(lhs.clear_ref() == rhs.clear_ref())) {
-    return lhs.clear_ref() < rhs.clear_ref();
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior);
-  }
-  if (!(lhs.ensure_ref() == rhs.ensure_ref())) {
-    return lhs.ensure_ref() < rhs.ensure_ref();
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::test::fixtures::patch::Recursive& RecursivePatchStruct::get_ensure() const& {
@@ -5760,11 +5512,7 @@ bool BarFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const BarFieldPatchStruc
 }
 
 bool BarFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const BarFieldPatchStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::AssignPatchAdapter>(lhs.__fbthrift_field_loop, rhs.__fbthrift_field_loop)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::AssignPatchAdapter>(lhs.__fbthrift_field_loop, rhs.__fbthrift_field_loop);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -5925,23 +5673,7 @@ bool BarPatchStruct::operator==(FOLLY_MAYBE_UNUSED const BarPatchStruct& rhs) co
 }
 
 bool BarPatchStruct::operator<(FOLLY_MAYBE_UNUSED const BarPatchStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.assign_ref(), rhs.assign_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.assign_ref(), rhs.assign_ref());
-  }
-  if (!(lhs.clear_ref() == rhs.clear_ref())) {
-    return lhs.clear_ref() < rhs.clear_ref();
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior);
-  }
-  if (!(lhs.ensure_ref() == rhs.ensure_ref())) {
-    return lhs.ensure_ref() < rhs.ensure_ref();
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::test::fixtures::patch::Bar& BarPatchStruct::get_ensure() const& {
@@ -6085,11 +5817,7 @@ bool LoopFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const LoopFieldPatchStr
 }
 
 bool LoopFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const LoopFieldPatchStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::StructPatchAdapter>(lhs.__fbthrift_field_bar, rhs.__fbthrift_field_bar)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::StructPatchAdapter>(lhs.__fbthrift_field_bar, rhs.__fbthrift_field_bar);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -6198,14 +5926,7 @@ bool LoopPatchStruct::operator==(FOLLY_MAYBE_UNUSED const LoopPatchStruct& rhs) 
 }
 
 bool LoopPatchStruct::operator<(FOLLY_MAYBE_UNUSED const LoopPatchStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if ((!::apache::thrift::detail::pointer_equal(lhs.assign_ref(), rhs.assign_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.assign_ref(), rhs.assign_ref());
-  }
-  if (!(lhs.clear_ref() == rhs.clear_ref())) {
-    return lhs.clear_ref() < rhs.clear_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

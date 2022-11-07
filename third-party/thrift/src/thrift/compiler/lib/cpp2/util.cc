@@ -339,8 +339,10 @@ bool is_orderable_walk(
     std::unordered_map<t_type const*, bool>& memo,
     t_type const& type,
     t_type const* prev,
-    is_orderable_walk_context& context) {
-  const bool has_disqualifying_annotation = is_custom_type(type);
+    is_orderable_walk_context& context,
+    bool enabledReflection) {
+  const bool has_disqualifying_annotation =
+      is_custom_type(type) && !enabledReflection;
   auto memo_it = memo.find(&type);
   if (memo_it != memo.end()) {
     return memo_it->second;
@@ -369,7 +371,8 @@ bool is_orderable_walk(
   if (type.is_typedef()) {
     auto const& real = [&]() -> auto&& { return *type.get_true_type(); };
     auto const& next = *(dynamic_cast<t_typedef const&>(type).get_type());
-    return result = is_orderable_walk(memo, next, &type, context) &&
+    return result = is_orderable_walk(
+                        memo, next, &type, context, enabledReflection) &&
         (!(real().is_set() || real().is_map()) ||
          !has_disqualifying_annotation);
   } else if (type.is_struct() || type.is_xception()) {
@@ -379,33 +382,41 @@ bool is_orderable_walk(
                as_struct.fields().end(),
                [&](const auto& f) {
                  return is_orderable_walk(
-                     memo, f.type().deref(), &type, context);
+                     memo,
+                     f.type().deref(),
+                     &type,
+                     context,
+                     !as_struct.uri().empty());
                });
   } else if (type.is_list()) {
     return result = is_orderable_walk(
                memo,
                *(dynamic_cast<t_list const&>(type).get_elem_type()),
                &type,
-               context);
+               context,
+               enabledReflection);
   } else if (type.is_set()) {
     return result = !has_disqualifying_annotation &&
         is_orderable_walk(
                memo,
                *(dynamic_cast<t_set const&>(type).get_elem_type()),
                &type,
-               context);
+               context,
+               enabledReflection);
   } else if (type.is_map()) {
     return result = !has_disqualifying_annotation &&
         is_orderable_walk(
                memo,
                *(dynamic_cast<t_map const&>(type).get_key_type()),
                &type,
-               context) &&
+               context,
+               enabledReflection) &&
         is_orderable_walk(
                memo,
                *(dynamic_cast<t_map const&>(type).get_val_type()),
                &type,
-               context);
+               context,
+               enabledReflection);
   }
   return false;
 }
@@ -438,7 +449,7 @@ bool is_orderable(
   // first all self-references are speculated, then negative classification is
   // back-propagated through the traversed dependencies.
   is_orderable_walk_context context;
-  is_orderable_walk(memo, type, nullptr, context);
+  is_orderable_walk(memo, type, nullptr, context, false);
   is_orderable_back_propagate(memo, context);
   auto it = memo.find(&type);
   return it == memo.end() || it->second;

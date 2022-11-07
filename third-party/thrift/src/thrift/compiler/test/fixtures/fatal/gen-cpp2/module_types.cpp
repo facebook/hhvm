@@ -3938,23 +3938,7 @@ bool struct_with_indirections::operator==(FOLLY_MAYBE_UNUSED const struct_with_i
 }
 
 bool struct_with_indirections::operator<(FOLLY_MAYBE_UNUSED const struct_with_indirections& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.real_ref() == rhs.real_ref())) {
-    return lhs.real_ref() < rhs.real_ref();
-  }
-  if (!(lhs.fake_ref() == rhs.fake_ref())) {
-    return lhs.fake_ref() < rhs.fake_ref();
-  }
-  if (!(lhs.number_ref() == rhs.number_ref())) {
-    return lhs.number_ref() < rhs.number_ref();
-  }
-  if (!(lhs.result_ref() == rhs.result_ref())) {
-    return lhs.result_ref() < rhs.result_ref();
-  }
-  if (!(lhs.phrase_ref() == rhs.phrase_ref())) {
-    return lhs.phrase_ref() < rhs.phrase_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

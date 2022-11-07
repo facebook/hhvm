@@ -252,6 +252,8 @@ TEST(CompareTest, UnorderedFields) {
 
     EXPECT_FALSE(detail::StructLessThan{}(lhs, lhs));
     EXPECT_TRUE(detail::StructLessThan{}(lhs, rhs));
+    EXPECT_FALSE(op::less<test::UnorderedFields>(lhs, lhs));
+    EXPECT_TRUE(op::less<test::UnorderedFields>(lhs, rhs));
   }
   {
     test::UnorderedFields lhs;
@@ -260,6 +262,8 @@ TEST(CompareTest, UnorderedFields) {
 
     EXPECT_FALSE(detail::StructLessThan{}(lhs, lhs));
     EXPECT_TRUE(detail::StructLessThan{}(lhs, rhs));
+    EXPECT_FALSE(op::less<test::UnorderedFields>(lhs, lhs));
+    EXPECT_TRUE(op::less<test::UnorderedFields>(lhs, rhs));
   }
   {
     test::CppTemplateListField lhs;

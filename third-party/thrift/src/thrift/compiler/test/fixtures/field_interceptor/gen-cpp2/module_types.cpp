@@ -130,26 +130,7 @@ bool InterceptedFields::operator==(FOLLY_MAYBE_UNUSED const InterceptedFields& r
 }
 
 bool InterceptedFields::operator<(FOLLY_MAYBE_UNUSED const InterceptedFields& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.access_field_ref() == rhs.access_field_ref())) {
-    return lhs.access_field_ref() < rhs.access_field_ref();
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.access_shared_field_ref(), rhs.access_shared_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.access_shared_field_ref(), rhs.access_shared_field_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.access_optional_shared_field_ref(), rhs.access_optional_shared_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.access_optional_shared_field_ref(), rhs.access_optional_shared_field_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.access_shared_const_field_ref(), rhs.access_shared_const_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.access_shared_const_field_ref(), rhs.access_shared_const_field_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.access_optional_shared_const_field_ref(), rhs.access_optional_shared_const_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.access_optional_shared_const_field_ref(), rhs.access_optional_shared_const_field_ref());
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.access_optional_boxed_field_ref(), rhs.access_optional_boxed_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.access_optional_boxed_field_ref(), rhs.access_optional_boxed_field_ref());
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

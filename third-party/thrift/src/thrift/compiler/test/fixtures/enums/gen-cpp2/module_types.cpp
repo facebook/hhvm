@@ -292,20 +292,7 @@ bool SomeStruct::operator==(FOLLY_MAYBE_UNUSED const SomeStruct& rhs) const {
 }
 
 bool SomeStruct::operator<(FOLLY_MAYBE_UNUSED const SomeStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.reasonable_ref() == rhs.reasonable_ref())) {
-    return lhs.reasonable_ref() < rhs.reasonable_ref();
-  }
-  if (!(lhs.fine_ref() == rhs.fine_ref())) {
-    return lhs.fine_ref() < rhs.fine_ref();
-  }
-  if (!(lhs.questionable_ref() == rhs.questionable_ref())) {
-    return lhs.questionable_ref() < rhs.questionable_ref();
-  }
-  if (!(lhs.tags_ref() == rhs.tags_ref())) {
-    return lhs.tags_ref() < rhs.tags_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::set<::std::int32_t>& SomeStruct::get_tags() const& {
@@ -417,20 +404,7 @@ bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.me2_3_ref() == rhs.me2_3_ref())) {
-    return lhs.me2_3_ref() < rhs.me2_3_ref();
-  }
-  if (!(lhs.me3_n3_ref() == rhs.me3_n3_ref())) {
-    return lhs.me3_n3_ref() < rhs.me3_n3_ref();
-  }
-  if (!(lhs.me1_t1_ref() == rhs.me1_t1_ref())) {
-    return lhs.me1_t1_ref() < rhs.me1_t1_ref();
-  }
-  if (!(lhs.me1_t2_ref() == rhs.me1_t2_ref())) {
-    return lhs.me1_t2_ref() < rhs.me1_t2_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 

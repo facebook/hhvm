@@ -99,11 +99,7 @@ bool Foo::operator==(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
 }
 
 bool Foo::operator<(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.field_ref() == rhs.field_ref())) {
-    return lhs.field_ref() < rhs.field_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -199,11 +195,7 @@ bool Bar::operator==(FOLLY_MAYBE_UNUSED const Bar& rhs) const {
 }
 
 bool Bar::operator<(FOLLY_MAYBE_UNUSED const Bar& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.list_field_ref() == rhs.list_field_ref())) {
-    return lhs.list_field_ref() < rhs.list_field_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::std::vector<::facebook::thrift::test::AdaptedFoo>& Bar::get_list_field() const& {
@@ -430,44 +422,7 @@ bool OpEncodeStruct::operator==(FOLLY_MAYBE_UNUSED const OpEncodeStruct& rhs) co
 }
 
 bool OpEncodeStruct::operator<(FOLLY_MAYBE_UNUSED const OpEncodeStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.int_field_ref() == rhs.int_field_ref())) {
-    return lhs.int_field_ref() < rhs.int_field_ref();
-  }
-  if (!(lhs.enum_field_ref() == rhs.enum_field_ref())) {
-    return lhs.enum_field_ref() < rhs.enum_field_ref();
-  }
-  if (!(lhs.foo_field_ref() == rhs.foo_field_ref())) {
-    return lhs.foo_field_ref() < rhs.foo_field_ref();
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adapted_field, rhs.__fbthrift_field_adapted_field)) {
-    return ::apache::thrift::adapt_detail::less<::apache::thrift::test::TemplatedTestAdapter>(lhs.__fbthrift_field_adapted_field, rhs.__fbthrift_field_adapted_field);
-  }
-  if (!(lhs.list_field_ref() == rhs.list_field_ref())) {
-    return lhs.list_field_ref() < rhs.list_field_ref();
-  }
-  if ((!::apache::thrift::detail::pointer_equal(lhs.list_shared_ptr_field_ref(), rhs.list_shared_ptr_field_ref()))) {
-    return ::apache::thrift::detail::pointer_less(lhs.list_shared_ptr_field_ref(), rhs.list_shared_ptr_field_ref());
-  }
-  if (!(lhs.list_cpp_type_field_ref() == rhs.list_cpp_type_field_ref())) {
-    return lhs.list_cpp_type_field_ref() < rhs.list_cpp_type_field_ref();
-  }
-  if (!(lhs.set_field_ref() == rhs.set_field_ref())) {
-    return lhs.set_field_ref() < rhs.set_field_ref();
-  }
-  if (!(lhs.map_field_ref() == rhs.map_field_ref())) {
-    return lhs.map_field_ref() < rhs.map_field_ref();
-  }
-  if (!(lhs.nested_field_ref() == rhs.nested_field_ref())) {
-    return lhs.nested_field_ref() < rhs.nested_field_ref();
-  }
-  if (!(lhs.bar_field_ref() == rhs.bar_field_ref())) {
-    return lhs.bar_field_ref() < rhs.bar_field_ref();
-  }
-  if (::apache::thrift::adapt_detail::not_equal<::FieldAdapter>(lhs.__fbthrift_field_adapted_list_field, rhs.__fbthrift_field_adapted_list_field)) {
-    return ::apache::thrift::adapt_detail::less<::FieldAdapter>(lhs.__fbthrift_field_adapted_list_field, rhs.__fbthrift_field_adapted_list_field);
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::facebook::thrift::test::Foo& OpEncodeStruct::get_foo_field() const& {

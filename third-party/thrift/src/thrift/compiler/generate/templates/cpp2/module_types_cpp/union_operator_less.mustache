@@ -16,6 +16,10 @@
 
 %>
 bool <%struct:cpp_underlying_name%>::operator<(FOLLY_MAYBE_UNUSED const <%struct:cpp_underlying_name%>& rhs) const {
+<%#struct:thrift_uri%>
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+<%/struct:thrift_uri%>
+<%^struct:thrift_uri%>
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
   if (lhs.getType() != rhs.getType()) {
     return lhs.getType() < rhs.getType();
@@ -41,4 +45,5 @@ bool <%struct:cpp_underlying_name%>::operator<(FOLLY_MAYBE_UNUSED const <%struct
     default:
       return false;
   }
+<%/struct:thrift_uri%>
 }

@@ -212,35 +212,7 @@ bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
 }
 
 bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.MyIntField_ref() == rhs.MyIntField_ref())) {
-    return lhs.MyIntField_ref() < rhs.MyIntField_ref();
-  }
-  if (!(lhs.MyStringField_ref() == rhs.MyStringField_ref())) {
-    return lhs.MyStringField_ref() < rhs.MyStringField_ref();
-  }
-  if (!(lhs.MyDataField_ref() == rhs.MyDataField_ref())) {
-    return lhs.MyDataField_ref() < rhs.MyDataField_ref();
-  }
-  if (!(lhs.myEnum_ref() == rhs.myEnum_ref())) {
-    return lhs.myEnum_ref() < rhs.myEnum_ref();
-  }
-  if (!(lhs.oneway_ref() == rhs.oneway_ref())) {
-    return lhs.oneway_ref() < rhs.oneway_ref();
-  }
-  if (!(lhs.readonly_ref() == rhs.readonly_ref())) {
-    return lhs.readonly_ref() < rhs.readonly_ref();
-  }
-  if (!(lhs.idempotent_ref() == rhs.idempotent_ref())) {
-    return lhs.idempotent_ref() < rhs.idempotent_ref();
-  }
-  if (!(lhs.floatSet_ref() == rhs.floatSet_ref())) {
-    return lhs.floatSet_ref() < rhs.floatSet_ref();
-  }
-  if (!(lhs.no_hack_codegen_field_ref() == rhs.no_hack_codegen_field_ref())) {
-    return lhs.no_hack_codegen_field_ref() < rhs.no_hack_codegen_field_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 const ::test::fixtures::basic::MyDataItem& MyStruct::get_MyDataField() const& {
@@ -345,8 +317,7 @@ bool MyDataItem::operator==(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
 }
 
 bool MyDataItem::operator<(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -456,22 +427,7 @@ bool MyUnion::operator==(const MyUnion& rhs) const {
 }
 
 bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::myEnum:
-      return lhs.value_.myEnum < rhs.value_.myEnum;
-    case Type::myStruct:
-      return lhs.value_.myStruct < rhs.value_.myStruct;
-    case Type::myDataItem:
-      return lhs.value_.myDataItem < rhs.value_.myDataItem;
-    case Type::floatSet:
-      return lhs.value_.floatSet < rhs.value_.floatSet;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 void swap(MyUnion& a, MyUnion& b) {
@@ -565,11 +521,7 @@ bool ReservedKeyword::operator==(FOLLY_MAYBE_UNUSED const ReservedKeyword& rhs) 
 }
 
 bool ReservedKeyword::operator<(FOLLY_MAYBE_UNUSED const ReservedKeyword& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.reserved_field_ref() == rhs.reserved_field_ref())) {
-    return lhs.reserved_field_ref() < rhs.reserved_field_ref();
-  }
-  return false;
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 
@@ -666,16 +618,7 @@ bool UnionToBeRenamed::operator==(const UnionToBeRenamed& rhs) const {
 }
 
 bool UnionToBeRenamed::operator<(FOLLY_MAYBE_UNUSED const UnionToBeRenamed& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::reserved_field:
-      return lhs.value_.reserved_field < rhs.value_.reserved_field;
-    default:
-      return false;
-  }
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
 void swap(UnionToBeRenamed& a, UnionToBeRenamed& b) {

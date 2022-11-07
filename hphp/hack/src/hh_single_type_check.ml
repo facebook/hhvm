@@ -63,7 +63,7 @@ type mode =
   | Dump_tast
   | Type
   | Check_tast
-  | Rewrite
+  | RewriteGlobalInference
   | Find_refs of int * int
   | Highlight_refs of int * int
   | Decl_compare
@@ -476,7 +476,7 @@ let parse_options () =
         " Print out the typed AST, stripped of type information."
         ^ " This can be compared against the named AST to look for holes." );
       ( "--rewrite",
-        Arg.Unit (set_mode Rewrite),
+        Arg.Unit (set_mode RewriteGlobalInference),
         " Rewrite the file after inferring types using global inference"
         ^ " (requires --global-inference)." );
       ( "--global-inference",
@@ -1844,6 +1844,28 @@ let handle_constraint_mode
   in
   iter_over_files process_multifile
 
+let apply_patches files_contents patches =
+  if List.length patches <= 0 then
+    print_endline "No patches"
+  else
+    (* simple key-map: convert Relative_path.Map.t into an SMap.t
+     * without changing the values *)
+    let file_contents =
+      Relative_path.Map.fold
+        files_contents
+        ~f:(fun fn -> SMap.add (Relative_path.suffix fn))
+        ~init:SMap.empty
+    in
+    let patched =
+      ServerRefactorTypes.apply_patches_to_file_contents file_contents patches
+    in
+    let print_filename = not @@ Int.equal (SMap.cardinal patched) 1 in
+    SMap.iter
+      (fun fn new_contents ->
+        if print_filename then Printf.printf "//// %s\n" fn;
+        Out_channel.output_string stdout new_contents)
+      patched
+
 let handle_mode
     mode
     filenames
@@ -2196,7 +2218,7 @@ let handle_mode
         let tast = Relative_path.Map.find tasts filename in
         let nast = Tast.to_nast tast in
         Printf.printf "%s\n" (Nast.show_program nast))
-  | Rewrite ->
+  | RewriteGlobalInference ->
     let (errors, _tasts, gi_solved) =
       compute_tasts_expand_types ctx ~verbosity files_info files_contents
     in
@@ -2208,31 +2230,8 @@ let handle_mode
         ^ " inference is turend off (use --global-inference)");
       exit 1
     | Some gi_solved ->
-      let patches =
-        ServerGlobalInference.Mode_rewrite.get_patches ~files_contents gi_solved
-      in
-      if List.length patches <= 0 then
-        print_endline "No patches"
-      else
-        (* simple key-map: convert Relative_path.Map.t into an SMap.t
-         * without changing the values *)
-        let file_contents =
-          Relative_path.Map.fold
-            files_contents
-            ~f:(fun fn -> SMap.add (Relative_path.suffix fn))
-            ~init:SMap.empty
-        in
-        let patched =
-          ServerRefactorTypes.apply_patches_to_file_contents
-            file_contents
-            patches
-        in
-        let print_filename = not @@ Int.equal (SMap.cardinal patched) 1 in
-        SMap.iter
-          (fun fn new_contents ->
-            if print_filename then Printf.printf "//// %s\n" fn;
-            Out_channel.output_string stdout new_contents)
-          patched)
+      ServerGlobalInference.Mode_rewrite.get_patches ~files_contents gi_solved
+      |> apply_patches files_contents)
   | Find_refs (line, column) ->
     let path = expect_single_file () in
     let naming_table = Naming_table.create files_info in

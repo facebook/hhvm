@@ -41,7 +41,8 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
   let strip_decorations { constraint_; _ } = constraint_ in
   let analyse (dec_map : decorated_constraints SMap.t) :
       any_constraint list SMap.t =
-    SMap.map strip_decoration_of_lists dec_map |> Inter_shape.analyse
+    SMap.map strip_decoration_of_lists dec_map
+    |> Inter_shape.analyse ~verbose:(verbosity > 0)
     |> function
     | Inter_shape.Convergent constr_map -> constr_map
     | Inter_shape.Divergent constr_map -> constr_map

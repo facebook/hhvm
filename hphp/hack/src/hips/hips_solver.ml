@@ -27,6 +27,16 @@ module Inter (I : Intra) = struct
       (constraint_map_2 : any_constraint list SMap.t) : bool =
     SMap.equal I.equiv constraint_map_1 constraint_map_2
 
+  let debug_constraint_map label m =
+    Format.printf "%s:\n" label;
+    m
+    |> SMap.iter (fun key cs ->
+           Format.printf "  key %s:\n" key;
+           cs
+           |> List.iter ~f:(fun c ->
+                  Format.printf "    %s\n" @@ I.debug_any_constraint c));
+    m
+
   let substitute_inter_any_backwards
       (inter_constr_1 : inter_constraint) (constr : any_constraint) :
       any_constraint option =
@@ -402,7 +412,15 @@ module Inter (I : Intra) = struct
     in
     SMap.fold add_constraints_for_key constraint_map constraint_map
 
-  let analyse (base_constraint_map : any_constraint list SMap.t) : solution =
+  let analyse (base_constraint_map : any_constraint list SMap.t) ~verbose :
+      solution =
+    let debug =
+      if verbose then
+        debug_constraint_map
+      else
+        fun _ m ->
+      m
+    in
     let deduce_any_list (any_constraint_list : any_constraint list) :
         any_constraint list =
       let destruct (any_constraint_list : any_constraint list) :
@@ -434,12 +452,17 @@ module Inter (I : Intra) = struct
     let rec analyse_help
         (completed_iterations : int)
         (argument_constraint_map : any_constraint list SMap.t) : solution =
+      if verbose then Format.printf "\n=== iteration: %d\n" completed_iterations;
       if Int.equal completed_iterations I.max_iteration then
         Divergent argument_constraint_map
       else
-        let substituted_constraint_map = substitute argument_constraint_map in
+        let substituted_constraint_map =
+          debug "substituted_constraint_map"
+          @@ substitute argument_constraint_map
+        in
         let deduced_constraint_map =
-          SMap.map deduce_any_list substituted_constraint_map
+          debug "deduced_constraint_map"
+          @@ SMap.map deduce_any_list substituted_constraint_map
         in
         let no_dupl_deduced_constraint_map =
           SMap.map
@@ -457,5 +480,7 @@ module Inter (I : Intra) = struct
         else
           analyse_help (completed_iterations + 1) no_dupl_deduced_constraint_map
     in
-    analyse_help 0 (close base_constraint_map)
+    analyse_help
+      0
+      (debug "closed base_constraint_map" @@ close base_constraint_map)
 end

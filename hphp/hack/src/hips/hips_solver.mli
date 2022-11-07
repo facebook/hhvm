@@ -22,5 +22,5 @@ module Inter (I : Intra) : sig
       "base" itself. It either finds a fixpoint, in which case it outputs
       "Convergent fp", or terminates early, in which case it outputs
       "Divergent p". *)
-  val analyse : I.any_constraint list SMap.t -> solution
+  val analyse : I.any_constraint list SMap.t -> verbose:bool -> solution
 end

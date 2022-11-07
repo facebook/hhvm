@@ -712,22 +712,22 @@ let maybe_poison_ancestors
             parent_return_ty
         in
         (* We need that the enforced child type is a subtype of the enforced parent type *)
-        let (_, ty_err1) =
-          Typing_phase.sub_type_decl
+        let sub1 =
+          Typing_phase.is_sub_type_decl
+            ~coerce:(Some Typing_logic.CoerceToDynamic)
             tmp_env
             enforced_child_ty
             enforced_parent_ty
-            (Some (Typing_error.Reasons_callback.unify_error_at child_pos))
         in
         (* But also the original child type should be a subtype of the enforced parent type *)
-        let (_, ty_err2) =
-          Typing_phase.sub_type_decl
+        let sub2 =
+          Typing_phase.is_sub_type_decl
+            ~coerce:(Some Typing_logic.CoerceToDynamic)
             tmp_env
             child_return_ty
             enforced_parent_ty
-            (Some (Typing_error.Reasons_callback.unify_error_at child_pos))
         in
-        if Option.is_none ty_err1 && Option.is_none ty_err2 then
+        if sub1 && sub2 then
           let ty_str =
             Typing_print.full_decl (Env.get_tcopt env) enforced_parent_ty
           in

@@ -1462,6 +1462,19 @@ let sub_type_decl env ty1 ty2 on_error =
   in
   (env, ty_err_opt)
 
+let is_sub_type_decl ?coerce env ty1 ty2 =
+  let ((env, e1), ty1) = localize_no_subst env ~ignore_errors:true ty1 in
+  let ((env, e2), ty2) = localize_no_subst env ~ignore_errors:true ty2 in
+  let (_env, e3) =
+    TUtils.sub_type
+      ?coerce
+      env
+      ty1
+      ty2
+      (Some (Typing_error.Reasons_callback.unify_error_at Pos.none))
+  in
+  Option.is_none e1 && Option.is_none e2 && Option.is_none e3
+
 let localize_and_add_generic_parameters_and_where_constraints
     ~ety_env env tparams where_constraints =
   let (env, e1) =

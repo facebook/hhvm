@@ -431,6 +431,10 @@ struct Options {
   bool m_useRichClient{true};
   bool m_useZippyRichClient{false};
   bool m_useP2P{false};
+  size_t m_casConnectionCount{16};
+  size_t m_engineConnectionCount{4};
+  size_t m_actionCacheConnectionCount{16};
+  std::string m_reClientFeaturesFileName = "remote_execution/features/re_client_hhbbc";
   std::string m_useCase;
 };
 

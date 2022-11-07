@@ -1,7 +1,7 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-// Error: __EnableMethodTraitDiamond is an experimental feature
+// __EnableMethodTraitDiamond is no longer an experimental feature, so this is supported.
 
 trait MyTrait1 {
   public function testFun(): void {}

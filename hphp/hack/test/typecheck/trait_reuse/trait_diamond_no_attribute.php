@@ -10,7 +10,8 @@ trait T {
 trait T1 { use T; }
 trait T2 { use T; }
 
-// Error, as EnableUnstableFeatures('method_trait_diamond') must be enabled
+// EnableUnstableFeatures('method_trait_diamond') is no longer required
+// to use <<__EnableMethodTraitDiamond>>
 
 <<__EnableMethodTraitDiamond>>
 class C {

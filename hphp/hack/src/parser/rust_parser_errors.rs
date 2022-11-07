@@ -5407,9 +5407,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     self.check_can_use_feature(node, &UnstableFeatures::UpcastExpression)
                 }
             }
-            OldAttributeSpecification(x) => {
-                self.old_attr_spec(node, &x.attributes);
-            }
             RequireClause(c) => {
                 if c.kind.is_class() {
                     self.check_can_use_feature(node, &UnstableFeatures::RequireClass)
@@ -5553,16 +5550,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         self.env.context.active_expression_tree = false;
         self.fold_child_nodes(node);
         self.env.context.active_expression_tree = previous_state;
-    }
-
-    fn old_attr_spec(&mut self, node: S<'a>, attributes: S<'a>) {
-        let attributes = self.text(attributes).split(',');
-        attributes.for_each(|attr| match attr.trim() {
-            sn::user_attributes::ENABLE_METHOD_TRAIT_DIAMOND => {
-                self.check_can_use_feature(node, &UnstableFeatures::MethodTraitDiamond)
-            }
-            _ => {}
-        });
     }
 
     fn check_nested_namespace(&mut self, node: S<'a>) {

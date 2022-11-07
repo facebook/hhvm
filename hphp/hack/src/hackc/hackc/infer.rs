@@ -7,13 +7,13 @@ use std::fs;
 use std::io;
 use std::path::Path;
 use std::path::PathBuf;
-use std::sync::Mutex;
 
 use anyhow::Result;
 use clap::Parser;
 use compile::Profile;
 use decl_provider::SelfProvider;
 use ocamlrep::rc::RcOc;
+use parking_lot::Mutex;
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
 use relative_path::Prefix;
@@ -74,11 +74,7 @@ pub fn run(opts: Opts) -> Result<()> {
 
 fn process_single_file(path: &Path, opts: &Opts, writer: &SyncWrite) -> Result<()> {
     match convert_single_file(path, opts) {
-        Ok(textual) => writer
-            .lock()
-            .unwrap()
-            .write_all(&textual)
-            .map_err(|e| e.into()),
+        Ok(textual) => writer.lock().write_all(&textual).map_err(|e| e.into()),
         Err(err) => Err(err),
     }
 }

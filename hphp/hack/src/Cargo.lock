@@ -1884,6 +1884,7 @@ dependencies = [
  "options",
  "oxidized",
  "panic-message",
+ "parking_lot 0.11.2",
  "parser_core_types",
  "pos",
  "positioned_by_ref_parser",

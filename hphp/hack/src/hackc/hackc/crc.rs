@@ -7,13 +7,11 @@ use std::borrow::Cow;
 use std::fs;
 use std::hash::Hash;
 use std::hash::Hasher;
-use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 use std::sync::Arc;
-use std::sync::Mutex;
 use std::time::Duration;
 use std::time::Instant;
 
@@ -21,6 +19,7 @@ use anyhow::bail;
 use anyhow::Result;
 use clap::Parser;
 use multifile_rust as multifile;
+use parking_lot::Mutex;
 use rayon::prelude::*;
 
 use crate::compile::SingleFileOpts;
@@ -29,8 +28,7 @@ use crate::profile::DurationEx;
 use crate::profile::MaxValue;
 use crate::profile::StatusTicker;
 use crate::profile::Timing;
-
-type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
+use crate::util::SyncWrite;
 
 #[derive(Parser, Debug)]
 pub struct Opts {
@@ -66,7 +64,7 @@ fn process_one_file(
             Ok((Err(e), profile1)) => {
                 // No panic - but called function failed.
                 *profile = compile::Profile::fold(std::mem::take(profile), profile1);
-                writeln!(writer.lock().unwrap(), "{}: error ({})", f.display(), e)?;
+                writeln!(writer.lock(), "{}: error ({})", f.display(), e)?;
                 bail!("failed");
             }
             Ok((Ok(output), profile1)) => {
@@ -75,11 +73,11 @@ fn process_one_file(
                 let mut hasher = std::collections::hash_map::DefaultHasher::new();
                 output.hash(&mut hasher);
                 let crc = hasher.finish();
-                writeln!(writer.lock().unwrap(), "{}: {:016x}", f.display(), crc)?;
+                writeln!(writer.lock(), "{}: {:016x}", f.display(), crc)?;
             }
             Err(_) => {
                 // Called function panic'd.
-                writeln!(writer.lock().unwrap(), "{}: panic", f.display())?;
+                writeln!(writer.lock(), "{}: panic", f.display())?;
                 bail!("panic");
             }
         }

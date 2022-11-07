@@ -9,12 +9,12 @@ use std::fmt::Display;
 use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
-use std::sync::Mutex;
 use std::thread::JoinHandle;
 use std::time::Duration;
 use std::time::Instant;
 
 use hash::HashMap;
+use parking_lot::Mutex;
 
 #[derive(Debug)]
 pub(crate) struct Timing {
@@ -244,7 +244,7 @@ impl StatusTicker {
 
         std::thread::spawn(move || {
             loop {
-                let mut shared = shared.lock().unwrap();
+                let mut shared = shared.lock();
                 if shared.finished {
                     break;
                 }
@@ -258,7 +258,7 @@ impl StatusTicker {
     }
 
     pub(crate) fn finish(self) -> (usize, Duration) {
-        let mut shared = self.shared.lock().unwrap();
+        let mut shared = self.shared.lock();
         shared.finished = true;
         let count = shared.count;
         let duration = shared.start.elapsed();
@@ -269,12 +269,12 @@ impl StatusTicker {
     }
 
     pub(crate) fn start_file(&self, path: &Path) {
-        let mut shared = self.shared.lock().unwrap();
+        let mut shared = self.shared.lock();
         shared.processing.insert(path.to_path_buf(), Instant::now());
     }
 
     pub(crate) fn finish_file(&self, path: &Path) {
-        let mut shared = self.shared.lock().unwrap();
+        let mut shared = self.shared.lock();
         shared.count += 1;
         shared.processing.remove(path);
     }

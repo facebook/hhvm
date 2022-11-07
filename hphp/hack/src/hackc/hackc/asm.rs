@@ -8,7 +8,6 @@ use std::io::stdout;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
-use std::sync::Mutex;
 
 use ::assemble as _;
 use anyhow::anyhow;
@@ -16,9 +15,11 @@ use anyhow::Result;
 use bumpalo::Bump;
 use clap::Parser;
 use options::Options;
+use parking_lot::Mutex;
 use rayon::prelude::*;
 use relative_path::RelativePath;
 
+use crate::util::SyncWrite;
 use crate::FileOpts;
 
 #[derive(Parser, Debug)]
@@ -31,8 +32,6 @@ pub struct Opts {
     #[clap(flatten)]
     files: FileOpts,
 }
-
-type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
 
 pub fn run(opts: Opts) -> Result<()> {
     let writer: SyncWrite = match &opts.output_file {
@@ -63,7 +62,7 @@ pub fn process_one_file(f: &Path, w: &SyncWrite) -> Result<()> {
             Err(anyhow!("bytecode_printer problem"))
         }
         Ok(_) => {
-            w.lock().unwrap().write_all(&output)?;
+            w.lock().write_all(&output)?;
             Ok(())
         }
     }

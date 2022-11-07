@@ -7,10 +7,10 @@ use std::ffi::OsStr;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
-use std::sync::Mutex;
 
 use anyhow::bail;
 use anyhow::Result;
+use parking_lot::Mutex;
 
 pub type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
 

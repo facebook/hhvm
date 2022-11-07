@@ -10,7 +10,6 @@ use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
-use std::sync::Mutex;
 
 use anyhow::Context;
 use anyhow::Result;
@@ -33,6 +32,7 @@ use multifile_rust as multifile;
 use naming_provider::SqliteNamingTable;
 use ocamlrep::rc::RcOc;
 use options::HhbcFlags;
+use parking_lot::Mutex;
 use parser_core_types::source_text::SourceText;
 use pos::ConstName;
 use pos::FunName;
@@ -118,11 +118,11 @@ fn process_one_file(f: &Path, opts: &Opts, w: &SyncWrite) -> Result<()> {
                 &mut Profile::default(),
             ) {
                 Err(e) => {
-                    writeln!(w.lock().unwrap(), "Error in file {}: {}", f.display(), e)?;
+                    writeln!(w.lock(), "Error in file {}: {}", f.display(), e)?;
                     Err(e)
                 }
                 Ok(output) => {
-                    w.lock().unwrap().write_all(&output)?;
+                    w.lock().write_all(&output)?;
                     Ok(())
                 }
             }

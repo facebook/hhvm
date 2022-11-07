@@ -18,6 +18,46 @@ module Phase = Typing_phase
 module EnvFromDef = Typing_env_from_def
 module Profile = Typing_toplevel_profile
 
+let get_cnstr_errs env tcstr reverse t_pos ty =
+  match tcstr with
+  | Some tcstr ->
+    let ((env, ty_err_opt1), cstr) =
+      Phase.localize_hint_no_subst env ~ignore_errors:false tcstr
+    in
+    let (env, ty_err_opt2) =
+      Typing_ops.sub_type
+        t_pos
+        Reason.URnewtype_cstr
+        env
+        (if reverse then
+          cstr
+        else
+          ty)
+        (if reverse then
+          ty
+        else
+          cstr)
+        Typing_error.Callback.newtype_alias_must_satisfy_constraint
+    in
+    (env, Option.merge ~f:Typing_error.both ty_err_opt1 ty_err_opt2)
+  | _ -> (env, None)
+
+let create_err_from_cycles cycles pos name =
+  let relevant_cycles =
+    List.filter
+      ~f:(fun Decl_typedef_expand.{ td_name; _ } -> String.equal name td_name)
+      cycles
+  in
+  let cycle_to_error Decl_typedef_expand.{ decl_pos; _ } =
+    Typing_error.(primary @@ Primary.Cyclic_typedef { pos; decl_pos })
+  in
+  let err =
+    match List.map relevant_cycles ~f:cycle_to_error with
+    | [] -> None
+    | head :: tail -> Some (List.fold_left tail ~init:head ~f:Typing_error.both)
+  in
+  err
+
 let typedef_def ctx typedef =
   let tcopt = Provider_context.get_tcopt ctx in
   Profile.measure_elapsed_time_and_report tcopt None typedef.t_name @@ fun () ->
@@ -56,45 +96,57 @@ let typedef_def ctx typedef =
   } =
     typedef
   in
-  let ((env, ty_err_opt2), ty) =
-    Phase.localize_hint_no_subst
-      env
-      ~ignore_errors:false
-      ~report_cycle:(t_pos, t_name)
-      hint
-  in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt2;
 
-  let get_cnstr_errs env tcstr reverse =
-    match tcstr with
-    | Some tcstr ->
-      let ((env, ty_err_opt1), cstr) =
-        Phase.localize_hint_no_subst env ~ignore_errors:false tcstr
-      in
-      let (env, ty_err_opt2) =
-        Typing_ops.sub_type
-          t_pos
-          Reason.URnewtype_cstr
+  let env =
+    if TypecheckerOptions.use_type_alias_heap (Env.get_tcopt env) then
+      match Decl_provider.get_typedef ctx t_name with
+      | Some _ ->
+        let (ty, ty_err_opt2) =
+          let ty = Decl_hint.hint env.Typing_env_types.decl_env hint in
+          let ctx = Typing_env.get_ctx env in
+          let r = Typing_defs_core.get_reason ty in
+          let (ty, cycles) =
+            Decl_typedef_expand.expand_typedef_with_error
+              ~force_expand:true
+              ctx
+              r
+              t_name
+          in
+          let err = create_err_from_cycles cycles t_pos t_name in
+          (ty, err)
+        in
+        Option.iter ~f:Errors.add_typing_error ty_err_opt2;
+        let ety_env = Typing_defs.empty_expand_env in
+        let ((env, ty_err_opt3), ty) = Phase.localize ~ety_env env ty in
+        Option.iter ~f:Errors.add_typing_error ty_err_opt3;
+
+        let (env, ty_err_opt3) = get_cnstr_errs env tascstr false t_pos ty in
+        let (env, ty_err_opt4) = get_cnstr_errs env tsupercstr true t_pos ty in
+        Option.iter
+          ~f:Errors.add_typing_error
+          (Option.merge ~f:Typing_error.both ty_err_opt3 ty_err_opt4);
+        env
+      | None ->
+        (* We get here if there's a "Name already bound" error. *)
+        env
+    else
+      let ((env, ty_err_opt2), ty) =
+        Phase.localize_hint_no_subst
           env
-          (if reverse then
-            cstr
-          else
-            ty)
-          (if reverse then
-            ty
-          else
-            cstr)
-          Typing_error.Callback.newtype_alias_must_satisfy_constraint
+          ~ignore_errors:false
+          ~report_cycle:(t_pos, t_name)
+          hint
       in
-      (env, Option.merge ~f:Typing_error.both ty_err_opt1 ty_err_opt2)
-    | _ -> (env, None)
+      Option.iter ~f:Errors.add_typing_error ty_err_opt2;
+
+      let (env, ty_err_opt3) = get_cnstr_errs env tascstr false t_pos ty in
+      let (env, ty_err_opt4) = get_cnstr_errs env tsupercstr true t_pos ty in
+      Option.iter
+        ~f:Errors.add_typing_error
+        (Option.merge ~f:Typing_error.both ty_err_opt3 ty_err_opt4);
+      env
   in
 
-  let (env, ty_err_opt3) = get_cnstr_errs env tascstr false in
-  let (env, ty_err_opt4) = get_cnstr_errs env tsupercstr true in
-  Option.iter
-    ~f:Errors.add_typing_error
-    (Option.merge ~f:Typing_error.both ty_err_opt3 ty_err_opt4);
   let env =
     match hint with
     | (_pos, Hshape { nsi_allows_unknown_fields = _; nsi_field_map }) ->

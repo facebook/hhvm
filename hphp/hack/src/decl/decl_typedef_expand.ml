@@ -11,6 +11,12 @@ open Typing_defs
 open Utils
 module MakeType = Typing_make_type
 
+type cyclic_td_usage = {
+  td_name: string;
+  decl_pos: Pos_or_decl.t;
+      (** Position of type alias usage that caused the cycle *)
+}
+
 let is_typedef ctx name =
   match Naming_provider.get_type_kind ctx name with
   | Some Naming_types.TTypedef -> true
@@ -27,12 +33,17 @@ let is_typedef ctx name =
     - name: name of type alias to expand
     - ty_argl: list of type arguments used to substitute the expanded typedef's type parameters *)
 let rec expand_and_instantiate
-    ?(force_expand = false) visited ctx r name ty_argl =
-  let (td_tparams, expanded_type) =
+    ?(force_expand = false) visited ctx r name ty_argl :
+    decl_ty * cyclic_td_usage list =
+  let (td_tparams, expanded_type, cycles) =
     expand_typedef_ ~force_expand visited ctx name
   in
-  let subst = Decl_instantiate.make_subst td_tparams ty_argl in
-  Decl_instantiate.instantiate subst (mk (r, expanded_type))
+  match expanded_type with
+  | Terr ->
+    (MakeType.err r, cycles @ [{ decl_pos = Reason.to_pos r; td_name = name }])
+  | _ ->
+    let subst = Decl_instantiate.make_subst td_tparams ty_argl in
+    (Decl_instantiate.instantiate subst (mk (r, expanded_type)), cycles)
 
 (** [expand_typedef_ visited ctx name ty_argl] returns the full expansion of the type alias named [name].
     E.g. if `type A<T> = Vec<B<T>>; type B<T> = Map<int, T>`, [expand_typedef] on "A" returns `(["T"], Vec<Map<int, T>>)`.
@@ -49,7 +60,7 @@ let rec expand_and_instantiate
     Opaque typedefs are not expanded, regardless of the current file.
     Detects cycles, but does not raise an error - it just stops expanding instead. *)
 and expand_typedef_ ?(force_expand = false) visited ctx (name : string) :
-    decl_tparam list * decl_ty_ =
+    decl_tparam list * decl_ty_ * cyclic_td_usage list =
   let td = unsafe_opt @@ Decl_provider.get_typedef ctx name in
   let {
     td_pos;
@@ -67,7 +78,7 @@ and expand_typedef_ ?(force_expand = false) visited ctx (name : string) :
     td
   in
   if SSet.mem name visited then
-    (td_tparams, get_node td_type)
+    ([], Terr, [])
   else
     let visited = SSet.add name visited in
     (* We don't want our visibility logic to depend on the filename of the caller,
@@ -82,7 +93,8 @@ and expand_typedef_ ?(force_expand = false) visited ctx (name : string) :
       | Aast.Transparent -> true
     in
     if should_expand then
-      (td_tparams, get_node (expand_ visited ctx td_type))
+      let (ty, cycles) = expand_ visited ctx td_type in
+      (td_tparams, get_node ty, cycles)
     else
       let tparam_to_tgeneric tparam =
         mk (Reason.Rhint (fst tparam.tp_name), Tgeneric (snd tparam.tp_name, []))
@@ -95,7 +107,7 @@ and expand_typedef_ ?(force_expand = false) visited ctx (name : string) :
           let r_cstr = Reason.Rimplicit_upper_bound (td_pos, "?nonnull") in
           MakeType.mixed r_cstr
       in
-      (td_tparams, Tnewtype (name, tyl, cstr))
+      (td_tparams, Tnewtype (name, tyl, cstr), [])
 
 (** [expand_ visited ctx ty] traverses the type tree of [ty] and recursively expands all its transparent type alias.
     E.g. if `type B<Tb> = Map<int, Tb>`, [expand_ visited ctx (Vec<B<Ta>>)] returns `Vec<Map<int, Ta>>`.
@@ -105,89 +117,128 @@ and expand_typedef_ ?(force_expand = false) visited ctx (name : string) :
     - visited: set of type alias names; used to detect cycles
 
     So this is just a decl_ty -> decl_ty mapper where the only interesting case is Tapply. *)
-and expand_ visited ctx (ty : decl_ty) : decl_ty =
+and expand_ visited ctx (ty : decl_ty) : decl_ty * cyclic_td_usage list =
   let (r, ty_) = deref ty in
   match ty_ with
-  | Tapply (((_pos, name) as _id), tyl) ->
+  | Tapply ((_pos, name), tyl) ->
     if is_typedef ctx name then
-      let tyl = List.map tyl ~f:(expand_ visited ctx) in
-      expand_and_instantiate visited ctx r name tyl
+      let (tyl, cycles1) =
+        List.unzip @@ List.map tyl ~f:(expand_ visited ctx)
+      in
+      let (ty, cycles2) = expand_and_instantiate visited ctx r name tyl in
+      (ty, List.concat cycles1 @ cycles2)
     else
-      let tyl = List.map tyl ~f:(expand_ visited ctx) in
-      mk (r, Tapply ((_pos, name), tyl))
+      let (tyl, cycles) = List.unzip @@ List.map tyl ~f:(expand_ visited ctx) in
+      (mk (r, Tapply ((_pos, name), tyl)), List.concat cycles)
   | Tvar _ -> failwith "not implemented"
   | Tthis -> failwith "should never happen"
   | (Tmixed | Terr | Tnonnull | Tdynamic | Tprim _ | Tgeneric _ | Tany _) as x
     ->
-    mk (r, x)
+    (mk (r, x), [])
   | Trefinement (ty, rs) ->
-    let ty = expand_ visited ctx ty in
-    let rs = Class_refinement.map (expand_ visited ctx) rs in
-    mk (r, Trefinement (ty, rs))
+    let (cycles, rs) =
+      Class_refinement.fold_map
+        (fun cycles1 ty ->
+          let (ty, cycles2) = expand_ visited ctx ty in
+          (cycles1 @ cycles2, ty))
+        []
+        rs
+    in
+    (mk (r, Trefinement (ty, rs)), cycles)
   | Tunion tyl ->
-    let tyl = List.map tyl ~f:(expand_ visited ctx) in
-    mk (r, Tunion tyl)
+    let (tyl, cycles) = List.unzip @@ List.map tyl ~f:(expand_ visited ctx) in
+    (mk (r, Tunion tyl), List.concat cycles)
   | Tintersection tyl ->
-    let tyl = List.map tyl ~f:(expand_ visited ctx) in
-    mk (r, Tintersection tyl)
+    let (tyl, cycles) = List.unzip @@ List.map tyl ~f:(expand_ visited ctx) in
+    (mk (r, Tintersection tyl), List.concat cycles)
   | Taccess (ty, id) ->
-    let ty = expand_ visited ctx ty in
-    mk (r, Taccess (ty, id))
+    let (ty, cycles) = expand_ visited ctx ty in
+    (mk (r, Taccess (ty, id)), cycles)
   | Toption ty ->
-    let x = expand_ visited ctx ty in
-    (match get_node x with
-    | Toption _ as y -> mk (r, y)
-    | _ -> mk (r, Toption x))
-  | Tlike ty -> mk (r, Tlike (expand_ visited ctx ty))
+    let (ty, cycles) = expand_ visited ctx ty in
+    (match get_node ty with
+    | Toption _ as y -> (mk (r, y), cycles)
+    | _ -> (mk (r, Toption ty), cycles))
+  | Tlike ty ->
+    let (ty, err) = expand_ visited ctx ty in
+    (mk (r, Tlike ty), err)
   | Ttuple tyl ->
-    let tyl = List.map tyl ~f:(expand_ visited ctx) in
-    mk (r, Ttuple tyl)
+    let (tyl, cycles) = List.unzip @@ List.map tyl ~f:(expand_ visited ctx) in
+    (mk (r, Ttuple tyl), List.concat cycles)
   | Tshape (shape_kind, fdm) ->
-    let fdm = ShapeFieldMap.map (expand_ visited ctx) fdm in
-    mk (r, Tshape (shape_kind, fdm))
+    let (cycles, fdm) =
+      ShapeFieldMap.map_env
+        (fun cycles1 ty ->
+          let (ty, cycles2) = expand_ visited ctx ty in
+          (cycles1 @ cycles2, ty))
+        []
+        fdm
+    in
+    (mk (r, Tshape (shape_kind, fdm)), cycles)
   | Tvec_or_dict (ty1, ty2) ->
-    let ty1 = expand_ visited ctx ty1 in
-    let ty2 = expand_ visited ctx ty2 in
-    mk (r, Tvec_or_dict (ty1, ty2))
+    let (ty1, err1) = expand_ visited ctx ty1 in
+    let (ty2, err2) = expand_ visited ctx ty2 in
+    (mk (r, Tvec_or_dict (ty1, ty2)), err1 @ err2)
   | Tfun ft ->
     let tparams = ft.ft_tparams in
-    let params =
-      List.map ft.ft_params ~f:(fun param ->
-          let ty = expand_possibly_enforced_ty visited ctx param.fp_type in
-          { param with fp_type = ty })
+    let (params, cycles1) =
+      List.unzip
+      @@ List.map ft.ft_params ~f:(fun param ->
+             let (ty, cycles) =
+               expand_possibly_enforced_ty visited ctx param.fp_type
+             in
+             ({ param with fp_type = ty }, cycles))
     in
-    let ret = expand_possibly_enforced_ty visited ctx ft.ft_ret in
-    let tparams =
-      List.map tparams ~f:(fun t ->
-          {
-            t with
-            tp_constraints =
-              List.map t.tp_constraints ~f:(fun (ck, ty) ->
-                  (ck, expand_ visited ctx ty));
-          })
+    let (ret, cycles2) = expand_possibly_enforced_ty visited ctx ft.ft_ret in
+    let (tparams, cycles3) =
+      List.unzip
+      @@ List.map tparams ~f:(fun t ->
+             let (constraints, cycles) =
+               List.unzip
+               @@ List.map t.tp_constraints ~f:(fun (ck, ty) ->
+                      let (ty, cycles) = expand_ visited ctx ty in
+                      ((ck, ty), cycles))
+             in
+             ({ t with tp_constraints = constraints }, List.concat cycles))
     in
-    let where_constraints =
-      List.map ft.ft_where_constraints ~f:(fun (ty1, ck, ty2) ->
-          (expand_ visited ctx ty1, ck, expand_ visited ctx ty2))
+    let (where_constraints, cycles4) =
+      List.unzip
+      @@ List.map ft.ft_where_constraints ~f:(fun (ty1, ck, ty2) ->
+             let (ty1, cycles1) = expand_ visited ctx ty1 in
+             let (ty2, cycles2) = expand_ visited ctx ty2 in
+             ((ty1, ck, ty2), cycles1 @ cycles2))
     in
-    mk
-      ( r,
-        Tfun
-          {
-            ft with
-            ft_params = params;
-            ft_ret = ret;
-            ft_tparams = tparams;
-            ft_where_constraints = where_constraints;
-          } )
+    ( mk
+        ( r,
+          Tfun
+            {
+              ft with
+              ft_params = params;
+              ft_ret = ret;
+              ft_tparams = tparams;
+              ft_where_constraints = where_constraints;
+            } ),
+      List.concat (cycles1 @ cycles3 @ cycles4) @ cycles2 )
   | Tnewtype (name, tyl, ty) ->
-    let tyl = List.map tyl ~f:(expand_ visited ctx) in
-    let ty = expand_ visited ctx ty in
-    mk (r, Tnewtype (name, tyl, ty))
+    let (tyl, cycles1) = List.unzip @@ List.map tyl ~f:(expand_ visited ctx) in
+    let (ty, cycles2) = expand_ visited ctx ty in
+    (mk (r, Tnewtype (name, tyl, ty)), List.concat cycles1 @ cycles2)
 
-and expand_possibly_enforced_ty visited ctx et =
-  { et_type = expand_ visited ctx et.et_type; et_enforced = et.et_enforced }
+and expand_possibly_enforced_ty visited ctx et :
+    decl_ty possibly_enforced_ty * cyclic_td_usage list =
+  let (ty, cycles) = expand_ visited ctx et.et_type in
+  ({ et_type = ty; et_enforced = et.et_enforced }, cycles)
 
 let expand_typedef ?(force_expand = false) ctx r name ty_argl =
   let visited = SSet.empty in
-  expand_and_instantiate ~force_expand visited ctx r name ty_argl
+  let (ty, _) =
+    expand_and_instantiate ~force_expand visited ctx r name ty_argl
+  in
+  ty
+
+let expand_typedef_with_error ?(force_expand = false) ctx r name =
+  let visited = SSet.empty in
+  let (_, expanded_type, cycles) =
+    expand_typedef_ ~force_expand visited ctx name
+  in
+  (mk (r, expanded_type), cycles)

@@ -26,3 +26,5 @@ function fcall_static(): void {
 function fcall_method(C $a): void {
   $a->b(1, 2, 3);
 }
+
+// CHECK: declare C.f(...): *Mixed

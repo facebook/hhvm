@@ -44,7 +44,7 @@ pub fn textual_writer(
 
     writeln!(w, "// ----- EXTERNALS -----")?;
     for name in state.func_declares.external_funcs() {
-        writeln!(w, "declare {name}(...): mixed")?;
+        writeln!(w, "declare {name}(...): *Mixed")?;
     }
 
     if !no_builtins {

@@ -796,6 +796,11 @@ fn rewrite_jmp_ops<'a>(mut func: ir::Func<'a>) -> ir::Func<'a> {
     func
 }
 
+pub(crate) struct MethodInfo<'a> {
+    pub(crate) class: &'a ir::Class<'a>,
+    pub(crate) is_static: bool,
+}
+
 /// Compare locals such that named ones go first followed by unnamed ones.
 /// Ordering for named locals is stable and is based on their source names.
 /// Unnamed locals have only their id which may differ accross runs. In which
@@ -812,9 +817,4 @@ fn cmp_lid(strings: &StringInterner, x: &LocalId, y: &LocalId) -> std::cmp::Orde
         (LocalId::Unnamed(_), LocalId::Named(_)) => std::cmp::Ordering::Greater,
         (LocalId::Unnamed(x_id), LocalId::Unnamed(y_id)) => x_id.cmp(y_id),
     }
-}
-
-pub(crate) struct MethodInfo<'a> {
-    pub(crate) class: &'a ir::Class<'a>,
-    pub(crate) is_static: bool,
 }

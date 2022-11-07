@@ -47,20 +47,38 @@ pub fn run(opts: Opts) -> Result<()> {
 
     let files = opts.files.gather_input_files()?;
 
-    let mut stdout = io::stdout();
-
     for path in files {
-        let pre_alloc = bumpalo::Bump::default();
-        let content = fs::read(&path)?;
-        let unit = compile_php_file(&pre_alloc, &path, &content, &opts.single_file_opts)?;
-
-        textual::textual_writer(&mut stdout, &path, unit, opts.no_builtins)?;
+        let status = safe_compile_php_file(&path, &opts);
+        match status {
+            Err(err) if opts.keep_going => {
+                eprintln!("Failed to compile {}: {}", path.display(), err);
+            }
+            other => other?,
+        }
     }
 
     Ok(())
 }
 
-pub(crate) fn compile_php_file<'a, 'arena>(
+fn safe_compile_php_file(path: &Path, opts: &Opts) -> Result<()> {
+    let content = fs::read(&path)?;
+
+    let action = || {
+        let pre_alloc = bumpalo::Bump::default();
+        build_ir(&pre_alloc, path, &content, &opts.single_file_opts).and_then(|unit| {
+            let mut stdout = io::stdout();
+            textual::textual_writer(&mut stdout, path, unit, opts.no_builtins)
+        })
+    };
+
+    if opts.keep_going {
+        with_catch_panics(action)
+    } else {
+        action()
+    }
+}
+
+fn build_ir<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     path: &'a Path,
     content: &[u8],
@@ -81,4 +99,15 @@ pub(crate) fn compile_php_file<'a, 'arena>(
     let ir = bc_to_ir::bc_to_ir(&unit, path);
 
     Ok(ir)
+}
+
+fn with_catch_panics<R>(action: impl FnOnce() -> Result<R> + std::panic::UnwindSafe) -> Result<R> {
+    match std::panic::catch_unwind(action) {
+        Ok(result) => result,
+        Err(e) => {
+            let msg = panic_message::panic_message(&e).to_string();
+            let err = anyhow::anyhow!(msg);
+            Err(err)
+        }
+    }
 }

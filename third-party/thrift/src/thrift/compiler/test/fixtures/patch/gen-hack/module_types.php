@@ -2600,7 +2600,7 @@ class Loop implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
  * MyDataFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyDataFieldPatch'))>>
-class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2625,11 +2625,6 @@ class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \I
     ?'data2' => ?\thrift\op\I32Patch,
   );
 
-  const type TShape = shape(
-    ?'data1' => ?\thrift\op\StringPatch::TShape,
-    ?'data2' => ?\thrift\op\I32Patch::TShape,
-    ...
-  );
   const int STRUCTURAL_ID = 4934641526205074734;
   /**
    * Original thrift field:-
@@ -2744,19 +2739,6 @@ class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \I
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'data1') === null ? null : (\thrift\op\StringPatch::__fromShape($shape['data1'])),
-      Shapes::idx($shape, 'data2') === null ? null : (\thrift\op\I32Patch::__fromShape($shape['data2'])),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'data1' => $this->data1?->__toShape(),
-      'data2' => $this->data2?->__toShape(),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -2789,7 +2771,7 @@ class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \I
  * MyDataPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyDataPatch'))>>
-class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -2834,14 +2816,6 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
     ?'patch' => ?\fixtures\patch\MyDataFieldPatch,
   );
 
-  const type TShape = shape(
-    ?'assign' => ?\fixtures\patch\MyData::TShape,
-    'clear' => bool,
-    ?'patchPrior' => ?\fixtures\patch\MyDataFieldPatch::TShape,
-    ?'ensure' => ?\fixtures\patch\MyData::TShape,
-    ?'patch' => ?\fixtures\patch\MyDataFieldPatch::TShape,
-    ...
-  );
   const int STRUCTURAL_ID = 5256392352261057461;
   /**
    * Assigns a value. If set, all other operations are ignored.
@@ -3031,25 +3005,6 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'assign') === null ? null : (\fixtures\patch\MyData::__fromShape($shape['assign'])),
-      $shape['clear'],
-      Shapes::idx($shape, 'patchPrior') === null ? null : (\fixtures\patch\MyDataFieldPatch::__fromShape($shape['patchPrior'])),
-      Shapes::idx($shape, 'ensure') === null ? null : (\fixtures\patch\MyData::__fromShape($shape['ensure'])),
-      Shapes::idx($shape, 'patch') === null ? null : (\fixtures\patch\MyDataFieldPatch::__fromShape($shape['patch'])),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'assign' => $this->assign?->__toShape(),
-      'clear' => $this->clear,
-      'patchPrior' => $this->patchPrior?->__toShape(),
-      'ensure' => $this->ensure?->__toShape(),
-      'patch' => $this->patch?->__toShape(),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -3097,7 +3052,7 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
  * InnerUnionFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/InnerUnionFieldPatch'))>>
-class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -3115,10 +3070,6 @@ class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata
     ?'innerOption' => ?\thrift\op\BinaryPatch,
   );
 
-  const type TShape = shape(
-    ?'innerOption' => ?\thrift\op\BinaryPatch::TShape,
-    ...
-  );
   const int STRUCTURAL_ID = 32095888299770904;
   /**
    * Original thrift field:-
@@ -3200,17 +3151,6 @@ class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'innerOption') === null ? null : (\thrift\op\BinaryPatch::__fromShape($shape['innerOption'])),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'innerOption' => $this->innerOption?->__toShape(),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -3237,7 +3177,7 @@ class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata
  * InnerUnionPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/InnerUnionPatch'))>>
-class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -3282,14 +3222,6 @@ class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
     ?'patch' => ?\fixtures\patch\InnerUnionFieldPatch,
   );
 
-  const type TShape = shape(
-    ?'assign' => ?\fixtures\patch\InnerUnion::TShape,
-    'clear' => bool,
-    ?'patchPrior' => ?\fixtures\patch\InnerUnionFieldPatch::TShape,
-    ?'ensure' => ?\fixtures\patch\InnerUnion::TShape,
-    ?'patch' => ?\fixtures\patch\InnerUnionFieldPatch::TShape,
-    ...
-  );
   const int STRUCTURAL_ID = 6617672747921804043;
   /**
    * Assigns a value. If set, all other operations are ignored.
@@ -3479,25 +3411,6 @@ class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'assign') === null ? null : (\fixtures\patch\InnerUnion::__fromShape($shape['assign'])),
-      $shape['clear'],
-      Shapes::idx($shape, 'patchPrior') === null ? null : (\fixtures\patch\InnerUnionFieldPatch::__fromShape($shape['patchPrior'])),
-      Shapes::idx($shape, 'ensure') === null ? null : (\fixtures\patch\InnerUnion::__fromShape($shape['ensure'])),
-      Shapes::idx($shape, 'patch') === null ? null : (\fixtures\patch\InnerUnionFieldPatch::__fromShape($shape['patch'])),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'assign' => $this->assign?->__toShape(),
-      'clear' => $this->clear,
-      'patchPrior' => $this->patchPrior?->__toShape(),
-      'ensure' => $this->ensure?->__toShape(),
-      'patch' => $this->patch?->__toShape(),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -3545,7 +3458,7 @@ class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
  * MyUnionFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyUnionFieldPatch'))>>
-class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -3577,12 +3490,6 @@ class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \
     ?'option3' => ?\fixtures\patch\InnerUnionPatch,
   );
 
-  const type TShape = shape(
-    ?'option1' => ?\thrift\op\StringPatch::TShape,
-    ?'option2' => ?\thrift\op\I32Patch::TShape,
-    ?'option3' => ?\fixtures\patch\InnerUnionPatch::TShape,
-    ...
-  );
   const int STRUCTURAL_ID = 7680965517871361038;
   /**
    * Original thrift field:-
@@ -3731,21 +3638,6 @@ class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'option1') === null ? null : (\thrift\op\StringPatch::__fromShape($shape['option1'])),
-      Shapes::idx($shape, 'option2') === null ? null : (\thrift\op\I32Patch::__fromShape($shape['option2'])),
-      Shapes::idx($shape, 'option3') === null ? null : (\fixtures\patch\InnerUnionPatch::__fromShape($shape['option3'])),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'option1' => $this->option1?->__toShape(),
-      'option2' => $this->option2?->__toShape(),
-      'option3' => $this->option3?->__toShape(),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -3784,7 +3676,7 @@ class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \
  * MyUnionPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyUnionPatch'))>>
-class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -3829,14 +3721,6 @@ class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
     ?'patch' => ?\fixtures\patch\MyUnionFieldPatch,
   );
 
-  const type TShape = shape(
-    ?'assign' => ?\fixtures\patch\MyUnion::TShape,
-    'clear' => bool,
-    ?'patchPrior' => ?\fixtures\patch\MyUnionFieldPatch::TShape,
-    ?'ensure' => ?\fixtures\patch\MyUnion::TShape,
-    ?'patch' => ?\fixtures\patch\MyUnionFieldPatch::TShape,
-    ...
-  );
   const int STRUCTURAL_ID = 4411333096338672350;
   /**
    * Assigns a value. If set, all other operations are ignored.
@@ -4026,25 +3910,6 @@ class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'assign') === null ? null : (\fixtures\patch\MyUnion::__fromShape($shape['assign'])),
-      $shape['clear'],
-      Shapes::idx($shape, 'patchPrior') === null ? null : (\fixtures\patch\MyUnionFieldPatch::__fromShape($shape['patchPrior'])),
-      Shapes::idx($shape, 'ensure') === null ? null : (\fixtures\patch\MyUnion::__fromShape($shape['ensure'])),
-      Shapes::idx($shape, 'patch') === null ? null : (\fixtures\patch\MyUnionFieldPatch::__fromShape($shape['patch'])),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'assign' => $this->assign?->__toShape(),
-      'clear' => $this->clear,
-      'patchPrior' => $this->patchPrior?->__toShape(),
-      'ensure' => $this->ensure?->__toShape(),
-      'patch' => $this->patch?->__toShape(),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -4092,7 +3957,7 @@ class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
  * MyStructField10Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField10Patch'))>>
-class MyStructField10Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class MyStructField10Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -4116,11 +3981,6 @@ class MyStructField10Patch implements \IThriftSyncStruct, \IThriftStructMetadata
     ?'clear' => ?bool,
   );
 
-  const type TShape = shape(
-    ?'assign' => ?\fixtures\patch\MyEnum,
-    'clear' => bool,
-    ...
-  );
   const int STRUCTURAL_ID = 1042349483945124076;
   /**
    * Assigns a value. If set, all other operations are ignored.
@@ -4214,19 +4074,6 @@ class MyStructField10Patch implements \IThriftSyncStruct, \IThriftStructMetadata
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'assign'),
-      $shape['clear'],
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'assign' => $this->assign,
-      'clear' => $this->clear,
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -4253,7 +4100,7 @@ class MyStructField10Patch implements \IThriftSyncStruct, \IThriftStructMetadata
  * MyStructField25Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField25Patch'))>>
-class MyStructField25Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class MyStructField25Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -4277,11 +4124,6 @@ class MyStructField25Patch implements \IThriftSyncStruct, \IThriftStructMetadata
     ?'clear' => ?bool,
   );
 
-  const type TShape = shape(
-    ?'assign' => ?\fixtures\patch\MyEnum,
-    'clear' => bool,
-    ...
-  );
   const int STRUCTURAL_ID = 1042349483945124076;
   /**
    * Assigns a value. If set, all other operations are ignored.
@@ -4375,19 +4217,6 @@ class MyStructField25Patch implements \IThriftSyncStruct, \IThriftStructMetadata
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'assign'),
-      $shape['clear'],
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'assign' => $this->assign,
-      'clear' => $this->clear,
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -4414,7 +4243,7 @@ class MyStructField25Patch implements \IThriftSyncStruct, \IThriftStructMetadata
  * MyStructField28Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField28Patch'))>>
-class MyStructField28Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class MyStructField28Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -4491,15 +4320,6 @@ class MyStructField28Patch implements \IThriftSyncStruct, \IThriftStructMetadata
     ?'append' => ?Vector<int>,
   );
 
-  const type TShape = shape(
-    ?'assign' => ?vec<int>,
-    'clear' => bool,
-    'patch' => dict<int, \thrift\op\I16Patch::TShape>,
-    'remove' => vec<int>,
-    'prepend' => vec<int>,
-    'append' => vec<int>,
-    ...
-  );
   const int STRUCTURAL_ID = 8909257665578209994;
   /**
    * Assigns a value. If set, all other operations are ignored.
@@ -4718,33 +4538,6 @@ class MyStructField28Patch implements \IThriftSyncStruct, \IThriftStructMetadata
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'assign') === null ? null : ((new Vector($shape['assign']))),
-      $shape['clear'],
-      (new Map($shape['patch']))->map(
-        $val0 ==> \thrift\op\I16Patch::__fromShape($val0),
-      ),
-      (new Vector($shape['remove'])),
-      (new Vector($shape['prepend'])),
-      (new Vector($shape['append'])),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'assign' => $this->assign
-        |> $$ === null ? null : vec($$),
-      'clear' => $this->clear,
-      'patch' => $this->patch->map(
-        ($_val0) ==> $_val0->__toShape(),
-      )
-        |> dict($$),
-      'remove' => vec($this->remove),
-      'prepend' => vec($this->prepend),
-      'append' => vec($this->append),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -4841,7 +4634,7 @@ class MyStructField28Patch implements \IThriftSyncStruct, \IThriftStructMetadata
  * MyStructField29Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField29Patch'))>>
-class MyStructField29Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class MyStructField29Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -4891,13 +4684,6 @@ class MyStructField29Patch implements \IThriftSyncStruct, \IThriftStructMetadata
     ?'add' => ?Set<string>,
   );
 
-  const type TShape = shape(
-    ?'assign' => ?dict<string, bool>,
-    'clear' => bool,
-    'remove' => dict<string, bool>,
-    'add' => dict<string, bool>,
-    ...
-  );
   const int STRUCTURAL_ID = 5127750308738770244;
   /**
    * Assigns a value. If set, all other operations are ignored.
@@ -5051,24 +4837,6 @@ class MyStructField29Patch implements \IThriftSyncStruct, \IThriftStructMetadata
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'assign') === null ? null : (new Set(Keyset\keys($shape['assign']))),
-      $shape['clear'],
-      new Set(Keyset\keys($shape['remove'])),
-      new Set(Keyset\keys($shape['add'])),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'assign' => $this->assign
-        |> $$ === null ? null : ThriftUtil::toDArray(Dict\fill_keys($$->toValuesArray(), true), static::class),
-      'clear' => $this->clear,
-      'remove' => ThriftUtil::toDArray(Dict\fill_keys($this->remove->toValuesArray(), true), static::class),
-      'add' => ThriftUtil::toDArray(Dict\fill_keys($this->add->toValuesArray(), true), static::class),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -5122,7 +4890,7 @@ class MyStructField29Patch implements \IThriftSyncStruct, \IThriftStructMetadata
  * MyStructField30Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField30Patch'))>>
-class MyStructField30Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class MyStructField30Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -5227,16 +4995,6 @@ class MyStructField30Patch implements \IThriftSyncStruct, \IThriftStructMetadata
     ?'put' => ?Map<string, string>,
   );
 
-  const type TShape = shape(
-    ?'assign' => ?dict<string, string>,
-    'clear' => bool,
-    'patchPrior' => dict<string, \thrift\op\StringPatch::TShape>,
-    'add' => dict<string, string>,
-    'patch' => dict<string, \thrift\op\StringPatch::TShape>,
-    'remove' => dict<string, bool>,
-    'put' => dict<string, string>,
-    ...
-  );
   const int STRUCTURAL_ID = 7038176317813649650;
   /**
    * Assigns a value. If set, all other operations are ignored.
@@ -5507,40 +5265,6 @@ class MyStructField30Patch implements \IThriftSyncStruct, \IThriftStructMetadata
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'assign') === null ? null : ((new Map($shape['assign']))),
-      $shape['clear'],
-      (new Map($shape['patchPrior']))->map(
-        $val0 ==> \thrift\op\StringPatch::__fromShape($val0),
-      ),
-      (new Map($shape['add'])),
-      (new Map($shape['patch']))->map(
-        $val1 ==> \thrift\op\StringPatch::__fromShape($val1),
-      ),
-      new Set(Keyset\keys($shape['remove'])),
-      (new Map($shape['put'])),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'assign' => $this->assign
-        |> $$ === null ? null : dict($$),
-      'clear' => $this->clear,
-      'patchPrior' => $this->patchPrior->map(
-        ($_val0) ==> $_val0->__toShape(),
-      )
-        |> dict($$),
-      'add' => dict($this->add),
-      'patch' => $this->patch->map(
-        ($_val0) ==> $_val0->__toShape(),
-      )
-        |> dict($$),
-      'remove' => ThriftUtil::toDArray(Dict\fill_keys($this->remove->toValuesArray(), true), static::class),
-      'put' => dict($this->put),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -5630,7 +5354,7 @@ class MyStructField30Patch implements \IThriftSyncStruct, \IThriftStructMetadata
  * MyStructField31Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField31Patch'))>>
-class MyStructField31Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class MyStructField31Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -5743,15 +5467,6 @@ class MyStructField31Patch implements \IThriftSyncStruct, \IThriftStructMetadata
     ?'append' => ?Vector<Map<string, int>>,
   );
 
-  const type TShape = shape(
-    ?'assign' => ?vec<dict<string, int>>,
-    'clear' => bool,
-    'patch' => dict<int, \fixtures\patch\MyStructField31Patch1::TShape>,
-    'remove' => vec<dict<string, int>>,
-    'prepend' => vec<dict<string, int>>,
-    'append' => vec<dict<string, int>>,
-    ...
-  );
   const int STRUCTURAL_ID = 8909257665578209994;
   /**
    * Assigns a value. If set, all other operations are ignored.
@@ -6022,52 +5737,6 @@ class MyStructField31Patch implements \IThriftSyncStruct, \IThriftStructMetadata
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'assign') === null ? null : ((new Vector($shape['assign']))->map(
-        $val0 ==> (new Map($val0)),
-      )),
-      $shape['clear'],
-      (new Map($shape['patch']))->map(
-        $val1 ==> \fixtures\patch\MyStructField31Patch1::__fromShape($val1),
-      ),
-      (new Vector($shape['remove']))->map(
-        $val2 ==> (new Map($val2)),
-      ),
-      (new Vector($shape['prepend']))->map(
-        $val3 ==> (new Map($val3)),
-      ),
-      (new Vector($shape['append']))->map(
-        $val4 ==> (new Map($val4)),
-      ),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'assign' => $this->assign?->map(
-        ($_val0) ==> dict($_val0),
-      )
-        |> $$ === null ? null : vec($$),
-      'clear' => $this->clear,
-      'patch' => $this->patch->map(
-        ($_val0) ==> $_val0->__toShape(),
-      )
-        |> dict($$),
-      'remove' => $this->remove->map(
-        ($_val0) ==> dict($_val0),
-      )
-        |> vec($$),
-      'prepend' => $this->prepend->map(
-        ($_val0) ==> dict($_val0),
-      )
-        |> vec($$),
-      'append' => $this->append->map(
-        ($_val0) ==> dict($_val0),
-      )
-        |> vec($$),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -6192,7 +5861,7 @@ class MyStructField31Patch implements \IThriftSyncStruct, \IThriftStructMetadata
  * MyStructField31Patch1
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField31Patch1'))>>
-class MyStructField31Patch1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class MyStructField31Patch1 implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -6297,16 +5966,6 @@ class MyStructField31Patch1 implements \IThriftSyncStruct, \IThriftStructMetadat
     ?'put' => ?Map<string, int>,
   );
 
-  const type TShape = shape(
-    ?'assign' => ?dict<string, int>,
-    'clear' => bool,
-    'patchPrior' => dict<string, \thrift\op\I32Patch::TShape>,
-    'add' => dict<string, int>,
-    'patch' => dict<string, \thrift\op\I32Patch::TShape>,
-    'remove' => dict<string, bool>,
-    'put' => dict<string, int>,
-    ...
-  );
   const int STRUCTURAL_ID = 7038176317813649650;
   /**
    * Assigns a value. If set, all other operations are ignored.
@@ -6577,40 +6236,6 @@ class MyStructField31Patch1 implements \IThriftSyncStruct, \IThriftStructMetadat
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'assign') === null ? null : ((new Map($shape['assign']))),
-      $shape['clear'],
-      (new Map($shape['patchPrior']))->map(
-        $val0 ==> \thrift\op\I32Patch::__fromShape($val0),
-      ),
-      (new Map($shape['add'])),
-      (new Map($shape['patch']))->map(
-        $val1 ==> \thrift\op\I32Patch::__fromShape($val1),
-      ),
-      new Set(Keyset\keys($shape['remove'])),
-      (new Map($shape['put'])),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'assign' => $this->assign
-        |> $$ === null ? null : dict($$),
-      'clear' => $this->clear,
-      'patchPrior' => $this->patchPrior->map(
-        ($_val0) ==> $_val0->__toShape(),
-      )
-        |> dict($$),
-      'add' => dict($this->add),
-      'patch' => $this->patch->map(
-        ($_val0) ==> $_val0->__toShape(),
-      )
-        |> dict($$),
-      'remove' => ThriftUtil::toDArray(Dict\fill_keys($this->remove->toValuesArray(), true), static::class),
-      'put' => dict($this->put),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -6715,7 +6340,7 @@ class MyStructField31Patch1 implements \IThriftSyncStruct, \IThriftStructMetadat
  * MyStructField32Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField32Patch'))>>
-class MyStructField32Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class MyStructField32Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -6847,16 +6472,6 @@ class MyStructField32Patch implements \IThriftSyncStruct, \IThriftStructMetadata
     ?'put' => ?Map<string, Map<string, int>>,
   );
 
-  const type TShape = shape(
-    ?'assign' => ?dict<string, dict<string, int>>,
-    'clear' => bool,
-    'patchPrior' => dict<string, \fixtures\patch\MyStructField32Patch1::TShape>,
-    'add' => dict<string, dict<string, int>>,
-    'patch' => dict<string, \fixtures\patch\MyStructField32Patch1::TShape>,
-    'remove' => dict<string, bool>,
-    'put' => dict<string, dict<string, int>>,
-    ...
-  );
   const int STRUCTURAL_ID = 7038176317813649650;
   /**
    * Assigns a value. If set, all other operations are ignored.
@@ -7166,54 +6781,6 @@ class MyStructField32Patch implements \IThriftSyncStruct, \IThriftStructMetadata
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'assign') === null ? null : ((new Map($shape['assign']))->map(
-        $val0 ==> (new Map($val0)),
-      )),
-      $shape['clear'],
-      (new Map($shape['patchPrior']))->map(
-        $val1 ==> \fixtures\patch\MyStructField32Patch1::__fromShape($val1),
-      ),
-      (new Map($shape['add']))->map(
-        $val2 ==> (new Map($val2)),
-      ),
-      (new Map($shape['patch']))->map(
-        $val3 ==> \fixtures\patch\MyStructField32Patch1::__fromShape($val3),
-      ),
-      new Set(Keyset\keys($shape['remove'])),
-      (new Map($shape['put']))->map(
-        $val4 ==> (new Map($val4)),
-      ),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'assign' => $this->assign?->map(
-        ($_val0) ==> dict($_val0),
-      )
-        |> $$ === null ? null : dict($$),
-      'clear' => $this->clear,
-      'patchPrior' => $this->patchPrior->map(
-        ($_val0) ==> $_val0->__toShape(),
-      )
-        |> dict($$),
-      'add' => $this->add->map(
-        ($_val0) ==> dict($_val0),
-      )
-        |> dict($$),
-      'patch' => $this->patch->map(
-        ($_val0) ==> $_val0->__toShape(),
-      )
-        |> dict($$),
-      'remove' => ThriftUtil::toDArray(Dict\fill_keys($this->remove->toValuesArray(), true), static::class),
-      'put' => $this->put->map(
-        ($_val0) ==> dict($_val0),
-      )
-        |> dict($$),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -7339,7 +6906,7 @@ class MyStructField32Patch implements \IThriftSyncStruct, \IThriftStructMetadata
  * MyStructField32Patch1
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructField32Patch1'))>>
-class MyStructField32Patch1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class MyStructField32Patch1 implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -7444,16 +7011,6 @@ class MyStructField32Patch1 implements \IThriftSyncStruct, \IThriftStructMetadat
     ?'put' => ?Map<string, int>,
   );
 
-  const type TShape = shape(
-    ?'assign' => ?dict<string, int>,
-    'clear' => bool,
-    'patchPrior' => dict<string, \thrift\op\I32Patch::TShape>,
-    'add' => dict<string, int>,
-    'patch' => dict<string, \thrift\op\I32Patch::TShape>,
-    'remove' => dict<string, bool>,
-    'put' => dict<string, int>,
-    ...
-  );
   const int STRUCTURAL_ID = 7038176317813649650;
   /**
    * Assigns a value. If set, all other operations are ignored.
@@ -7724,40 +7281,6 @@ class MyStructField32Patch1 implements \IThriftSyncStruct, \IThriftStructMetadat
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'assign') === null ? null : ((new Map($shape['assign']))),
-      $shape['clear'],
-      (new Map($shape['patchPrior']))->map(
-        $val0 ==> \thrift\op\I32Patch::__fromShape($val0),
-      ),
-      (new Map($shape['add'])),
-      (new Map($shape['patch']))->map(
-        $val1 ==> \thrift\op\I32Patch::__fromShape($val1),
-      ),
-      new Set(Keyset\keys($shape['remove'])),
-      (new Map($shape['put'])),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'assign' => $this->assign
-        |> $$ === null ? null : dict($$),
-      'clear' => $this->clear,
-      'patchPrior' => $this->patchPrior->map(
-        ($_val0) ==> $_val0->__toShape(),
-      )
-        |> dict($$),
-      'add' => dict($this->add),
-      'patch' => $this->patch->map(
-        ($_val0) ==> $_val0->__toShape(),
-      )
-        |> dict($$),
-      'remove' => ThriftUtil::toDArray(Dict\fill_keys($this->remove->toValuesArray(), true), static::class),
-      'put' => dict($this->put),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -7862,7 +7385,7 @@ class MyStructField32Patch1 implements \IThriftSyncStruct, \IThriftStructMetadat
  * MyStructFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructFieldPatch'))>>
-class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -8097,41 +7620,6 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, 
     ?'boolVal' => ?\thrift\op\BoolPatch,
   );
 
-  const type TShape = shape(
-    ?'mapMap' => ?\fixtures\patch\MyStructField32Patch::TShape,
-    ?'listMap' => ?\fixtures\patch\MyStructField31Patch::TShape,
-    ?'optMapVal' => ?\fixtures\patch\MyStructField30Patch::TShape,
-    ?'optSetVal' => ?\fixtures\patch\MyStructField29Patch::TShape,
-    ?'optListVal' => ?\fixtures\patch\MyStructField28Patch::TShape,
-    ?'optLateStructVal' => ?\fixtures\patch\LateDefStructPatch::TShape,
-    ?'optStructVal' => ?\fixtures\patch\MyDataPatch::TShape,
-    ?'optEnumVal' => ?\fixtures\patch\MyStructField25Patch::TShape,
-    ?'optBinaryVal' => ?\thrift\op\BinaryPatch::TShape,
-    ?'optStringVal' => ?\thrift\op\StringPatch::TShape,
-    ?'optDoubleVal' => ?\thrift\op\DoublePatch::TShape,
-    ?'optFloatVal' => ?\thrift\op\FloatPatch::TShape,
-    ?'optI64Val' => ?\thrift\op\I64Patch::TShape,
-    ?'optI32Val' => ?\thrift\op\I32Patch::TShape,
-    ?'optI16Val' => ?\thrift\op\I16Patch::TShape,
-    ?'optByteVal' => ?\thrift\op\BytePatch::TShape,
-    ?'optBoolVal' => ?\thrift\op\BoolPatch::TShape,
-    ?'timeVal' => ?\thrift\op\TimePatch::TShape,
-    ?'durationVal' => ?\thrift\op\DurationPatch::TShape,
-    ?'lateStructVal' => ?\fixtures\patch\LateDefStructPatch::TShape,
-    ?'unionVal' => ?\fixtures\patch\MyUnionPatch::TShape,
-    ?'structVal' => ?\fixtures\patch\MyDataPatch::TShape,
-    ?'enumVal' => ?\fixtures\patch\MyStructField10Patch::TShape,
-    ?'binaryVal' => ?\thrift\op\BinaryPatch::TShape,
-    ?'stringVal' => ?\thrift\op\StringPatch::TShape,
-    ?'doubleVal' => ?\thrift\op\DoublePatch::TShape,
-    ?'floatVal' => ?\thrift\op\FloatPatch::TShape,
-    ?'i64Val' => ?\thrift\op\I64Patch::TShape,
-    ?'i32Val' => ?\thrift\op\I32Patch::TShape,
-    ?'i16Val' => ?\thrift\op\I16Patch::TShape,
-    ?'byteVal' => ?\thrift\op\BytePatch::TShape,
-    ?'boolVal' => ?\thrift\op\BoolPatch::TShape,
-    ...
-  );
   const int STRUCTURAL_ID = 4927085445189139898;
   /**
    * Original thrift field:-
@@ -9266,79 +8754,6 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, 
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'mapMap') === null ? null : (\fixtures\patch\MyStructField32Patch::__fromShape($shape['mapMap'])),
-      Shapes::idx($shape, 'listMap') === null ? null : (\fixtures\patch\MyStructField31Patch::__fromShape($shape['listMap'])),
-      Shapes::idx($shape, 'optMapVal') === null ? null : (\fixtures\patch\MyStructField30Patch::__fromShape($shape['optMapVal'])),
-      Shapes::idx($shape, 'optSetVal') === null ? null : (\fixtures\patch\MyStructField29Patch::__fromShape($shape['optSetVal'])),
-      Shapes::idx($shape, 'optListVal') === null ? null : (\fixtures\patch\MyStructField28Patch::__fromShape($shape['optListVal'])),
-      Shapes::idx($shape, 'optLateStructVal') === null ? null : (\fixtures\patch\LateDefStructPatch::__fromShape($shape['optLateStructVal'])),
-      Shapes::idx($shape, 'optStructVal') === null ? null : (\fixtures\patch\MyDataPatch::__fromShape($shape['optStructVal'])),
-      Shapes::idx($shape, 'optEnumVal') === null ? null : (\fixtures\patch\MyStructField25Patch::__fromShape($shape['optEnumVal'])),
-      Shapes::idx($shape, 'optBinaryVal') === null ? null : (\thrift\op\BinaryPatch::__fromShape($shape['optBinaryVal'])),
-      Shapes::idx($shape, 'optStringVal') === null ? null : (\thrift\op\StringPatch::__fromShape($shape['optStringVal'])),
-      Shapes::idx($shape, 'optDoubleVal') === null ? null : (\thrift\op\DoublePatch::__fromShape($shape['optDoubleVal'])),
-      Shapes::idx($shape, 'optFloatVal') === null ? null : (\thrift\op\FloatPatch::__fromShape($shape['optFloatVal'])),
-      Shapes::idx($shape, 'optI64Val') === null ? null : (\thrift\op\I64Patch::__fromShape($shape['optI64Val'])),
-      Shapes::idx($shape, 'optI32Val') === null ? null : (\thrift\op\I32Patch::__fromShape($shape['optI32Val'])),
-      Shapes::idx($shape, 'optI16Val') === null ? null : (\thrift\op\I16Patch::__fromShape($shape['optI16Val'])),
-      Shapes::idx($shape, 'optByteVal') === null ? null : (\thrift\op\BytePatch::__fromShape($shape['optByteVal'])),
-      Shapes::idx($shape, 'optBoolVal') === null ? null : (\thrift\op\BoolPatch::__fromShape($shape['optBoolVal'])),
-      Shapes::idx($shape, 'timeVal') === null ? null : (\thrift\op\TimePatch::__fromShape($shape['timeVal'])),
-      Shapes::idx($shape, 'durationVal') === null ? null : (\thrift\op\DurationPatch::__fromShape($shape['durationVal'])),
-      Shapes::idx($shape, 'lateStructVal') === null ? null : (\fixtures\patch\LateDefStructPatch::__fromShape($shape['lateStructVal'])),
-      Shapes::idx($shape, 'unionVal') === null ? null : (\fixtures\patch\MyUnionPatch::__fromShape($shape['unionVal'])),
-      Shapes::idx($shape, 'structVal') === null ? null : (\fixtures\patch\MyDataPatch::__fromShape($shape['structVal'])),
-      Shapes::idx($shape, 'enumVal') === null ? null : (\fixtures\patch\MyStructField10Patch::__fromShape($shape['enumVal'])),
-      Shapes::idx($shape, 'binaryVal') === null ? null : (\thrift\op\BinaryPatch::__fromShape($shape['binaryVal'])),
-      Shapes::idx($shape, 'stringVal') === null ? null : (\thrift\op\StringPatch::__fromShape($shape['stringVal'])),
-      Shapes::idx($shape, 'doubleVal') === null ? null : (\thrift\op\DoublePatch::__fromShape($shape['doubleVal'])),
-      Shapes::idx($shape, 'floatVal') === null ? null : (\thrift\op\FloatPatch::__fromShape($shape['floatVal'])),
-      Shapes::idx($shape, 'i64Val') === null ? null : (\thrift\op\I64Patch::__fromShape($shape['i64Val'])),
-      Shapes::idx($shape, 'i32Val') === null ? null : (\thrift\op\I32Patch::__fromShape($shape['i32Val'])),
-      Shapes::idx($shape, 'i16Val') === null ? null : (\thrift\op\I16Patch::__fromShape($shape['i16Val'])),
-      Shapes::idx($shape, 'byteVal') === null ? null : (\thrift\op\BytePatch::__fromShape($shape['byteVal'])),
-      Shapes::idx($shape, 'boolVal') === null ? null : (\thrift\op\BoolPatch::__fromShape($shape['boolVal'])),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'mapMap' => $this->mapMap?->__toShape(),
-      'listMap' => $this->listMap?->__toShape(),
-      'optMapVal' => $this->optMapVal?->__toShape(),
-      'optSetVal' => $this->optSetVal?->__toShape(),
-      'optListVal' => $this->optListVal?->__toShape(),
-      'optLateStructVal' => $this->optLateStructVal?->__toShape(),
-      'optStructVal' => $this->optStructVal?->__toShape(),
-      'optEnumVal' => $this->optEnumVal?->__toShape(),
-      'optBinaryVal' => $this->optBinaryVal?->__toShape(),
-      'optStringVal' => $this->optStringVal?->__toShape(),
-      'optDoubleVal' => $this->optDoubleVal?->__toShape(),
-      'optFloatVal' => $this->optFloatVal?->__toShape(),
-      'optI64Val' => $this->optI64Val?->__toShape(),
-      'optI32Val' => $this->optI32Val?->__toShape(),
-      'optI16Val' => $this->optI16Val?->__toShape(),
-      'optByteVal' => $this->optByteVal?->__toShape(),
-      'optBoolVal' => $this->optBoolVal?->__toShape(),
-      'timeVal' => $this->timeVal?->__toShape(),
-      'durationVal' => $this->durationVal?->__toShape(),
-      'lateStructVal' => $this->lateStructVal?->__toShape(),
-      'unionVal' => $this->unionVal?->__toShape(),
-      'structVal' => $this->structVal?->__toShape(),
-      'enumVal' => $this->enumVal?->__toShape(),
-      'binaryVal' => $this->binaryVal?->__toShape(),
-      'stringVal' => $this->stringVal?->__toShape(),
-      'doubleVal' => $this->doubleVal?->__toShape(),
-      'floatVal' => $this->floatVal?->__toShape(),
-      'i64Val' => $this->i64Val?->__toShape(),
-      'i32Val' => $this->i32Val?->__toShape(),
-      'i16Val' => $this->i16Val?->__toShape(),
-      'byteVal' => $this->byteVal?->__toShape(),
-      'boolVal' => $this->boolVal?->__toShape(),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -9551,7 +8966,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, 
  * MyStructPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructPatch'))>>
-class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -9596,14 +9011,6 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
     ?'patch' => ?\fixtures\patch\MyStructFieldPatch,
   );
 
-  const type TShape = shape(
-    ?'assign' => ?\fixtures\patch\MyStruct::TShape,
-    'clear' => bool,
-    ?'patchPrior' => ?\fixtures\patch\MyStructFieldPatch::TShape,
-    ?'ensure' => ?\fixtures\patch\MyStruct::TShape,
-    ?'patch' => ?\fixtures\patch\MyStructFieldPatch::TShape,
-    ...
-  );
   const int STRUCTURAL_ID = 6000283475184898380;
   /**
    * Assigns a value. If set, all other operations are ignored.
@@ -9811,25 +9218,6 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'assign') === null ? null : (\fixtures\patch\MyStruct::__fromShape($shape['assign'])),
-      $shape['clear'],
-      Shapes::idx($shape, 'patchPrior') === null ? null : (\fixtures\patch\MyStructFieldPatch::__fromShape($shape['patchPrior'])),
-      Shapes::idx($shape, 'ensure') === null ? null : (\fixtures\patch\MyStruct::__fromShape($shape['ensure'])),
-      Shapes::idx($shape, 'patch') === null ? null : (\fixtures\patch\MyStructFieldPatch::__fromShape($shape['patch'])),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'assign' => $this->assign?->__toShape(),
-      'clear' => $this->clear,
-      'patchPrior' => $this->patchPrior?->__toShape(),
-      'ensure' => $this->ensure?->__toShape(),
-      'patch' => $this->patch?->__toShape(),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -9877,7 +9265,7 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
  * LateDefStructFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/LateDefStructFieldPatch'))>>
-class LateDefStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class LateDefStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -9888,9 +9276,6 @@ class LateDefStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetad
   const type TConstructorShape = shape(
   );
 
-  const type TShape = shape(
-    ...
-  );
   const int STRUCTURAL_ID = 957977401221134810;
 
   public function __construct()[] {
@@ -9937,15 +9322,6 @@ class LateDefStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetad
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -9966,7 +9342,7 @@ class LateDefStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetad
  * LateDefStructPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/LateDefStructPatch'))>>
-class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -10011,14 +9387,6 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata, 
     ?'patch' => ?\fixtures\patch\LateDefStructFieldPatch,
   );
 
-  const type TShape = shape(
-    ?'assign' => ?\fixtures\patch\LateDefStruct::TShape,
-    'clear' => bool,
-    ?'patchPrior' => ?\fixtures\patch\LateDefStructFieldPatch::TShape,
-    ?'ensure' => ?\fixtures\patch\LateDefStruct::TShape,
-    ?'patch' => ?\fixtures\patch\LateDefStructFieldPatch::TShape,
-    ...
-  );
   const int STRUCTURAL_ID = 6907948067616855680;
   /**
    * Assigns a value. If set, all other operations are ignored.
@@ -10208,25 +9576,6 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata, 
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'assign') === null ? null : (\fixtures\patch\LateDefStruct::__fromShape($shape['assign'])),
-      $shape['clear'],
-      Shapes::idx($shape, 'patchPrior') === null ? null : (\fixtures\patch\LateDefStructFieldPatch::__fromShape($shape['patchPrior'])),
-      Shapes::idx($shape, 'ensure') === null ? null : (\fixtures\patch\LateDefStruct::__fromShape($shape['ensure'])),
-      Shapes::idx($shape, 'patch') === null ? null : (\fixtures\patch\LateDefStructFieldPatch::__fromShape($shape['patch'])),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'assign' => $this->assign?->__toShape(),
-      'clear' => $this->clear,
-      'patchPrior' => $this->patchPrior?->__toShape(),
-      'ensure' => $this->ensure?->__toShape(),
-      'patch' => $this->patch?->__toShape(),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -10274,7 +9623,7 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata, 
  * RecursiveField1Patch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RecursiveField1Patch'))>>
-class RecursiveField1Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class RecursiveField1Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -10307,11 +9656,6 @@ class RecursiveField1Patch implements \IThriftSyncStruct, \IThriftStructMetadata
     ?'clear' => ?bool,
   );
 
-  const type TShape = shape(
-    ?'assign' => ?dict<string, \fixtures\patch\Recursive::TShape>,
-    'clear' => bool,
-    ...
-  );
   const int STRUCTURAL_ID = 734925607853642499;
   /**
    * Assigns a value. If set, all other operations are ignored.
@@ -10427,24 +9771,6 @@ class RecursiveField1Patch implements \IThriftSyncStruct, \IThriftStructMetadata
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'assign') === null ? null : ((new Map($shape['assign']))->map(
-        $val0 ==> \fixtures\patch\Recursive::__fromShape($val0),
-      )),
-      $shape['clear'],
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'assign' => $this->assign?->map(
-        ($_val0) ==> $_val0->__toShape(),
-      )
-        |> $$ === null ? null : dict($$),
-      'clear' => $this->clear,
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -10481,7 +9807,7 @@ class RecursiveField1Patch implements \IThriftSyncStruct, \IThriftStructMetadata
  * RecursiveFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RecursiveFieldPatch'))>>
-class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -10499,10 +9825,6 @@ class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata,
     ?'nodes' => ?\fixtures\patch\RecursiveField1Patch,
   );
 
-  const type TShape = shape(
-    ?'nodes' => ?\fixtures\patch\RecursiveField1Patch::TShape,
-    ...
-  );
   const int STRUCTURAL_ID = 1550759368524310852;
   /**
    * Original thrift field:-
@@ -10585,17 +9907,6 @@ class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata,
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'nodes') === null ? null : (\fixtures\patch\RecursiveField1Patch::__fromShape($shape['nodes'])),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'nodes' => $this->nodes?->__toShape(),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -10622,7 +9933,7 @@ class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata,
  * RecursivePatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/RecursivePatch'))>>
-class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -10667,14 +9978,6 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     ?'patch' => ?\fixtures\patch\RecursiveFieldPatch,
   );
 
-  const type TShape = shape(
-    ?'assign' => ?\fixtures\patch\Recursive::TShape,
-    'clear' => bool,
-    ?'patchPrior' => ?\fixtures\patch\RecursiveFieldPatch::TShape,
-    ?'ensure' => ?\fixtures\patch\Recursive::TShape,
-    ?'patch' => ?\fixtures\patch\RecursiveFieldPatch::TShape,
-    ...
-  );
   const int STRUCTURAL_ID = 2130991928648210432;
   /**
    * Assigns a value. If set, all other operations are ignored.
@@ -10864,25 +10167,6 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'assign') === null ? null : (\fixtures\patch\Recursive::__fromShape($shape['assign'])),
-      $shape['clear'],
-      Shapes::idx($shape, 'patchPrior') === null ? null : (\fixtures\patch\RecursiveFieldPatch::__fromShape($shape['patchPrior'])),
-      Shapes::idx($shape, 'ensure') === null ? null : (\fixtures\patch\Recursive::__fromShape($shape['ensure'])),
-      Shapes::idx($shape, 'patch') === null ? null : (\fixtures\patch\RecursiveFieldPatch::__fromShape($shape['patch'])),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'assign' => $this->assign?->__toShape(),
-      'clear' => $this->clear,
-      'patchPrior' => $this->patchPrior?->__toShape(),
-      'ensure' => $this->ensure?->__toShape(),
-      'patch' => $this->patch?->__toShape(),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -10930,7 +10214,7 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
  * BarFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/BarFieldPatch'))>>
-class BarFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class BarFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -10948,10 +10232,6 @@ class BarFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
     ?'loop' => ?\fixtures\patch\LoopPatch,
   );
 
-  const type TShape = shape(
-    ?'loop' => ?\fixtures\patch\LoopPatch::TShape,
-    ...
-  );
   const int STRUCTURAL_ID = 1773850756587145723;
   /**
    * Original thrift field:-
@@ -11043,17 +10323,6 @@ class BarFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'loop') === null ? null : (\fixtures\patch\LoopPatch::__fromShape($shape['loop'])),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'loop' => $this->loop?->__toShape(),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -11080,7 +10349,7 @@ class BarFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
  * BarPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/BarPatch'))>>
-class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -11125,14 +10394,6 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     ?'patch' => ?\fixtures\patch\BarFieldPatch,
   );
 
-  const type TShape = shape(
-    ?'assign' => ?\fixtures\patch\Bar::TShape,
-    'clear' => bool,
-    ?'patchPrior' => ?\fixtures\patch\BarFieldPatch::TShape,
-    ?'ensure' => ?\fixtures\patch\Bar::TShape,
-    ?'patch' => ?\fixtures\patch\BarFieldPatch::TShape,
-    ...
-  );
   const int STRUCTURAL_ID = 5180874570176193342;
   /**
    * Assigns a value. If set, all other operations are ignored.
@@ -11322,25 +10583,6 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'assign') === null ? null : (\fixtures\patch\Bar::__fromShape($shape['assign'])),
-      $shape['clear'],
-      Shapes::idx($shape, 'patchPrior') === null ? null : (\fixtures\patch\BarFieldPatch::__fromShape($shape['patchPrior'])),
-      Shapes::idx($shape, 'ensure') === null ? null : (\fixtures\patch\Bar::__fromShape($shape['ensure'])),
-      Shapes::idx($shape, 'patch') === null ? null : (\fixtures\patch\BarFieldPatch::__fromShape($shape['patch'])),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'assign' => $this->assign?->__toShape(),
-      'clear' => $this->clear,
-      'patchPrior' => $this->patchPrior?->__toShape(),
-      'ensure' => $this->ensure?->__toShape(),
-      'patch' => $this->patch?->__toShape(),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -11388,7 +10630,7 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
  * LoopFieldPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/LoopFieldPatch'))>>
-class LoopFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class LoopFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -11406,10 +10648,6 @@ class LoopFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     ?'bar' => ?\fixtures\patch\BarPatch,
   );
 
-  const type TShape = shape(
-    ?'bar' => ?\fixtures\patch\BarPatch::TShape,
-    ...
-  );
   const int STRUCTURAL_ID = 5975782493242643972;
   /**
    * Original thrift field:-
@@ -11492,17 +10730,6 @@ class LoopFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'bar') === null ? null : (\fixtures\patch\BarPatch::__fromShape($shape['bar'])),
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'bar' => $this->bar?->__toShape(),
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }
@@ -11529,7 +10756,7 @@ class LoopFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
  * LoopPatch
  */
 <<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/LoopPatch'))>>
-class LoopPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class LoopPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -11553,11 +10780,6 @@ class LoopPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
     ?'clear' => ?bool,
   );
 
-  const type TShape = shape(
-    ?'assign' => ?\fixtures\patch\Loop::TShape,
-    'clear' => bool,
-    ...
-  );
   const int STRUCTURAL_ID = 5599644265081798743;
   /**
    * Assigns a value. If set, all other operations are ignored.
@@ -11660,19 +10882,6 @@ class LoopPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
     );
   }
 
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'assign') === null ? null : (\fixtures\patch\Loop::__fromShape($shape['assign'])),
-      $shape['clear'],
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'assign' => $this->assign?->__toShape(),
-      'clear' => $this->clear,
-    );
-  }
   public function getInstanceKey()[write_props]: string {
     return \TCompactSerializer::serialize($this);
   }

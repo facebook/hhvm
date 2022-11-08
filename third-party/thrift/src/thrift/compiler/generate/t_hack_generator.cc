@@ -4423,7 +4423,7 @@ void t_hack_generator::generate_php_struct_methods(
   generate_php_struct_metadata_method(out, tstruct);
   generate_php_struct_structured_annotations_method(out, tstruct);
 
-  if (shapes_ && type != ThriftStructType::EXCEPTION &&
+  if (shapes_ && !tstruct->generated() && type != ThriftStructType::EXCEPTION &&
       type != ThriftStructType::RESULT) {
     if (is_async_shapish_struct) {
       generate_php_struct_async_shape_methods(
@@ -5153,8 +5153,8 @@ void t_hack_generator::_generate_php_struct_definition(
         << ">";
   }
 
-  bool gen_shapes = shapes_ && type != ThriftStructType::EXCEPTION &&
-      type != ThriftStructType::RESULT;
+  bool gen_shapes = shapes_ && !tstruct->generated() &&
+      type != ThriftStructType::EXCEPTION && type != ThriftStructType::RESULT;
 
   bool is_async_shapish = false;
   if (gen_shapes) {

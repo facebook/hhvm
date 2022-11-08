@@ -512,7 +512,8 @@ void Cpp2Worker::dispatchRequest(
             serverRequest, executor ? &executor.value().get() : nullptr);
         auto result = resourcePool->accept(std::move(serverRequest));
         if (result) {
-          auto errorCode = kQueueOverloadedErrorCode;
+          auto errorCode = errorCodeFromTapplicationException(
+              result.value().applicationException().getType());
           serverRequest.request()->sendErrorWrapped(
               folly::exception_wrapper(
                   folly::in_place,
@@ -583,6 +584,17 @@ void Cpp2Worker::dispatchRequest(
   } catch (...) {
     LOG(DFATAL) << "AsyncProcessor::process exception: "
                 << folly::exceptionStr(std::current_exception());
+  }
+}
+
+const std::string& Cpp2Worker::errorCodeFromTapplicationException(
+    TApplicationException::TApplicationExceptionType exceptionType) {
+  switch (exceptionType) {
+    case TApplicationException::TApplicationExceptionType::
+        TENANT_QUOTA_EXCEEDED:
+      return kTenantQuotaExceededErrorCode;
+    default:
+      return kQueueOverloadedErrorCode;
   }
 }
 

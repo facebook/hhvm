@@ -448,6 +448,9 @@ class Cpp2Worker : public IOWorkerContext,
 
   std::optional<ThriftParametersContext> getThriftParametersContext();
 
+  static const std::string& errorCodeFromTapplicationException(
+      TApplicationException::TApplicationExceptionType exceptionType);
+
   friend class Cpp2Connection;
   friend class ThriftServer;
   friend class RocketRoutingHandler;

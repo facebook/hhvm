@@ -56,6 +56,7 @@ class FOLLY_EXPORT TApplicationException : public TException {
     INJECTED_FAILURE = 13,
     CHECKSUM_MISMATCH = 14,
     INTERRUPTION = 15,
+    TENANT_QUOTA_EXCEEDED = 16,
   };
 
   TApplicationException() : type_(UNKNOWN) {}

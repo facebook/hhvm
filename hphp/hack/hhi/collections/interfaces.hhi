@@ -97,7 +97,7 @@ interface Collection<Te> extends \ConstCollection<Te>,
     /**
      * Removes all items from the collection.
      */
-    public function clear()[write_props];
+    public function clear()[write_props]: this;
 }
 
 } // namespace HH

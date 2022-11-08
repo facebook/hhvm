@@ -125,7 +125,7 @@ impl fmt::Display for FmtTy<'_> {
             | Ty::Vec
             | Ty::VecOrDict => {
                 textual_todo! {
-                    f.write_str(&format!("TODO_{:?}", self.0))
+                    f.write_str("*Mixed")
                 }
             }
         }

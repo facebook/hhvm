@@ -55,9 +55,10 @@ TEST_F(BinaryProtocolTest, writeInvalidBool) {
         w.writeBool(makeInvalidBool());
         auto s = std::string();
         q.appendToString(s);
-        CHECK(s != std::string(1, '\0')); // Die on success.
+        // Die on success.
+        CHECK(s != std::string(1, '\0')) << "invalid bool value";
       },
-      "Check failed");
+      "invalid bool value");
 }
 
 TEST_F(BinaryProtocolTest, writeStringExactly2GB) {

@@ -38,9 +38,10 @@ TEST(CompactProtocolTest, writeInvalidBool) {
         auto s = std::string();
         q.appendToString(s);
         // Die on success.
-        CHECK(s != std::string(1, '\1') && s != std::string(1, '\2'));
+        CHECK(s != std::string(1, '\1') && s != std::string(1, '\2'))
+            << "invalid bool value";
       },
-      "Check failed");
+      "invalid bool value");
 }
 
 TEST(CompactProtocolTest, writeStringExactly2GB) {

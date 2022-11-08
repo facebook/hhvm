@@ -180,8 +180,8 @@ class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector
     $return = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function isDisabled()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function invoke(...$args): HH\FIXME\MISSING_RETURN_TYPE;
-  public function invokeArgs(varray $args): HH\FIXME\MISSING_RETURN_TYPE;
+  public function invoke(mixed ...$args): HH\FIXME\MISSING_RETURN_TYPE;
+  public function invokeArgs(vec<mixed> $args): HH\FIXME\MISSING_RETURN_TYPE;
   public function getClosure(): HH\FIXME\MISSING_RETURN_TYPE;
   final public function getAttributeClass<T as HH\FunctionAttribute>(classname<T> $c)[]: ?T;
 }
@@ -206,19 +206,19 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   public function __construct($class, $name = null)[];
 
   public function __toString()[]: string;
-  public function isPublic()[];
-  public function isPrivate()[];
-  public function isProtected()[];
-  public function isAbstract()[];
-  public function isFinal()[];
-  public function isStatic()[];
-  public function isReadonly()[];
-  public function isConstructor()[];
-  public function getClosure($object);
-  public function getModifiers()[];
-  public function invoke($object, ...$args);
-  public function invokeArgs($object, varray $args);
-  public function getDeclaringClass()[];
+  public function isPublic()[]: bool;
+  public function isPrivate()[]: bool;
+  public function isProtected()[]: bool;
+  public function isAbstract()[]: bool;
+  public function isFinal()[]: bool;
+  public function isStatic()[]: bool;
+  public function isReadonly()[]: bool;
+  public function isConstructor()[]: bool;
+  public function getClosure(mixed $object = null): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getModifiers()[]: int;
+  public function invoke(mixed $object, mixed ...$args): HH\FIXME\MISSING_RETURN_TYPE;
+  public function invokeArgs(mixed $object, vec<mixed> $args): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getDeclaringClass()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function getOriginalClassname()[]: string;
   public function getPrototype()[]: HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>> public function setAccessible(bool $accessible)[write_props]: void;

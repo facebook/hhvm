@@ -287,18 +287,21 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
             // a simpler form (like control flow and generic calls). Everything
             // else should be handled in lower().
             textual_todo! {
-                use ir::instr::HasOperands;
-                let name = format!("TODO_hhbc_{}", hhbc);
-                let output = w.call(
-                    &name,
-                    instr
-                        .operands()
-                        .iter()
-                        .map(|vid| state.lookup_vid(*vid))
-                        .collect_vec(),
-                )?;
-                state.set_iid(iid, output);
-            }
+                    use ir::instr::HasOperands;
+                    let name = format!("TODO_hhbc_{}", hhbc);
+            state
+                        .func_declares
+                        .declare(&name, FuncDeclKind::External);
+                    let output = w.call(
+                        &name,
+                        instr
+                            .operands()
+                            .iter()
+                            .map(|vid| state.lookup_vid(*vid))
+                            .collect_vec(),
+                    )?;
+                    state.set_iid(iid, output);
+                }
         }
     }
 

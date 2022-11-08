@@ -15,8 +15,8 @@ use crate::Method;
 use crate::PropId;
 use crate::TraitReqKind;
 use crate::TypeConstant;
+use crate::TypeInfo;
 use crate::TypedValue;
-use crate::UserType;
 
 /// This represents a Hack class or enum in IR.
 #[derive(Debug)]
@@ -41,7 +41,7 @@ pub struct Class<'a> {
     /// enum A: int as int
     ///                ^^^
     /// ```
-    pub enum_type: Option<UserType>,
+    pub enum_type: Option<TypeInfo>,
     pub enum_includes: Vec<ClassId>,
 
     pub flags: Attr,
@@ -59,7 +59,7 @@ pub struct Class<'a> {
     pub type_constants: Vec<TypeConstant<'a>>,
 
     /// For class generics the upper bounds of each generic.
-    pub upper_bounds: Vec<(Str<'a>, Vec<UserType>)>,
+    pub upper_bounds: Vec<(Str<'a>, Vec<TypeInfo>)>,
 
     pub uses: Vec<ClassId>,
 }
@@ -71,7 +71,7 @@ pub struct Property<'arena> {
     pub attributes: Vec<Attribute<'arena>>,
     pub visibility: hhbc::Visibility,
     pub initial_value: Option<TypedValue>,
-    pub type_info: hhbc::TypeInfo<'arena>,
+    pub type_info: TypeInfo,
     pub doc_comment: ffi::Maybe<Str<'arena>>,
 }
 

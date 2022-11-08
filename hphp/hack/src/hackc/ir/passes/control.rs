@@ -164,7 +164,7 @@ mod test {
     use ir_core::InstrId;
     use ir_core::Param;
     use ir_core::StringInterner;
-    use ir_core::UserType;
+    use ir_core::TypeInfo;
 
     fn mk_param<'a>(name: &str, dv: BlockId, strings: &mut StringInterner) -> Param<'a> {
         Param {
@@ -173,7 +173,7 @@ mod test {
             is_inout: false,
             is_readonly: false,
             user_attributes: vec![],
-            ty: UserType::default(),
+            ty: TypeInfo::default(),
             default_value: Some(DefaultValue {
                 init: dv,
                 expr: ffi::Str::new(b"1"),

@@ -12,7 +12,7 @@ use ir::TypeConstraintFlags;
 
 use crate::strings::StringCache;
 
-fn convert_type<'a>(ty: &ir::UserType, strings: &StringCache<'a>) -> TypeInfo<'a> {
+fn convert_type<'a>(ty: &ir::TypeInfo, strings: &StringCache<'a>) -> TypeInfo<'a> {
     let mut user_type = ty.user_type.map(|ut| strings.lookup_ffi_str(ut));
 
     let name = if let Some(name) = base_type_string(&ty.enforced.ty) {
@@ -89,7 +89,7 @@ fn base_type_string(ty: &ir::BaseType) -> Option<Str<'static>> {
     }
 }
 
-pub(crate) fn convert<'a>(ty: &ir::UserType, strings: &StringCache<'a>) -> Maybe<TypeInfo<'a>> {
+pub(crate) fn convert<'a>(ty: &ir::TypeInfo, strings: &StringCache<'a>) -> Maybe<TypeInfo<'a>> {
     if ty.is_empty() {
         Maybe::Nothing
     } else {

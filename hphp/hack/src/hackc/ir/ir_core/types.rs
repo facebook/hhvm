@@ -194,19 +194,19 @@ impl Default for EnforceableType {
     }
 }
 
-/// A UserType represents a type written by the user.  It consists of the type
+/// A TypeInfo represents a type written by the user.  It consists of the type
 /// written by the user (including generics) and an enforced constraint.
 #[derive(Clone, Debug, Default)]
-pub struct UserType {
+pub struct TypeInfo {
     /// The textual type that the user wrote including generics and special
     /// chars (like '?').  If None then this is directly computable from the
     /// enforced type.
     pub user_type: Option<UnitBytesId>,
-    /// The underlying type this UserType is constrained as.
+    /// The underlying type this TypeInfo is constrained as.
     pub enforced: EnforceableType,
 }
 
-impl UserType {
+impl TypeInfo {
     pub fn empty() -> Self {
         Self {
             user_type: None,
@@ -217,7 +217,7 @@ impl UserType {
     pub fn is_empty(&self) -> bool {
         matches!(
             self,
-            UserType {
+            TypeInfo {
                 user_type: None,
                 enforced: EnforceableType {
                     ty: BaseType::None,
@@ -228,7 +228,7 @@ impl UserType {
     }
 
     pub fn write(&self, f: &mut fmt::Formatter<'_>, strings: &StringInterner) -> fmt::Result {
-        f.write_str("UserType { user_type: ")?;
+        f.write_str("TypeInfo { user_type: ")?;
         if let Some(ut) = self.user_type {
             write!(f, "\"{}\"", strings.lookup_bstr(ut))?;
         } else {
@@ -242,7 +242,7 @@ impl UserType {
     pub fn display<'a>(&'a self, strings: &'a StringInterner) -> impl fmt::Display + 'a {
         struct D<'a> {
             strings: &'a StringInterner,
-            self_: &'a UserType,
+            self_: &'a TypeInfo,
         }
 
         impl fmt::Display for D<'_> {

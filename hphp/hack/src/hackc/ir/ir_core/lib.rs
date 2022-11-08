@@ -140,6 +140,6 @@ pub use self::typed_value::ArrayKey;
 pub use self::typed_value::TypedValue;
 pub use self::types::BaseType;
 pub use self::types::EnforceableType;
-pub use self::types::UserType;
+pub use self::types::TypeInfo;
 pub use self::unit::Fatal;
 pub use self::unit::Unit;

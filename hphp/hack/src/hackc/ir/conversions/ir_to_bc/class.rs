@@ -147,7 +147,7 @@ fn convert_property<'a>(src: ir::Property<'a>, strings: &StringCache<'a>) -> hhb
             .initial_value
             .map(|tv| convert::convert_typed_value(&tv, strings))
             .into(),
-        type_info: src.type_info.clone(),
+        type_info: types::convert(&src.type_info, strings).unwrap(),
         doc_comment: src.doc_comment,
     }
 }

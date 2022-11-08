@@ -131,7 +131,7 @@ fn convert_property<'a>(
             .as_ref()
             .map(|tv| convert::convert_typed_value(tv, strings))
             .into(),
-        type_info: prop.type_info.clone(),
+        type_info: types::convert_type(&prop.type_info, strings),
         doc_comment: prop.doc_comment,
     }
 }

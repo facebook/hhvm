@@ -5,15 +5,13 @@
 
 use ffi::Maybe;
 use ffi::Str;
-use hhbc::TypeInfo;
 use ir::BaseType;
 use ir::ClassId;
 use ir::StringInterner;
-use ir::UserType;
 use maplit::hashmap;
 use once_cell::sync::OnceCell;
 
-pub(crate) fn convert_type<'a>(ty: &TypeInfo<'a>, strings: &StringInterner) -> UserType {
+pub(crate) fn convert_type<'a>(ty: &hhbc::TypeInfo<'a>, strings: &StringInterner) -> ir::TypeInfo {
     let user_type = ty.user_type.into_option();
     let name = ty.type_constraint.name.into_option();
     let constraint_ty = if let Some(name) = name {
@@ -37,7 +35,7 @@ pub(crate) fn convert_type<'a>(ty: &TypeInfo<'a>, strings: &StringInterner) -> U
             .unwrap_or(BaseType::Mixed)
     };
 
-    UserType {
+    ir::TypeInfo {
         user_type: user_type.map(|u| strings.intern_bytes(u.as_ref())),
         enforced: ir::EnforceableType {
             ty: constraint_ty,
@@ -47,12 +45,12 @@ pub(crate) fn convert_type<'a>(ty: &TypeInfo<'a>, strings: &StringInterner) -> U
 }
 
 pub(crate) fn convert_maybe_type<'a>(
-    ty: Maybe<&TypeInfo<'a>>,
+    ty: Maybe<&hhbc::TypeInfo<'a>>,
     strings: &StringInterner,
-) -> ir::UserType {
+) -> ir::TypeInfo {
     match ty {
         Maybe::Just(ty) => convert_type(ty, strings),
-        Maybe::Nothing => ir::UserType::empty(),
+        Maybe::Nothing => ir::TypeInfo::empty(),
     }
 }
 

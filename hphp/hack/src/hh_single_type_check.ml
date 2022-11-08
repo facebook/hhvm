@@ -75,6 +75,7 @@ type mode =
   | Apply_quickfixes
   | Shape_analysis of string
   | Refactor_sound_dynamic of string * string * string
+  | RemoveDeadUnsafeCasts
 
 type options = {
   files: string list;
@@ -864,6 +865,9 @@ let parse_options () =
         Arg.Set substitution_mutation,
         " Applies substitution mutation to applicable entities and typechecks them"
       );
+      ( "--remove-dead-unsafe-casts",
+        Arg.Unit (fun () -> set_mode RemoveDeadUnsafeCasts ()),
+        " Removes dead unsafe casts from a file" );
     ]
   in
 
@@ -2235,6 +2239,7 @@ let handle_mode
     | Some gi_solved ->
       ServerGlobalInference.Mode_rewrite.get_patches ~files_contents gi_solved
       |> apply_patches files_contents)
+  | RemoveDeadUnsafeCasts -> Format.printf "Stub for removing unsafe casts...\n"
   | Find_refs (line, column) ->
     let path = expect_single_file () in
     let naming_table = Naming_table.create files_info in

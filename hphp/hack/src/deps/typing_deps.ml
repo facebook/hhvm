@@ -477,11 +477,6 @@ module CustomGraph = struct
           filter_discovered_deps_batch mode
       end
     )
-
-  let idep_exists mode dependent dependency =
-    let idependent = Dep.make dependent in
-    let idependency = Dep.make dependency in
-    hh_custom_dep_graph_has_edge mode idependent idependency
 end
 
 module SaveHumanReadableDepMap : sig
@@ -803,11 +798,6 @@ let add_idep mode dependent dependency =
   | SaveToDiskMode _ -> SaveCustomGraph.add_idep mode dependent dependency
   | HhFanoutRustMode { hh_fanout } ->
     HhFanout.add_idep hh_fanout dependent dependency
-
-let idep_exists mode dependent dependency =
-  match mode with
-  | InMemoryMode _ -> CustomGraph.idep_exists mode dependent dependency
-  | _ -> false
 
 let dep_edges_make () : dep_edges = Some CustomGraph.DepEdgeSet.empty
 

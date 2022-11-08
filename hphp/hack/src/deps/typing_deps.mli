@@ -207,9 +207,6 @@ val allow_dependency_table_reads : Mode.t -> bool -> bool
 val add_idep :
   Mode.t -> Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> unit
 
-val idep_exists :
-  Mode.t -> Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> bool
-
 val dep_edges_make : unit -> dep_edges
 
 (** Depending on [mode], either return discovered edges

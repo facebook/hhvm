@@ -88,9 +88,8 @@ impl<'a, 'arena> Env<'a, 'arena> {
     }
 
     pub fn make_class_env(arena: &'arena bumpalo::Bump, class: &'a ast::Class_) -> Env<'a, 'arena> {
-        Env::default(arena, RcOc::clone(&class.namespace)).with_scope(Scope {
-            items: vec![ScopeItem::Class(ast_scope::Class::new_ref(class))],
-        })
+        let scope = Scope::with_item(ScopeItem::Class(ast_scope::Class::new_ref(class)));
+        Env::default(arena, RcOc::clone(&class.namespace)).with_scope(scope)
     }
 
     pub fn do_in_loop_body<'decl, R, F>(

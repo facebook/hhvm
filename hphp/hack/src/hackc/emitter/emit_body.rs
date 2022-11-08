@@ -279,7 +279,7 @@ fn make_decl_vars<'a, 'arena, 'decl>(
         captured_vars.extend_from_slice(decl_vars.as_slice());
         captured_vars
     } else {
-        match &scope.items[..] {
+        match scope.items() {
             [] | [.., ScopeItem::Class(_), _] => move_this(&mut decl_vars),
             _ => {}
         };
@@ -561,7 +561,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                     ),
                 };
 
-            let fn_name = match scope.items.last() {
+            let fn_name = match scope.top() {
                 Some(ScopeItem::Function(f)) => strip_id(f.get_name()),
                 Some(ScopeItem::Method(m)) => strip_id(m.get_name()),
                 _ => {

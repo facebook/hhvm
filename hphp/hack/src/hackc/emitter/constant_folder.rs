@@ -103,7 +103,7 @@ fn class_const_to_typed_value<'arena, 'decl>(
             emitter,
             false,
             true,
-            &ast_scope::Scope::toplevel(),
+            &ast_scope::Scope::default(),
             cid,
         );
         if let ClassExpr::Id(ast_defs::Id(_, cname)) = cexpr {

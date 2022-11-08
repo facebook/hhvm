@@ -88,7 +88,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
         }
         _ => false,
     };
-    let mut scope = Scope::toplevel();
+    let mut scope = Scope::default();
     if !is_debug_main {
         scope.push_item(ScopeItem::Function(ast_scope::Fun::new_ref(fd)));
     }

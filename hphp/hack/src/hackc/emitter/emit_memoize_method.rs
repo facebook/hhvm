@@ -136,12 +136,9 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
         method.ret.1.as_ref()
     };
     let name = hhbc::MethodName::from_ast_name(alloc, &method.name.1);
-    let scope = &Scope {
-        items: vec![
-            ScopeItem::Class(ast_scope::Class::new_ref(class)),
-            ScopeItem::Method(ast_scope::Method::new_ref(method)),
-        ],
-    };
+    let mut scope = Scope::default();
+    scope.push_item(ScopeItem::Class(ast_scope::Class::new_ref(class)));
+    scope.push_item(ScopeItem::Method(ast_scope::Method::new_ref(method)));
     let mut attributes = emit_attribute::from_asts(emitter, &method.user_attributes)?;
     attributes.extend(emit_attribute::add_reified_attribute(
         alloc,
@@ -179,7 +176,7 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
     let mut args = Args {
         info,
         method,
-        scope,
+        scope: &scope,
         deprecation_info: hhbc::deprecation_info(attributes.iter()),
         params: &method.params,
         ret,

@@ -169,17 +169,14 @@ pub fn from_ast<'a, 'arena, 'decl>(
     } else {
         None
     };
-    let mut scope = Scope {
-        items: vec![
-            ScopeItem::Class(ast_scope::Class::new_ref(class)),
-            ScopeItem::Method(match &method_ {
-                Cow::Borrowed(m) => ast_scope::Method::new_ref(m),
-                Cow::Owned(m) => ast_scope::Method::new_rc(m),
-            }),
-        ],
-    };
+    let mut scope = Scope::default();
+    scope.push_item(ScopeItem::Class(ast_scope::Class::new_ref(class)));
+    scope.push_item(ScopeItem::Method(match &method_ {
+        Cow::Borrowed(m) => ast_scope::Method::new_ref(m),
+        Cow::Owned(m) => ast_scope::Method::new_rc(m),
+    }));
     if is_closure_body {
-        scope.items.push(ScopeItem::Lambda(Lambda {
+        scope.push_item(ScopeItem::Lambda(Lambda {
             is_long: false,
             is_async,
             coeffects: Coeffects::default(),

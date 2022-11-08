@@ -217,7 +217,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     ((env, ty_err_opt), ty)
   | Tlike ty ->
     let ((env, ty_err_opt), ty) = localize ~ety_env env ty in
-    let (env, lty) = TUtils.union env (MakeType.dynamic r) ty in
+    let lty = MakeType.locl_like r ty in
     ((env, ty_err_opt), lty)
   | Tfun ft ->
     let pos = Reason.to_pos r in

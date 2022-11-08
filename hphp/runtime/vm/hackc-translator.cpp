@@ -38,16 +38,6 @@ namespace {
 using namespace HPHP::hackc;
 using namespace HPHP::hackc::hhbc;
 
-struct TranslationException : Exception {
-  template<class... A>
-  explicit TranslationException(A&&... args)
-    : Exception(folly::sformat(std::forward<A>(args)...))
-  {}
-};
-
-[[noreturn]] void error(const char* what) {
-  throw TranslationException("{}: {}", what, folly::errnoStr(errno));
-}
 
 struct TranslationState {
   void enterCatch() {
@@ -1456,7 +1446,8 @@ std::unique_ptr<UnitEmitter> unitEmitterFromHackCUnit(
   const char* filename,
 	const SHA1& sha1,
 	const SHA1& bcSha1,
-  const Native::FuncTable& nativeFuncs
+  const Native::FuncTable& nativeFuncs,
+  bool swallowErrors
 ) {
   auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs);
   StringData* sd = makeStaticString(filename);
@@ -1470,10 +1461,13 @@ std::unique_ptr<UnitEmitter> unitEmitterFromHackCUnit(
   } catch (const FatalUnitError& e) {
     ue = createFatalUnit(e.filePath, sha1, e.op, e.what(), e.pos);
   } catch (const FatalErrorException& e) {
+    if (!swallowErrors) throw;
     ue = createFatalUnit(sd, sha1, FatalOp::Runtime, e.what());
   } catch (const TranslationFatal& e) {
+    if (!swallowErrors) throw;
     ue = createFatalUnit(sd, sha1, FatalOp::Runtime, e.what());
   } catch (const std::exception& e) {
+    if (!swallowErrors) throw;
     ue = createFatalUnit(sd, sha1, FatalOp::Runtime, e.what());
   }
   return ue;

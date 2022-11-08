@@ -90,9 +90,14 @@ CompilerResult unitEmitterFromHackCUnitHandleErrors(const hackc::hhbc::Unit& uni
                                                     bool& internal_error,
                                                     CompileAbortMode mode) {
   try {
-    return unitEmitterFromHackCUnit(unit, filename, sha1, bcSha1, nativeFuncs);
+    return unitEmitterFromHackCUnit(unit, filename, sha1, bcSha1, nativeFuncs, false);
+  } catch (const FatalErrorException&) {
+    throw;
   } catch (const TranslationFatal& ex) {
     if (mode >= CompileAbortMode::VerifyErrors) internal_error = true;
+    return ex.what();
+  } catch (const std::exception& ex) {
+    internal_error = true;
     return ex.what();
   }
 }

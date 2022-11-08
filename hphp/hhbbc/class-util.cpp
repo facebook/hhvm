@@ -74,6 +74,10 @@ bool is_noflatten_trait(const php::Class* cls) {
   return cls->userAttributes.count(s_NoFlatten.get());
 }
 
+bool is_closure_base(const php::Class& c) {
+  return c.name->isame(s_Closure.get());
+}
+
 bool is_closure(const php::Class& c) {
   return c.parentName && c.parentName->isame(s_Closure.get());
 }

@@ -73,7 +73,13 @@ namespace {
 const StaticString s_test("test");
 const StaticString s_C("C");
 
+const StaticString s_ChildClosure1("Closure;ChildClosure1");
+const StaticString s_ChildClosure2("Closure;ChildClosure2");
+const StaticString s_ChildClosure3("Closure;ChildClosure3");
+
 #define TEST_CLASSES                            \
+  Y(Closure)                                    \
+                                                \
   X(TestClass)                                  \
   X(TestClassDeriver)                           \
   X(Base)                                       \
@@ -250,6 +256,28 @@ Index make_index() {
     }
 
     .class [unique builtin] HH\AwaitableChild extends HH\Awaitable {
+    }
+
+    .class [unique builtin] Closure {
+    }
+
+    .class [unique] Closure;ChildClosure1 extends Closure {
+      .method [public static] __invoke() isClosureBody {
+        Null
+        RetC
+      }
+    }
+    .class [unique] Closure;ChildClosure2 extends Closure {
+      .method [public static] __invoke() isClosureBody {
+        Null
+        RetC
+      }
+    }
+    .class [unique] Closure;ChildClosure3 extends Closure {
+      .method [public static] __invoke() isClosureBody {
+        Null
+        RetC
+      }
     }
 
     .class [interface unique] IBase {
@@ -1481,6 +1509,17 @@ std::vector<Type> specializedClasses(const Index& index) {
 #undef Y
 #undef X
 
+  auto const childClo1 = index.resolve_class(Context{}, s_ChildClosure1.get());
+  if (!childClo1 || !childClo1->resolved()) ADD_FAILURE();
+  auto const childClo2 = index.resolve_class(Context{}, s_ChildClosure2.get());
+  if (!childClo2 || !childClo2->resolved()) ADD_FAILURE();
+  auto const childClo3 = index.resolve_class(Context{}, s_ChildClosure3.get());
+  if (!childClo3 || !childClo3->resolved()) ADD_FAILURE();
+
+  addExactSub(*childClo1);
+  addExactSub(*childClo2);
+  addExactSub(*childClo3);
+
   auto const awaitable = index.wait_handle_class();
   addExactSub(awaitable);
 
@@ -1886,6 +1925,61 @@ TEST(Type, SpecializedClasses) {
       }
     }
   }
+}
+
+TEST(Type, Closure) {
+  auto index = make_index();
+
+  auto const closureCls = index.resolve_class(Context{}, s_Closure.get());
+  if (!closureCls || closureCls->resolved()) ADD_FAILURE();
+
+  auto const childCls1 = index.resolve_class(Context{}, s_ChildClosure1.get());
+  if (!childCls1 || !childCls1->resolved()) ADD_FAILURE();
+  auto const childCls2 = index.resolve_class(Context{}, s_ChildClosure2.get());
+  if (!childCls2 || !childCls2->resolved()) ADD_FAILURE();
+  auto const childCls3 = index.resolve_class(Context{}, s_ChildClosure3.get());
+  if (!childCls3 || !childCls3->resolved()) ADD_FAILURE();
+
+  auto const closure = subObj(*closureCls);
+  auto const child1 = objExact(*childCls1);
+  auto const child2 = objExact(*childCls2);
+  auto const child3 = objExact(*childCls3);
+
+  EXPECT_TRUE(child1.subtypeOf(closure));
+  EXPECT_TRUE(child2.subtypeOf(closure));
+  EXPECT_TRUE(child3.subtypeOf(closure));
+
+  EXPECT_FALSE(closure.subtypeOf(child1));
+  EXPECT_FALSE(closure.subtypeOf(child2));
+  EXPECT_FALSE(closure.subtypeOf(child3));
+
+  EXPECT_FALSE(child1.subtypeOf(child2));
+  EXPECT_FALSE(child1.subtypeOf(child3));
+  EXPECT_FALSE(child2.subtypeOf(child3));
+
+  EXPECT_TRUE(child1.couldBe(closure));
+  EXPECT_TRUE(child2.couldBe(closure));
+  EXPECT_TRUE(child3.couldBe(closure));
+
+  EXPECT_TRUE(closure.couldBe(child1));
+  EXPECT_TRUE(closure.couldBe(child2));
+  EXPECT_TRUE(closure.couldBe(child3));
+
+  EXPECT_FALSE(child1.couldBe(child2));
+  EXPECT_FALSE(child1.couldBe(child3));
+  EXPECT_FALSE(child2.couldBe(child3));
+
+  EXPECT_EQ(union_of(child1, closure), closure);
+  EXPECT_EQ(union_of(child2, closure), closure);
+  EXPECT_EQ(union_of(child3, closure), closure);
+
+  EXPECT_EQ(union_of(child1, child2), closure);
+  EXPECT_EQ(union_of(child1, child3), closure);
+  EXPECT_EQ(union_of(child2, child3), closure);
+
+  EXPECT_EQ(intersection_of(child1, closure), child1);
+  EXPECT_EQ(intersection_of(child2, closure), child2);
+  EXPECT_EQ(intersection_of(child3, closure), child3);
 }
 
 TEST(Type, SpecializedArrays) {

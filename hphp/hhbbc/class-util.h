@@ -42,6 +42,11 @@ struct Type;
 bool is_collection(res::Class);
 
 /*
+ * Returns whether a php::Class is the base class for all closures.
+ */
+bool is_closure_base(const php::Class&);
+
+/*
  * Returns whether a php::Class is a closure.
  */
 bool is_closure(const php::Class&);

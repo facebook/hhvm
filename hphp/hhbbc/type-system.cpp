@@ -2733,6 +2733,7 @@ bool Type::checkInvariants() const {
         )
       );
       assertx(m_data.dcls.cls().resolved());
+      assertx(!is_closure_base(*m_data.dcls.cls().cls()));
     } else if (m_data.dcls.isSub()) {
       assertx(m_data.dcls.cls().couldBeOverridden());
       assertx(
@@ -2747,6 +2748,8 @@ bool Type::checkInvariants() const {
           m_data.dcls.cls().couldBeOverriddenByRegular()
         )
       );
+      assertx(!m_data.dcls.cls().resolved() ||
+              !is_closure_base(*m_data.dcls.cls().cls()));
     } else {
       assertx(m_data.dcls.isIsect());
       // There's way more things we could verify here, but it gets
@@ -2759,6 +2762,7 @@ bool Type::checkInvariants() const {
             c.mightBeRegular() || c.couldBeOverriddenByRegular()
           )
         );
+        assertx(!c.resolved() || !is_closure_base(*c.cls()));
       }
     }
     break;
@@ -2769,8 +2773,11 @@ bool Type::checkInvariants() const {
     if (m_data.dobj.isExact()) {
       assertx(m_data.dobj.cls().mightBeRegular());
       assertx(m_data.dobj.cls().resolved());
+      assertx(!is_closure_base(*m_data.dobj.cls().cls()));
     } else if (m_data.dobj.isSub()) {
       assertx(m_data.dobj.cls().couldBeOverriddenByRegular());
+      assertx(!m_data.dobj.cls().resolved() ||
+              !is_closure_base(*m_data.dobj.cls().cls()));
     } else {
       assertx(m_data.dobj.isIsect());
       // There's way more things we could verify here, but it gets
@@ -2778,6 +2785,7 @@ bool Type::checkInvariants() const {
       assertx(m_data.dobj.isect().size() > 1);
       for (auto const DEBUG_ONLY c : m_data.dobj.isect()) {
         assertx(c.mightBeRegular() || c.couldBeOverriddenByRegular());
+        assertx(!c.resolved() || !is_closure_base(*c.cls()));
       }
     }
     break;

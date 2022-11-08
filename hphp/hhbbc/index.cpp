@@ -910,6 +910,13 @@ struct ClassInfo {
    * runtime. You usually want to avoid iterating the subclass list of
    * a trait.
    *
+   * As an optimization, Closure has an empty subclass list (this is
+   * the only situation where the subclass list can be completely
+   * empty). Closure's actual subclass list can grow pathologically
+   * large on a big code base and it's rarely useful. We force Closure
+   * to be unresolved whenever its inside a res::Class, so we never
+   * need the list.
+   *
    * The elements in this vector are sorted by their pointer value.
    */
   CompactVector<ClassInfo*> subclassList;
@@ -1207,6 +1214,7 @@ ClassInfo::InterfaceInfo::CouldBeSet couldBeSetBuilder(const ClassInfo* cinfo,
   // interfaces this implementation implements, and also all of its
   // parent classes.
   ClassInfo::InterfaceInfo::CouldBeSet couldBe;
+  assertx(!cinfo->subclassList.empty());
   for (auto const sub : cinfo->subclassList) {
     if (!nonRegular && !is_regular_class(*sub->cls)) continue;
     for (auto const& [_, impl] : sub->implInterfaces) couldBe.emplace(impl);
@@ -1470,6 +1478,7 @@ bool Class::subSubtypeOf(const Class& o,
     // For abstract classes, the inheritance check isn't absolute. To
     // be precise we need to check every (regular) subclass of the
     // abstract class.
+    assertx(!c1->subclassList.empty());
     for (auto const sub : c1->subclassList) {
       if (!is_regular_class(*sub->cls)) continue;
       if (!sub->derivedFrom(*c2)) return false;
@@ -1804,6 +1813,7 @@ bool Class::couldHaveMagicBool() const {
     [] (SString) { return true; },
     [] (ClassInfo* cinfo) {
       if (cinfo->cls->attrs & AttrInterface) {
+        assertx(!cinfo->subclassList.empty());
         for (auto const sub : cinfo->subclassList) {
           if (has_magic_bool_conversion(sub->baseList[0]->cls->name)) {
             return true;
@@ -1899,6 +1909,9 @@ Optional<res::Class> Class::parent() const {
   if (!val.right()) return std::nullopt;
   auto parent = val.right()->parent;
   if (!parent) return std::nullopt;
+  if (is_closure_base(*parent->cls)) {
+    return res::Class { parent->cls->name.get() };
+  }
   return res::Class { parent };
 }
 
@@ -1910,6 +1923,7 @@ void
 Class::forEachSubclass(const std::function<void(const php::Class*)>& f) const {
   auto const cinfo = val.right();
   assertx(cinfo);
+  assertx(!cinfo->subclassList.empty());
   for (auto const& s : cinfo->subclassList) f(s->cls);
 }
 
@@ -1965,6 +1979,7 @@ void Class::visitEverySub(folly::Range<const Class*> classes,
     } else if (cinfo->cls->attrs & AttrTrait) {
       if (includeNonRegular) f(Class { cinfo });
     } else {
+      assertx(!cinfo->subclassList.empty());
       for (auto const sub : cinfo->subclassList) {
         if (!includeNonRegular && !is_regular_class(*sub->cls)) continue;
         if (!f(Class { sub })) break;
@@ -2318,7 +2333,13 @@ TinyVector<Class, 2> Class::combine(folly::Range<const Class*> classes1,
     processList(classes2, isSub2, nonRegular2);
     // Combine the common classes
     if (commonBase && *commonBase) {
-      common.emplace_back(Class { *commonBase });
+      // Don't process resolved classes for Closure.
+      if (!is_closure_base(*(*commonBase)->cls)) {
+        common.emplace_back(Class { *commonBase });
+      } else {
+        assertx(!commonInterfaces || commonInterfaces->empty());
+        common.emplace_back(Class { (*commonBase)->cls->name.get() });
+      }
     }
     if (commonInterfaces) {
       for (auto const i : *commonInterfaces) {
@@ -3416,6 +3437,7 @@ void compute_subclass_list_rec(ClassInfo* cinfo,
   if (csub->cls->attrs & AttrNoExpandTrait) return;
   for (auto const ctrait : csub->usedTraits) {
     auto const ct = const_cast<ClassInfo*>(ctrait);
+    assertx(!is_closure_base(*ct->cls));
     ct->subclassList.push_back(cinfo);
     compute_subclass_list_rec(cinfo, ct);
   }
@@ -3425,13 +3447,33 @@ void compute_subclass_list(IndexData& index) {
   trace_time _("compute subclass list", index.sample);
 
   for (auto& cinfo : index.allClassInfos) {
+    if (is_closure(*cinfo->cls)) {
+      assertx(cinfo->baseList.size() == 2);
+      assertx(is_closure_base(*cinfo->baseList[0]->cls));
+      assertx(cinfo->usedTraits.empty());
+      assertx(cinfo->implInterfaces.empty());
+      assertx(is_regular_class(*cinfo->cls));
+      assertx(cinfo->subclassList.empty());
+      cinfo->subclassList.emplace_back(cinfo.get());
+      continue;
+    }
+    if (is_closure_base(*cinfo->cls)) {
+      assertx(cinfo->baseList.size() == 1);
+      assertx(cinfo->baseList[0] == cinfo.get());
+      assertx(cinfo->usedTraits.empty());
+      assertx(cinfo->implInterfaces.empty());
+      continue;
+    }
+
     for (auto& cparent : cinfo->baseList) {
+      assertx(!is_closure_base(*cparent->cls));
       cparent->subclassList.push_back(cinfo.get());
     }
     compute_subclass_list_rec(cinfo.get(), cinfo.get());
     // Also add classes to their interface's subclassLists
     for (auto& ipair : cinfo->implInterfaces) {
       auto impl = const_cast<ClassInfo*>(ipair.second);
+      assertx(!is_closure_base(*impl->cls));
       impl->subclassList.emplace_back(cinfo.get());
     }
   }
@@ -3439,12 +3481,20 @@ void compute_subclass_list(IndexData& index) {
   parallel::for_each(
     index.allClassInfos,
     [&] (const std::unique_ptr<ClassInfo>& cinfo) {
+      assertx(!cinfo->hasRegularSubclass);
+      assertx(!cinfo->hasNonRegularSubclass);
+
+      if (is_closure_base(*cinfo->cls)) {
+        assertx(cinfo->subclassList.empty());
+        cinfo->hasRegularSubclass = true;
+        return;
+      }
+
       auto& sub = cinfo->subclassList;
+      assertx(!sub.empty());
       std::sort(begin(sub), end(sub));
       sub.erase(std::unique(begin(sub), end(sub)), end(sub));
       sub.shrink_to_fit();
-      assertx(!cinfo->hasRegularSubclass);
-      assertx(!cinfo->hasNonRegularSubclass);
       for (auto const s : sub) {
         if (s == cinfo.get()) continue;
         if (is_regular_class(*s->cls)) {
@@ -3608,6 +3658,7 @@ define_func_family(IndexData& index,
   // the name.
   auto complete = true;
 
+  assertx(!base.subclassList.empty());
   for (auto const sub : base.subclassList) {
     // Ignore non-regular classes if we only want the regular subset.
     if (justRegular && !is_regular_class(*sub->cls)) continue;
@@ -4085,12 +4136,16 @@ void define_func_families(IndexData& index) {
           create_func_info(index, func)->regularClassMethod = true;
         }
 
-        // Don't construct func families for special methods, as it's
-        // not particularly useful.
-        if (is_special_method_name(name)) continue;
         // If the method is known not to be overridden, we don't need
         // a func family.
         if (mte.attrs & AttrNoOverride) continue;
+
+        assertx(!is_closure_base(*cinfo->cls));
+        assertx(!is_closure(*cinfo->cls));
+
+        // Don't construct func families for special methods, as it's
+        // not particularly useful.
+        if (is_special_method_name(name)) continue;
 
         auto const [a, r] = define_func_family(
           index, *cinfo, name, false
@@ -4230,7 +4285,9 @@ void define_func_families(IndexData& index) {
       // We don't bother with constructing name-only func families for
       // constructors, or special methods because it's not
       // particularly useful.
-      if (name == s_construct.get() || is_special_method_name(name)) continue;
+      if (name == s_construct.get() ||
+          name == s_invoke.get() ||
+          is_special_method_name(name)) continue;
       allMethods.emplace_back(name);
       always_assert(
         index.methodFamilies.emplace(name, IndexData::MethodFamilyEntry{}).second
@@ -4547,8 +4604,10 @@ void mark_no_override_classes(IndexData& index) {
       // index. Set them as necessary.
       assertx(!(cinfo->cls->attrs & AttrNoOverride));
       assertx(!(cinfo->cls->attrs & AttrNoOverrideRegular));
-      assertx(!cinfo->subclassList.empty());
 
+      if (is_closure_base(*cinfo->cls)) return;
+
+      assertx(!cinfo->subclassList.empty());
       if (cinfo->subclassList.size() == 1) {
         assertx(cinfo->subclassList[0] == cinfo.get());
         attribute_setter(cinfo->cls->attrs, true, AttrNoOverride);
@@ -4707,7 +4766,9 @@ void check_invariants(const IndexData& index, const ClassInfo* cinfo) {
     // Every method (except for constructors and special methods
     // should be in the global name-only tables.
     auto const nameIt = index.methodFamilies.find(m->name);
-    if (m->name == s_construct.get() || is_special_method_name(m->name)) {
+    if (m->name == s_construct.get() ||
+        m->name == s_invoke.get() ||
+        is_special_method_name(m->name)) {
       always_assert(nameIt == end(index.methodFamilies));
       continue;
     }
@@ -4792,6 +4853,10 @@ void check_invariants(const IndexData& index, const ClassInfo* cinfo) {
       // either.
       always_assert(IMPLIES(cinfo->cls->attrs & AttrNoOverride,
                             mte.attrs & AttrNoOverride));
+    }
+
+    if (is_closure_base(*cinfo->cls) || is_closure(*cinfo->cls)) {
+      always_assert(mte.attrs & AttrNoOverride);
     }
 
     auto const famIt = cinfo->methodFamilies.find(name);
@@ -4914,18 +4979,26 @@ void check_invariants(const IndexData& index, const ClassInfo* cinfo) {
 
   // The subclassList is non-empty, contains this ClassInfo, and
   // contains only unique elements.
-  always_assert(!cinfo->subclassList.empty());
-  always_assert(
-    std::find(
-      begin(cinfo->subclassList),
-      end(cinfo->subclassList),
-      cinfo
-    ) != end(cinfo->subclassList)
-  );
-  auto cpy = cinfo->subclassList;
-  std::sort(begin(cpy), end(cpy));
-  cpy.erase(std::unique(begin(cpy), end(cpy)), end(cpy));
-  always_assert(cpy.size() == cinfo->subclassList.size());
+  if (!is_closure_base(*cinfo->cls)) {
+    always_assert(!cinfo->subclassList.empty());
+    always_assert(
+      std::find(
+        begin(cinfo->subclassList),
+        end(cinfo->subclassList),
+        cinfo
+      ) != end(cinfo->subclassList)
+    );
+    auto cpy = cinfo->subclassList;
+    std::sort(begin(cpy), end(cpy));
+    cpy.erase(std::unique(begin(cpy), end(cpy)), end(cpy));
+    always_assert(cpy.size() == cinfo->subclassList.size());
+  } else if (is_closure(*cinfo->cls)) {
+    always_assert(cinfo->subclassList.size() == 2);
+    always_assert(is_closure_base(*cinfo->subclassList[0]->cls));
+    always_assert(cinfo->subclassList[1] == cinfo);
+  } else {
+    always_assert(cinfo->subclassList.empty());
+  }
 
   // The baseList is non-empty, and the last element is this class.
   always_assert(!cinfo->baseList.empty());
@@ -9006,10 +9079,13 @@ Index::lookup_extra_methods(const php::Class* cls) const {
 //////////////////////////////////////////////////////////////////////
 
 res::Class Index::resolve_class(const php::Class* cls) const {
-
   auto const it = m_data->classInfo.find(cls->name);
   if (it != end(m_data->classInfo)) {
     auto const cinfo = it->second;
+    // Force Closure to be unresolved
+    if (is_closure_base(*cinfo->cls)) {
+      return res::Class { cls->name.get() };
+    }
     if (cinfo->cls == cls) {
       return res::Class { cinfo };
     }
@@ -9050,6 +9126,11 @@ Optional<res::Class> Index::resolve_class(Context ctx,
                       ta->second->name->data());
       }
       always_assert(false);
+    }
+
+    // Force Closure to be unresolved
+    if (is_closure_base(*tinfo->cls)) {
+      return res::Class { clsName };
     }
     return res::Class { tinfo };
   }
@@ -9094,7 +9175,13 @@ Index::resolve_type_name(SString inName) const {
       auto const cinfo = cls_it->second;
       assertx(cinfo->cls->attrs & AttrUnique);
       if (!(cinfo->cls->attrs & AttrEnum)) {
-        return { AnnotType::Object, nullable, res::Class { cinfo } };
+        return {
+          AnnotType::Object,
+          nullable,
+          is_closure_base(*cinfo->cls)
+            ? res::Class { name }
+            : res::Class { cinfo }
+        };
       }
       auto const& tc = cinfo->cls->enumBaseTy;
       assertx(!tc.isNullable());
@@ -9212,10 +9299,13 @@ Index::resolve_closure_class(Context ctx, SString name) const {
 
 res::Class Index::builtin_class(SString name) const {
   auto const rcls = resolve_class(Context {}, name);
+  // Builtin classes should always be resolved, except for Closure,
+  // which are force to be unresolved.
   always_assert_flog(
     rcls.has_value() &&
-    rcls->val.right() &&
-    (rcls->val.right()->cls->attrs & AttrBuiltin),
+    (name->isame(s_Closure.get()) ||
+     (rcls->val.right() &&
+      (rcls->val.right()->cls->attrs & AttrBuiltin))),
     "A builtin class ({}) failed to resolve",
     name->data()
   );
@@ -9393,8 +9483,9 @@ res::Func Index::resolve_method(Context ctx,
     // We don't produce name-only global func families for special
     // methods, so be conservative. We don't call special methods in a
     // context where we'd expect to not know the class, so it's not
-    // worthwhile.
-    if (is_special_method_name(name)) {
+    // worthwhile. The same goes for __invoke, which is corresponds to
+    // every closure, and gets too large without much value.
+    if (is_special_method_name(name) || name == s_invoke.get()) {
       return Func { Func::MethodName { name } };
     }
 
@@ -10058,6 +10149,7 @@ bool Index::visit_every_dcls_cls(const DCls& dcls, const F& f) const {
     if (cinfo->cls->attrs & AttrTrait) {
       if (dcls.containsNonRegular()) f(cinfo);
     } else {
+      assertx(!cinfo->subclassList.empty());
       for (auto const sub : cinfo->subclassList) {
         if (!dcls.containsNonRegular() && !is_regular_class(*sub->cls)) {
           continue;

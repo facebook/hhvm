@@ -205,7 +205,7 @@ class InfiniteIterator<T> extends IteratorIterator<T> {
 }
 
 class GlobIterator extends FilesystemIterator implements Countable {
-  public function count() {}
+  public function count(): int {}
 }
 
 class SplStack<T> extends SplDoublyLinkedList<T> {
@@ -216,7 +216,7 @@ class SplPriorityQueue<T> implements Iterator<T>, Countable {
   const int EXTR_PRIORITY = 2;
   const int EXTR_DATA = 1;
   public function compare($a, $b): HH\FIXME\MISSING_RETURN_TYPE {}
-  public function count() {}
+  public function count(): int {}
   public function current() {}
   public function extract(): HH\FIXME\MISSING_RETURN_TYPE {}
   public function insert($value, $priority): HH\FIXME\MISSING_RETURN_TYPE {}

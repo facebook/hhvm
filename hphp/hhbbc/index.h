@@ -322,9 +322,6 @@ struct Class {
    * "regular" classes (interfaces/traits/abstract/etc). Whether these
    * will be considered as part of the check (on either side) is
    * context dependent and specified by nonRegularL and nonRegularR.
-   *
-   * Note: unresolved classes are not subtypes of anything except
-   * themself.
    */
   bool exactSubtypeOf(const Class& o, bool nonRegularL, bool nonRegularR) const;
   bool exactSubtypeOfExact(
@@ -348,9 +345,6 @@ struct Class {
    * "regular" classes (interfaces/traits/abstract/etc). Whether these
    * will be considered as part of the check (on either side) is
    * context dependent and specified by nonRegularL and nonRegularR.
-   *
-   * Note: unresolved classes always can be another unresolved class,
-   * and never a resolved class.
    */
   bool exactCouldBe(const Class& o, bool nonRegularL, bool nonRegularR) const;
   bool exactCouldBeExact(

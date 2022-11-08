@@ -2752,9 +2752,7 @@ bool Type::checkInvariants() const {
       // There's way more things we could verify here, but it gets
       // expensive (and requires the index).
       assertx(m_data.dcls.isect().size() > 1);
-      auto const DEBUG_ONLY resolved = m_data.dcls.isect()[0].resolved();
       for (auto const DEBUG_ONLY c : m_data.dcls.isect()) {
-        assertx(c.resolved() == resolved);
         assertx(
           IMPLIES(
             !m_data.dcls.containsNonRegular(),
@@ -2778,9 +2776,7 @@ bool Type::checkInvariants() const {
       // There's way more things we could verify here, but it gets
       // expensive (and requires the index).
       assertx(m_data.dobj.isect().size() > 1);
-      auto const DEBUG_ONLY resolved = m_data.dobj.isect()[0].resolved();
       for (auto const DEBUG_ONLY c : m_data.dobj.isect()) {
-        assertx(c.resolved() == resolved);
         assertx(c.mightBeRegular() || c.couldBeOverriddenByRegular());
       }
     }

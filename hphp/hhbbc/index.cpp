@@ -1356,8 +1356,7 @@ bool Class::exactSubtypeOf(const Class& o,
   // Unresolved classes are never exact, so it should not show up on
   // the lhs.
   assertx(!val.left());
-  // A resolved class can never be a subtype of an unresolved class.
-  if (o.val.left()) return false;
+
   auto const c1 = val.right();
   // If we want to exclude non-regular classes on either side, and the
   // lhs is not regular, there's no subtype relation. If nonRegularL
@@ -1367,6 +1366,16 @@ bool Class::exactSubtypeOf(const Class& o,
   if ((!nonRegularL || !nonRegularR) && !is_regular_class(*c1->cls)) {
     return !nonRegularL;
   }
+
+  if (auto const rname = o.val.left()) {
+    // The lhs is resolved, but the rhs is not. The lhs is a subtype
+    // of rhs if any of its bases have the same name.
+    for (auto const base : c1->baseList) {
+      if (base->cls->name->isame(rname)) return true;
+    }
+    return c1->implInterfaces.count(rname);
+  }
+
   // Otherwise just do an inheritance check.
   return c1->derivedFrom(*o.val.right());
 }
@@ -1379,11 +1388,31 @@ bool Class::subSubtypeOf(const Class& o,
   // non-regular classes if the rhs doesn't.
   if (auto const lname = val.left()) {
     if (auto const rname = o.val.left()) {
+      // If both classes are unresolved, we can't really say for sure
+      // if they're subclasses or not. However, as a special case, if
+      // their names are the same (and if the lhs doesn't contain
+      // non-regular classes if the rhs doesn't).
       return (!nonRegularL || nonRegularR) && lname->isame(rname);
     }
+    // The lhs is unresolved, but the rhs is resolved. We can use the
+    // rhs subclass list to see if the lhs is on it.
+    auto const c2 = o.val.right();
+    if (c2->cls->attrs & AttrTrait) {
+      return nonRegularR && c2->cls->name->isame(lname);
+    }
+    for (auto const sub : c2->subclassList) {
+      if (!nonRegularR && !is_regular_class(*sub->cls)) continue;
+      if (sub->cls->name->isame(lname)) return true;
+    }
     return false;
-  } else if (o.val.left()) {
-    return false;
+  } else if (auto const rname = o.val.left()) {
+    auto const c1 = val.right();
+    // The lhs is resolved, but the rhs is not. The lhs is a subtype
+    // of rhs if any of its bases have the same name.
+    for (auto const base : c1->baseList) {
+      if (base->cls->name->isame(rname)) return true;
+    }
+    return c1->implInterfaces.count(rname);
   }
 
   auto const c1 = val.right();
@@ -1479,31 +1508,87 @@ bool Class::exactCouldBe(const Class& o,
   // Unresolved classes can never be exact, so they shouldn't show up
   // on the lhs.
   assertx(!val.left());
-  // Unresolved classes are disjoint from resolved classes, so they
-  // cannot be each other.
-  if (o.val.left()) return false;
+
   // Otherwise the check is very similar to exactSubtypeOf (except for
   // the handling of bottoms).
   auto const c1 = val.right();
   if ((!nonRegularL || !nonRegularR) && !is_regular_class(*c1->cls)) {
     return false;
   }
+
+  if (auto const rname = o.val.left()) {
+    // The lhs is resolved, but the rhs is not. The lhs is a subtype
+    // of rhs if any of its bases have the same name (and therefore
+    // could be).
+    for (auto const base : c1->baseList) {
+      if (base->cls->name->isame(rname)) return true;
+    }
+    return c1->implInterfaces.count(rname);
+  }
+
   return c1->derivedFrom(*o.val.right());
 }
 
 bool Class::subCouldBe(const Class& o,
                        bool nonRegularL,
                        bool nonRegularR) const {
-  // Unresolved and resolved classes are disjoint so never can be each
-  // other. Two unresolved classes always can possibly be each other.
-  if (val.left()) return o.val.left();
-  if (o.val.left()) return false;
-
   // If we only want to consider regular classes on either side. If
   // true, this means that any possible intersection between the
   // classes can only include regular classes. If either side doesn't
   // have any regular classes, then no intersection is possible.
   auto const eitherRegOnly = !nonRegularL || !nonRegularR;
+
+  if (auto const lname = val.left()) {
+    // Two unresolved classes can always potentially be each other.
+    if (o.val.left()) return true;
+
+    // The lhs is unresolved, and the rhs is resolved. The lhs could
+    // be the rhs if the rhs has a subclass which has a parent or
+    // implemented interface with the same name as the lhs.
+    auto const c2 = o.val.right();
+    if (c2->cls->attrs & AttrTrait) {
+      if (eitherRegOnly) return false;
+      for (auto const base : c2->baseList) {
+        if (base->cls->name->isame(lname)) return true;
+      }
+      return c2->implInterfaces.count(lname);
+    }
+
+    for (auto const sub : c2->subclassList) {
+      if (eitherRegOnly && !is_regular_class(*sub->cls)) continue;
+      for (auto const base : sub->baseList) {
+        if (eitherRegOnly && !is_regular_class(*base->cls)) continue;
+        if (base->cls->name->isame(lname)) return true;
+      }
+      if (!eitherRegOnly && sub->implInterfaces.count(lname)) {
+        return true;
+      }
+    }
+    return false;
+  } else if (auto const rname = o.val.left()) {
+    // This is the same as above, but with the lhs and rhs flipped
+    // (for the necessary symmetry of couldBe).
+    auto const c1 = val.right();
+    if (c1->cls->attrs & AttrTrait) {
+      if (eitherRegOnly) return false;
+      for (auto const base : c1->baseList) {
+        if (base->cls->name->isame(rname)) return true;
+      }
+      return c1->implInterfaces.count(rname);
+    }
+
+    for (auto const sub : c1->subclassList) {
+      if (eitherRegOnly && !is_regular_class(*sub->cls)) continue;
+      for (auto const base : sub->baseList) {
+        if (eitherRegOnly && !is_regular_class(*base->cls)) continue;
+        if (base->cls->name->isame(rname)) return true;
+      }
+      if (!eitherRegOnly && sub->implInterfaces.count(rname)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   auto const c1 = val.right();
   auto const c2 = o.val.right();
@@ -1857,10 +1942,14 @@ ClassInfo* Class::commonAncestor(ClassInfo* a, ClassInfo* b) {
 }
 
 // Call the given callable for every class which is a subclass of
-// *all* the classes in the range. If a class is unresolved, it will
-// be passed, as is, to the callable. If the callable returns false,
-// iteration is stopped. If includeNonRegular is true, non-regular
-// subclasses are visited (normally they are skipped).
+// *all* the classes in the range. If the range includes nothing but
+// unresolved classes, they will be passed, as-is, to the callable. If
+// the range includes a mix of resolved and unresolved classes, the
+// unresolved classes will be used to narrow the classes passed to the
+// callable, but the unresolved classes themself will not be passed to
+// the callable .If the callable returns false, iteration is
+// stopped. If includeNonRegular is true, non-regular subclasses are
+// visited (normally they are skipped).
 template <typename F>
 void Class::visitEverySub(folly::Range<const Class*> classes,
                           bool includeNonRegular,
@@ -1890,41 +1979,60 @@ void Class::visitEverySub(folly::Range<const Class*> classes,
   // Find the first resolved class, and use that to initialize the
   // list of subclasses.
   auto const numClasses = classes.size();
-  int idx = 0;
-  while (idx < numClasses) {
-    if (auto const cinfo = classes[idx].val.right()) {
-      if (cinfo->cls->attrs & AttrTrait) {
-        if (includeNonRegular) common.emplace_back(cinfo);
-      } else if (includeNonRegular ||
-                 (!cinfo->hasNonRegularSubclass &&
-                  is_regular_class(*cinfo->cls))) {
-        common = cinfo->subclassList;
-      } else {
-        for (auto const sub : cinfo->subclassList) {
-          if (!is_regular_class(*sub->cls)) continue;
-          common.emplace_back(sub);
-        }
-      }
-      ++idx;
-      break;
+  size_t resolvedIdx = 0;
+  while (resolvedIdx < numClasses) {
+    auto const cinfo = classes[resolvedIdx].val.right();
+    if (!cinfo) {
+      ++resolvedIdx;
+      continue;
     }
-    if (!f(classes[idx])) return;
-    ++idx;
+
+    if (cinfo->cls->attrs & AttrTrait) {
+      if (includeNonRegular) common.emplace_back(cinfo);
+    } else if (includeNonRegular ||
+               (!cinfo->hasNonRegularSubclass &&
+                is_regular_class(*cinfo->cls))) {
+      common = cinfo->subclassList;
+    } else {
+      for (auto const sub : cinfo->subclassList) {
+        if (!is_regular_class(*sub->cls)) continue;
+        common.emplace_back(sub);
+      }
+    }
+    break;
   }
 
-  // Now process the result, removing any subclasses which aren't a
-  // subclass of all of the classes.
+  // We didn't find any resolved classes. This list is nothing but
+  // unresolved classes, so just provide them to the callable and then
+  // we're done.
+  if (resolvedIdx == numClasses) {
+    assertx(common.empty());
+    for (auto const c : classes) {
+      assertx(c.val.left());
+      if (!f(c)) break;
+    }
+    return;
+  }
+
+  // Otherwise we found a resolved class. Now process the rest of the
+  // resolved classes, removing any subclasses from the list which
+  // aren't a subclass of all of the classes.
   CompactVector<ClassInfo*> newCommon;
-  while (idx < numClasses) {
+  // We start again from 0 to process any unresolved classes we might
+  // have skipped over above.
+  for (size_t idx = 0; idx < numClasses; ++idx) {
+    assertx(!common.empty());
+    // Don't process the class we selected above twice.
+    if (idx == resolvedIdx) continue;
+    newCommon.clear();
+
+    // NB: We don't need to check includeNonRegular here. If it's
+    // false, we won't have any non-regular classes in common
+    // initially, so none will be part of any intersection.
     if (auto const cinfo = classes[idx].val.right()) {
-      if (common.empty()) {
-        ++idx;
-        continue;
-      }
-      newCommon.clear();
-      // NB: We don't need to check includeNonRegular here. If it's
-      // false, we won't have any non-regular classes in common
-      // initially, so none will be part of any intersection.
+      // If this class is resolved, intersect the subclass list with
+      // the common set of classes.
+      assertx(idx > resolvedIdx);
       std::set_intersection(
         begin(common),
         end(common),
@@ -1932,19 +2040,28 @@ void Class::visitEverySub(folly::Range<const Class*> classes,
         end(cinfo->subclassList),
         std::back_inserter(newCommon)
       );
-      std::swap(common, newCommon);
-      ++idx;
-      continue;
+    } else {
+      // If this class is unresolved, we can remove any classes from
+      // the common set which couldn't be the unresolved class.
+      for (auto const c : common) {
+        Class resolved{ c };
+        if (resolved.exactCouldBe(classes[idx],
+                                  includeNonRegular,
+                                  includeNonRegular)) {
+          newCommon.emplace_back(c);
+        }
+      }
     }
-    if (!f(classes[idx])) return;
-    ++idx;
+    std::swap(common, newCommon);
+    if (common.empty()) return;
   }
+  assertx(!common.empty());
 
   // We have the final list. Iterate over these and report them to the
   // callable.
   for (auto const c : common) {
     assertx(IMPLIES(!includeNonRegular, is_regular_class(*c->cls)));
-    if (!f(Class { c })) break;
+    if (!f(Class { c })) return;
   }
 }
 
@@ -2119,6 +2236,8 @@ TinyVector<Class, 2> Class::combine(folly::Range<const Class*> classes1,
       // If the list is just a single class, we can process things
       // more efficiently.
       auto const cinfo = classes[0].val.right();
+      // We dealt with lists of all unresolved classes specially
+      // below, so shouldn't get here.
       assertx(cinfo);
       if (cinfo->cls->attrs & (AttrAbstract|AttrInterface)) {
         // Are we including non-regular classes? If we are, we can
@@ -2160,6 +2279,9 @@ TinyVector<Class, 2> Class::combine(folly::Range<const Class*> classes1,
       classes,
       nonRegular,
       [&] (res::Class c) {
+        // visitEverySub will only report an unresolved class if the
+        // entire list is unresolved, and we deal with that case
+        // specially below and shouldn't get here.
         assertx(c.val.right());
         // We'll only "visit" exact sub-classes, so only use
         // processNormal here.
@@ -2175,56 +2297,61 @@ TinyVector<Class, 2> Class::combine(folly::Range<const Class*> classes1,
   assertx(IMPLIES(!isSub1, classes1.size() == 1));
   assertx(IMPLIES(!isSub2, classes2.size() == 1));
 
-  // Sanity check that if the list starts with an unresolved class,
-  // then the rest of the list contains nothing but unresolved
-  // classes. If the list starts with a resolved class, processList
-  // will assert if the rest are not resolved.
-  auto const unresolved1 = (bool)classes1[0].val.left();
-  auto const unresolved2 = (bool)classes2[0].val.left();
-  if (debug) {
-    if (unresolved1) {
-      for (auto const c : classes1) always_assert(c.val.left());
-    }
-    if (unresolved2) {
-      for (auto const c : classes2) always_assert(c.val.left());
-    }
-  }
+  // If either side is composed of nothing but unresolved classes, we
+  // need to deal with that specially (because we cannot know their
+  // subclasses, the above logic doesn't work). If either side has
+  // *some* (but not all) unresolved classes, that is fine, because
+  // visitEverySub will handle that for us.
+  auto const allUnresolved1 = std::all_of(
+    classes1.begin(), classes1.end(),
+    [] (res::Class c) { return (bool)c.val.left(); }
+  );
+  auto const allUnresolved2 = std::all_of(
+    classes2.begin(), classes2.end(),
+    [] (res::Class c) { return (bool)c.val.left(); }
+  );
 
-  // Treat lists of unresolved classes separately (since we cannot
-  // look at their subclasses). If one list is all unresolved classes
-  // and the other isn't (and vice versa), there's nothing in common,
-  // so return an empty list (this will become TObj or
-  // TCls). Otherwise return the unresolved classes which are in both
-  // lists. The result is guaranteed to already be canonicalized.
-  if (unresolved1) {
-    if (unresolved2) {
-      TinyVector<Class, 2> out;
-      for (auto const c1 : classes1) {
-        for (auto const c2 : classes2) {
-          if (c1.val.left()->isame(c2.val.left())) out.emplace_back(c1);
-        }
+  if (!allUnresolved1 && !allUnresolved2) {
+    // There's resolved classes on both sides. We can use the normal
+    // process logic.
+    processList(classes1, isSub1, nonRegular1);
+    processList(classes2, isSub2, nonRegular2);
+    // Combine the common classes
+    if (commonBase && *commonBase) {
+      common.emplace_back(Class { *commonBase });
+    }
+    if (commonInterfaces) {
+      for (auto const i : *commonInterfaces) {
+        common.emplace_back(Class { i });
       }
-      return out;
     }
-    return {};
-  } else if (unresolved2) {
-    return {};
+  } else {
+    // Either side (maybe both) is made up of unresolved
+    // classes. Instead of the above subclass based logic, only keep
+    // the classes (on either side) which are a subtype of a class on
+    // the opposite side.
+    auto const either = nonRegular1 || nonRegular2;
+    for (auto const c1 : classes1) {
+      auto const subtypeOf = std::any_of(
+        classes2.begin(), classes2.end(),
+        [&] (res::Class c2) {
+          return c2.subSubtypeOf(c1, either, either);
+        }
+      );
+      if (subtypeOf) common.emplace_back(c1);
+    }
+    for (auto const c2 : classes2) {
+      auto const subtypeOf = std::any_of(
+        classes1.begin(), classes1.end(),
+        [&] (res::Class c1) {
+          return c1.subSubtypeOf(c2, either, either);
+        }
+      );
+      if (subtypeOf) common.emplace_back(c2);
+    }
   }
 
-  // Otherwise process both lists and build the common sets.
-  processList(classes1, isSub1, nonRegular1);
-  processList(classes2, isSub2, nonRegular2);
-  // Combine the common classes
-  if (commonBase && *commonBase) {
-    common.emplace_back(Class { *commonBase });
-  }
-  if (commonInterfaces) {
-    for (auto const i : *commonInterfaces) {
-      common.emplace_back(Class { i });
-    }
-  }
-
-  // And canonicalize
+  // Finally canonicalize the set
   return canonicalizeIsects(common, nonRegular1 || nonRegular2);
 }
 
@@ -2242,9 +2369,7 @@ Class::removeNonRegular(folly::Range<const Class*> classes) {
     false,
     [&] (res::Class c) {
       // Unresolved classes are always "regular" (we can't tell
-      // otherwise), so they remain as is. Due to invariants, the
-      // class list will always be all resolved or all unresolved
-      // (though we don't check that here).
+      // otherwise), so they remain as is.
       if (c.val.left()) {
         common.emplace_back(c);
         return true;
@@ -2300,8 +2425,6 @@ TinyVector<Class, 2> Class::intersect(folly::Range<const Class*> classes1,
                                       bool nonRegular2,
                                       bool& nonRegularOut) {
   TinyVector<Class, 8> common;
-  Optional<ClassInfo*> commonBase;
-  Optional<hphp_fast_set<ClassInfo*>> commonInterfaces;
 
   // The algorithm for intersecting two intersection lists is similar
   // to unioning, except we only need to consider the classes which
@@ -2310,37 +2433,8 @@ TinyVector<Class, 2> Class::intersect(folly::Range<const Class*> classes1,
   assertx(!classes1.empty());
   assertx(!classes2.empty());
 
-  // Class lists should either be all resolved, or all unresolved, but
-  // not a mix.
-  auto const unresolved1 = (bool)classes1[0].val.left();
-  auto const unresolved2 = (bool)classes2[0].val.left();
-  if (debug) {
-    if (unresolved1) {
-      for (auto const c : classes1) always_assert(c.val.left());
-    }
-    if (unresolved2) {
-      for (auto const c : classes2) always_assert(c.val.left());
-    }
-  }
-
   auto const bothNonRegular = nonRegular1 && nonRegular2;
   nonRegularOut = bothNonRegular;
-
-  // Intersection of a list of all resolved classes and a list of all
-  // unresolved classes (or vice versa) is always going to be the
-  // empty set (an unresolved class cannot be a resolved class
-  // ever). Otherwise if both are unresolved, just combine the lists
-  // and canonicalize them.
-  if (unresolved1) {
-    if (unresolved2) {
-      for (auto const c : classes1) common.emplace_back(c);
-      for (auto const c : classes2) common.emplace_back(c);
-      return canonicalizeIsects(common, bothNonRegular);
-    }
-    return {};
-  } else if (unresolved2) {
-    return {};
-  }
 
   // Even if both the lhs and rhs contain non-regular classes, the
   // intersection may not. We check if the intersection contains any
@@ -2348,65 +2442,129 @@ TinyVector<Class, 2> Class::intersect(folly::Range<const Class*> classes1,
   // type appropriately.
   auto isectContainsNonRegular = false;
 
-  // Since we're calculating the intersection, we only have to visit
-  // one list, and check against the other.
-  visitEverySub(
-    classes1,
-    bothNonRegular,
-    [&] (res::Class c) {
-      // Must have a cinfo because we checked above all the classes
-      // were resolved.
-      auto const cinfo = c.val.right();
-      assertx(cinfo);
-      assertx(IMPLIES(!bothNonRegular, is_regular_class(*cinfo->cls)));
-
-      // Could this class be a class in the other list? If not, ignore
-      // it (it's not part of the intersection result).
-      for (auto const other : classes2) {
-        if (!c.exactCouldBe(other, bothNonRegular, bothNonRegular)) return true;
-      }
-
-      // Otherwise it is part of the intersection, and we need to
-      // update the common base and interfaces likewise.
-
-      if (!commonBase) {
-        commonBase = cinfo;
-      } else {
-        commonBase = commonAncestor(*commonBase, cinfo);
-      }
-
-      if (!commonInterfaces) {
-        commonInterfaces.emplace();
-        for (auto const i : cinfo->implInterfaces) {
-          commonInterfaces->emplace(const_cast<ClassInfo*>(i.second));
-        }
-      } else {
-        folly::erase_if(
-          *commonInterfaces,
-          [&] (ClassInfo* i) {
-            return !cinfo->implInterfaces.count(i->cls->name);
-          }
-        );
-      }
-
-      if (bothNonRegular &&
-          !isectContainsNonRegular &&
-          !is_regular_class(*cinfo->cls)) {
-        isectContainsNonRegular = true;
-      }
-
-      // Stop iterating if there's no longer anything in common.
-      return *commonBase || !commonInterfaces->empty();
+  // Estimate the sizes of each side by summing their subclass list
+  // lengths. We want to iterate over the "smaller" set of classes.
+  size_t size1 = 0;
+  size_t size2 = 0;
+  for (auto const c : classes1) {
+    if (auto const cinfo = c.val.right()) {
+      assertx(!cinfo->subclassList.empty());
+      size1 += cinfo->subclassList.size();
     }
-  );
-
-  if (commonBase && *commonBase) {
-    common.emplace_back(Class { *commonBase });
   }
-  if (commonInterfaces) {
-    for (auto const i : *commonInterfaces) {
-      common.emplace_back(Class { i });
+  for (auto const c : classes2) {
+    if (auto const cinfo = c.val.right()) {
+      assertx(!cinfo->subclassList.empty());
+      size2 += cinfo->subclassList.size();
     }
+  }
+
+  auto const process = [&] (folly::Range<const Class*> lhs,
+                            folly::Range<const Class*> rhs) {
+    Optional<ClassInfo*> commonBase;
+    Optional<hphp_fast_set<ClassInfo*>> commonInterfaces;
+
+    // Since we're calculating the intersection, we only have to visit
+    // one list, and check against the other.
+    visitEverySub(
+      lhs,
+      bothNonRegular,
+      [&] (res::Class c) {
+        auto const cinfo = c.val.right();
+        // We shouldn't use visitEverySub if the class list is nothing
+        // but unresolved classes, so we should never get an
+        // unresolved class in the callback.
+        assertx(cinfo);
+        assertx(IMPLIES(!bothNonRegular, is_regular_class(*cinfo->cls)));
+
+        // Could this class be a class in the other list? If not, ignore
+        // it (it's not part of the intersection result).
+        for (auto const other : rhs) {
+          if (!c.exactCouldBe(other, bothNonRegular, bothNonRegular)) {
+            return true;
+          }
+        }
+
+        // Otherwise it is part of the intersection, and we need to
+        // update the common base and interfaces likewise.
+
+        if (!commonBase) {
+          commonBase = cinfo;
+        } else {
+          commonBase = commonAncestor(*commonBase, cinfo);
+        }
+
+        if (!commonInterfaces) {
+          commonInterfaces.emplace();
+          for (auto const i : cinfo->implInterfaces) {
+            commonInterfaces->emplace(const_cast<ClassInfo*>(i.second));
+          }
+        } else {
+          folly::erase_if(
+            *commonInterfaces,
+            [&] (ClassInfo* i) {
+              return !cinfo->implInterfaces.count(i->cls->name);
+            }
+          );
+        }
+
+        if (bothNonRegular &&
+            !isectContainsNonRegular &&
+            !is_regular_class(*cinfo->cls)) {
+          isectContainsNonRegular = true;
+        }
+
+        // Stop iterating if there's no longer anything in common.
+        return *commonBase || !commonInterfaces->empty();
+      }
+    );
+
+    if (commonBase && *commonBase) {
+      common.emplace_back(Class { *commonBase });
+    }
+    if (commonInterfaces) {
+      for (auto const i : *commonInterfaces) {
+        common.emplace_back(Class { i });
+      }
+    }
+
+    // If the common set is empty at this point, the intersection is
+    // empty anyways, so we don't need to worry about any unresolved
+    // classes. Otherwise add unresolved classes on both sides to the
+    // common set. Canonicalization will remove them if they're
+    // redundant.
+    if (!common.empty()) {
+      for (auto const c : classes1) {
+        if (c.val.left()) common.emplace_back(c);
+      }
+      for (auto const c : classes2) {
+        if (c.val.left()) common.emplace_back(c);
+      }
+    }
+  };
+
+  // The first parameter is the class range we'll call visitEverySub
+  // on, so use the smaller of the two ranges. Don't use a range with
+  // a "size" of 0, which means it's nothing but unresolved classes.
+  if (size1 == 0) {
+    if (size2 > 0) {
+      process(classes2, classes1);
+    } else {
+      // If both ranges are nothing but unresolved classes, we don't
+      // need to process them at all. The intersection is just the
+      // combined list of classes (canonicalization will remove any
+      // redundancies).
+      for (auto const c : classes1) {
+        if (c.val.left()) common.emplace_back(c);
+      }
+      for (auto const c : classes2) {
+        if (c.val.left()) common.emplace_back(c);
+      }
+    }
+  } else if (size2 == 0 || size1 <= size2) {
+    process(classes1, classes2);
+  } else {
+    process(classes2, classes1);
   }
 
   // Canonicalize the common base classes/interfaces.
@@ -2422,24 +2580,6 @@ bool Class::couldBeIsect(folly::Range<const Class*> classes1,
   assertx(!classes1.empty());
   assertx(!classes2.empty());
 
-  // Class lists should either be all resolved, or all unresolved, but
-  // not a mix.
-  auto const unresolved1 = (bool)classes1[0].val.left();
-  auto const unresolved2 = (bool)classes2[0].val.left();
-  if (debug) {
-    if (unresolved1) {
-      for (auto const c : classes1) always_assert(c.val.left());
-    }
-    if (unresolved2) {
-      for (auto const c : classes2) always_assert(c.val.left());
-    }
-  }
-
-  // Unresolved classes can always be each other, and resolved classes
-  // will never be unresolved classes.
-  if (unresolved1) return unresolved2;
-  if (unresolved2) return false;
-
   auto const bothNonReg = nonRegular1 && nonRegular2;
 
   // Otherwise decompose the first class list into each of it's exact
@@ -2450,9 +2590,14 @@ bool Class::couldBeIsect(folly::Range<const Class*> classes1,
     classes1,
     bothNonReg,
     [&] (res::Class c) {
-      assertx(!c.val.left());
-      for (auto const o : classes2) {
-        if (!c.exactCouldBe(o, bothNonReg, bothNonReg)) return true;
+      if (!c.val.left()) {
+        for (auto const o : classes2) {
+          if (!c.exactCouldBe(o, bothNonReg, bothNonReg)) return true;
+        }
+      } else {
+        for (auto const o : classes2) {
+          if (!c.subCouldBe(o, bothNonReg, bothNonReg)) return true;
+        }
       }
       couldBe = true;
       return false;
@@ -9914,7 +10059,9 @@ bool Index::visit_every_dcls_cls(const DCls& dcls, const F& f) const {
       if (dcls.containsNonRegular()) f(cinfo);
     } else {
       for (auto const sub : cinfo->subclassList) {
-        if (!dcls.containsNonRegular() && !is_regular_class(*sub->cls)) continue;
+        if (!dcls.containsNonRegular() && !is_regular_class(*sub->cls)) {
+          continue;
+        }
         if (!f(sub)) break;
       }
     }

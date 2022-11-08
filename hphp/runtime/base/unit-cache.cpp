@@ -951,48 +951,13 @@ getNonRepoCacheWithWrapper(const StringData* rpath) {
   // If this isn't a CLI server request, this is a normal file access
   if (!uc) return std::make_pair(&s_nonRepoUnitCache, nullptr);
 
-  auto wrapper = Stream::getWrapperFromURI(StrNR{rpath});
-  if (!wrapper || !wrapper->isNormalFileStream()) {
-    return std::make_pair(nullptr, nullptr);
-  }
-
-  auto const unit_check_quarantine = [&] {
-    if (RuntimeOption::EvalUnixServerQuarantineUnits) {
-      auto iter = s_perUserUnitCaches.find(uc->uid);
-      if (iter != s_perUserUnitCaches.end()) {
-        return std::make_pair(iter->second, wrapper);
-      }
-      auto cache = new NonRepoUnitCache;
-      auto res = s_perUserUnitCaches.insert(uc->uid, cache);
-      if (!res.second) delete cache;
-      return std::make_pair(res.first->second, wrapper);
+  // If the server cannot access rpath attempt to open the unit on the client
+  if (access(rpath->data(), R_OK) == -1) {
+    auto wrapper = Stream::getWrapperFromURI(StrNR{rpath});
+    if (!wrapper || !wrapper->isNormalFileStream()) {
+      return std::make_pair(nullptr, nullptr);
     }
     return std::make_pair(&s_nonRepoUnitCache, wrapper);
-  };
-
-  // If the server cannot access rpath attempt to open the unit on the
-  // client. When UnixServerQuarantineUnits is set store units opened by
-  // clients in per UID caches which are never accessible by server web
-  // requests.
-  if (access(rpath->data(), R_OK) == -1) return unit_check_quarantine();
-
-  // When UnixServerVerifyExeAccess is set clients may not execute units if
-  // they cannot read them, even when the server has access. To verify that
-  // clients have access they are asked to open the file for read access,
-  // and using fstat the server verifies that the file it sees is identical
-  // to the unit opened by the client.
-  if (RuntimeOption::EvalUnixServerVerifyExeAccess) {
-    // We only allow normal file streams, which cannot re-enter.
-    struct stat local, remote;
-    auto remoteFile = wrapper->open(StrNR{rpath}, "r", 0, nullptr);
-    if (!remoteFile ||
-        fcntl(remoteFile->fd(), F_GETFL) != O_RDONLY ||
-        fstat(remoteFile->fd(), &remote) != 0 ||
-        stat(rpath->data(), &local) != 0 ||
-        remote.st_dev != local.st_dev ||
-        remote.st_ino != local.st_ino) {
-      return unit_check_quarantine();
-    }
   }
 
   // When the server is able to read the file prefer to access it that way,

@@ -1344,9 +1344,6 @@ struct RuntimeOption {
   F(std::string, UseRemoteUnixServer, "no")                             \
   F(std::string, UnixServerPath, "")                                    \
   F(uint32_t, UnixServerWorkers, Process::GetCPUCount())                \
-  F(bool, UnixServerQuarantineApc, false)                               \
-  F(bool, UnixServerQuarantineUnits, false)                             \
-  F(bool, UnixServerVerifyExeAccess, false)                             \
   F(bool, UnixServerFailWhenBusy, false)                                \
   F(std::vector<std::string>, UnixServerAllowedUsers,                   \
                                             std::vector<std::string>()) \

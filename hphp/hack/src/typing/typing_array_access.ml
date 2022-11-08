@@ -1012,16 +1012,6 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
   match deref ty with
   (* dynamic is valid for assign array get *)
   | (_, Tdynamic) -> ((env, None), Some ty)
-  | (r, Tclass (((_, cn) as id), _, tyl))
-    when cn = SN.Collections.cVec
-         || cn = SN.Collections.cKeyset
-         || cn = SN.Collections.cDict ->
-    let (env, params) =
-      List.map_env env tyl ~f:(fun env _ty ->
-          Env.fresh_type_invariant env expr_pos)
-    in
-    let ty = mk (r, Tclass (id, nonexact, params)) in
-    ((env, None), Some ty)
   | (r, Ttuple tyl) ->
     (* requires integer literal *)
     begin

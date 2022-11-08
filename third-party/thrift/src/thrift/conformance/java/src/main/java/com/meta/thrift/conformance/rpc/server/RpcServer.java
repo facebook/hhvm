@@ -28,11 +28,16 @@ public class RpcServer {
 
   public static void main(String[] args) {
     RpcServerHandler handler =
-        RPCConformanceService.serverHandlerBuilder(new RpcServerConformanceHandler()).build();
+        RPCConformanceService.Reactive.serverHandlerBuilder(new RpcServerReactiveHandler()).build();
 
     ServerTransport transport =
         RpcServerUtils.createServerTransport(
-                new ThriftServerConfig().setPort(0), TransportType.RSOCKET, handler)
+                new ThriftServerConfig()
+                    .setBindAddress("::1")
+                    .setBindAddressEnabled(true)
+                    .setPort(0),
+                TransportType.RSOCKET,
+                handler)
             .block();
 
     // Conformance test runner starts multiple instances of server

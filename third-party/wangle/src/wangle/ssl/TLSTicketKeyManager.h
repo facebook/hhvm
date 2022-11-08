@@ -37,6 +37,10 @@ struct TLSTicketKeySeeds;
  */
 class TLSTicketKeyManager : public folly::OpenSSLTicketHandler {
  public:
+  /**
+   * Creates and returns a TLSTicketKeyManager initialized with the given seeds,
+   * which must not be empty.
+   */
   static std::unique_ptr<TLSTicketKeyManager> fromSeeds(
       const TLSTicketKeySeeds* seeds);
 

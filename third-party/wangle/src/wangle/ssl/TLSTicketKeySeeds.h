@@ -51,7 +51,7 @@ struct TLSTicketKeySeeds {
   }
 
   bool isNotEmpty() const {
-    return !oldSeeds.empty() && !currentSeeds.empty() && !newSeeds.empty();
+    return !isEmpty();
   }
 
   // Verify the LHS is a subset of RHS

@@ -201,7 +201,8 @@ void configureTicketResumption(
     const SSLContextConfig& ctxConfig,
     SSLStats* stats) {
 #ifdef SSL_CTRL_SET_TLSEXT_TICKET_KEY_CB
-  if (ticketSeeds && ctxConfig.sessionTicketEnabled) {
+  if (ticketSeeds && ticketSeeds->isNotEmpty() &&
+      ctxConfig.sessionTicketEnabled) {
     auto handler = TicketSeedHandler::fromSeeds(ticketSeeds);
     handler->setStats(stats);
     sslCtx->setTicketHandler(std::move(handler));

@@ -93,6 +93,7 @@ const std::string TLSTicketKeyManager::TLSTicketKey::computeName() const {
 
 std::unique_ptr<TLSTicketKeyManager> TLSTicketKeyManager::fromSeeds(
     const TLSTicketKeySeeds* seeds) {
+  DCHECK(seeds->isNotEmpty());
   auto mgr = std::make_unique<TLSTicketKeyManager>();
   mgr->setTLSTicketKeySeeds(
       seeds->oldSeeds, seeds->currentSeeds, seeds->newSeeds);

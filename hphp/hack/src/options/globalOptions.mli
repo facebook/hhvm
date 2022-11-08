@@ -340,6 +340,8 @@ type t = {
      typechecks the mutated program *)
   tco_substitution_mutation: bool;
   tco_use_type_alias_heap: bool;
+  tco_allow_all_locations_for_type_constant_in_enum_class: bool;
+  tco_allowed_locations_for_type_constant_in_enum_class: string list;
 }
 [@@deriving eq, show]
 
@@ -480,6 +482,8 @@ val make :
   ?tco_expression_tree_virtualize_functions:bool ->
   ?tco_substitution_mutation:bool ->
   ?tco_use_type_alias_heap:bool ->
+  ?tco_allow_all_locations_for_type_constant_in_enum_class:bool ->
+  ?tco_allowed_locations_for_type_constant_in_enum_class:string list ->
   unit ->
   t
 

@@ -500,6 +500,12 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_expression_tree_virtualize_functions:
         (bool_opt "expression_tree_virtualize_functions" config)
       ?tco_use_type_alias_heap:(bool_opt "use_type_alias_heap" config)
+      ?tco_allowed_locations_for_type_constant_in_enum_class:
+        (string_list_opt
+           "allowed_locations_for_type_constant_in_enum_class"
+           config)
+      ?tco_allow_all_locations_for_type_constant_in_enum_class:
+        (bool_opt "allow_all_locations_for_type_constant_in_enum_class" config)
       ()
   in
   Errors.allowed_fixme_codes_strict :=

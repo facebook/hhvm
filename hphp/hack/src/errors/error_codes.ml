@@ -159,6 +159,7 @@ module Naming = struct
     | InvalidReqClass [@value 2119]
     | ModuleDeclarationOutsideAllowedFiles [@value 2120]
     | DynamicMethodAccess [@value 2121]
+    | TypeConstantInEnumClassOutsideAllowedLocations [@value 2122]
   (* Add new Naming codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

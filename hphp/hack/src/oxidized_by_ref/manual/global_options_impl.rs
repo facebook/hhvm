@@ -146,6 +146,8 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_expression_tree_virtualize_functions: false,
     tco_substitution_mutation: false,
     tco_use_type_alias_heap: false,
+    tco_allow_all_locations_for_type_constant_in_enum_class: false,
+    tco_allowed_locations_for_type_constant_in_enum_class: &[],
 };
 
 impl GlobalOptions<'static> {

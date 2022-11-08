@@ -237,6 +237,7 @@ type t =
     }
   | Module_declaration_outside_allowed_files of Pos.t
   | Dynamic_method_access of Pos.t
+  | Type_constant_in_enum_class_outside_allowed_locations of Pos.t
 
 let const_without_typehint pos name type_ =
   let name = Utils.strip_all_ns name in
@@ -1083,6 +1084,14 @@ let module_declaration_outside_allowed_files pos =
       ^ "The set of approved files is in .hhconfig" )
     []
 
+let type_constant_in_enum_class_outside_allowed_locations pos =
+  User_error.make
+    Error_code.(to_enum TypeConstantInEnumClassOutsideAllowedLocations)
+    ( pos,
+      "This type constant definition is not allowed in this file. "
+      ^ "The set of approved locations is in .hhconfig" )
+    []
+
 let to_user_error = function
   | Unsupported_trait_use_as pos -> unsupported_trait_use_as pos
   | Unsupported_instead_of pos -> unsupported_instead_of pos
@@ -1210,3 +1219,5 @@ let to_user_error = function
   | Module_declaration_outside_allowed_files pos ->
     module_declaration_outside_allowed_files pos
   | Dynamic_method_access pos -> dynamic_method_access pos
+  | Type_constant_in_enum_class_outside_allowed_locations pos ->
+    type_constant_in_enum_class_outside_allowed_locations pos

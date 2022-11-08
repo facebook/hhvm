@@ -2310,6 +2310,46 @@ let enum_ env enum_name ~in_enum_class ~abstract_enum_class e =
   in
   (Some bound, Some enum)
 
+let typeconsts ctx env c =
+  let open Aast in
+  (* Normal move, just run the algorithm on the declared type constants *)
+  let default () = List.map ~f:(typeconst env) c.c_typeconsts in
+  if
+    Ast_defs.is_c_enum_class c.Aast.c_kind && not (List.is_empty c.c_typeconsts)
+  then
+    (* However, we're still in the middle of developping type constants
+     * for enum classes, so we gate them carefully for now:
+     * They must use the feature flag `type_constants_in_enum_class` AND
+     * be in a selected list of directories.
+     * For internal testing, we provide a global "enable" flag to just
+     * enable them. This is off by default except in hh_single_type_check.
+     * *)
+    let tcopts = Provider_context.get_tcopt ctx in
+    let allowed_locations =
+      TypecheckerOptions.allowed_locations_for_type_constant_in_enum_class
+        tcopts
+    in
+    let allow_all_locations =
+      TypecheckerOptions.allow_all_locations_for_type_constant_in_enum_class
+        tcopts
+    in
+    let class_file = Relative_path.suffix @@ Pos.filename c.c_span in
+    let class_dir = Filename.dirname class_file in
+    if
+      (not allow_all_locations)
+      && not
+           (List.exists allowed_locations ~f:(fun allowed_dir ->
+                String.equal allowed_dir class_dir))
+    then (
+      Errors.add_naming_error
+      @@ Naming_error.Type_constant_in_enum_class_outside_allowed_locations
+           c.c_span;
+      []
+    ) else
+      default ()
+  else
+    default ()
+
 let class_help ctx env c =
   let c = Naming_captures.populate_class_ c in
   let where_constraints =
@@ -2423,7 +2463,7 @@ let class_help ctx env c =
    *)
   let tparam_l = type_paraml ~forbid_this:true env c.Aast.c_tparams in
   let consts = List.map ~f:(class_const env ~in_enum_class) c.Aast.c_consts in
-  let typeconsts = List.map ~f:(typeconst env) c.Aast.c_typeconsts in
+  let typeconsts = typeconsts ctx env c in
   let implements =
     List.map ~f:(hint ~allow_retonly:false env) c.Aast.c_implements
   in

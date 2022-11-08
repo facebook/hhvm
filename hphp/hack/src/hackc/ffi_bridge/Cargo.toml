@@ -13,7 +13,7 @@ anyhow = "1.0.65"
 bincode = "1.3.3"
 bumpalo = { version = "3.11.1", features = ["collections"] }
 compile = { path = "../compile/cargo/compile" }
-cxx = "1.0.76"
+cxx = "1.0.81"
 decl_provider = { path = "../decl_provider" }
 direct_decl_parser = { path = "../../parser/api/cargo/direct_decl_parser" }
 facts_rust = { path = "../../facts/cargo/facts_rust" }
@@ -29,4 +29,4 @@ relative_path = { path = "../../utils/rust/relative_path" }
 sha-1 = "0.10"
 
 [build-dependencies]
-cxx-build = "1.0.76"
+cxx-build = "1.0.81"

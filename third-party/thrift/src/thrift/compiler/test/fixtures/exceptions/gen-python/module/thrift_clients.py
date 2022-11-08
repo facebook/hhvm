@@ -31,6 +31,11 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
         return "module.Raiser"
     
     @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
+    
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return module.thrift_metadata.gen_metadata_service_Raiser()
     

@@ -31,6 +31,11 @@ class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"])
         return "module.FooService"
     
     @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
+    
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_FooService()
     
@@ -84,6 +89,11 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.FB303Service"
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -157,6 +167,11 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.MyService"
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -543,6 +558,11 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.DbMixedStackArguments"
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

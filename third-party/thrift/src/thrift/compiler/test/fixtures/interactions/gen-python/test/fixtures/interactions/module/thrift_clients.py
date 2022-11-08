@@ -30,6 +30,11 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         return "module.MyService"
     
     @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
+    
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService()
     
@@ -171,6 +176,11 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
         return "module.MyInteraction"
     
     @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
+    
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_MyInteraction()
     
@@ -257,6 +267,11 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
         return "module.MyInteractionFast"
     
     @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+    """process_in_event_base""": """1""",    }
+    
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_MyInteractionFast()
     
@@ -339,6 +354,11 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.SerialInteraction"
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+    """serial""": """1""",    }
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

@@ -34,6 +34,11 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
         return "module.SimpleService"
     
     @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
+    
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return module.thrift_metadata.gen_metadata_service_SimpleService()
     
@@ -1879,6 +1884,11 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
         return "module.DerivedService"
     
     @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+    """bar""": """1""","""foo""": """\"\"\"""",    }
+    
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return module.thrift_metadata.gen_metadata_service_DerivedService()
     
@@ -1946,6 +1956,11 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.RederivedService"
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
     
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

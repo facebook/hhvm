@@ -1143,6 +1143,36 @@ class python_mstch_const_value : public mstch_const_value {
   }
 };
 
+class python_mstch_deprecated_annotation : public mstch_deprecated_annotation {
+ public:
+  python_mstch_deprecated_annotation(
+      const t_annotation* a, mstch_context& ctx, mstch_element_position pos)
+      : mstch_deprecated_annotation(a, ctx, pos) {
+    register_methods(
+        this,
+        {
+            {"annotation:value?",
+             &python_mstch_deprecated_annotation::has_value},
+            {"annotation:py_quoted_key",
+             &python_mstch_deprecated_annotation::py_quoted_key},
+            {"annotation:py_quoted_value",
+             &python_mstch_deprecated_annotation::py_quoted_value},
+        });
+  }
+
+  mstch::node has_value() { return !val_.value.empty(); }
+  mstch::node py_quoted_key() { return to_python_string_literal(key_); }
+  mstch::node py_quoted_value() { return to_python_string_literal(val_.value); }
+
+ protected:
+  std::string to_python_string_literal(std::string val) const {
+    std::string quotes = "\"\"\"";
+    boost::algorithm::replace_all(val, "\\", "\\\\");
+    boost::algorithm::replace_all(val, "\"", "\\\"");
+    return quotes + val + quotes;
+  }
+};
+
 void t_mstch_python_generator::set_mstch_factories() {
   mstch_context_.add<python_mstch_program>();
   mstch_context_.add<python_mstch_service>(program_);
@@ -1155,6 +1185,7 @@ void t_mstch_python_generator::set_mstch_factories() {
   mstch_context_.add<python_mstch_enum_value>();
   mstch_context_.add<python_mstch_const>();
   mstch_context_.add<python_mstch_const_value>();
+  mstch_context_.add<python_mstch_deprecated_annotation>();
 }
 
 boost::filesystem::path t_mstch_python_generator::package_to_path() {

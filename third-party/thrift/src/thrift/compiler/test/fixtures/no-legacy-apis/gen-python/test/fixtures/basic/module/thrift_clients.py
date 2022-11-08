@@ -31,6 +31,11 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         return "module.MyService"
     
     @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
+    
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_MyService()
     

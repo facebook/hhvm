@@ -22,6 +22,12 @@ Thrift python client body definition, which is shared between normal clients and
 def __get_thrift_name__() -> str:
     return "{{program:name}}.{{service:name}}"
 
+@staticmethod
+def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+    return {
+        {{#service:annotations}}{{> common/annotation}}{{/service:annotations}}
+    }
+
 {{^service:interaction?}}
 @staticmethod
 def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

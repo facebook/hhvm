@@ -32,6 +32,11 @@ class ExtendTestService(_fbthrift_python_Client["ExtendTestService.Async", "Exte
         return "extend.ExtendTestService"
     
     @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
+    
+    @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return python_module_root.my.namespacing.extend.test.extend.thrift_metadata.gen_metadata_service_ExtendTestService()
     

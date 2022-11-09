@@ -13,6 +13,26 @@ namespace java com.facebook.eden.thrift
 namespace py facebook.eden
 namespace py3 eden.fs.service
 
+/**
+ * API style guide.
+ * ----------------
+ *
+ * These guides are to ensure we use consitent pratices to make
+ * our interface easy to use.
+ * 1. Wrap the endpoint arguments in a struct. The name of this argument
+ * struct should be the endpointname + "Request". This is Thrift's recommended
+ * practice for arguments and ensures that we can safely evolve the arguments
+ * of a method.
+ * 2. Wrap the return value from the endpoint in a struct, even if it is just
+ * a single value. This allows evolving return types without having to create a
+ * whole new endpoint. The name of this return value struct should be
+ * endpointname + "Response".
+ * 3. If your endpoint operates on a mount(s), make the mount identifier
+ * the first value in your arguments struct. Use the MountId struct as the type.
+ * This allows us to evolve the identifiers we use for mountpoints in the future
+ * without rewriting your new endpoint.
+ */
+
 /** Thrift doesn't really do unsigned numbers, but we can sort of fake it.
  * This type is serialized as an integer value that is 64-bits wide and
  * should round-trip with full fidelity for C++ client/server, but for
@@ -103,6 +123,10 @@ exception EdenError {
 
 exception NoValueForKeyError {
   1: string key;
+}
+
+struct MountId {
+  1: PathString mountPoint;
 }
 
 /**

@@ -177,7 +177,7 @@ struct BumpEmergencyMapper : public RangeMapper {
   explicit BumpEmergencyMapper(ExitFun&& exitFn, Args&&... args)
     : RangeMapper(std::forward<Args>(args)...)
     , m_exit(exitFn) {}
-  static std::atomic_flag s_emergencyFlag;
+  static std::atomic_bool s_emergencyFlag;
  protected:
   Direction direction() const override { return Direction::LowToHigh; }
   bool addMappingImpl() override;

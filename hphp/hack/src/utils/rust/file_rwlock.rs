@@ -22,7 +22,7 @@ use std::path::PathBuf;
 ///   the the lock's file even while we consider it locked, just by bypassing RwLock.
 ///   You might consider that a feature or a bug! but there's nothing better available.
 ///   As a safeguard, though, we do mark the file with a "poisoned" byte while anyone
-///   holds a lock, so that people won't inadvertently read it.
+///   holds a lock, so that people won't inadvertently deserialize it.
 /// * With an in-memory lock you know that RwLock::new() will necessarily succeed,
 ///   but for a shared-file lock then FileRwLock::create() might fail in the case
 ///   that the lock already exists on disk. This is indicated by LockError::Present
@@ -32,15 +32,12 @@ use std::path::PathBuf;
 ///   std::fs::remove_file() yourself at a time when you know there won't be races,
 ///   e.g. you know there won't be a concurrent "create".
 /// * As implementation, the "T" is stored on disk as pretty json. That's to help
-///   humans read it for debugging. It is deserialized when you lock(), and
-///   serialized again when you release the lock. To help humans debugging,
-///   create() also serializes it to disk. Also as implementation, the json is
+///   humans read it for debugging. It is deserialized when you lock, and serialized
+///   again when you release a write-lock. Also as implementation, the json is
 ///   stored on disk with a leading space, and that leading space is replaced
-///   with "@" to indicate both exclusive-locking and poison. This is how FileRwLock
-///   knows to fail a lock attempt it's poisoned, and it also prevents any non-FileRwLock
-///   consumers from inadvertently json-parsing the file when it's locked or poisoned.
-///   We mark the "@" immediately after acquiring the flock(LOCK_EX), and remove it
-///   immediately before releasing.
+///   with "@" to indicate poison. This is how FileRwLock knows to fail a lock attempt
+///   it's poisoned, and it also prevents any non-FileRwLock consumers from inadvertently
+///   json-parsing the file when it's locked or poisoned.
 ///
 /// IMPLEMENTATION
 /// I'd like to say I copied this all from stackoverflow, but I couldn't find any file
@@ -89,13 +86,15 @@ pub struct FileRwLock<T> {
     value_type: std::marker::PhantomData<T>,
 }
 
-/// This byte at the start of a file signifies that the lock is poisoned.
-const POISONED: u8 = b'@';
-
-/// This byte at the start of the file signifies that the lock is present
-/// and has a value. We use a symbol that won't interfere with json parsing,
-/// for human debugging convenience.
-const PRESENT: u8 = b' ';
+#[repr(u8)]
+enum State {
+    /// This byte at the start of a file signifies that the lock is poisoned.
+    Poisoned = b'@',
+    /// This byte at the start of the file signifies that the lock is present
+    /// and has a value. We use a symbol that won't interfere with json parsing,
+    /// for human debugging convenience.
+    Present = b' ',
+}
 
 impl<T: serde::Serialize + for<'de> serde::Deserialize<'de>> FileRwLock<T> {
     /// This method doesn't do anything on disk to the lockfile.
@@ -108,14 +107,15 @@ impl<T: serde::Serialize + for<'de> serde::Deserialize<'de>> FileRwLock<T> {
         }
     }
 
-    /// Creates a new lockfile on disk, resulting in the file being in state "present"
-    /// and with an exclusive lock on it.
+    /// Creates a new lockfile on disk, resulting in the file being in 'state'
+    /// (either present or poisoned). Returns Some(file, value).
     /// Will fail if the file was previously present/stopped/poisoned; all three
-    /// cases are represented by CreateError::Present.
-    pub fn create(
+    /// cases are represented by None.
+    fn create_impl(
         &mut self,
         value: T,
-    ) -> Result<Option<FileRwLockExclusiveGuard<'_, T>>, UnexpectedError> {
+        state: State,
+    ) -> Result<Option<(std::fs::File, T)>, UnexpectedError> {
         if let Some(parent) = self.path.parent() {
             std::fs::create_dir_all(parent).path_context(&self.path, "create_dir_all")?;
         }
@@ -159,26 +159,21 @@ impl<T: serde::Serialize + for<'de> serde::Deserialize<'de>> FileRwLock<T> {
         file.lock_exclusive()
             .path_context(&self.path, "flock(LOCK_EX)")?;
 
-        // Initialize the file. We'll put in poison so that if we crash then other processes
-        // will know the file is in an indeterminate state. For human debuggability
-        // of anyone viewing the lockfile, we'll write out the full initial value to it.
+        // Initialize the file. The file will initially be in "state" provided as a parameter,
+        // either present or poisoned, with different behaviors should we crash.
         use std::io::Write;
-        let json =
-            serde_json::to_string_pretty(&value).path_context(&self.path, "json::to_string")?;
-        let content = format!("{}{json}", POISONED as char);
+        let json = serde_json::to_string_pretty(&value)
+            .path_context(&self.path, "json::to_string_pretty")?;
+        let content = format!("{}{json}", state as u8 as char);
         file.write_all(content.as_bytes())
-            .path_context(&self.path, "write_poison_initial")?;
+            .path_context(&self.path, "write_initial")?;
 
         // Link the locked+initialized file into the desired location.
         // Our sequence point is the moment we link.
         #[cfg(not(target_os = "linux"))]
         {
             match nfile.persist_noclobber(&self.path) {
-                Ok(file) => Ok(Some(FileRwLockExclusiveGuard {
-                    lock: self,
-                    file: Some(file),
-                    value,
-                })),
+                Ok(file) => Ok(Some((file, value))),
                 Err(e) if e.error.kind() == std::io::ErrorKind::AlreadyExists => Ok(None),
                 Err(e) => Err(e).path_context(&self.path, "linkat"),
             }
@@ -201,13 +196,7 @@ impl<T: serde::Serialize + for<'de> serde::Deserialize<'de>> FileRwLock<T> {
                 )
             };
             if ret >= 0 {
-                // Over to the ExclusiveGuard, who will be responsible for writing
-                // back a real (non-poisoned) value to it upon drop/close.
-                Ok(Some(FileRwLockExclusiveGuard {
-                    lock: self,
-                    file: Some(file),
-                    value,
-                }))
+                Ok(Some((file, value)))
             } else {
                 let e = std::io::Error::last_os_error();
                 if e.kind() == std::io::ErrorKind::AlreadyExists {
@@ -219,6 +208,40 @@ impl<T: serde::Serialize + for<'de> serde::Deserialize<'de>> FileRwLock<T> {
                 }
             }
         }
+    }
+
+    /// Creates a new lockfile on disk. Upon success leaves the lockfile in state
+    /// 'present' and returns an ExclusiveGuard; if we crash then other parties
+    /// will be able to acquire the lock. If the lockfile already existed
+    /// (i.e. it was present/stopped/poisoned) then return None.
+    pub fn create(
+        &mut self,
+        value: T,
+    ) -> Result<Option<FileRwLockExclusiveGuard<'_, T>>, UnexpectedError> {
+        Ok(self
+            .create_impl(value, State::Present)?
+            .map(|(file, value)| FileRwLockExclusiveGuard {
+                lock: MutDropRef(self),
+                file,
+                value,
+            }))
+    }
+
+    /// Creates a new lockfile on disk. Upon success leaves the lockfile in state
+    /// 'poisoned' and returns a WriteGuard; if we crash then other parties
+    /// will not be able to acquire the lock. If the lockfile already existed
+    /// (i.e. it was present/stopped/poisoned) then return None.
+    pub fn create_poisoned(
+        &mut self,
+        value: T,
+    ) -> Result<Option<FileRwLockWriteGuard<'_, T>>, UnexpectedError> {
+        Ok(self
+            .create_impl(value, State::Poisoned)?
+            .map(|(file, value)| FileRwLockWriteGuard {
+                lock: Some(MutDropRef(self)),
+                file: Some(file),
+                value: Some(value),
+            }))
     }
 
     // Internal helper function used by read/ write...
@@ -262,12 +285,12 @@ impl<T: serde::Serialize + for<'de> serde::Deserialize<'de>> FileRwLock<T> {
         file.read_to_string(&mut content)
             .path_context(&self.path, "read")?;
         match content.bytes().next() {
-            Some(PRESENT) => {
+            Some(b) if b == State::Present as u8 => {
                 let value: T =
                     serde_json::from_str(&content).path_context(&self.path, "json::from_str")?;
                 Ok((file, value))
             }
-            Some(POISONED) => Err(LockError::Poisoned(self.path.clone())),
+            Some(b) if b == State::Poisoned as u8 => Err(LockError::Poisoned(self.path.clone())),
             Some(_) => Err(anyhow::anyhow!("corrupt: {}", content))
                 .path_context(&self.path, "validate")
                 .map_err(LockError::Unexpected),
@@ -284,7 +307,7 @@ impl<T: serde::Serialize + for<'de> serde::Deserialize<'de>> FileRwLock<T> {
         // Over to the SharedGuard, who will be responsible for
         // closing the file-descriptor and hence releasing the lock, upon drop.
         Ok(FileRwLockSharedGuard {
-            lock: self,
+            lock: DropRef(self),
             file,
             value,
         })
@@ -292,31 +315,27 @@ impl<T: serde::Serialize + for<'de> serde::Deserialize<'de>> FileRwLock<T> {
 
     /// Locks this lockfile with exclusive write access, blocking the current thread until it can
     /// can be acquired. The lockfile must be present -- if absent/poisoned/stopped, error.
-    pub fn write(&mut self) -> Result<FileRwLockExclusiveGuard<'_, T>, LockError> {
+    pub fn exclusive(&mut self) -> Result<FileRwLockExclusiveGuard<'_, T>, LockError> {
         // Our sequence point is the moment the lock is acquired
         let (file, value) = self.open_lock_read_validate(true)?;
 
-        // Now we'll poison the file. Prior to this point, if we crashed, then
-        // everyone else would find the lock present and unclaimed, which is fine
-        // since we've not yet returned the ExclusiveGuard to our caller. After this point
-        // though, if we crash, everyone else will find it poisoned.
-        file.write_all_at(&[POISONED], 0)
-            .path_context(&self.path, "write(poison)")?;
-
-        // Over to the ExclusiveGuard, who will be responsible for writing
-        // back a real (non-poisoned) value to it upon drop/close, and also
-        // closing the file-descriptor hence releasing the lock.
+        // Over to the ExclusiveGuard, who will be responsible for closing
+        // the file-descriptor and hence releasing the lock, upon drop.
         Ok(FileRwLockExclusiveGuard {
-            lock: self,
-            file: Some(file),
+            lock: MutDropRef(self),
+            file,
             value,
         })
+    }
+
+    pub fn write(&mut self) -> Result<FileRwLockWriteGuard<'_, T>, LockError> {
+        Ok(self.exclusive()?.write()?)
     }
 
     /// Puts the lockfile into a permanently stopped state. The only way out of this
     /// is to delete the path from disk and start over. This function works fine
     /// regardless of the state - present, absent, stopped, poisoned.
-    pub fn stop(self) -> Result<(), UnexpectedError> {
+    pub fn stop(&mut self) -> Result<(), UnexpectedError> {
         // If the file was initially absent, the stop method still has to mark the lockfile
         // as permanently stopped. We represent permanently-stopped with an empty file.
         // The following "open" will create an empty file if none existed.
@@ -342,14 +361,48 @@ impl<T: serde::Serialize + for<'de> serde::Deserialize<'de>> FileRwLock<T> {
     }
 }
 
-/// This structure is a Deref/DerefMut around 'value', but with the additional
-/// property that upon drop/close then it serializes 'value' into the file
-/// and closes the file (hence releasing all flocks).
+/// This structure is a Deref around 'value', but with the additional property
+/// that upon drop then it closes the file (hence releasing all flocks)
+#[derive(Debug)]
+pub struct FileRwLockSharedGuard<'a, T: serde::Serialize> {
+    /// This lock parameter isn't actually used, but it expresses that the lock
+    /// has a 'borrow' for the duration of the shared lock. This is just a convenience
+    /// so that some detection of "tried to acquire exclusive lock while shared
+    /// lock is held" can be done at compile-time, rather than solely at run-time.
+    #[allow(unused)]
+    lock: DropRef<'a, FileRwLock<T>>,
+    /// Note: members are dropped in order of declaration. Thus, value will be
+    /// dropped before file has been dropped, hence before the shared lock has
+    /// been released. This provides some determinism guarantees should there
+    /// be a destructor for value.
+    value: T,
+    /// This file parameter isn't actually used directly; it's only used because
+    /// when the struct is dropped then the file will be dropped too, and with it
+    /// the OS will drop all locks. If we didn't keep this parameter then the file
+    /// and its locks would be dropped too soon.
+    #[allow(unused)]
+    file: std::fs::File,
+}
+
+impl<T: serde::Serialize> std::ops::Deref for FileRwLockSharedGuard<'_, T> {
+    type Target = T;
+    fn deref(&self) -> &Self::Target {
+        &self.value
+    }
+}
+
+/// This structure is a Deref around 'value' with the additional property
+/// that upon drop then it closes the file (hence releasing all flocks).
+/// Additionally, instead of dropping, you can call write() to obtain FileRwLockWriteGuard.
+/// Invariant: file+value are Some until after write/drop, when they become None.
 #[derive(Debug)]
 pub struct FileRwLockExclusiveGuard<'a, T: serde::Serialize> {
-    lock: &'a FileRwLock<T>,
-    file: Option<std::fs::File>,
+    lock: MutDropRef<'a, FileRwLock<T>>,
+    /// Note: members are dropped in order of declaration. Thus, value will be
+    /// dropped before file has been dropped, hence before the exclusive lock
+    /// has been released. This will provide some determinism for any value destructor.
     value: T,
+    file: std::fs::File,
 }
 
 impl<T: serde::Serialize> std::ops::Deref for FileRwLockExclusiveGuard<'_, T> {
@@ -359,31 +412,73 @@ impl<T: serde::Serialize> std::ops::Deref for FileRwLockExclusiveGuard<'_, T> {
     }
 }
 
-impl<T: serde::Serialize> std::ops::DerefMut for FileRwLockExclusiveGuard<'_, T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.value
+impl<'a, T: serde::Serialize> FileRwLockExclusiveGuard<'a, T> {
+    pub fn write(self) -> Result<FileRwLockWriteGuard<'a, T>, UnexpectedError> {
+        // First we'll poison the file. Prior to this point, if we crashed, then
+        // everyone else would find the lockfile present and unclaimed, which is fine
+        // since we've not yet returned the WriteGuard to our caller. After this point
+        // though, if we crash, everyone else will find it poisoned.
+        self.file
+            .write_all_at(&[State::Poisoned as u8], 0)
+            .path_context(&self.lock.0.path, "write(poison)")?;
+
+        Ok(FileRwLockWriteGuard {
+            lock: Some(self.lock),
+            file: Some(self.file),
+            value: Some(self.value),
+        })
     }
 }
 
-impl<'a, T: serde::Serialize> FileRwLockExclusiveGuard<'a, T> {
-    fn close_impl(&mut self) -> Result<(), UnexpectedError> {
-        let file = match self.file.take() {
-            None => return Ok(()),
-            Some(file) => file,
-        };
+/// This structure is a Deref+DerefMut around 'value' with the additional property
+/// that upon drop/close then writes the value to disk and closes the file
+/// (hence releasing all flocks). You can also call commit() which writes
+/// the value to disk but retains an ExclusiveGuard.
+/// Invariant: fields are Some until after close/commit/drop, when they become None.
+#[derive(Debug)]
+pub struct FileRwLockWriteGuard<'a, T: serde::Serialize> {
+    lock: Option<MutDropRef<'a, FileRwLock<T>>>,
+    /// Note: members are dropped in order of declaration. Thus, value will be
+    /// dropped before file has been dropped, hence before the exclusive lock
+    /// has been released. This will provide some determinism for any value destructor.
+    value: Option<T>,
+    file: Option<std::fs::File>,
+}
 
-        // Our caller might have called deref_mut and mutated self.value.
-        // Now, upon close, is the moment when we'll write back that modified value.
-        // (until now the file had merely been marked as poisoned).
-        // We might imagine alternative models, e.g. (1) we only add the poison
-        // marker upon the first call to deref_mut although that's hard because
-        // deref_mut isn't supposed to have errors, (2) we optimize to avoid the
-        // writeback if deref_mut never got called, (3) we allow the caller
-        // to write into the file while they hold the lock rather than waiting
-        // until the end, for debugging purposes. But until we find a clear
-        // need for such models, we'll stick with the current simple approach.
-        let json = serde_json::to_string_pretty(&self.value)
-            .path_context(&self.lock.path, "json::to_string")?;
+impl<T: serde::Serialize> std::ops::Deref for FileRwLockWriteGuard<'_, T> {
+    type Target = T;
+    fn deref(&self) -> &Self::Target {
+        self.value.as_ref().unwrap()
+    }
+}
+
+impl<T: serde::Serialize> std::ops::DerefMut for FileRwLockWriteGuard<'_, T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.value.as_mut().unwrap()
+    }
+}
+
+impl<'a, T: serde::Serialize> FileRwLockWriteGuard<'a, T> {
+    pub fn commit(mut self) -> Result<FileRwLockExclusiveGuard<'a, T>, UnexpectedError> {
+        let lock = self.lock.take().unwrap();
+        let file = self.file.take().unwrap();
+        let value = self.value.take().unwrap();
+        self.commit_impl(&lock.0.path, &file, &value)?;
+        Ok(FileRwLockExclusiveGuard { lock, file, value })
+    }
+
+    pub fn close(mut self) -> Result<(), UnexpectedError> {
+        self.close_impl()
+    }
+
+    fn commit_impl(
+        &self,
+        path: &Path,
+        file: &std::fs::File,
+        value: &T,
+    ) -> Result<(), UnexpectedError> {
+        let json =
+            serde_json::to_string_pretty(value).path_context(path, "json::to_string_pretty")?;
 
         // We must be sure upon crash we won't leave the file either
         // empty or with partially written content but no poison marker. So: we'll write
@@ -391,54 +486,35 @@ impl<'a, T: serde::Serialize> FileRwLockExclusiveGuard<'a, T> {
         // has shrunk, and only after that is finished will we remove the poison pill at
         // byte offset 0.
         file.write_all_at(json.as_bytes(), 1)
-            .path_context(&self.lock.path, "write(value@1)")?;
+            .path_context(path, "write(value@1)")?;
         // do the truncate here, after writing json, so as to minimize how much we
         // jiggle the file's size.
         file.set_len(1 + json.as_bytes().len() as u64)
-            .path_context(&self.lock.path, "trunc")?;
-        file.write_all_at(&[PRESENT], 0)
-            .path_context(&self.lock.path, "write(value@0)")?;
-
-        // As for the job of closing file-descriptors in self.file?
-        // Well, we can leave that to the normal drop machinery,
-        // which happens right here and now!
+            .path_context(path, "trunc")?;
+        file.write_all_at(&[State::Present as u8], 0)
+            .path_context(path, "write(value@0)")?;
         Ok(())
     }
 
-    pub fn close(mut self) -> Result<(), UnexpectedError> {
-        self.close_impl()
+    fn close_impl(&mut self) -> Result<(), UnexpectedError> {
+        let (lock, file, value) = match (self.lock.take(), self.file.take(), self.value.take()) {
+            (None, None, None) => return Ok(()),
+            (Some(lock), Some(file), Some(value)) => (lock, file, value),
+            _ => panic!("lock, file, value should be Some/None at the same time"),
+        };
+        // This path arises when a user calls write_lock.close(),
+        // or when a user drops us without first having called close().
+        // First we commit the changes and unpoison the file contents
+        self.commit_impl(&lock.0.path, &file, &value)?;
+        // Now the ordinary Rust machinery will drop file, hence
+        // closing the FD and releasing flocks.
+        Ok(())
     }
 }
 
-impl<T: serde::Serialize> Drop for FileRwLockExclusiveGuard<'_, T> {
+impl<T: serde::Serialize> Drop for FileRwLockWriteGuard<'_, T> {
     fn drop(&mut self) {
         let _ = self.close_impl();
-    }
-}
-
-/// This structure is a Deref around 'value', but with the additional property
-/// that upon drop/close then it closes the file (hence releasing all flocks)
-#[derive(Debug)]
-pub struct FileRwLockSharedGuard<'a, T: serde::Serialize> {
-    /// This lock parameter isn't actually used, but it expresses that the lock
-    /// has a 'borrow' for the duration of the shared lock. This is just a convenience
-    /// so that some detection of "tried to acquire exclusive lock while shared
-    /// lock is held" can be done at compile-time, rather than solely at run-time.
-    #[allow(unused)]
-    lock: &'a FileRwLock<T>,
-    /// This file parameter isn't actually used directly; it's only used because
-    /// when the struct is dropped then the file will be dropped too, and with it
-    /// the OS will drop all locks. If we didn't keep this parameter then the file
-    /// and its locks would be dropped too soon.
-    #[allow(unused)]
-    file: std::fs::File,
-    value: T,
-}
-
-impl<T: serde::Serialize> std::ops::Deref for FileRwLockSharedGuard<'_, T> {
-    type Target = T;
-    fn deref(&self) -> &Self::Target {
-        &self.value
     }
 }
 
@@ -472,6 +548,41 @@ impl<T, E: Into<anyhow::Error>> UnexpectedContext<T> for Result<T, E> {
     }
 }
 
+/// This struct solely provides an empty Drop method. Because of this, the lifetime 'a
+/// of DropRef<'a, S> lasts until it it has been dropped -- by contrast, the lifetime
+/// of &'a S (without a Drop) ends earlier than the drop.
+/// https://doc.rust-lang.org/nomicon/lifetimes.html#the-area-covered-by-a-lifetime
+/// "[A borrow] is alive from the place it is created to its last use... if the value
+/// has a destructor, the destructor is run at the end of the scope. And running
+/// the destructor is considered a use."
+/// Here's a practical motivation. This code would deadlock, since it tries to acquire
+/// an exclusive flock on the file even while a shared lock is still being held. Without
+/// DropRef, the borrow checker would say that guard1 is only used at the read() call,
+/// and hence its lifetime doesn't conflict with the exclusive() call. With DropRef,
+/// the borrow checker will say that guard1 is (implicitly) used at the end of the block,
+/// and hence its lifetime does conflcit, and hence the code is disallowed.
+/// {
+///   let lock = FileRwLock::new(...)
+///   let guard1 = lock.read()?;
+///   let guard2 = lock.exclusive()?;
+/// }
+#[derive(Debug)]
+struct DropRef<'a, S>(&'a S);
+
+impl<'a, S> Drop for DropRef<'a, S> {
+    fn drop(&mut self) {}
+}
+
+/// This struct solely provides an empty Drop method, to influence lifetime analysis
+/// (which is sensitive to the presence or absence of Drop implementations). Please
+/// read the docs for DropRef which explain in greater length.
+#[derive(Debug)]
+struct MutDropRef<'a, S>(&'a mut S);
+
+impl<'a, S> Drop for MutDropRef<'a, S> {
+    fn drop(&mut self) {}
+}
+
 #[cfg(test)]
 mod tests {
     use std::assert_matches::assert_matches;
@@ -485,7 +596,7 @@ mod tests {
         // with an integer
         let path = tmpdir.path().join("lock1");
         let mut lock = FileRwLock::new(path.clone());
-        let mut guard = lock.create(15)?.expect("no create conflicts");
+        let mut guard = lock.create(15)?.expect("no create conflicts").write()?;
         assert_eq!(*guard, 15);
         assert_eq!(std::fs::read_to_string(&path)?, "@15");
         *guard = 12;
@@ -500,14 +611,17 @@ mod tests {
         // with unit, to check that our "poison" byte is ok
         let path = tmpdir.path().join("lock2");
         let mut lock = FileRwLock::new(path.clone());
-        let guard = lock.create(())?.expect("no create conflicts");
+        let guard = lock.create(())?.expect("no create conflicts").write()?;
         assert_eq!(std::fs::read_to_string(&path)?, "@null");
         guard.close()?;
 
         // with a string, to check that it looks right with our poison byte
         let path = tmpdir.path().join("lock3");
         let mut lock = FileRwLock::new(path.clone());
-        let guard = lock.create("!".to_owned())?.expect("no create conflicts");
+        let guard = lock
+            .create("!".to_owned())?
+            .expect("no create conflicts")
+            .write()?;
         assert_eq!(*guard, "!");
         assert_eq!(std::fs::read_to_string(&path)?, "@\"!\"");
         guard.close()?;
@@ -522,7 +636,7 @@ mod tests {
         // can't create if created
         let path = tmpdir.path().join("lock1");
         let mut lock = FileRwLock::new(path.clone());
-        let guard = lock.create(16)?.expect("no create conflicts");
+        let guard = lock.create(16)?.expect("no create conflicts").write()?;
         guard.close()?;
         assert!(lock.create(16)?.is_none());
 
@@ -551,7 +665,7 @@ mod tests {
 
         // can't lock if it's stopped
         let path = tmpdir.path().join("lock2");
-        let lock = FileRwLock::<i32>::new(path.clone());
+        let mut lock = FileRwLock::<i32>::new(path.clone());
         lock.stop()?;
         let mut lock = FileRwLock::<i32>::new(path);
         assert_matches!(lock.write(), Err(LockError::Stopped(_)));
@@ -570,7 +684,7 @@ mod tests {
         let tmpdir = tempfile::tempdir()?;
         let path = tmpdir.path().join("lock");
         let mut lock = FileRwLock::new(path.clone());
-        let mut guard = lock.create(15)?.expect("no create conflict");
+        let mut guard = lock.create(15)?.expect("no create conflict").write()?;
 
         let path2 = path;
         let thread = std::thread::spawn(move || -> anyhow::Result<_> {

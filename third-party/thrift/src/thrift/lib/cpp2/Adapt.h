@@ -492,6 +492,24 @@ uint32_t serializedSize(Protocol& prot, const AdaptedT& val, FallbackF f) {
       FallbackF>()(prot, val, f);
 }
 
+namespace bound {
+template <typename T>
+struct Always {
+  template <typename...>
+  using apply = T;
+};
+template <template <typename...> class T, typename... Bound>
+struct Bind {
+  template <typename... Args>
+  using apply = T<Bound..., Args...>;
+};
+template <template <typename...> class T, typename... Bound>
+struct BindBack {
+  template <typename... Args>
+  using apply = T<Args..., Bound...>;
+};
+} // namespace bound
+
 } // namespace adapt_detail
 
 template <typename AdaptedT>
@@ -526,18 +544,32 @@ struct StaticCastAdapter {
   }
 };
 
-// An adapter for types that know how to adapt themselves.
-template <typename T>
-struct InlineAdapter {
+struct BaseInlineAdapter {
   template <typename U>
-  static decltype(auto) toThrift(U&& obj) {
-    return std::forward<U>(obj).toThrift();
-  }
-  template <typename U>
-  static T fromThrift(U&& val) {
-    return T{std::forward<U>(val)};
+  static decltype(auto) toThrift(U&& value) {
+    return std::forward<U>(value).toThrift();
   }
 };
+
+// A adapters for types that know how to adapt themselves.
+template <typename F>
+struct BoundInlineAdapter : BaseInlineAdapter {
+  template <
+      typename U,
+      typename T = typename F::template apply<folly::remove_cvref_t<U>>>
+  static T fromThrift(U&& value) {
+    return T{std::forward<U>(value)};
+  }
+};
+
+template <typename T>
+using InlineAdapter = BoundInlineAdapter<adapt_detail::bound::Always<T>>;
+template <template <typename...> class T, typename... Args>
+using TemplateInlineAdapter =
+    BoundInlineAdapter<adapt_detail::bound::Bind<T, Args...>>;
+template <template <typename...> class T, typename... Args>
+using BackTemplateInlineAdapter =
+    BoundInlineAdapter<adapt_detail::bound::BindBack<T, Args...>>;
 
 } // namespace thrift
 } // namespace apache

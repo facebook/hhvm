@@ -20,6 +20,7 @@
 #include <type_traits>
 #include <utility>
 
+#include <thrift/lib/cpp2/Adapt.h>
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
 #include <thrift/lib/cpp2/op/detail/ContainerPatch.h>
 #include <thrift/lib/cpp2/op/detail/StructPatch.h>
@@ -30,35 +31,22 @@ namespace thrift {
 namespace op {
 namespace detail {
 
-template <template <typename> class PatchType>
-struct PatchAdapter {
-  template <typename Patch>
-  static decltype(auto) toThrift(Patch&& value) {
-    return std::forward<Patch>(value).toThrift();
-  }
-
-  template <typename Patch>
-  static PatchType<Patch> fromThrift(Patch&& value) {
-    return PatchType<Patch>{std::forward<Patch>(value)};
-  }
-};
-
 // Adapter for all base types.
-using AssignPatchAdapter = PatchAdapter<AssignPatch>;
-using BoolPatchAdapter = PatchAdapter<BoolPatch>;
-using NumberPatchAdapter = PatchAdapter<NumberPatch>;
-using StringPatchAdapter = PatchAdapter<StringPatch>;
-using BinaryPatchAdapter = PatchAdapter<BinaryPatch>;
+using AssignPatchAdapter = TemplateInlineAdapter<AssignPatch>;
+using BoolPatchAdapter = TemplateInlineAdapter<BoolPatch>;
+using NumberPatchAdapter = TemplateInlineAdapter<NumberPatch>;
+using StringPatchAdapter = TemplateInlineAdapter<StringPatch>;
+using BinaryPatchAdapter = TemplateInlineAdapter<BinaryPatch>;
 
 // Adapters for structred types.
-using FieldPatchAdapter = PatchAdapter<FieldPatch>;
-using StructPatchAdapter = PatchAdapter<StructPatch>;
-using UnionPatchAdapter = PatchAdapter<UnionPatch>;
+using FieldPatchAdapter = TemplateInlineAdapter<FieldPatch>;
+using StructPatchAdapter = TemplateInlineAdapter<StructPatch>;
+using UnionPatchAdapter = TemplateInlineAdapter<UnionPatch>;
 
 // Adapters for containers.
-using ListPatchAdapter = PatchAdapter<ListPatch>;
-using SetPatchAdapter = PatchAdapter<SetPatch>;
-using MapPatchAdapter = PatchAdapter<MapPatch>;
+using ListPatchAdapter = TemplateInlineAdapter<ListPatch>;
+using SetPatchAdapter = TemplateInlineAdapter<SetPatch>;
+using MapPatchAdapter = TemplateInlineAdapter<MapPatch>;
 
 } // namespace detail
 } // namespace op

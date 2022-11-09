@@ -29,6 +29,7 @@
 #include <thrift/compiler/lib/schematizer.h>
 
 #include <thrift/lib/cpp/util/VarintUtils.h>
+#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
@@ -43,6 +44,7 @@ namespace {
 enum class ast_protocol {
   json,
   debug,
+  compact,
 };
 
 template <typename Writer, typename T>
@@ -73,14 +75,15 @@ class t_ast_generator : public t_generator {
   void process_options(
       const std::map<std::string, std::string>& options) override {
     out_dir_base_ = "gen-ast";
-    protocol_ = ast_protocol::debug;
+    protocol_ = ast_protocol::json;
     for (auto& pair : options) {
       if (pair.first == "protocol") {
-        if (pair.second == "debug") {
-          protocol_ = ast_protocol::debug;
-        } else if (pair.second == "json") {
+        if (pair.second == "json") {
           protocol_ = ast_protocol::json;
-          throw std::runtime_error("TODO");
+        } else if (pair.second == "debug") {
+          protocol_ = ast_protocol::debug;
+        } else if (pair.second == "compact") {
+          protocol_ = ast_protocol::compact;
         } else {
           throw std::runtime_error(
               fmt::format("Unknown protocol `{}`", pair.second));
@@ -184,15 +187,25 @@ void t_ast_generator::generate_program() {
     defs.push_back(definition_index.at(&def));
   }
 
-  f_out_ << serialize<DebugProtocolWriter>(ast);
-  // TODO: JSON
+  switch (protocol_) {
+    case ast_protocol::json:
+      // TODO: use new json serializer when available.
+      f_out_ << serialize<SimpleJSONProtocolWriter>(ast);
+      break;
+    case ast_protocol::debug:
+      f_out_ << serialize<DebugProtocolWriter>(ast);
+      break;
+    case ast_protocol::compact:
+      f_out_ << serialize<CompactProtocolWriter>(ast);
+      break;
+  }
   f_out_.close();
 }
 
 THRIFT_REGISTER_GENERATOR(
     ast,
     "AST",
-    "    protocol:        Which of [json|debug] protocols to use for serialization.\n");
+    "    protocol:        Which of [json|debug|compact] protocols to use for serialization.\n");
 
 } // namespace compiler
 } // namespace thrift

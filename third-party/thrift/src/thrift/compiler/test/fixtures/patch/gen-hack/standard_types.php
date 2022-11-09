@@ -45,7 +45,7 @@ class apache_thrift_type_standard_Void_TEnumStaticMetadata implements \IThriftEn
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/JsonType'))>>
 enum apache_thrift_type_standard_JsonType: int {
   Null = 0;
-  Bool = 1;
+  Boolean = 1;
   Number = 2;
   String = 4;
   Array = 5;
@@ -59,7 +59,7 @@ class apache_thrift_type_standard_JsonType_TEnumStaticMetadata implements \IThri
         "name" => "standard.JsonType",
         "elements" => dict[
           0 => "Null",
-          1 => "Bool",
+          1 => "Boolean",
           2 => "Number",
           4 => "String",
           5 => "Array",
@@ -1470,6 +1470,16 @@ class apache_thrift_type_standard_JsonValue implements \IThriftSyncStruct, \IThr
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::type::detail::JsonAdapter<::apache::thrift::type::JsonType>",
+            "adaptedType" => "::apache::thrift::type::detail::Json<::apache::thrift::type::JsonType, ::apache::thrift::type::detail::JsonValue>",
+          )
+        ),
+        '\thrift\annotation\cpp\UseOpEncode' => \thrift\annotation\cpp\UseOpEncode::fromShape(
+          shape(
+          )
+        ),
         '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
           shape(
           )

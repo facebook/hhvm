@@ -16,8 +16,9 @@ import sys
 if sys.version_info[0] >= 3:
   long = int
 
-import thrift.annotation.thrift.ttypes
+import thrift.annotation.cpp.ttypes
 import thrift.annotation.java.ttypes
+import thrift.annotation.thrift.ttypes
 
 
 import pprint
@@ -53,7 +54,7 @@ class JsonType:
   The types availible in JSON, as defined by https://www.json.org.
   """
   Null = 0
-  Bool = 1
+  Boolean = 1
   Number = 2
   String = 4
   Array = 5
@@ -61,7 +62,7 @@ class JsonType:
 
   _VALUES_TO_NAMES = {
     0: "Null",
-    1: "Bool",
+    1: "Boolean",
     2: "Number",
     4: "String",
     5: "Array",
@@ -70,7 +71,7 @@ class JsonType:
 
   _NAMES_TO_VALUES = {
     "Null": 0,
-    "Bool": 1,
+    "Boolean": 1,
     "Number": 2,
     "String": 4,
     "Array": 5,

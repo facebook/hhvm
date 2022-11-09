@@ -10,8 +10,9 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	thrift0 "thrift/annotation/thrift"
+	cpp0 "thrift/annotation/cpp"
 	java1 "thrift/annotation/java"
+	thrift2 "thrift/annotation/thrift"
 
 )
 
@@ -22,8 +23,9 @@ var _ = sync.Mutex{}
 var _ = bytes.Equal
 var _ = context.Background
 
-var _ = thrift0.GoUnusedProtection__
+var _ = cpp0.GoUnusedProtection__
 var _ = java1.GoUnusedProtection__
+var _ = thrift2.GoUnusedProtection__
 var GoUnusedProtection__ int;
 
 type Void int64
@@ -67,7 +69,7 @@ func VoidPtr(v Void) *Void { return &v }
 type JsonType int64
 const (
   JsonType_Null JsonType = 0
-  JsonType_Bool JsonType = 1
+  JsonType_Boolean JsonType = 1
   JsonType_Number JsonType = 2
   JsonType_String JsonType = 4
   JsonType_Array JsonType = 5
@@ -76,7 +78,7 @@ const (
 
 var JsonTypeToName = map[JsonType]string {
   JsonType_Null: "Null",
-  JsonType_Bool: "Bool",
+  JsonType_Boolean: "Boolean",
   JsonType_Number: "Number",
   JsonType_String: "String",
   JsonType_Array: "Array",
@@ -85,7 +87,7 @@ var JsonTypeToName = map[JsonType]string {
 
 var JsonTypeToValue = map[string]JsonType {
   "Null": JsonType_Null,
-  "Bool": JsonType_Bool,
+  "Boolean": JsonType_Boolean,
   "Number": JsonType_Number,
   "String": JsonType_String,
   "Array": JsonType_Array,
@@ -94,7 +96,7 @@ var JsonTypeToValue = map[string]JsonType {
 
 var JsonTypeNames = []string {
   "Null",
-  "Bool",
+  "Boolean",
   "Number",
   "String",
   "Array",
@@ -103,7 +105,7 @@ var JsonTypeNames = []string {
 
 var JsonTypeValues = []JsonType {
   JsonType_Null,
-  JsonType_Bool,
+  JsonType_Boolean,
   JsonType_Number,
   JsonType_String,
   JsonType_Array,
@@ -973,13 +975,13 @@ func (p *UriStruct)  ReadField2(iprot thrift.Protocol) error {
   tSlice := make(DomainLabels, 0, size)
   p.Domain =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem2 string
+    var _elem3 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem2 = v
+      _elem3 = v
     }
-    p.Domain = append(p.Domain, _elem2)
+    p.Domain = append(p.Domain, _elem3)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -995,13 +997,13 @@ func (p *UriStruct)  ReadField4(iprot thrift.Protocol) error {
   tSlice := make(PathSegments, 0, size)
   p.Path =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem3 string
+    var _elem4 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem3 = v
+      _elem4 = v
     }
-    p.Path = append(p.Path, _elem3)
+    p.Path = append(p.Path, _elem4)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -1017,19 +1019,19 @@ func (p *UriStruct)  ReadField5(iprot thrift.Protocol) error {
   tMap := make(QueryArgs_, size)
   p.Query =  tMap
   for i := 0; i < size; i ++ {
-    var _key4 string
+    var _key5 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _key4 = v
+      _key5 = v
     }
-    var _val5 string
+    var _val6 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _val5 = v
+      _val6 = v
     }
-    p.Query[_key4] = _val5
+    p.Query[_key5] = _val6
   }
   if err := iprot.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)
@@ -1454,11 +1456,11 @@ func (p *JsonValue)  ReadField5(iprot thrift.Protocol) error {
   tSlice := make([]*JsonValue, 0, size)
   p.ArrayValue =  tSlice
   for i := 0; i < size; i ++ {
-    _elem6 := NewJsonValue()
-    if err := _elem6.Read(iprot); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem6), err)
+    _elem7 := NewJsonValue()
+    if err := _elem7.Read(iprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem7), err)
     }
-    p.ArrayValue = append(p.ArrayValue, _elem6)
+    p.ArrayValue = append(p.ArrayValue, _elem7)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -1474,17 +1476,17 @@ func (p *JsonValue)  ReadField6(iprot thrift.Protocol) error {
   tMap := make(map[string]*JsonValue, size)
   p.ObjectValue =  tMap
   for i := 0; i < size; i ++ {
-    var _key7 string
+    var _key8 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _key7 = v
+      _key8 = v
     }
-    _val8 := NewJsonValue()
-    if err := _val8.Read(iprot); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _val8), err)
+    _val9 := NewJsonValue()
+    if err := _val9.Read(iprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _val9), err)
     }
-    p.ObjectValue[_key7] = _val8
+    p.ObjectValue[_key8] = _val9
   }
   if err := iprot.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)

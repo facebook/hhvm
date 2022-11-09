@@ -53,6 +53,8 @@ import sys
 from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
+cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
+import facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
 cimport facebook.thrift.annotation.java.types as _facebook_thrift_annotation_java_types
 import facebook.thrift.annotation.java.types as _facebook_thrift_annotation_java_types
 cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types

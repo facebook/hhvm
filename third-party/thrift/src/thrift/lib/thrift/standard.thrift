@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-include "thrift/annotation/thrift.thrift"
+include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/java.thrift"
+include "thrift/annotation/thrift.thrift"
 
 cpp_include "<folly/io/IOBuf.h>"
 cpp_include "<folly/FBString.h>"
+cpp_include "thrift/lib/cpp2/type/detail/Json.h"
 
 /** The **standard** types all Thrift implementations support. */
 @thrift.v1alpha
@@ -251,7 +253,7 @@ typedef JsonValue Json
 /** The types availible in JSON, as defined by https://www.json.org. */
 enum JsonType {
   Null = 0,
-  Bool = 1,
+  Boolean = 1,
   Number = 2,
   String = 4,
   Array = 5,
@@ -269,6 +271,11 @@ enum JsonType {
  *
  * @see JsonString For the encoded version.
  */
+@cpp.Adapter{
+  name = "::apache::thrift::type::detail::JsonAdapter<::apache::thrift::type::JsonType>",
+  adaptedType = "::apache::thrift::type::detail::Json<::apache::thrift::type::JsonType, ::apache::thrift::type::detail::JsonValue>",
+}
+@cpp.UseOpEncode
 @thrift.Experimental // TODO(afuller): Adapt!
 union JsonValue {
   /** JSON "true" and "false" values represented as a boolean value. */

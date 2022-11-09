@@ -176,6 +176,24 @@ class CompareWrap : public EqWrap<Derived, T, Tag> {
   }
 };
 
+// Const and && preserving accessor definitions that forward from Wrap::data_.
+#define FBTHRIFT_WRAP_CDATA_FIELD(name, field)           \
+  decltype(auto) name() const& { return data_.field(); } \
+  decltype(auto) name() const&& { return std::move(data_).field(); }
+#define FBTHRIFT_WRAP_DATA_FIELD(name, field)                  \
+  decltype(auto) name()& { return data_.field(); }             \
+  decltype(auto) name()&& { return std::move(data_).field(); } \
+  FBTHRIFT_WRAP_CDATA_FIELD(name, field)
+
+// Dereferences the field before returning.
+#define FBTHRIFT_WRAP_CDATA_VALUE(name, field)            \
+  decltype(auto) name() const& { return *data_.field(); } \
+  decltype(auto) name() const&& { return std::move(*data_.field()); }
+#define FBTHRIFT_WRAP_DATA_VALUE(name, field)                   \
+  decltype(auto) name()& { return *data_.field(); }             \
+  decltype(auto) name()&& { return std::move(*data_.field()); } \
+  FBTHRIFT_WRAP_CDATA_VALUE(name, field)
+
 // The custom specialization of std::hash injected into the std namespace.
 #define FBTHRIFT_STD_HASH_WRAP_DATA(fullType)                        \
   namespace std {                                                    \

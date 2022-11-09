@@ -12,7 +12,7 @@ import java.util.HashMap;
 @SuppressWarnings({ "unused" })
 public enum JsonType implements com.facebook.thrift.TEnum {
   Null(0),
-  Bool(1),
+  Boolean(1),
   Number(2),
   String(4),
   Array(5),
@@ -40,7 +40,7 @@ public enum JsonType implements com.facebook.thrift.TEnum {
       case 0:
         return Null;
       case 1:
-        return Bool;
+        return Boolean;
       case 2:
         return Number;
       case 4:

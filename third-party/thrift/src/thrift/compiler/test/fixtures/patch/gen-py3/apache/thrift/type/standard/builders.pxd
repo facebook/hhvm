@@ -10,6 +10,8 @@ cimport folly.iobuf as _fbthrift_iobuf
 
 cimport thrift.py3.builder
 
+cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
+cimport facebook.thrift.annotation.cpp.builders as _facebook_thrift_annotation_cpp_builders
 cimport facebook.thrift.annotation.java.types as _facebook_thrift_annotation_java_types
 cimport facebook.thrift.annotation.java.builders as _facebook_thrift_annotation_java_builders
 cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types

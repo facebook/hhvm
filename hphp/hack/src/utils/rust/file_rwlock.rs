@@ -140,20 +140,21 @@ impl<T: serde::Serialize + for<'de> serde::Deserialize<'de>> FileRwLock<T> {
         // Because we're using link, we need to create the temp file on the same device.
         // open(O_TMPFILE) takes a directory argument for this reason, to know which device
         // to create on, and it's normal to use the desired containing directory.
-        use std::os::unix::ffi::OsStrExt;
-        let c_parent = std::ffi::CString::new(match self.path.parent() {
-            None => &b"/"[..],
-            Some(parent) => parent.as_os_str().as_bytes(),
-        })
-        .path_context(&self.path, "cparent")?;
+        let root = PathBuf::from("/");
+        let parent = self.path.parent().unwrap_or(&root);
 
-        // Create and lock the file. This uses O_TMPFILE which isn't supported everywhere.
-        let fd = unsafe { libc::open(c_parent.as_ptr(), libc::O_TMPFILE | libc::O_RDWR, 0o666) };
-        if fd < 0 {
-            return Err(std::io::Error::last_os_error()).path_context(&self.path, "open(O_TMPFILE");
-        }
-        use std::os::unix::io::FromRawFd;
-        let mut file = unsafe { std::fs::File::from_raw_fd(fd) };
+        // Create and lock the file.
+        // On linux, the tempfile crate uses O_TMPFILE for a guaranteed non-leaking FD and
+        // we can later do an atomic linkat("/proc/self/fd/{fd}").
+        // On other platforms, we fall back to NamedTempFile::persist_no_clobber which
+        // might leak the temp file if we crash.
+        #[cfg(target_os = "linux")]
+        let mut file = tempfile::tempfile_in(parent).path_context(&self.path, "open(O_TMPFILE)")?;
+        #[cfg(not(target_os = "linux"))]
+        let mut nfile =
+            tempfile::NamedTempFile::new_in(parent).path_context(&self.path, "open(O_TMPFILE)")?;
+        #[cfg(not(target_os = "linux"))]
+        let file = nfile.as_file_mut();
         use fs2::FileExt;
         file.lock_exclusive()
             .path_context(&self.path, "flock(LOCK_EX)")?;
@@ -170,36 +171,52 @@ impl<T: serde::Serialize + for<'de> serde::Deserialize<'de>> FileRwLock<T> {
 
         // Link the locked+initialized file into the desired location.
         // Our sequence point is the moment we link.
-        let c_path = std::ffi::CString::new(self.path.as_os_str().as_bytes())
-            .path_context(&self.path, "cpath")?;
-        let c_proc_fd = std::ffi::CString::new(format!("/proc/self/fd/{fd}")).unwrap();
         #[cfg(not(target_os = "linux"))]
-        compile_error!("This uses /proc/self/fd, which is linux-only");
-        let ret = unsafe {
-            libc::linkat(
-                libc::AT_FDCWD,
-                c_proc_fd.as_ptr(),
-                libc::AT_FDCWD,
-                c_path.as_ptr(),
-                libc::AT_SYMLINK_FOLLOW,
-            )
-        };
-        if ret >= 0 {
-            // Over to the ExclusiveGuard, who will be responsible for writing
-            // back a real (non-poisoned) value to it upon drop/close.
-            Ok(Some(FileRwLockExclusiveGuard {
-                lock: self,
-                file: Some(file),
-                value,
-            }))
-        } else {
-            let e = std::io::Error::last_os_error();
-            if e.kind() == std::io::ErrorKind::AlreadyExists {
-                // Either it already existed prior to this 'create' even started,
-                // or a concurrent 'create' raced with us and won.
-                Ok(None)
+        {
+            match nfile.persist_noclobber(&self.path) {
+                Ok(file) => Ok(Some(FileRwLockExclusiveGuard {
+                    lock: self,
+                    file: Some(file),
+                    value,
+                })),
+                Err(e) if e.error.kind() == std::io::ErrorKind::AlreadyExists => Ok(None),
+                Err(e) => Err(e).path_context(&self.path, "linkat"),
+            }
+        }
+        #[cfg(target_os = "linux")]
+        {
+            use std::os::unix::io::AsRawFd;
+            let fd = file.as_raw_fd();
+            use std::os::unix::ffi::OsStrExt;
+            let c_path = std::ffi::CString::new(self.path.as_os_str().as_bytes())
+                .path_context(&self.path, "cpath")?;
+            let c_proc_fd = std::ffi::CString::new(format!("/proc/self/fd/{fd}")).unwrap();
+            let ret = unsafe {
+                libc::linkat(
+                    libc::AT_FDCWD,
+                    c_proc_fd.as_ptr(),
+                    libc::AT_FDCWD,
+                    c_path.as_ptr(),
+                    libc::AT_SYMLINK_FOLLOW,
+                )
+            };
+            if ret >= 0 {
+                // Over to the ExclusiveGuard, who will be responsible for writing
+                // back a real (non-poisoned) value to it upon drop/close.
+                Ok(Some(FileRwLockExclusiveGuard {
+                    lock: self,
+                    file: Some(file),
+                    value,
+                }))
             } else {
-                Err(e).path_context(&self.path, "linkat")
+                let e = std::io::Error::last_os_error();
+                if e.kind() == std::io::ErrorKind::AlreadyExists {
+                    // Either it already existed prior to this 'create' even started,
+                    // or a concurrent 'create' raced with us and won.
+                    Ok(None)
+                } else {
+                    Err(e).path_context(&self.path, "linkat")
+                }
             }
         }
     }

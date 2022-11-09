@@ -739,7 +739,7 @@ static ClientHello constructEncryptedClientHello(
   Extension encodedECHExtension;
   // Create the encrypted client hello inner extension.
   switch (supportedConfig.config.version) {
-    case (ech::ECHVersion::Draft13): {
+    case (ech::ECHVersion::Draft15): {
       ech::OuterECHClientHello clientECHExtension;
       if (e == Event::ClientHello) {
         clientECHExtension = encryptClientHello(
@@ -848,7 +848,7 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
 
   if (echParams.has_value() &&
       echParams.value().supportedECHConfig.config.version ==
-          ech::ECHVersion::Draft13) {
+          ech::ECHVersion::Draft15) {
     ech::InnerECHClientHello chloIsInnerExt;
     chlo.extensions.push_back(encodeExtension(std::move(chloIsInnerExt)));
     requestedExtensions.push_back(ExtensionType::encrypted_client_hello);
@@ -1507,7 +1507,7 @@ Actions EventHandler<
   // ECH extension required.
   if (state.echState().has_value() &&
       state.echState()->supportedConfig.config.version ==
-          ech::ECHVersion::Draft13) {
+          ech::ECHVersion::Draft15) {
     ech::InnerECHClientHello chloIsInnerExt;
     encodedInnerECHExt = encodeExtension(std::move(chloIsInnerExt));
     requestedExtensions.push_back(ExtensionType::encrypted_client_hello);

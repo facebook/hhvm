@@ -205,8 +205,8 @@ folly::Optional<std::vector<ech::ECHConfig>> parseECHConfigs(
     std::string version = config["version"].asString();
 
     ech::ECHVersion echVersion;
-    if (version == "Draft13") {
-      echVersion = ech::ECHVersion::Draft13;
+    if (version == "Draft15") {
+      echVersion = ech::ECHVersion::Draft15;
     } else {
       continue;
     }
@@ -286,7 +286,7 @@ std::vector<ech::ECHConfig> getDefaultECHConfigs() {
 
   // Construct an ECH config to pass in to the client.
   ech::ECHConfig echConfig;
-  echConfig.version = ech::ECHVersion::Draft13;
+  echConfig.version = ech::ECHVersion::Draft15;
   echConfig.ech_config_content = encode(std::move(echConfigContent));
   auto configs = std::vector<ech::ECHConfig>();
   configs.push_back(std::move(echConfig));

@@ -32,7 +32,7 @@ folly::Optional<DecrypterLookupResult> decodeAndGetParam(
   folly::io::Cursor cursor(encodedECHExtension.extension_data.get());
   for (const auto& param : decrypterParams) {
     switch (param.echConfig.version) {
-      case ECHVersion::Draft13: {
+      case ECHVersion::Draft15: {
         auto echExtension = getExtension<ech::OuterECHClientHello>(cursor);
         auto& echConfig = param.echConfig;
         auto currentConfigDraft = decode<ECHConfigContentDraft>(
@@ -75,7 +75,7 @@ folly::Optional<DecrypterResult> tryToDecodeECH(
         configIdResult->echExtension.enc->clone(),
         configIdResult->echExtension.config_id,
         configIdResult->echExtension.payload->clone(),
-        ECHVersion::Draft13,
+        ECHVersion::Draft15,
         context);
     return DecrypterResult{
         std::move(chlo),
@@ -117,7 +117,7 @@ ClientHello decodeClientHelloHRR(
           configIdResult->echExtension.enc->clone(),
           configIdResult->echExtension.config_id,
           configIdResult->echExtension.payload->clone(),
-          ECHVersion::Draft13,
+          ECHVersion::Draft15,
           context);
     } else {
       auto recreatedContext = setupDecryptionContext(
@@ -133,7 +133,7 @@ ClientHello decodeClientHelloHRR(
           configIdResult->echExtension.enc->clone(),
           configIdResult->echExtension.config_id,
           configIdResult->echExtension.payload->clone(),
-          ECHVersion::Draft13,
+          ECHVersion::Draft15,
           recreatedContext);
     }
   } catch (const OuterExtensionsError& e) {

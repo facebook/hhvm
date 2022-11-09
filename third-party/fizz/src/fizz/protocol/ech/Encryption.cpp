@@ -57,7 +57,7 @@ std::unique_ptr<folly::IOBuf> extractEncodedClientHelloInner(
     const ClientHello& clientHelloOuter) {
   std::unique_ptr<folly::IOBuf> encodedClientHelloInner;
   switch (version) {
-    case ECHVersion::Draft13: {
+    case ECHVersion::Draft15: {
       auto aadCH = makeClientHelloOuterForAad(clientHelloOuter);
       encodedClientHelloInner =
           context->open(aadCH.get(), std::move(encryptedCh));
@@ -69,7 +69,7 @@ std::unique_ptr<folly::IOBuf> extractEncodedClientHelloInner(
 std::unique_ptr<folly::IOBuf> makeHpkeContextInfoParam(
     const ECHConfig& echConfig) {
   switch (echConfig.version) {
-    case ECHVersion::Draft13: {
+    case ECHVersion::Draft15: {
       // The "info" parameter to setupWithEncap is the
       // concatenation of "tls ech", a zero byte, and the serialized
       // ECHConfig.
@@ -138,7 +138,7 @@ folly::Optional<SupportedECHConfig> selectECHConfig(
   // we should be selecting the first one that we can support.
   for (const auto& config : configs) {
     folly::io::Cursor cursor(config.ech_config_content.get());
-    if (config.version == ECHVersion::Draft13) {
+    if (config.version == ECHVersion::Draft15) {
       auto echConfig = decode<ECHConfigContentDraft>(cursor);
 
       // Before anything else, check if the config has mandatory extensions.

@@ -1510,7 +1510,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
   EXPECT_CALL(*decrypter, getRetryConfigs())
       .WillOnce(InvokeWithoutArgs([]() -> std::vector<ech::ECHConfig> {
         ech::ECHConfig cfg;
-        cfg.version = ech::ECHVersion::Draft13;
+        cfg.version = ech::ECHVersion::Draft15;
         cfg.ech_config_content = folly::IOBuf::copyBuffer("retryconfig");
         return {std::move(cfg)};
       }));
@@ -1626,7 +1626,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
         auto modifiedEncryptedExt = TestMessages::encryptedExt();
         ech::ECHEncryptedExtensions serverECH;
         ech::ECHConfig cfg;
-        cfg.version = ech::ECHVersion::Draft13;
+        cfg.version = ech::ECHVersion::Draft15;
         cfg.ech_config_content = folly::IOBuf::copyBuffer("retryconfig");
         serverECH.retry_configs.push_back(std::move(cfg));
         modifiedEncryptedExt.extensions.push_back(
@@ -3385,7 +3385,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
   EXPECT_CALL(*decrypter, getRetryConfigs())
       .WillOnce(InvokeWithoutArgs([]() -> std::vector<ech::ECHConfig> {
         ech::ECHConfig cfg;
-        cfg.version = ech::ECHVersion::Draft13;
+        cfg.version = ech::ECHVersion::Draft15;
         cfg.ech_config_content = folly::IOBuf::copyBuffer("retryconfig");
         return {std::move(cfg)};
       }));
@@ -3489,7 +3489,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
         auto ee = TestMessages::encryptedExt();
         ech::ECHEncryptedExtensions serverECH;
         ech::ECHConfig cfg;
-        cfg.version = ech::ECHVersion::Draft13;
+        cfg.version = ech::ECHVersion::Draft15;
         cfg.ech_config_content = folly::IOBuf::copyBuffer("retryconfig");
         serverECH.retry_configs.push_back(std::move(cfg));
         ee.extensions.push_back(encodeExtension(std::move(serverECH)));

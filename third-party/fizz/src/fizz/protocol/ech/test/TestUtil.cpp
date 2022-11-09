@@ -43,7 +43,7 @@ ECHConfigContentDraft getECHConfigContent() {
 
 ECHConfig getECHConfig() {
   ECHConfig config;
-  config.version = ECHVersion::Draft13;
+  config.version = ECHVersion::Draft15;
   config.ech_config_content = encode(getECHConfigContent());
   return config;
 }

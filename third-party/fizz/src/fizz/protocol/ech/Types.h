@@ -22,7 +22,7 @@ using HpkePublicKey = Buf;
 constexpr size_t kEchAcceptConfirmationSize = 8;
 
 enum class ECHVersion : uint16_t {
-  Draft13 = 0xfe0d,
+  Draft15 = 0xfe0d,
 };
 
 struct HpkeSymmetricCipherSuite {

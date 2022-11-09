@@ -2625,7 +2625,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
   auto mockHpkeContext = new hpke::test::MockHpkeContext();
   state_.echState()->hpkeSetup.enc = folly::IOBuf::copyBuffer("enc");
   state_.echState()->hpkeSetup.context.reset(mockHpkeContext);
-  state_.echState()->supportedConfig.config.version = ech::ECHVersion::Draft13;
+  state_.echState()->supportedConfig.config.version = ech::ECHVersion::Draft15;
   state_.echState()->supportedConfig.config.ech_config_content =
       folly::IOBuf::copyBuffer("echconfig");
   state_.echState()->supportedConfig.cipherSuite = {
@@ -2893,7 +2893,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHRejectedFlow) {
   auto mockHpkeContext = new hpke::test::MockHpkeContext();
   state_.echState()->hpkeSetup.enc = folly::IOBuf::copyBuffer("enc");
   state_.echState()->hpkeSetup.context.reset(mockHpkeContext);
-  state_.echState()->supportedConfig.config.version = ech::ECHVersion::Draft13;
+  state_.echState()->supportedConfig.config.version = ech::ECHVersion::Draft15;
   state_.echState()->supportedConfig.config.ech_config_content =
       folly::IOBuf::copyBuffer("echconfig");
   state_.echState()->supportedConfig.cipherSuite = {
@@ -3174,7 +3174,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHPSKFlow) {
   auto mockHpkeContext = new hpke::test::MockHpkeContext();
   state_.echState()->hpkeSetup.enc = folly::IOBuf::copyBuffer("enc");
   state_.echState()->hpkeSetup.context.reset(mockHpkeContext);
-  state_.echState()->supportedConfig.config.version = ech::ECHVersion::Draft13;
+  state_.echState()->supportedConfig.config.version = ech::ECHVersion::Draft15;
   state_.echState()->supportedConfig.config.ech_config_content =
       folly::IOBuf::copyBuffer("echconfig");
   state_.echState()->supportedConfig.cipherSuite = {
@@ -3718,7 +3718,7 @@ TEST_F(ClientProtocolTest, TestEncryptedExtensionsECHRetryConfigs) {
   auto ee = TestMessages::encryptedExt();
   ech::ECHEncryptedExtensions serverECH;
   ech::ECHConfig cfg;
-  cfg.version = ech::ECHVersion::Draft13;
+  cfg.version = ech::ECHVersion::Draft15;
   cfg.ech_config_content = folly::IOBuf::copyBuffer("retryconfig");
   serverECH.retry_configs.push_back(std::move(cfg));
   ee.extensions.push_back(encodeExtension(std::move(serverECH)));

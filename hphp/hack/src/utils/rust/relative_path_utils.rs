@@ -74,6 +74,25 @@ pub fn canonicalized_strip_prefix_relative_to_cwd(
     }
 }
 
+/// This helper is for the common situation that you have a Vec<PathBuf>
+/// and want to turn it into RelativePath. Use it like v.filter_map(some_if_root(&root)).
+/// It is called some_if_root because it only returns Some(RelativePath) for the
+/// paths given to it that were indeed root-relative; it returns None for everything else.
+/// Note: it requires root to be canonicalized, and it treats any non-absolute
+/// input paths as CWD-relative.
+pub fn some_if_root(root: &Path) -> Box<dyn Fn(&PathBuf) -> Option<relative_path::RelativePath>> {
+    let root = root.to_owned();
+    Box::new(
+        move |path| match canonicalized_strip_prefix_relative_to_cwd(path, &root) {
+            Err(_) => None,
+            Ok(suffix) => Some(relative_path::RelativePath::make(
+                relative_path::Prefix::Root,
+                suffix,
+            )),
+        },
+    )
+}
+
 /// Like path.join, except is a no-op if suffix is None.
 fn path_join_opt(path: &Path, suffix: Option<PathBuf>) -> PathBuf {
     match suffix {
@@ -178,6 +197,28 @@ mod tests {
         assert_eq!(&relpath(&empty, "../a.php")?, "a.php");
         assert_eq!(&relpath(&empty, "../ax.php")?, "ax.php");
         assert!(&relpath(&empty, "../../x.php").is_err());
+
+        // filter_map
+        std::env::set_current_dir(&root)?;
+        let v = vec![
+            PathBuf::from("a.php"),
+            PathBuf::from("../ao.php"), // outside root
+            PathBuf::from("d/b.php"),
+            PathBuf::from("ax.php"),
+        ]
+        .iter()
+        .filter_map(some_if_root(&root))
+        .collect::<Vec<_>>();
+        use relative_path::Prefix;
+        use relative_path::RelativePath;
+        assert_eq!(
+            v,
+            vec![
+                RelativePath::make(Prefix::Root, PathBuf::from("a.php")),
+                RelativePath::make(Prefix::Root, PathBuf::from("d/b.php")),
+                RelativePath::make(Prefix::Root, PathBuf::from("ax.php"))
+            ]
+        );
 
         Ok(())
     }

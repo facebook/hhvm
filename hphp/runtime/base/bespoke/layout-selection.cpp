@@ -782,7 +782,9 @@ std::vector<Decision<ArrayLayout>> makeSinkDecisions(
     total += count;
   }
 
-  auto const p_cutoff = RO::EvalBespokeArraySinkSpecializationThreshold / 100;
+  auto const p_cutoff = isIteratorOp(profile.key.second.op()) ?
+    RO::EvalBespokeArraySinkIteratorSpecializationThreshold / 100 :
+    RO::EvalBespokeArraySinkSpecializationThreshold / 100;
 
   auto const p_sampled = 1.0 * sampled / (sampled + unsampled);
 

@@ -1207,6 +1207,7 @@ struct RuntimeOption {
    * codegen. */                                                        \
   F(double, BespokeArraySourceSpecializationThreshold, 95.0)            \
   F(double, BespokeArraySinkSpecializationThreshold,   95.0)            \
+  F(double, BespokeArraySinkIteratorSpecializationThreshold, 92.0)      \
   F(double, BespokeArraySinkSpecializationMinThreshold, 85.0)           \
   F(double, BespokeArraySinkSideExitThreshold, 95.0)                    \
   F(uint64_t, BespokeArraySinkSideExitMaxSources, 64)                   \

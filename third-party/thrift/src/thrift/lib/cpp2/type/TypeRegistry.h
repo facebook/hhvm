@@ -50,9 +50,9 @@ class TypeRegistry {
   // Store a value in an AnyData using the registered serializers.
   //
   // Throws std::out_of_range if no matching serializer has been registered.
-  AnyData store(Ref value, const Protocol& protocol) const;
+  AnyData store(ConstRef value, const Protocol& protocol) const;
   template <StandardProtocol P>
-  AnyData store(Ref value) const {
+  AnyData store(ConstRef value) const {
     return store(value, Protocol::get<P>());
   }
   AnyData store(const AnyValue& value, const Protocol& protocol) const;

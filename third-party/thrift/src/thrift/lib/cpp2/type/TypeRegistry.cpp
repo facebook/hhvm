@@ -32,7 +32,7 @@ FOLLY_EXPORT TypeRegistry& getGeneratedTypeRegistry() {
 
 } // namespace detail
 
-AnyData TypeRegistry::store(Ref value, const Protocol& protocol) const {
+AnyData TypeRegistry::store(ConstRef value, const Protocol& protocol) const {
   return storeImpl(value, protocol);
 }
 

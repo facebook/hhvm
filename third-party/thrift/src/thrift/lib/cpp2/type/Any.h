@@ -54,6 +54,17 @@ class AnyData : public detail::Wrap<AnyStruct> {
   const Type& type() const { return *data_.type(); }
   const Protocol& protocol() const { return *data_.protocol(); }
   const folly::IOBuf& data() const { return *data_.data(); }
+
+ private:
+  friend bool operator==(AnyData lhs, AnyData rhs) noexcept {
+    return lhs.data_ == rhs.data_;
+  }
+  friend bool operator!=(AnyData lhs, AnyData rhs) noexcept {
+    return lhs.data_ != rhs.data_;
+  }
+  friend bool operator<(AnyData lhs, AnyData rhs) noexcept {
+    return lhs.data_ < rhs.data_;
+  }
 };
 
 } // namespace type

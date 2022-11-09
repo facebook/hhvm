@@ -207,13 +207,4 @@ class Type : public detail::Wrap<TypeStruct> {
 } // namespace thrift
 } // namespace apache
 
-// The custom specialization of std::hash can be injected in namespace std.
-namespace std {
-template <>
-struct hash<apache::thrift::type::Type> {
-  using Type = apache::thrift::type::Type;
-  size_t operator()(const Type& type) const noexcept {
-    return apache::thrift::op::hash<Type::underlying_tag>(type.toThrift());
-  }
-};
-} // namespace std
+FBTHRIFT_STD_HASH_WRAP_DATA(apache::thrift::type::Type)

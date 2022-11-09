@@ -119,18 +119,4 @@ inline const Protocol kNoProtocol = {};
 
 } // namespace apache::thrift::type
 
-// The custom specialization of std::hash can be injected in namespace std.
-namespace std {
-template <>
-struct hash<apache::thrift::type::Protocol> {
-  size_t operator()(
-      const apache::thrift::type::Protocol& protocol) const noexcept {
-    // TODO(afuller): Switch to op::hash when it uses always on reflection.
-    size_t h1 = std::hash<apache::thrift::type::StandardProtocol>{}(
-        protocol.standard());
-    size_t h2 = std::hash<std::string_view>{}(protocol.custom());
-    return folly::hash::hash_combine(h1, h2);
-  }
-};
-
-} // namespace std
+FBTHRIFT_STD_HASH_WRAP_DATA(apache::thrift::type::Protocol)

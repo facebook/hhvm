@@ -176,6 +176,18 @@ class CompareWrap : public EqWrap<Derived, T, Tag> {
   }
 };
 
+// The custom specialization of std::hash injected into the std namespace.
+#define FBTHRIFT_STD_HASH_WRAP_DATA(fullType)                        \
+  namespace std {                                                    \
+  template <>                                                        \
+  struct hash<::fullType> {                                          \
+    size_t operator()(const ::fullType& value) const noexcept {      \
+      return ::apache::thrift::op::hash<::fullType::underlying_tag>( \
+          value.toThrift());                                         \
+    }                                                                \
+  };                                                                 \
+  } // namespace std
+
 } // namespace detail
 } // namespace type
 } // namespace thrift

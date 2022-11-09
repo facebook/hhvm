@@ -83,7 +83,7 @@ let shapes_method_access_with_non_existent_field
   match (status, optional_shape) with
   | (`DoesExist _, false) ->
     Lint.shape_idx_access_required_field pos1 (snd field_name)
-  | (`DoesNotExist (decl_pos, reason), false) ->
+  | (`DoesNotExist (decl_pos, reason), _) ->
     Errors.add_typing_error
       Typing_error.(
         shape
@@ -95,11 +95,7 @@ let shapes_method_access_with_non_existent_field
                method_name;
                reason;
              })
-  | (`DoesNotExist _, true) when String.equal method_name SN.Shapes.idx ->
-    (* Shapes::at only supports non optional shapes *)
-    Lint.opt_closed_shape_idx_missing_field (Some method_name) pos1
   | (`DoesExist _, true)
-  | (`DoesNotExist _, true)
   | (`Unknown, _) ->
     ()
 
@@ -108,13 +104,12 @@ let shape_access_with_non_existent_field pos1 env (shape, _, _) field_name =
     shapes_key_exists env shape (TSFlit_str field_name)
   in
   match (status, optional) with
-  | (`DoesNotExist (decl_pos, reason), false) ->
+  | (`DoesNotExist (decl_pos, reason), _) ->
     Errors.add_typing_error
       Typing_error.(
         shape
         @@ Primary.Shape.Shapes_access_with_non_existent_field
              { pos = pos1; field_name = snd field_name; decl_pos; reason })
-  | (`DoesNotExist _, true) -> Lint.opt_closed_shape_idx_missing_field None pos1
   | (`DoesExist _, _)
   | (`Unknown, _) ->
     ()

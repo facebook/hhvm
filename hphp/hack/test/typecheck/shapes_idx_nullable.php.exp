@@ -1,0 +1,8 @@
+File "shapes_idx_nullable.php", line 5, characters 19-21:
+You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
+  File "shapes_idx_nullable.php", line 3, characters 13-29:
+  The field `b` is not defined in this shape
+File "shapes_idx_nullable.php", line 8, characters 19-21:
+You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
+  File "shapes_idx_nullable.php", line 3, characters 13-29:
+  The field `b` is not defined in this shape

@@ -174,7 +174,8 @@ void add_fields(
     const t_program* program,
     t_const_value& schema,
     std::string fields_name,
-    node_list_view<const t_field> fields) {
+    node_list_view<const t_field> fields,
+    schematizer::InternFunc& intern_value) {
   auto fields_schema = val();
   fields_schema->set_list();
 
@@ -204,8 +205,8 @@ void add_fields(
     field_schema->add_map(val("type"), gen_type(*field.type()));
     if (auto deflt = field.default_value()) {
       assert(program);
-      auto id = const_cast<t_program*>(program)->intern_value(
-          deflt->clone(), field.type());
+      auto id = intern_value(
+          deflt->clone(), field.type(), const_cast<t_program*>(program));
       field_schema->add_map(val("customDefault"), val(id));
     }
     fields_schema->add_list(std::move(field_schema));
@@ -220,7 +221,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(
   auto schema = val();
   schema->set_map();
   add_definition(*schema, node);
-  add_fields(node.program(), *schema, "fields", node.fields());
+  add_fields(node.program(), *schema, "fields", node.fields(), intern_value_);
 
   if (node.is_exception()) {
     const auto& ex = static_cast<const t_exception&>(node);
@@ -280,7 +281,11 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
     auto param_list_schema = val();
     param_list_schema->set_map();
     add_fields(
-        node.program(), *param_list_schema, "fields", func.params().fields());
+        node.program(),
+        *param_list_schema,
+        "fields",
+        func.params().fields(),
+        intern_value_);
     func_schema->add_map(val("paramlist"), std::move(param_list_schema));
 
     if (func.exceptions()) {
@@ -288,7 +293,8 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
           node.program(),
           *func_schema,
           "exceptions",
-          func.exceptions()->fields());
+          func.exceptions()->fields(),
+          intern_value_);
     }
 
     functions_schema->add_list(std::move(func_schema));
@@ -362,6 +368,11 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_typedef& node) {
   schema->add_map(val("attrs"), std::move(attrs));
 
   return schema;
+}
+
+t_program::value_id schematizer::default_intern_value(
+    std::unique_ptr<t_const_value> val, t_type_ref type, t_program* program) {
+  return program->intern_value(std::move(val), std::move(type));
 }
 
 } // namespace compiler

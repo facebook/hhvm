@@ -266,7 +266,7 @@ class t_program : public t_named {
     return scope_name(node.name());
   }
 
-  enum class value_id {};
+  enum class value_id : int64_t {};
 
   // Adds value to intern list and returns ID
   value_id intern_value(std::unique_ptr<t_const_value> val, t_type_ref type) {

@@ -163,7 +163,7 @@ TEST(SchematizerTest, Service) {
 
   svc.add_function(std::move(func0));
 
-  auto schema = schematizer::gen_schema(svc);
+  auto schema = schematizer().gen_schema(svc);
   auto map = flatten_map(*schema);
 
   validateDefinition(map, service_name, service_uri);
@@ -199,7 +199,7 @@ TEST(SchematizerTest, Structured) {
   t_map tmap(t_base_type::t_string(), t_base_type::t_double());
   s.create_field(tmap, "Map", 3);
 
-  auto schema = schematizer::gen_schema(s);
+  auto schema = schematizer().gen_schema(s);
   validate_test_struct(*schema, struct_name, struct_uri);
 }
 
@@ -218,7 +218,7 @@ TEST(SchematizerTest, Const) {
       std::make_unique<t_const_value>("Hello"));
   c.set_uri(const_uri);
 
-  auto schema = schematizer::gen_schema(c);
+  auto schema = schematizer().gen_schema(c);
   auto map = flatten_map(*schema);
 
   validateDefinition(map, const_name, const_uri);
@@ -249,7 +249,7 @@ TEST(SchematizerTest, Enum) {
   e.append_value(std::make_unique<t_enum_value>(enum_value_0));
   e.append_value(std::make_unique<t_enum_value>(enum_value_1));
 
-  auto schema = schematizer::gen_schema(e);
+  auto schema = schematizer().gen_schema(e);
   auto map = flatten_map(*schema);
   const auto& values = map.at("values")->get_list();
 

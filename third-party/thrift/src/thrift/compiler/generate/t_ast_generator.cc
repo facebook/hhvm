@@ -110,13 +110,16 @@ void t_ast_generator::generate_program() {
       program_index;
   std::unordered_map<const t_named*, apache::thrift::type::DefinitionId>
       definition_index;
-  auto intern_value = [&](const t_const_value& val) {
+  auto intern_value = [&](std::unique_ptr<t_const_value> val,
+                          t_type_ref = {},
+                          t_program* = nullptr) {
     // TODO: deduplication
     auto& values = ast.values().ensure();
-    auto ret = positionToId<apache::thrift::type::ValueId>(values.size());
-    values.push_back(const_to_value(val));
+    auto ret = positionToId<t_program::value_id>(values.size());
+    values.push_back(const_to_value(*val));
     return ret;
   };
+  schematizer schema_source(intern_value);
   const_ast_visitor visitor;
   visitor.add_program_visitor([&](const t_program& program) {
     if (program_index.count(&program)) {
@@ -127,7 +130,7 @@ void t_ast_generator::generate_program() {
     auto pos = programs.size();
     auto program_id = positionToId<apache::thrift::type::ProgramId>(pos);
     program_index[&program] = program_id;
-    hydrate_const(programs.emplace_back(), *schematizer::gen_schema(program));
+    hydrate_const(programs.emplace_back(), *schema_source.gen_schema(program));
 
     for (auto* include : program.get_included_programs()) {
       // This could invalidate references into `programs`.
@@ -142,8 +145,8 @@ void t_ast_generator::generate_program() {
     cpp2::SourceInfo info;
     for (const auto& [lang, incs] : program.language_includes()) {
       for (const auto& inc : incs) {
-        info.languageIncludes()[lang].push_back(
-            intern_value(t_const_value(inc)));
+        info.languageIncludes()[lang].push_back(static_cast<type::ValueId>(
+            intern_value(std::make_unique<t_const_value>(inc))));
       }
     }
     // TODO: rest of sourceInfo
@@ -164,7 +167,7 @@ void t_ast_generator::generate_program() {
         positionToId<apache::thrift::type::DefinitionId>(pos); \
     hydrate_const(                                             \
         definitions.emplace_back().kind##Def_ref().ensure(),   \
-        *schematizer::gen_schema(node));                       \
+        *schema_source.gen_schema(node));                      \
   })
   THRIFT_ADD_VISITOR(service);
   THRIFT_ADD_VISITOR(interaction);

@@ -3,8 +3,6 @@ members = [
     "arena_collections",
     "arena_trait",
     "asdl_to_rust/lrgen",
-    "asdl_to_rust/asdl",
-    "asdl_to_rust/asdl_to_rust",
     "decl/cargo/rust_decl_ffi",
     "decl/direct_decl_smart_constructors",
     "deps/cargo/deps_rust",

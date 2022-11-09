@@ -153,23 +153,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbf56136a5198c7b01a49e3afcbef6cf84597273d298f54432926024107b0109"
 
 [[package]]
-name = "asdl"
-version = "0.0.0"
-dependencies = [
- "cfgrammar",
- "lrlex",
- "lrpar",
-]
-
-[[package]]
-name = "asdl_to_rust"
-version = "0.0.0"
-dependencies = [
- "asdl",
- "clap 3.2.17",
-]
-
-[[package]]
 name = "assemble"
 version = "0.0.0"
 dependencies = [

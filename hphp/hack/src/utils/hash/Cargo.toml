@@ -8,6 +8,6 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
-dashmap = { version = "4.0.2", features = ["rayon", "serde"] }
+dashmap = { version = "5", features = ["rayon", "serde"] }
 indexmap = { version = "1.9.1", features = ["rayon", "serde-1"] }
 rustc-hash = "1.1.0"

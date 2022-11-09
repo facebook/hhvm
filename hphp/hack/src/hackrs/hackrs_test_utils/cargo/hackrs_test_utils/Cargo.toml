@@ -10,7 +10,7 @@ path = "../../mod.rs"
 [dependencies]
 anyhow = "1.0.65"
 bincode = "1.3.3"
-dashmap = { version = "4.0.2", features = ["rayon", "serde"] }
+dashmap = { version = "5", features = ["rayon", "serde"] }
 datastore = { path = "../../../datastore" }
 decl_parser = { path = "../../../decl_parser/cargo/decl_parser" }
 depgraph = { path = "../../../../depgraph/cargo/depgraph" }

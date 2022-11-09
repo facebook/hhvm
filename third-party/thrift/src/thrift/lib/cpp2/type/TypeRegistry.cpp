@@ -33,26 +33,12 @@ FOLLY_EXPORT TypeRegistry& getGeneratedTypeRegistry() {
 } // namespace detail
 
 AnyData TypeRegistry::store(Ref value, const Protocol& protocol) const {
-  if (value.type() == Type::get<type::void_t>()) {
-    return {};
-  }
+  return storeImpl(value, protocol);
+}
 
-  // Encode the value.
-  const auto& serializer = getEntry(value.type()).getSerializer(protocol);
-  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
-
-  // Allocate 16KB at a time; leave some room for the IOBuf overhead
-  // TODO(afuller): This is the size we use by default, for structs. Consider
-  // adjusting it, based on what is being encoded.
-  constexpr size_t kDesiredGrowth = (1 << 14) - 64;
-  serializer.encode(value, folly::io::QueueAppender(&queue, kDesiredGrowth));
-
-  // Return the resulting Any.
-  SemiAny builder;
-  builder.data() = queue.moveAsValue();
-  builder.protocol() = protocol;
-  builder.type() = value.type();
-  return AnyData{std::move(builder)};
+AnyData TypeRegistry::store(
+    const AnyValue& value, const Protocol& protocol) const {
+  return storeImpl(value, protocol);
 }
 
 void TypeRegistry::load(const AnyData& data, Ref out) const {

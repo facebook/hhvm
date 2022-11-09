@@ -80,6 +80,9 @@ TEST(TypeRegistry, Register) {
 
   // Load the value, and verify it roundtriped correctly.
   EXPECT_EQ(treg.load(any).as<double_t>(), 2.5);
+
+  // Ensure API supports roundtripping the load and store.
+  EXPECT_EQ(treg.store(treg.load(any), test::kFollyToStringProtocol), any);
 }
 
 } // namespace

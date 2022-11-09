@@ -55,6 +55,11 @@ class TypeRegistry {
   AnyData store(Ref value) const {
     return store(value, Protocol::get<P>());
   }
+  AnyData store(const AnyValue& value, const Protocol& protocol) const;
+  template <StandardProtocol P>
+  AnyData store(const AnyValue& value) const {
+    return store(value, Protocol::get<P>());
+  }
   template <typename Tag>
   AnyData store(const native_type<Tag>& value, const Protocol& protocol) const {
     return store(Ref::to<Tag>(value), protocol);
@@ -116,6 +121,9 @@ class TypeRegistry {
   std::forward_list<std::unique_ptr<op::Serializer>> ownedSerializers_;
 
   const TypeEntry& getEntry(const Type& type) const;
+
+  template <typename T>
+  AnyData storeImpl(T&& value, const Protocol& protocol) const;
 };
 
 // Implemenation details
@@ -137,6 +145,30 @@ bool TypeRegistry::registerSerializer(
   }
   ownedSerializers_.emplace_front(std::move(serializer));
   return registerSerializer(*ownedSerializers_.front(), types);
+}
+
+template <typename T>
+AnyData TypeRegistry::storeImpl(T&& value, const Protocol& protocol) const {
+  if (value.type() == Type::get<type::void_t>()) {
+    return {};
+  }
+
+  // Encode the value.
+  const auto& serializer = getEntry(value.type()).getSerializer(protocol);
+  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
+
+  // Allocate 16KB at a time; leave some room for the IOBuf overhead
+  // TODO(afuller): This is the size we use by default, for structs. Consider
+  // adjusting it, based on what is being encoded.
+  constexpr size_t kDesiredGrowth = (1 << 14) - 64;
+  serializer.encode(value, folly::io::QueueAppender(&queue, kDesiredGrowth));
+
+  // Return the resulting Any.
+  SemiAny builder;
+  builder.data() = queue.moveAsValue();
+  builder.protocol() = protocol;
+  builder.type() = value.type();
+  return AnyData{std::move(builder)};
 }
 
 } // namespace type

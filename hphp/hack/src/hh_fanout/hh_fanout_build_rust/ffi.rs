@@ -15,6 +15,10 @@ ocaml_ffi! {
     delta_file: Option<OsString>,
     output: OsString,
   ) {
+    env_logger::init_from_env(
+        env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "info"),
+    );
+
     hh_fanout_build::build(allow_empty, incremental, new_edges_dir, delta_file, output).unwrap();
     std::process::exit(0)
   }

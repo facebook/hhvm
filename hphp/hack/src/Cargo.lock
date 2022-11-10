@@ -2074,7 +2074,6 @@ dependencies = [
  "dep_graph_delta",
  "depgraph",
  "depgraph_writer",
- "env_logger 0.7.1",
  "log",
  "parking_lot 0.11.2",
  "rayon",
@@ -2084,6 +2083,7 @@ dependencies = [
 name = "hh_fanout_build_rust"
 version = "0.0.0"
 dependencies = [
+ "env_logger 0.7.1",
  "hh_fanout_build",
  "ocamlrep_ocamlpool",
 ]

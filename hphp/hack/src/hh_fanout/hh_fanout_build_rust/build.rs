@@ -347,6 +347,14 @@ fn extend_edges_from_dep_graph(all_edges: &Edges, graph: &DepGraph<'_>) {
     });
 }
 
+/// Reads all the edges from the edges files in `edges_dir` and collects them in
+/// a list of hashmaps of dependency to its dependents.
+pub fn edges_from_dir(edges_dir: &Path) -> io::Result<Vec<HashMap<u64, Vec<u64>>>> {
+    let mut edges_dir = EdgesDir::open(edges_dir)?;
+    let edges = edges_dir.read_all_edges()?;
+    Ok(edges.structured_edges())
+}
+
 pub fn build(
     allow_empty: bool,
     incremental: Option<OsString>,
@@ -354,10 +362,6 @@ pub fn build(
     delta_file: Option<OsString>,
     output: OsString,
 ) -> io::Result<()> {
-    env_logger::init_from_env(
-        env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "info"),
-    );
-
     let all_edges = match (new_edges_dir, delta_file) {
         (None, None) => {
             panic!("build: at least one of --edges-dir or --delta-file flags should be passed")

@@ -13,7 +13,6 @@ doctest = false
 dep_graph_delta = { path = "../../../deps" }
 depgraph = { path = "../../../depgraph/cargo/depgraph" }
 depgraph_writer = { path = "../../../depgraph/cargo/depgraph_writer" }
-env_logger = "0.7"
 log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }
 parking_lot = { version = "0.11.2", features = ["send_guard"] }
 rayon = "1.2"

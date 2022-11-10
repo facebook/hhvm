@@ -127,7 +127,7 @@ fn write_final(
             )?;
             let src = state.lookup_vid(operands.next().unwrap());
             let src = w.write_expr(src)?;
-            w.store(base, src, tx_ty!(mixed))?;
+            w.store(base, src, tx_ty!(*HackMixed))?;
             Ok(src)
         }
         FinalOp::SetRangeM { .. } => todo!(),
@@ -170,7 +170,7 @@ fn write_final_query_m(
         MemberKey::EL => {
             // $a[$b]
             let key = locals.next().unwrap();
-            let key = w.load(tx_ty!(mixed), textual::Expr::deref(key))?;
+            let key = w.load(tx_ty!(*HackMixed), textual::Expr::deref(key))?;
             w.call("hack_array_get", (base, key, op_name))
         }
         MemberKey::ET(s) => {
@@ -243,7 +243,7 @@ fn write_entry(
         MemberKey::EL => {
             // $a[$b]
             let key = locals.next().unwrap();
-            let key = w.load(tx_ty!(mixed), textual::Expr::deref(key))?;
+            let key = w.load(tx_ty!(*HackMixed), textual::Expr::deref(key))?;
             w.call("hack_array_entry", (base, key, mode))
         }
         MemberKey::ET(s) => {

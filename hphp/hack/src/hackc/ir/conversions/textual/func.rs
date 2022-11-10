@@ -80,8 +80,7 @@ pub(crate) fn write_func(
     func: ir::Func<'_>,
     method_info: Option<&MethodInfo<'_>>,
 ) -> Result {
-    let func = func.clone();
-    let mut func = crate::lower::lower(func, method_info, Arc::clone(&unit_state.strings));
+    let mut func = crate::lower::lower_func(func, method_info, Arc::clone(&unit_state.strings));
     ir::verify::verify_func(&func, &Default::default(), &unit_state.strings)?;
 
     let params = std::mem::take(&mut func.params);
@@ -356,7 +355,7 @@ fn write_load_var(
     iid: InstrId,
     lid: LocalId,
 ) -> Result {
-    let sid = w.load(tx_ty!(mixed), textual::Expr::deref(lid))?;
+    let sid = w.load(tx_ty!(*HackMixed), textual::Expr::deref(lid))?;
     state.set_iid(iid, sid);
     Ok(())
 }
@@ -370,7 +369,7 @@ fn write_set_var(
     w.store(
         textual::Expr::deref(lid),
         state.lookup_vid(vid),
-        tx_ty!(mixed),
+        tx_ty!(*HackMixed),
     )
 }
 
@@ -563,9 +562,9 @@ fn write_inc_dec_l<'a>(
         _ => unreachable!(),
     };
 
-    let pre = w.load(tx_ty!(mixed), textual::Expr::deref(lid))?;
+    let pre = w.load(tx_ty!(*HackMixed), textual::Expr::deref(lid))?;
     let post = hack::call_builtin(w, builtin, (pre, textual::Expr::hack_int(1)))?;
-    w.store(textual::Expr::deref(lid), post, tx_ty!(mixed))?;
+    w.store(textual::Expr::deref(lid), post, tx_ty!(*HackMixed))?;
 
     let sid = match op {
         IncDecOp::PreInc | IncDecOp::PreDec => pre,

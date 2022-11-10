@@ -121,7 +121,6 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
                 BaseType::Null => self.todo_fake_instr("BaseType::Null", loc),
                 BaseType::Num => self.todo_fake_instr("BaseType::Num", loc),
                 BaseType::RawPtr(_) => self.todo_fake_instr("BaseType::RawPtr(_)", loc),
-                BaseType::RawType(_) => self.todo_fake_instr("BaseType::RawType(_)", loc),
                 BaseType::Resource => self.todo_fake_instr("BaseType::Resource", loc),
                 BaseType::String => Instr::Hhbc(Hhbc::IsTypeC(vid, IsTypeOp::Str, loc)),
                 BaseType::This => Instr::Hhbc(Hhbc::IsLateBoundCls(vid, loc)),

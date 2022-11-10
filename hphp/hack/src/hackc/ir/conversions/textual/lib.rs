@@ -16,14 +16,8 @@
 /// AllowNaked=0 means naked raw-types not allowed and AllowNaked=1 means naked
 /// raw-types are allowed.
 macro_rules! tx_ty_sub {
-    ($_:tt bool) => {
-        textual::Ty::Bool
-    };
     ($_:tt int) => {
         textual::Ty::Int
-    };
-    ($_:tt mixed) => {
-        crate::textual::Ty::Mixed
     };
     ($_:tt noreturn) => {
         crate::textual::Ty::Noreturn

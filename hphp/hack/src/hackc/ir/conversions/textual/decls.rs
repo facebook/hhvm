@@ -27,7 +27,7 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
     for builtin in Builtin::iter() {
         let name = builtin.to_string();
         match builtin {
-            Builtin::Bool => declare_function(w, &name, &[ty!(bool)], ty!(*HackBool))?,
+            Builtin::Bool => declare_function(w, &name, &[ty!(int)], ty!(*HackBool))?,
             Builtin::Int => declare_function(w, &name, &[ty!(int)], ty!(*HackInt))?,
             Builtin::Null => declare_function(w, &name, &[], ty!(*HackNull))?,
             Builtin::String => declare_function(w, &name, &[ty!(string)], ty!(*HackString))?,
@@ -39,8 +39,8 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
             Builtin::GetClass | Builtin::GetStaticClass => {
                 declare_function(w, &name, &[ty!(*void)], ty!(*class))?;
             }
-            Builtin::IsTrue => declare_function(w, &name, &[ty!(mixed)], ty!(bool))?,
-            Builtin::RawPtrIsNull => declare_function(w, &name, &[ty!(*void)], ty!(bool))?,
+            Builtin::IsTrue => declare_function(w, &name, &[ty!(*HackMixed)], ty!(int))?,
+            Builtin::RawPtrIsNull => declare_function(w, &name, &[ty!(*void)], ty!(int))?,
             Builtin::VerifyParamCount => declare_function(
                 w,
                 &name,
@@ -66,18 +66,25 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
             | Hhbc::CmpNeq
             | Hhbc::CmpSame
             | Hhbc::Modulo
-            | Hhbc::Sub => declare_function(w, &name, &[ty!(mixed), ty!(mixed)], ty!(mixed))?,
+            | Hhbc::Sub => declare_function(
+                w,
+                &name,
+                &[ty!(*HackMixed), ty!(*HackMixed)],
+                ty!(*HackMixed),
+            )?,
 
-            Hhbc::Exit => declare_function(w, &name, &[ty!(mixed)], ty!(noreturn))?,
+            Hhbc::Exit => declare_function(w, &name, &[ty!(*HackMixed)], ty!(noreturn))?,
 
             Hhbc::IsTypeInt | Hhbc::IsTypeNull | Hhbc::IsTypeStr => {
-                declare_function(w, &name, &[ty!(mixed)], ty!(bool))?
+                declare_function(w, &name, &[ty!(*HackMixed)], ty!(int))?
             }
 
-            Hhbc::NewObj => declare_function(w, &name, &[ty!(*class)], ty!(mixed))?,
+            Hhbc::NewObj => declare_function(w, &name, &[ty!(*class)], ty!(*HackMixed))?,
             Hhbc::NewVec => declare_function(w, &name, &[], ty!(*HackVec))?,
 
-            Hhbc::Print | Hhbc::Not => declare_function(w, &name, &[ty!(mixed)], ty!(mixed))?,
+            Hhbc::Print | Hhbc::Not => {
+                declare_function(w, &name, &[ty!(*HackMixed)], ty!(*HackMixed))?
+            }
             Hhbc::VerifyFailed => declare_function(w, &name, &[], ty!(noreturn))?,
         }
     }

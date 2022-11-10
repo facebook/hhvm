@@ -77,7 +77,6 @@ fn base_type_string(ty: &ir::BaseType) -> Option<Str<'static>> {
         BaseType::Null => Some(ir::types::BUILTIN_NAME_NULL),
         BaseType::Num => Some(ir::types::BUILTIN_NAME_NUM),
         BaseType::RawPtr(_) => panic!("unable to emit a RawPtr to HHBC"),
-        BaseType::RawType(_) => panic!("unable to emit a RawPtr to HHBC"),
         BaseType::Resource => Some(ir::types::BUILTIN_NAME_RESOURCE),
         BaseType::String => Some(ir::types::BUILTIN_NAME_STRING),
         BaseType::This => Some(ir::types::BUILTIN_NAME_THIS),

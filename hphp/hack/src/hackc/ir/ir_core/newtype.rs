@@ -29,6 +29,10 @@ macro_rules! interned_hhbc_id {
                 Self::new(strings.intern_str(name))
             }
 
+            pub fn from_bytes(name: &[u8], strings: &StringInterner) -> Self {
+                Self::new(strings.intern_bytes(name))
+            }
+
             pub fn as_bytes<'a>(
                 self,
                 strings: &'a StringInterner,

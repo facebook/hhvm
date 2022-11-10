@@ -8,6 +8,7 @@ pub mod print;
 pub mod util;
 
 pub use formatters::FmtBid;
+pub use formatters::FmtEnforceableType;
 pub use formatters::FmtInstr;
 pub use formatters::FmtLid;
 pub use formatters::FmtLoc;

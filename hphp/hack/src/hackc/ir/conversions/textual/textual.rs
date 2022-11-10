@@ -59,33 +59,11 @@ impl fmt::Display for FmtSid {
 
 #[derive(Debug, Clone)]
 pub(crate) enum Ty {
-    AnyArray,
-    Arraykey,
-    Bool,
-    Classname,
-    Darray,
-    Dict,
-    Float,
     Int,
-    Keyset,
-    Mixed,
-    None,
-    Nonnull,
     Noreturn,
-    Nothing,
-    Null,
-    Nullable(Box<Ty>),
-    Num,
     Ptr(Box<Ty>),
     Type(String),
-    Resource,
     String,
-    This,
-    Typename,
-    Varray,
-    VarrayOrDarray,
-    Vec,
-    VecOrDict,
     Void,
 }
 
@@ -94,40 +72,12 @@ struct FmtTy<'a>(&'a Ty);
 impl fmt::Display for FmtTy<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
-            // There's no `bool` type in textual. Use `int` instead
-            Ty::Bool => write!(f, "int"),
             Ty::Int => write!(f, "int"),
+            Ty::Noreturn => f.write_str("noreturn"),
+            Ty::Ptr(sub) => write!(f, "*{}", FmtTy(sub)),
             Ty::String => write!(f, "*string"),
             Ty::Type(s) => write!(f, "{s}"),
-            Ty::Ptr(sub) => write!(f, "*{}", FmtTy(sub)),
-            Ty::Mixed => f.write_str("*Mixed"),
-            Ty::Noreturn => f.write_str("noreturn"),
-            Ty::This => f.write_str("this"),
             Ty::Void => f.write_str("void"),
-
-            Ty::AnyArray
-            | Ty::Arraykey
-            | Ty::Classname
-            | Ty::Darray
-            | Ty::Dict
-            | Ty::Float
-            | Ty::Keyset
-            | Ty::None
-            | Ty::Nonnull
-            | Ty::Nothing
-            | Ty::Null
-            | Ty::Nullable(_)
-            | Ty::Num
-            | Ty::Resource
-            | Ty::Typename
-            | Ty::Varray
-            | Ty::VarrayOrDarray
-            | Ty::Vec
-            | Ty::VecOrDict => {
-                textual_todo! {
-                    f.write_str("*Mixed")
-                }
-            }
         }
     }
 }
@@ -165,7 +115,6 @@ impl fmt::Display for FmtVar<'_> {
 #[derive(Clone, Debug)]
 pub(crate) enum Const {
     False,
-    // Float(f64),
     HackInt(i64),
     HackString(Vec<u8>),
     Int(i64),
@@ -181,7 +130,6 @@ impl fmt::Display for FmtConst<'_> {
         let FmtConst(const_) = *self;
         match const_ {
             Const::False => f.write_str("false"),
-            // Const::Float(v) => v.fmt(f),
             Const::HackInt(i) => write!(f, "hack_int({})", i),
             Const::HackString(s) => {
                 write!(f, "hack_string(\"{}\")", crate::util::escaped_string(s))

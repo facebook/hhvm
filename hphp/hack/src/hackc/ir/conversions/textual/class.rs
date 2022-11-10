@@ -11,6 +11,8 @@
 //!
 //! To get the static class singleton call `load_static_class`.
 
+use std::sync::Arc;
+
 use anyhow::Error;
 use log::trace;
 use strum_macros::EnumIter;
@@ -46,9 +48,11 @@ impl Mangle for StaticClassId {
 pub(crate) fn write_class(
     w: &mut dyn std::io::Write,
     state: &mut UnitState,
-    mut class: ir::Class<'_>,
+    class: ir::Class<'_>,
 ) -> Result {
     trace!("Convert Class {}", class.name.as_bstr(&state.strings));
+
+    let mut class = crate::lower::lower_class(class, Arc::clone(&state.strings));
 
     write_type(w, state, &class, IsStatic::Static)?;
     write_type(w, state, &class, IsStatic::NonStatic)?;

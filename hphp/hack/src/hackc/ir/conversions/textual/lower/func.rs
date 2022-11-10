@@ -11,8 +11,10 @@ use ir::StringInterner;
 use log::trace;
 
 use crate::func::MethodInfo;
+use crate::lower::types::lower_ty;
+use crate::lower::types::lower_ty_in_place;
 
-pub(crate) fn lower<'a>(
+pub(crate) fn lower_func<'a>(
     func: Func<'a>,
     method_info: Option<&MethodInfo<'_>>,
     strings: Arc<StringInterner>,
@@ -21,6 +23,7 @@ pub(crate) fn lower<'a>(
         "Before Lower: {}",
         ir::print::DisplayFunc(&func, true, &strings)
     );
+
     let mut builder = FuncBuilder::with_func(func, Arc::clone(&strings));
 
     // Simplify various Instrs.
@@ -31,9 +34,18 @@ pub(crate) fn lower<'a>(
 
     ir::passes::clean::run(&mut func);
 
+    // Lower param types after instrs so that if the instrs refer to the param
+    // types it can see the unmolested ones.
+    for param in &mut func.params {
+        lower_ty_in_place(&mut param.ty, &strings);
+    }
+
+    func.return_type = lower_ty(func.return_type, &strings);
+
     trace!(
         "After Lower: {}",
         ir::print::DisplayFunc(&func, true, &strings)
     );
+
     func
 }

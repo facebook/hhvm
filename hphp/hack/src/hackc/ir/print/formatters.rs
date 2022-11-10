@@ -679,3 +679,11 @@ impl Display for FmtVisibility {
         vis.fmt(f)
     }
 }
+
+pub struct FmtEnforceableType<'a>(pub &'a EnforceableType, pub &'a StringInterner);
+
+impl<'a> Display for FmtEnforceableType<'a> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        self.0.write(f, self.1)
+    }
+}

@@ -80,8 +80,6 @@ pub enum BaseType {
     Num,
     /// Used to represent a raw pointer in the type system.  Not used by HHVM.
     RawPtr(Box<BaseType>),
-    /// Used to represent a raw named type.  Not used by HHVM.
-    RawType(String),
     Resource,
     String,
     This,
@@ -120,7 +118,6 @@ impl BaseType {
                 s.write(f, strings)?;
                 f.write_str(")")
             }
-            BaseType::RawType(s) => write!(f, "RawType({s})"),
             BaseType::Resource => f.write_str("Resource"),
             BaseType::String => f.write_str("String"),
             BaseType::This => f.write_str("This"),

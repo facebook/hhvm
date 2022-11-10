@@ -9,10 +9,10 @@ function main(): void {
   echo "Hello, World!\n";
 }
 
-// CHECK: define $root.cmp(this: *void, $a: *Mixed, $b: *Mixed) : *void {
+// CHECK: define $root.cmp(this: *void, $a: *HackMixed, $b: *HackMixed) : *void {
 // CHECK: #b0:
-// CHECK:   n0: *Mixed = load &$b
-// CHECK:   n1: *Mixed = load &$a
+// CHECK:   n0: *HackMixed = load &$b
+// CHECK:   n1: *HackMixed = load &$a
 // CHECK:   n2 = $builtins.hhbc_cmp_eq(n1, n0)
 // CHECK:   jmp b1, b2
 // CHECK: #b1:
@@ -68,4 +68,4 @@ function bool_call(): void {
   f_bool(true);
 }
 
-// CHECK: declare $builtins.hack_is_true(*Mixed): int
+// CHECK: declare $builtins.hack_is_true(*HackMixed): int

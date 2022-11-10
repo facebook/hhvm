@@ -77,7 +77,7 @@ const config = {
           label: 'API',
           items: [ // This generates a dropdown menu for API
             {
-              to: 'toc',
+              to: 'cpp_api_toc',
               label: 'C++',
             }
           ]

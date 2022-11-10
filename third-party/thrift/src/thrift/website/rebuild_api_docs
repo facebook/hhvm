@@ -11,6 +11,7 @@ buck2 run //fbcref/docgen:maker -- \
   --doxyfile ../../fbcref/Doxyfile \
   --doxygen-output /tmp/doxygen_thrift_output \
   --website . \
+  --ref-path ref/cpp \
   --allowlist \
     'thrift/lib/cpp/TProcessorEventHandler.h' \
     'thrift/lib/cpp/protocol/TCompactProtocol.*'
@@ -18,10 +19,10 @@ buck2 run //fbcref/docgen:maker -- \
 # Make the table of contents
 toc=$(cat << EOTOC
 Hooks
-  class/apache/thrift/TProcessorEventHandler
+  cpp/class/apache/thrift/TProcessorEventHandler
 
 Serialization
-  class/apache/thrift/protocol/TCompactProtocolT
+  cpp/class/apache/thrift/protocol/TCompactProtocolT
 EOTOC
 )
-python3.6 ../../fbcref/docgen/tocgen.py "$toc" > src/json/toc.json
+python3.6 ../../fbcref/docgen/tocgen.py "$toc" > src/json/cpp_api_toc.json

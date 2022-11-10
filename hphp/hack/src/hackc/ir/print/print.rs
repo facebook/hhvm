@@ -832,9 +832,9 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func<'_>, hhbc: &
             write!(
                 w,
                 "idx {}[{}] or {}",
-                FmtVid(func, vids[2], verbose, strings),
-                FmtVid(func, vids[1], verbose, strings),
                 FmtVid(func, vids[0], verbose, strings),
+                FmtVid(func, vids[1], verbose, strings),
+                FmtVid(func, vids[2], verbose, strings),
             )?;
         }
         Hhbc::IncDecL(lid, op, _) => {

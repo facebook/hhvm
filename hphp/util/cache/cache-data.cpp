@@ -27,7 +27,6 @@
 #include <folly/ScopeGuard.h>
 #include <folly/portability/Fcntl.h>
 #include <folly/portability/Unistd.h>
-#include <type_traits>
 #include "hphp/util/cache/cache-saver.h"
 #include "hphp/util/cache/magic-numbers.h"
 #include "hphp/util/cache/mmap-file.h"
@@ -144,7 +143,7 @@ void CacheData::createDirectory(const std::string& name, uint64_t id) {
   m_checksum = createChecksum();
 }
 
-bool CacheData::loadFromMmap(MmapFile* mmap_file) {
+bool CacheData::loadFromMmap(MmapFile* mmap_file, string* name) {
   if (!mmap_file->readUInt64(&m_id) ||
       !mmap_file->readUInt64(&m_flags) ||
       !mmap_file->readUInt64(&m_mtime) ||
@@ -171,7 +170,8 @@ bool CacheData::loadFromMmap(MmapFile* mmap_file) {
     return false;
   }
 
-  if (!mmap_file->readString(&m_name)) {
+  string temp_name;
+  if (!mmap_file->readString(&temp_name)) {
     return false;
   }
 
@@ -182,6 +182,7 @@ bool CacheData::loadFromMmap(MmapFile* mmap_file) {
 
   m_should_free = false;
 
+  *name = temp_name;
   return true;
 }
 
@@ -275,43 +276,6 @@ void CacheData::dump() const {
     fileSize(),
     m_id
   );
-
-  if (isDirectory()) {
-    printf(
-      "  Children: %" PRIu64 "\n",
-      m_directory_children.size());
-    for (const std::string& childName : m_directory_children) {
-      printf(
-        "    %s\n",
-        childName.c_str()
-      );
-    }
-  }
-}
-
-void CacheData::addChildToDirectory(std::string_view childName) {
-  if (isDirectory()) {
-    m_directory_children.emplace_back(childName);
-    m_directory_children_need_sorting = true;
-  }
-}
-
-std::vector<std::string> CacheData::getDirectoryChildren() const {
-  if (!isDirectory()) {
-    return {};
-  }
-
-  if (m_directory_children_need_sorting) {
-    sort(m_directory_children.begin(), m_directory_children.end());
-    m_directory_children.erase(
-        std::unique(
-            m_directory_children.begin(),
-            m_directory_children.end()),
-        m_directory_children.end());
-    m_directory_children_need_sorting = false;
-  }
-
-  return m_directory_children;
 }
 
 }  // namespace HPHP

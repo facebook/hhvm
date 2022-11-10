@@ -22,8 +22,6 @@
 #include <cstdint>
 #include <string>
 #include <atomic>
-#include <folly/Range.h>
-#include <folly/container/F14Map.h>
 
 namespace HPHP {
 
@@ -49,18 +47,13 @@ struct CacheData {
   // Create a named directory entry.
   void createDirectory(const std::string& name, uint64_t id);
 
-  // Point into an existing cache file on disk.
-  bool loadFromMmap(MmapFile* mmap_file);
+  // Point into an existing cache file on disk.  Populates name on success.
+  bool loadFromMmap(MmapFile* mmap_file, std::string* name);
 
   // --- End creation functions.
 
   // Push the internal data for this instance to CacheSaver for serialization.
   bool save(CacheSaver* cs) const;
-
-  // Get the name which is stored internally.
-  const std::string& getName() const {
-    return m_name;
-  }
 
   bool isRegularFile() const;
   bool isDirectory() const;
@@ -91,15 +84,7 @@ struct CacheData {
   // Returns false if data is not compressed, or on any other error.
   bool getDecompressedData(std::string* data) const;
 
-  // Write out the contents of this entry cache to stdout, for logging.
   void dump() const;
-
-  // CacheManager needs fast access to the directory listing, but it
-  // stores its files in an unsorted hash table for performance. So
-  // we so store a flat list of child items on the CacheData for the
-  // parent directory.
-  void addChildToDirectory(std::string_view childName);
-  std::vector<std::string> getDirectoryChildren() const;
 
  private:
   static const int kFlag_Compressed  = 0x00000001;
@@ -125,20 +110,8 @@ struct CacheData {
   std::atomic<bool> m_exist_checked{false};
   std::atomic<bool> m_data_fetched{false};
 
-  // To facilitate rapid directory listings, the CacheManager
-  // stores a list of child items on parent directory entries.
-  // (The directories may be created on demand when a file is
-  // added.) To address the typical usecase (load up a bunch of
-  // files initially, and then repeatedly list a few directories),
-  // we just append the items to a vector as they're added and
-  // set a dirty flag.
-  // When/if a particular directory is listed, if it's dirty it
-  // gets sorted and cleaned up to preserve legacy behavior,
-  // and then for subsequent queries this is extremely fast.
-  mutable bool m_directory_children_need_sorting{false};
-  mutable std::vector<std::string> m_directory_children;
-
   std::string m_name;
 };
 
 }  // namespace HPHP
+

@@ -144,5 +144,9 @@ TEST(GetValueOrNullTest, Union) {
   }
 }
 
+TEST(FindByOrdinal, Empty) {
+  EXPECT_FALSE(find_by_ordinal<test::Empty>([](auto) { return true; }));
+}
+
 } // namespace
 } // namespace apache::thrift::op

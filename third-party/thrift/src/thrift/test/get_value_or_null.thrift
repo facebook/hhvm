@@ -53,3 +53,5 @@ union Union {
 struct UnionStruct {
   1: optional Union field;
 }
+
+struct Empty {}

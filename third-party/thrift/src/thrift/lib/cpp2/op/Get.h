@@ -53,12 +53,16 @@ void for_each_ordinal(F&& f) {
 
 // Calls the given function with with ordinal<1> to ordinal<N>, returing the
 // first 'true' result produced.
-template <typename T, typename F>
+template <typename T, typename F, std::enable_if_t<size_v<T> != 0>* = nullptr>
 decltype(auto) find_by_ordinal(F&& f) {
   return detail::find_by_ordinal_impl(
       std::forward<F>(f), std::make_integer_sequence<size_t, size_v<T>>{});
 }
 
+template <typename T, typename F>
+std::enable_if_t<size_v<T> == 0, bool> find_by_ordinal(F&&) {
+  return false;
+}
 // Gets the field id, for example:
 //
 //   // Resolves to field id assigned to the field "foo" in MyS.

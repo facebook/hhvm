@@ -152,7 +152,8 @@ impl<'bytes> DepGraph<'bytes> {
         }
     }
 
-    /// Add the direct typing dependencies for one dependency.
+    /// Add the direct typing dependents for one dependency (i.e. the fanout of
+    /// that one dependency).
     pub fn add_typing_deps_for_dep(&self, acc: &mut HashTrieSet<Dep>, dep: Dep) {
         if let Some(dept_hash_list) = self.hash_list_for(dep) {
             for dept in self.hash_list_hashes(dept_hash_list) {
@@ -161,7 +162,7 @@ impl<'bytes> DepGraph<'bytes> {
         }
     }
 
-    /// Query the direct typing dependencies for the given set of dependencies.
+    /// Query the direct typing dependents for the given set of dependencies.
     pub fn query_typing_deps_multi(&self, deps: &HashTrieSet<Dep>) -> HashTrieSet<Dep> {
         let mut acc = deps.clone();
         for dep in deps {

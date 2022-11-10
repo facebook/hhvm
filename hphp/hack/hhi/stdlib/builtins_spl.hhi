@@ -211,13 +211,13 @@ class GlobIterator extends FilesystemIterator implements Countable {
 class SplStack<T> extends SplDoublyLinkedList<T> {
 }
 
-class SplPriorityQueue<T> implements Iterator<T>, Countable {
+class SplPriorityQueue<T> implements Iterator<HH\FIXME\POISON_MARKER<T>>, Countable {
   const int EXTR_BOTH = 3;
   const int EXTR_PRIORITY = 2;
   const int EXTR_DATA = 1;
   public function compare($a, $b): HH\FIXME\MISSING_RETURN_TYPE {}
   public function count(): int {}
-  public function current() {}
+  public function current(): HH\FIXME\POISON_MARKER<T> {}
   public function extract(): HH\FIXME\MISSING_RETURN_TYPE {}
   public function insert($value, $priority): HH\FIXME\MISSING_RETURN_TYPE {}
   public function isEmpty(): HH\FIXME\MISSING_RETURN_TYPE {}
@@ -227,7 +227,7 @@ class SplPriorityQueue<T> implements Iterator<T>, Countable {
   public function rewind(): void {}
   public function setExtractFlags($flags): HH\FIXME\MISSING_RETURN_TYPE {}
   public function top(): HH\FIXME\MISSING_RETURN_TYPE {}
-  public function valid() {}
+  public function valid(): bool {}
 }
 
 interface SplObserver {

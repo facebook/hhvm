@@ -48,11 +48,16 @@ class ThriftServerConfig {
    */
   std::string getCPUWorkerThreadName() const;
 
+  // get value read from configerator
+  std::optional<std::string> getBaselineCPUWorkerThreadName() const;
+
   /**
    * Get the timeout for joining workers.
    * @return workers joing timeout in seconds
    */
   std::chrono::seconds getWorkersJoinTimeout() const;
+
+  std::optional<std::chrono::seconds> getBaselineWorkersJoinTimeout() const;
 
   /**
    * Get the maximum number of pending connections each io worker thread can
@@ -60,11 +65,15 @@ class ThriftServerConfig {
    */
   uint32_t getMaxNumPendingConnectionsPerWorker() const;
 
+  std::optional<uint32_t> getBaselineMaxNumPendingConnectionsPerWorker() const;
+
   /** Get maximum number of milliseconds we'll wait for data (0 = infinity).
    *
    *  @return number of milliseconds, or 0 if no timeout set.
    */
   std::chrono::milliseconds getIdleTimeout() const;
+
+  std::optional<std::chrono::milliseconds> getBaselineIdleTimeout() const;
 
   /** Get maximum number of milliseconds we'll keep the connection alive (0 =
    * infinity).
@@ -80,6 +89,8 @@ class ThriftServerConfig {
    */
   size_t getNumIOWorkerThreads() const;
 
+  std::optional<size_t> getBaselineNumIOWorkerThreads() const;
+
   /**
    * Get the number of CPU (pool) threads
    *
@@ -87,12 +98,16 @@ class ThriftServerConfig {
    */
   size_t getNumCPUWorkerThreads() const;
 
+  std::optional<size_t> getBaselineNumCPUWorkerThreads() const;
+
   /**
    * Get the listen backlog.
    *
    * @return listen backlog.
    */
   int getListenBacklog() const;
+
+  std::optional<int> getBaselineListenBacklog() const;
 
   const folly::sorted_vector_set<std::string>&
   getMethodsBypassMaxRequestsLimit() const;
@@ -120,6 +135,8 @@ class ThriftServerConfig {
    */
   const ServerAttributeDynamic<uint32_t>& getMaxConnections() const;
 
+  const std::optional<uint32_t> getBaselineMaxConnections() const;
+
   /**
    * Get the maximum # of requests being processed in handler before overload.
    *
@@ -127,7 +144,11 @@ class ThriftServerConfig {
    */
   const ServerAttributeDynamic<uint32_t>& getMaxRequests() const;
 
+  const std::optional<uint32_t> getBaselineMaxRequests() const;
+
   const ServerAttributeDynamic<uint64_t>& getMaxResponseSize() const;
+
+  const std::optional<uint64_t> getBaselineMaxResponseSize() const;
 
   /**
    * Get the maximum QPS this server is allowed to handle, above that we will
@@ -136,6 +157,8 @@ class ThriftServerConfig {
   const ServerAttributeDynamic<uint32_t>& getMaxQps() const;
 
   const ServerAttributeDynamic<bool>& getUseClientTimeout() const;
+
+  const std::optional<bool> getBaselineUseClientTimeout() const;
 
   const ServerAttributeDynamic<bool>& getEnableCodel() const;
 
@@ -147,11 +170,17 @@ class ThriftServerConfig {
   const ServerAttributeDynamic<std::chrono::milliseconds>& getTaskExpireTime()
       const;
 
+  const std::optional<std::chrono::milliseconds> getBaselineTaskExpireTime()
+      const;
+
   /**
    * If there is no request for the stream for the given time period, then the
    * stream will create timeout error.
    */
   const ServerAttributeDynamic<std::chrono::milliseconds>& getStreamExpireTime()
+      const;
+
+  const std::optional<std::chrono::milliseconds> getBaselineStreamExpireTime()
       const;
 
   /**
@@ -162,6 +191,8 @@ class ThriftServerConfig {
   const ServerAttributeDynamic<std::chrono::milliseconds>& getQueueTimeout()
       const;
 
+  const std::optional<std::chrono::milliseconds> getBaselineQueueTimeout()
+      const;
   /**
    * Gets an observer representing the socket queue timeout. If no value is
    * set, this falls back to the thrift flag,
@@ -169,6 +200,9 @@ class ThriftServerConfig {
    */
   const ServerAttributeDynamic<std::chrono::nanoseconds>&
   getSocketQueueTimeout() const;
+
+  const std::optional<std::chrono::nanoseconds> getBaselineSocketQueueTimeout()
+      const;
 
   const ServerAttributeDynamic<std::chrono::milliseconds>&
   getSocketWriteTimeout() const;

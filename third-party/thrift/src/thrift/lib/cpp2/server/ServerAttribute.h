@@ -149,6 +149,10 @@ struct ServerAttributeObservable {
   }
   T get() const { return **getObserver(); }
 
+  std::optional<T> getBaseline() const {
+    return **rawValues_.baseline_.getObserver();
+  }
+
   const folly::observer::Observer<T>& getObserver() const {
     return mergedObserver_.try_emplace_with([&] {
       return folly::observer::makeObserver(
@@ -204,6 +208,7 @@ struct ServerAttributeAtomic
   using apache::thrift::detail::ServerAttributeObservable<T>::set;
   using apache::thrift::detail::ServerAttributeObservable<T>::getObserver;
   using apache::thrift::detail::ServerAttributeObservable<T>::setDefault;
+  using apache::thrift::detail::ServerAttributeObservable<T>::getBaseline;
 
   T get() const { return *getAtomicObserver(); }
 
@@ -224,6 +229,7 @@ struct ServerAttributeThreadLocal
   using apache::thrift::detail::ServerAttributeObservable<T>::set;
   using apache::thrift::detail::ServerAttributeObservable<T>::getObserver;
   using apache::thrift::detail::ServerAttributeObservable<T>::setDefault;
+  using apache::thrift::detail::ServerAttributeObservable<T>::getBaseline;
 
   const T& get() const { return **getTLObserver(); }
 
@@ -251,6 +257,7 @@ struct ServerAttributeStatic {
 
   void setDefault(T value) { default_ = value; }
   const T& get() const { return merged_.get(); }
+  const std::optional<T> getBaseline() const { return rawValues_.baseline_; }
 
  protected:
   void updateMergedValue() {

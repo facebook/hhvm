@@ -1556,6 +1556,10 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    * it may be empty if ResourcePools are not in use.
    */
   ResourcePoolSet& resourcePoolSet() override { return resourcePoolSet_; }
+
+  const ThriftServerConfig& getThriftServerConfig() const {
+    return thriftConfig_;
+  }
 };
 
 namespace detail {

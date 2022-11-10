@@ -912,7 +912,9 @@ struct SubprocessImpl : public Client::Impl {
        RefValVec,
        std::vector<RefValVec>,
        const folly::Range<const OutputType*>&,
-       const folly::Range<const OutputType*>*) override;
+       const folly::Range<const OutputType*>*,
+       Client::ExecMetadata
+       ) override;
 
 private:
   // Manage the pool of blob files
@@ -1111,7 +1113,8 @@ SubprocessImpl::exec(const RequestId& requestId,
                      RefValVec config,
                      std::vector<RefValVec> inputs,
                      const folly::Range<const OutputType*>& output,
-                     const folly::Range<const OutputType*>* finiOutput) {
+                     const folly::Range<const OutputType*>* finiOutput,
+                     Client::ExecMetadata) {
   FTRACE(4, "{} executing \"{}\" ({} runs)\n",
          requestId.tracePrefix(), command, inputs.size());
 

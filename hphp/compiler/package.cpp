@@ -1216,7 +1216,9 @@ coro::Task<void> Package::indexGroup(const IndexCallback& callback,
           g_indexJob,
           std::make_tuple(*configRef, std::move(metasRef)),
           std::move(fileRefs),
-          optimistic
+          Client::ExecMetadata {
+            .optimistic = optimistic,
+          }
         )
       );
       HPHP_CORO_MOVE_RETURN(out);
@@ -1450,7 +1452,7 @@ Package::emitAll(const EmitCallback& callback, const UnitIndex& index,
   auto const logEdges = !edgesPath.native().empty();
 
   // Find the initial set of groups
-  auto groups = HPHP_CORO_AWAIT(groupAll(true, true));
+  auto input_groups = HPHP_CORO_AWAIT(groupAll(true, true));
 
   // Select the files specified as inputs, collect ondemand file names.
   std::vector<SymbolRefEdge> edges;
@@ -1458,7 +1460,7 @@ Package::emitAll(const EmitCallback& callback, const UnitIndex& index,
   {
     Timer timer{Timer::WallTime, "emitting inputs"};
     ondemand = HPHP_CORO_AWAIT(
-      emitGroups(std::move(groups), callback, index)
+      emitGroups(std::move(input_groups), callback, index)
     );
     if (logEdges) {
       edges.insert(
@@ -1475,10 +1477,10 @@ Package::emitAll(const EmitCallback& callback, const UnitIndex& index,
   Timer timer{Timer::WallTime, "emitting on-demand"};
   // We have ondemand files, so keep emitting until a fix point.
   do {
-    assertx(groups.empty());
-    groupFiles(groups, std::move(ondemand.m_files));
+    Groups ondemand_groups;
+    groupFiles(ondemand_groups, std::move(ondemand.m_files));
     ondemand = HPHP_CORO_AWAIT(
-      emitGroups(std::move(groups), callback, index)
+      emitGroups(std::move(ondemand_groups), callback, index)
     );
     if (logEdges) {
       edges.insert(

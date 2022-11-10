@@ -1015,7 +1015,7 @@ template <typename C> coro::Task<typename Job<C>::ExecT>
 Client::exec(const Job<C>& job,
              typename Job<C>::ConfigT config,
              std::vector<typename Job<C>::InputsT> inputs,
-             bool optimistic) {
+             Client::ExecMetadata metadata) {
   using namespace folly::gen;
   using namespace detail;
 
@@ -1271,7 +1271,8 @@ Client::exec(const Job<C>& job,
               std::move(configRefVals),
               std::move(inputsRefVals),
               outputTypes,
-              finiTypes.get_pointer()
+              finiTypes.get_pointer(),
+              metadata
             )
           )
         );
@@ -1304,7 +1305,8 @@ Client::exec(const Job<C>& job,
                   std::move(configRefVals),
                   std::move(inputsRefVals),
                   outputTypes,
-                  finiTypes.get_pointer()
+                  finiTypes.get_pointer(),
+                  metadata
                 )));
               },
               useFallback,
@@ -1312,7 +1314,7 @@ Client::exec(const Job<C>& job,
               // stores. It's expected we'll get an exception thrown
               // if everything isn't uploaded and we don't want to
               // fallback in that case.
-              optimistic
+              metadata.optimistic
             )
           )
         );
@@ -1380,7 +1382,7 @@ Client::exec(const Job<C>& job,
     return toRef(std::move(v), Tag<RetT>{});
   };
 
-  if (optimistic && supportsOptimistic()) {
+  if (metadata.optimistic && supportsOptimistic()) {
     ++m_stats->optimisticExecs;
   }
 

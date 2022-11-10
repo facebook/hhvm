@@ -531,12 +531,32 @@ struct Client {
   storeMultiTuple(std::vector<std::tuple<T, Ts...>>,
                   bool optimistic = false);
 
+  // Hints to help the job scheduler
+  struct ExecMetadata {
+    // Assume all inputs are already present
+    bool optimistic{false};
+
+    // Expect the job to use this many logical cores for the duration it runs.
+    int32_t cpu_units{1};
+
+    // A job identifier used to track the "same" job across many
+    // client sessions and job executions with different inputs.
+    // Intuitively a job key can be a build target name.
+    std::string job_key;
+
+    // Try to schedule this job on a worker that ran a previous job
+    // with a matching key, to improve cache locality. Inspect the
+    // first key, then the second, and so on. Intuitively, an affinity
+    // key can be an input or output artifact name.
+    std::vector<std::string> affinity_keys;
+  };
+
   // Execute a job with the given sets of inputs (and any config setup
   // params). The output of those job executions will be returned as a
   // vector of Refs. The exact format of the inputs and outputs is
   // determined (at compile time) by the job being run and matches the
-  // job's specification. If "optimistic" is set to true, then at
-  // least one of the inputs was stored using the optimistic
+  // job's specification. If ExecMetadata::optimistic is set to true,
+  // then at least one of the inputs was stored using the optimistic
   // flag. This means the inputs may not actually exist on the worker
   // side. If it doesn't, the execution will fail (by throwing an
   // exception), and the caller should (actually) store the data and
@@ -545,7 +565,16 @@ struct Client {
   exec(const Job<C>& job,
        typename Job<C>::ConfigT config,
        std::vector<typename Job<C>::InputsT> inputs,
-       bool optimistic = false);
+       ExecMetadata);
+
+  // Exec with default metadata.
+  template <typename C> coro::Task<typename Job<C>::ExecT>
+  exec(const Job<C>& job,
+       typename Job<C>::ConfigT config,
+       std::vector<typename Job<C>::InputsT> inputs) {
+    ExecMetadata md{};
+    return exec(job, std::move(config), std::move(inputs), std::move(md));
+  }
 
   // Statistics about the usage of this extern-worker.
   struct Stats {
@@ -724,7 +753,9 @@ struct Client::Impl {
        RefValVec config,
        std::vector<RefValVec> inputs,
        const folly::Range<const OutputType*>& output,
-       const folly::Range<const OutputType*>* finiOutput) = 0;
+       const folly::Range<const OutputType*>* finiOutput,
+       Client::ExecMetadata
+       ) = 0;
 protected:
   Impl(std::string name, Client& parent)
     : m_name{std::move(name)}

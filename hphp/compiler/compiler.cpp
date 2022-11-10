@@ -1202,7 +1202,9 @@ bool process(const CompilerOptions &po) {
             std::move(fileMetas)
           ),
           std::move(files),
-          optimistic
+          Client::ExecMetadata {
+            .optimistic = optimistic
+          }
         )
       );
 
@@ -1249,7 +1251,9 @@ bool process(const CompilerOptions &po) {
         s_parseJob,
         std::make_tuple(config, std::move(fileMetas)),
         std::move(files),
-        optimistic
+        Client::ExecMetadata {
+          .optimistic = optimistic
+        }
       )
     );
 

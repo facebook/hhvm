@@ -170,11 +170,14 @@ oprot.writeI32(_iter0);
 
           _chain.postRead(_data);
 
-          reactor.core.publisher.Mono<Void> _delegateResponse =
-            _delegate.foo();
+          reactor.core.publisher.Mono<Void> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
+              _delegate.foo());
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+          } else {
+            _delegateResponse = _delegate.foo();
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =
@@ -260,11 +263,14 @@ oprot.writeI32(_iter0);
 
           _chain.postRead(_data);
 
-          reactor.core.publisher.Mono<Void> _delegateResponse =
-            _delegate.interact(arg);
+          reactor.core.publisher.Mono<Void> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
+              _delegate.interact(arg));
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+          } else {
+            _delegateResponse = _delegate.interact(arg);
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =
@@ -351,11 +357,14 @@ oprot.writeI32(_iter0);
 
           _chain.postRead(_data);
 
-          reactor.core.publisher.Mono<Integer> _delegateResponse =
-            _delegate.interactFast();
+          reactor.core.publisher.Mono<Integer> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
+              _delegate.interactFast());
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+          } else {
+            _delegateResponse = _delegate.interactFast();
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =

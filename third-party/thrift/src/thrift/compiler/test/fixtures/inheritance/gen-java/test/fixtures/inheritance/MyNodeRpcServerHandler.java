@@ -88,11 +88,14 @@ public class MyNodeRpcServerHandler  extends test.fixtures.inheritance.MyRootRpc
 
           _chain.postRead(_data);
 
-          reactor.core.publisher.Mono<Void> _delegateResponse =
-            _delegate.doMid();
+          reactor.core.publisher.Mono<Void> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
+              _delegate.doMid());
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+          } else {
+            _delegateResponse = _delegate.doMid();
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =

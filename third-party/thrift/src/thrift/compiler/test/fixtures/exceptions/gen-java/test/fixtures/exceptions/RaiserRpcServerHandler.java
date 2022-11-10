@@ -97,11 +97,14 @@ public class RaiserRpcServerHandler
 
           _chain.postRead(_data);
 
-          reactor.core.publisher.Mono<Void> _delegateResponse =
-            _delegate.doBland();
+          reactor.core.publisher.Mono<Void> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
+              _delegate.doBland());
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+          } else {
+            _delegateResponse = _delegate.doBland();
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =
@@ -210,11 +213,14 @@ public class RaiserRpcServerHandler
 
           _chain.postRead(_data);
 
-          reactor.core.publisher.Mono<Void> _delegateResponse =
-            _delegate.doRaise();
+          reactor.core.publisher.Mono<Void> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
+              _delegate.doRaise());
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+          } else {
+            _delegateResponse = _delegate.doRaise();
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =
@@ -333,11 +339,14 @@ oprot.writeString(_iter0);
 
           _chain.postRead(_data);
 
-          reactor.core.publisher.Mono<String> _delegateResponse =
-            _delegate.get200();
+          reactor.core.publisher.Mono<String> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
+              _delegate.get200());
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+          } else {
+            _delegateResponse = _delegate.get200();
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =
@@ -449,11 +458,14 @@ oprot.writeString(_iter0);
 
           _chain.postRead(_data);
 
-          reactor.core.publisher.Mono<String> _delegateResponse =
-            _delegate.get500();
+          reactor.core.publisher.Mono<String> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
+              _delegate.get500());
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+          } else {
+            _delegateResponse = _delegate.get500();
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =

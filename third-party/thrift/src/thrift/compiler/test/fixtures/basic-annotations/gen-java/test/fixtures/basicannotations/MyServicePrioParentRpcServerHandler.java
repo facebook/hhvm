@@ -91,11 +91,14 @@ public class MyServicePrioParentRpcServerHandler
 
           _chain.postRead(_data);
 
-          reactor.core.publisher.Mono<Void> _delegateResponse =
-            _delegate.ping();
+          reactor.core.publisher.Mono<Void> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
+              _delegate.ping());
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+          } else {
+            _delegateResponse = _delegate.ping();
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =
@@ -178,11 +181,14 @@ public class MyServicePrioParentRpcServerHandler
 
           _chain.postRead(_data);
 
-          reactor.core.publisher.Mono<Void> _delegateResponse =
-            _delegate.pong();
+          reactor.core.publisher.Mono<Void> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
+              _delegate.pong());
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+          } else {
+            _delegateResponse = _delegate.pong();
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =

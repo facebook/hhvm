@@ -95,11 +95,14 @@ _iter0.write0(oprot);
 
           _chain.postRead(_data);
 
-          reactor.core.publisher.Mono<test.fixtures.basic.MyStruct> _delegateResponse =
-            _delegate.query(u);
+          reactor.core.publisher.Mono<test.fixtures.basic.MyStruct> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
+              _delegate.query(u));
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+          } else {
+            _delegateResponse = _delegate.query(u);
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =

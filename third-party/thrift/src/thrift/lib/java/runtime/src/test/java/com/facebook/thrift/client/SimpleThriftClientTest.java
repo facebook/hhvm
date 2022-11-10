@@ -23,6 +23,7 @@ import com.facebook.swift.service.ThriftServerConfig;
 import com.facebook.thrift.example.ping.PingRequest;
 import com.facebook.thrift.example.ping.PingResponse;
 import com.facebook.thrift.example.ping.PingService;
+import com.facebook.thrift.example.ping.PingService.Reactive;
 import com.facebook.thrift.example.ping.PingServiceRpcServerHandler;
 import com.facebook.thrift.legacy.server.LegacyServerTransport;
 import com.facebook.thrift.legacy.server.LegacyServerTransportFactory;
@@ -30,6 +31,7 @@ import com.facebook.thrift.legacy.server.testservices.BlockingPingService;
 import com.facebook.thrift.server.RpcServerHandler;
 import com.facebook.thrift.util.FutureUtil;
 import com.facebook.thrift.util.SPINiftyMetrics;
+import com.facebook.thrift.util.resources.RpcResources;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.airlift.units.Duration;
 import java.net.InetSocketAddress;
@@ -37,14 +39,20 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.apache.thrift.ProtocolId;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.NonBlocking;
+import reactor.test.StepVerifier;
 
 public class SimpleThriftClientTest {
+
   private static final Logger LOG = LoggerFactory.getLogger(SimpleThriftClientTest.class);
 
   @Rule public ExpectedException expectedException = ExpectedException.none();
@@ -104,6 +112,49 @@ public class SimpleThriftClientTest {
     PingService.Async client =
         PingService.Async.clientBuilder().setProtocolId(ProtocolId.BINARY).build(factory, address);
     client.pingVoid(new PingRequest.Builder().setRequest("ping").build()).get();
+  }
+
+  @Test
+  public void testPingPongWithReactiveClientAndServer() {
+
+    System.out.println("create server handler");
+    Reactive mock = Mockito.mock(Reactive.class);
+    Mockito.when(mock.ping(Mockito.any(PingRequest.class)))
+        .then(
+            invocation -> {
+              if (RpcResources.isForceExecutionOffEventLoop()) {
+                Assert.assertFalse(Thread.currentThread() instanceof NonBlocking);
+              }
+              return Mono.just(PingResponse.defaultInstance());
+            });
+
+    RpcServerHandler serverHandler = new PingServiceRpcServerHandler(mock, Collections.emptyList());
+
+    System.out.println("starting server");
+    LegacyServerTransportFactory transportFactory =
+        new LegacyServerTransportFactory(new ThriftServerConfig().setEnableJdkSsl(false));
+    LegacyServerTransport transport = transportFactory.createServerTransport(serverHandler).block();
+    InetSocketAddress address = (InetSocketAddress) transport.getAddress();
+
+    LOG.info("creating client");
+
+    RpcClientFactory factory =
+        RpcClientFactory.builder()
+            .setDisableLoadBalancing(true)
+            .setThriftClientConfig(
+                new ThriftClientConfig()
+                    .setDisableSSL(true)
+                    .setRequestTimeout(Duration.succinctDuration(1, TimeUnit.DAYS)))
+            .build();
+
+    PingService.Reactive client =
+        PingService.Reactive.clientBuilder()
+            .setProtocolId(ProtocolId.BINARY)
+            .build(factory, address);
+
+    StepVerifier.create(client.ping(PingRequest.defaultInstance()))
+        .expectNextCount(1)
+        .verifyComplete();
   }
 
   @Test

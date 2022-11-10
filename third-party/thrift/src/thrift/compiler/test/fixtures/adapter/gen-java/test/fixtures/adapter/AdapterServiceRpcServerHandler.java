@@ -95,11 +95,14 @@ _iter0.write0(oprot);
 
           _chain.postRead(_data);
 
-          reactor.core.publisher.Mono<test.fixtures.adapter.CountingStruct> _delegateResponse =
-            _delegate.count();
+          reactor.core.publisher.Mono<test.fixtures.adapter.CountingStruct> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
+              _delegate.count());
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+          } else {
+            _delegateResponse = _delegate.count();
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =
@@ -188,11 +191,14 @@ _iter0.write0(oprot);
 
           _chain.postRead(_data);
 
-          reactor.core.publisher.Mono<test.fixtures.adapter.HeapAllocated> _delegateResponse =
-            _delegate.adaptedTypes(arg);
+          reactor.core.publisher.Mono<test.fixtures.adapter.HeapAllocated> _delegateResponse = null;
 
           if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
+              _delegate.adaptedTypes(arg));
             _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+          } else {
+            _delegateResponse = _delegate.adaptedTypes(arg);
           }
 
           reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =

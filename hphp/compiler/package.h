@@ -247,7 +247,7 @@ struct Package {
     const extern_worker::Ref<Config>&,
     extern_worker::Ref<FileMetaVec>,
     std::vector<FileData>,
-    bool
+    extern_worker::Client::ExecMetadata
   )>;
 
   coro::Task<bool> parse(const UnitIndex&, const ParseCallback&);

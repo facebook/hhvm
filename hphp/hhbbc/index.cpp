@@ -7880,6 +7880,9 @@ void flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       HPHP_CORO_RETURN(UpdateVec{});
     }
 
+    Client::ExecMetadata metadata{
+      .job_key = folly::sformat("flatten classes {}", work.classes[0])
+    };
     auto classes = from(work.classes)
       | map([&] (SString c) { return index.classRefs.at(c); })
       | as<std::vector>();
@@ -7892,7 +7895,8 @@ void flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       index.client->exec(
         s_flattenJob,
         std::move(config),
-        singleton_vec(std::make_tuple(std::move(classes), std::move(deps)))
+        singleton_vec(std::make_tuple(std::move(classes), std::move(deps))),
+        std::move(metadata)
       )
     );
     // Every flattening job is a single work-unit, so we should only

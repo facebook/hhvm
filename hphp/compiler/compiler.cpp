@@ -1187,7 +1187,7 @@ bool process(const CompilerOptions &po) {
   auto const parseRemoteUnit = [&] (const Ref<Package::Config>& config,
                                     Ref<Package::FileMetaVec> fileMetas,
                                     std::vector<Package::FileData> files,
-                                    bool optimistic)
+                                    Client::ExecMetadata metadata)
     -> coro::Task<Package::ParseMetaVec> {
     if (RO::EvalUseHHBBC) {
       // Run the HHBBC parse job, which produces WholeProgramInput
@@ -1202,9 +1202,7 @@ bool process(const CompilerOptions &po) {
             std::move(fileMetas)
           ),
           std::move(files),
-          Client::ExecMetadata {
-            .optimistic = optimistic
-          }
+          std::move(metadata)
         )
       );
 
@@ -1251,9 +1249,7 @@ bool process(const CompilerOptions &po) {
         s_parseJob,
         std::make_tuple(config, std::move(fileMetas)),
         std::move(files),
-        Client::ExecMetadata {
-          .optimistic = optimistic
-        }
+        std::move(metadata)
       )
     );
 

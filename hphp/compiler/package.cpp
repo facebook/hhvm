@@ -885,8 +885,14 @@ coro::Task<void> Package::parseGroup(
         // Retry until we successfully parse bytecode without requesting
         // any new decls.
         for (size_t attempts = 1;; ++attempts) {
+          assertx(!metas.empty());
+          Client::ExecMetadata metadata{
+            .optimistic = optimistic,
+            .job_key = folly::sformat("parse-{}-{}", attempts,
+                                      metas[0].m_filename)
+          };
           auto parseMetas = HPHP_CORO_AWAIT(callback(
-            *configRef, metasRef, fds, optimistic
+            *configRef, metasRef, fds, metadata
           ));
           if (parseMetas.empty()) {
             m_total += workItems;
@@ -1209,16 +1215,14 @@ coro::Task<void> Package::indexGroup(const IndexCallback& callback,
 
     using ExecT = decltype(g_indexJob)::ExecT;
     auto const doExec = [&] (
-        auto configRef, auto metasRef, auto fileRefs, bool optimistic
+        auto configRef, auto metasRef, auto fileRefs, auto metadata
     ) -> coro::Task<ExecT> {
       auto out = HPHP_CORO_AWAIT(
         m_client.exec(
           g_indexJob,
           std::make_tuple(*configRef, std::move(metasRef)),
           std::move(fileRefs),
-          Client::ExecMetadata {
-            .optimistic = optimistic,
-          }
+          std::move(metadata)
         )
       );
       HPHP_CORO_MOVE_RETURN(out);
@@ -1239,6 +1243,11 @@ coro::Task<void> Package::indexGroup(const IndexCallback& callback,
         bool optimistic = Option::ParserOptimisticStore &&
                           m_client.supportsOptimistic();
         for (;;) {
+          assertx(!metas.empty());
+          Client::ExecMetadata metadata{
+            .optimistic = optimistic,
+            .job_key = folly::sformat("index-{}", metas[0].m_filename)
+          };
           auto [configRef, metasRef, fileRefs, optionRefs] =
             HPHP_CORO_AWAIT(storeInputs(
               optimistic, paths, metas, options, storedOptions, m_client,
@@ -1254,7 +1263,7 @@ coro::Task<void> Package::indexGroup(const IndexCallback& callback,
           }
           try {
             HPHP_CORO_RETURN(HPHP_CORO_AWAIT(doExec(
-              configRef, std::move(metasRef), std::move(inputs), optimistic
+              configRef, std::move(metasRef), std::move(inputs), std::move(metadata)
             )));
           } catch (const extern_worker::WorkerError&) {
             throw;

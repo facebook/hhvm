@@ -1855,21 +1855,16 @@ let apply_patches files_contents patches =
   if List.length patches <= 0 then
     print_endline "No patches"
   else
-    (* simple key-map: convert Relative_path.Map.t into an SMap.t
-     * without changing the values *)
-    let file_contents =
-      Relative_path.Map.fold
-        files_contents
-        ~f:(fun fn -> SMap.add (Relative_path.suffix fn))
-        ~init:SMap.empty
-    in
     let patched =
-      ServerRefactorTypes.apply_patches_to_file_contents file_contents patches
+      ServerRefactorTypes.apply_patches_to_file_contents files_contents patches
     in
-    let print_filename = not @@ Int.equal (SMap.cardinal patched) 1 in
-    SMap.iter
-      (fun fn new_contents ->
-        if print_filename then Printf.printf "//// %s\n" fn;
+    let print_filename =
+      not @@ Int.equal (Relative_path.Map.cardinal patched) 1
+    in
+    Relative_path.Map.iter
+      ~f:(fun fn new_contents ->
+        if print_filename then
+          Printf.printf "//// %s\n" (Relative_path.to_absolute fn);
         Out_channel.output_string stdout new_contents)
       patched
 

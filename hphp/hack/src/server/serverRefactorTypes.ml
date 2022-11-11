@@ -145,8 +145,8 @@ let list_to_file_map =
 let apply_patches_to_file_contents file_contents patches =
   let file_map = list_to_file_map patches in
   let apply fn old_contents =
-    match SMap.find_opt fn file_map with
+    match SMap.find_opt (Relative_path.to_absolute fn) file_map with
     | Some patches -> apply_patches_to_string old_contents patches
     | None -> old_contents
   in
-  SMap.mapi apply file_contents
+  Relative_path.Map.mapi ~f:apply file_contents

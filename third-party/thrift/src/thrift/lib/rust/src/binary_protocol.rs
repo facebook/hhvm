@@ -528,5 +528,5 @@ where
 {
     let source: DeserializeSource<C> = b.into();
     let mut deser = BinaryProtocolDeserializer::new(source.0);
-    Ok(T::read(&mut deser)?)
+    T::read(&mut deser)
 }

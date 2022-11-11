@@ -101,7 +101,7 @@ where
 
     ctx_stack.on_write_data(&SerializedMessage {
         protocol: P::PROTOCOL_ID,
-        method_name: &name_cstr,
+        method_name: name_cstr,
         buffer: PhantomData,
     })?;
     ctx_stack.post_write(0)?;

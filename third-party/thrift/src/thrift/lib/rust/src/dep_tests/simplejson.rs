@@ -96,8 +96,7 @@ fn test_large_roundtrip() -> Result<()> {
         "e":2,
         "int_keys":{"42":43,"44":45}
     }"#
-    .replace(" ", "")
-    .replace("\n", "");
+    .replace([' ', '\n'], "");
     assert_eq!(expected_string, s);
 
     // It at least needs to be valid json, the serialize then
@@ -136,8 +135,7 @@ fn test_struct_key() -> Result<()> {
         "key_map":{{"num":0,"two":0}:1},
         "bin":""
     }"#
-    .replace(" ", "")
-    .replace("\n", "");
+    .replace([' ', '\n'], "");
     assert_eq!(expected_string, s);
 
     // It's definitely not JSON...
@@ -172,8 +170,7 @@ fn test_weird_text() -> Result<()> {
         "req_def":"IAMREQ",
         "bin":"MTIzNA"
     }"#
-    .replace(" ", "")
-    .replace("\n", "");
+    .replace([' ', '\n'], "");
     assert_eq!(expected_string, s);
     // Make sure its equal
     assert_eq!(sub, deserialize(s).unwrap());
@@ -189,7 +186,7 @@ fn test_weird_text() -> Result<()> {
     }"#
     // Double-space to deal with "tabs"
     .replace("  ", "")
-    .replace("\n", "");
+    .replace('\n', "");
     assert_eq!(expected_string, s);
     // Make sure its equal
     assert_eq!(sub, deserialize(s).unwrap());
@@ -215,8 +212,7 @@ fn test_skip_complex() -> Result<()> {
         "extra_map":{"thing":null,"thing2":2},
         "extra_bool":true
     }"#
-    .replace(" ", "")
-    .replace("\n", "");
+    .replace([' ', '\n'], "");
     // Make sure everything is skipped properly
     assert_eq!(sub, deserialize(input).unwrap());
 
@@ -233,8 +229,7 @@ fn test_need_commas() -> Result<()> {
         "num":1
         "two":2
     }"#
-    .replace(" ", "")
-    .replace("\n", "");
+    .replace([' ', '\n'], "");
     assert!(deserialize::<Small, _, _>(input).is_err());
 
     // even when skipping
@@ -244,8 +239,7 @@ fn test_need_commas() -> Result<()> {
         "extra_map":{"thing":null,"thing2":2}
         "extra_bool":true
     }"#
-    .replace(" ", "")
-    .replace("\n", "");
+    .replace([' ', '\n'], "");
     assert!(deserialize::<Small, _, _>(input2).is_err());
 
     Ok(())
@@ -293,8 +287,7 @@ fn test_null_stuff() -> Result<()> {
         "req_def":"IAMREQ",
         "bin":"MTIzNA"
     }"#
-    .replace(" ", "")
-    .replace("\n", "");
+    .replace([' ', '\n'], "");
     // Make sure everything is skipped properly
     assert_eq!(sub, deserialize(input).unwrap());
 
@@ -515,8 +508,7 @@ fn test_unknown_union() -> Result<()> {
     let old_output = r#"{
         "UnknownField":-1
     }"#
-    .replace(" ", "")
-    .replace("\n", "");
+    .replace([' ', '\n'], "");
 
     assert_eq!(u, deserialize(old_output).unwrap());
 

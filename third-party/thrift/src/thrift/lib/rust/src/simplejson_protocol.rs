@@ -531,11 +531,8 @@ impl<B: Buf> SimpleJsonProtocolDeserializer<B> {
             ValueKind::Object => {
                 let mut map = serde_json::Map::new();
                 self.read_struct_begin(|_| ())?;
-                loop {
-                    let key = match self.peek() {
-                        Some(b'"') => self.read_string()?,
-                        _ => break,
-                    };
+                while let Some(b'"') = self.peek() {
+                    let key = self.read_string()?;
                     self.eat(b":")?;
                     let value = self.read_json_value(max_depth - 1)?;
                     map.insert(key, value);
@@ -660,9 +657,7 @@ impl<B: Buf> SimpleJsonProtocolDeserializer<B> {
     fn check_null(&mut self) -> bool {
         self.strip_whitespace();
         match self.peek() {
-            Some(b'n') => {
-                return true;
-            }
+            Some(b'n') => true,
             _ => false,
         }
     }

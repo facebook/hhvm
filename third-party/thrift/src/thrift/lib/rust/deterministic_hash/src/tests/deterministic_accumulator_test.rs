@@ -129,8 +129,7 @@ fn deterministic_accumulator_end_ordered_on_empty() {
     da.end_ordered();
     assert_eq!(
         da.get_result()
-            .err()
-            .expect("error is expected")
+            .expect_err("error is expected")
             .downcast::<DeterministicAccumulatorError>()
             .expect("DeterministicAccumulatorError is expected"),
         DeterministicAccumulatorError::EndOrderedOnEmpty
@@ -143,8 +142,7 @@ fn deterministic_accumulator_end_unordered_on_empty() {
     da.end_unordered();
     assert_eq!(
         da.get_result()
-            .err()
-            .expect("error is expected")
+            .expect_err("error is expected")
             .downcast::<DeterministicAccumulatorError>()
             .expect("DeterministicAccumulatorError is expected"),
         DeterministicAccumulatorError::EndUnorderedOnEmpty
@@ -158,8 +156,7 @@ fn deterministic_accumulator_end_unordered_on_ordered() {
     da.end_unordered();
     assert_eq!(
         da.get_result()
-            .err()
-            .expect("error is expected")
+            .expect_err("error is expected")
             .downcast::<DeterministicAccumulatorError>()
             .expect("DeterministicAccumulatorError is expected"),
         DeterministicAccumulatorError::EndUnorderedOnOrdered
@@ -173,8 +170,7 @@ fn deterministic_accumulator_end_ordered_on_unordered() {
     da.end_ordered();
     assert_eq!(
         da.get_result()
-            .err()
-            .expect("error is expected")
+            .expect_err("error is expected")
             .downcast::<DeterministicAccumulatorError>()
             .expect("DeterministicAccumulatorError is expected"),
         DeterministicAccumulatorError::EndOrderedOnUnordered

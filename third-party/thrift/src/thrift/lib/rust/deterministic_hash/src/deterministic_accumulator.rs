@@ -228,6 +228,6 @@ impl<H: Hasher> Hashable<H> for f64 {
 
 impl<H: Hasher> Hashable<H> for &[u8] {
     fn add_to_hasher(&self, hasher: &mut H) {
-        hasher.combine_bytes(*self);
+        hasher.combine_bytes(self);
     }
 }

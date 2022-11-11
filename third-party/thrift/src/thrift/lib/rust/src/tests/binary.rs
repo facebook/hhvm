@@ -465,7 +465,7 @@ fn read_message_begin() {
             assert_eq!(mty, MessageType::try_from(1).expect("try_from failed"));
             assert_eq!(sid, 1);
         }
-        Err(_) => assert!(false),
+        Err(_) => panic!(),
     }
 }
 

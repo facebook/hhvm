@@ -673,6 +673,19 @@ let maybe_poison_ancestors
       ( Typing_enforceability.get_enforcement env parent_return_ty,
         Typing_enforceability.get_enforcement env child_return_ty )
     with
+    (* If the parent itself overrides a fully-enforced return type
+     * then we need to "copy down" any intersection, so record this in the log
+     *)
+    | (Unenforced, Unenforced) ->
+      let child_pos =
+        Pos_or_decl.unsafe_to_raw_pos (get_pos ft_child.ft_ret.et_type)
+      in
+      let parent_pos =
+        Pos_or_decl.unsafe_to_raw_pos (get_pos ft_parent.ft_ret.et_type)
+      in
+      let p = Pos.to_absolute parent_pos in
+      let s = Printf.sprintf "!,%s,%d" (Pos.filename p) (Pos.line p) in
+      Typing_log.log_pessimise_return env child_pos (Some s)
     | (Enforced, Unenforced) ->
       let enforced_child_ty =
         Typing_partial_enforcement.get_enforced_type

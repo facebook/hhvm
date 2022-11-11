@@ -649,11 +649,16 @@ let build_method_fun_elt
       fe_internal = false;
       fe_deprecated = None;
       fe_type =
-        Decl_enforceability.maybe_pessimise_fun_type
-          ~is_method:true
-          ctx
-          pos
-          m.sm_type;
+        Decl_enforceability.(
+          maybe_pessimise_fun_type
+            ~fun_kind:
+              (if MethodFlags.get_abstract m.sm_flags then
+                Abstract_method
+              else
+                Concrete_method)
+            ctx
+            pos
+            m.sm_type);
       fe_php_std_lib = false;
       fe_support_dynamic_type = support_dynamic_type;
     }

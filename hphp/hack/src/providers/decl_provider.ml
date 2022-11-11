@@ -157,11 +157,12 @@ let maybe_pessimise_fun_decl ctx fun_decl =
       {
         fun_decl with
         fe_type =
-          Decl_enforceability.pessimise_fun_type
-            ~is_method:false
-            ctx
-            fun_decl.fe_pos
-            fun_decl.fe_type;
+          Decl_enforceability.(
+            pessimise_fun_type
+              ~fun_kind:Function
+              ctx
+              fun_decl.fe_pos
+              fun_decl.fe_type);
       }
   else
     fun_decl

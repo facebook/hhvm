@@ -266,13 +266,36 @@ let maybe_pessimise_type ~is_xhp_attr ctx ty =
 let update_return_ty ft ty =
   { ft with ft_ret = { et_type = ty; et_enforced = Unenforced } }
 
-let intersect_enforceable ~is_method ret_ty ty_to_wrap =
-  match ret_ty with
-  | Some enf_ty when is_method ->
+type fun_kind =
+  | Function
+  | Abstract_method
+  | Concrete_method
+
+let intersect_enforceable ~fun_kind ret_ty ty_to_wrap =
+  match (ret_ty, fun_kind) with
+  | (Some enf_ty, Concrete_method) ->
     Typing_make_type.intersection (get_reason ty_to_wrap) [enf_ty; ty_to_wrap]
   | _ -> ty_to_wrap
 
-let pessimise_fun_type ~is_method ctx p ty =
+(*
+  How we pessimise a function depends on how the type is enforced, where the
+  function is, and the experimental_always_pessimise_return option.
+
+  The goal is to pessimise non-enforced return types to like types, while also
+  avoiding hierarchy errors.
+
+  If experimental_always_pessimise_return is set, the all methods should get
+  like-types on their return to avoid hierarchy errors, but top-level functions should
+  only be pessimised when the type is not enforceable.
+
+  If experimental_always_pessimise_return is not set, we only pessimise the return of
+  non-enforced types. Abstract methods do not have bodies to enforce anything, so we
+  always pessimise their returns. For Concrete methods, if the type is only partially
+  enforced, we pessimise and also intersect with the partially enforced type to
+  avoid hierarchy errors.
+
+*)
+let pessimise_fun_type ~fun_kind ctx p ty =
   match get_node ty with
   | Tfun ft ->
     let return_from_async = get_ft_async ft in
@@ -280,19 +303,21 @@ let pessimise_fun_type ~is_method ctx p ty =
     let ft =
       { ft with ft_tparams = add_supportdyn_constraints p ft.ft_tparams }
     in
-    if
-      is_method
-      && TypecheckerOptions.(
+    (match
+       ( fun_kind,
+         TypecheckerOptions.(
            experimental_feature_enabled
              (Provider_context.get_tcopt ctx)
-             experimental_always_pessimise_return)
-    then
+             experimental_always_pessimise_return) )
+     with
+    | (Concrete_method, true)
+    | (Abstract_method, _) ->
       mk
         ( get_reason ty,
           Tfun (update_return_ty ft (make_like_type ~return_from_async ret_ty))
         )
-    else (
-      match get_enforcement ~return_from_async ctx ret_ty with
+    | _ ->
+      (match get_enforcement ~return_from_async ctx ret_ty with
       | Enforced _ -> mk (get_reason ty, Tfun ft)
       | Unenforced enf_ty_opt ->
         mk
@@ -301,14 +326,13 @@ let pessimise_fun_type ~is_method ctx p ty =
               (update_return_ty
                  ft
                  (intersect_enforceable
-                    ~is_method
+                    ~fun_kind
                     enf_ty_opt
-                    (make_like_type ~return_from_async ret_ty))) )
-    )
+                    (make_like_type ~return_from_async ret_ty))) )))
   | _ -> ty
 
-let maybe_pessimise_fun_type ~is_method ctx p ty =
+let maybe_pessimise_fun_type ~fun_kind ctx p ty =
   if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
-    pessimise_fun_type ~is_method ctx p ty
+    pessimise_fun_type ~fun_kind ctx p ty
   else
     ty

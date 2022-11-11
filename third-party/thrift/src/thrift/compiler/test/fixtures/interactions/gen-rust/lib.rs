@@ -6299,7 +6299,7 @@ pub mod server {
                     ::tracing::info!(method = "MyService.interact", "success");
                     let (interaction_handler, res) = (res, ());
                     let interaction_processor = ::std::sync::Arc::new(MyInteractionProcessor::<P, ::std::boxed::Box<dyn MyInteraction>, R, RS>::new(interaction_handler));
-                    reply_state.lock().unwrap().set_interaction_processor(interaction_processor);
+                    reply_state.lock().unwrap().set_interaction_processor(interaction_processor)?;
                     crate::services::my_service::InteractExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_service::InteractExn::Success(_))) => {
@@ -6373,7 +6373,7 @@ pub mod server {
                     ::tracing::info!(method = "MyService.interactFast", "success");
                     let (interaction_handler, res) = res;
                     let interaction_processor = ::std::sync::Arc::new(MyInteractionFastProcessor::<P, ::std::boxed::Box<dyn MyInteractionFast>, R, RS>::new(interaction_handler));
-                    reply_state.lock().unwrap().set_interaction_processor(interaction_processor);
+                    reply_state.lock().unwrap().set_interaction_processor(interaction_processor)?;
                     crate::services::my_service::InteractFastExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_service::InteractFastExn::Success(_))) => {
@@ -6447,7 +6447,7 @@ pub mod server {
                     ::tracing::info!(method = "MyService.serialize", "success");
                     let (interaction_handler, res) = res;
                     let interaction_processor = ::std::sync::Arc::new(SerialInteractionProcessor::<P, ::std::boxed::Box<dyn SerialInteraction>, R, RS>::new(interaction_handler));
-                    reply_state.lock().unwrap().set_interaction_processor(interaction_processor);
+                    reply_state.lock().unwrap().set_interaction_processor(interaction_processor)?;
                     crate::services::my_service::SerializeExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_service::SerializeExn::Success(_))) => {
@@ -6851,17 +6851,20 @@ pub mod mock {
             let closure: &mut dyn ::std::ops::FnMut() -> _ = &mut **closure;
             ::std::boxed::Box::pin(::futures::future::ready(closure()))
         }
+
         fn interact(
             &self,
-            arg_arg: ::std::primitive::i32,
+            _arg_arg: ::std::primitive::i32,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::InteractError>> {
             unimplemented!("Mocking interactions is not yet implemented");
         }
+
         fn interactFast(
             &self,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::MyInteractionFastClient, ::std::primitive::i32), crate::errors::my_service::InteractFastError>> {
             unimplemented!("Mocking interactions is not yet implemented");
         }
+
         fn serialize(
             &self,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::SerialInteractionClient, (::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::my_service::SerializeStreamError>>)), crate::errors::my_service::SerializeError>> {

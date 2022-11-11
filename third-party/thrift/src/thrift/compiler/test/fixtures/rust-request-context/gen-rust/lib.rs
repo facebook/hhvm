@@ -5233,7 +5233,7 @@ pub mod server {
                     ::tracing::info!(method = "MyService.startPingInteraction", "success");
                     let (interaction_handler, res) = (res, ());
                     let interaction_processor = ::std::sync::Arc::new(MyInteractionProcessor::<P, ::std::boxed::Box<dyn MyInteraction>, R, RS>::new(interaction_handler));
-                    reply_state.lock().unwrap().set_interaction_processor(interaction_processor);
+                    reply_state.lock().unwrap().set_interaction_processor(interaction_processor)?;
                     crate::services::my_service::StartPingInteractionExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_service::StartPingInteractionExn::Success(_))) => {
@@ -5675,6 +5675,7 @@ pub mod mock {
         ) -> ::std::result::Result<crate::client::MyInteractionClient, ::anyhow::Error> {
             unimplemented!("Mocking interactions is not yet implemented");
         }
+
         fn startPingInteraction(
             &self,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::client::MyInteractionClient, crate::errors::my_service::StartPingInteractionError>> {

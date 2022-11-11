@@ -47,16 +47,13 @@
 
     impl<'mock> super::client::{{service:name}} for {{service:name}}<'mock> {{>lib/block}}{{!
         }}{{#service:rustFunctions}}
-        {{^function:starts_interaction?}}
+        {{^function:starts_interaction?}}{{^function:creates_interaction?}}
         fn {{function:rust_name}}(
             &self,{{!
             }}{{#function:args}}
             arg_{{field:name}}: {{>lib/arg}},{{!
             }}{{/function:args}}
         ) -> {{>lib/client_return_type}} {
-            {{#function:creates_interaction?}}
-            unimplemented!("Mocking interactions is not yet implemented");
-            {{/function:creates_interaction?}}{{^function:creates_interaction?}}
             let mut closure = self.{{function:rust_name}}.closure.lock().unwrap();
             let closure: &mut dyn ::std::ops::FnMut({{!
                 }}{{#function:args}}{{!
@@ -76,9 +73,17 @@
                 }}{{^last?}}, {{/last?}}{{!
                 }}{{/function:args}}{{!
             }})))
-            {{/function:creates_interaction?}}
         }{{!
-        }}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
+        }}{{/function:creates_interaction?}}{{#function:creates_interaction?}}
+        fn {{function:rust_name}}(
+            &self,{{!
+            }}{{#function:args}}
+            _arg_{{field:name}}: {{>lib/arg}},{{!
+            }}{{/function:args}}
+        ) -> {{>lib/client_return_type}} {
+            unimplemented!("Mocking interactions is not yet implemented");
+        }{{!
+        }}{{/function:creates_interaction?}}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
         fn {{function:rust_name}}(
             &self,
         ) -> ::std::result::Result<{{!

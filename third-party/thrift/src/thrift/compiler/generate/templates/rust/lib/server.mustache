@@ -245,7 +245,7 @@
                     let (interaction_handler, res) = res;
                     {{/type:void?}}{{/function:return_type}}
                     let interaction_processor = ::std::sync::Arc::new({{function:interaction_name}}Processor::<P, ::std::boxed::Box<dyn {{function:interaction_name}}>, R, RS>::new(interaction_handler));
-                    reply_state.lock().unwrap().set_interaction_processor(interaction_processor);
+                    reply_state.lock().unwrap().set_interaction_processor(interaction_processor)?;
                     {{/function:creates_interaction?}}
                     {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::Success(res)
                 }

@@ -186,7 +186,7 @@ class CarbonQueueAppenderStorage {
   }
 
  private:
-  static constexpr size_t kMaxIovecs{32};
+  static constexpr size_t kMaxIovecs{64};
   static constexpr size_t kInlineIOBufLen{128};
   static constexpr size_t kInitMsgStoreLen{512};
 

@@ -28,17 +28,10 @@
 #include <thrift/lib/cpp2/async/RequestCallback.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
+#include <thrift/lib/cpp2/transport/core/RpcMetadataPlugins.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::detail {
-
-THRIFT_PLUGGABLE_FUNC_REGISTER(
-    std::unique_ptr<folly::IOBuf>,
-    makeFrameworkMetadata,
-    const RpcOptions&,
-    folly::dynamic&) {
-  return nullptr;
-}
 
 RequestRpcMetadata makeRequestRpcMetadata(
     const RpcOptions& rpcOptions,

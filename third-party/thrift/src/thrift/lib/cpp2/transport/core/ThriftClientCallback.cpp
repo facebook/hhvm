@@ -18,6 +18,7 @@
 
 #include <glog/logging.h>
 
+#include <folly/MapUtil.h>
 #include <folly/io/async/Request.h>
 
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>

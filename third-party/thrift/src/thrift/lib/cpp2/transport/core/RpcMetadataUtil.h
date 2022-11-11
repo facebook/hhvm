@@ -21,7 +21,6 @@
 #include <folly/Optional.h>
 #include <folly/dynamic.h>
 #include <thrift/lib/cpp/transport/THeader.h>
-#include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/util/ManagedStringView.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
@@ -50,12 +49,6 @@ inline constexpr std::string_view kHeaderProxiedAnyex = "panyex";
 // Any exception type
 inline constexpr std::string_view kHeaderAnyexType = "anyext";
 inline constexpr std::string_view kHeaderProxiedAnyexType = "panyext";
-
-THRIFT_PLUGGABLE_FUNC_DECLARE(
-    std::unique_ptr<folly::IOBuf>,
-    makeFrameworkMetadata,
-    const RpcOptions&,
-    folly::dynamic& logMessages);
 
 RequestRpcMetadata makeRequestRpcMetadata(
     const RpcOptions& rpcOptions,

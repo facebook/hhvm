@@ -19,6 +19,7 @@
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/async/RpcOptions.h>
+#include <thrift/lib/cpp2/transport/core/RpcMetadataPlugins.h>
 
 using namespace apache::thrift;
 using namespace apache::thrift::detail;

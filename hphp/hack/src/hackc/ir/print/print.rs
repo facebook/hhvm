@@ -1339,7 +1339,6 @@ pub(crate) fn print_textual(
     textual: &instr::Textual,
 ) -> std::result::Result<(), Error> {
     use instr::Textual;
-    use instr::TextualHackBuiltinParam;
     let verbose = ctx.verbose;
     let strings = ctx.strings;
     match textual {
@@ -1360,25 +1359,11 @@ pub(crate) fn print_textual(
         Textual::HackBuiltin {
             values,
             target,
-            params,
             loc: _,
         } => {
-            let mut values = values.iter();
             write!(w, "textual::hack_builtin({target}")?;
-            for p in params.iter() {
-                match p {
-                    TextualHackBuiltinParam::Null => write!(w, ", null")?,
-                    TextualHackBuiltinParam::False => write!(w, ", false")?,
-                    TextualHackBuiltinParam::HackInt(i) => write!(w, "hack_int({i})")?,
-                    TextualHackBuiltinParam::HackString(s) => write!(w, "hack_string({s:?})")?,
-                    TextualHackBuiltinParam::Int(i) => write!(w, ", {i}")?,
-                    TextualHackBuiltinParam::String(s) => write!(w, ", \"{s}\"")?,
-                    TextualHackBuiltinParam::True => write!(w, ", true")?,
-                    TextualHackBuiltinParam::Value => {
-                        let vid = values.next().unwrap();
-                        write!(w, ", {}", FmtVid(func, *vid, verbose, strings))?
-                    }
-                }
+            for vid in values.iter() {
+                write!(w, ", {}", FmtVid(func, *vid, verbose, strings))?
             }
             write!(w, ")")?;
         }

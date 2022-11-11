@@ -18,11 +18,9 @@ use ir::instr::Predicate;
 use ir::instr::Special;
 use ir::instr::Terminator;
 use ir::instr::Textual;
-use ir::instr::TextualHackBuiltinParam;
 use ir::Block;
 use ir::BlockId;
 use ir::ClassName;
-use ir::CollectionType;
 use ir::Constant;
 use ir::ConstantId;
 use ir::Func;
@@ -220,10 +218,9 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
         }
         Instr::Special(Special::Textual(Textual::HackBuiltin {
             ref target,
-            ref params,
             ref values,
             loc: _,
-        })) => write_builtin(w, state, iid, target, params, values)?,
+        })) => write_builtin(w, state, iid, target, values)?,
         Instr::Terminator(Terminator::Enter(bid, _) | Terminator::Jmp(bid, _)) => {
             w.jmp(&[bid], ())?;
         }
@@ -312,27 +309,12 @@ fn write_builtin(
     state: &mut FuncState<'_>,
     iid: InstrId,
     target: &str,
-    params: &[TextualHackBuiltinParam],
     values: &[ValueId],
 ) -> Result {
-    let mut values = values.iter();
-    let params = params
+    let params = values
         .iter()
-        .map(|param| match *param {
-            TextualHackBuiltinParam::Null => textual::Expr::null(),
-            TextualHackBuiltinParam::False => textual::Expr::false_(),
-            TextualHackBuiltinParam::HackInt(i) => textual::Expr::hack_int(i),
-            TextualHackBuiltinParam::HackString(ref s) => textual::Expr::hack_string(s.clone()),
-            TextualHackBuiltinParam::Int(i) => textual::Expr::int(i),
-            TextualHackBuiltinParam::String(ref s) => textual::Expr::string(s.clone()),
-            TextualHackBuiltinParam::True => textual::Expr::true_(),
-            TextualHackBuiltinParam::Value => {
-                let vid = *values.next().unwrap();
-                state.lookup_vid(vid)
-            }
-        })
+        .map(|vid| state.lookup_vid(*vid))
         .collect_vec();
-
     let output = w.call(target, params)?;
     state.set_iid(iid, output);
     Ok(())
@@ -698,20 +680,22 @@ fn write_constants(remap: &mut ir::ValueIdMap<ValueId>, builder: &mut ir::FuncBu
     for (lid, constant) in builder.func.constants.iter_mut().enumerate() {
         let lid = ConstantId::from_usize(lid);
         match constant {
+            // Simple constants that are just emitted inline.
             Constant::Bool(..)
+            | Constant::Dir
             | Constant::Double(..)
+            | Constant::File
+            | Constant::FuncCred
             | Constant::Int(..)
+            | Constant::Method
+            | Constant::Named(..)
+            | Constant::NewCol(..)
             | Constant::Null
             | Constant::String(..)
             | Constant::Uninit => continue,
 
-            Constant::Array(..)
-            | Constant::Dir
-            | Constant::File
-            | Constant::FuncCred
-            | Constant::Method
-            | Constant::Named(..)
-            | Constant::NewCol(..) => {
+            // Complex constants that are emitted early.
+            Constant::Array(..) => {
                 let constant = std::mem::replace(constant, Constant::Uninit);
                 constants.push((lid, constant));
             }
@@ -724,31 +708,19 @@ fn write_constants(remap: &mut ir::ValueIdMap<ValueId>, builder: &mut ir::FuncBu
         let loc = LocId::NONE;
         let vid = match constant {
             Constant::Bool(..)
+            | Constant::Dir
             | Constant::Double(..)
+            | Constant::File
+            | Constant::FuncCred
             | Constant::Int(..)
+            | Constant::Method
+            | Constant::Named(..)
+            | Constant::NewCol(..)
             | Constant::Null
             | Constant::String(..)
             | Constant::Uninit => unreachable!(),
 
-            Constant::Array(..)
-            | Constant::Dir
-            | Constant::File
-            | Constant::FuncCred
-            | Constant::Method
-            | Constant::Named(..) => builder.emit_todo_instr(&format!("{constant:?}"), loc),
-
-            Constant::NewCol(ty) => match ty {
-                CollectionType::Vector => {
-                    builder.emit_hack_builtin(hack::Builtin::Hhbc(hack::Hhbc::NewVec), &[], loc)
-                }
-                CollectionType::Map
-                | CollectionType::Set
-                | CollectionType::Pair
-                | CollectionType::ImmVector
-                | CollectionType::ImmMap
-                | CollectionType::ImmSet => builder.emit_todo_instr(&format!("{ty:?}"), loc),
-                _ => unreachable!(),
-            },
+            Constant::Array(..) => builder.emit_todo_instr(&format!("{constant:?}"), loc),
         };
         remap.insert(src, vid);
     }

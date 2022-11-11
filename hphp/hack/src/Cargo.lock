@@ -2346,7 +2346,6 @@ dependencies = [
 name = "ir_core"
 version = "0.0.0"
 dependencies = [
- "ascii",
  "bstr 1.0.1",
  "ffi",
  "hash",

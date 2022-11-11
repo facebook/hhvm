@@ -11,7 +11,6 @@ use ir::FuncBuilder;
 use ir::Instr;
 use ir::LocId;
 use ir::ValueId;
-use itertools::Itertools;
 
 use crate::hack;
 
@@ -33,18 +32,11 @@ pub(crate) trait FuncBuilderEx {
 
 impl<'a> FuncBuilderEx for FuncBuilder<'a> {
     fn hack_builtin(&mut self, builtin: hack::Builtin, args: &[ValueId], loc: LocId) -> Instr {
-        use ir::instr::TextualHackBuiltinParam;
         let target = Cow::Owned(builtin.to_string());
-        let params = args
-            .iter()
-            .map(|_| TextualHackBuiltinParam::Value)
-            .collect_vec()
-            .into_boxed_slice();
         let values = args.to_vec().into_boxed_slice();
         Instr::Special(ir::instr::Special::Textual(
             ir::instr::Textual::HackBuiltin {
                 target,
-                params,
                 values,
                 loc,
             },

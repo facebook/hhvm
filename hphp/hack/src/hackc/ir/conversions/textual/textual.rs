@@ -173,10 +173,6 @@ impl Expr {
         Expr::Deref(v.into())
     }
 
-    pub(crate) fn false_() -> Expr {
-        Expr::Const(Const::False)
-    }
-
     pub(crate) fn hack_int(i: i64) -> Expr {
         Expr::Const(Const::HackInt(i))
     }
@@ -202,10 +198,6 @@ impl Expr {
 
     pub(crate) fn string(s: AsciiString) -> Expr {
         Expr::Const(Const::String(s))
-    }
-
-    pub(crate) fn true_() -> Expr {
-        Expr::Const(Const::True)
     }
 }
 

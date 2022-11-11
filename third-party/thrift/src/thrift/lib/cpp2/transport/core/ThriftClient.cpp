@@ -23,6 +23,7 @@
 #include <folly/synchronization/Baton.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
+#include <thrift/lib/cpp2/transport/core/RpcMetadataPlugins.h>
 #include <thrift/lib/cpp2/transport/core/ThriftChannelIf.h>
 #include <thrift/lib/cpp2/transport/core/ThriftClientCallback.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -157,6 +158,14 @@ ThriftClient::createRequestMetadata(
   if (otherMetadata->empty()) {
     otherMetadata.reset();
   }
+
+  folly::dynamic logMessages = folly::dynamic::object();
+  auto frameworkMetadata =
+      detail::makeFrameworkMetadata(rpcOptions, logMessages);
+  if (frameworkMetadata) {
+    metadata.frameworkMetadata_ref() = std::move(frameworkMetadata);
+  }
+
   return requestMetadata;
 }
 

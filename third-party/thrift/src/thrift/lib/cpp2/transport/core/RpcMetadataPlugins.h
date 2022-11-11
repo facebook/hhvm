@@ -33,6 +33,8 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
     const RpcOptions&,
     folly::dynamic& logMessages);
 
+THRIFT_PLUGGABLE_FUNC_DECLARE(const std::string&, getFrameworkMetadataHttpKey);
+
 } // namespace detail
 } // namespace thrift
 } // namespace apache

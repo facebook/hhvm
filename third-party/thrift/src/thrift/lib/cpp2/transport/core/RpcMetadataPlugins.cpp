@@ -26,4 +26,10 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
   return nullptr;
 }
 
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    const std::string&, getFrameworkMetadataHttpKey) {
+  static const std::string ret("thrift_fmhk");
+  return ret;
+}
+
 } // namespace apache::thrift::detail

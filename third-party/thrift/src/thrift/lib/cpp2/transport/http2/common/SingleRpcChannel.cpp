@@ -21,6 +21,7 @@
 #include <glog/logging.h>
 
 #include <folly/ExceptionWrapper.h>
+#include <folly/base64.h>
 #include <folly/io/IOBufQueue.h>
 #include <folly/io/async/EventBaseManager.h>
 #include <proxygen/lib/http/HTTPHeaders.h>
@@ -34,6 +35,7 @@
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/ThriftProcessor.h>
 #include <thrift/lib/cpp2/transport/core/EnvelopeUtil.h>
+#include <thrift/lib/cpp2/transport/core/RpcMetadataPlugins.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/cpp2/transport/core/ThriftClientCallback.h>
 
@@ -203,6 +205,15 @@ void SingleRpcChannel::sendThriftRequest(
   apache::thrift::transport::THeader::StringToStringMap otherMetadata;
   if (auto other = metadata.otherMetadata_ref()) {
     otherMetadata = std::move(*other);
+  }
+  if (auto tfm = metadata.frameworkMetadata_ref()) {
+    // HTTP headers need to be base64-encoded
+    auto bytes = (**tfm).coalesce();
+    auto start = bytes.data();
+    auto asChar = reinterpret_cast<const char*>(start);
+    std::string_view sv(asChar, bytes.size());
+    std::string encoded = folly::base64Encode(sv);
+    otherMetadata[detail::getFrameworkMetadataHttpKey()] = std::move(encoded);
   }
   if (auto clientTimeoutMs = metadata.clientTimeoutMs_ref()) {
     otherMetadata[transport::THeader::CLIENT_TIMEOUT_HEADER] =

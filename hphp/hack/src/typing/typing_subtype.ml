@@ -1372,14 +1372,14 @@ and simplify_subtype_i
           |> simplify_subtype_i
                ~subtype_env
                ~this_ty
+               ~super_like:true
                ty_sub
-               (LoclType (MakeType.dynamic r))
+               (LoclType ty)
           ||| simplify_subtype_i
                 ~subtype_env
                 ~this_ty
-                ~super_like:true
                 ty_sub
-                (LoclType ty)
+                (LoclType (MakeType.dynamic r))
           ||| finish
         | _ ->
           (* Implement the declarative subtyping rule C<~t1,...,~tn> <: ~C<t1,...,tn>

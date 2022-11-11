@@ -104,6 +104,19 @@ let coerce_type
     ty_have
     ty_expect
     (on_error : Typing_error.Callback.t) =
+  Typing_log.(
+    log_with_level env "typing" ~level:2 (fun () ->
+        log_types
+          (Pos_or_decl.of_raw_pos p)
+          env
+          [
+            Log_head
+              ( "Typing_coercion.coerce_type ",
+                [
+                  Log_type ("ty_expect", ty_expect.et_type);
+                  Log_type ("ty_have", ty_have);
+                ] );
+          ]));
   coerce_type_impl ~coerce_for_op ~coerce env ty_have ty_expect
   @@ Some
        (Typing_error.Reasons_callback.with_claim

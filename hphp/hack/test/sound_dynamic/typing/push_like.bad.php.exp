@@ -18,7 +18,9 @@ Invalid return type (Typing[4110])
   But got `(~int, NoSDTC)`
 File "push_like.bad.php", line 37, characters 10-11:
 Invalid return type (Typing[4110])
-  File "push_like.bad.php", line 32, characters 41-47:
-  Expected `dynamic`
-  File "push_like.bad.php", line 32, characters 30-35:
-  But got `Box<B>`
+  File "push_like.bad.php", line 32, characters 46-46:
+  Expected `C`
+  File "push_like.bad.php", line 32, characters 46-46:
+  This type argument to `Box` must match exactly (it is invariant)
+  File "push_like.bad.php", line 32, characters 34-34:
+  But got `B`

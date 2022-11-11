@@ -14,6 +14,7 @@
 use std::sync::Arc;
 
 use anyhow::Error;
+use ascii::AsciiString;
 use log::trace;
 use strum_macros::EnumIter;
 
@@ -24,6 +25,8 @@ use crate::func::MethodInfo;
 use crate::mangle::Mangle;
 use crate::mangle::MangleWithClass as _;
 use crate::state::UnitState;
+use crate::types::convert_ty;
+use crate::util;
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
 
@@ -109,13 +112,68 @@ fn write_type(
     class: &ir::Class<'_>,
     is_static: IsStatic,
 ) -> Result {
-    let fields = Vec::new();
-    if !class.properties.is_empty() {
-        textual_todo! { write!(w, "// TODO: class properties")? };
+    let mut fields: Vec<(AsciiString, textual::Ty, textual::Visibility)> = Vec::new();
+    for prop in &class.properties {
+        let ir::Property {
+            name,              // hhbc::PropName<'arena>,
+            mut flags,         //: Attr,
+            ref attributes,    //: Vec<Attribute<'arena>>,
+            visibility,        //: hhbc::Visibility,
+            ref initial_value, //: Option<TypedValue>,
+            ref type_info,     //: hhbc::TypeInfo<'arena>,
+            doc_comment: _,    //: ffi::Maybe<Str<'arena>>,
+        } = *prop;
+
+        let instance_match = match is_static {
+            IsStatic::Static => flags.is_static(),
+            IsStatic::NonStatic => !flags.is_static(),
+        };
+        if !instance_match {
+            continue;
+        }
+        flags.clear(ir::Attr::AttrStatic);
+
+        let name_bytes = state.strings.lookup_bytes(name.id);
+        let name = util::escaped_string(&name_bytes);
+
+        let vis = if flags.is_private() {
+            textual::Visibility::Private
+        } else if flags.is_protected() {
+            textual::Visibility::Protected
+        } else {
+            textual::Visibility::Public
+        };
+        flags.clear(ir::Attr::AttrPrivate);
+        flags.clear(ir::Attr::AttrProtected);
+        flags.clear(ir::Attr::AttrPublic);
+
+        if !flags.is_empty() {
+            trace!("CLASS FLAGS: {:?}", flags);
+            textual_todo! { writeln!(w, "// TODO: class flags: {:?}", flags)? };
+        }
+        if !attributes.is_empty() {
+            textual_todo! { writeln!(w, "// TODO: class attributes: {:?}", attributes)? };
+        }
+        if visibility == ir::Visibility::Private {
+            writeln!(w, "// TODO: private {}", name)?;
+        }
+        if let Some(initial_value) = initial_value {
+            writeln!(w, "// TODO: initial value {:?}", initial_value)?;
+        }
+
+        let ty = convert_ty(type_info.enforced.clone(), &state.strings);
+
+        fields.push((name, ty, vis));
     }
 
+    let fields = fields.iter().map(|(name, ty, visibility)| textual::Field {
+        name: name.as_str(),
+        ty,
+        visibility: *visibility,
+    });
+
     let cname = mangled_class_name(class.name, is_static, &state.strings);
-    textual::write_type(w, &cname, &class.src_loc, &fields, &state.strings)?;
+    textual::write_type(w, &cname, &class.src_loc, fields, &state.strings)?;
     Ok(())
 }
 

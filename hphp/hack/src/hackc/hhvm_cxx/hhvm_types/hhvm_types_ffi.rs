@@ -266,6 +266,11 @@ impl Attr {
             self.add(attr)
         }
     }
+
+    pub fn clear(&mut self, attr: Attr) {
+        self.repr &= !attr.repr;
+    }
+
     pub fn is_internal(&self) -> bool {
         (*self & Self::AttrInternal) != 0
     }

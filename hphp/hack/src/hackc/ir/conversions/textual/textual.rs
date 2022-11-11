@@ -636,20 +636,49 @@ impl<'a> FuncWriter<'a> {
     }
 }
 
-pub(crate) fn write_type(
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+pub(crate) enum Visibility {
+    Public,
+    Private,
+    Protected,
+}
+
+impl Visibility {
+    fn decl(&self) -> &str {
+        match self {
+            Visibility::Public => ".public",
+            Visibility::Private => ".private",
+            Visibility::Protected => ".protected",
+        }
+    }
+}
+
+pub(crate) struct Field<'a> {
+    pub name: &'a str,
+    pub ty: &'a Ty,
+    pub visibility: Visibility,
+}
+
+pub(crate) fn write_type<'a>(
     w: &mut dyn std::io::Write,
     name: &str,
     src_loc: &SrcLoc,
-    fields: &[(&str, Ty)],
+    fields: impl Iterator<Item = Field<'a>>,
     strings: &StringInterner,
 ) -> Result {
     write_full_loc(w, src_loc, strings)?;
 
-    write!(w, "type {name} = {{")?;
+    writeln!(w, "type {name} = {{")?;
 
     let mut sep = "\n";
-    for (name, ty) in fields {
-        write!(w, "{sep}{INDENT}{name}: {ty}", ty = FmtTy(ty))?;
+    for f in fields {
+        write!(
+            w,
+            "{sep}{INDENT}{name}: {vis} {ty}",
+            name = f.name,
+            ty = FmtTy(f.ty),
+            vis = f.visibility.decl()
+        )?;
         sep = ";\n";
     }
 

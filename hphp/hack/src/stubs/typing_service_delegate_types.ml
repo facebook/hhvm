@@ -10,17 +10,4 @@ type state = unit [@@deriving show]
 
 let default = ()
 
-let make
-    ~job_runner
-    ~artifact_store_config
-    ~max_batch_size
-    ~min_batch_size
-    ~initial_payload_size
-    ~raise_on_failure =
-  ignore
-    ( job_runner,
-      artifact_store_config,
-      max_batch_size,
-      min_batch_size,
-      initial_payload_size,
-      raise_on_failure )
+let make ~job_runner ~tenant = ignore (job_runner, tenant)

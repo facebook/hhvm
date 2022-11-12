@@ -994,13 +994,6 @@ let process_in_parallel
         (on_cancelled next workitems_to_process workitems_in_progress)
       ~interrupt
   in
-  let telemetry =
-    telemetry
-    |> Typing_service_delegate.add_telemetry !delegate_state
-    |> Telemetry.object_
-         ~key:"next"
-         ~value:(Measure.stats_to_telemetry ~record ())
-  in
   let paths_of (cancelled_results : job_progress list) : Relative_path.t list =
     let paths_of (cancelled_progress : job_progress) =
       let cancelled_computations = cancelled_progress.progress.remaining in

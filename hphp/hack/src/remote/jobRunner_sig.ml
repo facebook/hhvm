@@ -30,11 +30,6 @@ module type S = sig
     keys:string list ->
     hash:string ->
     check_id:string ->
-    transport_channel:string option ->
-    file_system_mode:string ->
-    recli_version:string ->
-    max_cas_bytes:int ->
-    max_inline_bytes:int ->
     root:string ->
     min_log_level:Hh_logger.Level.t ->
     version_specifier:string option ->
@@ -52,8 +47,6 @@ module type S = sig
   val begin_cancel_batch : Types.nonce -> (status list, string) result Future.t
 
   val begin_cancel : Types.job_id -> (status, string) result Future.t
-
-  val begin_heartbeat : Types.job_id -> (status, string) result Future.t
 
   val begin_run : command:command -> (Types.job_id list, string) result Future.t
 

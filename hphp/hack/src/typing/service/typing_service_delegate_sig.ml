@@ -13,15 +13,7 @@ module type Delegate_sig = sig
 
   val default : state
 
-  val make :
-    artifact_store_config:ArtifactStore.config ->
-    job_runner:(module JobRunner_sig.S) ->
-    tenant:string ->
-    max_batch_size:int ->
-    min_batch_size:int ->
-    initial_payload_size:int ->
-    raise_on_failure:bool ->
-    state
+  val make : job_runner:(module JobRunner_sig.S) -> tenant:string -> state
 
   val start :
     delegate_env ->
@@ -58,8 +50,6 @@ module type Delegate_sig = sig
     * remote_computation_payload list
     * delegate_next_result option
     * Telemetry.t
-
-  val add_telemetry : state -> Telemetry.t -> Telemetry.t
 
   (* Get delegate progress message *)
   val get_progress : state -> string option

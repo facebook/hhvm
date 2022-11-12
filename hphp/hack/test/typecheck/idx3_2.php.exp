@@ -6,7 +6,7 @@ Invalid return type (Typing[4110])
   But got `int`
   File "collections/Map.hhi", line 55, characters 108-109:
     via this generic `Tv`
-  File "collections/interfaces.hhi", line 1063, characters 63-64:
+  File "collections/interfaces.hhi", line 1059, characters 63-64:
     via this generic `Tv`
-  File "collections/interfaces.hhi", line 809, characters 68-69:
+  File "collections/interfaces.hhi", line 806, characters 68-69:
     via this generic `Tv`

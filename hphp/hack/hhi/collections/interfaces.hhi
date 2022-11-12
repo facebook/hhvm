@@ -35,9 +35,8 @@ interface ConstCollection<+Te> extends Countable, IPureStringishObject {
    *   the collection.
    */
   public function items()[]: HH\Iterable<Te>;
- /* HH_FIXME[0002] */
-  public function toVArray()[]: varray; /* HH_FIXME[0001] */
-  public function toDArray()[]: darray;
+  public function toVArray()[]: varray; /* TODO(T81501116) missing type argument should error */
+  public function toDArray()[]: darray; /* TODO(T81501116) missing type arguments should error */
 }
 
 /**
@@ -535,8 +534,7 @@ interface ConstVector<+Tv> extends KeyedContainer<int, Tv>,
    * @guide /hack/generics/constraints
    */
   public readonly function linearSearch(mixed $search_value)[]: int;
- /* HH_FIXME[0002] */
-  public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
+  public function toVArray()[]: varray<Tv>;
   public function toDArray()[]: darray<int, Tv>;
 }
 
@@ -794,8 +792,7 @@ interface MutableVector<<<__RequireDynamic>> Tv> extends ConstVector<Tv>,
    * @guide /hack/generics/constraints
    */
   public readonly function linearSearch(mixed $search_value)[]: int;
- /* HH_FIXME[0002] */
-  public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
+  public function toVArray()[]: varray<Tv>;
   public function toDArray()[]: darray<int, Tv>;
 }
 
@@ -1047,8 +1044,7 @@ interface ConstMap<Tk as arraykey, +Tv> extends KeyedContainer<Tk, Tv>,
    *           is empty.
    */
   public readonly function lastKey()[]: ?Tk;
- /* HH_FIXME[0002] */
-  public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
+  public function toVArray()[]: varray<Tv>;
   public function toDArray()[]: darray<Tk, Tv>;
 }
 
@@ -1305,8 +1301,7 @@ interface MutableMap<Tk as arraykey, Tv> extends ConstMap<Tk, Tv>,
    *           `MutableMap` is empty.
    */
   public readonly function lastKey()[]: ?Tk;
- /* HH_FIXME[0002] */
-  public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
+  public function toVArray()[]: varray<Tv>;
   public function toDArray()[]: darray<Tk, Tv>;
 }
 
@@ -1569,8 +1564,7 @@ interface ConstSet<+Tv as arraykey> extends KeyedContainer<Tv, Tv>,
    *           current `ConstSet` is empty.
    */
   public readonly function lastKey()[]: ?arraykey;
- /* HH_FIXME[0002] */
-  public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
+  public function toVArray()[]: varray<Tv>;
   public function toDArray()[]: darray<Tv, Tv>;
 }
 
@@ -1831,8 +1825,7 @@ interface ConstSet<+Tv as arraykey> extends KeyedContainer<Tv, Tv>,
    *           current `MutableSet` is empty.
    */
   public readonly function lastKey()[]: ?arraykey;
- /* HH_FIXME[0002] */
-  public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
+  public function toVArray()[]: varray<Tv>;
   public function toDArray()[]: darray<Tv, Tv>;
 }
 

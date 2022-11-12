@@ -6,9 +6,9 @@ Invalid return type (Typing[4110])
   But got `int`
   File "collections/Map.hhi", line 55, characters 104-105:
     via this generic `Tk`
-  File "collections/interfaces.hhi", line 1063, characters 59-60:
+  File "collections/interfaces.hhi", line 1059, characters 59-60:
     via this generic `Tk`
-  File "collections/interfaces.hhi", line 809, characters 64-65:
+  File "collections/interfaces.hhi", line 806, characters 64-65:
     via this generic `Tk`
   File "interfaces.hhi", line 110, characters 88-89:
     via this generic `Tk`

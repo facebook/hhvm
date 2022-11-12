@@ -6,9 +6,9 @@ Typing error (Typing[4110])
   But got `Foo`
   File "collections/Vector.hhi", line 46, characters 71-72:
     via this generic `Tv`
-  File "collections/interfaces.hhi", line 551, characters 70-71:
+  File "collections/interfaces.hhi", line 549, characters 70-71:
     via this generic `Tv`
-  File "collections/interfaces.hhi", line 294, characters 56-57:
+  File "collections/interfaces.hhi", line 293, characters 56-57:
     via this generic `Tv`
   File "interfaces.hhi", line 110, characters 66-67:
     via this generic `Tv`

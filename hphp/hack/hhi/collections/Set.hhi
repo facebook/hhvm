@@ -626,8 +626,7 @@ final class Set<<<__RequireDynamic>> Tv as arraykey> implements \MutableSet<Tv> 
    * @return - The `Iterable` view of the current `Set`.
    */
   public function items()[]: Iterable<Tv>;
- /* HH_FIXME[0002] */
-  public function toVArray()[]: varray<Tv>; /* HH_FIXME[0001] */
+  public function toVArray()[]: varray<Tv>;
   public function toDArray()[]: darray<Tv, Tv>;
 }
 

@@ -751,76 +751,61 @@ let next
       controller_started && HulkStrategy.is_hulk_v2 mode
     in
     let delegate_job =
-      if should_run_hulk_v2 then (
-        (*
+      (*
           This is the "reduce" part of the mapreduce paradigm. We activate this when workitems_to_check is empty,
           or in other words the local typechecker is done with its work. We'll try and download all the remote
           worker outputs in once go. For any payloads that aren't available we'll simply stop waiting on the
           remote worker and have the local worker "steal" the work.
         *)
-        let remote_workitems_to_process_length =
-          List.fold ~init:0 !remote_payloads ~f:(fun acc payload ->
+      let remote_workitems_to_process_length =
+        List.fold ~init:0 !remote_payloads ~f:(fun acc payload ->
+            acc + BigList.length payload.payload)
+      in
+      let ( remaining_local_workitems_to_process,
+            controller,
+            remaining_payloads,
+            job,
+            _telemetry ) =
+        Typing_service_delegate.collect
+          ~telemetry
+          !delegate_state
+          !workitems_to_process
+          workitems_to_process_length
+          !remote_payloads
+          (HulkStrategy.is_hulk_heavy mode)
+      in
+      (* Update the total workitems_processed_count after remote workers
+         have made progress, so we can update the progress bar with the
+         correct number of files typechecked.
+      *)
+      (if List.length !remote_payloads > List.length remaining_payloads then
+        let remaining_remote_workitems_to_process =
+          List.fold ~init:0 remaining_payloads ~f:(fun acc payload ->
               acc + BigList.length payload.payload)
         in
-        let ( remaining_local_workitems_to_process,
-              controller,
-              remaining_payloads,
-              job,
-              _telemetry ) =
-          Typing_service_delegate.collect
-            ~telemetry
-            !delegate_state
-            !workitems_to_process
-            workitems_to_process_length
-            !remote_payloads
-            (HulkStrategy.is_hulk_heavy mode)
+        let local_processed_count =
+          !workitems_processed_count
+          - BigList.length remaining_local_workitems_to_process
         in
-        (* Update the total workitems_processed_count after remote workers
-           have made progress, so we can update the progress bar with the
-           correct number of files typechecked.
-        *)
-        (if List.length !remote_payloads > List.length remaining_payloads then
-          let remaining_remote_workitems_to_process =
-            List.fold ~init:0 remaining_payloads ~f:(fun acc payload ->
-                acc + BigList.length payload.payload)
-          in
-          let local_processed_count =
-            !workitems_processed_count
-            - BigList.length remaining_local_workitems_to_process
-          in
-          let remote_processed_count =
-            remote_workitems_to_process_length
-            - remaining_remote_workitems_to_process
-          in
-          workitems_processed_count :=
-            local_processed_count + remote_processed_count);
+        let remote_processed_count =
+          remote_workitems_to_process_length
+          - remaining_remote_workitems_to_process
+        in
+        workitems_processed_count :=
+          local_processed_count + remote_processed_count);
 
-        workitems_to_process := remaining_local_workitems_to_process;
-        delegate_state := controller;
-        remote_payloads := remaining_payloads;
+      workitems_to_process := remaining_local_workitems_to_process;
+      delegate_state := controller;
+      remote_payloads := remaining_payloads;
 
-        job
-      ) else
-        None
+      job
     in
 
-    let (state, delegate_job) =
-      if should_run_hulk_v2 then
-        (!delegate_state, delegate_job)
-      else
-        Typing_service_delegate.next
-          !workitems_to_process
-          workitems_in_progress
-          !delegate_state
-    in
+    let (state, delegate_job) = (!delegate_state, delegate_job) in
     delegate_state := state;
 
-    let (stolen, state) =
-      if should_run_hulk_v2 then
-        ([], !delegate_state)
-      else
-        Typing_service_delegate.steal state max_size
-    in
+    (* TODO(milliechen): clean up hulk v1 work stealing logic *)
+    let stolen = [] in
 
     (* If a delegate job is returned, then that means that it should be done
        by the next MultiWorker worker (the one for whom we're creating a job

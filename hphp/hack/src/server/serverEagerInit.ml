@@ -53,12 +53,8 @@ let init
     (lazy_level : lazy_level)
     (env : ServerEnv.env)
     (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
-  let mode = genv.local_config.ServerLocalConfig.hulk_strategy in
   let env =
-    if HulkStrategy.is_hulk_v2 mode then
-      ServerCheckUtils.start_delegate_if_needed env genv 3_000_000 env.errorl
-    else
-      env
+    ServerCheckUtils.start_delegate_if_needed env genv 3_000_000 env.errorl
   in
   let init_telemetry =
     ServerEnv.Init_telemetry.make

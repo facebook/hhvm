@@ -753,7 +753,7 @@ let make_remote_server_api
           files_to_check
           ~memory_cap:(Some 200000)
           ~longlived_workers:false
-          ~mode:HulkStrategy.Legacy
+          ~mode:HulkStrategy.Heavy
           ~check_info
       in
       HackEventLogger.remote_worker_type_check_end telemetry ~start_t:t;

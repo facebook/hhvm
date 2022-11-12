@@ -730,7 +730,7 @@ let default =
     workload_quantile = None;
     rollout_group = None;
     saved_state_manifold_api_key = None;
-    hulk_strategy = HulkStrategy.Legacy;
+    hulk_strategy = HulkStrategy.Heavy;
     log_saved_state_age_and_distance = false;
     specify_manifold_api_key = false;
     remote_old_decls_no_limit = false;
@@ -1491,7 +1491,7 @@ let load_ fn ~silent ~current_version overrides =
     bool_if_min_version "hulk_lite" ~default:false ~current_version config
   in
   let hulk_heavy =
-    bool_if_min_version "hulk_heavy" ~default:false ~current_version config
+    bool_if_min_version "hulk_heavy" ~default:true ~current_version config
   in
   let hulk_mode = string_ "hulk_mode" ~default:"none" config in
   let hulk_strategy =

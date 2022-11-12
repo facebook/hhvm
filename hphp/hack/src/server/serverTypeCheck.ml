@@ -1929,21 +1929,15 @@ functor
       in
 
       let env =
-        match genv.local_config.ServerLocalConfig.hulk_strategy with
-        | HulkStrategy.Lite ->
-          (* For hulk lite we'll kill the server at the end. We use the non stopping state
-             to determine if we should kill it *)
-          env
-        | _ ->
-          {
-            env with
-            typing_service =
-              {
-                delegate_state =
-                  Typing_service_delegate.stop env.typing_service.delegate_state;
-                enabled = false;
-              };
-          }
+        {
+          env with
+          typing_service =
+            {
+              delegate_state =
+                Typing_service_delegate.stop env.typing_service.delegate_state;
+              enabled = false;
+            };
+        }
       in
       let telemetry =
         Telemetry.duration telemetry ~key:"stop_typing_service" ~start_time

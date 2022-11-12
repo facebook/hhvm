@@ -1018,13 +1018,10 @@ let process_in_parallel
     else
       ()
   in
-  let _ =
-    if HulkStrategy.is_hulk_heavy mode then
-      (* We want to ensure controller state is reset for the recheck *)
-      delegate_state := Typing_service_delegate.stop !delegate_state
-    else
-      ()
-  in
+
+  (* We want to ensure controller state is reset for the recheck *)
+  delegate_state := Typing_service_delegate.stop !delegate_state;
+
   ( typing_result,
     !delegate_state,
     telemetry,
@@ -1159,11 +1156,10 @@ let go_with_interrupt
   let sample_rate = TypecheckerOptions.typecheck_sample_rate opts in
   let fnl =
     match mode with
-    | HulkStrategy.Lite
     | HulkStrategy.Heavy ->
       (* We want to randomize order for hulk simple to reduce variability of remote worker typecheck times *)
       List.sort fnl ~compare:(fun _a _b -> Random.bits () - Random.bits ())
-    | HulkStrategy.Legacy -> fnl
+    | _ -> failwith "impossible"
   in
   let fnl = BigList.create fnl in
   let fnl =

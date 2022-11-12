@@ -52,7 +52,7 @@ Object parseObject(const folly::IOBuf& buf, bool string_to_binary = true) {
   Protocol prot;
   prot.setInput(&buf);
   auto result = detail::parseValue(prot, protocol::T_STRUCT, string_to_binary);
-  return *result.objectValue_ref();
+  return std::move(*result.objectValue_ref());
 }
 
 // Schemaless deserialization of thrift serialized data with mask.

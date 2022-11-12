@@ -804,9 +804,6 @@ let next
     let (state, delegate_job) = (!delegate_state, delegate_job) in
     delegate_state := state;
 
-    (* TODO(milliechen): clean up hulk v1 work stealing logic *)
-    let stolen = [] in
-
     (* If a delegate job is returned, then that means that it should be done
        by the next MultiWorker worker (the one for whom we're creating a job
        in this function). If delegate job is None, then the regular (local
@@ -823,29 +820,11 @@ let next
     | None ->
       (* WARNING: the following List.length is costly - for a full init, files_to_process starts
          out as the size of the entire repo, and we're traversing the entire list. *)
-      (match (workitems_to_process_length, stolen) with
-      | (0, []) when Hash_set.Poly.is_empty workitems_in_progress -> Bucket.Done
-      | (0, []) -> Bucket.Wait
-      | (_, stolen_jobs) ->
-        let jobs =
-          if workitems_to_process_length > List.length stolen_jobs then
-            !workitems_to_process
-          else begin
-            Hh_logger.log
-              "Steal payload from local workers: %d jobs"
-              (List.length stolen_jobs);
-            delegate_state := state;
-            let stolen_jobs =
-              List.map stolen_jobs ~f:(fun job ->
-                  Hash_set.Poly.remove workitems_in_progress job;
-                  match job with
-                  | Check { path; was_already_deferred = _ } ->
-                    Check { path; was_already_deferred = true }
-                  | _ -> failwith "unexpected state")
-            in
-            BigList.rev_append stolen_jobs !workitems_to_process
-          end
-        in
+      (match workitems_to_process_length with
+      | 0 when Hash_set.Poly.is_empty workitems_in_progress -> Bucket.Done
+      | 0 -> Bucket.Wait
+      | _ ->
+        let jobs = !workitems_to_process in
         begin
           match num_workers with
           (* When num_workers is zero, the execution mode is delegate-only, so we give an empty bucket to MultiWorker for execution. *)

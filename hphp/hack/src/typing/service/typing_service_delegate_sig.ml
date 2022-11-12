@@ -46,8 +46,6 @@ module type Delegate_sig = sig
 
   val process : delegate_job_sig -> typing_result * typing_progress
 
-  val steal : state -> int -> workitem list * state
-
   val dispatch :
     state ->
     workitem BigList.t ->

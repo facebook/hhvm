@@ -6,7 +6,6 @@
  *
  *)
 
-open Hh_prelude
 open Typing_service_types
 
 module type Delegate_sig = sig
@@ -34,15 +33,7 @@ module type Delegate_sig = sig
 
   val stop : state -> state
 
-  val next :
-    workitems_to_process ->
-    workitem Hash_set.Poly.t ->
-    state ->
-    state * delegate_next_result option
-
   val merge : state -> Errors.t -> typing_progress -> state
-
-  val on_cancelled : state -> workitem list * state
 
   val process : delegate_job_sig -> typing_result * typing_progress
 

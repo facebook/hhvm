@@ -102,7 +102,6 @@ let test () =
       ~interrupt
       ~memory_cap:None
       ~longlived_workers:false
-      ~mode:HulkStrategy.Heavy
       ~check_info
   in
   assert (Option.is_none diag_pusher);

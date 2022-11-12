@@ -18,7 +18,6 @@ module type Delegate_sig = sig
   val start :
     delegate_env ->
     state ->
-    HulkStrategy.hulk_mode ->
     cache_remote_decls:bool ->
     use_shallow_decls_saved_state:bool ->
     state
@@ -44,7 +43,6 @@ module type Delegate_sig = sig
     workitem BigList.t ->
     int ->
     remote_computation_payload list ->
-    bool ->
     workitem BigList.t
     * state
     * remote_computation_payload list

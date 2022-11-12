@@ -58,8 +58,6 @@ type rollout_flags = {
   max_typechecker_worker_memory_mb: int;
   max_workers: int;
   use_max_typechecker_worker_memory_for_decl_deferral: bool;
-  hulk_lite: bool;
-  hulk_heavy: bool;
   specify_manifold_api_key: bool;
   populate_member_heaps: bool;
   shm_use_sharded_hashtbl: bool;

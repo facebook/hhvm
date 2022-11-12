@@ -104,7 +104,6 @@
   errors
   file_info
   future
-  hulk_strategy
   naming
   relative_path
   sys_utils)

@@ -10,7 +10,6 @@
 open Hh_prelude
 open Utils
 open ServerCommandTypes
-open ServerEnv
 
 exception Nonfatal_rpc_exception of Exception.t * ServerEnv.env
 
@@ -257,16 +256,6 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
       ~parsed_files;
 
     ClientProvider.send_response_to_client client response;
-
-    let hulk_lite_ran =
-      Typing_service_delegate.did_run env.typing_service.delegate_state
-    in
-    let mode = genv.local_config.ServerLocalConfig.hulk_strategy in
-    if HulkStrategy.is_hulk_lite mode && hulk_lite_ran then (
-      Hh_logger.log
-        "Killing hh_server since hulk lite hh_servers can't be reused";
-      exit 0
-    );
 
     if
       ServerCommandTypes.is_disconnect_rpc cmd

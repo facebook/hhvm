@@ -103,7 +103,6 @@ let remote_init genv env root worker_key nonce check_id _profiling =
   let bin_root = Path.make (Filename.dirname Sys.argv.(0)) in
   let t = Unix.gettimeofday () in
   let ctx = Provider_utils.ctx_from_server_env env in
-  let mode = genv.local_config.ServerLocalConfig.hulk_strategy in
   let cache_remote_decls =
     genv.local_config.ServerLocalConfig.cache_remote_decls
   in
@@ -129,7 +128,6 @@ let remote_init genv env root worker_key nonce check_id _profiling =
     ~init_start_t
     ~bin_root
     ~root
-    ~mode
     ~cache_remote_decls
     ~use_shallow_decls_saved_state
     ~saved_state_manifold_path:

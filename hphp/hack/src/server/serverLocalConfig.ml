@@ -597,13 +597,6 @@ type t = {
   saved_state_manifold_api_key: string option;
       (** A string from hh.conf. The API key is used for saved state downloads
        when we call out to manifold *)
-  hulk_strategy: HulkStrategy.hulk_mode;
-  (*
-  hulk_lite: bool;
-      (** Rewrite of Hulk to be faster and simpler - Doesn't update dep graph *)
-  hulk_heavy: bool;
-      (** Rewrite of Hulk to be faster and simpler - Does update dep graph *)
-  *)
   specify_manifold_api_key: bool;
   remote_old_decls_no_limit: bool;
       (**  Remove remote old decl fetching limit *)
@@ -730,7 +723,6 @@ let default =
     workload_quantile = None;
     rollout_group = None;
     saved_state_manifold_api_key = None;
-    hulk_strategy = HulkStrategy.Heavy;
     log_saved_state_age_and_distance = false;
     specify_manifold_api_key = false;
     remote_old_decls_no_limit = false;
@@ -1487,16 +1479,6 @@ let load_ fn ~silent ~current_version overrides =
     else
       None
   in
-  let hulk_lite =
-    bool_if_min_version "hulk_lite" ~default:false ~current_version config
-  in
-  let hulk_heavy =
-    bool_if_min_version "hulk_heavy" ~default:true ~current_version config
-  in
-  let hulk_mode = string_ "hulk_mode" ~default:"none" config in
-  let hulk_strategy =
-    HulkStrategy.config_to_strategy hulk_mode hulk_lite hulk_heavy
-  in
   let remote_worker_saved_state_manifold_path =
     string_opt "remote_worker_saved_state_manifold_path" config
   in
@@ -1677,7 +1659,6 @@ let load_ fn ~silent ~current_version overrides =
     workload_quantile;
     rollout_group;
     saved_state_manifold_api_key;
-    hulk_strategy;
     log_saved_state_age_and_distance;
     specify_manifold_api_key;
     remote_old_decls_no_limit;
@@ -1721,8 +1702,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
         Option.value options.max_typechecker_worker_memory_mb ~default:(-1);
       use_max_typechecker_worker_memory_for_decl_deferral =
         options.use_max_typechecker_worker_memory_for_decl_deferral;
-      hulk_lite = HulkStrategy.is_hulk_lite options.hulk_strategy;
-      hulk_heavy = HulkStrategy.is_hulk_heavy options.hulk_strategy;
       specify_manifold_api_key = options.specify_manifold_api_key;
       remote_old_decls_no_limit = options.remote_old_decls_no_limit;
       no_marshalled_naming_table_in_saved_state =

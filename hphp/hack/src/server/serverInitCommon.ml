@@ -225,7 +225,6 @@ let type_check
       let longlived_workers =
         genv.local_config.ServerLocalConfig.longlived_workers
       in
-      let mode = genv.local_config.ServerLocalConfig.hulk_strategy in
       let ctx = Provider_utils.ctx_from_server_env env in
       CgroupProfiler.step_start_end cgroup_steps telemetry_label @@ fun () ->
       Typing_check_service.go
@@ -236,7 +235,6 @@ let type_check
         files_to_check
         ~memory_cap
         ~longlived_workers
-        ~mode
         ~check_info:
           (ServerCheckUtils.get_check_info
              ~check_reason:(ServerEnv.Init_telemetry.get_reason init_telemetry)

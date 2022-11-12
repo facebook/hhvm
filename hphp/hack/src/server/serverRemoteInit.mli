@@ -21,7 +21,6 @@ val init :
   init_start_t:float ->
   bin_root:Path.t ->
   root:Path.t ->
-  mode:HulkStrategy.hulk_mode ->
   cache_remote_decls:bool ->
   use_shallow_decls_saved_state:bool ->
   saved_state_manifold_path:string option ->

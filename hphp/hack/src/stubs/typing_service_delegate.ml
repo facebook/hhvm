@@ -45,13 +45,8 @@ let dispatch state files_to_process files_to_process_length =
   ([], files_to_process, state, (Telemetry.create (), 0.0))
 
 let collect
-    ~telemetry
-    state
-    files_to_process
-    files_to_process_length
-    remote_payloads
-    hulk_heavy =
-  ignore (files_to_process_length, hulk_heavy);
+    ~telemetry state files_to_process files_to_process_length remote_payloads =
+  ignore files_to_process_length;
   (files_to_process, state, remote_payloads, None, telemetry)
 
 let add_telemetry state telemetry =

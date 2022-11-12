@@ -2,6 +2,6 @@
  (name jobRunner_sig)
  (wrapped false)
  (modules jobRunner_sig)
- (libraries core_kernel future utils_core hulk_strategy)
+ (libraries core_kernel future utils_core)
  (preprocess
   (pps ppx_deriving.std)))

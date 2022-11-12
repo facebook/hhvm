@@ -121,14 +121,6 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name hulk_strategy)
- (wrapped false)
- (modules hulkStrategy)
- (libraries utils_core)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
  (name server_env)
  (wrapped false)
  (modules serverArgs serverArgs_sig serverConfig serverEnv serverLocalConfig)

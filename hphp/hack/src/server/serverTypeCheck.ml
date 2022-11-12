@@ -1072,7 +1072,6 @@ functor
       let longlived_workers =
         genv.local_config.ServerLocalConfig.longlived_workers
       in
-      let mode = genv.local_config.ServerLocalConfig.hulk_strategy in
       let cgroup_typecheck_telemetry = ref None in
       let (errorl', telemetry, env, cancelled, time_first_typing_error) =
         let ctx = Provider_utils.ctx_from_server_env env in
@@ -1100,7 +1099,6 @@ functor
             ~interrupt
             ~memory_cap
             ~longlived_workers
-            ~mode
             ~check_info:
               (ServerCheckUtils.get_check_info
                  ~check_reason

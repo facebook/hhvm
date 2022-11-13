@@ -308,6 +308,7 @@ add_library(
   server/ThriftServerConfig.cpp
   server/peeking/TLSHelper.cpp
   transport/core/RpcMetadataUtil.cpp
+  transport/core/RpcMetadataPlugins.cpp
   transport/core/ThriftClient.cpp
   transport/core/ThriftClientCallback.cpp
   transport/core/ThriftRequest.cpp

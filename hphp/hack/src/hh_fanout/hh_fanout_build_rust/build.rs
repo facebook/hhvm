@@ -18,8 +18,9 @@ use depgraph::reader::DepGraph;
 use depgraph::reader::DepGraphOpener;
 use depgraph_writer::DepGraphWriter;
 use depgraph_writer::HashListIndex;
-use depgraph_writer::ShardedLookupTableWriter;
-use hash::HashMap;
+use depgraph_writer::LookupTableWriter;
+use hash::DashMap;
+use hash::DashSet;
 use hash::HashSet;
 use hash::IndexMap;
 use log::info;
@@ -87,7 +88,7 @@ impl EdgesDir {
     }
 
     fn read_all_edges(&mut self) -> io::Result<Edges> {
-        let acc = Edges::new();
+        let acc = Edges::default();
         let num_list_handles = self.list_handle_count();
         let num_struct_handles = self.struct_handle_count();
         let list_result: io::Result<Vec<()>> = self
@@ -156,99 +157,42 @@ impl EdgesDir {
     }
 }
 
-const NUM_BUCKETS: usize = 2048;
-
 /// Structure used to read in all edges in parallel.
 ///
 /// Basically a shared HashMap+HashSet
+#[derive(Default)]
 struct Edges {
-    /// edges is a sharded map with NUM_BUCKETS entries. It is indexed
-    /// by dependency % NUM_BUCKETS. The same dependency cannot appear in more
-    /// than one buckets; the inner HashMaps have disjoint keys.
-    edges: Vec<Mutex<HashMap<u64, HashSet<u64>>>>,
+    /// Map<dependency, Set<dependent>>
+    edges: DashMap<u64, HashSet<u64>>,
 
-    /// hashes is a sharded set with NUM_BUCKETS entries. It is indexed by both
-    /// dependency and dependent u64 values. The inner HashSet have disjoint
-    /// values.
-    ///
     /// The u64 values stored here are used by DepGraphWriter to build a
     /// hash-cons table so unique u64 values can be referred to using
     /// an arbitrary u32 index.
-    hashes: Vec<Mutex<HashSet<u64>>>,
+    hashes: DashSet<u64>,
 }
 
 impl Edges {
-    pub fn new() -> Self {
-        Edges {
-            edges: std::iter::repeat_with(Default::default)
-                .take(NUM_BUCKETS)
-                .collect(),
-            hashes: std::iter::repeat_with(Default::default)
-                .take(NUM_BUCKETS)
-                .collect(),
-        }
+    fn register(&self, dependent: u64, dependency: u64) {
+        self.hashes.insert(dependent);
+        self.edges.entry(dependency).or_default().insert(dependent);
     }
 
-    pub fn register(&self, dependent: u64, dependency: u64) {
-        self.register_hash(dependent);
-        self.register_hash(dependency);
-        let bucket_index = dependency as usize % NUM_BUCKETS;
-        let bucket_mutex = self.edges.get(bucket_index).unwrap();
-        bucket_mutex
-            .lock()
-            .entry(dependency)
-            .or_default()
-            .insert(dependent);
-    }
-
-    fn register_hash(&self, hash: u64) {
-        let bucket_index = hash as usize % NUM_BUCKETS;
-        let bucket_mutex = self.hashes.get(bucket_index).unwrap();
-        bucket_mutex.lock().insert(hash);
-    }
-
-    pub fn finish(self) -> (Vec<HashMap<u64, Vec<u64>>>, Vec<u64>) {
-        let num_hashes = self.count_hashes();
+    fn finish(self) -> (Vec<(u64, Vec<u64>)>, Vec<u64>) {
         let edges = (self.edges.into_par_iter())
-            .map(|old_map| {
-                let mut new_map = HashMap::default();
-                for (dependency, dependents) in old_map.lock().iter() {
-                    let mut dependents_vec: Vec<u64> = Vec::with_capacity(dependents.len());
-                    for x in dependents.iter() {
-                        dependents_vec.push(*x);
-                    }
-                    dependents_vec.sort_unstable();
-                    new_map.insert(*dependency, dependents_vec);
-                }
-                new_map
+            .map(|(dependency, dependents)| {
+                self.hashes.insert(dependency);
+                let mut dependents: Vec<_> = dependents.into_iter().collect();
+                dependents.sort_unstable();
+                (dependency, dependents)
             })
             .collect();
-        let mut hashes: Vec<u64> = Vec::with_capacity(num_hashes);
-        for hash_set in self.hashes {
-            hashes.extend(hash_set.into_inner())
-        }
+        let mut hashes: Vec<u64> = self.hashes.into_iter().collect();
         hashes.par_sort_unstable();
         (edges, hashes)
     }
 
-    pub fn count_edges(&self) -> usize {
-        self.edges
-            .iter()
-            .map(|bucket_mutex| {
-                bucket_mutex
-                    .lock()
-                    .iter()
-                    .map(|(_, xs)| xs.len())
-                    .sum::<usize>()
-            })
-            .sum()
-    }
-
-    pub fn count_hashes(&self) -> usize {
-        self.hashes
-            .iter()
-            .map(|bucket_mutex| bucket_mutex.lock().len())
-            .sum()
+    fn count_edges(&self) -> usize {
+        self.edges.iter().map(|e| e.value().len()).sum()
     }
 }
 
@@ -262,10 +206,12 @@ struct HashListsIndices<'a> {
 }
 
 impl<'a> HashListsIndices<'a> {
+    const NUM_BUCKETS: usize = 2048;
+
     fn new() -> Self {
         Self {
             buckets: std::iter::repeat_with(Default::default)
-                .take(NUM_BUCKETS)
+                .take(Self::NUM_BUCKETS)
                 .collect(),
         }
     }
@@ -273,7 +219,7 @@ impl<'a> HashListsIndices<'a> {
     fn allocate_hash_list(&self, dependency: u64, sorted_dependents: &'a [u64]) {
         let mut hasher = hash::BuildHasher::default().build_hasher();
         sorted_dependents.hash(&mut hasher);
-        let bucket_index = hasher.finish() as usize % NUM_BUCKETS;
+        let bucket_index = hasher.finish() as usize % Self::NUM_BUCKETS;
         let mut bucket = self.buckets[bucket_index].lock();
         let (_, dependencies) = bucket
             .entry(sorted_dependents)
@@ -340,7 +286,7 @@ fn extend_edges_from_dep_graph(all_edges: &Edges, graph: &DepGraph<'_>) {
 
 /// Reads all the edges from the edges files in `edges_dir` and collects them in
 /// a list of hashmaps of dependency to its dependents.
-pub fn edges_from_dir(edges_dir: &Path) -> io::Result<Vec<HashMap<u64, Vec<u64>>>> {
+pub fn edges_from_dir(edges_dir: &Path) -> io::Result<Vec<(u64, Vec<u64>)>> {
     let mut edges_dir = EdgesDir::open(edges_dir)?;
     let edges = edges_dir.read_all_edges()?;
     let (structured, _) = edges.finish();
@@ -388,7 +334,7 @@ pub fn build(
             let num_read = delta.read_from(&mut r, |_, _| true)?;
             info!("Delta loaded with {} edges", num_read);
 
-            let all_edges = Edges::new();
+            let all_edges = Edges::default();
             for (dependent, dependency) in delta.iter() {
                 all_edges.register(dependent.into(), dependency.into());
             }
@@ -417,31 +363,20 @@ pub fn build(
         }
     }
 
-    info!(
-        "Building graph with {} unique hashes",
-        all_edges.count_hashes()
-    );
-    info!(
-        "            ... and {} unique edges",
-        all_edges.count_edges()
-    );
-
-    if !allow_empty && all_edges.count_edges() == 0 {
-        panic!("No input edges. Refusing to build as --allow-empty not set.");
-    }
-
     info!("Converting to structured_edges & unique hashes");
     let (structured_edges, sorted_hashes) = all_edges.finish();
 
-    info!("Registering unique hashes");
+    if !allow_empty && structured_edges.is_empty() {
+        panic!("No input edges. Refusing to build as --allow-empty not set.");
+    }
+
+    info!("Registering {} unique hashes", sorted_hashes.len());
     let w = DepGraphWriter::new(sorted_hashes)?;
 
     info!("Calculating relative hash list offsets");
     let hash_list_indices = HashListsIndices::new();
-    structured_edges.par_iter().for_each(|m| {
-        for (dependency, sorted_dependents) in m.iter() {
-            hash_list_indices.allocate_hash_list(*dependency, sorted_dependents);
-        }
+    (structured_edges.par_iter()).for_each(|(dependency, sorted_dependents)| {
+        hash_list_indices.allocate_hash_list(*dependency, sorted_dependents);
     });
 
     info!("Calculating absolute hash list offsets");
@@ -453,7 +388,7 @@ pub fn build(
     let indexer = w.clone_indexer();
 
     info!("Writing hash lists to database and constructing lookup table");
-    let lookup_table = ShardedLookupTableWriter::new();
+    let lookup_table = LookupTableWriter::default();
     let mmap = w.sharded_mmap();
     (hash_list_indices.buckets.into_par_iter())
         .zip(bucket_offsets)

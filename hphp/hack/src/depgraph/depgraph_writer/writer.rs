@@ -5,20 +5,13 @@
 use std::io::Write;
 
 pub use depgraph::dep::Dep;
+use hash::DashMap;
 use hash::HashMap;
 use memmap::MmapMut;
 use parking_lot::Mutex;
 use rayon::prelude::*;
 
 const PAGE_ALIGN: u32 = 4096;
-
-pub const NUM_SHARDS: usize = 2048;
-const SHARDS_INDEX_MASK: u64 = (NUM_SHARDS - 1) as u64;
-
-#[inline(always)]
-pub fn shard_index_for(hash: u64) -> usize {
-    (hash & SHARDS_INDEX_MASK) as usize
-}
 
 /// Type-safe hash index wrapper
 #[derive(Copy, Clone)]
@@ -35,99 +28,63 @@ impl HashListIndex {
     }
 }
 
-/// Sharded hash-to-hash-index map, for writing.
-struct ShardedIndexerWriter {
-    shards: Vec<Mutex<HashMap<u64, HashIndex>>>,
+/// Concurrent hash-to-hash-index map, for writing.
+#[derive(Default)]
+struct IndexerWriter {
+    hash_to_index: DashMap<u64, HashIndex>,
 }
 
-impl ShardedIndexerWriter {
-    fn new() -> Self {
-        Self {
-            shards: std::iter::repeat_with(Default::default)
-                .take(NUM_SHARDS)
-                .collect(),
-        }
-    }
-
+impl IndexerWriter {
     fn insert(&self, hash: u64, hash_index: HashIndex) {
-        let shard_index = shard_index_for(hash);
-        self.shards
-            .get(shard_index)
-            .unwrap()
-            .lock()
-            .insert(hash, hash_index);
+        self.hash_to_index.insert(hash, hash_index);
     }
 
-    fn into_read_only(self) -> ShardedIndexer {
-        ShardedIndexer::new(
-            self.shards
-                .into_iter()
-                .map(|lck| lck.into_inner())
-                .collect(),
-        )
-    }
-}
-
-/// Sharded hash-to-hash-index map, for reading.
-#[derive(Clone)]
-pub struct ShardedIndexer {
-    shards: Vec<HashMap<u64, HashIndex>>,
-}
-
-impl ShardedIndexer {
-    fn new(shards: Vec<HashMap<u64, HashIndex>>) -> Self {
-        Self { shards }
-    }
-
-    fn get(&self, hash: u64) -> Option<HashIndex> {
-        let shard_index = shard_index_for(hash);
-        self.shards.get(shard_index).unwrap().get(&hash).copied()
-    }
-}
-
-/// Sharded lookup table, used for construction
-pub struct ShardedLookupTableWriter {
-    shards: Vec<Mutex<HashMap<u64, HashListIndex>>>,
-}
-
-impl ShardedLookupTableWriter {
-    pub fn new() -> Self {
-        Self {
-            shards: std::iter::repeat_with(Default::default)
-                .take(NUM_SHARDS)
-                .collect(),
+    fn into_read_only(self) -> Indexer {
+        Indexer {
+            hash_to_index: self.hash_to_index.into_iter().collect(),
         }
     }
+}
 
+/// Plain hash-to-hash-index map, for reading.
+#[derive(Clone)]
+pub struct Indexer {
+    hash_to_index: HashMap<u64, HashIndex>,
+}
+
+impl Indexer {
+    fn get(&self, hash: u64) -> Option<HashIndex> {
+        self.hash_to_index.get(&hash).copied()
+    }
+}
+
+/// dependency HashList lookup table, used for construction
+#[derive(Default)]
+pub struct LookupTableWriter {
+    dependency_to_index: DashMap<u64, HashListIndex>,
+}
+
+impl LookupTableWriter {
     pub fn insert(&self, dependency: u64, hash_list_index: HashListIndex) {
-        let shard_index = shard_index_for(dependency);
-        let mut m = self.shards.get(shard_index).unwrap().lock();
-        m.insert(dependency, hash_list_index);
+        self.dependency_to_index.insert(dependency, hash_list_index);
     }
 
-    fn into_read_only(self) -> ShardedLookupTable {
-        ShardedLookupTable::new(
-            self.shards
-                .into_iter()
-                .map(|lck| lck.into_inner())
-                .collect(),
-        )
+    fn into_read_only(self) -> LookupTable {
+        LookupTable {
+            dependency_to_index: self.dependency_to_index.into_iter().collect(),
+        }
     }
 }
 
-/// Sharded lookup table, used for reading
-struct ShardedLookupTable {
-    shards: Vec<HashMap<u64, HashListIndex>>,
+/// dependency HashList lookup table, used for reading
+#[derive(Default)]
+struct LookupTable {
+    dependency_to_index: HashMap<u64, HashListIndex>,
 }
 
-impl ShardedLookupTable {
-    fn new(shards: Vec<HashMap<u64, HashListIndex>>) -> Self {
-        Self { shards }
-    }
-
-    fn get(&self, hash: u64) -> Option<HashListIndex> {
-        let shard_index = shard_index_for(hash);
-        self.shards.get(shard_index).unwrap().get(&hash).copied()
+impl LookupTable {
+    fn get(&self, dependency: u64) -> Option<HashListIndex> {
+        self.dependency_to_index.get(&dependency).copied()
     }
 }
 
@@ -203,8 +160,8 @@ struct DepGraphWriterState {
     next_set_offset: u32,
 
     sorted_hashes: Vec<u64>,
-    indexer: ShardedIndexer,
-    lookup_table: ShardedLookupTable,
+    indexer: Indexer,
+    lookup_table: LookupTable,
 }
 
 impl DepGraphWriter<Phase1AllocateHashSets> {
@@ -246,7 +203,7 @@ impl DepGraphWriter<Phase1AllocateHashSets> {
         }
 
         // Indexer!
-        let indexer = ShardedIndexerWriter::new();
+        let indexer = IndexerWriter::default();
         sorted_hashes.par_iter().enumerate().for_each(|(i, h)| {
             indexer.insert(*h, HashIndex(i as u32));
         });
@@ -259,7 +216,7 @@ impl DepGraphWriter<Phase1AllocateHashSets> {
 
                 sorted_hashes,
                 indexer: indexer.into_read_only(),
-                lookup_table: ShardedLookupTable::new(vec![]),
+                lookup_table: LookupTable::default(),
             },
 
             phase: Phase1AllocateHashSets,
@@ -293,7 +250,7 @@ impl DepGraphWriter<Phase1AllocateHashSets> {
 }
 
 impl DepGraphWriter<Phase2WriteHashSets> {
-    pub fn clone_indexer(&self) -> ShardedIndexer {
+    pub fn clone_indexer(&self) -> Indexer {
         self.state.indexer.clone()
     }
 
@@ -303,7 +260,7 @@ impl DepGraphWriter<Phase2WriteHashSets> {
 
     pub fn write_hash_list(
         mmap: &ShardedMmap<'_>,
-        indexer: &ShardedIndexer,
+        indexer: &Indexer,
         hash_list_index: HashListIndex,
         set: &[u64],
     ) -> std::io::Result<()> {
@@ -313,8 +270,7 @@ impl DepGraphWriter<Phase2WriteHashSets> {
 
         buf.write_all(&len.to_ne_bytes())?;
         for h in set {
-            let i: HashIndex = indexer.get(*h).unwrap();
-            let i: u32 = i.0;
+            let HashIndex(i) = indexer.get(*h).unwrap();
             buf.write_all(&i.to_ne_bytes())?;
         }
 
@@ -336,7 +292,7 @@ impl DepGraphWriter<Phase2WriteHashSets> {
 impl DepGraphWriter<Phase3RegisterLookupTable> {
     pub fn register_lookup_table(
         &mut self,
-        lookup_table: ShardedLookupTableWriter,
+        lookup_table: LookupTableWriter,
     ) -> std::io::Result<()> {
         let lookup_table = lookup_table.into_read_only();
 
@@ -382,11 +338,10 @@ impl DepGraphWriter<Phase3RegisterLookupTable> {
 #[cfg(test)]
 mod tests {
     use std::collections::BTreeSet;
-    use std::collections::HashMap;
-    use std::collections::HashSet;
     use std::fs;
 
     use depgraph::reader::DepGraphOpener;
+    use hash::HashSet;
     use tempfile::NamedTempFile;
 
     use super::*;
@@ -427,7 +382,7 @@ mod tests {
                 .open(&tmpfile_path)
                 .unwrap();
 
-            let mut all_hashes: HashSet<u64> = HashSet::new();
+            let mut all_hashes: HashSet<u64> = HashSet::default();
             self.graph.iter().for_each(|(dependency, dependents)| {
                 all_hashes.insert(*dependency);
                 for h in dependents.iter() {
@@ -439,8 +394,8 @@ mod tests {
 
             let writer = DepGraphWriter::new(all_hashes_vec).unwrap();
 
-            let lookup_table = ShardedLookupTableWriter::new();
-            let mut all_sets: HashMap<&BTreeSet<u64>, HashListIndex> = HashMap::new();
+            let lookup_table = LookupTableWriter::default();
+            let mut all_sets: HashMap<&BTreeSet<u64>, HashListIndex> = HashMap::default();
             let mut next_offset = HashListIndex(writer.first_hash_list_offset());
             for (dependency, dependents) in self.graph.iter() {
                 let set_vec: Vec<u64> = dependents.iter().copied().collect();

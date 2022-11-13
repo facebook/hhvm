@@ -2,8 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::collections::HashMap;
-use std::collections::HashSet;
 use std::ffi::OsString;
 use std::fs;
 use std::hash::BuildHasher;
@@ -21,6 +19,9 @@ use depgraph::reader::DepGraphOpener;
 use depgraph_writer::DepGraphWriter;
 use depgraph_writer::HashListIndex;
 use depgraph_writer::ShardedLookupTableWriter;
+use hash::HashMap;
+use hash::HashSet;
+use hash::IndexMap;
 use log::info;
 use parking_lot::Mutex;
 use rayon::prelude::*;
@@ -162,17 +163,28 @@ const BUCKET_INDEX_MASK: u64 = (NUM_BUCKETS - 1) as u64;
 ///
 /// Basically a shared HashMap+HashSet
 struct Edges {
+    /// edges is a sharded map with NUM_BUCKETS entries. It is indexed
+    /// by dependency % NUM_BUCKETS. The same dependency cannot appear in more
+    /// than one buckets; the inner HashMaps have disjoint keys.
     edges: Vec<Mutex<HashMap<u64, HashSet<u64>>>>,
+
+    /// hashes is a sharded set with NUM_BUCKETS entries. It is indexed by both
+    /// dependency and dependent u64 values. The inner HashSet have disjoint
+    /// values.
+    ///
+    /// The u64 values stored here are used by DepGraphWriter to build a
+    /// hash-cons table so unique u64 values can be referred to using
+    /// an arbitrary u32 index.
     hashes: Vec<Mutex<HashSet<u64>>>,
 }
 
 impl Edges {
     pub fn new() -> Self {
         Edges {
-            edges: std::iter::repeat_with(|| Mutex::new(HashMap::new()))
+            edges: std::iter::repeat_with(Default::default)
                 .take(NUM_BUCKETS)
                 .collect(),
-            hashes: std::iter::repeat_with(|| Mutex::new(HashSet::new()))
+            hashes: std::iter::repeat_with(Default::default)
                 .take(NUM_BUCKETS)
                 .collect(),
         }
@@ -186,14 +198,8 @@ impl Edges {
         bucket_mutex
             .lock()
             .entry(dependency)
-            .and_modify(|s| {
-                s.insert(dependent);
-            })
-            .or_insert_with(|| {
-                let mut s = HashSet::new();
-                s.insert(dependent);
-                s
-            });
+            .or_default()
+            .insert(dependent);
     }
 
     fn register_hash(&self, hash: u64) {
@@ -206,7 +212,7 @@ impl Edges {
         self.edges
             .par_iter()
             .map(|old_map| {
-                let mut new_map = HashMap::new();
+                let mut new_map = HashMap::default();
                 for (dependency, dependents) in old_map.lock().iter() {
                     let mut dependents_vec: Vec<u64> = Vec::with_capacity(dependents.len());
                     for x in dependents.iter() {
@@ -253,80 +259,87 @@ impl Edges {
 /// Structure used to calculate hash list offsets in parallel.
 ///
 /// Each bucket keeps track of
-///   - an internal offset `next_offset` that is incremented
-///     when reserving space for a hash list.
-///   - a map of hash list to
-///       1. internal hash list offset
-///       2. a list of dependencies that use this hash list
-///   - a bucket offset which is only calculated after the fact
-///     when all buckets have been processed.
+///   - a map of sorted_dependents to
+///       1. internal hash list offset (set in make_absolute())
+///       2. a list of dependencies that use this sorted_dependents
+///   - a bucket offset which is calculated in make_absolute() after
+///     all buckets have been populated.
+#[derive(Default)]
 struct HashListsIndicesBucket<'a> {
-    next_offset: HashListIndex,
-    hash_list_indices: HashMap<&'a [u64], (HashListIndex, Vec<u64>)>,
+    hash_list_indices: IndexMap<&'a [u64], (HashListIndex, Vec<u64>)>,
     bucket_offset: u32,
-}
-
-impl HashListsIndicesBucket<'_> {
-    fn with_hasher(hasher: std::collections::hash_map::RandomState) -> Self {
-        Self {
-            next_offset: HashListIndex(0),
-            hash_list_indices: HashMap::with_hasher(hasher),
-            bucket_offset: 0,
-        }
-    }
 }
 
 /// Allocates hash lists and populates the lookup table
 struct HashListsIndices<'a> {
     buckets: Vec<Mutex<HashListsIndicesBucket<'a>>>,
-    hash_builder: std::collections::hash_map::RandomState,
 }
 
 impl<'a> HashListsIndices<'a> {
     fn new() -> Self {
-        let hash_builder = std::collections::hash_map::RandomState::new();
         Self {
-            hash_builder: hash_builder.clone(),
-            buckets: std::iter::repeat_with(|| {
-                Mutex::new(HashListsIndicesBucket::with_hasher(hash_builder.clone()))
-            })
-            .take(NUM_BUCKETS)
-            .collect(),
+            buckets: std::iter::repeat_with(Default::default)
+                .take(NUM_BUCKETS)
+                .collect(),
         }
     }
 
-    fn hash_u64(&self, key: &[u64]) -> u64 {
-        let mut hasher = self.hash_builder.build_hasher();
+    fn hash_u64(key: &[u64]) -> u64 {
+        let mut hasher = hash::BuildHasher::default().build_hasher();
         key.hash(&mut hasher);
         hasher.finish() as u64
     }
 
-    fn allocate_hash_list(&self, dependency: u64, hash_list: &'a [u64]) {
-        let hash = self.hash_u64(hash_list);
+    fn allocate_hash_list(&self, dependency: u64, sorted_dependents: &'a [u64]) {
+        let hash = Self::hash_u64(sorted_dependents);
         let bucket_index = (hash & BUCKET_INDEX_MASK) as usize;
         let mut bucket = self.buckets.get(bucket_index).unwrap().lock();
 
-        let mut new_next_offset = bucket.next_offset;
-        bucket
+        let (_, dependencies) = bucket
             .hash_list_indices
-            .entry(hash_list)
-            .and_modify(|(_, dependencies)| dependencies.push(dependency))
-            .or_insert_with(|| {
-                let size = DepGraphWriter::size_needed_for_hash_list(hash_list);
-                let offset = new_next_offset;
-                new_next_offset = offset.incr(size);
-                let dependencies = vec![dependency];
-                (offset, dependencies)
-            });
-        bucket.next_offset = new_next_offset;
+            .entry(sorted_dependents)
+            .or_insert_with(|| (HashListIndex(0), Vec::new()));
+        dependencies.push(dependency);
     }
 
+    /// Assign deterministic offsets to every key in HashListIndicesBucket::hash_list_indices.
+    /// The contents of each bucket are determinstic because keys were assigned to buckets
+    /// using a determistic hash. But the order of keys in each bucket is nondeterministic because
+    /// they were inserted in parallel.
+    ///
+    /// for each bucket in parallel:
+    ///   * sort the &[u64] keys (sorted_dependents) of each bucket lexographically.
+    ///   * assign each key a relative offset (starting from 0) within this bucket
+    ///   * compute the total size of the bucket
+    ///   * while we're here, sort the dependents list for each key
+    ///
+    /// Then sequentially for each bucket:
+    ///   * assign the bucket a starting offset
+    ///   * adjust the next starting offset by this bucket's size.
+    ///
+    /// Now every bucket and every (sorted_dependents, dependencies) pair
+    /// has a deterministic offset and is in deterministic order.
     fn make_absolute(&self, first_set_offset: u32) -> HashListIndex {
+        let bucket_sizes: Vec<u32> = (self.buckets.par_iter())
+            .map(|m| {
+                let mut bucket = m.lock();
+                let mut size = 0;
+                bucket.hash_list_indices.sort_unstable_keys();
+                for (sorted_dependents, (offset, dependencies)) in
+                    bucket.hash_list_indices.iter_mut()
+                {
+                    *offset = HashListIndex(size);
+                    size += DepGraphWriter::size_needed_for_hash_list(sorted_dependents);
+                    dependencies.sort_unstable();
+                }
+                size
+            })
+            .collect();
         let mut bucket_offset: u32 = first_set_offset;
-        for lck in self.buckets.iter() {
-            let mut bucket = lck.lock();
+        for (m, size) in self.buckets.iter().zip(bucket_sizes) {
+            let mut bucket = m.lock();
             bucket.bucket_offset = bucket_offset;
-            bucket_offset += bucket.next_offset.0;
+            bucket_offset += size;
         }
         HashListIndex(bucket_offset)
     }
@@ -449,8 +462,8 @@ pub fn build(
     info!("Calculating relative hash list offsets");
     let hash_list_indices = HashListsIndices::new();
     structured_edges.par_iter().for_each(|m| {
-        for (dependency, dependents) in m.iter() {
-            hash_list_indices.allocate_hash_list(*dependency, dependents);
+        for (dependency, sorted_dependents) in m.iter() {
+            hash_list_indices.allocate_hash_list(*dependency, sorted_dependents);
         }
     });
 

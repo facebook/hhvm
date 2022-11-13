@@ -2,10 +2,10 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::collections::HashMap;
 use std::io::Write;
 
 pub use depgraph::dep::Dep;
+use hash::HashMap;
 use memmap::MmapMut;
 use parking_lot::Mutex;
 use rayon::prelude::*;
@@ -43,7 +43,7 @@ struct ShardedIndexerWriter {
 impl ShardedIndexerWriter {
     fn new() -> Self {
         Self {
-            shards: std::iter::repeat_with(|| Mutex::new(HashMap::new()))
+            shards: std::iter::repeat_with(Default::default)
                 .take(NUM_SHARDS)
                 .collect(),
         }
@@ -93,7 +93,7 @@ pub struct ShardedLookupTableWriter {
 impl ShardedLookupTableWriter {
     pub fn new() -> Self {
         Self {
-            shards: std::iter::repeat_with(|| Mutex::new(HashMap::new()))
+            shards: std::iter::repeat_with(Default::default)
                 .take(NUM_SHARDS)
                 .collect(),
         }
@@ -251,7 +251,7 @@ impl DepGraphWriter<Phase1AllocateHashSets> {
             indexer.insert(*h, HashIndex(i as u32));
         });
 
-        Ok(DepGraphWriter {
+        Ok(Self {
             state: DepGraphWriterState {
                 indexer_offset,
                 lookup_table_offset,

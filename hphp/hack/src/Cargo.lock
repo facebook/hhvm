@@ -1137,6 +1137,7 @@ name = "depgraph_writer"
 version = "0.0.0"
 dependencies = [
  "depgraph",
+ "hash",
  "memmap",
  "parking_lot 0.11.2",
  "rayon",
@@ -2074,6 +2075,7 @@ dependencies = [
  "dep_graph_delta",
  "depgraph",
  "depgraph_writer",
+ "hash",
  "log",
  "parking_lot 0.11.2",
  "rayon",

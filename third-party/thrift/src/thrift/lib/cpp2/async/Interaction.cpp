@@ -49,7 +49,7 @@ void Tile::decRef(folly::EventBase& eb, InteractionReleaseEvent event) {
 
   if (event != InteractionReleaseEvent::STREAM_TRANSFER && --refCount_ == 0) {
     if (tm_) {
-      std::move(tm_).add([this](auto&&) { delete this; });
+      std::move(tm_).add([ptr = std::unique_ptr<Tile>(this)](auto&&) {});
     } else {
       delete this;
     }

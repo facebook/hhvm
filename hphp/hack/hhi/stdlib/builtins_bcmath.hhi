@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -56,7 +56,4 @@ function bcpowmod(
   int $scale = -1,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function bcsqrt(
-  string $operand,
-  int $scale = -1,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function bcsqrt(string $operand, int $scale = -1): HH\FIXME\MISSING_RETURN_TYPE;

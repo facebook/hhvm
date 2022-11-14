@@ -46,7 +46,7 @@
 
 // We represent a context as an intersection type of all the
 // capabilities it includes, so enable the `&` type syntax.
-<<file:__EnableUnstableFeatures('union_intersection_type_hints')>>
+<<file: __EnableUnstableFeatures('union_intersection_type_hints')>>
 
 /**
  * This namespace defines all the contexts available in HHVM, the Hack
@@ -228,7 +228,8 @@ namespace HH\Contexts {
 
   type rx = (\HH\Capabilities\Rx & \HH\Capabilities\WriteProperty);
   // type rx_shallow = (\HH\Capabilities\RxShallow & rx);
-  type rx_shallow = (\HH\Capabilities\RxShallow & \HH\Capabilities\WriteProperty);
+  type rx_shallow =
+    (\HH\Capabilities\RxShallow & \HH\Capabilities\WriteProperty);
   // type rx_local = (\HH\Capabilities\RxLocal & rx_shallow);
   type rx_local = (\HH\Capabilities\RxLocal & \HH\Capabilities\WriteProperty);
 }

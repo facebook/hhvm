@@ -8,7 +8,8 @@
  *
  */
 
-class RecursiveRegexIterator<Tv> extends RegexIterator<Tv>
+class RecursiveRegexIterator<Tv>
+  extends RegexIterator<Tv>
   implements RecursiveIterator<Tv> {
 
   // Methods

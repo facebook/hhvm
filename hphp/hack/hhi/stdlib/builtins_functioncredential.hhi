@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -8,10 +8,10 @@
  *
  */
 
- /**
-  * Object of this type is returned by __FUNCTION_CREDENTIAL__
-  * but you almost certainly should NOT be attempting to construct this object
-  */
+/**
+ * Object of this type is returned by __FUNCTION_CREDENTIAL__
+ * but you almost certainly should NOT be attempting to construct this object
+ */
 final class FunctionCredential {
   private function __construct() {}
 

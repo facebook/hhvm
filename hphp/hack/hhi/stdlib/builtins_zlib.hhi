@@ -36,10 +36,7 @@ function gzfile(
 <<__PHPStdLib>>
 function gzgetc(resource $zp): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function gzgets(
-  resource $zp,
-  int $length = 1024,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function gzgets(resource $zp, int $length = 1024): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function gzgetss(
   resource $zp,
@@ -99,7 +96,10 @@ function readgzfile(
   int $use_include_path = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function zlib_decode(string $data, int $max_len = 0)[]: mixed; // string or false
+function zlib_decode(
+  string $data,
+  int $max_len = 0,
+)[]: mixed; // string or false
 <<__PHPStdLib>>
 function zlib_encode(string $data, int $encoding, int $level = -1)[]: mixed;
 <<__PHPStdLib>>

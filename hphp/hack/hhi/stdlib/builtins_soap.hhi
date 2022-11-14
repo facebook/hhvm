@@ -152,7 +152,14 @@ class SoapClient {
 }
 
 class SoapVar {
-  public function __construct($data, $type, string $type_name = "", string $type_namespace = "", string $node_name = "", string $node_namespace = "");
+  public function __construct(
+    $data,
+    $type,
+    string $type_name = "",
+    string $type_namespace = "",
+    string $node_name = "",
+    string $node_namespace = "",
+  );
 }
 
 class SoapParam {
@@ -160,7 +167,13 @@ class SoapParam {
 }
 
 class SoapHeader {
-  public function __construct(string $ns, string $name, $data = null, bool $mustunderstand = false, $actor = null);
+  public function __construct(
+    string $ns,
+    string $name,
+    $data = null,
+    bool $mustunderstand = false,
+    $actor = null,
+  );
 }
 
 class SoapFault extends Exception {

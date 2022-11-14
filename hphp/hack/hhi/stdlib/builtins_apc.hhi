@@ -51,9 +51,7 @@ function apc_cache_info(
   bool $limited = false,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apc_clear_cache(
-  string $cache_id = "",
-): HH\FIXME\MISSING_RETURN_TYPE {}
+function apc_clear_cache(string $cache_id = ""): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apc_sma_info(bool $limited = false): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>

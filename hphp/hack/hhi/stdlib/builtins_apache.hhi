@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -14,11 +14,11 @@ function apache_note(
   $note_value = "",
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apache_notes(dict<string, string> $notes): void { }
+function apache_notes(dict<string, string> $notes): void {}
 <<__PHPStdLib>>
-function apache_request_headers(): darray<string, string> { }
+function apache_request_headers(): darray<string, string> {}
 <<__PHPStdLib>>
-function apache_response_headers(): darray<string, string> { }
+function apache_response_headers(): darray<string, string> {}
 <<__PHPStdLib>>
 function apache_setenv(
   string $variable,

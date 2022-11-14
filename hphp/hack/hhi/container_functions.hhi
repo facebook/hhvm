@@ -16,102 +16,109 @@
 
 namespace {
 
-<<__PHPStdLib>>
-function array_key_exists(readonly mixed $key, readonly ?KeyedContainer<arraykey, mixed> $search)[]: bool;
+  <<__PHPStdLib>>
+  function array_key_exists(
+    readonly mixed $key,
+    readonly ?KeyedContainer<arraykey, mixed> $search,
+  )[]: bool;
 
-<<__PHPStdLib>>
+  <<__PHPStdLib>>
   function array_sum/*<T>*/(
     readonly /*Container<T>*/ $input,
   )[]/*: num*/: \HH\FIXME\MISSING_RETURN_TYPE;
-<<__PHPStdLib>>
+  <<__PHPStdLib>>
   function array_product/*<T>*/(
     readonly /*Container<T>*/ $input,
   )[]/*: num*/: \HH\FIXME\MISSING_RETURN_TYPE;
 
-<<__PHPStdLib>>
-function sort<T as Container<mixed>>(
+  <<__PHPStdLib>>
+  function sort<T as Container<mixed>>(
 
-  inout T $arg,
-  int $sort_flags = SORT_REGULAR,
-)[]: bool;
-<<__PHPStdLib>>
-function rsort<T as Container<mixed>>(
+    inout T $arg,
+    int $sort_flags = SORT_REGULAR,
+  )[]: bool;
+  <<__PHPStdLib>>
+  function rsort<T as Container<mixed>>(
 
-  inout T $arg,
-  int $sort_flags = SORT_REGULAR,
-)[]: bool;
-<<__PHPStdLib>>
-function asort<Tk as arraykey, Tv>(
+    inout T $arg,
+    int $sort_flags = SORT_REGULAR,
+  )[]: bool;
+  <<__PHPStdLib>>
+  function asort<Tk as arraykey, Tv>(
 
-  inout KeyedContainer<Tk, Tv> $arg,
-  int $sort_flags = SORT_REGULAR,
-)[]: bool;
-<<__PHPStdLib>>
-function arsort<Tk as arraykey, Tv>(
+    inout KeyedContainer<Tk, Tv> $arg,
+    int $sort_flags = SORT_REGULAR,
+  )[]: bool;
+  <<__PHPStdLib>>
+  function arsort<Tk as arraykey, Tv>(
 
-  inout KeyedContainer<Tk, Tv> $arg,
-  int $sort_flags = SORT_REGULAR,
-)[]: bool;
-<<__PHPStdLib>>
-function ksort<T as KeyedContainer<arraykey, mixed>>(
+    inout KeyedContainer<Tk, Tv> $arg,
+    int $sort_flags = SORT_REGULAR,
+  )[]: bool;
+  <<__PHPStdLib>>
+  function ksort<T as KeyedContainer<arraykey, mixed>>(
 
-  inout T $arg,
-  int $sort_flags = SORT_REGULAR,
-)[]: bool;
-<<__PHPStdLib>>
-function krsort<Tk as arraykey, Tv>(
+    inout T $arg,
+    int $sort_flags = SORT_REGULAR,
+  )[]: bool;
+  <<__PHPStdLib>>
+  function krsort<Tk as arraykey, Tv>(
 
-  inout KeyedContainer<Tk, Tv> $arg,
-  int $sort_flags = SORT_REGULAR,
-)[]: bool;
-<<__PHPStdLib>>
-function usort<Tv, T as Container<Tv>>(
+    inout KeyedContainer<Tk, Tv> $arg,
+    int $sort_flags = SORT_REGULAR,
+  )[]: bool;
+  <<__PHPStdLib>>
+  function usort<Tv, T as Container<Tv>>(
 
-  inout T $arg,
-  (function(Tv, Tv)[_]: num) $c,
-)[ctx $c]: bool;
-<<__PHPStdLib>>
-function uasort<Tk as arraykey, Tv>(
+    inout T $arg,
+    (function(Tv, Tv)[_]: num) $c,
+  )[ctx $c]: bool;
+  <<__PHPStdLib>>
+  function uasort<Tk as arraykey, Tv>(
 
-  inout KeyedContainer<Tk, Tv> $arg,
-  (function(Tv, Tv)[_]: num) $c,
-)[ctx $c]: bool;
-<<__PHPStdLib>>
-function uksort<Tk as arraykey, Tv>(
+    inout KeyedContainer<Tk, Tv> $arg,
+    (function(Tv, Tv)[_]: num) $c,
+  )[ctx $c]: bool;
+  <<__PHPStdLib>>
+  function uksort<Tk as arraykey, Tv>(
 
-  inout KeyedContainer<Tk, Tv> $arg,
-  (function(Tk, Tk)[_]: num) $c,
-)[ctx $c]: bool;
+    inout KeyedContainer<Tk, Tv> $arg,
+    (function(Tk, Tk)[_]: num) $c,
+  )[ctx $c]: bool;
 
 }
 
 namespace HH {
 
-/**
- * Creates a `dict` from a `KeyedTraversable`, preserving keys and order.
- */
-function dict<Tk as arraykey, Tv>(KeyedTraversable<Tk, Tv> $arr)[]: dict<Tk, Tv>;
+  /**
+   * Creates a `dict` from a `KeyedTraversable`, preserving keys and order.
+   */
+  function dict<Tk as arraykey, Tv>(
+    KeyedTraversable<Tk, Tv> $arr,
+  )[]: dict<Tk, Tv>;
 
-/**
- * Creates a `vec` from a `Traversable`, preserving order. Keys are not
- * preserved.
- */
-function vec<Tv>(Traversable<Tv> $arr)[]: vec<Tv>;
+  /**
+   * Creates a `vec` from a `Traversable`, preserving order. Keys are not
+   * preserved.
+   */
+  function vec<Tv>(Traversable<Tv> $arr)[]: vec<Tv>;
 
-/**
- * Create a `keyset` from a `Traversable` of strings or ints, preserving order.
- * Keys are not preserved.
- */
-function keyset<Tv as arraykey>(Traversable<Tv> $arr)[]: keyset<Tv>;
+  /**
+   * Create a `keyset` from a `Traversable` of strings or ints, preserving order.
+   * Keys are not preserved.
+   */
+  function keyset<Tv as arraykey>(Traversable<Tv> $arr)[]: keyset<Tv>;
 
-function darray<Tk as arraykey, Tv>(KeyedTraversable<Tk, Tv> $arr)[]: darray<Tk, Tv>;
+  function darray<Tk as arraykey, Tv>(
+    KeyedTraversable<Tk, Tv> $arr,
+  )[]: darray<Tk, Tv>;
 
-function varray<Tv>(Traversable<Tv> $arr)[]: varray<Tv>;
+  function varray<Tv>(Traversable<Tv> $arr)[]: varray<Tv>;
 
-function is_php_array(readonly mixed $input)[]: bool;
+  function is_php_array(readonly mixed $input)[]: bool;
 
-function is_vec_or_varray(readonly mixed $input)[]: bool;
+  function is_vec_or_varray(readonly mixed $input)[]: bool;
 
-function is_dict_or_darray(readonly mixed $input)[]: bool;
+  function is_dict_or_darray(readonly mixed $input)[]: bool;
 
 }

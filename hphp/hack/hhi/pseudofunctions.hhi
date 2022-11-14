@@ -9,29 +9,29 @@
 // but are compiled to bespoke bytecodes by HackC.
 
 namespace {
-/**
- * Determines whether or not a variable is "set." This can take a subscript
- * expression and checks whether a given index exists, e.g.:
- * ```
- * // Returns `false` if 42 doesn't exist at all, or maps to `null`
- * isset($d[42]);
- * ```
- */
-function isset(mixed $x)[]: bool;
+  /**
+   * Determines whether or not a variable is "set." This can take a subscript
+   * expression and checks whether a given index exists, e.g.:
+   * ```
+   * // Returns `false` if 42 doesn't exist at all, or maps to `null`
+   * isset($d[42]);
+   * ```
+   */
+  function isset(mixed $x)[]: bool;
 
-/**
- * Used to remove keys from arrays:
- *
- * ```
- * $d = dict[42 => true];
- * unset($d[42]);
- * var_dump($d); // prints an empty dict
- * ```
- *
- * Also can be used to unset object properties and variables, but this behavior
- * is disallowed by Hack.
- */
-function unset(mixed $x)[]: void;
+  /**
+   * Used to remove keys from arrays:
+   *
+   * ```
+   * $d = dict[42 => true];
+   * unset($d[42]);
+   * var_dump($d); // prints an empty dict
+   * ```
+   *
+   * Also can be used to unset object properties and variables, but this behavior
+   * is disallowed by Hack.
+   */
+  function unset(mixed $x)[]: void;
 }
 
 namespace HH {

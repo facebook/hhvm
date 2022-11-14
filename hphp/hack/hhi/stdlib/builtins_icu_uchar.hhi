@@ -472,7 +472,6 @@ class IntlChar {
   const int DT_WIDE = 0;
   const int DT_COUNT = 0;
 
-
   const int JT_NON_JOINING = 0;
   const int JT_JOIN_CAUSING = 0;
   const int JT_DUAL_JOINING = 0;
@@ -480,7 +479,6 @@ class IntlChar {
   const int JT_RIGHT_JOINING = 0;
   const int JT_TRANSPARENT = 0;
   const int JT_COUNT = 0;
-
 
   const int JG_NO_JOINING_GROUP = 0;
   const int JG_AIN = 0;
@@ -496,8 +494,6 @@ class IntlChar {
   const int JG_GAF = 0;
   const int JG_GAMAL = 0;
   const int JG_HAH = 0;
-
-
 
   const int JG_HAMZA_ON_HEH_GOAL = 0;
   const int JG_HE = 0;
@@ -651,10 +647,16 @@ class IntlChar {
     $cp,
     int $prop,
   ): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function getIntPropertyMaxValue(int $prop): int { return 0; }
-  static public function getIntPropertyMinValue(int $prop): int { return 0; }
+  static public function getIntPropertyMaxValue(int $prop): int {
+    return 0;
+  }
+  static public function getIntPropertyMinValue(int $prop): int {
+    return 0;
+  }
   static public function getNumericValue($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function enumCharTypes((function(int,int,int):void) $cb): void { }
+  static public function enumCharTypes(
+    (function(int, int, int): void) $cb,
+  ): void {}
   static public function getBlockCode($cp): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function charName(
     $cp,
@@ -664,7 +666,12 @@ class IntlChar {
     string $name,
     int $choice = IntlChar::UNICODE_CHAR_NAME,
   ): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function enumCharNames($start, $limit, (function(int,int,string):void) $cb, int $choice = IntlChar::UNICODE_CHAR_NAME): void { }
+  static public function enumCharNames(
+    $start,
+    $limit,
+    (function(int, int, string): void) $cb,
+    int $choice = IntlChar::UNICODE_CHAR_NAME,
+  ): void {}
   static public function getPropertyName(
     int $prop,
     int $choice = IntlChar::LONG_PROPERTY_NAME,
@@ -674,8 +681,12 @@ class IntlChar {
     int $value,
     int $choice = IntlChar::LONG_PROPERTY_NAME,
   ): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function getPropertyEnum(string $alias): int { return 0; }
-  static public function getPropertyValueEnum(int $prop, string $name): int { return 0; }
+  static public function getPropertyEnum(string $alias): int {
+    return 0;
+  }
+  static public function getPropertyValueEnum(int $prop, string $name): int {
+    return 0;
+  }
   static public function foldCase(
     $cp,
     int $options = IntlChar::FOLD_CASE_DEFAULT,
@@ -684,9 +695,14 @@ class IntlChar {
     $cp,
     int $radix = 10,
   ): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function forDigit(int $digit, int $radix = 10): int { return 0; }
+  static public function forDigit(int $digit, int $radix = 10): int {
+    return 0;
+  }
   static public function charAge($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  <<__PHPStdLib>> static public function getUnicodeVersion(): darray<arraykey, mixed> { return darray[]; }
+  <<__PHPStdLib>>
+  static public function getUnicodeVersion(): darray<arraykey, mixed> {
+    return darray[];
+  }
   static public function getFC_NFKC_Closure(
     $cp,
   ): HH\FIXME\MISSING_RETURN_TYPE {}
@@ -720,9 +736,7 @@ class IntlChar {
   static public function isJavaIDPart($cp): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function charDirection($cp): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function charType($cp): HH\FIXME\MISSING_RETURN_TYPE {}
-  static public function getCombiningClass(
-    $cp,
-  ): HH\FIXME\MISSING_RETURN_TYPE {}
+  static public function getCombiningClass($cp): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function charDigitValue($cp): HH\FIXME\MISSING_RETURN_TYPE {}
   static public function getBidiPairedBracket(
     $cp,

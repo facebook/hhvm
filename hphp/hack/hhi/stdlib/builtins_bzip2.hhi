@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -13,10 +13,7 @@ function bzclose(resource $bz): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function bzopen($filename, string $mode): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function bzread(
-  resource $bz,
-  int $length = 1024,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function bzread(resource $bz, int $length = 1024): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function bzwrite(
   resource $bz,

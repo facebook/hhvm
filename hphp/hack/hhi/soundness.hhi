@@ -28,7 +28,10 @@ namespace HH\FIXME;
  * applies to the entire next line, and `UNSAFE_CAST` applies to a single
  * expression.
  */
-function UNSAFE_CAST<<<__Explicit>> Tin, <<__Explicit>> Tout>(Tin $t, ?\HH\FormatString<nothing> $msg = null)[]: Tout;
+function UNSAFE_CAST<<<__Explicit>> Tin, <<__Explicit>> Tout>(
+  Tin $t,
+  ?\HH\FormatString<nothing> $msg = null,
+)[]: Tout;
 
 /**
  * `UNSAFE_NONNULL_CAST` allows you to lie to the type checker and
@@ -45,7 +48,10 @@ function UNSAFE_CAST<<<__Explicit>> Tin, <<__Explicit>> Tout>(Tin $t, ?\HH\Forma
  * if ($my_value is null) { ... } else { ... }
  * ```
  */
-function UNSAFE_NONNULL_CAST<T as nonnull>(?T $t, ?\HH\FormatString<nothing> $msg = null)[]: T;
+function UNSAFE_NONNULL_CAST<T as nonnull>(
+  ?T $t,
+  ?\HH\FormatString<nothing> $msg = null,
+)[]: T;
 
 /* Acts as Tany under current semantics, and T under sound dynamic */
 type TANY_MARKER<+T> = T;

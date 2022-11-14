@@ -54,7 +54,6 @@ const int E_USER_DEPRECATED = 1 << 14;
 const int E_ALL = (1 << 15) - 1;
 const int E_STRICT = 1 << 11;
 
-
 // Built in pseudoconstants
 const int __LINE__ = 0;
 const string __CLASS__ = '';

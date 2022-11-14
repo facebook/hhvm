@@ -85,7 +85,11 @@ const int STREAM_SOCK_STREAM = 1;
 const int STREAM_USE_PATH = 1;
 
 <<__PHPStdLib>>
-function stream_await(resource $fp, int $events, float $timeout = 0.0): Awaitable<int>;
+function stream_await(
+  resource $fp,
+  int $events,
+  float $timeout = 0.0,
+): Awaitable<int>;
 <<__PHPStdLib>>
 function stream_context_create(
   $options = null,
@@ -136,9 +140,7 @@ function stream_get_line(
   $ending = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function stream_get_meta_data(
-  resource $stream,
-)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function stream_get_meta_data(resource $stream)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function stream_get_transports(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>

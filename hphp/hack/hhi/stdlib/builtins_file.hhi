@@ -49,12 +49,12 @@ const int SEEK_END = 0;
 const int INI_SCANNER_NORMAL = 0;
 const int INT_SCANNER_RAW = 0;
 
-const int GLOB_ERR     = 1;
-const int GLOB_MARK    = 2;
-const int GLOB_NOSORT  = 4;
+const int GLOB_ERR = 1;
+const int GLOB_MARK = 2;
+const int GLOB_NOSORT = 4;
 const int GLOB_NOCHECK = 16;
-const int GLOB_ESCAPE  = 64;
-const int GLOB_BRACE   = 1024;
+const int GLOB_ESCAPE = 64;
+const int GLOB_BRACE = 1024;
 const int GLOB_ONLYDIR = 8192;
 
 <<__PHPStdLib>>
@@ -89,20 +89,14 @@ function fread(resource $handle, int $length): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function fgetc(resource $handle): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function fgets(
-  resource $handle,
-  int $length = 0,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function fgets(resource $handle, int $length = 0): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function fgetss(
   resource $handle,
   int $length = 0,
   string $allowable_tags = "",
 ): HH\FIXME\MISSING_RETURN_TYPE;
-function fscanf(
-  resource $handle,
-  string $format,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function fscanf(resource $handle, string $format): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function fpassthru(resource $handle): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>

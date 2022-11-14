@@ -1,4 +1,4 @@
 File "iterator.php", line 3, characters 44-54:
 This interface is not properly implemented (Typing[4054])
-  File "interfaces.hhi", line 134, characters 19-21:
+  File "interfaces.hhi", line 139, characters 21-23:
   Method `key` does not have an implementation

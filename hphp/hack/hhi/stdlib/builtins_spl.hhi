@@ -45,7 +45,8 @@ function iterator_to_array(
   bool $use_keys = true,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 
-class SplDoublyLinkedList<T> implements Iterator<T>, ArrayAccess<int, T>, Countable {
+class SplDoublyLinkedList<T>
+  implements Iterator<T>, ArrayAccess<int, T>, Countable {
   public function bottom(): T;
   public function isEmpty(): bool;
   public function key(): int;
@@ -114,7 +115,8 @@ class SplFileInfo {
   public function setInfoClass(string $class_name = "SplFileInfo"): void;
 }
 
-class SplFileObject extends SplFileInfo
+class SplFileObject
+  extends SplFileInfo
   implements
     SeekableIterator<HH\FIXME\POISON_MARKER<string>>,
     RecursiveIterator<HH\FIXME\POISON_MARKER<string>> {
@@ -184,7 +186,8 @@ class SplTempFileObject extends SplFileObject {
   public function __construct(?int $max_memory = null);
 }
 
-class DirectoryIterator extends SplFileInfo
+class DirectoryIterator
+  extends SplFileInfo
   implements SeekableIterator<DirectoryIterator> {
 
   // Methods
@@ -211,7 +214,8 @@ class GlobIterator extends FilesystemIterator implements Countable {
 class SplStack<T> extends SplDoublyLinkedList<T> {
 }
 
-class SplPriorityQueue<T> implements Iterator<HH\FIXME\POISON_MARKER<T>>, Countable {
+class SplPriorityQueue<T>
+  implements Iterator<HH\FIXME\POISON_MARKER<T>>, Countable {
   const int EXTR_BOTH = 3;
   const int EXTR_PRIORITY = 2;
   const int EXTR_DATA = 1;

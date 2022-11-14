@@ -1,4 +1,4 @@
-<?hh   /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -180,27 +180,28 @@ namespace HH {
     $inst,
     string $meth_name,
   ): \HH\FIXME\MISSING_RETURN_TYPE; // becomes:
-// function inst_meth<Tobj>(Tobj inst, 'method')
-//   : (function(<params of Tobj::method>): <the return type of Tobj::method>)
+  // function inst_meth<Tobj>(Tobj inst, 'method')
+  //   : (function(<params of Tobj::method>): <the return type of Tobj::method>)
 
-/**
- * See http://docs.hhvm.com/hack/reference/function/HH.invariant/
- */
-function invariant(
-  $condition, // e.g. is_int($x) or ($y instanceof SomeClass)
-  FormatString<\PlainSprintf> $f, ...$f_args
-)[]: void; // becomes:
-// if (!(<condition>)) { // an Exception is thrown
-//   invariant_violation('sprintf format: %s', 'string', ...);
-// }
-// <condition> is known to be true in the code below
+  /**
+   * See http://docs.hhvm.com/hack/reference/function/HH.invariant/
+   */
+  function invariant(
+    $condition, // e.g. is_int($x) or ($y instanceof SomeClass)
+    FormatString<\PlainSprintf> $f,
+    ...$f_args
+  )[]: void; // becomes:
+  // if (!(<condition>)) { // an Exception is thrown
+  //   invariant_violation('sprintf format: %s', 'string', ...);
+  // }
+  // <condition> is known to be true in the code below
 
-/**
- * See
- * http://docs.hhvm.com/hack/reference/function/HH.invariant_callback_register/
- */
-function invariant_callback_register(
-  (function(string, mixed ...): void) $callback
-)[globals]: void {}
+  /**
+   * See
+   * http://docs.hhvm.com/hack/reference/function/HH.invariant_callback_register/
+   */
+  function invariant_callback_register(
+    (function(string, mixed...): void) $callback,
+  )[globals]: void {}
 
 } // namespace HH

@@ -64,9 +64,7 @@ function pg_cmdtuples(resource $result): int;
 <<__PHPStdLib>>
 function pg_cancel_query(resource $connection): bool;
 <<__PHPStdLib>>
-function pg_client_encoding(
-  resource $connection,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function pg_client_encoding(resource $connection): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function pg_close(resource $connection): bool;
 <<__PHPStdLib>>

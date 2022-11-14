@@ -10,7 +10,7 @@
 
 namespace HH {
 
-abstract final class Shapes {
+  abstract final class Shapes {
 
     /**
      * Use `Shapes::idx` to retrieve a field value in a shape, when the key may or may not exist.
@@ -42,31 +42,29 @@ abstract final class Shapes {
       $default = null,
     )[]: \HH\FIXME\MISSING_RETURN_TYPE;
 
-  /**
-   * Check if a field in shape exists.
-   * Similar to array_key_exists, but for shapes.
-   */
-  public static function keyExists(
-    readonly shape(...) $shape,
-    arraykey $index
-  )[]: bool;
+    /**
+     * Check if a field in shape exists.
+     * Similar to array_key_exists, but for shapes.
+     */
+    public static function keyExists(
+      readonly shape(...) $shape,
+      arraykey $index,
+    )[]: bool;
 
-  /**
-   * Removes the $index field from the $shape (passed in as an inout argument).
-   * As with all inout arguments, it can only be used with local variables.
-   */
-  public static function removeKey<T as shape(...)>(
-    inout T $shape,
-    arraykey $index
-  )[]: void;
+    /**
+     * Removes the $index field from the $shape (passed in as an inout argument).
+     * As with all inout arguments, it can only be used with local variables.
+     */
+    public static function removeKey<T as shape(...)>(
+      inout T $shape,
+      arraykey $index,
+    )[]: void;
 
-  public static function toArray(
-    shape(...) $shape
-  )[]: darray<arraykey, mixed>;
+    public static function toArray(
+      shape(...) $shape,
+    )[]: darray<arraykey, mixed>;
 
-  public static function toDict(
-    shape(...) $shape
-  )[]: dict<arraykey, mixed>;
+    public static function toDict(shape(...) $shape)[]: dict<arraykey, mixed>;
 
     /**
      * Returns the value of the field $index of $shape,
@@ -78,6 +76,6 @@ abstract final class Shapes {
       arraykey $index,
     )[]: \HH\FIXME\MISSING_RETURN_TYPE;
 
-}
+  }
 
 } // namespace HH

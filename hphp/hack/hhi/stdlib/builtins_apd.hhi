@@ -9,16 +9,9 @@
  */
 
 <<__PHPStdLib>>
-function override_function(
-  $name,
-  $args,
-  $code,
-): HH\FIXME\MISSING_RETURN_TYPE {}
+function override_function($name, $args, $code): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function rename_function(
-  $orig_name,
-  $new_name,
-): HH\FIXME\MISSING_RETURN_TYPE {}
+function rename_function($orig_name, $new_name): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apd_set_browser_trace(): HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>

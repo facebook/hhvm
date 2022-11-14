@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,8 +9,8 @@
  */
 
 class Closure {
-  public function __construct() { }
+  public function __construct() {}
 }
 class DummyClosure {
-  public function __construct() { }
+  public function __construct() {}
 }

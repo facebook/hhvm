@@ -1,4 +1,4 @@
-<?hh    /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -8,17 +8,17 @@
  *
  */
 
-const string DATE_ATOM    = "";
-const string DATE_COOKIE  = "";
+const string DATE_ATOM = "";
+const string DATE_COOKIE = "";
 const string DATE_ISO8601 = "";
 const string DATE_RFC1036 = "";
 const string DATE_RFC1123 = "";
 const string DATE_RFC2822 = "";
 const string DATE_RFC3339 = "";
-const string DATE_RFC822  = "";
-const string DATE_RFC850  = "";
-const string DATE_RSS     = "";
-const string DATE_W3C     = "";
+const string DATE_RFC822 = "";
+const string DATE_RFC850 = "";
+const string DATE_RSS = "";
+const string DATE_W3C = "";
 
 const int DAY_1 = 131079;
 const int DAY_2 = 131080;
@@ -32,7 +32,7 @@ type DateTimeErrors = shape(
   'warning_count' => int,
   'warnings' => darray<int, string>,
   'error_count' => int,
-  'errors' => darray<int, string>
+  'errors' => darray<int, string>,
 );
 
 <<__PHPStdLib>>
@@ -149,9 +149,7 @@ function date(
 <<__PHPStdLib>>
 function getdate(?int $timestamp = null): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function gettimeofday(
-  bool $return_float = false,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function gettimeofday(bool $return_float = false): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function gmdate(
   string $format,
@@ -262,7 +260,10 @@ class DateTime implements DateTimeInterface {
   const string RSS = '';
   const string W3C = '';
 
-  public function __construct(string $time = 'now', ?DateTimeZone $timezone = null)[leak_safe];
+  public function __construct(
+    string $time = 'now',
+    ?DateTimeZone $timezone = null,
+  )[leak_safe];
   public function add(DateInterval $interval): HH\FIXME\MISSING_RETURN_TYPE;
   public function modify(string $modify): HH\FIXME\MISSING_RETURN_TYPE;
   public function getOffset(): int;
@@ -301,11 +302,13 @@ class DateTime implements DateTimeInterface {
   public static function getLastErrors(): DateTimeErrors;
 }
 
-
 class DateTimeImmutable implements DateTimeInterface {
   private DateTime $data;
 
-  public function __construct(string $time = 'now', ?DateTimeZone $timezone = null);
+  public function __construct(
+    string $time = 'now',
+    ?DateTimeZone $timezone = null,
+  );
   public function add(DateInterval $interval): this;
   public function modify(string $modify): this;
   public function getOffset(): int;
@@ -350,8 +353,8 @@ class DateTimeZone {
   const int ALL_WITH_BC = 0;
   const int PER_COUNTRY = 0;
   public function __construct(string $timezone)[];
-  public function getLocation()[]: darray { }
-  public function getName()[]: string { }
+  public function getLocation()[]: darray {}
+  public function getName()[]: string {}
   public function getOffset(
     DateTimeInterface $datetime,
   )[]: HH\FIXME\MISSING_RETURN_TYPE;

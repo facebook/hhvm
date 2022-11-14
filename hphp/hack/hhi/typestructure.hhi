@@ -10,53 +10,53 @@
 
 namespace HH {
 
-/*
- * The following enum values are defined in
- * hphp/runtime/ext/reflection/ext_reflection-classes.php
- */
-enum TypeStructureKind : int {
-  OF_VOID = 0;
-  OF_INT = 0;
-  OF_BOOL = 0;
-  OF_FLOAT = 0;
-  OF_STRING = 0;
-  OF_RESOURCE = 0;
-  OF_NUM = 0;
-  OF_ARRAYKEY = 0;
-  OF_NORETURN = 0;
-  OF_MIXED = 0;
-  OF_TUPLE = 0;
-  OF_FUNCTION = 0;
-  OF_ARRAY = 0;
-  OF_GENERIC = 0;
-  OF_SHAPE = 0;
-  OF_CLASS = 0;
-  OF_INTERFACE = 0;
-  OF_TRAIT = 0;
-  OF_ENUM = 0;
-  OF_DICT = 0;
-  OF_VEC = 0;
-  OF_KEYSET = 0;
-  OF_VEC_OR_DICT = 0;
-  OF_NONNULL = 0;
-  OF_DARRAY = 0;
-  OF_VARRAY = 0;
-  OF_VARRAY_OR_DARRAY = 0;
-  OF_NULL = 0;
-  OF_NOTHING = 0;
-  OF_DYNAMIC = 0;
-  OF_UNRESOLVED = 0;
-  OF_XHP = 0;
-}
+  /*
+   * The following enum values are defined in
+   * hphp/runtime/ext/reflection/ext_reflection-classes.php
+   */
+  enum TypeStructureKind: int {
+    OF_VOID = 0;
+    OF_INT = 0;
+    OF_BOOL = 0;
+    OF_FLOAT = 0;
+    OF_STRING = 0;
+    OF_RESOURCE = 0;
+    OF_NUM = 0;
+    OF_ARRAYKEY = 0;
+    OF_NORETURN = 0;
+    OF_MIXED = 0;
+    OF_TUPLE = 0;
+    OF_FUNCTION = 0;
+    OF_ARRAY = 0;
+    OF_GENERIC = 0;
+    OF_SHAPE = 0;
+    OF_CLASS = 0;
+    OF_INTERFACE = 0;
+    OF_TRAIT = 0;
+    OF_ENUM = 0;
+    OF_DICT = 0;
+    OF_VEC = 0;
+    OF_KEYSET = 0;
+    OF_VEC_OR_DICT = 0;
+    OF_NONNULL = 0;
+    OF_DARRAY = 0;
+    OF_VARRAY = 0;
+    OF_VARRAY_OR_DARRAY = 0;
+    OF_NULL = 0;
+    OF_NOTHING = 0;
+    OF_DYNAMIC = 0;
+    OF_UNRESOLVED = 0;
+    OF_XHP = 0;
+  }
 
-// Note: Nullable fields in shapes of this type may not be present, and so
-// should be considered optional. Additionally, shapes of this type may contain
-// additional fields other than those specified here.
-newtype TypeStructure<T> as shape(
-  'nullable' => ?bool,
-  'kind' => TypeStructureKind,
-  'name' => ?string,
-  'classname' => ?classname<T>,
+  // Note: Nullable fields in shapes of this type may not be present, and so
+  // should be considered optional. Additionally, shapes of this type may contain
+  // additional fields other than those specified here.
+  newtype TypeStructure<T> as shape(
+    'nullable' => ?bool,
+    'kind' => TypeStructureKind,
+    'name' => ?string,
+    'classname' => ?classname<T>,
   /* HH_FIXME[2071] */
   'elem_types' => ?varray,
   /* HH_FIXME[2071] */
@@ -65,58 +65,58 @@ newtype TypeStructure<T> as shape(
   'param_types' => ?varray,
   /* HH_FIXME[2071] */
   'generic_types' => ?varray,
-  'root_name' => ?string,
+    'root_name' => ?string,
   /* HH_FIXME[2071] */
   'access_list' => ?varray,
   /* HH_FIXME[2071] */
   'fields' => ?darray,
-  'allows_unknown_fields' => ?bool,
-  'is_cls_cns' => ?bool,
-  'optional_shape_field' => ?bool,
+    'allows_unknown_fields' => ?bool,
+    'is_cls_cns' => ?bool,
+    'optional_shape_field' => ?bool,
   /* HH_FIXME[2071] */
   'value' => ?darray,
-  'typevars' => ?string,
-  'alias' => ?string,
-  ?'exact' => bool,
-  ?'like' => bool,
-) = shape(
-  'nullable' => ?bool,
-  'kind' => TypeStructureKind,
-  // name for generics (type variables)
-  'name' => ?string,
-  // classname for classes, interfaces, enums, or traits
-  'classname' => ?classname<T>,
-  // for tuples
+    'typevars' => ?string,
+    'alias' => ?string,
+    ?'exact' => bool,
+    ?'like' => bool,
+  ) = shape(
+    'nullable' => ?bool,
+    'kind' => TypeStructureKind,
+    // name for generics (type variables)
+    'name' => ?string,
+    // classname for classes, interfaces, enums, or traits
+    'classname' => ?classname<T>,
+    // for tuples
   /* HH_FIXME[2071] */
   'elem_types' => ?varray,
   /* HH_FIXME[2071] */
   'return_type' => ?darray,
-  // for functions
+    // for functions
   /* HH_FIXME[2071] */
   'param_types' => ?varray,
-  // for arrays, classes
+    // for arrays, classes
   /* HH_FIXME[2071] */
   'generic_types' => ?varray,
-  'root_name' => ?string,
+    'root_name' => ?string,
   /* HH_FIXME[2071] */
   'access_list' => ?varray,
-  // for shapes
+    // for shapes
   /* HH_FIXME[2071] */
   'fields' => ?darray,
-  'allows_unknown_fields' => ?bool,
-  'is_cls_cns' => ?bool,
-  'optional_shape_field' => ?bool,
+    'allows_unknown_fields' => ?bool,
+    'is_cls_cns' => ?bool,
+    'optional_shape_field' => ?bool,
   /* HH_FIXME[2071] */
   'value' => ?darray,
-  // Comma-separated string
-  'typevars' => ?string,
-  // for type aliases
-  'alias' => ?string,
-  // if the type is exact (i.e., not a subtype)
-  ?'exact' => bool,
-  // if the type is a like-type
-  ?'like' => bool,
-);
+    // Comma-separated string
+    'typevars' => ?string,
+    // for type aliases
+    'alias' => ?string,
+    // if the type is exact (i.e., not a subtype)
+    ?'exact' => bool,
+    // if the type is a like-type
+    ?'like' => bool,
+  );
 
   /*
    * returns the shape associated with the type constant.
@@ -125,13 +125,15 @@ newtype TypeStructure<T> as shape(
     mixed $cls_or_obj,
     string $cns_name,
   )[]: \HH\FIXME\MISSING_RETURN_TYPE;
-// becomes:
-// type_structure(C::class or new C, 'type_const_name')
-//   : TypeStructure
+  // becomes:
+  // type_structure(C::class or new C, 'type_const_name')
+  //   : TypeStructure
 
-/*
- * Retrieves the TypeStructure for a type alias.
- */
-function type_structure_for_alias<T>(typename<T> $cls_or_obj)[]: TypeStructure<T>;
+  /*
+   * Retrieves the TypeStructure for a type alias.
+   */
+  function type_structure_for_alias<T>(
+    typename<T> $cls_or_obj,
+  )[]: TypeStructure<T>;
 
 } // namespace HH

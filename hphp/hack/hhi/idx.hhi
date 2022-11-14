@@ -33,10 +33,10 @@ namespace HH {
     $default = null,
   )[]: \HH\FIXME\MISSING_RETURN_TYPE {}
 
-function idx_readonly<Tk as arraykey, Tv>(
-  readonly ?KeyedContainer<Tk, Tv> $collection,
-  ?Tk $index,
-  $default = null,
-)[]: readonly Tv {}
+  function idx_readonly<Tk as arraykey, Tv>(
+    readonly ?KeyedContainer<Tk, Tv> $collection,
+    ?Tk $index,
+    $default = null,
+  )[]: readonly Tv {}
 
 }

@@ -33,9 +33,7 @@ function iconv_mime_decode_headers(
   $charset = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function iconv_get_encoding(
-  string $type = "all",
-): HH\FIXME\MISSING_RETURN_TYPE;
+function iconv_get_encoding(string $type = "all"): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function iconv_set_encoding(
   string $type,

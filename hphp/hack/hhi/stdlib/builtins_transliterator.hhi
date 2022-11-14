@@ -9,9 +9,7 @@ class Transliterator {
   public string $id = '';
 
   private function __construct();
-  private function __init(string $idOrRules,
-                                int $direction,
-                                bool $rules): bool;
+  private function __init(string $idOrRules, int $direction, bool $rules): bool;
   public static function create(
     string $id,
     int $direction = self::FORWARD,
@@ -61,4 +59,3 @@ function transliterator_transliterate(
   int $start = 0,
   int $end = -1,
 ): HH\FIXME\MISSING_RETURN_TYPE;
-

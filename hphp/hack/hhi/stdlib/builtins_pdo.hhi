@@ -99,7 +99,12 @@ class PDO {
   const int MYSQL_ATTR_SSL_CIPHER = 0;
   const int HH_MYSQL_ATTR_READ_TIMEOUT = 0;
   const int HH_MYSQL_ATTR_WRITE_TIMEOUT = 0;
-  public function __construct(string $dsn, string $username = "", string $password = "", $options = null);
+  public function __construct(
+    string $dsn,
+    string $username = "",
+    string $password = "",
+    $options = null,
+  );
   public function prepare(
     string $statement,
     $options = null,

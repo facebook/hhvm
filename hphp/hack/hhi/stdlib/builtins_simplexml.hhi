@@ -74,7 +74,13 @@ function simplexml_load_file(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 
 class SimpleXMLElement {
-  public function __construct(string $data, int $options = 0, bool $data_is_url = false, string $ns = "", bool $is_prefix = false);
+  public function __construct(
+    string $data,
+    int $options = 0,
+    bool $data_is_url = false,
+    string $ns = "",
+    bool $is_prefix = false,
+  );
   public function offsetExists($index): HH\FIXME\MISSING_RETURN_TYPE;
   public function offsetGet($index): HH\FIXME\MISSING_RETURN_TYPE;
   public function offsetSet($index, $newvalue): HH\FIXME\MISSING_RETURN_TYPE;

@@ -47,8 +47,16 @@ class XMLReader {
   public string $xmlLang;
 
   public function __construct();
-  public function open(string $uri, ?string $encoding = null, int $options = 0): mixed;
-  public function XML(string $source, ?string $encoding = null, int $options = 0): bool;
+  public function open(
+    string $uri,
+    ?string $encoding = null,
+    int $options = 0,
+  ): mixed;
+  public function XML(
+    string $source,
+    ?string $encoding = null,
+    int $options = 0,
+  ): bool;
   public function close(): bool;
   public function read(): bool;
   public function next(?string $localname = null): bool;

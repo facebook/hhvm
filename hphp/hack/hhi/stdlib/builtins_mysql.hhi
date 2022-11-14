@@ -202,15 +202,11 @@ function mysql_get_server_info(
 <<__PHPStdLib>>
 function mysql_info($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_insert_id(
-  $link_identifier = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function mysql_insert_id($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_stat($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function mysql_thread_id(
-  $link_identifier = null,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function mysql_thread_id($link_identifier = null): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function mysql_create_db(
   string $db,

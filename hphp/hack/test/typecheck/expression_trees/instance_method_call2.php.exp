@@ -6,9 +6,9 @@ Too few arguments (required 1 but got 0) (Typing[4104])
   Definition is here
 File "instance_method_call2.php", line 19, characters 19-21:
 No instance method `bar` in `Awaitable` (Typing[4053])
-  File "classes.hhi", line 157, characters 28-51:
+  File "classes.hhi", line 166, characters 28-51:
   Did you mean static method `setOnIOWaitEnterCallback` instead?
   File "instance_method_call2.php", line 13, characters 4-92:
   This is why I think it is an object of type HH\Awaitable
-  File "classes.hhi", line 156, characters 16-24:
+  File "classes.hhi", line 165, characters 18-26:
   Declaration of `Awaitable` is here

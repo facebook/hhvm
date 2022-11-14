@@ -8,8 +8,7 @@
  *
  */
 
-class Imagick
-  implements Countable, Iterator<Imagick>, Traversable<Imagick> {
+class Imagick implements Countable, Iterator<Imagick>, Traversable<Imagick> {
 
   // Constants
   const int COMPOSITE_MODULUSSUBTRACT = 52;
@@ -949,11 +948,7 @@ class Imagick
     float $size_correction = -6.0,
   ): bool;
   public function sampleImage(int $columns, int $rows): bool;
-  public function scaleImage(
-    int $cols,
-    int $rows,
-    bool $bestfit = false,
-  ): bool;
+  public function scaleImage(int $cols, int $rows, bool $bestfit = false): bool;
   public function segmentImage(
     int $COLORSPACE,
     float $cluster_threshold,
@@ -1023,10 +1018,7 @@ class Imagick
   public function setOption(string $key, string $value): bool;
   public function setPage(int $width, int $height, int $x, int $y): bool;
   public function setPointSize(float $point_size): bool;
-  public function setResolution(
-    float $x_resolution,
-    float $y_resolution,
-  ): bool;
+  public function setResolution(float $x_resolution, float $y_resolution): bool;
   public static function setResourceLimit(int $type, int $limit): bool;
   public function setSamplingFactors(varray $factors): bool;
   public function setSize(int $columns, int $rows): bool;
@@ -1049,22 +1041,14 @@ class Imagick
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
   public function shaveImage(int $columns, int $rows): bool;
-  public function shearImage(
-    $background,
-    float $x_shear,
-    float $y_shear,
-  ): bool;
+  public function shearImage($background, float $x_shear, float $y_shear): bool;
   public function sigmoidalContrastImage(
     bool $sharpen,
     float $alpha,
     float $beta,
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
-  public function sketchImage(
-    float $radius,
-    float $sigma,
-    float $angle,
-  ): bool;
+  public function sketchImage(float $radius, float $sigma, float $angle): bool;
   public function solarizeImage(int $threshold): bool;
   public function sparseColorImage(
     int $SPARSE_METHOD,

@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -51,7 +51,10 @@ class UConverter {
   const int CESU8 = 0;
   const int IMAP_MAILBOX = 0;
 
-  public function __construct(string $toEncoding = "utf-8", string $fromEncoding = "utf-8");
+  public function __construct(
+    string $toEncoding = "utf-8",
+    string $fromEncoding = "utf-8",
+  );
   public function getSourceEncoding(): HH\FIXME\MISSING_RETURN_TYPE;
   public function setSourceEncoding(
     string $encoding,

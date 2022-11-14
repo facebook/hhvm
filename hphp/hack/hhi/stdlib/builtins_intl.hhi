@@ -219,15 +219,9 @@ function collator_get_error_code($obj): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function collator_get_error_message($obj): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function collator_get_locale(
-  $obj,
-  int $type = 0,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function collator_get_locale($obj, int $type = 0): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function collator_get_sort_key(
-  $obj,
-  string $str,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function collator_get_sort_key($obj, string $str): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function collator_get_strength($obj): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -505,17 +499,13 @@ function intlcal_get_skipped_wall_time_option(
   IntlCalendar $calendar,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function intlcal_get_time(
-  IntlCalendar $calendar,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function intlcal_get_time(IntlCalendar $calendar): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function intlcal_get_time_zone(
   IntlCalendar $calendar,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function intlcal_get_type(
-  IntlCalendar $calendar,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function intlcal_get_type(IntlCalendar $calendar): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function intlcal_get_weekend_transition(
   IntlCalendar $calendar,
@@ -800,10 +790,7 @@ function msgfmt_parse_message(
   string $source,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function msgfmt_set_pattern(
-  $mf,
-  string $pattern,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function msgfmt_set_pattern($mf, string $pattern): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function normalizer_is_normalized(
   string $input,
@@ -857,11 +844,7 @@ function numfmt_parse_currency(
   inout $position,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function numfmt_set_attribute(
-  $nf,
-  $attr,
-  $value,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function numfmt_set_attribute($nf, $attr, $value): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function numfmt_set_pattern($nf, $pattern): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -1009,9 +992,7 @@ class Locale {
   public static function parseLocale(
     string $arg1,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public static function setDefault(
-    string $arg1,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public static function setDefault(string $arg1): HH\FIXME\MISSING_RETURN_TYPE;
 }
 
 class Normalizer {
@@ -1069,7 +1050,14 @@ class IntlDateFormatter {
   const int GREGORIAN = 1;
   const int TRADITIONAL = 0;
 
-  public function __construct(string $locale, int $datetype, int $timetype, $timezone = null, $calendar = null, string $pattern = "");
+  public function __construct(
+    string $locale,
+    int $datetype,
+    int $timetype,
+    $timezone = null,
+    $calendar = null,
+    string $pattern = "",
+  );
   public static function create(
     $locale,
     $datetype,
@@ -1326,9 +1314,7 @@ class IntlCalendar {
 class IntlGregorianCalendar extends IntlCalendar {
   public function getGregorianChange(): HH\FIXME\MISSING_RETURN_TYPE;
   public function isLeapYear(int $year): HH\FIXME\MISSING_RETURN_TYPE;
-  public function setGregorianChange(
-    float $date,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function setGregorianChange(float $date): HH\FIXME\MISSING_RETURN_TYPE;
 }
 
 class IntlIterator<Tv> implements KeyedIterator<int, Tv> {
@@ -1368,20 +1354,13 @@ class IntlBreakIterator implements KeyedTraversable<int, int> {
   public static function createCharacterInstance(
     $locale = null,
   ): IntlBreakIterator;
-  public static function createCodePointInstance(
-  ): IntlCodePointBreakIterator;
-  public static function createLineInstance(
-    $locale = null,
-  ): IntlBreakIterator;
+  public static function createCodePointInstance(): IntlCodePointBreakIterator;
+  public static function createLineInstance($locale = null): IntlBreakIterator;
   public static function createSentenceInstance(
     $locale = null,
   ): IntlBreakIterator;
-  public static function createTitleInstance(
-    $locale = null,
-  ): IntlBreakIterator;
-  public static function createWordInstance(
-    $locale = null,
-  ): IntlBreakIterator;
+  public static function createTitleInstance($locale = null): IntlBreakIterator;
+  public static function createWordInstance($locale = null): IntlBreakIterator;
   public function key(): mixed; // returns int or false
   public function rewind(): int;
   public function valid(): bool;

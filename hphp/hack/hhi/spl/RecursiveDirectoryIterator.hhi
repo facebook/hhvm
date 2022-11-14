@@ -8,9 +8,9 @@
  *
  */
 
-class RecursiveDirectoryIterator extends FilesystemIterator
-  implements
-    RecursiveIterator<SplFileInfo> {
+class RecursiveDirectoryIterator
+  extends FilesystemIterator
+  implements RecursiveIterator<SplFileInfo> {
 
   // Constants
   const int FOLLOW_SYMLINKS = 512;

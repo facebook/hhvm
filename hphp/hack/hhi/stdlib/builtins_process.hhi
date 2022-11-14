@@ -8,7 +8,7 @@
  *
  */
 
-const int WNOHANG   = 0b001;
+const int WNOHANG = 0b001;
 const int WUNTRACED = 0b010;
 
 <<__PHPStdLib>>

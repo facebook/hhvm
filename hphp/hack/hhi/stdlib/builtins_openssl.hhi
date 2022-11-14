@@ -277,9 +277,7 @@ function openssl_random_pseudo_bytes(
   inout $crypto_strong,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function openssl_cipher_iv_length(
-  string $method,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function openssl_cipher_iv_length(string $method): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function openssl_encrypt(
   string $data,

@@ -9,5 +9,5 @@
  */
 
 namespace HH\Lib\_Private\Native {
-function request_time_ns(): int;
+  function request_time_ns(): int;
 }

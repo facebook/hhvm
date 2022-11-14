@@ -64,7 +64,10 @@ function getopt(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function getopt_with_optind(
-  string $options, ?vec<string> $longopts, inout int $optind): dict<string, mixed>;
+  string $options,
+  ?vec<string> $longopts,
+  inout int $optind,
+): dict<string, mixed>;
 <<__PHPStdLib>>
 function getrusage(int $who = 0): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -130,7 +133,9 @@ function putenv(string $setting): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function set_time_limit(int $seconds): HH\FIXME\MISSING_RETURN_TYPE;
 function set_pre_timeout_handler(
-  int $seconds, (function(HH\Awaitable<mixed>): void) $callback): void;
+  int $seconds,
+  (function(HH\Awaitable<mixed>): void) $callback,
+): void;
 <<__PHPStdLib>>
 function sys_get_temp_dir(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>

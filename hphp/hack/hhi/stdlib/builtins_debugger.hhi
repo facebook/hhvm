@@ -58,11 +58,7 @@ class DebuggerClientCmdUser {
   public function ask($format, ...$args): HH\FIXME\MISSING_RETURN_TYPE;
   public function wrap($str): HH\FIXME\MISSING_RETURN_TYPE;
   public function helpTitle($str): HH\FIXME\MISSING_RETURN_TYPE;
-  public function helpCmds(
-    $cmd,
-    $desc,
-    ...$args
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function helpCmds($cmd, $desc, ...$args): HH\FIXME\MISSING_RETURN_TYPE;
   public function helpBody($str): HH\FIXME\MISSING_RETURN_TYPE;
   public function helpSection($str): HH\FIXME\MISSING_RETURN_TYPE;
   public function tutorial($str): HH\FIXME\MISSING_RETURN_TYPE;

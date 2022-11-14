@@ -10,38 +10,45 @@
 
 namespace HH {
 
-/**
- * The parent class for all array types (containers that are values).
- * This currently includes both Hack Arrays (vec, dict, keyset) and Legacy
- * Arrays (varray, darray).
- */
-<<__Sealed(dict::class, keyset::class, vec::class), __SupportDynamicType>>
-abstract class AnyArray<<<__RequireDynamic>> +Tk as arraykey, <<__RequireDynamic>> +Tv> implements KeyedContainer<Tk, Tv>, \XHPChild {
+  /**
+   * The parent class for all array types (containers that are values).
+   * This currently includes both Hack Arrays (vec, dict, keyset) and Legacy
+   * Arrays (varray, darray).
+   */
+  <<__Sealed(dict::class, keyset::class, vec::class), __SupportDynamicType>>
+  abstract class AnyArray<
+    <<__RequireDynamic>> +Tk as arraykey,
+    <<__RequireDynamic>> +Tv,
+  > implements KeyedContainer<Tk, Tv>, \XHPChild {
 
-}
+  }
 
-/**
- * A dict is an ordered, key-value data structure.
- *
- * `dict` is a value type, so any mutation produces a new value.
- */
-<<__SupportDynamicType>>
-abstract final class dict<<<__RequireDynamic>> +Tk as arraykey, <<__RequireDynamic>> +Tv> extends AnyArray<Tk, Tv> {}
+  /**
+   * A dict is an ordered, key-value data structure.
+   *
+   * `dict` is a value type, so any mutation produces a new value.
+   */
+  <<__SupportDynamicType>>
+  abstract final class dict<
+    <<__RequireDynamic>> +Tk as arraykey,
+    <<__RequireDynamic>> +Tv,
+  > extends AnyArray<Tk, Tv> {}
 
-/**
- * A `keyset` is an ordered data structure without duplicates. `keyset`s can only contain `arraykey` values.
- *
- * `keyset` is a value type, so any mutation produces a new value.
- */
-<<__SupportDynamicType>>
-abstract final class keyset<<<__RequireDynamic>> +T as arraykey> extends AnyArray<T, T> {}
+  /**
+   * A `keyset` is an ordered data structure without duplicates. `keyset`s can only contain `arraykey` values.
+   *
+   * `keyset` is a value type, so any mutation produces a new value.
+   */
+  <<__SupportDynamicType>>
+  abstract final class keyset<<<__RequireDynamic>> +T as arraykey>
+    extends AnyArray<T, T> {}
 
-/**
- * A `vec` is an ordered, iterable data structure. The name is short for 'vector'.
- *
- * `vec` is a value type, so any mutation produces a new value.
- */
-<<__SupportDynamicType>>
-abstract final class vec<<<__RequireDynamic>> +T> extends AnyArray<int, T> {}
+  /**
+   * A `vec` is an ordered, iterable data structure. The name is short for 'vector'.
+   *
+   * `vec` is a value type, so any mutation produces a new value.
+   */
+  <<__SupportDynamicType>>
+  abstract final class vec<<<__RequireDynamic>> +T> extends AnyArray<int, T> {}
 
 } // namespace HH

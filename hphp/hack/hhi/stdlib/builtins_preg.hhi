@@ -1,4 +1,4 @@
-<?hh    /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -31,8 +31,12 @@ function preg_grep_with_error(
  * This will eventually be fixed with more type inference magic.
  */
 <<__PHPStdLib>>
-function preg_match(string $pattern, string $subject,
-                    int $flags = 0, int $offset = 0)[]: int;
+function preg_match(
+  string $pattern,
+  string $subject,
+  int $flags = 0,
+  int $offset = 0,
+)[]: int;
 <<__PHPStdLib>>
 function preg_match_with_error(
   string $pattern,
@@ -42,8 +46,13 @@ function preg_match_with_error(
   int $offset = 0,
 )[]: int;
 <<__PHPStdLib>>
-function preg_match_with_matches(string $pattern, string $subject, inout $matches,
-                                 int $flags = 0, int $offset = 0)[]: int;
+function preg_match_with_matches(
+  string $pattern,
+  string $subject,
+  inout $matches,
+  int $flags = 0,
+  int $offset = 0,
+)[]: int;
 <<__PHPStdLib>>
 function preg_match_with_matches_and_error(
   string $pattern,

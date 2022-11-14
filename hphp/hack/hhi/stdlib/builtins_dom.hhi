@@ -141,16 +141,23 @@ class DOMNode {
   public function lookupPrefix(string $namespaceURI): string;
   public function normalize(): void;
   public function removeChild($node): DOMNode;
-  public function replaceChild<T as DOMNode>(DOMNode $newchildobj, T $oldchildobj): T;
-  public function C14N(bool $exclusive = false,
-                       bool $with_comments = false,
-                       ?darray<arraykey, mixed> $xpath = null,
-                       ?varray<mixed> $ns_prefixes = null): string;
-  public function C14NFile(string $uri,
-                           bool $exclusive = false,
-                           bool $with_comments = false,
-                           ?darray<arraykey, mixed> $xpath = null,
-                           ?varray<mixed> $ns_prefixes = null): int;
+  public function replaceChild<T as DOMNode>(
+    DOMNode $newchildobj,
+    T $oldchildobj,
+  ): T;
+  public function C14N(
+    bool $exclusive = false,
+    bool $with_comments = false,
+    ?darray<arraykey, mixed> $xpath = null,
+    ?varray<mixed> $ns_prefixes = null,
+  ): string;
+  public function C14NFile(
+    string $uri,
+    bool $exclusive = false,
+    bool $with_comments = false,
+    ?darray<arraykey, mixed> $xpath = null,
+    ?varray<mixed> $ns_prefixes = null,
+  ): int;
   public function getNodePath();
 }
 
@@ -218,10 +225,7 @@ class DOMDocument extends DOMNode {
     bool $deep = false,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function load($filename, $options = 0): HH\FIXME\MISSING_RETURN_TYPE;
-  public function loadHTML(
-    $source,
-    $options = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function loadHTML($source, $options = 0): HH\FIXME\MISSING_RETURN_TYPE;
   public function loadHTMLFile(
     $filename,
     $options = 0,
@@ -268,7 +272,11 @@ class DOMElement extends DOMNode {
   /* readonly */ public DOMNamedNodeMap<DOMAttr> $attributes;
 
   // methods
-  public function __construct(string $name, $value = null, $namespaceuri = null);
+  public function __construct(
+    string $name,
+    $value = null,
+    $namespaceuri = null,
+  );
   public function getAttribute(string $name): HH\FIXME\MISSING_RETURN_TYPE;
   public function getAttributeNode(string $name): HH\FIXME\MISSING_RETURN_TYPE;
   public function getAttributeNodeNS(
@@ -280,7 +288,10 @@ class DOMElement extends DOMNode {
     string $localname,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getElementsByTagName(string $name): DOMNodeList<DOMElement>;
-  public function getElementsByTagNameNS(string $namespaceuri, string $localname): DOMNodeList<DOMElement>;
+  public function getElementsByTagNameNS(
+    string $namespaceuri,
+    string $localname,
+  ): DOMNodeList<DOMElement>;
   public function hasAttribute(string $name): HH\FIXME\MISSING_RETURN_TYPE;
   public function hasAttributeNS(
     string $namespaceuri,
@@ -331,7 +342,6 @@ class DOMAttr extends DOMNode {
   public function isId(): bool;
 }
 
-
 abstract class DOMCharacterData extends DOMNode {
 
   // Properties
@@ -339,7 +349,7 @@ abstract class DOMCharacterData extends DOMNode {
   /* readonly */ public int $length;
 
   // Methods
-  public function appendData(string $data ): void;
+  public function appendData(string $data): void;
   public function deleteData(int $offset, int $count): void;
   public function insertData(int $offset, string $data): void;
   public function replaceData(int $offset, int $count, string $data): void;
@@ -352,7 +362,7 @@ class DOMText extends DOMCharacterData {
   /* readonly */ public string $wholeText;
 
   // Methods
-  public function __construct(string $value='');
+  public function __construct(string $value = '');
   public function isWhitespaceInElementContent(): bool;
   public function splitText(int $offset): DOMText;
 }
@@ -367,7 +377,8 @@ class DOMDocumentType extends DOMNode {
   /* readonly */ public string $internalSubset;
 
   // Methods
-  <<__PHPStdLib>> public function __debugInfo(): darray<arraykey, mixed>;
+  <<__PHPStdLib>>
+  public function __debugInfo(): darray<arraykey, mixed>;
 
 }
 

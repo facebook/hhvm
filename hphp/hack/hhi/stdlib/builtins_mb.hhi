@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -104,8 +104,7 @@ function mb_ereg_replace(
 <<__PHPStdLib>>
 function mb_ereg_search_getpos()[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function mb_ereg_search_getregs(
-)[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
+function mb_ereg_search_getregs()[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function mb_ereg_search_init(
   string $str,

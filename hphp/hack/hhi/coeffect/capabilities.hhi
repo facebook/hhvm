@@ -63,9 +63,11 @@ namespace HH\Capabilities {
   <<__Sealed(ImplicitPolicyOfShallow::class)>>
   interface ImplicitPolicyOf<T> extends ImplicitPolicy {}
   <<__Sealed(ImplicitPolicyOfLocal::class)>>
-  interface ImplicitPolicyOfShallow<T> extends ImplicitPolicyOf<T>, ImplicitPolicyShallow {}
+  interface ImplicitPolicyOfShallow<T>
+    extends ImplicitPolicyOf<T>, ImplicitPolicyShallow {}
   <<__Sealed()>>
-  interface ImplicitPolicyOfLocal<T> extends ImplicitPolicyOfShallow<T>, ImplicitPolicyLocal {}
+  interface ImplicitPolicyOfLocal<T>
+    extends ImplicitPolicyOfShallow<T>, ImplicitPolicyLocal {}
 
   /**
    * The core capability present in every reactive context.

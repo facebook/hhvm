@@ -8,11 +8,11 @@ builtin_call_bad_arg.php:4:22
 [1]  4 |   xhprof_frame_begin(3);
      5 | }
 
-/tmp/2TxRlh1BpW/builtins_fb.hhi:98:31
-    96 |   function xhprof_network_disable(): \HH\FIXME\MISSING_RETURN_TYPE;
-    97 | <<__PHPStdLib>>
-[2] 98 |   function xhprof_frame_begin(string $name): \HH\FIXME\MISSING_RETURN_TYPE;
-    99 | <<__PHPStdLib>>
-   100 |   function xhprof_frame_end(): \HH\FIXME\MISSING_RETURN_TYPE;
+/tmp/NKvItTFKcc/builtins_fb.hhi:95:31
+    93 |   function xhprof_network_disable(): \HH\FIXME\MISSING_RETURN_TYPE;
+    94 |   <<__PHPStdLib>>
+[2] 95 |   function xhprof_frame_begin(string $name): \HH\FIXME\MISSING_RETURN_TYPE;
+    96 |   <<__PHPStdLib>>
+    97 |   function xhprof_frame_end(): \HH\FIXME\MISSING_RETURN_TYPE;
 
 1 error found.

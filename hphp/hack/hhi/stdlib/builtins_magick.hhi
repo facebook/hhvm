@@ -462,13 +462,7 @@ function drawarc(
 <<__PHPStdLib>>
 function drawbezier($drw_wnd, $x_y_points_array): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawcircle(
-  $drw_wnd,
-  $ox,
-  $oy,
-  $px,
-  $py,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function drawcircle($drw_wnd, $ox, $oy, $px, $py): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function drawcolor(
   $drw_wnd,
@@ -664,11 +658,7 @@ function drawpathellipticarcrelative(
 <<__PHPStdLib>>
 function drawpathfinish($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathlinetoabsolute(
-  $drw_wnd,
-  $x,
-  $y,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function drawpathlinetoabsolute($drw_wnd, $x, $y): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function drawpathlinetohorizontalabsolute(
   $drw_wnd,
@@ -680,11 +670,7 @@ function drawpathlinetohorizontalrelative(
   $x,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathlinetorelative(
-  $drw_wnd,
-  $x,
-  $y,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function drawpathlinetorelative($drw_wnd, $x, $y): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function drawpathlinetoverticalabsolute(
   $drw_wnd,
@@ -696,26 +682,15 @@ function drawpathlinetoverticalrelative(
   $y,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathmovetoabsolute(
-  $drw_wnd,
-  $x,
-  $y,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function drawpathmovetoabsolute($drw_wnd, $x, $y): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpathmovetorelative(
-  $drw_wnd,
-  $x,
-  $y,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function drawpathmovetorelative($drw_wnd, $x, $y): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function drawpathstart($drw_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function drawpoint($drw_wnd, $x, $y): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawpolygon(
-  $drw_wnd,
-  $x_y_points_array,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function drawpolygon($drw_wnd, $x_y_points_array): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function drawpolyline(
   $drw_wnd,
@@ -870,10 +845,7 @@ function drawsettextdecoration(
   $decoration_type,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function drawsettextencoding(
-  $drw_wnd,
-  $encoding,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function drawsettextencoding($drw_wnd, $encoding): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function drawsettextundercolor(
   $drw_wnd,
@@ -1049,10 +1021,7 @@ function magickconstituteimage(
   $pixel_array,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magickcontrastimage(
-  $mgck_wnd,
-  $sharpen,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function magickcontrastimage($mgck_wnd, $sharpen): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function magickconvolveimage(
   $mgck_wnd,
@@ -1164,9 +1133,7 @@ function magickgetformat($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function magickgetimage($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magickgetimagebackgroundcolor(
-  $mgck_wnd,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function magickgetimagebackgroundcolor($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function magickgetimageblob($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -1224,9 +1191,7 @@ function magickgetimagehistogram($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function magickgetimageindex($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magickgetimageinterlacescheme(
-  $mgck_wnd,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function magickgetimageinterlacescheme($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function magickgetimageiterations($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -1248,9 +1213,7 @@ function magickgetimageprofile($mgck_wnd, $name): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function magickgetimageredprimary($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magickgetimagerenderingintent(
-  $mgck_wnd,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function magickgetimagerenderingintent($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function magickgetimageresolution($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -1432,10 +1395,7 @@ function magickposterizeimage(
   $dither,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magickpreviewimages(
-  $mgck_wnd,
-  $preview,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function magickpreviewimages($mgck_wnd, $preview): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function magickpreviousimage($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -1470,10 +1430,7 @@ function magickqueryfontmetrics(
   $multiline = false,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magickradialblurimage(
-  $mgck_wnd,
-  $angle,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function magickradialblurimage($mgck_wnd, $angle): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function magickraiseimage(
   $mgck_wnd,
@@ -1570,10 +1527,7 @@ function magicksetfirstiterator($mgck_wnd): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function magicksetformat($mgck_wnd, $format): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magicksetimage(
-  $mgck_wnd,
-  $replace_wand,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function magicksetimage($mgck_wnd, $replace_wand): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function magicksetimagebackgroundcolor(
   $mgck_wnd,
@@ -1637,10 +1591,7 @@ function magicksetimagefilename(
   $filename = null,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magicksetimageformat(
-  $mgck_wnd,
-  $format,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function magicksetimageformat($mgck_wnd, $format): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function magicksetimagegamma($mgck_wnd, $gamma): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -1864,10 +1815,7 @@ function magickwhitethresholdimage(
 <<__PHPStdLib>>
 function magickwriteimage($mgck_wnd, $filename): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function magickwriteimagefile(
-  $mgck_wnd,
-  $handle,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function magickwriteimagefile($mgck_wnd, $handle): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function magickwriteimages(
   $mgck_wnd,
@@ -1987,10 +1935,7 @@ function pixelsetredquantum($pxl_wnd, $red): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function pixelsetyellow($pxl_wnd, $yellow): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pixelsetyellowquantum(
-  $pxl_wnd,
-  $yellow,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function pixelsetyellowquantum($pxl_wnd, $yellow): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function pixelgetiteratorexception($pxl_iter): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -1998,9 +1943,7 @@ function pixelgetiteratorexceptionstring(
   $pxl_iter,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function pixelgetiteratorexceptiontype(
-  $pxl_iter,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function pixelgetiteratorexceptiontype($pxl_iter): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function pixelgetnextiteratorrow($pxl_iter): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>

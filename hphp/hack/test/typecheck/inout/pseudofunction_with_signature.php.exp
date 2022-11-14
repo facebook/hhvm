@@ -9,29 +9,29 @@ The two arguments to `type_structure()` must be:
 Could not resolve the type constant (Typing[4150])
 File "pseudofunction_with_signature.php", line 9, characters 28-30:
 No class constant `T` in `dict` (Typing[4090])
-  File "hackarray.hhi", line 29, characters 22-25:
+  File "hackarray.hhi", line 32, characters 24-27:
   Declaration of `dict` is here
 File "pseudofunction_with_signature.php", line 10, characters 16-23:
 Unexpected `inout` annotation for argument (Typing[4183])
-  File "printf.hhi", line 48, characters 38-39:
+  File "printf.hhi", line 48, characters 40-41:
   This is a normal parameter (does not have `inout`)
 File "pseudofunction_with_signature.php", line 11, characters 11-18:
 Unexpected `inout` annotation for argument (Typing[4183])
-  File "stdlib/builtins_variable.hhi", line 35, characters 33-36:
+  File "stdlib/builtins_variable.hhi", line 35, characters 35-38:
   This is a normal parameter (does not have `inout`)
 File "pseudofunction_with_signature.php", line 12, characters 24-31:
 Unexpected `inout` annotation for argument (Typing[4183])
-  File "container_functions.hhi", line 115, characters 43-48:
+  File "container_functions.hhi", line 122, characters 45-50:
   This is a normal parameter (does not have `inout`)
 File "pseudofunction_with_signature.php", line 13, characters 19-26:
 Unexpected `inout` annotation for argument (Typing[4183])
-  File "functions.hhi", line 44, characters 38-41:
+  File "functions.hhi", line 57, characters 40-43:
   This is a normal parameter (does not have `inout`)
 File "pseudofunction_with_signature.php", line 14, characters 23-30:
 Unexpected `inout` annotation for argument (Typing[4183])
-  File "container_functions.hhi", line 113, characters 42-47:
+  File "container_functions.hhi", line 120, characters 44-49:
   This is a normal parameter (does not have `inout`)
 File "pseudofunction_with_signature.php", line 15, characters 24-31:
 Unexpected `inout` annotation for argument (Typing[4183])
-  File "container_functions.hhi", line 115, characters 43-48:
+  File "container_functions.hhi", line 122, characters 45-50:
   This is a normal parameter (does not have `inout`)

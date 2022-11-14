@@ -12,7 +12,7 @@ interface Reflector extends IPureStringishObject {
   public function __toString()[]: string;
 }
 
-class Reflection  {
+class Reflection {
   public static function getModifierNames(
     $modifiers,
   )[]: HH\FIXME\MISSING_RETURN_TYPE;
@@ -59,7 +59,9 @@ class ReflectionClass implements Reflector {
   final public function getAttributes()[]: darray<string, varray<mixed>>;
   final public function hasAttribute(string $name)[]: bool;
   final public function getAttribute(string $name)[]: ?varray<mixed>;
-  final public function getAttributeClass<T as HH\ClassLikeAttribute>(classname<T> $c)[]: ?T;
+  final public function getAttributeClass<T as HH\ClassLikeAttribute>(
+    classname<T> $c,
+  )[]: ?T;
   public function getMethod(string $name)[]: ReflectionMethod;
   public function getMethods(?int $filter = null)[]: varray<ReflectionMethod>;
   public function getModifiers()[]: int;
@@ -71,14 +73,19 @@ class ReflectionClass implements Reflector {
    * Returns ReflectionClass or false
    */
   public function getParentClass()[]: mixed;
-  public function getProperties(int $filter = 0xFFFF)[]: varray<ReflectionProperty>;
+  public function getProperties(
+    int $filter = 0xFFFF,
+  )[]: varray<ReflectionProperty>;
   public function getProperty(string $name)[]: ReflectionProperty;
   public function getRequirementNames()[]: varray<string>;
   public function getRequirements()[]: darray<string, ReflectionClass>;
   public function getShortName()[]: string;
   public function getStartLine()[]: int;
   public function getStaticProperties(): darray<string, mixed>;
-  public function getStaticPropertyValue(string $name, mixed $def_value = null): mixed;
+  public function getStaticPropertyValue(
+    string $name,
+    mixed $def_value = null,
+  ): mixed;
   public function getTraitAliases()[]: darray<string, string>;
   public function getTraitNames()[]: varray<string>;
   public function getTraits()[]: darray<string, ReflectionClass>;
@@ -168,7 +175,9 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function getCoeffects()[]: vec<string>;
 }
 
-class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector {
+class ReflectionFunction
+  extends ReflectionFunctionAbstract
+  implements Reflector {
   const int IS_DEPRECATED = 262144;
 
   public $name = '';
@@ -183,17 +192,19 @@ class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector
   public function invoke(mixed ...$args): HH\FIXME\MISSING_RETURN_TYPE;
   public function invokeArgs(vec<mixed> $args): HH\FIXME\MISSING_RETURN_TYPE;
   public function getClosure(): HH\FIXME\MISSING_RETURN_TYPE;
-  final public function getAttributeClass<T as HH\FunctionAttribute>(classname<T> $c)[]: ?T;
+  final public function getAttributeClass<T as HH\FunctionAttribute>(
+    classname<T> $c,
+  )[]: ?T;
 }
 
 class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   // Constants
-  const int IS_STATIC    = 1;
-  const int IS_PUBLIC    = 256;
+  const int IS_STATIC = 1;
+  const int IS_PUBLIC = 256;
   const int IS_PROTECTED = 512;
-  const int IS_PRIVATE   = 1024;
-  const int IS_ABSTRACT  = 2;
-  const int IS_FINAL     = 4;
+  const int IS_PRIVATE = 1024;
+  const int IS_ABSTRACT = 2;
+  const int IS_FINAL = 4;
 
   public $name = '';
   public $class = '';
@@ -214,15 +225,26 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   public function isStatic()[]: bool;
   public function isReadonly()[]: bool;
   public function isConstructor()[]: bool;
-  public function getClosure(mixed $object = null): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getClosure(
+    mixed $object = null,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getModifiers()[]: int;
-  public function invoke(mixed $object, mixed ...$args): HH\FIXME\MISSING_RETURN_TYPE;
-  public function invokeArgs(mixed $object, vec<mixed> $args): HH\FIXME\MISSING_RETURN_TYPE;
+  public function invoke(
+    mixed $object,
+    mixed ...$args
+  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function invokeArgs(
+    mixed $object,
+    vec<mixed> $args,
+  ): HH\FIXME\MISSING_RETURN_TYPE;
   public function getDeclaringClass()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function getOriginalClassname()[]: string;
   public function getPrototype()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  <<__PHPStdLib>> public function setAccessible(bool $accessible)[write_props]: void;
-  final public function getAttributeClass<T as HH\MethodAttribute>(classname<T> $c)[]: ?T;
+  <<__PHPStdLib>>
+  public function setAccessible(bool $accessible)[write_props]: void;
+  final public function getAttributeClass<T as HH\MethodAttribute>(
+    classname<T> $c,
+  )[]: ?T;
 }
 
 class ReflectionParameter implements Reflector {
@@ -252,8 +274,7 @@ class ReflectionParameter implements Reflector {
   public function isDefaultValueAvailable()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function getDefaultValue()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function isDefaultValueConstant()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function getDefaultValueConstantName(
-  )[]: HH\FIXME\MISSING_RETURN_TYPE;
+  public function getDefaultValueConstantName()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function getTypehintText()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function getTypeText()[]: string;
   public function getDefaultValueText()[]: HH\FIXME\MISSING_RETURN_TYPE;
@@ -262,7 +283,9 @@ class ReflectionParameter implements Reflector {
   public function getType()[]: ?ReflectionType;
   final public function hasAttribute(string $name)[]: bool;
   final public function getAttribute(string $name)[]: ?varray<mixed>;
-  final public function getAttributeClass<T as HH\ParameterAttribute>(classname<T> $c)[]: ?T;
+  final public function getAttributeClass<T as HH\ParameterAttribute>(
+    classname<T> $c,
+  )[]: ?T;
   final public function getAttributes()[]: darray<string, varray<mixed>>;
 }
 
@@ -300,7 +323,8 @@ class ReflectionProperty implements Reflector {
   public function getModifiers()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function getDeclaringClass()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function getDocComment()[]: HH\FIXME\MISSING_RETURN_TYPE;
-  <<__PHPStdLib>> public function setAccessible(bool $accessible)[write_props]: void;
+  <<__PHPStdLib>>
+  public function setAccessible(bool $accessible)[write_props]: void;
   public function getTypeText()[]: HH\FIXME\MISSING_RETURN_TYPE;
   final public function getAttributes()[]: darray<string, varray<mixed>>;
   final public function hasAttribute(string $name)[]: bool;
@@ -359,13 +383,17 @@ class ReflectionTypeAlias implements Reflector {
   final public function getAttributes()[]: darray<string, varray<mixed>>;
   final public function hasAttribute(string $name)[]: bool;
   final public function getAttribute(string $name)[]: ?varray<mixed>;
-  final public function getAttributeClass<T as HH\TypeAliasAttribute>(classname<T> $c)[]: ?T;
+  final public function getAttributeClass<T as HH\TypeAliasAttribute>(
+    classname<T> $c,
+  )[]: ?T;
 }
 
 class ReflectionType implements IPureStringishObject {
   private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function __construct(?Reflector $param_or_ret = null,
-                              darray $type_hint_info = darray[]);
+  public function __construct(
+    ?Reflector $param_or_ret = null,
+    darray $type_hint_info = darray[],
+  );
   public function allowsNull()[]: bool;
   public function isBuiltin()[]: bool;
   public function __toString()[]: string;
@@ -379,7 +407,9 @@ class ReflectionFile implements Reflector {
   final public function getAttributes()[]: darray<string, varray<mixed>>;
   final public function hasAttribute(string $name)[]: bool;
   final public function getAttribute(string $name)[]: ?varray<mixed>;
-  final public function getAttributeClass<T as HH\FileAttribute>(classname<T> $c)[]: ?T;
+  final public function getAttributeClass<T as HH\FileAttribute>(
+    classname<T> $c,
+  )[]: ?T;
 }
 
 class ReflectionModule implements Reflector {
@@ -390,5 +420,7 @@ class ReflectionModule implements Reflector {
   final public function getAttributes()[]: darray<string, varray<mixed>>;
   final public function hasAttribute(string $name)[]: bool;
   final public function getAttribute(string $name)[]: ?varray<mixed>;
-  final public function getAttributeClass<T as HH\ModuleAttribute>(classname<T> $c)[]: ?T;
+  final public function getAttributeClass<T as HH\ModuleAttribute>(
+    classname<T> $c,
+  )[]: ?T;
 }

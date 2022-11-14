@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright(c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -49,10 +49,7 @@ function mime_content_type($filename): HH\FIXME\MISSING_RETURN_TYPE {}
 
 class finfo {
   // Methods
-  public function __construct(
-    int $options = FILEINFO_NONE,
-    $magic_file = null,
-  );
+  public function __construct(int $options = FILEINFO_NONE, $magic_file = null);
   public function buffer(
     $string = null,
     int $options = FILEINFO_NONE,

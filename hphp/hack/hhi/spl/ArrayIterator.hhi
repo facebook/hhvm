@@ -14,10 +14,10 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
-class ArrayIterator<T> implements KeyedIterator<arraykey, T>,
-                                  KeyedTraversable<arraykey, T>
-                                  /* Serializable - not implemented */ {
-  public function __construct (mixed $array);
+class ArrayIterator<T>
+  implements KeyedIterator<arraykey, T>, KeyedTraversable<arraykey, T>
+/* Serializable - not implemented */ {
+  public function __construct(mixed $array);
   public function current(): T;
   public function getFlags(): void;
   public function key(): arraykey;

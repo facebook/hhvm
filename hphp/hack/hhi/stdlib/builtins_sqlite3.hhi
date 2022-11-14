@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -21,7 +21,11 @@ const int SQLITE3_OPEN_READWRITE = 0;
 const int SQLITE3_OPEN_CREATE = 0;
 
 class SQLite3 {
-  public function __construct(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, $encryption_key = null);
+  public function __construct(
+    string $filename,
+    int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE,
+    $encryption_key = null,
+  );
   public function open(
     string $filename,
     int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE,

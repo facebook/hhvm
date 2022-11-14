@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -103,9 +103,7 @@ function xmlwriter_write_cdata(
   string $content,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function xmlwriter_end_cdata(
-  resource $xmlwriter,
-): HH\FIXME\MISSING_RETURN_TYPE;
+function xmlwriter_end_cdata(resource $xmlwriter): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function xmlwriter_start_comment(
   resource $xmlwriter,

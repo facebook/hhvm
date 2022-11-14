@@ -122,7 +122,11 @@ class Memcached {
     int $time = 0,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function deleteMulti(varray<string> $keys, int $time = 0): mixed;
-  public function deleteMultiByKey(string $server_key, varray<string> $keys, int $time = 0): mixed;
+  public function deleteMultiByKey(
+    string $server_key,
+    varray<string> $keys,
+    int $time = 0,
+  ): mixed;
   public function fetch(): HH\FIXME\MISSING_RETURN_TYPE;
   public function fetchAll(): HH\FIXME\MISSING_RETURN_TYPE;
   public function flush(int $delay = 0): HH\FIXME\MISSING_RETURN_TYPE;
@@ -154,10 +158,7 @@ class Memcached {
     bool $with_cas = false,
     $value_cb = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
-  public function getMulti(
-    $keys,
-    int $flags = 0,
-  ): HH\FIXME\MISSING_RETURN_TYPE;
+  public function getMulti($keys, int $flags = 0): HH\FIXME\MISSING_RETURN_TYPE;
   public function getMultiByKey(
     string $server_key,
     $keys,
@@ -226,5 +227,9 @@ class Memcached {
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function setOption(int $option, $value): HH\FIXME\MISSING_RETURN_TYPE;
   public function touch(string $key, int $expiration = 0): bool;
-  public function touchByKey(string $server_key, string $key, int $expiration = 0): bool;
+  public function touchByKey(
+    string $server_key,
+    string $key,
+    int $expiration = 0,
+  ): bool;
 }

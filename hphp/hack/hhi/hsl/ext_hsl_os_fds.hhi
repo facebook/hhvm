@@ -107,7 +107,7 @@ const int EXDEV = 0;
 
 const int O_RDONLY = 0;
 const int O_WRONLY = 0;
-const int O_RDWR= 0;
+const int O_RDWR = 0;
 const int O_NONBLOCK = 0;
 const int O_APPEND = 0;
 const int O_CREAT/*E < you dropped this*/ = 0;
@@ -131,27 +131,22 @@ final class ErrnoException extends \Exception {}
 function poll_async(
   FileDescriptor $fd,
   int $events,
-  int $timeout_ns
+  int $timeout_ns,
 ): Awaitable<int>;
 
 function open(string $path, int $flags, int $mode = 0): FileDescriptor;
 
 function request_stdio_fd(int $stdio_fileno): FileDescriptor;
 
-function mkdtemp(
-  string $template,
-): string;
+function mkdtemp(string $template): string;
 
 function mkostemps(
   string $template,
   int $suffixlen,
-  int $flags
+  int $flags,
 ): (FileDescriptor, string);
 
-function read(
-  FileDescriptor $fd,
-  int $max_to_read,
-): string;
+function read(FileDescriptor $fd, int $max_to_read): string;
 
 function write(FileDescriptor $fd, string $data): int;
 
@@ -229,9 +224,7 @@ type sa_family_t = int;
 type in_port_t = int;
 
 class sockaddr {
-  public function __construct(
-    public sa_family_t $sa_family,
-  ) {}
+  public function __construct(public sa_family_t $sa_family) {}
   // Intentionally not including "data":
   // - it's a placeholder
   // - it can be thought of as a union of the data of all the others
@@ -275,11 +268,20 @@ final class sockaddr_un_unnamed extends sockaddr_un {
 
 function getpeername(FileDescriptor $fd): sockaddr;
 function getsockname(FileDescriptor $fd): sockaddr;
-function socketpair(int $domain, int $type, int $protocol): (FileDescriptor, FileDescriptor);
+function socketpair(
+  int $domain,
+  int $type,
+  int $protocol,
+): (FileDescriptor, FileDescriptor);
 
 function fcntl(FileDescriptor $fd, int $cmd, mixed $arg = null): mixed;
 function getsockopt_int(FileDescriptor $fd, int $level, int $option): int;
-function setsockopt_int(FileDescriptor $fd, int $level, int $option, int $value): void;
+function setsockopt_int(
+  FileDescriptor $fd,
+  int $level,
+  int $option,
+  int $value,
+): void;
 
 function socket(int $domain, int $type, int $protocol): FileDescriptor;
 function connect(FileDescriptor $socket, sockaddr $addr): void;

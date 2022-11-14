@@ -6,15 +6,15 @@ File "typing.extends5.bad.php", line 25, characters 29-38:
 Enum F includes enum NormalEnum but their base types are incompatible (Typing[4388])
 File "typing.extends5.bad.php", line 25, characters 29-38:
 Some members in class `F` are incompatible with those declared in type `NormalEnum` (Typing[4341])
-  File "BuiltinEnum.hhi", line 107, characters 32-40:
+  File "BuiltinEnum.hhi", line 111, characters 34-42:
   The method `getValues` is not compatible with the overridden method
-  File "BuiltinEnum.hhi", line 33, characters 43-44:
+  File "BuiltinEnum.hhi", line 33, characters 45-46:
   Expected a function that requires the capability set {}
-  File "BuiltinEnum.hhi", line 107, characters 44-54:
+  File "BuiltinEnum.hhi", line 111, characters 46-56:
   But got a function that requires the capability WriteProperty
 File "typing.extends5.bad.php", line 25, characters 29-38:
 Some members in class `F` are incompatible with those declared in type `NormalEnum` (Typing[4070])
-  File "BuiltinEnum.hhi", line 107, characters 32-40:
+  File "BuiltinEnum.hhi", line 111, characters 34-42:
   You cannot override this method
-  File "BuiltinEnum.hhi", line 33, characters 32-40:
+  File "BuiltinEnum.hhi", line 33, characters 34-42:
   It was declared as final

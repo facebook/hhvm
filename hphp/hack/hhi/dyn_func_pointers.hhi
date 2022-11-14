@@ -1,4 +1,4 @@
-<?hh   /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,7 +9,7 @@
  */
 
 namespace HH {
-function dynamic_fun(string $func_name)[]: dynamic;
-function dynamic_class_meth(string $cls_name, string $meth_name)[]: dynamic;
-function dynamic_meth_caller(string $cls_name, string $meth_name)[]: dynamic;
+  function dynamic_fun(string $func_name)[]: dynamic;
+  function dynamic_class_meth(string $cls_name, string $meth_name)[]: dynamic;
+  function dynamic_meth_caller(string $cls_name, string $meth_name)[]: dynamic;
 }

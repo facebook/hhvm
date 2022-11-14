@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -13,7 +13,7 @@ function debug_backtrace(
   int $limit = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function debug_print_backtrace(int $options = 0, int $limit = 0): void { }
+function debug_print_backtrace(int $options = 0, int $limit = 0): void {}
 <<__PHPStdLib>>
 function error_get_last(): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>

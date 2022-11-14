@@ -1,4 +1,4 @@
-<?hh    /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -53,14 +53,26 @@ const int UCOL_NUMERIC_COLLATION = 0;
 const int TAG_PROVENANCE_HERE_MUTATE_COLLECTIONS = 0;
 
 <<__PHPStdLib>>
-function array_change_key_case<Tv>(KeyedContainer<arraykey, Tv> $input, int $upper = CASE_LOWER)[]: darray<arraykey, Tv>;
+function array_change_key_case<Tv>(
+  KeyedContainer<arraykey, Tv> $input,
+  int $upper = CASE_LOWER,
+)[]: darray<arraykey, Tv>;
 /** inner container will be a varray or darray depending on $preserve_keys */
 <<__PHPStdLib>>
-function array_chunk<Tv>(Container<Tv> $input, int $size, bool $preserve_keys = false)[]: varray<Container<int>>;
+function array_chunk<Tv>(
+  Container<Tv> $input,
+  int $size,
+  bool $preserve_keys = false,
+)[]: varray<Container<int>>;
 <<__PHPStdLib>>
-function array_combine<Tv1 as arraykey, Tv2>(Container<Tv1> $keys, Container<Tv2> $values)[]: darray<Tv1, Tv2>;
+function array_combine<Tv1 as arraykey, Tv2>(
+  Container<Tv1> $keys,
+  Container<Tv2> $values,
+)[]: darray<Tv1, Tv2>;
 <<__PHPStdLib>>
-function array_count_values<Tv as arraykey>(Container<Tv> $input)[]: darray<Tv, int>;
+function array_count_values<Tv as arraykey>(
+  Container<Tv> $input,
+)[]: darray<Tv, int>;
 <<__PHPStdLib>>
 function array_column<Tv>(
   Container<KeyedContainer<arraykey, Tv>> $array,
@@ -109,7 +121,7 @@ function array_keys<Tk as arraykey>(
  */
 <<__PHPStdLib>>
 function array_map<Tk as arraykey, Tin, Tout>(
-  (function (Tin): Tout) $callback,
+  (function(Tin): Tout) $callback,
   KeyedContainer<Tk, Tin> $arr,
 ): KeyedContainer<Tk, Tout>;
 
@@ -264,8 +276,13 @@ function array_unshift(
 function array_values<Tv>(Container<Tv> $input)[]: varray<Tv>;
 <<__PHPStdLib>>
 function shuffle(inout $array)[leak_safe]: HH\FIXME\MISSING_RETURN_TYPE;
-<<__Deprecated('Use count(), it does the same thing as sizeof() in PHP and '.
-  'doesn\'t suggest that it\'s counting bytes.'), __PHPStdLib>>
+<<
+  __Deprecated(
+    'Use count(), it does the same thing as sizeof() in PHP and '.
+    'doesn\'t suggest that it\'s counting bytes.',
+  ),
+  __PHPStdLib,
+>>
 function sizeof($var)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function hphp_get_iterator($iterable): HH\FIXME\MISSING_RETURN_TYPE;
@@ -278,11 +295,7 @@ function in_array(
 <<__PHPStdLib>>
 function range($low, $high, $step = 1)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function array_diff(
-  $array1,
-  $array2,
-  ...$args
-)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function array_diff($array1, $array2, ...$args)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function array_udiff(
   $array1,

@@ -1,6 +1,6 @@
 <?hh
 
-final class SodiumException extends Exception { }
+final class SodiumException extends Exception {}
 
 ///// utilities
 
@@ -43,7 +43,7 @@ function sodium_crypto_generichash(
 <<__PHPStdLib>>
 function sodium_crypto_generichash_init(
   ?string $key = null,
-  ?int $length = null
+  ?int $length = null,
 ): string;
 
 <<__PHPStdLib>>
@@ -109,10 +109,7 @@ function sodium_crypto_pwhash_str(
 ): string;
 
 <<__PHPStdLib>>
-function sodium_crypto_pwhash_str_verify(
-  string $hash,
-  string $password,
-): bool;
+function sodium_crypto_pwhash_str_verify(string $hash, string $password): bool;
 
 <<__PHPStdLib>>
 function sodium_crypto_pwhash_scryptsalsa208sha256_str(
@@ -209,11 +206,7 @@ function sodium_crypto_kx_server_session_keys(
 ///// Unauthenticated asymetric (PSK) encryption (you probably don't want this)
 
 <<__PHPStdLib>>
-function sodium_crypto_stream(
-  int $length,
-  string $nonce,
-  string $key,
-): string;
+function sodium_crypto_stream(int $length, string $nonce, string $key): string;
 
 <<__PHPStdLib>>
 function sodium_crypto_stream_xor(
@@ -239,10 +232,7 @@ function sodium_crypto_box_open(
 ): mixed;
 
 <<__PHPStdLib>>
-function sodium_crypto_box_seal(
-  string $plaintext,
-  string $publickey,
-): string;
+function sodium_crypto_box_seal(string $plaintext, string $publickey): string;
 
 <<__PHPStdLib>>
 function sodium_crypto_box_seal_open(
@@ -281,16 +271,10 @@ function sodium_crypto_sign_ed25519_sk_to_curve25519(string $eddsakey): string;
 ///// Asymetric (public key) signatures
 
 <<__PHPStdLib>>
-function sodium_crypto_sign(
-  string $message,
-  string $secretkey,
-): string;
+function sodium_crypto_sign(string $message, string $secretkey): string;
 
 <<__PHPStdLib>>
-function sodium_crypto_sign_open(
-  string $signed,
-  string $publickey,
-): mixed;
+function sodium_crypto_sign_open(string $signed, string $publickey): mixed;
 
 <<__PHPStdLib>>
 function sodium_crypto_sign_detached(
@@ -406,7 +390,9 @@ function sodium_crypto_secretstream_xchacha20poly1305_pull(
 ): (string, int); /* plaintext, tag */
 
 <<__PHPStdLib>>
-function sodium_crypto_secretstream_xchacha20poly1305_rekey(inout mixed $state): void;
+function sodium_crypto_secretstream_xchacha20poly1305_rekey(
+  inout mixed $state,
+): void;
 
 ///// Ristretto
 
@@ -432,13 +418,22 @@ function sodium_crypto_core_ristretto255_scalar_negate(string $s): string;
 function sodium_crypto_core_ristretto255_scalar_complement(string $s): string;
 
 <<__PHPStdLib>>
-function sodium_crypto_core_ristretto255_scalar_add(string $x, string $y): string;
+function sodium_crypto_core_ristretto255_scalar_add(
+  string $x,
+  string $y,
+): string;
 
 <<__PHPStdLib>>
-function sodium_crypto_core_ristretto255_scalar_sub(string $x, string $y): string;
+function sodium_crypto_core_ristretto255_scalar_sub(
+  string $x,
+  string $y,
+): string;
 
 <<__PHPStdLib>>
-function sodium_crypto_core_ristretto255_scalar_mul(string $x, string $y): string;
+function sodium_crypto_core_ristretto255_scalar_mul(
+  string $x,
+  string $y,
+): string;
 
 ///// Always-defined constants
 
@@ -458,14 +453,10 @@ const int SODIUM_CRYPTO_SHORTHASH_KEYBYTES = 0;
 
 const string SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_STRPREFIX = '';
 const int SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_SALTBYTES = 0;
-const int SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_OPSLIMIT_INTERACTIVE
-  = 0;
-const int SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_MEMLIMIT_INTERACTIVE
-  = 0;
-const int SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_OPSLIMIT_SENSITIVE
-  = 0;
-const int SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_MEMLIMIT_SENSITIVE
-  = 0;
+const int SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_OPSLIMIT_INTERACTIVE = 0;
+const int SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_MEMLIMIT_INTERACTIVE = 0;
+const int SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_OPSLIMIT_SENSITIVE = 0;
+const int SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_MEMLIMIT_SENSITIVE = 0;
 
 const int SODIUM_CRYPTO_AUTH_BYTES = 0;
 const int SODIUM_CRYPTO_AUTH_KEYBYTES = 0;
@@ -498,8 +489,7 @@ const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_ABYTES = 0;
 const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_ABYTES = 0;
 const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES = 0;
 const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_KEYBYTES = 0;
-const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_MESSAGEBYTES_MAX
-   = 0;
+const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_MESSAGEBYTES_MAX = 0;
 const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_MESSAGE = 0;
 const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_PUSH = 0;
 const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_REKEY = 0;
@@ -536,7 +526,7 @@ const int SODIUM_CRYPTO_AEAD_XCHACHA20POLY1305_IETF_ABYTES = 0;
 const int SODIUM_CRYPTO_KDF_BYTES_MIN = 0;
 const int SODIUM_CRYPTO_KDF_BYTES_MAX = 0;
 const int SODIUM_CRYPTO_KDF_BYTES_CONTEXTBYTES = 0;
-const int SODIUM_CRYPTO_KDF_BYTES_KEYBYTES  = 0;
+const int SODIUM_CRYPTO_KDF_BYTES_KEYBYTES = 0;
 
 const int SODIUM_CRYPTO_CORE_HCHACHA20_INPUTBYTES = 0;
 const int SODIUM_CRYPTO_CORE_HCHACHA20_KEYBYTES = 0;

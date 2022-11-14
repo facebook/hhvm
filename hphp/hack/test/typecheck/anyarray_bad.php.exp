@@ -42,9 +42,9 @@ Invalid argument (Typing[4110])
   Expected `arraykey` because type parameter `Tk` of `HH\Set` could not be determined. Please add explicit type parameters to the invocation of `HH\Set`
   File "anyarray_bad.php", line 31, characters 10-24:
   But got `mixed` from the argument to this \HH\is_any_array test
-  File "hackarray.hhi", line 19, characters 119-120:
+  File "hackarray.hhi", line 22, characters 35-36:
     via this generic `Tv`
-  File "interfaces.hhi", line 110, characters 66-67:
+  File "interfaces.hhi", line 115, characters 23-24:
     via this generic `Tv`
-  File "interfaces.hhi", line 92, characters 46-47:
+  File "interfaces.hhi", line 92, characters 48-49:
     via this generic `Tv`

@@ -116,7 +116,12 @@ function strtok(string $str, $token = null): HH\FIXME\MISSING_RETURN_TYPE;
  *  )
  */
 <<__PHPStdLib>>
-function str_getcsv(string $input, string $delimiter = ",", string $enclosure = "\"", string $escape = "\\"): varray<?string>;
+function str_getcsv(
+  string $input,
+  string $delimiter = ",",
+  string $enclosure = "\"",
+  string $escape = "\\",
+): varray<?string>;
 <<__PHPStdLib>>
 function str_replace(
   $search,
@@ -176,13 +181,30 @@ function wordwrap(
   bool $cut = false,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function html_entity_decode(string $str, int $quote_style = ENT_COMPAT, string $charset = "ISO-8859-1"): string;
+function html_entity_decode(
+  string $str,
+  int $quote_style = ENT_COMPAT,
+  string $charset = "ISO-8859-1",
+): string;
 <<__PHPStdLib>>
-function htmlentities(string $str, int $quote_style = ENT_COMPAT, string $charset = "ISO-8859-1", bool $double_encode = true): string;
+function htmlentities(
+  string $str,
+  int $quote_style = ENT_COMPAT,
+  string $charset = "ISO-8859-1",
+  bool $double_encode = true,
+): string;
 <<__PHPStdLib>>
-function htmlspecialchars_decode(string $str, int $quote_style = ENT_COMPAT): string;
+function htmlspecialchars_decode(
+  string $str,
+  int $quote_style = ENT_COMPAT,
+): string;
 <<__PHPStdLib>>
-function htmlspecialchars(string $str, int $quote_style = ENT_COMPAT, string $charset = "ISO-8859-1", bool $double_encode = true): string;
+function htmlspecialchars(
+  string $str,
+  int $quote_style = ENT_COMPAT,
+  string $charset = "ISO-8859-1",
+  bool $double_encode = true,
+): string;
 <<__PHPStdLib>>
 function quoted_printable_encode(string $str)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
@@ -268,10 +290,7 @@ function strncmp(
 <<__PHPStdLib>>
 function strnatcmp(string $str1, string $str2)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function strcasecmp(
-  string $str1,
-  string $str2,
-)[]: HH\FIXME\MISSING_RETURN_TYPE;
+function strcasecmp(string $str1, string $str2)[]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function strncasecmp(
   string $str1,

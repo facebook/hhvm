@@ -1,4 +1,4 @@
-<?hh    /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -38,7 +38,12 @@ function get_meta_tags(
   bool $use_include_path = false,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function http_build_query($formdata, $numeric_prefix = null, string $arg_separator = "", int $enc_type = PHP_QUERY_RFC1738)[]: string;
+function http_build_query(
+  $formdata,
+  $numeric_prefix = null,
+  string $arg_separator = "",
+  int $enc_type = PHP_QUERY_RFC1738,
+)[]: string;
 <<__PHPStdLib>>
 function parse_url(
   string $url,

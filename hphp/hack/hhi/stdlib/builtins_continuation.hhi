@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -16,7 +16,7 @@ function hphp_create_continuation(
   $args = null,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
 class DummyContinuation {
-  public function __construct() { }
+  public function __construct() {}
   public function current(): HH\FIXME\MISSING_RETURN_TYPE {}
   public function key(): HH\FIXME\MISSING_RETURN_TYPE {}
   public function next(): HH\FIXME\MISSING_RETURN_TYPE {}

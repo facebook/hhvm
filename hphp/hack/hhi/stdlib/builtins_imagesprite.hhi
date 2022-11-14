@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,7 +9,7 @@
  */
 
 class ImageSprite {
-  public function __construct() { }
+  public function __construct() {}
   public function addFile(
     $file,
     $options = null,

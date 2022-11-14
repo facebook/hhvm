@@ -8,9 +8,9 @@
  *
  */
 
-class FilesystemIterator extends DirectoryIterator
-  implements
-    SeekableIterator<SplFileInfo> {
+class FilesystemIterator
+  extends DirectoryIterator
+  implements SeekableIterator<SplFileInfo> {
 
   // Constants
   const int CURRENT_AS_PATHNAME = 32;

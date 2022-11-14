@@ -33,7 +33,7 @@ module Value = struct
   type t =
     | Positioned of SourceData.t
     | Synthetic
-  [@@deriving show, eq]
+  [@@deriving show, eq, sexp_of]
 
   let from_positioned_syntax syntax =
     Positioned (SourceData.from_positioned_syntax syntax)

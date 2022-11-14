@@ -7,6 +7,8 @@
  *
  *)
 
+open Sexplib.Std
+
 type t = {
   hhvm_compat_mode: bool;
   php5_compat_mode: bool;
@@ -26,7 +28,7 @@ type t = {
   interpret_soft_types_as_like_types: bool;
   is_systemlib: bool;
 }
-[@@deriving show]
+[@@deriving show, sexp_of]
 
 let default =
   {

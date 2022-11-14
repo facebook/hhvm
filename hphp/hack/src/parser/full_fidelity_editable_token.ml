@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Sexplib.Std
 
 (**
  * An editable token contains the text of the token; these tokens are not
@@ -22,7 +23,7 @@ type t = {
   leading: Trivia.t list;
   trailing: Trivia.t list;
 }
-[@@deriving show, eq]
+[@@deriving show, eq, sexp_of]
 
 let create kind text leading trailing = { kind; text; leading; trailing }
 

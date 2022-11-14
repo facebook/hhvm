@@ -26,13 +26,13 @@ module TokenKind = Full_fidelity_token_kind
 module type Syntax_S = sig
   module Token : Lexable_token_sig.LexableToken_S
 
-  type value [@@deriving show, eq]
+  type value [@@deriving show, eq, sexp_of]
 
   type t = {
     syntax: syntax;
     value: value;
   }
-  [@@deriving show, eq]
+  [@@deriving show, eq, sexp_of]
 
   and syntax =
     | Token of Token.t
@@ -1054,6 +1054,7 @@ module type Syntax_S = sig
         package_includes_includes: t;
         package_includes_right_brace: t;
       }
+  [@@deriving sexp_of]
 
   val rust_parse :
     Full_fidelity_source_text.t ->

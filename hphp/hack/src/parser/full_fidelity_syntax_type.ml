@@ -56,11 +56,12 @@
  * Therefore this module is functorized by the types for token and value to be
  * associated with the node.
  *)
+open Sexplib.Std
 
 module type TokenType = sig
   module Trivia : Lexable_trivia_sig.LexableTrivia_S
 
-  type t [@@deriving show, eq]
+  type t [@@deriving show, eq, sexp_of]
 
   val kind : t -> Full_fidelity_token_kind.t
 
@@ -70,7 +71,7 @@ module type TokenType = sig
 end
 
 module type SyntaxValueType = sig
-  type t [@@deriving show, eq]
+  type t [@@deriving show, eq, sexp_of]
 
   val to_json : t -> Hh_json.json
 end
@@ -81,13 +82,13 @@ end
  *)
 module MakeSyntaxType (Token : TokenType) (SyntaxValue : SyntaxValueType) =
 struct
-  type value = SyntaxValue.t [@@deriving show, eq]
+  type value = SyntaxValue.t [@@deriving show, eq, sexp_of]
 
   type t = {
     syntax: syntax;
     value: value;
   }
-  [@@deriving show, eq]
+  [@@deriving show, eq, sexp_of]
 
   and function_declaration = {
     function_attribute_spec: t;
@@ -1184,4 +1185,5 @@ struct
         package_includes_includes: t;
         package_includes_right_brace: t;
       }
+  [@@deriving sexp_of]
 end

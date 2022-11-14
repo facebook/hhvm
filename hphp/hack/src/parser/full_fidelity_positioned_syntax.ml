@@ -36,7 +36,7 @@ module PositionedSyntaxValue = struct
         source_text: SourceText.t;
         offset: int;
       }
-  [@@deriving show, eq]
+  [@@deriving show, eq, sexp_of]
 
   let source_text value =
     match value with

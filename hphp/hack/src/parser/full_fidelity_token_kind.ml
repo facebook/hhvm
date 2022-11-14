@@ -226,7 +226,7 @@ type t =
   | XHPBody
   | XHPComment
   | Hashbang
-[@@deriving show, eq]
+[@@deriving show, eq, sexp_of]
 
 let from_string keyword ~only_reserved =
   match keyword with

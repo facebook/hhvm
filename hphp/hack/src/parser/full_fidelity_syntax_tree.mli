@@ -12,7 +12,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) : sig
       (SmartConstructors : SmartConstructors.SmartConstructors_S
                              with type r = Syntax.t
                              with module Token = Syntax.Token) : sig
-    type t [@@deriving show]
+    type t [@@deriving show, sexp_of]
 
     val make :
       ?env:Full_fidelity_parser_env.t -> Full_fidelity_source_text.t -> t

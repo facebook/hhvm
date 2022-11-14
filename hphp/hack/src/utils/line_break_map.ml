@@ -9,7 +9,7 @@
 
 open Hh_prelude
 
-type t = int array [@@deriving show, eq]
+type t = int array [@@deriving show, eq, sexp_of]
 
 let last_offset = ref 0
 

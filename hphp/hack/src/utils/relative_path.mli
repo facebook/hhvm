@@ -32,7 +32,7 @@ module S : sig
   val to_string : t -> string
 end
 
-type t = S.t [@@deriving eq, show, ord]
+type t = S.t [@@deriving eq, show, ord, sexp_of]
 
 val default : t
 

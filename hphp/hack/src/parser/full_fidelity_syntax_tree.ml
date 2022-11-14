@@ -39,7 +39,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       mode: FileInfo.mode option;
       state: SCI.t;
     }
-    [@@deriving show]
+    [@@deriving show, sexp_of]
 
     let remove_duplicates errors equals =
       (* Assumes the list is sorted so that equal items are together. *)

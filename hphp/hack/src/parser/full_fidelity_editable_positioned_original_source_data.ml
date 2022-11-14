@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Sexplib.Std
 
 (**
  * SourceData represents information with relation to the original SourceText.
@@ -30,7 +31,7 @@ type t = {
   leading: Trivia.t list;
   trailing: Trivia.t list;
 }
-[@@deriving show, eq]
+[@@deriving show, eq, sexp_of]
 
 let empty =
   {

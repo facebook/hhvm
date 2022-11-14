@@ -19,6 +19,7 @@
  * build AST.
  
  *)
+open Sexplib.Std
 
 module type SC_S = SmartConstructors.SmartConstructors_S
 
@@ -27,7 +28,7 @@ module ParserEnv = Full_fidelity_parser_env
 module type State_S = sig
   type r [@@deriving show]
 
-  type t [@@deriving show]
+  type t [@@deriving show, sexp_of]
 
   val initial : ParserEnv.t -> t
 
@@ -52,7 +53,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
     struct
       module Token = Syntax.Token
 
-      type t = State.t [@@deriving show]
+      type t = State.t [@@deriving show, sexp_of]
 
       type r = Syntax.t [@@deriving show]
 
@@ -65,7 +66,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
   include WithState (struct
     type r = Syntax.t [@@deriving show]
 
-    type t = unit [@@deriving show]
+    type t = unit [@@deriving show, sexp_of]
 
     let initial _ = ()
 

@@ -51,6 +51,7 @@ let module_blacklist =
     "naming_special_names";
     "pp_type";
     "reordered_argument_collections";
+    "sexplib::std";
     "string_utils";
     "utils";
   ]

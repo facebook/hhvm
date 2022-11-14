@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
+open Sexplib.Std
 module Env = Full_fidelity_parser_env
 
 module type SC_S = SmartConstructors.SmartConstructors_S
@@ -17,7 +17,7 @@ module type SCWithToken_S = SmartConstructorsWrappers.SyntaxKind_S
 
 module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
   module WithSmartConstructors (SCI : SC_S with module Token = Syntax.Token) : sig
-    type t
+    type t [@@deriving sexp_of]
 
     val make : Env.t -> Full_fidelity_source_text.t -> t
 
@@ -39,6 +39,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       env: Env.t;
       sc_state: SCWithToken.t;
     }
+    [@@deriving sexp_of]
 
     let make (env : Env.t) text =
       { text; errors = []; env; sc_state = SCWithToken.initial_state env }

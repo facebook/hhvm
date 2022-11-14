@@ -108,9 +108,10 @@
   parser_schema_def
   relative_path
   rust_parser_errors_ffi
-  rust_parser_ffi)
+  rust_parser_ffi
+  sexplib)
  (preprocess
-  (pps visitors.ppx ppx_deriving.std)))
+  (pps ppx_sexp_conv visitors.ppx ppx_deriving.std)))
 
 (library
  (name parser)

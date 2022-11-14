@@ -185,17 +185,18 @@ module GenerateFFSyntaxType = struct
  * Therefore this module is functorized by the types for token and value to be
  * associated with the node."
     ^ "
+open Sexplib.Std
 
 module type TokenType = sig
   module Trivia : Lexable_trivia_sig.LexableTrivia_S
-  type t [@@deriving show, eq]
+  type t [@@deriving show, eq, sexp_of]
   val kind: t -> Full_fidelity_token_kind.t
   val to_json: t -> Hh_json.json
   val leading : t -> Trivia.t list
 end
 
 module type SyntaxValueType = sig
-  type t [@@deriving show, eq]
+  type t [@@deriving show, eq, sexp_of]
   val to_json: t -> Hh_json.json
 end
 
@@ -204,13 +205,14 @@ end
  * node.
  *)
 module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
-  type value = SyntaxValue.t [@@deriving show, eq]
-  type t = { syntax : syntax ; value : value } [@@deriving show, eq]
+  type value = SyntaxValue.t [@@deriving show, eq, sexp_of]
+  type t = { syntax : syntax ; value : value } [@@deriving show, eq, sexp_of]
 PARSE_TREE   and syntax =
   | Token                             of Token.t
   | Missing
   | SyntaxList                        of t list
 SYNTAX
+    [@@deriving sexp_of]
 end
 
 "
@@ -928,13 +930,14 @@ module TokenKind = Full_fidelity_token_kind
 
 module type Syntax_S = sig
   module Token : Lexable_token_sig.LexableToken_S
-  type value [@@deriving show, eq]
-  type t = { syntax : syntax ; value : value } [@@deriving show, eq]
+  type value [@@deriving show, eq, sexp_of]
+  type t = { syntax : syntax ; value : value } [@@deriving show, eq, sexp_of]
   and syntax =
   | Token                             of Token.t
   | Missing
   | SyntaxList                        of t list
 SYNTAX
+    [@@deriving sexp_of]
 
   val rust_parse :
     Full_fidelity_source_text.t ->
@@ -1027,7 +1030,7 @@ module ParserEnv = Full_fidelity_parser_env
 module type SmartConstructors_S = sig
   module Token : Lexable_token_sig.LexableToken_S
 
-  type t (* state *) [@@deriving show]
+  type t (* state *) [@@deriving show, sexp_of]
 
   type r (* smart constructor return type *) [@@deriving show]
 
@@ -1206,6 +1209,7 @@ module GenerateFFSyntaxSmartConstructors = struct
  * build AST.
  "
     ^ "
+open Sexplib.Std
 
 module type SC_S = SmartConstructors.SmartConstructors_S
 
@@ -1214,7 +1218,7 @@ module ParserEnv = Full_fidelity_parser_env
 module type State_S = sig
   type r [@@deriving show]
 
-  type t [@@deriving show]
+  type t [@@deriving show, sexp_of]
 
   val initial : ParserEnv.t -> t
 
@@ -1239,7 +1243,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
     struct
       module Token = Syntax.Token
 
-      type t = State.t [@@deriving show]
+      type t = State.t [@@deriving show, sexp_of]
 
       type r = Syntax.t [@@deriving show]
 
@@ -1252,7 +1256,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
   include WithState (struct
     type r = Syntax.t [@@deriving show]
 
-    type t = unit [@@deriving show]
+    type t = unit [@@deriving show, sexp_of]
 
     let initial _ = ()
 
@@ -1733,7 +1737,7 @@ module SyntaxKind (SC : SC_S) :
 
   type original_sc_r = SC.r [@@deriving show]
 
-  type t = SC.t [@@deriving show]
+  type t = SC.t [@@deriving show, sexp_of]
 
   type r = SK.t * SC.r [@@deriving show]
 
@@ -2307,7 +2311,7 @@ module GenerateFFTriviaKind = struct
 
 type t =
 TRIVIA
-  [@@deriving show, enum, eq]
+  [@@deriving show, enum, eq, sexp_of]
 
 let to_string kind =
   match kind with
@@ -2557,7 +2561,7 @@ type t =
 KIND_DECLARATIONS_NO_TEXT  (* Given text tokens *)
 KIND_DECLARATIONS_GIVEN_TEXT  (* Variable text tokens *)
 KIND_DECLARATIONS_VARIABLE_TEXT
-  [@@deriving show, eq]
+  [@@deriving show, eq, sexp_of]
 
 let from_string keyword ~only_reserved =
   match keyword with

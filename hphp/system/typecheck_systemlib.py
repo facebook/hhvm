@@ -43,10 +43,18 @@ def main():
     )
     parser.add_argument("paths", type=str, help="paths to traverse", nargs="+")
     parser.add_argument("--hhstc-path", type=str, help="`hh_single_type_check` to run")
+    parser.add_argument(
+        "--report-number-of-files",
+        action="store_true",
+        help="instead of running the typechecker, just print the number of files we'd typecheck",
+    )
     args = parser.parse_args()
     files = []
     for path in args.paths:
         files.extend(get_files_in(path))
+    if args.report_number_of_files:
+        print(len(list(filter(lambda f: f.endswith("php"), files))))
+        return
     sys.exit(p.run([args.hhstc_path] + FLAGS + files).returncode)
 
 

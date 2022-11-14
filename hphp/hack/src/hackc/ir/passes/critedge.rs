@@ -6,6 +6,7 @@ use ir_core::Block;
 use ir_core::BlockId;
 use ir_core::Func;
 use ir_core::Instr;
+use ir_core::LocId;
 
 /// Find and split critical edges. Assumes there are no unreachable blocks,
 /// which is the case after rpo_sort().
@@ -41,7 +42,11 @@ pub fn split_critical_edges(func: &mut Func<'_>, rpo_sort: bool) {
                     // cannot create new blocks and instructions while iterating
                     // here, so make a simple worklist
                     let split_bid = BlockId((num_blocks + work.len()) as u32);
-                    work.push((loc, split_bid, edge.clone()));
+                    work.push(WorkItem {
+                        loc,
+                        split_bid,
+                        old_target: edge.clone(),
+                    });
                     *edge = split_bid;
                 }
             }
@@ -50,12 +55,64 @@ pub fn split_critical_edges(func: &mut Func<'_>, rpo_sort: bool) {
     if !work.is_empty() {
         func.blocks
             .resize(num_blocks + work.len(), Block::default());
-        for (loc, split_bid, old_target) in work.drain(..) {
-            let instr = Instr::jmp(old_target, loc);
-            func.emit(split_bid, instr);
+        for item in work.drain(..) {
+            let _params = func.block(item.old_target).params.len();
+            let instr = Instr::jmp(item.old_target, item.loc);
+            func.emit(item.split_bid, instr);
         }
         if rpo_sort {
             crate::rpo_sort(func)
         }
+    }
+}
+
+struct WorkItem {
+    loc: LocId,
+    split_bid: BlockId,
+    old_target: BlockId,
+}
+
+#[cfg(test)]
+mod test {
+    use std::sync::Arc;
+
+    #[test]
+    fn basic_no_split() {
+        let (mut func, strings) = testutils::build_test_func(&[
+            testutils::Block::jmp_op("a", ["b", "c"]),
+            testutils::Block::jmp("b", "d"),
+            testutils::Block::jmp("c", "d"),
+            testutils::Block::ret("d"),
+        ]);
+        let expected = func.clone();
+
+        super::split_critical_edges(&mut func, true);
+        testutils::assert_func_struct_eq(&func, &expected, &strings);
+    }
+
+    #[test]
+    fn basic_split() {
+        let (mut func, strings) = testutils::build_test_func(&[
+            testutils::Block::jmp_op("a", ["b", "c"]),
+            testutils::Block::jmp("b", "d"),
+            testutils::Block::jmp_op("c", ["d", "e"]),
+            testutils::Block::ret("d"),
+            testutils::Block::ret("e"),
+        ]);
+
+        super::split_critical_edges(&mut func, true);
+
+        let expected = testutils::build_test_func_with_strings(
+            &[
+                testutils::Block::jmp_op("a", ["b", "c"]),
+                testutils::Block::jmp("b", "d"),
+                testutils::Block::jmp_op("c", ["f", "e"]),
+                testutils::Block::jmp("f", "d").unnamed(),
+                testutils::Block::ret("d"),
+                testutils::Block::ret("e"),
+            ],
+            Arc::clone(&strings),
+        );
+        testutils::assert_func_struct_eq(&func, &expected, &strings);
     }
 }

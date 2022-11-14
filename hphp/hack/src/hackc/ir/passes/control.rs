@@ -187,9 +187,9 @@ mod test {
     fn test1() {
         // Can't forward because 'b' isn't empty.
         let (mut func, strings) = testutils::build_test_func(&[
-            ("a", vec!["ca"], vec!["b"]),
-            ("b", vec!["cb"], vec!["c"]),
-            ("c", vec!["cc"], vec![]),
+            testutils::Block::jmp("a", "b").with_target(),
+            testutils::Block::jmp("b", "c").with_target(),
+            testutils::Block::ret("c"),
         ]);
         let expected = func.clone();
 
@@ -203,19 +203,18 @@ mod test {
     fn test2() {
         // 'a' forwards directly to 'c'
         let (mut func, strings) = testutils::build_test_func(&[
-            ("a", vec!["ca"], vec!["b"]),
-            ("b", vec![], vec!["c"]),
-            ("c", vec!["cc"], vec![]),
+            testutils::Block::jmp("a", "b").with_target(),
+            testutils::Block::jmp("b", "c"),
+            testutils::Block::ret("c").with_target(),
         ]);
 
         let changed = super::run(&mut func);
         assert!(changed);
 
-        #[rustfmt::skip]
         let expected = testutils::build_test_func_with_strings(
             &[
-                ("a", vec!["ca"], vec!["c"]),
-                ("c", vec!["cc"], vec![])
+                testutils::Block::jmp("a", "c").with_target(),
+                testutils::Block::ret("c").with_target(),
             ],
             Arc::clone(&strings),
         );
@@ -226,10 +225,10 @@ mod test {
     fn test3() {
         // Can't forward because it would create a critical section.
         let (mut func, strings) = testutils::build_test_func(&[
-            ("a", vec!["ca"], vec!["b", "c"]),
-            ("b", vec![], vec!["d"]),
-            ("c", vec![], vec!["d"]),
-            ("d", vec!["cd"], vec![]),
+            testutils::Block::jmp_op("a", ["b", "c"]).with_target(),
+            testutils::Block::jmp("b", "d"),
+            testutils::Block::jmp("c", "d"),
+            testutils::Block::ret("d").with_target(),
         ]);
         let expected = func.clone();
 
@@ -243,11 +242,11 @@ mod test {
     fn test4() {
         // Expect 'c' to be forwarded directly to 'e'.
         let (mut func, strings) = testutils::build_test_func(&[
-            ("a", vec!["ca"], vec!["b", "c"]),
-            ("b", vec![], vec!["e"]),
-            ("c", vec![], vec!["d"]),
-            ("d", vec![], vec!["e"]),
-            ("e", vec!["cd"], vec![]),
+            testutils::Block::jmp_op("a", ["b", "c"]).with_target(),
+            testutils::Block::jmp("b", "e"),
+            testutils::Block::jmp("c", "d"),
+            testutils::Block::jmp("d", "e"),
+            testutils::Block::ret("e").with_target(),
         ]);
 
         let changed = super::run(&mut func);
@@ -255,10 +254,10 @@ mod test {
 
         let expected = testutils::build_test_func_with_strings(
             &[
-                ("a", vec!["ca"], vec!["b", "c"]),
-                ("b", vec![], vec!["e"]),
-                ("c", vec![], vec!["e"]),
-                ("e", vec!["cd"], vec![]),
+                testutils::Block::jmp_op("a", ["b", "c"]).with_target(),
+                testutils::Block::jmp("b", "e"),
+                testutils::Block::jmp("c", "e"),
+                testutils::Block::ret("e").with_target(),
             ],
             Arc::clone(&strings),
         );
@@ -269,19 +268,18 @@ mod test {
     fn test5() {
         // Expect 'entry' to be removed.
         let (mut func, strings) = testutils::build_test_func(&[
-            ("entry", vec![], vec!["b"]),
-            ("b", vec!["cb"], vec!["c"]),
-            ("c", vec![], vec![]),
+            testutils::Block::jmp("entry", "b"),
+            testutils::Block::jmp("b", "c").with_target(),
+            testutils::Block::ret("c"),
         ]);
 
         let changed = super::run(&mut func);
         assert!(changed);
 
-        #[rustfmt::skip]
         let expected = testutils::build_test_func_with_strings(
             &[
-                ("b", vec!["cb"], vec!["c"]),
-                ("c", vec![], vec![])
+                testutils::Block::jmp("b", "c").with_target(),
+                testutils::Block::ret("c"),
             ],
             Arc::clone(&strings),
         );
@@ -292,11 +290,11 @@ mod test {
     fn test6() {
         // We can forward c -> e but still need b -> d -> e because of critedge.
         let (mut func, strings) = testutils::build_test_func(&[
-            ("a", vec![], vec!["b", "c"]),
-            ("b", vec![], vec!["d", "e"]),
-            ("c", vec![], vec!["d"]),
-            ("d", vec![], vec!["e"]),
-            ("e", vec![], vec![]),
+            testutils::Block::jmp_op("a", ["b", "c"]),
+            testutils::Block::jmp_op("b", ["d", "e"]),
+            testutils::Block::jmp("c", "d"),
+            testutils::Block::jmp("d", "e"),
+            testutils::Block::ret("e"),
         ]);
 
         let changed = super::run(&mut func);
@@ -304,11 +302,11 @@ mod test {
 
         let expected = testutils::build_test_func_with_strings(
             &[
-                ("a", vec![], vec!["b", "c"]),
-                ("b", vec![], vec!["d", "e"]),
-                ("c", vec![], vec!["e"]),
-                ("d", vec![], vec!["e"]),
-                ("e", vec![], vec![]),
+                testutils::Block::jmp_op("a", ["b", "c"]),
+                testutils::Block::jmp_op("b", ["d", "e"]),
+                testutils::Block::jmp("c", "e"),
+                testutils::Block::jmp("d", "e"),
+                testutils::Block::ret("e"),
             ],
             Arc::clone(&strings),
         );
@@ -319,11 +317,11 @@ mod test {
     fn test7() {
         // We expect to skip 'b' and 'c'
         let (mut func, strings) = testutils::build_test_func(&[
-            ("a", vec![], vec!["b", "c"]),
-            ("b", vec![], vec!["d"]),
-            ("c", vec![], vec!["e"]),
-            ("d", vec![], vec![]),
-            ("e", vec![], vec![]),
+            testutils::Block::jmp_op("a", ["b", "c"]),
+            testutils::Block::jmp("b", "d"),
+            testutils::Block::jmp("c", "e"),
+            testutils::Block::ret("d"),
+            testutils::Block::ret("e"),
         ]);
 
         let changed = super::run(&mut func);
@@ -331,9 +329,9 @@ mod test {
 
         let expected = testutils::build_test_func_with_strings(
             &[
-                ("a", vec![], vec!["d", "e"]),
-                ("d", vec![], vec![]),
-                ("e", vec![], vec![]),
+                testutils::Block::jmp_op("a", ["d", "e"]),
+                testutils::Block::ret("d"),
+                testutils::Block::ret("e"),
             ],
             Arc::clone(&strings),
         );
@@ -344,11 +342,11 @@ mod test {
     fn test8() {
         // We expect to skip the entry block.
         let (mut func, strings) = testutils::build_test_func(&[
-            ("a", vec![], vec!["c"]),
-            ("b", vec![], vec!["c"]),
-            ("c", vec![], vec!["d", "e"]),
-            ("d", vec![], vec![]),
-            ("e", vec![], vec![]),
+            testutils::Block::jmp("a", "c"),
+            testutils::Block::jmp("b", "c"),
+            testutils::Block::jmp_op("c", ["d", "e"]),
+            testutils::Block::ret("d"),
+            testutils::Block::ret("e"),
         ]);
         func.params.push(mk_param("x", BlockId(1), &strings));
         *func.instr_mut(InstrId(1)) = Instr::enter(BlockId(2), ir_core::LocId::NONE);
@@ -360,10 +358,10 @@ mod test {
 
         let mut expected = testutils::build_test_func_with_strings(
             &[
-                ("c", vec![], vec!["d", "e"]),
-                ("b", vec![], vec!["c"]),
-                ("d", vec![], vec![]),
-                ("e", vec![], vec![]),
+                testutils::Block::jmp_op("c", ["d", "e"]),
+                testutils::Block::jmp("b", "c"),
+                testutils::Block::ret("d"),
+                testutils::Block::ret("e"),
             ],
             Arc::clone(&strings),
         );

@@ -246,16 +246,19 @@ mod tests {
     }
 
     // Recursive reference implementation.
-    fn rpo_reference(testcase: &[(&str, Vec<&str>, Vec<&str>)]) -> String {
+    fn rpo_reference(testcase: &[testutils::Block]) -> String {
         let mut cfg: HashMap<&str, Vec<&str>> = HashMap::default();
-        for (b, _, s) in testcase {
-            cfg.insert(b, s.clone());
+        for block in testcase {
+            cfg.insert(
+                &block.name,
+                block.successors().map(String::as_str).collect(),
+            );
         }
 
         let mut result = Vec::with_capacity(cfg.len());
         let mut seen: HashSet<&str> =
             HashSet::with_capacity_and_hasher(cfg.len(), Default::default());
-        postorder_aux(&cfg, testcase[0].0, &mut result, &mut seen);
+        postorder_aux(&cfg, &testcase[0].name, &mut result, &mut seen);
         result.reverse();
 
         result.join(",")
@@ -264,16 +267,16 @@ mod tests {
     #[test]
     fn rpo() {
         // Define a little CFG with a some branches and loops.
-        let blocks: Vec<(&str, Vec<&str>, Vec<&str>)> = vec![
-            ("a", vec![], vec!["b"]),
-            ("b", vec![], vec!["c", "d"]),
-            ("c", vec![], vec!["e"]),
-            ("d", vec![], vec!["e", "f"]),
-            ("e", vec![], vec!["f", "f"]),
-            ("f", vec![], vec!["b", "g"]),
-            ("g", vec![], vec![]),
-            ("dead", vec![], vec!["b", "dead2"]),
-            ("dead2", vec![], vec!["dead"]),
+        let blocks: Vec<testutils::Block> = vec![
+            testutils::Block::jmp("a", "b"),
+            testutils::Block::jmp_op("b", ["c", "d"]),
+            testutils::Block::jmp("c", "e"),
+            testutils::Block::jmp_op("d", ["e", "f"]),
+            testutils::Block::jmp_op("e", ["f", "f"]),
+            testutils::Block::jmp_op("f", ["b", "g"]),
+            testutils::Block::ret("g"),
+            testutils::Block::jmp_op("dead", ["b", "dead2"]),
+            testutils::Block::jmp("dead2", "dead"),
         ];
 
         let mut rng = thread_rng();
@@ -311,15 +314,31 @@ mod tests {
             for i in 0..num_blocks {
                 // Choose 0, 1 or 2 successor, with only a small chance of 0.
                 let num_successors = (rng.gen_range(0..7) + 2) / 3;
-                let mut successors = Vec::with_capacity(num_successors);
-                for _ in 0..num_successors {
+                let mut succ = || {
                     // NOTE: You can't branch to the entry block.
-                    successors.push(names[rng.gen_range(1..num_blocks)])
-                }
-                let mut rsuccessors = successors.clone();
-                rsuccessors.reverse();
-                blocks.push((names[i], vec![], successors));
-                rblocks.push((names[i], vec![], rsuccessors));
+                    names[rng.gen_range(1..num_blocks)]
+                };
+                let (term, rterm) = match num_successors {
+                    0 => (testutils::Terminator::Ret, testutils::Terminator::Ret),
+                    1 => {
+                        let a = succ();
+                        (
+                            testutils::Terminator::Jmp(a.to_string()),
+                            testutils::Terminator::Jmp(a.to_string()),
+                        )
+                    }
+                    2 => {
+                        let a = succ();
+                        let b = succ();
+                        (
+                            testutils::Terminator::JmpOp(a.to_string(), b.to_string()),
+                            testutils::Terminator::JmpOp(b.to_string(), a.to_string()),
+                        )
+                    }
+                    _ => unreachable!(),
+                };
+                blocks.push(testutils::Block::ret(names[i]).with_terminator(term));
+                rblocks.push(testutils::Block::ret(names[i]).with_terminator(rterm));
             }
 
             let (mut func, _) = testutils::build_test_func(&blocks);

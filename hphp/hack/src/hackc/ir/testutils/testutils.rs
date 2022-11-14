@@ -17,34 +17,24 @@ use ir_core::Instr;
 use ir_core::LocId;
 use ir_core::StringInterner;
 
-/// Given a simple string-based CFG description, create a Func that matches it.
-///
-/// Each array entry looks like:
-///
-///    ("blockname", ["call_target1", "call_target2"], ["successor1", "successor2"])
-///
-/// where <instr count> is the number of non-terminal instructions to insert.
-///
-pub fn build_test_func<'a>(
-    testcase: &[(&str, Vec<&str>, Vec<&str>)],
-) -> (Func<'a>, Arc<StringInterner>) {
+/// Given a simple CFG description, create a Func that matches it.
+pub fn build_test_func<'a>(testcase: &[Block]) -> (Func<'a>, Arc<StringInterner>) {
     let strings = Arc::new(StringInterner::default());
     let func = build_test_func_with_strings(testcase, Arc::clone(&strings));
     (func, strings)
 }
 
 pub fn build_test_func_with_strings<'a>(
-    testcase: &[(&str, Vec<&str>, Vec<&str>)],
+    testcase: &[Block],
     strings: Arc<StringInterner>,
 ) -> Func<'a> {
     // Create a function whose CFG matches testcase.
-    let loc = LocId::NONE;
 
     FuncBuilder::build_func(strings, |fb| {
         let mut name_to_bid = HashMap::with_capacity_and_hasher(testcase.len(), Default::default());
-        for (i, (name, _, _)) in testcase.iter().enumerate() {
+        for (i, block) in testcase.iter().enumerate() {
             name_to_bid.insert(
-                *name,
+                block.name.clone(),
                 if i == 0 {
                     Func::ENTRY_BID
                 } else {
@@ -53,34 +43,126 @@ pub fn build_test_func_with_strings<'a>(
             );
         }
 
-        let null_iid = fb.emit_constant(Constant::Null);
-
-        for (name, call_targets, edges) in testcase {
-            fb.start_block(name_to_bid[name]);
-            fb.cur_block_mut().pname_hint = Some(name.to_string());
-
-            let e: Vec<BlockId> = edges
-                .iter()
-                .map(|block_name| match name_to_bid.get(block_name) {
-                    Some(&x) => x,
-                    None => panic!("No such block {}", block_name),
-                })
-                .collect();
-
-            for target in call_targets {
-                let target = FunctionId::from_str(target, &fb.strings);
-                fb.emit(Instr::simple_call(target, &[], loc));
-            }
-
-            let terminator = match e.len() {
-                0 => Instr::ret(null_iid, loc),
-                1 => Instr::jmp(e[0], loc),
-                2 => Instr::jmp_op(null_iid, instr::Predicate::NonZero, e[0], e[1], loc),
-                _ => panic!("unhandled edge count"),
-            };
-            fb.emit(terminator);
+        for block in testcase {
+            fb.start_block(name_to_bid[&block.name]);
+            block.emit(fb, &name_to_bid);
         }
     })
+}
+
+#[derive(Debug, Clone)]
+pub struct Block {
+    /// The name of the block for test lookup purposes.
+    pub name: String,
+    /// The pname of the block.
+    pub pname: Option<String>,
+    /// For each "call_target" we create a simple call instruction calling a
+    /// function with that target name.
+    pub call_targets: Vec<String>,
+    /// What kind of terminator to use on this block.
+    pub terminator: Terminator,
+    /// The number of block parameters this block expects.
+    pub params: usize,
+}
+
+#[derive(Debug, Clone)]
+pub enum Terminator {
+    Ret,
+    Jmp(String),
+    JmpOp(String, String),
+}
+
+impl Block {
+    pub fn successors(&self) -> impl Iterator<Item = &String> {
+        match &self.terminator {
+            Terminator::Ret => vec![].into_iter(),
+            Terminator::Jmp(a) => vec![a].into_iter(),
+            Terminator::JmpOp(a, b) => vec![a, b].into_iter(),
+        }
+    }
+
+    fn emit(&self, fb: &mut FuncBuilder<'_>, name_to_bid: &HashMap<String, BlockId>) {
+        if let Some(pname) = self.pname.as_ref() {
+            fb.cur_block_mut().pname_hint = Some(pname.to_string());
+        }
+
+        for _ in 0..self.params {
+            fb.alloc_param();
+        }
+
+        let bid_for = |block_name: &str| -> BlockId {
+            match name_to_bid.get(block_name) {
+                Some(&x) => x,
+                None => panic!("No such block {}", block_name),
+            }
+        };
+
+        let loc = LocId::NONE;
+
+        for target in &self.call_targets {
+            let target = FunctionId::from_str(target, &fb.strings);
+            fb.emit(Instr::simple_call(target, &[], loc));
+        }
+
+        let null_iid = fb.emit_constant(Constant::Null);
+
+        let terminator = match &self.terminator {
+            Terminator::Ret => Instr::ret(null_iid, loc),
+            Terminator::Jmp(a) => {
+                let a = bid_for(a);
+                Instr::jmp(a, loc)
+            }
+            Terminator::JmpOp(a, b) => {
+                let a = bid_for(a);
+                let b = bid_for(b);
+                Instr::jmp_op(null_iid, instr::Predicate::NonZero, a, b, loc)
+            }
+        };
+        fb.emit(terminator);
+    }
+
+    /// A simple block which jumps to a single successor.
+    pub fn jmp(name: &str, successor: &str) -> Block {
+        Self::ret(name).with_terminator(Terminator::Jmp(successor.to_string()))
+    }
+
+    /// A simple block which jumps to two successors.
+    pub fn jmp_op(name: &str, successors: [&str; 2]) -> Block {
+        Self::ret(name).with_terminator(Terminator::JmpOp(
+            successors[0].to_string(),
+            successors[1].to_string(),
+        ))
+    }
+
+    pub fn ret(name: &str) -> Block {
+        Block {
+            call_targets: Vec::new(),
+            name: name.to_owned(),
+            params: 0,
+            pname: Some(name.to_owned()),
+            terminator: Terminator::Ret,
+        }
+    }
+
+    pub fn unnamed(mut self) -> Self {
+        self.pname = None;
+        self
+    }
+
+    pub fn with_target(mut self) -> Self {
+        self.call_targets = vec![format!("{}_target", self.name)];
+        self
+    }
+
+    pub fn with_terminator(mut self, terminator: Terminator) -> Self {
+        self.terminator = terminator;
+        self
+    }
+
+    pub fn with_param(mut self) -> Self {
+        self.params = 1;
+        self
+    }
 }
 
 /// Structurally compare two Funcs.

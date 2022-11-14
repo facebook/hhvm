@@ -256,7 +256,8 @@ struct MethRef {
     return !(*this == o);
   }
   bool operator<(const MethRef& o) const {
-    if (!cls->isame(o.cls)) return string_data_lti{}(cls, o.cls);
+    if (string_data_lti{}(cls, o.cls)) return true;
+    if (string_data_lti{}(o.cls, cls)) return false;
     return idx < o.idx;
   }
 
@@ -270,6 +271,8 @@ struct MethRef {
     sd(cls)(idx);
   }
 };
+
+using MethRefSet = hphp_fast_set<MethRef, MethRef::Hash>;
 
 /*
  * Entries in the ClassInfo method table need to track some additional
@@ -304,6 +307,8 @@ struct MethTabEntry {
   bool topLevel() const { return cls.tag() & TopLevel; }
   // This method isn't overridden by methods in any regular classes.
   bool noOverrideRegular() const { return cls.tag() & NoOverrideRegular; }
+  // This method is overridden by another which is private.
+  bool hasPrivateSuccessor() const { return cls.tag() & HasPrivateSuccessor; }
 
   void setHasPrivateAncestor() {
     cls.set(Bits(cls.tag() | HasPrivateAncestor), cls.ptr());
@@ -313,6 +318,9 @@ struct MethTabEntry {
   }
   void setNoOverrideRegular() {
     cls.set(Bits(cls.tag() | NoOverrideRegular), cls.ptr());
+  }
+  void setHasPrivateSuccessor() {
+    cls.set(Bits(cls.tag() | HasPrivateSuccessor), cls.ptr());
   }
 
   void clearHasPrivateAncestor() {
@@ -324,6 +332,9 @@ struct MethTabEntry {
   void clearNoOverrideRegular() {
     cls.set(Bits(cls.tag() & ~NoOverrideRegular), cls.ptr());
   }
+  void clearHasPrivateSuccessor() {
+    cls.set(Bits(cls.tag() & ~HasPrivateSuccessor), cls.ptr());
+  }
 
 private:
   // Logically, a MethTabEntry stores a MethRef. However doing so
@@ -334,7 +345,8 @@ private:
   enum Bits : uint8_t {
     HasPrivateAncestor = (1u << 0),
     TopLevel = (1u << 1),
-    NoOverrideRegular = (1u << 2)
+    NoOverrideRegular = (1u << 2),
+    HasPrivateSuccessor = (1u << 3)
   };
   CompactTaggedPtr<const StringData, Bits> cls;
   uint32_t clsIdx;
@@ -1096,9 +1108,10 @@ struct ClassInfo2 {
   LSString parent{nullptr};
 
   /*
-   * A vector of the declared interfaces names. This is in declaration
-   * order mirroring the php::Class interfaceNames vector, and does
-   * not include inherited interfaces.
+   * A vector of the declared interfaces names. This does not include
+   * inherited interfaces. Any traits flattened into this class will
+   * have it's declInterfaces added to this. The interfaces are in no
+   * particular order.
    */
   CompactVector<SString> declInterfaces;
 
@@ -1155,6 +1168,24 @@ struct ClassInfo2 {
   SStringToOneT<MethTabEntry> methods;
 
   /*
+   * For classes (abstract and non-abstract), these are the names of
+   * the subclasses of this class, including the class itself.
+   *
+   * For interfaces, this is the list of names of classes that
+   * implement this interface, including the interface itself.
+   *
+   * For traits, this is the list of names of classes that use the
+   * trait where the trait wasn't flattened into the class (including
+   * the trait itself). Note that unlike the other cases, a class
+   * being on a trait's subclass list does *not* imply a "is-a"
+   * relationship at runtime. You usually want to avoid iterating the
+   * subclass list of a trait.
+   *
+   * The elements in this vector are sorted by name.
+   */
+  CompactVector<SString> subclassList;
+
+  /*
    * A vector of names that encodes the inheritance hierarchy, unless
    * if this class is an interface.
    *
@@ -1169,7 +1200,7 @@ struct ClassInfo2 {
    * with the class' methods. Examples are unflattened trait methods,
    * and the invoke methods of their associated closures.
    */
-  hphp_fast_set<MethRef, MethRef::Hash> extraMethods;
+  MethRefSet extraMethods;
 
   /*
    * A vector of names of all the closures associated with this class.
@@ -1177,14 +1208,64 @@ struct ClassInfo2 {
   CompactVector<SString> closures;
 
   /*
+   * Copy of attrs from associated php::Class. Might be modified as a
+   * result of optimizations, in which case this copy takes precedence
+   * over the php::Class one.
+   */
+  Attr attrs;
+
+  /*
    * Track if this class has any const props (including inherited ones).
    */
   bool hasConstProp{false};
 
   /*
+   * Track if any derived classes (including this one) have any const props.
+   */
+  bool subHasConstProp{false};
+
+  /*
    * Track if this class has a reified parent.
    */
   bool hasReifiedParent{false};
+
+  /*
+   * Whether this class (or any derived classes) has a __Reified
+   * attribute.
+   */
+  bool hasReifiedGeneric{false};
+  bool subHasReifiedGeneric{false};
+
+  /*
+   * Initial AttrNoReifiedInit setting of attrs (which might be
+   * modified).
+   */
+  bool initialNoReifiedInit{false};
+
+  /*
+   * Whether is_mock_class() is true for this class.
+   */
+  bool isMockClass{false};
+
+  /*
+   * Flags to track if this class is mocked, or if any of its derived
+   * classes are mocked. isSubMocked implies isMocked.
+   */
+  bool isMocked{false};
+  bool isSubMocked{false};
+
+  /*
+   * Whether is_regular_class() is true for this class.
+   */
+  bool isRegularClass{false};
+
+  /*
+   * True if there's at least one regular/non-regular class on
+   * subclassList (not including this class). If both are false, that
+   * implies this class doesn't have any subclasses.
+   */
+  bool hasRegularSubclass{false};
+  bool hasNonRegularSubclass{false};
 
   template <typename SerDe> void serde(SerDe& sd) {
     sd(name)
@@ -1196,11 +1277,23 @@ struct ClassInfo2 {
       (usedTraits)
       (traitProps)
       (methods, string_data_lt{})
+      (subclassList)
       (baseList)
       (extraMethods, std::less<MethRef>{})
       (closures)
+      (attrs)
       (hasConstProp)
+      (subHasConstProp)
       (hasReifiedParent)
+      (hasReifiedGeneric)
+      (subHasReifiedGeneric)
+      (initialNoReifiedInit)
+      (isMockClass)
+      (isMocked)
+      (isSubMocked)
+      (isRegularClass)
+      (hasRegularSubclass)
+      (hasNonRegularSubclass)
       ;
   }
 };
@@ -3432,84 +3525,6 @@ void add_program_to_index(IndexData& index) {
 
 //////////////////////////////////////////////////////////////////////
 
-void compute_subclass_list_rec(ClassInfo* cinfo,
-                               ClassInfo* csub) {
-  if (csub->cls->attrs & AttrNoExpandTrait) return;
-  for (auto const ctrait : csub->usedTraits) {
-    auto const ct = const_cast<ClassInfo*>(ctrait);
-    assertx(!is_closure_base(*ct->cls));
-    ct->subclassList.push_back(cinfo);
-    compute_subclass_list_rec(cinfo, ct);
-  }
-}
-
-void compute_subclass_list(IndexData& index) {
-  trace_time _("compute subclass list", index.sample);
-
-  for (auto& cinfo : index.allClassInfos) {
-    if (is_closure(*cinfo->cls)) {
-      assertx(cinfo->baseList.size() == 2);
-      assertx(is_closure_base(*cinfo->baseList[0]->cls));
-      assertx(cinfo->usedTraits.empty());
-      assertx(cinfo->implInterfaces.empty());
-      assertx(is_regular_class(*cinfo->cls));
-      assertx(cinfo->subclassList.empty());
-      cinfo->subclassList.emplace_back(cinfo.get());
-      continue;
-    }
-    if (is_closure_base(*cinfo->cls)) {
-      assertx(cinfo->baseList.size() == 1);
-      assertx(cinfo->baseList[0] == cinfo.get());
-      assertx(cinfo->usedTraits.empty());
-      assertx(cinfo->implInterfaces.empty());
-      continue;
-    }
-
-    for (auto& cparent : cinfo->baseList) {
-      assertx(!is_closure_base(*cparent->cls));
-      cparent->subclassList.push_back(cinfo.get());
-    }
-    compute_subclass_list_rec(cinfo.get(), cinfo.get());
-    // Also add classes to their interface's subclassLists
-    for (auto& ipair : cinfo->implInterfaces) {
-      auto impl = const_cast<ClassInfo*>(ipair.second);
-      assertx(!is_closure_base(*impl->cls));
-      impl->subclassList.emplace_back(cinfo.get());
-    }
-  }
-
-  parallel::for_each(
-    index.allClassInfos,
-    [&] (const std::unique_ptr<ClassInfo>& cinfo) {
-      assertx(!cinfo->hasRegularSubclass);
-      assertx(!cinfo->hasNonRegularSubclass);
-
-      if (is_closure_base(*cinfo->cls)) {
-        assertx(cinfo->subclassList.empty());
-        cinfo->hasRegularSubclass = true;
-        return;
-      }
-
-      auto& sub = cinfo->subclassList;
-      assertx(!sub.empty());
-      std::sort(begin(sub), end(sub));
-      sub.erase(std::unique(begin(sub), end(sub)), end(sub));
-      sub.shrink_to_fit();
-      for (auto const s : sub) {
-        if (s == cinfo.get()) continue;
-        if (is_regular_class(*s->cls)) {
-          cinfo->hasRegularSubclass = true;
-        } else {
-          cinfo->hasNonRegularSubclass = true;
-        }
-        if (cinfo->hasRegularSubclass && cinfo->hasNonRegularSubclass) break;
-      }
-    }
-  );
-}
-
-//////////////////////////////////////////////////////////////////////
-
 /*
  * Given a func list, canonicalize it, and return the appropriate
  * FuncFamilyOrSingle for both the entire list, and for the subset of
@@ -4555,187 +4570,6 @@ void compute_iface_vtables(IndexData& index) {
   }
 }
 
-void find_mocked_classes(IndexData& index) {
-  trace_time tracer("find mocked classes", index.sample);
-
-  for (auto& cinfo : index.allClassInfos) {
-    if (is_mock_class(cinfo->cls) && cinfo->parent) {
-      cinfo->parent->isMocked = true;
-    }
-  }
-
-  parallel::for_each(
-    index.allClassInfos,
-    [&] (const std::unique_ptr<ClassInfo>& cinfo) {
-      for (auto const sub : cinfo->subclassList) {
-        if (sub->isMocked) {
-          cinfo->isSubMocked = true;
-          break;
-        }
-      }
-    }
-  );
-}
-
-void mark_const_props(IndexData& index) {
-  trace_time tracer("mark const props", index.sample);
-
-  parallel::for_each(
-    index.allClassInfos,
-    [&] (const std::unique_ptr<ClassInfo>& cinfo) {
-      assertx(!cinfo->subHasConstProp);
-      for (auto const sub : cinfo->subclassList) {
-        if (sub->hasConstProp) {
-          cinfo->subHasConstProp = true;
-          break;
-        }
-      }
-    }
-  );
-}
-
-void mark_no_override_classes(IndexData& index) {
-  trace_time tracer("mark no override classes", index.sample);
-
-  parallel::for_each(
-    index.allClassInfos,
-    [&] (const std::unique_ptr<ClassInfo>& cinfo) {
-      // We cleared all the NoOverride flags while building the
-      // index. Set them as necessary.
-      assertx(!(cinfo->cls->attrs & AttrNoOverride));
-      assertx(!(cinfo->cls->attrs & AttrNoOverrideRegular));
-
-      if (is_closure_base(*cinfo->cls)) return;
-
-      assertx(!cinfo->subclassList.empty());
-      if (cinfo->subclassList.size() == 1) {
-        assertx(cinfo->subclassList[0] == cinfo.get());
-        attribute_setter(cinfo->cls->attrs, true, AttrNoOverride);
-        attribute_setter(cinfo->cls->attrs, true, AttrNoOverrideRegular);
-      } else if (!cinfo->hasRegularSubclass) {
-        attribute_setter(cinfo->cls->attrs, true, AttrNoOverrideRegular);
-      }
-    }
-  );
-}
-
-void mark_no_override_methods(IndexData& index) {
-  trace_time tracer("mark no override methods", index.sample);
-
-  // We reset the override flags from all methods when adding the
-  // units to the index. Set them to true now. We'll reset them below
-  // if we detect an override. We need to do this in a separate
-  // parallel pass to avoid race conditions with setting it to false
-  // below.
-  parallel::for_each(
-    index.allClassInfos,
-    [&] (const std::unique_ptr<ClassInfo>& cinfo) {
-      for (auto& m : cinfo->methods) {
-        assertx(!(m.second.attrs & AttrNoOverride));
-        assertx(!m.second.noOverrideRegular());
-        if (is_special_method_name(m.first)) continue;
-        attribute_setter(m.second.attrs, true, AttrNoOverride);
-        attribute_setter(
-          func_from_meth_ref(index, m.second.meth())->attrs,
-          true,
-          AttrNoOverride
-        );
-        m.second.setNoOverrideRegular();
-      }
-    }
-  );
-
-  parallel::for_each(
-    index.allClassInfos,
-    [&] (const std::unique_ptr<ClassInfo>& cinfo) {
-      for (auto& mte : cinfo->methods) {
-        auto const name = mte.first;
-        auto& meth = mte.second;
-
-        if (!(meth.attrs & AttrNoOverride)) continue;
-        assertx(meth.noOverrideRegular());
-
-        auto& funcAttrs = func_from_meth_ref(index, meth.meth())->attrs;
-
-        // Look up method in every subclass. If there's a different
-        // method with the same name, there's an override so clear the
-        // bits.
-        for (auto const sub : cinfo->subclassList) {
-          if (sub == cinfo.get()) continue;
-
-          auto const clear = [&] (const MethTabEntry* subMeth) {
-            // A private method on a non-regular class can be called
-            // even from regular contexts.
-            auto const reg =
-              is_regular_class(*sub->cls) ||
-              (subMeth && (subMeth->attrs & AttrPrivate) &&
-               subMeth->topLevel());
-            if (reg) meth.clearNoOverrideRegular();
-            attribute_setter(meth.attrs, false, AttrNoOverride);
-            attribute_setter(funcAttrs, false, AttrNoOverride);
-            FTRACE(4, "Clearing AttrNoOverride{} on {}::{} because of {}\n",
-                   reg ? " and noOverrideRegular" : "",
-                   meth.meth().cls, name, sub->cls->name);
-            return reg;
-          };
-
-          auto const it = sub->methods.find(name);
-          if (it == end(sub->methods)) {
-            // Method doesn't exist in subclass. This can happen with
-            // special functions or interface methods, for example.
-            assertx(is_special_method_name(name) ||
-                    !is_regular_class(*cinfo->cls));
-            if (clear(nullptr)) break;
-            continue;
-          }
-
-          // Check if method in subclass is the same as in parent.
-          if (it->second.meth() != meth.meth()) {
-            if (clear(&it->second)) break;
-            continue;
-          }
-        }
-      }
-    }
-  );
-}
-
-const StaticString s__Reified("__Reified");
-
-/*
- * Emitter adds a 86reifiedinit method to all classes that have reified
- * generics. All base classes also need to have this method so that when we
- * call parent::86reifeidinit(...), there is a stopping point.
- * Since while emitting we do not know whether a base class will have
- * reified parents, during JIT time we need to add 86reifiedinit
- * unless AttrNoReifiedInit attribute is set. At this phase,
- * we set AttrNoReifiedInit attribute on classes do not have any
- * reified classes that extend it.
- */
-void clean_86reifiedinit_methods(IndexData& index) {
-  trace_time tracer("clean 86reifiedinit methods", index.sample);
-  hphp_fast_set<const php::Class*> needsinit;
-
-  // Find all classes that still need their 86reifiedinit methods
-  for (auto const& cinfo : index.allClassInfos) {
-    auto const& ual = cinfo->cls->userAttributes;
-    // Each class that has at least one reified generic has an attribute
-    // __Reified added by the emitter
-    auto has_reification = ual.find(s__Reified.get()) != ual.end();
-    if (!has_reification) continue;
-    // Add the base class for this reified class
-    needsinit.emplace(cinfo->baseList[0]->cls);
-  }
-
-  // Add AttrNoReifiedInit to the base classes that do not need this method
-  for (auto& cinfo : index.allClassInfos) {
-    if (cinfo->parent == nullptr && needsinit.count(cinfo->cls) == 0) {
-      FTRACE(2, "Adding AttrNoReifiedInit on class {}\n", cinfo->cls->name);
-      attribute_setter(cinfo->cls->attrs, true, AttrNoReifiedInit);
-    }
-  }
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void check_invariants(const IndexData& index, const ClassInfo* cinfo) {
@@ -4848,11 +4682,19 @@ void check_invariants(const IndexData& index, const ClassInfo* cinfo) {
 
     // AttrNoOverride implies noOverrideRegular
     always_assert(IMPLIES(mte.attrs & AttrNoOverride, mte.noOverrideRegular()));
+
+    // Having a private successor is only possible if you've been
+    // overridden.
+    always_assert(IMPLIES(mte.hasPrivateSuccessor(), !mte.noOverrideRegular()));
+
     if (!is_special_method_name(name)) {
       // If the class isn't overridden, none of it's methods can be
       // either.
       always_assert(IMPLIES(cinfo->cls->attrs & AttrNoOverride,
                             mte.attrs & AttrNoOverride));
+    } else {
+      always_assert(!(mte.attrs & AttrNoOverride));
+      always_assert(!mte.noOverrideRegular());
     }
 
     if (is_closure_base(*cinfo->cls) || is_closure(*cinfo->cls)) {
@@ -5682,6 +5524,272 @@ PropMergeResult<> merge_static_type_impl(IndexData& data,
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Split a group of buckets so that no bucket is larger (including its
+ * dependencies) than the given max size. The given callable is used
+ * to obtain the dependencies of bucket item.
+ *
+ * Note: if a single item has dependencies larger than maxSize, you'll
+ * get a bucket with just that and its dependencies (which will be
+ * larger than maxSize). This is the only situation where a returned
+ * bucket will be larger than maxSize.
+ */
+template <typename GetDeps>
+std::vector<std::vector<SString>>
+split_buckets(const std::vector<std::vector<SString>>& items,
+              size_t maxSize,
+              const GetDeps& getDeps) {
+  // Split all of the buckets in parallel
+  auto rebuckets = parallel::map(
+    items,
+    [&] (const std::vector<SString>& bucket) {
+      // If there's only one thing in a bucket, there's no point in
+      // splitting it.
+      if (bucket.size() <= 1) return singleton_vec(bucket);
+
+      // The splitting algorithm is simple. Iterate over each element
+      // in the bucket. As long as all the dependencies are less than
+      // the maximum size, we put it into a new bucket. If we exceed
+      // the max size, create a new bucket.
+      std::vector<std::vector<SString>> out;
+      out.emplace_back();
+      out.back().emplace_back(bucket[0]);
+
+      auto allDeps = getDeps(bucket[0]);
+      for (size_t i = 1, size = bucket.size(); i < size; ++i) {
+        auto const& d = getDeps(bucket[i]);
+        allDeps.insert(begin(d), end(d));
+        auto const newSize = allDeps.size() + out.back().size() + 1;
+        if (newSize > maxSize) {
+          allDeps = d;
+          out.emplace_back();
+        }
+        out.back().emplace_back(bucket[i]);
+      }
+      return out;
+    }
+  );
+
+  // Flatten all of the new buckets into a single list of buckets.
+  std::vector<std::vector<SString>> flattened;
+  flattened.reserve(items.size());
+  for (auto& r : rebuckets) {
+    for (auto& b : r) flattened.emplace_back(std::move(b));
+  }
+  return flattened;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * For efficiency reasons, we often want to process classes in as few
+ * passes as possible. However, this is tricky because the algorithms
+ * are usually naturally iterative. You start at the root classes
+ * (which may be the top classes in the hierarchy, or leaf classes),
+ * and flow data down to each of their parents or children. This
+ * requires N passes, where N is the maximum depth of the class
+ * hierarchy. N can get large.
+ *
+ * Instead when we process a class, we ensure that all of it's
+ * dependencies (all the way up to the roots) are also present in the
+ * job. Since we're doing this in one pass, none of the dependencies
+ * will have any calculated information, and the job will have to do
+ * this first.
+ *
+ * It is not, in general, possible to ensure that each dependency is
+ * present in exactly one job (because the dependency may be shared by
+ * lots of classes which are not bucketed together). So, any given
+ * dependency may end up on multiple jobs and have the same
+ * information calculated for it. This is fine, as it just results in
+ * some wasted work.
+ *
+ * We perform flattening using the following approach:
+ *
+ * - First we Bucketize the root classes (using the standard
+ *   consistent hashing algorithm) into N buckets.
+ *
+ * - We split any buckets which are larger than the specified maximum
+ *   size. This prevents buckets from becoming pathologically large if
+ *   there's many dependencies.
+ *
+ * - For each bucket, find all of the (transitive) dependencies of the
+ *   leaves and add them to that bucket (as dependencies). As stated
+ *   above, the same class may end up in multiple buckets as
+ *   dependencies.
+ *
+ * - So far for each bucket (each bucket will map to one job), we have
+ *   a set of input classes (the roots), and all of the dependencies
+ *   for each roots.
+ *
+ * - We want results for every class, not just the roots, so the
+ *   dependencies need to become inputs of the first kind in at least
+ *   one bucket. So, for each dependency, in one of the buckets
+ *   they're already present in, we "promote" it to a full input (and
+ *   will receive output for it). This is done by hashing the bucket
+ *   index and class name and picking the bucket that results in the
+ *   lowest hash. In some situations we don't want a dependency to
+ *   ever be promoted, so those will be skipped.
+*/
+
+// Single output bucket for assign_hierarchial_work. Each bucket
+// contains classes which will be processed and returned as output,
+// and a set of dependency classes which will just be used as inputs.
+struct HierarchialWorkBucket {
+  std::vector<SString> classes;
+  std::vector<SString> deps;
+};
+
+/*
+ * Assign work for a set of root classes (using the above
+ * algorithm). The function is named because it's meant for situations
+ * where we're processing classes in a "hierarchial" manner (either
+ * from parent class to children, or from leaf class to parents).
+ *
+ * The dependencies for each class is provided by the getDeps
+ * callable. For the purposes of promoting a class to a full output
+ * (see above algorithm description), each class must be assigned an
+ * index. The (optional) index for a class is provided by the getIdx
+ * callable. If getIdx returns std::nullopt, then that class won't be
+ * considered for promotion. The given "numClasses" parameter is an
+ * upper bound on the possible returned indices.
+ */
+template <typename GetDeps, typename GetIdx>
+std::vector<HierarchialWorkBucket>
+assign_hierarchial_work(std::vector<SString> roots,
+                        size_t numClasses,
+                        size_t bucketSize,
+                        size_t maxSize,
+                        const GetDeps& getDeps,
+                        const GetIdx& getIdx) {
+  // First turn roots into buckets, and split if any exceed the
+  // maximum size.
+  auto buckets = split_buckets(
+    consistently_bucketize(roots, bucketSize),
+    maxSize,
+    [&] (SString cls) -> const ISStringSet& {
+      auto const [d, _] = getDeps(cls);
+      return *d;
+    }
+  );
+
+  struct DepHashState {
+    std::mutex lock;
+    size_t lowestHash{std::numeric_limits<size_t>::max()};
+    size_t lowestBucket{std::numeric_limits<size_t>::max()};
+  };
+  std::vector<DepHashState> depHashState{numClasses};
+
+  // For each bucket (which right now just contains the root classes),
+  // find all the transitive dependencies those root classes need. A
+  // dependency might end up in multiple buckets (because multiple
+  // roots in different buckets depend on it). We only want to
+  // actually perform the flattening for those dependencies in one of
+  // the buckets. So, we need a tie-breaker. We hash the name of the
+  // dependency along with the bucket number. The bucket that the
+  // dependency is present in with the lowest hash is what "wins".
+  auto const bucketDeps = parallel::gen(
+    buckets.size(),
+    [&] (size_t bucketIdx) {
+      assertx(bucketIdx < buckets.size());
+      auto& bucket = buckets[bucketIdx];
+
+      // Gather up all dependencies for this bucket, and remove
+      // non-instantiable root classes.
+      ISStringSet deps;
+      bucket.erase(
+        std::remove_if(
+          begin(bucket),
+          end(bucket),
+          [&] (SString cls) {
+            auto const [d, instantiable] = getDeps(cls);
+            deps.insert(begin(*d), end(*d));
+            return !instantiable;
+          }
+        ),
+        end(bucket)
+      );
+
+      // Nothing already in the bucket should be in the dependency set
+      // (because the classes in the bucket are all roots).
+      if (debug) {
+        for (auto const c : bucket) {
+          always_assert(!deps.count(c));
+        }
+      }
+
+      // For each dependency, store the bucket with the lowest hash.
+      for (auto const d : deps) {
+        auto const idx = getIdx(d);
+        if (!idx.has_value()) continue;
+        assertx(*idx < depHashState.size());
+        auto& s = depHashState[*idx];
+        auto const hash = hash_int64_pair(
+          d->hashStatic(),
+          bucketIdx
+        );
+        std::lock_guard<std::mutex> _{s.lock};
+        if (hash < s.lowestHash) {
+          s.lowestHash = hash;
+          s.lowestBucket = bucketIdx;
+        } else if (hash == s.lowestHash) {
+          s.lowestBucket = std::min(s.lowestBucket, bucketIdx);
+        }
+      }
+
+      return deps;
+    }
+  );
+
+  // Now for each bucket, "promote" dependencies into a full input
+  // class. The dependency is promoted in the bucket with the lowest
+  // hash, which we've already calculated.
+  assertx(buckets.size() == bucketDeps.size());
+  return parallel::gen(
+    buckets.size(),
+    [&] (size_t bucketIdx) {
+      auto& bucket = buckets[bucketIdx];
+      auto const& deps = bucketDeps[bucketIdx];
+
+      std::vector<SString> depOut;
+      depOut.reserve(deps.size());
+
+      for (auto const d : deps) {
+        // Calculate the hash for the dependency for this bucket. If
+        // the hash equals the already calculated lowest hash, promote
+        // this dependency.
+        auto const idx = getIdx(d);
+        if (!idx.has_value()) {
+          depOut.emplace_back(d);
+          continue;
+        }
+        assertx(*idx < depHashState.size());
+        auto const& s = depHashState[*idx];
+        auto const hash = hash_int64_pair(
+          d->hashStatic(),
+          bucketIdx
+        );
+        if (hash == s.lowestHash && bucketIdx == s.lowestBucket) {
+          bucket.emplace_back(d);
+        } else {
+          // Otherwise keep it as a dependency.
+          depOut.emplace_back(d);
+        }
+      }
+
+      // Keep deterministic ordering. Make sure there's no duplicates.
+      std::sort(bucket.begin(), bucket.end(), string_data_lti{});
+      std::sort(depOut.begin(), depOut.end(), string_data_lti{});
+      assertx(std::adjacent_find(bucket.begin(), bucket.end()) == bucket.end());
+      assertx(std::adjacent_find(depOut.begin(), depOut.end()) == depOut.end());
+      return HierarchialWorkBucket{
+        std::move(bucket),
+        std::move(depOut)
+      };
+    }
+  );
+}
+
+//////////////////////////////////////////////////////////////////////
 // Class flattening:
 
 const StaticString s___Sealed("__Sealed");
@@ -5718,8 +5826,19 @@ struct FlattenJob {
       }
     };
     std::vector<NewClosures> newClosures;
+    // Report parents of each class. A class is a parent of another if
+    // it would appear on a subclass list. The parents of a closure
+    // are not reported because that's implicit.
+    struct Parents {
+      std::vector<SString> names;
+      template <typename SerDe> void serde(SerDe& sd) { sd(names); }
+    };
+    std::vector<Parents> parents;
     template <typename SerDe> void serde(SerDe& sd) {
-      sd(uninstantiable, string_data_lti{})(newClosures);
+      sd(uninstantiable, string_data_lti{})
+        (newClosures)
+        (parents)
+        ;
     }
   };
 
@@ -5838,15 +5957,28 @@ struct FlattenJob {
     outInfos.vals.reserve(classes.vals.size() + newClosures.size());
     outMeta.newClosures.reserve(classes.vals.size());
     outNames.reserve(classes.vals.size());
+    outMeta.parents.reserve(classes.vals.size() + newClosures.size());
 
     for (auto& cls : classes.vals) {
-      auto const cinfoIt = index.m_classInfos.find(cls->name);
+      auto const name = cls->name;
+      auto const cinfoIt = index.m_classInfos.find(name);
       if (cinfoIt == index.m_classInfos.end()) {
-        always_assert(index.uninstantiable(cls->name));
-        outMeta.uninstantiable.emplace(cls->name);
+        always_assert(index.uninstantiable(name));
+        outMeta.uninstantiable.emplace(name);
         continue;
       }
-      outNames.emplace(cls->name);
+
+      if (!is_closure(*cls)) {
+        auto const& state = index.m_states.at(name);
+        outMeta.parents.emplace_back();
+        auto& parents = outMeta.parents.back().names;
+        parents.reserve(state->m_parents.size());
+        for (auto const p : state->m_parents) {
+          parents.emplace_back(p->name);
+        }
+      }
+
+      outNames.emplace(name);
       outClasses.vals.emplace_back(std::move(cls));
       outInfos.vals.emplace_back(std::move(cinfoIt->second));
     }
@@ -5866,6 +5998,8 @@ struct FlattenJob {
       assertx(clo->closureContextCls);
       assertx(clo->unit);
 
+      // Only return the closures for classes we were actually
+      // requested to flatten.
       if (!outNames.count(clo->closureContextCls)) continue;
 
       auto& outNewClosures = outMeta.newClosures;
@@ -5905,6 +6039,7 @@ private:
     CompactVector<php::Const> m_traitCns;
     SStringSet m_cnsFromTrait;
     SStringToOneT<size_t> m_methodIndices;
+    CompactVector<const php::Class*> m_parents;
 
     size_t& methodIdx(SString context, SString cls, SString name) {
       auto const it = m_methodIndices.find(name);
@@ -6115,23 +6250,50 @@ private:
   static std::unique_ptr<ClassInfo2> make_info(const LocalIndex& index,
                                                php::Class& cls,
                                                State& state) {
-    if (debug && is_closure(cls)) {
-      always_assert(cls.parentName->isame(s_Closure.get()));
+    if (debug && (is_closure(cls) || is_closure_base(cls))) {
+      if (is_closure(cls)) {
+        always_assert(cls.parentName->isame(s_Closure.get()));
+      } else {
+        always_assert(!cls.parentName);
+      }
       always_assert(cls.interfaceNames.empty());
       always_assert(cls.includedEnumNames.empty());
       always_assert(cls.usedTraitNames.empty());
       always_assert(cls.requirements.empty());
       always_assert(cls.constants.empty());
       always_assert(cls.userAttributes.empty());
-      always_assert(!(cls.attrs & (AttrTrait | AttrInterface)));
+      always_assert(!(cls.attrs & (AttrTrait | AttrInterface | AttrAbstract)));
     }
 
+    // Set up some initial values for ClassInfo properties. If this
+    // class is a leaf (we can't actually determine that yet), these
+    // will be valid and remain as-is. If not, they'll be updated
+    // properly when calculating subclass information in another pass.
     auto cinfo = std::make_unique<ClassInfo2>();
     cinfo->name = cls.name;
+    cinfo->attrs = cls.attrs;
     cinfo->hasConstProp = cls.hasConstProp;
     cinfo->hasReifiedParent = cls.hasReifiedGenerics;
+    cinfo->hasReifiedGeneric = cls.userAttributes.count(s___Reified.get());
+    cinfo->subHasReifiedGeneric = cinfo->hasReifiedGeneric;
+    cinfo->initialNoReifiedInit = cls.attrs & AttrNoReifiedInit;
+    cinfo->isMockClass = is_mock_class(&cls);
+    cinfo->isRegularClass = is_regular_class(cls);
+
+    if (!is_closure_base(cls)) {
+      attribute_setter(cinfo->attrs, true, AttrNoOverride);
+      attribute_setter(cinfo->attrs, true, AttrNoOverrideRegular);
+    } else {
+      cinfo->hasRegularSubclass = true;
+      cinfo->hasNonRegularSubclass = false;
+      attribute_setter(cinfo->attrs, false, AttrNoOverride);
+      attribute_setter(cinfo->attrs, false, AttrNoOverrideRegular);
+    }
 
     if (cls.parentName) {
+      assertx(!is_closure_base(cls));
+      assertx(is_closure(cls) == cls.parentName->isame(s_Closure.get()));
+
       if (index.uninstantiable(cls.parentName)) {
         ITRACE(2,
                "Making class-info failed for `{}' because "
@@ -6142,6 +6304,7 @@ private:
       auto const& parent = index.cls(cls.parentName);
       auto const& parentInfo = index.classInfo(cls.parentName);
 
+      assertx(!is_closure(parent));
       if (parent.attrs & (AttrInterface | AttrTrait)) {
         ITRACE(2,
                "Making class-info failed for `{}' because "
@@ -6156,10 +6319,16 @@ private:
       cinfo->implInterfaces = parentInfo.implInterfaces;
       cinfo->hasConstProp |= parentInfo.hasConstProp;
       cinfo->hasReifiedParent |= parentInfo.hasReifiedParent;
+
+      state.m_parents.emplace_back(&parent);
+    } else if (!cinfo->hasReifiedGeneric) {
+      attribute_setter(cinfo->attrs, true, AttrNoReifiedInit);
     }
     cinfo->baseList.emplace_back(cls.name);
 
     for (auto const iname : cls.interfaceNames) {
+      assertx(!is_closure(cls));
+      assertx(!is_closure_base(cls));
       if (index.uninstantiable(iname)) {
         ITRACE(2,
                "Making class-info failed for `{}' because "
@@ -6170,6 +6339,7 @@ private:
       auto const& iface = index.cls(iname);
       auto const& ifaceInfo = index.classInfo(iname);
 
+      assertx(!is_closure(iface));
       if (!(iface.attrs & AttrInterface)) {
         ITRACE(2,
                "Making class-info failed for `{}' because `{}' "
@@ -6185,9 +6355,13 @@ private:
         ifaceInfo.implInterfaces.end()
       );
       cinfo->hasReifiedParent |= ifaceInfo.hasReifiedParent;
+
+      state.m_parents.emplace_back(&iface);
     }
 
     for (auto const ename : cls.includedEnumNames) {
+      assertx(!is_closure(cls));
+      assertx(!is_closure_base(cls));
       if (index.uninstantiable(ename)) {
         ITRACE(2,
                "Making class-info failed for `{}' because "
@@ -6198,6 +6372,7 @@ private:
       auto const& e = index.cls(ename);
       auto const& einfo = index.classInfo(ename);
 
+      assertx(!is_closure(e));
       auto const wantAttr = cls.attrs & (AttrEnum | AttrEnumClass);
       if (!(e.attrs & wantAttr)) {
         ITRACE(2,
@@ -6217,6 +6392,8 @@ private:
     }
 
     for (auto const tname : cls.usedTraitNames) {
+      assertx(!is_closure(cls));
+      assertx(!is_closure_base(cls));
       if (index.uninstantiable(tname)) {
         ITRACE(2,
                "Making class-info failed for `{}' because "
@@ -6227,6 +6404,7 @@ private:
       auto const& trait = index.cls(tname);
       auto const& traitInfo = index.classInfo(tname);
 
+      assertx(!is_closure(trait));
       if (!(trait.attrs & AttrTrait)) {
         ITRACE(2,
                "Making class-info failed for `{}' because `{}' "
@@ -6243,6 +6421,8 @@ private:
       );
       cinfo->hasConstProp |= traitInfo.hasConstProp;
       cinfo->hasReifiedParent |= traitInfo.hasReifiedParent;
+
+      state.m_parents.emplace_back(&trait);
     }
 
     if (cls.attrs & AttrInterface) cinfo->implInterfaces.emplace(cls.name);
@@ -6262,7 +6442,65 @@ private:
         cinfo->closures.emplace_back(clo->name);
       }
     }
-    assertx(IMPLIES(is_closure(cls), cinfo->closures.empty()));
+
+    std::sort(
+      begin(state.m_parents),
+      end(state.m_parents),
+      [] (const php::Class* a, const php::Class* b) {
+        return string_data_lti{}(a->name, b->name);
+      }
+    );
+    state.m_parents.erase(
+      std::unique(begin(state.m_parents), end(state.m_parents)),
+      end(state.m_parents)
+    );
+    assertx(
+      std::none_of(
+        begin(state.m_parents), end(state.m_parents),
+        [] (const php::Class* c) { return is_closure(*c); }
+      )
+    );
+
+    if (!is_closure_base(cls)) {
+      cinfo->subclassList.emplace_back(cls.name);
+    }
+    cinfo->subHasConstProp = cinfo->hasConstProp;
+
+    // All methods are originally not overridden (we'll update this as
+    // necessary later), except for special methods, which are always
+    // considered to be overridden.
+    for (auto& [name, mte] : cinfo->methods) {
+      if (is_special_method_name(name)) {
+        attribute_setter(mte.attrs, false, AttrNoOverride);
+        mte.clearNoOverrideRegular();
+      } else {
+        attribute_setter(mte.attrs, true, AttrNoOverride);
+        mte.setNoOverrideRegular();
+      }
+    }
+
+    // We don't calculate subclass information for closures, so make
+    // sure their initial values are all what they should be.
+    if (debug && (is_closure(cls) || is_closure_base(cls))) {
+      if (is_closure(cls)) {
+        always_assert(is_closure_name(cls.name));
+        always_assert(state.m_parents.size() == 1);
+        always_assert(state.m_parents[0]->name->isame(s_Closure.get()));
+        always_assert(!(cinfo->attrs & AttrNoReifiedInit));
+      } else {
+        always_assert(state.m_parents.empty());
+        always_assert(cinfo->attrs & AttrNoReifiedInit);
+      }
+      always_assert(cinfo->closures.empty());
+      always_assert(!cinfo->hasConstProp);
+      always_assert(!cinfo->subHasConstProp);
+      always_assert(!cinfo->hasReifiedParent);
+      always_assert(!cinfo->hasReifiedGeneric);
+      always_assert(!cinfo->subHasReifiedGeneric);
+      always_assert(!cinfo->initialNoReifiedInit);
+      always_assert(!cinfo->isMockClass);
+      always_assert(cinfo->isRegularClass);
+    }
 
     ITRACE(2, "new class-info: {}\n", cls.name);
     if (Trace::moduleEnabled(Trace::hhbbc_index, 3)) {
@@ -7184,6 +7422,8 @@ private:
     ITRACE(4, "flatten traits: {}\n", cls.name);
     Trace::Indent indent;
 
+    assertx(!is_closure(cls));
+
     auto traitHasConstProp = cls.hasConstProp;
     for (auto const tname : cinfo.usedTraits) {
       auto const& trait = index.cls(tname);
@@ -7295,6 +7535,57 @@ private:
     }
     state.m_traitCns.clear();
 
+    // A class should inherit any declared interfaces of any traits
+    // that are flattened into it.
+    for (auto const tname : cinfo.usedTraits) {
+      auto const& tinfo = index.classInfo(tname);
+      cinfo.declInterfaces.insert(
+        end(cinfo.declInterfaces),
+        begin(tinfo.declInterfaces),
+        end(tinfo.declInterfaces)
+      );
+    }
+    std::sort(
+      begin(cinfo.declInterfaces),
+      end(cinfo.declInterfaces),
+      string_data_lti{}
+    );
+    cinfo.declInterfaces.erase(
+      std::unique(begin(cinfo.declInterfaces), end(cinfo.declInterfaces)),
+      end(cinfo.declInterfaces)
+    );
+
+    // If we flatten the traits into us, they're no longer actual
+    // parents.
+    state.m_parents.erase(
+      std::remove_if(
+        begin(state.m_parents),
+        end(state.m_parents),
+        [] (const php::Class* c) { return bool(c->attrs & AttrTrait); }
+      ),
+      end(state.m_parents)
+    );
+
+    for (auto const tname : cinfo.usedTraits) {
+      auto const& traitState = index.state(tname);
+      state.m_parents.insert(
+        end(state.m_parents),
+        begin(traitState.m_parents),
+        end(traitState.m_parents)
+      );
+    }
+    std::sort(
+      begin(state.m_parents),
+      end(state.m_parents),
+      [] (const php::Class* a, const php::Class* b) {
+        return string_data_lti{}(a->name, b->name);
+      }
+    );
+    state.m_parents.erase(
+      std::unique(begin(state.m_parents), end(state.m_parents)),
+      end(state.m_parents)
+    );
+
     std::vector<NewClosure> newClosures;
     if (!clones.empty()) {
       auto const add = [&] (std::unique_ptr<php::Func> clone) {
@@ -7345,6 +7636,8 @@ private:
 
       for (auto& [orig, clo] : clonedClosures) {
         ITRACE(4, "- closure {} as {}\n", orig->name, clo->name);
+        assertx(is_closure(*orig));
+        assertx(is_closure(*clo));
         assertx(clo->closureContextCls->isame(cls.name));
         assertx(clo->unit == cls.unit);
 
@@ -7354,6 +7647,8 @@ private:
         assertx(cloinfo);
         assertx(cloState.m_traitCns.empty());
         assertx(cloState.m_cnsFromTrait.empty());
+        assertx(cloState.m_parents.size() == 1);
+        assertx(cloState.m_parents[0]->name->isame(s_Closure.get()));
 
         cinfo.closures.emplace_back(clo->name);
         newClosures.emplace_back(
@@ -7392,6 +7687,8 @@ private:
     }
 
     cls.attrs |= AttrNoExpandTrait;
+    cinfo.attrs |= AttrNoExpandTrait;
+
     return newClosures;
   }
 };
@@ -7459,36 +7756,14 @@ Job<UnitFixupJob> s_unitFixupJob;
 
 /*
  * For efficiency reasons, we want to do class flattening all in one
- * pass. However, this is tricky because the algorithm is naturally
- * iterative. You start at the classes with no dependencies (the roots
- * of the class hierarchy), and flow data down to each of their
- * children. This requires N passes, where N is the maximum depth of
- * the class hierarchy. N can get large.
+ * pass. So, we use assign_hierarchial_work (described above) to
+ * calculate work buckets to allow us to do this.
  *
- * Instead when we flatten a class, we ensure that all of it's
- * dependencies (all the way up to the roots) are also present in the
- * job. Since we're doing this in one pass, none of the dependencies
- * will have any calculated information, and the job will have to do
- * this first.
+ * - The "root" classes are the leaf classes in the hierarchy. These are
+ * the buckets which are not dependencies of anything.
  *
- * It is not, in general, possible to ensure that each dependency is
- * present in exactly one job (because the dependency may be shared by
- * lots of classes which are not bucketed together). So, any given
- * dependency may end up on multiple jobs and have the same
- * information calculated for it. This is fine, as it just results in
- * some wasted work.
- *
- * We perform flattening using the following approach:
- *
- * - First we find all leaf classes in the hierarchy. These are the
- *   classes which are not dependencies of anything.
- *
- * - Bucketize the leaf classes (using standard algorithm) into N buckets.
- *
- * - For each bucket, find all of the (transitive) dependencies of the
- *   leaves and add them to that bucket (as dependencies). As stated
- *   above, the same class may end up in multiple buckets as
- *   dependencies.
+ * - The dependencies of a class are all of the (transitive) parent
+ *   classes of that class (up to the top classes with no parents).
  *
  * - Each job takes two kinds of input. The first is the set of
  *   classes which are actually to be flattened. These will have the
@@ -7499,41 +7774,31 @@ Job<UnitFixupJob> s_unitFixupJob;
  *   to calculate the output for the first set of inputs. Their
  *   results will be thrown away.
  *
- * - So far for each bucket (each bucket will map to one job), we have
- *   a set of input classes (the leafs), and all of the dependencies
- *   for each leaf.
- *
- * - We want flattened results for every class, not just the leafs, so
- *   the dependencies need to become inputs of the first kind in at
- *   least one bucket. So, for each dependency, in one of the buckets
- *   they're already present in, we "promote" it to a full input (and
- *   will receive output for it). This is done by hashing the bucket
- *   index and class name and picking the bucket that results in the
- *   lowest hash.
- *
- * - Run the jobs. Take the outputs and turn that into a set of
+ * - When we run the jobs, we'll take the outputs and turn that into a set of
  *   updates, which we then apply to the Index data structures. Some
  *   of these updates require changes to the php::Unit, which we do a
  *   in separate set of "fixup" jobs at the end.
- *
-*/
+ */
 
+// Input class metadata to be turned into work buckets.
 struct IndexFlattenMetadata {
   struct ClassMeta {
     std::vector<SString> deps;
     std::vector<SString> closures;
-    size_t idx;
+    size_t idx; // Index into allCls vector
+    bool isClosure{false};
   };
   ISStringToOneT<ClassMeta> cls;
+  // All classes to be flattened
   std::vector<SString> allCls;
+  // Mapping of units to classes which should be deleted from that
+  // unit. This is typically from duplicate meth callers. This is
+  // performed as part of "fixing up" the unit after flattening
+  // because it's convenient to do so there.
   SStringToOneT<std::vector<SString>> unitDeletions;
 };
-struct FlattenClassesWork {
-  std::vector<SString> classes;
-  std::vector<SString> deps;
-};
 
-std::vector<FlattenClassesWork>
+std::vector<HierarchialWorkBucket>
 flatten_classes_assign(const IndexFlattenMetadata& meta) {
   trace_time trace{"flatten classes assign"};
   trace.ignore_client_stats();
@@ -7556,30 +7821,6 @@ flatten_classes_assign(const IndexFlattenMetadata& meta) {
       for (auto const clo : clsMeta.closures) onDep(clo);
     }
   );
-
-  constexpr size_t kBucketSize = 2000;
-
-  // Bucketize all of the leaf classes
-  auto buckets = consistently_bucketize(
-    [&] {
-      std::vector<SString> l;
-      auto const size = meta.allCls.size();
-      assertx(size == isNotLeaf.size());
-      l.reserve(size);
-      for (size_t i = 0; i < size; ++i) {
-        if (!isNotLeaf[i]) l.emplace_back(meta.allCls[i]);
-      }
-      return l;
-    }(),
-    kBucketSize
-  );
-
-  struct DepHashState {
-    std::mutex lock;
-    size_t lowestHash{std::numeric_limits<size_t>::max()};
-    size_t lowestBucket{std::numeric_limits<size_t>::max()};
-  };
-  std::vector<DepHashState> depHashState{meta.allCls.size()};
 
   // Store all of the (transitive) dependencies for every class,
   // calculated lazily. LockFreeLazy ensures that multiple classes can
@@ -7661,110 +7902,29 @@ flatten_classes_assign(const IndexFlattenMetadata& meta) {
     );
   };
 
-  // For each bucket (which right now just contains the leaf classes),
-  // find all the transitive dependencies those leaf classes need. A
-  // dependency might end up in multiple buckets (because multiple
-  // leafs in different buckets depend on it). We only want to
-  // actually perform the flattening for those dependencies in one of
-  // the buckets. So, we need a tie-breaker. We hash the name of the
-  // dependency along with the bucket number. The bucket that the
-  // dependency is present in with the lowest hash is what "wins".
-  auto const bucketDeps = parallel::gen(
-    buckets.size(),
-    [&] (size_t bucketIdx) {
-      assertx(bucketIdx < buckets.size());
-      auto& bucket = buckets[bucketIdx];
+  constexpr size_t kBucketSize = 2000;
+  constexpr size_t kMaxBucketSize = 30000;
 
-      // Gather up all dependencies for this bucket, and remove
-      // non-instantiable leaf classes.
-      ISStringSet deps;
-      bucket.erase(
-        std::remove_if(
-          begin(bucket),
-          end(bucket),
-          [&] (SString cls) {
-            ISStringSet visited;
-            auto const& lookup = findAllDeps(cls, visited, findAllDeps);
-            deps.insert(begin(lookup.deps), end(lookup.deps));
-            return !lookup.instantiable;
-          }
-        ),
-        end(bucket)
-      );
-
-      // Nothing already in the bucket should be in the dependency set
-      // (because the classes in the bucket are all leafs).
-      if (debug) {
-        for (auto const c : bucket) {
-          always_assert(!deps.count(c));
-        }
+  auto const work = assign_hierarchial_work(
+    [&] {
+      std::vector<SString> l;
+      auto const size = meta.allCls.size();
+      assertx(size == isNotLeaf.size());
+      l.reserve(size);
+      for (size_t i = 0; i < size; ++i) {
+        if (!isNotLeaf[i]) l.emplace_back(meta.allCls[i]);
       }
-
-      // For each dependency, store the bucket with the lowest hash.
-      for (auto const d : deps) {
-        auto const& depMeta = meta.cls.at(d);
-        auto const idx = depMeta.idx;
-        assertx(idx < depHashState.size());
-        auto& s = depHashState[idx];
-        auto const hash = hash_int64_pair(
-          d->hashStatic(),
-          bucketIdx
-        );
-        std::lock_guard<std::mutex> _{s.lock};
-        if (hash < s.lowestHash) {
-          s.lowestHash = hash;
-          s.lowestBucket = bucketIdx;
-        } else if (hash == s.lowestHash) {
-          s.lowestBucket = std::min(s.lowestBucket, bucketIdx);
-        }
-      }
-
-      return deps;
-    }
-  );
-
-  // Now for each bucket, "promote" dependencies into a full input
-  // class. The dependency is promoted in the bucket with the lowest
-  // hash, which we've already calculated.
-  assertx(buckets.size() == bucketDeps.size());
-  auto const work = parallel::gen(
-    buckets.size(),
-    [&] (size_t bucketIdx) {
-      auto& bucket = buckets[bucketIdx];
-      auto const& deps = bucketDeps[bucketIdx];
-
-      std::vector<SString> depOut;
-      depOut.reserve(deps.size());
-
-      for (auto const d : deps) {
-        // Calculate the hash for the dependency for this bucket. If
-        // the hash equals the already calulated lowest hash, promote
-        // this dependency.
-        auto const idx = meta.cls.at(d).idx;
-        assertx(idx < depHashState.size());
-        auto const& s = depHashState[idx];
-        auto const hash = hash_int64_pair(
-          d->hashStatic(),
-          bucketIdx
-        );
-        if (hash == s.lowestHash && bucketIdx == s.lowestBucket) {
-          bucket.emplace_back(d);
-        } else {
-          // Otherwise keep it as a dependency.
-          depOut.emplace_back(d);
-        }
-      }
-
-      // Keep deterministic ordering. Make sure there's no duplicates.
-      std::sort(bucket.begin(), bucket.end(), string_data_lti{});
-      std::sort(depOut.begin(), depOut.end(), string_data_lti{});
-      assertx(std::adjacent_find(bucket.begin(), bucket.end()) == bucket.end());
-      assertx(std::adjacent_find(depOut.begin(), depOut.end()) == depOut.end());
-      return FlattenClassesWork{
-        std::move(bucket),
-        std::move(depOut)
-      };
-    }
+      return l;
+    }(),
+    meta.allCls.size(),
+    kBucketSize,
+    kMaxBucketSize,
+    [&] (SString c) {
+      ISStringSet visited;
+      auto const& lookup = findAllDeps(c, visited, findAllDeps);
+      return std::make_pair(&lookup.deps, lookup.instantiable);
+    },
+    [&] (SString c) -> Optional<size_t> { return meta.cls.at(c).idx; }
   );
 
   if (Trace::moduleEnabled(Trace::hhbbc_index, 5)) {
@@ -7792,6 +7952,8 @@ void flatten_classes_fixup_units(IndexData& index,
   auto const run = [&] (std::vector<SString> units) -> coro::Task<void> {
     HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
 
+    if (units.empty()) HPHP_CORO_RETURN_VOID;
+
     std::vector<UnitFixupJob::Fixup> fixups;
 
     // Gather up the fixups and ensure a deterministic ordering.
@@ -7818,11 +7980,16 @@ void flatten_classes_fixup_units(IndexData& index,
       );
     }
 
+    Client::ExecMetadata metadata{
+      .job_key = folly::sformat("fixup units {}", units[0])
+    };
+
     auto config = HPHP_CORO_AWAIT(index.configRef->getCopy());
     auto outputs = HPHP_CORO_AWAIT(index.client->exec(
       s_unitFixupJob,
       std::move(config),
-      std::move(inputs)
+      std::move(inputs),
+      std::move(metadata)
     ));
     assertx(outputs.size() == units.size());
 
@@ -7859,7 +8026,23 @@ void flatten_classes_fixup_units(IndexData& index,
   ));
 }
 
-void flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
+// Metadata used to assign work buckets for building subclasses. This
+// is produced from flattening classes. We don't put closures (or
+// Closure base class) into here. There's a lot of them, but we can
+// predict their results without running build subclass pass on them.
+struct SubclassMetadata {
+  // Immediately children and parents of class (not transitive!).
+  struct Meta {
+    std::vector<SString> children;
+    std::vector<SString> parents;
+    size_t idx; // Index into all classes vector.
+  };
+  ISStringToOneT<Meta> meta;
+  // All classes to be processed
+  std::vector<SString> all;
+};
+
+SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
   trace_time trace("flatten classes", index.sample);
 
   using namespace folly::gen;
@@ -7869,10 +8052,11 @@ void flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     UniquePtrRef<php::Class> cls;
     UniquePtrRef<ClassInfo2> cinfo;
     SString unitToAddTo;
+    CompactVector<SString> parents;
   };
   using UpdateVec = std::vector<Update>;
 
-  auto const run = [&] (FlattenClassesWork work) -> coro::Task<UpdateVec> {
+  auto const run = [&] (HierarchialWorkBucket work) -> coro::Task<UpdateVec> {
     HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
 
     if (work.classes.empty()) {
@@ -7916,6 +8100,7 @@ void flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     updates.reserve(work.classes.size() * 3);
 
     size_t outputIdx = 0;
+    size_t parentIdx = 0;
     for (auto const name : work.classes) {
       if (clsMeta.uninstantiable.count(name)) continue;
       assertx(outputIdx < clsRefs.size());
@@ -7927,6 +8112,19 @@ void flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
           nullptr
         }
       );
+
+      // Ignore closures. We don't run the build subclass pass for
+      // closures, so we don't need information for them.
+      if (!meta.cls.at(name).isClosure) {
+        assertx(parentIdx < clsMeta.parents.size());
+        auto const& parents = clsMeta.parents[parentIdx].names;
+        auto& update = updates.back();
+        update.parents.insert(
+          end(update.parents), begin(parents), end(parents)
+        );
+        ++parentIdx;
+      }
+
       ++outputIdx;
     }
 
@@ -7958,7 +8156,7 @@ void flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     return coro::wait(coro::collectRange(
       from(assignments)
         | move
-        | map([&] (FlattenClassesWork w) {
+        | map([&] (HierarchialWorkBucket w) {
             return run(std::move(w)).scheduleOn(index.executor->sticky());
           })
         | as<std::vector>()
@@ -7968,7 +8166,10 @@ void flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
   // Now take the updates and apply them to the Index tables. This
   // needs to be done in a single threaded context (per data
   // structure). This also gathers up all the fixups needed.
+
   SStringToOneT<UnitFixupJob::Fixup> unitFixups;
+  SubclassMetadata subclassMeta;
+
   {
     trace_time trace2("flatten classes update");
     trace2.ignore_client_stats();
@@ -8006,12 +8207,1259 @@ void flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
         for (auto& [unit, deletions] : meta.unitDeletions) {
           unitFixups[unit].removeFunc = std::move(deletions);
         }
+      },
+      [&] {
+        // Build metadata for the next build subclass pass.
+        auto& all = subclassMeta.all;
+        auto& meta = subclassMeta.meta;
+        for (auto& updates : allUpdates) {
+          for (auto& update : updates) {
+            // We shouldn't have parents for closures because we
+            // special case those explicitly.
+            if (is_closure_name(update.name) ||
+                update.name->isame(s_Closure.get())) {
+              assertx(update.parents.empty());
+              continue;
+            }
+            // Otherwise build the children lists from the parents.
+            all.emplace_back(update.name);
+            for (auto const p : update.parents) {
+              meta[p].children.emplace_back(update.name);
+            }
+            auto& parents = meta[update.name].parents;
+            assertx(parents.empty());
+            parents.insert(
+              end(parents),
+              begin(update.parents), end(update.parents)
+            );
+          }
+        }
+
+        std::sort(begin(all), end(all), string_data_lti{});
+        // Make sure there's no duplicates:
+        assertx(std::adjacent_find(begin(all), end(all)) == end(all));
+
+        for (size_t i = 0; i < all.size(); ++i) meta[all[i]].idx = i;
       }
     );
   }
 
   // Apply the fixups
   flatten_classes_fixup_units(index, std::move(unitFixups));
+
+  return subclassMeta;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Subclass list
+
+/*
+ * Subclass lists are built in a similar manner as flattening classes,
+ * except the order is reversed. The "roots" are classes without any
+ * parents (the roots of the class hierarchy). The dependencies of a
+ * class are all of the transitive children.
+ *
+ * However, there is one complication: the transitive children of each
+ * class can be huge. In fact, for large hierarchies, they can easily
+ * be too large to (efficiently) handle in a single job.
+ *
+ * Rather than (always) processing everything in a single pass, we
+ * might need to use multiple passes to keep the fan-in down. When
+ * calculating the work buckets, we keep the size of each bucket into
+ * account and don't allow any bucket to grow too large. If it does,
+ * we'll just process that bucket, and process any dependencies in the
+ * next pass.
+ *
+ * This isn't sufficient. A single class have (far) more direct
+ * children than we want in a single bucket. Multiple passes don't
+ * help here because there's no intermediate classes to use as an
+ * output. To fix this, we insert "splits", which serve to "summarize"
+ * some subset of a class' direct children.
+ *
+ * For example, suppose a class has 10k direct children, and our
+ * maximum bucket size is 1k. On the first pass we'll process all of
+ * the children in ~10 different jobs, each one processing 1k of the
+ * children, and producing a single split node. The second pass will
+ * actually process the class and take all of the splits as inputs
+ * (not the actual children). The inputs to the job has been reduced
+ * from 10k to 10. This is a simplification. In reality a job can
+ * produce multiple splits, and inputs can be a mix of splits and
+ * actual classes. In extreme cases, you might need multiple rounds of
+ * splits before processing the class.
+ */
+
+/*
+ * Extern-worker job to build ClassInfo2 subclass lists, and calculate
+ * various properties on the ClassInfo2 from it.
+ */
+struct BuildSubclassListJob {
+  static std::string name() { return "hhbbc-build-subclass"; }
+  static void init(const Config& config) {
+    process_init(config.o, config.gd, false);
+  }
+  static void fini() {}
+
+  // Intermediate data stored for each class. The data can either come
+  // from a split node, or inferred from a class. This is cached so we
+  // don't have to process any given class/split more than once.
+  struct Data {
+    // Subclasses of this class, including this class.
+    ISStringSet subclasses;
+
+    // Methods which are present in *all* subclasses.
+    MethRefSet methods;
+    // Methods which are present in all regular subclasses.
+    MethRefSet regularMethods;
+
+    // Private methods declared by this class directly.
+    SStringSet privates;
+    // Private methods declared by subclasses of this class (but not
+    // this class). If a method has a private successor, it's
+    // considered overridden, even if the private is on a non-regular
+    // class.
+    SStringSet privateSuccessors;
+
+    bool hasConstProp{false};
+    bool hasReifiedGeneric{false};
+
+    bool isMockClass{false};
+    bool isMocked{false};
+    bool isSubMocked{false};
+
+    bool hasRegularClass{false};
+    bool hasNonRegularClass{false};
+    bool hasRegularSubclass{false};
+    bool hasNonRegularSubclass{false};
+
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(subclasses, string_data_lti{})
+        (methods, std::less<MethRef>{})
+        (regularMethods, std::less<MethRef>{})
+        (privates, string_data_lt{})
+        (privateSuccessors, string_data_lt{})
+        (hasConstProp)
+        (hasReifiedGeneric)
+        (isMockClass)
+        (isMocked)
+        (isSubMocked)
+        (hasRegularClass)
+        (hasNonRegularClass)
+        (hasRegularSubclass)
+        (hasNonRegularSubclass)
+        ;
+    }
+  };
+
+  // Split node. Used to summarize some subset of a class' children.
+  struct Split {
+    Split() = default;
+    explicit Split(SString name) : name{name} {}
+
+    SString name;
+    CompactVector<SString> children;
+    Data data;
+
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(name)
+        (children)
+        (data)
+        ;
+    }
+  };
+
+  // Mark a dependency on a class to a split node. Since the splits
+  // are not actually part of the hierarchy, the relationship between
+  // classes and splits cannot be inferred otherwise.
+  struct EdgeToSplit {
+    SString cls;
+    SString split;
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(cls)
+        (split)
+        ;
+    }
+  };
+
+  // Each job produces updated classes, and some (perhaps 0) split
+  // nodes.
+  using Output = Multi<
+    Variadic<std::unique_ptr<ClassInfo2>>,
+    Variadic<std::unique_ptr<Split>>
+  >;
+
+  // Each job takes the list of classes and splits which should be
+  // produced, dependency classes and splits (which are not updated),
+  // and edges between classes and splits.
+  static Output
+  run(Variadic<std::unique_ptr<ClassInfo2>> classes,
+      Variadic<std::unique_ptr<ClassInfo2>> deps,
+      Variadic<std::unique_ptr<Split>> splits,
+      Variadic<std::unique_ptr<Split>> splitDeps,
+      Variadic<EdgeToSplit> edges) {
+
+    // Store mappings of names to classes and edges.
+    LocalIndex index;
+    for (auto& cinfo : classes.vals) {
+      always_assert(
+        index.classInfos.emplace(cinfo->name, cinfo.get()).second
+      );
+      index.top.emplace(cinfo->name);
+    }
+    for (auto& cinfo : deps.vals) {
+      always_assert(
+        index.classInfos.emplace(cinfo->name, cinfo.get()).second
+      );
+    }
+    for (auto& split : splits.vals) {
+      always_assert(
+        index.splits.emplace(split->name, split.get()).second
+      );
+      index.top.emplace(split->name);
+    }
+    for (auto& split : splitDeps.vals) {
+      always_assert(
+        index.splits.emplace(split->name, split.get()).second
+      );
+    }
+
+    build_children(index, edges.vals);
+    process_roots(index, classes.vals, splits.vals);
+    return std::make_tuple(std::move(classes), std::move(splits));
+  }
+private:
+
+  struct LocalIndex {
+    ISStringToOneT<ClassInfo2*> classInfos;
+    ISStringToOneT<Split*> splits;
+    ISStringSet top;
+    ISStringToOneT<ISStringSet> children;
+    ISStringToOneT<Data> data;
+  };
+
+  // From the information present in the inputs, calculate a mapping
+  // of classes to their children (which can be other classes or split
+  // nodes). Split nodes have their children stored directly within
+  // them.
+  static void build_children(LocalIndex& index,
+                             const std::vector<EdgeToSplit>& edges) {
+    auto const onParent = [&] (SString parent, const ClassInfo2* child) {
+      // Due to how work is divided, a class might have parents not
+      // present in this job. Ignore those.
+      if (!index.classInfos.count(parent)) return;
+      index.children[parent].emplace(child->name);
+    };
+
+    // For the purposes of this algorithm, the only parents we care
+    // about are the parent class, the declared interfaces (not
+    // implemented interfaces), and if traits aren't flattened, the
+    // used traits.
+    for (auto const [name, cinfo] : index.classInfos) {
+      if (cinfo->parent) onParent(cinfo->parent, cinfo);
+      for (auto const iface : cinfo->declInterfaces) {
+        onParent(iface, cinfo);
+      }
+      if (!(cinfo->attrs & AttrNoExpandTrait)) {
+        for (auto const trait : cinfo->usedTraits) {
+          onParent(trait, cinfo);
+        }
+      }
+    }
+
+    for (auto const& edge : edges) {
+      if (!index.classInfos.count(edge.cls)) continue;
+      if (!index.splits.count(edge.split)) continue;
+      index.children[edge.cls].emplace(edge.split);
+    }
+  }
+
+  // Given a list of children, calculate a Data from the union of the
+  // children.
+  template <typename T>
+  static Data data_from_children(LocalIndex& index, const T& children) {
+    assertx(!children.empty());
+
+    Data data;
+    auto first = true;
+    for (auto const child : children) {
+      // Get the data for this child.
+      auto const& childData = process_children(index, child);
+      // Union the subclasses
+      data.subclasses.insert(
+        begin(childData.subclasses),
+        end(childData.subclasses)
+      );
+
+      // Union the private method data
+      data.privates.insert(
+        begin(childData.privates),
+        end(childData.privates)
+      );
+      data.privateSuccessors.insert(
+        begin(childData.privateSuccessors),
+        end(childData.privateSuccessors)
+      );
+
+      // If this is the first child, just use it's methods. Otherwise
+      // intersect the methods we already have with those in this
+      // child (we only store methods present in every subclass).
+      if (first) {
+        data.methods = childData.methods;
+        first = false;
+      } else {
+        folly::erase_if(
+          data.methods,
+          [&] (const MethRef& r) { return !childData.methods.count(r); }
+        );
+      }
+
+      // If the child has no regular classes, don't change
+      // regularMethods at all. Otherwise use similar logic as we used
+      // for methods.
+      if (childData.hasRegularClass) {
+        if (!data.hasRegularClass) {
+          assertx(data.regularMethods.empty());
+          data.regularMethods = childData.regularMethods;
+        } else {
+          folly::erase_if(
+            data.regularMethods,
+            [&] (const MethRef& r) {
+              return !childData.regularMethods.count(r);
+            }
+          );
+        }
+      } else {
+        assertx(childData.regularMethods.empty());
+      }
+
+      // The rest are booleans which can just be unioned together.
+      data.hasConstProp |= childData.hasConstProp;
+      data.hasReifiedGeneric |= childData.hasReifiedGeneric;
+      data.isMockClass |= childData.isMockClass;
+      data.isMocked |= childData.isMocked;
+      data.isSubMocked |= childData.isSubMocked;
+      data.hasRegularClass |= childData.hasRegularClass;
+      data.hasNonRegularClass |= childData.hasNonRegularClass;
+      data.hasRegularSubclass |= childData.hasRegularSubclass;
+      data.hasNonRegularSubclass |= childData.hasNonRegularSubclass;
+    }
+
+    return data;
+  }
+
+  // Calculate the data for each root (those which will we'll provide
+  // outputs for) and update the ClassInfo or Split as appropriate.
+  static void process_roots(
+    LocalIndex& index,
+    const std::vector<std::unique_ptr<ClassInfo2>>& roots,
+    const std::vector<std::unique_ptr<Split>>& splits
+  ) {
+    for (auto const& cinfo : roots) {
+      assertx(index.top.count(cinfo->name));
+      // Process the children of this class and build a unified Data
+      // for it.
+      auto const& data = process_children(index, cinfo->name);
+
+      // These are just copied directly from Data.
+      cinfo->subHasConstProp = data.hasConstProp;
+      cinfo->subHasReifiedGeneric = data.hasReifiedGeneric;
+      cinfo->hasRegularSubclass = data.hasRegularSubclass;
+      cinfo->hasNonRegularSubclass = data.hasNonRegularSubclass;
+      cinfo->isMocked = data.isMocked;
+      cinfo->isSubMocked = data.isSubMocked;
+
+      // We can use whether we saw regular/non-regular subclasses to
+      // infer if this class is overridden.
+      if (cinfo->hasRegularSubclass) {
+        attribute_setter(cinfo->attrs, false, AttrNoOverrideRegular);
+        attribute_setter(cinfo->attrs, false, AttrNoOverride);
+      } else if (cinfo->hasNonRegularSubclass) {
+        attribute_setter(cinfo->attrs, true, AttrNoOverrideRegular);
+        attribute_setter(cinfo->attrs, false, AttrNoOverride);
+      } else {
+        attribute_setter(cinfo->attrs, true, AttrNoOverrideRegular);
+        attribute_setter(cinfo->attrs, true, AttrNoOverride);
+      }
+
+      assertx(
+        IMPLIES(
+          cinfo->initialNoReifiedInit,
+          cinfo->attrs & AttrNoReifiedInit
+        )
+      );
+
+      attribute_setter(
+        cinfo->attrs,
+        cinfo->initialNoReifiedInit ||
+        (!cinfo->parent &&
+         (!data.hasReifiedGeneric || (cinfo->attrs & AttrInterface))),
+        AttrNoReifiedInit
+      );
+
+      assertx(IMPLIES(!data.hasRegularClass, data.regularMethods.empty()));
+
+      // Update method bits. A method is *not* overridden if the
+      // method is also present on every subclass (which the methods
+      // and regularMethods set tracks).
+      for (auto& [name, mte] : cinfo->methods) {
+        if (is_special_method_name(name)) continue;
+
+        assertx(mte.attrs & AttrNoOverride);
+        assertx(mte.noOverrideRegular());
+
+        auto const meth = mte.meth();
+        if (data.privateSuccessors.count(name) ||
+            (data.hasRegularSubclass &&
+             !data.regularMethods.count(meth))) {
+          mte.clearNoOverrideRegular();
+          attribute_setter(mte.attrs, false, AttrNoOverride);
+        } else if (!data.methods.count(meth)) {
+          attribute_setter(mte.attrs, false, AttrNoOverride);
+        }
+
+        assertx(!mte.hasPrivateSuccessor());
+        if (data.privateSuccessors.count(name)) {
+          mte.setHasPrivateSuccessor();
+        }
+      }
+
+      // Flatten classes sets up the subclass list to just contain
+      // this class (as if it was a leaf). Since we're updating this
+      // class (and we're the only ones who should be doing so), we're
+      // expecting the subclass list to reflect that.
+      assertx(cinfo->subclassList.size() == 1);
+      assertx(cinfo->subclassList[0]->isame(cinfo->name));
+
+      // Update the list with what we computed. We need to sort the
+      // list to maintain a deterministic order.
+      cinfo->subclassList.clear();
+      cinfo->subclassList.reserve(data.subclasses.size());
+      for (auto const s : data.subclasses) {
+        cinfo->subclassList.emplace_back(s);
+      }
+      std::sort(
+        begin(cinfo->subclassList),
+        end(cinfo->subclassList),
+        string_data_lti{}
+      );
+    }
+
+    // Splits just store the data directly. Since this split hasn't
+    // been processed yet (and no other job should process it), all of
+    // the fields should be their default settings.
+    for (auto& split : splits) {
+      assertx(!index.data.count(split->name));
+      assertx(index.top.count(split->name));
+      assertx(!split->children.empty());
+      assertx(split->data.subclasses.empty());
+      assertx(split->data.methods.empty());
+      assertx(split->data.regularMethods.empty());
+      assertx(split->data.privates.empty());
+      assertx(split->data.privateSuccessors.empty());
+      assertx(!split->data.hasConstProp);
+      assertx(!split->data.hasReifiedGeneric);
+      assertx(!split->data.isMockClass);
+      assertx(!split->data.isMocked);
+      assertx(!split->data.isSubMocked);
+      assertx(!split->data.hasRegularClass);
+      assertx(!split->data.hasNonRegularClass);
+      assertx(!split->data.hasRegularSubclass);
+      assertx(!split->data.hasNonRegularSubclass);
+      split->data = data_from_children(index, split->children);
+    }
+  }
+
+  // Given a name, which could represent a class or a split node,
+  // return the Data for it, processing any transitive children as
+  // necessary. The Data is cached, so every class is only ever
+  // processed once. This function returns a const reference to the
+  // Data. This reference is only guaranteed to be valid until the
+  // next call to process_children, so don't keep it around.
+  static const Data& process_children(LocalIndex& index, SString name) {
+    // If we've already processed this name, just return what was
+    // calculated.
+    if (auto const data = folly::get_ptr(index.data, name)) return *data;
+
+    // Does this name represent a class?
+    if (auto cinfo = folly::get_default(index.classInfos, name, nullptr)) {
+      assertx(!cinfo->subclassList.empty());
+      assertx(IMPLIES(cinfo->subclassList.size() == 1,
+                      cinfo->subclassList[0]->isame(name)));
+      assertx(IMPLIES(cinfo->subclassList.size() > 1,
+                      !index.top.count(name)));
+
+      /*
+       * Obtain the Data for this class. There's two possibilities. The
+       * class might have already been processed in a previous job. In
+       * that case, it's values are correct and we can use those
+       * directly. This can be inferred if the class' subclass list
+       * has more than one entry (which can only happen if the class
+       * is already processed). If the class has no children on this
+       * job, then it's either a legitimate leaf, or was already
+       * processed. If the class is an actual leaf we can treat it as
+       * if it was already processed (class flattening initializes
+       * leafs with their initial correct values).
+       *
+       * The second case is that class has children and isn't already
+       * processed. In that case we process it's children recursively,
+       * combine their Datas, then assign it to this class.
+       */
+      auto data = [&] {
+        auto const children = [&] () -> const ISStringSet* {
+          // If subclass has more than one entry, we know it's already
+          // processed.
+          if (cinfo->subclassList.size() > 1) return nullptr;
+          return folly::get_ptr(index.children, name);
+        }();
+        if (children) {
+          // We need to process children. data_from_children will
+          // union together all of the children information. We then
+          // need to add our own.
+          auto d = data_from_children(index, *children);
+          d.subclasses.emplace(name);
+
+          // Any private methods declared by a child class get added
+          // to the private successor set.
+          d.privateSuccessors.insert(
+            begin(d.privates),
+            end(d.privates)
+          );
+          // The private methods declared by this class will be set
+          // below.
+          d.privates.clear();
+
+          // Build the set of methods which can be propagated to a
+          // parent. A method is only propagated if there's not a
+          // private successor with the same name and the method is
+          // present in all subclasses.
+          MethRefSet meths;
+          for (auto const& [methname, mte] : cinfo->methods) {
+            if (is_special_method_name(methname)) continue;
+            if (!d.privateSuccessors.count(methname)) {
+              meths.emplace(mte.meth());
+            }
+            if (mte.topLevel() && (mte.attrs & AttrPrivate)) {
+              d.privates.emplace(methname);
+            }
+          }
+
+          // Remove any methods from the Data if it's not present on
+          // this class.
+          folly::erase_if(
+            d.methods,
+            [&] (const MethRef& r) { return !meths.count(r); }
+          );
+
+          // Do the same for regularMethods, but only if this is a
+          // regular class.
+          if (cinfo->isRegularClass) {
+            if (!d.hasRegularClass) {
+              // This is a regular class, but none of the children
+              // were regular. The set of regularMethods should just
+              // be this class' methods.
+              assertx(d.regularMethods.empty());
+              d.regularMethods = std::move(meths);
+            } else {
+              folly::erase_if(
+                d.regularMethods,
+                [&] (const MethRef& r) { return !meths.count(r); }
+              );
+            }
+          }
+
+          return d;
+        }
+
+        // This class is already processed (or might be an actual
+        // leaf). It shouldn't be marked as an output class because
+        // that implies it *hasn't* been processed.
+        assertx(!index.top.count(name));
+
+        // The subclass list and method info can be inferred directly
+        // from the ClassInfo.
+        Data d;
+        d.subclasses.insert(
+          begin(cinfo->subclassList),
+          end(cinfo->subclassList)
+        );
+
+        for (auto const& [methname, mte] : cinfo->methods) {
+          if (is_special_method_name(methname)) continue;
+
+          // Initial method info. We can use whether the class is
+          // overridden or not to set up the initial method sets.
+          auto const meth = mte.meth();
+          if (mte.noOverrideRegular()) {
+            if (mte.attrs & AttrNoOverride) {
+              d.methods.emplace(meth);
+            }
+            if (cinfo->isRegularClass || cinfo->hasRegularSubclass) {
+              d.regularMethods.emplace(meth);
+            }
+          } else {
+            assertx(!(mte.attrs & AttrNoOverride));
+          }
+
+          if (mte.hasPrivateSuccessor()) {
+            assertx(!mte.noOverrideRegular());
+            d.privateSuccessors.emplace(methname);
+          }
+
+          if (mte.topLevel() && (mte.attrs & AttrPrivate)) {
+            d.privates.emplace(methname);
+          }
+        }
+
+        // The rest will be handled by the common logic below.
+        return d;
+      }();
+
+      // Common handling for both cases. Update the data (which might
+      // just reflect the subclasses) to also reflect any information
+      // in this class. Depending on which situation we encountered
+      // above, some of these might be redundant.
+
+      // These are true if true on this class, or any subclasses.
+      data.hasConstProp |=
+        cinfo->subHasConstProp || cinfo->hasConstProp;
+      data.hasReifiedGeneric |=
+        cinfo->subHasReifiedGeneric || cinfo->hasReifiedGeneric;
+
+      // A class is mocked *only* if one of it's direct children is a
+      // mock class. Interfaces and traits are never marked as mocked.
+      data.isMocked = cinfo->isMocked;
+      if (!(cinfo->attrs & (AttrInterface | AttrTrait))) {
+        data.isMocked |= data.isMockClass;
+      }
+      data.isSubMocked |= data.isMocked || cinfo->isSubMocked;
+      // Whether this is a mock class is solely determined by this
+      // class, and not any children.
+      data.isMockClass = cinfo->isMockClass;
+
+      // The ordering of these is important:
+      data.hasRegularSubclass =
+        data.hasRegularClass || cinfo->hasRegularSubclass;
+      data.hasNonRegularSubclass =
+        data.hasNonRegularClass || cinfo->hasNonRegularSubclass;
+
+      data.hasRegularClass =
+        data.hasRegularSubclass || cinfo->isRegularClass;
+      data.hasNonRegularClass =
+        data.hasNonRegularSubclass || !cinfo->isRegularClass;
+
+      auto const DEBUG_ONLY [existing, emplaced] =
+        index.data.emplace(name, std::move(data));
+      assertx(emplaced);
+      return existing->second;
+    }
+
+    // It doesn't represent a class. It should represent a
+    // split. Split store Data directly, so no need for caching. We
+    // can just return a reference to its Data.
+
+    // A split cannot be both a root and a dependency due to how we
+    // set up the buckets.
+    assertx(!index.top.count(name));
+    auto const split = index.splits.at(name);
+    assertx(!split->data.subclasses.empty());
+    assertx(split->data.hasRegularClass || split->data.hasNonRegularClass);
+    return split->data;
+  }
+};
+
+Job<BuildSubclassListJob> s_buildSubclassJob;
+
+struct SubclassWork {
+  ISStringToOneT<std::unique_ptr<BuildSubclassListJob::Split>> allSplits;
+  struct Bucket {
+    std::vector<SString> classes;
+    std::vector<SString> deps;
+    std::vector<SString> splits;
+    std::vector<SString> splitDeps;
+    std::vector<BuildSubclassListJob::EdgeToSplit> edges;
+  };
+  std::vector<std::vector<Bucket>> buckets;
+};
+
+/*
+ * Algorithm for assigning work for building subclass lists:
+ *
+ * - Keep track of which classes have been processed and which ones
+ *   have not yet been.
+ *
+ * - Keep looping until all classes have been processed. Each round of
+ *   the algorithm becomes a round of output.
+ *
+ * - Iterate over all classes which haven't been
+ *   processed. Distinguish classes which are eligible for processing
+ *   or not. A class is eligible for processing if its transitive
+ *   dependencies are below the maximum size.
+ *
+ * - Eligible classes are separated into roots and non-roots. A class
+ *   is a root if none of its parents are roots and none of its
+ *   parents have children which will be turned into split nodes.
+ *
+ * - Non-eligible classes are ignored and will be processed again next
+ *   round. However, if the class has more eligible direct children
+ *   than the bucket size, the class' children will be turned into
+ *   split nodes.
+ *
+ * - Create split nodes. For each class (who we're splitting), use the
+ *   typical consistent hashing algorithm to assign each child to a
+ *   split node. Change the class' child list to contain the split
+ *   nodes instead of the children (this should shrink it
+ *   considerably). Each new split becomes a root.
+ *
+ * - Assign each root to a bucket. Use assign_hierachial_work to map
+ *   each root to a bucket. The classes which are non-roots (which are
+ *   eligible but not roots) can be used by assign_hierarchial_work as
+ *   dependencies (and will be promoted).
+ *
+ * - Update the processed set. Any class which hasn't been processed
+ *   that round should have their dependency set shrunken. Processing
+ *   a class makes its dependency set be empty. So if a class wasn't
+ *   eligible, it should have a dependency which was. Therefore the
+ *   class' transitive dependencies should shrink. It should continue
+ *   to shrink until its eventually becomes eligible. The same happens
+ *   if the class' children are turned into split nodes. Each N
+ *   children is replaced with a single split (with no other
+ *   dependencies), so the class' dependencies should shrink. Thus,
+ *   the algorithm eventually terminates.
+*/
+
+SubclassWork build_subclass_lists_assign(SubclassMetadata subclassMeta) {
+  trace_time trace{"build subclass lists assign"};
+  trace.ignore_client_stats();
+
+  constexpr size_t kBucketSize = 2000;
+  constexpr size_t kMaxBucketSize = 20000;
+
+  SubclassWork out;
+
+  auto const maxClassIdx = subclassMeta.all.size();
+
+  // A processed class/split is considered processed once it's
+  // assigned to a bucket in a round. Once considered processed, it
+  // will have no dependencies.
+  ISStringSet processed;
+
+  // Dependency information for a class or split node.
+  struct DepData {
+    // Transitive dependencies (children) for this class.
+    ISStringSet deps;
+    // Any split nodes which are dependencies of this class.
+    ISStringSet edges;
+    // The number of direct children of this class which will be
+    // processed this round.
+    size_t processChildren{0};
+  };
+  ISStringToOneT<std::unique_ptr<DepData>> splitDeps;
+  ISStringToOneT<std::unique_ptr<BuildSubclassListJob::Split>> splitPtrs;
+
+  // Keep creating rounds until all of the classes are assigned to a
+  // bucket in a round.
+  auto toProcess = std::move(subclassMeta.all);
+  for (size_t round = 0; !toProcess.empty(); ++round) {
+    // If we have this many rounds, something has gone wrong, because
+    // it should require an astronomical amount of classes.
+    always_assert(round < 10);
+
+    // The dependency information for every class, for just this
+    // round. The information is calculated lazily and recursively by
+    // findDeps.
+    std::vector<LockFreeLazy<DepData>> deps{maxClassIdx};
+
+    auto const findDeps = [&] (SString cls,
+                               auto const& self) -> const DepData& {
+      // If it's processed, there's implicitly no dependencies
+      static DepData empty;
+      if (processed.count(cls)) return empty;
+
+      // Look up the metadata for this class. If we don't find any,
+      // assume that it's for a split.
+      auto const it = subclassMeta.meta.find(cls);
+      if (it == end(subclassMeta.meta)) {
+        auto const it2 = splitDeps.find(cls);
+        always_assert(it2 != end(splitDeps));
+        return *it2->second;
+      }
+      auto const& meta = it->second;
+      auto const idx = meta.idx;
+      assertx(idx < deps.size());
+
+      // Now that we have the index into the dependency vector, look
+      // it up, calculating it if it hasn't been already.
+      return deps[idx].get(
+        [&] {
+          DepData out;
+          for (auto const c : meta.children) {
+            out.deps.emplace(c);
+            if (splitDeps.count(c)) out.edges.emplace(c);
+            auto const& childDeps = self(c, self);
+            if (childDeps.deps.size() <= kMaxBucketSize) ++out.processChildren;
+            out.deps.insert(begin(childDeps.deps), end(childDeps.deps));
+          }
+          return out;
+        }
+      );
+    };
+
+    auto const depsSize = [&] (SString cls) {
+      return findDeps(cls, findDeps).deps.size();
+    };
+    // If this class' children needs to be split into split nodes this
+    // round. This happens if the number of direct children of this
+    // class which are eligible for processing exceeds the bucket
+    // size.
+    auto const willSplitChildren = [&] (SString cls) {
+      return findDeps(cls, findDeps).processChildren > kBucketSize;
+    };
+    // If this class will be processed this round. A class will be
+    // processed if it's dependencies are less than the maximum bucket
+    // size.
+    auto const willProcess = [&] (SString cls) {
+      return depsSize(cls) <= kMaxBucketSize;
+    };
+
+    // Process every remaining class in parallel and assign an action
+    // to each:
+
+    // Do nothing with this class this round
+    struct Defer { SString cls; };
+    // This class will be processed this round, but will not be a
+    // root. It is a dependency of some root.
+    struct Process { SString cls; };
+    // This class will be processed this round and is a root.
+    struct Root { SString cls; };
+    // This class' children should be split. The class' child list
+    // will be replaced with the new child list and splits created.
+    struct Split {
+      SString cls;
+      std::vector<SString> children;
+      struct Data {
+        SString name;
+        std::unique_ptr<DepData> deps;
+        std::unique_ptr<BuildSubclassListJob::Split> ptr;
+      };
+      std::vector<Data> splits;
+    };
+    using Action = boost::variant<Defer, Process, Root, Split>;
+
+    auto const actions = parallel::map(
+      toProcess,
+      [&] (SString cls) {
+        auto const& meta = subclassMeta.meta.at(cls);
+        // If the class has no children, it's a leaf and can always be
+        // processed. It never will be a root because it's information
+        // is already correct and doesn't need to be updated.
+        if (meta.children.empty()) return Action{ Process{cls} };
+
+        if (willProcess(cls)) {
+          // This class is eligible for processing. It might be a
+          // root. A class is a root if none of it's parents are
+          // eligible, and the parents won't split their children.
+          auto const top = std::none_of(
+            begin(meta.parents),
+            end(meta.parents),
+            [&] (SString parent) {
+              return willProcess(parent) || willSplitChildren(parent);
+            }
+          );
+          return top ? Action{ Root{cls} } : Action{ Process{cls} };
+        }
+
+        // The class isn't eligible and we won't split the
+        // children. Nothing to do here but defer it to another
+        // round. It's dependency size should shrink and make it
+        // eligible.
+        if (!willSplitChildren(cls)) return Action{ Defer{cls} };
+
+        // Otherwise we're going to split some/all of this class'
+        // children. Once we process those in this round, this class'
+        // dependencies should be smaller and be able to be processed.
+        Split split;
+        split.cls = cls;
+        split.splits = [&] {
+          // Group all of the eligible children into buckets, and
+          // split the buckets to ensure they remain below the maximum
+          // size.
+          auto const buckets = split_buckets(
+            [&] {
+              auto const numChildren = findDeps(cls, findDeps).processChildren;
+              auto const numBuckets =
+                (numChildren + kMaxBucketSize - 1) / kMaxBucketSize;
+              assertx(numBuckets > 0);
+
+              std::vector<std::vector<SString>> buckets;
+              buckets.resize(numBuckets);
+              for (auto const child : meta.children) {
+                if (!willProcess(child)) continue;
+                auto const idx =
+                  consistent_hash(child->hashStatic(), numBuckets);
+                assertx(idx < numBuckets);
+                buckets[idx].emplace_back(child);
+              }
+
+              buckets.erase(
+                std::remove_if(
+                  begin(buckets),
+                  end(buckets),
+                  [] (const std::vector<SString>& b) { return b.empty(); }
+                ),
+                end(buckets)
+              );
+
+              return buckets;
+            }(),
+            kMaxBucketSize,
+            [&] (SString child) -> const ISStringSet& {
+              return findDeps(child, findDeps).deps;
+            }
+          );
+          // Each bucket corresponds to a new split node, which will
+          // contain the results for the children in that bucket.
+          auto const numSplits = buckets.size();
+
+          // Actually make the splits and fill their children list.
+          std::vector<Split::Data> splits;
+          splits.reserve(numSplits);
+          for (size_t i = 0; i < numSplits; ++i) {
+            // The names of a split node are arbitrary, but most be
+            // unique and not collide with any actual classes.
+            auto const name = makeStaticString(
+              folly::sformat("{}_{}_split;{}", round, i, cls)
+            );
+
+            auto deps = std::make_unique<DepData>();
+            auto split = std::make_unique<BuildSubclassListJob::Split>(name);
+
+            for (auto const child : buckets[i]) {
+              split->children.emplace_back(child);
+              auto const& childDeps = findDeps(child, findDeps).deps;
+              deps->deps.insert(begin(childDeps), end(childDeps));
+              deps->deps.emplace(child);
+            }
+
+            std::sort(
+              begin(split->children),
+              end(split->children),
+              string_data_lti{}
+            );
+
+            splits.emplace_back(
+              Split::Data{name, std::move(deps), std::move(split)}
+            );
+          }
+          return splits;
+        }();
+
+        // Create the new children list for this class. The new
+        // children list are any children which won't be processed,
+        // and the new splits.
+        for (auto const child : meta.children) {
+          if (willProcess(child)) continue;
+          split.children.emplace_back(child);
+        }
+        for (auto const& [name, _, _2] : split.splits) {
+          split.children.emplace_back(name);
+        }
+
+        return Action{ std::move(split) };
+      }
+    );
+
+    assertx(actions.size() == toProcess.size());
+    std::vector<SString> roots;
+    std::vector<SString> markProcessed;
+    roots.reserve(actions.size());
+    markProcessed.reserve(actions.size());
+    // Clear the list of classes to process. It will be repopulated
+    // with any classes marked as Defer.
+    toProcess.clear();
+
+    for (auto const& action : actions) {
+      match<void>(
+        action,
+        [&] (Defer d) { toProcess.emplace_back(d.cls); },
+        [&] (Process p) { markProcessed.emplace_back(p.cls); },
+        [&] (Root r) {
+          roots.emplace_back(r.cls);
+          markProcessed.emplace_back(r.cls);
+        },
+        [&] (const Split& s) {
+          auto& meta = subclassMeta.meta.at(s.cls);
+          meta.children = s.children;
+          toProcess.emplace_back(s.cls);
+          auto& splits = const_cast<std::vector<Split::Data>&>(s.splits);
+          for (auto& [name, deps, ptr] : splits) {
+            roots.emplace_back(name);
+            markProcessed.emplace_back(name);
+            splitDeps.emplace(name, std::move(deps));
+            splitPtrs.emplace(name, std::move(ptr));
+          }
+        }
+      );
+    }
+
+    // We have a root set now. So use assign_hierarchial_work to turn
+    // it into a set of buckets:
+
+    auto const bucketSize = [&] {
+      // Anything other than the first round tends to have a very
+      // small amount of items (but are relatively expensive). In that
+      // case, it's faster to try to assign everything to its own
+      // bucket.
+      if (out.buckets.empty() || roots.size() > kBucketSize) {
+        return kBucketSize;
+      }
+      return 1ul;
+    }();
+
+    auto const work = assign_hierarchial_work(
+      roots,
+      maxClassIdx,
+      bucketSize,
+      kMaxBucketSize,
+      [&] (SString c) {
+        auto const& deps = findDeps(c, findDeps).deps;
+        // Everything at this point is always instantiable.
+        return std::make_pair(&deps, true);
+      },
+      // Called to get the class index for promotion from a dependency
+      // to an output.
+      [&] (SString c) -> Optional<size_t> {
+        // If the class is already processed, it should remain a
+        // dependency.
+        if (processed.count(c)) return std::nullopt;
+        auto const it = subclassMeta.meta.find(c);
+        // Splits should never be promoted
+        if (it == end(subclassMeta.meta)) return std::nullopt;
+        // Leaf classes should never be promoted either. They're
+        // already processed.
+        if (it->second.children.empty()) return std::nullopt;
+        return it->second.idx;
+      }
+    );
+
+    // The output of assign_hierarchial_work is just buckets with the
+    // names. We need to map those to classes or edge nodes and put
+    // them in the correct data structure in the output. If there's a
+    // class dependency on a split node, we also need to record an
+    // edge between them.
+    auto const add = [&] (SString cls, auto& clsList,
+                          auto& splitList, auto& edgeList) {
+      auto const it = splitPtrs.find(cls);
+      if (it == end(splitPtrs)) {
+        clsList.emplace_back(cls);
+        for (auto const s : findDeps(cls, findDeps).edges) {
+          edgeList.emplace_back(BuildSubclassListJob::EdgeToSplit{cls, s});
+        }
+      } else {
+        splitList.emplace_back(it->second->name);
+      }
+    };
+
+    out.buckets.emplace_back();
+    for (auto const& w : work) {
+      out.buckets.back().emplace_back();
+      auto& bucket = out.buckets.back().back();
+      for (auto const cls : w.classes) {
+        add(cls, bucket.classes, bucket.splits, bucket.edges);
+      }
+      for (auto const cls : w.deps) {
+        add(cls, bucket.deps, bucket.splitDeps, bucket.edges);
+      }
+
+      std::sort(
+        begin(bucket.edges), end(bucket.edges),
+        [] (const BuildSubclassListJob::EdgeToSplit& a,
+            const BuildSubclassListJob::EdgeToSplit& b) {
+          if (string_data_lti{}(a.cls, b.cls)) return true;
+          if (string_data_lti{}(b.cls, a.cls)) return false;
+          return string_data_lti{}(a.split, b.split);
+        }
+      );
+    }
+
+    // Update the processed set. We have to defer that until here
+    // because we'd check it when building the buckets.
+    processed.insert(begin(markProcessed), end(markProcessed));
+  }
+
+  // Keep all split nodes created in the output
+  for (auto& [name, p] : splitPtrs) out.allSplits.emplace(name, std::move(p));
+
+  if (Trace::moduleEnabled(Trace::hhbbc_index, 5)) {
+    for (size_t round = 0; round < out.buckets.size(); ++round) {
+      auto const& r = out.buckets[round];
+      for (size_t i = 0; i < r.size(); ++i) {
+        auto const& bucket = r[i];
+        FTRACE(5, "build subclass lists round #{} work item #{}:\n", round, i);
+        FTRACE(5, "  classes ({}):\n", bucket.classes.size());
+        for (auto const DEBUG_ONLY c : bucket.classes) FTRACE(6, "    {}\n", c);
+        FTRACE(5, "  splits ({}):\n", bucket.splits.size());
+        for (auto const DEBUG_ONLY s : bucket.splits) FTRACE(6, "    {}\n", s);
+        FTRACE(5, "  deps ({}):\n", bucket.deps.size());
+        for (auto const DEBUG_ONLY d : bucket.deps) FTRACE(6, "    {}\n", d);
+        FTRACE(5, "  split deps ({}):\n", bucket.splitDeps.size());
+        for (auto const DEBUG_ONLY s : bucket.splitDeps) {
+          FTRACE(6, "    {}\n", s);
+        }
+        FTRACE(5, "  edges ({}):\n", bucket.edges.size());
+        for (DEBUG_ONLY auto const& e : bucket.edges) {
+          FTRACE(6, "    {} -> {}\n", e.cls, e.split);
+        }
+      }
+    }
+  }
+
+  return out;
+}
+
+void build_subclass_lists(IndexData& index, SubclassMetadata meta) {
+  trace_time tracer{"build subclass lists", index.sample};
+
+  using namespace folly::gen;
+
+  // Mapping of splits to their Ref. We only upload a split when we're
+  // going to run a job which it is part of the output.
+  ISStringToOneT<UniquePtrRef<BuildSubclassListJob::Split>> splitsToRefs;
+
+  // Use the metadata to assign to rounds and buckets.
+  auto work = build_subclass_lists_assign(std::move(meta));
+
+  // We need to defer updates to data structures until after all the
+  // jobs in a round have completed. Otherwise we could update a ref
+  // to a class at the same time another thread is reading it.
+  struct Updates {
+    std::vector<std::pair<SString, UniquePtrRef<ClassInfo2>>> classes;
+    std::vector<
+      std::pair<SString, UniquePtrRef<BuildSubclassListJob::Split>>
+    > splits;
+  };
+
+  auto const run = [&] (SubclassWork::Bucket bucket) -> coro::Task<Updates> {
+    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+
+    if (bucket.classes.empty() && bucket.splits.empty()) {
+      assertx(bucket.deps.empty());
+      assertx(bucket.splitDeps.empty());
+      HPHP_CORO_RETURN(Updates{});
+    }
+
+    // We shouldn't get closures or Closure in any of this.
+    if (debug) {
+      for (auto const c : bucket.classes) {
+        always_assert(!c->isame(s_Closure.get()));
+        always_assert(!is_closure_name(c));
+      }
+      for (auto const c : bucket.deps) {
+        always_assert(!c->isame(s_Closure.get()));
+        always_assert(!is_closure_name(c));
+      }
+    }
+
+    auto classes = from(bucket.classes)
+      | map([&] (SString c) { return index.classInfoRefs.at(c); })
+      | as<std::vector>();
+    auto deps = from(bucket.deps)
+      | map([&] (SString c) { return index.classInfoRefs.at(c); })
+      | as<std::vector>();
+    auto splits = from(bucket.splits)
+      | map([&] (SString s) {
+          std::unique_ptr<BuildSubclassListJob::Split> split =
+            std::move(work.allSplits.at(s));
+          assertx(split);
+          return split;
+        })
+      | as<std::vector>();
+    auto splitDeps = from(bucket.splitDeps)
+      | map([&] (SString s) { return splitsToRefs.at(s); })
+      | as<std::vector>();
+
+    // ClassInfos and any dependency splits should already be
+    // stored. Any splits as output of the job, or edges need to be
+    // uploaded, however.
+    auto [splitRefs, edges, config] = HPHP_CORO_AWAIT(coro::collect(
+      index.client->storeMulti(std::move(splits)),
+      index.client->storeMulti(std::move(bucket.edges)),
+      index.configRef->getCopy()
+    ));
+
+    Client::ExecMetadata metadata{
+      .job_key = folly::sformat(
+        "build subclass list {}",
+        bucket.classes.empty() ? bucket.splits[0] : bucket.classes[0]
+      )
+    };
+
+    auto results = HPHP_CORO_AWAIT(
+      index.client->exec(
+        s_buildSubclassJob,
+        std::move(config),
+        singleton_vec(
+          std::make_tuple(
+            std::move(classes),
+            std::move(deps),
+            std::move(splitRefs),
+            std::move(splitDeps),
+            std::move(edges)
+          )
+        ),
+        std::move(metadata)
+      )
+    );
+    // Every job is a single work-unit, so we should only ever get one
+    // result for each one.
+    assertx(results.size() == 1);
+    auto& [cinfoRefs, outSplitRefs] = results[0];
+    assertx(cinfoRefs.size() == bucket.classes.size());
+    assertx(outSplitRefs.size() == bucket.splits.size());
+
+    Updates updates;
+    for (size_t i = 0, size = bucket.classes.size(); i < size; ++i) {
+      updates.classes.emplace_back(bucket.classes[i], cinfoRefs[i]);
+    }
+    for (size_t i = 0, size = bucket.splits.size(); i < size; ++i) {
+      updates.splits.emplace_back(bucket.splits[i], outSplitRefs[i]);
+    }
+    HPHP_CORO_MOVE_RETURN(updates);
+  };
+
+  trace_time tracer2{"build subclass lists work"};
+  tracer2.ignore_client_stats();
+
+  for (auto& round : work.buckets) {
+    // In each round, run all of the work for each bucket
+    // simultaneously, gathering up updates from each job.
+    auto const updates = coro::wait(coro::collectRange(
+      from(round)
+        | move
+        | map([&] (SubclassWork::Bucket&& b) {
+            return run(std::move(b)).scheduleOn(index.executor->sticky());
+          })
+        | as<std::vector>()
+    ));
+
+    // Apply the updates to ClassInfo refs. We can do this
+    // concurrently because every ClassInfo is already in the map, so
+    // we can update in place (without mutating the map).
+    parallel::for_each(
+      updates,
+      [&] (const Updates& u) {
+        for (auto const& [name, ref] : u.classes) {
+          index.classInfoRefs.at(name) = ref;
+        }
+      }
+    );
+    // However updating splitsToRefs cannot be, because we're mutating
+    // the map by inserting into it. However there's a relatively
+    // small number of splits, so this should be fine.
+    for (auto const& u : updates) {
+      for (auto const& [name, ref] : u.splits) {
+        always_assert(splitsToRefs.emplace(name, ref).second);
+      }
+    }
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -8070,6 +9518,7 @@ IndexFlattenMetadata make_remote(IndexData& index,
     if (cls.closureContext) {
       flattenMeta.cls[cls.closureContext].closures.emplace_back(cls.name);
     }
+    meta.isClosure = cls.isClosure;
     meta.deps = std::move(cls.dependencies);
     meta.idx = flattenMeta.allCls.size();
     flattenMeta.allCls.emplace_back(cls.name);
@@ -8169,6 +9618,19 @@ void make_class_infos_local(IndexData& index,
   }
   index.allClassInfos.shrink_to_fit();
 
+  // Set AttrNoOverride to true for all methods. If we determine it's
+  // actually overridden below, we'll clear it.
+  parallel::for_each(
+    index.program->classes,
+    [&] (std::unique_ptr<php::Class>& cls) {
+      for (auto& m : cls->methods) {
+        assertx(!(m->attrs & AttrNoOverride));
+        if (is_special_method_name(m->name)) continue;
+        attribute_setter(m->attrs, true, AttrNoOverride);
+      }
+    }
+  );
+
   auto const get = [&] (SString name) {
     auto const it = index.classInfo.find(name);
     always_assert_flog(
@@ -8227,6 +9689,13 @@ void make_class_infos_local(IndexData& index,
         std::vector<std::pair<SString, MethTabEntry>> methods;
         methods.reserve(cinfo->methods.size());
         for (auto const& [name, mte] : rcinfo->methods) {
+          if (!(mte.attrs & AttrNoOverride)) {
+            attribute_setter(
+              func_from_meth_ref(index, mte.meth())->attrs,
+              false,
+              AttrNoOverride
+            );
+          }
           methods.emplace_back(name, mte);
         }
         std::sort(
@@ -8239,6 +9708,21 @@ void make_class_infos_local(IndexData& index,
         cinfo->methods.shrink_to_fit();
       }
 
+      for (auto const sub : rcinfo->subclassList) {
+        cinfo->subclassList.emplace_back(get(sub));
+      }
+      std::sort(begin(cinfo->subclassList), end(cinfo->subclassList));
+
+      cinfo->hasConstProp = rcinfo->hasConstProp;
+      cinfo->hasReifiedParent = rcinfo->hasReifiedParent;
+      cinfo->subHasConstProp = rcinfo->subHasConstProp;
+      cinfo->isMocked = rcinfo->isMocked;
+      cinfo->isSubMocked = rcinfo->isSubMocked;
+      cinfo->hasRegularSubclass = rcinfo->hasRegularSubclass;
+      cinfo->hasNonRegularSubclass = rcinfo->hasNonRegularSubclass;
+
+      const_cast<php::Class*>(cinfo->cls)->attrs = rcinfo->attrs;
+
       if (!rcinfo->extraMethods.empty()) {
         // This is rare. Only happens with unflattened traits, so we
         // taking a lock here is fine.
@@ -8248,9 +9732,6 @@ void make_class_infos_local(IndexData& index,
           extra.emplace(func_from_meth_ref(index, meth));
         }
       }
-
-      cinfo->hasConstProp = rcinfo->hasConstProp;
-      cinfo->hasReifiedParent = rcinfo->hasReifiedParent;
 
       // Free memory as we go.
       rcinfo.reset();
@@ -8465,7 +9946,8 @@ Index::Index(Input input,
     std::move(client),
     std::move(dispose)
   );
-  flatten_classes(*m_data, std::move(flattenMeta));
+  auto subclassMeta = flatten_classes(*m_data, std::move(flattenMeta));
+  build_subclass_lists(*m_data, std::move(subclassMeta));
 
   make_local(*m_data);
 
@@ -8474,14 +9956,6 @@ Index::Index(Input input,
   // not). This avoids that.
   m_data->funcInfo = decltype(m_data->funcInfo)(m_data->nextFuncId);
 
-  // Part of the index building routines happens before the various asserted
-  // index invariants hold.  These each may depend on computations from
-  // previous functions, so be careful changing the order here.
-  compute_subclass_list(*m_data);
-  clean_86reifiedinit_methods(*m_data); // uses the base class lists
-  mark_no_override_methods(*m_data);
-  find_mocked_classes(*m_data);
-  mark_const_props(*m_data);
   auto const logging = Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
   m_data->compute_iface_vtables = std::thread([&] {
       HphpSessionAndThread _{Treadmill::SessionKind::HHBBC};
@@ -8493,7 +9967,6 @@ Index::Index(Input input,
   );
   define_func_families(*m_data);        // AttrNoOverride, iface_vtables,
                                         // subclass_list
-  mark_no_override_classes(*m_data);
   check_invariants(*m_data);
 
   trace_time tracer_2("initialize return types", sample);
@@ -12004,18 +13477,8 @@ void PublicSPropMutations::mergeUnknown(Context ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
-template<>
-struct BlobEncoderHelper<std::unique_ptr<HHBBC::ClassInfo2>> {
-  template <typename SerDe>
-  static void serde(SerDe& sd, std::unique_ptr<HHBBC::ClassInfo2>& p) {
-    if constexpr (SerDe::deserializing) {
-      p = std::make_unique<HHBBC::ClassInfo2>();
-    } else {
-      assertx(p);
-    }
-    sd(*p);
-  }
-};
+MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::ClassInfo2);
+MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::BuildSubclassListJob::Split);
 
 //////////////////////////////////////////////////////////////////////
 

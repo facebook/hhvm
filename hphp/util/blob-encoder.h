@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/util/compact-vector.h"
+#include "hphp/util/copy-ptr.h"
 #include "hphp/util/optional.h"
 
 #include <folly/sorted_vector_types.h>
@@ -25,6 +26,7 @@
 #include <folly/container/F14Set.h>
 
 #include <filesystem>
+#include <memory>
 #include <set>
 #include <type_traits>
 #include <unordered_map>
@@ -899,6 +901,51 @@ private:
   } else {                                      \
     SD(X);                                      \
   }
+
+//////////////////////////////////////////////////////////////////////
+
+namespace detail {
+
+// Helpers to stamp out BlobEncoderHelpers for unique_ptr and
+// copy_ptrs wrapping the above types.
+
+template <typename T> struct UPBlobImpl {
+  template <typename SerDe, typename... Extra>
+  static void serde(SerDe& sd, std::unique_ptr<T>& p, Extra... extra) {
+    if constexpr (SerDe::deserializing) {
+      p = std::make_unique<T>();
+    } else {
+      assertx(p);
+    }
+    sd(*p, extra...);
+  }
+};
+
+template <typename T> struct CPBlobImpl {
+  template <typename SerDe, typename... Extra>
+  static void serde(SerDe& sd, copy_ptr<T>& p, Extra... extra) {
+    if constexpr (SerDe::deserializing) {
+      sd(*p.emplace(), extra...);
+    } else {
+      assertx(p);
+      sd(*p, extra...);
+    }
+  }
+};
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+#define MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(T)                    \
+  template<>                                                    \
+  struct BlobEncoderHelper<std::unique_ptr<T>>                  \
+    : public detail::UPBlobImpl<T> {};
+
+#define MAKE_COPY_PTR_BLOB_SERDE_HELPER(T)                      \
+  template<>                                                    \
+  struct BlobEncoderHelper<copy_ptr<T>>                         \
+    : public detail::CPBlobImpl<T> {};
 
 //////////////////////////////////////////////////////////////////////
 

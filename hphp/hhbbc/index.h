@@ -702,6 +702,7 @@ struct Index {
       LSString name;
       std::vector<SString> dependencies;
       LSString closureContext;
+      bool isClosure;
     };
 
     struct FuncMeta {

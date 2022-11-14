@@ -52,6 +52,11 @@ bool is_closure_base(const php::Class&);
 bool is_closure(const php::Class&);
 
 /*
+ * Whether the given name is that of a closure.
+ */
+bool is_closure_name(SString);
+
+/*
  * Returns whether a clsName is a class with a magic toBoolean method.
  */
 bool has_magic_bool_conversion(SString clsName);

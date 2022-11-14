@@ -1421,13 +1421,13 @@ template <typename T> T Client::unblobify(std::string&& blob) {
 }
 
 // Turn the given value into a blob.
-template <typename T> std::string Client::blobify(T&& t) {
+template <typename T> std::string Client::blobify(const T& t) {
   using BaseT =
     typename std::remove_cv<typename std::remove_reference<T>::type>::type;
   static_assert(!detail::IsMarker<BaseT>::value,
                 "Special markers cannot be blobified");
   if constexpr (std::is_same<BaseT, std::string>::value) {
-    return std::forward<T>(t);
+    return t;
   } else {
     BlobEncoder encoder;
     encoder(t);

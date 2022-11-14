@@ -695,7 +695,7 @@ private:
   coro::Task<T> tryWithFallback(const F&, bool&, bool noFallback = false);
 
   template <typename T> static T unblobify(std::string&&);
-  template <typename T> static std::string blobify(T&&);
+  template <typename T> static std::string blobify(const T&);
 
   static const std::array<OutputType, 1> s_valOutputType;
   static const std::array<OutputType, 1> s_vecOutputType;

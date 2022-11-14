@@ -1,6 +1,6 @@
 # Test making closures
 
-.class [no_override unique] ClosureTest extends Closure {
+.class [no_override unique] Closure$Test extends Closure {
   .property [private] x = uninit;
   .method [public static] __invoke() isClosureBody {
     .declvars $x;
@@ -17,7 +17,7 @@
   NullUninit
   NullUninit
   CUGetL $x
-  CreateCl 1 "ClosureTest"
+  CreateCl 1 "Closure$Test"
 
   FCallFunc <> 0 1 "" "" - ""
   Print

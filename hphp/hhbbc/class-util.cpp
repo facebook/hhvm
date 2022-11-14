@@ -25,6 +25,8 @@
 
 #include "hphp/runtime/vm/preclass-emitter.h"
 
+#include <boost/algorithm/string/predicate.hpp>
+
 namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
@@ -80,6 +82,10 @@ bool is_closure_base(const php::Class& c) {
 
 bool is_closure(const php::Class& c) {
   return c.parentName && c.parentName->isame(s_Closure.get());
+}
+
+bool is_closure_name(SString name) {
+  return boost::starts_with(name->slice(), "Closure$");
 }
 
 bool is_unused_trait(const php::Class& c) {

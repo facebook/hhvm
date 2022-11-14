@@ -708,63 +708,18 @@ bool check(const Program&);
 
 //////////////////////////////////////////////////////////////////////
 
-namespace detail {
-
-// Helpers to stamp out BlobEncoderHelpers for unique_ptr and
-// copy_ptrs wrapping the above types.
-
-template <typename T> struct UPBlobImpl {
-  template <typename SerDe, typename... Extra>
-  static void serde(SerDe& sd, std::unique_ptr<T>& p, Extra... extra) {
-    if constexpr (SerDe::deserializing) {
-      p = std::make_unique<T>();
-    } else {
-      assertx(p);
-    }
-    sd(*p, extra...);
-  }
-};
-
-template <typename T> struct CPBlobImpl {
-  template <typename SerDe, typename... Extra>
-  static void serde(SerDe& sd, copy_ptr<T>& p, Extra... extra) {
-    if constexpr (SerDe::deserializing) {
-      sd(*p.emplace(), extra...);
-    } else {
-      assertx(p);
-      sd(*p, extra...);
-    }
-  }
-};
-
 }
 
 //////////////////////////////////////////////////////////////////////
 
-}
-
-//////////////////////////////////////////////////////////////////////
-
-#define MAKE_UNIQUE_PTR_BLOB_HELPER(T)                          \
-  template<>                                                    \
-  struct BlobEncoderHelper<std::unique_ptr<HHBBC::php::T>>      \
-    : public HHBBC::php::detail::UPBlobImpl<HHBBC::php::T> {};
-
-#define MAKE_COPY_PTR_BLOB_HELPER(T)                            \
-  template<>                                                    \
-  struct BlobEncoderHelper<copy_ptr<HHBBC::php::T>>             \
-    : public HHBBC::php::detail::CPBlobImpl<HHBBC::php::T> {};
-
-MAKE_COPY_PTR_BLOB_HELPER(Block)
-MAKE_UNIQUE_PTR_BLOB_HELPER(Unit)
-MAKE_UNIQUE_PTR_BLOB_HELPER(Func)
-MAKE_UNIQUE_PTR_BLOB_HELPER(Class)
-MAKE_UNIQUE_PTR_BLOB_HELPER(Constant)
-MAKE_UNIQUE_PTR_BLOB_HELPER(TypeAlias)
-MAKE_UNIQUE_PTR_BLOB_HELPER(Module)
-MAKE_UNIQUE_PTR_BLOB_HELPER(FatalInfo)
-#undef MAKE_UNIQUE_PTR_BLOB_HELPER
-#undef MAKE_COPY_PTR_BLOB_HELPER
+MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::php::Block)
+MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Unit)
+MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Func)
+MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Class)
+MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Constant)
+MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::TypeAlias)
+MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Module)
+MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::FatalInfo)
 
 //////////////////////////////////////////////////////////////////////
 

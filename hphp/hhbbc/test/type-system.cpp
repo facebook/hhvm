@@ -73,9 +73,9 @@ namespace {
 const StaticString s_test("test");
 const StaticString s_C("C");
 
-const StaticString s_ChildClosure1("Closure;ChildClosure1");
-const StaticString s_ChildClosure2("Closure;ChildClosure2");
-const StaticString s_ChildClosure3("Closure;ChildClosure3");
+const StaticString s_ChildClosure1("Closure$ChildClosure1");
+const StaticString s_ChildClosure2("Closure$ChildClosure2");
+const StaticString s_ChildClosure3("Closure$ChildClosure3");
 
 #define TEST_CLASSES                            \
   Y(Closure)                                    \
@@ -261,19 +261,19 @@ Index make_index() {
     .class [unique builtin] Closure {
     }
 
-    .class [unique] Closure;ChildClosure1 extends Closure {
+    .class [unique] Closure$ChildClosure1 extends Closure {
       .method [public static] __invoke() isClosureBody {
         Null
         RetC
       }
     }
-    .class [unique] Closure;ChildClosure2 extends Closure {
+    .class [unique] Closure$ChildClosure2 extends Closure {
       .method [public static] __invoke() isClosureBody {
         Null
         RetC
       }
     }
-    .class [unique] Closure;ChildClosure3 extends Closure {
+    .class [unique] Closure$ChildClosure3 extends Closure {
       .method [public static] __invoke() isClosureBody {
         Null
         RetC
@@ -692,13 +692,15 @@ Index make_index() {
   for (auto& c : parse.classes) {
     auto const name = c->name;
     auto deps = Index::Input::makeDeps(*c);
+    auto const isClosure = is_closure(*c);
     auto stored = coro::wait(client->store(std::move(c)));
     indexInput.classes.emplace_back(
       Index::Input::ClassMeta{
         std::move(stored),
         name,
         std::move(deps),
-        nullptr
+        nullptr,
+        isClosure
       }
     );
   }

@@ -55,6 +55,14 @@ consistently_bucketize(const std::vector<SString>& items, size_t bucketSize) {
     buckets[indices[i]].emplace_back(items[i]);
   }
 
+  // Sort each bucket to keep things consistent.
+  parallel::for_each(
+    buckets,
+    [] (std::vector<SString>& bucket) {
+      std::sort(begin(bucket), end(bucket), string_data_lti{});
+    }
+  );
+
   // Finally, remove any empty buckets.
   buckets.erase(
     std::remove_if(

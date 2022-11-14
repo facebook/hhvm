@@ -524,18 +524,22 @@ struct WholeProgramInput::Key::Impl {
   LSString name;
   LSString context;
   std::vector<SString> dependencies;
+  bool isClosure;
 
   Impl(Type type,
        SString name,
        SString context,
-       std::vector<SString> dependencies)
+       std::vector<SString> dependencies,
+       bool isClosure)
     : type{type}
     , name{name}
     , context{context}
     , dependencies{std::move(dependencies)}
+    , isClosure{isClosure}
   {
     assertx(IMPLIES(!dependencies.empty(), type == Type::Class));
     assertx(IMPLIES(context, type == Type::Func || type == Type::Class));
+    assertx(IMPLIES(isClosure, type == Type::Class));
   }
 };
 struct WholeProgramInput::Value::Impl {
@@ -571,11 +575,12 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
                         SString name,
                         SString context,
                         std::vector<SString> deps,
+                        bool isClosure,
                         auto v) {
     Key key;
     Value value;
     key.m_impl.reset(
-      new Key::Impl{type, name, context, std::move(deps)}
+      new Key::Impl{type, name, context, std::move(deps), isClosure}
     );
     value.m_impl.reset(new Value::Impl{std::move(v)});
     out.emplace_back(std::move(key), std::move(value));
@@ -589,6 +594,7 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
           makeStaticString(fi->fatalMsg),
           nullptr,
           {},
+          false,
           nullptr
         );
         return out;
@@ -600,18 +606,21 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
       name,
       nullptr,
       {},
+      false,
       std::move(parsed.unit)
     );
   }
   for (auto& c : parsed.classes) {
     auto const name = c->name;
     auto const context = c->closureContextCls;
+    auto const isClosure = is_closure(*c);
     auto deps = Index::Input::makeDeps(*c);
     add(
       Key::Impl::Type::Class,
       name,
       context,
       std::move(deps),
+      isClosure,
       std::move(c)
     );
   }
@@ -624,6 +633,7 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
       name,
       context,
       {},
+      false,
       std::move(f)
     );
   }
@@ -636,6 +646,7 @@ void WholeProgramInput::Key::serde(BlobEncoder& sd) const {
   if (m_impl->type == Impl::Type::Class) {
     sd(m_impl->context);
     sd(m_impl->dependencies);
+    sd(m_impl->isClosure);
   } else if (m_impl->type == Impl::Type::Func) {
     sd(m_impl->context);
   }
@@ -645,10 +656,12 @@ void WholeProgramInput::Key::serde(BlobDecoder& sd) {
   SString name;
   SString context{nullptr};
   std::vector<SString> dependencies;
+  bool isClosure{false};
   sd(type)(name);
   if (type == Impl::Type::Class) {
     sd(context);
     sd(dependencies);
+    sd(isClosure);
   } else if (type == Impl::Type::Func) {
     sd(context);
   }
@@ -657,7 +670,8 @@ void WholeProgramInput::Key::serde(BlobDecoder& sd) {
       type,
       name,
       context,
-      std::move(dependencies)
+      std::move(dependencies),
+      isClosure
     }
   );
 }
@@ -711,7 +725,8 @@ Index::Input make_index_input(WholeProgramInput input) {
                p.second.cast<std::unique_ptr<php::Class>>(),
                p.first.m_impl->name,
                std::move(p.first.m_impl->dependencies),
-               p.first.m_impl->context
+               p.first.m_impl->context,
+               p.first.m_impl->isClosure
              }
            );
            break;

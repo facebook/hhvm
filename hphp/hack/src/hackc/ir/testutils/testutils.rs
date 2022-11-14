@@ -27,21 +27,20 @@ use ir_core::StringInterner;
 ///
 pub fn build_test_func<'a>(
     testcase: &[(&str, Vec<&str>, Vec<&str>)],
-) -> (Func<'a>, StringInterner) {
-    let mut strings = StringInterner::default();
-    let func = build_test_func_with_strings(testcase, &mut strings);
+) -> (Func<'a>, Arc<StringInterner>) {
+    let strings = Arc::new(StringInterner::default());
+    let func = build_test_func_with_strings(testcase, Arc::clone(&strings));
     (func, strings)
 }
 
 pub fn build_test_func_with_strings<'a>(
     testcase: &[(&str, Vec<&str>, Vec<&str>)],
-    strings: &mut StringInterner,
+    strings: Arc<StringInterner>,
 ) -> Func<'a> {
     // Create a function whose CFG matches testcase.
     let loc = LocId::NONE;
 
-    let tmp_strings = Arc::new(StringInterner::read_only());
-    FuncBuilder::build_func(Arc::clone(&tmp_strings), |fb| {
+    FuncBuilder::build_func(strings, |fb| {
         let mut name_to_bid = HashMap::with_capacity_and_hasher(testcase.len(), Default::default());
         for (i, (name, _, _)) in testcase.iter().enumerate() {
             name_to_bid.insert(
@@ -69,7 +68,7 @@ pub fn build_test_func_with_strings<'a>(
                 .collect();
 
             for target in call_targets {
-                let target = FunctionId::from_str(target, strings);
+                let target = FunctionId::from_str(target, &fb.strings);
                 fb.emit(Instr::simple_call(target, &[], loc));
             }
 

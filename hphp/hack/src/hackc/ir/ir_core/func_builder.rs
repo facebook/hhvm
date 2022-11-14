@@ -107,7 +107,7 @@ impl<'a> FuncBuilder<'a> {
         F: FnOnce(&mut FuncBuilder<'a>) -> R,
     {
         let tmp_strings = Arc::new(StringInterner::read_only());
-        Self::borrow_func(borrowed, Arc::clone(&tmp_strings), f)
+        Self::borrow_func(borrowed, tmp_strings, f)
     }
 
     pub fn add_loc(&mut self, loc: SrcLoc) -> LocId {

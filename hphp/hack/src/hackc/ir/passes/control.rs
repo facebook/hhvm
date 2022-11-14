@@ -158,6 +158,8 @@ fn forward_edge(
 
 #[cfg(test)]
 mod test {
+    use std::sync::Arc;
+
     use ir_core::func::DefaultValue;
     use ir_core::BlockId;
     use ir_core::Instr;
@@ -166,7 +168,7 @@ mod test {
     use ir_core::StringInterner;
     use ir_core::TypeInfo;
 
-    fn mk_param<'a>(name: &str, dv: BlockId, strings: &mut StringInterner) -> Param<'a> {
+    fn mk_param<'a>(name: &str, dv: BlockId, strings: &StringInterner) -> Param<'a> {
         Param {
             name: strings.intern_str(name),
             is_variadic: false,
@@ -199,16 +201,12 @@ mod test {
 
     #[test]
     fn test2() {
-        let mut strings = StringInterner::default();
         // 'a' forwards directly to 'c'
-        let mut func = testutils::build_test_func_with_strings(
-            &[
-                ("a", vec!["ca"], vec!["b"]),
-                ("b", vec![], vec!["c"]),
-                ("c", vec!["cc"], vec![]),
-            ],
-            &mut strings,
-        );
+        let (mut func, strings) = testutils::build_test_func(&[
+            ("a", vec!["ca"], vec!["b"]),
+            ("b", vec![], vec!["c"]),
+            ("c", vec!["cc"], vec![]),
+        ]);
 
         let changed = super::run(&mut func);
         assert!(changed);
@@ -219,24 +217,20 @@ mod test {
                 ("a", vec!["ca"], vec!["c"]),
                 ("c", vec!["cc"], vec![])
             ],
-            &mut strings,
+            Arc::clone(&strings),
         );
         testutils::assert_func_struct_eq(&func, &expected, &strings);
     }
 
     #[test]
     fn test3() {
-        let mut strings = StringInterner::default();
         // Can't forward because it would create a critical section.
-        let mut func = testutils::build_test_func_with_strings(
-            &[
-                ("a", vec!["ca"], vec!["b", "c"]),
-                ("b", vec![], vec!["d"]),
-                ("c", vec![], vec!["d"]),
-                ("d", vec!["cd"], vec![]),
-            ],
-            &mut strings,
-        );
+        let (mut func, strings) = testutils::build_test_func(&[
+            ("a", vec!["ca"], vec!["b", "c"]),
+            ("b", vec![], vec!["d"]),
+            ("c", vec![], vec!["d"]),
+            ("d", vec!["cd"], vec![]),
+        ]);
         let expected = func.clone();
 
         let changed = super::run(&mut func);
@@ -247,18 +241,14 @@ mod test {
 
     #[test]
     fn test4() {
-        let mut strings = StringInterner::default();
         // Expect 'c' to be forwarded directly to 'e'.
-        let mut func = testutils::build_test_func_with_strings(
-            &[
-                ("a", vec!["ca"], vec!["b", "c"]),
-                ("b", vec![], vec!["e"]),
-                ("c", vec![], vec!["d"]),
-                ("d", vec![], vec!["e"]),
-                ("e", vec!["cd"], vec![]),
-            ],
-            &mut strings,
-        );
+        let (mut func, strings) = testutils::build_test_func(&[
+            ("a", vec!["ca"], vec!["b", "c"]),
+            ("b", vec![], vec!["e"]),
+            ("c", vec![], vec!["d"]),
+            ("d", vec![], vec!["e"]),
+            ("e", vec!["cd"], vec![]),
+        ]);
 
         let changed = super::run(&mut func);
         assert!(changed);
@@ -270,23 +260,19 @@ mod test {
                 ("c", vec![], vec!["e"]),
                 ("e", vec!["cd"], vec![]),
             ],
-            &mut strings,
+            Arc::clone(&strings),
         );
         testutils::assert_func_struct_eq(&func, &expected, &strings);
     }
 
     #[test]
     fn test5() {
-        let mut strings = StringInterner::default();
         // Expect 'entry' to be removed.
-        let mut func = testutils::build_test_func_with_strings(
-            &[
-                ("entry", vec![], vec!["b"]),
-                ("b", vec!["cb"], vec!["c"]),
-                ("c", vec![], vec![]),
-            ],
-            &mut strings,
-        );
+        let (mut func, strings) = testutils::build_test_func(&[
+            ("entry", vec![], vec!["b"]),
+            ("b", vec!["cb"], vec!["c"]),
+            ("c", vec![], vec![]),
+        ]);
 
         let changed = super::run(&mut func);
         assert!(changed);
@@ -297,25 +283,21 @@ mod test {
                 ("b", vec!["cb"], vec!["c"]),
                 ("c", vec![], vec![])
             ],
-            &mut strings,
+            Arc::clone(&strings),
         );
         testutils::assert_func_struct_eq(&func, &expected, &strings);
     }
 
     #[test]
     fn test6() {
-        let mut strings = StringInterner::default();
         // We can forward c -> e but still need b -> d -> e because of critedge.
-        let mut func = testutils::build_test_func_with_strings(
-            &[
-                ("a", vec![], vec!["b", "c"]),
-                ("b", vec![], vec!["d", "e"]),
-                ("c", vec![], vec!["d"]),
-                ("d", vec![], vec!["e"]),
-                ("e", vec![], vec![]),
-            ],
-            &mut strings,
-        );
+        let (mut func, strings) = testutils::build_test_func(&[
+            ("a", vec![], vec!["b", "c"]),
+            ("b", vec![], vec!["d", "e"]),
+            ("c", vec![], vec!["d"]),
+            ("d", vec![], vec!["e"]),
+            ("e", vec![], vec![]),
+        ]);
 
         let changed = super::run(&mut func);
         assert!(changed);
@@ -328,25 +310,21 @@ mod test {
                 ("d", vec![], vec!["e"]),
                 ("e", vec![], vec![]),
             ],
-            &mut strings,
+            Arc::clone(&strings),
         );
         testutils::assert_func_struct_eq(&func, &expected, &strings);
     }
 
     #[test]
     fn test7() {
-        let mut strings = StringInterner::default();
         // We expect to skip 'b' and 'c'
-        let mut func = testutils::build_test_func_with_strings(
-            &[
-                ("a", vec![], vec!["b", "c"]),
-                ("b", vec![], vec!["d"]),
-                ("c", vec![], vec!["e"]),
-                ("d", vec![], vec![]),
-                ("e", vec![], vec![]),
-            ],
-            &mut strings,
-        );
+        let (mut func, strings) = testutils::build_test_func(&[
+            ("a", vec![], vec!["b", "c"]),
+            ("b", vec![], vec!["d"]),
+            ("c", vec![], vec!["e"]),
+            ("d", vec![], vec![]),
+            ("e", vec![], vec![]),
+        ]);
 
         let changed = super::run(&mut func);
         assert!(changed);
@@ -357,26 +335,22 @@ mod test {
                 ("d", vec![], vec![]),
                 ("e", vec![], vec![]),
             ],
-            &mut strings,
+            Arc::clone(&strings),
         );
         testutils::assert_func_struct_eq(&func, &expected, &strings);
     }
 
     #[test]
     fn test8() {
-        let mut strings = StringInterner::default();
         // We expect to skip the entry block.
-        let mut func = testutils::build_test_func_with_strings(
-            &[
-                ("a", vec![], vec!["c"]),
-                ("b", vec![], vec!["c"]),
-                ("c", vec![], vec!["d", "e"]),
-                ("d", vec![], vec![]),
-                ("e", vec![], vec![]),
-            ],
-            &mut strings,
-        );
-        func.params.push(mk_param("x", BlockId(1), &mut strings));
+        let (mut func, strings) = testutils::build_test_func(&[
+            ("a", vec![], vec!["c"]),
+            ("b", vec![], vec!["c"]),
+            ("c", vec![], vec!["d", "e"]),
+            ("d", vec![], vec![]),
+            ("e", vec![], vec![]),
+        ]);
+        func.params.push(mk_param("x", BlockId(1), &strings));
         *func.instr_mut(InstrId(1)) = Instr::enter(BlockId(2), ir_core::LocId::NONE);
 
         eprintln!("FUNC:\n{}", print::DisplayFunc(&func, true, &strings));
@@ -391,11 +365,9 @@ mod test {
                 ("d", vec![], vec![]),
                 ("e", vec![], vec![]),
             ],
-            &mut strings,
+            Arc::clone(&strings),
         );
-        expected
-            .params
-            .push(mk_param("x", BlockId(1), &mut strings));
+        expected.params.push(mk_param("x", BlockId(1), &strings));
         *expected.instr_mut(InstrId(1)) = Instr::enter(BlockId(0), ir_core::LocId::NONE);
 
         testutils::assert_func_struct_eq(&func, &expected, &strings);

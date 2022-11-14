@@ -35,7 +35,12 @@ public class MyStructField32Patch1 implements TBase, java.io.Serializable, Clone
   private static final TField PUT_FIELD_DESC = new TField("put", TType.MAP, (short)9);
 
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    */
   public Map<String,Integer> assign;
   /**
@@ -250,14 +255,24 @@ public class MyStructField32Patch1 implements TBase, java.io.Serializable, Clone
   }
 
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    */
   public Map<String,Integer> getAssign() {
     return this.assign;
   }
 
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    */
   public MyStructField32Patch1 setAssign(Map<String,Integer> assign) {
     this.assign = assign;

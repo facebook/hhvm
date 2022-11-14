@@ -33,7 +33,12 @@ public class LateDefStructPatch implements TBase, java.io.Serializable, Cloneabl
   private static final TField PATCH_FIELD_DESC = new TField("patch", TType.STRUCT, (short)6);
 
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    */
   public final LateDefStruct assign;
   /**
@@ -107,7 +112,12 @@ public class LateDefStructPatch implements TBase, java.io.Serializable, Cloneabl
   }
 
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    */
   public LateDefStruct getAssign() {
     return this.assign;

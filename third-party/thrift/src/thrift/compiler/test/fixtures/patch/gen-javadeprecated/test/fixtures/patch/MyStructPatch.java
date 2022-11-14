@@ -33,7 +33,12 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
   private static final TField PATCH_FIELD_DESC = new TField("patch", TType.STRUCT, (short)6);
 
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    */
   public MyStruct assign;
   /**
@@ -195,14 +200,24 @@ public class MyStructPatch implements TBase, java.io.Serializable, Cloneable, Co
   }
 
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    */
   public MyStruct getAssign() {
     return this.assign;
   }
 
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    */
   public MyStructPatch setAssign(MyStruct assign) {
     this.assign = assign;

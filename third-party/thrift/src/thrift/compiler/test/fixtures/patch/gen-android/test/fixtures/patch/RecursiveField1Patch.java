@@ -30,7 +30,12 @@ public class RecursiveField1Patch implements TBase, java.io.Serializable, Clonea
   private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
 
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    */
   public final Map<String,Recursive> assign;
   /**
@@ -68,7 +73,12 @@ public class RecursiveField1Patch implements TBase, java.io.Serializable, Clonea
   }
 
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    */
   public Map<String,Recursive> getAssign() {
     return this.assign;

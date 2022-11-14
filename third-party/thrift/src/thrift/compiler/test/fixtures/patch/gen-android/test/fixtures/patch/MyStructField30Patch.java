@@ -35,7 +35,12 @@ public class MyStructField30Patch implements TBase, java.io.Serializable, Clonea
   private static final TField PUT_FIELD_DESC = new TField("put", TType.MAP, (short)9);
 
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    */
   public final Map<String,String> assign;
   /**
@@ -133,7 +138,12 @@ public class MyStructField30Patch implements TBase, java.io.Serializable, Clonea
   }
 
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    */
   public Map<String,String> getAssign() {
     return this.assign;

@@ -34,9 +34,11 @@ public class BytePatch implements TBase, java.io.Serializable, Cloneable, Compar
   private static final TField ADD_FIELD_DESC = new TField("add", TType.BYTE, (short)8);
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public byte assign;
   /**
@@ -163,18 +165,22 @@ public class BytePatch implements TBase, java.io.Serializable, Cloneable, Compar
   }
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public byte getAssign() {
     return this.assign;
   }
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public BytePatch setAssign(byte assign) {
     this.assign = assign;

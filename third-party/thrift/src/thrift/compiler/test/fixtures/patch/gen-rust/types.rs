@@ -131,7 +131,7 @@ pub struct MyDataFieldPatch {
 
 #[derive(Clone, PartialEq)]
 pub struct MyDataPatch {
-    #[doc = "Assigns a value. If set, all other operations are ignored."]
+    #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::boxed::Box<crate::types::MyData>>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
@@ -162,7 +162,7 @@ pub struct InnerUnionFieldPatch {
 
 #[derive(Clone, PartialEq)]
 pub struct InnerUnionPatch {
-    #[doc = "Assigns a value. If set, all other operations are ignored."]
+    #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::boxed::Box<crate::types::InnerUnion>>,
     #[doc = "Clears any set value. Applies first."]
     pub clear: ::std::primitive::bool,
@@ -195,7 +195,7 @@ pub struct MyUnionFieldPatch {
 
 #[derive(Clone, PartialEq)]
 pub struct MyUnionPatch {
-    #[doc = "Assigns a value. If set, all other operations are ignored."]
+    #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::boxed::Box<crate::types::MyUnion>>,
     #[doc = "Clears any set value. Applies first."]
     pub clear: ::std::primitive::bool,
@@ -215,7 +215,7 @@ pub struct MyUnionPatch {
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MyStructField10Patch {
-    #[doc = "Assigns a value. If set, all other operations are ignored."]
+    #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<crate::types::MyEnum>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
@@ -229,7 +229,7 @@ pub struct MyStructField10Patch {
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MyStructField25Patch {
-    #[doc = "Assigns a value. If set, all other operations are ignored."]
+    #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<crate::types::MyEnum>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
@@ -243,7 +243,7 @@ pub struct MyStructField25Patch {
 
 #[derive(Clone, PartialEq)]
 pub struct MyStructField28Patch {
-    #[doc = "Assigns a value. If set, all other operations are ignored."]
+    #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::vec::Vec<::std::primitive::i16>>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
@@ -265,7 +265,7 @@ pub struct MyStructField28Patch {
 
 #[derive(Clone, PartialEq)]
 pub struct MyStructField29Patch {
-    #[doc = "Assigns a value. If set, all other operations are ignored."]
+    #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::collections::BTreeSet<::std::string::String>>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
@@ -283,7 +283,7 @@ pub struct MyStructField29Patch {
 
 #[derive(Clone, PartialEq)]
 pub struct MyStructField30Patch {
-    #[doc = "Assigns a value. If set, all other operations are ignored."]
+    #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::collections::BTreeMap<::std::string::String, ::std::string::String>>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
@@ -307,7 +307,7 @@ pub struct MyStructField30Patch {
 
 #[derive(Clone, PartialEq)]
 pub struct MyStructField31Patch {
-    #[doc = "Assigns a value. If set, all other operations are ignored."]
+    #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::vec::Vec<::std::collections::BTreeMap<::std::string::String, ::std::primitive::i32>>>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
@@ -329,7 +329,7 @@ pub struct MyStructField31Patch {
 
 #[derive(Clone, PartialEq)]
 pub struct MyStructField31Patch1 {
-    #[doc = "Assigns a value. If set, all other operations are ignored."]
+    #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::collections::BTreeMap<::std::string::String, ::std::primitive::i32>>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
@@ -353,7 +353,7 @@ pub struct MyStructField31Patch1 {
 
 #[derive(Clone, PartialEq)]
 pub struct MyStructField32Patch {
-    #[doc = "Assigns a value. If set, all other operations are ignored."]
+    #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::collections::BTreeMap<::std::string::String, ::std::collections::BTreeMap<::std::string::String, ::std::primitive::i32>>>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
@@ -377,7 +377,7 @@ pub struct MyStructField32Patch {
 
 #[derive(Clone, PartialEq)]
 pub struct MyStructField32Patch1 {
-    #[doc = "Assigns a value. If set, all other operations are ignored."]
+    #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::collections::BTreeMap<::std::string::String, ::std::primitive::i32>>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
@@ -443,7 +443,7 @@ pub struct MyStructFieldPatch {
 
 #[derive(Clone, PartialEq)]
 pub struct MyStructPatch {
-    #[doc = "Assigns a value. If set, all other operations are ignored."]
+    #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::boxed::Box<crate::types::MyStruct>>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
@@ -473,7 +473,7 @@ pub struct LateDefStructFieldPatch {
 
 #[derive(Clone, PartialEq)]
 pub struct LateDefStructPatch {
-    #[doc = "Assigns a value. If set, all other operations are ignored."]
+    #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::boxed::Box<crate::types::LateDefStruct>>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
@@ -493,7 +493,7 @@ pub struct LateDefStructPatch {
 
 #[derive(Clone, PartialEq)]
 pub struct RecursiveField1Patch {
-    #[doc = "Assigns a value. If set, all other operations are ignored."]
+    #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::collections::BTreeMap<::std::string::String, crate::types::Recursive>>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
@@ -518,7 +518,7 @@ pub struct RecursiveFieldPatch {
 
 #[derive(Clone, PartialEq)]
 pub struct RecursivePatch {
-    #[doc = "Assigns a value. If set, all other operations are ignored."]
+    #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::boxed::Box<crate::types::Recursive>>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
@@ -549,7 +549,7 @@ pub struct BarFieldPatch {
 
 #[derive(Clone, PartialEq)]
 pub struct BarPatch {
-    #[doc = "Assigns a value. If set, all other operations are ignored."]
+    #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::boxed::Box<crate::types::Bar>>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
@@ -580,7 +580,7 @@ pub struct LoopFieldPatch {
 
 #[derive(Clone, PartialEq)]
 pub struct LoopPatch {
-    #[doc = "Assigns a value. If set, all other operations are ignored."]
+    #[doc = "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned."]
     pub assign: ::std::option::Option<::std::boxed::Box<crate::types::Loop>>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,

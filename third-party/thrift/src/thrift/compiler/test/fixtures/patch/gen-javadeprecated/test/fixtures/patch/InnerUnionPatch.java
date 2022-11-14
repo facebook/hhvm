@@ -33,7 +33,12 @@ public class InnerUnionPatch implements TBase, java.io.Serializable, Cloneable, 
   private static final TField PATCH_FIELD_DESC = new TField("patch", TType.STRUCT, (short)6);
 
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    */
   public InnerUnion assign;
   /**
@@ -195,14 +200,24 @@ public class InnerUnionPatch implements TBase, java.io.Serializable, Cloneable, 
   }
 
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    */
   public InnerUnion getAssign() {
     return this.assign;
   }
 
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    */
   public InnerUnionPatch setAssign(InnerUnion assign) {
     this.assign = assign;

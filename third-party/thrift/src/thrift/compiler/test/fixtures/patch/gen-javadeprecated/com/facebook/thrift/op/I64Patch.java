@@ -34,9 +34,11 @@ public class I64Patch implements TBase, java.io.Serializable, Cloneable, Compara
   private static final TField ADD_FIELD_DESC = new TField("add", TType.I64, (short)8);
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public long assign;
   /**
@@ -163,18 +165,22 @@ public class I64Patch implements TBase, java.io.Serializable, Cloneable, Compara
   }
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public long getAssign() {
     return this.assign;
   }
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public I64Patch setAssign(long assign) {
     this.assign = assign;

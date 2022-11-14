@@ -35,9 +35,11 @@ public class StringPatch implements TBase, java.io.Serializable, Cloneable, Comp
   private static final TField APPEND_FIELD_DESC = new TField("append", TType.STRING, (short)9);
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public String assign;
   /**
@@ -178,18 +180,22 @@ public class StringPatch implements TBase, java.io.Serializable, Cloneable, Comp
   }
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public String getAssign() {
     return this.assign;
   }
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public StringPatch setAssign(String assign) {
     this.assign = assign;

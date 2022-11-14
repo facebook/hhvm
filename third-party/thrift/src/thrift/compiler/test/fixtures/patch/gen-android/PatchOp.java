@@ -13,6 +13,11 @@ import java.util.HashMap;
 public enum PatchOp implements com.facebook.thrift.TEnum {
   /**
    * Set the value. Supersedes all other ops.
+   * 
+   * Note: Due to a limitation in current Thrift protocol encoding schemes,
+   * unions cannot be reliabily distinquished from structs/exceptions, so fields
+   * must be set before assign can change the value, for example via an
+   * `EnsureStruct` or `EnsureUnion` operation.
    */
   Assign(1),
   /**

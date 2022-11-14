@@ -34,9 +34,11 @@ public class FloatPatch implements TBase, java.io.Serializable, Cloneable, Compa
   private static final TField ADD_FIELD_DESC = new TField("add", TType.FLOAT, (short)8);
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public float assign;
   /**
@@ -163,18 +165,22 @@ public class FloatPatch implements TBase, java.io.Serializable, Cloneable, Compa
   }
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public float getAssign() {
     return this.assign;
   }
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public FloatPatch setAssign(float assign) {
     this.assign = assign;

@@ -52,9 +52,11 @@ struct AssignOnlyPatch {}
 }
 struct BoolPatch {
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    *
    * If set, all other patch operations are ignored.
+   *
+   * Note: Only modifies set field values.
    */
   1: optional bool assign;
 
@@ -72,9 +74,11 @@ struct BoolPatch {
 }
 struct BytePatch {
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    *
    * If set, all other patch operations are ignored.
+   *
+   * Note: Only modifies set field values.
    */
   1: optional byte assign;
 
@@ -92,9 +96,11 @@ struct BytePatch {
 }
 struct I16Patch {
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    *
    * If set, all other patch operations are ignored.
+   *
+   * Note: Only modifies set field values.
    */
   1: optional i16 assign;
 
@@ -112,13 +118,15 @@ struct I16Patch {
 }
 struct I32Patch {
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    *
    * If set, all other patch operations are ignored.
+   *
+   * Note: Only modifies set field values.
    */
   1: optional i32 assign;
 
-  /** Clear any set value. */
+  /** Clears any set value. */
   2: bool clear;
 
   /** Add to a given value. */
@@ -132,9 +140,11 @@ struct I32Patch {
 }
 struct I64Patch {
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    *
    * If set, all other patch operations are ignored.
+   *
+   * Note: Only modifies set field values.
    */
   1: optional i64 assign;
 
@@ -152,9 +162,11 @@ struct I64Patch {
 }
 struct FloatPatch {
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    *
    * If set, all other patch operations are ignored.
+   *
+   * Note: Only modifies set field values.
    */
   1: optional float assign;
 
@@ -172,9 +184,11 @@ struct FloatPatch {
 }
 struct DoublePatch {
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    *
    * If set, all other patch operations are ignored.
+   *
+   * Note: Only modifies set field values.
    */
   1: optional double assign;
 
@@ -192,9 +206,11 @@ struct DoublePatch {
 }
 struct StringPatch {
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    *
    * If set, all other patch operations are ignored.
+   *
+   * Note: Only modifies set field values.
    */
   1: optional string assign;
 
@@ -215,9 +231,11 @@ struct StringPatch {
 }
 struct BinaryPatch {
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    *
    * If set, all other patch operations are ignored.
+   *
+   * Note: Only modifies set field values.
    */
   1: optional standard.ByteBuffer assign;
 
@@ -238,9 +256,11 @@ struct BinaryPatch {
 }
 struct DurationPatch {
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    *
    * If set, all other patch operations are ignored.
+   *
+   * Note: Only modifies set field values.
    */
   1: optional standard.DurationStruct assign;
 
@@ -259,9 +279,11 @@ struct DurationPatch {
 }
 struct TimePatch {
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    *
    * If set, all other patch operations are ignored.
+   *
+   * Note: Only modifies set field values.
    */
   1: optional standard.TimeStruct assign;
 
@@ -282,7 +304,14 @@ struct TimePatch {
  */
 @thrift.GenDefaultEnumValue
 enum PatchOp {
-  /** Set the value. Supersedes all other ops. */
+  /**
+   * Set the value. Supersedes all other ops.
+   *
+   * Note: Due to a limitation in current Thrift protocol encoding schemes,
+   * unions cannot be reliabily distinquished from structs/exceptions, so fields
+   * must be set before assign can change the value, for example via an
+   * `EnsureStruct` or `EnsureUnion` operation.
+   */
   Assign = 1,
 
   /** Set to the intrinsic default (which might be 'unset'). */

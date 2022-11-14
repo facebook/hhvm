@@ -34,9 +34,11 @@ public class I16Patch implements TBase, java.io.Serializable, Cloneable, Compara
   private static final TField ADD_FIELD_DESC = new TField("add", TType.I16, (short)8);
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public short assign;
   /**
@@ -163,18 +165,22 @@ public class I16Patch implements TBase, java.io.Serializable, Cloneable, Compara
   }
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public short getAssign() {
     return this.assign;
   }
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public I16Patch setAssign(short assign) {
     this.assign = assign;

@@ -32,7 +32,12 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
   private static final TField ADD_FIELD_DESC = new TField("add", TType.SET, (short)8);
 
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    */
   public Set<String> assign;
   /**
@@ -176,14 +181,24 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
   }
 
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    */
   public Set<String> getAssign() {
     return this.assign;
   }
 
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    */
   public MyStructField29Patch setAssign(Set<String> assign) {
     this.assign = assign;

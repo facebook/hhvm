@@ -3128,7 +3128,12 @@ func (p *MyDataFieldPatch) String() string {
 }
 
 // Attributes:
-//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Assign: Assigns to a (set) value.
+// 
+// If set, all other operations are ignored.
+// 
+// Note: Optional and union fields must be set before assigned.
+// 
 //  - Clear: Clears a value. Applies first.
 //  - PatchPrior: Patches any previously set values. Applies second.
 //  - Ensure: Initialize fields, using the given defaults. Applies third.
@@ -3617,7 +3622,12 @@ func (p *InnerUnionFieldPatch) String() string {
 }
 
 // Attributes:
-//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Assign: Assigns to a (set) value.
+// 
+// If set, all other operations are ignored.
+// 
+// Note: Optional and union fields must be set before assigned.
+// 
 //  - Clear: Clears any set value. Applies first.
 //  - PatchPrior: Patches any previously set values. Applies second.
 //  - Ensure: Assigns the value, if not already set to the same field. Applies third.
@@ -4227,7 +4237,12 @@ func (p *MyUnionFieldPatch) String() string {
 }
 
 // Attributes:
-//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Assign: Assigns to a (set) value.
+// 
+// If set, all other operations are ignored.
+// 
+// Note: Optional and union fields must be set before assigned.
+// 
 //  - Clear: Clears any set value. Applies first.
 //  - PatchPrior: Patches any previously set values. Applies second.
 //  - Ensure: Assigns the value, if not already set to the same field. Applies third.
@@ -4584,7 +4599,12 @@ func (p *MyUnionPatch) String() string {
 }
 
 // Attributes:
-//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Assign: Assigns to a (set) value.
+// 
+// If set, all other operations are ignored.
+// 
+// Note: Optional and union fields must be set before assigned.
+// 
 //  - Clear: Clears a value. Applies first.
 type MyStructField10Patch struct {
   Assign *MyEnum `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
@@ -4752,7 +4772,12 @@ func (p *MyStructField10Patch) String() string {
 }
 
 // Attributes:
-//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Assign: Assigns to a (set) value.
+// 
+// If set, all other operations are ignored.
+// 
+// Note: Optional and union fields must be set before assigned.
+// 
 //  - Clear: Clears a value. Applies first.
 type MyStructField25Patch struct {
   Assign *MyEnum `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
@@ -4920,7 +4945,12 @@ func (p *MyStructField25Patch) String() string {
 }
 
 // Attributes:
-//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Assign: Assigns to a (set) value.
+// 
+// If set, all other operations are ignored.
+// 
+// Note: Optional and union fields must be set before assigned.
+// 
 //  - Clear: Clears a value. Applies first.
 //  - Patch: Patches list values by index. Applies second.
 //  - Remove: Removes entries, if present. Applies third.
@@ -5361,7 +5391,12 @@ func (p *MyStructField28Patch) String() string {
 }
 
 // Attributes:
-//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Assign: Assigns to a (set) value.
+// 
+// If set, all other operations are ignored.
+// 
+// Note: Optional and union fields must be set before assigned.
+// 
 //  - Clear: Clears a value. Applies first.
 //  - Remove: Removes entries, if present. Applies third.
 //  - Add: Adds entries, if not already present. Applies fourth.
@@ -5690,7 +5725,12 @@ func (p *MyStructField29Patch) String() string {
 }
 
 // Attributes:
-//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Assign: Assigns to a (set) value.
+// 
+// If set, all other operations are ignored.
+// 
+// Note: Optional and union fields must be set before assigned.
+// 
 //  - Clear: Clears a value. Applies first.
 //  - PatchPrior: Patches any previously set values. Applies second.
 //  - Add: Add the given values, if the keys are not already present. Applies forth.
@@ -6233,7 +6273,12 @@ func (p *MyStructField30Patch) String() string {
 }
 
 // Attributes:
-//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Assign: Assigns to a (set) value.
+// 
+// If set, all other operations are ignored.
+// 
+// Note: Optional and union fields must be set before assigned.
+// 
 //  - Clear: Clears a value. Applies first.
 //  - Patch: Patches list values by index. Applies second.
 //  - Remove: Removes entries, if present. Applies third.
@@ -6786,7 +6831,12 @@ func (p *MyStructField31Patch) String() string {
 }
 
 // Attributes:
-//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Assign: Assigns to a (set) value.
+// 
+// If set, all other operations are ignored.
+// 
+// Note: Optional and union fields must be set before assigned.
+// 
 //  - Clear: Clears a value. Applies first.
 //  - PatchPrior: Patches any previously set values. Applies second.
 //  - Add: Add the given values, if the keys are not already present. Applies forth.
@@ -7329,7 +7379,12 @@ func (p *MyStructField31Patch1) String() string {
 }
 
 // Attributes:
-//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Assign: Assigns to a (set) value.
+// 
+// If set, all other operations are ignored.
+// 
+// Note: Optional and union fields must be set before assigned.
+// 
 //  - Clear: Clears a value. Applies first.
 //  - PatchPrior: Patches any previously set values. Applies second.
 //  - Add: Add the given values, if the keys are not already present. Applies forth.
@@ -7956,7 +8011,12 @@ func (p *MyStructField32Patch) String() string {
 }
 
 // Attributes:
-//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Assign: Assigns to a (set) value.
+// 
+// If set, all other operations are ignored.
+// 
+// Note: Optional and union fields must be set before assigned.
+// 
 //  - Clear: Clears a value. Applies first.
 //  - PatchPrior: Patches any previously set values. Applies second.
 //  - Add: Add the given values, if the keys are not already present. Applies forth.
@@ -10509,7 +10569,12 @@ func (p *MyStructFieldPatch) String() string {
 }
 
 // Attributes:
-//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Assign: Assigns to a (set) value.
+// 
+// If set, all other operations are ignored.
+// 
+// Note: Optional and union fields must be set before assigned.
+// 
 //  - Clear: Clears a value. Applies first.
 //  - PatchPrior: Patches any previously set values. Applies second.
 //  - Ensure: Initialize fields, using the given defaults. Applies third.
@@ -10932,7 +10997,12 @@ func (p *LateDefStructFieldPatch) String() string {
 }
 
 // Attributes:
-//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Assign: Assigns to a (set) value.
+// 
+// If set, all other operations are ignored.
+// 
+// Note: Optional and union fields must be set before assigned.
+// 
 //  - Clear: Clears a value. Applies first.
 //  - PatchPrior: Patches any previously set values. Applies second.
 //  - Ensure: Initialize fields, using the given defaults. Applies third.
@@ -11290,7 +11360,12 @@ func (p *LateDefStructPatch) String() string {
 }
 
 // Attributes:
-//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Assign: Assigns to a (set) value.
+// 
+// If set, all other operations are ignored.
+// 
+// Note: Optional and union fields must be set before assigned.
+// 
 //  - Clear: Clears a value. Applies first.
 type RecursiveField1Patch struct {
   Assign map[string]*Recursive `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
@@ -11609,7 +11684,12 @@ func (p *RecursiveFieldPatch) String() string {
 }
 
 // Attributes:
-//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Assign: Assigns to a (set) value.
+// 
+// If set, all other operations are ignored.
+// 
+// Note: Optional and union fields must be set before assigned.
+// 
 //  - Clear: Clears a value. Applies first.
 //  - PatchPrior: Patches any previously set values. Applies second.
 //  - Ensure: Initialize fields, using the given defaults. Applies third.
@@ -12092,7 +12172,12 @@ func (p *BarFieldPatch) String() string {
 }
 
 // Attributes:
-//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Assign: Assigns to a (set) value.
+// 
+// If set, all other operations are ignored.
+// 
+// Note: Optional and union fields must be set before assigned.
+// 
 //  - Clear: Clears a value. Applies first.
 //  - PatchPrior: Patches any previously set values. Applies second.
 //  - Ensure: Initialize fields, using the given defaults. Applies third.
@@ -12581,7 +12666,12 @@ func (p *LoopFieldPatch) String() string {
 }
 
 // Attributes:
-//  - Assign: Assigns a value. If set, all other operations are ignored.
+//  - Assign: Assigns to a (set) value.
+// 
+// If set, all other operations are ignored.
+// 
+// Note: Optional and union fields must be set before assigned.
+// 
 //  - Clear: Clears a value. Applies first.
 type LoopPatch struct {
   Assign *Loop `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`

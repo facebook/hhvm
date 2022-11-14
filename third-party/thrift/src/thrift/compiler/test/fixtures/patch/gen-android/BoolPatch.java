@@ -32,9 +32,11 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable {
   private static final TField INVERT_FIELD_DESC = new TField("invert", TType.BOOL, (short)9);
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public final Boolean assign;
   /**
@@ -84,9 +86,11 @@ public class BoolPatch implements TBase, java.io.Serializable, Cloneable {
   }
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public Boolean isAssign() {
     return this.assign;

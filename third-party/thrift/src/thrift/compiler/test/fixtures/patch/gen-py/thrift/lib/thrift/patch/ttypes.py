@@ -265,9 +265,11 @@ class BoolPatch:
   A patch for a boolean value.
   
   Attributes:
-   - assign: Assign to a given value.
+   - assign: Assigns to a (set) value.
   
   If set, all other patch operations are ignored.
+  
+  Note: Only modifies set field values.
    - clear: Clear any set value.
    - invert: If the bool value should be inverted.
   """
@@ -410,9 +412,11 @@ class BytePatch:
   A patch for an 8-bit integer value.
   
   Attributes:
-   - assign: Assign to a given value.
+   - assign: Assigns to a (set) value.
   
   If set, all other patch operations are ignored.
+  
+  Note: Only modifies set field values.
    - clear: Clear any set value.
    - add: Add to a given value.
   """
@@ -559,9 +563,11 @@ class I16Patch:
   A patch for a 16-bit integer value.
   
   Attributes:
-   - assign: Assign to a given value.
+   - assign: Assigns to a (set) value.
   
   If set, all other patch operations are ignored.
+  
+  Note: Only modifies set field values.
    - clear: Clear any set value.
    - add: Add to a given value.
   """
@@ -708,10 +714,12 @@ class I32Patch:
   A patch for a 32-bit integer value.
   
   Attributes:
-   - assign: Assign to a given value.
+   - assign: Assigns to a (set) value.
   
   If set, all other patch operations are ignored.
-   - clear: Clear any set value.
+  
+  Note: Only modifies set field values.
+   - clear: Clears any set value.
    - add: Add to a given value.
   """
 
@@ -857,9 +865,11 @@ class I64Patch:
   A patch for a 64-bit integer value.
   
   Attributes:
-   - assign: Assign to a given value.
+   - assign: Assigns to a (set) value.
   
   If set, all other patch operations are ignored.
+  
+  Note: Only modifies set field values.
    - clear: Clear any set value.
    - add: Add to a given value.
   """
@@ -1002,9 +1012,11 @@ class FloatPatch:
   A patch for a 32-bit floating point value.
   
   Attributes:
-   - assign: Assign to a given value.
+   - assign: Assigns to a (set) value.
   
   If set, all other patch operations are ignored.
+  
+  Note: Only modifies set field values.
    - clear: Clear any set value.
    - add: Add to a given value.
   """
@@ -1147,9 +1159,11 @@ class DoublePatch:
   A patch for an 64-bit floating point value.
   
   Attributes:
-   - assign: Assign to a given value.
+   - assign: Assigns to a (set) value.
   
   If set, all other patch operations are ignored.
+  
+  Note: Only modifies set field values.
    - clear: Clear any set value.
    - add: Add to a given value.
   """
@@ -1292,9 +1306,11 @@ class StringPatch:
   A patch for a string value.
   
   Attributes:
-   - assign: Assign to a given value.
+   - assign: Assigns to a (set) value.
   
   If set, all other patch operations are ignored.
+  
+  Note: Only modifies set field values.
    - clear: Clear a given string.
    - prepend: Prepend to a given value.
    - append: Append to a given value.
@@ -1454,9 +1470,11 @@ class BinaryPatch:
   A patch for a binary value.
   
   Attributes:
-   - assign: Assign to a given value.
+   - assign: Assigns to a (set) value.
   
   If set, all other patch operations are ignored.
+  
+  Note: Only modifies set field values.
    - clear: Clear a given binary.
    - prepend: Prepend to a given value.
    - append: Append to a given value.
@@ -1616,9 +1634,11 @@ class DurationPatch:
   A patch for a Duration value.
   
   Attributes:
-   - assign: Assign to a given value.
+   - assign: Assigns to a (set) value.
   
   If set, all other patch operations are ignored.
+  
+  Note: Only modifies set field values.
    - clear: Clear any set value.
    - add: Add to a given value.
   """
@@ -1765,9 +1785,11 @@ class TimePatch:
   A patch for a Time value.
   
   Attributes:
-   - assign: Assign to a given value.
+   - assign: Assigns to a (set) value.
   
   If set, all other patch operations are ignored.
+  
+  Note: Only modifies set field values.
    - clear: Clear any set value.
    - add: Add to a given value.
   """

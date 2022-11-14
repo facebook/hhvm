@@ -34,9 +34,11 @@ public class TimePatch implements TBase, java.io.Serializable, Cloneable, Compar
   private static final TField ADD_FIELD_DESC = new TField("add", TType.STRUCT, (short)8);
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public com.facebook.thrift.type.TimeStruct assign;
   /**
@@ -156,18 +158,22 @@ public class TimePatch implements TBase, java.io.Serializable, Cloneable, Compar
   }
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public com.facebook.thrift.type.TimeStruct getAssign() {
     return this.assign;
   }
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public TimePatch setAssign(com.facebook.thrift.type.TimeStruct assign) {
     this.assign = assign;

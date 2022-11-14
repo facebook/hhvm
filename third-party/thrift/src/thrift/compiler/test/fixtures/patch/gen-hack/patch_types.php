@@ -22,6 +22,11 @@ namespace thrift\op;
 enum PatchOp: int {
   /**
    * Set the value. Supersedes all other ops.
+   * 
+   * Note: Due to a limitation in current Thrift protocol encoding schemes,
+   * unions cannot be reliabily distinquished from structs/exceptions, so fields
+   * must be set before assign can change the value, for example via an
+   * `EnsureStruct` or `EnsureUnion` operation.
    */
   Assign = 1;
   /**
@@ -346,9 +351,11 @@ class BoolPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
   );
   const int STRUCTURAL_ID = 2251787647339945166;
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    * 
    * Original thrift field:-
    * 1: bool assign
@@ -537,9 +544,11 @@ class BytePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
   );
   const int STRUCTURAL_ID = 4505194819966548722;
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    * 
    * Original thrift field:-
    * 1: byte assign
@@ -738,9 +747,11 @@ class I16Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   );
   const int STRUCTURAL_ID = 5082368378070508743;
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    * 
    * Original thrift field:-
    * 1: i16 assign
@@ -939,16 +950,18 @@ class I32Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   );
   const int STRUCTURAL_ID = 5651774406360207497;
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    * 
    * Original thrift field:-
    * 1: i32 assign
    */
   public ?int $assign;
   /**
-   * Clear any set value.
+   * Clears any set value.
    * 
    * Original thrift field:-
    * 2: bool clear
@@ -1140,9 +1153,11 @@ class I64Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   );
   const int STRUCTURAL_ID = 772578002356738682;
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    * 
    * Original thrift field:-
    * 1: i64 assign
@@ -1331,9 +1346,11 @@ class FloatPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
   );
   const int STRUCTURAL_ID = 6430265023131058648;
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    * 
    * Original thrift field:-
    * 1: float assign
@@ -1522,9 +1539,11 @@ class DoublePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
   );
   const int STRUCTURAL_ID = 8893328759161386606;
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    * 
    * Original thrift field:-
    * 1: double assign
@@ -1720,9 +1739,11 @@ class StringPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
   );
   const int STRUCTURAL_ID = 5212135444748250232;
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    * 
    * Original thrift field:-
    * 1: string assign
@@ -1946,9 +1967,11 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
   );
   const int STRUCTURAL_ID = 3272396238315663852;
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    * 
    * Original thrift field:-
    * 1: binary assign
@@ -2224,9 +2247,11 @@ class DurationPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
   );
   const int STRUCTURAL_ID = 566871531090175355;
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    * 
    * Original thrift field:-
    * 1: struct standard.DurationStruct assign
@@ -2440,9 +2465,11 @@ class TimePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
   );
   const int STRUCTURAL_ID = 2651075519081273310;
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    * 
    * Original thrift field:-
    * 1: struct standard.TimeStruct assign

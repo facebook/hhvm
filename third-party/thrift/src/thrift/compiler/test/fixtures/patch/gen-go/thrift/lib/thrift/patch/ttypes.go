@@ -252,9 +252,11 @@ func (p *AssignOnlyPatch) String() string {
 // A patch for a boolean value.
 // 
 // Attributes:
-//  - Assign: Assign to a given value.
+//  - Assign: Assigns to a (set) value.
 // 
 // If set, all other patch operations are ignored.
+// 
+// Note: Only modifies set field values.
 //  - Clear: Clear any set value.
 //  - Invert: If the bool value should be inverted.
 type BoolPatch struct {
@@ -466,9 +468,11 @@ func (p *BoolPatch) String() string {
 // A patch for an 8-bit integer value.
 // 
 // Attributes:
-//  - Assign: Assign to a given value.
+//  - Assign: Assigns to a (set) value.
 // 
 // If set, all other patch operations are ignored.
+// 
+// Note: Only modifies set field values.
 //  - Clear: Clear any set value.
 //  - Add: Add to a given value.
 type BytePatch struct {
@@ -682,9 +686,11 @@ func (p *BytePatch) String() string {
 // A patch for a 16-bit integer value.
 // 
 // Attributes:
-//  - Assign: Assign to a given value.
+//  - Assign: Assigns to a (set) value.
 // 
 // If set, all other patch operations are ignored.
+// 
+// Note: Only modifies set field values.
 //  - Clear: Clear any set value.
 //  - Add: Add to a given value.
 type I16Patch struct {
@@ -896,10 +902,12 @@ func (p *I16Patch) String() string {
 // A patch for a 32-bit integer value.
 // 
 // Attributes:
-//  - Assign: Assign to a given value.
+//  - Assign: Assigns to a (set) value.
 // 
 // If set, all other patch operations are ignored.
-//  - Clear: Clear any set value.
+// 
+// Note: Only modifies set field values.
+//  - Clear: Clears any set value.
 //  - Add: Add to a given value.
 type I32Patch struct {
   Assign *int32 `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
@@ -1110,9 +1118,11 @@ func (p *I32Patch) String() string {
 // A patch for a 64-bit integer value.
 // 
 // Attributes:
-//  - Assign: Assign to a given value.
+//  - Assign: Assigns to a (set) value.
 // 
 // If set, all other patch operations are ignored.
+// 
+// Note: Only modifies set field values.
 //  - Clear: Clear any set value.
 //  - Add: Add to a given value.
 type I64Patch struct {
@@ -1324,9 +1334,11 @@ func (p *I64Patch) String() string {
 // A patch for a 32-bit floating point value.
 // 
 // Attributes:
-//  - Assign: Assign to a given value.
+//  - Assign: Assigns to a (set) value.
 // 
 // If set, all other patch operations are ignored.
+// 
+// Note: Only modifies set field values.
 //  - Clear: Clear any set value.
 //  - Add: Add to a given value.
 type FloatPatch struct {
@@ -1538,9 +1550,11 @@ func (p *FloatPatch) String() string {
 // A patch for an 64-bit floating point value.
 // 
 // Attributes:
-//  - Assign: Assign to a given value.
+//  - Assign: Assigns to a (set) value.
 // 
 // If set, all other patch operations are ignored.
+// 
+// Note: Only modifies set field values.
 //  - Clear: Clear any set value.
 //  - Add: Add to a given value.
 type DoublePatch struct {
@@ -1752,9 +1766,11 @@ func (p *DoublePatch) String() string {
 // A patch for a string value.
 // 
 // Attributes:
-//  - Assign: Assign to a given value.
+//  - Assign: Assigns to a (set) value.
 // 
 // If set, all other patch operations are ignored.
+// 
+// Note: Only modifies set field values.
 //  - Clear: Clear a given string.
 //  - Prepend: Prepend to a given value.
 //  - Append: Append to a given value.
@@ -2008,9 +2024,11 @@ func (p *StringPatch) String() string {
 // A patch for a binary value.
 // 
 // Attributes:
-//  - Assign: Assign to a given value.
+//  - Assign: Assigns to a (set) value.
 // 
 // If set, all other patch operations are ignored.
+// 
+// Note: Only modifies set field values.
 //  - Clear: Clear a given binary.
 //  - Prepend: Prepend to a given value.
 //  - Append: Append to a given value.
@@ -2260,9 +2278,11 @@ func (p *BinaryPatch) String() string {
 // A patch for a Duration value.
 // 
 // Attributes:
-//  - Assign: Assign to a given value.
+//  - Assign: Assigns to a (set) value.
 // 
 // If set, all other patch operations are ignored.
+// 
+// Note: Only modifies set field values.
 //  - Clear: Clear any set value.
 //  - Add: Add to a given value.
 type DurationPatch struct {
@@ -2500,9 +2520,11 @@ func (p *DurationPatch) String() string {
 // A patch for a Time value.
 // 
 // Attributes:
-//  - Assign: Assign to a given value.
+//  - Assign: Assigns to a (set) value.
 // 
 // If set, all other patch operations are ignored.
+// 
+// Note: Only modifies set field values.
 //  - Clear: Clear any set value.
 //  - Add: Add to a given value.
 type TimePatch struct {

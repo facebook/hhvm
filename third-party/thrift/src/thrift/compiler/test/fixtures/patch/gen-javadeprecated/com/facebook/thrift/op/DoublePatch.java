@@ -34,9 +34,11 @@ public class DoublePatch implements TBase, java.io.Serializable, Cloneable, Comp
   private static final TField ADD_FIELD_DESC = new TField("add", TType.DOUBLE, (short)8);
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public double assign;
   /**
@@ -163,18 +165,22 @@ public class DoublePatch implements TBase, java.io.Serializable, Cloneable, Comp
   }
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public double getAssign() {
     return this.assign;
   }
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public DoublePatch setAssign(double assign) {
     this.assign = assign;

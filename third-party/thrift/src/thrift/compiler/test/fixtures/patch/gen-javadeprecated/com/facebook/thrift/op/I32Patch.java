@@ -34,13 +34,15 @@ public class I32Patch implements TBase, java.io.Serializable, Cloneable, Compara
   private static final TField ADD_FIELD_DESC = new TField("add", TType.I32, (short)8);
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public int assign;
   /**
-   * Clear any set value.
+   * Clears any set value.
    */
   public boolean clear;
   /**
@@ -163,18 +165,22 @@ public class I32Patch implements TBase, java.io.Serializable, Cloneable, Compara
   }
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public int getAssign() {
     return this.assign;
   }
 
   /**
-   * Assign to a given value.
+   * Assigns to a (set) value.
    * 
    * If set, all other patch operations are ignored.
+   * 
+   * Note: Only modifies set field values.
    */
   public I32Patch setAssign(int assign) {
     this.assign = assign;
@@ -196,14 +202,14 @@ public class I32Patch implements TBase, java.io.Serializable, Cloneable, Compara
   }
 
   /**
-   * Clear any set value.
+   * Clears any set value.
    */
   public boolean isClear() {
     return this.clear;
   }
 
   /**
-   * Clear any set value.
+   * Clears any set value.
    */
   public I32Patch setClear(boolean clear) {
     this.clear = clear;

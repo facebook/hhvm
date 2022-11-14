@@ -1875,7 +1875,12 @@ class MyDataFieldPatch:
 class MyDataPatch:
   """
   Attributes:
-   - assign: Assigns a value. If set, all other operations are ignored.
+   - assign: Assigns to a (set) value.
+  
+  If set, all other operations are ignored.
+  
+  Note: Optional and union fields must be set before assigned.
+  
    - clear: Clears a value. Applies first.
    - patchPrior: Patches any previously set values. Applies second.
    - ensure: Initialize fields, using the given defaults. Applies third.
@@ -2167,7 +2172,12 @@ class InnerUnionFieldPatch:
 class InnerUnionPatch:
   """
   Attributes:
-   - assign: Assigns a value. If set, all other operations are ignored.
+   - assign: Assigns to a (set) value.
+  
+  If set, all other operations are ignored.
+  
+  Note: Optional and union fields must be set before assigned.
+  
    - clear: Clears any set value. Applies first.
    - patchPrior: Patches any previously set values. Applies second.
    - ensure: Assigns the value, if not already set to the same field. Applies third.
@@ -2497,7 +2507,12 @@ class MyUnionFieldPatch:
 class MyUnionPatch:
   """
   Attributes:
-   - assign: Assigns a value. If set, all other operations are ignored.
+   - assign: Assigns to a (set) value.
+  
+  If set, all other operations are ignored.
+  
+  Note: Optional and union fields must be set before assigned.
+  
    - clear: Clears any set value. Applies first.
    - patchPrior: Patches any previously set values. Applies second.
    - ensure: Assigns the value, if not already set to the same field. Applies third.
@@ -2680,7 +2695,12 @@ class MyUnionPatch:
 class MyStructField10Patch:
   """
   Attributes:
-   - assign: Assigns a value. If set, all other operations are ignored.
+   - assign: Assigns to a (set) value.
+  
+  If set, all other operations are ignored.
+  
+  Note: Optional and union fields must be set before assigned.
+  
    - clear: Clears a value. Applies first.
   """
 
@@ -2810,7 +2830,12 @@ class MyStructField10Patch:
 class MyStructField25Patch:
   """
   Attributes:
-   - assign: Assigns a value. If set, all other operations are ignored.
+   - assign: Assigns to a (set) value.
+  
+  If set, all other operations are ignored.
+  
+  Note: Optional and union fields must be set before assigned.
+  
    - clear: Clears a value. Applies first.
   """
 
@@ -2940,7 +2965,12 @@ class MyStructField25Patch:
 class MyStructField28Patch:
   """
   Attributes:
-   - assign: Assigns a value. If set, all other operations are ignored.
+   - assign: Assigns to a (set) value.
+  
+  If set, all other operations are ignored.
+  
+  Note: Optional and union fields must be set before assigned.
+  
    - clear: Clears a value. Applies first.
    - patch: Patches list values by index. Applies second.
    - remove: Removes entries, if present. Applies third.
@@ -3225,7 +3255,12 @@ class MyStructField28Patch:
 class MyStructField29Patch:
   """
   Attributes:
-   - assign: Assigns a value. If set, all other operations are ignored.
+   - assign: Assigns to a (set) value.
+  
+  If set, all other operations are ignored.
+  
+  Note: Optional and union fields must be set before assigned.
+  
    - clear: Clears a value. Applies first.
    - remove: Removes entries, if present. Applies third.
    - add: Adds entries, if not already present. Applies fourth.
@@ -3428,7 +3463,12 @@ class MyStructField29Patch:
 class MyStructField30Patch:
   """
   Attributes:
-   - assign: Assigns a value. If set, all other operations are ignored.
+   - assign: Assigns to a (set) value.
+  
+  If set, all other operations are ignored.
+  
+  Note: Optional and union fields must be set before assigned.
+  
    - clear: Clears a value. Applies first.
    - patchPrior: Patches any previously set values. Applies second.
    - add: Add the given values, if the keys are not already present. Applies forth.
@@ -3755,7 +3795,12 @@ class MyStructField30Patch:
 class MyStructField31Patch:
   """
   Attributes:
-   - assign: Assigns a value. If set, all other operations are ignored.
+   - assign: Assigns to a (set) value.
+  
+  If set, all other operations are ignored.
+  
+  Note: Optional and union fields must be set before assigned.
+  
    - clear: Clears a value. Applies first.
    - patch: Patches list values by index. Applies second.
    - remove: Removes entries, if present. Applies third.
@@ -4168,7 +4213,12 @@ class MyStructField31Patch:
 class MyStructField31Patch1:
   """
   Attributes:
-   - assign: Assigns a value. If set, all other operations are ignored.
+   - assign: Assigns to a (set) value.
+  
+  If set, all other operations are ignored.
+  
+  Note: Optional and union fields must be set before assigned.
+  
    - clear: Clears a value. Applies first.
    - patchPrior: Patches any previously set values. Applies second.
    - add: Add the given values, if the keys are not already present. Applies forth.
@@ -4501,7 +4551,12 @@ class MyStructField31Patch1:
 class MyStructField32Patch:
   """
   Attributes:
-   - assign: Assigns a value. If set, all other operations are ignored.
+   - assign: Assigns to a (set) value.
+  
+  If set, all other operations are ignored.
+  
+  Note: Optional and union fields must be set before assigned.
+  
    - clear: Clears a value. Applies first.
    - patchPrior: Patches any previously set values. Applies second.
    - add: Add the given values, if the keys are not already present. Applies forth.
@@ -4930,7 +4985,12 @@ class MyStructField32Patch:
 class MyStructField32Patch1:
   """
   Attributes:
-   - assign: Assigns a value. If set, all other operations are ignored.
+   - assign: Assigns to a (set) value.
+  
+  If set, all other operations are ignored.
+  
+  Note: Optional and union fields must be set before assigned.
+  
    - clear: Clears a value. Applies first.
    - patchPrior: Patches any previously set values. Applies second.
    - add: Add the given values, if the keys are not already present. Applies forth.
@@ -5961,7 +6021,12 @@ class MyStructFieldPatch:
 class MyStructPatch:
   """
   Attributes:
-   - assign: Assigns a value. If set, all other operations are ignored.
+   - assign: Assigns to a (set) value.
+  
+  If set, all other operations are ignored.
+  
+  Note: Optional and union fields must be set before assigned.
+  
    - clear: Clears a value. Applies first.
    - patchPrior: Patches any previously set values. Applies second.
    - ensure: Initialize fields, using the given defaults. Applies third.
@@ -6230,7 +6295,12 @@ class LateDefStructFieldPatch:
 class LateDefStructPatch:
   """
   Attributes:
-   - assign: Assigns a value. If set, all other operations are ignored.
+   - assign: Assigns to a (set) value.
+  
+  If set, all other operations are ignored.
+  
+  Note: Optional and union fields must be set before assigned.
+  
    - clear: Clears a value. Applies first.
    - patchPrior: Patches any previously set values. Applies second.
    - ensure: Initialize fields, using the given defaults. Applies third.
@@ -6413,7 +6483,12 @@ class LateDefStructPatch:
 class RecursiveField1Patch:
   """
   Attributes:
-   - assign: Assigns a value. If set, all other operations are ignored.
+   - assign: Assigns to a (set) value.
+  
+  If set, all other operations are ignored.
+  
+  Note: Optional and union fields must be set before assigned.
+  
    - clear: Clears a value. Applies first.
   """
 
@@ -6669,7 +6744,12 @@ class RecursiveFieldPatch:
 class RecursivePatch:
   """
   Attributes:
-   - assign: Assigns a value. If set, all other operations are ignored.
+   - assign: Assigns to a (set) value.
+  
+  If set, all other operations are ignored.
+  
+  Note: Optional and union fields must be set before assigned.
+  
    - clear: Clears a value. Applies first.
    - patchPrior: Patches any previously set values. Applies second.
    - ensure: Initialize fields, using the given defaults. Applies third.
@@ -6961,7 +7041,12 @@ class BarFieldPatch:
 class BarPatch:
   """
   Attributes:
-   - assign: Assigns a value. If set, all other operations are ignored.
+   - assign: Assigns to a (set) value.
+  
+  If set, all other operations are ignored.
+  
+  Note: Optional and union fields must be set before assigned.
+  
    - clear: Clears a value. Applies first.
    - patchPrior: Patches any previously set values. Applies second.
    - ensure: Initialize fields, using the given defaults. Applies third.
@@ -7253,7 +7338,12 @@ class LoopFieldPatch:
 class LoopPatch:
   """
   Attributes:
-   - assign: Assigns a value. If set, all other operations are ignored.
+   - assign: Assigns to a (set) value.
+  
+  If set, all other operations are ignored.
+  
+  Note: Optional and union fields must be set before assigned.
+  
    - clear: Clears a value. Applies first.
   """
 

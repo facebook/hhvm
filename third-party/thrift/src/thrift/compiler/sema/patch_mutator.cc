@@ -188,7 +188,9 @@ struct PatchGen : StructGen {
   // {kAssignId}: {type} assign;
   t_field& assign(t_type_ref type) {
     return box(
-        doc("Assigns a value. If set, all other operations are ignored.",
+        doc("Assigns to a (set) value.\n\n"
+            "If set, all other operations are ignored.\n\n"
+            "Note: Optional and union fields must be set before assigned.\n",
             field(kAssignId, type, "assign")));
   }
 

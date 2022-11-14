@@ -2818,7 +2818,12 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   const int STRUCTURAL_ID = 5256392352261057461;
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    * 
    * Original thrift field:-
    * 1: struct module.MyData assign
@@ -3224,7 +3229,12 @@ class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   const int STRUCTURAL_ID = 6617672747921804043;
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    * 
    * Original thrift field:-
    * 1: struct module.InnerUnion assign
@@ -3723,7 +3733,12 @@ class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   const int STRUCTURAL_ID = 4411333096338672350;
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    * 
    * Original thrift field:-
    * 1: struct module.MyUnion assign
@@ -3983,7 +3998,12 @@ class MyStructField10Patch implements \IThriftSyncStruct, \IThriftStructMetadata
 
   const int STRUCTURAL_ID = 1042349483945124076;
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    * 
    * Original thrift field:-
    * 1: enum module.MyEnum assign
@@ -4126,7 +4146,12 @@ class MyStructField25Patch implements \IThriftSyncStruct, \IThriftStructMetadata
 
   const int STRUCTURAL_ID = 1042349483945124076;
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    * 
    * Original thrift field:-
    * 1: enum module.MyEnum assign
@@ -4322,7 +4347,12 @@ class MyStructField28Patch implements \IThriftSyncStruct, \IThriftStructMetadata
 
   const int STRUCTURAL_ID = 8909257665578209994;
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    * 
    * Original thrift field:-
    * 1: list<i16> assign
@@ -4686,7 +4716,12 @@ class MyStructField29Patch implements \IThriftSyncStruct, \IThriftStructMetadata
 
   const int STRUCTURAL_ID = 5127750308738770244;
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    * 
    * Original thrift field:-
    * 1: set<string> assign
@@ -4997,7 +5032,12 @@ class MyStructField30Patch implements \IThriftSyncStruct, \IThriftStructMetadata
 
   const int STRUCTURAL_ID = 7038176317813649650;
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    * 
    * Original thrift field:-
    * 1: map<string, string> assign
@@ -5469,7 +5509,12 @@ class MyStructField31Patch implements \IThriftSyncStruct, \IThriftStructMetadata
 
   const int STRUCTURAL_ID = 8909257665578209994;
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    * 
    * Original thrift field:-
    * 1: list<map<string, i32>> assign
@@ -5968,7 +6013,12 @@ class MyStructField31Patch1 implements \IThriftSyncStruct, \IThriftStructMetadat
 
   const int STRUCTURAL_ID = 7038176317813649650;
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    * 
    * Original thrift field:-
    * 1: map<string, i32> assign
@@ -6474,7 +6524,12 @@ class MyStructField32Patch implements \IThriftSyncStruct, \IThriftStructMetadata
 
   const int STRUCTURAL_ID = 7038176317813649650;
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    * 
    * Original thrift field:-
    * 1: map<string, map<string, i32>> assign
@@ -7013,7 +7068,12 @@ class MyStructField32Patch1 implements \IThriftSyncStruct, \IThriftStructMetadat
 
   const int STRUCTURAL_ID = 7038176317813649650;
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    * 
    * Original thrift field:-
    * 1: map<string, i32> assign
@@ -9013,7 +9073,12 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   const int STRUCTURAL_ID = 6000283475184898380;
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    * 
    * Original thrift field:-
    * 1: struct module.MyStruct assign
@@ -9389,7 +9454,12 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   const int STRUCTURAL_ID = 6907948067616855680;
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    * 
    * Original thrift field:-
    * 1: struct module.LateDefStruct assign
@@ -9658,7 +9728,12 @@ class RecursiveField1Patch implements \IThriftSyncStruct, \IThriftStructMetadata
 
   const int STRUCTURAL_ID = 734925607853642499;
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    * 
    * Original thrift field:-
    * 1: map<string, struct module.Recursive> assign
@@ -9980,7 +10055,12 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   const int STRUCTURAL_ID = 2130991928648210432;
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    * 
    * Original thrift field:-
    * 1: struct module.Recursive assign
@@ -10396,7 +10476,12 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   const int STRUCTURAL_ID = 5180874570176193342;
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    * 
    * Original thrift field:-
    * 1: struct module.Bar assign
@@ -10782,7 +10867,12 @@ class LoopPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   const int STRUCTURAL_ID = 5599644265081798743;
   /**
-   * Assigns a value. If set, all other operations are ignored.
+   * Assigns to a (set) value.
+   * 
+   * If set, all other operations are ignored.
+   * 
+   * Note: Optional and union fields must be set before assigned.
+   * 
    * 
    * Original thrift field:-
    * 1: struct module.Loop assign

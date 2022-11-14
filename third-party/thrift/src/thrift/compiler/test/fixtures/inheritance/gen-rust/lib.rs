@@ -1366,7 +1366,7 @@ pub mod server {
             self.service
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "MyRoot.do_root"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyRoot.do_root"))]
         async fn handle_do_root<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -1400,13 +1400,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "MyRoot.do_root"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "MyRoot.do_root", "success");
+                    ::tracing::info!("success");
                     crate::services::my_root::DoRootExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_root::DoRootExn::Success(_))) => {
@@ -1416,7 +1415,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyRoot.do_root", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -1684,7 +1683,7 @@ pub mod server {
             self.service
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "MyNode.do_mid"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyNode.do_mid"))]
         async fn handle_do_mid<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -1718,13 +1717,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "MyNode.do_mid"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "MyNode.do_mid", "success");
+                    ::tracing::info!("success");
                     crate::services::my_node::DoMidExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_node::DoMidExn::Success(_))) => {
@@ -1734,7 +1732,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyNode.do_mid", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -2011,7 +2009,7 @@ pub mod server {
             self.service
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "MyLeaf.do_leaf"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyLeaf.do_leaf"))]
         async fn handle_do_leaf<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -2045,13 +2043,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "MyLeaf.do_leaf"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "MyLeaf.do_leaf", "success");
+                    ::tracing::info!("success");
                     crate::services::my_leaf::DoLeafExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_leaf::DoLeafExn::Success(_))) => {
@@ -2061,7 +2058,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyLeaf.do_leaf", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {

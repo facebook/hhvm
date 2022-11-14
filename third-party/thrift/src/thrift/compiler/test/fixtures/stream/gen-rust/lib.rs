@@ -4920,7 +4920,7 @@ pub mod server {
             self.service
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "PubSubStreamingService.returnstream"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "PubSubStreamingService.returnstream"))]
         async fn handle_returnstream<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -4956,13 +4956,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "PubSubStreamingService.returnstream"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "PubSubStreamingService.returnstream", "success");
+                    ::tracing::info!("success");
                     crate::services::pub_sub_streaming_service::ReturnstreamExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::ReturnstreamExn::Success(_))) => {
@@ -5032,7 +5031,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "PubSubStreamingService.streamthrows"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "PubSubStreamingService.streamthrows"))]
         async fn handle_streamthrows<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -5067,13 +5066,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "PubSubStreamingService.streamthrows"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "PubSubStreamingService.streamthrows", "success");
+                    ::tracing::info!("success");
                     crate::services::pub_sub_streaming_service::StreamthrowsExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::StreamthrowsExn::Success(_))) => {
@@ -5149,7 +5147,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "PubSubStreamingService.servicethrows"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "PubSubStreamingService.servicethrows"))]
         async fn handle_servicethrows<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -5184,13 +5182,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "PubSubStreamingService.servicethrows"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "PubSubStreamingService.servicethrows", "success");
+                    ::tracing::info!("success");
                     crate::services::pub_sub_streaming_service::ServicethrowsExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::ServicethrowsExn::Success(_))) => {
@@ -5264,7 +5261,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "PubSubStreamingService.servicethrows2"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "PubSubStreamingService.servicethrows2"))]
         async fn handle_servicethrows2<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -5299,13 +5296,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "PubSubStreamingService.servicethrows2"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "PubSubStreamingService.servicethrows2", "success");
+                    ::tracing::info!("success");
                     crate::services::pub_sub_streaming_service::Servicethrows2Exn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::Servicethrows2Exn::Success(_))) => {
@@ -5383,7 +5379,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "PubSubStreamingService.boththrows"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "PubSubStreamingService.boththrows"))]
         async fn handle_boththrows<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -5418,13 +5414,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "PubSubStreamingService.boththrows"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "PubSubStreamingService.boththrows", "success");
+                    ::tracing::info!("success");
                     crate::services::pub_sub_streaming_service::BoththrowsExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::BoththrowsExn::Success(_))) => {
@@ -5504,7 +5499,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "PubSubStreamingService.responseandstreamstreamthrows"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "PubSubStreamingService.responseandstreamstreamthrows"))]
         async fn handle_responseandstreamstreamthrows<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -5539,13 +5534,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "PubSubStreamingService.responseandstreamstreamthrows"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "PubSubStreamingService.responseandstreamstreamthrows", "success");
+                    ::tracing::info!("success");
                     crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn::Success(_))) => {
@@ -5621,7 +5615,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "PubSubStreamingService.responseandstreamservicethrows"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "PubSubStreamingService.responseandstreamservicethrows"))]
         async fn handle_responseandstreamservicethrows<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -5656,13 +5650,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "PubSubStreamingService.responseandstreamservicethrows"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "PubSubStreamingService.responseandstreamservicethrows", "success");
+                    ::tracing::info!("success");
                     crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn::Success(_))) => {
@@ -5736,7 +5729,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "PubSubStreamingService.responseandstreamboththrows"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "PubSubStreamingService.responseandstreamboththrows"))]
         async fn handle_responseandstreamboththrows<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -5771,13 +5764,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "PubSubStreamingService.responseandstreamboththrows"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "PubSubStreamingService.responseandstreamboththrows", "success");
+                    ::tracing::info!("success");
                     crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn::Success(_))) => {
@@ -5857,7 +5849,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "PubSubStreamingService.returnstreamFast"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "PubSubStreamingService.returnstreamFast"))]
         async fn handle_returnstreamFast<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -5893,13 +5885,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "PubSubStreamingService.returnstreamFast"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "PubSubStreamingService.returnstreamFast", "success");
+                    ::tracing::info!("success");
                     crate::services::pub_sub_streaming_service::ReturnstreamFastExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::ReturnstreamFastExn::Success(_))) => {

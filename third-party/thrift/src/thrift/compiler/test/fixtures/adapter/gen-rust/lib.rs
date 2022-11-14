@@ -1278,7 +1278,7 @@ pub mod server {
             self.service
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "Service.func"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "Service.func"))]
         async fn handle_func<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -1315,13 +1315,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "Service.func"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "Service.func", "success");
+                    ::tracing::info!("success");
                     crate::services::service::FuncExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::service::FuncExn::Success(_))) => {
@@ -1331,7 +1330,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "Service.func", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -1644,7 +1643,7 @@ pub mod server {
             self.service
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "AdapterService.count"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "AdapterService.count"))]
         async fn handle_count<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -1678,13 +1677,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "AdapterService.count"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "AdapterService.count", "success");
+                    ::tracing::info!("success");
                     crate::services::adapter_service::CountExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::adapter_service::CountExn::Success(_))) => {
@@ -1694,7 +1692,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "AdapterService.count", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -1715,7 +1713,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "AdapterService.adaptedTypes"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "AdapterService.adaptedTypes"))]
         async fn handle_adaptedTypes<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -1750,13 +1748,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "AdapterService.adaptedTypes"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "AdapterService.adaptedTypes", "success");
+                    ::tracing::info!("success");
                     crate::services::adapter_service::AdaptedTypesExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::adapter_service::AdaptedTypesExn::Success(_))) => {
@@ -1766,7 +1763,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "AdapterService.adaptedTypes", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {

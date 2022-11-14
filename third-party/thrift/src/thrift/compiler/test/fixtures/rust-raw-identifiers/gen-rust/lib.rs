@@ -796,7 +796,7 @@ pub mod server {
             self.service
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "Foo.return"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "Foo.return"))]
         async fn handle_return<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -831,13 +831,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "Foo.return"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "Foo.return", "success");
+                    ::tracing::info!("success");
                     crate::services::foo::ReturnExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::foo::ReturnExn::Success(_))) => {
@@ -847,7 +846,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "Foo.return", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -868,7 +867,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "Foo.super"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "Foo.super"))]
         async fn handle_super<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -903,13 +902,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "Foo.super"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "Foo.super", "success");
+                    ::tracing::info!("success");
                     crate::services::foo::SuperExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::foo::SuperExn::Success(_))) => {
@@ -919,7 +917,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "Foo.super", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {

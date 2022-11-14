@@ -4489,7 +4489,7 @@ pub mod server {
             self.service
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "MyInteraction.frobnicate"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.frobnicate"))]
         async fn handle_frobnicate<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -4523,13 +4523,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "MyInteraction.frobnicate"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "MyInteraction.frobnicate", "success");
+                    ::tracing::info!("success");
                     crate::services::my_interaction::FrobnicateExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::FrobnicateExn::Success(_))) => {
@@ -4539,7 +4538,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteraction.frobnicate", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -4560,7 +4559,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "MyInteraction.ping"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.ping"))]
         async fn handle_ping<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -4594,13 +4593,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "MyInteraction.ping"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "MyInteraction.ping", "success");
+                    ::tracing::info!("success");
                     crate::services::my_interaction::PingExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::PingExn::Success(_))) => {
@@ -4610,7 +4608,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteraction.ping", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -4631,7 +4629,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "MyInteraction.truthify"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.truthify"))]
         async fn handle_truthify<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -4665,13 +4663,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "MyInteraction.truthify"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "MyInteraction.truthify", "success");
+                    ::tracing::info!("success");
                     crate::services::my_interaction::TruthifyExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::Success(_))) => {
@@ -4741,7 +4738,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "MyInteraction.encode"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteraction.encode"))]
         async fn handle_encode<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -4775,13 +4772,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "MyInteraction.encode"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "MyInteraction.encode", "success");
+                    ::tracing::info!("success");
                     crate::services::my_interaction::EncodeExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::EncodeExn::Success(_))) => {
@@ -4791,7 +4787,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteraction.encode", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -5161,7 +5157,7 @@ pub mod server {
             self.service
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "MyInteractionFast.frobnicate"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.frobnicate"))]
         async fn handle_frobnicate<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -5195,13 +5191,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "MyInteractionFast.frobnicate"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "MyInteractionFast.frobnicate", "success");
+                    ::tracing::info!("success");
                     crate::services::my_interaction_fast::FrobnicateExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::FrobnicateExn::Success(_))) => {
@@ -5211,7 +5206,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteractionFast.frobnicate", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -5232,7 +5227,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "MyInteractionFast.ping"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.ping"))]
         async fn handle_ping<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -5266,13 +5261,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "MyInteractionFast.ping"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "MyInteractionFast.ping", "success");
+                    ::tracing::info!("success");
                     crate::services::my_interaction_fast::PingExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::PingExn::Success(_))) => {
@@ -5282,7 +5276,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteractionFast.ping", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -5303,7 +5297,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "MyInteractionFast.truthify"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.truthify"))]
         async fn handle_truthify<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -5337,13 +5331,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "MyInteractionFast.truthify"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "MyInteractionFast.truthify", "success");
+                    ::tracing::info!("success");
                     crate::services::my_interaction_fast::TruthifyExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyExn::Success(_))) => {
@@ -5413,7 +5406,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "MyInteractionFast.encode"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyInteractionFast.encode"))]
         async fn handle_encode<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -5447,13 +5440,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "MyInteractionFast.encode"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "MyInteractionFast.encode", "success");
+                    ::tracing::info!("success");
                     crate::services::my_interaction_fast::EncodeExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::EncodeExn::Success(_))) => {
@@ -5463,7 +5455,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyInteractionFast.encode", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -5714,7 +5706,7 @@ pub mod server {
             self.service
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "SerialInteraction.frobnicate"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "SerialInteraction.frobnicate"))]
         async fn handle_frobnicate<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -5748,13 +5740,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "SerialInteraction.frobnicate"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "SerialInteraction.frobnicate", "success");
+                    ::tracing::info!("success");
                     crate::services::serial_interaction::FrobnicateExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::serial_interaction::FrobnicateExn::Success(_))) => {
@@ -5764,7 +5755,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "SerialInteraction.frobnicate", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -6184,7 +6175,7 @@ pub mod server {
             self.service.createSerialInteraction()
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "MyService.foo"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyService.foo"))]
         async fn handle_foo<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -6218,13 +6209,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "MyService.foo"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "MyService.foo", "success");
+                    ::tracing::info!("success");
                     crate::services::my_service::FooExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_service::FooExn::Success(_))) => {
@@ -6234,7 +6224,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyService.foo", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -6255,7 +6245,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "MyService.interact"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyService.interact"))]
         async fn handle_interact<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -6290,13 +6280,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "MyService.interact"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "MyService.interact", "success");
+                    ::tracing::info!("success");
                     let (interaction_handler, res) = (res, ());
                     let interaction_processor = ::std::sync::Arc::new(MyInteractionProcessor::<P, ::std::boxed::Box<dyn MyInteraction>, R, RS>::new(interaction_handler));
                     reply_state.lock().unwrap().set_interaction_processor(interaction_processor)?;
@@ -6309,7 +6298,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyService.interact", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -6330,7 +6319,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "MyService.interactFast"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyService.interactFast"))]
         async fn handle_interactFast<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -6364,13 +6353,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "MyService.interactFast"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "MyService.interactFast", "success");
+                    ::tracing::info!("success");
                     let (interaction_handler, res) = res;
                     let interaction_processor = ::std::sync::Arc::new(MyInteractionFastProcessor::<P, ::std::boxed::Box<dyn MyInteractionFast>, R, RS>::new(interaction_handler));
                     reply_state.lock().unwrap().set_interaction_processor(interaction_processor)?;
@@ -6383,7 +6371,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyService.interactFast", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -6404,7 +6392,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "MyService.serialize"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyService.serialize"))]
         async fn handle_serialize<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -6438,13 +6426,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "MyService.serialize"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "MyService.serialize", "success");
+                    ::tracing::info!("success");
                     let (interaction_handler, res) = res;
                     let interaction_processor = ::std::sync::Arc::new(SerialInteractionProcessor::<P, ::std::boxed::Box<dyn SerialInteraction>, R, RS>::new(interaction_handler));
                     reply_state.lock().unwrap().set_interaction_processor(interaction_processor)?;

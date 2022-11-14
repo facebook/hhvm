@@ -1331,7 +1331,7 @@ pub mod server {
             self.service
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "C.f"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "C.f"))]
         async fn handle_f<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -1365,13 +1365,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "C.f"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "C.f", "success");
+                    ::tracing::info!("success");
                     crate::services::c::FExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::c::FExn::Success(_))) => {
@@ -1381,7 +1380,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "C.f", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -1402,7 +1401,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "C.numbers"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "C.numbers"))]
         async fn handle_numbers<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -1436,13 +1435,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "C.numbers"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "C.numbers", "success");
+                    ::tracing::info!("success");
                     crate::services::c::NumbersExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::c::NumbersExn::Success(_))) => {
@@ -1512,7 +1510,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "C.thing"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "C.thing"))]
         async fn handle_thing<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -1549,13 +1547,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "C.thing"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "C.thing", "success");
+                    ::tracing::info!("success");
                     crate::services::c::ThingExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::c::ThingExn::Success(_))) => {
@@ -1565,7 +1562,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "C.thing", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {

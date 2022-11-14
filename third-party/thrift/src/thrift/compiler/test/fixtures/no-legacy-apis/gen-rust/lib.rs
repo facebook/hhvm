@@ -525,7 +525,7 @@ pub mod server {
             self.service
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "MyService.query"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "MyService.query"))]
         async fn handle_query<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -560,13 +560,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "MyService.query"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "MyService.query", "success");
+                    ::tracing::info!("success");
                     crate::services::my_service::QueryExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_service::QueryExn::Success(_))) => {
@@ -576,7 +575,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "MyService.query", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {

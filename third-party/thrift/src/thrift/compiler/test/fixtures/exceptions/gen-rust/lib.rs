@@ -1419,7 +1419,7 @@ pub mod server {
             self.service
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "Raiser.doBland"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "Raiser.doBland"))]
         async fn handle_doBland<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -1453,13 +1453,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "Raiser.doBland"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "Raiser.doBland", "success");
+                    ::tracing::info!("success");
                     crate::services::raiser::DoBlandExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::raiser::DoBlandExn::Success(_))) => {
@@ -1469,7 +1468,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "Raiser.doBland", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -1490,7 +1489,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "Raiser.doRaise"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "Raiser.doRaise"))]
         async fn handle_doRaise<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -1524,13 +1523,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "Raiser.doRaise"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "Raiser.doRaise", "success");
+                    ::tracing::info!("success");
                     crate::services::raiser::DoRaiseExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::raiser::DoRaiseExn::Success(_))) => {
@@ -1540,7 +1538,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "Raiser.doRaise", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -1561,7 +1559,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "Raiser.get200"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "Raiser.get200"))]
         async fn handle_get200<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -1595,13 +1593,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "Raiser.get200"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "Raiser.get200", "success");
+                    ::tracing::info!("success");
                     crate::services::raiser::Get200Exn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::raiser::Get200Exn::Success(_))) => {
@@ -1611,7 +1608,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "Raiser.get200", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -1632,7 +1629,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "Raiser.get500"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "Raiser.get500"))]
         async fn handle_get500<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -1666,13 +1663,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "Raiser.get500"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "Raiser.get500", "success");
+                    ::tracing::info!("success");
                     crate::services::raiser::Get500Exn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::raiser::Get500Exn::Success(_))) => {
@@ -1682,7 +1678,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "Raiser.get500", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {

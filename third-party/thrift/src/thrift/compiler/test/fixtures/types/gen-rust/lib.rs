@@ -811,7 +811,7 @@ pub mod server {
             self.service
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "SomeService.bounce_map"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "SomeService.bounce_map"))]
         async fn handle_bounce_map<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -846,13 +846,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "SomeService.bounce_map"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "SomeService.bounce_map", "success");
+                    ::tracing::info!("success");
                     crate::services::some_service::BounceMapExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::some_service::BounceMapExn::Success(_))) => {
@@ -862,7 +861,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "SomeService.bounce_map", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -883,7 +882,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "SomeService.binary_keyed_map"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "SomeService.binary_keyed_map"))]
         async fn handle_binary_keyed_map<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -918,13 +917,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "SomeService.binary_keyed_map"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "SomeService.binary_keyed_map", "success");
+                    ::tracing::info!("success");
                     crate::services::some_service::BinaryKeyedMapExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::some_service::BinaryKeyedMapExn::Success(_))) => {
@@ -934,7 +932,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "SomeService.binary_keyed_map", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {

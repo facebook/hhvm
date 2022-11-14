@@ -1627,7 +1627,7 @@ pub mod server {
             self.service
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "NestedContainers.mapList"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "NestedContainers.mapList"))]
         async fn handle_mapList<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -1662,13 +1662,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "NestedContainers.mapList"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "NestedContainers.mapList", "success");
+                    ::tracing::info!("success");
                     crate::services::nested_containers::MapListExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::nested_containers::MapListExn::Success(_))) => {
@@ -1678,7 +1677,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "NestedContainers.mapList", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -1699,7 +1698,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "NestedContainers.mapSet"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "NestedContainers.mapSet"))]
         async fn handle_mapSet<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -1734,13 +1733,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "NestedContainers.mapSet"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "NestedContainers.mapSet", "success");
+                    ::tracing::info!("success");
                     crate::services::nested_containers::MapSetExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::nested_containers::MapSetExn::Success(_))) => {
@@ -1750,7 +1748,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "NestedContainers.mapSet", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -1771,7 +1769,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "NestedContainers.listMap"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "NestedContainers.listMap"))]
         async fn handle_listMap<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -1806,13 +1804,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "NestedContainers.listMap"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "NestedContainers.listMap", "success");
+                    ::tracing::info!("success");
                     crate::services::nested_containers::ListMapExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::nested_containers::ListMapExn::Success(_))) => {
@@ -1822,7 +1819,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "NestedContainers.listMap", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -1843,7 +1840,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "NestedContainers.listSet"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "NestedContainers.listSet"))]
         async fn handle_listSet<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -1878,13 +1875,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "NestedContainers.listSet"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "NestedContainers.listSet", "success");
+                    ::tracing::info!("success");
                     crate::services::nested_containers::ListSetExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::nested_containers::ListSetExn::Success(_))) => {
@@ -1894,7 +1890,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "NestedContainers.listSet", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
@@ -1915,7 +1911,7 @@ pub mod server {
             Ok(())
         }
 
-        #[::tracing::instrument(skip_all, fields(method = "NestedContainers.turtles"))]
+        #[::tracing::instrument(skip_all, name = "handler", fields(method = "NestedContainers.turtles"))]
         async fn handle_turtles<'a>(
             &'a self,
             p: &'a mut P::Deserializer,
@@ -1950,13 +1946,12 @@ pub mod server {
                 )
             )
             .catch_unwind()
-            .instrument(::tracing::info_span!("service_handler", method = "NestedContainers.turtles"))
             .await;
 
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!(method = "NestedContainers.turtles", "success");
+                    ::tracing::info!("success");
                     crate::services::nested_containers::TurtlesExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::nested_containers::TurtlesExn::Success(_))) => {
@@ -1966,7 +1961,7 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(method = "NestedContainers.turtles", exception = ?exn);
+                    ::tracing::error!(exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {

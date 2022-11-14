@@ -7,6 +7,3 @@ disallow_fun_and_cls_meth_pseudo_funcs = true
 
 auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
 disable_xhp_element_mangling = false
-
-allowed_locations_for_type_constant_in_enum_class = enum/class/allowed, enum/class/other/allowed
-allow_unstable_features = true

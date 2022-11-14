@@ -9,6 +9,8 @@ use std::sync::Arc;
 use hash::HashMap;
 use ir::StringInterner;
 
+use crate::textual;
+
 #[derive(Eq, PartialEq)]
 pub(crate) enum FuncDeclKind {
     Internal,
@@ -16,26 +18,27 @@ pub(crate) enum FuncDeclKind {
 }
 
 pub(crate) struct UnitState {
-    pub(crate) func_declares: FuncDecls,
+    pub(crate) decls: Decls,
     pub(crate) strings: Arc<StringInterner>,
 }
 
 impl UnitState {
     pub(crate) fn new(strings: Arc<StringInterner>) -> Self {
         Self {
-            func_declares: Default::default(),
+            decls: Default::default(),
             strings,
         }
     }
 }
 
 #[derive(Default)]
-pub(crate) struct FuncDecls {
+pub(crate) struct Decls {
     pub(crate) funcs: HashMap<String, FuncDeclKind>,
+    pub(crate) globals: HashMap<String, textual::Ty>,
 }
 
-impl FuncDecls {
-    pub(crate) fn declare<'a>(&mut self, name: impl Into<Cow<'a, str>>, kind: FuncDeclKind) {
+impl Decls {
+    pub(crate) fn declare_func<'a>(&mut self, name: impl Into<Cow<'a, str>>, kind: FuncDeclKind) {
         let name = name.into().into_owned();
         match kind {
             FuncDeclKind::Internal => {
@@ -56,9 +59,17 @@ impl FuncDecls {
         }
     }
 
-    pub(crate) fn merge(&mut self, other: FuncDecls) {
+    pub(crate) fn declare_global<'a>(&mut self, name: impl Into<Cow<'a, str>>, ty: textual::Ty) {
+        let name = name.into().into_owned();
+        self.globals.entry(name).or_insert(ty);
+    }
+
+    pub(crate) fn merge(&mut self, other: Decls) {
         for (name, kind) in other.funcs {
-            self.declare(name, kind)
+            self.declare_func(name, kind)
+        }
+        for (name, ty) in other.globals {
+            self.declare_global(name, ty)
         }
     }
 

@@ -40,8 +40,8 @@ use crate::hack;
 use crate::lower::func_builder::FuncBuilderEx as _;
 use crate::mangle::Mangle as _;
 use crate::mangle::MangleWithClass as _;
+use crate::state;
 use crate::state::FuncDeclKind;
-use crate::state::FuncDecls;
 use crate::state::UnitState;
 use crate::textual;
 use crate::textual::Sid;
@@ -126,7 +126,7 @@ pub(crate) fn write_func(
         .collect::<Vec<_>>();
 
     let span = func.loc(func.loc_id).clone();
-    let func_declares = textual::write_function(
+    let decls = textual::write_function(
         w,
         &unit_state.strings,
         name,
@@ -150,14 +150,12 @@ pub(crate) fn write_func(
                 write_block(w, &mut state, bid)?;
             }
 
-            Ok(state.func_declares)
+            Ok(state.decls)
         },
     )?;
 
-    unit_state
-        .func_declares
-        .declare(name, FuncDeclKind::Internal);
-    unit_state.func_declares.merge(func_declares);
+    unit_state.decls.declare_func(name, FuncDeclKind::Internal);
+    unit_state.decls.merge(decls);
 
     Ok(())
 }
@@ -283,21 +281,21 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
             // a simpler form (like control flow and generic calls). Everything
             // else should be handled in lower().
             textual_todo! {
-                    use ir::instr::HasOperands;
-                    let name = format!("TODO_hhbc_{}", hhbc);
-            state
-                        .func_declares
-                        .declare(&name, FuncDeclKind::External);
-                    let output = w.call(
-                        &name,
-                        instr
-                            .operands()
-                            .iter()
-                            .map(|vid| state.lookup_vid(*vid))
-                            .collect_vec(),
-                    )?;
-                    state.set_iid(iid, output);
-                }
+                use ir::instr::HasOperands;
+                let name = format!("TODO_hhbc_{}", hhbc);
+                state
+                    .decls
+                    .declare_func(&name, FuncDeclKind::External);
+                let output = w.call(
+                    &name,
+                    instr
+                        .operands()
+                        .iter()
+                        .map(|vid| state.lookup_vid(*vid))
+                        .collect_vec(),
+                )?;
+                state.set_iid(iid, output);
+            }
         }
     }
 
@@ -460,9 +458,9 @@ fn write_call(
             // C::foo()
             let target = method.mangle(clsid, state.strings);
             state
-                .func_declares
-                .declare(target.to_string(), FuncDeclKind::External);
-            let this = class::load_static_class(w, clsid, state.strings)?;
+                .decls
+                .declare_func(target.to_string(), FuncDeclKind::External);
+            let this = class::load_static_class(w, clsid, state.strings, &mut state.decls)?;
             w.call_static(
                 &target,
                 this.into(),
@@ -477,9 +475,12 @@ fn write_call(
         CallDetail::FCallCtor => {
             textual_todo! {
                 // new $x
-                let ty = ClassName::new(Str::new(b"Mixed"));
+                let ty = ClassName::new(Str::new(b"HackMixed"));
                 let target =
                     ir::MethodName::new(ffi::Slice::new(b"TODO_ctor")).mangle(&ty, state.strings);
+                state
+                    .decls
+                    .declare_func(target.to_string(), FuncDeclKind::External);
                 w.call_virtual(
                     &target,
                     state.lookup_vid(detail.obj(operands)),
@@ -492,8 +493,8 @@ fn write_call(
             // foo()
             let target = func.mangle(state.strings);
             state
-                .func_declares
-                .declare(target.to_string(), FuncDeclKind::External);
+                .decls
+                .declare_func(target.to_string(), FuncDeclKind::External);
             // A top-level function is called like a class static in a special
             // top-level class. Its 'this' pointer is null.
             w.call_static(
@@ -513,11 +514,11 @@ fn write_call(
             }
 
             // TODO: need to try to figure out the type.
-            let ty = ClassName::new(Str::new(b"Mixed"));
+            let ty = ClassName::new(Str::new(b"HackMixed"));
             let target = method.mangle(&ty, state.strings);
             state
-                .func_declares
-                .declare(target.to_string(), FuncDeclKind::External);
+                .decls
+                .declare_func(target.to_string(), FuncDeclKind::External);
             w.call_virtual(
                 &target,
                 state.lookup_vid(detail.obj(operands)),
@@ -559,7 +560,7 @@ fn write_inc_dec_l<'a>(
 }
 
 pub(crate) struct FuncState<'a> {
-    func_declares: FuncDecls,
+    decls: state::Decls,
     func: &'a ir::Func<'a>,
     iid_mapping: ir::InstrIdMap<textual::Expr>,
     method_info: Option<&'a MethodInfo<'a>>,
@@ -573,7 +574,7 @@ impl<'a> FuncState<'a> {
         method_info: Option<&'a MethodInfo<'a>>,
     ) -> Self {
         Self {
-            func_declares: Default::default(),
+            decls: Default::default(),
             func,
             iid_mapping: Default::default(),
             method_info,

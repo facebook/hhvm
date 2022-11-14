@@ -89,8 +89,8 @@ pub(crate) enum Builtin {
     ///   BadProperty() -> noreturn
     #[strum(props(Function = "hack_bad_property"))]
     BadProperty,
-    /// Turns a raw boolean into a Mixed.
-    ///   Bool(n: bool) -> *Mixed
+    /// Turns a raw boolean into a HackMixed.
+    ///   Bool(n: bool) -> *HackMixed
     #[strum(props(Function = "hack_bool"))]
     Bool,
     /// Returns the Class identifier for the given class.
@@ -101,24 +101,28 @@ pub(crate) enum Builtin {
     GetStaticClass,
     /// Hhbc handlers.  See hphp/doc/bytecode.specification for docs.
     Hhbc(Hhbc),
-    /// Turns a raw int into a Mixed.
-    ///   Int(n: int) -> *Mixed
+    /// Turns a raw int into a HackMixed.
+    ///   Int(n: int) -> *HackMixed
     #[strum(props(Function = "hack_int"))]
     Int,
-    /// Returns true if the given Mixed is truthy.
-    ///   IsTrue(p: *Mixed) -> bool
+    /// Returns true if the given HackMixed is truthy.
+    ///   IsTrue(p: *HackMixed) -> bool
     #[strum(props(Function = "hack_is_true"))]
     IsTrue,
-    /// Returns a Mixed containing a `null`.
-    ///   Null() -> *Mixed
+    /// Returns a HackMixed containing a `null`.
+    ///   Null() -> *HackMixed
     #[strum(props(Function = "hack_null"))]
     Null,
     /// Returns true if the given raw pointer is null.
     ///   RawPtrIsNull(*void) -> bool
     #[strum(props(Function = "raw_ptr_is_null"))]
     RawPtrIsNull,
-    /// Turns a raw string into a Mixed.
-    ///   String(s: *string) -> *Mixed
+    /// Lazily initializes a static singleton.
+    ///   lazy_initialize(*HackMixed)
+    #[strum(props(Function = "lazy_initialize"))]
+    SilLazyInitialize,
+    /// Turns a raw string into a HackMixed.
+    ///   String(s: *string) -> *HackMixed
     #[strum(props(Function = "hack_string"))]
     String,
     /// Used to check param count on function entry.

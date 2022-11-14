@@ -42,9 +42,15 @@ pub fn textual_writer(
         crate::func::write_function(w, &mut state, func)?;
     }
 
+    writeln!(w, "// ----- GLOBALS -----")?;
+    for (name, ty) in state.decls.globals.iter() {
+        textual::declare_global(w, name, ty)?;
+    }
+    writeln!(w)?;
+
     writeln!(w, "// ----- EXTERNALS -----")?;
-    for name in state.func_declares.external_funcs() {
-        writeln!(w, "declare {name}(...): *Mixed")?;
+    for name in state.decls.external_funcs() {
+        textual::declare_unknown_function(w, name)?;
     }
 
     if !no_builtins {

@@ -24,6 +24,7 @@ use super::textual;
 use crate::func::MethodInfo;
 use crate::mangle::Mangle;
 use crate::mangle::MangleWithClass as _;
+use crate::state;
 use crate::state::UnitState;
 use crate::types::convert_ty;
 use crate::util;
@@ -100,7 +101,7 @@ fn init_static_name(class: ir::ClassId, strings: &ir::StringInterner) -> String 
 }
 
 /// The name of the global singleton for a static class.
-pub(crate) fn static_singleton_name(class: ir::ClassId, strings: &ir::StringInterner) -> String {
+fn static_singleton_name(class: ir::ClassId, strings: &ir::StringInterner) -> String {
     let cname = class.mangle(strings);
     format!("static_singleton::{cname}")
 }
@@ -188,11 +189,10 @@ fn write_init_static(
     state: &mut UnitState,
     class: &ir::Class<'_>,
 ) -> Result {
-    textual::declare_global(
-        w,
-        &static_singleton_name(class.name, &state.strings),
-        static_ty(class.name, &state.strings),
-    )?;
+    let singleton_name = static_singleton_name(class.name, &state.strings);
+    state
+        .decls
+        .declare_global(&singleton_name, static_ty(class.name, &state.strings));
 
     textual::write_function(
         w,
@@ -206,7 +206,6 @@ fn write_init_static(
             let sz = 0; // TODO: properties
             let p = hack::call_builtin(w, hack::Builtin::AllocWords, [sz])?;
 
-            let singleton_name = static_singleton_name(class.name, &state.strings);
             let singleton_expr = textual::Expr::deref(textual::Var::named(singleton_name));
             w.store(singleton_expr, p, static_ty(class.name, &state.strings))?;
 
@@ -254,11 +253,13 @@ pub(crate) fn load_static_class(
     w: &mut textual::FuncWriter<'_>,
     class: ir::ClassId,
     strings: &ir::StringInterner,
+    decls: &mut state::Decls,
 ) -> Result<textual::Sid> {
     // Blindly load the static singleton, assuming it's already been initialized.
     let singleton_name = static_singleton_name(class, strings);
+    decls.declare_global(&singleton_name, static_ty(class, strings));
     let singleton_expr = textual::Expr::deref(textual::Var::named(singleton_name));
     let value = w.load(static_ty(class, strings), singleton_expr)?;
-    w.call("__sil_lazy_initialize", [value])?;
+    hack::call_builtin(w, hack::Builtin::SilLazyInitialize, [value])?;
     Ok(value)
 }

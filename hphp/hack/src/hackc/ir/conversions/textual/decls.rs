@@ -41,6 +41,9 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
             }
             Builtin::IsTrue => declare_function(w, &name, &[ty!(*HackMixed)], ty!(int))?,
             Builtin::RawPtrIsNull => declare_function(w, &name, &[ty!(*void)], ty!(int))?,
+            Builtin::SilLazyInitialize => {
+                declare_function(w, &name, &[ty!(*HackMixed)], ty!(void))?
+            }
             Builtin::VerifyParamCount => declare_function(
                 w,
                 &name,
@@ -76,7 +79,7 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
             Hhbc::Exit => declare_function(w, &name, &[ty!(*HackMixed)], ty!(noreturn))?,
 
             Hhbc::IsTypeInt | Hhbc::IsTypeNull | Hhbc::IsTypeStr => {
-                declare_function(w, &name, &[ty!(*HackMixed)], ty!(int))?
+                declare_function(w, &name, &[ty!(*HackMixed)], ty!(*HackMixed))?
             }
 
             Hhbc::NewObj => declare_function(w, &name, &[ty!(*class)], ty!(*HackMixed))?,

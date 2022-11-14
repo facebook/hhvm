@@ -57,7 +57,7 @@ impl fmt::Display for FmtSid {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub(crate) enum Ty {
     Int,
     Noreturn,
@@ -680,9 +680,8 @@ pub(crate) fn write_type<'a>(
     Ok(())
 }
 
-pub(crate) fn declare_global(w: &mut dyn std::io::Write, name: &str, ty: Ty) -> Result {
-    writeln!(w, "global {name} : {}", FmtTy(&ty))?;
-    writeln!(w)?;
+pub(crate) fn declare_global(w: &mut dyn std::io::Write, name: &str, ty: &Ty) -> Result {
+    writeln!(w, "global {name} : {}", FmtTy(ty))?;
     Ok(())
 }
 
@@ -701,5 +700,10 @@ pub(crate) fn declare_function(
     }
 
     writeln!(w, "): {}", FmtTy(&ret_ty))?;
+    Ok(())
+}
+
+pub(crate) fn declare_unknown_function(w: &mut dyn std::io::Write, name: &str) -> Result {
+    writeln!(w, "declare {name}(...): *HackMixed")?;
     Ok(())
 }

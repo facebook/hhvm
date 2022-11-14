@@ -38,6 +38,10 @@ pub(crate) fn lower_enforced_ty(ty: EnforceableType, strings: &StringInterner) -
             modifiers: TypeConstraintFlags::NoFlags,
         } => ty_hack_mixed(strings),
         EnforceableType {
+            ty: BaseType::None,
+            modifiers: TypeConstraintFlags::NoFlags,
+        } => ty_hack_mixed(strings),
+        EnforceableType {
             ty: BaseType::String,
             modifiers: TypeConstraintFlags::NoFlags | TypeConstraintFlags::ExtendedHint,
         } => ty_hack_string(strings),

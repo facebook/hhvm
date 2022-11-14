@@ -280,6 +280,7 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
             // This should only handle instructions that can't be rewritten into
             // a simpler form (like control flow and generic calls). Everything
             // else should be handled in lower().
+            trace!("TODO: {hhbc:?}");
             textual_todo! {
                 use ir::instr::HasOperands;
                 let name = format!("TODO_hhbc_{}", hhbc);
@@ -546,7 +547,8 @@ fn write_inc_dec_l<'a>(
     };
 
     let pre = w.load(tx_ty!(*HackMixed), textual::Expr::deref(lid))?;
-    let post = hack::call_builtin(w, builtin, (pre, textual::Expr::hack_int(1)))?;
+    let one = hack::call_builtin(w, hack::Builtin::Int, [1])?;
+    let post = hack::call_builtin(w, builtin, (pre, one))?;
     w.store(textual::Expr::deref(lid), post, tx_ty!(*HackMixed))?;
 
     let sid = match op {
@@ -593,26 +595,24 @@ impl<'a> FuncState<'a> {
     /// (already emitted) Sid. For simple ConstIds use an Expr representing the
     /// value directly.
     pub fn lookup_vid(&self, vid: ValueId) -> textual::Expr {
-        use textual::Expr;
         match vid.full() {
             ir::FullInstrId::Instr(iid) => self.lookup_iid(iid),
             ir::FullInstrId::Constant(c) => {
                 use hack::Builtin;
                 let c = self.func.constant(c);
                 match c {
-                    Constant::Bool(v) => hack::expr_builtin(Builtin::Bool, [Expr::bool_(*v)]),
-                    Constant::Int(i) => hack::expr_builtin(Builtin::Int, [Expr::int(*i)]),
+                    Constant::Bool(false) => hack::expr_builtin(Builtin::Bool, [false]),
+                    Constant::Bool(true) => hack::expr_builtin(Builtin::Bool, [true]),
+                    Constant::Int(i) => hack::expr_builtin(Builtin::Int, [*i]),
                     Constant::Null => hack::expr_builtin(Builtin::Null, ()),
                     Constant::String(s) => {
                         let s = self.strings.lookup_bstr(*s);
                         let s = util::escaped_string(&s);
-                        hack::expr_builtin(Builtin::String, [Expr::string(s)])
+                        hack::expr_builtin(Builtin::String, [s])
                     }
                     Constant::Array(..) => todo!(),
                     Constant::Dir => todo!(),
-                    Constant::Double(..) => textual_todo! {
-                        textual::Expr::call("TODO_Double".to_string(), ())
-                    },
+                    Constant::Double(f) => hack::expr_builtin(Builtin::Float, [f.to_f64()]),
                     Constant::File => todo!(),
                     Constant::FuncCred => todo!(),
                     Constant::Method => todo!(),

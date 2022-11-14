@@ -15,6 +15,7 @@ use ir::ReadonlyOp;
 use ir::ValueId;
 
 use crate::func::FuncState;
+use crate::hack;
 use crate::textual;
 use crate::textual::Sid;
 
@@ -162,10 +163,8 @@ fn write_final_query_m(
         }
         MemberKey::EI(i) => {
             // $a[3]
-            w.call(
-                "hack_array_get",
-                (base, textual::Expr::hack_int(i), op_name),
-            )
+            let idx = hack::call_builtin(w, hack::Builtin::Int, [i])?;
+            w.call("hack_array_get", (base, idx, op_name))
         }
         MemberKey::EL => {
             // $a[$b]
@@ -176,7 +175,8 @@ fn write_final_query_m(
         MemberKey::ET(s) => {
             // $a["hello"]
             let key = state.strings.lookup_bytes(s);
-            let key = textual::Expr::hack_string(&key as &[u8]);
+            let key = crate::util::escaped_string(&key);
+            let key = hack::call_builtin(w, hack::Builtin::String, [key])?;
             w.call("hack_array_get", (base, key, op_name))
         }
         MemberKey::PC => {
@@ -197,7 +197,8 @@ fn write_final_query_m(
             // access.
 
             let key = state.strings.lookup_bytes(prop.id);
-            let key = textual::Expr::hack_string(&key as &[u8]);
+            let key = crate::util::escaped_string(&key);
+            let key = hack::call_builtin(w, hack::Builtin::String, [key])?;
             w.call("hack_field_get", (base, key, op_name))
         }
         MemberKey::QT(_) => {
@@ -238,7 +239,8 @@ fn write_entry(
         }
         MemberKey::EI(i) => {
             // $a[3]
-            w.call("hack_array_entry", (base, textual::Expr::hack_int(i), mode))
+            let idx = hack::call_builtin(w, hack::Builtin::Int, [i])?;
+            w.call("hack_array_entry", (base, idx, mode))
         }
         MemberKey::EL => {
             // $a[$b]
@@ -249,7 +251,8 @@ fn write_entry(
         MemberKey::ET(s) => {
             // $a["hello"]
             let key = state.strings.lookup_bytes(s);
-            let key = textual::Expr::hack_string(&key as &[u8]);
+            let key = crate::util::escaped_string(&key);
+            let key = hack::call_builtin(w, hack::Builtin::String, [key])?;
             w.call("hack_array_entry", (base, key, mode))
         }
         MemberKey::PC => {
@@ -263,7 +266,8 @@ fn write_entry(
         MemberKey::PT(prop) => {
             // $a->hello
             let key = state.strings.lookup_bytes(prop.id);
-            let key = textual::Expr::hack_string(&key as &[u8]);
+            let key = crate::util::escaped_string(&key);
+            let key = hack::call_builtin(w, hack::Builtin::String, [key])?;
             w.call("hack_field_entry", (base, key, mode))
         }
         MemberKey::QT(_) => {

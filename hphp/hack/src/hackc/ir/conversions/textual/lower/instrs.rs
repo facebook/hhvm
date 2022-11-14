@@ -1,3 +1,4 @@
+#![allow(unused)]
 // Copyright (c) Facebook, Inc. and its affiliates.
 //
 // This source code is licensed under the MIT license found in the
@@ -16,6 +17,7 @@ use ir::Instr;
 use ir::InstrId;
 use ir::IsTypeOp;
 use ir::LocId;
+use ir::LocalId;
 use ir::ValueId;
 
 use super::func_builder::FuncBuilderEx as _;
@@ -51,6 +53,7 @@ struct LowerInstrs<'a> {
 impl LowerInstrs<'_> {
     fn handle_with_builtin(&self, builder: &mut FuncBuilder<'_>, instr: &Instr) -> Option<Instr> {
         let builtin = match instr {
+            Instr::Hhbc(Hhbc::Add(..)) => hack::Builtin::Hhbc(hack::Hhbc::Add),
             Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Eq, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpEq),
             Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Gt, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpGt),
             Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Gte, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpGte),
@@ -61,6 +64,8 @@ impl LowerInstrs<'_> {
             }
             Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Neq, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpNeq),
             Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Same, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpSame),
+            Instr::Hhbc(Hhbc::Concat(..)) => hack::Builtin::Hhbc(hack::Hhbc::Concat),
+            Instr::Hhbc(Hhbc::Div(..)) => hack::Builtin::Hhbc(hack::Hhbc::Div),
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::ArrLike, _)) => todo!(),
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Bool, _)) => todo!(),
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Class, _)) => todo!(),
@@ -84,13 +89,39 @@ impl LowerInstrs<'_> {
             }
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Vec, _)) => todo!(),
             Instr::Hhbc(Hhbc::Modulo(..)) => hack::Builtin::Hhbc(hack::Hhbc::Modulo),
+            Instr::Hhbc(Hhbc::Mul(..)) => hack::Builtin::Hhbc(hack::Hhbc::Mul),
             Instr::Hhbc(Hhbc::NewObjS(..)) => hack::Builtin::Hhbc(hack::Hhbc::NewObj),
+            Instr::Hhbc(Hhbc::NewVec(..)) => hack::Builtin::Hhbc(hack::Hhbc::NewVec),
             Instr::Hhbc(Hhbc::Not(..)) => hack::Builtin::Hhbc(hack::Hhbc::Not),
             Instr::Hhbc(Hhbc::Print(..)) => hack::Builtin::Hhbc(hack::Hhbc::Print),
             Instr::Hhbc(Hhbc::Sub(..)) => hack::Builtin::Hhbc(hack::Hhbc::Sub),
             _ => return None,
         };
         Some(builder.hack_builtin(builtin, instr.operands(), instr.loc_id()))
+    }
+
+    fn verify_out_type(
+        &self,
+        builder: &mut FuncBuilder<'_>,
+        vid: ValueId,
+        lid: LocalId,
+        loc: LocId,
+    ) -> Instr {
+        // if !(<vid> is <param type>) {
+        //   verify_failed();
+        // }
+        if let Some(param) = builder.func.get_param_by_lid(lid) {
+            let param_type = param.ty.enforced.clone();
+            let pred = builder.emit_is(vid, &param_type, loc);
+            let pred = builder.emit(Instr::Hhbc(Hhbc::Not(pred, loc)));
+            builder.emit_if_then(pred, loc, |builder| {
+                builder.emit_hack_builtin(hack::Builtin::Hhbc(hack::Hhbc::VerifyFailed), &[], loc);
+                Instr::unreachable()
+            });
+            Instr::copy(vid)
+        } else {
+            panic!("Unknown parameter in verify_out_type()");
+        }
     }
 
     fn verify_ret_type_c(&self, builder: &mut FuncBuilder<'_>, vid: ValueId, loc: LocId) -> Instr {
@@ -125,10 +156,21 @@ impl TransformInstr for LowerInstrs<'_> {
                     builder.hack_builtin(hack::Builtin::GetStaticClass, &[this], loc)
                 }
             }
-            Instr::Terminator(Terminator::Exit(..)) => {
+            Instr::Terminator(Terminator::Exit(ops, loc)) => {
                 let builtin = hack::Builtin::Hhbc(hack::Hhbc::Exit);
-                builder.emit_hack_builtin(builtin, instr.operands(), instr.loc_id());
+                builder.emit_hack_builtin(builtin, &[ops], loc);
                 Instr::unreachable()
+            }
+            Instr::Terminator(Terminator::RetM(ops, loc)) => {
+                // ret a, b;
+                // =>
+                // ret vec[a, b];
+                let builtin = hack::Builtin::Hhbc(hack::Hhbc::NewVec);
+                let vec = builder.emit_hack_builtin(builtin, &ops, loc);
+                Instr::ret(vec, loc)
+            }
+            Instr::Hhbc(Hhbc::VerifyOutType(vid, lid, loc)) => {
+                self.verify_out_type(builder, vid, lid, loc)
             }
             Instr::Hhbc(Hhbc::VerifyRetTypeC(vid, loc)) => {
                 self.verify_ret_type_c(builder, vid, loc)

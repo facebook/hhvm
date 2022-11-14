@@ -28,6 +28,7 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
         let name = builtin.to_string();
         match builtin {
             Builtin::Bool => declare_function(w, &name, &[ty!(int)], ty!(*HackBool))?,
+            Builtin::Float => declare_function(w, &name, &[ty!(float)], ty!(*HackFloat))?,
             Builtin::Int => declare_function(w, &name, &[ty!(int)], ty!(*HackInt))?,
             Builtin::Null => declare_function(w, &name, &[], ty!(*HackNull))?,
             Builtin::String => declare_function(w, &name, &[ty!(string)], ty!(*HackString))?,
@@ -68,7 +69,10 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
             | Hhbc::CmpNSame
             | Hhbc::CmpNeq
             | Hhbc::CmpSame
+            | Hhbc::Concat
+            | Hhbc::Div
             | Hhbc::Modulo
+            | Hhbc::Mul
             | Hhbc::Sub => declare_function(
                 w,
                 &name,
@@ -83,7 +87,7 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
             }
 
             Hhbc::NewObj => declare_function(w, &name, &[ty!(*class)], ty!(*HackMixed))?,
-            Hhbc::NewVec => declare_function(w, &name, &[], ty!(*HackVec))?,
+            Hhbc::NewVec => declare_function(w, &name, &[ty!(...)], ty!(*HackVec))?,
 
             Hhbc::Print | Hhbc::Not => {
                 declare_function(w, &name, &[ty!(*HackMixed)], ty!(*HackMixed))?

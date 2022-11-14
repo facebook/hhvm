@@ -25,6 +25,7 @@ use crate::HasEdges;
 use crate::Instr;
 use crate::InstrId;
 use crate::LocId;
+use crate::LocalId;
 use crate::MethodFlags;
 use crate::MethodName;
 use crate::TypeInfo;
@@ -338,6 +339,13 @@ impl<'a> Func<'a> {
 
     pub fn get_instr_mut(&mut self, iid: InstrId) -> Option<&mut Instr> {
         self.instrs.get_mut(iid)
+    }
+
+    pub fn get_param_by_lid(&self, lid: LocalId) -> Option<&Param<'_>> {
+        match lid {
+            LocalId::Named(name) => self.params.iter().find(|p| p.name == name),
+            LocalId::Unnamed(_) => None,
+        }
     }
 
     pub fn get_loc(&self, loc: LocId) -> Option<&SrcLoc> {

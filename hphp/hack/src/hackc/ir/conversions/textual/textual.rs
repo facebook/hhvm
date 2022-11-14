@@ -16,6 +16,7 @@ use ir::BlockId;
 use ir::LocalId;
 use ir::StringInterner;
 use itertools::Itertools;
+use log::trace;
 use newtype::newtype_int;
 
 pub(crate) const INDENT: &str = "  ";
@@ -59,6 +60,8 @@ impl fmt::Display for FmtSid {
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub(crate) enum Ty {
+    Ellipsis,
+    Float,
     Int,
     Noreturn,
     Ptr(Box<Ty>),
@@ -72,6 +75,8 @@ struct FmtTy<'a>(&'a Ty);
 impl fmt::Display for FmtTy<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
+            Ty::Ellipsis => write!(f, "..."),
+            Ty::Float => write!(f, "float"),
             Ty::Int => write!(f, "int"),
             Ty::Noreturn => f.write_str("noreturn"),
             Ty::Ptr(sub) => write!(f, "*{}", FmtTy(sub)),
@@ -115,8 +120,7 @@ impl fmt::Display for FmtVar<'_> {
 #[derive(Clone, Debug)]
 pub(crate) enum Const {
     False,
-    HackInt(i64),
-    HackString(Vec<u8>),
+    Float(f64),
     Int(i64),
     Null,
     String(AsciiString),
@@ -130,10 +134,7 @@ impl fmt::Display for FmtConst<'_> {
         let FmtConst(const_) = *self;
         match const_ {
             Const::False => f.write_str("false"),
-            Const::HackInt(i) => write!(f, "hack_int({})", i),
-            Const::HackString(s) => {
-                write!(f, "hack_string(\"{}\")", crate::util::escaped_string(s))
-            }
+            Const::Float(d) => d.fmt(f),
             Const::Int(i) => i.fmt(f),
             Const::Null => f.write_str("null"),
             Const::String(ref s) => {
@@ -161,24 +162,12 @@ pub(crate) enum Expr {
 }
 
 impl Expr {
-    pub(crate) fn bool_(v: bool) -> Expr {
-        Expr::Const(if v { Const::True } else { Const::False })
-    }
-
     pub(crate) fn call(target: impl ToString, params: impl VarArgs) -> Expr {
         Expr::Call(target.to_string(), params.into_exprs().into_boxed_slice())
     }
 
     pub(crate) fn deref(v: impl Into<Var>) -> Expr {
         Expr::Deref(v.into())
-    }
-
-    pub(crate) fn hack_int(i: i64) -> Expr {
-        Expr::Const(Const::HackInt(i))
-    }
-
-    pub(crate) fn hack_string(s: impl Into<Vec<u8>>) -> Expr {
-        Expr::Const(Const::HackString(s.into()))
     }
 
     #[allow(dead_code)]
@@ -188,22 +177,36 @@ impl Expr {
         Expr::Index(Box::new(base), Box::new(offset))
     }
 
-    pub(crate) fn int(i: i64) -> Expr {
-        Expr::Const(Const::Int(i))
-    }
-
     pub(crate) fn null() -> Expr {
         Expr::Const(Const::Null)
-    }
-
-    pub(crate) fn string(s: AsciiString) -> Expr {
-        Expr::Const(Const::String(s))
     }
 }
 
 impl From<&'static str> for Expr {
     fn from(s: &'static str) -> Self {
         Expr::Const(Const::String(AsciiString::from_ascii(s).unwrap()))
+    }
+}
+
+impl From<AsciiString> for Expr {
+    fn from(s: AsciiString) -> Self {
+        Expr::Const(Const::String(s))
+    }
+}
+
+impl From<bool> for Expr {
+    fn from(v: bool) -> Self {
+        if v {
+            Expr::Const(Const::True)
+        } else {
+            Expr::Const(Const::False)
+        }
+    }
+}
+
+impl From<f64> for Expr {
+    fn from(f: f64) -> Self {
+        Expr::Const(Const::Float(f))
     }
 }
 
@@ -487,6 +490,7 @@ impl<'a> FuncWriter<'a> {
     }
 
     pub(crate) fn write_todo(&mut self, msg: &str) -> Result<Sid> {
+        trace!("TODO: {}", msg);
         textual_todo! {
             self.call_static(msg, Expr::null(), ())
         }

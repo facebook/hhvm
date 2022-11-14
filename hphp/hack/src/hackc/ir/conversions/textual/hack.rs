@@ -43,6 +43,10 @@ pub(crate) enum Hhbc {
     CmpNeq,
     #[strum(props(Function = "hhbc_cmp_same"))]
     CmpSame,
+    #[strum(props(Function = "hhbc_concat"))]
+    Concat,
+    #[strum(props(Function = "hhbc_div"))]
+    Div,
     #[strum(props(Function = "hhbc_exit"))]
     Exit,
     #[strum(props(Function = "hhbc_is_type_int"))]
@@ -53,6 +57,8 @@ pub(crate) enum Hhbc {
     IsTypeStr,
     #[strum(props(Function = "hhbc_modulo"))]
     Modulo,
+    #[strum(props(Function = "hhbc_mul"))]
+    Mul,
     #[strum(props(Function = "hhbc_new_obj"))]
     NewObj,
     #[strum(props(Function = "hhbc_new_vec"))]
@@ -93,6 +99,10 @@ pub(crate) enum Builtin {
     ///   Bool(n: bool) -> *HackMixed
     #[strum(props(Function = "hack_bool"))]
     Bool,
+    /// Turns a raw float into a Mixed.
+    ///   Float(f: float) -> *Mixed
+    #[strum(props(Function = "hack_float"))]
+    Float,
     /// Returns the Class identifier for the given class.
     #[strum(props(Function = "hack_get_class"))]
     GetClass,

@@ -16,6 +16,9 @@
 /// AllowNaked=0 means naked raw-types not allowed and AllowNaked=1 means naked
 /// raw-types are allowed.
 macro_rules! tx_ty_sub {
+    ($_:tt float) => {
+        textual::Ty::Float
+    };
     ($_:tt int) => {
         textual::Ty::Int
     };
@@ -30,6 +33,9 @@ macro_rules! tx_ty_sub {
     };
     (1 $name:ident) => {
         crate::textual::Ty::Type(stringify!($name).to_owned())
+    };
+    (0 ...) => {
+        textual::Ty::Ellipsis
     };
     ($_:tt * $($rest:tt)+) => {
         crate::textual::Ty::Ptr(Box::new(tx_ty_sub!(1 $($rest)+)))

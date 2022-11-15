@@ -107,15 +107,11 @@ final class TClientBufferedStream {
     (function(?string, ?Exception): TStreamResponse) $streamDecode,
   ): HH\AsyncGenerator<null, TStreamResponse, void> {
     while (true) {
-      /* HH_FIXME[2049] TODO(T128347870) */
-      $timer = WallTimeOperation::begin();
       try {
         list($buffer, $ex_msg) = await $this->genNext();
       } catch (Exception $ex) {
         $streamDecode(null, $ex);
         break;
-      } finally {
-        $timer->end();
       }
 
       if ($buffer === null && $ex_msg === null) {
@@ -148,17 +144,11 @@ final class TClientSink {
 
   public async function genCreditsOrFinalResponseHelper(
   ): Awaitable<(?int, ?string, ?Exception)> {
-    /* HH_FIXME[2049] TODO(T128347870) */
-    $timer = WallTimeOperation::begin();
-    try {
-      list($credits, $final_response, $exception) =
-        HH\FIXME\UNSAFE_CAST<
-          ?(int, ?string, ?string),
-          (?int, ?string, ?string)
-        >(await $this->genCreditsOrFinalResponse());
-    } finally {
-      $timer->end();
-    }
+    list($credits, $final_response, $exception) =
+      HH\FIXME\UNSAFE_CAST<
+        ?(int, ?string, ?string),
+        (?int, ?string, ?string)
+      >(await $this->genCreditsOrFinalResponse());
     if (
       ($credits === null || $credits === 0) &&
       $final_response === null &&

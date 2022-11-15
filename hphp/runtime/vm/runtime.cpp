@@ -430,7 +430,6 @@ void moduleBoundaryViolationImpl(
   const StringData* fromModule,
   bool soft
 ) {
-  assertx(RO::EvalEnforceModules);
   // Internal symbols must always have a module
   assertx(symbolModule != nullptr);
   assertx(symbolModule != fromModule);
@@ -446,9 +445,7 @@ void moduleBoundaryViolationImpl(
       ? folly::sformat("module {}", fromModule)
       : "outside of a module"
   );
-  if (RO::EvalEnforceModules > 1 && !soft) {
-    SystemLib::throwModuleBoundaryViolationExceptionObject(errMsg);
-  }
+  if (!soft) SystemLib::throwModuleBoundaryViolationExceptionObject(errMsg);
   raise_warning(errMsg);
 }
 
@@ -460,7 +457,6 @@ void raiseModulePropertyViolation(
   const StringData* callerModule,
   bool is_static = false
 ) {
-  if (!RO::EvalEnforceModules) return;
   assertx(cls);
   assertx(prop);
   auto const attrs = [&] {
@@ -486,8 +482,6 @@ void raiseModulePropertyViolation(
 void raiseModuleBoundaryViolation(const Class* ctx,
                                   const Func* callee,
                                   const StringData* callerModule) {
-  if (!RO::EvalEnforceModules) return;
-
   assertx(callee);
   assertx(IMPLIES(callee->isMethod(), ctx));
   assertx(callee->isInternal());
@@ -502,8 +496,6 @@ void raiseModuleBoundaryViolation(const Class* ctx,
 
 void raiseModuleBoundaryViolation(const Class* cls,
                                   const StringData* callerModule) {
-  if (!RO::EvalEnforceModules) return;
-
   assertx(cls);
   assertx(cls->isInternal());
   return moduleBoundaryViolationImpl(

@@ -1,19 +1,19 @@
-Warning: Accessing internal method C::foo in module B from module A is not allowed in %s on line 8
+Warning: Accessing soft internal method C::foo in module B from module A is not allowed in %s on line 8
 in C::foo
 in D::foo
 
-Warning: Accessing internal method E::foo in module B from module A is not allowed in %s on line 8
+Warning: Accessing soft internal method E::foo in module B from module A is not allowed in %s on line 8
 in E::foo
 
-Warning: Accessing internal method C::foo in module B from module A is not allowed in %s on line 8
+Warning: Accessing soft internal method C::foo in module B from module A is not allowed in %s on line 8
 in C::foo
 
-Warning: Accessing internal method C::foo_static in module B from module A is not allowed in %s on line 12
+Warning: Accessing soft internal method C::foo_static in module B from module A is not allowed in %s on line 12
 in C::foo_static
 in D::foo_static
 
-Warning: Accessing internal method E::foo_static in module B from module A is not allowed in %s on line 12
+Warning: Accessing soft internal method E::foo_static in module B from module A is not allowed in %s on line 12
 in E::foo_static
 
-Warning: Accessing internal method C::foo_static in module B from module A is not allowed in %s on line 12
+Warning: Accessing soft internal method C::foo_static in module B from module A is not allowed in %s on line 12
 in C::foo_static

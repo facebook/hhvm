@@ -1,5 +1,0 @@
-Warning: Accessing internal method Cls::foo_static in module A from outside of a module is not allowed in %s on line 6
-in foo_static
-
-Warning: Accessing internal method Cls::foo in module A from outside of a module is not allowed in %s on line 7
-in foo

@@ -1278,7 +1278,6 @@ void emitModuleBoundaryCheckKnown(IRGS& env, const Class::SProp* prop) {
 }
 
 void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) {
-  if (!RO::EvalEnforceModules) return;
   auto const caller = curFunc(env);
   ifElse(
     env,

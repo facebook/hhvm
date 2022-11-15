@@ -30,7 +30,6 @@ use ir::InstrId;
 use ir::LocId;
 use ir::LocalId;
 use ir::StringInterner;
-use ir::TryCatchId;
 use ir::ValueId;
 use itertools::Itertools;
 use log::trace;
@@ -164,10 +163,6 @@ fn write_block(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, bid: 
     trace!("  Block {bid}");
     let block = state.func.block(bid);
 
-    if block.tcid != TryCatchId::None {
-        textual_todo! { w.comment("TODO: Try-Catch Block")?; }
-    }
-
     let params = block
         .params
         .iter()
@@ -178,9 +173,21 @@ fn write_block(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, bid: 
         w.write_label(bid, &params)?;
     }
 
-    for iid in block.iids() {
-        write_instr(w, state, iid)?;
+    // All the non-terminators.
+    let n_iids = block.iids.len() - 1;
+    for iid in &block.iids[..n_iids] {
+        write_instr(w, state, *iid)?;
     }
+
+    // The terminator.
+    write_terminator(w, state, block.terminator_iid())?;
+
+    // Exception handler.
+    let handler = state.func.catch_target(bid);
+    if handler != BlockId::NONE {
+        w.write_exception_handler(handler)?;
+    }
+
     Ok(())
 }
 
@@ -219,31 +226,6 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
             ref values,
             loc: _,
         })) => write_builtin(w, state, iid, target, values)?,
-        Instr::Terminator(Terminator::Enter(bid, _) | Terminator::Jmp(bid, _)) => {
-            w.jmp(&[bid], ())?;
-        }
-        Instr::Terminator(Terminator::JmpArgs(bid, ref params, _)) => {
-            w.jmp(
-                &[bid],
-                params.iter().map(|v| state.lookup_vid(*v)).collect_vec(),
-            )?;
-        }
-        Instr::Terminator(Terminator::JmpOp {
-            cond: _,
-            pred: _,
-            targets: [true_bid, false_bid],
-            loc: _,
-        }) => {
-            // We just need to emit the jmp - the rewrite_jmp_ops() pass should
-            // have already inserted assert in place on the target bids.
-            w.jmp(&[true_bid, false_bid], ())?;
-        }
-        Instr::Terminator(Terminator::Ret(vid, _)) => {
-            w.ret(state.lookup_vid(vid))?;
-        }
-        Instr::Terminator(Terminator::Unreachable) => {
-            w.unreachable()?;
-        }
 
         Instr::Special(Special::Copy(..)) => todo!(),
         Instr::Special(Special::IrToBc(..)) => todo!(),
@@ -251,30 +233,6 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
         Instr::Special(Special::Select(..)) => todo!(),
         Instr::Special(Special::Tmp(..)) => todo!(),
         Instr::Special(Special::Tombstone) => todo!(),
-
-        Instr::Terminator(Terminator::CallAsync(..))
-        | Instr::Terminator(Terminator::Exit(..))
-        | Instr::Terminator(Terminator::Fatal(..))
-        | Instr::Terminator(Terminator::IterInit(..))
-        | Instr::Terminator(Terminator::IterNext(..))
-        | Instr::Terminator(Terminator::MemoGet(..))
-        | Instr::Terminator(Terminator::MemoGetEager(..))
-        | Instr::Terminator(Terminator::NativeImpl(..))
-        | Instr::Terminator(Terminator::RetCSuspended(..))
-        | Instr::Terminator(Terminator::RetM(..))
-        | Instr::Terminator(Terminator::SSwitch { .. })
-        | Instr::Terminator(Terminator::Switch { .. })
-        | Instr::Terminator(Terminator::ThrowAsTypeStructException { .. }) => {
-            w.write_todo(&format!("{:?}", instr))?;
-        }
-
-        Instr::Terminator(Terminator::Throw(vid, _)) => {
-            textual_todo! {
-                let expr = state.lookup_vid(vid);
-                w.call("TODO_throw", [expr])?;
-                w.unreachable()?;
-            }
-        }
 
         Instr::Hhbc(ref hhbc) => {
             // This should only handle instructions that can't be rewritten into
@@ -296,6 +254,79 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
                         .collect_vec(),
                 )?;
                 state.set_iid(iid, output);
+            }
+        }
+
+        Instr::Terminator(_) => unreachable!(),
+    }
+
+    Ok(())
+}
+
+fn write_terminator(
+    w: &mut textual::FuncWriter<'_>,
+    state: &mut FuncState<'_>,
+    iid: InstrId,
+) -> Result {
+    let terminator = match state.func.instr(iid) {
+        Instr::Terminator(terminator) => terminator,
+        _ => unreachable!(),
+    };
+    trace!("    Instr {iid}: {terminator:?}");
+
+    state.update_loc(w, terminator.loc_id())?;
+
+    // In general don't write directly to `w` here - isolate the formatting to
+    // the `textual` crate.
+
+    match *terminator {
+        Terminator::Enter(bid, _) | Terminator::Jmp(bid, _) => {
+            w.jmp(&[bid], ())?;
+        }
+        Terminator::JmpArgs(bid, ref params, _) => {
+            w.jmp(
+                &[bid],
+                params.iter().map(|v| state.lookup_vid(*v)).collect_vec(),
+            )?;
+        }
+        Terminator::JmpOp {
+            cond: _,
+            pred: _,
+            targets: [true_bid, false_bid],
+            loc: _,
+        } => {
+            // We just need to emit the jmp - the rewrite_jmp_ops() pass should
+            // have already inserted assert in place on the target bids.
+            w.jmp(&[true_bid, false_bid], ())?;
+        }
+        Terminator::Ret(vid, _) => {
+            w.ret(state.lookup_vid(vid))?;
+        }
+        Terminator::Unreachable => {
+            w.unreachable()?;
+        }
+
+        Terminator::CallAsync(..)
+        | Terminator::Exit(..)
+        | Terminator::Fatal(..)
+        | Terminator::IterInit(..)
+        | Terminator::IterNext(..)
+        | Terminator::MemoGet(..)
+        | Terminator::MemoGetEager(..)
+        | Terminator::NativeImpl(..)
+        | Terminator::RetCSuspended(..)
+        | Terminator::RetM(..)
+        | Terminator::SSwitch { .. }
+        | Terminator::Switch { .. }
+        | Terminator::ThrowAsTypeStructException { .. } => {
+            w.write_todo(&format!("{terminator:?}"))?;
+        }
+
+        Terminator::Throw(vid, _) => {
+            textual_todo! {
+                let expr = state.lookup_vid(vid);
+                w.call("TODO_throw", [expr])?;
+                w.unreachable()?;
             }
         }
     }

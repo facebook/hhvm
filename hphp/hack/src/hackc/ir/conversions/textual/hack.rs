@@ -69,6 +69,8 @@ pub(crate) enum Hhbc {
     Print,
     #[strum(props(Function = "hhbc_sub"))]
     Sub,
+    #[strum(props(Function = "hhbc_throw"))]
+    Throw,
     #[strum(props(Function = "hhbc_verify_failed"))]
     VerifyFailed,
 }
@@ -119,6 +121,10 @@ pub(crate) enum Builtin {
     ///   IsTrue(p: *HackMixed) -> bool
     #[strum(props(Function = "hack_is_true"))]
     IsTrue,
+    /// Returns true if the given HackMixed is of the named type.
+    ///   IsType(p: *HackMixed, t: *string) -> bool
+    #[strum(props(Function = "hack_is_type"))]
+    IsType,
     /// Returns a HackMixed containing a `null`.
     ///   Null() -> *HackMixed
     #[strum(props(Function = "hack_null"))]

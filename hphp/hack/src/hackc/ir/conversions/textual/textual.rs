@@ -463,6 +463,11 @@ impl<'a> FuncWriter<'a> {
         Ok(())
     }
 
+    pub(crate) fn write_exception_handler(&mut self, target: BlockId) -> Result {
+        writeln!(self.w, "{INDENT}.handlers {}", FmtBid(target))?;
+        Ok(())
+    }
+
     pub(crate) fn write_expr(&mut self, expr: impl Into<Expr>) -> Result<Sid> {
         let expr = expr.into();
         match expr {
@@ -481,7 +486,7 @@ impl<'a> FuncWriter<'a> {
             write!(self.w, "#{}(", FmtBid(bid))?;
             let mut sep = "";
             for sid in params {
-                write!(self.w, "{sep}{}", FmtSid(*sid))?;
+                write!(self.w, "{sep}{}: *HackMixed", FmtSid(*sid))?;
                 sep = ", ";
             }
             writeln!(self.w, "):")?;

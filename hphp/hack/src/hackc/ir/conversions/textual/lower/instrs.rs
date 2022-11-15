@@ -10,6 +10,7 @@ use ir::instr::HasLoc;
 use ir::instr::HasOperands;
 use ir::instr::Hhbc;
 use ir::instr::Terminator;
+use ir::Constant;
 use ir::Func;
 use ir::FuncBuilder;
 use ir::FuncBuilderEx as _;
@@ -147,6 +148,10 @@ impl TransformInstr for LowerInstrs<'_> {
         }
 
         let instr = match instr {
+            Instr::Hhbc(Hhbc::InstanceOfD(vid, cid, loc)) => {
+                let cid = builder.emit_constant(Constant::String(cid.id));
+                builder.hack_builtin(hack::Builtin::IsType, &[vid, cid], loc)
+            }
             Instr::Hhbc(Hhbc::LateBoundCls(loc)) => {
                 if self.method_info.unwrap().is_static {
                     let this = builder.emit(Instr::Hhbc(Hhbc::This(loc)));
@@ -156,9 +161,20 @@ impl TransformInstr for LowerInstrs<'_> {
                     builder.hack_builtin(hack::Builtin::GetStaticClass, &[this], loc)
                 }
             }
+            Instr::Hhbc(Hhbc::VerifyOutType(vid, lid, loc)) => {
+                self.verify_out_type(builder, vid, lid, loc)
+            }
+            Instr::Hhbc(Hhbc::VerifyRetTypeC(vid, loc)) => {
+                self.verify_ret_type_c(builder, vid, loc)
+            }
             Instr::Terminator(Terminator::Exit(ops, loc)) => {
                 let builtin = hack::Builtin::Hhbc(hack::Hhbc::Exit);
                 builder.emit_hack_builtin(builtin, &[ops], loc);
+                Instr::unreachable()
+            }
+            Instr::Terminator(Terminator::Throw(value, loc)) => {
+                let builtin = hack::Builtin::Hhbc(hack::Hhbc::Throw);
+                builder.emit_hack_builtin(builtin, &[value], loc);
                 Instr::unreachable()
             }
             Instr::Terminator(Terminator::RetM(ops, loc)) => {
@@ -168,12 +184,6 @@ impl TransformInstr for LowerInstrs<'_> {
                 let builtin = hack::Builtin::Hhbc(hack::Hhbc::NewVec);
                 let vec = builder.emit_hack_builtin(builtin, &ops, loc);
                 Instr::ret(vec, loc)
-            }
-            Instr::Hhbc(Hhbc::VerifyOutType(vid, lid, loc)) => {
-                self.verify_out_type(builder, vid, lid, loc)
-            }
-            Instr::Hhbc(Hhbc::VerifyRetTypeC(vid, loc)) => {
-                self.verify_ret_type_c(builder, vid, loc)
             }
             instr => {
                 return instr;

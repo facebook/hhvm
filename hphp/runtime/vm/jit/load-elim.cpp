@@ -1396,25 +1396,45 @@ void save_taken_state(Global& genv, const IRInstruction& inst,
 
   auto& outState = genv.blockInfo[inst.block()].stateOutTaken = state;
 
-  // CheckInitMem's pointee is TUninit on the taken branch, so update
-  // outState. Likewise, CheckMROProp's taken branch means the bit is
-  // set to false.
-  if (inst.is(CheckInitMem, CheckMROProp)) {
+  auto const handleCheck = [&](Type maxTakenType, Type subtractedType) {
     assertx(!inst.maySyncVMRegsWithSources());
     auto const effects = memory_effects(inst);
     auto const ge = boost::get<GeneralEffects>(effects);
     assertx(ge.inout == AEmpty);
     assertx(ge.backtrace == AEmpty);
     auto const meta = genv.ainfo.find(canonicalize(ge.loads));
-    auto const newType = inst.is(CheckInitMem) ? TUninit : Type::cns(false);
     if (auto const tloc = find_tracked(outState, meta)) {
-      tloc->knownType &= newType;
+      tloc->knownType = negativeCheckType(
+        tloc->knownType & maxTakenType, subtractedType);
     } else if (meta) {
       auto tloc = &outState.tracked[meta->index];
       tloc->knownValue = nullptr;
-      tloc->knownType = newType;
+      tloc->knownType = negativeCheckType(maxTakenType, subtractedType);
       outState.avail.set(meta->index);
     }
+  };
+
+  switch (inst.op()) {
+    case CheckTypeMem:
+    case CheckLoc:
+    case CheckStk:
+    case CheckMBase:
+      // Subtract inst.typeParam() on the taken branch.
+      handleCheck(TCell, inst.typeParam());
+      break;
+
+    case CheckInitMem:
+      // The pointee is TUninit on the taken branch.
+      handleCheck(TUninit, TBottom);
+      break;
+
+    case CheckMROProp:
+      // The bit is set to false on taken branch.
+      handleCheck(Type::cns(false), TBottom);
+      break;
+
+    default:
+      break;
   }
 }
 

@@ -99,6 +99,12 @@ final class RpcOptions implements IPureStringishObject {
   public function __toString()[]: string;
 }
 
+final class ThriftApplicationException extends Exception {
+  public function __construct(?string $message = null)[] {
+    parent::__construct($message);
+  }
+}
+
 <<__NativeData("TClientBufferedStream")>>
 final class TClientBufferedStream {
   public function __construct(): void {}

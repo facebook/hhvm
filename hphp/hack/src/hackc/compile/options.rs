@@ -10,7 +10,6 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use bstr::BString;
-use bstr::ByteSlice;
 use hhbc::IncludePath;
 pub use oxidized::parser_options::ParserOptions;
 use relative_path::RelativePath;
@@ -48,7 +47,6 @@ impl Hhvm {
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct Options {
-    pub doc_root: BString,
     pub compiler_flags: CompilerFlags,
     pub hhvm: Hhvm,
     pub hhbc: HhbcFlags,
@@ -68,7 +66,6 @@ impl Default for Options {
             compiler_flags: CompilerFlags::default(),
             hhvm: Hhvm::default(),
             hhbc: HhbcFlags::default(),
-            doc_root: "".into(),
         }
     }
 }
@@ -81,9 +78,8 @@ impl bytecode_printer::IncludeProcessor for Options {
     ) -> Option<PathBuf> {
         let alloc = bumpalo::Bump::new();
         let include_roots = &self.hhvm.include_roots;
-        let doc_root = self.doc_root.as_bstr();
         match include_path.into_doc_root_relative(&alloc, include_roots) {
-            IncludePath::Absolute(p) => {
+            IncludePath::DocRootRelative(p) | IncludePath::Absolute(p) => {
                 let path = Path::new(OsStr::from_bytes(&p));
                 if path.exists() {
                     Some(path.to_owned())
@@ -105,23 +101,13 @@ impl bytecode_printer::IncludeProcessor for Options {
             IncludePath::IncludeRootRelative(v, p) => {
                 if !p.is_empty() {
                     if let Some(ir) = include_roots.get(v.as_bstr()) {
-                        let resolved = Path::new(OsStr::from_bytes(doc_root))
-                            .join(OsStr::from_bytes(ir))
-                            .join(OsStr::from_bytes(&p));
+                        let resolved = Path::new(OsStr::from_bytes(ir)).join(OsStr::from_bytes(&p));
                         if resolved.exists() {
                             return Some(resolved);
                         }
                     }
                 }
                 None
-            }
-            IncludePath::DocRootRelative(p) => {
-                let resolved = Path::new(OsStr::from_bytes(doc_root)).join(OsStr::from_bytes(&p));
-                if resolved.exists() {
-                    Some(resolved)
-                } else {
-                    None
-                }
             }
         }
     }

@@ -5,18 +5,16 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-path = "lib.rs"
+path = "../../lib.rs"
 
 [dependencies]
 anyhow = "1.0.65"
 ascii = "1.0"
-escaper = { path = "../../../../utils/escaper" }
-ffi = { path = "../../../../utils/ffi" }
-hash = { path = "../../../../utils/hash" }
-ir = { path = "../.." }
+escaper = { path = "../../../../../../utils/escaper" }
+ffi = { path = "../../../../../../utils/ffi" }
+hash = { path = "../../../../../../utils/hash" }
+ir = { path = "../../../.." }
 itertools = "0.10.3"
 log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }
-newtype = { path = "../../../../utils/newtype" }
-once_cell = "1.12"
-strum = "0.21"
-strum_macros = "0.21"
+newtype = { path = "../../../../../../utils/newtype" }
+textual_macros = { path = "../macros" }

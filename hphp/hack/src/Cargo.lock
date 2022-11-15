@@ -4512,9 +4512,18 @@ dependencies = [
  "itertools 0.10.3",
  "log",
  "newtype",
- "once_cell",
- "strum",
- "strum_macros",
+ "textual_macros",
+]
+
+[[package]]
+name = "textual_macros"
+version = "0.0.0"
+dependencies = [
+ "itertools 0.10.3",
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

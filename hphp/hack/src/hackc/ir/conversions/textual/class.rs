@@ -16,7 +16,6 @@ use std::sync::Arc;
 use anyhow::Error;
 use ascii::AsciiString;
 use log::trace;
-use strum_macros::EnumIter;
 
 use super::func;
 use super::hack;
@@ -31,7 +30,7 @@ use crate::util;
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
 
-#[derive(Copy, Clone, Eq, PartialEq, EnumIter)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub(crate) enum IsStatic {
     Static,
     NonStatic,

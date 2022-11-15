@@ -3,19 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::fmt;
-
 use anyhow::Error;
-use once_cell::sync::OnceCell;
-use strum::EnumProperty as _;
-use strum_macros::EnumIter;
-use strum_macros::EnumProperty;
+use textual_macros::TextualDecl;
 
-use crate::mangle::MangleWithClass as _;
 use crate::textual;
 use crate::textual::Sid;
-
-const BUILTINS_CLASS: ir::ClassName<'static> = ir::ClassName::new(ffi::Str::new(b"$builtins"));
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
 
@@ -23,144 +15,97 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 /// the names should match the HHBC name except when they are compound bytecodes
 /// (like Cmp with a parameter of Eq becoming CmpEq). Documentation can be found
 /// in hphp/doc/bytecode.specification.
-#[derive(Copy, Clone, EnumIter, EnumProperty)]
+#[derive(Copy, Clone, TextualDecl)]
 pub(crate) enum Hhbc {
-    #[strum(props(Function = "hhbc_add"))]
+    #[decl(fn hhbc_add(*HackMixed, *HackMixed) -> *HackMixed)]
     Add,
-    #[strum(props(Function = "hhbc_cmp_eq"))]
+    #[decl(fn hhbc_cmp_eq(*HackMixed, *HackMixed) -> *HackMixed)]
     CmpEq,
-    #[strum(props(Function = "hhbc_cmp_gt"))]
+    #[decl(fn hhbc_cmp_gt(*HackMixed, *HackMixed) -> *HackMixed)]
     CmpGt,
-    #[strum(props(Function = "hhbc_cmp_gte"))]
+    #[decl(fn hhbc_cmp_gte(*HackMixed, *HackMixed) -> *HackMixed)]
     CmpGte,
-    #[strum(props(Function = "hhbc_cmp_lt"))]
+    #[decl(fn hhbc_cmp_lt(*HackMixed, *HackMixed) -> *HackMixed)]
     CmpLt,
-    #[strum(props(Function = "hhbc_cmp_lte"))]
+    #[decl(fn hhbc_cmp_lte(*HackMixed, *HackMixed) -> *HackMixed)]
     CmpLte,
-    #[strum(props(Function = "hhbc_cmp_nsame"))]
+    #[decl(fn hhbc_cmp_nsame(*HackMixed, *HackMixed) -> *HackMixed)]
     CmpNSame,
-    #[strum(props(Function = "hhbc_cmp_neq"))]
+    #[decl(fn hhbc_cmp_neq(*HackMixed, *HackMixed) -> *HackMixed)]
     CmpNeq,
-    #[strum(props(Function = "hhbc_cmp_same"))]
+    #[decl(fn hhbc_cmp_same(*HackMixed, *HackMixed) -> *HackMixed)]
     CmpSame,
-    #[strum(props(Function = "hhbc_concat"))]
+    #[decl(fn hhbc_concat(*HackMixed, *HackMixed) -> *HackMixed)]
     Concat,
-    #[strum(props(Function = "hhbc_div"))]
+    #[decl(fn hhbc_div(*HackMixed, *HackMixed) -> *HackMixed)]
     Div,
-    #[strum(props(Function = "hhbc_exit"))]
+    #[decl(fn hhbc_exit(*HackMixed) -> noreturn)]
     Exit,
-    #[strum(props(Function = "hhbc_is_type_int"))]
+    #[decl(fn hhbc_is_type_int(*HackMixed) -> *HackMixed)]
     IsTypeInt,
-    #[strum(props(Function = "hhbc_is_type_null"))]
+    #[decl(fn hhbc_is_type_null(*HackMixed) -> *HackMixed)]
     IsTypeNull,
-    #[strum(props(Function = "hhbc_is_type_str"))]
+    #[decl(fn hhbc_is_type_str(*HackMixed) -> *HackMixed)]
     IsTypeStr,
-    #[strum(props(Function = "hhbc_modulo"))]
+    #[decl(fn hhbc_modulo(*HackMixed, *HackMixed) -> *HackMixed)]
     Modulo,
-    #[strum(props(Function = "hhbc_mul"))]
+    #[decl(fn hhbc_mul(*HackMixed, *HackMixed) -> *HackMixed)]
     Mul,
-    #[strum(props(Function = "hhbc_new_obj"))]
+    #[decl(fn hhbc_new_obj(*class) -> *HackMixed)]
     NewObj,
-    #[strum(props(Function = "hhbc_new_vec"))]
+    #[decl(fn hhbc_new_vec(...) -> *HackVec)]
     NewVec,
-    #[strum(props(Function = "hhbc_not"))]
+    #[decl(fn hhbc_not(*HackMixed) -> *HackMixed)]
     Not,
-    #[strum(props(Function = "hhbc_print"))]
+    #[decl(fn hhbc_print(*HackMixed) -> *HackMixed)]
     Print,
-    #[strum(props(Function = "hhbc_sub"))]
+    #[decl(fn hhbc_sub(*HackMixed, *HackMixed) -> *HackMixed)]
     Sub,
-    #[strum(props(Function = "hhbc_throw"))]
+    #[decl(fn hhbc_throw(*HackMixed) -> noreturn)]
     Throw,
-    #[strum(props(Function = "hhbc_verify_failed"))]
+    #[decl(fn hhbc_verify_failed() -> noreturn)]
     VerifyFailed,
 }
 
-// Need Default for EnumIter on Builtin
-impl std::default::Default for Hhbc {
-    fn default() -> Self {
-        Hhbc::Add
-    }
-}
-
-#[derive(EnumIter, EnumProperty)]
+#[derive(TextualDecl)]
 pub(crate) enum Builtin {
     /// Allocate an array with the given number of words (a word is a
     /// pointer-sized value).
-    ///   AllocWords(int) -> *void
-    #[strum(props(Function = "alloc_words"))]
+    #[decl(fn alloc_words(int) -> *void)]
     AllocWords,
-    /// Throws a BadMethodCall exception.
-    ///   BadMethodCall() -> noreturn
-    #[strum(props(Function = "hack_bad_method_call"))]
-    BadMethodCall,
-    /// Throws a BadProperty exception.
-    ///   BadProperty() -> noreturn
-    #[strum(props(Function = "hack_bad_property"))]
-    BadProperty,
     /// Turns a raw boolean into a HackMixed.
-    ///   Bool(n: bool) -> *HackMixed
-    #[strum(props(Function = "hack_bool"))]
+    #[decl(fn hack_bool(int) -> *HackBool)]
     Bool,
     /// Turns a raw float into a Mixed.
-    ///   Float(f: float) -> *Mixed
-    #[strum(props(Function = "hack_float"))]
+    #[decl(fn hack_float(float) -> *HackFloat)]
     Float,
     /// Returns the Class identifier for the given class.
-    #[strum(props(Function = "hack_get_class"))]
+    #[decl(fn hack_get_class(*void) -> *class)]
     GetClass,
     /// Returns the Class identifier for the given class's static class.
-    #[strum(props(Function = "hack_get_static_class"))]
+    #[decl(fn hack_get_static_class(*void) -> *class)]
     GetStaticClass,
     /// Hhbc handlers.  See hphp/doc/bytecode.specification for docs.
+    #[decl(skip)]
     Hhbc(Hhbc),
     /// Turns a raw int into a HackMixed.
-    ///   Int(n: int) -> *HackMixed
-    #[strum(props(Function = "hack_int"))]
+    #[decl(fn hack_int(int) -> *HackInt)]
     Int,
     /// Returns true if the given HackMixed is truthy.
-    ///   IsTrue(p: *HackMixed) -> bool
-    #[strum(props(Function = "hack_is_true"))]
+    #[decl(fn hack_is_true(*HackMixed) -> int)]
     IsTrue,
     /// Returns true if the given HackMixed is of the named type.
-    ///   IsType(p: *HackMixed, t: *string) -> bool
-    #[strum(props(Function = "hack_is_type"))]
+    #[decl(fn hack_is_type(*HackMixed, *HackString) -> *HackMixed)]
     IsType,
     /// Returns a HackMixed containing a `null`.
-    ///   Null() -> *HackMixed
-    #[strum(props(Function = "hack_null"))]
+    #[decl(fn hack_null() -> *HackNull)]
     Null,
-    /// Returns true if the given raw pointer is null.
-    ///   RawPtrIsNull(*void) -> bool
-    #[strum(props(Function = "raw_ptr_is_null"))]
-    RawPtrIsNull,
     /// Lazily initializes a static singleton.
-    ///   lazy_initialize(*HackMixed)
-    #[strum(props(Function = "lazy_initialize"))]
+    #[decl(fn lazy_initialize(*HackMixed) -> void)]
     SilLazyInitialize,
     /// Turns a raw string into a HackMixed.
-    ///   String(s: *string) -> *HackMixed
-    #[strum(props(Function = "hack_string"))]
+    #[decl(fn hack_string(string) -> *HackString)]
     String,
-    /// Used to check param count on function entry.
-    ///   VerifyParamCount(params, min, max)
-    #[strum(props(Function = "verify_param_count"))]
-    VerifyParamCount,
-}
-
-impl fmt::Display for Builtin {
-    fn fmt(&self, w: &mut fmt::Formatter<'_>) -> fmt::Result {
-        static DUMMY: OnceCell<ir::StringInterner> = OnceCell::new();
-        let strings = DUMMY.get_or_init(Default::default);
-
-        let name = match self {
-            Builtin::Hhbc(hhbc) => hhbc.get_str("Function").unwrap(),
-            _ => self.get_str("Function").unwrap(),
-        };
-        let method = ir::MethodName::new(ffi::Str::new(name.as_bytes()));
-        // Use a dummy string table - this is fine because builtins will never
-        // be based on the UnitBytesId.
-        w.write_str(&method.mangle(&BUILTINS_CLASS, strings))
-    }
 }
 
 pub(crate) fn call_builtin(

@@ -630,6 +630,14 @@ let rec switch
   let env = handle_default_case env dfl in
   env
 
+and foreach_pattern env collection_ent = function
+  | A.As_v (_, _, A.Lvar (_, lid))
+  | A.As_kv (_, (_, _, A.Lvar (_, lid)))
+  | A.Await_as_v (_, (_, _, A.Lvar (_, lid)))
+  | A.Await_as_kv (_, _, (_, _, A.Lvar (_, lid))) ->
+    Env.set_local env lid collection_ent
+  | _ -> env
+
 and stmt (env : env) ((pos, stmt) : T.stmt) : env =
   let decorate ~origin constraint_ = { hack_pos = pos; origin; constraint_ } in
   match stmt with
@@ -710,6 +718,34 @@ and stmt (env : env) ((pos, stmt) : T.stmt) : env =
         ~origin:__LINE__
         env
         [Cont.Break; Cont.Next]
+    in
+    env
+  | A.Foreach (collection_exp, pattern, bl) ->
+    let (env, collection_ent) = expr_ env collection_exp in
+    Env.stash_and_do env [Cont.Continue; Cont.Break] @@ fun env ->
+    let env =
+      Env.save_and_merge_next_in_cont ~pos ~origin:__LINE__ env Cont.Continue
+    in
+    let env_before_iteration = Env.refresh ~pos ~origin:__LINE__ env in
+    let env_after_iteration =
+      let env = foreach_pattern env_before_iteration collection_ent pattern in
+      let env = block env bl in
+      env
+    in
+    let env =
+      Env.loop_continuation
+        ~pos
+        ~origin:__LINE__
+        Cont.Next
+        ~env_before_iteration
+        ~env_after_iteration
+    in
+    let env =
+      Env.update_next_from_conts
+        ~pos
+        ~origin:__LINE__
+        env
+        [Cont.Continue; Cont.Break; Cont.Next]
     in
     env
   | A.Block statements -> block env statements

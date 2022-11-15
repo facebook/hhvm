@@ -614,6 +614,10 @@ let parse_check_args cmd =
         Arg.Unit (fun () -> set_mode (MODE_REMOVE_DEAD_FIXMES [])),
         " (mode) remove dead HH_FIXME for any error code < 5000 "
         ^ "(first do hh_client restart --no-load)" );
+      ( "--remove-dead-unsafe-casts",
+        Arg.Unit (fun () -> set_mode MODE_REMOVE_DEAD_UNSAFE_CASTS),
+        " (mode) remove dead UNSAFE_CASTS (first do hh_client restart --no-load)"
+      );
       ( "--resume",
         Arg.Unit (fun () -> set_mode (MODE_PAUSE false)),
         " (mode) resume recheck-on-file-change [EXPERIMENTAL]" );

@@ -843,6 +843,28 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
             apply_patches patches;
           Lwt.return (Exit_status.No_error, telemetry)
       end
+    | MODE_REMOVE_DEAD_UNSAFE_CASTS ->
+      let status_cmd =
+        Rpc.STATUS
+          { ignore_ide = true; max_errors = args.max_errors; remote = false }
+      in
+      let rec go () =
+        let%lwt (response, telemetry) =
+          rpc args @@ Rpc.REMOVE_DEAD_UNSAFE_CASTS
+        in
+        match response with
+        | `Error msg ->
+          Printf.eprintf "%s\n" msg;
+          Lwt.return (Exit_status.Type_error, telemetry)
+        | `Ok patches ->
+          apply_patches patches;
+          if List.is_empty patches then
+            Lwt.return (Exit_status.No_error, telemetry)
+          else
+            let%lwt _ = rpc args status_cmd in
+            go ()
+      in
+      go ()
     | MODE_REWRITE_LAMBDA_PARAMETERS files ->
       let%lwt conn = connect args in
       let%lwt (patches, telemetry) =

@@ -9,6 +9,9 @@
 val get_fixme_patches :
   int list -> ServerEnv.env -> ServerRefactorTypes.patch list
 
+val get_dead_unsafe_cast_patches :
+  ServerEnv.env -> ServerRefactorTypes.patch list
+
 val get_lambda_parameter_rewrite_patches :
   Provider_context.t -> string list -> ServerRefactorTypes.patch list
 

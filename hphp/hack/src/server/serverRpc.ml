@@ -12,8 +12,10 @@ open ServerEnv
 open ServerCommandTypes
 open Utils
 
-let remove_dead_fixme_warning =
-  "hh_server was started without '--no-load', which is required when removing dead fixmes.\n"
+let remove_dead_warning name =
+  "hh_server was started without '--no-load', which is required when removing dead "
+  ^ name
+  ^ "s.\n"
   ^ "Please run 'hh_client restart --no-load' to restart it."
 
 let take_max_errors error_list max_errors =
@@ -326,7 +328,14 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         (Errors.get_error_list env.errorl |> List.map ~f:User_error.get_code);
       (env, `Ok (ServerRefactor.get_fixme_patches codes env))
     ) else
-      (env, `Error remove_dead_fixme_warning)
+      (env, `Error (remove_dead_warning "fixme"))
+  | REMOVE_DEAD_UNSAFE_CASTS ->
+    if genv.ServerEnv.options |> ServerArgs.no_load then (
+      HackEventLogger.check_response
+        (Errors.get_error_list env.errorl |> List.map ~f:User_error.get_code);
+      (env, `Ok (ServerRefactor.get_dead_unsafe_cast_patches env))
+    ) else
+      (env, `Error (remove_dead_warning "unsafe cast"))
   | REWRITE_LAMBDA_PARAMETERS files ->
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, ServerRefactor.get_lambda_parameter_rewrite_patches ctx files)

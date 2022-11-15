@@ -156,3 +156,50 @@ class TestFreshInit(common_tests.CommonTests):
                 }
             """,
             )
+
+    def test_remove_dead_unsafe_casts(self) -> None:
+        with open(os.path.join(self.test_driver.repo_dir, "foo_5.php"), "w") as f:
+            f.write(
+                r"""<?hh
+                function takes_string(string $i): void {}
+
+                function foo(?string $s): ?string {
+                  takes_string(\HH\FIXME\UNSAFE_CAST<?string, string>($s)); // Not redundant
+                  \HH\FIXME\UNSAFE_CAST<mixed, ?string>($s); // Redundant
+                  if (\HH\FIXME\UNSAFE_CAST<mixed, ?string>($s) === 'test') { // Redundant
+                    print "hello";
+                    return \HH\FIXME\UNSAFE_CAST<?string, string>($s); // Not redundant
+                  } else {
+                    return \HH\FIXME\UNSAFE_CAST<mixed, ?string>($s); // Redundant
+                  }
+                }
+            """
+            )
+
+        self.test_driver.start_hh_server(
+            changed_files=["foo_5.php"],
+            args=["--no-load", "--config", "populate_dead_unsafe_cast_heap=true"],
+        )
+        self.test_driver.check_cmd(
+            expected_output=None, options=["--remove-dead-unsafe-casts"]
+        )
+
+        with open(os.path.join(self.test_driver.repo_dir, "foo_5.php")) as f:
+            out = f.read()
+            self.assertEqual(
+                out,
+                r"""<?hh
+                function takes_string(string $i): void {}
+
+                function foo(?string $s): ?string {
+                  takes_string(\HH\FIXME\UNSAFE_CAST<?string, string>($s)); // Not redundant
+                  ($s); // Redundant
+                  if (($s) === 'test') { // Redundant
+                    print "hello";
+                    return \HH\FIXME\UNSAFE_CAST<?string, string>($s); // Not redundant
+                  } else {
+                    return ($s); // Redundant
+                  }
+                }
+            """,
+            )

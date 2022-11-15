@@ -506,6 +506,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
            config)
       ?tco_allow_all_locations_for_type_constant_in_enum_class:
         (bool_opt "allow_all_locations_for_type_constant_in_enum_class" config)
+      ?tco_populate_dead_unsafe_cast_heap:
+        (bool_opt "populate_dead_unsafe_cast_heap" config)
       ()
   in
   Errors.allowed_fixme_codes_strict :=

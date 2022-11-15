@@ -33,6 +33,12 @@ let get_fixme_patches codes (env : env) =
   in
   List.map ~f:(fun pos -> Remove (Pos.to_absolute pos)) poslist
 
+let get_dead_unsafe_cast_patches (env : env) =
+  Remove_dead_unsafe_casts.get_patches
+    ~is_test:false
+    ~fold:(Naming_table.fold ~warn_on_naming_costly_iter:true)
+    ~files_info:env.naming_table
+
 let get_lambda_parameter_rewrite_patches ctx files =
   List.concat_map files ~f:(fun file ->
       ServerRewriteLambdaParameters.get_patches

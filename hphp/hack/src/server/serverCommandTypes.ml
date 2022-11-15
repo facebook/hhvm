@@ -383,6 +383,8 @@ type _ t =
   | REMOVE_DEAD_FIXMES :
       int list
       -> [ `Ok of ServerRefactorTypes.patch list | `Error of string ] t
+  | REMOVE_DEAD_UNSAFE_CASTS
+      : [ `Ok of ServerRefactorTypes.patch list | `Error of string ] t
   | REWRITE_LAMBDA_PARAMETERS : string list -> ServerRefactorTypes.patch list t
   | REWRITE_TYPE_PARAMS_TYPE : string list -> ServerRefactorTypes.patch list t
   | IN_MEMORY_DEP_TABLE_SIZE : (int, string) Stdlib.result t

@@ -687,94 +687,99 @@ let maybe_poison_ancestors
       let s = Printf.sprintf "!,%s,%d" (Pos.filename p) (Pos.line p) in
       Typing_log.log_pessimise_return env child_pos (Some s)
     | (Enforced, Unenforced) ->
-      let enforced_child_ty =
-        Typing_partial_enforcement.get_enforced_type
-          env
-          (Some child_class)
-          child_return_ty
-      in
-      if ty_equal child_return_ty enforced_child_ty then
-        ()
-      else
-        (* Construct a temporary environment for doing decl subtyping in which the bound on this is set to that corresponding to origin *)
-        let tmp_env =
-          match Env.get_class env origin with
-          | None -> env
-          | Some c ->
-            let self_ty =
-              Typing_make_type.class_type
-                Reason.Rnone
-                (Cls.name c)
-                (List.map (Cls.tparams c) ~f:(fun tp ->
-                     Typing_make_type.generic Reason.Rnone (snd tp.tp_name)))
-            in
-            Env.env_with_tpenv
+      begin
+        match get_node parent_return_ty with
+        | Tmixed -> ()
+        | _ ->
+          let enforced_child_ty =
+            Typing_partial_enforcement.get_enforced_type
               env
-              (Type_parameter_env.add_upper_bound
-                 Type_parameter_env.empty
-                 Naming_special_names.Typehints.this
-                 self_ty)
-        in
-        let child_pos =
-          Pos_or_decl.unsafe_to_raw_pos (get_pos ft_child.ft_ret.et_type)
-        in
-        let enforced_parent_ty =
-          Typing_partial_enforcement.get_enforced_type
-            env
-            (Some parent_class)
-            parent_return_ty
-        in
-        (* We need that the enforced child type is a subtype of the enforced parent type *)
-        let sub1 =
-          Typing_phase.is_sub_type_decl
-            ~coerce:(Some Typing_logic.CoerceToDynamic)
-            tmp_env
-            enforced_child_ty
-            enforced_parent_ty
-        in
-        (* But also the original child type should be a subtype of the enforced parent type *)
-        let sub2 =
-          Typing_phase.is_sub_type_decl
-            ~coerce:(Some Typing_logic.CoerceToDynamic)
-            tmp_env
-            child_return_ty
-            enforced_parent_ty
-        in
-        if sub1 && sub2 then
-          let ty_str =
-            Typing_print.full_decl (Env.get_tcopt env) enforced_parent_ty
+              (Some child_class)
+              child_return_ty
           in
-          (* Hack to remove "\\" if XHP type is rendered as "\\:X" *)
-          (* TODO: fix Typing_print so that it renders XHP correctly *)
-          let ty_str =
-            let re = Str.regexp "\\\\:" in
-            Str.global_replace re ":" ty_str
-          in
-          Typing_log.log_pessimise_return env child_pos (Some ty_str)
-        else
-          Cls.all_ancestor_names child_class
-          |> List.map ~f:(Env.get_class env)
-          |> List.filter_opt
-          |> List.iter ~f:(fun cls ->
-                 MemberKind.(
-                   match member_kind with
-                   | Static_method -> Cls.get_smethod cls member_name
-                   | Method -> Cls.get_method cls member_name
-                   | _ -> None)
-                 |> Option.iter ~f:(fun elt ->
-                        let (lazy fty) = elt.ce_type in
-                        match get_node fty with
-                        | Tfun { ft_ret; _ } ->
-                          let pos =
-                            Pos_or_decl.unsafe_to_raw_pos
-                              (get_pos ft_ret.et_type)
-                          in
-                          (* The ^ denotes poisoning *)
-                          Typing_log.log_pessimise_poisoned_return
-                            env
-                            pos
-                            (Cls.name child_class ^ "::" ^ member_name)
-                        | _ -> ()))
+          if ty_equal child_return_ty enforced_child_ty then
+            ()
+          else
+            (* Construct a temporary environment for doing decl subtyping in which the bound on this is set to that corresponding to origin *)
+            let tmp_env =
+              match Env.get_class env origin with
+              | None -> env
+              | Some c ->
+                let self_ty =
+                  Typing_make_type.class_type
+                    Reason.Rnone
+                    (Cls.name c)
+                    (List.map (Cls.tparams c) ~f:(fun tp ->
+                         Typing_make_type.generic Reason.Rnone (snd tp.tp_name)))
+                in
+                Env.env_with_tpenv
+                  env
+                  (Type_parameter_env.add_upper_bound
+                     Type_parameter_env.empty
+                     Naming_special_names.Typehints.this
+                     self_ty)
+            in
+            let child_pos =
+              Pos_or_decl.unsafe_to_raw_pos (get_pos ft_child.ft_ret.et_type)
+            in
+            let enforced_parent_ty =
+              Typing_partial_enforcement.get_enforced_type
+                env
+                (Some parent_class)
+                parent_return_ty
+            in
+            (* We need that the enforced child type is a subtype of the enforced parent type *)
+            let sub1 =
+              Typing_phase.is_sub_type_decl
+                ~coerce:(Some Typing_logic.CoerceToDynamic)
+                tmp_env
+                enforced_child_ty
+                enforced_parent_ty
+            in
+            (* But also the original child type should be a subtype of the enforced parent type *)
+            let sub2 =
+              Typing_phase.is_sub_type_decl
+                ~coerce:(Some Typing_logic.CoerceToDynamic)
+                tmp_env
+                child_return_ty
+                enforced_parent_ty
+            in
+            if sub1 && sub2 then
+              let ty_str =
+                Typing_print.full_decl (Env.get_tcopt env) enforced_parent_ty
+              in
+              (* Hack to remove "\\" if XHP type is rendered as "\\:X" *)
+              (* TODO: fix Typing_print so that it renders XHP correctly *)
+              let ty_str =
+                let re = Str.regexp "\\\\:" in
+                Str.global_replace re ":" ty_str
+              in
+              Typing_log.log_pessimise_return env child_pos (Some ty_str)
+            else
+              Cls.all_ancestor_names child_class
+              |> List.map ~f:(Env.get_class env)
+              |> List.filter_opt
+              |> List.iter ~f:(fun cls ->
+                     MemberKind.(
+                       match member_kind with
+                       | Static_method -> Cls.get_smethod cls member_name
+                       | Method -> Cls.get_method cls member_name
+                       | _ -> None)
+                     |> Option.iter ~f:(fun elt ->
+                            let (lazy fty) = elt.ce_type in
+                            match get_node fty with
+                            | Tfun { ft_ret; _ } ->
+                              let pos =
+                                Pos_or_decl.unsafe_to_raw_pos
+                                  (get_pos ft_ret.et_type)
+                              in
+                              (* The ^ denotes poisoning *)
+                              Typing_log.log_pessimise_poisoned_return
+                                env
+                                pos
+                                (Cls.name child_class ^ "::" ^ member_name)
+                            | _ -> ()))
+      end
     | _ -> ()
 
 (* Check that overriding is correct *)

@@ -17,11 +17,14 @@ let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
   let enable_sound_dynamic =
     TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
   in
-  (* hack to avoid yet another flag, just for data gathering for pessimisation *)
-  let mixed_nonnull_unenforced = TypecheckerOptions.like_casts env.genv.tcopt in
   let rec enforcement include_dynamic env visited ty =
     match get_node ty with
     | Tthis -> Unenforced
+    (* Look through supportdyn, just as we look through ~ *)
+    | Tapply ((_, name), [ty])
+      when String.equal name Naming_special_names.Classes.cSupportDyn
+           && enable_sound_dynamic ->
+      enforcement include_dynamic env visited ty
     (* Enums are only enforced at their underlying type, in contrast to as and is
      * tests which check for validity of values *)
     | Tapply ((_, name), _) when Env.is_enum env name -> Unenforced
@@ -99,11 +102,7 @@ let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
       end
     | Tany _ -> Enforced
     | Terr -> Enforced
-    | Tnonnull ->
-      if mixed_nonnull_unenforced then
-        Unenforced
-      else
-        Enforced
+    | Tnonnull -> Enforced
     | Tdynamic ->
       if (not enable_sound_dynamic) || include_dynamic then
         Enforced
@@ -115,11 +114,7 @@ let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
     | Tunion _ -> Unenforced
     | Tintersection _ -> Unenforced
     | Tshape _ -> Unenforced
-    | Tmixed ->
-      if mixed_nonnull_unenforced then
-        Unenforced
-      else
-        Enforced
+    | Tmixed -> Enforced
     | Tvar _ -> Unenforced
     (* With no parameters, we enforce varray_or_darray just like array *)
     | Tvec_or_dict (_, ty) ->

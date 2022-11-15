@@ -42,8 +42,6 @@ let get_enforcement ~return_from_async (ctx : Provider_context.t) (ty : decl_ty)
     : enf =
   let tcopt = Provider_context.get_tcopt ctx in
   let enable_sound_dynamic = TypecheckerOptions.enable_sound_dynamic tcopt in
-  (* hack to avoid yet another flag, just for data gathering for pessimisation *)
-  let mixed_nonnull_unenforced = TypecheckerOptions.like_casts tcopt in
   (* is_dynamic_enforceable controls whether the type dynamic is considered enforceable.
      It isn't at the top-level of a type, but is as an argument to a reified generic. *)
   let rec enforcement ~is_dynamic_enforceable ctx visited ty =
@@ -141,11 +139,7 @@ let get_enforcement ~return_from_async (ctx : Provider_context.t) (ty : decl_ty)
       end
     | Tany _ -> Enforced ty
     | Terr -> Enforced ty
-    | Tnonnull ->
-      if mixed_nonnull_unenforced then
-        Unenforced None
-      else
-        Enforced ty
+    | Tnonnull -> Enforced ty
     | Tdynamic ->
       if (not enable_sound_dynamic) || is_dynamic_enforceable then
         Enforced ty
@@ -157,11 +151,7 @@ let get_enforcement ~return_from_async (ctx : Provider_context.t) (ty : decl_ty)
     | Tunion _ -> Unenforced None
     | Tintersection _ -> Unenforced None
     | Tshape _ -> Unenforced None
-    | Tmixed ->
-      if mixed_nonnull_unenforced then
-        Unenforced None
-      else
-        Enforced ty
+    | Tmixed -> Enforced ty
     | Tvar _ -> Unenforced None
     (* With no parameters, we enforce varray_or_darray just like array *)
     | Tvec_or_dict (_, el_ty) ->

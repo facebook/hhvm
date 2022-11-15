@@ -68,7 +68,7 @@ class Foo final  {
                                                       ::apache::thrift::ident::MyInt>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::MyInt> = 1;

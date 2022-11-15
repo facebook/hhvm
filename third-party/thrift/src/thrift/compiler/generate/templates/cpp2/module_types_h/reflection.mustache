@@ -33,7 +33,7 @@
                                                       ::apache::thrift::ident::<%field:cpp_name%><%/struct:fields%>>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     <%#struct:fields%>
     template<> static constexpr int value<::apache::thrift::field_id<<%field:key%>>> = <%field:ordinal%>;

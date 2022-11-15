@@ -717,7 +717,7 @@ class Foo final  {
                                                       ::apache::thrift::ident::doubleAdaptedField>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::intField> = 1;
@@ -1355,7 +1355,7 @@ class Baz final  {
                                                       ::apache::thrift::ident::longField>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::intField> = 1;
@@ -1929,7 +1929,7 @@ class DirectlyAdapted final  {
                                                       ::apache::thrift::ident::field>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::field> = 1;
@@ -2115,7 +2115,7 @@ class Bar final  {
                                                       ::apache::thrift::ident::adaptedStructField>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::structField> = 1;
@@ -2570,7 +2570,7 @@ class A final  {
                                                       void>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
@@ -2688,7 +2688,7 @@ class ThriftAdaptedStruct final  {
                                                       ::apache::thrift::ident::data>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::data> = 1;
@@ -2855,7 +2855,7 @@ class DirectlyAdaptedStruct final  {
                                                       ::apache::thrift::ident::data>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::data> = 1;
@@ -3029,7 +3029,7 @@ class MyAnnotation final  {
                                                       ::apache::thrift::ident::color>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::signature> = 1;
@@ -3256,7 +3256,7 @@ class IndependentDirectlyAdapted final  {
                                                       ::apache::thrift::ident::field>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::field> = 1;
@@ -3434,7 +3434,7 @@ class StructWithFieldAdapter final  {
                                                       ::apache::thrift::ident::boxed_field>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::field> = 1;
@@ -3781,7 +3781,7 @@ class TerseAdaptedFields final  {
                                                       ::apache::thrift::ident::set_field>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::int_field> = 1;
@@ -4029,7 +4029,7 @@ class B final  {
                                                       ::apache::thrift::ident::a>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::a> = 1;
@@ -4182,7 +4182,7 @@ class Config final  {
                                                       ::apache::thrift::ident::path>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::path> = 1;
@@ -4353,7 +4353,7 @@ class MyStruct final  {
                                                       ::apache::thrift::ident::set_string>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::field> = 1;
@@ -4591,7 +4591,7 @@ class AdaptTestStruct final  {
                                                       ::apache::thrift::ident::binary_data>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::delay> = 1;
@@ -5247,7 +5247,7 @@ class AdaptTemplatedTestStruct final  {
                                                       ::apache::thrift::ident::doubleTypedefBool>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::adaptedBool> = 1;
@@ -6389,7 +6389,7 @@ class AdaptTemplatedNestedTestStruct final  {
                                                       ::apache::thrift::ident::adaptedStruct>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::adaptedStruct> = 1;
@@ -6554,7 +6554,7 @@ class ThriftAdaptTestUnion final  {
                                                       ::apache::thrift::ident::custom>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::delay> = 1;
@@ -6898,7 +6898,7 @@ class StructFieldAdaptedStruct final  {
                                                       ::apache::thrift::ident::typedefOfAdapted>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::adaptedStruct> = 1;
@@ -7195,7 +7195,7 @@ class CircularStruct final  {
                                                       ::apache::thrift::ident::field>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::field> = 1;
@@ -7344,7 +7344,7 @@ class CircularAdaptee final  {
                                                       ::apache::thrift::ident::field>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::field> = 1;
@@ -7504,7 +7504,7 @@ class DeclaredAfterStruct final  {
                                                       void>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
@@ -7612,7 +7612,7 @@ class ReorderedStruct final  {
                                                       ::apache::thrift::ident::reordered_dependent_adapted>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::reordered_dependent_adapted> = 1;
@@ -7763,7 +7763,7 @@ class UnderlyingRenamedStruct final  {
                                                       ::apache::thrift::ident::data>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::data> = 1;
@@ -7930,7 +7930,7 @@ class UnderlyingSameNamespaceStruct final  {
                                                       ::apache::thrift::ident::data>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::data> = 1;
@@ -8095,7 +8095,7 @@ class HeapAllocated final  {
                                                       void>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
@@ -8203,7 +8203,7 @@ class MoveOnly final  {
                                                       ::apache::thrift::ident::ptr>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::ptr> = 1;
@@ -8354,7 +8354,7 @@ class AlsoMoveOnly final  {
                                                       ::apache::thrift::ident::ptr>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::ptr> = 1;
@@ -8503,7 +8503,7 @@ class ApplyAdapter final  {
                                                       void>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
@@ -8606,7 +8606,7 @@ class TransitiveAdapted final  {
                                                       void>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
@@ -8720,7 +8720,7 @@ class CountingStruct final  {
                                                       ::apache::thrift::ident::regularString>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::regularInt> = 1;
@@ -8971,7 +8971,7 @@ class Person final  {
                                                       ::apache::thrift::ident::name>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::name> = 1;
@@ -9139,7 +9139,7 @@ class Person2 final  {
                                                       ::apache::thrift::ident::name>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::name> = 1;

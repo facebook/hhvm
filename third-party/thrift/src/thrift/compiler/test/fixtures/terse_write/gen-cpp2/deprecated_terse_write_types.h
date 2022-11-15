@@ -332,7 +332,7 @@ class MyStruct final  {
                                                       void>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
@@ -476,7 +476,7 @@ class StructLevelTerseStruct final  {
                                                       ::apache::thrift::ident::struct_field>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::bool_field> = 1;
@@ -1468,7 +1468,7 @@ class FieldLevelTerseStruct final  {
                                                       ::apache::thrift::ident::struct_field>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::terse_bool_field> = 1;

@@ -1005,7 +1005,7 @@ class MyData final  {
                                                       ::apache::thrift::ident::data2>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::data1> = 1;
@@ -1229,7 +1229,7 @@ class InnerUnion final  {
                                                       ::apache::thrift::ident::innerOption>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::innerOption> = 1;
@@ -1500,7 +1500,7 @@ class MyUnion final  {
                                                       ::apache::thrift::ident::option3>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::option1> = 1;
@@ -1916,7 +1916,7 @@ class LateDefStruct final  {
                                                       void>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
@@ -2114,7 +2114,7 @@ class MyStruct final  {
                                                       ::apache::thrift::ident::mapMap>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<-1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::boolVal> = 1;
@@ -4102,7 +4102,7 @@ class Recursive final  {
                                                       ::apache::thrift::ident::nodes>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<-1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::nodes> = 1;
@@ -4262,7 +4262,7 @@ class Bar final  {
                                                       ::apache::thrift::ident::loop>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<-1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::loop> = 1;
@@ -4412,7 +4412,7 @@ class Loop final  {
                                                       ::apache::thrift::ident::bar>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<-1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::bar> = 1;
@@ -4575,7 +4575,7 @@ class MyDataFieldPatchStruct final  {
                                                       ::apache::thrift::ident::data2>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::data1> = 1;
@@ -4790,7 +4790,7 @@ class MyDataPatchStruct final  {
                                                       ::apache::thrift::ident::patch>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
@@ -5154,7 +5154,7 @@ class InnerUnionFieldPatchStruct final  {
                                                       ::apache::thrift::ident::innerOption>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::innerOption> = 1;
@@ -5321,7 +5321,7 @@ class InnerUnionPatchStruct final  {
                                                       ::apache::thrift::ident::patch>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
@@ -5691,7 +5691,7 @@ class MyUnionFieldPatchStruct final  {
                                                       ::apache::thrift::ident::option3>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::option1> = 1;
@@ -5954,7 +5954,7 @@ class MyUnionPatchStruct final  {
                                                       ::apache::thrift::ident::patch>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
@@ -6321,7 +6321,7 @@ class MyStructField10PatchStruct final  {
                                                       ::apache::thrift::ident::clear>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
@@ -6554,7 +6554,7 @@ class MyStructField25PatchStruct final  {
                                                       ::apache::thrift::ident::clear>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
@@ -6799,7 +6799,7 @@ class MyStructField28PatchStruct final  {
                                                       ::apache::thrift::ident::append>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
@@ -7257,7 +7257,7 @@ class MyStructField29PatchStruct final  {
                                                       ::apache::thrift::ident::add>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
@@ -7610,7 +7610,7 @@ class MyStructField30PatchStruct final  {
                                                       ::apache::thrift::ident::put>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
@@ -8133,7 +8133,7 @@ class MyStructField31Patch1Struct final  {
                                                       ::apache::thrift::ident::put>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
@@ -8653,7 +8653,7 @@ class MyStructField31PatchStruct final  {
                                                       ::apache::thrift::ident::append>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
@@ -9120,7 +9120,7 @@ class MyStructField32Patch1Struct final  {
                                                       ::apache::thrift::ident::put>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
@@ -9643,7 +9643,7 @@ class MyStructField32PatchStruct final  {
                                                       ::apache::thrift::ident::put>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
@@ -10145,7 +10145,7 @@ class LateDefStructFieldPatchStruct final  {
                                                       void>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
@@ -10264,7 +10264,7 @@ class LateDefStructPatchStruct final  {
                                                       ::apache::thrift::ident::patch>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
@@ -10721,7 +10721,7 @@ class MyStructFieldPatchStruct final  {
                                                       ::apache::thrift::ident::boolVal>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<-32>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::mapMap> = 1;
@@ -12376,7 +12376,7 @@ class MyStructPatchStruct final  {
                                                       ::apache::thrift::ident::patch>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
@@ -12743,7 +12743,7 @@ class RecursiveField1PatchStruct final  {
                                                       ::apache::thrift::ident::clear>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
@@ -12966,7 +12966,7 @@ class RecursiveFieldPatchStruct final  {
                                                       ::apache::thrift::ident::nodes>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<-1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::nodes> = 1;
@@ -13133,7 +13133,7 @@ class RecursivePatchStruct final  {
                                                       ::apache::thrift::ident::patch>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
@@ -13500,7 +13500,7 @@ class LoopPatchStruct final  {
                                                       ::apache::thrift::ident::clear>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
@@ -13713,7 +13713,7 @@ class BarFieldPatchStruct final  {
                                                       ::apache::thrift::ident::loop>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<-1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::loop> = 1;
@@ -13880,7 +13880,7 @@ class BarPatchStruct final  {
                                                       ::apache::thrift::ident::patch>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::assign> = 1;
@@ -14244,7 +14244,7 @@ class LoopFieldPatchStruct final  {
                                                       ::apache::thrift::ident::bar>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<-1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::bar> = 1;

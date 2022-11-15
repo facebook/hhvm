@@ -243,7 +243,7 @@ class MyDataItem final  {
                                                       void>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
@@ -372,7 +372,7 @@ class MyStruct final  {
                                                       ::apache::thrift::ident::no_hack_codegen_field>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::MyIntField> = 1;
@@ -1011,7 +1011,7 @@ class MyUnion final  {
                                                       ::apache::thrift::ident::floatSet>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::myEnum> = 1;
@@ -1514,7 +1514,7 @@ class ReservedKeyword final  {
                                                       ::apache::thrift::ident::reserved_field>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::reserved_field> = 1;
@@ -1679,7 +1679,7 @@ class UnionToBeRenamed final  {
                                                       ::apache::thrift::ident::reserved_field>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::reserved_field> = 1;

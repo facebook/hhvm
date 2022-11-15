@@ -580,7 +580,7 @@ class YourStruct final  {
                                                       ::apache::thrift::ident::my_id>;
 
   struct __fbthrift_ordinal_impl {
-#if defined(_MSC_VER) || defined(__clang__)
+#if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
     template<class> static constexpr int value = 0;
     template<> static constexpr int value<::apache::thrift::field_id<2>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::majorVer> = 1;

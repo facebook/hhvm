@@ -1430,6 +1430,10 @@ class UseOpEncode implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
+        '\thrift\annotation\Program' => \thrift\annotation\Program::fromShape(
+          shape(
+          )
+        ),
         '\thrift\annotation\Structured' => \thrift\annotation\Structured::fromShape(
           shape(
           )

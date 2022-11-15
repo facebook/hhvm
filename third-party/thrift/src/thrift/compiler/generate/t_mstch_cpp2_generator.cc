@@ -997,7 +997,10 @@ class cpp_mstch_type : public mstch_type {
     return name;
   }
   mstch::node use_op_encode() {
-    return t_typedef::get_first_structured_annotation_or_null(
+    return (type_->program() &&
+            type_->program()->inherit_annotation_or_null(
+                *type_, kCppUseOpEncodeUri)) ||
+        t_typedef::get_first_structured_annotation_or_null(
                type_, kCppUseOpEncodeUri) ||
         gen::cpp::type_resolver::find_first_adapter(*type_);
   }
@@ -1438,8 +1441,10 @@ class cpp_mstch_struct : public mstch_struct {
   }
 
   mstch::node cpp_use_op_encode() {
-    return struct_->find_structured_annotation_or_null(kCppUseOpEncodeUri) !=
-        nullptr;
+    return (struct_->program() &&
+            struct_->program()->inherit_annotation_or_null(
+                *struct_, kCppUseOpEncodeUri)) ||
+        struct_->find_structured_annotation_or_null(kCppUseOpEncodeUri);
   }
 
  protected:

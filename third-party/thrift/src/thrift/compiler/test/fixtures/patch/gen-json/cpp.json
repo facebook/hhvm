@@ -29,7 +29,7 @@
       }
     },
     "EnumUnderlyingType" : {
-      "lineno" : 199,
+      "lineno" : 200,
       "constants" : {
         "I8" : 0,
         "U8" : 1,
@@ -39,11 +39,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 199,
+          "line" : 200,
           "column" : 1
         },
         "end" : {
-          "line" : 210,
+          "line" : 211,
           "column" : 2
         }
       }
@@ -390,13 +390,13 @@
           "column" : 1
         },
         "end" : {
-          "line" : 193,
+          "line" : 194,
           "column" : 22
         }
       }
     },
     "EnumType" : {
-      "lineno" : 229,
+      "lineno" : 230,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -406,11 +406,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 231,
+              "line" : 232,
               "column" : 3
             },
             "end" : {
-              "line" : 231,
+              "line" : 232,
               "column" : 30
             }
           }
@@ -418,11 +418,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 229,
+          "line" : 230,
           "column" : 1
         },
         "end" : {
-          "line" : 232,
+          "line" : 233,
           "column" : 2
         }
       }

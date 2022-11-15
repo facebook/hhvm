@@ -41,36 +41,36 @@
           "I8" : {
             "name" : "I8",
             "docstring" : "::std::int8_t\n",
-            "lineno" : 201,
+            "lineno" : 202,
             "value" : 0
           },
           "U8" : {
             "name" : "U8",
             "docstring" : "::std::uint8_t\n",
-            "lineno" : 203,
+            "lineno" : 204,
             "value" : 1
           },
           "I16" : {
             "name" : "I16",
             "docstring" : "::std::int16_t\n",
-            "lineno" : 205,
+            "lineno" : 206,
             "value" : 2
           },
           "U16" : {
             "name" : "U16",
             "docstring" : "::std::uint16_t\n",
-            "lineno" : 207,
+            "lineno" : 208,
             "value" : 3
           },
           "U32" : {
             "name" : "U32",
             "docstring" : "::std::uint32_t\n",
-            "lineno" : 209,
+            "lineno" : 210,
             "value" : 4
           }
         },
         "docstring" : "Enum in C++ by default uses signed 32 bit integer. There is no need to specify\nunderlying type for signed 32 bit integer.\n",
-        "lineno" : 199
+        "lineno" : 200
       }
       },
   "structs" :
@@ -372,6 +372,14 @@
       "UseOpEncode" : {
         "name" : "UseOpEncode",
         "structured_annotations": {
+          "scope.Program" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Program",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
           "scope.Structured" : {
         "type" : {
   "type" : "struct",
@@ -402,7 +410,7 @@
           "type" : {
             "name" : "type",
             "key" : 1,
-            "lineno" : 231,
+            "lineno" : 232,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -412,7 +420,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 229
+        "lineno" : 230
       }
       },
   "source_path" : "thrift/annotation/cpp",

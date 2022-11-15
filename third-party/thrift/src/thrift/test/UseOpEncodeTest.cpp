@@ -18,6 +18,8 @@
 #include <thrift/conformance/cpp2/internal/AnyStructSerializer.h>
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
+#include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/test/gen-cpp2/UseOpEncodeProgram_types.h>
 #include <thrift/test/gen-cpp2/UseOpEncode_types.h>
 
 // TODO: Remove this. Specify namespace explicitly instead.
@@ -112,5 +114,12 @@ void testSerializedSize() {
 TEST(UseOpEncodeTest, SerializedSize) {
   testSerializedSize<StandardProtocol::Binary>();
   testSerializedSize<StandardProtocol::Compact>();
+}
+TEST(UseOpEncodeTest, ProgramScopeAnnotation) {
+  FooList a;
+  a.adapted_list_field()->value.emplace_back().value.field() = 42;
+  auto b = apache::thrift::CompactSerializer::deserialize<FooList>(
+      apache::thrift::CompactSerializer::serialize<std::string>(a));
+  EXPECT_EQ(b.adapted_list_field()->value.at(0).value.field(), 42);
 }
 } // namespace apache::thrift::test

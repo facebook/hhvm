@@ -40,23 +40,12 @@ let process_source_text _ctx prog File_info.{ path; source_text; _ } =
     |> snd
   | _ -> prog
 
-let process_xrefs_all_files ctx files_info progress =
-  List.fold
-    files_info
-    ~init:progress
-    ~f:(Symbol_index_xrefs.process_xrefs_and_calls ctx)
-
-let process_decls_all_files ctx files_info progress =
-  List.fold files_info ~init:progress ~f:(Symbol_index_decls.process_decls ctx)
-
-let process_source_text_all_files ctx files_info progress =
-  List.fold files_info ~init:progress ~f:(process_source_text ctx)
-
-(* This function processes both declarations and cross-references,
-sharing the declaration fact cache between them. *)
 let build_json ctx files_info ~ownership =
-  Fact_acc.init ~ownership
-  |> process_source_text_all_files ctx files_info
-  |> process_decls_all_files ctx files_info
-  |> process_xrefs_all_files ctx files_info
-  |> Fact_acc.to_json
+  let index_file progress file_info =
+    Fact_acc.set_ownership_unit progress (Some file_info.File_info.path);
+    let progress = process_source_text ctx progress file_info in
+    let progress = Symbol_index_decls.process_decls ctx progress file_info in
+    Symbol_index_xrefs.process_xrefs_and_calls ctx progress file_info
+  in
+  let progress = Fact_acc.init ~ownership in
+  List.fold files_info ~init:progress ~f:index_file |> Fact_acc.to_json

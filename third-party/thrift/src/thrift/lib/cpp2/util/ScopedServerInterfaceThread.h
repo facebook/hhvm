@@ -47,6 +47,9 @@ class ScopedServerInterfaceThread {
       folly::Function<RequestChannel::Ptr(folly::AsyncSocket::UniquePtr)>;
   using FaultInjectionFunc =
       folly::Function<folly::exception_wrapper(folly::StringPiece methodName)>;
+  using StreamFaultInjectionFunc =
+      folly::Function<folly::Function<folly::exception_wrapper()>(
+          folly::StringPiece methodName)>;
 
   ScopedServerInterfaceThread(
       std::shared_ptr<AsyncProcessorFactory> apf,
@@ -82,12 +85,18 @@ class ScopedServerInterfaceThread {
    * Like newClient but invokes injectFault before each request and
    * short-circuits the request if it returns an exception.
    * Useful for testing handling of e.g. TTransportException.
+   *
+   * Additionally, streamInjectFault (optional) is a function that will be
+   * called once when a new stream is created and the returned function will
+   * be called every time a stream chunk is received. If that function returns
+   * an exception, the stream will be terminated with that exception.
    */
   template <class AsyncClientT>
   std::unique_ptr<AsyncClientT> newClientWithFaultInjection(
       FaultInjectionFunc injectFault,
       folly::Executor* callbackExecutor = nullptr,
-      MakeChannelFunc channelFunc = RocketClientChannel::newChannel) const;
+      MakeChannelFunc channelFunc = RocketClientChannel::newChannel,
+      StreamFaultInjectionFunc streamInjectFault = nullptr) const;
 
   /**
    * Like newClient but sends all requests over a single internal channel
@@ -99,7 +108,9 @@ class ScopedServerInterfaceThread {
 
   static std::shared_ptr<RequestChannel> makeTestClientChannel(
       std::shared_ptr<AsyncProcessorFactory> apf,
-      ScopedServerInterfaceThread::FaultInjectionFunc injectFault);
+      ScopedServerInterfaceThread::FaultInjectionFunc injectFault,
+      ScopedServerInterfaceThread::StreamFaultInjectionFunc streamInjectFault =
+          nullptr);
 
  private:
   std::shared_ptr<BaseThriftServer> ts_;
@@ -127,6 +138,11 @@ using get_service_tag_t =
  * short-circuits the request if it returns an exception.
  * Useful for testing handling of e.g. TTransportException.)
  *
+ * Additionally, streamInjectFault (optional) is a function that will be
+ * called once when a new stream is created and the returned function will
+ * be called every time a stream chunk is received. If that function returns
+ * an exception, the stream will be terminated with that exception.
+ *
  * This is more convenient but offers less control than managing
  * your own ScopedServerInterfaceThread.
  */
@@ -136,12 +152,16 @@ template <
         apache::thrift::detail::get_service_tag_t<ServiceHandler>>
 std::unique_ptr<Client<ServiceTag>> makeTestClient(
     std::shared_ptr<ServiceHandler> handler,
-    ScopedServerInterfaceThread::FaultInjectionFunc injectFault = nullptr);
+    ScopedServerInterfaceThread::FaultInjectionFunc injectFault = nullptr,
+    ScopedServerInterfaceThread::StreamFaultInjectionFunc streamInjectFault =
+        nullptr);
 
 template <class AsyncClientT>
 std::unique_ptr<AsyncClientT> makeTestClient(
     std::shared_ptr<AsyncProcessorFactory> apf,
-    ScopedServerInterfaceThread::FaultInjectionFunc injectFault = nullptr);
+    ScopedServerInterfaceThread::FaultInjectionFunc injectFault = nullptr,
+    ScopedServerInterfaceThread::StreamFaultInjectionFunc streamInjectFault =
+        nullptr);
 } // namespace thrift
 } // namespace apache
 

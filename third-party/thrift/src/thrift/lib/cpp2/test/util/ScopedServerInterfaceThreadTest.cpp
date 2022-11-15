@@ -74,7 +74,11 @@ class SimpleServiceImpl
     requestSem_.post();
     return folly::futures::sleep(std::chrono::milliseconds(sleepMs))
         .deferValue([](auto&&) {
-          return apache::thrift::ServerStream<int64_t>::createEmpty();
+          auto [stream, publisher] =
+              apache::thrift::ServerStream<int64_t>::createPublisher();
+          publisher.next(0);
+          std::move(publisher).complete();
+          return std::move(stream);
         });
   }
 
@@ -276,8 +280,12 @@ TEST(ScopedServerInterfaceThread, faultInjection) {
                      : folly::exception_wrapper{};
     };
 
+    auto streamThrowOdd = [=](auto) {
+      return [=]() mutable { return throwOdd(""); };
+    };
+
     auto client = ssit->newClientWithFaultInjection<SimpleServiceAsyncClient>(
-        throwOdd, nullptr, RocketClientChannel::newChannel);
+        throwOdd, nullptr, RocketClientChannel::newChannel, streamThrowOdd);
 
     EXPECT_THROW(co_await client->co_add(1, 2), CustomException);
     EXPECT_NO_THROW(co_await client->co_add(1, 2));
@@ -289,10 +297,21 @@ TEST(ScopedServerInterfaceThread, faultInjection) {
     EXPECT_NO_THROW(client->sync_lob());
 
     EXPECT_THROW(co_await client->co_emptyStreamSlow(0), CustomException);
-    EXPECT_NO_THROW(co_await client->co_emptyStreamSlow(0));
+    auto gen = (co_await client->co_emptyStreamSlow(0)).toAsyncGenerator();
+    EXPECT_THROW(co_await gen.next(), CustomException);
 
     EXPECT_THROW(co_await client->co_slowReturnSink(0), CustomException);
     EXPECT_NO_THROW(co_await client->co_slowReturnSink(0));
+
+    // test nullptr for normal fault injection func
+    client = ssit->newClientWithFaultInjection<SimpleServiceAsyncClient>(
+        nullptr, nullptr, RocketClientChannel::newChannel, streamThrowOdd);
+    gen = (co_await client->co_emptyStreamSlow(0)).toAsyncGenerator();
+    EXPECT_THROW(co_await gen.next(), CustomException);
+
+    // test stream fault injection function state is independent between streams
+    gen = (co_await client->co_emptyStreamSlow(0)).toAsyncGenerator();
+    EXPECT_THROW(co_await gen.next(), CustomException);
   }());
 }
 

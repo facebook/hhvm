@@ -116,13 +116,16 @@ struct TestClientRunner {
 std::shared_ptr<RequestChannel>
 ScopedServerInterfaceThread::makeTestClientChannel(
     std::shared_ptr<AsyncProcessorFactory> apf,
-    ScopedServerInterfaceThread::FaultInjectionFunc injectFault) {
+    ScopedServerInterfaceThread::FaultInjectionFunc injectFault,
+    ScopedServerInterfaceThread::StreamFaultInjectionFunc streamInjectFault) {
   auto runner = std::make_shared<TestClientRunner>(std::move(apf));
   auto innerChannel = runner->runner.newChannel(
       folly::getGlobalCPUExecutor().get(), RocketClientChannel::newChannel);
-  if (injectFault) {
+  if (injectFault || streamInjectFault) {
     runner->channel.reset(new apache::thrift::detail::FaultInjectionChannel(
-        std::move(innerChannel), std::move(injectFault)));
+        std::move(innerChannel),
+        std::move(injectFault),
+        std::move(streamInjectFault)));
   } else {
     runner->channel = std::move(innerChannel);
   }

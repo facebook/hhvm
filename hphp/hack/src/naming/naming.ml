@@ -2360,7 +2360,10 @@ let class_help ctx env c =
   let smethods = List.map ~f:(method_ env) smethods in
   let (sprops, props) = Aast.split_vars c.Aast.c_vars in
   let sprops = List.map ~f:(class_prop_static env) sprops in
-  let attrs = user_attributes env c.Aast.c_user_attributes in
+  (* The attributes applied to a class exist outside the current class so references to `self` are invalid *)
+  let attrs =
+    user_attributes { env with current_cls = None } c.Aast.c_user_attributes
+  in
   let const = Naming_attributes.find SN.UserAttributes.uaConst attrs in
   let props = List.map ~f:(class_prop_non_static ~const env) props in
   let xhp_attrs = List.map ~f:(xhp_attribute_decl env) c.Aast.c_xhp_attrs in

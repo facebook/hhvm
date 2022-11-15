@@ -259,6 +259,12 @@ val get_support_dynamic_type : env -> bool
 
 val set_self : env -> string -> locl_ty -> env
 
+(** Run a given function with self unset in the environment.
+    Restore self after the function finishes executing. This is used when
+    checking attributes applied to a class, because the self keyword is not
+    allowed as part of an argument to an attribute *)
+val run_with_no_self : env -> (env -> env * 'a) -> env * 'a
+
 val set_parent : env -> string -> decl_ty -> env
 
 val set_static : env -> env

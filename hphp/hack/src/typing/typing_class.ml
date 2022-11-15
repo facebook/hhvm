@@ -1548,20 +1548,20 @@ let check_parents_are_tapply_add_constructor_deps env c parents =
   Option.iter enum_includes ~f:(check_is_tapply_add_constructor_dep env);
   ()
 
-let check_class_attributes env c =
+let check_class_attributes env ~cls =
   let (env, user_attributes) =
     let kind =
-      if Ast_defs.is_c_enum c.c_kind then
+      if Ast_defs.is_c_enum cls.c_kind then
         SN.AttributeKinds.enum
-      else if Ast_defs.is_c_enum_class c.c_kind then
+      else if Ast_defs.is_c_enum_class cls.c_kind then
         SN.AttributeKinds.enumcls
       else
         SN.AttributeKinds.cls
     in
-    Typing.attributes_check_def env kind c.c_user_attributes
+    Typing.attributes_check_def env kind cls.c_user_attributes
   in
-  let (env, file_attrs) = Typing.file_attributes env c.c_file_attributes in
-  (env, user_attributes, file_attrs)
+  let (env, file_attrs) = Typing.file_attributes env cls.c_file_attributes in
+  (env, (user_attributes, file_attrs))
 
 (** Check type parameter definition, including variance, and add constraints to the environment. *)
 let check_class_type_parameters_add_constraints env c tc =
@@ -1588,7 +1588,15 @@ let check_hint_wellformedness_in_class env c parents =
   - type hint wellformedness
   - generic static properties *)
 let class_wellformedness_checks env c tc (parents : class_parents) =
-  let (env, user_attributes, file_attrs) = check_class_attributes env c in
+  (* Class and file level attributes are ran outside of the class context and thus should not
+     have access to `self` in the environment, so we unset self while running these attribute checks.
+
+     Note: This has the side effect of allowing internal classes to be referenced on class-level attributes
+     that are applied to a public trait. This is intended and safe because class-level attributes are not
+     copied to the use site of a trait.*)
+  let (env, (user_attributes, file_attrs)) =
+    Env.run_with_no_self env (check_class_attributes ~cls:c)
+  in
   NastInitCheck.class_ env c;
   let env = check_class_type_parameters_add_constraints env c tc in
   let env = check_hint_wellformedness_in_class env c parents in

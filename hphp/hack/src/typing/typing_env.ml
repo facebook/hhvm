@@ -1042,6 +1042,13 @@ let set_self env self_id self_ty =
   let genv = { genv with self = Some (self_id, self_ty) } in
   { env with genv }
 
+let run_with_no_self env f =
+  let self = env.genv.self in
+  let genv = { env.genv with self = None } in
+  let (env, result) = f { env with genv } in
+  let genv = { env.genv with self } in
+  ({ env with genv }, result)
+
 let set_parent env parent_id parent_ty =
   let genv = env.genv in
   let genv = { genv with parent = Some (parent_id, parent_ty) } in

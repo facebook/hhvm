@@ -69,10 +69,31 @@ inline constexpr bool is_gteq(folly::ordering cmp) noexcept {
 // The 'equal to' operator.
 //
 // Delegates to std::equal_to, by default.
-template <typename LTag, typename RTag = LTag, typename = void>
+template <typename LTag = void, typename RTag = LTag, typename = void>
 struct EqualTo : std::equal_to<type::native_type<LTag>> {
   static_assert(type::is_concrete_v<LTag>, "");
   static_assert(type::is_concrete_v<RTag>, "");
+};
+template <>
+struct EqualTo<type::void_t> {
+  template <typename L, typename R>
+  constexpr bool operator()(const L& lhs, const R& rhs) const {
+    return EqualTo<type::infer_tag<L>, type::infer_tag<R>>{}(lhs, rhs);
+  }
+};
+template <typename LTag>
+struct EqualTo<LTag, type::void_t> {
+  template <typename L, typename R>
+  constexpr bool operator()(const L& lhs, const R& rhs) const {
+    return EqualTo<LTag, type::infer_tag<R>>{}(lhs, rhs);
+  }
+};
+template <typename RTag>
+struct EqualTo<type::void_t, RTag> {
+  template <typename L, typename R>
+  constexpr bool operator()(const L& lhs, const R& rhs) const {
+    return EqualTo<type::infer_tag<L>, RTag>{}(lhs, rhs);
+  }
 };
 
 // The 'identical to' operator.
@@ -80,6 +101,13 @@ struct EqualTo : std::equal_to<type::native_type<LTag>> {
 // Unlike other binary operators, only accepts a single tag.
 template <typename Tag, typename = void>
 struct IdenticalTo : EqualTo<Tag> {}; // Delegates to EqualTo, by default.
+template <>
+struct IdenticalTo<type::void_t> {
+  template <typename T>
+  constexpr bool operator()(const T& lhs, const T& rhs) const {
+    return IdenticalTo<type::infer_tag<T>>{}(lhs, rhs);
+  }
+};
 
 // The 'less than' operator.
 //
@@ -88,6 +116,27 @@ template <typename LTag, typename RTag = LTag, typename = void>
 struct LessThan : std::less<> { // Deletegates to std::less<>, by default.
   static_assert(type::is_concrete_v<LTag>, "");
   static_assert(type::is_concrete_v<RTag>, "");
+};
+template <>
+struct LessThan<type::void_t> {
+  template <typename L, typename R>
+  constexpr bool operator()(const L& lhs, const R& rhs) const {
+    return LessThan<type::infer_tag<L>, type::infer_tag<R>>{}(lhs, rhs);
+  }
+};
+template <typename LTag>
+struct LessThan<LTag, type::void_t> {
+  template <typename L, typename R>
+  constexpr bool operator()(const L& lhs, const R& rhs) const {
+    return LessThan<LTag, type::infer_tag<R>>{}(lhs, rhs);
+  }
+};
+template <typename RTag>
+struct LessThan<type::void_t, RTag> {
+  template <typename L, typename R>
+  constexpr bool operator()(const L& lhs, const R& rhs) const {
+    return LessThan<type::infer_tag<L>, RTag>{}(lhs, rhs);
+  }
 };
 
 // The type returned by a call to `LessThan::operator()`, if well defined.
@@ -112,7 +161,8 @@ template <
     typename EqualTo = EqualTo<LTag, RTag>,
     typename LessThan = LessThan<LTag, RTag>,
     typename L = type::native_type<LTag>,
-    typename R = type::native_type<RTag>>
+    typename R = type::native_type<RTag>,
+    typename = if_less_than_comparable<LTag, RTag>>
 struct DefaultCompareWith {
   constexpr folly::ordering operator()(const L& lhs, const R& rhs) const {
     if (equalTo(lhs, rhs)) {
@@ -131,11 +181,30 @@ struct DefaultCompareWith {
 // The 'compare with' operator.
 //
 // TODO(afuller): Add more efficient specializations.
-template <
-    typename LTag,
-    typename RTag = LTag,
-    typename = if_less_than_comparable<LTag, RTag>> // Only when supported.
+template <typename LTag, typename RTag = LTag, typename = void>
 struct CompareWith : DefaultCompareWith<LTag, RTag> {}; // Delegates by default.
+
+template <>
+struct CompareWith<type::void_t> {
+  template <typename L, typename R>
+  constexpr folly::ordering operator()(const L& lhs, const R& rhs) const {
+    return CompareWith<type::infer_tag<L>, type::infer_tag<R>>{}(lhs, rhs);
+  }
+};
+template <typename LTag>
+struct CompareWith<LTag, type::void_t> {
+  template <typename L, typename R>
+  constexpr folly::ordering operator()(const L& lhs, const R& rhs) const {
+    return CompareWith<LTag, type::infer_tag<R>>{}(lhs, rhs);
+  }
+};
+template <typename RTag>
+struct CompareWith<type::void_t, RTag> {
+  template <typename L, typename R>
+  constexpr folly::ordering operator()(const L& lhs, const R& rhs) const {
+    return CompareWith<type::infer_tag<L>, RTag>{}(lhs, rhs);
+  }
+};
 
 // The type returned by a call to `CompareWith::operator()`, if well defined.
 template <typename LTag, typename RTag = LTag>

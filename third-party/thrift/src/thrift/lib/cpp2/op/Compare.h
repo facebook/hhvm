@@ -32,9 +32,9 @@ namespace op {
 //   equal<double_t>(0.0, -0.0) -> true
 //   equal<float_t>(NaN, NaN) -> false
 //   equal<list<double_t>>([NaN, 0.0], [NaN, -0.0]) -> false
-template <typename LTag, typename RTag = LTag>
+template <typename LTag = void, typename RTag = LTag>
 struct EqualTo : detail::EqualTo<LTag, RTag> {};
-template <typename LTagOrT, typename RTagOrT = LTagOrT>
+template <typename LTagOrT = void, typename RTagOrT = LTagOrT>
 FOLLY_INLINE_VARIABLE constexpr EqualTo<
     type::infer_tag<LTagOrT>,
     type::infer_tag<RTagOrT>>
@@ -48,9 +48,9 @@ FOLLY_INLINE_VARIABLE constexpr EqualTo<
 //   identical<double_t>(0.0, -0.0) -> false
 //   identical<float_t>(NaN, NaN) -> true
 //   identical<list<double_t>>([NaN, 0.0], [NaN, -0.0]) -> false
-template <typename Tag>
+template <typename Tag = void>
 struct IdenticalTo : detail::IdenticalTo<Tag> {};
-template <typename TagOrT>
+template <typename TagOrT = void>
 FOLLY_INLINE_VARIABLE constexpr IdenticalTo<type::infer_tag<TagOrT>>
     identical{};
 
@@ -61,9 +61,9 @@ FOLLY_INLINE_VARIABLE constexpr IdenticalTo<type::infer_tag<TagOrT>>
 //   less<int32_t>(1, 2) -> true
 //   less<double_t>(0.0, -0.0) -> false
 //   less<float_t>(NaN, NaN) -> false
-template <typename LTag, typename RTag = LTag>
+template <typename LTag = void, typename RTag = LTag>
 struct Less : detail::LessThan<LTag, RTag> {};
-template <typename LTagOrT, typename RTagOrT = LTagOrT>
+template <typename LTagOrT = void, typename RTagOrT = LTagOrT>
 FOLLY_INLINE_VARIABLE constexpr Less<
     type::infer_tag<LTagOrT>,
     type::infer_tag<RTagOrT>>
@@ -75,7 +75,7 @@ FOLLY_INLINE_VARIABLE constexpr Less<
 //   compare<int32_t>(1, 2) -> folly::ordering::lt
 //   less<double_t>(0.0, -0.0) -> folly::ordering::eq
 //   compare<string_t>("aa", "a") -> folly::ordering::gt
-template <typename LTagOrT, typename RTagOrT = LTagOrT>
+template <typename LTagOrT = void, typename RTagOrT = LTagOrT>
 FOLLY_INLINE_VARIABLE constexpr detail::
     CompareWith<type::infer_tag<LTagOrT>, type::infer_tag<RTagOrT>>
         compare{};

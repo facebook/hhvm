@@ -67,10 +67,10 @@ TEST(CompareTest, Double) {
   EXPECT_EQ(compare<type::double_t>(1.0, 2.0), folly::ordering::lt);
 
   // -0 is equal to, but not identical to 0.
-  EXPECT_FALSE(identical<type::double_t>(-0.0, +0.0));
-  EXPECT_TRUE(equal<type::double_t>(-0.0, +0.0));
-  EXPECT_FALSE(less<type::double_t>(-0.0, +0.0));
-  EXPECT_EQ(compare<type::double_t>(-0.0, +0.0), folly::ordering::eq);
+  EXPECT_FALSE(identical<>(-0.0, +0.0));
+  EXPECT_TRUE(equal<>(-0.0, +0.0));
+  EXPECT_FALSE(less<>(-0.0, +0.0));
+  EXPECT_EQ(compare<>(-0.0, +0.0), folly::ordering::eq);
 
   // NaN is identical to, but not equal to itself.
   EXPECT_TRUE(identical<type::double_t>(
@@ -245,34 +245,12 @@ TEST(CompareTest, Struct) {
 }
 
 TEST(CompareTest, UnorderedFields) {
-  {
-    test::UnorderedFields lhs;
-    test::UnorderedFields rhs;
-    --lhs.f1()->at("c");
+  test::CppTemplateListField lhs;
+  test::CppTemplateListField rhs;
+  lhs.f1()->push_front("0");
 
-    EXPECT_FALSE(detail::StructLessThan{}(lhs, lhs));
-    EXPECT_TRUE(detail::StructLessThan{}(lhs, rhs));
-    EXPECT_FALSE(op::less<test::UnorderedFields>(lhs, lhs));
-    EXPECT_TRUE(op::less<test::UnorderedFields>(lhs, rhs));
-  }
-  {
-    test::UnorderedFields lhs;
-    test::UnorderedFields rhs;
-    rhs.f2()->insert("d");
-
-    EXPECT_FALSE(detail::StructLessThan{}(lhs, lhs));
-    EXPECT_TRUE(detail::StructLessThan{}(lhs, rhs));
-    EXPECT_FALSE(op::less<test::UnorderedFields>(lhs, lhs));
-    EXPECT_TRUE(op::less<test::UnorderedFields>(lhs, rhs));
-  }
-  {
-    test::CppTemplateListField lhs;
-    test::CppTemplateListField rhs;
-    lhs.f1()->push_front("0");
-
-    EXPECT_FALSE(op::less<test::CppTemplateListField>(lhs, lhs));
-    EXPECT_TRUE(op::less<test::CppTemplateListField>(lhs, rhs));
-  }
+  EXPECT_FALSE(op::less<test::CppTemplateListField>(lhs, lhs));
+  EXPECT_TRUE(op::less<test::CppTemplateListField>(lhs, rhs));
 }
 
 } // namespace

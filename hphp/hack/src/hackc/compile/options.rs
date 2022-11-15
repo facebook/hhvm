@@ -53,7 +53,6 @@ pub struct Options {
     pub hhvm: Hhvm,
     pub hhbc: HhbcFlags,
     pub max_array_elem_size_on_the_stack: usize,
-    pub include_search_paths: Vec<BString>,
 }
 
 impl Options {
@@ -69,7 +68,6 @@ impl Default for Options {
             compiler_flags: CompilerFlags::default(),
             hhvm: Hhvm::default(),
             hhbc: HhbcFlags::default(),
-            include_search_paths: Default::default(),
             doc_root: "".into(),
         }
     }
@@ -83,7 +81,6 @@ impl bytecode_printer::IncludeProcessor for Options {
     ) -> Option<PathBuf> {
         let alloc = bumpalo::Bump::new();
         let include_roots = &self.hhvm.include_roots;
-        let search_paths = &self.include_search_paths;
         let doc_root = self.doc_root.as_bstr();
         match include_path.into_doc_root_relative(&alloc, include_roots) {
             IncludePath::Absolute(p) => {
@@ -102,12 +99,6 @@ impl bytecode_printer::IncludeProcessor for Options {
                 if path_from_cur_dirname.exists() {
                     Some(path_from_cur_dirname)
                 } else {
-                    for prefix in search_paths.iter() {
-                        let path = Path::new(OsStr::from_bytes(prefix)).join(OsStr::from_bytes(&p));
-                        if path.exists() {
-                            return Some(path);
-                        }
-                    }
                     None
                 }
             }

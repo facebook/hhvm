@@ -213,8 +213,8 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    * @return - a `Set` with the current values of the current `Pair`.
    */
   <<__Native>>
-  /* HH_FIXME[2049] */
-  public function toSet()[]: Set<mixed>;
+  public function toSet(
+  )[]: Set<arraykey> where Tv1 as arraykey, Tv2 as arraykey;
 
   /**
    * Returns an immutable set (`ImmSet`) with the values of the current `Pair`.
@@ -222,8 +222,8 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
    * @return - an `ImmSet` with the current values of the current `Pair`.
    */
   <<__Native>>
-  /* HH_FIXME[2049] */
-  public function toImmSet()[]: ImmSet<mixed>;
+  public function toImmSet(
+  )[]: ImmSet<arraykey> where Tv1 as arraykey, Tv2 as arraykey;
 
   /**
    * Returns an immutable version of this collection.

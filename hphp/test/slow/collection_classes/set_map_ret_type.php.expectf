@@ -1,4 +1,9 @@
 bool(true)
 bool(true)
 
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Only integer values and string values may be used with Sets' in %a
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Invalid keyset key: expected a key of type int or string, HH\Pair given' in %s/set_map_ret_type.php:19
+Stack trace:
+#0 %s/set_map_ret_type.php(19): HH\Set->map()
+#1 %s/set_map_ret_type.php(25): main()
+#2 (): main_set_map_ret_type()
+#3 {main}

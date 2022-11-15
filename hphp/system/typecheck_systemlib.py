@@ -17,6 +17,10 @@ FIXME_CODES: List[int] = [
     # "Memoizing object parameters requires the capability AccessGlobals:" for
     # now, we're allowing this in some places like `create_opaque_value`
     4447,
+    # There are some functions that don't have *quite* correct coeffects; if
+    # we're going to change these it should be done separate from an initial
+    # pass making systemlib "clean."
+    4390,
 ]
 
 FLAGS: List[str] = [

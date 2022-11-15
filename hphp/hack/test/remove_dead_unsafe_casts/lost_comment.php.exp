@@ -1,0 +1,8 @@
+<?hh
+
+function f(int $i): void {
+  /* We should have a comment on the next line. */
+  ($i);
+}
+
+Typechecking after the codemod... (no output after this is good news)

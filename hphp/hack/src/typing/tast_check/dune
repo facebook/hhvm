@@ -9,6 +9,7 @@
   nast
   shape_analysis
   shape_analysis_scuba
+  remove_dead_unsafe_casts
   tast_env
   typing_deps
   typing_pessimisation_deps

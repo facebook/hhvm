@@ -167,6 +167,7 @@ type t = {
   tco_use_type_alias_heap: bool;
   tco_allow_all_locations_for_type_constant_in_enum_class: bool;
   tco_allowed_locations_for_type_constant_in_enum_class: string list;
+  tco_populate_dead_unsafe_cast_heap: bool;
 }
 [@@deriving eq, show]
 
@@ -311,6 +312,7 @@ let default =
     tco_use_type_alias_heap = false;
     tco_allow_all_locations_for_type_constant_in_enum_class = false;
     tco_allowed_locations_for_type_constant_in_enum_class = [];
+    tco_populate_dead_unsafe_cast_heap = false;
   }
 
 let make
@@ -486,6 +488,8 @@ let make
       default.tco_allow_all_locations_for_type_constant_in_enum_class)
     ?(tco_allowed_locations_for_type_constant_in_enum_class =
       default.tco_allowed_locations_for_type_constant_in_enum_class)
+    ?(tco_populate_dead_unsafe_cast_heap =
+      default.tco_populate_dead_unsafe_cast_heap)
     () =
   {
     tco_experimental_features;
@@ -627,6 +631,7 @@ let make
     tco_use_type_alias_heap;
     tco_allow_all_locations_for_type_constant_in_enum_class;
     tco_allowed_locations_for_type_constant_in_enum_class;
+    tco_populate_dead_unsafe_cast_heap;
   }
 
 let so_remote_version_specifier t = t.so_remote_version_specifier

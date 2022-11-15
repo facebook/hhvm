@@ -1,0 +1,11 @@
+<?hh
+
+function foo(arraykey $x): int {
+  return 0;
+}
+
+function bar(string $x): num {
+  return (foo(($x)));
+}
+
+Typechecking after the codemod... (no output after this is good news)

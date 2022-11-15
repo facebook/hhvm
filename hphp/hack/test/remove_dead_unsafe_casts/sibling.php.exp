@@ -1,0 +1,8 @@
+<?hh
+
+function f(int $i): void {
+  // Both of these are redundant
+  ($i) + ($i);
+}
+
+Typechecking after the codemod... (no output after this is good news)

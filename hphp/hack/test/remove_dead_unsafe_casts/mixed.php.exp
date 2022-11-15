@@ -1,0 +1,8 @@
+<?hh
+
+function some_redundant_some_not(string $str): void {
+  ($str); // redundant
+  HH\FIXME\UNSAFE_CAST<string, int>($str); // not redundant
+}
+
+Typechecking after the codemod... (no output after this is good news)

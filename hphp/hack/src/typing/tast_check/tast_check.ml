@@ -32,9 +32,8 @@ let logger_handlers ctx =
 
 (* Global access check is turned on only if certain files or functions are
    enabled for checking global writes or global reads. *)
-let is_global_access_check_enabled ctx =
+let is_global_access_check_enabled tcopt =
   let open TypecheckerOptions in
-  let tcopt = Provider_context.get_tcopt ctx in
   let check_write = global_access_check_on_write tcopt in
   let check_read = global_access_check_on_read tcopt in
   let files_enabled =
@@ -49,16 +48,13 @@ let visitor ctx =
   (* Handlers that are not TAST checks to produce errors, but are used for
      telemetry that processes TASTs. *)
   let irregular_handlers = logger_handlers ctx in
-  let skip_hierarchy_checks =
-    TypecheckerOptions.skip_hierarchy_checks (Provider_context.get_tcopt ctx)
-  in
+  let tcopt = Provider_context.get_tcopt ctx in
   let hierarchy_check handler =
-    if skip_hierarchy_checks then
+    if TypecheckerOptions.skip_hierarchy_checks tcopt then
       None
     else
       Some handler
   in
-  let is_global_access_check_enabled = is_global_access_check_enabled ctx in
   let handlers =
     irregular_handlers
     @ List.filter_map
@@ -97,11 +93,15 @@ let visitor ctx =
           Some Expression_tree_check.handler;
           hierarchy_check Class_const_origin_check.handler;
           Some Enum_classes_check.handler;
-          (if is_global_access_check_enabled then
+          (if is_global_access_check_enabled tcopt then
             Some Global_access_check.handler
           else
             None);
           hierarchy_check Enum_check.handler;
+          (if TypecheckerOptions.populate_dead_unsafe_cast_heap tcopt then
+            Some Remove_dead_unsafe_casts.patch_location_collection_handler
+          else
+            None);
         ]
   in
   let handlers =

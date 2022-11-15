@@ -379,6 +379,16 @@ let remove_decls ~backend ~funs ~classes ~typedefs ~consts ~modules =
   Naming_provider.remove_const_batch backend consts;
   Naming_provider.remove_module_batch backend modules
 
+let remove_decls_using_file_info backend file_info =
+  let open FileInfo in
+  remove_decls
+    ~backend
+    ~funs:(List.map ~f:id_name file_info.funs)
+    ~classes:(List.map ~f:id_name file_info.classes)
+    ~typedefs:(List.map ~f:id_name file_info.typedefs)
+    ~consts:(List.map ~f:id_name file_info.consts)
+    ~modules:(List.map ~f:id_name file_info.modules)
+
 (*****************************************************************************)
 (* The entry point to build the naming environment *)
 (*****************************************************************************)

@@ -1,0 +1,20 @@
+<?hh
+
+type S = shape('a' => int, 'b' => bool);
+newtype NS = shape('a' => int, 'b' => bool);
+
+class C {
+  const type TCShape = shape('a' => int, 'b' => bool);
+}
+
+function redundant_unsafe_casts(string $str, shape('a' => int, 'b' => bool) $s): void {
+  ($str);
+  ($s);
+  ($s);
+  ($s);
+  ($s);
+  ($s);
+  ($s);
+}
+
+Typechecking after the codemod... (no output after this is good news)

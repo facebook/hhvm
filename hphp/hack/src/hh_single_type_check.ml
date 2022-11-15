@@ -1648,6 +1648,18 @@ let compute_tasts_expand_types ctx ~verbosity files_info interesting_files =
   let tasts = Relative_path.Map.map tasts ~f:(Tast_expand.expand_program ctx) in
   (errors, tasts, gi_solved)
 
+let decl_parse_typecheck_and_then ~verbosity ctx files_contents f =
+  let (parse_errors, files_info) = parse_name_and_decl ctx files_contents in
+  let parse_errors = Errors.get_sorted_error_list parse_errors in
+  let (errors, _tasts, _gi_solved) =
+    compute_tasts_expand_types ctx ~verbosity files_info files_contents
+  in
+  let errors = parse_errors @ Errors.get_sorted_error_list errors in
+  if List.is_empty errors then
+    f files_info
+  else
+    print_errors_if_present errors
+
 let print_nasts ~should_print_position nasts filenames =
   List.iter filenames ~f:(fun filename ->
       match Relative_path.Map.find_opt nasts filename with
@@ -1833,22 +1845,21 @@ let handle_constraint_mode
   in
   iter_over_files process_multifile
 
+let print_files files =
+  let print_filename = not @@ Int.equal (Relative_path.Map.cardinal files) 1 in
+  Relative_path.Map.iter
+    ~f:(fun fn new_contents ->
+      if print_filename then
+        Printf.printf "//// %s\n" (Relative_path.to_absolute fn);
+      Out_channel.output_string stdout new_contents)
+    files
+
 let apply_patches files_contents patches =
   if List.length patches <= 0 then
     print_endline "No patches"
   else
-    let patched =
-      ServerRefactorTypes.apply_patches_to_file_contents files_contents patches
-    in
-    let print_filename =
-      not @@ Int.equal (Relative_path.Map.cardinal patched) 1
-    in
-    Relative_path.Map.iter
-      ~f:(fun fn new_contents ->
-        if print_filename then
-          Printf.printf "//// %s\n" (Relative_path.to_absolute fn);
-        Out_channel.output_string stdout new_contents)
-      patched
+    ServerRefactorTypes.apply_patches_to_file_contents files_contents patches
+    |> print_files
 
 let handle_mode
     mode
@@ -2216,7 +2227,67 @@ let handle_mode
     | Some gi_solved ->
       ServerGlobalInference.Mode_rewrite.get_patches ~files_contents gi_solved
       |> apply_patches files_contents)
-  | RemoveDeadUnsafeCasts -> Format.printf "Stub for removing unsafe casts...\n"
+  | RemoveDeadUnsafeCasts ->
+    let ctx =
+      Provider_context.map_tcopt ctx ~f:(fun tcopt ->
+          GlobalOptions.{ tcopt with tco_populate_dead_unsafe_cast_heap = true })
+    in
+    let decl_parse_typecheck_and_then =
+      decl_parse_typecheck_and_then ~verbosity ctx
+    in
+    let backend = Provider_context.get_backend ctx in
+    (* Because we repeatedly apply the codemod, positions change. So we need to
+       re-parse, decl, and typecheck the file to generated accurate patches as
+       well as amend the patched test files in memory. This involves
+       invalidating a number of shared heaps and providing in memory
+       replacements after patching files. *)
+    let invalidate_heaps_and_update_files files_info files_contents =
+      let paths_to_purge =
+        Relative_path.Map.keys files_contents |> Relative_path.Set.of_list
+      in
+      (* Purge the file, then provide its replacement, otherwise the
+         replacement is dropped on the floor. *)
+      File_provider.remove_batch paths_to_purge;
+      Relative_path.Map.iter
+        ~f:File_provider.provide_file_for_tests
+        files_contents;
+      Ast_provider.remove_batch paths_to_purge;
+      Relative_path.Map.iter
+        ~f:(fun path file_info ->
+          (* Don't invalidate builtins, otherwise, we can't find them. *)
+          if not (Relative_path.prefix path |> Relative_path.is_hhi) then
+            Naming_global.remove_decls_using_file_info backend file_info)
+        files_info
+    in
+    (* Repeatedly apply dead unsafe cast removal. We can't do this at once as
+       removing one unsafe cast might have a bearing on another. *)
+    let rec go files_info files_contents =
+      invalidate_heaps_and_update_files files_info files_contents;
+      decl_parse_typecheck_and_then files_contents @@ fun files_info ->
+      let patches =
+        Remove_dead_unsafe_casts.get_patches
+          ~is_test:true
+          ~files_info
+          ~fold:Relative_path.Map.fold
+      in
+      let files_contents =
+        ServerRefactorTypes.apply_patches_to_file_contents
+          files_contents
+          patches
+      in
+      if List.is_empty patches then
+        print_files files_contents
+      else
+        go files_info files_contents
+    in
+    go files_info files_contents;
+
+    (* Typecheck after the codemod is fully applied to confirm that what we
+       produce is not garbage. *)
+    Printf.printf
+      "\nTypechecking after the codemod... (no output after this is good news)\n";
+    invalidate_heaps_and_update_files files_info files_contents;
+    decl_parse_typecheck_and_then files_contents @@ fun _ -> ()
   | Find_refs (line, column) ->
     let path = expect_single_file () in
     let naming_table = Naming_table.create files_info in

@@ -31,6 +31,7 @@
   parent
   rust_provider_backend_stubs
   refactor_sd
+  remove_dead_unsafe_casts
   server_coverage_metric_utils
   server_color_file
   server_env

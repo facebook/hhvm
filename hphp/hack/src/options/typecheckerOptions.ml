@@ -321,3 +321,6 @@ let log_fanout t ~fanout_cardinal =
 let substitution_mutation t = t.GlobalOptions.tco_substitution_mutation
 
 let use_type_alias_heap t = t.GlobalOptions.tco_use_type_alias_heap
+
+let populate_dead_unsafe_cast_heap t =
+  t.GlobalOptions.tco_populate_dead_unsafe_cast_heap

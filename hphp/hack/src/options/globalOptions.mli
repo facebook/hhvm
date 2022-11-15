@@ -342,6 +342,10 @@ type t = {
   tco_use_type_alias_heap: bool;
   tco_allow_all_locations_for_type_constant_in_enum_class: bool;
   tco_allowed_locations_for_type_constant_in_enum_class: string list;
+  (* Dead UNSAFE_CAST codemod stashes patches through a TAST visitor in shared
+     heap. This is only needed in dead UNSAFE_CAST removal mode. This option
+     controls whether the heap will be populated or not. *)
+  tco_populate_dead_unsafe_cast_heap: bool;
 }
 [@@deriving eq, show]
 
@@ -484,6 +488,7 @@ val make :
   ?tco_use_type_alias_heap:bool ->
   ?tco_allow_all_locations_for_type_constant_in_enum_class:bool ->
   ?tco_allowed_locations_for_type_constant_in_enum_class:string list ->
+  ?tco_populate_dead_unsafe_cast_heap:bool ->
   unit ->
   t
 

@@ -148,6 +148,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_use_type_alias_heap: false,
     tco_allow_all_locations_for_type_constant_in_enum_class: false,
     tco_allowed_locations_for_type_constant_in_enum_class: &[],
+    tco_populate_dead_unsafe_cast_heap: false,
 };
 
 impl GlobalOptions<'static> {

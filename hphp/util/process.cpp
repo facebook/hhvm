@@ -20,24 +20,14 @@
 #include <sys/types.h>
 #include <stdlib.h>
 
-#ifdef _MSC_VER
-#include <lmcons.h>
-#include <Windows.h>
-#include <ShlObj.h>
-#else
 #include <sys/fcntl.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
 #include <pwd.h>
+
 #include <folly/portability/Sockets.h>
 #include <folly/portability/SysMman.h>
 #include <folly/portability/Unistd.h>
-#endif
-
-#ifdef __APPLE__
-#include <crt_externs.h>
-#endif
-
 #include <folly/Conv.h>
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
@@ -189,14 +179,18 @@ int64_t readCgroup2FileMb(const char* fileName) {
  * If cgroup2 is enabled, update the MemInfo in `info' based on cgroup2 limits.
  */
 void updateMemInfoWithCgroup2Info(MemInfo& info) {
+  if (!ProcStatus::valid()) return;
   const int64_t cgroup2TotalMb = readCgroup2FileMb("max");
+  const int64_t currUsageMb = ProcStatus::totalRssKb() / 1024;
   if (cgroup2TotalMb >= 0) {
-    // Update info.totalMb with the cgroup2/memory.max limit.  Note that cgroup2
-    // doesn't have the "available memory" information, so we just reduce
-    // meminfo's availableMb by the same delta that totalMb is being reduced by.
-    const int64_t delta = info.totalMb - cgroup2TotalMb;
-    info.totalMb = cgroup2TotalMb;
-    info.availableMb -= delta;
+    auto const availableMb_approx =
+      std::max(cgroup2TotalMb - currUsageMb, int64_t{});
+    if (availableMb_approx < info.availableMb) {
+      info.availableMb = availableMb_approx;
+    }
+    if (cgroup2TotalMb < info.totalMb) {
+      info.totalMb = cgroup2TotalMb;
+    }
   }
 }
 
@@ -223,11 +217,6 @@ int64_t readSize(const char* line, bool expectKB = false) {
 /////////////////////////////////////////////////////////////////////////
 
 bool Process::GetMemoryInfo(MemInfo& info, bool checkCgroup2) {
-#ifdef _WIN32
-#error "Process::GetMemoryInfo() doesn't support Windows (yet)."
-  return false;
-#endif
-
   info = MemInfo{};
   FILE* f = fopen("/proc/meminfo", "r");
   if (f) {

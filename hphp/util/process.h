@@ -76,6 +76,10 @@ struct ProcStatus {
   static std::atomic_uint lastUpdate;   // seconds in std::chrono::steady_clock
 
  public:
+  static auto totalRssKb() {            // include hugetlb pages
+    return VmRSSKb.load(std::memory_order_relaxed) +
+      HugetlbPagesKb.load(std::memory_order_relaxed);
+  }
   static auto adjustedRssKb() {
     assert(valid());
     return VmRSSKb.load(std::memory_order_relaxed)

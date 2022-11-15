@@ -2749,10 +2749,6 @@ void hphp_session_init(Treadmill::SessionKind session_kind,
   g_thread_safe_locale_handler->reset();
   Treadmill::startRequest(session_kind);
 
-  // Ordering is sensitive; StatCache::requestInit produces work that
-  // must be done in ExecutionContext::requestInit.
-  StatCache::requestInit();
-
   // Allow request event handlers to be created now that a new request has
   // started.
   g_context->acceptRequestEventHandlers(true);

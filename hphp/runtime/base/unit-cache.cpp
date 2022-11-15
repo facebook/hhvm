@@ -471,7 +471,7 @@ Optional<SHA1> getHashForFile(const std::string& relPath,
 
   struct stat st;
   auto const fullpath = root / relPath;
-  if (StatCache::stat(fullpath.string(), &st) != 0) return {};
+  if (statSyscall(fullpath.string(), &st) != 0) return {};
 
   {
     HashCache::const_accessor acc;
@@ -971,7 +971,7 @@ const StringData* resolveRequestedPath(const StringData* requestedPath,
     if (!RuntimeOption::CheckSymLink || alreadyRealpath) {
       return makeStaticString(p);
     }
-    auto const rp = StatCache::realpath(p->data());
+    auto const rp = realpathLibc(p->data());
     return (rp.size() != 0 &&
             (rp.size() != p->size() || memcmp(rp.data(), p->data(), rp.size())))
       ? makeStaticString(rp)
@@ -1374,7 +1374,7 @@ bool findFile(const StringData* path, struct stat* s, bool allow_dir,
     return lookupUnitRepoAuth(path, nativeFuncs).unit != nullptr;
   }
 
-  if (StatCache::stat(path->data(), s) == 0) {
+  if (statSyscall(path->data(), s) == 0) {
     // The call explicitly populates the struct for dirs, but returns
     // false for them because it is geared toward file includes.
     return allow_dir || !S_ISDIR(s->st_mode);

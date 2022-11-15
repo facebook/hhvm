@@ -347,7 +347,6 @@ struct RuntimeOption {
   static bool AlwaysDecodePostDataDefault;
   static bool ServerThreadDropStack;
   static bool ServerHttpSafeMode;
-  static bool ServerStatCache;
   static bool ServerFixPathInfo;
   static bool ServerAddVaryEncoding;
   static bool ServerLogSettingsOnStartup;

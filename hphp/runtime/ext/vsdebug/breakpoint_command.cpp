@@ -112,8 +112,7 @@ bool SetBreakpointsCommand::executeImpl(
     );
   }
 
-  const auto realPath =
-    StatCache::realpath(
+  const auto realPath = realpathLibc(
       File::TranslatePathKeepRelative(String(filePath)).data());
 
   const std::string& path = realPath.empty() && !filePath.empty()

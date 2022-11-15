@@ -709,7 +709,6 @@ int RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds = -1;
 bool RuntimeOption::AlwaysDecodePostDataDefault = true;
 bool RuntimeOption::ServerThreadDropStack = false;
 bool RuntimeOption::ServerHttpSafeMode = false;
-bool RuntimeOption::ServerStatCache = false;
 bool RuntimeOption::ServerFixPathInfo = false;
 bool RuntimeOption::ServerAddVaryEncoding = true;
 bool RuntimeOption::ServerLogSettingsOnStartup = false;
@@ -2228,7 +2227,6 @@ void RuntimeOption::Load(
                  "Server.ThreadJobMaxQueuingMilliSeconds", -1);
     Config::Bind(ServerThreadDropStack, ini, config, "Server.ThreadDropStack");
     Config::Bind(ServerHttpSafeMode, ini, config, "Server.HttpSafeMode");
-    Config::Bind(ServerStatCache, ini, config, "Server.StatCache", false);
     Config::Bind(ServerFixPathInfo, ini, config, "Server.FixPathInfo", false);
     Config::Bind(ServerAddVaryEncoding, ini, config, "Server.AddVaryEncoding",
                  ServerAddVaryEncoding);

@@ -748,10 +748,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         handleVMRequest(cmd, transport)) {
       break;
     }
-    if (cmd == "statcache-clear") {
-      StatCache::clearCache();
-      break;
-    }
 
     if (cmd == "pcre-cache-size") {
       std::ostringstream size;

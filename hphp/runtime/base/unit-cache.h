@@ -45,7 +45,7 @@ struct FuncTable;
 /*
  * Try to get a Unit* for a php file, given a path and directory.  The actual
  * path to try to find the file at is located using these arguments,
- * resolveVmInclude, and possibly StatCache::realpath calls.
+ * resolveVmInclude, and possibly realpath calls.
  *
  * In RepoAuthoritative mode, this will only find Units that were compiled into
  * the repo ahead of time.  Otherwise, this function may invoke the compiler to

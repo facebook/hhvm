@@ -2236,7 +2236,7 @@ std::string Debugger::getFilePathForUnit(const HPHP::Unit* compilationUnit) {
   const auto path =
     HPHP::String(const_cast<StringData*>(compilationUnit->filepath()));
   const auto translatedPath = File::TranslatePath(path).toCppString();
-  return StatCache::realpath(translatedPath.c_str());
+  return realpathLibc(translatedPath.c_str());
 }
 
 std::string Debugger::getStopReasonForBp(

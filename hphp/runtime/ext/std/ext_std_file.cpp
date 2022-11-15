@@ -217,7 +217,7 @@ static int statSyscall(
       }
       return ::stat(fullpath.data(), buf);
     }
-    std::string realpath = StatCache::realpath(fullpath.data());
+    std::string realpath = realpathLibc(fullpath.data());
     // realpath will return an empty string for nonexistent files
     if (realpath.empty()) {
       return ENOENT;

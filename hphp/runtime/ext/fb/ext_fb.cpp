@@ -1257,7 +1257,7 @@ Variant HHVM_FUNCTION(fb_lazy_lstat, const String& filename) {
   if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
     return false;
   }
-  return do_lazy_stat(StatCache::lstat, filename);
+  return do_lazy_stat(lstatSyscall, filename);
 }
 
 Variant HHVM_FUNCTION(fb_lazy_realpath, const String& filename) {
@@ -1265,7 +1265,7 @@ Variant HHVM_FUNCTION(fb_lazy_realpath, const String& filename) {
     return false;
   }
 
-  return StatCache::realpath(filename.c_str());
+  return realpathLibc(filename.c_str());
 }
 
 int64_t HHVM_FUNCTION(HH_non_crypto_md5_upper, StringArg str) {

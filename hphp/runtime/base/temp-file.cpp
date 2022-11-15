@@ -135,7 +135,7 @@ bool TempFile::truncate(int64_t size) {
 
 int64_t TempFile::getLength() {
   struct stat sb;
-  if (StatCache::lstat(File::TranslatePathWithFileCache(m_rawName).c_str(), &sb)) {
+  if (lstatSyscall(File::TranslatePathWithFileCache(m_rawName).c_str(), &sb)) {
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
                     folly::errnoStr(errno).c_str());
     // use fstat directly

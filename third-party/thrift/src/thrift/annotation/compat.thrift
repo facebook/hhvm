@@ -61,3 +61,30 @@ struct Utf8 {}
 @Strings{onInvalidUtf8 = CodingErrorAction.Legacy}
 @scope.Transitive
 struct LegacyString {}
+
+/**
+ * Enumeration for enum types.
+ */
+enum EnumType {
+  /**
+   * Default enum type of the languages in Thrift v0.
+   * C++ default is open, Java is closed.
+   */
+  Legacy = 0,
+  /**
+   * Enum is defined as open enum type.
+   * A new enum value UNRECOGNIZED is added to the enum for the values outside the defined range.
+   * Unrecognized values are stored as its underlying integer value and can be retrieved.
+   * Default behavior in Thrift v1.
+   */
+  Open = 1,
+}
+
+/**
+ * Enables compatibility on enums.
+ */
+@scope.Program
+@scope.FbthriftInternalEnum
+struct Enums {
+  1: EnumType type;
+}

@@ -154,21 +154,6 @@
  (libraries collections core_kernel naming_special_names))
 
 (library
- (name parsing_service)
- (wrapped false)
- (modules parsing_service)
- (preprocess
-  (pps visitors.ppx ppx_deriving.std))
- (libraries
-  ast_provider
-  decl
-  direct_decl_parser
-  heap_shared_mem
-  procs_procs
-  shallow_decl_defs
-  typechecker_options))
-
-(library
  (name ast_and_decl_service)
  (modules ast_and_decl_service)
  (preprocess

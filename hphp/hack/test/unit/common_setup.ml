@@ -102,26 +102,15 @@ let setup
   in
   let get_next = MultiWorker.next None [foo_path; bar_path] in
   let (file_infos, _errors, _failed_parsing) =
-    if
-      TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
-    then
-      ( Direct_decl_service.go
-          ctx
-          None
-          ~ide_files:Relative_path.Set.empty
-          ~get_next
-          ~trace:true
-          ~cache_decls:false,
-        Errors.empty,
-        Relative_path.Set.empty )
-    else
-      Parsing_service.go_DEPRECATED
+    ( Direct_decl_service.go
         ctx
         None
-        Relative_path.Set.empty
+        ~ide_files:Relative_path.Set.empty
         ~get_next
-        popt
         ~trace:true
+        ~cache_decls:false,
+      Errors.empty,
+      Relative_path.Set.empty )
   in
   let naming_table = Naming_table.create file_infos in
   (* Construct the reverse naming table (symbols-to-files) *)

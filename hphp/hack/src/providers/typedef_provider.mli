@@ -14,9 +14,6 @@ val get_typedef : Provider_context.t -> type_key -> typedef_decl option
 
 val err_not_found : Relative_path.t -> type_key -> 'a
 
-val declare_typedef_in_file_DEPRECATED :
-  Provider_context.t -> Relative_path.t -> type_key -> typedef_decl
-
 val find_in_direct_decl_parse :
   cache_results:bool ->
   Provider_context.t ->

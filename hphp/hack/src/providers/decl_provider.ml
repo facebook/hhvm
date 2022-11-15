@@ -33,9 +33,6 @@ let err_not_found = Typedef_provider.err_not_found
 
 let find_in_direct_decl_parse = Typedef_provider.find_in_direct_decl_parse
 
-let use_direct_decl_parser ctx =
-  TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
-
 (** This cache caches the result of full class computations
       (the class merged with all its inherited members.)  *)
 module Cache =
@@ -167,15 +164,6 @@ let maybe_pessimise_fun_decl ctx fun_decl =
   else
     fun_decl
 
-let declare_fun_in_file_DEPRECATED
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : fun_key) :
-    Typing_defs.fun_elt =
-  match Ast_provider.find_fun_in_file ctx file name with
-  | Some f ->
-    let (_name, decl) = Decl_nast.fun_naming_and_decl_DEPRECATED ctx f in
-    decl
-  | None -> err_not_found file name
-
 let get_fun
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
@@ -215,20 +203,12 @@ let get_fun
     | None ->
       (match Naming_provider.get_fun_path ctx fun_name with
       | Some filename ->
-        if use_direct_decl_parser ctx then
-          find_in_direct_decl_parse
-            ~cache_results:true
-            ctx
-            filename
-            fun_name
-            Shallow_decl_defs.to_fun_decl_opt
-        else
-          let ft =
-            Errors.run_in_decl_mode filename (fun () ->
-                declare_fun_in_file_DEPRECATED ctx filename fun_name)
-          in
-          Decl_store.((get ()).add_fun fun_name ft);
-          Some ft
+        find_in_direct_decl_parse
+          ~cache_results:true
+          ctx
+          filename
+          fun_name
+          Shallow_decl_defs.to_fun_decl_opt
       | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
@@ -237,19 +217,12 @@ let get_fun
       ~default:(fun () ->
         match Naming_provider.get_fun_path ctx fun_name with
         | Some filename ->
-          if use_direct_decl_parser ctx then
-            find_in_direct_decl_parse
-              ~cache_results:true
-              ctx
-              filename
-              fun_name
-              Shallow_decl_defs.to_fun_decl_opt
-          else
-            let ft =
-              Errors.run_in_decl_mode filename (fun () ->
-                  declare_fun_in_file_DEPRECATED ctx filename fun_name)
-            in
-            Some ft
+          find_in_direct_decl_parse
+            ~cache_results:true
+            ctx
+            filename
+            fun_name
+            Shallow_decl_defs.to_fun_decl_opt
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_fun decl fun_name
@@ -317,36 +290,17 @@ let get_typedef
       ~default:(fun () ->
         match Naming_provider.get_typedef_path ctx typedef_name with
         | Some filename ->
-          if use_direct_decl_parser ctx then
-            find_in_direct_decl_parse
-              ~cache_results:true
-              ctx
-              filename
-              typedef_name
-              Shallow_decl_defs.to_typedef_decl_opt
-          else
-            let tdecl =
-              Errors.run_in_decl_mode filename (fun () ->
-                  Typedef_provider.declare_typedef_in_file_DEPRECATED
-                    ctx
-                    filename
-                    typedef_name)
-            in
-            Some tdecl
+          find_in_direct_decl_parse
+            ~cache_results:true
+            ctx
+            filename
+            typedef_name
+            Shallow_decl_defs.to_typedef_decl_opt
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_typedef decl typedef_name
   | Provider_backend.Rust_provider_backend backend ->
     Rust_provider_backend.Decl.get_typedef backend typedef_name
-
-let declare_const_in_file_DEPRECATED
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : gconst_key) :
-    gconst_decl =
-  match Ast_provider.find_gconst_in_file ctx file name with
-  | Some cst ->
-    let (_name, decl) = Decl_nast.const_naming_and_decl_DEPRECATED ctx cst in
-    decl
-  | None -> err_not_found file name
 
 let get_gconst
     ?(tracing_info : Decl_counters.tracing_info option)
@@ -386,20 +340,12 @@ let get_gconst
     | None ->
       (match Naming_provider.get_const_path ctx gconst_name with
       | Some filename ->
-        if use_direct_decl_parser ctx then
-          find_in_direct_decl_parse
-            ~cache_results:true
-            ctx
-            filename
-            gconst_name
-            Shallow_decl_defs.to_const_decl_opt
-        else
-          let gconst =
-            Errors.run_in_decl_mode filename (fun () ->
-                declare_const_in_file_DEPRECATED ctx filename gconst_name)
-          in
-          Decl_store.((get ()).add_gconst gconst_name gconst);
-          Some gconst
+        find_in_direct_decl_parse
+          ~cache_results:true
+          ctx
+          filename
+          gconst_name
+          Shallow_decl_defs.to_const_decl_opt
       | None -> None))
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
@@ -408,19 +354,12 @@ let get_gconst
       ~default:(fun () ->
         match Naming_provider.get_const_path ctx gconst_name with
         | Some filename ->
-          if use_direct_decl_parser ctx then
-            find_in_direct_decl_parse
-              ~cache_results:true
-              ctx
-              filename
-              gconst_name
-              Shallow_decl_defs.to_const_decl_opt
-          else
-            let gconst =
-              Errors.run_in_decl_mode filename (fun () ->
-                  declare_const_in_file_DEPRECATED ctx filename gconst_name)
-            in
-            Some gconst
+          find_in_direct_decl_parse
+            ~cache_results:true
+            ctx
+            filename
+            gconst_name
+            Shallow_decl_defs.to_const_decl_opt
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_gconst decl gconst_name
@@ -446,15 +385,6 @@ let prepare_for_typecheck
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.parse_and_cache_decls_in decl path content
 
-let declare_module_in_file_DEPRECATED
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : module_key) :
-    module_decl =
-  match Ast_provider.find_module_in_file ctx file name with
-  | Some md ->
-    let (_name, decl) = Decl_nast.module_naming_and_decl_DEPRECATED ctx md in
-    decl
-  | None -> err_not_found file name
-
 let get_module
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
@@ -464,20 +394,12 @@ let get_module
   let fetch_from_backing_store () =
     Naming_provider.get_module_path ctx module_name
     |> Option.bind ~f:(fun filename ->
-           if use_direct_decl_parser ctx then
-             find_in_direct_decl_parse
-               ~cache_results:true
-               ctx
-               filename
-               module_name
-               Shallow_decl_defs.to_module_decl_opt
-           else
-             let module_ =
-               Errors.run_in_decl_mode filename (fun () ->
-                   declare_module_in_file_DEPRECATED ctx filename module_name)
-             in
-             Decl_store.((get ()).add_module module_name module_);
-             Some module_)
+           find_in_direct_decl_parse
+             ~cache_results:true
+             ctx
+             filename
+             module_name
+             Shallow_decl_defs.to_module_decl_opt)
   in
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_module module_name)

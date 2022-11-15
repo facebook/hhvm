@@ -80,13 +80,8 @@ let check_extend_kind
 (*****************************************************************************)
 
 let member_heaps_enabled (ctx : Provider_context.t) : bool =
-  (* We can only disable member heaps when the direct decl parser is enabled,
-     as there's no caching mechanism for shallow decls when the FFP is used
-     to parse decls. The absence of such caching makes not writing to the
-     member heaps prohibitively slow. *)
   let tco = Provider_context.get_tcopt ctx in
-  TypecheckerOptions.(
-    (not (use_direct_decl_parser tco)) || populate_member_heaps tco)
+  TypecheckerOptions.(populate_member_heaps tco)
 
 (**
  * Adds the traits/classes which are part of a class' hierarchy.

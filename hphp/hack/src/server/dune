@@ -493,7 +493,6 @@
   linting_main
   lints_core
   lsp
-  parsing_service
   remote
   security_stubs
   shallow_classes_provider

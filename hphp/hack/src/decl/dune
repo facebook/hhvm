@@ -98,6 +98,7 @@
   decl_pos_utils
   decl_store
   decl_to_typing
+  decl_utils
   naming
   procs_procs
   shallow_classes_provider
@@ -393,22 +394,10 @@
  (libraries
   bloom_filter
   decl_defs
+  decl_utils
   heap_shared_mem
   naming
   naming_heap
-  shallow_decl
-  shallow_decl_defs
-  typing_defs)
- (preprocess
-  (pps ppx_deriving.std)))
-
-(library
- (name shallow_decl)
- (modules shallow_decl)
- (libraries
-  decl_defs
-  decl_fun_utils
-  decl_utils
   shallow_decl_defs
   typing_defs)
  (preprocess

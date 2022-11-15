@@ -64,68 +64,22 @@ let init root popt : Provider_context.t =
 
   ctx
 
-let rec shallow_declare_ast ctx decls prog =
-  List.fold prog ~init:decls ~f:(fun decls def ->
-      let open Aast in
-      match def with
-      | Namespace (_, prog) -> shallow_declare_ast ctx decls prog
-      | NamespaceUse _ -> decls
-      | SetModule _ -> decls
-      | SetNamespaceEnv _ -> decls
-      | FileAttributes _ -> decls
-      | Fun f ->
-        let (name, decl) = Decl_nast.fun_naming_and_decl_DEPRECATED ctx f in
-        (name, Shallow_decl_defs.Fun decl) :: decls
-      | Class c ->
-        let decl = Shallow_classes_provider.decl_DEPRECATED ctx c in
-        let (_, name) = decl.Shallow_decl_defs.sc_name in
-        (name, Shallow_decl_defs.Class decl) :: decls
-      | Typedef typedef ->
-        let (name, decl) =
-          Decl_nast.typedef_naming_and_decl_DEPRECATED ctx typedef
-        in
-        (name, Shallow_decl_defs.Typedef decl) :: decls
-      | Stmt _ -> decls
-      | Constant cst ->
-        let (name, decl) = Decl_nast.const_naming_and_decl_DEPRECATED ctx cst in
-        (name, Shallow_decl_defs.Const decl) :: decls
-      | Module md ->
-        let (name, decl) = Decl_nast.module_naming_and_decl_DEPRECATED ctx md in
-        (name, Shallow_decl_defs.Module decl) :: decls)
-
 let direct_decl_parse ctx fn text =
   let popt = Provider_context.get_popt ctx in
   let opts = DeclParserOptions.from_parser_options popt in
   let parsed_file = parse_decls opts fn text in
   parsed_file.pf_decls
 
-let compare_decls ctx fn text =
+let parse_and_print_decls ctx fn text =
   let (ctx, _entry) =
     Provider_context.(
       add_or_overwrite_entry_contents ~ctx ~path:fn ~contents:text)
   in
-  let ast = Ast_provider.get_ast ctx fn in
-  let legacy_decls = shallow_declare_ast ctx [] ast in
-  let legacy_decls_str = show_decls (List.rev legacy_decls) ^ "\n" in
   let decls = direct_decl_parse ctx fn text in
   let decls_str = show_decls (List.rev decls) ^ "\n" in
-  let matched = String.equal decls_str legacy_decls_str in
-  if matched then
-    Printf.eprintf "%s%!" decls_str
-  else
-    Tempfile.with_real_tempdir (fun dir ->
-        let temp_dir = Path.to_string dir in
-        let expected =
-          Caml.Filename.temp_file ~temp_dir "expected_decls" ".txt"
-        in
-        let actual = Caml.Filename.temp_file ~temp_dir "actual_decls" ".txt" in
-        Disk.write_file ~file:expected ~contents:legacy_decls_str;
-        Disk.write_file ~file:actual ~contents:decls_str;
-        Ppxlib_print_diff.print
-          ~diff_command:"diff -U9999 --label legacy --label 'direct decl'"
-          ~file1:expected
-          ~file2:actual
-          ());
+  Printf.eprintf "%s%!" decls_str;
+  (* TODO: don't print "They matched!"; it doesn't mean anything for this mode anymore *)
+  let matched = true in
   matched
 
 let compare_marshal ctx fn text =
@@ -164,7 +118,7 @@ let compare_marshal ctx fn text =
   marshaled_bytes_matched && rust_read_back_matched
 
 type modes =
-  | CompareDirectDeclParser
+  | DirectDeclParse
   | VerifyOcamlrepMarshal
 
 let () =
@@ -201,10 +155,9 @@ let () =
   let ignored_arg flag = (flag, Arg.String (fun _ -> ()), "(ignored)") in
   Arg.parse
     [
-      ( "--compare-direct-decl-parser",
-        Arg.Unit (set_mode CompareDirectDeclParser),
-        "(mode) Runs the direct decl parser against the FFP -> naming -> decl pipeline and compares their output"
-      );
+      ( "--decl-parse",
+        Arg.Unit (set_mode DirectDeclParse),
+        "(mode) Runs the direct decl parser on the given file" );
       ( "--verify-ocamlrep-marshal",
         Arg.Unit (set_mode VerifyOcamlrepMarshal),
         "(mode) Marshals the output of the direct decl parser using Marshal and ocamlrep_marshal and compares their output"
@@ -373,7 +326,7 @@ let () =
             ~ctx
             ~f:(fun () ->
               match mode with
-              | CompareDirectDeclParser -> compare_decls ctx filename contents
+              | DirectDeclParse -> parse_and_print_decls ctx filename contents
               | VerifyOcamlrepMarshal -> compare_marshal ctx filename contents)
           && matched
         in

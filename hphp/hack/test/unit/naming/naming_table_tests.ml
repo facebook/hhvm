@@ -82,45 +82,15 @@ let write_and_parse_test_files ctx =
       Disk.mkdir_p (Path.to_string dir);
       Disk.write_file ~file:(Path.to_string fn) ~contents);
   let get_next = MultiWorker.next None (List.map files ~f:fst) in
-  let (file_infos, errors, failed_parsing) =
-    if
-      TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
-    then
-      ( Direct_decl_service.go
-          ctx
-          None
-          ~ide_files:Relative_path.Set.empty
-          ~get_next
-          ~trace:true
-          ~cache_decls:false,
-        Errors.empty,
-        Relative_path.Set.empty )
-    else
-      let po =
-        ParserOptions.with_allow_unstable_features ParserOptions.default true
-      in
-      Parsing_service.go_DEPRECATED
-        ctx
-        None
-        Relative_path.Set.empty
-        ~get_next
-        po
-        ~trace:true
+  let file_infos =
+    Direct_decl_service.go
+      ctx
+      None
+      ~ide_files:Relative_path.Set.empty
+      ~get_next
+      ~trace:true
+      ~cache_decls:false
   in
-  if not (Errors.is_empty errors) then (
-    Errors.iter_error_list
-      (fun e ->
-        List.iter (User_error.to_list_ e) ~f:(fun (pos, msg) ->
-            eprintf
-              "%s: %s\n"
-              (Pos.string
-                 (Pos.to_absolute @@ Pos_or_decl.unsafe_to_raw_pos pos))
-              msg))
-      errors;
-    failwith "Expected no errors from parsing."
-  );
-  if not (Relative_path.Set.is_empty failed_parsing) then
-    failwith "Expected all files to pass parsing.";
   Naming_table.create file_infos
 
 let run_naming_table_test f =

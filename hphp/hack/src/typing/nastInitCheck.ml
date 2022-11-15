@@ -21,9 +21,6 @@ module Native = Typing_native
 let shallow_decl_enabled (ctx : Provider_context.t) : bool =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
 
-let use_direct_decl_parser (ctx : Provider_context.t) : bool =
-  TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
-
 module SSetWTop = struct
   type t =
     | Top
@@ -165,10 +162,7 @@ module Env = struct
     let sc =
       lazy
         (assert (shallow_decl_enabled ctx);
-         if use_direct_decl_parser ctx then
-           Option.value_exn (Shallow_classes_provider.get ctx (snd c.c_name))
-         else
-           Shallow_decl.class_DEPRECATED ctx c)
+         Option.value_exn (Shallow_classes_provider.get ctx (snd c.c_name)))
     in
 
     (* In Zoncolan, we don't support eviction. We don't support lazy reparsing of

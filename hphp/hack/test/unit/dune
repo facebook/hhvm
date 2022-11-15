@@ -13,7 +13,6 @@
   errors
   naming_global
   naming_table
-  parsing_service
   provider_context
   tast_provider))
 
@@ -31,7 +30,6 @@
   decl_counters
   default_injector_config
   deferred_decl
-  parsing_service
   provider_utils
   server_monitor
   telemetry_test_utils

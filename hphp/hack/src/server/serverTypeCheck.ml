@@ -47,9 +47,6 @@ end
 let shallow_decl_enabled (ctx : Provider_context.t) =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
 
-let use_direct_decl_parser (ctx : Provider_context.t) =
-  TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
-
 (*****************************************************************************)
 (* Debugging *)
 (*****************************************************************************)
@@ -273,24 +270,15 @@ let parsing genv env to_check cgroup_steps =
   let ctx = Provider_utils.ctx_from_server_env env in
   let (defs_per_file, errors, failed_parsing) =
     CgroupProfiler.step_start_end cgroup_steps "parsing" @@ fun _cgroup_step ->
-    if use_direct_decl_parser ctx then
-      ( Direct_decl_service.go
-          ctx
-          genv.workers
-          ~ide_files
-          ~get_next
-          ~trace:true
-          ~cache_decls:false,
-        Errors.empty,
-        Relative_path.Set.empty )
-    else
-      Parsing_service.go_DEPRECATED
+    ( Direct_decl_service.go
         ctx
         genv.workers
-        ide_files
+        ~ide_files
         ~get_next
-        env.popt
         ~trace:true
+        ~cache_decls:false,
+      Errors.empty,
+      Relative_path.Set.empty )
   in
 
   SearchServiceRunner.update_fileinfo_map
@@ -1507,9 +1495,7 @@ functor
              ~key:"redecl2_count_later"
              ~value:(Relative_path.Map.cardinal lazy_decl_later)
         |> Telemetry.bool_ ~key:"shallow" ~value:(shallow_decl_enabled ctx)
-        |> Telemetry.bool_
-             ~key:"direct_decl"
-             ~value:(use_direct_decl_parser ctx)
+        |> Telemetry.bool_ ~key:"direct_decl" ~value:true
       in
 
       if not (shallow_decl_enabled ctx) then (

@@ -608,12 +608,14 @@ void validate_uri_uniqueness(diagnostic_context& ctx, const t_program& prog) {
   std::unordered_map<std::string, const t_named*> uri_to_node;
   basic_ast_visitor<true> visit;
   visit.add_definition_visitor([&](const t_named& node) {
-    if (!node.uri().empty()) {
-      auto result = uri_to_node.emplace(node.uri(), &node);
-      if (!result.second) {
-        report_redef_error(
-            ctx, "Thrift URI", node.uri(), node, node, *result.first->second);
-      }
+    const auto& uri = node.uri();
+    if (uri.empty() || uri == kTransitiveUri) {
+      return;
+    }
+    auto result = uri_to_node.emplace(uri, &node);
+    if (!result.second) {
+      report_redef_error(
+          ctx, "Thrift URI", uri, node, node, *result.first->second);
     }
   });
   for (const auto* p : prog.get_included_programs()) {

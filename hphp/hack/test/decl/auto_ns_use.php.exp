@@ -86,5 +86,3 @@
         td_is_ctx = false; td_attributes = []; td_internal = false;
         td_docs_url = None }))
   ]
-
-They matched!

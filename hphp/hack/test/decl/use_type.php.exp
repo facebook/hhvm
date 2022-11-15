@@ -72,5 +72,3 @@
         fe_pos = [17:12-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }))
   ]
-
-They matched!

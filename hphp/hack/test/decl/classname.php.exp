@@ -40,5 +40,3 @@
                 te_constraint = None; te_includes = [] });
         sc_docs_url = None }))
   ]
-
-They matched!

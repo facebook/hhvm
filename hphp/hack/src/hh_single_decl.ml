@@ -78,8 +78,8 @@ let parse_and_print_decls ctx fn text =
   let decls = direct_decl_parse ctx fn text in
   let decls_str = show_decls (List.rev decls) ^ "\n" in
   Printf.eprintf "%s%!" decls_str;
-  (* TODO: don't print "They matched!"; it doesn't mean anything for this mode anymore *)
-  let matched = true in
+  (* This mode doesn't compare anything. Return false so that we don't print "They matched!". *)
+  let matched = false in
   matched
 
 let compare_marshal ctx fn text =

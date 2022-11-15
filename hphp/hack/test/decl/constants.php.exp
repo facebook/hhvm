@@ -27,5 +27,3 @@
             [(Rhint ([11:11-14]), (Tprim Tint))])))
         }))
   ]
-
-They matched!

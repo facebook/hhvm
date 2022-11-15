@@ -43,5 +43,3 @@
         cd_type =
         (Rhint ([9:7-20]), (Tapply (([9:7-20], "\\MyPartialType"), []))) }))
   ]
-
-They matched!

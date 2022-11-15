@@ -240,5 +240,3 @@
         fe_pos = [9:10-23]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }))
   ]
-
-They matched!

@@ -60,5 +60,3 @@ File root|module_properties.php--f.php
        fe_pos = [3:10-11]; fe_php_std_lib = false;
        fe_support_dynamic_type = false }))
   ]
-
-They matched!

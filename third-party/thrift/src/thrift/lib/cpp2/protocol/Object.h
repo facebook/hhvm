@@ -107,10 +107,12 @@ std::unique_ptr<folly::IOBuf> serializeValue(const Value& val) {
 // obj: object to be serialized Serialized output is same as schema based
 // serialization except when struct contains an empty list, set or map
 template <class Protocol>
-std::unique_ptr<folly::IOBuf> serializeObject(const Object& obj) {
-  Value val;
-  val.objectValue_ref() = obj;
-  return serializeValue<Protocol>(val);
+std::unique_ptr<folly::IOBuf> serializeObject(const Object& val) {
+  Protocol prot;
+  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
+  prot.setOutput(&queue);
+  detail::serializeObject(prot, val);
+  return queue.move();
 }
 
 // Serialization of protocol::Object with MaskedProtocolData.

@@ -701,22 +701,26 @@ void serializeValue(Protocol& prot, const Value& value) {
       return;
     }
     case Value::Type::objectValue: {
-      prot.writeStructBegin("");
-      for (const auto& [fieldID, fieldVal] :
-           *value.objectValue_ref()->members()) {
-        auto fieldType = getTType(fieldVal);
-        prot.writeFieldBegin("", fieldType, fieldID);
-        serializeValue(prot, fieldVal);
-        prot.writeFieldEnd();
-      }
-      prot.writeFieldStop();
-      prot.writeStructEnd();
+      serializeObject(prot, *value.objectValue_ref());
       return;
     }
     default: {
       TProtocolException::throwInvalidFieldData();
     }
   }
+}
+
+template <class Protocol>
+void serializeObject(Protocol& prot, const Object& obj) {
+  prot.writeStructBegin("");
+  for (const auto& [fieldID, fieldVal] : *obj.members()) {
+    auto fieldType = getTType(fieldVal);
+    prot.writeFieldBegin("", fieldType, fieldID);
+    serializeValue(prot, fieldVal);
+    prot.writeFieldEnd();
+  }
+  prot.writeFieldStop();
+  prot.writeStructEnd();
 }
 
 // Writes the field from raw data in MaskedData.

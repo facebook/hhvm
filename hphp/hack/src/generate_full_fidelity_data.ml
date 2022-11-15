@@ -2652,7 +2652,7 @@ module GenerateFFRustTokenKind = struct
         " if " ^ guard
     in
     sprintf
-      "            \"%s\"%s => Some(TokenKind::%s),\n"
+      "            b\"%s\"%s => Some(TokenKind::%s),\n"
       token_text
       guard
       (token_kind x)
@@ -2729,10 +2729,9 @@ TO_STRING_VARIABLE_TEXT        }
         keyword: &[u8],
         only_reserved: bool,
     ) -> Option<Self> {
-        let keyword = unsafe { std::str::from_utf8_unchecked(keyword) };
         match keyword {
-            \"true\" if !only_reserved => Some(TokenKind::BooleanLiteral),
-            \"false\" if !only_reserved => Some(TokenKind::BooleanLiteral),
+            b\"true\" if !only_reserved => Some(TokenKind::BooleanLiteral),
+            b\"false\" if !only_reserved => Some(TokenKind::BooleanLiteral),
 FROM_STRING_GIVEN_TEXT            _ => None,
         }
     }

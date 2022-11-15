@@ -157,7 +157,10 @@ TranslationResult getTranslation(SrcKey sk) {
     return TranslationResult{s};
   }
 
-  tc::createSrcRec(sk, liveSpOff());
+  if (tc::createSrcRec(sk, liveSpOff()) == nullptr) {
+    // ran out of TC space
+    return TranslationResult::failForProcess();
+  }
 
   if (auto const tca = tc::findSrcRec(sk)->getTopTranslation()) {
     // Handle extremely unlikely race; someone may have just added the first

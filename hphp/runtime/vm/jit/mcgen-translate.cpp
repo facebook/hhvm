@@ -171,7 +171,10 @@ void optimize(tc::FuncMetaInfo& info) {
     translator->optIndex = optIndex++;
     auto const spOff = region->entry()->initialSpOffset();
     translator->spOff = spOff;
-    tc::createSrcRec(regionSk, spOff);
+    if (tc::createSrcRec(regionSk, spOff) == nullptr) {
+      // ran out of TC space, stop trying to translate regions
+      break;
+    }
     translator->translate(info.tcBuf.view());
     if (translator->translateSuccess()) {
       info.add(std::move(translator));

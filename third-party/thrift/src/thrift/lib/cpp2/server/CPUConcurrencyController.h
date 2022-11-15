@@ -117,6 +117,8 @@ class CPUConcurrencyController {
 
   bool enabled() const { return config().mode != Mode::DISABLED; }
 
+  const Config& config() const { return **config_; }
+
  private:
   void cycleOnce();
 
@@ -126,8 +128,6 @@ class CPUConcurrencyController {
   uint32_t getLimit() const;
   void setLimit(uint32_t newLimit);
   uint32_t getLimitUsage();
-
-  const Config& config() const { return **config_; }
 
   folly::observer::TLObserver<Config> config_;
   folly::observer::CallbackHandle configSchedulerCallback_;

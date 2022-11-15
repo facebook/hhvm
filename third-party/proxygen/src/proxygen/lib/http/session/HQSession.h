@@ -345,6 +345,10 @@ class HQSession
     return &unidirectionalReadDispatcher_;
   }
 
+  const TimePoint& getTransportStart() const {
+    return transportStart_;
+  }
+
   /**
    * Set flow control properties on an already started session.
    * QUIC requires both stream and connection flow control window sizes to be

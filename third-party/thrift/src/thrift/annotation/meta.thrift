@@ -36,8 +36,3 @@ namespace py thrift.annotation.meta
 struct SetGenerated {} (
   thrift.uri = "facebook.com/thrift/annotation/SetGenerated",
 )
-
-// TODO(afuller): Delete.
-@scope.Struct
-@thrift.Deprecated
-struct Transitive {} (thrift.uri = "facebook.com/thrift/annotation/Transitive")

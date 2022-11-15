@@ -5825,6 +5825,9 @@ and expression_tree env p et =
         expr env et_virtualized_expr ~allow_awaitable:false)
   in
 
+  (* If the virtualized expression is pessimised, we should strip off the like type *)
+  let ty_virtual = Typing_utils.strip_dynamic env ty_virtual in
+
   (* Given the runtime expression:
 
       MyVisitor::makeTree(...)

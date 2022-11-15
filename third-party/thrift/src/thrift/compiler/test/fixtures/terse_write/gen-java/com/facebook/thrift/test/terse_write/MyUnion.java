@@ -748,7 +748,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
       case _ENUM_FIELD: {
         oprot.writeFieldBegin(ENUM_FIELD_FIELD_DESC);
         com.facebook.thrift.test.terse_write.MyEnum enumField = (com.facebook.thrift.test.terse_write.MyEnum)this.value;
-        oprot.writeI32(enumField == null ? 0 : enumField.getValue());
+        oprot.writeI32(enumField == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(enumField));
         oprot.writeFieldEnd();
         break;
       }

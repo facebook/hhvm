@@ -12,7 +12,7 @@ import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocol;
 
 @SwiftGenerated
-public enum Metasyntactic implements com.facebook.thrift.payload.ThriftSerializable {
+public enum Metasyntactic implements com.facebook.thrift.enums.BaseEnum, com.facebook.thrift.payload.ThriftSerializable {
     FOO(1),
     BAR(2),
     BAZ(3),

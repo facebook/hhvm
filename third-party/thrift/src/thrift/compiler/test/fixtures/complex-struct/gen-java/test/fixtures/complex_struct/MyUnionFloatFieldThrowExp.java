@@ -282,7 +282,7 @@ public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payl
       case _MYENUM: {
         oprot.writeFieldBegin(MY_ENUM_FIELD_DESC);
         test.fixtures.complex_struct.MyEnum myEnum = (test.fixtures.complex_struct.MyEnum)this.value;
-        oprot.writeI32(myEnum == null ? 0 : myEnum.getValue());
+        oprot.writeI32(myEnum == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(myEnum));
         oprot.writeFieldEnd();
         break;
       }

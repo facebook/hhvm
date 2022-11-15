@@ -721,9 +721,9 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
         oprot.writeFieldEnd();
       }
       java.util.Objects.requireNonNull(enumField, "enumField must not be null");
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(enumField.getValue())) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(com.facebook.thrift.util.EnumUtil.getValue(enumField))) {
         oprot.writeFieldBegin(ENUM_FIELD_FIELD_DESC);
-        oprot.writeI32(this.enumField == null ? 0 : this.enumField.getValue());
+        oprot.writeI32(this.enumField == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.enumField));
         oprot.writeFieldEnd();
       };
       java.util.Objects.requireNonNull(listField, "listField must not be null");

@@ -1401,9 +1401,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeFieldEnd();
       }
       java.util.Objects.requireNonNull(enumVal, "enumVal must not be null");
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(enumVal.getValue())) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(com.facebook.thrift.util.EnumUtil.getValue(enumVal))) {
         oprot.writeFieldBegin(ENUM_VAL_FIELD_DESC);
-        oprot.writeI32(this.enumVal == null ? 0 : this.enumVal.getValue());
+        oprot.writeI32(this.enumVal == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.enumVal));
         oprot.writeFieldEnd();
       };
       java.util.Objects.requireNonNull(structVal, "structVal must not be null");
@@ -1503,7 +1503,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       }
       if (optEnumVal != null) {
         oprot.writeFieldBegin(OPT_ENUM_VAL_FIELD_DESC);
-        oprot.writeI32(this.optEnumVal == null ? 0 : this.optEnumVal.getValue());
+        oprot.writeI32(this.optEnumVal == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.optEnumVal));
         oprot.writeFieldEnd();
       }
       if (optStructVal != null) {

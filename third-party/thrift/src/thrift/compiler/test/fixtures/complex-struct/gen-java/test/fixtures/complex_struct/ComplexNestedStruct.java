@@ -1406,7 +1406,7 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         for (List<test.fixtures.complex_struct.MyEnum> _iter3 : _iter2) {
           oprot.writeListBegin(new TList(TType.I32, _iter3.size()));
         for (test.fixtures.complex_struct.MyEnum _iter4 : _iter3) {
-          oprot.writeI32(_iter4 == null ? 0 : _iter4.getValue());
+          oprot.writeI32(_iter4 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter4));
         }
         oprot.writeListEnd();
         }
@@ -1687,7 +1687,7 @@ oprot.writeString(_iter2.getValue());
           oprot.writeBool(_iter2);
         }
         oprot.writeSetEnd();
-oprot.writeI32(_iter1 == null ? 0 : _iter1.getValue().getValue());
+oprot.writeI32(_iter1 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter1.getValue()));
         }
         oprot.writeMapEnd();
         oprot.writeFieldEnd();

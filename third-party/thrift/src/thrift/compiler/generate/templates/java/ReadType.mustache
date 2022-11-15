@@ -33,7 +33,7 @@
 
 }}{{#type:enum?}}{{!
 }}{{#field:isNested?}}{{> BoxedType}}.fromInteger(oprot.readI32()){{/field:isNested?}}{{!
-}}{{^field:isNested?}}{{> ThriftFieldType}} {{field:javaName}} = {{> FieldType}}.fromInteger(oprot.readI32());{{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> ThriftFieldType}} {{field:javaName}} = {{> ThriftFieldType}}.fromInteger(oprot.readI32());{{/field:isNested?}}{{!
 }}{{/type:enum?}}{{!
 
 }}{{#type:binary?}}{{!

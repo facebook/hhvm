@@ -186,7 +186,7 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
         oprot.writeFieldEnd();
       }
       oprot.writeFieldBegin(COLOR_FIELD_DESC);
-      oprot.writeI32(this.color == null ? 0 : this.color.getValue());
+      oprot.writeI32(this.color == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.color));
       oprot.writeFieldEnd();
       oprot.writeFieldStop();
       oprot.writeStructEnd();

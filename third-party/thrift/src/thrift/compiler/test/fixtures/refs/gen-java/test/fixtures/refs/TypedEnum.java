@@ -12,7 +12,7 @@ import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocol;
 
 @SwiftGenerated
-public enum TypedEnum implements com.facebook.thrift.payload.ThriftSerializable {
+public enum TypedEnum implements com.facebook.thrift.enums.BaseEnum, com.facebook.thrift.payload.ThriftSerializable {
     VAL1(0),
     VAL2(1);
 

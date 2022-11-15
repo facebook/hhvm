@@ -442,14 +442,14 @@ public final class MyField implements com.facebook.thrift.payload.ThriftSerializ
       oprot.writeFieldEnd();
       if (optEnumValue != null) {
         oprot.writeFieldBegin(OPT_ENUM_VALUE_FIELD_DESC);
-        oprot.writeI32(this.optEnumValue == null ? 0 : this.optEnumValue.getValue());
+        oprot.writeI32(this.optEnumValue == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.optEnumValue));
         oprot.writeFieldEnd();
       }
       oprot.writeFieldBegin(ENUM_VALUE_FIELD_DESC);
-      oprot.writeI32(this.enumValue == null ? 0 : this.enumValue.getValue());
+      oprot.writeI32(this.enumValue == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.enumValue));
       oprot.writeFieldEnd();
       oprot.writeFieldBegin(REQ_ENUM_VALUE_FIELD_DESC);
-      oprot.writeI32(this.reqEnumValue == null ? 0 : this.reqEnumValue.getValue());
+      oprot.writeI32(this.reqEnumValue == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.reqEnumValue));
       oprot.writeFieldEnd();
       if (optStrValue != null) {
         oprot.writeFieldBegin(OPT_STR_VALUE_FIELD_DESC);

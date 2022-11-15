@@ -289,7 +289,7 @@ public final class ComplexException extends org.apache.thrift.TBaseException imp
         oprot.writeFieldEnd();
       }
       oprot.writeFieldBegin(ERROR_ENUM_FIELD_DESC);
-      oprot.writeI32(this.errorEnum == null ? 0 : this.errorEnum.getValue());
+      oprot.writeI32(this.errorEnum == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.errorEnum));
       oprot.writeFieldEnd();
       if (unionError != null) {
         oprot.writeFieldBegin(UNION_ERROR_FIELD_DESC);

@@ -96,7 +96,7 @@ public void write0(TProtocol oprot) throws TException {
   {{#field:terse?}}
   {{#field:isEnum?}}
   java.util.Objects.requireNonNull({{field:javaName}}, "{{field:javaName}} must not be null");
-  if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault({{field:javaName}}.getValue())) {
+  if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(com.facebook.thrift.util.EnumUtil.getValue({{field:javaName}}))) {
   {{/field:isEnum?}}
   {{^field:isEnum?}}
   if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault({{field:javaName}})) {

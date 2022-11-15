@@ -76,9 +76,9 @@
 }}{{/type:struct?}}{{!
 
 }}{{#type:enum?}}{{!
-}}{{#field:isNested?}}oprot.writeI32(_iter{{field:nestedDepth}} == null ? 0 : _iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}.getValue());
+}}{{#field:isNested?}}oprot.writeI32(_iter{{field:nestedDepth}} == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}));
 {{/field:isNested?}}{{!
-}}{{^field:isNested?}}oprot.writeI32({{^struct:isUnion?}}{{^field:hasAdapterOrWrapper?}}this.{{/field:hasAdapterOrWrapper?}}{{/struct:isUnion?}}{{field:javaName}} == null ? 0 : {{^struct:isUnion?}}{{^field:hasAdapterOrWrapper?}}this.{{/field:hasAdapterOrWrapper?}}{{/struct:isUnion?}}{{field:javaName}}.getValue());{{/field:isNested?}}{{!
+}}{{^field:isNested?}}oprot.writeI32({{^struct:isUnion?}}{{^field:hasAdapterOrWrapper?}}this.{{/field:hasAdapterOrWrapper?}}{{/struct:isUnion?}}{{field:javaName}} == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue({{^struct:isUnion?}}{{^field:hasAdapterOrWrapper?}}this.{{/field:hasAdapterOrWrapper?}}{{/struct:isUnion?}}{{field:javaName}}));{{/field:isNested?}}{{!
 }}{{/type:enum?}}{{!
 
 }}{{#type:binary?}}{{!

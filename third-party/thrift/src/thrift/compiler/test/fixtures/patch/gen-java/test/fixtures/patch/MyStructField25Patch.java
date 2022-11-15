@@ -182,7 +182,7 @@ public final class MyStructField25Patch implements com.facebook.thrift.payload.T
       oprot.writeStructBegin(STRUCT_DESC);
       if (assign != null) {
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
-        oprot.writeI32(this.assign == null ? 0 : this.assign.getValue());
+        oprot.writeI32(this.assign == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.assign));
         oprot.writeFieldEnd();
       }
       oprot.writeFieldBegin(CLEAR_FIELD_DESC);

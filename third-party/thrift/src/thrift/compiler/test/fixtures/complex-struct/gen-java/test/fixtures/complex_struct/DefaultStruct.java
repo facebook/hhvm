@@ -1173,7 +1173,7 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
         List<test.fixtures.complex_struct.MyEnum> _iter0 = myList;
         oprot.writeListBegin(new TList(TType.I32, _iter0.size()));
         for (test.fixtures.complex_struct.MyEnum _iter1 : _iter0) {
-          oprot.writeI32(_iter1 == null ? 0 : _iter1.getValue());
+          oprot.writeI32(_iter1 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter1));
         }
         oprot.writeListEnd();
         oprot.writeFieldEnd();
@@ -1266,7 +1266,7 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
           oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter1.getValue().size()));
         for (Map.Entry<Integer, test.fixtures.complex_struct.MyEnum> _iter2 : _iter1.getValue().entrySet()) {
           oprot.writeI32(_iter2.getKey());
-          oprot.writeI32(_iter2 == null ? 0 : _iter2.getValue().getValue());
+          oprot.writeI32(_iter2 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter2.getValue()));
         }
         oprot.writeMapEnd();
         }

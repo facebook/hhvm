@@ -2093,7 +2093,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         oprot.writeFieldEnd();
       }
       oprot.writeFieldBegin(JUST_AN_ENUM_FIELD_DESC);
-      oprot.writeI32(this.justAnEnum == null ? 0 : this.justAnEnum.getValue());
+      oprot.writeI32(this.justAnEnum == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.justAnEnum));
       oprot.writeFieldEnd();
       if (justAUnion != null) {
         oprot.writeFieldBegin(JUST_A_UNION_FIELD_DESC);
@@ -2207,11 +2207,11 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
       }
       if (optionalEnum != null) {
         oprot.writeFieldBegin(OPTIONAL_ENUM_FIELD_DESC);
-        oprot.writeI32(this.optionalEnum == null ? 0 : this.optionalEnum.getValue());
+        oprot.writeI32(this.optionalEnum == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.optionalEnum));
         oprot.writeFieldEnd();
       }
       oprot.writeFieldBegin(REQUIRED_ENUM_WITH_DEFAULT_FIELD_DESC);
-      oprot.writeI32(this.requiredEnumWithDefault == null ? 0 : this.requiredEnumWithDefault.getValue());
+      oprot.writeI32(this.requiredEnumWithDefault == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.requiredEnumWithDefault));
       oprot.writeFieldEnd();
       if (stringWithDefaultValue != null) {
         oprot.writeFieldBegin(STRING_WITH_DEFAULT_VALUE_FIELD_DESC);
@@ -2225,7 +2225,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
       oprot.writeDouble(this.doubleWithDefaultValue);
       oprot.writeFieldEnd();
       oprot.writeFieldBegin(ENUM_WITH_DEFAULT_VALUE_FIELD_DESC);
-      oprot.writeI32(this.enumWithDefaultValue == null ? 0 : this.enumWithDefaultValue.getValue());
+      oprot.writeI32(this.enumWithDefaultValue == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.enumWithDefaultValue));
       oprot.writeFieldEnd();
       if (aWithDefaultValue != null) {
         oprot.writeFieldBegin(A_WITH_DEFAULT_VALUE_FIELD_DESC);

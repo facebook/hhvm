@@ -1303,9 +1303,9 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
         oprot.writeFieldEnd();
       }
       java.util.Objects.requireNonNull(terseEnumField, "terseEnumField must not be null");
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(terseEnumField.getValue())) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(com.facebook.thrift.util.EnumUtil.getValue(terseEnumField))) {
         oprot.writeFieldBegin(TERSE_ENUM_FIELD_FIELD_DESC);
-        oprot.writeI32(this.terseEnumField == null ? 0 : this.terseEnumField.getValue());
+        oprot.writeI32(this.terseEnumField == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.terseEnumField));
         oprot.writeFieldEnd();
       };
       java.util.Objects.requireNonNull(terseListField, "terseListField must not be null");
@@ -1397,7 +1397,7 @@ public final class FieldLevelTerseStruct implements com.facebook.thrift.payload.
         oprot.writeFieldEnd();
       }
       oprot.writeFieldBegin(ENUM_FIELD_FIELD_DESC);
-      oprot.writeI32(this.enumField == null ? 0 : this.enumField.getValue());
+      oprot.writeI32(this.enumField == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.enumField));
       oprot.writeFieldEnd();
       if (listField != null) {
         oprot.writeFieldBegin(LIST_FIELD_FIELD_DESC);

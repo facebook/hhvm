@@ -12,7 +12,7 @@ import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocol;
 
 @SwiftGenerated
-public enum Animal implements com.facebook.thrift.payload.ThriftSerializable {
+public enum Animal implements com.facebook.thrift.enums.BaseEnum, com.facebook.thrift.payload.ThriftSerializable {
     DOG(1),
     CAT(2),
     TARANTULA(3);

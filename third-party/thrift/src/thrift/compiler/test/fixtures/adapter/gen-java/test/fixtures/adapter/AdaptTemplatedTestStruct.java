@@ -1052,7 +1052,7 @@ public final class AdaptTemplatedTestStruct implements com.facebook.thrift.paylo
         oprot.writeFieldEnd();
       }
       oprot.writeFieldBegin(ADAPTED_ENUM_FIELD_DESC);
-      oprot.writeI32(this.adaptedEnum == null ? 0 : this.adaptedEnum.getValue());
+      oprot.writeI32(this.adaptedEnum == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.adaptedEnum));
       oprot.writeFieldEnd();
       if (adaptedListDefault != null) {
         oprot.writeFieldBegin(ADAPTED_LIST_DEFAULT_FIELD_DESC);

@@ -456,7 +456,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeFieldEnd();
       }
       oprot.writeFieldBegin(MY_ENUM_FIELD_DESC);
-      oprot.writeI32(this.myEnum == null ? 0 : this.myEnum.getValue());
+      oprot.writeI32(this.myEnum == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.myEnum));
       oprot.writeFieldEnd();
       oprot.writeFieldBegin(ONEWAY_FIELD_DESC);
       oprot.writeBool(this.oneway);

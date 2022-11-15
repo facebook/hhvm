@@ -253,16 +253,16 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(ME2_3_FIELD_DESC);
-      oprot.writeI32(this.me23 == null ? 0 : this.me23.getValue());
+      oprot.writeI32(this.me23 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.me23));
       oprot.writeFieldEnd();
       oprot.writeFieldBegin(ME3_N3_FIELD_DESC);
-      oprot.writeI32(this.me3N3 == null ? 0 : this.me3N3.getValue());
+      oprot.writeI32(this.me3N3 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.me3N3));
       oprot.writeFieldEnd();
       oprot.writeFieldBegin(ME1_T1_FIELD_DESC);
-      oprot.writeI32(this.me1T1 == null ? 0 : this.me1T1.getValue());
+      oprot.writeI32(this.me1T1 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.me1T1));
       oprot.writeFieldEnd();
       oprot.writeFieldBegin(ME1_T2_FIELD_DESC);
-      oprot.writeI32(this.me1T2 == null ? 0 : this.me1T2.getValue());
+      oprot.writeI32(this.me1T2 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.me1T2));
       oprot.writeFieldEnd();
       oprot.writeFieldStop();
       oprot.writeStructEnd();

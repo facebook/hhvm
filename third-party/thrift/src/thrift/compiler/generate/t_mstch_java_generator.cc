@@ -1052,8 +1052,10 @@ class mstch_java_enum : public mstch_enum {
             {"enum:javaCapitalName", &mstch_java_enum::java_capital_name},
             {"enum:skipEnumNameMap?",
              &mstch_java_enum::java_skip_enum_name_map},
+            {"enum:ordinal++", &mstch_java_enum::get_ordinal},
         });
   }
+  int32_t ordinal = 0;
   mstch::node java_package() {
     return get_namespace_or_default(*enum_->program());
   }
@@ -1063,6 +1065,7 @@ class mstch_java_enum : public mstch_enum {
   mstch::node java_skip_enum_name_map() {
     return enum_->has_annotation("java.swift.skip_enum_name_map");
   }
+  mstch::node get_ordinal() { return ordinal++; }
 };
 
 class mstch_java_enum_value : public mstch_enum_value {

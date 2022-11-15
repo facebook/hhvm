@@ -12,7 +12,7 @@ import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocol;
 
 @SwiftGenerated
-public class TooBigEnum extends IntEnum implements com.facebook.thrift.payload.ThriftSerializable {
+public class TooBigEnum extends IntEnum implements com.facebook.thrift.enums.BaseEnum, com.facebook.thrift.payload.ThriftSerializable {
 
     private final int value;
 

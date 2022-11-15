@@ -295,7 +295,7 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
       }
       if (employer != null) {
         oprot.writeFieldBegin(EMPLOYER_FIELD_DESC);
-        oprot.writeI32(this.employer == null ? 0 : this.employer.getValue());
+        oprot.writeI32(this.employer == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.employer));
         oprot.writeFieldEnd();
       }
       if (compensation != null) {

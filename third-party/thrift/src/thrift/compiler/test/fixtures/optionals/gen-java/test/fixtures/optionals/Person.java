@@ -539,7 +539,7 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
         Map<test.fixtures.optionals.Animal, String> _iter0 = petNames;
         oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _iter0.size()));
         for (Map.Entry<test.fixtures.optionals.Animal, String> _iter1 : _iter0.entrySet()) {
-          oprot.writeI32(_iter1 == null ? 0 : _iter1.getKey().getValue());
+          oprot.writeI32(_iter1 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter1.getKey()));
           oprot.writeString(_iter1.getValue());
         }
         oprot.writeMapEnd();
@@ -547,7 +547,7 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
       }
       if (afraidOfAnimal != null) {
         oprot.writeFieldBegin(AFRAID_OF_ANIMAL_FIELD_DESC);
-        oprot.writeI32(this.afraidOfAnimal == null ? 0 : this.afraidOfAnimal.getValue());
+        oprot.writeI32(this.afraidOfAnimal == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(this.afraidOfAnimal));
         oprot.writeFieldEnd();
       }
       if (vehicles != null) {

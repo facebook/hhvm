@@ -285,7 +285,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
       case _MYENUM: {
         oprot.writeFieldBegin(MY_ENUM_FIELD_DESC);
         test.fixtures.basic.MyEnum myEnum = (test.fixtures.basic.MyEnum)this.value;
-        oprot.writeI32(myEnum == null ? 0 : myEnum.getValue());
+        oprot.writeI32(myEnum == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(myEnum));
         oprot.writeFieldEnd();
         break;
       }

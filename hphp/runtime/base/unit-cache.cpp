@@ -719,7 +719,17 @@ void releaseFromHashCache(Unit* unit) {
   // for the accessor. Check if the entry for the hash is the same
   // Unit. If it is, the Unit still exists and we can access it
   // safely.
-  if (cached.copy() != unit) return;
+  if (cached.copy() != unit) {
+    // See if the unit is anywhere in the linked list of cached units
+    for (auto u = cached.copy(); u; u = u->nextCachedByHash()) {
+      if (u->nextCachedByHash() == unit) {
+        if (unit->hasCacheRef()) return;
+        u->setNextCachedByHash(unit->nextCachedByHash());
+        Treadmill::enqueue([unit] { delete unit; });
+      }
+    }
+    return;
+  }
   // Check if the ref-count went back up since we decremented it. If
   // so, freeing it will happen later and be some other thread's
   // responsibility.
@@ -736,7 +746,7 @@ void releaseFromHashCache(Unit* unit) {
   // Unit since we already checked that. Treadmill the Unit and we're
   // done. Once we release the accessor, any other thread waiting to
   // delete this Unit will see that the entry is gone.
-  auto const DEBUG_ONLY old = lock.update(nullptr);
+  auto const DEBUG_ONLY old = lock.update(unit->nextCachedByHash());
   assertx(old == unit);
   Treadmill::enqueue([unit] { delete unit; });
 }
@@ -847,8 +857,15 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
           return CachedFilePtr{};
         };
 
+        auto const checkDeps = [&] (Unit* unit) -> Unit* {
+          for (; unit; unit = unit->nextCachedByHash()) {
+            if (!anyDepsChanged(unit, options, wrapper)) return unit;
+          }
+          return nullptr;
+        };
+
         // First check before acquiring the lock
-        if (auto const unit = cached.copy()) return hit(unit);
+        if (auto const unit = checkDeps(cached.copy())) return hit(unit);
 
         // No entry, so acquire the lock:
         auto lock = cached.try_lock_for_update();
@@ -858,7 +875,7 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
         }
 
         // Try again now that we have the lock
-        if (auto const unit = cached.copy()) {
+        if (auto const unit = checkDeps(cached.copy())) {
           // NB: Its safe to unlock first. The Unit can only be freed by
           // releaseFromHashCache() which acquires an exclusive lock on
           // this table slot first (so cannot happen concurrently).
@@ -894,10 +911,12 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
           return makeCachedFilePtr(unit);
         }
         unit->makeFilepathPerRequest();
+        unit->setNextCachedByHash(cached.copy());
 
         // Store the Unit in the cache.
         auto const DEBUG_ONLY old = lock->update(std::move(unit));
-        assertx(!old);
+        assertx(!old || !checkDeps(old));
+        assertx(old == unit->nextCachedByHash());
         return makeCachedFilePtr(unit);
       }();
       if (cachedFilePtr) {

@@ -211,6 +211,20 @@ function drain_unit_prefetcher(): void;
 function non_repo_unit_cache_info(): dict;
 
 /*
+ * Returns a string containing the pretty printed bytecode for the calling
+ * function.
+ */
+<<__Native>>
+function debug_get_bytecode(): string;
+
+/*
+ * Return an array of recorded dependencies for the file in which this builtin
+ * is called.
+ */
+<<__Native>>
+function debug_file_deps(): vec<string>;
+
+/*
  * We need to be able to unit test functionality of __NativeData classes
  * without tripping over the funky behavior or (intentional) limitations
  * of the __NativeData classes that actually do something.

@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/surprise-flags.h"
@@ -455,6 +456,27 @@ Array HHVM_FUNCTION(non_repo_unit_cache_info) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+String HHVM_FUNCTION(debug_get_bytecode) {
+  return fromCaller([] (const BTFrame& frame) {
+    std::ostringstream ss;
+    frame.func()->prettyPrint(ss);
+    return String(ss.str());
+  });
+}
+
+Array HHVM_FUNCTION(debug_file_deps) {
+  return fromCaller([] (const BTFrame& frame) {
+    auto const& deps = frame.func()->unit()->deps();
+    VecInit vinit{deps.size()};
+    for (auto const& [name, sha] : deps) {
+      vinit.append(String(name));
+    }
+    return vinit.toArray();
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 struct DummyNativeData {
@@ -531,6 +553,9 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\is_unit_loaded, is_unit_loaded);
   HHVM_FALIAS(__hhvm_intrinsics\\drain_unit_prefetcher, drain_unit_prefetcher);
   HHVM_FALIAS(__hhvm_intrinsics\\non_repo_unit_cache_info, non_repo_unit_cache_info);
+
+  HHVM_FALIAS(__hhvm_intrinsics\\debug_get_bytecode, debug_get_bytecode);
+  HHVM_FALIAS(__hhvm_intrinsics\\debug_file_deps, debug_file_deps);
 
   HHVM_NAMED_ME(__hhvm_intrinsics\\ExtensibleNewableClassWithNativeData,
                 setDummyValue,

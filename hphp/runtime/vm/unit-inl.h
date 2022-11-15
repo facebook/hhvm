@@ -143,6 +143,19 @@ inline bool Unit::hasCacheRef() const {
   return getExtended()->m_cacheRefCount > 0;
 }
 
+inline Unit* Unit::nextCachedByHash() const {
+  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(m_extended);
+  return getExtended()->m_nextCachedByHash.load(std::memory_order_acquire);
+}
+
+inline void Unit::setNextCachedByHash(Unit* u) {
+  assertx(!RuntimeOption::RepoAuthoritative);
+  assertx(m_extended);
+  assertx(!u || u->sha1() == sha1());
+  return getExtended()->m_nextCachedByHash.store(u, std::memory_order_release);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Idle unit reaping
 

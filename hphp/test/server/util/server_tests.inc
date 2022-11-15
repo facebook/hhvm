@@ -69,6 +69,29 @@ function dumpLogFilesToStdoutAndDie() {
   readfile("{$LOG_ROOT}_curl$test_run_id.log");
   echo "\n";
   error_log('-------------------------------------------');
+
+  $log_data = file_get_contents("{$LOG_ROOT}_test_server$test_run_id.log");
+  $hits = null;
+  if (
+    preg_match_with_matches(
+      '#\nStack trace in ([a-zA-Z0-9._/-]+)\n#',
+      $log_data,
+      inout $hits,
+    ) !== 0
+  ) {
+    for ($i = 1; $i < count($hits); $i++) {
+      if (is_readable($hits[$i])) {
+        echo "\n";
+        error_log('-------------------------------------------');
+        error_log("Contents of '{$hits[$i]}'");
+        readfile($hits[$i]);
+        echo "\n";
+        error_log('-------------------------------------------');
+      } else {
+        error_log("Unable to read {$hits[$i]}");
+      }
+    }
+  }
   throw new Exception("test failed");
 }
 

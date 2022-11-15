@@ -279,6 +279,14 @@ public:
    */
   bool hasCacheRef() const;
 
+  /*
+   * When Eval.EnableDecl is set we may have multiple versions of the same unit
+   * cached under a particular SHA-1 because of differing versions of
+   * dependencies in different repos.
+   */
+  Unit* nextCachedByHash() const;
+  void setNextCachedByHash(Unit* u);
+
   /////////////////////////////////////////////////////////////////////////////
   // Idle unit reaping
 
@@ -521,7 +529,7 @@ public:
     return offsetof(Unit, m_moduleName);
   }
 
-  const std::vector<DeclDep> deps() const { return m_deps; }
+  const std::vector<DeclDep>& deps() const { return m_deps; }
 
   /////////////////////////////////////////////////////////////////////////////
   // Internal methods.
@@ -605,6 +613,8 @@ struct UnitExtended : Unit {
   // Used by Eval.IdleUnitTimeoutSecs:
   std::atomic<int64_t> m_lastTouchRequest{0};
   std::atomic<TouchClock::time_point> m_lastTouchTime{TouchClock::time_point{}};
+
+  std::atomic<Unit*> m_nextCachedByHash{nullptr};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

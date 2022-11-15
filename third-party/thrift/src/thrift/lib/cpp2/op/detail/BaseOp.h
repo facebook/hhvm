@@ -84,7 +84,7 @@ struct BaseOp : type::detail::BaseErasedOp {
     return op::identical<Tag>(ref(lhs), rhs.as<Tag>());
   }
 
-  static partial_ordering compare(const void* lhs, const Dyn& rhs) {
+  static folly::partial_ordering compare(const void* lhs, const Dyn& rhs) {
     if (const T* ptr = rhs.tryAs<Tag>()) {
       return partialCmp<Tag>(ref(lhs), *ptr);
     }
@@ -96,12 +96,12 @@ struct BaseOp : type::detail::BaseErasedOp {
  private:
   template <typename UTag>
   static if_comparable<UTag> partialCmp(const T& lhs, const T& rhs) {
-    return to_partial_ordering(op::compare<Tag>(lhs, rhs));
+    return op::compare<Tag>(lhs, rhs);
   }
   template <typename UTag>
   static if_not_comparable<UTag> partialCmp(const T& lhs, const T& rhs) {
-    return op::equal<Tag>(lhs, rhs) ? partial_ordering::eq
-                                    : partial_ordering::ne;
+    return op::equal<Tag>(lhs, rhs) ? folly::partial_ordering::equivalent
+                                    : folly::partial_ordering::unordered;
   }
 };
 

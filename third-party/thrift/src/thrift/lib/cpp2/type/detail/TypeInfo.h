@@ -33,7 +33,6 @@ namespace apache {
 namespace thrift {
 namespace type {
 namespace detail {
-using op::detail::partial_ordering;
 class Dyn;
 class Ptr;
 
@@ -50,7 +49,7 @@ struct TypeInfo {
   void* (*make)(void*, bool);
   bool (*empty)(const void*);
   bool (*identical)(const void*, const Dyn&);
-  partial_ordering (*compare_)(const void*, const Dyn&);
+  folly::partial_ordering (*compare_)(const void*, const Dyn&);
   void (*clear)(void*);
   void (*assign)(void*, const Dyn&);
   void (*append)(void*, const Dyn&);
@@ -63,11 +62,11 @@ struct TypeInfo {
   size_t (*size)(const void*);
 
   bool equal(const void* lhs, const Dyn& rhs) const {
-    return is_eq(compare_(lhs, rhs));
+    return op::detail::is_eq(compare_(lhs, rhs));
   }
 
   folly::ordering compare(const void* lhs, const Dyn& rhs) const {
-    return to_ordering(compare_(lhs, rhs));
+    return folly::ordering(compare_(lhs, rhs));
   }
 
   bool less(const void* lhs, const Dyn& rhs) const {

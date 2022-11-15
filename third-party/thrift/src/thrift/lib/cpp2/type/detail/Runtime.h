@@ -906,9 +906,9 @@ struct VoidErasedOp : BaseErasedOp {
   }
   static bool empty(const void*) { return true; }
   static bool identical(const void*, const Dyn&) { return true; }
-  static partial_ordering compare(const void*, const Dyn& rhs) {
+  static folly::partial_ordering compare(const void*, const Dyn& rhs) {
     check_op(!rhs.has_value());
-    return partial_ordering::eq;
+    return folly::partial_ordering::equivalent;
   }
   static void clear(void*) {}
   static void assign(void*, const Dyn& val) { check_op(!val.has_value()); }

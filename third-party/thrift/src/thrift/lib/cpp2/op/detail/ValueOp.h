@@ -42,15 +42,15 @@ struct NumberOp : BaseOp<Tag> {
 
   // TODO(afuller): Make this implicit-conversion safe.
   template <typename L, typename R>
-  static partial_ordering compare(const L& lhs, const R& rhs) {
-    return partial_ordering((lhs > rhs) - (rhs > lhs));
+  static folly::ordering compare(const L& lhs, const R& rhs) {
+    return static_cast<folly::ordering>((lhs > rhs) - (rhs > lhs));
   }
 
   // TODO(afuller): Use saturating add.
   static bool add(T& self, const T& val) { return (self += val, true); }
   static bool add(void* s, const Dyn& v) { return add(ref(s), v.as<Tag>()); }
 
-  static partial_ordering compare(const void* lhs, const Dyn& rhs) {
+  static folly::partial_ordering compare(const void* lhs, const Dyn& rhs) {
     switch (rhs.type().baseType()) {
       case type::BaseType::Bool:
         return compare(ref(lhs), rhs.as<type::bool_t>());
@@ -239,17 +239,17 @@ struct StringOp : BaseOp<Tag> {
     prepend(self, *val);
   }
 
-  static partial_ordering compare(const void* lhs, const Dyn& rhs) {
+  static folly::partial_ordering compare(const void* lhs, const Dyn& rhs) {
     StringCompare cmp;
     // TODO(afuller): Consider using a ~map.
     if (const T* ptr = rhs.tryAs<Tag>()) {
-      return to_partial_ordering(cmp(ref(lhs), *ptr));
+      return cmp(ref(lhs), *ptr);
     } else if (const auto* ptr = rhs.tryAs<StdTag>()) {
-      return to_partial_ordering(cmp(ref(lhs), *ptr));
+      return cmp(ref(lhs), *ptr);
     } else if (const auto* ptr = rhs.tryAs<IOBufTag>()) {
-      return to_partial_ordering(cmp(ref(lhs), *ptr));
+      return cmp(ref(lhs), *ptr);
     } else if (const auto* ptr = rhs.tryAs<IOBufPtrTag>()) {
-      return to_partial_ordering(cmp(ref(lhs), **ptr));
+      return cmp(ref(lhs), **ptr);
     }
     // TODO(afuller): Implement compatibility with any type convertable to
     // fmt::string_view.

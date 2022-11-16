@@ -1340,7 +1340,6 @@ pub mod server {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::const_cstr::const_cstr;
-            use ::tracing::Instrument as _;
             use ::futures::FutureExt as _;
 
             const_cstr! {
@@ -1410,7 +1409,6 @@ pub mod server {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::const_cstr::const_cstr;
-            use ::tracing::Instrument as _;
             use ::futures::FutureExt as _;
 
             const_cstr! {
@@ -1519,7 +1517,6 @@ pub mod server {
             _seqid: ::std::primitive::u32,
         ) -> ::anyhow::Result<()> {
             use ::const_cstr::const_cstr;
-            use ::tracing::Instrument as _;
             use ::futures::FutureExt as _;
 
             const_cstr! {

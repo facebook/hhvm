@@ -339,7 +339,15 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
   | Taccess (ty, _) ->
     get_typarams ty
   | Trefinement (ty, rs) ->
-    Class_refinement.fold rs ~f:get_typarams_union ~init:(get_typarams ty)
+    SMap.fold
+      (fun _ r acc ->
+        match r with
+        | TRexact bnd ->
+          let tp = get_typarams bnd in
+          union acc @@ union (flip tp) tp
+        | TRloose _ -> (* TODO(type-refinements) implement later *) empty)
+      rs.cr_types
+      (get_typarams ty)
   | Tunion tyl
   | Tintersection tyl
   | Ttuple tyl ->

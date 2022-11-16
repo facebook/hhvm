@@ -1,0 +1,4 @@
+File "module_internal_type_alias.php--B.php", line 6, characters 29-32:
+Cannot access an internal element from module `A` in module `B` (Typing[4444])
+  File "module_internal_type_alias.php--A.php", line 6, characters 15-18:
+  This is from module `A`

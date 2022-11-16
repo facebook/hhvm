@@ -124,8 +124,11 @@ let check_type_name
       end
     | None ->
       begin
-        match Naming_provider.get_type_pos_and_kind env.ctx name with
-        | Some (def_pos, Naming_types.TTypedef) when not allow_typedef ->
+        match Naming_provider.get_type_kind env.ctx name with
+        | Some Naming_types.TTypedef when not allow_typedef ->
+          let def_pos =
+            Naming_provider.get_type_pos env.ctx name |> Option.value_exn
+          in
           let (decl_pos, _) =
             Naming_global.GEnv.get_type_full_pos env.ctx (def_pos, name)
           in

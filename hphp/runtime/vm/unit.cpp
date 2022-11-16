@@ -566,7 +566,7 @@ Array getFunctions() {
   Array a = Array::CreateVec();
   NamedEntity::foreach_cached_func([&](Func* func) {
     if ((system ^ func->isBuiltin()) || func->isGenerated()) return; //continue
-    a.append(HHVM_FN(strtolower)(func->nameStr()));
+    a.append(Variant(func->nameStr()));
   });
   return a;
 }

@@ -111,6 +111,11 @@ class HQControlCodec
     return &settings_;
   }
 
+  const HTTPSettings* getEgressSettings() const {
+    CHECK(isEgress());
+    return &settings_;
+  }
+
   void enableDoubleGoawayDrain() override {
     doubleGoaway_ = true;
   }
@@ -134,6 +139,10 @@ class HQControlCodec
                           uint8_t maxLevel) override;
 
   HTTPCodec::StreamID mapPriorityToDependency(uint8_t priority) const override;
+
+  bool receivedSettings() const {
+    return receivedSettings_;
+  }
 
  protected:
   ParseResult checkFrameAllowed(FrameType type) override;

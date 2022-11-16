@@ -44,6 +44,7 @@ static const std::string kNoProtocolString("");
 static const std::string kH1QV1ProtocolString("h1q-fb");
 static const std::string kH1QV2ProtocolString("h1q-fb-v2");
 static const std::string kQUICProtocolName("QUIC");
+constexpr uint64_t kMaxQuarterStreamId = (1ull << 60) - 1;
 
 using namespace proxygen::HTTP3;
 bool noError(quic::QuicErrorCode error) {
@@ -3733,11 +3734,12 @@ void HQSession::onDatagramsAvailable() noexcept {
   for (auto& datagram : result.value()) {
     folly::io::Cursor cursor(datagram.get());
     auto quarterStreamId = quic::decodeQuicInteger(cursor);
-    if (!quarterStreamId) {
+    if (!quarterStreamId || quarterStreamId->first > kMaxQuarterStreamId) {
       dropConnectionAsync(
           quic::QuicError(HTTP3::ErrorCode::HTTP_GENERAL_PROTOCOL_ERROR,
                           "H3_DATAGRAM: error decoding stream-id"),
           kErrorConnection);
+      break;
     }
     auto ctxId = quic::decodeQuicInteger(cursor);
     if (!ctxId) {

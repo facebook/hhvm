@@ -8,9 +8,7 @@
  *
  */
 
-class FilesystemIterator
-  extends DirectoryIterator
-  implements SeekableIterator<SplFileInfo> {
+class FilesystemIterator extends DirectoryIterator {
 
   // Constants
   const int CURRENT_AS_PATHNAME = 32;
@@ -30,7 +28,7 @@ class FilesystemIterator
 
   // Methods
   public function __construct($path, $flags = null);
-  public function current();
+  public function current(): HH\FIXME\POISON_MARKER<SplFileInfo>;
   public function getFlags();
   public function key();
   public function next(): void;

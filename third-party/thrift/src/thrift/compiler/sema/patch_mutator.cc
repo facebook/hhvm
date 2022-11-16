@@ -119,6 +119,7 @@ struct StructGen {
   const t_node& annot;
   // The struct to add fields to.
   t_struct& generated;
+  t_program& program_;
 
   // Add a new field to generated, and return it.
   t_field& field(t_field_id id, t_type_ref type, std::string name) {
@@ -135,9 +136,9 @@ struct StructGen {
   operator t_struct&() { return generated; }
   operator t_type_ref() { return generated; }
 
-  void set_adapter(std::string name, t_program& program) {
-    auto annotation =
-        dynamic_cast<const t_type*>(program.scope()->find_def(kCppAdapterUri));
+  void set_adapter(std::string name) {
+    const t_type* annotation =
+        dynamic_cast<const t_type*>(program_.scope()->find_def(kCppAdapterUri));
     assert(annotation); // transitive include from patch.thrift
     auto value = std::make_unique<t_const_value>();
     value->set_map();
@@ -153,8 +154,25 @@ struct StructGen {
         std::make_unique<t_const_value>(""));
     value->set_ttype(*annotation);
     auto adapter =
-        std::make_unique<t_const>(&program, annotation, "", std::move(value));
+        std::make_unique<t_const>(&program_, annotation, "", std::move(value));
     generated.add_structured_annotation(std::move(adapter));
+  }
+
+  t_field& intern_box(t_field& field) {
+    const t_type* annotation =
+        dynamic_cast<const t_type*>(program_.scope()->find_def(kInternBoxUri));
+    assert(annotation);
+    auto value = std::make_unique<t_const_value>();
+    value->set_ttype(*annotation);
+    auto intern_box =
+        std::make_unique<t_const>(&program_, annotation, "", std::move(value));
+    field.add_structured_annotation(std::move(intern_box));
+    return field;
+  }
+
+  t_field& terse(t_field& field) {
+    field.set_qualifier(t_field_qualifier::terse);
+    return field;
   }
 };
 
@@ -348,44 +366,46 @@ t_struct& patch_generator::add_field_patch(
       ctx_.warning(field, "Could not resolve patch type for field.");
     }
   }
-  StructGen gen{annot, gen_suffix_struct(annot, orig, "FieldPatch")};
+  StructGen gen{annot, gen_suffix_struct(annot, orig, "FieldPatch"), program_};
   for (const auto& entry : types) {
-    gen.field(
-        entry.first, entry.second, orig.get_field_by_id(entry.first)->name());
+    gen.intern_box(gen.terse(gen.field(
+        entry.first, entry.second, orig.get_field_by_id(entry.first)->name())));
   }
-  gen.set_adapter("FieldPatchAdapter", program_);
+  gen.set_adapter("FieldPatchAdapter");
   return gen;
 }
 
 t_struct& patch_generator::add_union_patch(
     const t_const& annot, t_union& value_type, t_type_ref patch_type) {
-  PatchGen gen{{annot, gen_suffix_struct(annot, value_type, "Patch")}};
+  PatchGen gen{
+      {annot, gen_suffix_struct(annot, value_type, "Patch"), program_}};
   gen.assign(value_type);
   gen.clearUnion();
   if (get_assign_only_annotation_or_null(value_type)) {
-    gen.set_adapter("AssignPatchAdapter", program_);
+    gen.set_adapter("AssignPatchAdapter");
     return gen;
   }
   gen.patchPrior(patch_type);
   gen.ensureUnion(value_type);
   gen.patchAfter(patch_type);
-  gen.set_adapter("UnionPatchAdapter", program_);
+  gen.set_adapter("UnionPatchAdapter");
   return gen;
 }
 
 t_struct& patch_generator::add_struct_patch(
     const t_const& annot, t_struct& value_type, t_type_ref patch_type) {
-  PatchGen gen{{annot, gen_suffix_struct(annot, value_type, "Patch")}};
+  PatchGen gen{
+      {annot, gen_suffix_struct(annot, value_type, "Patch"), program_}};
   gen.assign(value_type);
   gen.clear();
   if (get_assign_only_annotation_or_null(value_type)) {
-    gen.set_adapter("AssignPatchAdapter", program_);
+    gen.set_adapter("AssignPatchAdapter");
     return gen;
   }
   gen.patchPrior(patch_type);
   gen.ensureStruct(value_type);
   gen.patchAfter(patch_type);
-  gen.set_adapter("StructPatchAdapter", program_);
+  gen.set_adapter("StructPatchAdapter");
   return gen;
 }
 
@@ -525,13 +545,14 @@ t_struct& patch_generator::gen_patch(
     t_type_ref type,
     size_t traversal_order) {
   auto suffix = getFieldIdPatchSuffix(field_id, traversal_order);
-  PatchGen gen{{annot, gen_suffix_struct(annot, orig, suffix.c_str())}};
+  PatchGen gen{
+      {annot, gen_suffix_struct(annot, orig, suffix.c_str()), program_}};
   // All value patches have an assign and clear field.
   gen.assign(type);
   gen.clear();
 
   if (annot.get_type()->uri() == kAssignOnlyPatchUri) {
-    gen.set_adapter("AssignPatchAdapter", program_);
+    gen.set_adapter("AssignPatchAdapter");
     return gen;
   }
 
@@ -546,12 +567,12 @@ t_struct& patch_generator::gen_patch(
     gen.remove(inst_list(list->elem_type()));
     gen.prepend(type);
     gen.append(type);
-    gen.set_adapter("ListPatchAdapter", program_);
+    gen.set_adapter("ListPatchAdapter");
   } else if (auto* set = dynamic_cast<const t_set*>(ttype)) {
     // TODO(afuller): support 'replace' op.
     gen.remove(type);
     gen.addSet(type);
-    gen.set_adapter("SetPatchAdapter", program_);
+    gen.set_adapter("SetPatchAdapter");
   } else if (auto* map = dynamic_cast<const t_map*>(ttype)) {
     // TODO(afuller): support 'removeIf' op.
     // TODO(afuller): support 'replace' op.
@@ -562,9 +583,9 @@ t_struct& patch_generator::gen_patch(
     gen.patchAfter(inst_map(map->key_type(), val_patch_type));
     gen.remove(inst_set(map->key_type()));
     gen.put(type);
-    gen.set_adapter("MapPatchAdapter", program_);
+    gen.set_adapter("MapPatchAdapter");
   } else {
-    gen.set_adapter("AssignPatchAdapter", program_);
+    gen.set_adapter("AssignPatchAdapter");
   }
   return gen;
 }

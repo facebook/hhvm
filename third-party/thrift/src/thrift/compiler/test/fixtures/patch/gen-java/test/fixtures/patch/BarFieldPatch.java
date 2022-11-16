@@ -25,21 +25,21 @@ public final class BarFieldPatch implements com.facebook.thrift.payload.ThriftSe
 
     @ThriftConstructor
     public BarFieldPatch(
-        @com.facebook.swift.codec.ThriftField(value=-1, name="loop", isLegacyId=true, requiredness=Requiredness.NONE) final test.fixtures.patch.LoopPatch loop
+        @com.facebook.swift.codec.ThriftField(value=-1, name="loop", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.LoopPatch loop
     ) {
         this.loop = loop;
     }
     
     @ThriftConstructor
     protected BarFieldPatch() {
-      this.loop = null;
+      this.loop = test.fixtures.patch.LoopPatch.defaultInstance();
     }
     
     public static class Builder {
     
-        private test.fixtures.patch.LoopPatch loop = null;
+        private test.fixtures.patch.LoopPatch loop = test.fixtures.patch.LoopPatch.defaultInstance();
     
-        @com.facebook.swift.codec.ThriftField(value=-1, name="loop", isLegacyId=true, requiredness=Requiredness.NONE)
+        @com.facebook.swift.codec.ThriftField(value=-1, name="loop", isLegacyId=true, requiredness=Requiredness.TERSE)
         public Builder setLoop(test.fixtures.patch.LoopPatch loop) {
             this.loop = loop;
             return this;
@@ -78,7 +78,7 @@ public final class BarFieldPatch implements com.facebook.thrift.payload.ThriftSe
     }
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-1, name="loop", isLegacyId=true, requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=-1, name="loop", isLegacyId=true, requiredness=Requiredness.TERSE)
     public test.fixtures.patch.LoopPatch getLoop() { return loop; }
     
     @java.lang.Override
@@ -144,11 +144,19 @@ public final class BarFieldPatch implements com.facebook.thrift.payload.ThriftSe
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (loop != null) {
+      int structStart = 0;
+      int pos = 0;
+      com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
+      java.util.Objects.requireNonNull(loop, "loop must not be null");
+      structStart = p.mark();
         oprot.writeFieldBegin(LOOP_FIELD_DESC);
+        pos = p.mark();
         this.loop.write0(oprot);
-        oprot.writeFieldEnd();
-      }
+        if (p.mark() - pos > p.getEmptyStructSize()) {
+          p.writeFieldEnd();    
+        } else {
+          p.rollback(structStart);
+        }    
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }

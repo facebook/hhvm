@@ -483,24 +483,44 @@
             "name" : "data1",
             "key" : 1,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "StringPatch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "data2" : {
             "name" : "data2",
             "key" : 2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "I32Patch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  }
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -593,13 +613,23 @@
             "name" : "innerOption",
             "key" : 1,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "BinaryPatch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  }
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -692,34 +722,64 @@
             "name" : "option1",
             "key" : 1,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "StringPatch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "option2" : {
             "name" : "option2",
             "key" : 2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "I32Patch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "option3" : {
             "name" : "option3",
             "key" : 3,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "InnerUnionPatch"
 }
-                  }
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -1562,342 +1622,662 @@
             "name" : "mapMap",
             "key" : -32,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyStructField32Patch"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "listMap" : {
             "name" : "listMap",
             "key" : -31,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyStructField31Patch"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "optMapVal" : {
             "name" : "optMapVal",
             "key" : -30,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyStructField30Patch"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "optSetVal" : {
             "name" : "optSetVal",
             "key" : -29,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyStructField29Patch"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "optListVal" : {
             "name" : "optListVal",
             "key" : -28,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyStructField28Patch"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "optLateStructVal" : {
             "name" : "optLateStructVal",
             "key" : -27,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "LateDefStructPatch"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "optStructVal" : {
             "name" : "optStructVal",
             "key" : -26,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyDataPatch"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "optEnumVal" : {
             "name" : "optEnumVal",
             "key" : -25,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyStructField25Patch"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "optBinaryVal" : {
             "name" : "optBinaryVal",
             "key" : -24,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "BinaryPatch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "optStringVal" : {
             "name" : "optStringVal",
             "key" : -23,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "StringPatch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "optDoubleVal" : {
             "name" : "optDoubleVal",
             "key" : -22,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "DoublePatch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "optFloatVal" : {
             "name" : "optFloatVal",
             "key" : -21,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "FloatPatch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "optI64Val" : {
             "name" : "optI64Val",
             "key" : -20,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "I64Patch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "optI32Val" : {
             "name" : "optI32Val",
             "key" : -19,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "I32Patch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "optI16Val" : {
             "name" : "optI16Val",
             "key" : -18,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "I16Patch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "optByteVal" : {
             "name" : "optByteVal",
             "key" : -17,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "BytePatch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "optBoolVal" : {
             "name" : "optBoolVal",
             "key" : -16,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "BoolPatch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "timeVal" : {
             "name" : "timeVal",
             "key" : -15,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "TimePatch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "durationVal" : {
             "name" : "durationVal",
             "key" : -14,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "DurationPatch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "lateStructVal" : {
             "name" : "lateStructVal",
             "key" : -13,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "LateDefStructPatch"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "unionVal" : {
             "name" : "unionVal",
             "key" : -12,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyUnionPatch"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "structVal" : {
             "name" : "structVal",
             "key" : -11,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyDataPatch"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "enumVal" : {
             "name" : "enumVal",
             "key" : -10,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyStructField10Patch"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "binaryVal" : {
             "name" : "binaryVal",
             "key" : -9,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "BinaryPatch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "stringVal" : {
             "name" : "stringVal",
             "key" : -8,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "StringPatch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "doubleVal" : {
             "name" : "doubleVal",
             "key" : -7,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "DoublePatch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "floatVal" : {
             "name" : "floatVal",
             "key" : -6,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "FloatPatch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "i64Val" : {
             "name" : "i64Val",
             "key" : -5,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "I64Patch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "i32Val" : {
             "name" : "i32Val",
             "key" : -4,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "I32Patch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "i16Val" : {
             "name" : "i16Val",
             "key" : -3,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "I16Patch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "byteVal" : {
             "name" : "byteVal",
             "key" : -2,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "BytePatch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "boolVal" : {
             "name" : "boolVal",
             "key" : -1,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "BoolPatch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  }
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -2117,12 +2497,22 @@
             "name" : "nodes",
             "key" : -1,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "RecursiveField1Patch"
 }
-                  }
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -2215,12 +2605,22 @@
             "name" : "loop",
             "key" : -1,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "LoopPatch"
 }
-                  }
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -2313,12 +2713,22 @@
             "name" : "bar",
             "key" : -1,
             "lineno" : 22,
-            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "BarPatch"
 }
-                  }
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          }
         },
         "is_exception" : false,
         "is_union" : false,

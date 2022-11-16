@@ -22,8 +22,7 @@
 #include <thrift/conformance/cpp2/AnyRegistry.h>
 #include <thrift/conformance/cpp2/Protocol.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
-#include <thrift/lib/cpp2/reflection/populator.h>
-#include <thrift/test/testset/Testing.h>
+#include <thrift/test/testset/Populator.h>
 #include <thrift/test/testset/gen-cpp2/testset_types_custom_protocol.h>
 
 namespace apache::thrift::conformance {
@@ -36,8 +35,7 @@ TYPED_TEST_CASE_P(TestValueTest);
 
 TYPED_TEST_P(TestValueTest, RoundTrip) {
   std::mt19937 rng;
-  TypeParam expected;
-  populator::populate(expected, {}, rng);
+  auto expected = test::populated_if_not_adapted<TypeParam>(rng);
 
   // Convert to an EncodeValue.
   EncodeValue value = asEncodeValue(expected);

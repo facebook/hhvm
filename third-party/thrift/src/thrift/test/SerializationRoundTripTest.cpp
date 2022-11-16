@@ -19,10 +19,7 @@
 #include <folly/portability/GTest.h>
 #include <thrift/conformance/cpp2/AnyRegistry.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
-#include <thrift/lib/cpp2/reflection/populator.h>
-#include <thrift/lib/cpp2/reflection/reflection.h>
-#include <thrift/test/testset/Testing.h>
-#include <thrift/test/testset/gen-cpp2/testset_fatal_types.h>
+#include <thrift/test/testset/Populator.h>
 
 namespace apache::thrift::test {
 
@@ -38,11 +35,7 @@ class SerializationRoundTripTest : public testing::Test {
   std::mt19937 rng_;
 
  protected:
-  T populated() {
-    T result;
-    populator::populate(result, {}, rng_);
-    return result;
-  }
+  T populated() { return populated_if_not_adapted<T>(rng_); }
 
   template <typename SerializerT>
   void testSerializer() {

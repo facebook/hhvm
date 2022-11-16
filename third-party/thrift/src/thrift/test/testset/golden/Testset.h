@@ -20,6 +20,7 @@ enum class FieldModifier {
   Box,
   CustomDefault,
   AlternativeCustomDefault,
+  Adapter,
 };
 
 namespace detail {
@@ -2719,6 +2720,216 @@ struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod
 template <>
 struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Box, FieldModifier::Optional>> {
   using type = struct_optional_map_i64_set_i64_box;
+};
+
+template <>
+struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::byte_t, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::i16_t, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::i32_t, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::i64_t, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::float_t, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_float;
+};
+
+template <>
+struct struct_ByFieldType<type::double_t, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_double;
+};
+
+template <>
+struct struct_ByFieldType<type::binary_t, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_string;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_list_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_list_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_list_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_list_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_list_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_list_float;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_list_double;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_list_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_list_string;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_set_string;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_set_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_string_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_string_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_string_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_string_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_string_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_string_float;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_string_double;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_string_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_string_string;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_i64_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_i64_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_i64_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_i64_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_i64_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_i64_float;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_i64_double;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_i64_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_i64_string;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_string_set_string;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_string_set_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_i64_set_string;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_i64_set_i64;
 };
 
 template <>
@@ -5574,6 +5785,216 @@ struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, 
 template <>
 struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Box, FieldModifier::Optional>> {
   using type = exception_optional_map_i64_set_i64_box;
+};
+
+template <>
+struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_bool;
+};
+
+template <>
+struct exception_ByFieldType<type::byte_t, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_byte;
+};
+
+template <>
+struct exception_ByFieldType<type::i16_t, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_i16;
+};
+
+template <>
+struct exception_ByFieldType<type::i32_t, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_i32;
+};
+
+template <>
+struct exception_ByFieldType<type::i64_t, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_i64;
+};
+
+template <>
+struct exception_ByFieldType<type::float_t, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_float;
+};
+
+template <>
+struct exception_ByFieldType<type::double_t, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_double;
+};
+
+template <>
+struct exception_ByFieldType<type::binary_t, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_binary;
+};
+
+template <>
+struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_string;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_list_bool;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_list_byte;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_list_i16;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_list_i32;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_list_i64;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_list_float;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_list_double;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_list_binary;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_list_string;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_set_string;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_set_i64;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_string_bool;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_string_byte;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_string_i16;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_string_i32;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_string_i64;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_string_float;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_string_double;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_string_binary;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_string_string;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_i64_bool;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_i64_byte;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_i64_i16;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_i64_i32;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_i64_i64;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_i64_float;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_i64_double;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_i64_binary;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_i64_string;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_string_set_string;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_string_set_i64;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_i64_set_string;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = exception_adapted_map_i64_set_i64;
 };
 
 template <>

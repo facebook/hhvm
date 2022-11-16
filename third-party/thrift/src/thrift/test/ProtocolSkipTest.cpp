@@ -17,10 +17,7 @@
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/protocol/ProtocolReaderStructReadState.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
-#include <thrift/lib/cpp2/reflection/populator.h>
-#include <thrift/lib/cpp2/reflection/reflection.h>
-#include <thrift/test/testset/Testing.h>
-#include <thrift/test/testset/gen-cpp2/testset_fatal_types.h>
+#include <thrift/test/testset/Populator.h>
 #include <thrift/test/testset/gen-cpp2/testset_types_custom_protocol.h>
 
 namespace apache::thrift::test {
@@ -181,10 +178,9 @@ class SpecializedSkipTest : public testing::Test {
   template <typename Reader>
   static auto serialized() {
     std::mt19937 rng;
-    T obj;
-    populator::populate(obj, {}, rng);
     using Writer = typename Reader::ProtocolWriter;
-    auto buf = Serializer<Reader, Writer>::template serialize<std::string>(obj);
+    auto buf = Serializer<Reader, Writer>::template serialize<std::string>(
+        populated_if_not_adapted<T>(rng));
     return folly::IOBuf::copyBuffer(buf);
   }
 

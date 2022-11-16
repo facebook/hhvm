@@ -78,10 +78,10 @@
         ) -> {{>lib/server_return_type}} {
             (**self).{{function:rust_name}}({{!
                 }}{{#service:requestContext?}}
-                request_context, {{!
+                request_context,{{!
                 }}{{/service:requestContext?}}{{!
                 }}{{#function:args}}
-                {{field:rust_name}}, {{!
+                {{field:rust_name}},{{!
                 }}{{/function:args}}
             ).await
         }

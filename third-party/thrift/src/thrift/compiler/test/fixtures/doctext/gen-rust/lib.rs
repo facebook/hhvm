@@ -1208,9 +1208,9 @@ pub mod server {
             c: ::std::collections::BTreeSet<::std::primitive::i32>,
         ) -> ::std::result::Result<::std::string::String, crate::services::c::ThingExn> {
             (**self).thing(
-                a, 
-                b, 
-                c, 
+                a,
+                b,
+                c,
             ).await
         }
     }

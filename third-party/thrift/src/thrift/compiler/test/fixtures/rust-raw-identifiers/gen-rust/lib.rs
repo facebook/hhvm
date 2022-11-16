@@ -695,7 +695,7 @@ pub mod server {
             bar: crate::types::ThereAreNoPascalCaseKeywords,
         ) -> ::std::result::Result<(), crate::services::foo::ReturnExn> {
             (**self).r#return(
-                bar, 
+                bar,
             ).await
         }
         async fn super_(
@@ -703,7 +703,7 @@ pub mod server {
             bar: crate::types::ThereAreNoPascalCaseKeywords,
         ) -> ::std::result::Result<(), crate::services::foo::SuperExn> {
             (**self).super_(
-                bar, 
+                bar,
             ).await
         }
     }

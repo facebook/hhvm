@@ -1418,7 +1418,7 @@ pub mod server {
             foo: ::std::collections::BTreeMap<::std::primitive::i32, ::std::vec::Vec<::std::primitive::i32>>,
         ) -> ::std::result::Result<(), crate::services::nested_containers::MapListExn> {
             (**self).mapList(
-                foo, 
+                foo,
             ).await
         }
         async fn mapSet(
@@ -1426,7 +1426,7 @@ pub mod server {
             foo: ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>,
         ) -> ::std::result::Result<(), crate::services::nested_containers::MapSetExn> {
             (**self).mapSet(
-                foo, 
+                foo,
             ).await
         }
         async fn listMap(
@@ -1434,7 +1434,7 @@ pub mod server {
             foo: ::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>>,
         ) -> ::std::result::Result<(), crate::services::nested_containers::ListMapExn> {
             (**self).listMap(
-                foo, 
+                foo,
             ).await
         }
         async fn listSet(
@@ -1442,7 +1442,7 @@ pub mod server {
             foo: ::std::vec::Vec<::std::collections::BTreeSet<::std::primitive::i32>>,
         ) -> ::std::result::Result<(), crate::services::nested_containers::ListSetExn> {
             (**self).listSet(
-                foo, 
+                foo,
             ).await
         }
         async fn turtles(
@@ -1450,7 +1450,7 @@ pub mod server {
             foo: ::std::vec::Vec<::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeMap<::std::primitive::i32, ::std::collections::BTreeSet<::std::primitive::i32>>>>>,
         ) -> ::std::result::Result<(), crate::services::nested_containers::TurtlesExn> {
             (**self).turtles(
-                foo, 
+                foo,
             ).await
         }
     }

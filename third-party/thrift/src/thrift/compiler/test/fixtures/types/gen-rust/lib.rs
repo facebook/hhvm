@@ -710,7 +710,7 @@ pub mod server {
             m: include::types::SomeMap,
         ) -> ::std::result::Result<include::types::SomeMap, crate::services::some_service::BounceMapExn> {
             (**self).bounce_map(
-                m, 
+                m,
             ).await
         }
         async fn binary_keyed_map(
@@ -718,7 +718,7 @@ pub mod server {
             r: ::std::vec::Vec<::std::primitive::i64>,
         ) -> ::std::result::Result<::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>, crate::services::some_service::BinaryKeyedMapExn> {
             (**self).binary_keyed_map(
-                r, 
+                r,
             ).await
         }
     }

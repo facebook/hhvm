@@ -4293,7 +4293,7 @@ pub mod server {
             int_parameter: ::std::primitive::i32,
         ) -> ::std::result::Result<crate::types::ReservedKeyword, crate::services::f_b303_service::SimpleRpcExn> {
             (**self).simple_rpc(
-                int_parameter, 
+                int_parameter,
             ).await
         }
     }
@@ -4725,7 +4725,7 @@ pub mod server {
             sink: ::std::primitive::i64,
         ) -> ::std::result::Result<(), crate::services::my_service::SinkExn> {
             (**self).sink(
-                sink, 
+                sink,
             ).await
         }
         async fn putDataById(
@@ -4734,8 +4734,8 @@ pub mod server {
             data: ::std::string::String,
         ) -> ::std::result::Result<(), crate::services::my_service::PutDataByIdExn> {
             (**self).putDataById(
-                id, 
-                data, 
+                id,
+                data,
             ).await
         }
         async fn hasDataById(
@@ -4743,7 +4743,7 @@ pub mod server {
             id: ::std::primitive::i64,
         ) -> ::std::result::Result<::std::primitive::bool, crate::services::my_service::HasDataByIdExn> {
             (**self).hasDataById(
-                id, 
+                id,
             ).await
         }
         async fn getDataById(
@@ -4751,7 +4751,7 @@ pub mod server {
             id: ::std::primitive::i64,
         ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetDataByIdExn> {
             (**self).getDataById(
-                id, 
+                id,
             ).await
         }
         async fn deleteDataById(
@@ -4759,7 +4759,7 @@ pub mod server {
             id: ::std::primitive::i64,
         ) -> ::std::result::Result<(), crate::services::my_service::DeleteDataByIdExn> {
             (**self).deleteDataById(
-                id, 
+                id,
             ).await
         }
         async fn lobDataById(
@@ -4768,8 +4768,8 @@ pub mod server {
             data: ::std::string::String,
         ) -> ::std::result::Result<(), crate::services::my_service::LobDataByIdExn> {
             (**self).lobDataById(
-                id, 
-                data, 
+                id,
+                data,
             ).await
         }
         async fn invalid_return_for_hack(
@@ -6021,7 +6021,7 @@ pub mod server {
             key: ::std::string::String,
         ) -> ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::services::db_mixed_stack_arguments::GetDataByKey0Exn> {
             (**self).getDataByKey0(
-                key, 
+                key,
             ).await
         }
         async fn getDataByKey1(
@@ -6029,7 +6029,7 @@ pub mod server {
             key: ::std::string::String,
         ) -> ::std::result::Result<::std::vec::Vec<::std::primitive::u8>, crate::services::db_mixed_stack_arguments::GetDataByKey1Exn> {
             (**self).getDataByKey1(
-                key, 
+                key,
             ).await
         }
     }

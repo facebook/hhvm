@@ -1201,9 +1201,9 @@ pub mod server {
             arg3: crate::types::Foo,
         ) -> ::std::result::Result<crate::types::MyI32, crate::services::service::FuncExn> {
             (**self).func(
-                arg1, 
-                arg2, 
-                arg3, 
+                arg1,
+                arg2,
+                arg3,
             ).await
         }
     }
@@ -1554,7 +1554,7 @@ pub mod server {
             arg: crate::types::HeapAllocated,
         ) -> ::std::result::Result<crate::types::HeapAllocated, crate::services::adapter_service::AdaptedTypesExn> {
             (**self).adaptedTypes(
-                arg, 
+                arg,
             ).await
         }
     }

@@ -459,7 +459,7 @@ pub mod server {
             int1: ::std::primitive::i64,
         ) -> ::std::result::Result<::std::primitive::i64, crate::services::test_service::InitExn> {
             (**self).init(
-                int1, 
+                int1,
             ).await
         }
     }

@@ -460,7 +460,7 @@ pub mod server {
             u: crate::types::MyUnion,
         ) -> ::std::result::Result<crate::types::MyStruct, crate::services::my_service::QueryExn> {
             (**self).query(
-                u, 
+                u,
             ).await
         }
     }

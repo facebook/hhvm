@@ -5998,7 +5998,7 @@ pub mod server {
             arg: ::std::primitive::i32,
         ) -> ::std::result::Result<::std::boxed::Box<dyn MyInteraction>, crate::services::my_service::InteractExn> {
             (**self).interact(
-                arg, 
+                arg,
             ).await
         }
         async fn interactFast(

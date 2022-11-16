@@ -4537,8 +4537,8 @@ pub mod server {
         ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamStreamExn>>
 , crate::services::pub_sub_streaming_service::ReturnstreamExn> {
             (**self).returnstream(
-                i32_from, 
-                i32_to, 
+                i32_from,
+                i32_to,
             ).await
         }
         async fn streamthrows(
@@ -4547,7 +4547,7 @@ pub mod server {
         ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::StreamthrowsStreamExn>>
 , crate::services::pub_sub_streaming_service::StreamthrowsExn> {
             (**self).streamthrows(
-                foo, 
+                foo,
             ).await
         }
         async fn servicethrows(
@@ -4556,7 +4556,7 @@ pub mod server {
         ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ServicethrowsStreamExn>>
 , crate::services::pub_sub_streaming_service::ServicethrowsExn> {
             (**self).servicethrows(
-                foo, 
+                foo,
             ).await
         }
         async fn servicethrows2(
@@ -4565,7 +4565,7 @@ pub mod server {
         ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::Servicethrows2StreamExn>>
 , crate::services::pub_sub_streaming_service::Servicethrows2Exn> {
             (**self).servicethrows2(
-                foo, 
+                foo,
             ).await
         }
         async fn boththrows(
@@ -4574,7 +4574,7 @@ pub mod server {
         ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::BoththrowsStreamExn>>
 , crate::services::pub_sub_streaming_service::BoththrowsExn> {
             (**self).boththrows(
-                foo, 
+                foo,
             ).await
         }
         async fn responseandstreamstreamthrows(
@@ -4586,7 +4586,7 @@ pub mod server {
 )
 , crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn> {
             (**self).responseandstreamstreamthrows(
-                foo, 
+                foo,
             ).await
         }
         async fn responseandstreamservicethrows(
@@ -4598,7 +4598,7 @@ pub mod server {
 )
 , crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn> {
             (**self).responseandstreamservicethrows(
-                foo, 
+                foo,
             ).await
         }
         async fn responseandstreamboththrows(
@@ -4610,7 +4610,7 @@ pub mod server {
 )
 , crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn> {
             (**self).responseandstreamboththrows(
-                foo, 
+                foo,
             ).await
         }
         async fn returnstreamFast(
@@ -4620,8 +4620,8 @@ pub mod server {
         ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::services::pub_sub_streaming_service::ReturnstreamFastStreamExn>>
 , crate::services::pub_sub_streaming_service::ReturnstreamFastExn> {
             (**self).returnstreamFast(
-                i32_from, 
-                i32_to, 
+                i32_from,
+                i32_to,
             ).await
         }
     }

@@ -3988,7 +3988,7 @@ pub mod server {
             request_context: &Self::RequestContext,
         ) -> ::std::result::Result<(), crate::services::my_service::PingExn> {
             (**self).ping(
-                request_context, 
+                request_context,
             ).await
         }
         async fn getRandomData(
@@ -3996,7 +3996,7 @@ pub mod server {
             request_context: &Self::RequestContext,
         ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetRandomDataExn> {
             (**self).getRandomData(
-                request_context, 
+                request_context,
             ).await
         }
         async fn hasDataById(
@@ -4005,8 +4005,8 @@ pub mod server {
             id: ::std::primitive::i64,
         ) -> ::std::result::Result<::std::primitive::bool, crate::services::my_service::HasDataByIdExn> {
             (**self).hasDataById(
-                request_context, 
-                id, 
+                request_context,
+                id,
             ).await
         }
         async fn getDataById(
@@ -4015,8 +4015,8 @@ pub mod server {
             id: ::std::primitive::i64,
         ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetDataByIdExn> {
             (**self).getDataById(
-                request_context, 
-                id, 
+                request_context,
+                id,
             ).await
         }
         async fn putDataById(
@@ -4026,9 +4026,9 @@ pub mod server {
             data: ::std::string::String,
         ) -> ::std::result::Result<(), crate::services::my_service::PutDataByIdExn> {
             (**self).putDataById(
-                request_context, 
-                id, 
-                data, 
+                request_context,
+                id,
+                data,
             ).await
         }
         async fn lobDataById(
@@ -4038,9 +4038,9 @@ pub mod server {
             data: ::std::string::String,
         ) -> ::std::result::Result<(), crate::services::my_service::LobDataByIdExn> {
             (**self).lobDataById(
-                request_context, 
-                id, 
-                data, 
+                request_context,
+                id,
+                data,
             ).await
         }
         async fn streamById(
@@ -4050,8 +4050,8 @@ pub mod server {
         ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdStreamExn>>
 , crate::services::my_service::StreamByIdExn> {
             (**self).streamById(
-                request_context, 
-                id, 
+                request_context,
+                id,
             ).await
         }
         async fn streamByIdWithException(
@@ -4061,8 +4061,8 @@ pub mod server {
         ) -> ::std::result::Result<    ::futures::stream::BoxStream<'static, ::std::result::Result<crate::types::MyStruct, crate::services::my_service::StreamByIdWithExceptionStreamExn>>
 , crate::services::my_service::StreamByIdWithExceptionExn> {
             (**self).streamByIdWithException(
-                request_context, 
-                id, 
+                request_context,
+                id,
             ).await
         }
         async fn streamByIdWithResponse(
@@ -4075,8 +4075,8 @@ pub mod server {
 )
 , crate::services::my_service::StreamByIdWithResponseExn> {
             (**self).streamByIdWithResponse(
-                request_context, 
-                id, 
+                request_context,
+                id,
             ).await
         }
         fn createMyInteraction(
@@ -4089,7 +4089,7 @@ pub mod server {
             request_context: &Self::RequestContext,
         ) -> ::std::result::Result<::std::boxed::Box<dyn MyInteraction>, crate::services::my_service::StartPingInteractionExn> {
             (**self).startPingInteraction(
-                request_context, 
+                request_context,
             ).await
         }
     }

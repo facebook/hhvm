@@ -3805,7 +3805,7 @@ pub mod server {
             id: ::std::primitive::i64,
         ) -> ::std::result::Result<::std::primitive::bool, crate::services::my_service::HasDataByIdExn> {
             (**self).hasDataById(
-                id, 
+                id,
             ).await
         }
         async fn getDataById(
@@ -3813,7 +3813,7 @@ pub mod server {
             id: ::std::primitive::i64,
         ) -> ::std::result::Result<::std::string::String, crate::services::my_service::GetDataByIdExn> {
             (**self).getDataById(
-                id, 
+                id,
             ).await
         }
         async fn putDataById(
@@ -3822,8 +3822,8 @@ pub mod server {
             data: ::std::string::String,
         ) -> ::std::result::Result<(), crate::services::my_service::PutDataByIdExn> {
             (**self).putDataById(
-                id, 
-                data, 
+                id,
+                data,
             ).await
         }
         async fn lobDataById(
@@ -3832,8 +3832,8 @@ pub mod server {
             data: ::std::string::String,
         ) -> ::std::result::Result<(), crate::services::my_service::LobDataByIdExn> {
             (**self).lobDataById(
-                id, 
-                data, 
+                id,
+                data,
             ).await
         }
         async fn doNothing(

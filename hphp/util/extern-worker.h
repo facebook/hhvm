@@ -387,6 +387,11 @@ struct Options {
     return *this;
   }
 
+  Options& setFeaturesFile(std::string f) {
+    m_featuresFile = std::move(f);
+    return *this;
+  }
+
   // If the backend is busy, retry the action this number of times (0
   // disables retrying).
   Options& setThrottleRetries(size_t r) {
@@ -418,6 +423,21 @@ struct Options {
     return *this;
   }
 
+  Options& setCasConnectionCount(size_t n) {
+    m_casConnectionCount = n;
+    return *this;
+  }
+
+  Options& setEngineConnectionCount(size_t n) {
+    m_engineConnectionCount = n;
+    return *this;
+  }
+
+  Options& setAcConnectionCount(size_t n) {
+    m_acConnectionCount = n;
+    return *this;
+  }
+
   UseSubprocess m_useSubprocess{UseSubprocess::Fallback};
   std::filesystem::path m_workingDir{std::filesystem::temp_directory_path()};
   std::chrono::seconds m_timeout{std::chrono::minutes{15}};
@@ -431,7 +451,11 @@ struct Options {
   bool m_useRichClient{true};
   bool m_useZippyRichClient{false};
   bool m_useP2P{false};
-  std::string m_useCase;
+  int m_casConnectionCount{16};
+  int m_engineConnectionCount{6};
+  int m_acConnectionCount{16};
+  std::string m_useCase{""};
+  std::string m_featuresFile{""};
 };
 
 //////////////////////////////////////////////////////////////////////

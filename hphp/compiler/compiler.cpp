@@ -762,6 +762,7 @@ Options makeExternWorkerOptions(const CompilerOptions& po) {
   Options options;
   options
     .setUseCase(Option::ExternWorkerUseCase)
+    .setFeaturesFile(Option::ExternWorkerFeaturesFile)
     .setUseSubprocess(Option::ExternWorkerForceSubprocess
                       ? Options::UseSubprocess::Always
                       : Options::UseSubprocess::Fallback)
@@ -771,6 +772,9 @@ Options makeExternWorkerOptions(const CompilerOptions& po) {
     .setUseRichClient(Option::ExternWorkerUseRichClient)
     .setUseZippyRichClient(Option::ExternWorkerUseZippyRichClient)
     .setUseP2P(Option::ExternWorkerUseP2P)
+    .setCasConnectionCount(Option::ExternWorkerCasConnectionCount)
+    .setEngineConnectionCount(Option::ExternWorkerEngineConnectionCount)
+    .setAcConnectionCount(Option::ExternWorkerAcConnectionCount)
     .setVerboseLogging(Option::ExternWorkerVerboseLogging);
   if (Option::ExternWorkerTimeoutSecs > 0) {
     options.setTimeout(std::chrono::seconds{Option::ExternWorkerTimeoutSecs});
@@ -1034,10 +1038,14 @@ bool process(const CompilerOptions &po) {
   StructuredLogEntry sample;
   sample.setStr("debug", debug ? "true" : "false");
   sample.setStr("use_case", Option::ExternWorkerUseCase);
+  sample.setStr("features_file", Option::ExternWorkerFeaturesFile);
   sample.setInt("use_rich_client", Option::ExternWorkerUseRichClient);
   sample.setInt("use_zippy_rich_client",
       Option::ExternWorkerUseZippyRichClient);
   sample.setInt("use_p2p", Option::ExternWorkerUseP2P);
+  sample.setInt("cas_connection_count", Option::ExternWorkerCasConnectionCount);
+  sample.setInt("engine_connection_count", Option::ExternWorkerEngineConnectionCount);
+  sample.setInt("ac_connection_count", Option::ExternWorkerAcConnectionCount);
   sample.setInt("force_subprocess", Option::ExternWorkerForceSubprocess);
   sample.setInt("use_exec_cache", Option::ExternWorkerUseExecCache);
   sample.setInt("timeout_secs", Option::ExternWorkerTimeoutSecs);

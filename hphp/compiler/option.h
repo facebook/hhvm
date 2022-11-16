@@ -101,6 +101,7 @@ struct Option {
 
   /* Config passed to extern_worker::Client */
   static std::string ExternWorkerUseCase;
+  static std::string ExternWorkerFeaturesFile;
   static bool ExternWorkerForceSubprocess;
   static int ExternWorkerTimeoutSecs;
   static bool ExternWorkerUseExecCache;
@@ -108,6 +109,9 @@ struct Option {
   static bool ExternWorkerUseRichClient;
   static bool ExternWorkerUseZippyRichClient;
   static bool ExternWorkerUseP2P;
+  static int ExternWorkerCasConnectionCount;
+  static int ExternWorkerEngineConnectionCount;
+  static int ExternWorkerAcConnectionCount;
   static bool ExternWorkerVerboseLogging;
   static int ExternWorkerThrottleRetries;
   static int ExternWorkerThrottleBaseWaitMSecs;

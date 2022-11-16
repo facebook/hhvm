@@ -61,6 +61,7 @@ bool Option::ParserAsyncCleanup = true;
 bool Option::ParserOptimisticStore = true;
 
 std::string Option::ExternWorkerUseCase;
+std::string Option::ExternWorkerFeaturesFile;
 bool Option::ExternWorkerForceSubprocess = false;
 int Option::ExternWorkerTimeoutSecs = 0;
 bool Option::ExternWorkerUseExecCache = true;
@@ -68,6 +69,9 @@ bool Option::ExternWorkerCleanup = true;
 bool Option::ExternWorkerUseRichClient = true;
 bool Option::ExternWorkerUseZippyRichClient = false;
 bool Option::ExternWorkerUseP2P = false;
+int Option::ExternWorkerCasConnectionCount = 16;
+int Option::ExternWorkerEngineConnectionCount = 6;
+int Option::ExternWorkerAcConnectionCount = 16;
 bool Option::ExternWorkerVerboseLogging = false;
 std::string Option::ExternWorkerWorkingDir;
 
@@ -208,6 +212,8 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   Config::Bind(ExternWorkerUseCase, ini, config, "ExternWorker.UseCase",
                ExternWorkerUseCase);
+  Config::Bind(ExternWorkerFeaturesFile, ini, config,
+               "ExternWorker.FeaturesFile", ExternWorkerFeaturesFile);
   // Kill switch for extern-worker. Disable all implementations except
   // the builtin one.
   Config::Bind(ExternWorkerForceSubprocess, ini, config,
@@ -227,6 +233,15 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
                ExternWorkerUseZippyRichClient);
   Config::Bind(ExternWorkerUseP2P, ini, config, "ExternWorker.UseP2P",
                ExternWorkerUseP2P);
+  Config::Bind(ExternWorkerCasConnectionCount, ini, config,
+               "ExternWorker.CasConnectionCount",
+               ExternWorkerCasConnectionCount);
+  Config::Bind(ExternWorkerEngineConnectionCount, ini, config,
+               "ExternWorker.EngineConnectionCount",
+               ExternWorkerEngineConnectionCount);
+  Config::Bind(ExternWorkerAcConnectionCount, ini, config,
+               "ExternWorker.AcConnectionCount",
+               ExternWorkerAcConnectionCount);
   Config::Bind(ExternWorkerVerboseLogging, ini, config,
                "ExternWorker.VerboseLogging",
                ExternWorkerVerboseLogging);

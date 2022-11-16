@@ -630,15 +630,15 @@ let resolve_position : Provider_context.t -> Pos_or_decl.t -> Pos.t =
 let get_module_full_pos ctx (pos, name) =
   match pos with
   | FileInfo.Full p -> Some p
-  | FileInfo.File (FileInfo.Module, md) ->
+  | FileInfo.File (FileInfo.Module, fn) ->
     begin
       match Provider_context.get_backend ctx with
       | Provider_backend.Decl_service { decl = decl_service; _ } ->
         Decl_service_client.rpc_get_module decl_service name
         |> Option.map ~f:(fun decl ->
-               decl.Typing_defs.mdt_pos |> resolve_position ctx)
+               decl.Typing_defs.mdt_pos |> Pos_or_decl.fill_in_filename fn)
       | _ ->
-        Ast_provider.find_module_in_file ctx md name
+        Ast_provider.find_module_in_file ctx fn name
         |> Option.map ~f:(fun md -> fst md.Aast.md_name)
     end
   | _ -> None
@@ -653,7 +653,7 @@ let get_const_full_pos ctx (pos, name) =
       | Provider_backend.Decl_service { decl = decl_service; _ } ->
         Decl_service_client.rpc_get_gconst decl_service name
         |> Option.map ~f:(fun decl ->
-               decl.Typing_defs.cd_pos |> resolve_position ctx)
+               decl.Typing_defs.cd_pos |> Pos_or_decl.fill_in_filename fn)
       | _ ->
         Ast_provider.find_gconst_in_file ctx fn name
         |> Option.map ~f:(fun ast -> fst ast.Aast.cst_name)
@@ -670,7 +670,7 @@ let get_fun_full_pos ctx (pos, name) =
       | Provider_backend.Decl_service { decl = decl_service; _ } ->
         Decl_service_client.rpc_get_fun decl_service name
         |> Option.map ~f:(fun decl ->
-               decl.Typing_defs.fe_pos |> resolve_position ctx)
+               decl.Typing_defs.fe_pos |> Pos_or_decl.fill_in_filename fn)
       | _ ->
         Ast_provider.find_fun_in_file ctx fn name
         |> Option.map ~f:(fun fd -> fst fd.Aast.fd_fun.Aast.f_name)
@@ -694,7 +694,7 @@ let get_type_full_pos ctx (pos, name) =
           |> Option.map ~f:(fun decl -> decl.Typing_defs.td_pos)
         | _ -> None
       end
-      |> Option.map ~f:(resolve_position ctx)
+      |> Option.map ~f:(Pos_or_decl.fill_in_filename fn)
     | _ ->
       (match name_type with
       | FileInfo.Class ->

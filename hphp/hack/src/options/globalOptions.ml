@@ -126,7 +126,6 @@ type t = {
   tco_enable_sound_dynamic: bool;
   po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
   po_disallow_inst_meth: bool;
-  tco_use_direct_decl_parser: bool;
   tco_ifc_enabled: string list;
   tco_global_access_check_files_enabled: string list;
   tco_global_access_check_functions_enabled: SSet.t;
@@ -271,7 +270,6 @@ let default =
     tco_enable_sound_dynamic = false;
     po_disallow_fun_and_cls_meth_pseudo_funcs = false;
     po_disallow_inst_meth = false;
-    tco_use_direct_decl_parser = true;
     tco_ifc_enabled = [];
     tco_global_access_check_files_enabled = [];
     tco_global_access_check_functions_enabled = SSet.empty;
@@ -427,7 +425,6 @@ let make
     ?(po_disallow_fun_and_cls_meth_pseudo_funcs =
       default.po_disallow_fun_and_cls_meth_pseudo_funcs)
     ?(po_disallow_inst_meth = default.po_disallow_inst_meth)
-    ?(tco_use_direct_decl_parser = default.tco_use_direct_decl_parser)
     ?(tco_ifc_enabled = default.tco_ifc_enabled)
     ?(tco_global_access_check_files_enabled =
       default.tco_global_access_check_files_enabled)
@@ -590,7 +587,6 @@ let make
     tco_enable_sound_dynamic;
     po_disallow_fun_and_cls_meth_pseudo_funcs;
     po_disallow_inst_meth;
-    tco_use_direct_decl_parser;
     tco_ifc_enabled;
     tco_global_access_check_files_enabled;
     tco_global_access_check_functions_enabled;

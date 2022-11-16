@@ -53,7 +53,6 @@ let init ~enable_strict_const_semantics popt : Provider_context.t =
       popt with
       GlobalOptions.tco_shallow_class_decl = false;
       tco_higher_kinded_types = true;
-      tco_use_direct_decl_parser = true;
       GlobalOptions.tco_enable_strict_const_semantics =
         enable_strict_const_semantics;
     }

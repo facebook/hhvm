@@ -298,7 +298,6 @@ let parse_options () =
   let always_pessimise_return = ref false in
   let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
   let disallow_inst_meth = ref false in
-  let use_direct_decl_parser = ref true in
   let disable_enum_classes = ref false in
   let interpret_soft_types_as_like_types = ref false in
   let enable_strict_string_concat_interp = ref false in
@@ -742,9 +741,6 @@ let parse_options () =
       ( "--disallow-inst-meth",
         Arg.Set disallow_inst_meth,
         " Disable parsing of inst_meth()." );
-      ( "--no-direct-decl-parser",
-        Arg.Clear use_direct_decl_parser,
-        " Produce decls from ASTs instead of using the direct decl parser" );
       ( "--disable-enum-classes",
         Arg.Set disable_enum_classes,
         " Disable the enum classes extension." );
@@ -1004,7 +1000,6 @@ let parse_options () =
         !enable_global_access_check_functions
       ~tco_global_access_check_on_write:!global_access_check_on_write
       ~tco_global_access_check_on_read:!global_access_check_on_read
-      ~tco_use_direct_decl_parser:!use_direct_decl_parser
       ~po_enable_enum_classes:(not !disable_enum_classes)
       ~po_interpret_soft_types_as_like_types:!interpret_soft_types_as_like_types
       ~tco_enable_strict_string_concat_interp:

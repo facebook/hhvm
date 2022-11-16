@@ -251,8 +251,6 @@ type t = {
   po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
   (* Disable parsing of inst_meth() *)
   po_disallow_inst_meth: bool;
-  (* Enable use of the direct decl parser for parsing type signatures. *)
-  tco_use_direct_decl_parser: bool;
   (* Enable ifc on the specified list of path prefixes
      (a list containing the empty string would denote all files,
      an empty list denotes no files) *)
@@ -447,7 +445,6 @@ val make :
   ?tco_enable_sound_dynamic:bool ->
   ?po_disallow_fun_and_cls_meth_pseudo_funcs:bool ->
   ?po_disallow_inst_meth:bool ->
-  ?tco_use_direct_decl_parser:bool ->
   ?tco_ifc_enabled:string list ->
   ?tco_global_access_check_files_enabled:string list ->
   ?tco_global_access_check_functions_enabled:SSet.t ->

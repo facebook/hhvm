@@ -213,8 +213,6 @@ let report_pos_from_reason t = t.GlobalOptions.tco_report_pos_from_reason
 
 let enable_sound_dynamic t = t.GlobalOptions.tco_enable_sound_dynamic
 
-let use_direct_decl_parser t = t.GlobalOptions.tco_use_direct_decl_parser
-
 let interpret_soft_types_as_like_types t =
   t.GlobalOptions.po_interpret_soft_types_as_like_types
 

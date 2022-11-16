@@ -569,8 +569,6 @@ type t = {
   tico_invalidate_files: bool;
       (** Allows hh_server to invalidate units in hhvm based on local changes *)
   tico_invalidate_smart: bool;  (** Use finer grain hh_server dependencies *)
-  use_direct_decl_parser: bool;
-      (** Enable use of the direct decl parser for parsing type signatures. *)
   per_file_profiling: HackEventLogger.PerFileProfilingConfig.t;
       (** turns on memtrace .ctf writes to this directory *)
   memtrace_dir: string option;
@@ -711,7 +709,6 @@ let default =
     symbolindex_file = None;
     tico_invalidate_files = false;
     tico_invalidate_smart = false;
-    use_direct_decl_parser = true;
     per_file_profiling = HackEventLogger.PerFileProfilingConfig.default;
     memtrace_dir = None;
     go_to_implementation = true;
@@ -1300,13 +1297,6 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
-  let use_direct_decl_parser =
-    bool_if_min_version
-      "use_direct_decl_parser"
-      ~default:default.use_direct_decl_parser
-      ~current_version
-      config
-  in
   let profile_log =
     bool_if_min_version
       "profile_log"
@@ -1405,14 +1395,6 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
-  let force_shallow_decl_fanout =
-    if force_shallow_decl_fanout && not use_direct_decl_parser then (
-      Hh_logger.warn
-        "You have force_shallow_decl_fanout=true but use_direct_decl_parser=false. This is incompatible. Turning off force_shallow_decl_fanout";
-      false
-    ) else
-      force_shallow_decl_fanout
-  in
   let force_load_hot_shallow_decls =
     if force_load_hot_shallow_decls && not force_shallow_decl_fanout then (
       Hh_logger.warn
@@ -1488,14 +1470,6 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.rust_provider_backend
       ~current_version
       config
-  in
-  let rust_provider_backend =
-    if rust_provider_backend && not use_direct_decl_parser then (
-      Hh_logger.warn
-        "You have rust_provider_backend=true but use_direct_decl_parser=false. This is incompatible. Turning off rust_provider_backend";
-      false
-    ) else
-      rust_provider_backend
   in
   let rust_provider_backend =
     if rust_provider_backend && not shm_use_sharded_hashtbl then (
@@ -1636,7 +1610,6 @@ let load_ fn ~silent ~current_version overrides =
     symbolindex_file;
     tico_invalidate_files;
     tico_invalidate_smart;
-    use_direct_decl_parser;
     per_file_profiling =
       {
         HackEventLogger.PerFileProfilingConfig.profile_log;
@@ -1682,7 +1655,6 @@ let load ~silent ~current_version config_overrides =
 let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
   HackEventLogger.
     {
-      use_direct_decl_parser = options.use_direct_decl_parser;
       longlived_workers = options.longlived_workers;
       force_shallow_decl_fanout = options.force_shallow_decl_fanout;
       log_from_client_when_slow_monitor_connections =

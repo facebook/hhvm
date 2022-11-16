@@ -42,7 +42,6 @@ type serialized_globals = Serialized_globals
 let serialize_globals () = Serialized_globals
 
 type rollout_flags = {
-  use_direct_decl_parser: bool;
   longlived_workers: bool;
   force_shallow_decl_fanout: bool;
   log_from_client_when_slow_monitor_connections: bool;

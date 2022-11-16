@@ -173,7 +173,6 @@ let parse_options () =
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
       ~po_allowed_decl_fixme_codes:
         (Option.value !allowed_decl_fixme_codes ~default:ISet.empty)
-      ~tco_use_direct_decl_parser:true
       ()
   in
   Errors.allowed_fixme_codes_strict :=

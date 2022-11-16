@@ -67,7 +67,6 @@ let init (root : Path.t) (naming_table_path : string option) :
       popt with
       GlobalOptions.tco_shallow_class_decl = false;
       tco_higher_kinded_types = true;
-      tco_use_direct_decl_parser = true;
     }
   in
   let ctx =

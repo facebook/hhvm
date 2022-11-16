@@ -109,7 +109,6 @@ impl Default for GlobalOptions {
             tco_enable_sound_dynamic: false,
             po_disallow_fun_and_cls_meth_pseudo_funcs: false,
             po_disallow_inst_meth: false,
-            tco_use_direct_decl_parser: true,
             tco_ifc_enabled: vec![],
             tco_global_access_check_files_enabled: vec![],
             tco_global_access_check_functions_enabled: s_set::SSet::new(),

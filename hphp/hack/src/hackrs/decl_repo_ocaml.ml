@@ -81,7 +81,6 @@ let init
       popt with
       GlobalOptions.tco_shallow_class_decl = false;
       tco_higher_kinded_types = true;
-      tco_use_direct_decl_parser = true;
     }
   in
   if rust_provider_backend then Provider_backend.set_rust_backend popt;

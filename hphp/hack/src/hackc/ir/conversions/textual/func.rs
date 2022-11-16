@@ -319,7 +319,8 @@ fn write_terminator(
         | Terminator::SSwitch { .. }
         | Terminator::Switch { .. }
         | Terminator::ThrowAsTypeStructException { .. } => {
-            w.write_todo(&format!("{terminator:?}"))?;
+            write_todo(w, state, &format!("{}", terminator))?;
+            w.unreachable()?;
         }
 
         Terminator::Throw(vid, _) => {
@@ -356,7 +357,10 @@ fn write_load_this(
     iid: InstrId,
 ) -> Result {
     let class = state.method_info.unwrap().class;
-    let sid = w.load(class::non_static_ty(class.name, state.strings), "this")?;
+    let sid = w.load(
+        class::non_static_ty(class.name, state.strings),
+        textual::Expr::deref(textual::Var::named("this")),
+    )?;
     state.set_iid(iid, sid);
     Ok(())
 }
@@ -485,7 +489,7 @@ fn write_call(
     let args = detail.args(operands);
 
     let output = match *detail {
-        CallDetail::FCallClsMethod { .. } => todo!(),
+        CallDetail::FCallClsMethod { .. } => write_todo(w, state, "FCallClsMethod")?,
         CallDetail::FCallClsMethodD { clsid, method } => {
             // C::foo()
             let target = method.mangle(clsid, state.strings);
@@ -499,11 +503,9 @@ fn write_call(
                 args.iter().copied().map(|vid| state.lookup_vid(vid)),
             )?
         }
-        CallDetail::FCallClsMethodM { .. } => todo!(),
-        CallDetail::FCallClsMethodS { .. } => todo!(),
-        CallDetail::FCallClsMethodSD { .. } => {
-            textual_todo! { w.call("TODO_FCallClsMethodSD", ())? }
-        }
+        CallDetail::FCallClsMethodM { .. } => write_todo(w, state, "TODO_FCallClsMethodM")?,
+        CallDetail::FCallClsMethodS { .. } => write_todo(w, state, "TODO_FCallClsMethodS")?,
+        CallDetail::FCallClsMethodSD { .. } => write_todo(w, state, "TODO_FCallClsMethodSD")?,
         CallDetail::FCallCtor => {
             textual_todo! {
                 // new $x
@@ -520,7 +522,7 @@ fn write_call(
                 )?
             }
         }
-        CallDetail::FCallFunc => todo!(),
+        CallDetail::FCallFunc => write_todo(w, state, "TODO_FCallFunc")?,
         CallDetail::FCallFuncD { func } => {
             // foo()
             let target = func.mangle(state.strings);
@@ -535,7 +537,7 @@ fn write_call(
                 args.iter().copied().map(|vid| state.lookup_vid(vid)),
             )?
         }
-        CallDetail::FCallObjMethod { .. } => todo!(),
+        CallDetail::FCallObjMethod { .. } => write_todo(w, state, "FCallObjMethod")?,
         CallDetail::FCallObjMethodD { flavor, method } => {
             // $x->y()
             if flavor == ir::ObjMethodOp::NullSafe {
@@ -641,15 +643,15 @@ impl<'a> FuncState<'a> {
                         let s = util::escaped_string(&s);
                         hack::expr_builtin(Builtin::String, [s])
                     }
-                    Constant::Array(..) => todo!(),
-                    Constant::Dir => todo!(),
+                    Constant::Array(..) => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
+                    Constant::Dir => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
                     Constant::Double(f) => hack::expr_builtin(Builtin::Float, [f.to_f64()]),
-                    Constant::File => todo!(),
-                    Constant::FuncCred => todo!(),
-                    Constant::Method => todo!(),
-                    Constant::Named(..) => todo!(),
-                    Constant::NewCol(..) => todo!(),
-                    Constant::Uninit => todo!(),
+                    Constant::File => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
+                    Constant::FuncCred => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
+                    Constant::Method => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
+                    Constant::Named(..) => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
+                    Constant::NewCol(..) => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
+                    Constant::Uninit => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
                 }
             }
             ir::FullInstrId::None => unreachable!(),
@@ -822,5 +824,20 @@ fn cmp_lid(strings: &StringInterner, x: &LocalId, y: &LocalId) -> std::cmp::Orde
         (LocalId::Named(_), LocalId::Unnamed(_)) => std::cmp::Ordering::Less,
         (LocalId::Unnamed(_), LocalId::Named(_)) => std::cmp::Ordering::Greater,
         (LocalId::Unnamed(x_id), LocalId::Unnamed(y_id)) => x_id.cmp(y_id),
+    }
+}
+
+pub(crate) fn write_todo(
+    w: &mut textual::FuncWriter<'_>,
+    state: &mut FuncState<'_>,
+    msg: &str,
+) -> Result<Sid> {
+    trace!("TODO: {}", msg);
+    textual_todo! {
+        let target = format!("$todo.{msg}");
+        state
+            .decls
+            .declare_func(&target, FuncDeclKind::External);
+        w.call(&target, ())
     }
 }

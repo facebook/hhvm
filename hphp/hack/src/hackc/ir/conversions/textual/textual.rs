@@ -16,7 +16,6 @@ use ir::BlockId;
 use ir::LocalId;
 use ir::StringInterner;
 use itertools::Itertools;
-use log::trace;
 use newtype::newtype_int;
 
 pub(crate) const INDENT: &str = "  ";
@@ -492,13 +491,6 @@ impl<'a> FuncWriter<'a> {
             writeln!(self.w, "):")?;
         }
         Ok(())
-    }
-
-    pub(crate) fn write_todo(&mut self, msg: &str) -> Result<Sid> {
-        trace!("TODO: {}", msg);
-        textual_todo! {
-            self.call_static(msg, Expr::null(), ())
-        }
     }
 
     /// Call the target as a static call (without virtual dispatch).

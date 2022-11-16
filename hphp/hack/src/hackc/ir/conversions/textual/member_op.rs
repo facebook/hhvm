@@ -14,6 +14,7 @@ use ir::QueryMOp;
 use ir::ReadonlyOp;
 use ir::ValueId;
 
+use crate::func::write_todo;
 use crate::func::FuncState;
 use crate::hack;
 use crate::textual;
@@ -42,7 +43,7 @@ pub(crate) fn write(
     let mut locals = mop.locals.iter().copied();
     let mut operands = mop.operands.iter().copied();
 
-    let mut base = write_base(w, &mop.base_op, &mut locals, &mut operands)?;
+    let mut base = write_base(w, &mop.base_op, &mut locals, &mut operands, state)?;
 
     for intermediate in mop.intermediate_ops.iter() {
         base = write_entry(
@@ -71,17 +72,18 @@ fn write_base(
     base_op: &BaseOp,
     locals: &mut impl Iterator<Item = LocalId>,
     operands: &mut impl Iterator<Item = ValueId>,
+    state: &mut FuncState<'_>,
 ) -> Result<Sid> {
     match *base_op {
         BaseOp::BaseC { .. } => {
             let _ = operands.next();
-            w.write_todo("BaseC")
+            write_todo(w, state, "BaseC")
         }
         BaseOp::BaseGC { .. } => {
             let _ = operands.next();
-            w.write_todo("BaseGC")
+            write_todo(w, state, "BaseGC")
         }
-        BaseOp::BaseH { .. } => w.write_todo("BaseH"),
+        BaseOp::BaseH { .. } => write_todo(w, state, "BaseH"),
         BaseOp::BaseL {
             mode: _,
             readonly: _,
@@ -91,7 +93,11 @@ fn write_base(
             let value = textual::Expr::deref(lid);
             w.copy(value)
         }
-        BaseOp::BaseSC { .. } => w.write_todo("BaseSC"),
+        BaseOp::BaseSC { .. } => {
+            let _ = operands.next();
+            let _ = operands.next();
+            write_todo(w, state, "BaseSC")
+        }
     }
 }
 
@@ -132,8 +138,35 @@ fn write_final(
             Ok(src)
         }
         FinalOp::SetRangeM { .. } => todo!(),
-        FinalOp::SetOpM { .. } => todo!(),
-        FinalOp::UnsetM { .. } => todo!(),
+        FinalOp::SetOpM { ref key, .. } => textual_todo! {
+            match *key {
+                MemberKey::EC => { let _ = operands.next(); }
+                MemberKey::EI(_) => { }
+                MemberKey::EL => { let _ = locals.next(); }
+                MemberKey::ET(_) => { }
+                MemberKey::PC => { }
+                MemberKey::PL => { }
+                MemberKey::PT(_) => { }
+                MemberKey::QT(_) => { }
+                MemberKey::W => { }
+            }
+            let _ = operands.next();
+            write_todo(w, state, "SetOpM")
+        },
+        FinalOp::UnsetM { ref key, .. } => textual_todo! {
+            match *key {
+                MemberKey::EC => { let _ = operands.next(); }
+                MemberKey::EI(_) => { }
+                MemberKey::EL => { let _ = locals.next(); }
+                MemberKey::ET(_) => { }
+                MemberKey::PC => { }
+                MemberKey::PL => { }
+                MemberKey::PT(_) => { }
+                MemberKey::QT(_) => { }
+                MemberKey::W => { }
+            }
+            write_todo(w, state, "UnsetM")
+        },
     }
 }
 
@@ -201,9 +234,14 @@ fn write_final_query_m(
             let key = hack::call_builtin(w, hack::Builtin::String, [key])?;
             w.call("hack_field_get", (base, key, op_name))
         }
-        MemberKey::QT(_) => {
+        MemberKey::QT(prop) => {
             // $a?->hello
-            todo!();
+            textual_todo! {
+                let key = state.strings.lookup_bytes(prop.id);
+                let key = crate::util::escaped_string(&key);
+                let key = hack::call_builtin(w, hack::Builtin::String, [key])?;
+                w.call("hack_field_get", (base, key, op_name))
+            }
         }
         MemberKey::W => {
             // $a[]
@@ -270,13 +308,18 @@ fn write_entry(
             let key = hack::call_builtin(w, hack::Builtin::String, [key])?;
             w.call("hack_field_entry", (base, key, mode))
         }
-        MemberKey::QT(_) => {
+        MemberKey::QT(prop) => {
             // $a?->hello
-            todo!();
+            textual_todo! {
+                let key = state.strings.lookup_bytes(prop.id);
+                let key = crate::util::escaped_string(&key);
+                let key = hack::call_builtin(w, hack::Builtin::String, [key])?;
+                w.call("hack_field_entry", (base, key, mode))
+            }
         }
         MemberKey::W => {
             // $a[]
-            w.write_todo("MemberKey::W")
+            write_todo(w, state, "MemberKey_W")
         }
     }
 }

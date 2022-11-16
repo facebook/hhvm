@@ -134,7 +134,7 @@ impl CanThrow for Instr {
     }
 }
 
-#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands, Display)]
 pub enum Terminator {
     // This is an async call - it's a terminator with one edge for the async
     // return and one edge for the eager return. The async edge takes a single

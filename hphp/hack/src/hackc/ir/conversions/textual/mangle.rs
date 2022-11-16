@@ -39,13 +39,18 @@ impl Mangle for [u8] {
         // \ -> ::
         // anything else -> $xx
         let mut res = String::with_capacity(self.len());
+        let mut first = true;
         for &ch in self {
             if (b'A'..=b'Z').contains(&ch)
                 || (b'a'..=b'z').contains(&ch)
-                || (b'0'..=b'9').contains(&ch)
                 || (ch == b'_')
                 || (ch == b'$')
             {
+                res.push(ch as char);
+            } else if (b'0'..=b'9').contains(&ch) {
+                if first {
+                    res.push('_')
+                }
                 res.push(ch as char);
             } else if ch == b'\\' {
                 res.push(':');
@@ -54,6 +59,7 @@ impl Mangle for [u8] {
                 res.push(b"0123456789abcdef"[(ch >> 4) as usize] as char);
                 res.push(b"0123456789abcdef"[(ch & 15) as usize] as char);
             }
+            first = false;
         }
         res
     }

@@ -47,17 +47,16 @@ module Cache =
       let capacity = 1000
     end)
 
-let declare_folded_class_in_file
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : type_key) :
+let declare_folded_class (ctx : Provider_context.t) (name : type_key) :
     Decl_defs.decl_class_type * Decl_store.class_members option =
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> failwith "invalid"
   | _ ->
     (match
-       Errors.run_in_decl_mode file (fun () ->
+       Errors.run_in_decl_mode (fun () ->
            Decl_folded_class.class_decl_if_missing ~sh:SharedMem.Uses ctx name)
      with
-    | None -> err_not_found file name
+    | None -> err_not_found None name
     | Some decl_and_members -> decl_and_members)
 
 let lookup_or_populate_class_cache class_name populate =
@@ -113,9 +112,7 @@ let get_class
      * outdated member types once we update its members during
      * pessimisation. *)
     begin
-      match
-        Typing_classes_heap.get ctx class_name declare_folded_class_in_file
-      with
+      match Typing_classes_heap.get ctx class_name declare_folded_class with
       | None -> None
       | Some v -> Some (counter, v, Some ctx)
     end
@@ -124,7 +121,7 @@ let get_class
     begin
       match
         lookup_or_populate_class_cache class_name (fun class_name ->
-            Typing_classes_heap.get ctx class_name declare_folded_class_in_file)
+            Typing_classes_heap.get ctx class_name declare_folded_class)
       with
       | None -> None
       | Some v -> Some (counter, v, Some ctx)
@@ -135,7 +132,7 @@ let get_class
       ctx
       class_name
       decl_cache
-      declare_folded_class_in_file
+      declare_folded_class
     >>| fun cls -> (counter, cls, Some ctx)
   | Provider_backend.Rust_provider_backend backend ->
     begin
@@ -430,5 +427,5 @@ let local_changes_push_sharedmem_stack () =
 let local_changes_pop_sharedmem_stack () =
   Decl_store.((get ()).pop_local_changes ())
 
-let declare_folded_class_in_file_FOR_TESTS_ONLY ctx fn cid =
-  fst (declare_folded_class_in_file ctx fn cid)
+let declare_folded_class_in_file_FOR_TESTS_ONLY ctx cid =
+  fst (declare_folded_class ctx cid)

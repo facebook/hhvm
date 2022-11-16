@@ -183,8 +183,9 @@ let (error_map : error files_t ref) = ref Relative_path.Map.empty
 
 let accumulate_errors = ref false
 
-(* Some filename when declaring *)
-let in_lazy_decl = ref None
+(* Are we in the middle of folding a decl? ("lazy" means it happens on-demand
+during the course of the typecheck, rather than all upfront). *)
+let in_lazy_decl = ref false
 
 let (is_hh_fixme : (Pos.t -> error_code -> bool) ref) = ref (fun _ _ -> false)
 
@@ -434,9 +435,9 @@ let do_with_context ?(drop_fixmed = true) path phase f =
 (** Turn on lazy decl mode for the duration of the closure.
     This runs without returning the original state,
     since we collect it later in do_with_lazy_decls_ *)
-let run_in_decl_mode filename f =
+let run_in_decl_mode f =
   let old_in_lazy_decl = !in_lazy_decl in
-  in_lazy_decl := Some filename;
+  in_lazy_decl := true;
   Utils.try_finally ~f ~finally:(fun () -> in_lazy_decl := old_in_lazy_decl)
 
 let read_lines path =
@@ -520,14 +521,12 @@ let add_error_impl error =
   else
     (* We have an error, but haven't handled it in any way *)
     let msg = error |> User_error.to_absolute |> to_string in
-    match !in_lazy_decl with
-    | Some _ ->
+    if !in_lazy_decl then
       lazy_decl_error_logging msg error_map User_error.to_absolute to_string
-    | None ->
-      if error.User_error.is_fixmed then
-        ()
-      else
-        Utils.assert_false_log_backtrace (Some msg)
+    else if error.User_error.is_fixmed then
+      ()
+    else
+      Utils.assert_false_log_backtrace (Some msg)
 
 (* Whether we've found at least one error *)
 let currently_has_errors () = not (List.is_empty (get_current_list !error_map))

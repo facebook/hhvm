@@ -113,10 +113,7 @@ let compare_folded
   in
   let ocaml_folded_classes =
     List.map class_names ~f:(fun cid ->
-        Decl_provider.declare_folded_class_in_file_FOR_TESTS_ONLY
-          ctx
-          filename
-          cid)
+        Decl_provider.declare_folded_class_in_file_FOR_TESTS_ONLY ctx cid)
   in
   let rupro_folded_classes = Relative_path.Map.find rupro_decls filename in
 

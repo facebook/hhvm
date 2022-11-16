@@ -19,7 +19,6 @@ val get :
   Provider_context.t ->
   string ->
   (Provider_context.t ->
-  Relative_path.t ->
   string ->
   Decl_defs.decl_class_type * Decl_store.class_members option) ->
   class_t option
@@ -205,8 +204,5 @@ val get_class_with_cache :
   Provider_context.t ->
   string ->
   Provider_backend.Decl_cache.t ->
-  (Provider_context.t ->
-  Relative_path.t ->
-  string ->
-  Decl_defs.decl_class_type * 'a) ->
+  (Provider_context.t -> string -> Decl_defs.decl_class_type * 'a) ->
   class_t option

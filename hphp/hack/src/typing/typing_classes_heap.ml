@@ -72,26 +72,25 @@ let make_eager_class_decl decl =
         construct = ref None;
       } )
 
-let make_eager_class_type ctx class_name declare_folded_class_in_file =
+let make_eager_class_type ctx class_name declare_folded_class =
   match Decl_store.((get ()).get_class class_name) with
   | Some decl -> Some (make_eager_class_decl decl)
   | None ->
     begin
-      match Naming_provider.get_class_path ctx class_name with
+      match Naming_provider.get_type_kind ctx class_name with
       | None -> None
-      | Some file ->
+      | Some Naming_types.TTypedef -> None
+      | Some Naming_types.TClass ->
         Deferred_decl.raise_if_should_defer ();
         (* declare_folded_class_in_file actual reads from Decl_heap.Classes.get
          * like what we do above, which makes our test redundant but cleaner.
          * It also writes into Decl_heap.Classes and other Decl_heaps. *)
-        let (decl, _) = declare_folded_class_in_file ctx file class_name in
+        let (decl, _) = declare_folded_class ctx class_name in
         Some (make_eager_class_decl decl)
     end
 
-let get
-    (ctx : Provider_context.t)
-    (class_name : string)
-    declare_folded_class_in_file : class_t option =
+let get (ctx : Provider_context.t) (class_name : string) declare_folded_class :
+    class_t option =
   (* Fetches either the [Lazy] class (if shallow decls are enabled)
    * or the [Eager] class (otherwise).
    * Note: Eager will always read+write to shmem Decl_heaps.
@@ -99,7 +98,7 @@ let get
   if TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx) then
     make_lazy_class_type ctx class_name
   else
-    make_eager_class_type ctx class_name declare_folded_class_in_file
+    make_eager_class_type ctx class_name declare_folded_class
 
 module ApiShallow = struct
   let shallow_decl (decl, t, _ctx) =
@@ -639,9 +638,8 @@ module Api = struct
       false
 end
 
-let get_class_with_cache ctx class_name decl_cache declare_folded_class_in_file
-    =
+let get_class_with_cache ctx class_name decl_cache declare_folded_class =
   Provider_backend.Decl_cache.find_or_add
     decl_cache
     ~key:(Provider_backend.Decl_cache_entry.Class_decl class_name)
-    ~default:(fun () -> get ctx class_name declare_folded_class_in_file)
+    ~default:(fun () -> get ctx class_name declare_folded_class)

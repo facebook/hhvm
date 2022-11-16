@@ -68,14 +68,14 @@ let rec collect_legacy_class
         try
           match Naming_provider.get_class_path ctx cid with
           | None -> raise Exit
-          | Some filename ->
+          | Some _filename ->
             Hh_logger.log "Declaring %s class %s" kind cid;
 
             (* NOTE: the following relies on the fact that declaring a class puts
              * the inheritance hierarchy into the shared memory heaps. When that
              * invariant no longer holds, the following will no longer work. *)
             let (_ : _ option) =
-              Errors.run_in_decl_mode filename (fun () ->
+              Errors.run_in_decl_mode (fun () ->
                   Decl_folded_class.class_decl_if_missing
                     ~sh:SharedMem.Uses
                     ctx

@@ -128,7 +128,7 @@ val run_in_context : Relative_path.t -> phase -> (unit -> 'a) -> 'a
 (** Turn on lazy decl mode for the duration of the closure.
     This runs without returning the original state,
     since we collect it later in do_with_lazy_decls_ *)
-val run_in_decl_mode : Relative_path.t -> (unit -> 'a) -> 'a
+val run_in_decl_mode : (unit -> 'a) -> 'a
 
 (* Run this function with span for the definition being checked.
  * This is used to check that the primary position for errors is not located

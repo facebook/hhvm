@@ -1,6 +1,6 @@
 // RUN: %hackc compile-infer %s | FileCheck %s
 
-// CHECK: define $root.main(this: *void) : *void {
+// CHECK: define $root.main(this: *void) : *HackMixed {
 // CHECK: local $e: *void, $x: *void
 // CHECK: #b0:
 // CHECK:   n0 = $root.a(null, $builtins.hack_int(0))

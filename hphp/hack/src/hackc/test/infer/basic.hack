@@ -1,7 +1,7 @@
 // RUN: %hackc compile-infer %s | FileCheck %s
 // CHECK: .source_language = "hack"
 
-// CHECK: define $root.main(this: *void) : *void {
+// CHECK: define $root.main(this: *void) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_print($builtins.hack_string("Hello, World!\n"))
 // CHECK:   ret $builtins.hack_null()
@@ -9,7 +9,7 @@ function main(): void {
   echo "Hello, World!\n";
 }
 
-// CHECK: define $root.cmp(this: *void, $a: *HackMixed, $b: *HackMixed) : *void {
+// CHECK: define $root.cmp(this: *void, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$b
 // CHECK:   n1: *HackMixed = load &$a
@@ -33,7 +33,7 @@ function cmp(mixed $a, mixed $b): void {
   }
 }
 
-// CHECK: define $root.cmp2(this: *void, $a: *HackInt, $b: *HackInt) : *void {
+// CHECK: define $root.cmp2(this: *void, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
 function cmp2(int $a, int $b): void {
   if ($a == $b) {
     echo "equal";
@@ -42,7 +42,7 @@ function cmp2(int $a, int $b): void {
   }
 }
 
-// CHECK: define $root.ret_str(this: *void) : *HackString {
+// CHECK: define $root.ret_str(this: *void) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_is_type_str($builtins.hack_string("hello, world\n"))
 // CHECK:   n1 = $builtins.hhbc_not(n0)
@@ -58,7 +58,7 @@ function ret_str(): string {
   return "hello, world\n";
 }
 
-// CHECK: define $root.bool_call(this: *void) : *void {
+// CHECK: define $root.bool_call(this: *void) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0 = $root.f_bool(null, $builtins.hack_bool(false))
 // CHECK:   n1 = $root.f_bool(null, $builtins.hack_bool(true))

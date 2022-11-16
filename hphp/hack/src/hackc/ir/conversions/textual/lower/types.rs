@@ -72,7 +72,7 @@ fn ty_hack_int(strings: &StringInterner) -> EnforceableType {
     ty_class_ptr(b"HackInt", strings)
 }
 
-fn ty_hack_mixed(strings: &StringInterner) -> EnforceableType {
+pub(crate) fn ty_hack_mixed(strings: &StringInterner) -> EnforceableType {
     ty_class_ptr(b"HackMixed", strings)
 }
 

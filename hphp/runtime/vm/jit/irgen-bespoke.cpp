@@ -1327,7 +1327,6 @@ jit::ArrayLayout guardToLayout(
   assertx(sinkLayouts.layouts.size() == 1);
 
   auto const kind = env.context.kind;
-  assertx(!env.irb->guardFailBlock());
   if (kind != TransKind::Optimize) return type.arrSpec().layout();
 
   auto const sl = sinkLayouts.layouts[0];
@@ -1339,7 +1338,7 @@ jit::ArrayLayout guardToLayout(
   }
 
   if (sinkLayouts.sideExit && !RO::EvalBespokeEscalationSampleRate) {
-    checkType(env, loc, target, curSrcKey(env));
+    checkType(env, loc, target, makeExit(env));
     return sl.layout;
   }
 
@@ -1348,9 +1347,7 @@ jit::ArrayLayout guardToLayout(
   ifThen(
     env,
     [&](Block* taken) {
-      env.irb->setGuardFailBlock(taken);
-      checkType(env, loc, target, curSrcKey(env));
-      env.irb->resetGuardFailBlock();
+      checkType(env, loc, target, taken);
     },
     [&]{
       hint(env, Block::Hint::Unlikely);
@@ -1371,7 +1368,7 @@ jit::ArrayLayout guardToLayout(
         assertx(RO::EvalBespokeEscalationSampleRate);
         auto const arr = loadLocation(env, loc);
         gen(env, LogGuardFailure, target, arr);
-        gen(env, Jmp, makeExit(env, curSrcKey(env)));
+        gen(env, Jmp, makeExit(env));
       } else {
         if (emitVanilla && target == bespoke) {
           emitVanilla(env);
@@ -1397,7 +1394,6 @@ void guardToMultipleLayoutsAndEmit(
     Type type, std::function<void(IRGS&)> emitVanilla,
     const bespoke::SinkLayouts& sinkLayouts) {
   assertx(sinkLayouts.layouts.size() > 1);
-  assertx(!env.irb->guardFailBlock());
 
   auto const emitTranslation = [&](const bool vanilla){
     vanilla && emitVanilla ?
@@ -1421,7 +1417,7 @@ void guardToMultipleLayoutsAndEmit(
     }
 
     if (sinkLayouts.sideExit && !RO::EvalBespokeEscalationSampleRate) {
-      checkType(env, loc, target, curSrcKey(env));
+      checkType(env, loc, target, makeExit(env));
       emitTranslation(sl.layout.vanilla());
       return;
     }
@@ -1464,9 +1460,7 @@ void guardToMultipleLayoutsAndEmit(
 
     mc.ifThen(
       [&](Block* taken) {
-        env.irb->setGuardFailBlock(taken);
-        checkType(env, loc, target, curSrcKey(env));
-        env.irb->resetGuardFailBlock();
+        checkType(env, loc, target, taken);
         // Dead-code, but needed to satisfy MultiCond
         return cns(env, staticEmptyString());
       },
@@ -1504,7 +1498,6 @@ void emitLoggingDiamond(
     IRGS& env, const NormalizedInstruction& ni, Location loc,
     std::function<void(IRGS&)> emitVanilla) {
   assertx(env.context.kind == TransKind::Profile);
-  assertx(!env.irb->guardFailBlock());
 
   auto const dropArrSpec = [&](Type type) {
     return type.arrSpec() ? type.unspecialize() : type;
@@ -1514,9 +1507,7 @@ void emitLoggingDiamond(
   ifThen(
     env,
     [&](Block* taken) {
-      env.irb->setGuardFailBlock(taken);
-      checkType(env, loc, TVanillaArrLike, curSrcKey(env));
-      env.irb->resetGuardFailBlock();
+      checkType(env, loc, TVanillaArrLike, taken);
 
       emitVanilla(env);
 

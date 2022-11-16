@@ -110,7 +110,7 @@ SSATmp* cns(IRGS& env, Args&&... args) {
 /*
  * Type checks and assertions.
  */
-void checkType(IRGS&, const Location&, Type, SrcKey dest);
+void checkType(IRGS&, const Location&, Type, Block* exit);
 void assertTypeStack(IRGS&, BCSPRelOffset, Type);
 void assertTypeLocal(IRGS&, uint32_t id, Type);
 void assertTypeLocation(IRGS&, const Location&, Type);

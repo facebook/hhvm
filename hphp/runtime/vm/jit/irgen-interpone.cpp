@@ -284,7 +284,7 @@ void interpOne(IRGS& env) {
     }.to<SBInvOffset>(env.irb->fs().bcSPOff());
 
     auto const loc = Location::Stack { checkIdx };
-    checkType(env, loc, *checkTypeType, nextSrcKey(env));
+    checkType(env, loc, *checkTypeType, makeExit(env, nextSrcKey(env)));
   }
 }
 

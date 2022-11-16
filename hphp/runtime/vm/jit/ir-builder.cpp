@@ -1195,18 +1195,6 @@ void IRBuilder::restoreOffsetMapping(SkToBlockMap&& offsetMapping) {
   m_skToBlockMap = std::move(offsetMapping);
 }
 
-Block* IRBuilder::guardFailBlock() const {
-  return m_guardFailBlock;
-}
-
-void IRBuilder::setGuardFailBlock(Block* block) {
-  m_guardFailBlock = block;
-}
-
-void IRBuilder::resetGuardFailBlock() {
-  m_guardFailBlock = nullptr;
-}
-
 void IRBuilder::pushBlock(const BCMarker& marker, Block* b) {
   FTRACE(2, "IRBuilder::pushBlock:\n  saved: B{} @ {}\n pushed: B{} @ {}\n",
          m_curBlock->id(), curMarker().show(), b->id(), marker.show());

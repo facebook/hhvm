@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
+#include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-sib.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -128,12 +129,12 @@ void setIRBlock(irgen::IRGS& irgs,
 
 /*
  * Set IRBuilder's Blocks for srcBlockId's successors' offsets within
- * the region.  It also sets the guard-failure block, if any.
+ * the region.  It also returns the guard-failure block, if any.
  */
-void setSuccIRBlocks(irgen::IRGS& irgs,
-                     const RegionDesc& region,
-                     RegionDesc::BlockId srcBlockId,
-                     const BlockIdToIRBlockMap& blockIdToIRBlock) {
+Block* setSuccIRBlocks(irgen::IRGS& irgs,
+                       const RegionDesc& region,
+                       RegionDesc::BlockId srcBlockId,
+                       const BlockIdToIRBlockMap& blockIdToIRBlock) {
   FTRACE(3, "setSuccIRBlocks: srcBlockId = {}\n", srcBlockId);
   auto& irb = *irgs.irb;
   irb.resetOffsetMapping();
@@ -143,10 +144,9 @@ void setSuccIRBlocks(irgen::IRGS& irgs,
   if (auto nextRetrans = region.nextRetrans(srcBlockId)) {
     auto it = blockIdToIRBlock.find(nextRetrans.value());
     assertx(it != blockIdToIRBlock.end());
-    irb.setGuardFailBlock(it->second);
-  } else {
-    irb.resetGuardFailBlock();
+    return it->second;
   }
+  return nullptr;
 }
 
 bool blockHasUnprocessedPred(
@@ -239,7 +239,8 @@ struct ArrayReachInfo {
  */
 void emitGuards(irgen::IRGS& irgs,
                 const RegionDesc::Block& block,
-                bool isEntry) {
+                bool isEntry,
+                Block* guardFailBlock) {
   auto const sk = block.start();
   if (isEntry) {
     irgen::ringbufferEntry(irgs, Trace::RBTypeTraceletGuards, sk);
@@ -255,7 +256,8 @@ void emitGuards(irgen::IRGS& irgs,
     auto const type = preCond.type;
     auto const loc  = preCond.location;
     assertx(IMPLIES(type.arrSpec(), irgs.context.kind == TransKind::Live));
-    irgen::checkType(irgs, loc, type, sk);
+    if (guardFailBlock == nullptr) guardFailBlock = irgen::makeExit(irgs, sk);
+    irgen::checkType(irgs, loc, type, guardFailBlock);
   }
 
   // Finish emitting guards, and emit profiling counters.
@@ -442,13 +444,11 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
   auto prevProfFactor  = irgs.profFactor;  irgs.profFactor  = profFactor;
   auto prevProfTransIDs = irgs.profTransIDs; irgs.profTransIDs = TransIDSet{};
   auto prevOffsetMapping = irb.saveAndClearOffsetMapping();
-  auto prevGuardFailBlock = irb.guardFailBlock(); irb.resetGuardFailBlock();
   SCOPE_EXIT {
     irgs.region      = prevRegion;
     irgs.profFactor  = prevProfFactor;
     irgs.profTransIDs = prevProfTransIDs;
     irb.restoreOffsetMapping(std::move(prevOffsetMapping));
-    irb.setGuardFailBlock(prevGuardFailBlock);
   };
 
   FTRACE(1, "translateRegion (mode={}, profFactor={:.2}) starting with:\n{}\n",
@@ -533,15 +533,15 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         blockId
       );
     }
-    setSuccIRBlocks(irgs, region, blockId, blockIdToIRBlock);
+    auto const guardFailBlock =
+      setSuccIRBlocks(irgs, region, blockId, blockIdToIRBlock);
 
     // Emit the type predictions for this region block. If this is the first
     // instruction in the region, we check inner type eagerly, insert
     // `EndGuards` after the checks, and generate profiling code in profiling
     // translations.
     auto const isEntry = &block == region.entry().get() && !inlining;
-    emitGuards(irgs, block, isEntry);
-    irb.resetGuardFailBlock();
+    emitGuards(irgs, block, isEntry, guardFailBlock);
 
     if (irb.inUnreachableState()) {
       FTRACE(1, "translateRegion: skipping unreachable block: {}\n", blockId);

@@ -201,13 +201,15 @@ bool prepareInstruction(Env& env) {
   auto const op = env.inst.op();
   auto& fs = env.irgs.irb->fs();
 
+  Block* guardFailBlock = nullptr;
   auto addGuardIfUntracked = [&](Location loc) {
     FTRACE(1, "prepareInstruction: input: {}\n", show(loc));
     if (!fs.tracked(loc) &&
         (loc.tag() != LTag::Local || !fs.localsCleared())) {
       auto const type = getLiveType(env.ctx.liveTypes, loc);
       assert_flog(type <= TCell, "loc = {}: type = {}", show(loc), type);
-      irgen::checkType(env.irgs, loc, type, env.ctx.sk);
+      if (guardFailBlock == nullptr) guardFailBlock = irgen::makeExit(env.irgs);
+      irgen::checkType(env.irgs, loc, type, guardFailBlock);
     }
   };
 
@@ -477,20 +479,20 @@ RegionDescPtr form_region(Env& env) {
                           *env.region, show(env.irgs.irb->unit()));
   };
 
-  env.irgs.irb->setGuardFailBlock(irgen::makeExit(env.irgs));
-  const bool eager =
+  auto const eager =
     env.ctx.liveTypes.size() <= RuntimeOption::EvalJitTraceletEagerGuardsLimit;
 
+  Block* guardFailBlock = nullptr;
   for (auto const& lt : env.ctx.liveTypes) {
     // Local and stack slots are lazily guarded when there are too many live
     // locations; but MBase is always eagerly guarded.
     if (eager || lt.location.tag() == LTag::MBase) {
       auto t = lt.type;
       assertx(t <= TCell);
-      irgen::checkType(env.irgs, lt.location, t, env.ctx.sk);
+      if (guardFailBlock == nullptr) guardFailBlock = irgen::makeExit(env.irgs);
+      irgen::checkType(env.irgs, lt.location, t, guardFailBlock);
     }
   }
-  env.irgs.irb->resetGuardFailBlock();
 
   // EndGuards is used to mark the end of the guards, allowing visitGuards to
   // avoid scanning through the entire unit.  We only insert EndGuards if all

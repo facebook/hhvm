@@ -232,16 +232,6 @@ struct IRBuilder {
   void restoreOffsetMapping(SkToBlockMap&& offsetMapping);
 
   /*
-   * Get, set, or null out the block to branch to in case of a guard failure.
-   *
-   * A nullptr guard fail block indicates that guard failures should end the
-   * region and perform a service request.
-   */
-  Block* guardFailBlock() const;
-  void setGuardFailBlock(Block* block);
-  void resetGuardFailBlock();
-
-  /*
    * To emit code to a block other than the current block, call pushBlock(),
    * emit instructions as usual with gen(...), then call popBlock(). This is
    * best done using the BlockPusher struct:
@@ -383,11 +373,6 @@ private:
 
   // Keep track of blocks created to support bytecode control flow.
   SkToBlockMap m_skToBlockMap;
-
-  // Keeps the block to branch to (if any) in case a guard fails.
-  // This holds nullptr if the guard failures should perform a service
-  // request (StubType::Retranslate or REQ_BIND_JMP).
-  Block* m_guardFailBlock{nullptr};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

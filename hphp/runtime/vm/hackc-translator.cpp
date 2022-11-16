@@ -1391,6 +1391,60 @@ void translateModule(TranslationState& ts, const hhbc::Module& m) {
   });
 }
 
+std::string translateIncludePath(const hhbc::IncludePath&  i) {
+  switch (i.tag) {
+    case IncludePath::Tag::Absolute: {
+      return toString(i.Absolute._0);
+    }
+    case IncludePath::Tag::SearchPathRelative: {
+      return toString(i.SearchPathRelative._0);
+    }
+    case IncludePath::Tag::IncludeRootRelative: {
+      auto const body = toString(i.IncludeRootRelative._0);
+      auto const body1 = toString(i.IncludeRootRelative._1);
+      return body + body1;
+    }
+    case IncludePath::Tag::DocRootRelative: {
+      return toString(i.DocRootRelative._0);
+    }
+  }
+  not_reached();
+}
+
+void translateSymbolRefs(TranslationState& ts, const hhbc::SymbolRefs& s) {
+  CompactVector<std::string> includes;
+  auto includes_ = range(s.includes);
+  includes.reserve(includes_.size());
+  for (auto const& i : includes_) {
+    includes.push_back(translateIncludePath(i));
+  }
+  ts.ue->m_symbol_refs.emplace_back(SymbolRef::Include, std::move(includes));
+
+  CompactVector<std::string> constants;
+  auto constants_ = range(s.constants);
+  constants.reserve(constants_.size());
+  for (auto const& c : constants_) {
+    constants.push_back(toString(c._0));
+  }
+  ts.ue->m_symbol_refs.emplace_back(SymbolRef::Constant, std::move(constants));
+
+  CompactVector<std::string> functions;
+  auto functions_ = range(s.functions);
+  functions.reserve(functions_.size());
+  for (auto const& f : functions_) {
+    functions.push_back(toString(f._0));
+  }
+  ts.ue->m_symbol_refs.emplace_back(SymbolRef::Function, std::move(functions));
+
+  CompactVector<std::string> classes;
+  auto classes_ = range(s.classes);
+  classes.reserve(classes_.size());
+  for (auto const& c : classes_) {
+    classes.push_back(toString(c._0));
+  }
+  ts.ue->m_symbol_refs.emplace_back(SymbolRef::Class, std::move(classes));
+}
+
 void translate(TranslationState& ts, const hhbc::Unit& unit) {
   translateModuleUse(ts, maybe(unit.module_use));
   auto adata = range(unit.adata);
@@ -1417,6 +1471,8 @@ void translate(TranslationState& ts, const hhbc::Unit& unit) {
   for (auto const& t : typedefs) {
     translateTypedef(ts, t);
   }
+
+  translateSymbolRefs(ts, unit.symbol_refs);
 
   auto modules = range(unit.modules);
   for (auto const& m : modules) {

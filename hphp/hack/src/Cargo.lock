@@ -1409,6 +1409,7 @@ dependencies = [
  "options",
  "oxidized",
  "print_expr",
+ "relative_path",
  "statement_state",
 ]
 
@@ -2146,6 +2147,7 @@ dependencies = [
  "hhvm_types_ffi",
  "naming_special_names_rust",
  "oxidized",
+ "relative_path",
  "serde",
  "write_bytes",
 ]
@@ -3072,11 +3074,7 @@ name = "options"
 version = "0.0.0"
 dependencies = [
  "bstr 1.0.1",
- "bumpalo",
- "bytecode_printer",
- "hhbc",
  "oxidized",
- "relative_path",
  "serde",
 ]
 

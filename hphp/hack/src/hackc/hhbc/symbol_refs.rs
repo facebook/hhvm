@@ -7,10 +7,12 @@ use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::ffi::OsStr;
 use std::os::unix::ffi::OsStrExt;
+use std::path::Path;
 
 use bstr::BString;
 use ffi::Slice;
 use ffi::Str;
+use relative_path::RelativePath;
 use serde::Serialize;
 
 use crate::ClassName;
@@ -61,31 +63,43 @@ impl<'arena> PartialEq for IncludePath<'arena> {
 }
 
 impl<'arena> IncludePath<'arena> {
-    pub fn into_doc_root_relative(
+    pub fn resolve_include_roots(
         self,
         alloc: &'arena bumpalo::Bump,
         include_roots: &BTreeMap<BString, BString>,
+        current_path: &RelativePath,
     ) -> IncludePath<'arena> {
-        if let IncludePath::IncludeRootRelative(var, lit) = &self {
-            use std::path::Path;
-            match include_roots.get(var.as_bstr()) {
-                Some(prefix) => {
-                    let path = Path::new(OsStr::from_bytes(prefix)).join(OsStr::from_bytes(lit));
-                    let relative = path.is_relative();
-                    let path_str = Str::new_str(alloc, path.to_str().expect("non UTF-8 path"));
-                    return if relative {
-                        IncludePath::DocRootRelative(path_str)
-                    } else {
-                        IncludePath::Absolute(path_str)
-                    };
+        match self {
+            IncludePath::IncludeRootRelative(var, lit) => {
+                match include_roots.get(var.as_bstr()) {
+                    Some(prefix) => {
+                        let path =
+                            Path::new(OsStr::from_bytes(prefix)).join(OsStr::from_bytes(&lit));
+                        let relative = path.is_relative();
+                        let path_str = Str::new_str(alloc, path.to_str().expect("non UTF-8 path"));
+                        return if relative {
+                            IncludePath::DocRootRelative(path_str)
+                        } else {
+                            IncludePath::Absolute(path_str)
+                        };
+                    }
+                    _ => self, // This should probably never happen
                 }
-                _ => return self, // This should probably never happen
-            };
+            }
+            IncludePath::SearchPathRelative(p) => {
+                let pathbuf = current_path
+                    .path()
+                    .parent()
+                    .unwrap_or_else(|| Path::new(""))
+                    .join(OsStr::from_bytes(&p));
+                let path_from_cur_dirname = Str::new_str(alloc, pathbuf.to_str().unwrap());
+                IncludePath::SearchPathRelative(path_from_cur_dirname)
+            }
+            _ => self,
         }
-        self
     }
 
-    fn extract_str(&self) -> (&str, &str) {
+    pub fn extract_str(&self) -> (&str, &str) {
         match self {
             IncludePath::Absolute(s)
             | IncludePath::SearchPathRelative(s)

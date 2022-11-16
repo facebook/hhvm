@@ -702,25 +702,25 @@ fn emit_import<'a, 'arena, 'decl>(
     use ast::ImportFlavor;
     let alloc = env.arena; // Should this be emitter.alloc?
     let inc = parse_include(alloc, expr);
-    e.add_include_ref(inc.clone());
+    let filepath = e.filepath.clone();
+    let resolved_inc = inc.resolve_include_roots(alloc, &e.options().hhvm.include_roots, &filepath);
     let (expr_instrs, import_op_instr) = match flavor {
         ImportFlavor::Include => (emit_expr(e, env, expr)?, instr::incl()),
         ImportFlavor::Require => (emit_expr(e, env, expr)?, instr::req()),
         ImportFlavor::IncludeOnce => (emit_expr(e, env, expr)?, instr::incl_once()),
-        ImportFlavor::RequireOnce => {
-            match inc.into_doc_root_relative(alloc, &e.options().hhvm.include_roots) {
-                IncludePath::DocRootRelative(path) => {
-                    let expr = ast::Expr(
-                        (),
-                        pos.clone(),
-                        ast::Expr_::String(path.unsafe_as_str().into()),
-                    );
-                    (emit_expr(e, env, &expr)?, instr::req_doc())
-                }
-                _ => (emit_expr(e, env, expr)?, instr::req_once()),
+        ImportFlavor::RequireOnce => match &resolved_inc {
+            IncludePath::DocRootRelative(path) => {
+                let expr = ast::Expr(
+                    (),
+                    pos.clone(),
+                    ast::Expr_::String(path.unsafe_as_str().into()),
+                );
+                (emit_expr(e, env, &expr)?, instr::req_doc())
             }
-        }
+            _ => (emit_expr(e, env, expr)?, instr::req_once()),
+        },
     };
+    e.add_include_ref(resolved_inc);
     Ok(InstrSeq::gather(vec![
         expr_instrs,
         emit_pos(pos),

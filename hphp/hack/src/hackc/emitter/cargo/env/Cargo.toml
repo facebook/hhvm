@@ -24,4 +24,5 @@ ocamlrep = { path = "../../../../ocamlrep" }
 options = { path = "../../../compile/cargo/options" }
 oxidized = { path = "../../../../oxidized" }
 print_expr = { path = "../../../print_expr" }
+relative_path = { path = "../../../../utils/rust/relative_path" }
 statement_state = { path = "../statement_state" }

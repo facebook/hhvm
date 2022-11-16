@@ -5,6 +5,9 @@
 
 use std::borrow::Cow;
 use std::collections::BTreeSet;
+use std::ffi::OsStr;
+use std::os::unix::ffi::OsStrExt;
+use std::path::Path;
 use std::sync::Arc;
 
 use decl_provider::DeclProvider;
@@ -25,6 +28,7 @@ use oxidized::ast;
 use oxidized::ast_defs;
 use oxidized::pos::Pos;
 use print_expr::HhasBodyEnv;
+use relative_path::RelativePath;
 use statement_state::StatementState;
 
 use crate::adata_state::AdataState;
@@ -46,6 +50,8 @@ pub struct Emitter<'arena, 'decl> {
     local_gen: LocalGen,
     iterator: IterGen,
     named_locals: IndexSet<Str<'arena>>,
+
+    pub filepath: RelativePath,
 
     pub for_debugger_eval: bool,
 
@@ -73,6 +79,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         for_debugger_eval: bool,
         alloc: &'arena bumpalo::Bump,
         decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
+        filepath: RelativePath,
     ) -> Emitter<'arena, 'decl> {
         Emitter {
             opts,
@@ -86,6 +93,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
             local_gen: LocalGen::new(),
             iterator: Default::default(),
             named_locals: Default::default(),
+            filepath,
 
             adata_state: None,
             statement_state_: None,
@@ -192,7 +200,17 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
     }
 
     pub fn add_include_ref(&mut self, inc: IncludePath<'arena>) {
-        self.symbol_refs_state.includes.insert(inc);
+        match inc {
+            IncludePath::SearchPathRelative(p)
+            | IncludePath::DocRootRelative(p)
+            | IncludePath::Absolute(p) => {
+                let path = Path::new(OsStr::from_bytes(&p));
+                if path.exists() {
+                    self.symbol_refs_state.includes.insert(inc);
+                }
+            }
+            IncludePath::IncludeRootRelative(_, _) => {}
+        };
     }
 
     pub fn add_constant_ref(&mut self, s: ConstName<'arena>) {

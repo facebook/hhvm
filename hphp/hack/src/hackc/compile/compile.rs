@@ -272,7 +272,7 @@ pub fn unit_to_string(
         (print_result, profile.printing_t) = profile_rust::time(|| {
             let opts = NativeEnv::to_options(native_env);
             bytecode_printer::print_unit(
-                &Context::new(&opts, Some(&native_env.filepath), opts.array_provenance()),
+                &Context::new(Some(&native_env.filepath), opts.array_provenance()),
                 writer,
                 program,
             )
@@ -383,6 +383,7 @@ fn create_emitter<'arena, 'decl>(
         flags.for_debugger_eval,
         alloc,
         decl_provider,
+        native_env.filepath.clone(),
     )
 }
 
@@ -495,6 +496,7 @@ pub fn expr_to_string_lossy(flags: &EnvFlags, expr: &ast::Expr) -> String {
         flags.for_debugger_eval,
         &alloc,
         None,
+        RelativePath::make(Prefix::Dummy, Default::default()),
     );
     let ctx = Context::new(&emitter);
 

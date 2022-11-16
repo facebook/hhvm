@@ -6,9 +6,7 @@
 use std::fmt;
 use std::io::Result;
 use std::io::Write;
-use std::path::PathBuf;
 
-use hhbc::IncludePath;
 use relative_path::RelativePath;
 
 /// Indent is an abstraction of indentation. Configurable indentation
@@ -39,38 +37,20 @@ impl fmt::Display for Indent {
     }
 }
 
-/// This trait is used by the bytecode printer to turn the IncludePaths in the
-/// SymbolRefs::includes into a PathBuf for printing.
-pub trait IncludeProcessor {
-    /// Turn an IncludePath into a PathBuf. If the resulting file doesn't exist
-    /// returns None.
-    fn convert_include<'a>(
-        &'a self,
-        include_path: IncludePath<'a>,
-        cur_path: Option<&'a RelativePath>,
-    ) -> Option<PathBuf>;
-}
-
 #[derive(Clone)]
 pub struct Context<'a> {
     pub(crate) path: Option<&'a RelativePath>,
 
     indent: Indent,
 
-    pub(crate) include_processor: &'a dyn IncludeProcessor,
     pub(crate) array_provenance: bool,
 }
 
 impl<'a> Context<'a> {
-    pub fn new(
-        include_processor: &'a dyn IncludeProcessor,
-        path: Option<&'a RelativePath>,
-        array_provenance: bool,
-    ) -> Self {
+    pub fn new(path: Option<&'a RelativePath>, array_provenance: bool) -> Self {
         Self {
             path,
             indent: Indent::new(),
-            include_processor,
             array_provenance,
         }
     }

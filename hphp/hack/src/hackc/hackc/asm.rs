@@ -14,7 +14,6 @@ use anyhow::anyhow;
 use anyhow::Result;
 use bumpalo::Bump;
 use clap::Parser;
-use options::Options;
 use parking_lot::Mutex;
 use rayon::prelude::*;
 use relative_path::RelativePath;
@@ -53,8 +52,7 @@ pub fn process_one_file(f: &Path, w: &SyncWrite) -> Result<()> {
     let alloc = Bump::default();
     let (hcu, fp) = assemble::assemble(&alloc, f)?;
     let filepath = RelativePath::make(relative_path::Prefix::Dummy, fp);
-    let comp_options: Options = Default::default();
-    let ctxt = bytecode_printer::Context::new(&comp_options, Some(&filepath), false);
+    let ctxt = bytecode_printer::Context::new(Some(&filepath), false);
     let mut output = Vec::new();
     match bytecode_printer::print_unit(&ctxt, &mut output, &hcu) {
         Err(e) => {

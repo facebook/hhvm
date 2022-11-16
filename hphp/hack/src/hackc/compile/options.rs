@@ -4,15 +4,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use std::collections::BTreeMap;
-use std::ffi::OsStr;
-use std::os::unix::ffi::OsStrExt;
-use std::path::Path;
-use std::path::PathBuf;
 
 use bstr::BString;
-use hhbc::IncludePath;
 pub use oxidized::parser_options::ParserOptions;
-use relative_path::RelativePath;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -66,49 +60,6 @@ impl Default for Options {
             compiler_flags: CompilerFlags::default(),
             hhvm: Hhvm::default(),
             hhbc: HhbcFlags::default(),
-        }
-    }
-}
-
-impl bytecode_printer::IncludeProcessor for Options {
-    fn convert_include<'a>(
-        &'a self,
-        include_path: IncludePath<'a>,
-        cur_path: Option<&'a RelativePath>,
-    ) -> Option<PathBuf> {
-        let alloc = bumpalo::Bump::new();
-        let include_roots = &self.hhvm.include_roots;
-        match include_path.into_doc_root_relative(&alloc, include_roots) {
-            IncludePath::DocRootRelative(p) | IncludePath::Absolute(p) => {
-                let path = Path::new(OsStr::from_bytes(&p));
-                if path.exists() {
-                    Some(path.to_owned())
-                } else {
-                    None
-                }
-            }
-            IncludePath::SearchPathRelative(p) => {
-                let path_from_cur_dirname = cur_path
-                    .and_then(|p| p.path().parent())
-                    .unwrap_or_else(|| Path::new(""))
-                    .join(OsStr::from_bytes(&p));
-                if path_from_cur_dirname.exists() {
-                    Some(path_from_cur_dirname)
-                } else {
-                    None
-                }
-            }
-            IncludePath::IncludeRootRelative(v, p) => {
-                if !p.is_empty() {
-                    if let Some(ir) = include_roots.get(v.as_bstr()) {
-                        let resolved = Path::new(OsStr::from_bytes(ir)).join(OsStr::from_bytes(&p));
-                        if resolved.exists() {
-                            return Some(resolved);
-                        }
-                    }
-                }
-                None
-            }
         }
     }
 }

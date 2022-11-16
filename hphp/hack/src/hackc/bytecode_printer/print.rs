@@ -167,28 +167,21 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit<'_>) -> Result<
     concat(w, &prog.constants, |w, c| print_constant(ctx, w, c))?;
     concat(w, &prog.typedefs, |w, td| print_typedef(ctx, w, td))?;
     print_file_attributes(ctx, w, prog.file_attributes.as_ref())?;
-    print_include_region(ctx, w, &prog.symbol_refs.includes)?;
+    print_include_region(w, &prog.symbol_refs.includes)?;
     print_symbol_ref_regions(ctx, w, &prog.symbol_refs)?;
     Ok(())
 }
 
-fn print_include_region(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    includes: &Slice<'_, IncludePath<'_>>,
-) -> Result<()> {
-    fn print_include(ctx: &Context<'_>, w: &mut dyn Write, inc: IncludePath<'_>) -> Result<()> {
-        if let Some(path) = ctx.include_processor.convert_include(inc, ctx.path) {
-            write!(w, "\n  {}", path.display())?;
-        }
+fn print_include_region(w: &mut dyn Write, includes: &Slice<'_, IncludePath<'_>>) -> Result<()> {
+    fn print_include(w: &mut dyn Write, inc: &IncludePath<'_>) -> Result<()> {
+        let (s1, s2) = inc.extract_str();
+        write!(w, "\n  {}{}", s1, s2)?;
         Ok(())
     }
     if !includes.is_empty() {
         w.write_all(b"\n.includes {")?;
         for inc in includes.as_ref().iter() {
-            // TODO(hrust): avoid clone. Rethink onwership of inc in
-            // hhas_symbol_refs_rust::IncludePath::into_doc_root_relative
-            print_include(ctx, w, inc.clone())?;
+            print_include(w, inc)?;
         }
         w.write_all(b"\n}\n")?;
     }

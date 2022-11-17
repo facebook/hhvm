@@ -303,20 +303,6 @@ SSATmp* ptrToUninit(IRGS& env) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-/*
- * This is called in a few places to be consistent with old minstrs, and should
- * be revisited once they're gone. It probably doesn't make sense to always
- * guard on an object class when we have one.
- */
-void specializeObjBase(IRGS& env, SSATmp* base) {
-  if (base && base->isA(TObj) && base->type().clsSpec().cls()) {
-    env.irb->constrainValue(
-      base, GuardConstraint(base->type().clsSpec().cls()));
-  }
-}
-
-//////////////////////////////////////////////////////////////////////
 // Intermediate ops
 
 Optional<PropInfo>
@@ -326,7 +312,8 @@ getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType,
   auto const baseCls = base->type().clsSpec().cls();
   auto const info = getPropertyOffset(env, baseCls, keyType, ignoreLateInit);
   if (!info) return info;
-  specializeObjBase(env, base);
+
+  env.irb->constrainValue(base, GuardConstraint(info->propClass));
   return info;
 }
 

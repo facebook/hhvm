@@ -43,22 +43,25 @@ pub struct ParsedFile<'a> {
 }
 
 // NB: Must keep in sync with OCaml type `Direct_decl_parser.parsed_file_with_hashes`
-#[derive(ToOcamlRep)]
+#[derive(Debug, Clone, ToOcamlRep)]
 pub struct ParsedFileWithHashes<'a> {
     pub mode: Option<file_info::Mode>,
+
+    /// FileDeclHash must be computed before php stdlib decls are removed,
+    /// and must be computed over the decls in reverse file order
+    /// (the hash is order sensitive).
     pub hash: Int64,
+
+    /// Decls along with a position insensitive hash.
     pub decls: Vec<(&'a str, Decl<'a>, Int64)>,
 }
 
 impl<'a> From<ParsedFile<'a>> for ParsedFileWithHashes<'a> {
     fn from(parsed_file: ParsedFile<'a>) -> ParsedFileWithHashes<'a> {
         let file_decls_hash = Int64(hh_hash::position_insensitive_hash(&parsed_file.decls) as i64);
-        let decls = Vec::from_iter(
-            parsed_file
-                .decls
-                .into_iter()
-                .map(|(name, decl)| (name, decl, Int64(hh_hash::hash(&decl) as i64))),
-        );
+        let decls = (parsed_file.decls.into_iter())
+            .map(|(name, decl)| (name, decl, Int64(hh_hash::hash(&decl) as i64)))
+            .collect();
         ParsedFileWithHashes {
             mode: parsed_file.mode,
             hash: file_decls_hash,
@@ -68,11 +71,24 @@ impl<'a> From<ParsedFile<'a>> for ParsedFileWithHashes<'a> {
 }
 
 impl<'a> ParsedFileWithHashes<'a> {
-    pub fn remove_php_stdlib_decls_and_rev(&mut self, arena: &'a bumpalo::Bump) {
-        self.decls = Vec::from_iter(self.decls.drain(..).rev().filter_map(|(name, decl, hash)| {
-            filter_php_stdlib_decls(arena, decl).map(|decl| (name, decl, hash))
-        }));
+    pub fn remove_php_stdlib_decls(&mut self, arena: &'a bumpalo::Bump) {
+        self.decls = (self.decls.drain(..))
+            .filter_map(|(name, decl, hash)| {
+                filter_php_stdlib_decls(arena, decl).map(|decl| (name, decl, hash))
+            })
+            .collect();
     }
+
+    pub fn remove_php_stdlib_decls_and_rev(&mut self, arena: &'a bumpalo::Bump) {
+        self.decls = (self.decls.drain(..).rev())
+            .filter_map(|(name, decl, hash)| {
+                filter_php_stdlib_decls(arena, decl).map(|decl| (name, decl, hash))
+            })
+            .collect();
+    }
+
+    /// NB do not call this unless you must. To visit decls in forward order,
+    /// use self.decls.iter().rev()
     pub fn rev(&mut self) {
         self.decls.reverse()
     }

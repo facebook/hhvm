@@ -25,6 +25,7 @@ use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use oxidized::global_options::GlobalOptions;
+use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use pos::ConstName;
 use pos::FunName;
 use pos::MethodName;
@@ -40,6 +41,7 @@ use shm_store::OcamlShmStore;
 use shm_store::ShmStore;
 use ty::decl;
 use ty::decl::folded::FoldedClass;
+use ty::decl::shallow::NamedDecl;
 use ty::reason::BReason as BR;
 
 pub struct HhServerProviderBackend {
@@ -160,12 +162,14 @@ impl HhServerProviderBackend {
         path: RelativePath,
         text: &'a [u8],
         arena: &'a bumpalo::Bump,
-    ) -> Result<oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes<'a>> {
-        let mut parsed_file = self.decl_parser.parse_impl(path, text, arena);
-        self.lazy_shallow_decl_provider
-            .dedup_and_add_decls(path, parsed_file.decls.iter().map(Into::into))?;
-        parsed_file.decls.rev(arena); // To match OCaml behavior
-        Ok(parsed_file.into())
+    ) -> Result<ParsedFileWithHashes<'a>> {
+        let hashed_file = self.decl_parser.parse_impl_rev(path, text, arena);
+        self.lazy_shallow_decl_provider.dedup_and_add_decls(
+            path,
+            (hashed_file.decls.iter().rev())
+                .map(|(name, decl, _)| NamedDecl::from(&(*name, *decl))),
+        )?;
+        Ok(hashed_file)
     }
 
     /// Directly add the given decls to the shallow decl store (without removing

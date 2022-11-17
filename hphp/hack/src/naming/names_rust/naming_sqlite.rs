@@ -805,7 +805,7 @@ impl Names {
         path: impl AsRef<Path>,
         faster_not_durable: bool,
         file_summaries: impl IntoIterator<Item = (RelativePath, crate::FileSummary)>,
-    ) -> anyhow::Result<Self> {
+    ) -> anyhow::Result<(Self, crate::SaveResult)> {
         let path = path.as_ref();
         let conn = Connection::open(path)?;
         if faster_not_durable {
@@ -818,10 +818,10 @@ impl Names {
             )?;
         }
         let log = slog::Logger::root(slog::Discard, slog::o!());
-        let (conn, _save_result) = Self::build(&log, conn, |tx| {
+        let (conn, save_result) = Self::build(&log, conn, |tx| {
             file_summaries.into_iter().try_for_each(|x| Ok(tx.send(x)?))
         })?;
-        Ok(Self { conn })
+        Ok((Self { conn }, save_result))
     }
 
     /// Build a naming table using the information provided in
@@ -875,6 +875,13 @@ impl Names {
         conn.execute("END TRANSACTION", params![])?;
 
         Ok((conn, save_result))
+    }
+
+    /// Close the connection. If the close fails, returns Err(conn, err)
+    /// so the caller can try again, report what went wrong, etc.
+    /// drop() has the same flushing behavior as close(), but without error handling.
+    pub fn close(self) -> Result<(), (rusqlite::Connection, rusqlite::Error)> {
+        self.conn.close()
     }
 }
 

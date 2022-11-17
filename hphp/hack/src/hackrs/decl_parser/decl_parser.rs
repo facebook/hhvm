@@ -10,8 +10,10 @@ use file_provider::FileProvider;
 use names::FileSummary;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::parser_options::ParserOptions;
+use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use pos::RelativePath;
 use ty::decl::shallow;
+use ty::decl::shallow::NamedDecl;
 use ty::reason::Reason;
 
 #[derive(Debug, Clone)]
@@ -44,8 +46,10 @@ impl<R: Reason> DeclParser<R> {
     pub fn parse(&self, path: RelativePath) -> anyhow::Result<Vec<shallow::NamedDecl<R>>> {
         let arena = bumpalo::Bump::new();
         let text = self.file_provider.get(path)?;
-        let parsed_file = self.parse_impl(path, &text, &arena);
-        Ok(parsed_file.decls.iter().map(Into::into).collect())
+        let hashed_file = self.parse_impl_fwd(path, &text, &arena);
+        Ok((hashed_file.decls.into_iter())
+            .map(|(name, decl, _)| NamedDecl::from(&(name, decl)))
+            .collect())
     }
 
     pub fn parse_and_summarize(
@@ -54,29 +58,57 @@ impl<R: Reason> DeclParser<R> {
     ) -> anyhow::Result<(Vec<shallow::NamedDecl<R>>, FileSummary)> {
         let arena = bumpalo::Bump::new();
         let text = self.file_provider.get(path)?;
-        let parsed_file = self.parse_impl(path, &text, &arena);
-        let summary = FileSummary::from_decls(parsed_file);
-        Ok((parsed_file.decls.iter().map(Into::into).collect(), summary))
+        let hashed_file = self.parse_impl_fwd(path, &text, &arena);
+        let summary = names::FileSummary::from_fwd_filtered_decls(&hashed_file);
+        let decls = (hashed_file.decls.into_iter())
+            .map(|(name, decl, _)| NamedDecl::from(&(name, decl)))
+            .collect();
+        Ok((decls, summary))
     }
 
-    pub fn parse_impl<'a>(
+    /// parse and hash decls, optionally remove stdlib decls, and restore
+    /// decls to file order.
+    fn parse_impl_fwd<'a>(
         &self,
         path: RelativePath,
         text: &'a [u8],
         arena: &'a bumpalo::Bump,
-    ) -> oxidized_by_ref::direct_decl_parser::ParsedFile<'a> {
+    ) -> ParsedFileWithHashes<'a> {
         let opts = DeclParserOptions::from_parser_options(&self.opts);
-        let mut parsed_file =
+        let parsed_file =
             direct_decl_parser::parse_decls_for_typechecking(&opts, path.into(), text, arena);
         // TODO: The direct decl parser should return decls in the same
         // order as they are declared in the file. At the moment it reverses
         // them. Reverse them again to match the syntactic order.
         let deregister_std_lib = path.is_hhi() && self.opts.po_deregister_php_stdlib;
+        let mut hashed_file = ParsedFileWithHashes::from(parsed_file);
         if deregister_std_lib {
-            parsed_file.decls.remove_php_stdlib_decls_and_rev(arena);
+            hashed_file.remove_php_stdlib_decls_and_rev(arena);
         } else {
-            parsed_file.decls.rev(arena);
+            hashed_file.rev();
         }
-        parsed_file
+        hashed_file
+    }
+
+    /// parse and hash decls, then optionally remove stdlib decls.
+    /// Decls remain in reversed file order as returned by parser.
+    pub fn parse_impl_rev<'a>(
+        &self,
+        path: RelativePath,
+        text: &'a [u8],
+        arena: &'a bumpalo::Bump,
+    ) -> ParsedFileWithHashes<'a> {
+        let opts = DeclParserOptions::from_parser_options(&self.opts);
+        let parsed_file =
+            direct_decl_parser::parse_decls_for_typechecking(&opts, path.into(), text, arena);
+        // TODO: The direct decl parser should return decls in the same
+        // order as they are declared in the file. At the moment it reverses
+        // them. Leave them in reversed order for consumers that expect reversed order.
+        let deregister_std_lib = path.is_hhi() && self.opts.po_deregister_php_stdlib;
+        let mut hashed_file = ParsedFileWithHashes::from(parsed_file);
+        if deregister_std_lib {
+            hashed_file.remove_php_stdlib_decls(arena);
+        }
+        hashed_file
     }
 }

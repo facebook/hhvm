@@ -32,7 +32,6 @@ impl FileSummary {
         remove_php_stdlib: bool,
         arena: &'a bumpalo::Bump,
     ) -> Self {
-        let hash = crate::FileDeclsHash::from_u64(file.hash.0 as u64);
         // TODO: The direct decl parser should return decls in the same
         // order as they are declared in the file. At the moment it reverses
         // them. Reverse them again to match the syntactic order.
@@ -41,9 +40,13 @@ impl FileSummary {
         } else {
             file.rev();
         }
+        Self::from_fwd_filtered_decls(&file)
+    }
+
+    pub fn from_fwd_filtered_decls<'a>(file: &ParsedFileWithHashes<'a>) -> Self {
         Self {
             mode: file.mode,
-            hash,
+            hash: FileDeclsHash::from_u64(file.hash.0 as u64),
             decls: file
                 .decls
                 .iter()

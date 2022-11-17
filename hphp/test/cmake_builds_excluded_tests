@@ -107,6 +107,7 @@ slow/readonly_tdb/static_method_1.php
 slow/readonly_tdb/static_method_2.php
 slow/readonly_tdb/static_prop_1.php
 slow/types/autoload_alias/autoload_alias.php
+slow/autoload/requireclass/requireclass.php
 
 # TODO(alexeyt) jit assertion failure
 slow/u_converter/2135.php

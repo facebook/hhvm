@@ -1,0 +1,1 @@
+--inputs=hphp/test/slow/autoload/requireclass/requireclass-1.inc --inputs=hphp/test/slow/autoload/requireclass/requireclass-2.inc

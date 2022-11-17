@@ -1393,8 +1393,5 @@ class IntlCodePointBreakIterator extends IntlBreakIterator {
 }
 
 class IntlPartsIterator extends IntlIterator<string> {
-  const int KEY_SEQUENTIAL = 0;
-  const int KEY_LEFT = 1;
-  const int KEY_RIGHT = 2;
   public function getBreakIterator(): IntlBreakIterator {}
 }

@@ -176,7 +176,6 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 class ReflectionFunction
   extends ReflectionFunctionAbstract
   implements Reflector {
-  const int IS_DEPRECATED = 262144;
 
   public $name = '';
 

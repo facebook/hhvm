@@ -170,9 +170,17 @@ impl NamingTable {
     }
 
     fn get_filename_by_hash(&self, hash: deps_rust::Dep) -> Result<Option<RelativePath>> {
+        let hash = ToplevelSymbolHash::from_u64(hash.into());
+        if let Some((pos, _kind)) = self.types.get_pos_by_hash(hash)? {
+            return Ok(Some(pos.into_filename()));
+        } else if let Some(pos) = self.funs.get_pos_by_hash(hash)? {
+            return Ok(Some(pos.into_filename()));
+        } else if let Some(pos) = self.consts.get(hash)? {
+            return Ok(Some(pos.into_filename()));
+        };
         Ok(self
             .db
-            .with_db(|db| db.get_path_by_symbol_hash(ToplevelSymbolHash::from_u64(hash.into())))?
+            .with_db(|db| db.get_path_by_symbol_hash(hash))?
             .as_ref()
             .map(Into::into))
     }
@@ -208,6 +216,15 @@ impl std::fmt::Debug for NamingTable {
 enum Pos {
     Full(pos::BPos),
     File(NameType, RelativePath),
+}
+
+impl Pos {
+    fn into_filename(self) -> RelativePath {
+        match self {
+            Self::Full(pos) => pos.file(),
+            Self::File(_, path) => path,
+        }
+    }
 }
 
 impl From<&file_info::Pos> for Pos {
@@ -429,6 +446,10 @@ mod reverse_naming_table {
 
         pub fn get_pos(&self, name: K) -> Result<Option<P>> {
             self.positions.get(name.into())
+        }
+
+        pub fn get_pos_by_hash(&self, name: ToplevelSymbolHash) -> Result<Option<P>> {
+            self.positions.get(name)
         }
 
         pub fn get_canon_name(&self, name: K) -> Result<Option<K>> {

@@ -415,45 +415,6 @@ void HHVM_FUNCTION(drain_unit_prefetcher) {
   drainUnitPrefetcher();
 }
 
-Array HHVM_FUNCTION(non_repo_unit_cache_info) {
-  auto const paths = nonRepoUnitCacheUnits();
-  auto const hashes = nonRepoUnitHashCacheUnits();
-
-  VecInit pathsInit{paths.size()};
-  for (auto const& p : paths) {
-    auto const perRequest = p.second->perRequestFilepath();
-    pathsInit.append(
-      make_dict_array(
-        "path", StrNR{p.first},
-        "orig-filepath", StrNR{p.second->origFilepath()},
-        "per-request-filepath", perRequest ? StrNR{perRequest} : empty_string(),
-        "sha1", String{p.second->sha1().toString()},
-        "bc-sha1", String{p.second->bcSha1().toString()},
-        "addr", (uintptr_t)p.second
-      )
-    );
-  }
-
-  VecInit hashesInit{hashes.size()};
-  for (auto const& p : hashes) {
-    auto const perRequest = p.second->perRequestFilepath();
-    hashesInit.append(
-      make_dict_array(
-        "sha1", String{p.first.toString()},
-        "bc-sha1", String{p.second->bcSha1().toString()},
-        "orig-filepath", StrNR{p.second->origFilepath()},
-        "per-request-filepath", perRequest ? StrNR{perRequest} : empty_string(),
-        "addr", (uintptr_t)p.second
-      )
-    );
-  }
-
-  return make_dict_array(
-    "path-to-unit", pathsInit.toArray(),
-    "hash-to-unit", hashesInit.toArray()
-  );
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 String HHVM_FUNCTION(debug_get_bytecode) {
@@ -552,7 +513,6 @@ void StandardExtension::initIntrinsics() {
 
   HHVM_FALIAS(__hhvm_intrinsics\\is_unit_loaded, is_unit_loaded);
   HHVM_FALIAS(__hhvm_intrinsics\\drain_unit_prefetcher, drain_unit_prefetcher);
-  HHVM_FALIAS(__hhvm_intrinsics\\non_repo_unit_cache_info, non_repo_unit_cache_info);
 
   HHVM_FALIAS(__hhvm_intrinsics\\debug_get_bytecode, debug_get_bytecode);
   HHVM_FALIAS(__hhvm_intrinsics\\debug_file_deps, debug_file_deps);

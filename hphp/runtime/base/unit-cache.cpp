@@ -1584,36 +1584,6 @@ std::vector<Unit*> loadedUnitsRepoAuth() {
   return units;
 }
 
-std::vector<std::pair<const StringData*, Unit*>> nonRepoUnitCacheUnits() {
-  std::vector<std::pair<const StringData*, Unit*>> paths;
-
-  // NB: Technically its not safe to iterate over a
-  // tbb::concurrent_hash_map concurrently. However we never delete
-  // entries from the cache which prevents us from accessing freed
-  // memory. This is technically safe, but we might visit an entry
-  // more than once or skip one. This is fine since this function is
-  // meant for debugging.
-  for (auto const& p : s_nonRepoUnitCache) {
-    assertx(p.first->isStatic());
-    auto const cached = p.second.cachedUnit.copy();
-    if (!cached || !cached->cu.unit) continue;
-    paths.emplace_back(p.first, cached->cu.unit);
-  }
-  return paths;
-}
-
-std::vector<std::pair<SHA1, Unit*>> nonRepoUnitHashCacheUnits() {
-  std::vector<std::pair<SHA1, Unit*>> hashes;
-
-  // NB: See above explanation why this is safe.
-  for (auto const& p : s_unitByHashCache) {
-    auto const unit = p.second.unit.copy();
-    if (!unit) continue;
-    hashes.emplace_back(p.first, unit);
-  }
-  return hashes;
-}
-
 void invalidateUnit(StringData* path) {
   always_assert(!RuntimeOption::RepoAuthoritative);
 

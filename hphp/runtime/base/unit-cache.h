@@ -143,13 +143,6 @@ size_t numLoadedUnits();
 std::vector<Unit*> loadedUnitsRepoAuth();
 
 /*
- * Return the current entires in the non-repo Unit cache or the
- * per-hash Unit cache. Used for debugging.
- */
-std::vector<std::pair<const StringData*, Unit*>> nonRepoUnitCacheUnits();
-std::vector<std::pair<SHA1, Unit*>> nonRepoUnitHashCacheUnits();
-
-/*
  * Resolve an include path, for the supplied path and directory, using the same
  * rules as PHP's fopen() or include.  May return a null String if the path
  * would not be includable.  File stat information is returned in `s'.

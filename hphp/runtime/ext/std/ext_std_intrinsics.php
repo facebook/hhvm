@@ -201,14 +201,6 @@ function is_unit_loaded(string $path): bool;
 <<__Native>>
 function drain_unit_prefetcher(): void;
 
-/*
- * Return information about the current contents of the non-repo Unit
- * cache and per-hash Unit cache. Due to the nature of the caches this
- * information may be out of date immediately. Only really meant for
- * Unit tests.
- */
-<<__Native>>
-function non_repo_unit_cache_info(): dict;
 
 /*
  * Returns a string containing the pretty printed bytecode for the calling

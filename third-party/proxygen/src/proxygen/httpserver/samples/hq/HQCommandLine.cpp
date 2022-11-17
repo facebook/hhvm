@@ -141,6 +141,15 @@ DEFINE_uint32(d6d_probe_timeout_secs,
               600,
               "Client only. The probe timeout advertised to server");
 
+DEFINE_bool(use_ack_receive_timestamps,
+            false,
+            "Replace the ACK frame with ACK_RECEIVE_TIMESTAMPS frame"
+            "which carries the received packet timestamps");
+DEFINE_uint32(
+    max_ack_receive_timestamps_to_send,
+    quic::kMaxReceivedPktsTimestampsStored,
+    "Controls how many packet receieve timestamps the peer should send");
+
 namespace quic::samples {
 
 std::ostream& operator<<(std::ostream& o, const HQMode& m) {
@@ -319,6 +328,13 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
   hqParams.transportSettings.shouldUseRecvmmsgForBatchRecv = true;
   hqParams.transportSettings.advertisedInitialMaxStreamsBidi = 100;
   hqParams.transportSettings.advertisedInitialMaxStreamsUni = 100;
+
+  if (FLAGS_use_ack_receive_timestamps) {
+    hqParams.transportSettings.maybeAckReceiveTimestampsConfigSentToPeer.assign(
+        {.max_receive_timestamps_per_ack =
+             FLAGS_max_ack_receive_timestamps_to_send,
+         .receive_timestamps_exponent = kDefaultReceiveTimestampsExponent});
+  }
 } // initializeTransportSettings
 
 void initializeHttpServerSettings(HQToolServerParams& hqParams) {

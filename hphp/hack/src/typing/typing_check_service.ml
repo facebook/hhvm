@@ -1146,10 +1146,6 @@ let go_with_interrupt
   in
   let opts = Provider_context.get_tcopt ctx in
   let sample_rate = TypecheckerOptions.typecheck_sample_rate opts in
-  let fnl =
-    (* We want to randomize order for hulk simple to reduce variability of remote worker typecheck times *)
-    List.sort fnl ~compare:(fun _a _b -> Random.bits () - Random.bits ())
-  in
   let fnl = BigList.create fnl in
   let fnl =
     if Float.(sample_rate >= 1.0) then

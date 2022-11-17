@@ -248,26 +248,3 @@ interface SplSubject {
   ): HH\FIXME\MISSING_RETURN_TYPE {}
   public function notify(): HH\FIXME\MISSING_RETURN_TYPE {}
 }
-
-class SplType {
-  public function __construct($initial_value, $strict) {}
-}
-
-class SplInt extends SplType {
-}
-
-class SplFloat extends SplType {
-}
-
-class SplString extends SplType {
-}
-
-class SplEnum extends SplType {
-  public function __construct($initial_value, $strict) {}
-  public function getConstList(
-    $include_default = false,
-  ): HH\FIXME\MISSING_RETURN_TYPE {}
-}
-
-class SplBool extends SplEnum {
-}

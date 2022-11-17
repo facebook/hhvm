@@ -15,11 +15,3 @@ function hphp_create_continuation(
   $origFuncName,
   $args = null,
 ): HH\FIXME\MISSING_RETURN_TYPE {}
-class DummyContinuation {
-  public function __construct() {}
-  public function current(): HH\FIXME\MISSING_RETURN_TYPE {}
-  public function key(): HH\FIXME\MISSING_RETURN_TYPE {}
-  public function next(): HH\FIXME\MISSING_RETURN_TYPE {}
-  public function rewind(): HH\FIXME\MISSING_RETURN_TYPE {}
-  public function valid(): HH\FIXME\MISSING_RETURN_TYPE {}
-}

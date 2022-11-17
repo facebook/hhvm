@@ -80,7 +80,7 @@ void implCondJmp(IRGS& env, Offset taken, bool negate, SSATmp* src) {
   auto const target = getBlock(env, taken);
   assertx(target != nullptr);
   auto const boolSrc = gen(env, ConvTVToBool, src);
-  decRef(env, src, DecRefProfileId::Default);
+  decRef(env, src);
   gen(env, negate ? JmpZero : JmpNZero, target, boolSrc);
 }
 
@@ -121,7 +121,7 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
   Offset defaultOff = bcOff(env) + iv.vec32()[iv.size() - 1];
 
   if (UNLIKELY(!(type <= TInt))) {
-    if (type <= TArrLike) decRef(env, switchVal, DecRefProfileId::Default);
+    if (type <= TArrLike) decRef(env, switchVal);
     gen(env, Jmp, getBlock(env, defaultOff));
     return;
   }
@@ -221,7 +221,7 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
 
   if (UNLIKELY(!testVal->isA(TStr))) {
     // straight to the default
-    decRef(env, testVal, DecRefProfileId::Default);
+    decRef(env, testVal);
     gen(env, Jmp, getBlock(env, defaultOff));
     return;
   }
@@ -240,7 +240,7 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
   data.bcSPOff    = spOffBCFromStackBase(env);
 
   auto const dest = gen(env, LdSSwitchDest, data, testVal);
-  decRef(env, testVal, DecRefProfileId::Default);
+  decRef(env, testVal);
   spillInlinedFrames(env);
   gen(
     env,
@@ -269,7 +269,7 @@ void emitRaiseClassStringConversionWarning(IRGS& env) {
 void emitSelect(IRGS& env) {
   auto const condSrc = popC(env);
   auto const boolSrc = gen(env, ConvTVToBool, condSrc);
-  decRef(env, condSrc, DecRefProfileId::Default);
+  decRef(env, condSrc);
 
   ifThenElse(
     env,

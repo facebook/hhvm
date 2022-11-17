@@ -472,7 +472,7 @@ void implAwaitSucceeded(IRGS& env, SSATmp* child) {
   auto const res = gen(env, LdWHResult, awaitedTy, child);
   popC(env);
   gen(env, IncRef, res);
-  decRef(env, child, DecRefProfileId::Default);
+  decRef(env, child);
   push(env, res);
 }
 
@@ -489,7 +489,7 @@ void implAwaitFailed(IRGS& env, SSATmp* child, Block* exit) {
   auto const exception = gen(env, LdWHResult, TObj, child);
   popC(env);
   gen(env, IncRef, exception);
-  decRef(env, child, DecRefProfileId::Default);
+  decRef(env, child);
   if (offset != kInvalidOffset) {
     push(env, exception);
     jmpImpl(env, offset);

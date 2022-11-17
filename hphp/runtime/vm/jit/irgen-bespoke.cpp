@@ -362,7 +362,7 @@ SSATmp* emitEscalateToVanilla(
   if (layout.bespoke()) {
     auto const str = cns(env, reason.get());
     auto const result = gen(env, BespokeEscalateToVanilla, arr, str);
-    decRef(env, arr, DecRefProfileId::Default);
+    decRef(env, arr);
     return result;
   }
   return cond(
@@ -674,7 +674,7 @@ void emitBespokeSetOpM(IRGS& env, int32_t nDiscard, SetOpOp op, MemberKey mk) {
   auto const key = memberKey(env, mk);
 
   auto const finish = [&] (SSATmp* result) {
-    popDecRef(env, DecRefProfileId::Default);
+    popDecRef(env);
     mFinalImpl(env, nDiscard, result);
   };
 
@@ -929,7 +929,7 @@ void emitBespokeAddElemC(IRGS& env) {
   auto const arrLoc = ldStkAddr(env, BCSPRelOffset{0});
   auto const arr = gen(env, LdMem, arrType, arrLoc);
 
-  auto const finish = [&] (SSATmp*) { decRef(env, key, DecRefProfileId::Default); };
+  auto const finish = [&] (SSATmp*) { decRef(env, key); };
   emitSet(env, arr, key, value, arrLoc, finish);
 }
 
@@ -1010,7 +1010,7 @@ void emitBespokeClassGetTS(IRGS& env) {
   );
 
   auto const cls = ldCls(env, className);
-  popDecRef(env, DecRefProfileId::Default);
+  popDecRef(env);
   push(env, cls);
   push(env, cns(env, TInitNull));
 }

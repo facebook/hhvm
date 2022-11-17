@@ -2483,7 +2483,7 @@ void emitSetImplicitContextByValue(IRGS& env) {
           pushIncRef(env, prev);
           // Decref after discarding so that if we are pushing the same object back,
           // avoid refcount going to zero
-          decRef(env, obj, DecRefProfileId::Default);
+          decRef(env, obj);
         },
         [&] {
           hint(env, Block::Hint::Unlikely);

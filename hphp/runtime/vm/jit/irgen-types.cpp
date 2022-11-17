@@ -585,7 +585,7 @@ SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className) {
 void emitInstanceOfD(IRGS& env, const StringData* className) {
   auto const src = popC(env);
   push(env, implInstanceOfD(env, src, className));
-  decRef(env, src, DecRefProfileId::Default);
+  decRef(env, src);
 }
 
 void emitInstanceOf(IRGS& env) {
@@ -658,7 +658,7 @@ void emitIsLateBoundCls(IRGS& env) {
   } else {
     PUNT(IsLateBoundCls-MaybeObject);
   }
-  decRef(env, obj, DecRefProfileId::Default);
+  decRef(env, obj);
 }
 
 namespace {
@@ -1097,7 +1097,7 @@ void emitThrowAsTypeStructException(IRGS& env) {
       if (!ts->same(maybe_resolved)) {
         auto const inputTS = cns(env, maybe_resolved);
         return {inputTS, create_catch_block(
-            env, [&]{ decRef(env, inputTS, DecRefProfileId::Default); })};
+            env, [&]{ decRef(env, inputTS); })};
       }
     }
     auto const ts = resolveTypeStructImpl(env, true, false, 1, true);
@@ -1535,7 +1535,7 @@ void emitOODeclExists(IRGS& env, OODeclExistsOp subop) {
   );
   discard(env, 2);
   push(env, val);
-  decRef(env, tCls, DecRefProfileId::Default);
+  decRef(env, tCls);
 }
 
 void emitIssetL(IRGS& env, int32_t id) {
@@ -1569,7 +1569,7 @@ SSATmp* isTypeHelper(IRGS& env, IsTypeOp subop, SSATmp* val) {
 void emitIsTypeC(IRGS& env, IsTypeOp subop) {
   auto const val = popC(env, DataTypeSpecific);
   push(env, isTypeHelper(env, subop, val));
-  decRef(env, val, DecRefProfileId::Default);
+  decRef(env, val);
 }
 
 void emitIsTypeL(IRGS& env, NamedLocal loc, IsTypeOp subop) {

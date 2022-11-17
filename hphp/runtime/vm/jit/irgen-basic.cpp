@@ -46,7 +46,7 @@ void emitClassGetC(IRGS& env) {
 
   if (name->isA(TObj)) {
     push(env, gen(env, LdObjClass, name));
-    decRef(env, name, DecRefProfileId::Default);
+    decRef(env, name);
     return;
   }
 
@@ -55,7 +55,7 @@ void emitClassGetC(IRGS& env) {
   }
 
   auto const cls = ldCls(env, name);
-  decRef(env, name, DecRefProfileId::Default);
+  decRef(env, name);
   if (name->isA(TStr)) emitModuleBoundaryCheck(env, cls, false);
   push(env, cls);
 }
@@ -169,7 +169,7 @@ void emitCGetL2(IRGS& env, NamedLocal loc) {
 void emitUnsetL(IRGS& env, int32_t id) {
   auto const prev = ldLoc(env, id, DataTypeGeneric);
   stLocRaw(env, id, fp(env), cns(env, TUninit));
-  decRef(env, prev, DecRefProfileId::Default);
+  decRef(env, prev);
 }
 
 void emitSetL(IRGS& env, int32_t id) {
@@ -234,7 +234,7 @@ void emitClone(IRGS& env) {
   if (!topC(env)->isA(TObj)) PUNT(Clone-NonObj);
   auto const obj        = popC(env);
   push(env, gen(env, Clone, obj));
-  decRef(env, obj, DecRefProfileId::Default);
+  decRef(env, obj);
 }
 
 void emitLateBoundCls(IRGS& env) {
@@ -384,25 +384,25 @@ void emitCastKeyset(IRGS& env) {
 void emitCastBool(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, ConvTVToBool, src));
-  decRef(env, src, DecRefProfileId::Default);
+  decRef(env, src);
 }
 
 void emitCastDouble(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, ConvTVToDbl, src));
-  decRef(env, src, DecRefProfileId::Default);
+  decRef(env, src);
 }
 
 void emitCastInt(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, ConvTVToInt, src));
-  decRef(env, src, DecRefProfileId::Default);
+  decRef(env, src);
 }
 
 void emitCastString(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, ConvTVToStr, ConvNoticeData{}, src));
-  decRef(env, src, DecRefProfileId::Default);
+  decRef(env, src);
 }
 
 //////////////////////////////////////////////////////////////////////

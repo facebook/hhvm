@@ -482,7 +482,7 @@ void emitAddElemC(IRGS& env) {
   auto const key = convertClassKey(env, popC(env));
   auto const arr = popC(env);
   push(env, gen(env, DictSet, arr, key, val));
-  decRef(env, key, DecRefProfileId::Default);
+  decRef(env, key);
 }
 
 void emitAddNewElemC(IRGS& env) {
@@ -495,7 +495,7 @@ void emitAddNewElemC(IRGS& env) {
   auto const arr = popC(env);
   auto const op = arr->isA(TVec) ? AddNewElemVec : AddNewElemKeyset;
   push(env, gen(env, op, arr, val));
-  decRef(env, val, DecRefProfileId::Default);
+  decRef(env, val);
 }
 
 void emitNewCol(IRGS& env, CollectionType type) {
@@ -540,7 +540,7 @@ void emitCheckClsReifiedGenericMismatch(IRGS& env) {
     PUNT(CheckClsReifiedGenericMismatch-InvalidTS);
   }
   gen(env, CheckClsReifiedGenericMismatch, cns(env, cls), reified);
-  popDecRef(env, DecRefProfileId::Default);
+  popDecRef(env);
 }
 
 void emitClassHasReifiedGenerics(IRGS& env) {
@@ -548,7 +548,7 @@ void emitClassHasReifiedGenerics(IRGS& env) {
   if (!cls_->isA(TCls) && !cls_->isA(TLazyCls)) return interpOne(env);
   auto const cls = cls_->isA(TLazyCls) ? ldCls(env, cls_) : cls_;
   auto const result = gen(env, ClassHasReifiedGenerics, cls);
-  popDecRef(env, DecRefProfileId::Default);
+  popDecRef(env);
   push(env, result);
 }
 
@@ -558,7 +558,7 @@ void emitGetClsRGProp(IRGS& env) {
   auto const cls = cls_->isA(TLazyCls) ? ldCls(env, cls_) : cls_;
   auto const thiz = checkAndLoadThis(env);
   auto const result = gen(env, GetClsRGProp, cls, thiz);
-  popDecRef(env, DecRefProfileId::Default);
+  popDecRef(env);
   push(env, result);
 }
 
@@ -567,7 +567,7 @@ void emitHasReifiedParent(IRGS& env) {
   if (!cls_->isA(TCls) && !cls_->isA(TLazyCls)) return interpOne(env);
   auto const cls = cls_->isA(TLazyCls) ? ldCls(env, cls_) : cls_;
   auto const result = gen(env, HasReifiedParent, cls);
-  popDecRef(env, DecRefProfileId::Default);
+  popDecRef(env);
   push(env, result);
 }
 
@@ -576,7 +576,7 @@ void emitCheckClsRGSoft(IRGS& env) {
   if (!cls_->isA(TCls) && !cls_->isA(TLazyCls)) return interpOne(env);
   auto const cls = cls_->isA(TLazyCls) ? ldCls(env, cls_) : cls_;
   gen(env, CheckClsRGSoft, cls);
-  popDecRef(env, DecRefProfileId::Default);
+  popDecRef(env);
 }
 
 //////////////////////////////////////////////////////////////////////

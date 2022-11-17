@@ -643,7 +643,7 @@ void emitSpecializedInit(IRGS& env, const Accessor& accessor,
   ifThen(env,
     [&](Block* taken) { gen(env, JmpZero, taken, size); },
     [&]{
-      if (!local) decRef(env, arr, DecRefProfileId::Default);
+      if (!local) decRef(env, arr);
       gen(env, Jmp, done);
     }
   );
@@ -738,7 +738,7 @@ void emitSpecializedNext(IRGS& env, const Accessor& accessor,
         // this load in the loop, because it's dead there for pointer iters,
         auto const base = iterBase(env, accessor, data, baseLocalId);
         gen(env, KillIter, id, fp(env));
-        decRef(env, base, DecRefProfileId::Default);
+        decRef(env, base);
       }
     }
   );

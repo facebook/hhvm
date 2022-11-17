@@ -105,7 +105,7 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
   if (!callee->hasReifiedGenerics()) {
     // FIXME: leaks memory if generics were given but not expected nor pushed.
     if (pushed) {
-      popDecRef(env, DecRefProfileId::Default);
+      popDecRef(env);
       updateMarker(env);
       env.irb->exceptionStackBoundary();
     }

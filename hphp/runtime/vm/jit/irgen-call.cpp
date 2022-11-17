@@ -910,7 +910,7 @@ void optimizeProfiledCallMethod(IRGS& env,
     if (!callee->isStaticInPrologue()) return ctx;
     assertx(ctx->type() <= TObj);
     auto ret = cls ? cns(env, cls) : gen(env, LdObjClass, ctx);
-    decRef(env, ctx, DecRefProfileId::Default);
+    decRef(env, ctx);
     return ret;
   };
 
@@ -1200,7 +1200,7 @@ void fcallFuncRFunc(IRGS& env, const FCallArgs& fca) {
   auto const generics = gen(env, LdGenericsFromRFunc, rfunc);
   gen(env, IncRef, generics);
 
-  popDecRef(env, DecRefProfileId::Default);
+  popDecRef(env);
   push(env, generics);
   updateStackOffset(env);
   prepareAndCallProfiled(env, func, fca.withGenerics(), nullptr, false, false);
@@ -1226,7 +1226,7 @@ void fcallFuncRClsMeth(IRGS& env, const FCallArgs& fca) {
   auto const generics = gen(env, LdGenericsFromRClsMeth, rclsMeth);
   gen(env, IncRef, generics);
 
-  popDecRef(env, DecRefProfileId::Default);
+  popDecRef(env);
   push(env, generics);
   updateStackOffset(env);
   prepareAndCallProfiled(env, func, fca.withGenerics(), cls, false, false);
@@ -1239,7 +1239,7 @@ void fcallFuncStr(IRGS& env, const FCallArgs& fca) {
   // TODO: improve this if str->hasConstVal()
   auto const funcN = gen(env, LdFunc, str);
   auto const func = gen(env, CheckNonNull, makeExitSlow(env), funcN);
-  popDecRef(env, DecRefProfileId::Default);
+  popDecRef(env);
   updateStackOffset(env);
   emitModuleBoundaryCheck(env, func);
   prepareAndCallProfiled(env, func, fca, nullptr, true, false);
@@ -1409,7 +1409,7 @@ void emitResolveRFunc(IRGS& env, const StringData* name) {
       push(env, gen(env, NewRFunc, funcTmp, tsList));
     },
     [&] {
-      decRef(env, tsList, DecRefProfileId::Default);
+      decRef(env, tsList);
       push(env, funcTmp);
     }
   );
@@ -1725,7 +1725,7 @@ void checkGenericsAndResolveRClsMeth(IRGS& env, SSATmp* cls, SSATmp* func,
     },
     [&] {
       push(env, gen(env, NewClsMeth, cls, func));
-      decRef(env, tsList, DecRefProfileId::Default);
+      decRef(env, tsList);
     }
   );
 }
@@ -1888,7 +1888,7 @@ void fcallClsMethodCommon(IRGS& env,
     }
 
     auto const ctx = forward ? ldCtxCls(env) : clsVal;
-    decRef(env, methVal, DecRefProfileId::Default);
+    decRef(env, methVal);
     discard(env, numExtraInputs);
     if (noCallProfiling) {
       prepareAndCallUnknown(env, func, fca, ctx,
@@ -1982,7 +1982,7 @@ void emitFCallClsMethodM(IRGS& env, FCallArgs fca, const StringData* clsHint,
     auto const ret = name->isA(TObj) ?
       gen(env, LdObjClass, name) : ldCls(env, name);
     if (name->isA(TStr)) emitModuleBoundaryCheck(env, ret, false);
-    decRef(env, name, DecRefProfileId::Default);
+    decRef(env, name);
     return ret;
   }();
 

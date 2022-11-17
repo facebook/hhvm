@@ -724,7 +724,7 @@ void emitBitNot(IRGS& env) {
 void emitNot(IRGS& env) {
   auto const src = popC(env);
   push(env, negate(env, gen(env, ConvTVToBool, src)));
-  decRef(env, src, DecRefProfileId::Default);
+  decRef(env, src);
 }
 
 const StaticString s_DIVISION_BY_ZERO(Strings::DIVISION_BY_ZERO);

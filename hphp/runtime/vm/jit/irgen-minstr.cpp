@@ -1195,7 +1195,7 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {
     auto const oldVal = gen(env, LdMem, propInfo->knownType, propPtr);
     gen(env, IncRef, newVal);
     gen(env, StMem, propPtr, newVal);
-    decRef(env, oldVal, DecRefProfileId::Default);
+    decRef(env, oldVal);
   } else {
     gen(
       env,
@@ -1426,7 +1426,7 @@ SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, Finish finish) {
       } else if (t == TStaticStr) {
         // Base is a string. Stack result is a new string so we're responsible
         // for decreffing value.
-        decRef(env, value, DecRefProfileId::Default);
+        decRef(env, value);
         value = result;
       } else {
         assertx(t == (TStaticStr | TNullptr));
@@ -2188,7 +2188,7 @@ void emitSetOpM(IRGS& env, uint32_t nDiscard, SetOpOp op, MemberKey mk) {
   auto rhs = topC(env);
 
   auto const finish = [&] (SSATmp* result) {
-    popDecRef(env, DecRefProfileId::Default);
+    popDecRef(env);
     mFinalImpl(env, nDiscard, result);
   };
   auto const result = [&] {

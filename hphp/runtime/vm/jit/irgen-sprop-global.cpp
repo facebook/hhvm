@@ -35,13 +35,13 @@ void bindMem(IRGS& env, SSATmp* ptr, SSATmp* src, Type prevTy) {
   auto const prevValue = gen(env, LdMem, prevTy, ptr);
   pushIncRef(env, src);
   gen(env, StMem, ptr, src);
-  decRef(env, prevValue, DecRefProfileId::Default);
+  decRef(env, prevValue);
 }
 
 void destroyName(IRGS& env, SSATmp* name) {
   if (env.irb->inUnreachableState()) return;
   assertx(name == topC(env));
-  popDecRef(env, DecRefProfileId::Default);
+  popDecRef(env);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -426,7 +426,7 @@ void emitIncDecS(IRGS& env, IncDecOp subop) {
 
   gen(env, StMem, lookup.propPtr, result);
   gen(env, IncRef, result);
-  decRef(env, oldVal, DecRefProfileId::Default);
+  decRef(env, oldVal);
 }
 
 //////////////////////////////////////////////////////////////////////

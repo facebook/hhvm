@@ -195,7 +195,7 @@ void emitClsCnsL(IRGS& env, int32_t id) {
     emitClsCns(env, cnsName->strVal());
   } else {
     auto const cns = gen(env, LookupClsCns, cls, cnsName);
-    popDecRef(env, DecRefProfileId::Default);
+    popDecRef(env);
     pushIncRef(env, cns);
   }
 }

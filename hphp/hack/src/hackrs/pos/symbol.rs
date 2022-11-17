@@ -37,6 +37,10 @@ impl Symbol {
     pub fn as_str(&self) -> &'static str {
         self.0.as_str()
     }
+
+    pub fn as_bytes(&self) -> &'static [u8] {
+        self.0.as_str().as_bytes()
+    }
 }
 
 impl std::ops::Deref for Symbol {
@@ -246,6 +250,18 @@ macro_rules! common_impls {
         impl std::convert::AsRef<str> for $name {
             fn as_ref(&self) -> &str {
                 self.as_str()
+            }
+        }
+
+        impl std::borrow::Borrow<str> for $name {
+            fn borrow(&self) -> &str {
+                self.as_str()
+            }
+        }
+
+        impl std::borrow::Borrow<[u8]> for $name {
+            fn borrow(&self) -> &[u8] {
+                self.as_bytes()
             }
         }
 

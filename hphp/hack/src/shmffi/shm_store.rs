@@ -6,6 +6,7 @@
 #![feature(allocator_api)]
 
 use std::alloc::Layout;
+use std::borrow::Borrow;
 use std::borrow::Cow;
 use std::hash::Hash;
 use std::hash::Hasher;
@@ -245,10 +246,19 @@ impl<K, V> std::fmt::Debug for ShmStore<K, V> {
 /// custom hashing trait and hash the entire string representation of the
 /// symbol. We might want to revisit this later and see whether there's a way to
 /// hash these less expensively.
+///
+/// If an implementor of this trait also implements `Borrow<[u8]>`, its impl of
+/// `hash_key` must behave the same as `impl Key for [u8]` (which just invokes
+/// `self.hash(state)`).
 pub trait Key {
     fn hash_key<H: Hasher>(&self, state: &mut H);
 }
 
+impl Key for [u8] {
+    fn hash_key<H: Hasher>(&self, state: &mut H) {
+        self.hash(state);
+    }
+}
 impl Key for pos::TypeName {
     fn hash_key<H: Hasher>(&self, state: &mut H) {
         self.as_str().hash(state);
@@ -329,7 +339,10 @@ where
     /// trigger a GC, so no unrooted OCaml values may exist. The returned
     /// `UnsafeOcamlPtr` is unrooted and could be invalidated if the GC is
     /// triggered after this method returns.
-    pub unsafe fn get_ocaml_value(&self, key: K) -> Option<UnsafeOcamlPtr> {
+    pub unsafe fn get_ocaml_value(&self, key: &[u8]) -> Option<UnsafeOcamlPtr>
+    where
+        K: Borrow<[u8]>,
+    {
         shmffi::with(|segment| {
             segment.table.get(&self.hash_key(key)).map(|heap_value| {
                 extern "C" {
@@ -349,7 +362,10 @@ where
         })
     }
 
-    fn hash_key(&self, key: K) -> u64 {
+    fn hash_key<Q: ?Sized + Key>(&self, key: &Q) -> u64
+    where
+        K: Borrow<Q>,
+    {
         let mut hasher = hash::Hasher::default();
         self.prefix.hash(&mut hasher);
         key.hash_key(&mut hasher);
@@ -367,7 +383,7 @@ where
             return Ok(true);
         }
         Ok(shmffi::with(|segment| {
-            segment.table.contains_key(&self.hash_key(key))
+            segment.table.contains_key(&self.hash_key(&key))
         }))
     }
 
@@ -375,7 +391,7 @@ where
         if let Some(val) = self.cache.lock().get(&key) {
             return Ok(Some(val.clone()));
         }
-        let hash = self.hash_key(key);
+        let hash = self.hash_key(&key);
         let val_opt: Option<V> = shmffi::with(|segment| {
             segment
                 .table
@@ -413,7 +429,7 @@ where
         let blob = ocaml_blob::SerializedValue::BStr(&bytes);
         let _did_insert = shmffi::with(|segment| {
             segment.table.insert(
-                self.hash_key(key),
+                self.hash_key(&key),
                 Some(Layout::from_size_align(blob.as_slice().len(), 1).unwrap()),
                 self.evictable,
                 |buffer| blob.to_heap_value_in(self.evictable, buffer),
@@ -425,8 +441,8 @@ where
     fn move_batch(&self, keys: &mut dyn Iterator<Item = (K, K)>) -> Result<()> {
         let mut cache = self.cache.lock();
         for (old_key, new_key) in keys {
-            let old_hash = self.hash_key(old_key);
-            let new_hash = self.hash_key(new_key);
+            let old_hash = self.hash_key(&old_key);
+            let new_hash = self.hash_key(&new_key);
             shmffi::with(|segment| {
                 let (header, data) = segment.table.inspect_and_remove(&old_hash, |value| {
                     let value = value.unwrap();
@@ -454,7 +470,7 @@ where
     fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()> {
         let mut cache = self.cache.lock();
         for key in keys {
-            let hash = self.hash_key(key);
+            let hash = self.hash_key(&key);
             let _size = shmffi::with(|segment| {
                 segment
                     .table

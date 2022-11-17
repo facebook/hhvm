@@ -734,50 +734,30 @@ impl HhServerProviderBackend {
     /// with no concurrent interaction with the OCaml runtime. The returned
     /// `UnsafeOcamlPtr` is unrooted and could be invalidated if the GC is
     /// triggered after this method returns.
-    pub unsafe fn get_ocaml_shallow_class(&self, name: TypeName) -> Option<UnsafeOcamlPtr> {
-        if self.shallow_decl_changes_store.classes.has_local_change(name) { None }
+    pub unsafe fn get_ocaml_shallow_class(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+        if self.shallow_decl_changes_store.classes.has_local_changes() { None }
         else { self.shallow_decl_changes_store.classes_shm.get_ocaml_value(name) }
     }
-    pub unsafe fn get_ocaml_typedef(&self, name: TypeName) -> Option<UnsafeOcamlPtr> {
-        if self.shallow_decl_changes_store.typedefs.has_local_change(name) { None }
+    pub unsafe fn get_ocaml_typedef(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+        if self.shallow_decl_changes_store.typedefs.has_local_changes() { None }
         else { self.shallow_decl_changes_store.typedefs_shm.get_ocaml_value(name) }
     }
-    pub unsafe fn get_ocaml_fun(&self, name: pos::FunName) -> Option<UnsafeOcamlPtr> {
-        if self.shallow_decl_changes_store.funs.has_local_change(name) { None }
+    pub unsafe fn get_ocaml_fun(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+        if self.shallow_decl_changes_store.funs.has_local_changes() { None }
         else { self.shallow_decl_changes_store.funs_shm.get_ocaml_value(name) }
     }
-    pub unsafe fn get_ocaml_const(&self, name: pos::ConstName) -> Option<UnsafeOcamlPtr> {
-        if self.shallow_decl_changes_store.consts.has_local_change(name) { None }
+    pub unsafe fn get_ocaml_const(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+        if self.shallow_decl_changes_store.consts.has_local_changes() { None }
         else { self.shallow_decl_changes_store.consts_shm.get_ocaml_value(name) }
     }
-    pub unsafe fn get_ocaml_module(&self, name: pos::ModuleName) -> Option<UnsafeOcamlPtr> {
-        if self.shallow_decl_changes_store.modules.has_local_change(name) { None }
+    pub unsafe fn get_ocaml_module(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+        if self.shallow_decl_changes_store.modules.has_local_changes() { None }
         else { self.shallow_decl_changes_store.modules_shm.get_ocaml_value(name) }
     }
 
-    pub unsafe fn get_ocaml_folded_class(&self, name: TypeName) -> Option<UnsafeOcamlPtr> {
-        if self.folded_classes_store.has_local_change(name) { None }
+    pub unsafe fn get_ocaml_folded_class(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+        if self.folded_classes_store.has_local_changes() { None }
         else { self.folded_classes_shm.get_ocaml_value(name) }
-    }
-    pub unsafe fn get_ocaml_property(&self, name: (TypeName, pos::PropName)) -> Option<UnsafeOcamlPtr> {
-        if self.shallow_decl_changes_store.props.has_local_change(name) { None }
-        else { self.shallow_decl_changes_store.props_shm.get_ocaml_value(name) }
-    }
-    pub unsafe fn get_ocaml_static_property(&self, name: (TypeName, pos::PropName)) -> Option<UnsafeOcamlPtr> {
-        if self.shallow_decl_changes_store.static_props.has_local_change(name) { None }
-        else { self.shallow_decl_changes_store.static_props_shm.get_ocaml_value(name) }
-    }
-    pub unsafe fn get_ocaml_method(&self, name: (TypeName, pos::MethodName)) -> Option<UnsafeOcamlPtr> {
-        if self.shallow_decl_changes_store.methods.has_local_change(name) { None }
-        else { self.shallow_decl_changes_store.methods_shm.get_ocaml_value(name) }
-    }
-    pub unsafe fn get_ocaml_static_method(&self, name: (TypeName, pos::MethodName)) -> Option<UnsafeOcamlPtr> {
-        if self.shallow_decl_changes_store.static_methods.has_local_change(name) { None }
-        else { self.shallow_decl_changes_store.static_methods_shm.get_ocaml_value(name) }
-    }
-    pub unsafe fn get_ocaml_constructor(&self, name: TypeName) -> Option<UnsafeOcamlPtr> {
-        if self.shallow_decl_changes_store.constructors.has_local_change(name) { None }
-        else { self.shallow_decl_changes_store.constructors_shm.get_ocaml_value(name) }
     }
 }
 
@@ -794,15 +774,10 @@ struct ShallowStoreWithChanges {
     modules:            Arc<ChangesStore <pos::ModuleName, Arc<decl::ModuleDecl<BR>>>>,
     modules_shm:        Arc<OcamlShmStore<pos::ModuleName, Arc<decl::ModuleDecl<BR>>>>,
     props:              Arc<ChangesStore <(TypeName, pos::PropName), decl::Ty<BR>>>,
-    props_shm:          Arc<OcamlShmStore<(TypeName, pos::PropName), decl::Ty<BR>>>,
     static_props:       Arc<ChangesStore <(TypeName, pos::PropName), decl::Ty<BR>>>,
-    static_props_shm:   Arc<OcamlShmStore<(TypeName, pos::PropName), decl::Ty<BR>>>,
     methods:            Arc<ChangesStore <(TypeName, pos::MethodName), decl::Ty<BR>>>,
-    methods_shm:        Arc<OcamlShmStore<(TypeName, pos::MethodName), decl::Ty<BR>>>,
     static_methods:     Arc<ChangesStore <(TypeName, pos::MethodName), decl::Ty<BR>>>,
-    static_methods_shm: Arc<OcamlShmStore<(TypeName, pos::MethodName), decl::Ty<BR>>>,
     constructors:       Arc<ChangesStore <TypeName, decl::Ty<BR>>>,
-    constructors_shm:   Arc<OcamlShmStore<TypeName, decl::Ty<BR>>>,
     store_view: Arc<ShallowDeclStore<BR>>,
 }
 
@@ -826,11 +801,11 @@ impl ShallowStoreWithChanges {
         let funs =           Arc::new(ChangesStore::new(Arc::clone(&funs_shm) as _));
         let consts =         Arc::new(ChangesStore::new(Arc::clone(&consts_shm) as _));
         let modules =        Arc::new(ChangesStore::new(Arc::clone(&modules_shm) as _));
-        let props =          Arc::new(ChangesStore::new(Arc::clone(&props_shm) as _));
-        let static_props =   Arc::new(ChangesStore::new(Arc::clone(&static_props_shm) as _));
-        let methods =        Arc::new(ChangesStore::new(Arc::clone(&methods_shm) as _));
-        let static_methods = Arc::new(ChangesStore::new(Arc::clone(&static_methods_shm) as _));
-        let constructors =   Arc::new(ChangesStore::new(Arc::clone(&constructors_shm) as _));
+        let props =          Arc::new(ChangesStore::new(props_shm));
+        let static_props =   Arc::new(ChangesStore::new(static_props_shm));
+        let methods =        Arc::new(ChangesStore::new(methods_shm));
+        let static_methods = Arc::new(ChangesStore::new(static_methods_shm));
+        let constructors =   Arc::new(ChangesStore::new(constructors_shm));
 
         let store_view = if populate_member_heaps {
             Arc::new(ShallowDeclStore::new(
@@ -870,11 +845,6 @@ impl ShallowStoreWithChanges {
             funs_shm,
             consts_shm,
             modules_shm,
-            props_shm,
-            static_props_shm,
-            methods_shm,
-            static_methods_shm,
-            constructors_shm,
             store_view,
         }
     }

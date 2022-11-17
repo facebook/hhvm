@@ -192,13 +192,17 @@ fn to_ocaml<T: ToOcamlRep + ?Sized>(value: &T) -> UnsafeOcamlPtr {
 ocaml_ffi! {
     fn hh_rust_provider_backend_get_fun(
         backend: Backend,
-        name: pos::FunName,
+        name: UnsafeOcamlPtr,
     ) -> UnsafeOcamlPtr {
+        // SAFETY: We have to make sure not to use this value after calling into
+        // the OCaml runtime (e.g. after invoking `backend.get_ocaml_*`).
+        let name = unsafe { name.as_value().as_byte_string().unwrap() };
         if let Some(backend) = backend.as_hh_server_backend() {
             if let opt @ Some(_) = unsafe { backend.get_ocaml_fun(name) } {
                 return to_ocaml(&opt);
             }
         }
+        let name = pos::FunName::from(std::str::from_utf8(name).unwrap());
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<Arc<decl::FunDecl<BReason>>> = backend.folded_decl_provider()
@@ -217,12 +221,16 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_get_shallow_class(
         backend: Backend,
-        name: pos::TypeName,
+        name: UnsafeOcamlPtr,
     ) -> Option<UnsafeOcamlPtr> {
+        // SAFETY: We have to make sure not to use this value after calling into
+        // the OCaml runtime (e.g. after invoking `backend.get_ocaml_*`).
+        let name = unsafe { name.as_value().as_byte_string().unwrap() };
         if let Some(backend) = backend.as_hh_server_backend() {
             if let opt @ Some(_) = unsafe { backend.get_ocaml_shallow_class(name) } {
                 return opt;
             }
+            let name = pos::TypeName::from(std::str::from_utf8(name).unwrap());
             let c: Option<Arc<decl::ShallowClass<BReason>>> =
                 backend.shallow_decl_provider().get_class(name).unwrap();
             c.as_ref().map(to_ocaml)
@@ -233,13 +241,17 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_get_typedef(
         backend: Backend,
-        name: pos::TypeName,
+        name: UnsafeOcamlPtr,
     ) -> UnsafeOcamlPtr {
+        // SAFETY: We have to make sure not to use this value after calling into
+        // the OCaml runtime (e.g. after invoking `backend.get_ocaml_*`).
+        let name = unsafe { name.as_value().as_byte_string().unwrap() };
         if let Some(backend) = backend.as_hh_server_backend() {
             if let opt @ Some(_) = unsafe { backend.get_ocaml_typedef(name) } {
                 return to_ocaml(&opt);
             }
         }
+        let name = pos::TypeName::from(std::str::from_utf8(name).unwrap());
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<Arc<decl::TypedefDecl<BReason>>> = backend.folded_decl_provider()
@@ -258,13 +270,17 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_get_gconst(
         backend: Backend,
-        name: pos::ConstName,
+        name: UnsafeOcamlPtr,
     ) -> UnsafeOcamlPtr {
+        // SAFETY: We have to make sure not to use this value after calling into
+        // the OCaml runtime (e.g. after invoking `backend.get_ocaml_*`).
+        let name = unsafe { name.as_value().as_byte_string().unwrap() };
         if let Some(backend) = backend.as_hh_server_backend() {
             if let opt @ Some(_) = unsafe { backend.get_ocaml_const(name) } {
                 return to_ocaml(&opt);
             }
         }
+        let name = pos::ConstName::from(std::str::from_utf8(name).unwrap());
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<Arc<decl::ConstDecl<BReason>>> = backend.folded_decl_provider()
@@ -283,13 +299,17 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_get_module(
         backend: Backend,
-        name: pos::ModuleName,
+        name: UnsafeOcamlPtr,
     ) -> UnsafeOcamlPtr {
+        // SAFETY: We have to make sure not to use this value after calling into
+        // the OCaml runtime (e.g. after invoking `backend.get_ocaml_*`).
+        let name = unsafe { name.as_value().as_byte_string().unwrap() };
         if let Some(backend) = backend.as_hh_server_backend() {
             if let opt @ Some(_) = unsafe { backend.get_ocaml_module(name) } {
                 return to_ocaml(&opt);
             }
         }
+        let name = pos::ModuleName::from(std::str::from_utf8(name).unwrap());
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<Arc<decl::ModuleDecl<BReason>>> = backend.folded_decl_provider()
@@ -308,7 +328,7 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_get_prop(
         backend: Backend,
-        name: (pos::TypeName, pos::PropName),
+        name: UnsafeOcamlPtr,
     ) -> UnsafeOcamlPtr {
         if let Some(backend) = backend.as_hh_server_backend() {
             // If we're not populating member heaps, return None to trigger lazy
@@ -321,10 +341,8 @@ ocaml_ffi! {
             if !backend.opts().tco_populate_member_heaps {
                 return to_ocaml(&None::<()>);
             }
-            if let opt @ Some(_) = unsafe { backend.get_ocaml_property(name) } {
-                return to_ocaml(&opt);
-            }
         }
+        let name = <(pos::TypeName, pos::PropName)>::from_ocamlrep(unsafe { name.as_value() }).unwrap();
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
@@ -343,17 +361,15 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_get_static_prop(
         backend: Backend,
-        name: (pos::TypeName, pos::PropName),
+        name: UnsafeOcamlPtr,
     ) -> UnsafeOcamlPtr {
         if let Some(backend) = backend.as_hh_server_backend() {
             // Let OCaml do the lazy member lookup
             if !backend.opts().tco_populate_member_heaps {
                 return to_ocaml(&None::<()>);
             }
-            if let opt @ Some(_) = unsafe { backend.get_ocaml_static_property(name) } {
-                return to_ocaml(&opt);
-            }
         }
+        let name = <(pos::TypeName, pos::PropName)>::from_ocamlrep(unsafe { name.as_value() }).unwrap();
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
@@ -372,17 +388,15 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_get_method(
         backend: Backend,
-        name: (pos::TypeName, pos::MethodName),
+        name: UnsafeOcamlPtr,
     ) -> UnsafeOcamlPtr {
         if let Some(backend) = backend.as_hh_server_backend() {
             // Let OCaml do the lazy member lookup
             if !backend.opts().tco_populate_member_heaps {
                 return to_ocaml(&None::<()>);
             }
-            if let opt @ Some(_) = unsafe { backend.get_ocaml_method(name) } {
-                return to_ocaml(&opt);
-            }
         }
+        let name = <(pos::TypeName, pos::MethodName)>::from_ocamlrep(unsafe { name.as_value() }).unwrap();
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
@@ -401,17 +415,15 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_get_static_method(
         backend: Backend,
-        name: (pos::TypeName, pos::MethodName),
+        name: UnsafeOcamlPtr,
     ) -> UnsafeOcamlPtr {
         if let Some(backend) = backend.as_hh_server_backend() {
             // Let OCaml do the lazy member lookup
             if !backend.opts().tco_populate_member_heaps {
                 return to_ocaml(&None::<()>);
             }
-            if let opt @ Some(_) = unsafe { backend.get_ocaml_static_method(name) } {
-                return to_ocaml(&opt);
-            }
         }
+        let name = <(pos::TypeName, pos::MethodName)>::from_ocamlrep(unsafe { name.as_value() }).unwrap();
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
@@ -430,17 +442,15 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_get_constructor(
         backend: Backend,
-        name: pos::TypeName,
+        name: UnsafeOcamlPtr,
     ) -> UnsafeOcamlPtr {
         if let Some(backend) = backend.as_hh_server_backend() {
             // Let OCaml do the lazy member lookup
             if !backend.opts().tco_populate_member_heaps {
                 return to_ocaml(&None::<()>);
             }
-            if let opt @ Some(_) = unsafe { backend.get_ocaml_constructor(name) } {
-                return to_ocaml(&opt);
-            }
         }
+        let name = pos::TypeName::from_ocamlrep(unsafe { name.as_value() }).unwrap();
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
@@ -459,13 +469,17 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_get_folded_class(
         backend: Backend,
-        name: pos::TypeName,
+        name: UnsafeOcamlPtr,
     ) -> UnsafeOcamlPtr {
+        // SAFETY: We have to make sure not to use this value after calling into
+        // the OCaml runtime (e.g. after invoking `backend.get_ocaml_*`).
+        let name = unsafe { name.as_value().as_byte_string().unwrap() };
         if let Some(backend) = backend.as_hh_server_backend() {
             if let opt @ Some(_) = unsafe { backend.get_ocaml_folded_class(name) } {
                 return to_ocaml(&opt);
             }
         }
+        let name = pos::TypeName::from(std::str::from_utf8(name).unwrap());
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<Arc<decl::FoldedClass<BReason>>> = backend.folded_decl_provider()

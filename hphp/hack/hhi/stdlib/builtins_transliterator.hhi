@@ -3,8 +3,8 @@
 // Based on runtime/ext/icu/ext_icu_transliterator.php
 
 class Transliterator {
-  const int FORWARD = 0;
-  const int REVERSE = 1;
+  const int FORWARD;
+  const int REVERSE;
 
   public string $id = '';
 

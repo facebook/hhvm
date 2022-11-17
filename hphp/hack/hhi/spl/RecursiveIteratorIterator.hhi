@@ -11,17 +11,17 @@
 class RecursiveIteratorIterator<Tv> implements OuterIterator<Tv> {
 
   // Constants
-  const int LEAVES_ONLY = 0;
-  const int SELF_FIRST = 1;
-  const int CHILD_FIRST = 2;
-  const int CATCH_GET_CHILD = 16;
-  const int STATE_NEXT = 10;
-  const int STATE_TEST = 11;
-  const int STATE_SELF = 12;
-  const int STATE_CHILD = 13;
-  const int STATE_START = 14;
-  const int NEXT_COMPLETE = 10;
-  const int NEXT_REPEAT = 11;
+  const int LEAVES_ONLY;
+  const int SELF_FIRST;
+  const int CHILD_FIRST;
+  const int CATCH_GET_CHILD;
+  const int STATE_NEXT;
+  const int STATE_TEST;
+  const int STATE_SELF;
+  const int STATE_CHILD;
+  const int STATE_START;
+  const int NEXT_COMPLETE;
+  const int NEXT_REPEAT;
 
   // Methods
   public function __construct(

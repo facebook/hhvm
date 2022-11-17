@@ -877,30 +877,30 @@ function resourcebundle_locales(
 ): HH\FIXME\MISSING_RETURN_TYPE;
 
 class Collator {
-  const int SORT_REGULAR = 0;
-  const int SORT_NUMERIC = 0;
-  const int SORT_STRING = 0;
-  const int FRENCH_COLLATION = 0;
-  const int ALTERNATE_HANDLING = 0;
-  const int CASE_FIRST = 0;
-  const int CASE_LEVEL = 0;
-  const int NORMALIZATION_MODE = 0;
-  const int STRENGTH = 0;
-  const int HIRAGANA_QUATERNARY_MODE = 0;
-  const int NUMERIC_COLLATION = 0;
-  const int DEFAULT_VALUE = 0;
-  const int PRIMARY = 0;
-  const int SECONDARY = 0;
-  const int TERTIARY = 0;
-  const int DEFAULT_STRENGTH = 0;
-  const int QUATERNARY = 0;
-  const int IDENTICAL = 0;
-  const int OFF = 0;
-  const int ON = 0;
-  const int SHIFTED = 0;
-  const int NON_IGNORABLE = 0;
-  const int LOWER_FIRST = 0;
-  const int UPPER_FIRST = 0;
+  const int SORT_REGULAR;
+  const int SORT_NUMERIC;
+  const int SORT_STRING;
+  const int FRENCH_COLLATION;
+  const int ALTERNATE_HANDLING;
+  const int CASE_FIRST;
+  const int CASE_LEVEL;
+  const int NORMALIZATION_MODE;
+  const int STRENGTH;
+  const int HIRAGANA_QUATERNARY_MODE;
+  const int NUMERIC_COLLATION;
+  const int DEFAULT_VALUE;
+  const int PRIMARY;
+  const int SECONDARY;
+  const int TERTIARY;
+  const int DEFAULT_STRENGTH;
+  const int QUATERNARY;
+  const int IDENTICAL;
+  const int OFF;
+  const int ON;
+  const int SHIFTED;
+  const int NON_IGNORABLE;
+  const int LOWER_FIRST;
+  const int UPPER_FIRST;
 
   public function __construct(string $locale);
   public function asort(
@@ -928,16 +928,16 @@ class Collator {
 }
 
 class Locale {
-  const int ACTUAL_LOCALE = 0;
-  const int VALID_LOCALE = 1;
-  const string DEFAULT_LOCALE = '';
-  const string LANG_TAG = 'language';
-  const string EXTLANG_TAG = 'extlang';
-  const string SCRIPT_TAG = 'script';
-  const string REGION_TAG = 'region';
-  const string VARIANT_TAG = 'variant';
-  const string GRANDFATHERED_LANG_TAG = 'grandfathered';
-  const string PRIVATE_TAG = 'private';
+  const int ACTUAL_LOCALE;
+  const int VALID_LOCALE;
+  const string DEFAULT_LOCALE;
+  const string LANG_TAG;
+  const string EXTLANG_TAG;
+  const string SCRIPT_TAG;
+  const string REGION_TAG;
+  const string VARIANT_TAG;
+  const string GRANDFATHERED_LANG_TAG;
+  const string PRIVATE_TAG;
 
   public static function acceptFromHttp(
     string $arg1,
@@ -996,15 +996,15 @@ class Locale {
 }
 
 class Normalizer {
-  const int NONE = 0;
-  const int FORM_D = 0;
-  const int NFD = 0;
-  const int FORM_KD = 0;
-  const int NFKD = 0;
-  const int FORM_C = 0;
-  const int NFC = 0;
-  const int FORM_KC = 0;
-  const int NFKC = 0;
+  const int NONE;
+  const int FORM_D;
+  const int NFD;
+  const int FORM_KD;
+  const int NFKD;
+  const int FORM_C;
+  const int NFC;
+  const int FORM_KC;
+  const int NFKC;
 
   static public function isNormalized(
     string $input,
@@ -1042,13 +1042,13 @@ class MessageFormatter {
 }
 
 class IntlDateFormatter {
-  const int FULL = 0;
-  const int LONG = 1;
-  const int MEDIUM = 2;
-  const int SHORT = 3;
-  const int NONE = -1;
-  const int GREGORIAN = 1;
-  const int TRADITIONAL = 0;
+  const int FULL;
+  const int LONG;
+  const int MEDIUM;
+  const int SHORT;
+  const int NONE;
+  const int GREGORIAN;
+  const int TRADITIONAL;
 
   public function __construct(
     string $locale,
@@ -1119,17 +1119,17 @@ class ResourceBundle<T> implements Traversable<T> {
 }
 
 class IntlTimeZone {
-  const int DISPLAY_SHORT = 1;
-  const int DISPLAY_LONG = 2;
-  const int DISPLAY_SHORT_GENERIC = 3;
-  const int DISPLAY_LONG_GENERIC = 4;
-  const int DISPLAY_SHORT_GMT = 5;
-  const int DISPLAY_LONG_GMT = 6;
-  const int DISPLAY_SHORT_COMMONLY_USED = 7;
-  const int DISPLAY_GENERIC_LOCATION = 8;
-  const int TYPE_ANY = 0;
-  const int TYPE_CANONICAL = 1;
-  const int TYPE_CANONICAL_LOCATION = 2;
+  const int DISPLAY_SHORT;
+  const int DISPLAY_LONG;
+  const int DISPLAY_SHORT_GENERIC;
+  const int DISPLAY_LONG_GENERIC;
+  const int DISPLAY_SHORT_GMT;
+  const int DISPLAY_LONG_GMT;
+  const int DISPLAY_SHORT_COMMONLY_USED;
+  const int DISPLAY_GENERIC_LOCATION;
+  const int TYPE_ANY;
+  const int TYPE_CANONICAL;
+  const int TYPE_CANONICAL_LOCATION;
 
   private function __construct();
   public static function countEquivalentIDs(
@@ -1188,45 +1188,45 @@ class IntlTimeZone {
 }
 
 class IntlCalendar {
-  const int FIELD_ERA = 0;
-  const int FIELD_YEAR = 1;
-  const int FIELD_MONTH = 2;
-  const int FIELD_WEEK_OF_YEAR = 3;
-  const int FIELD_WEEK_OF_MONTH = 4;
-  const int FIELD_DATE = 5;
-  const int FIELD_DAY_OF_YEAR = 6;
-  const int FIELD_DAY_OF_WEEK = 7;
-  const int FIELD_DAY_OF_WEEK_IN_MONTH = 8;
-  const int FIELD_AM_PM = 9;
-  const int FIELD_HOUR = 10;
-  const int FIELD_HOUR_OF_DAY = 11;
-  const int FIELD_MINUTE = 12;
-  const int FIELD_SECOND = 13;
-  const int FIELD_MILLISECOND = 14;
-  const int FIELD_ZONE_OFFSET = 15;
-  const int FIELD_DST_OFFSET = 16;
-  const int FIELD_YEAR_WOY = 17;
-  const int FIELD_DOW_LOCAL = 18;
-  const int FIELD_EXTENDED_YEAR = 19;
-  const int FIELD_JULIAN_DAY = 20;
-  const int FIELD_MILLISECONDS_IN_DAY = 21;
-  const int FIELD_IS_LEAP_MONTH = 22;
-  const int FIELD_FIELD_COUNT = 23;
-  const int FIELD_DAY_OF_MONTH = 5;
-  const int DOW_SUNDAY = 1;
-  const int DOW_MONDAY = 2;
-  const int DOW_TUESDAY = 3;
-  const int DOW_WEDNESDAY = 4;
-  const int DOW_THURSDAY = 5;
-  const int DOW_FRIDAY = 6;
-  const int DOW_SATURDAY = 7;
-  const int DOW_TYPE_WEEKDAY = 0;
-  const int DOW_TYPE_WEEKEND = 1;
-  const int DOW_TYPE_WEEKEND_OFFSET = 2;
-  const int DOW_TYPE_WEEKEND_CEASE = 3;
-  const int WALLTIME_FIRST = 1;
-  const int WALLTIME_LAST = 0;
-  const int WALLTIME_NEXT_VALID = 2;
+  const int FIELD_ERA;
+  const int FIELD_YEAR;
+  const int FIELD_MONTH;
+  const int FIELD_WEEK_OF_YEAR;
+  const int FIELD_WEEK_OF_MONTH;
+  const int FIELD_DATE;
+  const int FIELD_DAY_OF_YEAR;
+  const int FIELD_DAY_OF_WEEK;
+  const int FIELD_DAY_OF_WEEK_IN_MONTH;
+  const int FIELD_AM_PM;
+  const int FIELD_HOUR;
+  const int FIELD_HOUR_OF_DAY;
+  const int FIELD_MINUTE;
+  const int FIELD_SECOND;
+  const int FIELD_MILLISECOND;
+  const int FIELD_ZONE_OFFSET;
+  const int FIELD_DST_OFFSET;
+  const int FIELD_YEAR_WOY;
+  const int FIELD_DOW_LOCAL;
+  const int FIELD_EXTENDED_YEAR;
+  const int FIELD_JULIAN_DAY;
+  const int FIELD_MILLISECONDS_IN_DAY;
+  const int FIELD_IS_LEAP_MONTH;
+  const int FIELD_FIELD_COUNT;
+  const int FIELD_DAY_OF_MONTH;
+  const int DOW_SUNDAY;
+  const int DOW_MONDAY;
+  const int DOW_TUESDAY;
+  const int DOW_WEDNESDAY;
+  const int DOW_THURSDAY;
+  const int DOW_FRIDAY;
+  const int DOW_SATURDAY;
+  const int DOW_TYPE_WEEKDAY;
+  const int DOW_TYPE_WEEKEND;
+  const int DOW_TYPE_WEEKEND_OFFSET;
+  const int DOW_TYPE_WEEKEND_CEASE;
+  const int WALLTIME_FIRST;
+  const int WALLTIME_LAST;
+  const int WALLTIME_NEXT_VALID;
 
   private function __construct();
   public function add(int $field, int $amount): HH\FIXME\MISSING_RETURN_TYPE;
@@ -1329,25 +1329,25 @@ class IntlIterator<Tv> implements KeyedIterator<int, Tv> {
 class IntlBreakIterator implements KeyedTraversable<int, int> {
 
   // Constants
-  const int DONE = -1;
-  const int WORD_NONE = 0;
-  const int WORD_NONE_LIMIT = 100;
-  const int WORD_NUMBER = 100;
-  const int WORD_LETTER = 200;
-  const int WORD_KANA = 300;
-  const int WORD_KANA_LIMIT = 400;
-  const int WORD_IDEO = 400;
-  const int WORD_IDEO_LIMIT = 500;
-  const int LINE_SOFT = 0;
-  const int LINE_SOFT_LIMIT = 100;
-  const int LINE_HARD = 100;
-  const int LINE_HARD_LIMIT = 200;
-  const int SENTENCE_TERM = 0;
-  const int SENTENCE_SEP = 100;
-  const int WORD_NUMBER_LIMIT = 200;
-  const int WORD_LETTER_LIMIT = 300;
-  const int SENTENCE_TERM_LIMIT = 100;
-  const int SENTENCE_SEP_LIMIT = 200;
+  const int DONE;
+  const int WORD_NONE;
+  const int WORD_NONE_LIMIT;
+  const int WORD_NUMBER;
+  const int WORD_LETTER;
+  const int WORD_KANA;
+  const int WORD_KANA_LIMIT;
+  const int WORD_IDEO;
+  const int WORD_IDEO_LIMIT;
+  const int LINE_SOFT;
+  const int LINE_SOFT_LIMIT;
+  const int LINE_HARD;
+  const int LINE_HARD_LIMIT;
+  const int SENTENCE_TERM;
+  const int SENTENCE_SEP;
+  const int WORD_NUMBER_LIMIT;
+  const int WORD_LETTER_LIMIT;
+  const int SENTENCE_TERM_LIMIT;
+  const int SENTENCE_SEP_LIMIT;
 
   // Methods
   public static function createCharacterInstance(

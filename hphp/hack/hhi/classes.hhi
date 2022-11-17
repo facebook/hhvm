@@ -241,8 +241,8 @@ namespace HH {
 
   <<__SupportDynamicType>>
   final class RescheduleWaitHandle extends WaitableWaitHandle<void> {
-    const int QUEUE_DEFAULT = 0;
-    const int QUEUE_NO_PENDING_IO = 1;
+    const int QUEUE_DEFAULT;
+    const int QUEUE_NO_PENDING_IO;
     public static function create(
       int $queue,
       int $priority,

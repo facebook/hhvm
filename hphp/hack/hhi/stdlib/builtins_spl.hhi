@@ -122,10 +122,10 @@ class SplFileObject
     RecursiveIterator<HH\FIXME\POISON_MARKER<string>> {
 
   // Constants
-  const int DROP_NEW_LINE = 1;
-  const int READ_AHEAD = 2;
-  const int SKIP_EMPTY = 4;
-  const int READ_CSV = 8;
+  const int DROP_NEW_LINE;
+  const int READ_AHEAD;
+  const int SKIP_EMPTY;
+  const int READ_CSV;
 
   // Methods
   public function __construct(
@@ -216,9 +216,9 @@ class SplStack<T> extends SplDoublyLinkedList<T> {
 
 class SplPriorityQueue<T>
   implements Iterator<HH\FIXME\POISON_MARKER<T>>, Countable {
-  const int EXTR_BOTH = 3;
-  const int EXTR_PRIORITY = 2;
-  const int EXTR_DATA = 1;
+  const int EXTR_BOTH;
+  const int EXTR_PRIORITY;
+  const int EXTR_DATA;
   public function compare($a, $b): HH\FIXME\MISSING_RETURN_TYPE {}
   public function count(): int {}
   public function current(): HH\FIXME\POISON_MARKER<T> {}

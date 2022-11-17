@@ -8,28 +8,28 @@
  *
  */
 class XMLReader {
-  const int NONE = 0;
-  const int ELEMENT = 0;
-  const int ATTRIBUTE = 0;
-  const int TEXT = 0;
-  const int CDATA = 0;
-  const int ENTITY_REF = 0;
-  const int ENTITY = 0;
-  const int PI = 0;
-  const int COMMENT = 0;
-  const int DOC = 0;
-  const int DOC_TYPE = 0;
-  const int DOC_FRAGMENT = 0;
-  const int NOTATION = 0;
-  const int WHITESPACE = 0;
-  const int SIGNIFICANT_WHITESPACE = 0;
-  const int END_ELEMENT = 0;
-  const int END_ENTITY = 0;
-  const int XML_DECLARATION = 0;
-  const int LOADDTD = 0;
-  const int DEFAULTATTRS = 0;
-  const int VALIDATE = 0;
-  const int SUBST_ENTITIES = 0;
+  const int NONE;
+  const int ELEMENT;
+  const int ATTRIBUTE;
+  const int TEXT;
+  const int CDATA;
+  const int ENTITY_REF;
+  const int ENTITY;
+  const int PI;
+  const int COMMENT;
+  const int DOC;
+  const int DOC_TYPE;
+  const int DOC_FRAGMENT;
+  const int NOTATION;
+  const int WHITESPACE;
+  const int SIGNIFICANT_WHITESPACE;
+  const int END_ELEMENT;
+  const int END_ENTITY;
+  const int XML_DECLARATION;
+  const int LOADDTD;
+  const int DEFAULTATTRS;
+  const int VALIDATE;
+  const int SUBST_ENTITIES;
 
   public int $attributeCount;
   public string $baseURI;

@@ -9,13 +9,13 @@
  */
 
 class SpoofChecker {
-  const int SINGLE_SCRIPT_CONFUSABLE = 0;
-  const int MIXED_SCRIPT_CONFUSABLE = 0;
-  const int WHOLE_SCRIPT_CONFUSABLE = 0;
-  const int ANY_CASE = 0;
-  const int SINGLE_SCRIPT = 0;
-  const int INVISIBLE = 0;
-  const int CHAR_LIMIT = 0;
+  const int SINGLE_SCRIPT_CONFUSABLE;
+  const int MIXED_SCRIPT_CONFUSABLE;
+  const int WHOLE_SCRIPT_CONFUSABLE;
+  const int ANY_CASE;
+  const int SINGLE_SCRIPT;
+  const int INVISIBLE;
+  const int CHAR_LIMIT;
 
   public function __construct();
   public function isSuspicious(

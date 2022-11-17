@@ -24,9 +24,9 @@ class Reflection {
 
 class ReflectionClass implements Reflector {
 
-  const int IS_IMPLICIT_ABSTRACT = 16;
-  const int IS_EXPLICIT_ABSTRACT = 32;
-  const int IS_FINAL = 64;
+  const int IS_IMPLICIT_ABSTRACT;
+  const int IS_EXPLICIT_ABSTRACT;
+  const int IS_FINAL;
 
   /**
    * This field is read-only
@@ -196,12 +196,12 @@ class ReflectionFunction
 
 class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   // Constants
-  const int IS_STATIC = 1;
-  const int IS_PUBLIC = 256;
-  const int IS_PROTECTED = 512;
-  const int IS_PRIVATE = 1024;
-  const int IS_ABSTRACT = 2;
-  const int IS_FINAL = 4;
+  const int IS_STATIC;
+  const int IS_PUBLIC;
+  const int IS_PROTECTED;
+  const int IS_PRIVATE;
+  const int IS_ABSTRACT;
+  const int IS_FINAL;
 
   public $name = '';
   public $class = '';
@@ -287,10 +287,10 @@ class ReflectionParameter implements Reflector {
 }
 
 class ReflectionProperty implements Reflector {
-  const int IS_STATIC = 1;
-  const int IS_PUBLIC = 256;
-  const int IS_PROTECTED = 512;
-  const int IS_PRIVATE = 1024;
+  const int IS_STATIC;
+  const int IS_PUBLIC;
+  const int IS_PROTECTED;
+  const int IS_PRIVATE;
 
   public $name = '';
   public $class = '';

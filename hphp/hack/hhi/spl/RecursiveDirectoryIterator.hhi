@@ -13,7 +13,7 @@ class RecursiveDirectoryIterator
   implements RecursiveIterator<HH\FIXME\POISON_MARKER<SplFileInfo>> {
 
   // Constants
-  const int FOLLOW_SYMLINKS = 512;
+  const int FOLLOW_SYMLINKS;
 
   // Methods
   public function __construct($path, $flags = null);

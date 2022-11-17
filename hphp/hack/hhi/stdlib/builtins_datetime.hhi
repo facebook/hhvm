@@ -248,17 +248,17 @@ interface DateTimeInterface {
 }
 
 class DateTime implements DateTimeInterface {
-  const string ATOM = '';
-  const string COOKIE = '';
-  const string ISO8601 = '';
-  const string RFC822 = '';
-  const string RFC850 = '';
-  const string RFC1036 = '';
-  const string RFC1123 = '';
-  const string RFC2822 = '';
-  const string RFC3339 = '';
-  const string RSS = '';
-  const string W3C = '';
+  const string ATOM;
+  const string COOKIE;
+  const string ISO8601;
+  const string RFC822;
+  const string RFC850;
+  const string RFC1036;
+  const string RFC1123;
+  const string RFC2822;
+  const string RFC3339;
+  const string RSS;
+  const string W3C;
 
   public function __construct(
     string $time = 'now',
@@ -338,20 +338,20 @@ class DateTimeImmutable implements DateTimeInterface {
 }
 
 class DateTimeZone {
-  const int AFRICA = 0;
-  const int AMERICA = 0;
-  const int ANTARCTICA = 0;
-  const int ARCTIC = 0;
-  const int ASIA = 0;
-  const int ATLANTIC = 0;
-  const int AUSTRALIA = 0;
-  const int EUROPE = 0;
-  const int INDIAN = 0;
-  const int PACIFIC = 0;
-  const int UTC = 0;
-  const int ALL = 0;
-  const int ALL_WITH_BC = 0;
-  const int PER_COUNTRY = 0;
+  const int AFRICA;
+  const int AMERICA;
+  const int ANTARCTICA;
+  const int ARCTIC;
+  const int ASIA;
+  const int ATLANTIC;
+  const int AUSTRALIA;
+  const int EUROPE;
+  const int INDIAN;
+  const int PACIFIC;
+  const int UTC;
+  const int ALL;
+  const int ALL_WITH_BC;
+  const int PER_COUNTRY;
   public function __construct(string $timezone)[];
   public function getLocation()[]: darray {}
   public function getName()[]: string {}
@@ -387,7 +387,7 @@ class DateInterval {
 }
 
 class DatePeriod implements Iterator<DateTime> {
-  const int EXCLUDE_START_DATE = 1;
+  const int EXCLUDE_START_DATE;
 
   public function __construct(
     /* DateTimeInterface */ $start, // date string converts

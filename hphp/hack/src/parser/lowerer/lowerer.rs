@@ -1782,61 +1782,22 @@ fn p_function_call_expr<'a>(
 ) -> Result<Expr_> {
     let recv = &c.receiver;
     let args = &c.argument_list;
-    let get_hhas_adata = || {
-        if text_str(recv, env) == "__hhas_adata" {
-            if let SyntaxList(l) = &args.children {
-                if let Some(li) = l.first() {
-                    if let ListItem(i) = &li.children {
-                        if let LiteralExpression(le) = &i.item.children {
-                            let expr = &le.expression;
-                            if token_kind(expr) == Some(TK::NowdocStringLiteral) {
-                                return Some(expr);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        None
+    let targs = match (&recv.children, &c.type_args.children) {
+        (_, TypeArguments(c)) => could_map(&c.types, env, p_targ)?,
+        /* TODO might not be needed */
+        (GenericTypeSpecifier(c), _) => match &c.argument_list.children {
+            TypeArguments(c) => could_map(&c.types, env, p_targ)?,
+            _ => vec![],
+        },
+        _ => vec![],
     };
-    match get_hhas_adata() {
-        Some(expr) => {
-            let literal_expression_pos = p_pos(expr, env);
-            let s = extract_unquoted_string(text_str(expr, env), 0, expr.width()).map_err(|e| {
-                Error::ParsingError {
-                    message: e.msg,
-                    pos: literal_expression_pos.clone(),
-                }
-            })?;
-            Ok(Expr_::mk_call(
-                p_expr(recv, env)?,
-                vec![],
-                vec![(
-                    ast::ParamKind::Pnormal,
-                    Expr::new((), literal_expression_pos, Expr_::String(s.into())),
-                )],
-                None,
-            ))
-        }
-        None => {
-            let targs = match (&recv.children, &c.type_args.children) {
-                (_, TypeArguments(c)) => could_map(&c.types, env, p_targ)?,
-                /* TODO might not be needed */
-                (GenericTypeSpecifier(c), _) => match &c.argument_list.children {
-                    TypeArguments(c) => could_map(&c.types, env, p_targ)?,
-                    _ => vec![],
-                },
-                _ => vec![],
-            };
 
-            // Mark expression as CallReceiver so that we can correctly set
-            // PropOrMethod field in ObjGet and ClassGet
-            let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, env, None)?;
-            let (args, varargs) = split_args_vararg(args, env)?;
+    // Mark expression as CallReceiver so that we can correctly set
+    // PropOrMethod field in ObjGet and ClassGet
+    let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, env, None)?;
+    let (args, varargs) = split_args_vararg(args, env)?;
 
-            Ok(Expr_::mk_call(recv, targs, args, varargs))
-        }
-    }
+    Ok(Expr_::mk_call(recv, targs, args, varargs))
 }
 
 fn p_function_pointer_expr<'a>(

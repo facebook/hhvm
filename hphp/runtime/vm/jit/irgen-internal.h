@@ -555,7 +555,10 @@ inline SSATmp* popC(IRGS& env, GuardConstraint gc = DataTypeSpecific) {
   return assertType(pop(env, gc), TInitCell);
 }
 
-inline SSATmp* popCU(IRGS& env) { return assertType(pop(env), TCell); }
+inline SSATmp* popCU(IRGS& env) {
+  return assertType(pop(env, DataTypeGeneric), TCell);
+}
+
 inline SSATmp* popU(IRGS& env) {
   auto const offset = offsetFromIRSP(env, BCSPRelOffset{0});
   gen(env, AssertStk, TUninit, IRSPRelOffsetData{offset}, sp(env));

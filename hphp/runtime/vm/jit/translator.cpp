@@ -400,7 +400,7 @@ static const struct {
   { OpDim,         {MBase|MKey,       MBase,        OutNone         }},
   { OpQueryM,      {BStackN|MBase|MKey,
                                       Stack1,       OutUnknown      }},
-  { OpSetM,        {Stack1|BStackN|MBase|MKey,
+  { OpSetM,        {Stack1|DontGuardStack1|BStackN|MBase|MKey,
                                       Stack1,       OutUnknown      }},
   { OpSetRangeM,   {StackTop3|BStackN|MBase,
                                       None,         OutNone         }},
@@ -750,6 +750,8 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, SBInvOffset bcSPOff) {
     SKTRACE(1, sk, "getInputs: BStackN %d %d\n", stackOff.offset, numArgs);
     for (int i = 0; i < numArgs; i++) {
       inputs.emplace_back(Location::Stack { stackOff-- });
+      inputs.back().dontGuard = true;
+      inputs.back().dontBreak = true;
     }
   }
   if (isFCall(ni.op())) {

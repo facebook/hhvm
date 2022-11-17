@@ -167,6 +167,12 @@ struct Global {
     , vmRegsLiveness(analyzeVMRegLiveness(unit, reverse(rpoBlocks)))
   {}
 
+  bool changed() const {
+    return
+      instrsReduced || loadsRemoved || loadsRefined || jumpsRemoved ||
+      edgesOptimized || stackTeardownsOptimized;
+  }
+
   IRUnit& unit;
   BlockList rpoBlocks;
   AliasAnalysis ainfo;
@@ -193,6 +199,7 @@ struct Global {
   size_t loadsRemoved  = 0;
   size_t loadsRefined  = 0;
   size_t jumpsRemoved  = 0;
+  size_t edgesOptimized = 0;
   size_t stackTeardownsOptimized = 0;
 };
 
@@ -1033,7 +1040,8 @@ SSATmp* resolve_phis(Global& env, Block* block, uint32_t alocID) {
 }
 
 template<class Flag>
-SSATmp* resolve_value(Global& env, const IRInstruction& inst, Flag flags) {
+SSATmp* resolve_value(Global& env, const IRInstruction& inst, Flag flags,
+                      bool createPhis) {
   if (inst.dst() && !(flags.knownType <= inst.dst()->type())) {
     /*
      * It's possible we could assert the intersection of the types, but it's
@@ -1048,12 +1056,16 @@ SSATmp* resolve_value(Global& env, const IRInstruction& inst, Flag flags) {
   if (val == nullptr) return nullptr;
   return val.match(
     [&] (SSATmp* t) { return t; },
-    [&] (Block* b) { return resolve_phis(env, b, flags.aloc); }
+    [&] (Block* b) -> SSATmp* {
+      if (!createPhis) return nullptr;
+      return resolve_phis(env, b, flags.aloc);
+    }
   );
 }
 
-bool reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
-  auto const resolved = resolve_value(env, inst, flags);
+bool reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags,
+                 bool createPhis) {
+  auto const resolved = resolve_value(env, inst, flags, createPhis);
   if (!resolved) return false;
 
   DEBUG_ONLY Opcode oldOp = inst.op();
@@ -1195,14 +1207,16 @@ void optimize_end_catch(Global& env, IRInstruction& inst,
 
 //////////////////////////////////////////////////////////////////////
 
-void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
+void optimize_inst(Global& env, IRInstruction& inst, Flags flags,
+                   bool createPhis) {
   auto simplify = false;
   match<void>(
     flags,
     [&] (FNone) {},
 
     [&] (FRedundant redundantFlags) {
-      auto const resolved = resolve_value(env, inst, redundantFlags);
+      auto const resolved =
+        resolve_value(env, inst, redundantFlags, createPhis);
       if (!resolved) return;
 
       FTRACE(2, "      redundant: {} :: {} = {}\n",
@@ -1231,7 +1245,7 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
     },
 
     [&] (FReducible reducibleFlags) {
-      if (reduce_inst(env, inst, reducibleFlags)) simplify = true;
+      if (reduce_inst(env, inst, reducibleFlags, createPhis)) simplify = true;
     },
 
     [&] (FRefinableLoad f) {
@@ -1271,23 +1285,88 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
     }
   );
 
-  if (simplify) simplifyInPlace(env.unit, &inst);
+  // simplifyInPlace may perform CFG changes incompatible with phi creation.
+  if (simplify && !createPhis) simplifyInPlace(env.unit, &inst);
 }
 
-void optimize_block(Local& env, Global& genv, Block* blk) {
+void optimize_edges(Global& env, Block* blk) {
+  /*
+   * If a target block of an edge is a branch which could be trivially resolved
+   * in the context of the source block state, replace the target block with
+   * the resolved branch.
+   */
+  auto const optimize = [&](const State& state, Block* targetBlk) -> Block* {
+    if (targetBlk == nullptr) return nullptr;
+
+    while (targetBlk->front().is(Jmp) && targetBlk->front().numSrcs() == 0) {
+      targetBlk = targetBlk->front().taken();
+    }
+
+    if (targetBlk->instrs().size() != 1) return nullptr;
+    auto const& inst = targetBlk->front();
+
+    auto const handleCheck = [&](Type typeParam) -> Block* {
+      assertx(inst.next() && inst.taken());
+      auto const ge = boost::get<GeneralEffects>(memory_effects(inst));
+      auto const meta = env.ainfo.find(canonicalize(ge.loads));
+      if (!meta) return nullptr;
+      if (!state.avail[meta->index]) return nullptr;
+      auto const& tloc = state.tracked[meta->index];
+      if (tloc.knownType <= typeParam) return inst.next();
+      if (!tloc.knownType.maybe(typeParam)) return inst.taken();
+      return nullptr;
+    };
+
+    switch (inst.op()) {
+      case CheckTypeMem:
+      case CheckLoc:
+      case CheckStk:
+      case CheckMBase:
+        return handleCheck(inst.typeParam());
+
+      case CheckInitMem:
+        return handleCheck(TInitCell);
+
+      case CheckMROProp:
+        return handleCheck(Type::cns(true));
+
+      default:
+        return nullptr;
+    }
+  };
+
+  auto const& bi = env.blockInfo[blk];
+  while (auto const newNext = optimize(bi.stateOutNext, blk->next())) {
+    FTRACE(2, "      setNext: {} -> {}\n", blk->next()->id(), newNext->id());
+    blk->back().setNext(newNext);
+    ++env.edgesOptimized;
+  }
+  while (auto const newTaken = optimize(bi.stateOutTaken, blk->taken())) {
+    FTRACE(2, "      setTaken: {} -> {}\n", blk->taken()->id(), newTaken->id());
+    blk->back().setTaken(newTaken);
+    ++env.edgesOptimized;
+  }
+}
+
+void optimize_block(Local& env, Global& genv, Block* blk, bool createPhis) {
   if (!env.state.initialized) {
     FTRACE(2, "  unreachable\n");
     return;
   }
 
   for (auto& inst : *blk) {
-    simplifyInPlace(genv.unit, &inst);
+    // simplifyInPlace may perform CFG changes incompatible with phi creation.
+    if (!createPhis) simplifyInPlace(genv.unit, &inst);
     auto const flags = analyze_inst(env, inst);
-    optimize_inst(genv, inst, flags);
+    optimize_inst(genv, inst, flags, createPhis);
   }
+
+  // If we are allowed to create phis, we can't perform CFG optimizations that
+  // may move jumps through blocks defining these phis.
+  if (!createPhis) optimize_edges(genv, blk);
 }
 
-void optimize(Global& genv) {
+void optimize(Global& genv, bool createPhis) {
   /*
    * Simplify() calls can make blocks unreachable as we walk, and visiting the
    * unreachable blocks with simplify calls is not allowed.  They may have uses
@@ -1307,7 +1386,7 @@ void optimize(Global& genv) {
     }
 
     auto env = Local { genv, genv.blockInfo[blk].stateIn };
-    optimize_block(env, genv, blk);
+    optimize_block(env, genv, blk, createPhis);
 
     if (auto const x = blk->next()) reachable[x] = true;
     if (auto const x = blk->taken()) reachable[x] = true;
@@ -1589,6 +1668,7 @@ void optimizeLoads(IRUnit& unit) {
   size_t loadsRemoved = 0;
   size_t loadsRefined = 0;
   size_t jumpsRemoved = 0;
+  size_t edgesOptimized = 0;
   size_t stackTeardownsOptimized = 0;
   do {
     auto genv = Global { unit };
@@ -1615,13 +1695,14 @@ void optimizeLoads(IRUnit& unit) {
           );
 
     FTRACE(1, "\nOptimize:\n");
-    optimize(genv);
+    optimize(genv, false);
 
-    if (!genv.instrsReduced &&
-        !genv.loadsRemoved &&
-        !genv.loadsRefined &&
-        !genv.jumpsRemoved &&
-        !genv.stackTeardownsOptimized) {
+    if (!genv.changed()) {
+      FTRACE(1, "\nOptimize with phis:\n");
+      optimize(genv, true);
+    }
+
+    if (!genv.changed()) {
       // Nothing changed so we're done
       break;
     }
@@ -1629,6 +1710,7 @@ void optimizeLoads(IRUnit& unit) {
     loadsRemoved += genv.loadsRemoved;
     loadsRefined += genv.loadsRefined;
     jumpsRemoved += genv.jumpsRemoved;
+    edgesOptimized += genv.edgesOptimized;
     stackTeardownsOptimized += genv.stackTeardownsOptimized;
 
     FTRACE(2, "reflowing types\n");
@@ -1660,6 +1742,7 @@ void optimizeLoads(IRUnit& unit) {
     entry->setInt("optimize_loads_loads_removed", loadsRemoved);
     entry->setInt("optimize_loads_loads_refined", loadsRefined);
     entry->setInt("optimize_loads_jumps_removed", jumpsRemoved);
+    entry->setInt("optimize_loads_edges_optimized", edgesOptimized);
     entry->setInt("optimize_loads_stack_teardowns_optimized",
       stackTeardownsOptimized);
   }

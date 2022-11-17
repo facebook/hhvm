@@ -12,12 +12,16 @@ use crate::ReadonlyStore;
 use crate::Store;
 
 /// A mutable set of changes on top of a readonly fallback data store.
+///
+/// Reads from the fallback store are cached in the delta, so it is important
+/// not to use `DeltaStore` in scenarios where the fallback store may mutate and
+/// those mutations need to be observable.
 pub struct DeltaStore<K, V> {
     delta: Arc<dyn Store<K, Option<V>>>,
     fallback: Arc<dyn ReadonlyStore<K, V>>,
 }
 
-impl<K: Copy + Hash + Eq, V> DeltaStore<K, V> {
+impl<K: Copy + Hash + Eq, V: Clone> DeltaStore<K, V> {
     pub fn new(
         delta: Arc<dyn Store<K, Option<V>>>,
         fallback: Arc<dyn ReadonlyStore<K, V>>,
@@ -37,7 +41,9 @@ impl<K: Copy + Hash + Eq, V> DeltaStore<K, V> {
         if let Some(val_opt) = self.delta.get(key)? {
             Ok(val_opt)
         } else {
-            self.fallback.get(key)
+            let val_opt = self.fallback.get(key)?;
+            self.delta.insert(key, val_opt.clone())?;
+            Ok(val_opt)
         }
     }
 
@@ -61,7 +67,7 @@ impl<K: Copy + Hash + Eq, V> DeltaStore<K, V> {
     }
 }
 
-impl<K: Copy + Hash + Eq, V> Store<K, V> for DeltaStore<K, V> {
+impl<K: Copy + Hash + Eq, V: Clone> Store<K, V> for DeltaStore<K, V> {
     fn contains_key(&self, key: K) -> Result<bool> {
         DeltaStore::contains_key(self, key)
     }

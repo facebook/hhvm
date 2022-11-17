@@ -27,8 +27,12 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
+import reactor.core.Fuseable.ScalarCallable;
+import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Operators;
 import reactor.core.scheduler.Scheduler;
+import reactor.util.context.Context;
 
 public final class FutureUtil {
 
@@ -165,15 +169,59 @@ public final class FutureUtil {
    * @return The ListenableFuture wrapping the mono
    */
   public static <T> ListenableFuture<T> toListenableFuture(final Mono<T> mono) {
+    SettableFuture<T> settableFuture = SettableFuture.create();
     try {
-      SettableFuture<T> settableFuture = SettableFuture.create();
-      mono.doOnCancel(() -> settableFuture.cancel(true))
-          .doOnSuccess(settableFuture::set)
-          .doOnError(settableFuture::setException)
-          .subscribe();
-      return settableFuture;
+      if (mono instanceof ScalarCallable<?>) {
+        ScalarCallable<T> scalarCallable = (ScalarCallable<T>) mono;
+        T call = scalarCallable.call();
+        settableFuture.set(call);
+      } else {
+        mono.subscribe(new ListenableFutureSubscriber<>(settableFuture));
+      }
     } catch (Throwable t) {
-      return Futures.immediateFailedFuture(t);
+      settableFuture.setException(t);
+    }
+
+    return settableFuture;
+  }
+
+  private static class ListenableFutureSubscriber<T> extends BaseSubscriber<T> {
+    private final SettableFuture<T> settableFuture;
+
+    public ListenableFutureSubscriber(SettableFuture<T> settableFuture) {
+      this.settableFuture = settableFuture;
+    }
+
+    @Override
+    protected void hookOnNext(T value) {
+      if (!settableFuture.isDone()) {
+        settableFuture.set(value);
+      } else {
+        Operators.onNextDropped(value, Context.empty());
+      }
+    }
+
+    @Override
+    protected void hookOnError(Throwable throwable) {
+      if (!settableFuture.isDone()) {
+        settableFuture.setException(throwable);
+      } else {
+        Operators.onErrorDropped(throwable, Context.empty());
+      }
+    }
+
+    @Override
+    protected void hookOnCancel() {
+      if (!settableFuture.isDone()) {
+        settableFuture.cancel(true);
+      }
+    }
+
+    @Override
+    protected void hookOnComplete() {
+      if (!settableFuture.isDone()) {
+        settableFuture.set(null);
+      }
     }
   }
 

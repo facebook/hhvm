@@ -4225,7 +4225,8 @@ void simplifyInPlace(IRUnit& unit, IRInstruction* origInst) {
   if (res.instrs.empty() && !res.dst) {
     // If we have narrowed the result of a block end instruction to a bottom
     // type, its next block must be unreachable.
-    if (origInst->isNextEdgeUnreachable() && origInst->isBlockEnd()) {
+    if (origInst->isNextEdgeUnreachable() && origInst->isBlockEnd() &&
+        !origInst->next()->isUnreachable()) {
       origInst->setNext(unreachableBlock(unit, origInst->bcctx()));
     }
     return;
@@ -4283,7 +4284,8 @@ void simplifyInPlace(IRUnit& unit, IRInstruction* origInst) {
 
   // If the last instruction is block-ending and produces a Bottom result, its
   // next block should be unreachable.
-  if (last != nullptr && last->isNextEdgeUnreachable() && last->isBlockEnd()) {
+  if (last != nullptr && last->isNextEdgeUnreachable() && last->isBlockEnd() &&
+      !last->next()->isUnreachable()) {
     last->setNext(unreachableBlock(unit, last->bcctx()));
   }
 
@@ -4366,7 +4368,9 @@ void simplifyPass(IRUnit& unit) {
         if (dst->type() == TBottom) {
           if (inst->isBlockEnd()) {
             assertx(inst->nextEdge());
-            inst->setNext(unreachableBlock(unit, inst->bcctx()));
+            if (!inst->next()->isUnreachable()) {
+              inst->setNext(unreachableBlock(unit, inst->bcctx()));
+            }
             return false;
           }
           return true;

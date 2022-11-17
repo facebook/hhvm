@@ -27,9 +27,11 @@ namespace detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     void, handleFrameworkMetadata, std::unique_ptr<folly::IOBuf>&&) {}
 THRIFT_PLUGGABLE_FUNC_REGISTER(
-    void,
+    bool,
     handleFrameworkMetadataHeader,
-    folly::F14NodeMap<std::string, std::string>&) {}
+    folly::F14NodeMap<std::string, std::string>&) {
+  return false;
+}
 } // namespace detail
 
 ThriftRequestCore::ThriftRequestCore(
@@ -71,13 +73,16 @@ ThriftRequestCore::ThriftRequestCore(
   if (auto priority = metadata.priority_ref()) {
     header_.setCallPriority(static_cast<concurrency::PRIORITY>(*priority));
   }
-  if (auto frameworkMetadata = metadata.frameworkMetadata_ref()) {
-    DCHECK(*frameworkMetadata && !(**frameworkMetadata).empty());
-    detail::handleFrameworkMetadata(std::move(*frameworkMetadata));
-  } else if (auto otherMetadata = metadata.otherMetadata_ref()) {
-    detail::handleFrameworkMetadataHeader(*otherMetadata);
+  auto otherMetadata = metadata.otherMetadata_ref();
+  // When processing ThriftFrameworkMetadata, the header takes priority.
+  if (!otherMetadata ||
+      !detail::handleFrameworkMetadataHeader(*otherMetadata)) {
+    if (auto frameworkMetadata = metadata.frameworkMetadata_ref()) {
+      DCHECK(*frameworkMetadata && !(**frameworkMetadata).empty());
+      detail::handleFrameworkMetadata(std::move(*frameworkMetadata));
+    }
   }
-  if (auto otherMetadata = metadata.otherMetadata_ref()) {
+  if (otherMetadata) {
     header_.setReadHeaders(std::move(*otherMetadata));
   }
   if (auto clientId = metadata.clientId_ref()) {

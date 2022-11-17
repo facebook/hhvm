@@ -784,8 +784,8 @@ struct ShallowStoreWithChanges {
 impl ShallowStoreWithChanges {
     #[rustfmt::skip]
     fn new(populate_member_heaps: bool) -> Self {
-        use shm_store::{Compression, Evictability::Evictable};
-        let classes_shm =        Arc::new(OcamlShmStore::new("Classes", Evictable, Compression::default()));
+        use shm_store::{Compression, Evictability::{Evictable, NonEvictable}};
+        let classes_shm =        Arc::new(OcamlShmStore::new("Classes", NonEvictable, Compression::default()));
         let typedefs_shm =       Arc::new(OcamlShmStore::new("Typedefs", Evictable, Compression::default()));
         let funs_shm =           Arc::new(OcamlShmStore::new("Funs", Evictable, Compression::default()));
         let consts_shm =         Arc::new(OcamlShmStore::new("Consts", Evictable, Compression::default()));

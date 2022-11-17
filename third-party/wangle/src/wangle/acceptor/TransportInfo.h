@@ -213,6 +213,16 @@ struct TransportInfo {
    */
   int64_t totalBytes{0};
 
+  /*
+   * total number of packets sent over the connection
+   */
+  int64_t totalPackets{-1};
+
+  /*
+   * total number of packets marked lost over the connection
+   */
+  int64_t totalPacketsLost{-1};
+
   /**
    * the address of the remote side. If this is associated with a client socket,
    * it is a server side address. Otherwise, it is a client side address.

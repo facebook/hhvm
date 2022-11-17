@@ -576,6 +576,10 @@ bool HQSession::getCurrentTransportInfoWithoutUpdate(
     tinfo->rtx_tm = static_cast<int64_t>(quicInfo.timeoutBasedLoss);
     tinfo->rto = static_cast<int64_t>(quicInfo.pto.count());
     tinfo->totalBytes = static_cast<int64_t>(quicInfo.bytesSent);
+    // For calculation of packet loss rate
+    tinfo->totalPackets = static_cast<int64_t>(quicInfo.totalPacketsSent);
+    tinfo->totalPacketsLost =
+        static_cast<int64_t>(quicInfo.totalPacketsMarkedLost);
   }
   // TODO: fill up other properties.
   return true;

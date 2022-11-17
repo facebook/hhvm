@@ -30,6 +30,8 @@ enum MyEnum {
   MyValue0 = 0,
 }
 
+typedef list<i64> (cpp.template = "std::deque") LongList
+
 struct MyStruct {
   bool boolVal;
   byte byteVal;
@@ -63,6 +65,8 @@ struct MyStruct {
   optional list<i16> optListVal;
   optional set<string> optSetVal;
   optional map<string, string> optMapVal;
+
+  LongList longList;
 }
 
 // Intentionally defined after MyStruct, so it's patch types are generated after MyStruct's.

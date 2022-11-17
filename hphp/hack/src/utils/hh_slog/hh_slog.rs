@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#![cfg_attr(not(fbcode_build), allow(unused_variables))]
-
 use slog::o;
 use slog::Drain;
 
@@ -20,29 +18,6 @@ pub struct Log {
     pub scuba: slog::Logger,
     /// Only logs to the log file.
     pub file: slog::Logger,
-}
-
-/// Initializes a `Log` for the specified scuba dataset and log file path, and
-/// returns its async guards (scuba guard, log file guard).
-/// When dropped, async guards will send a flush+terminate message to all loggers
-/// derived from its corresponding logger in `Log`.
-pub fn init(
-    fb: fbinit::FacebookInit,
-    binary_name: &'static str,
-    dataset: &str,
-    filename: &std::path::Path,
-) -> (Log, (slog_async::AsyncGuard, slog_async::AsyncGuard)) {
-    // The scuba logger just becomes a file logger in non-fbcode builds
-    #[cfg(fbcode_build)]
-    let (scuba, scuba_guard) = hh_slog_scuba::init_scuba_logfile(fb, dataset, filename);
-    #[cfg(not(fbcode_build))]
-    let (scuba, scuba_guard) = init_file(filename);
-
-    let (file, file_guard) = init_file(filename);
-    let scuba = scuba.new(o!("bin" => binary_name));
-    let file = file.new(o!("bin" => binary_name));
-
-    (Log { scuba, file }, (scuba_guard, file_guard))
 }
 
 /// Creates a logger that drains to the given path. Also returns its guard (read
@@ -104,24 +79,4 @@ pub fn init_testing() -> Log {
         scuba: init_term_testing(),
         file: init_term_testing(),
     }
-}
-
-/// Wrapper around `hh_slog_scuba::init_scuba` that defaults to a test (terminal) logger in non-fb builds.
-pub fn init_scuba(
-    fb: fbinit::FacebookInit,
-    dataset: &str,
-) -> (slog::Logger, slog_async::AsyncGuard) {
-    #[cfg(fbcode_build)]
-    return hh_slog_scuba::init_scuba(fb, dataset);
-    #[cfg(not(fbcode_build))]
-    return init_term("not-fbcode-build-scuba");
-}
-
-/// Wrapper around `hh_slog_scuba::init_scuba_sync` that defaults to a test
-/// (terminal) logger in non-fb builds.
-pub fn init_scuba_sync(fb: fbinit::FacebookInit, dataset: &str) -> slog::Logger {
-    #[cfg(fbcode_build)]
-    return hh_slog_scuba::init_scuba_sync(fb, dataset);
-    #[cfg(not(fbcode_build))]
-    return init_term_testing();
 }

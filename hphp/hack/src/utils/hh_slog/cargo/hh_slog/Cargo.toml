@@ -11,7 +11,6 @@ doctest = false
 
 [dependencies]
 chrono = { version = "0.4", features = ["clock", "serde", "std"], default-features = false }
-fbinit = { path = "../../../../../../../common/rust/shed/fbinit" }
 locked_file_drain = { path = "../locked_file_drain" }
 slog = { version = "2.7", features = ["max_level_trace", "nested-values"] }
 slog-async = { version = "2.3", features = ["nested-values"] }

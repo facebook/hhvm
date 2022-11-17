@@ -10,3 +10,4 @@ b.php:4:23,27: Invalid xhp value for attribute `:prop` in `child` (Typing[4343])
 === fanout ===
 0x52d77445a3eff51b
 0x7eeda955b68b5127
+Fun xhp_simple_attribute

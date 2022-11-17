@@ -808,6 +808,27 @@ let get_gconst env cst_name =
     add_fine_dep_if_enabled env dep;
     res
 
+let add_member_dep ~is_method ~is_static env (class_ : Cls.t) mid class_elt_opt
+    =
+  let add_dep cid =
+    let dep =
+      match (is_method, is_static) with
+      | (true, true) -> Dep.SMethod (cid, mid)
+      | (true, false) -> Dep.Method (cid, mid)
+      | (false, true) -> Dep.SProp (cid, mid)
+      | (false, false) -> Dep.Prop (cid, mid)
+    in
+    Option.iter env.decl_env.droot ~f:(fun root ->
+        Typing_deps.add_idep (get_deps_mode env) root dep);
+    add_fine_dep_if_enabled env dep
+  in
+  if not (Pos_or_decl.is_hhi (Cls.pos class_)) then (
+    make_depend_on_class env (Cls.name class_);
+    add_dep (Cls.name class_);
+    Option.iter class_elt_opt ~f:(fun ce -> add_dep ce.ce_origin)
+  );
+  ()
+
 let get_static_member is_method env class_ mid =
   (* The type of a member is stored separately in the heap. This means that
    * any user of the member also has a dependency on the class where the member
@@ -819,24 +840,7 @@ let get_static_member is_method env class_ mid =
     else
       Cls.get_sprop class_ mid
   in
-  if not (Pos_or_decl.is_hhi (Cls.pos class_)) then begin
-    make_depend_on_class env (Cls.name class_);
-    let dep x =
-      if is_method then
-        Dep.SMethod (x, mid)
-      else
-        Dep.SProp (x, mid)
-    in
-    let add_dep x =
-      Option.iter env.decl_env.droot ~f:(fun root ->
-          Typing_deps.add_idep (get_deps_mode env) root (dep x))
-    in
-    add_dep (Cls.name class_);
-    Option.iter ce_opt ~f:(fun ce ->
-        add_dep ce.ce_origin;
-        add_fine_dep_if_enabled env (dep ce.ce_origin))
-  end;
-
+  add_member_dep ~is_method ~is_static:true env class_ mid ce_opt;
   ce_opt
 
 (* Given a list of [possibilities] whose name we can extract with [f], return
@@ -888,17 +892,6 @@ let suggest_static_member is_method class_ mid =
   suggest_member members mid
 
 let get_member is_method env (class_ : Cls.t) mid =
-  let add_dep x =
-    let dep =
-      if is_method then
-        Dep.Method (x, mid)
-      else
-        Dep.Prop (x, mid)
-    in
-    Option.iter env.decl_env.droot ~f:(fun root ->
-        Typing_deps.add_idep (get_deps_mode env) root dep);
-    add_fine_dep_if_enabled env dep
-  in
   (* The type of a member is stored separately in the heap. This means that
    * any user of the member also has a dependency on the class where the member
    * originated.
@@ -909,11 +902,7 @@ let get_member is_method env (class_ : Cls.t) mid =
     else
       Cls.get_prop class_ mid
   in
-  if not (Pos_or_decl.is_hhi (Cls.pos class_)) then
-    make_depend_on_class env (Cls.name class_);
-  Option.iter ce_opt ~f:(fun ce ->
-      add_dep (Cls.name class_);
-      add_dep ce.ce_origin);
+  add_member_dep ~is_method ~is_static:false env class_ mid ce_opt;
   ce_opt
 
 let suggest_member is_method class_ mid =

@@ -237,6 +237,8 @@ final class Flobby extends FlobBase {
 }
 
 trait TFlobby {
+  require extends FlobBase;
+
   final public function g(): void {
     $flobby = $this->asFlobby();
     $flobby->f1();

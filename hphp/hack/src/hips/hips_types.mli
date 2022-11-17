@@ -70,9 +70,7 @@ module type Intra = sig
   (** Intra-procedural constraint type, e.g. Has_static_key(p, 'a', int) *)
   type intra_constraint
 
-  (** Inter-procedural constraints type, e.g. "ArgLike("f", 1, q)" for f(_, q, _).
-      TODO(T127947010): Add inter-procedural return type, e.g. "Ret(f, p)", if
-      the function f returns p. *)
+  (** Inter-procedural constraints type, e.g. "ArgLike("f", 1, q)" for f(_, q, _). *)
   type inter_constraint = intra_entity inter_constraint_
 
   (** The union of inter- and intra-procedural constraint types. For example,

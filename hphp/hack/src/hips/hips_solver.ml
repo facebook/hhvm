@@ -273,7 +273,6 @@ module Inter (I : Intra) = struct
                        ancestor_const_name)
             |> Option.value ~default:input_constr_list_map
           | _ -> input_constr_list_map)
-        (* TODO(T127947010) Add case for inter-procedural return constraint *)
       in
       List.fold_left
         ~f:substitute_any

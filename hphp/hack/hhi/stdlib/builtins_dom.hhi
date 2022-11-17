@@ -151,7 +151,7 @@ class DOMNode {
     ?darray<arraykey, mixed> $xpath = null,
     ?varray<mixed> $ns_prefixes = null,
   ): string;
-  public function C14NFile(
+  public function C14Nfile(
     string $uri,
     bool $exclusive = false,
     bool $with_comments = false,

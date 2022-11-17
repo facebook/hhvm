@@ -15,11 +15,11 @@
 final class FunctionCredential {
   private function __construct() {}
 
-  public final function getClassName()[]: ?string;
+  public function getClassName()[]: ?string;
 
-  public final function getFunctionName()[]: string;
+  public function getFunctionName()[]: string;
 
-  public final function getFilename()[]: string;
+  public function getFilename()[]: string;
 
-  public final function __getDebugInfo(): darray;
+  public function __debugInfo(): darray<string, ?string>;
 }

@@ -1067,7 +1067,7 @@ class IntlDateFormatter {
     $pattern = null,
   ): HH\FIXME\MISSING_RETURN_TYPE;
   public function format($args = null): HH\FIXME\MISSING_RETURN_TYPE;
-  public static function formatObject(
+  public static function FormatObject(
     $object,
     $format = null,
     $locale = null,
@@ -1308,7 +1308,6 @@ class IntlCalendar {
   public function setTime($date): HH\FIXME\MISSING_RETURN_TYPE;
   public function setTimezone($timeZone): HH\FIXME\MISSING_RETURN_TYPE;
   public function toDateTime(): HH\FIXME\MISSING_RETURN_TYPE;
-  public function call__($fname, $args): mixed;
 }
 
 class IntlGregorianCalendar extends IntlCalendar {

@@ -86,7 +86,6 @@ class ReflectionClass implements Reflector {
     string $name,
     mixed $def_value = null,
   ): mixed;
-  public function getTraitAliases()[]: darray<string, string>;
   public function getTraitNames()[]: varray<string>;
   public function getTraits()[]: darray<string, ReflectionClass>;
   public function hasConstant(string $name)[]: bool;
@@ -154,7 +153,6 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function getStartLine()[]: mixed; // int | false
   public function getEndLine()[]: mixed; // int | false
   public function getDocComment()[]: mixed; // string | false
-  public function getStaticVariables(): darray<string, mixed>;
   public function getReturnTypeText()[]: HH\FIXME\MISSING_RETURN_TYPE;
   public function getModule()[]: ?string;
   public function isInternalToModule()[]: bool;

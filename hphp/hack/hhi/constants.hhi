@@ -64,6 +64,4 @@ const string __FUNCTION__ = '';
 const string __METHOD__ = '';
 const string __NAMESPACE__ = '';
 const string __COMPILER_FRONTEND__ = '';
-/* HH_FIXME[4110] This isn't really a constant, and there's no way to
- * write a proper constant initializer because the value is an object */
-const FunctionCredential __FUNCTION_CREDENTIAL__ = 0;
+const FunctionCredential __FUNCTION_CREDENTIAL__;

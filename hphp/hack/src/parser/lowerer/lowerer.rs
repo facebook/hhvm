@@ -5448,6 +5448,18 @@ fn check_effect_polymorphic_reification<'a>(
     }
 }
 
+fn p_const_value<'a>(node: S<'a>, env: &mut Env<'a>, default_pos: Pos) -> Result<ast::Expr> {
+    match &node.children {
+        SimpleInitializer(c) => p_expr(&c.value, env),
+        _ if env.file_mode() == file_info::Mode::Mhhi && !env.codegen() => {
+            // We use Omitted as a placeholder here because we don't care about
+            // the constant's value when in HHI mode
+            Ok(Expr::new((), default_pos, Expr_::Omitted))
+        }
+        _ => missing_syntax("simple initializer", node, env),
+    }
+}
+
 fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
     let doc_comment_opt = extract_docblock(node, env);
     match &node.children {
@@ -5592,7 +5604,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                             mode: env.file_mode(),
                             name: pos_name(name, env)?,
                             type_: map_optional(ty, env, p_hint)?,
-                            value: p_simple_initializer(init, env)?,
+                            value: p_const_value(init, env, p_pos(name, env))?,
                             namespace: mk_empty_ns_env(env),
                             span: p_pos(node, env),
                             emit_id: None,

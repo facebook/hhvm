@@ -477,7 +477,9 @@ pub fn emit_expr<'a, 'arena, 'decl>(
                 "emit_xhp: syntax should have been converted during rewriting",
             )),
             Expr_::Import(e) => emit_import(emitter, env, pos, &e.0, &e.1),
-            Expr_::Omitted => Ok(instr::empty()),
+            Expr_::Omitted => Err(Error::unrecoverable(
+                "emit_expr: Omitted should never be encountered by codegen",
+            )),
             Expr_::Lfun(_) => Err(Error::unrecoverable(
                 "expected Lfun to be converted to Efun during closure conversion emit_expr",
             )),

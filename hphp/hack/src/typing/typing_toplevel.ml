@@ -238,9 +238,15 @@ let gconst_def ctx cst =
   List.iter ~f:Errors.add_typing_error
   @@ Typing_type_wellformedness.global_constant env cst;
   let (typed_cst_value, (env, ty_err_opt)) =
-    let value = cst.cst_value in
-    match cst.cst_type with
-    | Some hint ->
+    let ((_, _, init) as value) = cst.cst_value in
+    match (cst.cst_type, init) with
+    | (Some _, Omitted) when Env.is_hhi env ->
+      (* We don't require global consts to have a value set for decl purposes
+       * in HHI files so it may just be a placeholder, therefore we don't care
+       * about checking the value and simply pass it through *)
+      let (env, te, _ty) = Typing.expr env value in
+      (te, (env, None))
+    | (Some hint, _) ->
       let ty = Decl_hint.hint env.decl_env hint in
       let ty = Typing_enforceability.compute_enforced_ty env ty in
       let ((env, ty_err_opt1), dty) =
@@ -265,7 +271,7 @@ let gconst_def ctx cst =
         Option.merge ~f:Typing_error.both ty_err_opt1 ty_err_opt2
       in
       (te, (env, ty_err_opt))
-    | None ->
+    | (None, _) ->
       if
         (not (is_literal_with_trivially_inferable_type value))
         && not (Env.is_hhi env)

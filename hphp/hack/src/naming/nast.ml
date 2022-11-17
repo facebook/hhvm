@@ -526,6 +526,8 @@ module Visitor_DEPRECATED = struct
 
       method on_upcast : 'a -> expr -> hint -> 'a
 
+      method on_omitted : 'a -> 'a
+
       method on_class_id : 'a -> class_id -> 'a
 
       method on_class_id_ : 'a -> class_id_ -> 'a
@@ -793,7 +795,7 @@ module Visitor_DEPRECATED = struct
         | Xml (sid, attrl, el) -> this#on_xml acc sid attrl el
         | ValCollection (s, ta, el) -> this#on_valCollection acc s ta el
         | KeyValCollection (s, tap, fl) -> this#on_keyValCollection acc s tap fl
-        | Omitted -> acc
+        | Omitted -> this#on_omitted acc
         | Lfun (f, idl) -> this#on_lfun acc f idl
         | Import (_, e) -> this#on_expr acc e
         | Collection (_, tal, fl) -> this#on_collection acc tal fl
@@ -992,6 +994,8 @@ module Visitor_DEPRECATED = struct
       method on_as acc e _ _ = this#on_expr acc e
 
       method on_upcast acc e _ = this#on_expr acc e
+
+      method on_omitted acc = acc
 
       method on_class_id acc (_, _, cid) = this#on_class_id_ acc cid
 

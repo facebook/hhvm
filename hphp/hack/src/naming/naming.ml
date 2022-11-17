@@ -2119,6 +2119,9 @@ let rec check_constant_expr env expr =
       Errors.add_naming_error @@ Naming_error.Illegal_constant p;
       false
     )
+  | Aast.Omitted when FileInfo.is_hhi env.in_mode ->
+    (* Only allowed in HHI positions where we don't care about the value *)
+    true
   | _ ->
     Errors.add_naming_error @@ Naming_error.Illegal_constant pos;
     false

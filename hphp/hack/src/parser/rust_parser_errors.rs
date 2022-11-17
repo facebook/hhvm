@@ -1880,7 +1880,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             Some(p_const_declaration) if is_concrete_const(p_const_declaration) => true,
             _ => false,
         };
-        is_concrete && init.is_missing()
+        is_concrete && !self.env.is_hhi_mode() && init.is_missing()
     }
 
     fn methodish_memoize_lsb_on_non_static(&mut self, node: S<'a>) {

@@ -25,8 +25,8 @@ public final class MyDataFieldPatch implements com.facebook.thrift.payload.Thrif
 
     @ThriftConstructor
     public MyDataFieldPatch(
-        @com.facebook.swift.codec.ThriftField(value=1, name="data1", requiredness=Requiredness.TERSE) final com.facebook.thrift.op.StringPatch data1,
-        @com.facebook.swift.codec.ThriftField(value=2, name="data2", requiredness=Requiredness.TERSE) final com.facebook.thrift.op.I32Patch data2
+        @com.facebook.swift.codec.ThriftField(value=1, name="data1", requiredness=Requiredness.NONE) final com.facebook.thrift.op.StringPatch data1,
+        @com.facebook.swift.codec.ThriftField(value=2, name="data2", requiredness=Requiredness.NONE) final com.facebook.thrift.op.I32Patch data2
     ) {
         this.data1 = data1;
         this.data2 = data2;
@@ -34,16 +34,16 @@ public final class MyDataFieldPatch implements com.facebook.thrift.payload.Thrif
     
     @ThriftConstructor
     protected MyDataFieldPatch() {
-      this.data1 = com.facebook.thrift.op.StringPatch.defaultInstance();
-      this.data2 = com.facebook.thrift.op.I32Patch.defaultInstance();
+      this.data1 = null;
+      this.data2 = null;
     }
     
     public static class Builder {
     
-        private com.facebook.thrift.op.StringPatch data1 = com.facebook.thrift.op.StringPatch.defaultInstance();
-        private com.facebook.thrift.op.I32Patch data2 = com.facebook.thrift.op.I32Patch.defaultInstance();
+        private com.facebook.thrift.op.StringPatch data1 = null;
+        private com.facebook.thrift.op.I32Patch data2 = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="data1", requiredness=Requiredness.TERSE)
+        @com.facebook.swift.codec.ThriftField(value=1, name="data1", requiredness=Requiredness.NONE)
         public Builder setData1(com.facebook.thrift.op.StringPatch data1) {
             this.data1 = data1;
             return this;
@@ -51,7 +51,7 @@ public final class MyDataFieldPatch implements com.facebook.thrift.payload.Thrif
     
         public com.facebook.thrift.op.StringPatch getData1() { return data1; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="data2", requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=2, name="data2", requiredness=Requiredness.NONE)
         public Builder setData2(com.facebook.thrift.op.I32Patch data2) {
             this.data2 = data2;
             return this;
@@ -98,12 +98,12 @@ public final class MyDataFieldPatch implements com.facebook.thrift.payload.Thrif
     }
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=1, name="data1", requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=1, name="data1", requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.StringPatch getData1() { return data1; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=2, name="data2", requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=2, name="data2", requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.I32Patch getData2() { return data2; }
     
     @java.lang.Override
@@ -180,29 +180,16 @@ public final class MyDataFieldPatch implements com.facebook.thrift.payload.Thrif
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      int structStart = 0;
-      int pos = 0;
-      com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
-      java.util.Objects.requireNonNull(data1, "data1 must not be null");
-      structStart = p.mark();
+      if (data1 != null) {
         oprot.writeFieldBegin(DATA1_FIELD_DESC);
-        pos = p.mark();
         this.data1.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(data2, "data2 must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (data2 != null) {
         oprot.writeFieldBegin(DATA2_FIELD_DESC);
-        pos = p.mark();
         this.data2.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
+        oprot.writeFieldEnd();
+      }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }

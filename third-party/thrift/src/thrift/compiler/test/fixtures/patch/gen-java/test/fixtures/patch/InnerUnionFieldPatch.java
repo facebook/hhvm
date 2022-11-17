@@ -25,21 +25,21 @@ public final class InnerUnionFieldPatch implements com.facebook.thrift.payload.T
 
     @ThriftConstructor
     public InnerUnionFieldPatch(
-        @com.facebook.swift.codec.ThriftField(value=1, name="innerOption", requiredness=Requiredness.TERSE) final com.facebook.thrift.op.BinaryPatch innerOption
+        @com.facebook.swift.codec.ThriftField(value=1, name="innerOption", requiredness=Requiredness.NONE) final com.facebook.thrift.op.BinaryPatch innerOption
     ) {
         this.innerOption = innerOption;
     }
     
     @ThriftConstructor
     protected InnerUnionFieldPatch() {
-      this.innerOption = com.facebook.thrift.op.BinaryPatch.defaultInstance();
+      this.innerOption = null;
     }
     
     public static class Builder {
     
-        private com.facebook.thrift.op.BinaryPatch innerOption = com.facebook.thrift.op.BinaryPatch.defaultInstance();
+        private com.facebook.thrift.op.BinaryPatch innerOption = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="innerOption", requiredness=Requiredness.TERSE)
+        @com.facebook.swift.codec.ThriftField(value=1, name="innerOption", requiredness=Requiredness.NONE)
         public Builder setInnerOption(com.facebook.thrift.op.BinaryPatch innerOption) {
             this.innerOption = innerOption;
             return this;
@@ -78,7 +78,7 @@ public final class InnerUnionFieldPatch implements com.facebook.thrift.payload.T
     }
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=1, name="innerOption", requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=1, name="innerOption", requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.BinaryPatch getInnerOption() { return innerOption; }
     
     @java.lang.Override
@@ -144,19 +144,11 @@ public final class InnerUnionFieldPatch implements com.facebook.thrift.payload.T
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      int structStart = 0;
-      int pos = 0;
-      com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
-      java.util.Objects.requireNonNull(innerOption, "innerOption must not be null");
-      structStart = p.mark();
+      if (innerOption != null) {
         oprot.writeFieldBegin(INNER_OPTION_FIELD_DESC);
-        pos = p.mark();
         this.innerOption.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
+        oprot.writeFieldEnd();
+      }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }

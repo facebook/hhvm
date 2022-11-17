@@ -1,0 +1,34 @@
+Errors:
+  [8:13-16] Wrong type hint
+  [8:9-12] Expected `int`
+  [8:19-26] But got `string`
+[(Class
+    { c_span = [3:1-9:2]; c_annotation = (); c_mode = Mhhi; c_final = false; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+      c_name = ([3:7-12], "\\Klass"); c_tparams = []; c_extends = []; 
+      c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+      c_implements = []; c_where_constraints = [];
+      c_consts =
+      [{ cc_user_attributes = []; cc_type = (Some ([4:9-12], (Hprim Tint))); 
+         cc_id = ([4:13-15], "X1"); cc_kind = (CCConcrete ((int), [4:18-19], (Int "0"))); 
+         cc_span = [4:3-20]; cc_doc_comment = None };
+        { cc_user_attributes = []; cc_type = (Some ([5:9-12], (Hprim Tint))); cc_id = ([5:13-15], "X2"); cc_kind = (CCConcrete ((_), [5:13-15], Omitted)); cc_span = [5:3-16]; cc_doc_comment = None };
+        { cc_user_attributes = []; cc_type = (Some ([6:9-15], (Hprim Tstring))); 
+          cc_id = ([6:16-17], "Y"); cc_kind = (CCConcrete ((_), [6:16-17], Omitted)); 
+          cc_span = [6:3-18]; cc_doc_comment = None };
+        { cc_user_attributes = []; cc_type = (Some ([7:9-27], (Happly (([7:9-27], "\\FunctionCredential"), [])))); 
+          cc_id = ([7:28-29], "Z"); cc_kind = (CCConcrete ((_), [7:28-29], Omitted)); 
+          cc_span = [7:3-30]; cc_doc_comment = None };
+        { cc_user_attributes = []; cc_type = (Some ([8:9-12], (Hprim Tint))); 
+          cc_id = ([8:13-16], "BAD"); cc_kind = (CCConcrete ((string), [8:19-26], (String "hello"))); 
+          cc_span = [8:3-27]; cc_doc_comment = None }
+        ];
+      c_typeconsts = []; c_vars = []; c_methods = []; c_xhp_children = []; 
+      c_xhp_attrs = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+      c_module = None })

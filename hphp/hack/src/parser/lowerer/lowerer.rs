@@ -4804,11 +4804,12 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
                 could_map_emit_error(&c.declarators, env, |n, e| match &n.children {
                     ConstantDeclarator(c) => {
                         let id = pos_name(&c.name, e)?;
+                        let pos = &id.0;
                         use aast::ClassConstKind::*;
                         let kind = if has_abstract {
                             CCAbstract(map_optional(&c.initializer, e, p_simple_initializer)?)
                         } else {
-                            CCConcrete(p_simple_initializer(&c.initializer, e)?)
+                            CCConcrete(p_const_value(&c.initializer, e, pos.clone())?)
                         };
                         Ok(ast::ClassConst {
                             user_attributes: user_attributes.clone(),

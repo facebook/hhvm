@@ -1019,6 +1019,12 @@ let class_const_def ~in_enum_class c env cc =
       in
       let env = check env ty' in
       (env, Aast.CCConcrete te, ty')
+    | CCConcrete ((_, _, Omitted) as e) when Env.is_hhi env ->
+      (* We don't require class consts to have a value set for decl purposes
+       * in HHI files so it may just be a placeholder, therefore we don't care
+       * about checking the value and simply pass it through *)
+      let (env, te, _ty) = Typing.expr env e in
+      ((env, None), CCConcrete te, hint_ty.et_type)
     | CCConcrete e ->
       let (env, te, ty') = type_and_check env e in
       (env, Aast.CCConcrete te, ty')

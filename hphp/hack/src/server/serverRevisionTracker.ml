@@ -17,11 +17,29 @@
  **)
 open Hh_prelude
 
+type watchman_event = {
+  timestamp: float;
+  source: string;
+  is_enter: bool;
+}
+
+(** A list of all unpaired "hg.update.enter", "hg.update.leave", "hg.transaction.enter",
+"hg.transaction.leave" events that we have encountered, sorted by time, most recent first.
+Because they are unpaired, the list will never contain both X.enter and X.leave for a given source.
+Meaning, from the perspective of consulting the list to see whether we are in a state,
+or amending the list because we just received a state-transition event, is the same
+1. We are "in a state" if there exist any enter events
+2. A new leave will be paired to the most recent enter, if present.
+3. A new enter will be paired to the most recent leave only if it is recent; otherwise we ditch the leave, and log.
+4. Observe the consequence, that existence of "enter" events can only be discharged either by
+a subsequent leave, or an outstanding one from the recent past.
+*)
+type event_list = watchman_event list
+
 type tracker_state = {
   mutable is_enabled: bool;
+  mutable outstanding_events: event_list;
   mutable current_mergebase: Hg.global_rev option;
-  mutable is_in_hg_update_state: bool;
-  mutable is_in_hg_transaction_state: bool;
   mutable did_change_mergebase: bool;
       (**  Do we think that this server have processed a mergebase change? If we are
         * in this state and get notified about changes to a huge number of files (or
@@ -46,12 +64,71 @@ let tracker_state =
   {
     is_enabled = false;
     current_mergebase = None;
-    is_in_hg_update_state = false;
-    is_in_hg_transaction_state = false;
+    outstanding_events = [];
     did_change_mergebase = false;
     pending_queries = Queue.create ();
     mergebase_queries = Caml.Hashtbl.create 200;
   }
+
+let is_in_state (outstanding : event_list) : bool =
+  List.exists outstanding ~f:(fun e -> e.is_enter)
+
+let transition (outstanding : event_list) (e : watchman_event) : event_list =
+  (* Note: we blindly trusting that e.timestamp is newer than anything in the list.
+     The consequence if not is mild; it just means the 10s criterion will be slightly off. *)
+
+  (* consider S301212, which manifests as the following
+       transaction/leave
+       transaction/leave
+       transaction/leave
+       transaction/enter
+       transaction/enter
+
+     all with the same timestamp. How do we resolve a stale leave at the bottom?
+     Simply throw it away if another event comes in 10+ seconds after,
+  *)
+  let outstanding =
+    if is_in_state outstanding then
+      outstanding
+    else
+      match List.filter outstanding ~f:(fun e -> not e.is_enter) with
+      | { timestamp; _ } :: _ when Float.(timestamp < e.timestamp -. 10.) ->
+        (* the most recent event (which must be a leave based on our if-branch)
+            is old. Throw away current state of events
+        *)
+        let telemetry =
+          Telemetry.create ()
+          |> Telemetry.string_opt ~key:"event_source" ~value:(Some e.source)
+          |> Telemetry.bool_ ~key:"flushed_by_new_event" ~value:true
+        in
+        HackEventLogger.server_revision_tracker_forced_reset ~telemetry;
+        []
+      | _ -> outstanding
+  in
+
+  (* Strip the first pair, if there is one *)
+  let rec strip_first_match outstanding =
+    match outstanding with
+    (* if there is an event of matching source and opposite is_enter,
+       assume that's the pair to our incoming event and remove it *)
+    | { source; is_enter; _ } :: rest
+      when String.equal source e.source && Bool.(is_enter = not e.is_enter) ->
+      rest
+    | olde :: rest -> olde :: strip_first_match rest
+    | [] -> []
+  in
+  let new_outstanding = strip_first_match outstanding in
+
+  (* Otherwise prepend our new event
+     In other words, if we were able to remove a pair to the incoming event,
+     then the new event list is new_outstanding.
+
+     If we didn't find a pair, then the new event list is the old list + our new one
+  *)
+  if List.length new_outstanding < List.length outstanding then
+    new_outstanding
+  else
+    e :: outstanding
 
 let initialize mergebase =
   Hh_logger.log "ServerRevisionTracker: Initializing mergebase to r%d" mergebase;
@@ -70,16 +147,23 @@ let add_query ~hg_rev root =
 
 let on_state_enter state_name =
   match state_name with
-  | "hg.update" -> tracker_state.is_in_hg_update_state <- true
-  | "hg.transaction" -> tracker_state.is_in_hg_transaction_state <- true
+  | "hg.update"
+  | "hg.transaction" ->
+    let event =
+      { source = state_name; timestamp = Unix.gettimeofday (); is_enter = true }
+    in
+    tracker_state.outstanding_events <-
+      transition tracker_state.outstanding_events event
   | _ -> ()
 
 let on_state_leave root state_name state_metadata =
+  let event =
+    { source = state_name; timestamp = Unix.gettimeofday (); is_enter = false }
+  in
   match state_name with
   | "hg.update" ->
-    if not tracker_state.is_in_hg_update_state then
-      HackEventLogger.invalid_mercurial_state_transition ~state:state_name;
-    tracker_state.is_in_hg_update_state <- false;
+    tracker_state.outstanding_events <-
+      transition tracker_state.outstanding_events event;
     Hh_logger.log "ServerRevisionTracker: leaving hg.update";
     Option.Monad_infix.(
       Option.iter
@@ -90,14 +174,11 @@ let on_state_leave root state_name state_metadata =
             Hh_logger.log "ServerRevisionTracker: Ignoring merge rev %s" hg_rev
           | _ -> add_query ~hg_rev root))
   | "hg.transaction" ->
-    if not tracker_state.is_in_hg_transaction_state then
-      HackEventLogger.invalid_mercurial_state_transition ~state:state_name;
-    tracker_state.is_in_hg_transaction_state <- false
+    tracker_state.outstanding_events <-
+      transition tracker_state.outstanding_events event
   | _ -> ()
 
-let is_hg_updating () =
-  tracker_state.is_in_hg_update_state
-  || tracker_state.is_in_hg_transaction_state
+let is_hg_updating () = is_in_state tracker_state.outstanding_events
 
 let check_query future ~timeout ~current_t =
   match Future.get ~timeout future with

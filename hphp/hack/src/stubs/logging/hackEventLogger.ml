@@ -454,6 +454,8 @@ let processed_clients _ = ()
 
 let invalid_mercurial_state_transition ~state:_ = ()
 
+let server_revision_tracker_forced_reset ~telemetry:_ = ()
+
 let search_symbol_index
     ~query_text:_
     ~max_results:_

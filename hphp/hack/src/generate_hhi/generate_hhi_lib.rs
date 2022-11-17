@@ -46,6 +46,12 @@ pub fn run(out: &mut impl std::io::Write, filename: &Path) -> anyhow::Result<()>
                     Syntax::make_token(Token::make(TokenKind::Semicolon, 0, 0, vec![], vec![]));
                 ControlFlow::Break(())
             }
+            // remove constant values
+            SyntaxVariant::ConstantDeclarator(c) => {
+                // no value
+                c.constant_declarator_initializer = Syntax::make_missing(&state, 0);
+                ControlFlow::Break(())
+            }
             _ => ControlFlow::Continue(()),
         }
     });

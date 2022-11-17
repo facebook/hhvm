@@ -29,10 +29,16 @@ impl Names {
         Ok(Self { conn })
     }
 
-    pub fn from_file_assume_valid_db(path: impl AsRef<Path>) -> anyhow::Result<Self> {
+    pub fn from_file_readonly(path: impl AsRef<Path>) -> anyhow::Result<Self> {
+        use rusqlite::OpenFlags;
         let path = path.as_ref();
-        let conn = Connection::open(path)?;
-        Ok(Self { conn })
+        let conn = Connection::open_with_flags(
+            path,
+            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
+        )?;
+        let this = Self { conn };
+        this.pragma_fast_but_not_durable()?;
+        Ok(this)
     }
 
     pub fn new_in_memory() -> anyhow::Result<Self> {

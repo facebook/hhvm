@@ -8,15 +8,15 @@
  *
  */
 
-const int GMP_ROUND_ZERO = 0;
-const int GMP_ROUND_PLUSINF = 0;
-const int GMP_ROUND_MINUSINF = 0;
-const int GMP_MSW_FIRST = 0;
-const int GMP_LSW_FIRST = 0;
-const int GMP_LITTLE_ENDIAN = 0;
-const int GMP_BIG_ENDIAN = 0;
-const int GMP_NATIVE_ENDIAN = 0;
-const string GMP_VERSION = '5.0.1';
+const int GMP_ROUND_ZERO;
+const int GMP_ROUND_PLUSINF;
+const int GMP_ROUND_MINUSINF;
+const int GMP_MSW_FIRST;
+const int GMP_LSW_FIRST;
+const int GMP_LITTLE_ENDIAN;
+const int GMP_BIG_ENDIAN;
+const int GMP_NATIVE_ENDIAN;
+const string GMP_VERSION;
 
 <<__PHPStdLib>>
 function gmp_abs(mixed $a): mixed;

@@ -8,30 +8,30 @@
  *
  */
 
-const int LIBXML_COMPACT = 0;
-const int LIBXML_DTDATTR = 0;
-const int LIBXML_DTDLOAD = 0;
-const int LIBXML_DTDVALID = 0;
-const int LIBXML_HTML_NOIMPLIED = 0;
-const int LIBXML_HTML_NODEFDTD = 0;
-const int LIBXML_NOBLANKS = 0;
-const int LIBXML_NOCDATA = 0;
-const int LIBXML_NOEMPTYTAG = 0;
-const int LIBXML_NOENT = 0;
-const int LIBXML_NOERROR = 0;
-const int LIBXML_NONET = 0;
-const int LIBXML_NOWARNING = 0;
-const int LIBXML_NOXMLDECL = 0;
-const int LIBXML_NSCLEAN = 0;
-const int LIBXML_PARSEHUGE = 0;
-const int LIBXML_PEDANTIC = 0;
-const int LIBXML_XINCLUDE = 0;
-const int LIBXML_ERR_ERROR = 0;
-const int LIBXML_ERR_FATAL = 0;
-const int LIBXML_ERR_NONE = 0;
-const int LIBXML_ERR_WARNING = 0;
-const int LIBXML_VERSION = 0;
-const int LIBXML_SCHEMA_CREATE = 0;
+const int LIBXML_COMPACT;
+const int LIBXML_DTDATTR;
+const int LIBXML_DTDLOAD;
+const int LIBXML_DTDVALID;
+const int LIBXML_HTML_NOIMPLIED;
+const int LIBXML_HTML_NODEFDTD;
+const int LIBXML_NOBLANKS;
+const int LIBXML_NOCDATA;
+const int LIBXML_NOEMPTYTAG;
+const int LIBXML_NOENT;
+const int LIBXML_NOERROR;
+const int LIBXML_NONET;
+const int LIBXML_NOWARNING;
+const int LIBXML_NOXMLDECL;
+const int LIBXML_NSCLEAN;
+const int LIBXML_PARSEHUGE;
+const int LIBXML_PEDANTIC;
+const int LIBXML_XINCLUDE;
+const int LIBXML_ERR_ERROR;
+const int LIBXML_ERR_FATAL;
+const int LIBXML_ERR_NONE;
+const int LIBXML_ERR_WARNING;
+const int LIBXML_VERSION;
+const int LIBXML_SCHEMA_CREATE;
 
 <<__PHPStdLib>>
 function libxml_get_errors(): HH\FIXME\MISSING_RETURN_TYPE;

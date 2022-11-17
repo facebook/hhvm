@@ -205,22 +205,22 @@ function spliti(
 <<__PHPStdLib>>
 function sql_regcase(string $str): HH\FIXME\MISSING_RETURN_TYPE;
 
-const int PREG_PATTERN_ORDER = 0;
-const int PREG_SET_ORDER = 0;
-const int PREG_OFFSET_CAPTURE = 0;
-const int PREG_SPLIT_NO_EMPTY = 0;
-const int PREG_SPLIT_DELIM_CAPTURE = 0;
-const int PREG_SPLIT_OFFSET_CAPTURE = 0;
+const int PREG_PATTERN_ORDER;
+const int PREG_SET_ORDER;
+const int PREG_OFFSET_CAPTURE;
+const int PREG_SPLIT_NO_EMPTY;
+const int PREG_SPLIT_DELIM_CAPTURE;
+const int PREG_SPLIT_OFFSET_CAPTURE;
 
 // Error code constants
-const int PREG_NO_ERROR = 0;
-const int PREG_INTERNAL_ERROR = 0;
-const int PREG_BACKTRACK_LIMIT_ERROR = 0;
-const int PREG_RECURSION_LIMIT_ERROR = 0;
-const int PREG_BAD_UTF8_ERROR = 0;
-const int PREG_BAD_UTF8_OFFSET_ERROR = 0;
-const int PREG_BAD_REGEX_ERROR = 0;
-const int PREG_JIT_STACKLIMIT_ERROR = 0;
+const int PREG_NO_ERROR;
+const int PREG_INTERNAL_ERROR;
+const int PREG_BACKTRACK_LIMIT_ERROR;
+const int PREG_RECURSION_LIMIT_ERROR;
+const int PREG_BAD_UTF8_ERROR;
+const int PREG_BAD_UTF8_OFFSET_ERROR;
+const int PREG_BAD_REGEX_ERROR;
+const int PREG_JIT_STACKLIMIT_ERROR;
 
-const int PREG_GREP_INVERT = 0;
-const string PCRE_VERSION = '';
+const int PREG_GREP_INVERT;
+const string PCRE_VERSION;

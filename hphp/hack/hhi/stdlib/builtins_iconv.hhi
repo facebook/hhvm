@@ -8,11 +8,11 @@
  *
  */
 
-const string ICONV_IMPL = '';
-const string ICONV_VERSION = '';
+const string ICONV_IMPL;
+const string ICONV_VERSION;
 
-const int ICONV_MIME_DECODE_STRICT = 0b001;
-const int ICONV_MIME_DECODE_CONTINUE_ON_ERROR = 0b010;
+const int ICONV_MIME_DECODE_STRICT;
+const int ICONV_MIME_DECODE_CONTINUE_ON_ERROR;
 
 <<__PHPStdLib>>
 function iconv_mime_encode(

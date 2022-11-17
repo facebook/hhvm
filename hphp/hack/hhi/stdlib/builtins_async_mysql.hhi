@@ -8,48 +8,48 @@
  *
  */
 namespace {
-  const int NOT_NULL_FLAG = 0;
-  const int PRI_KEY_FLAG = 0;
-  const int UNIQUE_KEY_FLAG = 0;
-  const int MULTIPLE_KEY_FLAG = 0;
-  const int UNSIGNED_FLAG = 0;
-  const int ZEROFILL_FLAG = 0;
-  const int BINARY_FLAG = 0;
-  const int AUTO_INCREMENT_FLAG = 0;
-  const int ENUM_FLAG = 0;
-  const int SET_FLAG = 0;
-  const int BLOB_FLAG = 0;
-  const int TIMESTAMP_FLAG = 0;
-  const int NUM_FLAG = 0;
-  const int NO_DEFAULT_VALUE_FLAG = 0;
+  const int NOT_NULL_FLAG;
+  const int PRI_KEY_FLAG;
+  const int UNIQUE_KEY_FLAG;
+  const int MULTIPLE_KEY_FLAG;
+  const int UNSIGNED_FLAG;
+  const int ZEROFILL_FLAG;
+  const int BINARY_FLAG;
+  const int AUTO_INCREMENT_FLAG;
+  const int ENUM_FLAG;
+  const int SET_FLAG;
+  const int BLOB_FLAG;
+  const int TIMESTAMP_FLAG;
+  const int NUM_FLAG;
+  const int NO_DEFAULT_VALUE_FLAG;
 
-  const int MYSQL_TYPE_TINY = 0;
-  const int MYSQL_TYPE_SHORT = 0;
-  const int MYSQL_TYPE_LONG = 0;
-  const int MYSQL_TYPE_INT24 = 0;
-  const int MYSQL_TYPE_LONGLONG = 0;
-  const int MYSQL_TYPE_DECIMAL = 0;
-  const int MYSQL_TYPE_NEWDECIMAL = 0;
-  const int MYSQL_TYPE_FLOAT = 0;
-  const int MYSQL_TYPE_DOUBLE = 0;
-  const int MYSQL_TYPE_BIT = 0;
-  const int MYSQL_TYPE_TIMESTAMP = 0;
-  const int MYSQL_TYPE_DATE = 0;
-  const int MYSQL_TYPE_TIME = 0;
-  const int MYSQL_TYPE_DATETIME = 0;
-  const int MYSQL_TYPE_YEAR = 0;
-  const int MYSQL_TYPE_STRING = 0;
-  const int MYSQL_TYPE_VAR_STRING = 0;
-  const int MYSQL_TYPE_BLOB = 0;
-  const int MYSQL_TYPE_SET = 0;
-  const int MYSQL_TYPE_ENUM = 0;
-  const int MYSQL_TYPE_GEOMETRY = 0;
-  const int MYSQL_TYPE_NULL = 0;
+  const int MYSQL_TYPE_TINY;
+  const int MYSQL_TYPE_SHORT;
+  const int MYSQL_TYPE_LONG;
+  const int MYSQL_TYPE_INT24;
+  const int MYSQL_TYPE_LONGLONG;
+  const int MYSQL_TYPE_DECIMAL;
+  const int MYSQL_TYPE_NEWDECIMAL;
+  const int MYSQL_TYPE_FLOAT;
+  const int MYSQL_TYPE_DOUBLE;
+  const int MYSQL_TYPE_BIT;
+  const int MYSQL_TYPE_TIMESTAMP;
+  const int MYSQL_TYPE_DATE;
+  const int MYSQL_TYPE_TIME;
+  const int MYSQL_TYPE_DATETIME;
+  const int MYSQL_TYPE_YEAR;
+  const int MYSQL_TYPE_STRING;
+  const int MYSQL_TYPE_VAR_STRING;
+  const int MYSQL_TYPE_BLOB;
+  const int MYSQL_TYPE_SET;
+  const int MYSQL_TYPE_ENUM;
+  const int MYSQL_TYPE_GEOMETRY;
+  const int MYSQL_TYPE_NULL;
 
-  const int ASYNC_OP_INVALID = 0;
-  const int ASYNC_OP_UNSET = 0;
-  const int ASYNC_OP_CONNECT = 0;
-  const int ASYNC_OP_QUERY = 0;
+  const int ASYNC_OP_INVALID;
+  const int ASYNC_OP_UNSET;
+  const int ASYNC_OP_CONNECT;
+  const int ASYNC_OP_QUERY;
 
   class AsyncMysqlClient {
     private function __construct() {}

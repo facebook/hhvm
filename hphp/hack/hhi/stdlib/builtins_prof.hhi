@@ -10,9 +10,9 @@
 
 namespace {
 
-  const int OBJPROF_FLAGS_DEFAULT = 1;
-  const int OBJPROF_FLAGS_USER_TYPES_ONLY = 2;
-  const int OBJPROF_FLAGS_PER_PROPERTY = 4;
+  const int OBJPROF_FLAGS_DEFAULT;
+  const int OBJPROF_FLAGS_USER_TYPES_ONLY;
+  const int OBJPROF_FLAGS_PER_PROPERTY;
 
 }
 

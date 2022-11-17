@@ -8,25 +8,25 @@
  *
  */
 
-const string DATE_ATOM = "";
-const string DATE_COOKIE = "";
-const string DATE_ISO8601 = "";
-const string DATE_RFC1036 = "";
-const string DATE_RFC1123 = "";
-const string DATE_RFC2822 = "";
-const string DATE_RFC3339 = "";
-const string DATE_RFC822 = "";
-const string DATE_RFC850 = "";
-const string DATE_RSS = "";
-const string DATE_W3C = "";
+const string DATE_ATOM;
+const string DATE_COOKIE;
+const string DATE_ISO8601;
+const string DATE_RFC1036;
+const string DATE_RFC1123;
+const string DATE_RFC2822;
+const string DATE_RFC3339;
+const string DATE_RFC822;
+const string DATE_RFC850;
+const string DATE_RSS;
+const string DATE_W3C;
 
-const int DAY_1 = 131079;
-const int DAY_2 = 131080;
-const int DAY_3 = 131081;
-const int DAY_4 = 131082;
-const int DAY_5 = 131083;
-const int DAY_6 = 131084;
-const int DAY_7 = 131085;
+const int DAY_1;
+const int DAY_2;
+const int DAY_3;
+const int DAY_4;
+const int DAY_5;
+const int DAY_6;
+const int DAY_7;
 
 type DateTimeErrors = shape(
   'warning_count' => int,

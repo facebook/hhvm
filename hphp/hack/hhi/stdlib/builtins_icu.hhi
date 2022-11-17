@@ -8,12 +8,12 @@
  *
  */
 
-const int UREGEX_CASE_INSENSITIVE = 0;
-const int UREGEX_COMMENTS = 0;
-const int UREGEX_DOTALL = 0;
-const int UREGEX_MULTILINE = 0;
-const int UREGEX_UWORD = 0;
-const int UREGEX_OFFSET_CAPTURE = 0;
+const int UREGEX_CASE_INSENSITIVE;
+const int UREGEX_COMMENTS;
+const int UREGEX_DOTALL;
+const int UREGEX_MULTILINE;
+const int UREGEX_UWORD;
+const int UREGEX_OFFSET_CAPTURE;
 
 <<__PHPStdLib>>
 function icu_match(

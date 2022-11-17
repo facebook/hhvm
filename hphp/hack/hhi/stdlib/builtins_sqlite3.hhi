@@ -8,17 +8,17 @@
  *
  */
 
-const int SQLITE3_ASSOC = 0;
-const int SQLITE3_NUM = 0;
-const int SQLITE3_BOTH = 0;
-const int SQLITE3_INTEGER = 0;
-const int SQLITE3_FLOAT = 0;
-const int SQLITE3_TEXT = 0;
-const int SQLITE3_BLOB = 0;
-const int SQLITE3_NULL = 0;
-const int SQLITE3_OPEN_READONLY = 0;
-const int SQLITE3_OPEN_READWRITE = 0;
-const int SQLITE3_OPEN_CREATE = 0;
+const int SQLITE3_ASSOC;
+const int SQLITE3_NUM;
+const int SQLITE3_BOTH;
+const int SQLITE3_INTEGER;
+const int SQLITE3_FLOAT;
+const int SQLITE3_TEXT;
+const int SQLITE3_BLOB;
+const int SQLITE3_NULL;
+const int SQLITE3_OPEN_READONLY;
+const int SQLITE3_OPEN_READWRITE;
+const int SQLITE3_OPEN_CREATE;
 
 class SQLite3 {
   public function __construct(

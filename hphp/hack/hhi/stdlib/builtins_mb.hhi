@@ -8,12 +8,12 @@
  *
  */
 
-const int MB_OVERLOAD_MAIL = 1;
-const int MB_OVERLOAD_STRING = 2;
-const int MB_OVERLOAD_REGEX = 4;
-const int MB_CASE_UPPER = 0;
-const int MB_CASE_LOWER = 1;
-const int MB_CASE_TITLE = 2;
+const int MB_OVERLOAD_MAIL;
+const int MB_OVERLOAD_STRING;
+const int MB_OVERLOAD_REGEX;
+const int MB_CASE_UPPER;
+const int MB_CASE_LOWER;
+const int MB_CASE_TITLE;
 <<__PHPStdLib>>
 function mb_list_encodings()[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>

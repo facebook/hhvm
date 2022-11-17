@@ -8,13 +8,13 @@
  *
  */
 
-const int ZLIB_ENCODING_RAW = 0;
-const int ZLIB_ENCODING_GZIP = 0;
-const int ZLIB_ENCODING_DEFLATE = 0;
-const int ZLIB_ENCODING_ANY = 0;
+const int ZLIB_ENCODING_RAW;
+const int ZLIB_ENCODING_GZIP;
+const int ZLIB_ENCODING_DEFLATE;
+const int ZLIB_ENCODING_ANY;
 
-const int FORCE_GZIP = 0;
-const int FORCE_DEFLATE = 0;
+const int FORCE_GZIP;
+const int FORCE_DEFLATE;
 
 <<__PHPStdLib>>
 function gzclose(resource $zp): HH\FIXME\MISSING_RETURN_TYPE;

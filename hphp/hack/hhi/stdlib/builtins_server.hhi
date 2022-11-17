@@ -10,9 +10,9 @@
 
 namespace {
 
-  const int PAGELET_NOT_READY = 0;
-  const int PAGELET_READY = 0;
-  const int PAGELET_DONE = 0;
+  const int PAGELET_NOT_READY;
+  const int PAGELET_READY;
+  const int PAGELET_DONE;
 
   <<__PHPStdLib>>
   function hphp_thread_type(): int;

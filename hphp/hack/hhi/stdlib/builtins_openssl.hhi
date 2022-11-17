@@ -8,47 +8,47 @@
  *
  */
 
-const string OPENSSL_VERSION_TEXT = '';
-const int OPENSSL_VERSION_NUMBER = 0;
+const string OPENSSL_VERSION_TEXT;
+const int OPENSSL_VERSION_NUMBER;
 
-const int OPENSSL_RAW_DATA = 1;
-const int OPENSSL_PKCS1_PADDING = 1;
-const int OPENSSL_ZERO_PADDING = 2;
-const int OPENSSL_SSLV23_PADDING = 2;
-const int OPENSSL_NO_PADDING = 3;
-const int OPENSSL_PKCS1_OAEP_PADDING = 4;
+const int OPENSSL_RAW_DATA;
+const int OPENSSL_PKCS1_PADDING;
+const int OPENSSL_ZERO_PADDING;
+const int OPENSSL_SSLV23_PADDING;
+const int OPENSSL_NO_PADDING;
+const int OPENSSL_PKCS1_OAEP_PADDING;
 
-const int OPENSSL_KEYTYPE_RSA = 0;
-const int OPENSSL_KEYTYPE_DSA = 0;
-const int OPENSSL_KEYTYPE_DH = 0;
-const int OPENSSL_KEYTYPE_EC = 0;
+const int OPENSSL_KEYTYPE_RSA;
+const int OPENSSL_KEYTYPE_DSA;
+const int OPENSSL_KEYTYPE_DH;
+const int OPENSSL_KEYTYPE_EC;
 
-const int OPENSSL_ALGO_DSS1 = 0;
-const int OPENSSL_ALGO_SHA1 = 0;
-const int OPENSSL_ALGO_SHA224 = 0;
-const int OPENSSL_ALGO_SHA256 = 0;
-const int OPENSSL_ALGO_SHA384 = 0;
-const int OPENSSL_ALGO_SHA512 = 0;
-const int OPENSSL_ALGO_RMD160 = 0;
-const int OPENSSL_ALGO_MD5 = 0;
-const int OPENSSL_ALGO_MD4 = 0;
-const int OPENSSL_ALGO_MD2 = 0;
+const int OPENSSL_ALGO_DSS1;
+const int OPENSSL_ALGO_SHA1;
+const int OPENSSL_ALGO_SHA224;
+const int OPENSSL_ALGO_SHA256;
+const int OPENSSL_ALGO_SHA384;
+const int OPENSSL_ALGO_SHA512;
+const int OPENSSL_ALGO_RMD160;
+const int OPENSSL_ALGO_MD5;
+const int OPENSSL_ALGO_MD4;
+const int OPENSSL_ALGO_MD2;
 
-const int PKCS7_TEXT = 1;
-const int PKCS7_BINARY = 128;
-const int PKCS7_NOINTERN = 16;
-const int PKCS7_NOVERIFY = 32;
-const int PKCS7_NOCHAIN = 8;
-const int PKCS7_NOCERTS = 2;
-const int PKCS7_NOATTR = 256;
-const int PKCS7_DETACHED = 64;
-const int PKCS7_NOSIGS = 4;
+const int PKCS7_TEXT;
+const int PKCS7_BINARY;
+const int PKCS7_NOINTERN;
+const int PKCS7_NOVERIFY;
+const int PKCS7_NOCHAIN;
+const int PKCS7_NOCERTS;
+const int PKCS7_NOATTR;
+const int PKCS7_DETACHED;
+const int PKCS7_NOSIGS;
 
-const int OPENSSL_CIPHER_RC2_40 = 0;
-const int OPENSSL_CIPHER_RC2_128 = 0;
-const int OPENSSL_CIPHER_RC2_64 = 0;
-const int OPENSSL_CIPHER_DES = 0;
-const int OPENSSL_CIPHER_3DES = 0;
+const int OPENSSL_CIPHER_RC2_40;
+const int OPENSSL_CIPHER_RC2_128;
+const int OPENSSL_CIPHER_RC2_64;
+const int OPENSSL_CIPHER_DES;
+const int OPENSSL_CIPHER_3DES;
 
 <<__PHPStdLib>>
 function openssl_csr_export_to_file(

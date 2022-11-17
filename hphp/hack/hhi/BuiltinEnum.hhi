@@ -70,7 +70,7 @@ namespace HH {
 
   type enumname<T> = classname<BuiltinEnum<T>>;
 
-  const enumname<arraykey> BUILTIN_ENUM = BuiltinEnum::class;
+  const enumname<arraykey> BUILTIN_ENUM;
 
   /**
    * Wrapper for enum class

@@ -9,48 +9,48 @@
  */
 
 // flags for array_change_key_case()
-const int CASE_LOWER = 0;
-const int CASE_UPPER = 0;
+const int CASE_LOWER;
+const int CASE_UPPER;
 
 // flags for array_multisort
-const int SORT_ASC = 0;
-const int SORT_DESC = 0;
+const int SORT_ASC;
+const int SORT_DESC;
 
 // flags for sort() family
-const int SORT_REGULAR = 0;
-const int SORT_NUMERIC = 0;
-const int SORT_STRING = 0;
-const int SORT_LOCALE_STRING = 0;
-const int SORT_NATURAL = 0;
-const int SORT_FLAG_CASE = 0;
+const int SORT_REGULAR;
+const int SORT_NUMERIC;
+const int SORT_STRING;
+const int SORT_LOCALE_STRING;
+const int SORT_NATURAL;
+const int SORT_FLAG_CASE;
 
 // flags for count()
-const int COUNT_NORMAL = 0;
-const int COUNT_RECURSIVE = 0;
+const int COUNT_NORMAL;
+const int COUNT_RECURSIVE;
 
-const int UCOL_DEFAULT = 0;
-const int UCOL_PRIMARY = 0;
-const int UCOL_SECONDARY = 0;
-const int UCOL_TERTIARY = 0;
-const int UCOL_DEFAULT_STRENGTH = 0;
-const int UCOL_QUATERNARY = 0;
-const int UCOL_IDENTICAL = 0;
-const int UCOL_OFF = 0;
-const int UCOL_ON = 0;
-const int UCOL_SHIFTED = 0;
-const int UCOL_NON_IGNORABLE = 0;
-const int UCOL_LOWER_FIRST = 0;
-const int UCOL_UPPER_FIRST = 0;
-const int UCOL_FRENCH_COLLATION = 0;
-const int UCOL_ALTERNATE_HANDLING = 0;
-const int UCOL_CASE_FIRST = 0;
-const int UCOL_CASE_LEVEL = 0;
-const int UCOL_NORMALIZATION_MODE = 0;
-const int UCOL_STRENGTH = 0;
-const int UCOL_HIRAGANA_QUATERNARY_MODE = 0;
-const int UCOL_NUMERIC_COLLATION = 0;
+const int UCOL_DEFAULT;
+const int UCOL_PRIMARY;
+const int UCOL_SECONDARY;
+const int UCOL_TERTIARY;
+const int UCOL_DEFAULT_STRENGTH;
+const int UCOL_QUATERNARY;
+const int UCOL_IDENTICAL;
+const int UCOL_OFF;
+const int UCOL_ON;
+const int UCOL_SHIFTED;
+const int UCOL_NON_IGNORABLE;
+const int UCOL_LOWER_FIRST;
+const int UCOL_UPPER_FIRST;
+const int UCOL_FRENCH_COLLATION;
+const int UCOL_ALTERNATE_HANDLING;
+const int UCOL_CASE_FIRST;
+const int UCOL_CASE_LEVEL;
+const int UCOL_NORMALIZATION_MODE;
+const int UCOL_STRENGTH;
+const int UCOL_HIRAGANA_QUATERNARY_MODE;
+const int UCOL_NUMERIC_COLLATION;
 
-const int TAG_PROVENANCE_HERE_MUTATE_COLLECTIONS = 0;
+const int TAG_PROVENANCE_HERE_MUTATE_COLLECTIONS;
 
 <<__PHPStdLib>>
 function array_change_key_case<Tv>(

@@ -8,10 +8,10 @@
  *
  */
 
-const int CLOCK_MONOTONIC = 1;
-const int CLOCK_PROCESS_CPUTIME_ID = 2;
-const int CLOCK_REALTIME = 0;
-const int CLOCK_THREAD_CPUTIME_ID = 3;
+const int CLOCK_MONOTONIC;
+const int CLOCK_PROCESS_CPUTIME_ID;
+const int CLOCK_REALTIME;
+const int CLOCK_THREAD_CPUTIME_ID;
 
 <<__PHPStdLib>>
 function dl(string $_library): HH\FIXME\MISSING_RETURN_TYPE;

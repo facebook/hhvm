@@ -8,29 +8,29 @@
  *
  */
 
-const int HTML_SPECIALCHARS = 0;
-const int HTML_ENTITIES = 1;
+const int HTML_SPECIALCHARS;
+const int HTML_ENTITIES;
 
-const int ENT_COMPAT = 2;
-const int ENT_QUOTES = 3;
-const int ENT_NOQUOTES = 0;
-const int ENT_IGNORE = 4;
-const int ENT_SUBSTITUTE = 8;
-const int ENT_HTML5 = 0;
+const int ENT_COMPAT;
+const int ENT_QUOTES;
+const int ENT_NOQUOTES;
+const int ENT_IGNORE;
+const int ENT_SUBSTITUTE;
+const int ENT_HTML5;
 
-const int STR_PAD_LEFT = 0;
-const int STR_PAD_RIGHT = 1;
-const int STR_PAD_BOTH = 2;
+const int STR_PAD_LEFT;
+const int STR_PAD_RIGHT;
+const int STR_PAD_BOTH;
 
-const int LC_ALL = 6;
-const int LC_COLLATE = 3;
-const int LC_CTYPE = 0;
-const int LC_MESSAGES = 5;
-const int LC_MONETARY = 4;
-const int LC_NUMERIC = 1;
-const int LC_TIME = 2;
+const int LC_ALL;
+const int LC_COLLATE;
+const int LC_CTYPE;
+const int LC_MESSAGES;
+const int LC_MONETARY;
+const int LC_NUMERIC;
+const int LC_TIME;
 
-const string HPHP_TRIM_CHARLIST = "\n\r\t\013\000 ";
+const string HPHP_TRIM_CHARLIST;
 
 <<__PHPStdLib>>
 function addcslashes(

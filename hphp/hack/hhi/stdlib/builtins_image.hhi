@@ -8,27 +8,27 @@
  *
  */
 
-const int IMAGETYPE_BMP = 6;
-const int IMAGETYPE_COUNT = 19;
-const int IMAGETYPE_GIF = 1;
-const int IMAGETYPE_IFF = 14;
-const int IMAGETYPE_JB2 = 12;
-const int IMAGETYPE_JP2 = 10;
-const int IMAGETYPE_JPC = 9;
-const int IMAGETYPE_JPEG = 2;
-const int IMAGETYPE_JPEG2000 = 9;
-const int IMAGETYPE_JPX = 11;
-const int IMAGETYPE_PNG = 3;
-const int IMAGETYPE_PSD = 5;
-const int IMAGETYPE_SWC = 13;
-const int IMAGETYPE_SWF = 4;
-const int IMAGETYPE_TIFF_II = 7;
-const int IMAGETYPE_TIFF_MM = 8;
-const int IMAGETYPE_UNKNOWN = 0;
-const int IMAGETYPE_WBMP = 15;
-const int IMAGETYPE_XBM = 16;
-const int IMAGETYPE_ICO = 17;
-const int IMAGETYPE_WEBP = 18;
+const int IMAGETYPE_BMP;
+const int IMAGETYPE_COUNT;
+const int IMAGETYPE_GIF;
+const int IMAGETYPE_IFF;
+const int IMAGETYPE_JB2;
+const int IMAGETYPE_JP2;
+const int IMAGETYPE_JPC;
+const int IMAGETYPE_JPEG;
+const int IMAGETYPE_JPEG2000;
+const int IMAGETYPE_JPX;
+const int IMAGETYPE_PNG;
+const int IMAGETYPE_PSD;
+const int IMAGETYPE_SWC;
+const int IMAGETYPE_SWF;
+const int IMAGETYPE_TIFF_II;
+const int IMAGETYPE_TIFF_MM;
+const int IMAGETYPE_UNKNOWN;
+const int IMAGETYPE_WBMP;
+const int IMAGETYPE_XBM;
+const int IMAGETYPE_ICO;
+const int IMAGETYPE_WEBP;
 
 <<__PHPStdLib>>
 function gd_info(): HH\FIXME\MISSING_RETURN_TYPE;

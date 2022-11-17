@@ -23,8 +23,8 @@ namespace HH {
   function is_array_marked_legacy(mixed $in)[]: bool;
 }
 namespace {
-  const float INF = 0.0;
-  const float NAN = 0.0;
+  const float INF;
+  const float NAN;
   <<__PHPStdLib>>
   function connection_aborted(): \HH\FIXME\MISSING_RETURN_TYPE;
   <<__PHPStdLib>>

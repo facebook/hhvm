@@ -9,8 +9,8 @@
  */
 
 // flags for password_hash
-const int PASSWORD_DEFAULT = 0;
-const int PASSWORD_BCRYPT = 0;
+const int PASSWORD_DEFAULT;
+const int PASSWORD_BCRYPT;
 
 <<__PHPStdLib>>
 function password_hash(

@@ -247,18 +247,18 @@ function ldap_escape(
   int $flags = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
 
-const int LDAP_ESCAPE_FILTER = 1;
-const int LDAP_ESCAPE_DN = 2;
-const int LDAP_OPT_DEREF = 2;
-const int LDAP_OPT_SIZELIMIT = 3;
-const int LDAP_OPT_TIMELIMIT = 4;
-const int LDAP_OPT_NETWORK_TIMEOUT = 20485;
-const int LDAP_OPT_PROTOCOL_VERSION = 17;
-const int LDAP_OPT_ERROR_NUMBER = 49;
-const int LDAP_OPT_REFERRALS = 8;
-const int LDAP_OPT_RESTART = 9;
-const int LDAP_OPT_HOST_NAME = 48;
-const int LDAP_OPT_ERROR_STRING = 50;
-const int LDAP_OPT_MATCHED_DN = 51;
-const int LDAP_OPT_SERVER_CONTROLS = 18;
-const int LDAP_OPT_CLIENT_CONTROLS = 19;
+const int LDAP_ESCAPE_FILTER;
+const int LDAP_ESCAPE_DN;
+const int LDAP_OPT_DEREF;
+const int LDAP_OPT_SIZELIMIT;
+const int LDAP_OPT_TIMELIMIT;
+const int LDAP_OPT_NETWORK_TIMEOUT;
+const int LDAP_OPT_PROTOCOL_VERSION;
+const int LDAP_OPT_ERROR_NUMBER;
+const int LDAP_OPT_REFERRALS;
+const int LDAP_OPT_RESTART;
+const int LDAP_OPT_HOST_NAME;
+const int LDAP_OPT_ERROR_STRING;
+const int LDAP_OPT_MATCHED_DN;
+const int LDAP_OPT_SERVER_CONTROLS;
+const int LDAP_OPT_CLIENT_CONTROLS;

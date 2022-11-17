@@ -8,28 +8,28 @@
  *
  */
 
-const int PHP_ROUND_HALF_UP = 1;
-const int PHP_ROUND_HALF_DOWN = 2;
-const int PHP_ROUND_HALF_EVEN = 3;
-const int PHP_ROUND_HALF_ODD = 4;
+const int PHP_ROUND_HALF_UP;
+const int PHP_ROUND_HALF_DOWN;
+const int PHP_ROUND_HALF_EVEN;
+const int PHP_ROUND_HALF_ODD;
 
-const float M_PI = 3.14159265358979323846;
-const float M_E = 2.7182818284590452354;
-const float M_LOG2E = 1.4426950408889634074;
-const float M_LOG10E = 0.43429448190325182765;
-const float M_LN2 = 0.69314718055994530942;
-const float M_LN10 = 2.30258509299404568402;
-const float M_PI_2 = 1.57079632679489661923;
-const float M_PI_4 = 0.78539816339744830962;
-const float M_1_PI = 0.31830988618379067154;
-const float M_2_PI = 0.63661977236758134308;
-const float M_SQRTPI = 1.77245385090551602729;
-const float M_2_SQRTPI = 1.12837916709551257390;
-const float M_SQRT2 = 1.41421356237309504880;
-const float M_SQRT3 = 1.73205080756887729352;
-const float M_SQRT1_2 = 0.70710678118654752440;
-const float M_LNPI = 1.14472988584940017414;
-const float M_EULER = 0.57721566490153286061;
+const float M_PI;
+const float M_E;
+const float M_LOG2E;
+const float M_LOG10E;
+const float M_LN2;
+const float M_LN10;
+const float M_PI_2;
+const float M_PI_4;
+const float M_1_PI;
+const float M_2_PI;
+const float M_SQRTPI;
+const float M_2_SQRTPI;
+const float M_SQRT2;
+const float M_SQRT3;
+const float M_SQRT1_2;
+const float M_LNPI;
+const float M_EULER;
 
 <<__PHPStdLib>>
 function pi()[]: HH\FIXME\MISSING_RETURN_TYPE;

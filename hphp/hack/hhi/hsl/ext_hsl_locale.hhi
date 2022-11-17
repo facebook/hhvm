@@ -47,22 +47,22 @@ namespace HH\Lib\_Private\_Locale {
   // more are defined for every platform, but the HHI is only including ones that
   // are defined on every supported platform
 
-  const int LC_ALL = 0xdeadbeef;
-  const int LC_COLLATE = 0xdeadbeef;
-  const int LC_CTYPE = 0xdeadbeef;
-  const int LC_MONETARY = 0xdeadbeef;
-  const int LC_NUMERIC = 0xdeadbeef;
-  const int LC_TIME = 0xdeadbeef;
+  const int LC_ALL;
+  const int LC_COLLATE;
+  const int LC_CTYPE;
+  const int LC_MONETARY;
+  const int LC_NUMERIC;
+  const int LC_TIME;
   // required by POSIX, but not by C standard. Not supported by MSVC, but we don't
   // support that (yet?).
-  const int LC_MESSAGES = 0xdeadbeef;
+  const int LC_MESSAGES;
 
-  const int LC_ALL_MASK = 0xdeadbeef;
-  const int LC_COLLATE_MASK = 0xdeadbeef;
-  const int LC_CTYPE_MASK = 0xdeadbeef;
-  const int LC_MONETARY_MASK = 0xdeadbeef;
-  const int LC_NUMERIC_MASK = 0xdeadbeef;
-  const int LC_TIME_MASK = 0xdeadbeef;
-  const int LC_MESSAGES_MASK = 0xdeadbeef;
+  const int LC_ALL_MASK;
+  const int LC_COLLATE_MASK;
+  const int LC_CTYPE_MASK;
+  const int LC_MONETARY_MASK;
+  const int LC_NUMERIC_MASK;
+  const int LC_TIME_MASK;
+  const int LC_MESSAGES_MASK;
 
 } // namespace HH\Lib\_Private\_Locale

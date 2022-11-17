@@ -8,7 +8,7 @@
  *
  */
 
-const int THRIFT_MARK_LEGACY_ARRAYS = 1 << 0;
+const int THRIFT_MARK_LEGACY_ARRAYS;
 
 <<__PHPStdLib>>
 function thrift_protocol_write_binary(

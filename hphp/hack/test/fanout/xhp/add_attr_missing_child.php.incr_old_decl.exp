@@ -1,0 +1,12 @@
+=== base errors ===
+b.php:4:17,20: No property `:prop` in `child` (Typing[4053])
+  a.php:7:12,17: Did you mean `file` instead?
+  b.php:4:11,15: This is why I think it is an object of type child
+  child.php:3:7,12: Declaration of `child` is here
+=== changed errors ===
+b.php:4:23,27: Invalid xhp value for attribute `:prop` in `child` (Typing[4343])
+  a.php:4:13,18: Expected `string`
+  b.php:3:31,33: But got `int`
+=== fanout ===
+0x52d77445a3eff51b
+0x7eeda955b68b5127

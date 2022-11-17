@@ -1,0 +1,19 @@
+=== base errors ===
+No errors!
+=== changed errors ===
+b.php:4:23,27: Invalid xhp value for attribute `:prop` in `child` (Typing[4343])
+  a.php:4:13,17: Expected `float`
+  b.php:3:31,33: But got `int`
+gchild.php:4:13,20: The property `:prop` has the wrong type (Typing[4341])
+  gchild.php:4:13,20: Typing error
+  a.php:4:13,17: Expected `float`
+  gchild.php:4:13,20: But got `arraykey`
+gchild.php:4:13,20: The property `:prop` has the wrong type (Typing[4341])
+  gchild.php:4:13,20: Typing error
+  gchild.php:4:13,20: Expected `arraykey`
+  a.php:4:13,17: But got `float`
+=== fanout ===
+0x04d53eab8e552845
+0x52d77445a3eff51b
+0x7eeda955b68b5127
+Fun xhp_simple_attribute

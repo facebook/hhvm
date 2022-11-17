@@ -1,0 +1,11 @@
+=== base errors ===
+No errors!
+=== changed errors ===
+use.php:4:10,10: Invalid argument (Typing[4110])
+  a.php:4:30,35: Expected `string`
+  use.php:4:10,10: But got `int`
+=== fanout ===
+Fun f
+Type B
+Type C
+Type D

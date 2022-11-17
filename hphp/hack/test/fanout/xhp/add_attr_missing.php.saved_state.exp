@@ -1,0 +1,12 @@
+=== base errors ===
+b.php:4:19,22: No property `:prop` in `element` (Typing[4053])
+  a.php:7:12,17: Did you mean `file` instead?
+  b.php:4:11,17: This is why I think it is an object of type element
+  a.php:3:7,14: Declaration of `element` is here
+=== changed errors ===
+b.php:4:25,29: Invalid xhp value for attribute `:prop` in `element` (Typing[4343])
+  a.php:4:13,18: Expected `string`
+  b.php:3:31,33: But got `int`
+=== fanout ===
+0x52d77445a3eff51b
+Fun xhp_simple_attribute

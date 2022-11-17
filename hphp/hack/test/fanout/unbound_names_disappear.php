@@ -37,6 +37,24 @@ function i(AA $a): void {
   $a->bar();
 }
 
+//// base-dict.php
+<?hh
+
+function f_dict(): void {
+  dict[
+    AA::class => 0,
+  ];
+}
+
+//// base-shape.php
+<?hh
+
+function f_shp(): void {
+  shape(
+    AA::class => 0,
+  );
+}
+
 //// changed-a.php
 <?hh
 
@@ -74,4 +92,22 @@ function h(AA $a): void {}
 
 function i(AA $a): void {
   $a->bar();
+}
+
+//// changed-dict.php
+<?hh
+
+function f_dict(): void {
+  dict[
+    AA::class => 0,
+  ];
+}
+
+//// changed-shape.php
+<?hh
+
+function f_shp(): void {
+  shape(
+    AA::class => 0,
+  );
 }

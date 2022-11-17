@@ -17,22 +17,22 @@ let make_workers
     (root : Path.t)
     (server_config : ServerConfig.t)
     (server_local_config : ServerLocalConfig.t)
-    ~(longlived_workers : bool) : MultiWorker.worker list =
+    ~(longlived_workers : bool)
+    ~(log_sharedmem_stats : bool) : MultiWorker.worker list =
   let num_workers = Sys_utils.nbr_procs in
   let gc_control = Gc.get () in
   let hhconfig_version =
     server_config |> ServerConfig.version |> Config_file.version_to_string_opt
   in
   let shmem_config = ServerConfig.sharedmem_config server_config in
+  let log_level =
+    if log_sharedmem_stats then
+      1
+    else
+      0
+  in
   let heap_handle =
-    SharedMem.init
-      ~num_workers
-      SharedMem.
-        {
-          shmem_config with
-          shm_use_sharded_hashtbl = true;
-          shm_cache_size = 60 * (1024 * 1024 * 1024);
-        }
+    SharedMem.(init ~num_workers { shmem_config with log_level })
   in
   ServerWorker.make
     ~longlived_workers
@@ -64,7 +64,8 @@ let init
     (root : Path.t)
     (naming_table_path : string option)
     ~(longlived_workers : bool)
-    ~(rust_provider_backend : bool) :
+    ~(rust_provider_backend : bool)
+    ~(log_sharedmem_stats : bool) :
     Provider_context.t * Naming_table.t option * MultiWorker.worker list option
     =
   Relative_path.set_path_prefix Relative_path.Root root;
@@ -72,6 +73,24 @@ let init
   Relative_path.set_path_prefix Relative_path.Hhi (Hhi.get_hhi_root ());
 
   let server_args = ServerArgs.default_options ~root:(Path.to_string root) in
+  let server_args =
+    ServerArgs.(
+      set_config
+        server_args
+        ([
+           ("rust_provider_backend", string_of_bool rust_provider_backend);
+           ("shm_use_sharded_hashtbl", "true");
+           ("shm_cache_size", string_of_int (60 * (1024 * 1024 * 1024)));
+           ("force_shallow_decl_fanout", "true");
+           ("populate_member_heaps", "false");
+           ( "log_sharedmem_stats",
+             if log_sharedmem_stats then
+               "1"
+             else
+               "0" );
+         ]
+        @ config server_args))
+  in
   let (server_config, server_local_config) =
     ServerConfig.load ~silent:true ServerConfig.filename server_args
   in
@@ -92,7 +111,12 @@ let init
       ~deps_mode:(Typing_deps_mode.InMemoryMode None)
   in
   let workers =
-    make_workers root server_config server_local_config ~longlived_workers
+    make_workers
+      root
+      server_config
+      server_local_config
+      ~longlived_workers
+      ~log_sharedmem_stats
   in
   Hh_logger.log
     "About to decl %s with %d workers %s"
@@ -178,6 +202,7 @@ let () =
   let naming_table_path = ref None in
   let longlived_workers = ref false in
   let rust_provider_backend = ref false in
+  let log_sharedmem_stats = ref false in
   let num_files = ref None in
   let args =
     [
@@ -195,6 +220,9 @@ let () =
       ( "--num-files",
         Arg.Int (fun n -> num_files := Some n),
         " Fold only this number of files instead of the entire repository" );
+      ( "--log-sharedmem-stats",
+        Arg.Set log_sharedmem_stats,
+        " Record sharedmem telemetry and print before exit" );
     ]
   in
   Arg.parse args (fun filepath -> repo := Some filepath) usage;
@@ -212,6 +240,7 @@ let () =
       !naming_table_path
       ~longlived_workers:!longlived_workers
       ~rust_provider_backend:!rust_provider_backend
+      ~log_sharedmem_stats:!log_sharedmem_stats
   in
   let file_summaries =
     match naming_table_opt with
@@ -244,8 +273,19 @@ let () =
       Relative_path.Map.of_list files
   in
 
+  let with_shmem_logging f =
+    if SharedMem.SMTelemetry.hh_log_level () > 0 then Measure.push_global ();
+    f ();
+    if SharedMem.SMTelemetry.hh_log_level () > 0 then
+      Measure.print_stats () ~record:(Measure.pop_global ())
+  in
+
   Hh_logger.log "Phase: writing folded decls";
-  fold_repo ctx workers (Relative_path.Map.elements file_summaries);
+  with_shmem_logging (fun () ->
+      fold_repo ctx workers (Relative_path.Map.elements file_summaries));
 
   Hh_logger.log "Phase: reading back folded decls";
-  fold_repo ctx workers (Relative_path.Map.elements file_summaries)
+  with_shmem_logging (fun () ->
+      fold_repo ctx workers (Relative_path.Map.elements file_summaries));
+
+  ()

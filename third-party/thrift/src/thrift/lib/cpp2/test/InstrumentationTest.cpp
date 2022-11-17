@@ -495,7 +495,16 @@ TEST_F(RequestInstrumentationTest, threadSnapshotWithShallowRC) {
   client->semifuture_wait(0, true, true);
   handler()->waitForRequests(2);
 
-  auto onThreadReqs = getRootIdsOnThreads();
+  const int kTries = 5;
+  std::vector<intptr_t> onThreadReqs;
+  for (auto i = 0; i < kTries; ++i) {
+    onThreadReqs = getRootIdsOnThreads();
+    if (onThreadReqs.size() == 1) {
+      break;
+    }
+    /* sleep override */
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  }
   auto allReqs = getRequestSnapshots(2);
   EXPECT_EQ(1, onThreadReqs.size());
   EXPECT_EQ(2, allReqs.size());

@@ -186,7 +186,8 @@ class SplTempFileObject extends SplFileObject {
   public function __construct(?int $max_memory = null);
 }
 
-class DirectoryIterator extends SplFileInfo
+class DirectoryIterator
+  extends SplFileInfo
   implements SeekableIterator<HH\FIXME\POISON_MARKER<SplFileInfo>> {
 
   // Methods

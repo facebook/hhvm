@@ -8,9 +8,9 @@
  *
  */
 
-class RecursiveDirectoryIterator extends FilesystemIterator
-  implements
-    RecursiveIterator<HH\FIXME\POISON_MARKER<SplFileInfo>> {
+class RecursiveDirectoryIterator
+  extends FilesystemIterator
+  implements RecursiveIterator<HH\FIXME\POISON_MARKER<SplFileInfo>> {
 
   // Constants
   const int FOLLOW_SYMLINKS = 512;

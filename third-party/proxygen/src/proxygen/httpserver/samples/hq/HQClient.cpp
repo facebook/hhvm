@@ -19,6 +19,7 @@
 #include <folly/json.h>
 
 #include <proxygen/httpserver/samples/hq/FizzContext.h>
+#include <proxygen/httpserver/samples/hq/H1QUpstreamSession.h>
 #include <proxygen/httpserver/samples/hq/HQLoggerHelper.h>
 #include <proxygen/httpserver/samples/hq/InsecureVerifierDangerousDoNotUseInProduction.h>
 #include <proxygen/lib/http/codec/HTTP1xCodec.h>
@@ -44,23 +45,8 @@ int HQClient::start() {
   initializeQLogger();
 
   // TODO: turn on cert verification
-  wangle::TransportInfo tinfo;
-  session_ = new proxygen::HQUpstreamSession(params_.txnTimeout,
-                                             params_.connectTimeout,
-                                             nullptr, // controller
-                                             tinfo,
-                                             nullptr); // codecfiltercallback
-
-  // Need this for Interop since we use HTTP0.9
-  session_->setForceUpstream1_1(false);
-
-  // TODO: this could now be moved back in the ctor
-  session_->setSocket(quicClient_);
-  session_->setConnectCallback(this);
-
   LOG(INFO) << "HQClient connecting to " << params_.remoteAddress->describe();
-  session_->startNow();
-  quicClient_->start(session_, session_);
+  quicClient_->start(this, nullptr);
 
   // This is to flush the CFIN out so the server will see the handshake as
   // complete.
@@ -73,6 +59,48 @@ int HQClient::start() {
   evb_.loop();
 
   return failed_ ? -1 : 0;
+}
+
+void HQClient::onConnectionSetupError(quic::QuicError code) noexcept {
+  LOG(ERROR) << "Failed to establish QUIC connection: " << code.message;
+  quicClient_->setConnectionSetupCallback(nullptr);
+  connectError(code);
+}
+
+void HQClient::onTransportReady() noexcept {
+  auto alpn = quicClient_->getAppProtocol();
+  if (alpn && alpn == proxygen::kHQ) {
+    h1qSession_ = new H1QUpstreamSession(quicClient_);
+    connectSuccess();
+  } else {
+    wangle::TransportInfo tinfo;
+    hqSession_ = new proxygen::HQUpstreamSession(params_.txnTimeout,
+                                                 params_.connectTimeout,
+                                                 nullptr, // controller
+                                                 tinfo,
+                                                 nullptr);
+    hqSession_->setConnectCallback(&connCb_);
+    quicClient_->setConnectionCallback(hqSession_);
+    quicClient_->setConnectionSetupCallback(hqSession_);
+    hqSession_->setSocket(quicClient_);
+    hqSession_->startNow();
+    // TODO: get rid HQUpstreamSession::ConnectCallback
+    if (replaySafe_) {
+      hqSession_->onReplaySafe();
+    }
+    hqSession_->onTransportReady(); // invokes connectSuccess()
+  }
+}
+
+proxygen::HTTPTransaction* HQClient::newTransaction(
+    proxygen::HTTPTransactionHandler* handler) {
+  proxygen::HTTPTransaction* txn = nullptr;
+  if (h1qSession_) {
+    txn = h1qSession_->newTransaction(handler);
+  } else {
+    txn = hqSession_->newTransaction(handler);
+  }
+  return txn;
 }
 
 proxygen::HTTPTransaction* FOLLY_NULLABLE
@@ -90,7 +118,7 @@ HQClient::sendRequest(const proxygen::URL& requestUrl) {
 
   client->setLogging(params_.logResponse);
   client->setHeadersLogging(params_.logResponseHeaders);
-  auto txn = session_->newTransaction(client.get());
+  auto txn = newTransaction(client.get());
   if (!txn) {
     return nullptr;
   }
@@ -116,6 +144,15 @@ HQClient::sendRequest(const proxygen::URL& requestUrl) {
   return txn;
 }
 
+void HQClient::drainSession() {
+  if (h1qSession_) {
+    h1qSession_->drain();
+  } else {
+    hqSession_->drain();
+    hqSession_->closeWhenIdle();
+  }
+}
+
 void HQClient::sendRequests(bool closeSession, uint64_t numOpenableStreams) {
   VLOG(10) << "http-version:" << params_.httpVersion;
   do {
@@ -126,8 +163,7 @@ void HQClient::sendRequests(bool closeSession, uint64_t numOpenableStreams) {
   } while (!params_.sendRequestsSequentially && !httpPaths_.empty() &&
            numOpenableStreams > 0);
   if (closeSession && httpPaths_.empty()) {
-    session_->drain();
-    session_->closeWhenIdle();
+    drainSession();
   }
   // If there are still pending requests to be sent sequentially, schedule a
   // callback on the first EOM to try to make one more request. That callback
@@ -195,12 +231,13 @@ void HQClient::sendKnobFrame(const folly::StringPiece str) {
   }
 }
 
-void HQClient::onReplaySafe() {
-  VLOG(10) << "Transport replay safe";
+void HQClient::onReplaySafe() noexcept {
+  VLOG(4) << "Transport replay safe";
+  replaySafe_ = true;
   evb_.terminateLoopSoon();
 }
 
-void HQClient::connectError(quic::QuicError error) {
+void HQClient::connectError(const quic::QuicError& error) {
   LOG(ERROR) << "HQClient failed to connect, error=" << toString(error.code)
              << ", msg=" << error.message;
   failed_ = true;

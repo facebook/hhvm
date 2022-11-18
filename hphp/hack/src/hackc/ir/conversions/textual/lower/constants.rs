@@ -91,6 +91,8 @@ fn insert_constants(builder: &mut FuncBuilder<'_>, start_bid: BlockId) {
     let bids = follow_block_successors(&builder.func, start_bid);
     let constants = compute_live_constants(&builder.func, &bids);
 
+    let constants = sort_and_filter_constants(&builder.func, constants);
+
     let mut remap = ValueIdMap::default();
     let mut fixups = Vec::default();
 
@@ -98,11 +100,10 @@ fn insert_constants(builder: &mut FuncBuilder<'_>, start_bid: BlockId) {
     builder.start_block(new_bid);
 
     for cid in constants.into_iter() {
-        if let Some(vid) = write_constant(builder, cid) {
-            let src = ValueId::from_constant(cid);
-            remap.insert(src, vid);
-            fixups.push((vid, src));
-        }
+        let vid = write_constant(builder, cid);
+        let src = ValueId::from_constant(cid);
+        remap.insert(src, vid);
+        fixups.push((vid, src));
     }
 
     let mut old_iids = std::mem::take(&mut builder.func.block_mut(start_bid).iids);
@@ -118,7 +119,42 @@ fn insert_constants(builder: &mut FuncBuilder<'_>, start_bid: BlockId) {
     }
 }
 
-fn write_constant(builder: &mut FuncBuilder<'_>, cid: ConstantId) -> Option<ValueId> {
+/// Arrays can refer to some prior constants (like Strings) so they need to be
+/// sorted before being written. Right now arrays can't refer to other arrays so
+/// they don't need to be sorted relative to each other.
+fn sort_and_filter_constants(func: &Func<'_>, constants: ConstantIdSet) -> Vec<ConstantId> {
+    let mut strings = Vec::with_capacity(constants.len());
+    let mut arrays = Vec::with_capacity(constants.len());
+    for cid in constants {
+        let constant = func.constant(cid);
+        match constant {
+            Constant::Bool(..)
+            | Constant::Dir
+            | Constant::Float(..)
+            | Constant::File
+            | Constant::FuncCred
+            | Constant::Int(..)
+            | Constant::Method
+            | Constant::Named(..)
+            | Constant::NewCol(..)
+            | Constant::Null
+            | Constant::Uninit => {}
+
+            Constant::Array(_) => {
+                arrays.push(cid);
+            }
+            Constant::String(_) => {
+                strings.push(cid);
+            }
+        }
+    }
+
+    let mut result = strings;
+    result.append(&mut arrays);
+    result
+}
+
+fn write_constant(builder: &mut FuncBuilder<'_>, cid: ConstantId) -> ValueId {
     let constant = builder.func.constant(cid);
     trace!("    Const {cid}: {constant:?}");
     match constant {
@@ -132,9 +168,9 @@ fn write_constant(builder: &mut FuncBuilder<'_>, cid: ConstantId) -> Option<Valu
         | Constant::Named(..)
         | Constant::NewCol(..)
         | Constant::Null
-        | Constant::Uninit => None,
+        | Constant::Uninit => unreachable!(),
 
         // Insert a tombstone which will be turned into a 'copy' later.
-        Constant::Array(_) | Constant::String(_) => Some(builder.emit(Instr::tombstone())),
+        Constant::Array(_) | Constant::String(_) => builder.emit(Instr::tombstone()),
     }
 }

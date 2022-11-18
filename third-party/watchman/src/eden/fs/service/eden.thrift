@@ -1065,6 +1065,20 @@ struct GetStatInfoParams {
   1: i64 statsMask;
 }
 
+struct DebugInvalidateRequest {
+  1: MountId mount;
+  // Relative path in the repo to recursively invalidate
+  2: PathString path;
+  // Files last accessed before now-age will be invalidated. A zero age means
+  // all inodes.
+  3: TimeSpec age;
+  4: SyncBehavior sync;
+}
+
+struct DebugInvalidateResponse {
+  1: unsigned64 numInvalidated;
+}
+
 /**
  * A representation of the system-dependent dirent::d_type field.
  * The bits and their interpretation is system dependent.
@@ -1993,6 +2007,16 @@ service EdenService extends fb303_core.BaseService {
     1: PathString mountPoint,
     2: PathString path,
     3: TimeSpec age,
+  ) throws (1: EdenError ex);
+
+  /**
+   * Garbage collect the repository by invalidating all the files/directories
+   * below the passed in path who haven't been accessed since the given age.
+   *
+   * TODO: Rewrite as a streaming API once eden doctor is in Rust.
+   */
+  DebugInvalidateResponse debugInvalidateNonMaterialized(
+    1: DebugInvalidateRequest params,
   ) throws (1: EdenError ex);
 
   /**

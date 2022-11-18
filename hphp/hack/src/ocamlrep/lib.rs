@@ -314,6 +314,7 @@ pub mod rc;
 pub use arena::Arena;
 pub use block::Block;
 pub use block::BlockBuilder;
+pub use block::BlockBytes;
 pub use block::Color;
 pub use block::Header;
 pub use block::ABSTRACT_TAG;
@@ -476,6 +477,23 @@ pub trait Allocator: Sized {
     ///
     /// `add_root` is not re-entrant, and panics upon attempts to do so.
     fn add_root<'a, T: ToOcamlRep + ?Sized>(&'a self, value: &'a T) -> Value<'a>;
+
+    /// Allocate a block with tag `STRING_TAG` and enough space for a string of
+    /// `len` bytes. Write its header and return a `BlockBytes` wrapping the
+    /// buffer and the block.
+    fn byte_string_with_len<'a>(&'a self, len: usize) -> BlockBytes<'a> {
+        let word_size = std::mem::size_of::<*const u8>();
+        let words = (len + 1 /*null-ending*/ + (word_size - 1)/*rounding*/) / word_size;
+        let length = words * word_size;
+        let mut block = self.block_with_size_and_tag(words, STRING_TAG);
+        unsafe {
+            let block = self.block_ptr_mut(&mut block);
+            *block.add(words - 1) = Value::from_bits(0);
+            let block_bytes = block as *mut u8;
+            *block_bytes.add(length - 1) = (length - len - 1) as u8;
+            BlockBytes::new(std::slice::from_raw_parts_mut(block_bytes, len))
+        }
+    }
 }
 
 /// A type which can be reconstructed from an OCaml value.

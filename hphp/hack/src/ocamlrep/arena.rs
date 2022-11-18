@@ -172,9 +172,23 @@ impl Allocator for Arena {
 
 #[cfg(test)]
 mod tests {
+    use std::io::Write;
     use std::time::Instant;
 
     use super::*;
+
+    #[test]
+    fn test_alloc_byte_string_with_len() {
+        let arena = Arena::with_capacity(1000);
+
+        let msg: &[u8] = b"Hello world!";
+        let mut w = arena.byte_string_with_len(msg.len());
+        let bytes_written = w.write(msg).ok().unwrap();
+        assert!(bytes_written == msg.len());
+
+        let value: Value<'_> = w.build();
+        assert_eq!(value.as_byte_string().unwrap(), msg);
+    }
 
     #[test]
     fn test_alloc_block_of_three_fields() {

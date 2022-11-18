@@ -235,3 +235,36 @@ impl Debug for Header {
             .finish()
     }
 }
+
+pub struct BlockBytes<'a>(&'a mut [u8], *const u8);
+
+impl<'a> BlockBytes<'a> {
+    // SAFETY: `bytes` must be the data segment of a valid block with
+    // `STRING_TAG`, excluding the trailing padding bytes; see
+    // `Allocator::byte_string_with_len`
+    pub(crate) unsafe fn new(bytes: &'a mut [u8]) -> Self {
+        BlockBytes(bytes, bytes.as_ptr())
+    }
+}
+
+impl std::io::Write for BlockBytes<'_> {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        // If the number of bytes to be written exceeds the buffer size, error,
+        // don't do short writes!
+        self.0.write_all(buf)?;
+        Ok(buf.len())
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        self.0.flush()
+    }
+}
+
+impl<'a> BlockBytes<'a> {
+    pub fn build(self) -> Value<'a> {
+        let BlockBytes(slice, block) = self;
+        if !slice.is_empty() {
+            panic!("ocamlrep: BlockBytes invariant violation: not all bytes written to.");
+        }
+        unsafe { Value::from_bits(block as usize) }
+    }
+}

@@ -235,7 +235,11 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
         }
         Instr::Special(Special::IrToBc(..)) => todo!(),
         Instr::Special(Special::Param) => todo!(),
-        Instr::Special(Special::Select(..)) => todo!(),
+        Instr::Special(Special::Select(vid, _idx)) => {
+            textual_todo! {
+                state.set_iid(iid, w.copy(state.lookup_vid(vid))?);
+            }
+        }
         Instr::Special(Special::Tmp(..)) => todo!(),
         Instr::Special(Special::Tombstone) => todo!(),
 
@@ -456,9 +460,19 @@ fn write_call(
         loc: _,
     } = *call;
 
-    assert!(inouts.as_ref().map_or(true, |inouts| inouts.is_empty()));
+    if !inouts.as_ref().map_or(true, |inouts| inouts.is_empty()) {
+        textual_todo! {
+            w.comment("TODO: inouts")?;
+        }
+    }
+
     assert!(readonly.as_ref().map_or(true, |ro| ro.is_empty()));
-    assert!(num_rets < 2);
+
+    if num_rets >= 2 {
+        textual_todo! {
+            w.comment("TODO: num_rets >= 2")?;
+        }
+    }
 
     let context = state.strings.lookup_bytes_or_none(context);
     if let Some(context) = context {

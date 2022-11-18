@@ -45,12 +45,38 @@ pub(crate) enum Hhbc {
     Div,
     #[decl(fn hhbc_exit(*HackMixed) -> noreturn)]
     Exit,
+    #[decl(fn hhbc_is_type_arr_like(*HackMixed) -> *HackMixed)]
+    IsTypeArrLike,
+    #[decl(fn hhbc_is_type_bool(*HackMixed) -> *HackMixed)]
+    IsTypeBool,
+    #[decl(fn hhbc_is_type_class(*HackMixed) -> *HackMixed)]
+    IsTypeClass,
+    #[decl(fn hhbc_is_type_cls_meth(*HackMixed) -> *HackMixed)]
+    IsTypeClsMeth,
+    #[decl(fn hhbc_is_type_dbl(*HackMixed) -> *HackMixed)]
+    IsTypeDbl,
+    #[decl(fn hhbc_is_type_dict(*HackMixed) -> *HackMixed)]
+    IsTypeDict,
+    #[decl(fn hhbc_is_type_func(*HackMixed) -> *HackMixed)]
+    IsTypeFunc,
     #[decl(fn hhbc_is_type_int(*HackMixed) -> *HackMixed)]
     IsTypeInt,
+    #[decl(fn hhbc_is_type_keyset(*HackMixed) -> *HackMixed)]
+    IsTypeKeyset,
+    #[decl(fn hhbc_is_type_legacy_arr_like(*HackMixed) -> *HackMixed)]
+    IsTypeLegacyArrLike,
     #[decl(fn hhbc_is_type_null(*HackMixed) -> *HackMixed)]
     IsTypeNull,
+    #[decl(fn hhbc_is_type_obj(*HackMixed) -> *HackMixed)]
+    IsTypeObj,
+    #[decl(fn hhbc_is_type_res(*HackMixed) -> *HackMixed)]
+    IsTypeRes,
+    #[decl(fn hhbc_is_type_scalar(*HackMixed) -> *HackMixed)]
+    IsTypeScalar,
     #[decl(fn hhbc_is_type_str(*HackMixed) -> *HackMixed)]
     IsTypeStr,
+    #[decl(fn hhbc_is_type_vec(*HackMixed) -> *HackMixed)]
+    IsTypeVec,
     #[decl(fn hhbc_modulo(*HackMixed, *HackMixed) -> *HackMixed)]
     Modulo,
     #[decl(fn hhbc_mul(*HackMixed, *HackMixed) -> *HackMixed)]

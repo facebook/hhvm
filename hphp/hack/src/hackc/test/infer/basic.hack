@@ -10,6 +10,17 @@ function main(): void {
   echo "Hello, World!\n";
 }
 
+// CHECK: define $root.escaped_string(this: *void) : *HackMixed {
+// CHECK: local base: *HackMixed
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hack_string("This string has \042 a quote")
+// CHECK:   n1 = $builtins.hhbc_print(n0)
+// CHECK:   ret $builtins.hack_null()
+// CHECK: }
+function escaped_string(): void {
+  echo 'This string has " a quote';
+}
+
 // CHECK: define $root.cmp(this: *void, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("equal")

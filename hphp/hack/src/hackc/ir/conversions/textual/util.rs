@@ -14,6 +14,14 @@ pub fn escaped_string(input: &[u8]) -> AsciiString {
             b'\n' => AsciiChar::new('n'),
             b'\r' => AsciiChar::new('r'),
             b'\t' => AsciiChar::new('t'),
+            b'"' => {
+                // \" doesn't work - emit \042 instead
+                res.push(AsciiChar::BackSlash);
+                res.push(AsciiChar::_0);
+                res.push(AsciiChar::_4);
+                res.push(AsciiChar::_2);
+                continue;
+            }
             _ if ch == b' ' || ch.is_ascii_graphic() => {
                 res.push(AsciiChar::new(ch as char));
                 continue;

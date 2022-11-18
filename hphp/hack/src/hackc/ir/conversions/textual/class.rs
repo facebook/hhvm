@@ -146,6 +146,7 @@ fn write_type(
         flags.clear(ir::Attr::AttrPrivate);
         flags.clear(ir::Attr::AttrProtected);
         flags.clear(ir::Attr::AttrPublic);
+        flags.clear(ir::Attr::AttrSystemInitialValue);
 
         if !flags.is_empty() {
             trace!("CLASS FLAGS: {:?}", flags);

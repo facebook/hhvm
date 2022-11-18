@@ -52,51 +52,58 @@ struct LowerInstrs<'a> {
 }
 
 impl LowerInstrs<'_> {
+    fn handle_hhbc_with_builtin(&self, hhbc: &Hhbc) -> Option<hack::Hhbc> {
+        let builtin = match hhbc {
+            Hhbc::Add(..) => hack::Hhbc::Add,
+            Hhbc::ClassGetC(..) => hack::Hhbc::ClassGetC,
+            Hhbc::CmpOp(_, CmpOp::Eq, _) => hack::Hhbc::CmpEq,
+            Hhbc::CmpOp(_, CmpOp::Gt, _) => hack::Hhbc::CmpGt,
+            Hhbc::CmpOp(_, CmpOp::Gte, _) => hack::Hhbc::CmpGte,
+            Hhbc::CmpOp(_, CmpOp::Lt, _) => hack::Hhbc::CmpLt,
+            Hhbc::CmpOp(_, CmpOp::Lte, _) => hack::Hhbc::CmpLte,
+            Hhbc::CmpOp(_, CmpOp::NSame, _) => hack::Hhbc::CmpNSame,
+            Hhbc::CmpOp(_, CmpOp::Neq, _) => hack::Hhbc::CmpNeq,
+            Hhbc::CmpOp(_, CmpOp::Same, _) => hack::Hhbc::CmpSame,
+            Hhbc::Concat(..) => hack::Hhbc::Concat,
+            Hhbc::Div(..) => hack::Hhbc::Div,
+            Hhbc::IsTypeC(_, IsTypeOp::ArrLike, _) => todo!(),
+            Hhbc::IsTypeC(_, IsTypeOp::Bool, _) => todo!(),
+            Hhbc::IsTypeC(_, IsTypeOp::Class, _) => todo!(),
+            Hhbc::IsTypeC(_, IsTypeOp::ClsMeth, _) => todo!(),
+            Hhbc::IsTypeC(_, IsTypeOp::Dbl, _) => todo!(),
+            Hhbc::IsTypeC(_, IsTypeOp::Dict, _) => todo!(),
+            Hhbc::IsTypeC(_, IsTypeOp::Func, _) => todo!(),
+            Hhbc::IsTypeC(_, IsTypeOp::Int, _) => hack::Hhbc::IsTypeInt,
+            Hhbc::IsTypeC(_, IsTypeOp::Keyset, _) => todo!(),
+            Hhbc::IsTypeC(_, IsTypeOp::LegacyArrLike, _) => todo!(),
+            Hhbc::IsTypeC(_, IsTypeOp::Null, _) => hack::Hhbc::IsTypeNull,
+            Hhbc::IsTypeC(_, IsTypeOp::Obj, _) => todo!(),
+            Hhbc::IsTypeC(_, IsTypeOp::Res, _) => todo!(),
+            Hhbc::IsTypeC(_, IsTypeOp::Scalar, _) => todo!(),
+            Hhbc::IsTypeC(_, IsTypeOp::Str, _) => hack::Hhbc::IsTypeStr,
+            Hhbc::IsTypeC(_, IsTypeOp::Vec, _) => todo!(),
+            Hhbc::Modulo(..) => hack::Hhbc::Modulo,
+            Hhbc::Mul(..) => hack::Hhbc::Mul,
+            Hhbc::NewDictArray(..) => hack::Hhbc::NewDictArray,
+            Hhbc::NewObjS(..) => hack::Hhbc::NewObj,
+            Hhbc::NewVec(..) => hack::Hhbc::NewVec,
+            Hhbc::Not(..) => hack::Hhbc::Not,
+            Hhbc::Print(..) => hack::Hhbc::Print,
+            Hhbc::Sub(..) => hack::Hhbc::Sub,
+            _ => return None,
+        };
+        Some(builtin)
+    }
+
     fn handle_with_builtin(&self, builder: &mut FuncBuilder<'_>, instr: &Instr) -> Option<Instr> {
         let builtin = match instr {
-            Instr::Hhbc(Hhbc::Add(..)) => hack::Builtin::Hhbc(hack::Hhbc::Add),
-            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Eq, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpEq),
-            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Gt, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpGt),
-            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Gte, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpGte),
-            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Lt, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpLt),
-            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Lte, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpLte),
-            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::NSame, _)) => {
-                hack::Builtin::Hhbc(hack::Hhbc::CmpNSame)
+            Instr::Hhbc(hhbc) => {
+                if let Some(hhbc) = self.handle_hhbc_with_builtin(hhbc) {
+                    hack::Builtin::Hhbc(hhbc)
+                } else {
+                    return None;
+                }
             }
-            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Neq, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpNeq),
-            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Same, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpSame),
-            Instr::Hhbc(Hhbc::Concat(..)) => hack::Builtin::Hhbc(hack::Hhbc::Concat),
-            Instr::Hhbc(Hhbc::Div(..)) => hack::Builtin::Hhbc(hack::Hhbc::Div),
-            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::ArrLike, _)) => todo!(),
-            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Bool, _)) => todo!(),
-            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Class, _)) => todo!(),
-            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::ClsMeth, _)) => todo!(),
-            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Dbl, _)) => todo!(),
-            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Dict, _)) => todo!(),
-            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Func, _)) => todo!(),
-            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Int, _)) => {
-                hack::Builtin::Hhbc(hack::Hhbc::IsTypeInt)
-            }
-            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Keyset, _)) => todo!(),
-            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::LegacyArrLike, _)) => todo!(),
-            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Null, _)) => {
-                hack::Builtin::Hhbc(hack::Hhbc::IsTypeNull)
-            }
-            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Obj, _)) => todo!(),
-            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Res, _)) => todo!(),
-            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Scalar, _)) => todo!(),
-            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Str, _)) => {
-                hack::Builtin::Hhbc(hack::Hhbc::IsTypeStr)
-            }
-            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Vec, _)) => todo!(),
-            Instr::Hhbc(Hhbc::Modulo(..)) => hack::Builtin::Hhbc(hack::Hhbc::Modulo),
-            Instr::Hhbc(Hhbc::Mul(..)) => hack::Builtin::Hhbc(hack::Hhbc::Mul),
-            Instr::Hhbc(Hhbc::NewDictArray(..)) => hack::Builtin::Hhbc(hack::Hhbc::NewDictArray),
-            Instr::Hhbc(Hhbc::NewObjS(..)) => hack::Builtin::Hhbc(hack::Hhbc::NewObj),
-            Instr::Hhbc(Hhbc::NewVec(..)) => hack::Builtin::Hhbc(hack::Hhbc::NewVec),
-            Instr::Hhbc(Hhbc::Not(..)) => hack::Builtin::Hhbc(hack::Hhbc::Not),
-            Instr::Hhbc(Hhbc::Print(..)) => hack::Builtin::Hhbc(hack::Hhbc::Print),
-            Instr::Hhbc(Hhbc::Sub(..)) => hack::Builtin::Hhbc(hack::Hhbc::Sub),
             _ => return None,
         };
         Some(builder.hack_builtin(builtin, instr.operands(), instr.loc_id()))
@@ -115,14 +122,28 @@ impl LowerInstrs<'_> {
             .expect("Unknown parameter in verify_out_type()");
         let param_type = param.ty.enforced.clone();
         let pred = builder.emit_is(obj, &param_type, loc);
-        builder.hack_builtin(hack::Builtin::VerifyTypePred, &[obj, pred], loc);
+        builder.emit_hack_builtin(hack::Builtin::VerifyTypePred, &[obj, pred], loc);
         Instr::copy(obj)
+    }
+
+    fn verify_param_type_ts(
+        &self,
+        builder: &mut FuncBuilder<'_>,
+        lid: LocalId,
+        ts: ValueId,
+        loc: LocId,
+    ) -> Instr {
+        let obj = builder.emit(Instr::Hhbc(Hhbc::CGetL(lid, loc)));
+        let builtin = hack::Builtin::Hhbc(hack::Hhbc::VerifyParamTypeTS);
+        builder.emit_hack_builtin(builtin, &[obj, ts], loc);
+        Instr::tombstone()
     }
 
     fn verify_ret_type_c(&self, builder: &mut FuncBuilder<'_>, obj: ValueId, loc: LocId) -> Instr {
         let return_type = builder.func.return_type.enforced.clone();
         let pred = builder.emit_is(obj, &return_type, loc);
-        builder.hack_builtin(hack::Builtin::VerifyTypePred, &[obj, pred], loc)
+        builder.emit_hack_builtin(hack::Builtin::VerifyTypePred, &[obj, pred], loc);
+        Instr::copy(obj)
     }
 }
 
@@ -134,6 +155,17 @@ impl TransformInstr for LowerInstrs<'_> {
         }
 
         let instr = match instr {
+            Instr::Hhbc(Hhbc::BareThis(_op, loc)) => {
+                let this = builder.strings.intern_str("$this");
+                let lid = LocalId::Named(this);
+                Instr::Hhbc(Hhbc::CGetL(lid, loc))
+            }
+            Instr::Hhbc(Hhbc::CheckThis(loc)) => {
+                let builtin = hack::Builtin::Hhbc(hack::Hhbc::CheckThis);
+                let op = ir::BareThisOp::NoNotice;
+                let this = builder.emit(Instr::Hhbc(Hhbc::BareThis(op, loc)));
+                builder.hack_builtin(builtin, &[this], loc)
+            }
             Instr::Hhbc(Hhbc::InstanceOfD(vid, cid, loc)) => {
                 let cid = builder.emit_constant(Constant::String(cid.id));
                 builder.hack_builtin(hack::Builtin::IsType, &[vid, cid], loc)
@@ -150,10 +182,8 @@ impl TransformInstr for LowerInstrs<'_> {
             Instr::Hhbc(Hhbc::VerifyOutType(vid, lid, loc)) => {
                 self.verify_out_type(builder, vid, lid, loc)
             }
-            Instr::Hhbc(Hhbc::VerifyParamTypeTS(param_type, lid, loc)) => {
-                let obj = builder.emit(Instr::Hhbc(Hhbc::CGetL(lid, loc)));
-                let builtin = hack::Builtin::Hhbc(hack::Hhbc::VerifyParamTypeTS);
-                builder.hack_builtin(builtin, &[obj, param_type], loc)
+            Instr::Hhbc(Hhbc::VerifyParamTypeTS(ts, lid, loc)) => {
+                self.verify_param_type_ts(builder, lid, ts, loc)
             }
             Instr::Hhbc(Hhbc::VerifyRetTypeC(vid, loc)) => {
                 self.verify_ret_type_c(builder, vid, loc)

@@ -1,0 +1,213 @@
+// RUN: %hackc compile-infer %s | FileCheck %s
+// CHECK: .source_language = "hack"
+
+class D {
+  public int $foo = 42;
+  /* HH_FIXME[4055] No initial value */
+  public static D $bar;
+
+  // CHECK: define D.mop_baseh_querym_pt(this: *D) : *HackMixed {
+  // CHECK: local $this: *void, base: *HackMixed
+  // CHECK: #b0:
+  // CHECK:   n0: *HackMixed = load &$this
+  // CHECK:   n1 = $builtins.hhbc_check_this(n0)
+  // CHECK:   n2 = &$this
+  // CHECK:   n3 = $builtins.hack_string("foo")
+  // CHECK:   n4 = $builtins.hack_dim_field_get(n2, n3)
+  // CHECK:   n5: *HackMixed = load n4
+  // CHECK:   n6 = $builtins.hhbc_is_type_int(n5)
+  // CHECK:   n7 = $builtins.hhbc_verify_type_pred(n5, n6)
+  // CHECK:   ret n5
+  // CHECK: }
+  public function mop_baseh_querym_pt(): int {
+    return $this->foo;
+  }
+
+  // CHECK: define D.mop_basesc_querym_pt(this: *D) : *HackMixed {
+  // CHECK: local base: *HackMixed
+  // CHECK: #b0:
+  // CHECK:   n0 = $builtins.hack_string("bar")
+  // CHECK:   n1 = $builtins.hack_string("D")
+  // CHECK:   n2 = $builtins.hhbc_class_get_c(n1)
+  // CHECK:   store &base <- n0: *HackMixed
+  // CHECK:   n3 = $builtins.hack_dim_field_get(&base, n2)
+  // CHECK:   n4 = $builtins.hack_string("foo")
+  // CHECK:   n5 = $builtins.hack_dim_field_get(n3, n4)
+  // CHECK:   n6: *HackMixed = load n5
+  // CHECK:   n7 = $builtins.hhbc_is_type_int(n6)
+  // CHECK:   n8 = $builtins.hhbc_verify_type_pred(n6, n7)
+  // CHECK:   ret n6
+  // CHECK: }
+  public function mop_basesc_querym_pt(): int {
+    return D::$bar->foo;
+  }
+}
+
+// CHECK: define $root.mop_basec_querym_pc(this: *void) : *HackMixed {
+// CHECK: local base: *HackMixed
+// CHECK: #b0:
+// CHECK:   n0 = $root.ret_c(null)
+// CHECK:   store &base <- n0: *HackMixed
+// CHECK:   n1 = &base
+// CHECK:   n2 = $builtins.hack_string("foo")
+// CHECK:   n3 = $builtins.hack_dim_field_get(n1, n2)
+// CHECK:   n4: *HackMixed = load n3
+// CHECK:   n5 = $builtins.hhbc_is_type_int(n4)
+// CHECK:   n6 = $builtins.hhbc_verify_type_pred(n4, n5)
+// CHECK:   ret n4
+// CHECK: }
+function mop_basec_querym_pc(): int {
+  return ret_c()->foo;
+}
+
+// CHECK: define $root.mop_basegc_querym_ec(this: *void) : *HackMixed {
+// CHECK: local base: *HackMixed
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hack_string("_SERVER")
+// CHECK:   n1 = $root.ret_int(null)
+// CHECK:   n2 = $builtins.hack_base_get_superglobal(n0)
+// CHECK:   n3 = $builtins.hack_dim_array_get(n2, n1)
+// CHECK:   n4: *HackMixed = load n3
+// CHECK:   n5 = $builtins.hhbc_is_type_int(n4)
+// CHECK:   n6 = $builtins.hhbc_verify_type_pred(n4, n5)
+// CHECK:   ret n4
+// CHECK: }
+function mop_basegc_querym_ec(): int {
+  /* HH_FIXME[2050] Hack doesn't know about $_SERVER */
+  return $_SERVER[ret_int()];
+}
+
+// CHECK: define $root.mop_basel_querym_ei(this: *void, $a: *HackMixed) : *HackMixed {
+// CHECK: local base: *HackMixed
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(20), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1))))
+// CHECK:   n1: *HackMixed = load &$a
+// CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
+// CHECK:   n3 = &$a
+// CHECK:   n4 = $builtins.hack_int(5)
+// CHECK:   n5 = $builtins.hack_dim_array_get(n3, n4)
+// CHECK:   n6: *HackMixed = load n5
+// CHECK:   n7 = $builtins.hhbc_is_type_int(n6)
+// CHECK:   n8 = $builtins.hhbc_verify_type_pred(n6, n7)
+// CHECK:   ret n6
+// CHECK: }
+function mop_basel_querym_ei(vec<int> $a): int {
+  return $a[5];
+}
+
+// CHECK: define $root.mop_basel_querym_pc(this: *void, $a: *HackMixed) : *HackMixed {
+// CHECK: local base: *HackMixed
+// CHECK: #b0:
+// CHECK:   n0 = $root.ret_str(null)
+// CHECK:   n1 = &$a
+// CHECK:   n2 = $builtins.hack_dim_field_get(n1, n0)
+// CHECK:   n3: *HackMixed = load n2
+// CHECK:   n4 = $builtins.hhbc_is_type_int(n3)
+// CHECK:   n5 = $builtins.hhbc_verify_type_pred(n3, n4)
+// CHECK:   ret n3
+// CHECK: }
+function mop_basel_querym_pc(C $a): int {
+  return $a->{ret_str()};
+}
+
+// CHECK: define $root.mop_basel_querym_pl(this: *void, $a: *HackMixed) : *HackMixed {
+// CHECK: local $b: *void, base: *HackMixed
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hack_string("hello")
+// CHECK:   store &$b <- n0: *HackMixed
+// CHECK:   n1 = &$a
+// CHECK:   n2: *HackMixed = load &$b
+// CHECK:   n3 = $builtins.hack_dim_field_get(n1, n2)
+// CHECK:   n4: *HackMixed = load n3
+// CHECK:   n5 = $builtins.hhbc_is_type_int(n4)
+// CHECK:   n6 = $builtins.hhbc_verify_type_pred(n4, n5)
+// CHECK:   ret n4
+// CHECK: }
+function mop_basel_querym_pl(C $a): int {
+  $b = "hello";
+  /* HH_FIXME[2011] dynamic access */
+  return $a->{$b};
+}
+
+// CHECK: define $root.mop_basel_querym_el(this: *void, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
+// CHECK: local base: *HackMixed
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(20), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1))))
+// CHECK:   n1: *HackMixed = load &$a
+// CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
+// CHECK:   n3 = &$a
+// CHECK:   n4: *HackMixed = load &$b
+// CHECK:   n5 = $builtins.hack_dim_array_get(n3, n4)
+// CHECK:   n6: *HackMixed = load n5
+// CHECK:   n7 = $builtins.hhbc_is_type_int(n6)
+// CHECK:   n8 = $builtins.hhbc_verify_type_pred(n6, n7)
+// CHECK:   ret n6
+// CHECK: }
+function mop_basel_querym_el(vec<int> $a, int $b): int {
+  return $a[$b];
+}
+
+// CHECK: define $root.mop_basel_querym_et(this: *void, $a: *HackMixed) : *HackMixed {
+// CHECK: local base: *HackMixed
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(19), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(4)), $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1))))
+// CHECK:   n1: *HackMixed = load &$a
+// CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
+// CHECK:   n3 = &$a
+// CHECK:   n4 = $builtins.hack_string("hello")
+// CHECK:   n5 = $builtins.hack_dim_array_get(n3, n4)
+// CHECK:   n6: *HackMixed = load n5
+// CHECK:   n7 = $builtins.hhbc_is_type_int(n6)
+// CHECK:   n8 = $builtins.hhbc_verify_type_pred(n6, n7)
+// CHECK:   ret n6
+// CHECK: }
+function mop_basel_querym_et(dict<string, int> $a): int {
+  return $a["hello"];
+}
+
+// CHECK: define $root.mop_basel_querym_pt(this: *void, $a: *HackMixed) : *HackMixed {
+// CHECK: local base: *HackMixed
+// CHECK: #b0:
+// CHECK:   n0 = &$a
+// CHECK:   n1 = $builtins.hack_string("foo")
+// CHECK:   n2 = $builtins.hack_dim_field_get(n0, n1)
+// CHECK:   n3: *HackMixed = load n2
+// CHECK:   n4 = $builtins.hhbc_is_type_int(n3)
+// CHECK:   n5 = $builtins.hhbc_verify_type_pred(n3, n4)
+// CHECK:   ret n3
+// CHECK: }
+function mop_basel_querym_pt(C $a): int {
+  return $a->foo;
+}
+
+// CHECK: define $root.mop_basel_querym_qt(this: *void, $a: *HackMixed) : *HackMixed {
+// CHECK: local base: *HackMixed
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hack_string("Unhandled modifiers: TypeConstraintFlags(261)")
+// CHECK:   n1 = &$a
+// CHECK:   n2 = $builtins.hack_string("foo")
+// CHECK:   n3 = $builtins.hack_dim_field_get_or_null(n1, n2)
+// CHECK:   n4: *HackMixed = load n3
+// CHECK:   n5 = $root.todo(null, n0)
+// CHECK:   n6 = $builtins.hhbc_verify_type_pred(n4, n5)
+// CHECK:   ret n4
+// CHECK: }
+function mop_basel_querym_qt(?C $a): ?int {
+  return $a?->foo;
+}
+
+// CHECK: define $root.mop_basel_setm_w(this: *void, $a: *HackMixed) : *HackMixed {
+// CHECK: local base: *HackMixed
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(20), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1))))
+// CHECK:   n1: *HackMixed = load &$a
+// CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
+// CHECK:   n3 = &$a
+// CHECK:   n4 = $builtins.hack_dim_array_append(n3)
+// CHECK:   n5 = $builtins.hack_int(5)
+// CHECK:   store n4 <- n5: *HackMixed
+// CHECK:   ret $builtins.hack_null()
+// CHECK: }
+function mop_basel_setm_w(vec<int> $a): void {
+  $a[] = 5;
+}

@@ -19,13 +19,16 @@ use ir::ValueId;
 use ir::ValueIdMap;
 use log::trace;
 
-/// Write the complex constants to the start of the entry block and remap their
-/// uses to the emitted values.
+/// Write the complex constants to the start of the entry block (and 'default'
+/// handling blocks) and remap their uses to the emitted values.
 pub(crate) fn write_constants(builder: &mut FuncBuilder<'_>) {
+    // Write the complex constants to the entry block.
     insert_constants(builder, Func::ENTRY_BID);
 }
 
-/// Follow the blocks successors around but stopping at an 'enter'.
+/// Follow the blocks successors around but stopping at an 'enter'. We stop at
+/// enter under the assumption that default blocks enter into the entry path -
+/// so those will be handled separately.
 fn follow_block_successors(func: &Func<'_>, bid: BlockId) -> Vec<BlockId> {
     let mut result = Vec::new();
     let mut processed = BlockIdSet::default();
@@ -59,8 +62,7 @@ fn follow_block_successors(func: &Func<'_>, bid: BlockId) -> Vec<BlockId> {
     result
 }
 
-/// Compute the set of constants that are visible starting from `bid` up to
-/// either a `ret` or an `enter`.
+/// Compute the set of constants that are visible starting from `bid`.
 fn compute_live_constants(func: &Func<'_>, bids: &Vec<BlockId>) -> ConstantIdSet {
     let mut visible = ConstantIdSet::default();
     for &bid in bids {

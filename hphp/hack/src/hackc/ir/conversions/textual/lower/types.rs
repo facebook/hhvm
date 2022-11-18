@@ -20,7 +20,7 @@ pub(crate) fn lower_enforced_ty(ty: EnforceableType, strings: &StringInterner) -
     match ty {
         EnforceableType {
             ty: cls @ BaseType::Class(_),
-            modifiers: TypeConstraintFlags::NoFlags,
+            modifiers: TypeConstraintFlags::NoFlags | TypeConstraintFlags::ExtendedHint,
         } => EnforceableType {
             ty: BaseType::RawPtr(Box::new(cls)),
             modifiers: TypeConstraintFlags::NoFlags,

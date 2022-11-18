@@ -19,6 +19,10 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 pub(crate) enum Hhbc {
     #[decl(fn hhbc_add(*HackMixed, *HackMixed) -> *HackMixed)]
     Add,
+    #[decl(fn hhbc_check_this(*HackMixed) -> void)]
+    CheckThis,
+    #[decl(fn hhbc_class_get_c(*HackMixed) -> *HackMixed)]
+    ClassGetC,
     #[decl(fn hhbc_cmp_eq(*HackMixed, *HackMixed) -> *HackMixed)]
     CmpEq,
     #[decl(fn hhbc_cmp_gt(*HackMixed, *HackMixed) -> *HackMixed)]
@@ -77,9 +81,24 @@ pub(crate) enum Builtin {
     /// pointer-sized value).
     #[decl(fn alloc_words(int) -> *void)]
     AllocWords,
+    /// Get the superglobal as a base.
+    #[decl(fn hack_base_get_superglobal(name: *HackMixed) -> **HackMixed)]
+    BaseGetSuperglobal,
     /// Turns a raw boolean into a HackMixed.
     #[decl(fn hack_bool(int) -> *HackBool)]
     Bool,
+    /// Append a new value to a base.
+    #[decl(fn hack_dim_array_append(base: **HackMixed) -> **HackMixed)]
+    DimArrayAppend,
+    /// Get the address of an indexed value from a base.
+    #[decl(fn hack_dim_array_get(base: **HackMixed, index: *HackMixed) -> **HackMixed)]
+    DimArrayGet,
+    /// Get the address of a named field from a struct.
+    #[decl(fn hack_dim_field_get(base: **HackMixed, name: *HackMixed) -> **HackMixed)]
+    DimFieldGet,
+    /// Gets a named field from a struct.
+    #[decl(fn hack_dim_field_get_or_null(base: **HackMixed, name: *HackMixed) -> **HackMixed)]
+    DimFieldGetOrNull,
     /// Turns a raw float into a Mixed.
     #[decl(fn hack_float(float) -> *HackFloat)]
     Float,

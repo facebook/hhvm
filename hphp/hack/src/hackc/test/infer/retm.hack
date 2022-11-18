@@ -9,8 +9,9 @@
 // CHECK:   n1 = $builtins.hhbc_verify_type_pred($builtins.hack_int(5), n0)
 // CHECK:   n2: *HackMixed = load &$a
 // CHECK:   n3 = $builtins.hhbc_is_type_int(n2)
-// CHECK:   n4 = $builtins.hhbc_new_vec(n1, n2)
-// CHECK:   ret n4
+// CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
+// CHECK:   n5 = $builtins.hhbc_new_vec($builtins.hack_int(5), n2)
+// CHECK:   ret n5
 // CHECK: }
 function multi_ret(inout int $a): int {
   $a = 7;

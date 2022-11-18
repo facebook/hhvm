@@ -67,7 +67,7 @@ function cmp2(int $a, int $b): void {
 // CHECK:   n0 = $builtins.hack_string("hello, world\n")
 // CHECK:   n1 = $builtins.hhbc_is_type_str(n0)
 // CHECK:   n2 = $builtins.hhbc_verify_type_pred(n0, n1)
-// CHECK:   ret n2
+// CHECK:   ret n0
 function ret_str(): string {
   return "hello, world\n";
 }

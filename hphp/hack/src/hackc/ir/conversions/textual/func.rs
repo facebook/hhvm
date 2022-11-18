@@ -112,7 +112,7 @@ pub(crate) fn write_func(
         .flat_map(HasLocals::locals)
         .cloned()
         .collect::<HashSet<_>>();
-    let locals = lids
+    let mut locals = lids
         .into_iter()
         .filter(|lid| !param_lids.contains(lid))
         .sorted_by(|x, y| cmp_lid(&unit_state.strings, x, y))
@@ -122,6 +122,10 @@ pub(crate) fn write_func(
             (lid, ty)
         })
         .collect::<Vec<_>>();
+
+    // Always add a temp var for use by member_ops.
+    let base = crate::member_op::base_var(&unit_state.strings);
+    locals.push((base, tx_ty!(*HackMixed)));
 
     let span = func.loc(func.loc_id).clone();
     let decls = textual::write_function(

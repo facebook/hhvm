@@ -472,7 +472,17 @@ impl<'a> FuncWriter<'a> {
         match expr {
             Expr::Sid(sid) => Ok(sid),
             Expr::Call(target, params) => self.call(&target, params),
-            Expr::Const(_) | Expr::Deref(_) | Expr::Index(_, _) => {
+            Expr::Const(c) => {
+                let sid = self.alloc_sid();
+                writeln!(
+                    self.w,
+                    "{INDENT}{dst} = {src}",
+                    dst = FmtSid(sid),
+                    src = FmtConst(&c)
+                )?;
+                Ok(sid)
+            }
+            Expr::Deref(_) | Expr::Index(_, _) => {
                 todo!("EXPR: {expr:?}")
             }
         }
@@ -558,7 +568,15 @@ impl<'a> FuncWriter<'a> {
     }
 
     pub(crate) fn copy(&mut self, src: impl Into<Expr>) -> Result<Sid> {
-        self.call("copy", vec![src])
+        let src = src.into();
+        let dst = self.alloc_sid();
+        writeln!(
+            self.w,
+            "{INDENT}{dst} = {src}",
+            dst = FmtSid(dst),
+            src = FmtExpr(self.strings, &src)
+        )?;
+        Ok(dst)
     }
 
     pub(crate) fn load(&mut self, ty: Ty, src: impl Into<Expr>) -> Result<Sid> {

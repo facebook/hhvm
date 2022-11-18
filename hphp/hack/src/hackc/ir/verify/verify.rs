@@ -158,14 +158,12 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
 
         // Push the dominated IIDs into the successors.
         for &edge in self.func.edges(bid) {
-            match self.dominated_iids.entry(edge) {
-                Entry::Vacant(e) => {
-                    e.insert(dominated_iids.clone());
-                }
-                Entry::Occupied(mut e) => {
-                    e.get_mut().retain(|iid| dominated_iids.contains(iid));
-                }
-            }
+            self.push_dominated_iids(edge, &dominated_iids);
+        }
+        let handler = self.func.catch_target(bid);
+        if handler != BlockId::NONE {
+            // Push the dominated IIDs into the catch handler.
+            self.push_dominated_iids(handler, &dominated_iids);
         }
         self.dominated_iids.insert(bid, dominated_iids);
 
@@ -188,6 +186,17 @@ impl<'a, 'b> VerifyFunc<'a, 'b> {
         }
 
         Ok(())
+    }
+
+    fn push_dominated_iids(&mut self, bid: BlockId, dominated_iids: &InstrIdSet) {
+        match self.dominated_iids.entry(bid) {
+            Entry::Vacant(e) => {
+                e.insert(dominated_iids.clone());
+            }
+            Entry::Occupied(mut e) => {
+                e.get_mut().retain(|iid| dominated_iids.contains(iid));
+            }
+        }
     }
 
     fn verify_func_body(&mut self) -> Result {

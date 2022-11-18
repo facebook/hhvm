@@ -139,6 +139,8 @@ pub use self::string_intern::StringInterner;
 pub use self::string_intern::UnitBytesId;
 pub use self::type_const::TypeConstant;
 pub use self::typed_value::ArrayKey;
+pub use self::typed_value::DictValue;
+pub use self::typed_value::KeysetValue;
 pub use self::typed_value::TypedValue;
 pub use self::types::BaseType;
 pub use self::types::EnforceableType;

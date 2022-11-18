@@ -1021,7 +1021,7 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::DblAsBits => todo!(),
         Opcode::Dir => simple!(Constant::Dir),
         Opcode::Div => simple!(Hhbc::Div),
-        Opcode::Double => simple!(Constant::Double),
+        Opcode::Double => simple!(Constant::Float),
         Opcode::Eq => simple!(Hhbc::CmpOp, CmpOp::Eq),
         Opcode::Exit => simple!(Terminator::Exit),
         Opcode::False => simple!(Constant::Bool, false),

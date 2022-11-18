@@ -727,7 +727,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 Constant::Bool(false) => Opcode::False,
                 Constant::Bool(true) => Opcode::True,
                 Constant::Dir => Opcode::Dir,
-                Constant::Double(v) => Opcode::Double(*v),
+                Constant::Float(v) => Opcode::Double(*v),
                 Constant::File => Opcode::File,
                 Constant::FuncCred => Opcode::FuncCred,
                 Constant::Int(v) => Opcode::Int(*v),

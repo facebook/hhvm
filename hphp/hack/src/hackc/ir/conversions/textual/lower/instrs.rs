@@ -91,6 +91,7 @@ impl LowerInstrs<'_> {
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Vec, _)) => todo!(),
             Instr::Hhbc(Hhbc::Modulo(..)) => hack::Builtin::Hhbc(hack::Hhbc::Modulo),
             Instr::Hhbc(Hhbc::Mul(..)) => hack::Builtin::Hhbc(hack::Hhbc::Mul),
+            Instr::Hhbc(Hhbc::NewDictArray(..)) => hack::Builtin::Hhbc(hack::Hhbc::NewDictArray),
             Instr::Hhbc(Hhbc::NewObjS(..)) => hack::Builtin::Hhbc(hack::Hhbc::NewObj),
             Instr::Hhbc(Hhbc::NewVec(..)) => hack::Builtin::Hhbc(hack::Hhbc::NewVec),
             Instr::Hhbc(Hhbc::Not(..)) => hack::Builtin::Hhbc(hack::Hhbc::Not),
@@ -104,39 +105,24 @@ impl LowerInstrs<'_> {
     fn verify_out_type(
         &self,
         builder: &mut FuncBuilder<'_>,
-        vid: ValueId,
+        obj: ValueId,
         lid: LocalId,
         loc: LocId,
     ) -> Instr {
-        // if !(<vid> is <param type>) {
-        //   verify_failed();
-        // }
-        if let Some(param) = builder.func.get_param_by_lid(lid) {
-            let param_type = param.ty.enforced.clone();
-            let pred = builder.emit_is(vid, &param_type, loc);
-            let pred = builder.emit(Instr::Hhbc(Hhbc::Not(pred, loc)));
-            builder.emit_if_then(pred, loc, |builder| {
-                builder.emit_hack_builtin(hack::Builtin::Hhbc(hack::Hhbc::VerifyFailed), &[], loc);
-                Instr::unreachable()
-            });
-            Instr::copy(vid)
-        } else {
-            panic!("Unknown parameter in verify_out_type()");
-        }
+        let param = builder
+            .func
+            .get_param_by_lid(lid)
+            .expect("Unknown parameter in verify_out_type()");
+        let param_type = param.ty.enforced.clone();
+        let pred = builder.emit_is(obj, &param_type, loc);
+        builder.hack_builtin(hack::Builtin::VerifyTypePred, &[obj, pred], loc);
+        Instr::copy(obj)
     }
 
-    fn verify_ret_type_c(&self, builder: &mut FuncBuilder<'_>, vid: ValueId, loc: LocId) -> Instr {
-        // if !(<vid> is <ret type>) {
-        //   verify_failed();
-        // }
+    fn verify_ret_type_c(&self, builder: &mut FuncBuilder<'_>, obj: ValueId, loc: LocId) -> Instr {
         let return_type = builder.func.return_type.enforced.clone();
-        let pred = builder.emit_is(vid, &return_type, loc);
-        let pred = builder.emit(Instr::Hhbc(Hhbc::Not(pred, loc)));
-        builder.emit_if_then(pred, loc, |builder| {
-            builder.emit_hack_builtin(hack::Builtin::Hhbc(hack::Hhbc::VerifyFailed), &[], loc);
-            Instr::unreachable()
-        });
-        Instr::copy(vid)
+        let pred = builder.emit_is(obj, &return_type, loc);
+        builder.hack_builtin(hack::Builtin::VerifyTypePred, &[obj, pred], loc)
     }
 }
 
@@ -163,6 +149,11 @@ impl TransformInstr for LowerInstrs<'_> {
             }
             Instr::Hhbc(Hhbc::VerifyOutType(vid, lid, loc)) => {
                 self.verify_out_type(builder, vid, lid, loc)
+            }
+            Instr::Hhbc(Hhbc::VerifyParamTypeTS(param_type, lid, loc)) => {
+                let obj = builder.emit(Instr::Hhbc(Hhbc::CGetL(lid, loc)));
+                let builtin = hack::Builtin::Hhbc(hack::Hhbc::VerifyParamTypeTS);
+                builder.hack_builtin(builtin, &[obj, param_type], loc)
             }
             Instr::Hhbc(Hhbc::VerifyRetTypeC(vid, loc)) => {
                 self.verify_ret_type_c(builder, vid, loc)

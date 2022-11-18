@@ -46,6 +46,10 @@ pub(crate) fn lower_enforced_ty(ty: EnforceableType, strings: &StringInterner) -
             modifiers: TypeConstraintFlags::NoFlags | TypeConstraintFlags::ExtendedHint,
         } => ty_hack_string(strings),
         EnforceableType {
+            ty: BaseType::Vec,
+            modifiers: TypeConstraintFlags::ExtendedHint,
+        } => ty_hack_vec(strings),
+        EnforceableType {
             ty: BaseType::Void,
             modifiers: TypeConstraintFlags::NoFlags,
         } => ty_hack_void_ptr(),
@@ -78,6 +82,10 @@ pub(crate) fn ty_hack_mixed(strings: &StringInterner) -> EnforceableType {
 
 fn ty_hack_string(strings: &StringInterner) -> EnforceableType {
     ty_class_ptr(b"HackString", strings)
+}
+
+fn ty_hack_vec(strings: &StringInterner) -> EnforceableType {
+    ty_class_ptr(b"HackVec", strings)
 }
 
 fn ty_hack_void_ptr() -> EnforceableType {

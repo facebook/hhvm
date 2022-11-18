@@ -240,7 +240,7 @@ impl Display for FmtConstant<'_, '_> {
             Constant::Array(tv) => write!(f, "array({})", FmtTypedValue(tv, strings)),
             Constant::Bool(b) => write!(f, "{b}"),
             Constant::Dir => write!(f, "dir"),
-            Constant::Double(value) => write!(f, "{}", value.0),
+            Constant::Float(value) => write!(f, "{}", value.0),
             Constant::File => write!(f, "file"),
             Constant::FuncCred => write!(f, "func_cred"),
             Constant::Int(value) => write!(f, "{}", value),

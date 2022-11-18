@@ -51,6 +51,10 @@ pub(crate) enum Hhbc {
     Modulo,
     #[decl(fn hhbc_mul(*HackMixed, *HackMixed) -> *HackMixed)]
     Mul,
+    #[decl(fn hhbc_new_dict() -> *HackMixed)]
+    NewDictArray,
+    #[decl(fn hhbc_new_keyset_array(...) -> *HackMixed)]
+    NewKeysetArray,
     #[decl(fn hhbc_new_obj(*class) -> *HackMixed)]
     NewObj,
     #[decl(fn hhbc_new_vec(...) -> *HackVec)]
@@ -63,8 +67,8 @@ pub(crate) enum Hhbc {
     Sub,
     #[decl(fn hhbc_throw(*HackMixed) -> noreturn)]
     Throw,
-    #[decl(fn hhbc_verify_failed() -> noreturn)]
-    VerifyFailed,
+    #[decl(fn hhbc_verify_param_type_ts(obj: *HackMixed, ts: *HackMixed) -> void)]
+    VerifyParamTypeTS,
 }
 
 #[derive(TextualDecl)]
@@ -94,9 +98,12 @@ pub(crate) enum Builtin {
     /// Returns true if the given HackMixed is truthy.
     #[decl(fn hack_is_true(*HackMixed) -> int)]
     IsTrue,
-    /// Returns true if the given HackMixed is of the named type.
-    #[decl(fn hack_is_type(*HackMixed, *HackString) -> *HackMixed)]
+    /// Returns true if the given object is of the named type.
+    #[decl(fn hack_is_type(obj: *HackMixed, ty: *HackString) -> *HackMixed)]
     IsType,
+    /// Build a dict based on key/value pairs.
+    #[decl(fn hack_new_dict(...) -> *HackMixed)]
+    NewDict,
     /// Returns a HackMixed containing a `null`.
     #[decl(fn hack_null() -> *HackNull)]
     Null,
@@ -106,6 +113,9 @@ pub(crate) enum Builtin {
     /// Turns a raw string into a HackMixed.
     #[decl(fn hack_string(string) -> *HackString)]
     String,
+    /// Checks that the predicate is true or throws a VerifyType error.
+    #[decl(fn hhbc_verify_type_pred(obj: *HackMixed, pred: *HackMixed) -> void)]
+    VerifyTypePred,
 }
 
 pub(crate) fn call_builtin(

@@ -11,12 +11,13 @@ use ir::FuncBuilder;
 use ir::Instr;
 use ir::LocId;
 use ir::ValueId;
+use log::trace;
 
 use crate::hack;
 
 pub(crate) trait FuncBuilderEx {
     /// Build a hack::Builtin call.
-    fn hack_builtin(&mut self, _builtin: hack::Builtin, _args: &[ValueId], _loc: LocId) -> Instr;
+    fn hack_builtin(&mut self, builtin: hack::Builtin, args: &[ValueId], loc: LocId) -> Instr;
 
     fn emit_hack_builtin(
         &mut self,
@@ -54,6 +55,7 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
     }
 
     fn todo_instr(&mut self, reason: &str, loc: LocId) -> Instr {
+        trace!("TODO: {reason}");
         textual_todo! {
             use ir::FuncBuilderEx;
             self.todo_fake_instr(reason, loc)

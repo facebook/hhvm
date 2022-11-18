@@ -1367,6 +1367,9 @@ pub(crate) fn print_textual(
             }
             write!(w, ")")?;
         }
+        Textual::String(s) => {
+            write!(w, "textual::string({:?})", s)?;
+        }
     }
     Ok(())
 }

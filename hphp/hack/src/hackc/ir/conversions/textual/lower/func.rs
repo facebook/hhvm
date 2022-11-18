@@ -28,7 +28,11 @@ pub(crate) fn lower_func<'a>(
     // Simplify various Instrs.
     super::instrs::lower_instrs(&mut builder, method_info);
 
+    // Write the complex constants out as a prelude to the function.
+    super::constants::write_constants(&mut builder);
+
     let mut func = builder.finish();
+
     ir::passes::split_critical_edges(&mut func, true);
 
     ir::passes::clean::run(&mut func);

@@ -77,6 +77,7 @@ mod mangle;
 mod member_op;
 mod state;
 mod textual;
+mod typed_value;
 mod types;
 mod util;
 mod writer;

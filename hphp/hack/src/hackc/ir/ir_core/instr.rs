@@ -1111,6 +1111,10 @@ pub enum Textual {
         values: Box<[ValueId]>,
         loc: LocId,
     },
+    /// Literal String
+    #[has_operands(none)]
+    #[has_loc(none)]
+    String(UnitBytesId),
 }
 
 #[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]

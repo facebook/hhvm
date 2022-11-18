@@ -18,11 +18,9 @@ use ir::instr::Predicate;
 use ir::instr::Special;
 use ir::instr::Terminator;
 use ir::instr::Textual;
-use ir::Block;
 use ir::BlockId;
 use ir::ClassName;
 use ir::Constant;
-use ir::ConstantId;
 use ir::Func;
 use ir::IncDecOp;
 use ir::Instr;
@@ -36,7 +34,7 @@ use log::trace;
 
 use crate::class;
 use crate::hack;
-use crate::lower::func_builder::FuncBuilderEx as _;
+use crate::lower;
 use crate::mangle::Mangle as _;
 use crate::mangle::MangleWithClass as _;
 use crate::state;
@@ -44,6 +42,7 @@ use crate::state::FuncDeclKind;
 use crate::state::UnitState;
 use crate::textual;
 use crate::textual::Sid;
+use crate::typed_value;
 use crate::types::convert_ty;
 use crate::util;
 
@@ -77,7 +76,7 @@ pub(crate) fn write_func(
     func: ir::Func<'_>,
     method_info: Option<&MethodInfo<'_>>,
 ) -> Result {
-    let mut func = crate::lower::lower_func(func, method_info, Arc::clone(&unit_state.strings));
+    let mut func = lower::lower_func(func, method_info, Arc::clone(&unit_state.strings));
     ir::verify::verify_func(&func, &Default::default(), &unit_state.strings)?;
 
     let params = std::mem::take(&mut func.params);
@@ -134,12 +133,6 @@ pub(crate) fn write_func(
         ret_ty,
         &locals,
         |w| {
-            let func = rewrite_prelude(func, Arc::clone(&unit_state.strings));
-            trace!(
-                "After Rewrite Prelude: {}",
-                ir::print::DisplayFunc(&func, true, &unit_state.strings)
-            );
-
             let mut func = rewrite_jmp_ops(func);
             ir::passes::clean::run(&mut func);
 
@@ -226,8 +219,16 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
             ref values,
             loc: _,
         })) => write_builtin(w, state, iid, target, values)?,
+        Instr::Special(Special::Textual(Textual::String(s))) => {
+            let s = state.strings.lookup_bstr(s);
+            let s = util::escaped_string(&s);
+            let s = hack::expr_builtin(hack::Builtin::String, [s]);
+            state.set_iid(iid, w.copy(s)?);
+        }
 
-        Instr::Special(Special::Copy(..)) => todo!(),
+        Instr::Special(Special::Copy(vid)) => {
+            write_copy(w, state, iid, vid)?;
+        }
         Instr::Special(Special::IrToBc(..)) => todo!(),
         Instr::Special(Special::Param) => todo!(),
         Instr::Special(Special::Select(..)) => todo!(),
@@ -260,6 +261,48 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
         Instr::Terminator(_) => unreachable!(),
     }
 
+    Ok(())
+}
+
+fn write_copy(
+    w: &mut textual::FuncWriter<'_>,
+    state: &mut FuncState<'_>,
+    iid: InstrId,
+    vid: ValueId,
+) -> Result {
+    use hack::Builtin;
+    use textual::Const;
+    use textual::Expr;
+    use typed_value::typed_value_expr;
+
+    match vid.full() {
+        ir::FullInstrId::Constant(cid) => {
+            let constant = state.func.constant(cid);
+            let expr = match constant {
+                Constant::Array(tv) => typed_value_expr(tv, &state.strings),
+                Constant::Bool(false) => Expr::Const(Const::False),
+                Constant::Bool(true) => Expr::Const(Const::True),
+                Constant::Dir => todo!(),
+                Constant::File => todo!(),
+                Constant::Float(f) => Expr::Const(Const::Float(f.to_f64())),
+                Constant::FuncCred => todo!(),
+                Constant::Int(i) => hack::expr_builtin(Builtin::Int, [Expr::Const(Const::Int(*i))]),
+                Constant::Method => todo!(),
+                Constant::Named(..) => todo!(),
+                Constant::NewCol(..) => todo!(),
+                Constant::Null => Expr::Const(Const::Null),
+                Constant::String(s) => {
+                    let s = util::escaped_string(&state.strings.lookup_bytes(*s));
+                    hack::expr_builtin(Builtin::String, [Expr::Const(Const::String(s))])
+                }
+                Constant::Uninit => Expr::Const(Const::Null),
+            };
+
+            state.set_iid(iid, w.write_expr(expr)?);
+        }
+        ir::FullInstrId::Instr(instr) => state.copy_iid(iid, ValueId::from_instr(instr)),
+        ir::FullInstrId::None => unreachable!(),
+    }
     Ok(())
 }
 
@@ -645,7 +688,7 @@ impl<'a> FuncState<'a> {
                     }
                     Constant::Array(..) => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
                     Constant::Dir => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
-                    Constant::Double(f) => hack::expr_builtin(Builtin::Float, [f.to_f64()]),
+                    Constant::Float(f) => hack::expr_builtin(Builtin::Float, [f.to_f64()]),
                     Constant::File => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
                     Constant::FuncCred => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
                     Constant::Method => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
@@ -683,80 +726,6 @@ impl<'a> FuncState<'a> {
             w.write_loc(new)?;
         }
         Ok(())
-    }
-}
-
-/// Rewrite the function prelude:
-/// - Convert complex constants into builtins.
-fn rewrite_prelude<'a>(mut func: ir::Func<'a>, strings: Arc<StringInterner>) -> ir::Func<'a> {
-    let mut remap = ir::ValueIdMap::default();
-    ir::FuncBuilder::borrow_func(&mut func, strings, |builder| {
-        // Swap out the initial block so we can inject our entry code.
-        let entry_bid = builder.func.alloc_bid(Block::default());
-        builder.func.blocks.swap(Func::ENTRY_BID, entry_bid);
-        builder
-            .func
-            .remap_bids(&[(Func::ENTRY_BID, entry_bid)].into_iter().collect());
-
-        builder.start_block(Func::ENTRY_BID);
-        write_constants(&mut remap, builder);
-        builder.emit(Instr::jmp(entry_bid, LocId::NONE));
-    });
-    func.remap_vids(&remap);
-    func
-}
-
-fn write_constants(remap: &mut ir::ValueIdMap<ValueId>, builder: &mut ir::FuncBuilder<'_>) {
-    // Steal the contents of the "complex" constants first. We need to do this
-    // because we may create more constants during lowering (but don't create
-    // more complex ones!).
-    let mut constants = Vec::default();
-    for (lid, constant) in builder.func.constants.iter_mut().enumerate() {
-        let lid = ConstantId::from_usize(lid);
-        match constant {
-            // Simple constants that are just emitted inline.
-            Constant::Bool(..)
-            | Constant::Dir
-            | Constant::Double(..)
-            | Constant::File
-            | Constant::FuncCred
-            | Constant::Int(..)
-            | Constant::Method
-            | Constant::Named(..)
-            | Constant::NewCol(..)
-            | Constant::Null
-            | Constant::String(..)
-            | Constant::Uninit => continue,
-
-            // Complex constants that are emitted early.
-            Constant::Array(..) => {
-                let constant = std::mem::replace(constant, Constant::Uninit);
-                constants.push((lid, constant));
-            }
-        }
-    }
-
-    for (lid, constant) in constants.into_iter() {
-        trace!("    Const {lid}: {constant:?}");
-        let src = ValueId::from_constant(lid);
-        let loc = LocId::NONE;
-        let vid = match constant {
-            Constant::Bool(..)
-            | Constant::Dir
-            | Constant::Double(..)
-            | Constant::File
-            | Constant::FuncCred
-            | Constant::Int(..)
-            | Constant::Method
-            | Constant::Named(..)
-            | Constant::NewCol(..)
-            | Constant::Null
-            | Constant::String(..)
-            | Constant::Uninit => unreachable!(),
-
-            Constant::Array(..) => builder.emit_todo_instr(&format!("{constant:?}"), loc),
-        };
-        remap.insert(src, vid);
     }
 }
 

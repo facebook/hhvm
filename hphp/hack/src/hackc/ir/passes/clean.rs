@@ -26,9 +26,15 @@ use print::FmtRawVid;
 /// - renumber Instrs
 /// - remove unreferenced Instrs.
 pub fn run<'a>(func: &mut Func<'a>) {
-    merge_simple_jumps(func);
+    // Start with RPO which will DCE as a side-effect.
     crate::rpo_sort(func);
+    // Remove unnecessary block params.
     remove_common_args(func);
+    // Snap through jumps.
+    merge_simple_jumps(func);
+    // Re-RPO (since the structure may have changed).
+    crate::rpo_sort(func);
+    // Finally renumber all the Instrs.
     renumber(func);
 }
 
@@ -400,6 +406,12 @@ fn remapper(
 
 #[cfg(test)]
 mod test {
+    use std::sync::Arc;
+
+    use testutils::build_test_func;
+    use testutils::build_test_func_with_strings;
+    use testutils::Block;
+
     use super::*;
 
     #[test]
@@ -427,5 +439,26 @@ mod test {
 
         remap[iid(6)] = vid(7);
         assert_eq!(lookup(&mut remap, vid(2)), vid(7));
+    }
+
+    #[test]
+    fn test_snap() {
+        let (mut f1, strings) = build_test_func(&[
+            Block::jmp_arg("b0", "b4", "p0").with_named_target("p0"),
+            Block::jmp_op("b1", ["b2", "b3"]).with_param("p3"),
+            Block::jmp_arg("b2", "b5", "p3"),
+            Block::jmp_arg("b3", "b5", "p6").with_named_target("p6"),
+            Block::jmp_arg("b4", "b5", "p8").with_param("p8"),
+            Block::ret_value("b5", "p10").with_param("p10"),
+        ]);
+
+        run(&mut f1);
+
+        let f2 = build_test_func_with_strings(
+            &[Block::ret_value("b0", "p0").with_named_target("p0")],
+            Arc::clone(&strings),
+        );
+
+        testutils::assert_func_struct_eq(&f1, &f2, &strings);
     }
 }

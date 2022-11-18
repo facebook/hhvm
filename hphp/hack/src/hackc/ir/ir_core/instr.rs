@@ -1165,6 +1165,11 @@ impl Instr {
         Instr::Terminator(Terminator::Enter(bid, loc))
     }
 
+    pub fn jmp_args<'a>(bid: BlockId, args: &[ValueId], loc: LocId) -> Instr {
+        let args = args.to_vec().into_boxed_slice();
+        Instr::Terminator(Terminator::JmpArgs(bid, args, loc))
+    }
+
     pub fn jmp_op(
         cond: ValueId,
         pred: Predicate,

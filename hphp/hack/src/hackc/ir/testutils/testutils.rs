@@ -16,6 +16,7 @@ use ir_core::HasEdges;
 use ir_core::Instr;
 use ir_core::LocId;
 use ir_core::StringInterner;
+use ir_core::ValueId;
 
 /// Given a simple CFG description, create a Func that matches it.
 pub fn build_test_func<'a>(testcase: &[Block]) -> (Func<'a>, Arc<StringInterner>) {
@@ -32,20 +33,24 @@ pub fn build_test_func_with_strings<'a>(
 
     FuncBuilder::build_func(strings, |fb| {
         let mut name_to_bid = HashMap::with_capacity_and_hasher(testcase.len(), Default::default());
+        let mut name_to_vid = HashMap::default();
         for (i, block) in testcase.iter().enumerate() {
-            name_to_bid.insert(
-                block.name.clone(),
-                if i == 0 {
-                    Func::ENTRY_BID
-                } else {
-                    fb.alloc_bid()
-                },
-            );
+            let bid = if i == 0 {
+                Func::ENTRY_BID
+            } else {
+                fb.alloc_bid()
+            };
+            name_to_bid.insert(block.name.clone(), bid);
+            fb.start_block(bid);
+            for pn in &block.params {
+                let pid = fb.alloc_param();
+                name_to_vid.insert(pn.clone(), pid);
+            }
         }
 
         for block in testcase {
             fb.start_block(name_to_bid[&block.name]);
-            block.emit(fb, &name_to_bid);
+            block.emit(fb, &name_to_bid, &mut name_to_vid);
         }
     })
 }
@@ -58,64 +63,100 @@ pub struct Block {
     pub pname: Option<String>,
     /// For each "call_target" we create a simple call instruction calling a
     /// function with that target name.
-    pub call_targets: Vec<String>,
+    pub call_targets: Vec<(String, Option<String>)>,
     /// What kind of terminator to use on this block.
     pub terminator: Terminator,
-    /// The number of block parameters this block expects.
-    pub params: usize,
+    /// The parameters this block expects.
+    pub params: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
 pub enum Terminator {
     Ret,
+    RetValue(String),
     Jmp(String),
+    JmpArg(String, String),
     JmpOp(String, String),
+    CallAsync {
+        target: String,
+        lazy: String,
+        eager: String,
+    },
 }
 
 impl Block {
     pub fn successors(&self) -> impl Iterator<Item = &String> {
         match &self.terminator {
-            Terminator::Ret => vec![].into_iter(),
-            Terminator::Jmp(a) => vec![a].into_iter(),
+            Terminator::Ret | Terminator::RetValue(_) => vec![].into_iter(),
+            Terminator::Jmp(target) | Terminator::JmpArg(target, _) => vec![target].into_iter(),
             Terminator::JmpOp(a, b) => vec![a, b].into_iter(),
+            Terminator::CallAsync { lazy, eager, .. } => vec![lazy, eager].into_iter(),
         }
     }
 
-    fn emit(&self, fb: &mut FuncBuilder<'_>, name_to_bid: &HashMap<String, BlockId>) {
+    fn emit(
+        &self,
+        fb: &mut FuncBuilder<'_>,
+        name_to_bid: &HashMap<String, BlockId>,
+        name_to_vid: &mut HashMap<String, ValueId>,
+    ) {
         if let Some(pname) = self.pname.as_ref() {
             fb.cur_block_mut().pname_hint = Some(pname.to_string());
         }
 
-        for _ in 0..self.params {
-            fb.alloc_param();
-        }
-
-        let bid_for = |block_name: &str| -> BlockId {
-            match name_to_bid.get(block_name) {
-                Some(&x) => x,
-                None => panic!("No such block {}", block_name),
-            }
-        };
+        let bid_for = |name: &str| -> BlockId { *name_to_bid.get(name).unwrap() };
 
         let loc = LocId::NONE;
 
-        for target in &self.call_targets {
+        for (target, name) in &self.call_targets {
             let target = FunctionId::from_str(target, &fb.strings);
-            fb.emit(Instr::simple_call(target, &[], loc));
+            let iid = fb.emit(Instr::simple_call(target, &[], loc));
+            if let Some(name) = name {
+                name_to_vid.insert(name.clone(), iid);
+            }
         }
 
         let null_iid = fb.emit_constant(Constant::Null);
 
         let terminator = match &self.terminator {
             Terminator::Ret => Instr::ret(null_iid, loc),
+            Terminator::RetValue(arg) => {
+                let arg = *name_to_vid.get(arg).unwrap();
+                Instr::ret(arg, loc)
+            }
             Terminator::Jmp(a) => {
                 let a = bid_for(a);
                 Instr::jmp(a, loc)
+            }
+            Terminator::JmpArg(a, arg) => {
+                let a = bid_for(a);
+                let arg = *name_to_vid.get(arg).unwrap();
+                Instr::jmp_args(a, &[arg], loc)
             }
             Terminator::JmpOp(a, b) => {
                 let a = bid_for(a);
                 let b = bid_for(b);
                 Instr::jmp_op(null_iid, instr::Predicate::NonZero, a, b, loc)
+            }
+            Terminator::CallAsync {
+                target,
+                lazy,
+                eager,
+            } => {
+                let lazy = bid_for(lazy);
+                let eager = bid_for(eager);
+                let func = FunctionId::from_str(target, &fb.strings);
+                let call = ir_core::Call {
+                    operands: Box::new([]),
+                    context: ir_core::UnitBytesId::NONE,
+                    detail: instr::CallDetail::FCallFuncD { func },
+                    flags: ir_core::FCallArgsFlags::default(),
+                    num_rets: 1,
+                    inouts: None,
+                    readonly: None,
+                    loc,
+                };
+                Instr::Terminator(instr::Terminator::CallAsync(Box::new(call), [lazy, eager]))
             }
         };
         fb.emit(terminator);
@@ -134,14 +175,31 @@ impl Block {
         ))
     }
 
+    pub fn jmp_arg(name: &str, successor: &str, value: &str) -> Block {
+        Self::ret(name)
+            .with_terminator(Terminator::JmpArg(successor.to_string(), value.to_string()))
+    }
+
     pub fn ret(name: &str) -> Block {
         Block {
             call_targets: Vec::new(),
             name: name.to_owned(),
-            params: 0,
+            params: Vec::new(),
             pname: Some(name.to_owned()),
             terminator: Terminator::Ret,
         }
+    }
+
+    pub fn ret_value(name: &str, param: &str) -> Block {
+        Self::ret(name).with_terminator(Terminator::RetValue(param.to_owned()))
+    }
+
+    pub fn call_async(name: &str, target: &str, [lazy, eager]: [&str; 2]) -> Block {
+        Self::ret(name).with_terminator(Terminator::CallAsync {
+            target: target.to_owned(),
+            lazy: lazy.to_owned(),
+            eager: eager.to_owned(),
+        })
     }
 
     pub fn unnamed(mut self) -> Self {
@@ -150,7 +208,13 @@ impl Block {
     }
 
     pub fn with_target(mut self) -> Self {
-        self.call_targets = vec![format!("{}_target", self.name)];
+        self.call_targets = vec![(format!("{}_target", self.name), None)];
+        self
+    }
+
+    pub fn with_named_target(mut self, name: &str) -> Self {
+        let name = name.to_owned();
+        self.call_targets = vec![(format!("{}_target", self.name), Some(name))];
         self
     }
 
@@ -159,8 +223,8 @@ impl Block {
         self
     }
 
-    pub fn with_param(mut self) -> Self {
-        self.params = 1;
+    pub fn with_param(mut self, name: &str) -> Self {
+        self.params = vec![name.to_owned()];
         self
     }
 }

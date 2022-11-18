@@ -131,7 +131,22 @@ fn write_final(
     let base = write_entry(w, state, base, key, locals, operands)?;
 
     match *final_op {
-        FinalOp::IncDecM { .. } => todo!(),
+        FinalOp::IncDecM { inc_dec_op, .. } => {
+            let src = w.load(tx_ty!(*HackMixed), base)?;
+            let op = match inc_dec_op {
+                ir::IncDecOp::PreInc | ir::IncDecOp::PostInc => hack::Hhbc::Add,
+                ir::IncDecOp::PreDec | ir::IncDecOp::PostDec => hack::Hhbc::Sub,
+                _ => unreachable!(),
+            };
+            let incr = hack::expr_builtin(hack::Builtin::Int, [1]);
+            let dst = w.write_expr(hack::expr_builtin(hack::Builtin::Hhbc(op), (src, incr)))?;
+            w.store(base, dst, tx_ty!(*HackMixed))?;
+            Ok(match inc_dec_op {
+                ir::IncDecOp::PreInc | ir::IncDecOp::PreDec => dst,
+                ir::IncDecOp::PostInc | ir::IncDecOp::PostDec => src,
+                _ => unreachable!(),
+            })
+        }
         FinalOp::QueryM { .. } => w.load(tx_ty!(*HackMixed), base),
         FinalOp::SetM { .. } => {
             let src = state.lookup_vid(operands.next().unwrap());

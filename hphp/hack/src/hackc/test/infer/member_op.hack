@@ -211,3 +211,24 @@ function mop_basel_querym_qt(?C $a): ?int {
 function mop_basel_setm_w(vec<int> $a): void {
   $a[] = 5;
 }
+
+// CHECK: define $root.mop_basel_incdec_ei(this: *void, $a: *HackMixed) : *HackMixed {
+// CHECK: local base: *HackMixed
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(20), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1))))
+// CHECK:   n1: *HackMixed = load &$a
+// CHECK:   n2 = $builtins.hhbc_verify_param_type_ts(n1, n0)
+// CHECK:   n3 = &$a
+// CHECK:   n4 = $builtins.hack_int(3)
+// CHECK:   n5 = $builtins.hack_dim_array_get(n3, n4)
+// CHECK:   n6: *HackMixed = load n5
+// CHECK:   n7 = $builtins.hhbc_add(n6, $builtins.hack_int(1))
+// CHECK:   store n5 <- n7: *HackMixed
+// CHECK:   n8 = $builtins.hhbc_is_type_int(n6)
+// CHECK:   n9 = $builtins.hhbc_verify_type_pred(n6, n8)
+// CHECK:   ret n6
+// CHECK: }
+function mop_basel_incdec_ei(vec<int> $a): int {
+  /* HH_FIXME[1002] Assignment as expression */
+  return $a[3]++;
+}

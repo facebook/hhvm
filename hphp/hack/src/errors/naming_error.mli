@@ -121,7 +121,11 @@ type t =
   | Illegal_inst_meth of Pos.t
   | Illegal_meth_caller of Pos.t
   | Illegal_class_meth of Pos.t
-  | Lvar_in_obj_get of Pos.t
+  | Lvar_in_obj_get of {
+      pos: Pos.t;
+      lvar_pos: Pos.t;
+      lvar_name: string;
+    }
   | Class_meth_non_final_self of {
       pos: Pos.t;
       class_name: string;

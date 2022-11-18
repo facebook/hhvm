@@ -743,6 +743,43 @@ struct InodePathDebugInfo {
   3: bool linked;
 }
 
+/**
+ * Where debug methods should fetch data from.
+ */
+enum DataFetchOrigin {
+  NOWHERE = 0,
+  ANYWHERE = 1,
+  MEMORY_CACHE = 2,
+  DISK_CACHE = 4,
+  LOCAL_BACKING_STORE = 8,
+  REMOTE_BACKING_STORE = 16,
+/* NEXT_WHERE = 2^x */
+} (cpp2.enum_type = 'uint64_t')
+
+struct DebugGetScmBlobRequest {
+  1: MountId mountId;
+  # id of the blob we would like to fetch
+  2: ThriftObjectId id;
+  # where we should fetch the blob from
+  3: unsigned64 origins; # DataFetchOrigin
+}
+
+union ScmBlobOrError {
+  1: binary blob;
+  2: EdenError error;
+}
+
+struct ScmBlobWithOrigin {
+  # the blob data
+  1: ScmBlobOrError blob;
+  # where the blob was fetched from
+  2: DataFetchOrigin origin;
+}
+
+struct DebugGetScmBlobResponse {
+  1: list<ScmBlobWithOrigin> blobs;
+}
+
 struct ActivityRecorderResult {
   // 0 if the operation has failed. For example,
   // fail to start recording due to file permission issue
@@ -1803,6 +1840,9 @@ service EdenService extends fb303_core.BaseService {
   ) throws (1: EdenError ex);
 
   /**
+   * DEPRECATED -- use debugGetBlob instead.
+   * TODO: Remove January 2023.
+   *
    * Get the contents of a source control Blob.
    *
    * This can be used to confirm if eden's LocalStore contains information
@@ -1812,6 +1852,17 @@ service EdenService extends fb303_core.BaseService {
     1: PathString mountPoint,
     2: ThriftObjectId id,
     3: bool localStoreOnly,
+  ) throws (1: EdenError ex);
+
+  /**
+   * Get the contents of a source control Blob.
+   *
+   * The origins field can control where to check for the blob. This will
+   * attempt to fetch the blob from all locations and return the blob contents
+   * from each of the locations.
+   */
+  DebugGetScmBlobResponse debugGetBlob(
+    1: DebugGetScmBlobRequest request,
   ) throws (1: EdenError ex);
 
   /**

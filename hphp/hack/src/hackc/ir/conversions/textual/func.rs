@@ -201,12 +201,23 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
         Instr::Call(ref call) => write_call(w, state, iid, call)?,
         Instr::Hhbc(Hhbc::CGetL(lid, _)) => write_load_var(w, state, iid, lid)?,
         Instr::Hhbc(Hhbc::IncDecL(lid, op, _)) => write_inc_dec_l(w, state, iid, lid, op)?,
+        Instr::Hhbc(Hhbc::ResolveClass(cid, _)) => {
+            let vid = class::load_static_class(w, cid, state.strings, &mut state.decls)?;
+            state.set_iid(iid, vid);
+        }
         Instr::Hhbc(Hhbc::SetL(vid, lid, _)) => {
             write_set_var(w, state, lid, vid)?;
             // SetL emits the input as the output.
             state.copy_iid(iid, vid);
         }
         Instr::Hhbc(Hhbc::This(_)) => write_load_this(w, state, iid)?,
+        Instr::Hhbc(Hhbc::UnsetL(lid, _)) => {
+            w.store(
+                textual::Expr::deref(lid),
+                textual::Expr::Const(textual::Const::Null),
+                tx_ty!(*HackMixed),
+            )?;
+        }
         Instr::MemberOp(ref mop) => crate::member_op::write(w, state, iid, mop)?,
         Instr::Special(Special::Textual(Textual::AssertFalse(vid, _))) => {
             // I think "prune_not" means "stop if this expression IS true"...
@@ -483,6 +494,8 @@ fn write_call(
         }
     }
 
+    // flags &= FCallArgsFlags::LockWhileUnwinding - ignored
+
     if flags & FCallArgsFlags::HasUnpack != 0 {
         textual_todo! {
             w.comment("TODO: FCallArgsFlags::HasUnpack")?;
@@ -491,11 +504,6 @@ fn write_call(
     if flags & FCallArgsFlags::HasGenerics != 0 {
         textual_todo! {
             w.comment("TODO: FCallArgsFlags::HasGenerics")?;
-        }
-    }
-    if flags & FCallArgsFlags::LockWhileUnwinding != 0 {
-        textual_todo! {
-            w.comment("TODO: FCallArgsFlags::LockWhileUnwinding")?;
         }
     }
     if flags & FCallArgsFlags::SkipRepack != 0 {
@@ -567,22 +575,7 @@ fn write_call(
         CallDetail::FCallClsMethodM { .. } => write_todo(w, state, "TODO_FCallClsMethodM")?,
         CallDetail::FCallClsMethodS { .. } => write_todo(w, state, "TODO_FCallClsMethodS")?,
         CallDetail::FCallClsMethodSD { .. } => write_todo(w, state, "TODO_FCallClsMethodSD")?,
-        CallDetail::FCallCtor => {
-            textual_todo! {
-                // new $x
-                let ty = ClassName::new(Str::new(b"HackMixed"));
-                let target =
-                    ir::MethodName::new(ffi::Slice::new(b"TODO_ctor")).mangle(&ty, state.strings);
-                state
-                    .decls
-                    .declare_func(target.to_string(), FuncDeclKind::External);
-                w.call_virtual(
-                    &target,
-                    state.lookup_vid(detail.obj(operands)),
-                    args.iter().copied().map(|vid| state.lookup_vid(vid)),
-                )?
-            }
-        }
+        CallDetail::FCallCtor => unreachable!(),
         CallDetail::FCallFunc => write_todo(w, state, "TODO_FCallFunc")?,
         CallDetail::FCallFuncD { func } => {
             // foo()
@@ -633,16 +626,16 @@ fn write_inc_dec_l<'a>(
     op: IncDecOp,
 ) -> Result {
     let builtin = match op {
-        IncDecOp::PreInc => hack::Builtin::Hhbc(hack::Hhbc::Add),
-        IncDecOp::PostInc => hack::Builtin::Hhbc(hack::Hhbc::Add),
-        IncDecOp::PreDec => hack::Builtin::Hhbc(hack::Hhbc::Sub),
-        IncDecOp::PostDec => hack::Builtin::Hhbc(hack::Hhbc::Sub),
+        IncDecOp::PreInc => hack::Hhbc::Add,
+        IncDecOp::PostInc => hack::Hhbc::Add,
+        IncDecOp::PreDec => hack::Hhbc::Sub,
+        IncDecOp::PostDec => hack::Hhbc::Sub,
         _ => unreachable!(),
     };
 
     let pre = w.load(tx_ty!(*HackMixed), textual::Expr::deref(lid))?;
     let one = hack::call_builtin(w, hack::Builtin::Int, [1])?;
-    let post = hack::call_builtin(w, builtin, (pre, one))?;
+    let post = hack::call_builtin(w, hack::Builtin::Hhbc(builtin), (pre, one))?;
     w.store(textual::Expr::deref(lid), post, tx_ty!(*HackMixed))?;
 
     let sid = match op {
@@ -693,6 +686,7 @@ impl<'a> FuncState<'a> {
             ir::FullInstrId::Instr(iid) => self.lookup_iid(iid),
             ir::FullInstrId::Constant(c) => {
                 use hack::Builtin;
+                use ir::CollectionType;
                 let c = self.func.constant(c);
                 match c {
                     Constant::Bool(false) => hack::expr_builtin(Builtin::Bool, [false]),
@@ -711,7 +705,28 @@ impl<'a> FuncState<'a> {
                     Constant::FuncCred => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
                     Constant::Method => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
                     Constant::Named(..) => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
-                    Constant::NewCol(..) => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
+                    Constant::NewCol(CollectionType::ImmMap) => {
+                        hack::expr_builtin(Builtin::Hhbc(hack::Hhbc::NewColImmMap), ())
+                    }
+                    Constant::NewCol(CollectionType::ImmSet) => {
+                        hack::expr_builtin(Builtin::Hhbc(hack::Hhbc::NewColImmSet), ())
+                    }
+                    Constant::NewCol(CollectionType::ImmVector) => {
+                        hack::expr_builtin(Builtin::Hhbc(hack::Hhbc::NewColImmVector), ())
+                    }
+                    Constant::NewCol(CollectionType::Map) => {
+                        hack::expr_builtin(Builtin::Hhbc(hack::Hhbc::NewColMap), ())
+                    }
+                    Constant::NewCol(CollectionType::Pair) => {
+                        hack::expr_builtin(Builtin::Hhbc(hack::Hhbc::NewColPair), ())
+                    }
+                    Constant::NewCol(CollectionType::Set) => {
+                        hack::expr_builtin(Builtin::Hhbc(hack::Hhbc::NewColSet), ())
+                    }
+                    Constant::NewCol(CollectionType::Vector) => {
+                        hack::expr_builtin(Builtin::Hhbc(hack::Hhbc::NewColVector), ())
+                    }
+                    Constant::NewCol(_) => unreachable!(),
                     Constant::Uninit => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
                 }
             }

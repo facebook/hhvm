@@ -19,6 +19,7 @@ use ir::InstrId;
 use ir::IsTypeOp;
 use ir::LocId;
 use ir::LocalId;
+use ir::SpecialClsRef;
 use ir::ValueId;
 
 use super::func_builder::FuncBuilderEx as _;
@@ -55,7 +56,10 @@ impl LowerInstrs<'_> {
     fn handle_hhbc_with_builtin(&self, hhbc: &Hhbc) -> Option<hack::Hhbc> {
         let builtin = match hhbc {
             Hhbc::Add(..) => hack::Hhbc::Add,
+            Hhbc::CastVec(..) => hack::Hhbc::CastVec,
             Hhbc::ClassGetC(..) => hack::Hhbc::ClassGetC,
+            Hhbc::ClassHasReifiedGenerics(..) => hack::Hhbc::ClassHasReifiedGenerics,
+            Hhbc::CheckClsRGSoft(..) => hack::Hhbc::CheckClsRGSoft,
             Hhbc::CmpOp(_, CmpOp::Eq, _) => hack::Hhbc::CmpEq,
             Hhbc::CmpOp(_, CmpOp::Gt, _) => hack::Hhbc::CmpGt,
             Hhbc::CmpOp(_, CmpOp::Gte, _) => hack::Hhbc::CmpGte,
@@ -66,6 +70,8 @@ impl LowerInstrs<'_> {
             Hhbc::CmpOp(_, CmpOp::Same, _) => hack::Hhbc::CmpSame,
             Hhbc::Concat(..) => hack::Hhbc::Concat,
             Hhbc::Div(..) => hack::Hhbc::Div,
+            Hhbc::GetClsRGProp(..) => hack::Hhbc::GetClsRGProp,
+            Hhbc::HasReifiedParent(..) => hack::Hhbc::HasReifiedParent,
             Hhbc::IsTypeC(_, IsTypeOp::ArrLike, _) => hack::Hhbc::IsTypeArrLike,
             Hhbc::IsTypeC(_, IsTypeOp::Bool, _) => hack::Hhbc::IsTypeBool,
             Hhbc::IsTypeC(_, IsTypeOp::Class, _) => hack::Hhbc::IsTypeClass,
@@ -85,7 +91,6 @@ impl LowerInstrs<'_> {
             Hhbc::Modulo(..) => hack::Hhbc::Modulo,
             Hhbc::Mul(..) => hack::Hhbc::Mul,
             Hhbc::NewDictArray(..) => hack::Hhbc::NewDictArray,
-            Hhbc::NewObjS(..) => hack::Hhbc::NewObj,
             Hhbc::NewVec(..) => hack::Hhbc::NewVec,
             Hhbc::Not(..) => hack::Hhbc::Not,
             Hhbc::Print(..) => hack::Hhbc::Print,
@@ -134,8 +139,8 @@ impl LowerInstrs<'_> {
         loc: LocId,
     ) -> Instr {
         let obj = builder.emit(Instr::Hhbc(Hhbc::CGetL(lid, loc)));
-        let builtin = hack::Builtin::Hhbc(hack::Hhbc::VerifyParamTypeTS);
-        builder.emit_hack_builtin(builtin, &[obj, ts], loc);
+        let builtin = hack::Hhbc::VerifyParamTypeTS;
+        builder.emit_hhbc_builtin(builtin, &[obj, ts], loc);
         Instr::tombstone()
     }
 
@@ -149,35 +154,100 @@ impl LowerInstrs<'_> {
 
 impl TransformInstr for LowerInstrs<'_> {
     fn apply(&mut self, _iid: InstrId, instr: Instr, builder: &mut FuncBuilder<'_>) -> Instr {
+        use hack::Builtin;
+
         if let Some(instr) = self.handle_with_builtin(builder, &instr) {
             self.changed = true;
             return instr;
         }
 
         let instr = match instr {
+            Instr::Call(
+                box mut call @ ir::Call {
+                    detail: ir::instr::CallDetail::FCallCtor,
+                    ..
+                },
+            ) => {
+                let flavor = ir::ObjMethodOp::NullThrows;
+                let method = ir::MethodId::from_str("__construct", &builder.strings);
+                call.detail = ir::instr::CallDetail::FCallObjMethodD { flavor, method };
+                Instr::Call(Box::new(call))
+            }
             Instr::Hhbc(Hhbc::BareThis(_op, loc)) => {
                 let this = builder.strings.intern_str("$this");
                 let lid = LocalId::Named(this);
                 Instr::Hhbc(Hhbc::CGetL(lid, loc))
             }
             Instr::Hhbc(Hhbc::CheckThis(loc)) => {
-                let builtin = hack::Builtin::Hhbc(hack::Hhbc::CheckThis);
+                let builtin = hack::Hhbc::CheckThis;
                 let op = ir::BareThisOp::NoNotice;
                 let this = builder.emit(Instr::Hhbc(Hhbc::BareThis(op, loc)));
-                builder.hack_builtin(builtin, &[this], loc)
+                builder.hhbc_builtin(builtin, &[this], loc)
             }
             Instr::Hhbc(Hhbc::InstanceOfD(vid, cid, loc)) => {
                 let cid = builder.emit_constant(Constant::String(cid.id));
-                builder.hack_builtin(hack::Builtin::IsType, &[vid, cid], loc)
+                builder.hack_builtin(Builtin::IsType, &[vid, cid], loc)
             }
             Instr::Hhbc(Hhbc::LateBoundCls(loc)) => {
                 if self.method_info.unwrap().is_static {
                     let this = builder.emit(Instr::Hhbc(Hhbc::This(loc)));
-                    builder.hack_builtin(hack::Builtin::GetClass, &[this], loc)
+                    builder.hack_builtin(Builtin::GetClass, &[this], loc)
                 } else {
                     let this = builder.emit(Instr::Hhbc(Hhbc::This(loc)));
-                    builder.hack_builtin(hack::Builtin::GetStaticClass, &[this], loc)
+                    builder.hack_builtin(Builtin::GetStaticClass, &[this], loc)
                 }
+            }
+            Instr::Hhbc(Hhbc::LockObj(obj, loc)) => {
+                builder.emit_hhbc_builtin(hack::Hhbc::LockObj, &[obj], loc);
+                Instr::copy(obj)
+            }
+            Instr::Hhbc(Hhbc::NewObj(cls, loc)) => {
+                let method = ir::MethodId::from_str("__factory", &builder.strings);
+                let operands = vec![cls].into_boxed_slice();
+                let context = ir::UnitBytesId::NONE;
+                let flavor = ir::ObjMethodOp::NullThrows;
+                let detail = ir::instr::CallDetail::FCallObjMethodD { flavor, method };
+                let flags = ir::FCallArgsFlags::default();
+                Instr::Call(Box::new(ir::instr::Call {
+                    operands,
+                    context,
+                    detail,
+                    flags,
+                    num_rets: 1,
+                    inouts: None,
+                    readonly: None,
+                    loc,
+                }))
+            }
+            Instr::Hhbc(Hhbc::NewObjD(clsid, loc)) => {
+                let cls = builder.emit(Instr::Hhbc(Hhbc::ResolveClass(clsid, loc)));
+                let method = ir::MethodId::from_str("__factory", &builder.strings);
+                let operands = vec![cls].into_boxed_slice();
+                let context = ir::UnitBytesId::NONE;
+                let flavor = ir::ObjMethodOp::NullThrows;
+                let detail = ir::instr::CallDetail::FCallObjMethodD { flavor, method };
+                let flags = ir::FCallArgsFlags::default();
+                Instr::Call(Box::new(ir::instr::Call {
+                    operands,
+                    context,
+                    detail,
+                    flags,
+                    num_rets: 1,
+                    inouts: None,
+                    readonly: None,
+                    loc,
+                }))
+            }
+            Instr::Hhbc(Hhbc::NewObjS(clsref, loc)) => {
+                let cls = match clsref {
+                    SpecialClsRef::SelfCls => builder.emit(Instr::Hhbc(Hhbc::SelfCls(loc))),
+                    SpecialClsRef::LateBoundCls => {
+                        builder.emit(Instr::Hhbc(Hhbc::LateBoundCls(loc)))
+                    }
+                    SpecialClsRef::ParentCls => builder.emit(Instr::Hhbc(Hhbc::ParentCls(loc))),
+                    _ => unreachable!(),
+                };
+                Instr::Hhbc(Hhbc::NewObj(cls, loc))
             }
             Instr::Hhbc(Hhbc::VerifyOutType(vid, lid, loc)) => {
                 self.verify_out_type(builder, vid, lid, loc)
@@ -189,21 +259,21 @@ impl TransformInstr for LowerInstrs<'_> {
                 self.verify_ret_type_c(builder, vid, loc)
             }
             Instr::Terminator(Terminator::Exit(ops, loc)) => {
-                let builtin = hack::Builtin::Hhbc(hack::Hhbc::Exit);
-                builder.emit_hack_builtin(builtin, &[ops], loc);
+                let builtin = hack::Hhbc::Exit;
+                builder.emit_hhbc_builtin(builtin, &[ops], loc);
                 Instr::unreachable()
             }
             Instr::Terminator(Terminator::Throw(value, loc)) => {
-                let builtin = hack::Builtin::Hhbc(hack::Hhbc::Throw);
-                builder.emit_hack_builtin(builtin, &[value], loc);
+                let builtin = hack::Hhbc::Throw;
+                builder.emit_hhbc_builtin(builtin, &[value], loc);
                 Instr::unreachable()
             }
             Instr::Terminator(Terminator::RetM(ops, loc)) => {
                 // ret a, b;
                 // =>
                 // ret vec[a, b];
-                let builtin = hack::Builtin::Hhbc(hack::Hhbc::NewVec);
-                let vec = builder.emit_hack_builtin(builtin, &ops, loc);
+                let builtin = hack::Hhbc::NewVec;
+                let vec = builder.emit_hhbc_builtin(builtin, &ops, loc);
                 Instr::ret(vec, loc)
             }
             instr => {

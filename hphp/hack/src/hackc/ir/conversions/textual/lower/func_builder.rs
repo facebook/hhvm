@@ -26,6 +26,14 @@ pub(crate) trait FuncBuilderEx {
         loc: LocId,
     ) -> ValueId;
 
+    fn hhbc_builtin(&mut self, builtin: hack::Hhbc, args: &[ValueId], loc: LocId) -> Instr {
+        self.hack_builtin(hack::Builtin::Hhbc(builtin), args, loc)
+    }
+
+    fn emit_hhbc_builtin(&mut self, builtin: hack::Hhbc, args: &[ValueId], loc: LocId) -> ValueId {
+        self.emit_hack_builtin(hack::Builtin::Hhbc(builtin), args, loc)
+    }
+
     fn todo_instr(&mut self, reason: &str, loc: LocId) -> Instr;
 
     fn emit_todo_instr(&mut self, reason: &str, loc: LocId) -> ValueId;

@@ -19,10 +19,16 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 pub(crate) enum Hhbc {
     #[decl(fn hhbc_add(*HackMixed, *HackMixed) -> *HackMixed)]
     Add,
+    #[decl(fn hhbc_cast_vec(*HackMixed) -> void)]
+    CastVec,
+    #[decl(fn hhbc_class_get_c(*HackMixed) -> void)]
+    CheckClsRGSoft,
     #[decl(fn hhbc_check_this(*HackMixed) -> void)]
     CheckThis,
     #[decl(fn hhbc_class_get_c(*HackMixed) -> *HackMixed)]
     ClassGetC,
+    #[decl(fn hhbc_class_has_reified_generics(*HackMixed) -> *HackMixed)]
+    ClassHasReifiedGenerics,
     #[decl(fn hhbc_cmp_eq(*HackMixed, *HackMixed) -> *HackMixed)]
     CmpEq,
     #[decl(fn hhbc_cmp_gt(*HackMixed, *HackMixed) -> *HackMixed)]
@@ -45,6 +51,10 @@ pub(crate) enum Hhbc {
     Div,
     #[decl(fn hhbc_exit(*HackMixed) -> noreturn)]
     Exit,
+    #[decl(fn hhbc_get_cls_rg_prop(*HackMixed) -> *HackMixed)]
+    GetClsRGProp,
+    #[decl(fn hhbc_has_reified_parent(*HackMixed) -> *HackMixed)]
+    HasReifiedParent,
     #[decl(fn hhbc_is_type_arr_like(*HackMixed) -> *HackMixed)]
     IsTypeArrLike,
     #[decl(fn hhbc_is_type_bool(*HackMixed) -> *HackMixed)]
@@ -77,16 +87,30 @@ pub(crate) enum Hhbc {
     IsTypeStr,
     #[decl(fn hhbc_is_type_vec(*HackMixed) -> *HackMixed)]
     IsTypeVec,
+    #[decl(fn hhbc_lock_obj(*HackMixed) -> void)]
+    LockObj,
     #[decl(fn hhbc_modulo(*HackMixed, *HackMixed) -> *HackMixed)]
     Modulo,
     #[decl(fn hhbc_mul(*HackMixed, *HackMixed) -> *HackMixed)]
     Mul,
+    #[decl(fn hhbc_new_col_imm_map() -> *HackMixed)]
+    NewColImmMap,
+    #[decl(fn hhbc_new_col_imm_set() -> *HackMixed)]
+    NewColImmSet,
+    #[decl(fn hhbc_new_col_imm_vector() -> *HackMixed)]
+    NewColImmVector,
+    #[decl(fn hhbc_new_col_map() -> *HackMixed)]
+    NewColMap,
+    #[decl(fn hhbc_new_col_pair() -> *HackMixed)]
+    NewColPair,
+    #[decl(fn hhbc_new_col_set() -> *HackMixed)]
+    NewColSet,
+    #[decl(fn hhbc_new_col_vector() -> *HackMixed)]
+    NewColVector,
     #[decl(fn hhbc_new_dict() -> *HackMixed)]
     NewDictArray,
     #[decl(fn hhbc_new_keyset_array(...) -> *HackMixed)]
     NewKeysetArray,
-    #[decl(fn hhbc_new_obj(*class) -> *HackMixed)]
-    NewObj,
     #[decl(fn hhbc_new_vec(...) -> *HackVec)]
     NewVec,
     #[decl(fn hhbc_not(*HackMixed) -> *HackMixed)]

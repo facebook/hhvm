@@ -96,9 +96,9 @@ function bool_call(): void {
 // CHECK: define $root.test_const(this: *void) : *HackMixed {
 // CHECK: local $a: *void, $b: *void, $c: *void
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.hhbc_new_vec($builtins.hack_string("x"), $builtins.hack_float(2), $builtins.hack_int(3), $builtins.hack_bool(true))
+// CHECK:   n0 = $builtins.hhbc_new_vec($builtins.hack_string("x"), $builtins.hack_float(2.0), $builtins.hack_int(3), $builtins.hack_bool(true))
 // CHECK:   n1 = $builtins.hhbc_new_keyset_array($builtins.hack_string("xyzzy"), $builtins.hack_int(2))
-// CHECK:   n2 = $builtins.hack_new_dict($builtins.hack_string("a"), $builtins.hack_string("b"), $builtins.hack_int(5), $builtins.hack_float(2))
+// CHECK:   n2 = $builtins.hack_new_dict($builtins.hack_string("a"), $builtins.hack_string("b"), $builtins.hack_int(5), $builtins.hack_float(2.0))
 // CHECK:   store &$a <- n0: *HackMixed
 // CHECK:   store &$b <- n2: *HackMixed
 // CHECK:   store &$c <- n1: *HackMixed
@@ -108,4 +108,16 @@ function test_const(): void {
   $a = vec["x", 2.0, 3, true];
   $b = dict["a" => "b", 5 => 2.0];
   $c = keyset["xyzzy", 2];
+}
+
+// CHECK: define $root.float_arg(this: *void) : *HackMixed {
+// CHECK: local base: *HackMixed
+// CHECK: #b0:
+// CHECK:   n0 = $root.f_float(null, $builtins.hack_float(3.14))
+// CHECK:   n1 = $root.f_float(null, $builtins.hack_float(3.0))
+// CHECK:   ret $builtins.hack_null()
+// CHECK: }
+function float_arg(): void {
+  f_float(3.14);
+  f_float(3.0);
 }

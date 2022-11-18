@@ -133,7 +133,7 @@ impl fmt::Display for FmtConst<'_> {
         let FmtConst(const_) = *self;
         match const_ {
             Const::False => f.write_str("false"),
-            Const::Float(d) => d.fmt(f),
+            Const::Float(d) => write!(f, "{d:?}"),
             Const::Int(i) => i.fmt(f),
             Const::Null => f.write_str("null"),
             Const::String(ref s) => {

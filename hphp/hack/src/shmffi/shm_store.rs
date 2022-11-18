@@ -249,34 +249,34 @@ impl<K, V> std::fmt::Debug for ShmStore<K, V> {
 ///
 /// If an implementor of this trait also implements `Borrow<[u8]>`, its impl of
 /// `hash_key` must behave the same as `impl Key for [u8]` (which just invokes
-/// `self.hash(state)`).
+/// `state.write(self)`).
 pub trait Key {
     fn hash_key<H: Hasher>(&self, state: &mut H);
 }
 
 impl Key for [u8] {
     fn hash_key<H: Hasher>(&self, state: &mut H) {
-        self.hash(state);
+        state.write(self);
     }
 }
 impl Key for pos::TypeName {
     fn hash_key<H: Hasher>(&self, state: &mut H) {
-        self.as_str().hash(state);
+        state.write(self.as_bytes());
     }
 }
 impl Key for pos::ModuleName {
     fn hash_key<H: Hasher>(&self, state: &mut H) {
-        self.as_str().hash(state);
+        state.write(self.as_bytes());
     }
 }
 impl Key for pos::FunName {
     fn hash_key<H: Hasher>(&self, state: &mut H) {
-        self.as_str().hash(state);
+        state.write(self.as_bytes());
     }
 }
 impl Key for pos::ConstName {
     fn hash_key<H: Hasher>(&self, state: &mut H) {
-        self.as_str().hash(state);
+        state.write(self.as_bytes());
     }
 }
 

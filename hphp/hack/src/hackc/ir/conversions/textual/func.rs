@@ -495,6 +495,7 @@ fn write_call(
     }
 
     // flags &= FCallArgsFlags::LockWhileUnwinding - ignored
+    let is_async = flags & FCallArgsFlags::HasAsyncEagerOffset != 0;
 
     if flags & FCallArgsFlags::HasUnpack != 0 {
         textual_todo! {
@@ -544,11 +545,6 @@ fn write_call(
             w.comment("TODO: FCallArgsFlags::EnforceReadonly")?;
         }
     }
-    if flags & FCallArgsFlags::HasAsyncEagerOffset != 0 {
-        textual_todo! {
-            w.comment("TODO: FCallArgsFlags::HasAsyncEagerOffset")?;
-        }
-    }
     if flags & FCallArgsFlags::NumArgsStart != 0 {
         textual_todo! {
             w.comment("TODO: FCallArgsFlags::NumArgsStart")?;
@@ -557,7 +553,7 @@ fn write_call(
 
     let args = detail.args(operands);
 
-    let output = match *detail {
+    let mut output = match *detail {
         CallDetail::FCallClsMethod { .. } => write_todo(w, state, "FCallClsMethod")?,
         CallDetail::FCallClsMethodD { clsid, method } => {
             // C::foo()
@@ -614,6 +610,11 @@ fn write_call(
             )?
         }
     };
+
+    if is_async {
+        output = hack::call_builtin(w, hack::Builtin::Await, [output])?;
+    }
+
     state.set_iid(iid, output);
     Ok(())
 }

@@ -131,6 +131,9 @@ pub(crate) enum Builtin {
     /// pointer-sized value).
     #[decl(fn alloc_words(int) -> *void)]
     AllocWords,
+    /// Await for a value returned by an async function.
+    #[decl(fn await(*HackMixed) -> *HackMixed)]
+    Await,
     /// Get the superglobal as a base.
     #[decl(fn hack_base_get_superglobal(name: *HackMixed) -> **HackMixed)]
     BaseGetSuperglobal,

@@ -14,12 +14,19 @@ use crate::func::MethodInfo;
 use crate::lower::types::ty_hack_mixed;
 
 pub(crate) fn lower_func<'a>(
-    func: Func<'a>,
+    mut func: Func<'a>,
     method_info: Option<&MethodInfo<'_>>,
     strings: Arc<StringInterner>,
 ) -> Func<'a> {
     trace!(
         "Before Lower: {}",
+        ir::print::DisplayFunc(&func, true, &strings)
+    );
+
+    // Start by 'unasync'ing the Func.
+    ir::passes::unasync(&mut func);
+    trace!(
+        "After unasync: {}",
         ir::print::DisplayFunc(&func, true, &strings)
     );
 

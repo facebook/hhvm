@@ -35,33 +35,57 @@ pub(crate) trait MangleWithClass {
 
 impl Mangle for [u8] {
     fn mangle(&self, _strings: &StringInterner) -> String {
-        // [A-Za-z0-9_$] -> identity
-        // \ -> ::
-        // anything else -> $xx
-        let mut res = String::with_capacity(self.len());
-        let mut first = true;
-        for &ch in self {
-            if (b'A'..=b'Z').contains(&ch)
-                || (b'a'..=b'z').contains(&ch)
-                || (ch == b'_')
-                || (ch == b'$')
-            {
-                res.push(ch as char);
-            } else if (b'0'..=b'9').contains(&ch) {
-                if first {
-                    res.push('_')
+        // Handle some reserved tokens.
+        match self {
+            b"declare" => "declare_".to_owned(),
+            b"define" => "define_".to_owned(),
+            b"extends" => "extends_".to_owned(),
+            b"false" => "false_".to_owned(),
+            b"float" => "float_".to_owned(),
+            b"global" => "global_".to_owned(),
+            b"int" => "int_".to_owned(),
+            b"jmp" => "jmp_".to_owned(),
+            b"load" => "load_".to_owned(),
+            b"local" => "local_".to_owned(),
+            b"null" => "null_".to_owned(),
+            b"prune" => "prune_".to_owned(),
+            b"ret" => "ret_".to_owned(),
+            b"store" => "store_".to_owned(),
+            b"throw" => "throw_".to_owned(),
+            b"true" => "true_".to_owned(),
+            b"type" => "type_".to_owned(),
+            b"unreachable" => "unreachable_".to_owned(),
+            b"void" => "void_".to_owned(),
+            _ => {
+                // [A-Za-z0-9_$] -> identity
+                // \ -> ::
+                // anything else -> $xx
+                let mut res = String::with_capacity(self.len());
+                let mut first = true;
+                for &ch in self {
+                    if (b'A'..=b'Z').contains(&ch)
+                        || (b'a'..=b'z').contains(&ch)
+                        || (ch == b'_')
+                        || (ch == b'$')
+                    {
+                        res.push(ch as char);
+                    } else if (b'0'..=b'9').contains(&ch) {
+                        if first {
+                            res.push('_')
+                        }
+                        res.push(ch as char);
+                    } else if ch == b'\\' {
+                        res.push(':');
+                        res.push(':');
+                    } else {
+                        res.push(b"0123456789abcdef"[(ch >> 4) as usize] as char);
+                        res.push(b"0123456789abcdef"[(ch & 15) as usize] as char);
+                    }
+                    first = false;
                 }
-                res.push(ch as char);
-            } else if ch == b'\\' {
-                res.push(':');
-                res.push(':');
-            } else {
-                res.push(b"0123456789abcdef"[(ch >> 4) as usize] as char);
-                res.push(b"0123456789abcdef"[(ch & 15) as usize] as char);
+                res
             }
-            first = false;
         }
-        res
     }
 }
 
@@ -111,5 +135,11 @@ impl MangleWithClass for ir::MethodId {
             class.mangle_class(strings),
             self.as_bytes(strings).mangle(strings)
         )
+    }
+}
+
+impl Mangle for ir::PropId {
+    fn mangle(&self, strings: &StringInterner) -> String {
+        self.as_bytes(strings).mangle(strings)
     }
 }

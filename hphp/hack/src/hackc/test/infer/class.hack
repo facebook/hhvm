@@ -7,7 +7,8 @@
 
 // CHECK: type C = {
 // CHECK:   prop1: .public *HackInt;
-// CHECK:   prop2: .public *HackString
+// CHECK:   prop2: .public *HackString;
+// CHECK:   type_: .public *HackInt
 // CHECK: }
 
 // CHECK: define C.$init_static() : void {
@@ -15,14 +16,16 @@
 // CHECK:   n0 = $builtins.alloc_words(0)
 // CHECK:   store &static_singleton::C <- n0: *C$static
 // CHECK:   ret 0
-
-// CHECK: global static_singleton::C : *C$static
+// CHECK: }
 
 class C {
   public int $prop1 = 42;
   public string $prop2 = "hello";
   public static float $prop3 = 3.14;
   public static mixed $prop4 = null;
+
+  // Test reserved token.
+  public int $type = 2;
 
   public static function cmp(mixed $a, mixed $b): void {
     if ($a == $b) {
@@ -32,3 +35,5 @@ class C {
     }
   }
 }
+
+// CHECK: global static_singleton::C : *C$static

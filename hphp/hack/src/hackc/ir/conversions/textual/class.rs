@@ -14,7 +14,6 @@
 use std::sync::Arc;
 
 use anyhow::Error;
-use ascii::AsciiString;
 use log::trace;
 
 use super::func;
@@ -26,7 +25,6 @@ use crate::mangle::MangleWithClass as _;
 use crate::state;
 use crate::state::UnitState;
 use crate::types::convert_ty;
-use crate::util;
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
 
@@ -112,7 +110,7 @@ fn write_type(
     class: &ir::Class<'_>,
     is_static: IsStatic,
 ) -> Result {
-    let mut fields: Vec<(AsciiString, textual::Ty, textual::Visibility)> = Vec::new();
+    let mut fields: Vec<(String, textual::Ty, textual::Visibility)> = Vec::new();
     for prop in &class.properties {
         let ir::Property {
             name,              // hhbc::PropName<'arena>,
@@ -133,8 +131,7 @@ fn write_type(
         }
         flags.clear(ir::Attr::AttrStatic);
 
-        let name_bytes = state.strings.lookup_bytes(name.id);
-        let name = util::escaped_string(&name_bytes);
+        let name = name.mangle(&state.strings);
 
         let vis = if flags.is_private() {
             textual::Visibility::Private

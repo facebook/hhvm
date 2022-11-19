@@ -67,6 +67,12 @@ Test createRoundTripTest(
 
     // Test case #2: Unqualified field
     add(mod_set<>{}, "");
+
+    // Test case #3: Optional field
+    add(mod_set<FieldModifier::Optional>{}, "Optional.");
+
+    // Test case #4: Terse field
+    add(mod_set<FieldModifier::Terse>{}, "Terse.");
   }
 
   return test;

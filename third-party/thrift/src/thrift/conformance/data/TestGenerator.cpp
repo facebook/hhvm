@@ -27,6 +27,8 @@
 #include <thrift/test/testset/Testset.h>
 
 namespace mp11 = boost::mp11;
+using apache::thrift::test::testset::FieldModifier;
+using apache::thrift::test::testset::detail::mod_set;
 
 namespace apache::thrift::conformance::data {
 
@@ -41,23 +43,30 @@ Test createRoundTripTest(
   test.name() = protocol.name();
   test.tags()->emplace(getSpecDefinitionTag<TT>());
   for (const auto& value : ValueGenerator<TT>::getInterestingValues()) {
-    // Test case #1: Use ValueStruct
     RoundTripTestCase roundTrip;
-    roundTrip.request()->value() =
-        registry.store(asValueStruct<TT>(value.value), protocol);
+    {
+      // Test case #1: Use ValueStruct
+      roundTrip.request()->value() =
+          registry.store(asValueStruct<TT>(value.value), protocol);
 
-    auto& testCase1 = test.testCases()->emplace_back();
-    testCase1.name() = fmt::format("{}/{}", type::getName<TT>(), value.name);
-    testCase1.test()->set_roundTrip(roundTrip);
+      auto& testCase = test.testCases()->emplace_back();
+      testCase.name() = fmt::format("{}/{}", type::getName<TT>(), value.name);
+      testCase.test()->roundTrip_ref() = roundTrip;
+    }
 
-    // Test case #2: Use Testset
-    typename struct_ByFieldType<TT, mod_set<>>::type data;
-    data.field_1() = value.value;
-    roundTrip.request()->value() = registry.store(data, protocol);
-    auto& testCase2 = test.testCases()->emplace_back();
-    testCase2.name() =
-        fmt::format("testset.{}/{}", type::getName<TT>(), value.name);
-    testCase2.test()->set_roundTrip(roundTrip);
+    auto add = [&](auto modSet, auto msg) {
+      using ModSet = decltype(modSet);
+      typename struct_ByFieldType<TT, ModSet>::type data;
+      data.field_1() = value.value;
+      roundTrip.request()->value() = registry.store(data, protocol);
+      auto& testCase = test.testCases()->emplace_back();
+      testCase.name() =
+          fmt::format("testset.{}{}/{}", msg, type::getName<TT>(), value.name);
+      testCase.test()->roundTrip_ref() = roundTrip;
+    };
+
+    // Test case #2: Unqualified field
+    add(mod_set<>{}, "");
   }
 
   return test;

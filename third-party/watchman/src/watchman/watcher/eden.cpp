@@ -745,7 +745,7 @@ class EdenView final : public QueryableView {
             "eden_file_count_threshold_for_fresh_instance",
             10000)),
         enableGlobUpperBounds_(
-            config.getBool("eden_enable_glob_upper_bounds", false)) {}
+            config.getBool("eden_enable_glob_upper_bounds", true)) {}
 
   void timeGenerator(const Query* /*query*/, QueryContext* ctx) const override {
     ctx->generationStarted();

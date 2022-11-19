@@ -57,7 +57,11 @@ Test createRoundTripTest(
     auto add = [&](auto modSet, auto msg) {
       using ModSet = decltype(modSet);
       typename struct_ByFieldType<TT, ModSet>::type data;
-      data.field_1() = value.value;
+      if constexpr (std::is_same_v<mod_set<FieldModifier::Adapter>, ModSet>) {
+        data.field_1().ensure().value = value.value;
+      } else {
+        data.field_1() = value.value;
+      }
       roundTrip.request()->value() = registry.store(data, protocol);
       auto& testCase = test.testCases()->emplace_back();
       testCase.name() =
@@ -73,6 +77,9 @@ Test createRoundTripTest(
 
     // Test case #4: Terse field
     add(mod_set<FieldModifier::Terse>{}, "Terse.");
+
+    // Test case #5: Adapted field
+    add(mod_set<FieldModifier::Adapter>{}, "Adapted.");
   }
 
   return test;

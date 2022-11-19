@@ -6,8 +6,6 @@ edition = "2021"
 
 [lib]
 path = "../../hh_slog.rs"
-test = false
-doctest = false
 
 [dependencies]
 chrono = { version = "0.4", features = ["clock", "serde", "std"], default-features = false }

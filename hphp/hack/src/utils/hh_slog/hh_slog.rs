@@ -80,3 +80,177 @@ pub fn init_testing() -> Log {
         file: init_term_testing(),
     }
 }
+
+/// Helper class to print up to the first 'n' items of a slice or BTreeSet.
+/// It delegates to the Debug or Display traits for T.
+/// If it can't show all items, then it shows "... [LEN items]" at the end
+/// See docs for FmtN::slice and FmtN::bset for usage.
+pub struct FmtN<'a, T> {
+    /// Stores the first n items
+    items: Vec<&'a T>,
+    /// this is LEN, the length of the original slice or BTreeSet
+    len: usize,
+}
+
+impl<'a, T> FmtN<'a, T> {
+    /// Prints up to first 'n' items of the slice, e.g.
+    /// println!("strings: {}", FmtN::slice(3, &names));
+    /// println!("pathbufs: {:?}", FmtN::slice(5, &files));
+    pub fn slice(n: usize, slice: &'a [T]) -> Self {
+        Self {
+            items: slice.iter().take(n).collect(),
+            len: slice.len(),
+        }
+    }
+
+    /// Prints up to the first 'n' items of the BTreeSet in iter() order, e.g.
+    /// println!("strings: {}", FmtN::bset(3, &names));
+    /// println!("pathbufs: {:?}", FmtN::bset(5, &files));
+    pub fn bset(n: usize, set: &'a std::collections::BTreeSet<T>) -> Self {
+        Self {
+            items: set.iter().take(n).collect(),
+            len: set.len(),
+        }
+    }
+}
+
+impl<'a, T: std::fmt::Display> std::fmt::Display for FmtN<'a, T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut sep = "";
+        for item in self.items.iter() {
+            f.write_str(sep)?;
+            item.fmt(f)?; // Display::fmt
+            sep = ", ";
+        }
+        if self.items.is_empty() {
+            f.write_str("[none]")?;
+        } else if self.len > self.items.len() {
+            f.write_fmt(std::format_args!(", ... [{} total]", self.len))?;
+        }
+        Ok(())
+    }
+}
+
+impl<'a, T: std::fmt::Debug> std::fmt::Debug for FmtN<'a, T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut sep = "";
+        for item in self.items.iter() {
+            f.write_str(sep)?;
+            item.fmt(f)?; // Display::fmt
+            sep = ", ";
+        }
+        if self.items.is_empty() {
+            f.write_str("[none]")?;
+        } else if self.len > self.items.len() {
+            f.write_fmt(std::format_args!(", ... [{} total]", self.len))?;
+        }
+        Ok(())
+    }
+}
+
+#[test]
+fn test_fmtn() {
+    // Test FmtN::slice
+    let v0: Vec<&str> = vec![];
+    let v1: Vec<&str> = vec!["a"];
+    let v2: Vec<&str> = vec!["a", "b"];
+    let v3: Vec<&str> = vec!["a", "b", "c"];
+    assert_eq!(format!("{}", FmtN::slice(0, &v0)), "[none]".to_owned());
+    assert_eq!(format!("{}", FmtN::slice(1, &v0)), "[none]".to_owned());
+    assert_eq!(format!("{}", FmtN::slice(0, &v1)), "[none]".to_owned());
+    assert_eq!(format!("{}", FmtN::slice(1, &v1)), "a".to_owned());
+    assert_eq!(format!("{}", FmtN::slice(2, &v1)), "a".to_owned());
+    assert_eq!(format!("{}", FmtN::slice(0, &v2)), "[none]".to_owned());
+    assert_eq!(
+        format!("{}", FmtN::slice(1, &v2)),
+        "a, ... [2 total]".to_owned()
+    );
+    assert_eq!(format!("{}", FmtN::slice(2, &v2)), "a, b".to_owned());
+    assert_eq!(format!("{}", FmtN::slice(3, &v2)), "a, b".to_owned());
+    assert_eq!(format!("{}", FmtN::slice(0, &v3)), "[none]".to_owned());
+    assert_eq!(
+        format!("{}", FmtN::slice(1, &v3)),
+        "a, ... [3 total]".to_owned()
+    );
+    assert_eq!(
+        format!("{}", FmtN::slice(2, &v3)),
+        "a, b, ... [3 total]".to_owned()
+    );
+    assert_eq!(format!("{}", FmtN::slice(3, &v3)), "a, b, c".to_owned());
+    assert_eq!(format!("{}", FmtN::slice(4, &v3)), "a, b, c".to_owned());
+
+    // Test FmtN::bset
+    let v0: std::collections::BTreeSet<&str> = v0.into_iter().collect();
+    let v1: std::collections::BTreeSet<&str> = v1.into_iter().collect();
+    let v2: std::collections::BTreeSet<&str> = v2.into_iter().collect();
+    let v3: std::collections::BTreeSet<&str> = v3.into_iter().collect();
+    assert_eq!(format!("{}", FmtN::bset(0, &v0)), "[none]".to_owned());
+    assert_eq!(format!("{}", FmtN::bset(1, &v0)), "[none]".to_owned());
+    assert_eq!(format!("{}", FmtN::bset(0, &v1)), "[none]".to_owned());
+    assert_eq!(format!("{}", FmtN::bset(1, &v1)), "a".to_owned());
+    assert_eq!(format!("{}", FmtN::bset(2, &v1)), "a".to_owned());
+    assert_eq!(format!("{}", FmtN::bset(0, &v2)), "[none]".to_owned());
+    assert_eq!(
+        format!("{}", FmtN::bset(1, &v2)),
+        "a, ... [2 total]".to_owned()
+    );
+    assert_eq!(format!("{}", FmtN::bset(2, &v2)), "a, b".to_owned());
+    assert_eq!(format!("{}", FmtN::bset(3, &v2)), "a, b".to_owned());
+    assert_eq!(format!("{}", FmtN::bset(0, &v3)), "[none]".to_owned());
+    assert_eq!(
+        format!("{}", FmtN::bset(1, &v3)),
+        "a, ... [3 total]".to_owned()
+    );
+    assert_eq!(
+        format!("{}", FmtN::bset(2, &v3)),
+        "a, b, ... [3 total]".to_owned()
+    );
+    assert_eq!(format!("{}", FmtN::bset(3, &v3)), "a, b, c".to_owned());
+    assert_eq!(format!("{}", FmtN::bset(4, &v3)), "a, b, c".to_owned());
+
+    // Test FmtN::slice debug
+    use std::path::Path;
+    use std::path::PathBuf;
+    let a = PathBuf::from("a");
+    let b = PathBuf::from("b");
+    let c = PathBuf::from("c");
+    let v0: Vec<&Path> = vec![];
+    let v1: Vec<&Path> = vec![&a];
+    let v2: Vec<&Path> = vec![&a, &b];
+    let v3: Vec<&Path> = vec![&a, &b, &c];
+    assert_eq!(format!("{:?}", FmtN::slice(0, &v0)), "[none]".to_owned());
+    assert_eq!(format!("{:?}", FmtN::slice(1, &v0)), "[none]".to_owned());
+    assert_eq!(format!("{:?}", FmtN::slice(0, &v1)), "[none]".to_owned());
+    assert_eq!(format!("{:?}", FmtN::slice(1, &v1)), "\"a\"".to_owned());
+    assert_eq!(format!("{:?}", FmtN::slice(2, &v1)), "\"a\"".to_owned());
+    assert_eq!(format!("{:?}", FmtN::slice(0, &v2)), "[none]".to_owned());
+    assert_eq!(
+        format!("{:?}", FmtN::slice(1, &v2)),
+        "\"a\", ... [2 total]".to_owned()
+    );
+    assert_eq!(
+        format!("{:?}", FmtN::slice(2, &v2)),
+        "\"a\", \"b\"".to_owned()
+    );
+    assert_eq!(
+        format!("{:?}", FmtN::slice(3, &v2)),
+        "\"a\", \"b\"".to_owned()
+    );
+    assert_eq!(format!("{:?}", FmtN::slice(0, &v3)), "[none]".to_owned());
+    assert_eq!(
+        format!("{:?}", FmtN::slice(1, &v3)),
+        "\"a\", ... [3 total]".to_owned()
+    );
+    assert_eq!(
+        format!("{:?}", FmtN::slice(2, &v3)),
+        "\"a\", \"b\", ... [3 total]".to_owned()
+    );
+    assert_eq!(
+        format!("{:?}", FmtN::slice(3, &v3)),
+        "\"a\", \"b\", \"c\"".to_owned()
+    );
+    assert_eq!(
+        format!("{:?}", FmtN::slice(4, &v3)),
+        "\"a\", \"b\", \"c\"".to_owned()
+    );
+}

@@ -984,6 +984,7 @@ struct RuntimeOption {
   F(double, HHIRExitArrayProfileThreshold, 0.98)                        \
   F(double, HHIROffsetExitArrayProfileThreshold, 0.98)                  \
   F(double, HHIRIsTypeStructProfileThreshold, 0.95)                     \
+  F(uint32_t, HHIRTypeProfileMinSamples, 10)                            \
   /* Register allocation flags */                                       \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \

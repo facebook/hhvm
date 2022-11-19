@@ -344,14 +344,14 @@ SSATmp* profiledType(IRGS& env, SSATmp* tmp, Finish finish) {
 
   if (!prof.optimizing()) return tmp;
 
-  auto const reducedType = prof.data().type;
+  auto const data = prof.data();
 
-  if (reducedType == TBottom) {
-    // We got no samples
+  if (data.count < RO::EvalHHIRTypeProfileMinSamples) {
+    // Not enough samples.
     return tmp;
   }
 
-  Type typeToCheck = relaxToGuardable(reducedType);
+  Type typeToCheck = relaxToGuardable(data.type);
 
   // Avoid the guard if it is going to always succeed or fail.
   if (tmp->type() <= typeToCheck || !tmp->type().maybe(typeToCheck)) return tmp;

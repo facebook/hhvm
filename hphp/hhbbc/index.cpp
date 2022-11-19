@@ -9581,6 +9581,60 @@ IndexFlattenMetadata make_remote(IndexData& index,
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Combines multiple classes/class-infos/funcs/units into a single
+ * blob. Makes make_local() more efficient, as you can download a
+ * smaller number of large blobs rather than many small blobs.
+ */
+struct AggregateJob {
+  static std::string name() { return "hhbbc-aggregate"; }
+  static void init(const Config& config) {
+    process_init(config.o, config.gd, false);
+  }
+  static void fini() {}
+
+  struct Bundle {
+    std::vector<std::unique_ptr<php::Class>> classes;
+    std::vector<std::unique_ptr<ClassInfo2>> classInfos;
+    std::vector<std::unique_ptr<php::Func>> funcs;
+    std::vector<std::unique_ptr<php::Unit>> units;
+
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(classes)
+        (classInfos)
+        (funcs)
+        (units)
+        ;
+    }
+  };
+
+  static Bundle run(Variadic<std::unique_ptr<php::Class>> classes,
+                    Variadic<std::unique_ptr<ClassInfo2>> classInfos,
+                    Variadic<std::unique_ptr<php::Func>> funcs,
+                    Variadic<std::unique_ptr<php::Unit>> units) {
+    Bundle bundle;
+    bundle.classes.reserve(classes.vals.size());
+    bundle.classInfos.reserve(classInfos.vals.size());
+    bundle.funcs.reserve(funcs.vals.size());
+    bundle.units.reserve(units.vals.size());
+    for (auto& c : classes.vals) {
+      bundle.classes.emplace_back(std::move(c));
+    }
+    for (auto& c : classInfos.vals) {
+      bundle.classInfos.emplace_back(std::move(c));
+    }
+    for (auto& f : funcs.vals) {
+      bundle.funcs.emplace_back(std::move(f));
+    }
+    for (auto& u : units.vals) {
+      bundle.units.emplace_back(std::move(u));
+    }
+    return bundle;
+  }
+};
+
+Job<AggregateJob> s_aggregateJob;
+
 // Convert the ClassInfo2s we loaded from extern-worker into their
 // equivalent ClassInfos (and store it in the Index).
 void make_class_infos_local(IndexData& index,
@@ -9742,63 +9796,82 @@ void make_class_infos_local(IndexData& index,
 
 // Switch to "local" mode, in which all calculations are expected to
 // be done locally (not using extern-worker). This involves
-// downloading everything out of extern-worker and converting it.
+// downloading everything out of extern-worker and converting it. To
+// improve efficiency, we first aggregate many small(er) items into
+// larger aggregate blobs in external workers, then download the
+// larger blobs.
 void make_local(IndexData& index) {
   trace_time tracer("make local", index.sample);
+
+  using namespace folly::gen;
+
+  // Unlike other cases, we want to bound each bucket to roughly the
+  // same total byte size (since ultimately we're going to download
+  // everything).
+  constexpr size_t kSizePerBucket = 10*1024*1024;
+
+  /*
+   * We'll use the names of the various items as the items to
+   * bucketize. This is somewhat problematic because names between
+   * units/funcs/classes/class-infos can collide (indeed classes and
+   * class-infos will always collide). Adding to the complication is
+   * that some of these are case sensitive and some aren't.
+   *
+   * We'll store a case sensitive version of each name exactly *once*,
+   * using a seen set. Since the hash for a static string (which
+   * consistently_bucketize() uses) is case insensitive, all case
+   * sensitive versions of the same name will always hash to the same
+   * bucket.
+   *
+   * When we obtain the Refs for a corresponding bucket, we'll load
+   * all items with that given name, using a set to ensure each RefId
+   * is only used once.
+   */
+  auto const& [items, totalSize] = [&] {
+    SStringSet seen;
+    std::vector<SString> items;
+    size_t totalSize = 0;
+    items.reserve(
+      index.unitRefs.size() + index.classRefs.size() +
+      index.classInfoRefs.size() + index.funcRefs.size()
+    );
+    for (auto const& [name, ref] : index.unitRefs) {
+      totalSize += ref.id().m_size;
+      if (!seen.emplace(name).second) continue;
+      items.emplace_back(name);
+    }
+    for (auto const& [name, ref] : index.classRefs) {
+      totalSize += ref.id().m_size;
+      if (!seen.emplace(name).second) continue;
+      items.emplace_back(name);
+    }
+    for (auto const& [name, ref] : index.classInfoRefs) {
+      totalSize += ref.id().m_size;
+      if (!seen.emplace(name).second) continue;
+      items.emplace_back(name);
+    }
+    for (auto const& [name, ref] : index.funcRefs) {
+      totalSize += ref.id().m_size;
+      if (!seen.emplace(name).second) continue;
+      items.emplace_back(name);
+    }
+    std::sort(begin(items), end(items), string_data_lt{});
+    return std::make_pair(items, totalSize);
+  }();
+
+  // Back out the number of buckets we want from the total size of
+  // everything and the target size of a bucket.
+  auto const numBuckets = (totalSize + kSizePerBucket - 1) / kSizePerBucket;
+  auto buckets = consistently_bucketize(
+    items,
+    (items.size() + numBuckets - 1) / numBuckets
+  );
 
   // We're going to be downloading all bytecode, so to avoid wasted
   // memory, try to re-use identical bytecode.
   php::Func::BytecodeReuser reuser;
   php::Func::s_reuser = &reuser;
   SCOPE_EXIT { php::Func::s_reuser = nullptr; };
-
-  // For speed, split up the unit loading into chunks.
-  constexpr size_t kLoadChunkSize = 2500;
-  constexpr size_t kMaxConcurrentChunks = 300;
-
-  // Chunk everything we need to load:
-  struct Chunk {
-    std::vector<UniquePtrRef<php::Class>> classes;
-    std::vector<UniquePtrRef<ClassInfo2>> classInfos;
-    std::vector<UniquePtrRef<php::Func>> funcs;
-    std::vector<UniquePtrRef<php::Unit>> units;
-
-    size_t size() const {
-      return
-        classes.size() + classInfos.size() +
-        funcs.size() + units.size();
-    }
-    bool empty() const {
-      return
-        classes.empty() && classInfos.empty() &&
-        funcs.empty() && units.empty();
-    }
-  };
-  std::vector<Chunk> chunks;
-  Chunk current;
-
-  auto const added = [&] {
-    if (current.size() >= kLoadChunkSize) {
-      chunks.emplace_back(std::move(current));
-    }
-  };
-  for (auto& [_, unit] : index.unitRefs) {
-    current.units.emplace_back(std::move(unit));
-    added();
-  }
-  for (auto& [_, cls] : index.classRefs) {
-    current.classes.emplace_back(std::move(cls));
-    added();
-  }
-  for (auto& [_, cinfo] : index.classInfoRefs) {
-    current.classInfos.emplace_back(std::move(cinfo));
-    added();
-  }
-  for (auto& [_, func] : index.funcRefs) {
-    current.funcs.emplace_back(std::move(func));
-    added();
-  }
-  if (!current.empty()) chunks.emplace_back(std::move(current));
 
   std::mutex lock;
   auto program = std::make_unique<php::Program>();
@@ -9808,58 +9881,104 @@ void make_local(IndexData& index) {
   std::vector<std::unique_ptr<ClassInfo2>> remoteClassInfos;
   remoteClassInfos.reserve(index.classInfoRefs.size());
 
-  // For each chunk, load it, and add it to the php::Program.
-  auto const loadAndParse = [&] (Chunk chunk) -> coro::Task<void> {
+  auto const run = [&] (std::vector<SString> chunks) -> coro::Task<void> {
     HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
 
-    auto [classes, classInfos, funcs, units] = HPHP_CORO_AWAIT(coro::collect(
-      index.client->load(std::move(chunk.classes)),
-      index.client->load(std::move(chunk.classInfos)),
-      index.client->load(std::move(chunk.funcs)),
-      index.client->load(std::move(chunk.units))
-    ));
+    if (chunks.empty()) HPHP_CORO_RETURN_VOID;
 
+    std::vector<UniquePtrRef<php::Class>> classes;
+    std::vector<UniquePtrRef<ClassInfo2>> classInfos;
+    std::vector<UniquePtrRef<php::Func>> funcs;
+    std::vector<UniquePtrRef<php::Unit>> units;
+
+    // Since a name can map to multiple items, and different case
+    // sensitive version of the same name can appear in the same
+    // bucket, use a set to make sure any given RefId only included
+    // once. A set of case insensitive identical names will always
+    // appear in the same bucket, so there's no need to track
+    // duplicates globally.
+    hphp_fast_set<RefId, RefId::Hasher> ids;
+
+    for (auto const name : chunks) {
+      if (auto const r = folly::get_optional(index.unitRefs, name)) {
+        if (!ids.emplace(r->id()).second) continue;
+        units.emplace_back(*r);
+      }
+      if (auto const r = folly::get_optional(index.classRefs, name)) {
+        if (!ids.emplace(r->id()).second) continue;
+        classes.emplace_back(*r);
+      }
+      if (auto const r = folly::get_optional(index.classInfoRefs, name)) {
+        if (!ids.emplace(r->id()).second) continue;
+        classInfos.emplace_back(*r);
+      }
+      if (auto const r = folly::get_optional(index.funcRefs, name)) {
+        if (!ids.emplace(r->id()).second) continue;
+        funcs.emplace_back(*r);
+      }
+    }
+
+    Client::ExecMetadata metadata{
+      .job_key = folly::sformat("aggregate {}", chunks[0])
+    };
+
+    // Aggregate the data, which makes downloading it more efficient.
+    auto config = HPHP_CORO_AWAIT(index.configRef->getCopy());
+    auto outputs = HPHP_CORO_AWAIT(index.client->exec(
+      s_aggregateJob,
+      std::move(config),
+      singleton_vec(
+        std::make_tuple(
+          std::move(classes),
+          std::move(classInfos),
+          std::move(funcs),
+          std::move(units)
+        )
+      ),
+      std::move(metadata)
+    ));
+    assertx(outputs.size() == 1);
+
+    // Download the aggregate chunks.
+    auto chunk =
+      HPHP_CORO_AWAIT(index.client->load(std::move(outputs[0])));
+
+    // And add it to our php::Program.
     {
       std::scoped_lock<std::mutex> _{lock};
-      for (auto& unit : units) {
+      for (auto& unit : chunk.units) {
         program->units.emplace_back(std::move(unit));
       }
-      for (auto& cls : classes) {
+      for (auto& cls : chunk.classes) {
         program->classes.emplace_back(std::move(cls));
       }
-      for (auto& func : funcs) {
+      for (auto& func : chunk.funcs) {
         program->funcs.emplace_back(std::move(func));
       }
       remoteClassInfos.insert(
         end(remoteClassInfos),
-        std::make_move_iterator(begin(classInfos)),
-        std::make_move_iterator(end(classInfos))
+        std::make_move_iterator(begin(chunk.classInfos)),
+        std::make_move_iterator(end(chunk.classInfos))
       );
     }
+
     HPHP_CORO_RETURN_VOID;
   };
 
-  // We've moved all refs out of these tables. Free them now to save
-  // memory before we load anything.
+  coro::wait(coro::collectRange(
+    from(buckets)
+      | move
+      | map([&] (std::vector<SString> chunks) {
+          return run(std::move(chunks)).scheduleOn(index.executor->sticky());
+        })
+      | as<std::vector>()
+  ));
+
+  // We've used any refs we need. Free them now to save memory.
   decltype(index.unitRefs){}.swap(index.unitRefs);
   decltype(index.classRefs){}.swap(index.classRefs);
   decltype(index.funcRefs){}.swap(index.funcRefs);
   decltype(index.classInfoRefs){}.swap(index.classInfoRefs);
-
-  // Load everything
-  std::vector<coro::TaskWithExecutor<void>> tasks;
-  tasks.reserve(chunks.size());
-  for (auto& c : chunks) {
-    tasks.emplace_back(
-      loadAndParse(std::move(c)).scheduleOn(index.executor->sticky())
-    );
-  }
-  coro::wait(
-    coro::collectRangeWindowed(
-      std::move(tasks),
-      kMaxConcurrentChunks
-    )
-  );
 
   // Done with any extern-worker stuff at this point:
   index.configRef.reset();

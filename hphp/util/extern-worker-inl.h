@@ -258,6 +258,10 @@ inline bool RefId::operator<(const RefId& o) const {
     std::tie(o.m_id, o.m_extra, o.m_size);
 }
 
+inline size_t RefId::hash() const {
+  return folly::hash::hash_combine(m_id, m_size, m_extra);
+}
+
 inline std::string RefId::toString() const {
   // Don't print out the extra field if it's zero, to avoid clutter
   // for implementations which don't use it. The id might contain

@@ -220,6 +220,11 @@ struct RefId {
   bool operator==(const RefId&) const;
   bool operator!=(const RefId&) const;
   bool operator<(const RefId&) const;
+  size_t hash() const;
+
+  struct Hasher {
+    size_t operator()(const RefId& r) const { return r.hash(); }
+  };
 
   std::string m_id;
   size_t m_size; // Size of data

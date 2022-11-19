@@ -805,50 +805,52 @@ impl Names {
         Ok(())
     }
 
-    /// This creates a sqlite directory at the specified path.
-    /// It will fail if the directory containing that path doesn't exist.
-    pub fn build_at_path(
+    /// Wrapper around `build` (see its documentation); this wrapper is for when you
+    /// want to pass file summaries as an iterator rather than send them over a channel.
+    pub fn build_from_iterator(
         path: impl AsRef<Path>,
-        faster_not_durable: bool,
         file_summaries: impl IntoIterator<Item = (RelativePath, crate::FileSummary)>,
-    ) -> anyhow::Result<(Self, crate::SaveResult)> {
-        let path = path.as_ref();
-        let conn = Connection::open(path)?;
-        if faster_not_durable {
-            conn.execute_batch(
-                "PRAGMA journal_mode = OFF;
-            PRAGMA synchronous = OFF;
-            PRAGMA cache_size = 1000000;
-            PRAGMA locking_mode = EXCLUSIVE;
-            PRAGMA temp_store = MEMORY;",
-            )?;
-        }
-        let log = slog::Logger::root(slog::Discard, slog::o!());
-        let (conn, save_result) = Self::build(&log, conn, |tx| {
+    ) -> anyhow::Result<crate::SaveResult> {
+        Self::build(path, |tx| {
             file_summaries.into_iter().try_for_each(|x| Ok(tx.send(x)?))
-        })?;
-        Ok((Self { conn }, save_result))
+        })
     }
 
-    /// Build a naming table using the information provided in
-    /// `collect_file_summaries` and writing to `conn`. The naming table will be
+    /// Build a naming table at `path` (its containing directory will be created if necessary)
+    /// out of the information provided in `collect_file_summaries`. The naming table will be
     /// built on a background thread while `collect_file_summaries` is run. Once
-    /// all file summaries have been sent on the `Sender`, drop it (usually by
+    /// all file summaries have been sent on the `Sender` , drop it (usually by
     /// letting it go out of scope as `collect_file_summaries` terminates) to
     /// allow building to continue.
+    /// If this function errors, the naming-table at `path` will be left in an indeterminate state.
     pub fn build(
-        log: &slog::Logger,
-        mut conn: rusqlite::Connection,
+        path: impl AsRef<Path>,
         collect_file_summaries: impl FnOnce(
             crossbeam::channel::Sender<(RelativePath, crate::FileSummary)>,
         ) -> anyhow::Result<()>,
-    ) -> anyhow::Result<(rusqlite::Connection, crate::SaveResult)> {
-        // We can't use rusqlite::Transaction for now because a lot of methods
-        // we want to use are on Self, and Self wants ownership of the
-        // Connection. Sqlite will automatically perform a rollback when the
-        // connection is closed, which will happen (via impl Drop for
-        // Connection) if we return Err here.
-        conn.execute("BEGIN TRANSACTION", params![])?;
+    ) -> anyhow::Result<crate::SaveResult> {
+        let path = path.as_ref();
+        std::fs::create_dir_all(
+            path.parent()
+                .ok_or_else(|| anyhow::anyhow!("Invalid output path: {}", path.display()))?,
+        )?;
+        let mut conn = Connection::open(path)?;
+
+        // The upshot of these commands is they're the fastest way we've found to write
+        // millions of rows into sqlite. They avoid sqlite having to acquire locks each
+        // row, and avoid it facing the overhead of recoverability in case of failure.
+        // The idea of a "transaction" here is a bit odd, because we're non-recoverable,
+        // in case of error, but it's part of the magic sauce of helping sqlite go fast
+        // (since it avoids the overhead of starting a fresh transaction once per row).
+        conn.execute_batch(
+            "PRAGMA journal_mode = OFF;
+        PRAGMA synchronous = OFF;
+        PRAGMA cache_size = 1000000;
+        PRAGMA locking_mode = EXCLUSIVE;
+        PRAGMA temp_store = MEMORY;
+        BEGIN TRANSACTION;",
+        )?;
+
         Self::create_tables(&mut conn)?;
 
         let mut names = Self { conn };
@@ -872,15 +874,16 @@ impl Names {
         })
         .unwrap()?;
         names.set_checksum(save_result.checksum)?;
-        let mut conn = names.conn;
 
-        slog::info!(log, "Creating indices...");
+        // Another part of the magic sauce for sqlite speed is to create indices in
+        // one go at the end, rather than having them updated once per row.
+        let mut conn = names.conn;
         Self::create_indices(&mut conn)?;
 
-        slog::info!(log, "Closing DB transaction...");
         conn.execute("END TRANSACTION", params![])?;
+        conn.close().map_err(|(_conn, e)| e)?;
 
-        Ok((conn, save_result))
+        Ok(save_result)
     }
 
     /// Close the connection. If the close fails, returns Err(conn, err)

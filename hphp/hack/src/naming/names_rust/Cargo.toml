@@ -19,5 +19,4 @@ rand = { version = "0.8", features = ["small_rng"] }
 relative_path = { path = "../../utils/rust/relative_path" }
 rusqlite = { version = "0.28.0", features = ["backup", "blob", "column_decltype"] }
 serde = { version = "1.0.136", features = ["derive", "rc"] }
-slog = { version = "2.7", features = ["max_level_trace", "nested-values"] }
 typing_deps_hash = { path = "../../deps/cargo/typing_deps_hash" }

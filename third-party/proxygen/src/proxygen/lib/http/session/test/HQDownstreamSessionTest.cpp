@@ -2820,6 +2820,24 @@ TEST_P(HQDownstreamSessionTestHQ, TestGreaseFramePerSession) {
   hqSession_->closeWhenIdle();
 }
 
+namespace {
+void verifyDSROffset(size_t dsrOffset,
+                     size_t headerBytes,
+                     size_t dataFrameHeaderSize) {
+  // See HQFramer.cpp writeGreaseFrame, grease 'index' rand(16)
+  // Length=0 -> 1 byte
+  auto minGreaseFrameSize = *quic::getQuicIntegerSize(*hq::getGreaseId(0)) + 1;
+  auto maxGreaseFrameSize = *quic::getQuicIntegerSize(*hq::getGreaseId(15)) + 1;
+
+  // HEADERS frame id encoded length = 1
+  auto headerFrameHeaderSize = *quic::getQuicIntegerSize(headerBytes) + 1;
+  auto noGreaseSize = headerFrameHeaderSize + headerBytes + dataFrameHeaderSize;
+
+  EXPECT_GE(dsrOffset, minGreaseFrameSize + noGreaseSize);
+  EXPECT_LE(dsrOffset, maxGreaseFrameSize + noGreaseSize);
+}
+} // namespace
+
 TEST_P(HQDownstreamSessionTest, DelegateResponse) {
   if (!IS_HQ) {
     hqSession_->closeWhenIdle();
@@ -2848,22 +2866,21 @@ TEST_P(HQDownstreamSessionTest, DelegateResponse) {
               senderStorage = std::move(sender);
               return folly::unit;
             }));
-    folly::Optional<size_t> headerBytes;
+    folly::Optional<size_t> dsrOffset;
     EXPECT_CALL(*mockDsrRequestSender, onHeaderBytesGenerated(_))
         .WillOnce(Invoke([&](auto bytes) {
           handler->txn_->addBufferMeta();
           handler->txn_->sendEOM();
-          headerBytes = bytes;
+          dsrOffset = bytes;
         }));
     EXPECT_TRUE(handler->sendHeadersWithDelegate(
         200, 1000 * 10, std::move(dsrRequestSender)));
     EXPECT_GT(transportCallback_.bodyBytesGenerated_, 0);
     auto dataFrameHeaderSize = transportCallback_.bodyBytesGenerated_;
-    ASSERT_TRUE(headerBytes.hasValue());
-    // TODO is + 5 really the best way to encode this?
-    EXPECT_EQ(
-        *headerBytes,
-        dataFrameHeaderSize + transportCallback_.headerBytesGenerated_ + 5);
+    ASSERT_TRUE(dsrOffset.hasValue());
+    verifyDSROffset(*dsrOffset,
+                    transportCallback_.headerBytesGenerated_,
+                    dataFrameHeaderSize);
     EXPECT_TRUE(handler->txn_->isEgressStarted());
     handler->txn_->onWriteReady(10 * 1000, 1.0);
     EXPECT_EQ(transportCallback_.bodyBytesGenerated_,
@@ -2910,22 +2927,21 @@ TEST_P(HQDownstreamSessionTest, DelegateResponseError) {
               senderStorage = std::move(sender);
               return folly::unit;
             }));
-    folly::Optional<size_t> headerBytes;
+    folly::Optional<size_t> dsrOffset;
     EXPECT_CALL(*mockDsrRequestSender, onHeaderBytesGenerated(_))
         .WillOnce(Invoke([&](auto bytes) {
           handler->txn_->addBufferMeta();
           handler->txn_->sendEOM();
-          headerBytes = bytes;
+          dsrOffset = bytes;
         }));
     EXPECT_TRUE(handler->sendHeadersWithDelegate(
         200, 1000 * 10, std::move(dsrRequestSender)));
     EXPECT_GT(transportCallback_.bodyBytesGenerated_, 0);
     auto dataFrameHeaderSize = transportCallback_.bodyBytesGenerated_;
-    ASSERT_TRUE(headerBytes.hasValue());
-    // TODO is + 5 really the best way to encode this?
-    EXPECT_EQ(
-        *headerBytes,
-        dataFrameHeaderSize + transportCallback_.headerBytesGenerated_ + 5);
+    ASSERT_TRUE(dsrOffset.hasValue());
+    verifyDSROffset(*dsrOffset,
+                    transportCallback_.headerBytesGenerated_,
+                    dataFrameHeaderSize);
     EXPECT_TRUE(handler->txn_->isEgressStarted());
     handler->txn_->onWriteReady(10 * 1000, 1.0);
     EXPECT_EQ(transportCallback_.bodyBytesGenerated_,

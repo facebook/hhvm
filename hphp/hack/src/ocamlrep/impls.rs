@@ -44,8 +44,6 @@ macro_rules! trivial_from_in_impl {
     };
 }
 
-const WORD_SIZE: usize = std::mem::size_of::<Value<'_>>();
-
 impl ToOcamlRep for () {
     fn to_ocamlrep<'a, A: Allocator>(&'a self, _alloc: &'a A) -> Value<'a> {
         Value::int(0)
@@ -963,19 +961,11 @@ impl<'a> FromOcamlRepIn<'a> for &'a [u8] {
 
 /// Allocate an OCaml string using the given allocator and copy the given byte
 /// slice into it.
-pub fn bytes_to_ocamlrep<'a, A: Allocator>(s: &[u8], alloc: &'a A) -> Value<'a> {
-    let words = (s.len() + 1 /*null-ending*/ + (WORD_SIZE - 1)/*rounding*/) / WORD_SIZE;
-    let length = words * WORD_SIZE;
-    let mut block = alloc.block_with_size_and_tag(words, block::STRING_TAG);
-    let block_contents_as_slice: &mut [u8] = unsafe {
-        let block = alloc.block_ptr_mut(&mut block);
-        *block.add(words - 1) = Value::from_bits(0);
-        let block_bytes = block as *mut u8;
-        *block_bytes.add(length - 1) = (length - s.len() - 1) as u8;
-        std::slice::from_raw_parts_mut(block_bytes, s.len())
-    };
-    block_contents_as_slice.copy_from_slice(s);
-    block.build()
+pub fn bytes_to_ocamlrep<'a, A: Allocator>(bytes: &[u8], alloc: &'a A) -> Value<'a> {
+    use std::io::Write;
+    let mut w = alloc.byte_string_with_len(bytes.len());
+    let _ = w.write(bytes).unwrap();
+    w.build()
 }
 
 /// Given an OCaml string, return a byte slice pointing to its contents.

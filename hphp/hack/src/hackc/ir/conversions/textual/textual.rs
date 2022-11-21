@@ -681,7 +681,7 @@ pub(crate) fn write_type<'a>(
 
     writeln!(w, "type {name} = {{")?;
 
-    let mut sep = "\n";
+    let mut sep = "";
     for f in fields {
         write!(
             w,

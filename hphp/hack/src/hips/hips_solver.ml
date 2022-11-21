@@ -76,16 +76,15 @@ module Inter (I : Intra) = struct
     | Inter (ClassExtends _) -> true
     | _ -> false
 
-  let const_constraint_of (constr_list : any_constraint list) : any_constraint =
-    match List.find ~f:is_const_constr constr_list with
-    | Some const_constraint -> const_constraint
-    | None -> failwith "Couldn't find Constant constraint"
+  let const_constraint_of (constr_list : any_constraint list) :
+      any_constraint option =
+    List.find ~f:is_const_constr constr_list
 
-  let const_initial_ent_of (constr_list : any_constraint list) : I.intra_entity
-      =
+  let const_initial_ent_of (constr_list : any_constraint list) :
+      I.intra_entity option =
     match List.find ~f:is_const_initial_constr constr_list with
-    | Some (Inter (ConstantInitial const_initial_ent)) -> const_initial_ent
-    | _ -> failwith "Used invalid identifier"
+    | Some (Inter (ConstantInitial const_initial_ent)) -> Some const_initial_ent
+    | _ -> None
 
   let find_const_in_ancestors ~constraint_map ~const_name class_name :
       (any_constraint list * string) option =
@@ -137,12 +136,15 @@ module Inter (I : Intra) = struct
       (constr_list_at_const_ent : any_constraint list)
       (input_constr_list_map : any_constraint list SMap.t) :
       any_constraint list SMap.t =
-    let to_append_at_current_func =
-      List.filter_map
-        constr_list_at_const_ent
-        ~f:
-          (substitute_inter_any_backwards
-             (ConstantInitial (const_initial_ent_of constr_list_at_const_ent)))
+    let to_append_at_current_func_opt =
+      Option.map
+        (const_initial_ent_of constr_list_at_const_ent)
+        ~f:(fun const_initial_ent ->
+          List.filter_map
+            constr_list_at_const_ent
+            ~f:
+              (substitute_inter_any_backwards
+                 (ConstantInitial const_initial_ent)))
     in
     let to_append_at_const =
       List.filter_map
@@ -152,7 +154,8 @@ module Inter (I : Intra) = struct
     input_constr_list_map
     |> SMap.update
          current_func_id
-         (Option.map ~f:(fun x -> x @ to_append_at_current_func))
+         (Option.map2 to_append_at_current_func_opt ~f:(fun to_append x ->
+              x @ to_append))
     |> SMap.update
          new_const_ident_string
          (Option.map ~f:(fun x -> x @ to_append_at_const))
@@ -162,20 +165,18 @@ module Inter (I : Intra) = struct
       (new_const_ident_string : string)
       (input_constr_list_map : any_constraint list SMap.t) :
       any_constraint list SMap.t =
-    let const_ent =
-      match const_constraint_of constr_list_at_const_ent with
-      | Inter (Constant const_ent) -> const_ent
-      | _ -> failwith "Used invalid identifier"
-    in
-    let to_append_at_const_ident =
-      List.filter_map
-        constr_list_at_const_ent
-        ~f:(substitute_inter_any_backwards (Constant const_ent))
-    in
-    input_constr_list_map
-    |> SMap.update
-         new_const_ident_string
-         (Option.map ~f:(fun x -> x @ to_append_at_const_ident))
+    match const_constraint_of constr_list_at_const_ent with
+    | Some (Inter (Constant const_ent)) ->
+      let to_append_at_const_ident =
+        List.filter_map
+          constr_list_at_const_ent
+          ~f:(substitute_inter_any_backwards (Constant const_ent))
+      in
+      input_constr_list_map
+      |> SMap.update
+           new_const_ident_string
+           (Option.map ~f:(fun x -> x @ to_append_at_const_ident))
+    | _ -> input_constr_list_map
 
   (**
   example: `"C::DICT_NAME" -> Some ("C", "DICT_NAME")`
@@ -189,6 +190,7 @@ module Inter (I : Intra) = struct
 
   let substitute (constraint_map : any_constraint list SMap.t) :
       any_constraint list SMap.t =
+    let open Option.Monad_infix in
     let substitute_any_list
         (current_func_id : string)
         (current_func_constr_list : any_constraint list)
@@ -203,23 +205,18 @@ module Inter (I : Intra) = struct
           (match inter_constr with
           | ArgLike (((_, f), f_idx), intra_ent) ->
             let constr_list_at = SMap.find_opt f constraint_map in
-            let param_constr : inter_constraint =
-              match constr_list_at with
-              | Some constr_list_at_ ->
-                let param_ent_opt =
-                  List.find
-                    ~f:(function
-                      | Inter (ParamLike ((_, g), g_idx)) ->
-                        String.equal f g
-                        && Hips_types.equal_param_like_index f_idx g_idx
-                      | _ -> false)
-                    constr_list_at_
-                in
-                (match param_ent_opt with
-                | Some (Inter (ParamLike param_ent)) ->
-                  ArgLike (param_ent, intra_ent)
-                | _ -> failwith "Used invalid function identifier")
-              | None -> failwith "Used invalid function identifier"
+            let param_constr_opt : inter_constraint option =
+              ( constr_list_at >>= fun constr_list_at_ ->
+                List.find
+                  ~f:(function
+                    | Inter (ParamLike ((_, g), g_idx)) ->
+                      String.equal f g && equal_param_like_index f_idx g_idx
+                    | _ -> false)
+                  constr_list_at_ )
+              >>= function
+              | Inter (ParamLike param_ent) ->
+                Some (ArgLike (param_ent, intra_ent))
+              | _ -> None
             in
             let constr_list_backwards =
               match constr_list_at with
@@ -230,9 +227,12 @@ module Inter (I : Intra) = struct
                   ~f:(substitute_inter_any_backwards inter_constr)
             in
             let constr_list_forwards =
-              List.filter_map
-                current_func_constr_list
-                ~f:(substitute_inter_any_forwards param_constr)
+              param_constr_opt
+              >>| (fun param_constr ->
+                    List.filter_map
+                      current_func_constr_list
+                      ~f:(substitute_inter_any_forwards param_constr))
+              |> Option.value ~default:[]
             in
             input_constr_list_map
             |> SMap.update f (Option.map ~f:(fun x -> x @ constr_list_forwards))
@@ -293,37 +293,37 @@ module Inter (I : Intra) = struct
       (ident_ent : constant_identifier_entity)
       (input_constr_map : any_constraint list SMap.t)
       (f : string) : any_constraint list SMap.t =
-    let const_constraint = const_constraint_of constr_list_at_const_ent in
-    let const_initial_constraint =
-      match List.find ~f:is_const_initial_constr constr_list_at_const_ent with
-      | Some const_initial_constraint -> const_initial_constraint
-      | None -> failwith "Couldn't find ConstantInitial constraint"
+    let const_constraint_opt = const_constraint_of constr_list_at_const_ent in
+    let const_initial_constraint_opt =
+      List.find ~f:is_const_initial_constr constr_list_at_const_ent
     in
-    let (const_ent, const_initial_ent) =
-      match (const_constraint, const_initial_constraint) with
-      | (Inter (Constant const_ent), Inter (ConstantInitial const_initial_ent))
-        ->
-        (const_ent, const_initial_ent)
-      | _ -> failwith "Used invalid identifier"
+    let append_using_ents const_ent const_initial_ent =
+      let subset_any_constr =
+        Intra
+          (I.subsets
+             (I.embed_entity (ConstantIdentifier ident_ent))
+             (I.embed_entity (Constant const_ent)))
+      in
+      let subset_initial_any_constr =
+        Intra
+          (I.subsets
+             const_initial_ent
+             (I.embed_entity (ConstantIdentifier ident_ent)))
+      in
+      let append_opt = Option.map ~f:(fun x -> subset_any_constr :: x) in
+      let append_initial_opt =
+        Option.map ~f:(fun x -> subset_initial_any_constr :: x)
+      in
+      SMap.update (snd const_ent) append_opt input_constr_map
+      |> SMap.update f append_initial_opt
     in
-    let subset_any_constr =
-      Intra
-        (I.subsets
-           (I.embed_entity (ConstantIdentifier ident_ent))
-           (I.embed_entity (Constant const_ent)))
-    in
-    let subset_initial_any_constr =
-      Intra
-        (I.subsets
-           const_initial_ent
-           (I.embed_entity (ConstantIdentifier ident_ent)))
-    in
-    let append_opt = Option.map ~f:(fun x -> subset_any_constr :: x) in
-    let append_initial_opt =
-      Option.map ~f:(fun x -> subset_initial_any_constr :: x)
-    in
-    SMap.update (snd const_ent) append_opt input_constr_map
-    |> SMap.update f append_initial_opt
+    match Option.both const_constraint_opt const_initial_constraint_opt with
+    | None -> input_constr_map
+    | Some
+        (Inter (Constant const_ent), Inter (ConstantInitial const_initial_ent))
+      ->
+      append_using_ents const_ent const_initial_ent
+    | _ -> failwith "should be unreachable"
 
   let add_const_identifier_constraints ~key constraint_map const_identifier =
     match find_const const_identifier constraint_map with
@@ -342,20 +342,21 @@ module Inter (I : Intra) = struct
       any_constraint list SMap.t =
     let const_constraint_1 = const_constraint_of ent1_constraints in
     let const_constraint_2 = const_constraint_of ent2_constraints in
-    let (const_ent_1, const_ent_2) =
-      match (const_constraint_1, const_constraint_2) with
-      | (Inter (Constant const_ent_1), Inter (Constant const_ent_2)) ->
-        (const_ent_1, const_ent_2)
-      | _ -> failwith "Used invalid identifier"
+    let append_using_ents const_ent_1 const_ent_2 =
+      let subset_any_constr =
+        Intra
+          (I.subsets
+             (I.embed_entity (Constant const_ent_1))
+             (I.embed_entity (Constant const_ent_2)))
+      in
+      let append_opt = Option.map ~f:(fun x -> subset_any_constr :: x) in
+      SMap.update (snd const_ent_2) append_opt input_constr_map
     in
-    let subset_any_constr =
-      Intra
-        (I.subsets
-           (I.embed_entity (Constant const_ent_1))
-           (I.embed_entity (Constant const_ent_2)))
-    in
-    let append_opt = Option.map ~f:(fun x -> subset_any_constr :: x) in
-    SMap.update (snd const_ent_2) append_opt input_constr_map
+    match Option.both const_constraint_1 const_constraint_2 with
+    | Some (Inter (Constant const_ent_1), Inter (Constant const_ent_2)) ->
+      append_using_ents const_ent_1 const_ent_2
+    | None -> input_constr_map
+    | _ -> failwith "should be unreachable"
 
   (** Add subset constraints for constant overrides.
 

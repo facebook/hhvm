@@ -37,8 +37,8 @@ void FileServerListGenerator::FileGenerator::run(milliseconds /*timeout*/) {
   std::string content;
   try {
     readFile(params_->fileName, content);
-  } catch (const std::exception& ex) {
-    callback_->serverListError(std::make_exception_ptr(ex));
+  } catch (const std::exception&) {
+    callback_->serverListError(std::current_exception());
     delete this;
     return;
   }
@@ -73,8 +73,8 @@ void FileServerListGenerator::FileGenerator::run(milliseconds /*timeout*/) {
         address.setFromHostPort(e.asString());
         servers.emplace_back(ServerConfig(address.getAddressStr(), address));
       }
-    } catch (const std::exception& ex) {
-      callback_->serverListError(std::make_exception_ptr(ex));
+    } catch (const std::exception&) {
+      callback_->serverListError(std::current_exception());
       delete this;
       return;
     }

@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::fs;
+use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 use std::time::Duration;
@@ -13,6 +13,8 @@ use std::time::Duration;
 use anyhow::ensure;
 use clap::Parser;
 use decl_provider::SelfProvider;
+use hash::HashMap;
+use hash::HashSet;
 use itertools::Itertools;
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
@@ -166,6 +168,13 @@ impl IrOpts {
 
         let post_alloc = bumpalo::Bump::default();
         let (ir, bc_to_ir_t) = Timing::time(path, || bc_to_ir::bc_to_ir(&pre_unit, path));
+
+        ir.strings.debug_for_each(|_id, s| {
+            if !profile.global_strings.contains(s) {
+                profile.global_strings.insert(s.to_owned());
+            }
+        });
+
         let (post_unit, ir_to_bc_t) = Timing::time(path, || ir_to_bc::ir_to_bc(&post_alloc, ir));
 
         let (result, verify_t) =
@@ -363,6 +372,7 @@ struct ProfileAcc {
     printing_t: Timing,
     total_t: Timing,
     verify_t: Timing,
+    global_strings: HashSet<Vec<u8>>,
 }
 
 impl std::default::Default for ProfileAcc {
@@ -379,6 +389,7 @@ impl std::default::Default for ProfileAcc {
             printing_t: Default::default(),
             total_t: Default::default(),
             verify_t: Default::default(),
+            global_strings: Default::default(),
         }
     }
 }
@@ -401,6 +412,19 @@ impl ProfileAcc {
         self.printing_t.fold_with(other.printing_t);
         self.total_t.fold_with(other.total_t);
         self.verify_t.fold_with(other.verify_t);
+
+        match (
+            self.global_strings.is_empty(),
+            other.global_strings.is_empty(),
+        ) {
+            (false, false) => {
+                self.global_strings.extend(other.global_strings.into_iter());
+            }
+            (true, false) => {
+                self.global_strings = other.global_strings;
+            }
+            (_, true) => {}
+        }
     }
 
     fn fold(mut self, other: Self) -> Self {
@@ -470,6 +494,25 @@ impl ProfileAcc {
         profile::report_stat(&mut w, "  ", "bc_to_ir time", &self.bc_to_ir_t)?;
         profile::report_stat(&mut w, "  ", "ir_to_bc time", &self.ir_to_bc_t)?;
         profile::report_stat(&mut w, "  ", "verify time", &self.verify_t)?;
+
+        if !self.global_strings.is_empty() {
+            let mut hist: hdrhistogram::Histogram<u64> = hdrhistogram::Histogram::new(3).unwrap();
+            let mut total = 0;
+            for s in self.global_strings.iter() {
+                let len = s.len() as u64;
+                total += len;
+                hist.record(len).unwrap();
+            }
+
+            writeln!(w)?;
+            writeln!(w, "String Interning:")?;
+            writeln!(w, "  {} unique strings, {total} bytes total", hist.len())?;
+            write!(w, "  min: {}B", hist.min())?;
+            write!(w, ", P50: {}B", hist.value_at_percentile(50.0))?;
+            write!(w, ", P90: {}B", hist.value_at_percentile(90.0))?;
+            write!(w, ", P99: {}B", hist.value_at_percentile(99.0))?;
+            writeln!(w, ", max: {}B", hist.max())?;
+        }
 
         Ok(())
     }

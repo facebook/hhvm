@@ -101,4 +101,16 @@ impl StringInterner {
     pub fn lookup_bstr<'a>(&'a self, id: UnitBytesId) -> MappedRwLockReadGuard<'a, BStr> {
         MappedRwLockReadGuard::map(self.lookup_bytes(id), |v: &[u8]| -> &BStr { v.into() })
     }
+
+    /// This is meant for debugging ONLY.
+    pub fn debug_for_each<F>(&self, mut f: F)
+    where
+        F: FnMut(UnitBytesId, &[u8]),
+    {
+        self.values
+            .read()
+            .iter()
+            .enumerate()
+            .for_each(|(idx, s)| f(UnitBytesId::from_usize(idx), s))
+    }
 }

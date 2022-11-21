@@ -122,13 +122,40 @@ if (BUILD_SAMPLES)
 endif()
 
 if (BUILD_QUIC AND BUILD_SAMPLES)
+  add_library(
+      proxygenhqloggerhelper
+      samples/hq/HQLoggerHelper.cpp
+  )
+  target_compile_options(
+      proxygenhqloggerhelper
+      PRIVATE
+          ${_PROXYGEN_COMMON_COMPILE_OPTIONS}
+   )
+  if (BUILD_SHARED_LIBS)
+      set_property(TARGET proxygenhqloggerhelper PROPERTY POSITION_INDEPENDENT_CODE ON)
+      if (DEFINED PACKAGE_VERSION)
+          set_target_properties(proxygenhqloggerhelper PROPERTIES VERSION ${PACKAGE_VERSION})
+      endif()
+  endif()
+
+  target_link_libraries(
+      proxygenhqloggerhelper
+      PUBLIC
+          proxygen
+  )
+  install(
+      TARGETS proxygenhqloggerhelper
+      EXPORT proxygen-exports
+      ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+      LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+  )
+
   add_executable(hq
       samples/hq/main.cpp
       samples/hq/FizzContext.cpp
       samples/hq/H2Server.cpp
       samples/hq/HQClient.cpp
       samples/hq/HQCommandLine.cpp
-      samples/hq/HQLoggerHelper.cpp
       samples/hq/HQServer.cpp
       samples/hq/HQServerModule.cpp
       samples/hq/HQParams.cpp
@@ -146,6 +173,7 @@ if (BUILD_QUIC AND BUILD_SAMPLES)
           proxygen
           proxygencurl
           proxygenhttpserver
+          proxygenhqloggerhelper
           mvfst::mvfst_transport
           mvfst::mvfst_client
           mvfst::mvfst_server

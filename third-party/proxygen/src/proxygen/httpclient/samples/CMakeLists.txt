@@ -6,3 +6,4 @@
 
 add_subdirectory(curl)
 add_subdirectory(H3Datagram)
+add_subdirectory(httperf2)

@@ -1981,7 +1981,6 @@ module EnumClassLabelOps = struct
     | Success of Tast.expr * locl_ty
     | ClassNotFound
     | LabelNotFound of Tast.expr * locl_ty
-    | Invalid
     | Skip
 
   (** Given an [enum_id] and a [label_name], tries to see if
@@ -4951,7 +4950,6 @@ and expr_
     | EnumClassLabelOps.LabelNotFound _ ->
       (* Error registered in EnumClassLabelOps.expand *)
       error ()
-    | EnumClassLabelOps.Invalid
     | EnumClassLabelOps.Skip ->
       Errors.add_typing_error
         Typing_error.(enum @@ Primary.Enum.Enum_class_label_as_expr p);
@@ -8796,38 +8794,39 @@ and call
             let (env, label_type) =
               let ety = param.fp_type.et_type in
               let (env, ety) = Env.expand_type env ety in
-              let is_label =
+              let is_label env ety =
                 match get_node (TUtils.strip_dynamic env ety) with
-                | Tnewtype (name, _, _) ->
-                  String.equal SN.Classes.cEnumClassLabel name
-                | _ -> false
+                | Tnewtype (name, [ty_enum; _ty_interface], _) ->
+                  if String.equal SN.Classes.cEnumClassLabel name then
+                    Some (name, ty_enum)
+                  else
+                    None
+                | _ -> None
               in
-              match arg with
-              | EnumClassLabel (None, label_name) when is_label ->
-                (match get_node (TUtils.strip_dynamic env ety) with
-                | Tnewtype (name, [ty_enum; _ty_interface], _)
-                  when String.equal name SN.Classes.cMemberOf
-                       || String.equal name SN.Classes.cEnumClassLabel ->
-                  let ctor = name in
-                  (match compute_enum_name env ty_enum with
-                  | (env, None) -> (env, EnumClassLabelOps.ClassNotFound)
-                  | (env, Some enum_name) ->
-                    let ty_pos = Typing_defs.get_pos ty_enum in
-                    EnumClassLabelOps.expand
-                      pos
-                      env
-                      ~full:false
-                      ~ctor
-                      (Pos.none, enum_name)
-                      label_name
-                      (Some ty_pos))
-                | _ ->
-                  (* Already reported, see Typing_type_wellformedness *)
-                  (env, EnumClassLabelOps.Invalid))
-              | EnumClassLabel (Some _, _) ->
+              let is_maybe_label =
+                match get_node (TUtils.strip_dynamic env ety) with
+                | Toption ety -> is_label env ety
+                | _ -> is_label env ety
+              in
+              match (arg, is_maybe_label) with
+              | (EnumClassLabel (None, label_name), Some (name, ty_enum)) ->
+                let ctor = name in
+                (match compute_enum_name env ty_enum with
+                | (env, None) -> (env, EnumClassLabelOps.ClassNotFound)
+                | (env, Some enum_name) ->
+                  let ty_pos = Typing_defs.get_pos ty_enum in
+                  EnumClassLabelOps.expand
+                    pos
+                    env
+                    ~full:false
+                    ~ctor
+                    (Pos.none, enum_name)
+                    label_name
+                    (Some ty_pos))
+              | (EnumClassLabel (Some _, _), _) ->
                 (* Full info is here, use normal inference *)
                 (env, EnumClassLabelOps.Skip)
-              | _ -> (env, EnumClassLabelOps.Skip)
+              | (_, _) -> (env, EnumClassLabelOps.Skip)
             in
             let (env, te, ty) =
               match label_type with

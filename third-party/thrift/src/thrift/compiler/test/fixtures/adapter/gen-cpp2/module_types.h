@@ -792,7 +792,6 @@ class Foo final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1400,7 +1399,6 @@ class Baz final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
 
@@ -1954,7 +1952,6 @@ class DirectlyAdapted final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -2170,7 +2167,6 @@ class Bar final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -2590,7 +2586,6 @@ class A final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -2713,7 +2708,6 @@ class ThriftAdaptedStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -2880,7 +2874,6 @@ class DirectlyAdaptedStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -3059,7 +3052,6 @@ class MyAnnotation final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -3281,7 +3273,6 @@ class IndependentDirectlyAdapted final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -3479,7 +3470,6 @@ class StructWithFieldAdapter final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -3816,7 +3806,6 @@ class TerseAdaptedFields final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -4054,7 +4043,6 @@ class B final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -4207,7 +4195,6 @@ class Config final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -4383,7 +4370,6 @@ class MyStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -4661,7 +4647,6 @@ class AdaptTestStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -5377,7 +5362,6 @@ class AdaptTemplatedTestStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -6414,7 +6398,6 @@ class AdaptTemplatedNestedTestStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -6584,7 +6567,6 @@ class ThriftAdaptTestUnion final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
 
@@ -6938,7 +6920,6 @@ class StructFieldAdaptedStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -7220,7 +7201,6 @@ class CircularStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -7369,7 +7349,6 @@ class CircularAdaptee final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -7524,7 +7503,6 @@ class DeclaredAfterStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -7637,7 +7615,6 @@ class ReorderedStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -7788,7 +7765,6 @@ class UnderlyingRenamedStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -7955,7 +7931,6 @@ class UnderlyingSameNamespaceStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -8115,7 +8090,6 @@ class HeapAllocated final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -8228,7 +8202,6 @@ class MoveOnly final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -8379,7 +8352,6 @@ class AlsoMoveOnly final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -8523,7 +8495,6 @@ class ApplyAdapter final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -8626,7 +8597,6 @@ class TransitiveAdapted final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -8755,7 +8725,6 @@ class CountingStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -8996,7 +8965,6 @@ class Person final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -9164,7 +9132,6 @@ class Person2 final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;

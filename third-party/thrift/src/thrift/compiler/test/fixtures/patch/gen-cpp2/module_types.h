@@ -1035,7 +1035,6 @@ class MyData final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -1254,7 +1253,6 @@ class InnerUnion final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
 
@@ -1535,7 +1533,6 @@ class MyUnion final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
 
@@ -1936,7 +1933,6 @@ class LateDefStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -2294,7 +2290,6 @@ class MyStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -4127,7 +4122,6 @@ class Recursive final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -4287,7 +4281,6 @@ class Bar final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -4437,7 +4430,6 @@ class Loop final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -4605,7 +4597,6 @@ class MyDataFieldPatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -4835,7 +4826,6 @@ class MyDataPatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -5179,7 +5169,6 @@ class InnerUnionFieldPatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -5366,7 +5355,6 @@ class InnerUnionPatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -5726,7 +5714,6 @@ class MyUnionFieldPatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -5999,7 +5986,6 @@ class MyUnionPatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -6351,7 +6337,6 @@ class MyStructField10PatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -6584,7 +6569,6 @@ class MyStructField25PatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -6849,7 +6833,6 @@ class MyStructField28PatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -7297,7 +7280,6 @@ class MyStructField29PatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -7665,7 +7647,6 @@ class MyStructField30PatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -8188,7 +8169,6 @@ class MyStructField31Patch1Struct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -8703,7 +8683,6 @@ class MyStructField31PatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -9175,7 +9154,6 @@ class MyStructField32Patch1Struct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -9698,7 +9676,6 @@ class MyStructField32PatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -10165,7 +10142,6 @@ class LateDefStructFieldPatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -10309,7 +10285,6 @@ class LateDefStructPatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -10901,7 +10876,6 @@ class MyStructFieldPatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -12421,7 +12395,6 @@ class MyStructPatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -12773,7 +12746,6 @@ class RecursiveField1PatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -12991,7 +12963,6 @@ class RecursiveFieldPatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -13178,7 +13149,6 @@ class RecursivePatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -13530,7 +13500,6 @@ class LoopPatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -13738,7 +13707,6 @@ class BarFieldPatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -13925,7 +13893,6 @@ class BarPatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -14269,7 +14236,6 @@ class LoopFieldPatchStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;

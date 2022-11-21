@@ -496,7 +496,6 @@ class SomeStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;
@@ -841,7 +840,6 @@ class MyStruct final  {
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
-
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
   bool __fbthrift_is_empty() const;

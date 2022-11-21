@@ -8,7 +8,6 @@ use arena_trait::TrivialDrop;
 use no_pos_hash::NoPosHash;
 use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
-use ocamlrep_caml_builtins::Int64;
 use oxidized::file_info::NameType;
 use serde::Deserialize;
 use serde::Serialize;
@@ -43,24 +42,32 @@ pub struct ParsedFile<'a> {
 }
 
 // NB: Must keep in sync with OCaml type `Direct_decl_parser.parsed_file_with_hashes`
-#[derive(Debug, Clone, ToOcamlRep)]
+#[derive(Debug, Clone)]
 pub struct ParsedFileWithHashes<'a> {
     pub mode: Option<file_info::Mode>,
 
     /// FileDeclHash must be computed before php stdlib decls are removed,
     /// and must be computed over the decls in reverse file order
     /// (the hash is order sensitive).
-    pub hash: Int64,
+    pub hash: hh24_types::FileDeclsHash,
 
     /// Decls along with a position insensitive hash.
-    pub decls: Vec<(&'a str, Decl<'a>, Int64)>,
+    pub decls: Vec<(&'a str, Decl<'a>, hh24_types::DeclHash)>,
 }
 
 impl<'a> From<ParsedFile<'a>> for ParsedFileWithHashes<'a> {
     fn from(parsed_file: ParsedFile<'a>) -> ParsedFileWithHashes<'a> {
-        let file_decls_hash = Int64(hh_hash::position_insensitive_hash(&parsed_file.decls) as i64);
+        let file_decls_hash = hh24_types::FileDeclsHash::from_u64(
+            hh_hash::position_insensitive_hash(&parsed_file.decls),
+        );
         let decls = (parsed_file.decls.into_iter())
-            .map(|(name, decl)| (name, decl, Int64(hh_hash::hash(&decl) as i64)))
+            .map(|(name, decl)| {
+                (
+                    name,
+                    decl,
+                    hh24_types::DeclHash::from_u64(hh_hash::hash(&decl)),
+                )
+            })
             .collect();
         ParsedFileWithHashes {
             mode: parsed_file.mode,

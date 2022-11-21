@@ -23,5 +23,6 @@ ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 pos = { path = "../../../hackrs/pos/cargo/pos" }
+rust_decl_ffi = { path = "../../../decl/cargo/rust_decl_ffi" }
 rust_provider_backend_api = { path = "../.." }
 ty = { path = "../../../hackrs/ty/cargo/ty" }

@@ -46,14 +46,14 @@ impl FileSummary {
     pub fn from_fwd_filtered_decls<'a>(file: &ParsedFileWithHashes<'a>) -> Self {
         Self {
             mode: file.mode,
-            hash: FileDeclsHash::from_u64(file.hash.0 as u64),
+            hash: file.hash,
             decls: file
                 .decls
                 .iter()
                 .map(|&(symbol, decl, hash)| DeclSummary {
                     name_type: decl.kind(),
                     symbol: symbol.to_owned(),
-                    hash: DeclHash::from_u64(hash.0 as u64),
+                    hash,
                 })
                 .collect(),
         }

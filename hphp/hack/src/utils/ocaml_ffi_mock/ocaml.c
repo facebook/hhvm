@@ -61,4 +61,6 @@ void caml_output_value_to_malloc() {}
 
 
 
-int ocamlpool_generation = 0;
+void* Caml_state = 0;
+unsigned long caml_allocated_words = 0;
+unsigned long ocamlpool_generation = 0;

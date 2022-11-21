@@ -20,7 +20,7 @@ type parsed_file = {
   pf_has_first_pass_parse_errors: bool;
 }
 
-(* NB: Must keep in sync with Rust type rust_decl_ffi::ParsedFileWithHashes *)
+(* NB: Must keep in sync with ToOcamlRep impl of Rust type rust_decl_ffi::OcamlParsedFileWithHashes *)
 type parsed_file_with_hashes = {
   pfh_mode: FileInfo.mode option;
   pfh_hash: Int64.t;

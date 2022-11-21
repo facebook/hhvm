@@ -19,6 +19,43 @@ use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 use relative_path::RelativePath;
 
+#[derive(Debug, Clone)]
+pub struct OcamlParsedFileWithHashes<'a>(ParsedFileWithHashes<'a>);
+
+impl<'a> From<ParsedFileWithHashes<'a>> for OcamlParsedFileWithHashes<'a> {
+    fn from(file: ParsedFileWithHashes<'a>) -> Self {
+        Self(file)
+    }
+}
+
+// NB: Must keep in sync with OCaml type `Direct_decl_parser.parsed_file_with_hashes`.
+// Written manually to avoid reallocating the Vec `self.0.decls`.
+impl ocamlrep::ToOcamlRep for OcamlParsedFileWithHashes<'_> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&'a self, alloc: &'a A) -> ocamlrep::Value<'a> {
+        let mut block = alloc.block_with_size(3);
+        alloc.set_field(&mut block, 0, alloc.add(&self.0.mode));
+        alloc.set_field(
+            &mut block,
+            1,
+            alloc.add_copy(Int64(self.0.hash.as_u64() as i64)),
+        );
+        let mut hd = alloc.add(&());
+        for (name, decl, hash) in self.0.decls.iter().rev() {
+            let mut tuple = alloc.block_with_size(3);
+            alloc.set_field(&mut tuple, 0, alloc.add(name));
+            alloc.set_field(&mut tuple, 1, alloc.add(decl));
+            alloc.set_field(&mut tuple, 2, alloc.add_copy(Int64(hash.as_u64() as i64)));
+
+            let mut cons_cell = alloc.block_with_size(2);
+            alloc.set_field(&mut cons_cell, 0, tuple.build());
+            alloc.set_field(&mut cons_cell, 1, hd);
+            hd = cons_cell.build();
+        }
+        alloc.set_field(&mut block, 2, hd);
+        block.build()
+    }
+}
+
 ocaml_ffi_arena_result! {
     fn hh_parse_decls_ffi<'a>(
         arena: &'a Bump,
@@ -39,13 +76,15 @@ ocaml_ffi_arena_result! {
         opts: DeclParserOptions,
         filename: RelativePath,
         text: UnsafeOcamlPtr,
-    ) -> ParsedFileWithHashes<'a> {
+    ) -> OcamlParsedFileWithHashes<'a> {
         // SAFETY: Borrow the contents of the source file from the value on the
         // OCaml heap rather than copying it over. This is safe as long as we
         // don't call into OCaml within this function scope.
         let text_value: ocamlrep::Value<'a> = unsafe { text.as_value() };
         let text = bytes_from_ocamlrep(text_value).expect("expected string");
-        direct_decl_parser::parse_decls_for_typechecking(&opts, filename, text, arena).into()
+        let parsed_file = direct_decl_parser::parse_decls_for_typechecking(&opts, filename, text, arena);
+        let with_hashes = ParsedFileWithHashes::from(parsed_file);
+        with_hashes.into()
     }
 }
 
@@ -87,6 +126,7 @@ unsafe extern "C" fn hh_parse_ast_and_decls_ffi(env: usize, source_text: usize) 
         let arena = &Bump::new();
         let (ast_result, decls) = ast_and_decl_parser::from_text(&env, &indexed_source_text, arena);
         let decls = ParsedFileWithHashes::from(decls);
+        let decls = OcamlParsedFileWithHashes::from(decls);
         // SAFETY: Requires no concurrent interaction with the OCaml runtime
         unsafe { to_ocaml(&(ast_result, decls)) }
     }

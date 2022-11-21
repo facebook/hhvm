@@ -21,7 +21,6 @@ use ocamlrep_ocamlpool::Bump;
 use oxidized::file_info;
 use oxidized::global_options::GlobalOptions;
 use oxidized::naming_types;
-use oxidized_by_ref::direct_decl_parser;
 use oxidized_by_ref::shallow_decl_defs;
 use pos::RelativePath;
 use pos::RelativePathCtx;
@@ -146,7 +145,7 @@ ocaml_ffi_with_arena! {
         backend: UnsafeOcamlPtr,
         path: RelativePath,
         text: UnsafeOcamlPtr,
-    ) -> direct_decl_parser::ParsedFileWithHashes<'a> {
+    ) -> rust_decl_ffi::OcamlParsedFileWithHashes<'a> {
         let backend = unsafe { get_backend(backend) };
         let backend = match backend.as_hh_server_backend() {
             Some(backend) => backend,
@@ -157,7 +156,7 @@ ocaml_ffi_with_arena! {
         // don't call into OCaml within this function scope.
         let text_value: ocamlrep::Value<'a> = unsafe { text.as_value() };
         let text = ocamlrep::bytes_from_ocamlrep(text_value).expect("expected string");
-        backend.parse_and_cache_decls(path, text, arena).unwrap()
+        backend.parse_and_cache_decls(path, text, arena).unwrap().into()
     }
 
     fn hh_rust_provider_backend_add_shallow_decls<'a>(

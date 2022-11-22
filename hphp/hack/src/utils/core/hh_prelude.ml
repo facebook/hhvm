@@ -55,3 +55,4 @@ let ( = ) : int -> int -> bool = Int.equal
 let ( <> ) (x : int) (y : int) = not (Int.equal x y)
 
 module Unix = Caml_unix
+module Sys = Stdlib.Sys

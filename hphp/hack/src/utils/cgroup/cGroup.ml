@@ -8,6 +8,7 @@
 
 open Core_kernel
 module Unix = Caml_unix
+module Sys = Stdlib.Sys
 open Result.Monad_infix
 
 let spf = Printf.sprintf

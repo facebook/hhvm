@@ -1,5 +1,5 @@
 module List = struct
-  include Core_kernel.List
+  include Core.List
 
   let unzip4 xyzws =
     let rec aux ((xs, ys, zs, ws) as acc) = function
@@ -270,7 +270,7 @@ module List = struct
 end
 
 module Result = struct
-  include Core_kernel.Result
+  include Core.Result
 
   let fold t ~ok ~error =
     match t with

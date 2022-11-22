@@ -692,7 +692,7 @@ let pessimize_enabled pos pessimize_coefficient =
     let range = 2000000 in
     let filename = Relative_path.suffix path in
     let hash = Hashtbl.hash filename in
-    let r = hash % range in
+    let r = Int.( % ) hash range in
     Float.of_int r /. Float.of_int range <= pessimize_coefficient
   | _ -> Float.equal pessimize_coefficient 1.0
 

@@ -95,7 +95,7 @@ let test_exception_in_future_continuation () =
     | Ok _result -> failwith "Expected a failure"
     | Error error ->
       Asserter.String_asserter.assert_equals
-        "Continuation_raised((Failure \"Does it fire?\"))"
+        "Continuation_raised(Failure(\"Does it fire?\"))"
         (Future.error_to_string error)
         "expecting the correct error"
   in
@@ -128,7 +128,7 @@ let test_of_error () =
     | Ok _result -> failwith "Expected a failure"
     | Error error ->
       Asserter.String_asserter.assert_equals
-        "Continuation_raised((Failure \"Does it fail?\"))"
+        "Continuation_raised(Failure(\"Does it fail?\"))"
         (Future.error_to_string error)
         "expecting the correct error"
   in

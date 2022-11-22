@@ -6,6 +6,7 @@
  *)
 
 open Core_kernel
+module Sys = Stdlib.Sys
 open Result.Monad_infix
 
 let spf = Printf.sprintf

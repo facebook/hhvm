@@ -7,6 +7,7 @@
  *)
 
 open Core_kernel
+module Sys = Stdlib.Sys
 open Printf
 open Reordered_argument_collections
 open Utils

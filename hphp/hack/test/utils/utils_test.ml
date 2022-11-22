@@ -104,7 +104,7 @@ let test_telemetry_test () =
   assert_throws
     (Telemetry_test_utils.int_exn telemetry)
     "e"
-    "Assert_failure"
+    "Assertion failed"
     "int_exn e should throw";
   assert_throws
     (Telemetry_test_utils.int_exn telemetry)
@@ -118,7 +118,7 @@ let test_telemetry_test () =
   assert_throws
     (Telemetry_test_utils.int_exn telemetry)
     "e.b"
-    "Assert_failure"
+    "Assertion failed"
     "int_exn e.b should throw";
   assert_throws
     (Telemetry_test_utils.int_exn telemetry)

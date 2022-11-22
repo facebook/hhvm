@@ -44,7 +44,7 @@ module Constants = struct
 
   let no_errors : Errors.t = Errors.from_file_error_list []
 
-  let no_errors_absolute = SMap.empty
+  (* let no_errors_absolute = SMap.empty *)
 
   let one_error file error : Errors.t =
     Errors.from_file_error_list [(file, error)]

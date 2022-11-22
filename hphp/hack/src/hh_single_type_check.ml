@@ -15,8 +15,6 @@ open Sys_utils
 open Typing_env_types
 module Inf = Typing_inference_env
 module Cls = Decl_provider.Class
-module PS = Full_fidelity_positioned_syntax
-module PositionedTree = Full_fidelity_syntax_tree.WithSyntax (PS)
 
 (*****************************************************************************)
 (* Profiling utilities *)

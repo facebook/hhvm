@@ -146,7 +146,7 @@ let exception_ ~(e : Exception.t) (telemetry : t) : t =
 
 let quick_gc_stat () : t =
   let stat = Gc.quick_stat () in
-  let bytes_per_word = Sys.word_size / 8 in
+  let bytes_per_word = Stdlib.Sys.word_size / 8 in
   let bytes_per_wordf = bytes_per_word |> float_of_int in
   let open Gc.Stat in
   create ()

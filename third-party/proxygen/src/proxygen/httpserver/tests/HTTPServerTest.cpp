@@ -27,6 +27,7 @@
 #include <proxygen/lib/utils/TestUtils.h>
 #include <wangle/acceptor/Acceptor.h>
 #include <wangle/acceptor/ServerSocketConfig.h>
+#include <wangle/client/ssl/SSLSessionCallbacks.h>
 
 using namespace folly;
 using namespace folly::ssl;
@@ -255,13 +256,10 @@ class Cb : public folly::AsyncSocket::ConnectCallback {
   }
   void connectSuccess() noexcept override {
     success = true;
-    reusedSession = sock_->getSSLSessionReused();
-    session = sock_->getSSLSession();
     if (auto cert = sock_->getPeerCertificate()) {
       // keeps this alive until Cb is destroyed, even if sock is closed
       peerCert_ = folly::OpenSSLTransportCertificate::tryExtractX509(cert);
     }
-    sock_->close();
   }
 
   void connectErr(const folly::AsyncSocketException&) noexcept override {
@@ -276,8 +274,6 @@ class Cb : public folly::AsyncSocket::ConnectCallback {
   }
 
   bool success{false};
-  bool reusedSession{false};
-  std::shared_ptr<folly::ssl::SSLSession> session;
   folly::AsyncSSLSocket* sock_{nullptr};
   folly::ssl::X509UniquePtr peerCert_{nullptr};
 };
@@ -503,72 +499,201 @@ TEST(SSL, DisallowInsecureOnSecureServer) {
   EXPECT_EQ(nullptr, response);
 }
 
+constexpr size_t kBufferSize = 4096;
+const std::string kSessionCacheContext{"some random string"};
+
+// A dummy callback to handle session ticket reads. With TLS 1.3, which the
+// resumption tests are configured to use, the session ticket(s) arrives after
+// the handshake is complete. We can use instances of this class to read from
+// the socket, while the corresponding EventBase is looping, and eventually
+// receive the parsed session.
+struct SSLSessionReadCallback
+    : public wangle::SSLSessionCallbacks
+    , public folly::AsyncTransport::ReadCallback {
+  SSLSessionReadCallback() {
+    readBuffer_ = folly::IOBuf::create(kBufferSize);
+  }
+  void setSSLSession(
+      const std::string& /* ignore */,
+      folly::ssl::SSLSessionUniquePtr sessionPtr) noexcept override {
+    session = std::move(sessionPtr);
+    // without a read callback, the event base will stop looping
+    if (socket) {
+      socket->setReadCB(nullptr);
+    }
+  }
+  folly::ssl::SSLSessionUniquePtr getSSLSession(
+      const std::string&) const noexcept override {
+    return nullptr;
+  }
+  bool removeSSLSession(const std::string&) noexcept override {
+    return true;
+  }
+  void readDataAvailable(size_t) noexcept override {
+  }
+  void getReadBuffer(void** buf, size_t* lenReturn) override {
+    *buf = readBuffer_->writableData();
+    *lenReturn = kBufferSize;
+  }
+  void readEOF() noexcept override {
+  }
+  void readErr(const folly::AsyncSocketException&) noexcept override {
+  }
+  folly::AsyncSocket* socket;
+  folly::ssl::SSLSessionUniquePtr session;
+
+ private:
+  std::unique_ptr<folly::IOBuf> readBuffer_;
+};
+
+TEST(SSL, TestResumptionWithTicketsTLS12) {
+  std::unique_ptr<HTTPServer> server;
+
+  std::unique_ptr<ServerThread> st;
+  wangle::TLSTicketKeySeeds seeds;
+  seeds.currentSeeds.push_back(hexlify(std::string(32, 'a')));
+  std::tie(server, st) = setupServer(false, seeds);
+
+  folly::EventBase evb;
+  auto ctx =
+      std::make_shared<SSLContext>(folly::SSLContext::SSLVersion::TLSv1_2);
+  // explicitly disable TLS 1.3
+  ctx->disableTLS13();
+  ctx->setSessionCacheContext(kSessionCacheContext);
+  SSLSessionReadCallback sessionCb;
+  wangle::SSLSessionCallbacks::attachCallbacksToContext(ctx.get(), &sessionCb);
+  folly::AsyncSSLSocket::UniquePtr sock(new folly::AsyncSSLSocket(ctx, &evb));
+  sock->setSessionKey(kSessionCacheContext);
+  Cb cb(sock.get());
+  sock->connect(&cb, server->addresses().front().address, 1000);
+  // In TLS 1.2, the session arrives during the handshake/connect. We don't need
+  // to register a read callback. Once the connect completes, there won't be any
+  // events to process and the loop will exit.
+  evb.loop();
+  ASSERT_TRUE(cb.success);
+  ASSERT_NE(nullptr, sessionCb.session);
+  ASSERT_FALSE(sock->getSSLSessionReused());
+
+  folly::AsyncSSLSocket::UniquePtr sock2(new folly::AsyncSSLSocket(ctx, &evb));
+  auto sslSession = std::move(sessionCb.session);
+  ASSERT_NE(nullptr, sslSession);
+  sock2->setRawSSLSession(std::move(sslSession));
+  Cb cb2(sock2.get());
+  sock2->connect(&cb2, server->addresses().front().address, 1000);
+  evb.loop();
+  ASSERT_TRUE(cb2.success);
+  ASSERT_TRUE(sock2->getSSLSessionReused());
+}
+
 TEST(SSL, TestResumptionWithTickets) {
   std::unique_ptr<HTTPServer> server;
 
   std::unique_ptr<ServerThread> st;
   wangle::TLSTicketKeySeeds seeds;
-  seeds.currentSeeds.push_back(hexlify("hello"));
+  seeds.currentSeeds.push_back(hexlify(std::string(32, 'a')));
   std::tie(server, st) = setupServer(false, seeds);
 
   folly::EventBase evb;
   auto ctx = std::make_shared<SSLContext>();
+  ctx->enableTLS13();
+  ctx->setSessionCacheContext(kSessionCacheContext);
+  SSLSessionReadCallback sessionCb;
+  wangle::SSLSessionCallbacks::attachCallbacksToContext(ctx.get(), &sessionCb);
   folly::AsyncSSLSocket::UniquePtr sock(new folly::AsyncSSLSocket(ctx, &evb));
+  sock->setSessionKey(kSessionCacheContext);
   Cb cb(sock.get());
   sock->connect(&cb, server->addresses().front().address, 1000);
+  // For TLS 1.3, we need the read callback so that we can read the
+  // NewSessionTicket message
+  sock->setReadCB(&sessionCb);
+  // attach the socket so session callback can unregister read callback
+  sessionCb.socket = sock.get();
   evb.loop();
   ASSERT_TRUE(cb.success);
-  ASSERT_NE(nullptr, cb.session.get());
-  ASSERT_FALSE(cb.reusedSession);
+  ASSERT_NE(nullptr, sessionCb.session);
+  ASSERT_FALSE(sock->getSSLSessionReused());
 
   folly::AsyncSSLSocket::UniquePtr sock2(new folly::AsyncSSLSocket(ctx, &evb));
-  sock2->setSSLSession(cb.session);
+  auto sslSession = std::move(sessionCb.session);
+  ASSERT_NE(nullptr, sslSession);
+  sock2->setRawSSLSession(std::move(sslSession));
   Cb cb2(sock2.get());
   sock2->connect(&cb2, server->addresses().front().address, 1000);
   evb.loop();
   ASSERT_TRUE(cb2.success);
-  ASSERT_NE(nullptr, cb2.session.get());
-  ASSERT_TRUE(cb2.reusedSession);
+  ASSERT_TRUE(sock2->getSSLSessionReused());
 }
 
 TEST(SSL, TestResumptionAfterUpdateFails) {
   std::unique_ptr<HTTPServer> server;
   std::unique_ptr<ServerThread> st;
   wangle::TLSTicketKeySeeds seeds;
-  seeds.currentSeeds.push_back(hexlify("hello"));
+  seeds.currentSeeds.push_back(hexlify(std::string(32, 'a')));
   std::tie(server, st) = setupServer(false, seeds);
 
   folly::EventBase evb;
   auto ctx = std::make_shared<SSLContext>();
-  folly::AsyncSSLSocket::UniquePtr sock(new folly::AsyncSSLSocket(ctx, &evb));
-  Cb cb(sock.get());
-  sock->connect(&cb, server->addresses().front().address, 1000);
-  evb.loop();
-  ASSERT_TRUE(cb.success);
-  ASSERT_NE(nullptr, cb.session.get());
-  ASSERT_FALSE(cb.reusedSession);
+  ctx->enableTLS13();
+  ctx->setAdvertisedNextProtocols({"http/1.1"});
+  ctx->setSessionCacheContext(kSessionCacheContext);
+  SSLSessionReadCallback sessionCb;
+  wangle::SSLSessionCallbacks::attachCallbacksToContext(ctx.get(), &sessionCb);
+  {
+    folly::AsyncSSLSocket::UniquePtr sock(new folly::AsyncSSLSocket(ctx, &evb));
+    sock->setSessionKey(kSessionCacheContext);
+    Cb cb(sock.get());
+    sock->connect(&cb, server->addresses().front().address, 1000);
+    // For TLS 1.3, we need the read callback so that we can read the
+    // NewSessionTicket message
+    sock->setReadCB(&sessionCb);
+    // attach the socket so session callback can unregister read callback
+    sessionCb.socket = sock.get();
+    evb.loop();
+    ASSERT_TRUE(cb.success);
+    ASSERT_NE(nullptr, sessionCb.session);
+    ASSERT_FALSE(sock->getSSLSessionReused());
+  }
 
+  // change ticket secrets
   wangle::TLSTicketKeySeeds newSeeds;
-  newSeeds.currentSeeds.push_back(hexlify("goodbyte"));
+  newSeeds.currentSeeds.push_back(hexlify(std::string(32, 'b')));
   server->updateTicketSeeds(newSeeds);
 
-  folly::AsyncSSLSocket::UniquePtr sock2(new folly::AsyncSSLSocket(ctx, &evb));
-  sock2->setSSLSession(cb.session);
-  Cb cb2(sock2.get());
-  sock2->connect(&cb2, server->addresses().front().address, 1000);
-  evb.loop();
-  ASSERT_TRUE(cb2.success);
-  ASSERT_NE(nullptr, cb2.session.get());
-  ASSERT_FALSE(cb2.reusedSession);
+  {
+    // We can't resume with the ticket received during the first connection
+    // because the server has since changed its ticket secrets. We expect this
+    // resumption to fail. We also expect to receive a new session ticket that
+    // we can use to resume a follow up connection.
+    folly::AsyncSSLSocket::UniquePtr sock2(
+        new folly::AsyncSSLSocket(ctx, &evb));
+    sock2->setRawSSLSession(std::move(sessionCb.session));
+    sock2->setSessionKey(kSessionCacheContext);
+    Cb cb2(sock2.get());
+    sock2->connect(&cb2, server->addresses().front().address, 1000);
+    sock2->setReadCB(&sessionCb);
+    // attach the socket so session callback can unregister read callback
+    sessionCb.socket = sock2.get();
+    evb.loop();
+    ASSERT_TRUE(cb2.success);
+    ASSERT_NE(nullptr, sessionCb.session);
+    ASSERT_FALSE(sock2->getSSLSessionReused());
+  }
 
-  folly::AsyncSSLSocket::UniquePtr sock3(new folly::AsyncSSLSocket(ctx, &evb));
-  sock3->setSSLSession(cb2.session);
-  Cb cb3(sock3.get());
-  sock3->connect(&cb3, server->addresses().front().address, 1000);
-  evb.loop();
-  ASSERT_TRUE(cb3.success);
-  ASSERT_NE(nullptr, cb3.session.get());
-  ASSERT_TRUE(cb3.reusedSession);
+  {
+    // 3rd request expected to succeed resumption (against 2nd's ticket)
+    folly::AsyncSSLSocket::UniquePtr sock3(
+        new folly::AsyncSSLSocket(ctx, &evb));
+    sock3->setRawSSLSession(std::move(sessionCb.session));
+    sock3->setSessionKey(kSessionCacheContext);
+    Cb cb3(sock3.get());
+    sock3->connect(&cb3, server->addresses().front().address, 1000);
+    sock3->setReadCB(&sessionCb);
+    // attach the socket so session callback can unregister read callback
+    sessionCb.socket = sock3.get();
+    evb.loop();
+    ASSERT_TRUE(cb3.success);
+    ASSERT_TRUE(sock3->getSSLSessionReused());
+  }
 }
 
 TEST(SSL, TestUpdateTLSCredentials) {

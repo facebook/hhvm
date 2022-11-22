@@ -495,7 +495,7 @@ functor
         else
           0.);
       Measure.sample
-        "(ALL shmem cache hit rate)"
+        "ALL shmem cache hit rate"
         (if hit then
           1.
         else

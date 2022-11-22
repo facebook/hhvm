@@ -100,7 +100,7 @@ impl HhServerProviderBackend {
         ));
 
         let folded_classes_shm = Arc::new(OcamlShmStore::new(
-            "FoldedClasses",
+            "Decl_Class",
             shm_store::Evictability::Evictable,
             shm_store::Compression::default(),
         ));
@@ -785,16 +785,16 @@ impl ShallowStoreWithChanges {
     #[rustfmt::skip]
     fn new(populate_member_heaps: bool) -> Self {
         use shm_store::{Compression, Evictability::{Evictable, NonEvictable}};
-        let classes_shm =        Arc::new(OcamlShmStore::new("Classes", NonEvictable, Compression::default()));
-        let typedefs_shm =       Arc::new(OcamlShmStore::new("Typedefs", Evictable, Compression::default()));
-        let funs_shm =           Arc::new(OcamlShmStore::new("Funs", Evictable, Compression::default()));
-        let consts_shm =         Arc::new(OcamlShmStore::new("Consts", Evictable, Compression::default()));
-        let modules_shm =        Arc::new(OcamlShmStore::new("Modules", Evictable, Compression::default()));
-        let props_shm =          Arc::new(OcamlShmStore::new("Props", Evictable, Compression::default()));
-        let static_props_shm =   Arc::new(OcamlShmStore::new("StaticProps", Evictable, Compression::default()));
-        let methods_shm =        Arc::new(OcamlShmStore::new("Methods", Evictable, Compression::default()));
-        let static_methods_shm = Arc::new(OcamlShmStore::new("StaticMethods", Evictable, Compression::default()));
-        let constructors_shm =   Arc::new(OcamlShmStore::new("Constructors", Evictable, Compression::default()));
+        let classes_shm =        Arc::new(OcamlShmStore::new("Decl_ShallowClass", NonEvictable, Compression::default()));
+        let typedefs_shm =       Arc::new(OcamlShmStore::new("Decl_Typedef", Evictable, Compression::default()));
+        let funs_shm =           Arc::new(OcamlShmStore::new("Decl_Fun", Evictable, Compression::default()));
+        let consts_shm =         Arc::new(OcamlShmStore::new("Decl_GConst", Evictable, Compression::default()));
+        let modules_shm =        Arc::new(OcamlShmStore::new("Decl_Module", Evictable, Compression::default()));
+        let props_shm =          Arc::new(OcamlShmStore::new("Decl_Property", Evictable, Compression::default()));
+        let static_props_shm =   Arc::new(OcamlShmStore::new("Decl_StaticProperty", Evictable, Compression::default()));
+        let methods_shm =        Arc::new(OcamlShmStore::new("Decl_Method", Evictable, Compression::default()));
+        let static_methods_shm = Arc::new(OcamlShmStore::new("Decl_StaticMethod", Evictable, Compression::default()));
+        let constructors_shm =   Arc::new(OcamlShmStore::new("Decl_Constructor", Evictable, Compression::default()));
 
         let classes =        Arc::new(ChangesStore::new(Arc::clone(&classes_shm) as _));
         let typedefs =       Arc::new(ChangesStore::new(Arc::clone(&typedefs_shm) as _));

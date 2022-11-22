@@ -73,6 +73,36 @@ where
         key.hash_key(&mut hasher);
         hasher.finish()
     }
+
+    #[rustfmt::skip]
+    fn log_serialize(&self, size_in_shm: usize) {
+        let size_in_shm = size_in_shm as f64;
+        // shmrs doesn't actually allow us to count the total including
+        // header/padding/alignment. `shmffi` just reuses the `compressed`
+        // number for this stat, so do the same for now.
+        measure::sample((self.prefix, "total bytes including header and padding"), size_in_shm);
+        measure::sample(("ALL bytes", "total bytes including header and padding"), size_in_shm);
+        measure::sample((self.prefix, "bytes serialized into shared heap"), size_in_shm);
+        measure::sample("ALL bytes serialized into shared heap", size_in_shm);
+    }
+
+    #[rustfmt::skip]
+    fn log_deserialize(&self, compressed_size: usize) {
+        measure::sample((self.prefix, "bytes deserialized from shared heap"), compressed_size as f64);
+        measure::sample("ALL bytes deserialized from shared heap", compressed_size as f64);
+    }
+
+    #[rustfmt::skip]
+    fn log_shmem_hit_rate(&self, is_hit: bool) {
+        measure::sample((self.prefix, "shmem cache hit rate"), is_hit as u8 as f64);
+        measure::sample("ALL shmem cache hit rate", is_hit as u8 as f64);
+    }
+
+    #[rustfmt::skip]
+    fn log_cache_hit_rate(&self, is_hit: bool) {
+        measure::sample((self.prefix, "rust cache hit rate"), is_hit as u8 as f64);
+        measure::sample("ALL rust cache hit rate", is_hit as u8 as f64);
+    }
 }
 
 impl<K, V> datastore::Store<K, V> for ShmStore<K, V>
@@ -90,21 +120,23 @@ where
     }
 
     fn get(&self, key: K) -> Result<Option<V>> {
-        if let Some(val) = self.cache.lock().get(&key) {
-            return Ok(Some(val.clone()));
+        let cache_val_opt = self.cache.lock().get(&key).cloned();
+        self.log_cache_hit_rate(cache_val_opt.is_some());
+        if cache_val_opt.is_some() {
+            return Ok(cache_val_opt);
         }
         let hash = self.hash_key(key);
         let val_opt: Option<V> = shmffi::with(|segment| {
             segment
                 .table
                 .get(&hash)
-                .map(|heap_value| match self.compression {
-                    Compression::None => deserialize(heap_value.as_slice()),
-                    Compression::Lz4 { .. } => {
-                        lz4_decompress_and_deserialize(heap_value.as_slice())
-                    }
-                    Compression::Zstd { .. } => {
-                        zstd_decompress_and_deserialize(heap_value.as_slice())
+                .map(|heap_value| {
+                    let bytes = heap_value.as_slice();
+                    self.log_deserialize(bytes.len());
+                    match self.compression {
+                        Compression::None => deserialize(bytes),
+                        Compression::Lz4 { .. } => lz4_decompress_and_deserialize(bytes),
+                        Compression::Zstd { .. } => zstd_decompress_and_deserialize(bytes),
                     }
                 })
                 .transpose()
@@ -112,6 +144,7 @@ where
         if let Some(val) = &val_opt {
             self.cache.lock().put(key, val.clone());
         }
+        self.log_shmem_hit_rate(val_opt.is_some());
         Ok(val_opt)
     }
 
@@ -126,8 +159,9 @@ where
             }
         };
         self.cache.lock().put(key, val);
+        let compressed_size = blob.len();
         let blob = ocaml_blob::SerializedValue::BStr(&blob);
-        let _did_insert = shmffi::with(|segment| {
+        let did_insert = shmffi::with(|segment| {
             segment.table.insert(
                 self.hash_key(key),
                 Some(Layout::from_size_align(blob.as_slice().len(), 1).unwrap()),
@@ -135,6 +169,9 @@ where
                 |buffer| blob.to_heap_value_in(self.evictable, buffer),
             )
         });
+        if did_insert {
+            self.log_serialize(compressed_size);
+        }
         Ok(())
     }
 
@@ -308,6 +345,15 @@ impl Key for hh24_types::ToplevelCanonSymbolHash {
     }
 }
 
+extern "C" {
+    fn hh_log_level() -> ocamlrep::Value<'static>;
+}
+
+fn shm_log_level() -> isize {
+    // SAFETY: We rely on sharedmem having been initialized here.
+    unsafe { hh_log_level() }.as_int().unwrap()
+}
+
 /// A `datastore::Store` which writes its values to sharedmem (via the `shmffi`
 /// crate) as OCaml-marshaled values. Can be configured to compress the
 /// marshaled blobs using `Compression`.
@@ -344,17 +390,21 @@ where
         K: Borrow<[u8]>,
     {
         shmffi::with(|segment| {
-            segment.table.get(&self.hash_key(key)).map(|heap_value| {
+            let v = segment.table.get(&self.hash_key(key)).map(|heap_value| {
                 extern "C" {
                     fn caml_input_value_from_block(data: *const u8, size: usize) -> UnsafeOcamlPtr;
                 }
-                let bytes = self.decompress(heap_value.as_slice()).unwrap();
+                let bytes = heap_value.as_slice();
+                let bytes = self.decompress(bytes).unwrap();
                 caml_input_value_from_block(bytes.as_ptr(), bytes.len())
-            })
+            });
+            self.log_shmem_hit_rate(v.is_some());
+            v
         })
     }
 
     fn decompress<'a>(&self, bytes: &'a [u8]) -> Result<Cow<'a, [u8]>> {
+        self.log_deserialize(bytes.len());
         Ok(match self.compression {
             Compression::None => Cow::Borrowed(bytes),
             Compression::Lz4 { .. } => Cow::Owned(lz4_decompress(bytes)?),
@@ -370,6 +420,55 @@ where
         self.prefix.hash(&mut hasher);
         key.hash_key(&mut hasher);
         hasher.finish()
+    }
+
+    #[rustfmt::skip]
+    fn log_serialize(&self, compressed: usize, original: usize) {
+        if shm_log_level() < 1 {
+            return;
+        }
+        let compressed = compressed as f64;
+        let original = original as f64;
+        let saved = original - compressed;
+        let ratio = compressed / original;
+        // shmrs doesn't actually allow us to count the total including
+        // header/padding/alignment. `shmffi` just reuses the `compressed`
+        // number for this stat, so do the same for now.
+        measure::sample((self.prefix, "total bytes including header and padding"), compressed);
+        measure::sample(("ALL bytes", "total bytes including header and padding"), compressed);
+        measure::sample((self.prefix, "bytes serialized into shared heap"), compressed);
+        measure::sample("ALL bytes serialized into shared heap", compressed);
+        measure::sample((self.prefix, "bytes saved in shared heap due to compression"), saved);
+        measure::sample("ALL bytes saved in shared heap due to compression", saved);
+        measure::sample((self.prefix, "shared heap compression ratio"), ratio);
+        measure::sample("ALL bytes shared heap compression ratio", ratio);
+    }
+
+    #[rustfmt::skip]
+    fn log_deserialize(&self, compressed_size: usize) {
+        if shm_log_level() < 1 {
+            return;
+        }
+        measure::sample((self.prefix, "bytes deserialized from shared heap"), compressed_size as f64);
+        measure::sample("ALL bytes deserialized from shared heap", compressed_size as f64);
+    }
+
+    #[rustfmt::skip]
+    fn log_shmem_hit_rate(&self, is_hit: bool) {
+        if shm_log_level() < 1 {
+            return;
+        }
+        measure::sample((self.prefix, "shmem cache hit rate"), is_hit as u8 as f64);
+        measure::sample("ALL shmem cache hit rate", is_hit as u8 as f64);
+    }
+
+    #[rustfmt::skip]
+    fn log_cache_hit_rate(&self, is_hit: bool) {
+        if shm_log_level() < 1 {
+            return;
+        }
+        measure::sample((self.prefix, "rust cache hit rate"), is_hit as u8 as f64);
+        measure::sample("ALL rust cache hit rate", is_hit as u8 as f64);
     }
 }
 
@@ -388,8 +487,10 @@ where
     }
 
     fn get(&self, key: K) -> Result<Option<V>> {
-        if let Some(val) = self.cache.lock().get(&key) {
-            return Ok(Some(val.clone()));
+        let cache_val_opt = self.cache.lock().get(&key).cloned();
+        self.log_cache_hit_rate(cache_val_opt.is_some());
+        if cache_val_opt.is_some() {
+            return Ok(cache_val_opt);
         }
         let hash = self.hash_key(&key);
         let val_opt: Option<V> = shmffi::with(|segment| {
@@ -407,6 +508,7 @@ where
         if let Some(val) = &val_opt {
             self.cache.lock().put(key, val.clone());
         }
+        self.log_shmem_hit_rate(val_opt.is_some());
         Ok(val_opt)
     }
 
@@ -420,14 +522,16 @@ where
             ocamlrep_marshal::ExternFlags::empty(),
         )?;
         let bytes = bytes.into_inner();
+        let uncompressed_size = bytes.len();
         let bytes = match self.compression {
             Compression::None => bytes,
             Compression::Lz4 { compression_level } => lz4_compress(&bytes, compression_level)?,
             Compression::Zstd { compression_level } => zstd_compress(&bytes, compression_level)?,
         };
+        let compressed_size = bytes.len();
         self.cache.lock().put(key, val);
         let blob = ocaml_blob::SerializedValue::BStr(&bytes);
-        let _did_insert = shmffi::with(|segment| {
+        let did_insert = shmffi::with(|segment| {
             segment.table.insert(
                 self.hash_key(&key),
                 Some(Layout::from_size_align(blob.as_slice().len(), 1).unwrap()),
@@ -435,6 +539,9 @@ where
                 |buffer| blob.to_heap_value_in(self.evictable, buffer),
             )
         });
+        if did_insert {
+            self.log_serialize(compressed_size, uncompressed_size);
+        }
         Ok(())
     }
 

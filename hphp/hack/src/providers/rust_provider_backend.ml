@@ -85,9 +85,22 @@ module Decl = struct
 
     let clear_cache = Cache.clear
 
+    let log_hit_rate ~hit =
+      let hit =
+        if hit then
+          1.
+        else
+          0.
+      in
+      Measure.sample (Value.description ^ " (ffi cache hit rate)") hit;
+      Measure.sample "ALL ffi cache hit rate" hit
+
     let get t key =
-      match Cache.get key with
-      | Some _ as value_opt -> value_opt
+      let v = Cache.get key in
+      if SharedMem.SMTelemetry.hh_log_level () > 0 then
+        log_hit_rate ~hit:(Option.is_some v);
+      match v with
+      | Some _ -> v
       | None ->
         let value_opt = Ffi.get t key in
         (match value_opt with
@@ -115,7 +128,7 @@ module Decl = struct
       (struct
         type t = Shallow_decl_defs.fun_decl
 
-        let description = "Rust_Decl_Fun"
+        let description = "Decl_Fun"
       end)
       (struct
         external get : t -> string -> Shallow_decl_defs.fun_decl option
@@ -137,7 +150,7 @@ module Decl = struct
       (struct
         type t = Shallow_decl_defs.class_decl
 
-        let description = "Rust_Decl_ShallowClass"
+        let description = "Decl_ShallowClass"
       end)
       (struct
         external get : t -> string -> Shallow_decl_defs.class_decl option
@@ -159,7 +172,7 @@ module Decl = struct
       (struct
         type t = Shallow_decl_defs.typedef_decl
 
-        let description = "Rust_Decl_Typedef"
+        let description = "Decl_Typedef"
       end)
       (struct
         external get : t -> string -> Shallow_decl_defs.typedef_decl option
@@ -181,7 +194,7 @@ module Decl = struct
       (struct
         type t = Shallow_decl_defs.const_decl
 
-        let description = "Rust_Decl_GConst"
+        let description = "Decl_GConst"
       end)
       (struct
         external get : t -> string -> Shallow_decl_defs.const_decl option
@@ -203,7 +216,7 @@ module Decl = struct
       (struct
         type t = Shallow_decl_defs.module_decl
 
-        let description = "Rust_Decl_Module"
+        let description = "Decl_Module"
       end)
       (struct
         external get : t -> string -> Shallow_decl_defs.module_decl option
@@ -238,7 +251,7 @@ module Decl = struct
       (struct
         type t = Typing_defs.decl_ty
 
-        let description = "Rust_Decl_Prop"
+        let description = "Decl_Property"
       end)
       (struct
         external get : t -> string * string -> Typing_defs.decl_ty option
@@ -260,7 +273,7 @@ module Decl = struct
       (struct
         type t = Typing_defs.decl_ty
 
-        let description = "Rust_Decl_StaticProp"
+        let description = "Decl_StaticProperty"
       end)
       (struct
         external get : t -> string * string -> Typing_defs.decl_ty option
@@ -294,7 +307,7 @@ module Decl = struct
       (struct
         type t = Typing_defs.fun_elt
 
-        let description = "Rust_Decl_Method"
+        let description = "Decl_Method"
       end)
       (struct
         external get_ffi : t -> string * string -> Typing_defs.decl_ty option
@@ -318,7 +331,7 @@ module Decl = struct
       (struct
         type t = Typing_defs.fun_elt
 
-        let description = "Rust_Decl_StaticMethod"
+        let description = "Decl_StaticMethod"
       end)
       (struct
         external get_ffi : t -> string * string -> Typing_defs.decl_ty option
@@ -342,7 +355,7 @@ module Decl = struct
       (struct
         type t = Typing_defs.fun_elt
 
-        let description = "Rust_Decl_Constructor"
+        let description = "Decl_Constructor"
       end)
       (struct
         external get_ffi : t -> string -> Typing_defs.decl_ty option
@@ -366,7 +379,7 @@ module Decl = struct
       (struct
         type t = Decl_defs.decl_class_type
 
-        let description = "Rust_Decl_FoldedClass"
+        let description = "Decl_Class"
       end)
       (struct
         external get : t -> string -> Decl_defs.decl_class_type option

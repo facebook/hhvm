@@ -44,13 +44,17 @@ impl NamingTable {
         Ok(Self {
             types: ReverseNamingTable::new(
                 Arc::new(TypeDb(Arc::clone(&db))),
-                "TypePos",
-                "TypeCanon",
+                "Naming_TypePos",
+                "Naming_TypeCanon",
             ),
-            funs: ReverseNamingTable::new(Arc::new(FunDb(Arc::clone(&db))), "FunPos", "FunCanon"),
+            funs: ReverseNamingTable::new(
+                Arc::new(FunDb(Arc::clone(&db))),
+                "Naming_FunPos",
+                "Naming_FunCanon",
+            ),
             consts: ChangesStore::new(Arc::new(DeltaStore::new(
                 Arc::new(ShmStore::new(
-                    "ConstPos",
+                    "Naming_ConstPos",
                     shm_store::Evictability::NonEvictable,
                     shm_store::Compression::None,
                 )),
@@ -58,7 +62,7 @@ impl NamingTable {
             ))),
             modules: ChangesStore::new(Arc::new(DeltaStore::new(
                 Arc::new(ShmStore::new(
-                    "ModulePos",
+                    "Naming_ModulePos",
                     shm_store::Evictability::NonEvictable,
                     shm_store::Compression::None,
                 )),

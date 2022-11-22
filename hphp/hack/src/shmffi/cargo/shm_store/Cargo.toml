@@ -19,6 +19,7 @@ hh24_types = { path = "../../../utils/hh24_types" }
 intern = { path = "../../../utils/intern" }
 lru = "0.7.0"
 lz4 = "1.23.1"
+measure = { path = "../../../utils/rust/measure" }
 ocaml_blob = { path = "../ocaml_blob" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_marshal = { path = "../../../ocamlrep_marshal/cargo/ocamlrep_marshal" }

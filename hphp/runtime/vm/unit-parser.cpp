@@ -197,78 +197,64 @@ CompilerResult hackc_compile(
     }
   }
 
-  // Invoke hackc, producing a rust Vec<u8> containing HHAS.
-  rust::Vec<uint8_t> hhas_vec = [&] {
-    tracing::Block _{
-      "hackc",
-      [&] {
-        return tracing::Props{}
-          .add("filename", filename ? filename : "")
-          .add("code_size", strlen(code));
-      }
-    };
-    return hackc::compile_from_text_cpp_ffi(native_env, code);
-  }();
-  auto const hhas = std::string(hhas_vec.begin(), hhas_vec.end());
-
-  // Assemble HHAS into a UnitEmitter, or a std::string if there were errors.
-  auto res = assemble_string_handle_errors(code,
-                                           hhas,
-                                           filename,
-                                           sha1,
-                                           nativeFuncs,
-                                           internal_error,
-                                           mode);
-
-  if (RO::EvalTranslateHackC) {
+  auto const fromHackCUnit = [&]() -> CompilerResult {
     auto const unit_wrapped =
       hackc::compile_unit_from_text_cpp_ffi(native_env, code);
 
     auto const bcSha1 = SHA1(hash_unit(*unit_wrapped));
-    auto const assemblerOut = [&]() -> std::string {
+    const hackc::hhbc::Unit* unit = hackCUnitRaw(unit_wrapped);
+    auto hackCResult = unitEmitterFromHackCUnitHandleErrors
+      (*unit, filename, sha1, bcSha1, nativeFuncs, internal_error, mode
+    );
+    return hackCResult;
+  };
+
+  auto const fromHhas = [&]() -> CompilerResult {
+    // Invoke hackc, producing a rust Vec<u8> containing HHAS.
+    rust::Vec<uint8_t> hhas_vec = [&] {
+      tracing::Block _{
+        "hackc",
+        [&] {
+          return tracing::Props{}
+            .add("filename", filename ? filename : "")
+            .add("code_size", strlen(code));
+        }
+      };
+      return hackc::compile_from_text_cpp_ffi(native_env, code);
+    }();
+    auto const hhas = std::string(hhas_vec.begin(), hhas_vec.end());
+
+    // Assemble HHAS into a UnitEmitter, or a std::string if there were errors.
+    auto res = assemble_string_handle_errors(code,
+                                            hhas,
+                                            filename,
+                                            sha1,
+                                            nativeFuncs,
+                                            internal_error,
+                                            mode);
+    return res;
+  };
+
+  if (RO::EvalVerifyTranslateHackC) {
+    auto const disassembleResult = [](CompilerResult& res) -> std::string {
       if (auto ue = boost::get<std::unique_ptr<UnitEmitter>>(&res)) {
         (*ue)->finish();
         return disassemble((*ue)->create().get());
       }
       return boost::get<std::string>(res);
-    }();
-
-    const hackc::hhbc::Unit* unit = hackCUnitRaw(unit_wrapped);
-    auto hackCResult = unitEmitterFromHackCUnitHandleErrors
-      (*unit, filename, sha1, bcSha1, nativeFuncs, internal_error, mode
-    );
-
-    auto const hackCTranslatorOut = [&]() -> std::string {
-      if (auto ue = boost::get<std::unique_ptr<UnitEmitter>>(&hackCResult)) {
-        (*ue)->finish();
-        return disassemble((*ue)->create().get());
-      }
-      return boost::get<std::string>(hackCResult);
-    }();
-
-    UNUSED auto start_of_line = 0;
-    for(int i = 0; i < hackCTranslatorOut.length(); i++) {
-      if (hackCTranslatorOut[i] == '\n' || assemblerOut[i] == '\n') {
-        start_of_line = i;
-      }
-      if (hackCTranslatorOut[i] != assemblerOut[i]) {
-        while (i < hackCTranslatorOut.length() &&
-                hackCTranslatorOut[i] != '\n' && assemblerOut[i] != '\n') {
-          i++;
-        }
-        Logger::FError("HackC Translator incorrect: {}\n", filename);
-        ITRACE(3, "HackC Translator: {}\n\nassembler: {}\n\n",
-          hackCTranslatorOut.substr(start_of_line,i),
-          assemblerOut.substr(start_of_line,i)
-        );
-        ITRACE(4, "HackC Translator:\n{}\n", hackCTranslatorOut);
-        ITRACE(4, "assembler:\n{}\n", assemblerOut);
-        break;
-      }
-    }
-    return hackCResult;
+    };
+    auto assemblerResult =  fromHhas();
+    auto hackCTranslatorResult = fromHackCUnit();
+    auto const assemblerOut = disassembleResult(assemblerResult);
+    auto const hackCTranslatorOut = disassembleResult(hackCTranslatorResult);
+    always_assert(hackCTranslatorOut == assemblerOut);
+    return hackCTranslatorResult;
   }
-  return res;
+  if (RO::EvalTranslateHackC){
+    return fromHackCUnit();
+  } else {
+    return fromHhas();
+  }
 }
 
 /// A simple UnitCompiler that invokes hackc in-process.

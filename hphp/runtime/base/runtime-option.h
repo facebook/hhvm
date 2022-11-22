@@ -837,6 +837,7 @@ struct RuntimeOption {
   F(bool, MemInfoCheckCgroup2,         true)                            \
   F(bool, AllowScopeBinding,           false)                           \
   F(bool, TranslateHackC,              false)                           \
+  F(bool, VerifyTranslateHackC,        false)                           \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \

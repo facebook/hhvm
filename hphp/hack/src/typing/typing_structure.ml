@@ -100,7 +100,11 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
           in
           let (env, sft_ty) = Env.expand_type env sft_ty in
           let (supportdyn, ty) = TUtils.strip_supportdyn ty in
-          let base_type = TUtils.get_base_type env ty in
+          let base_type =
+            TUtils.get_base_type ~expand_supportdyn:false env ty
+          in
+          let (supportdyn2, base_type) = TUtils.strip_supportdyn base_type in
+          let supportdyn = supportdyn || supportdyn2 in
           match (field, deref sft_ty, deref base_type) with
           | (TSFlit_str (_, "nullable"), (_, Toption fty), _) when nullable ->
             (env, acc_field_with_type fty)

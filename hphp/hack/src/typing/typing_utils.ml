@@ -508,14 +508,20 @@ let run_on_intersection_array_key_value_res env ~f tyl =
   (env, res, arr_errs, key_errs, val_errs)
 
 (* Gets the base type of an abstract type *)
-let rec get_base_type env ty =
+let rec get_base_type ?(expand_supportdyn = true) env ty =
+  let get_base_type = get_base_type ~expand_supportdyn in
   let (env, ty) = Env.expand_type env ty in
+  let r = get_reason ty in
   match get_node ty with
   | Tnewtype (classname, _, _) when String.equal classname SN.Classes.cClassname
     ->
     ty
   | Tnewtype (n, _, ty) when String.equal n SN.Classes.cSupportDyn ->
-    get_base_type env ty
+    let ty = get_base_type env ty in
+    if expand_supportdyn then
+      ty
+    else
+      MakeType.supportdyn r ty
   (* If we have an expression dependent type and it only has one super
      type, we can treat it similarly to AKdependent _, Some ty *)
   | Tgeneric (n, targs) when DependentKind.is_generic_dep_ty n ->
@@ -537,7 +543,7 @@ let rec get_base_type env ty =
   | Tnewtype _
   | Tdependent _ ->
     let (_env, tys) =
-      get_concrete_supertypes ~expand_supportdyn:true ~abstract_enum:true env ty
+      get_concrete_supertypes ~expand_supportdyn ~abstract_enum:true env ty
     in
     (match tys with
     | [ty] -> get_base_type env ty

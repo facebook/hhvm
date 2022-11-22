@@ -197,7 +197,10 @@ val is_tintersection : Typing_env_types.env -> Typing_defs.locl_ty -> bool
 val is_tyvar : Typing_env_types.env -> Typing_defs.locl_ty -> bool
 
 val get_base_type :
-  Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty
+  ?expand_supportdyn:bool ->
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_defs.locl_ty
 
 val get_printable_shape_field_name : Typing_defs.tshape_field_name -> string
 

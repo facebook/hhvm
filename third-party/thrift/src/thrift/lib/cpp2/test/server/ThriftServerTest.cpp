@@ -1774,7 +1774,7 @@ TEST_P(HeaderOrRocket, ConnectionIdleTimeoutTestSSL) {
   std::this_thread::sleep_for(10ms);
   // succeeds because connection is still a live
   EXPECT_NO_THROW(client->sync_sendResponse(response, 200));
-  std::this_thread::sleep_for(200ms);
+  std::this_thread::sleep_for(800ms);
   // throws an exception because connection is dropped
   EXPECT_THROW(client->sync_sendResponse(response, 200), TTransportException);
 }

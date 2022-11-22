@@ -127,7 +127,7 @@ impl UnstableFeatures {
             UnstableFeatures::MethodTraitDiamond => OngoingRelease,
             UnstableFeatures::UpcastExpression => Unstable,
             UnstableFeatures::RequireClass => Preview,
-            UnstableFeatures::EnumClassTypeConstants => Unstable,
+            UnstableFeatures::EnumClassTypeConstants => Preview,
             UnstableFeatures::NewtypeSuperBounds => Unstable,
         }
     }

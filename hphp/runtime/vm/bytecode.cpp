@@ -1271,7 +1271,7 @@ OPTBLD_INLINE void iopClsCns(const StringData* clsCnsName) {
 
 OPTBLD_INLINE void iopClsCnsD(const StringData* clsCnsName, Id classId) {
   const NamedEntityPair& classNamedEntity =
-    vmfp()->func()->unit()->lookupNamedTypePairId(classId);
+    vmfp()->func()->unit()->lookupNamedEntityPairId(classId);
   auto const clsCns = g_context->lookupClsCns(classNamedEntity.second,
                                        classNamedEntity.first, clsCnsName);
   auto const c1 = vmStack().allocC();
@@ -1526,7 +1526,7 @@ OPTBLD_INLINE void iopDblAsBits() {
 
 ALWAYS_INLINE
 bool implInstanceOfHelper(const StringData* str1, TypedValue* c2) {
-  const NamedEntity* rhs = NamedEntity::getType(str1, false);
+  const NamedEntity* rhs = NamedEntity::get(str1, false);
   // Because of other codepaths, an un-normalized name might enter the
   // table without a Class* so we need to check if it's there.
   if (LIKELY(rhs && rhs->getCachedClass() != nullptr)) {
@@ -1558,7 +1558,7 @@ OPTBLD_INLINE void iopInstanceOf() {
 }
 
 OPTBLD_INLINE void iopInstanceOfD(Id id) {
-  const NamedEntity* ne = vmfp()->func()->unit()->lookupNamedTypeId(id);
+  const NamedEntity* ne = vmfp()->func()->unit()->lookupNamedEntityId(id);
   TypedValue* c1 = vmStack().topC();
   bool r = tvInstanceOf(c1, ne);
   vmStack().replaceC<KindOfBoolean>(r);
@@ -2203,7 +2203,7 @@ OPTBLD_INLINE void iopClassGetTS() {
     auto const mangledTypeName =
       makeStaticString(mangleReifiedGenericsName(reified_types));
     reified_types->incRefCount();
-    reified_types = addToTypeReifiedGenericsTable(mangledTypeName, reified_types);
+    reified_types = addToReifiedGenericsTable(mangledTypeName, reified_types);
   }
   auto const cls = Class::load(name);
   if (cls == nullptr) {
@@ -3703,7 +3703,7 @@ OPTBLD_INLINE JitResumeAddr fcallFuncRClsMeth(bool retToJit, PC origpc, PC& pc,
 
 Func* resolveFuncImpl(Id id) {
   auto unit = vmfp()->func()->unit();
-  auto const nep = unit->lookupNamedFuncPairId(id);
+  auto const nep = unit->lookupNamedEntityPairId(id);
   auto func = Func::resolve(nep.second, nep.first, vmfp()->func());
   if (func) return func;
   raise_resolve_func_undefined(unit->lookupLitstrId(id));
@@ -3716,7 +3716,7 @@ OPTBLD_INLINE void iopResolveFunc(Id id) {
 
 OPTBLD_INLINE void iopResolveMethCaller(Id id) {
   auto unit = vmfp()->func()->unit();
-  auto const nep = unit->lookupNamedFuncPairId(id);
+  auto const nep = unit->lookupNamedEntityPairId(id);
   auto func = Func::resolve(nep.second, nep.first, vmfp()->func());
   assertx(func && func->isMethCaller());
   checkMethCaller(func, arGetContextClass(vmfp()));
@@ -3771,7 +3771,7 @@ OPTBLD_INLINE JitResumeAddr iopFCallFunc(bool retToJit, PC origpc, PC& pc,
 
 OPTBLD_INLINE JitResumeAddr iopFCallFuncD(bool retToJit, PC origpc, PC& pc,
                                           FCallArgs fca, Id id) {
-  auto const nep = vmfp()->unit()->lookupNamedFuncPairId(id);
+  auto const nep = vmfp()->unit()->lookupNamedEntityPairId(id);
   auto const func = Func::resolve(nep.second, nep.first, vmfp()->func());
   if (UNLIKELY(func == nullptr)) {
     raise_call_to_undefined(vmfp()->unit()->lookupLitstrId(id));
@@ -3981,7 +3981,7 @@ OPTBLD_INLINE void iopResolveClsMethod(const StringData* methName) {
 
 OPTBLD_INLINE void iopResolveClsMethodD(Id classId,
                                         const StringData* methName) {
-  auto const nep = vmfp()->func()->unit()->lookupNamedTypePairId(classId);
+  auto const nep = vmfp()->func()->unit()->lookupNamedEntityPairId(classId);
   auto cls = Class::resolve(nep.second, nep.first, vmfp()->func());
   if (UNLIKELY(cls == nullptr)) {
     raise_error("Failure to resolve class name \'%s\'", nep.first->data());
@@ -4034,7 +4034,7 @@ OPTBLD_INLINE void iopResolveRClsMethod(const StringData* methName) {
 
 OPTBLD_INLINE void iopResolveRClsMethodD(Id classId,
                                          const StringData* methName) {
-  auto const nep = vmfp()->func()->unit()->lookupNamedTypePairId(classId);
+  auto const nep = vmfp()->func()->unit()->lookupNamedEntityPairId(classId);
   auto cls = Class::resolve(nep.second, nep.first, vmfp()->func());
   if (UNLIKELY(cls == nullptr)) {
     raise_error("Failure to resolve class name \'%s\'", nep.first->data());
@@ -4159,7 +4159,7 @@ OPTBLD_INLINE JitResumeAddr
 iopFCallClsMethodD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
                    Id classId, const StringData* methName) {
   const NamedEntityPair &nep =
-    vmfp()->func()->unit()->lookupNamedTypePairId(classId);
+    vmfp()->func()->unit()->lookupNamedEntityPairId(classId);
   Class* cls = Class::resolve(nep.second, nep.first, vmfp()->func());
   if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, nep.first->data());
@@ -4227,7 +4227,7 @@ OPTBLD_INLINE void iopNewObj() {
 
 OPTBLD_INLINE void iopNewObjD(Id id) {
   const NamedEntityPair &nep =
-    vmfp()->func()->unit()->lookupNamedTypePairId(id);
+    vmfp()->func()->unit()->lookupNamedEntityPairId(id);
   auto cls = Class::resolve(nep.second, nep.first, vmfp()->func());
   if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS,

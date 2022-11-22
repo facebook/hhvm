@@ -297,7 +297,7 @@ void Func::setFullName(int /*numParams*/) {
     // `methodSlot', which refers to its slot in its `baseCls' (which still
     // points to a subclass of Closure).
     if (!isMethod()) {
-      setNamedEntity(NamedEntity::getFunc(m_name));
+      setNamedEntity(NamedEntity::get(m_name));
     }
   }
 }
@@ -832,7 +832,7 @@ Func* Func::lookup(const NamedEntity* ne) {
 }
 
 Func* Func::lookup(const StringData* name) {
-  const NamedEntity* ne = NamedEntity::getFunc(name);
+  const NamedEntity* ne = NamedEntity::get(name);
   return ne->getCachedFunc();
 }
 
@@ -841,7 +841,7 @@ Func* Func::lookupBuiltin(const StringData* name) {
   // beginning of every request (if JitEnableRenameFunction or interception is
   // enabled). In either case, they're unique, so they should be present in the
   // NamedEntity.
-  auto const ne = NamedEntity::getFunc(name);
+  auto const ne = NamedEntity::get(name);
   auto const f = ne->getCachedFunc();
   return (f && f->isUnique() && f->isBuiltin()) ? f : nullptr;
 }
@@ -858,7 +858,7 @@ Func* Func::load(const NamedEntity* ne, const StringData* name) {
 
 Func* Func::load(const StringData* name) {
   String normStr;
-  auto ne = NamedEntity::getFunc(name, true, &normStr);
+  auto ne = NamedEntity::get(name, true, &normStr);
 
   // Try to fetch from cache
   Func* func_ = ne->getCachedFunc();

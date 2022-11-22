@@ -601,7 +601,7 @@ ArrayData* errorOnIsAsExpressionInvalidTypesHelper(ArrayData* a) {
 
 ArrayData* recordReifiedGenericsAndGetTSList(ArrayData* tsList) {
   auto const mangledName = makeStaticString(mangleReifiedGenericsName(tsList));
-  auto result = addToTypeReifiedGenericsTable(mangledName, tsList);
+  auto result = addToReifiedGenericsTable(mangledName, tsList);
   return result;
 }
 

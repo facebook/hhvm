@@ -73,8 +73,7 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
 std::string show(const RepoGlobalData& gd) {
   std::string out;
 #define SHOW(x) folly::format(&out, "  {}: {}\n", #x, gd.x)
-  SHOW(InitialTypeTableSize);
-  SHOW(InitialFuncTableSize);
+  SHOW(InitialNamedEntityTableSize);
   SHOW(InitialStaticStringTableSize);
   SHOW(CheckPropTypeHints);
   SHOW(HardGenericsUB);

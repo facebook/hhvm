@@ -72,9 +72,9 @@ void TypeConstraint::init() {
     m_type = Type::Unresolved;
   }
   if (isObject()) {
-    m_namedEntity = NamedEntity::getType(m_clsName);
+    m_namedEntity = NamedEntity::get(m_clsName);
   } else if (isUnresolved()) {
-    m_namedEntity = NamedEntity::getType(m_typeName);
+    m_namedEntity = NamedEntity::get(m_typeName);
   }
   TRACE(5, "TypeConstraint: this %p NamedEntity: %p\n",
         this, m_namedEntity.get());

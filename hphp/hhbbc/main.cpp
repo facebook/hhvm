@@ -261,8 +261,8 @@ RepoGlobalData get_global_data() {
     RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;
   gd.HackArrCompatSerializeNotices =
     RuntimeOption::EvalHackArrCompatSerializeNotices;
-  gd.InitialTypeTableSize = RuntimeOption::EvalInitialTypeTableSize;
-  gd.InitialFuncTableSize = RuntimeOption::EvalInitialFuncTableSize;
+  gd.InitialNamedEntityTableSize  =
+    RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =
     RuntimeOption::EvalInitialStaticStringTableSize;
   gd.EmitClsMethPointers = RuntimeOption::EvalEmitClsMethPointers;
@@ -612,11 +612,8 @@ void process_init(const Options& o,
 
   // These need to be set before RO::Load, because it triggers the
   // table resizing.
-  if (gd.InitialTypeTableSize) {
-    RO::EvalInitialTypeTableSize  = gd.InitialTypeTableSize;
-  }
-  if (gd.InitialFuncTableSize) {
-    RO::EvalInitialFuncTableSize  = gd.InitialFuncTableSize;
+  if (gd.InitialNamedEntityTableSize) {
+    RO::EvalInitialNamedEntityTableSize = gd.InitialNamedEntityTableSize;
   }
   if (gd.InitialStaticStringTableSize) {
     RO::EvalInitialStaticStringTableSize = gd.InitialStaticStringTableSize;

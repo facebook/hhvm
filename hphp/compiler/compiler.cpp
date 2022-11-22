@@ -452,10 +452,8 @@ RepoGlobalData getGlobalData() {
   gd.EnableArgsInBacktraces      = RuntimeOption::EnableArgsInBacktraces;
   gd.NoticeOnBuiltinDynamicCalls =
     RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;
-  gd.InitialTypeTableSize =
-    RuntimeOption::EvalInitialTypeTableSize;
-  gd.InitialFuncTableSize =
-    RuntimeOption::EvalInitialFuncTableSize;
+  gd.InitialNamedEntityTableSize =
+    RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =
     RuntimeOption::EvalInitialStaticStringTableSize;
   gd.HackArrCompatSerializeNotices =

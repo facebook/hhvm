@@ -138,7 +138,7 @@ void ProcessInit() {
 
 #define INIT_SYSTEMLIB_CLASS_FIELD(cls)                                 \
   {                                                                     \
-    Class *cls = NamedEntity::getType(s_##cls.get())->clsList();        \
+    Class *cls = NamedEntity::get(s_##cls.get())->clsList();            \
     assert(cls);                                                        \
     SystemLib::s_##cls##Class = cls;                                    \
   }
@@ -164,7 +164,7 @@ void ProcessInit() {
 
 #define INIT_SYSTEMLIB_HH_CLASS_FIELD(cls)                              \
   {                                                                     \
-    Class *cls = NamedEntity::getType(s_HH_##cls.get())->clsList();     \
+    Class *cls = NamedEntity::get(s_HH_##cls.get())->clsList();         \
     assert(cls);                                                        \
     SystemLib::s_HH_##cls##Class = cls;                                 \
   }

@@ -136,8 +136,8 @@ Variant* get_intercept_handler(const Func* func) {
 void rename_function(const String& old_name, const String& new_name) {
   auto const old = old_name.get();
   auto const n3w = new_name.get();
-  auto const oldNe = const_cast<NamedEntity*>(NamedEntity::getFunc(old));
-  auto const newNe = const_cast<NamedEntity*>(NamedEntity::getFunc(n3w));
+  auto const oldNe = const_cast<NamedEntity*>(NamedEntity::get(old));
+  auto const newNe = const_cast<NamedEntity*>(NamedEntity::get(n3w));
 
   Func* func = Func::lookup(oldNe);
   if (!func) {

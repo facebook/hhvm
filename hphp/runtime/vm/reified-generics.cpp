@@ -27,11 +27,11 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ArrayData* addToTypeReifiedGenericsTable(
+ArrayData* addToReifiedGenericsTable(
   const StringData* name,
   ArrayData* tsList
 ) {
-  auto const ne = NamedEntity::getType(name, true);
+  auto const ne = NamedEntity::get(name, true);
   auto const generics = ne->getCachedReifiedGenerics();
   if (!generics) {
     // We have created a new entry on the named entity table

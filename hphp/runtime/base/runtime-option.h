@@ -663,8 +663,7 @@ struct RuntimeOption {
   static bool LookForTypechecker;
   static bool AutoTypecheck;
   static uint32_t EvalInitialStaticStringTableSize;
-  static uint32_t EvalInitialTypeTableSize;
-  static uint32_t EvalInitialFuncTableSize;
+  static uint32_t EvalInitialNamedEntityTableSize;
   static JitSerdesMode EvalJitSerdesMode;
   static int ProfDataTTLHours;
   static std::string EvalJitSerdesFile;

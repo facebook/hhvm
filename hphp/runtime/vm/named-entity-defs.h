@@ -25,12 +25,7 @@ namespace HPHP {
 
 template<class Fn>
 void NamedEntity::foreach_name(Fn fn) {
-  if (auto table = NamedEntity::types()) {
-    for (auto n = table->begin(); n != table->end(); ++n) {
-      fn(n->second);
-    }
-  }
-  if (auto table = NamedEntity::funcs()) {
+  if (auto table = NamedEntity::table()) {
     for (auto n = table->begin(); n != table->end(); ++n) {
       fn(n->second);
     }

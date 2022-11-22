@@ -124,8 +124,7 @@ namespace {
 /*
  * Global NamedEntity table.
  */
-NamedEntity::Map* s_namedTypeMap;
-NamedEntity::Map* s_namedFuncMap;
+NamedEntity::Map* s_namedDataMap;
 
 /*
  * Initialize the NamedEntity table.
@@ -136,23 +135,21 @@ void initializeNamedDataMap() {
   config.growthFactor = 1;
   config.entryCountThreadCacheSize = 10;
 
-  s_namedTypeMap = new (vm_malloc(sizeof(NamedEntity::Map)))
-    NamedEntity::Map(RuntimeOption::EvalInitialTypeTableSize, config);
-  s_namedFuncMap = new (vm_malloc(sizeof(NamedEntity::Map)))
-    NamedEntity::Map(RuntimeOption::EvalInitialFuncTableSize, config);
+  s_namedDataMap = new (vm_malloc(sizeof(NamedEntity::Map)))
+    NamedEntity::Map(RuntimeOption::EvalInitialNamedEntityTableSize, config);
 }
 
 /*
  * Insert a NamedEntity into the table.
  */
 NEVER_INLINE
-NamedEntity* insertNamedEntity(const StringData* str, NamedEntity::Map* map) {
+NamedEntity* insertNamedEntity(const StringData* str) {
   if (!str->isStatic()) {
     str = makeStaticString(str);
   }
-  auto res = map->insert(str, NamedEntity());
+  auto res = s_namedDataMap->insert(str, NamedEntity());
   static std::atomic<bool> signaled{false};
-  checkAHMSubMaps(*map, "named entity table", signaled);
+  checkAHMSubMaps(*s_namedDataMap, "named entity table", signaled);
 
   auto const ne = &res.first->second;
   if (res.second && RuntimeOption::EvalEnableReverseDataMap) {
@@ -164,20 +161,20 @@ NamedEntity* insertNamedEntity(const StringData* str, NamedEntity::Map* map) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-NamedEntity* NamedEntity::getType(const StringData* str,
+NamedEntity* NamedEntity::get(const StringData* str,
                               bool allowCreate /* = true */,
                               String* normalizedStr /* = nullptr */) {
   if (str->isSymbol()) {
     if (auto const result = str->getNamedEntity()) return result;
   }
 
-  if (UNLIKELY(!s_namedTypeMap)) {
+  if (UNLIKELY(!s_namedDataMap)) {
     initializeNamedDataMap();
   }
 
   auto const result = [&]() -> NamedEntity* {
-    auto it = s_namedTypeMap->find(str);
-    if (LIKELY(it != s_namedTypeMap->end())) {
+    auto it = s_namedDataMap->find(str);
+    if (LIKELY(it != s_namedDataMap->end())) {
       return &it->second;
     }
 
@@ -186,11 +183,11 @@ NamedEntity* NamedEntity::getType(const StringData* str,
       if (normalizedStr) {
         *normalizedStr = normStr;
       }
-      return getType(normStr.get(), allowCreate, normalizedStr);
+      return get(normStr.get(), allowCreate, normalizedStr);
     }
 
     if (LIKELY(allowCreate)) {
-      return insertNamedEntity(str, s_namedTypeMap);
+      return insertNamedEntity(str);
     }
     return nullptr;
   }();
@@ -201,64 +198,21 @@ NamedEntity* NamedEntity::getType(const StringData* str,
   return result;
 }
 
-NamedEntity* NamedEntity::getFunc(const StringData* str,
-                              bool allowCreate /* = true */,
-                              String* normalizedStr /* = nullptr */) {
-  if (str->isSymbol()) {
-    if (auto const result = str->getNamedEntity()) return result;
-  }
-
-  if (UNLIKELY(!s_namedFuncMap)) {
-    initializeNamedDataMap();
-  }
-
-  auto const result = [&]() -> NamedEntity* {
-    auto it = s_namedFuncMap->find(str);
-    if (LIKELY(it != s_namedFuncMap->end())) {
-      return &it->second;
-    }
-
-    if (needsNSNormalization(str)) {
-      auto normStr = normalizeNS(StrNR(str).asString());
-      if (normalizedStr) {
-        *normalizedStr = normStr;
-      }
-      return getFunc(normStr.get(), allowCreate, normalizedStr);
-    }
-
-    if (LIKELY(allowCreate)) {
-      return insertNamedEntity(str, s_namedFuncMap);
-    }
-    return nullptr;
-  }();
-
-  if (str->isSymbol() && result) {
-    const_cast<StringData*>(str)->setNamedEntity(result);
-  }
-  return result;
-}
-
-NamedEntity::Map* NamedEntity::types() {
-  return s_namedTypeMap;
-}
-NamedEntity::Map* NamedEntity::funcs() {
-  return s_namedFuncMap;
+NamedEntity::Map* NamedEntity::table() {
+  return s_namedDataMap;
 }
 
 size_t NamedEntity::tableSize() {
-  return (s_namedTypeMap ? s_namedTypeMap->size() : 0) +
-         (s_namedFuncMap ? s_namedFuncMap->size() : 0);
+  return s_namedDataMap ? s_namedDataMap->size() : 0;
 }
 
 std::vector<std::pair<const char*, int64_t>> NamedEntity::tableStats() {
   std::vector<std::pair<const char*, int64_t>> stats;
-  if (!s_namedTypeMap && !s_namedFuncMap) return stats;
-  auto numSubMaps = (s_namedTypeMap ? s_namedTypeMap->numSubMaps() : 0) +
-                    (s_namedFuncMap ? s_namedFuncMap->numSubMaps() : 0);
-  auto capacity = (s_namedTypeMap ? s_namedTypeMap->capacity() : 0) +
-                  (s_namedFuncMap ? s_namedFuncMap->capacity() : 0);
-  stats.emplace_back("submaps", numSubMaps);
-  stats.emplace_back("capacity", capacity);
+  if (!s_namedDataMap) return stats;
+
+  stats.emplace_back("submaps", s_namedDataMap->numSubMaps());
+  stats.emplace_back("capacity", s_namedDataMap->capacity());
+
   return stats;
 }
 

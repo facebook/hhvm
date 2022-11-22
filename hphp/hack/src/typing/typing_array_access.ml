@@ -352,6 +352,7 @@ let rec array_get
       let nullable_container_get env ty_actual ty =
         if
           lhs_of_null_coalesce
+          || env.Typing_env_types.in_support_dynamic_type_method_check
           (* Normally, we would not allow indexing into a nullable container,
              however, because the pattern shows up so frequently, we are allowing
              indexing into a nullable container as long as it is on the lhs of a
@@ -864,6 +865,14 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
     env
     ty1
     (fun env ty1 ->
+      (* In dynamic mode strip off nullable because we can always upcast to dynamic *)
+      let ty1 =
+        match get_node ty1 with
+        | Toption ty
+          when env.Typing_env_types.in_support_dynamic_type_method_check ->
+          ty
+        | _ -> ty1
+      in
       let got_dynamic () =
         let tv = Typing_make_type.dynamic (get_reason ty1) in
         let (env, val_ty_err_opt) =

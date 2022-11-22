@@ -2675,6 +2675,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "measure"
+version = "0.0.0"
+dependencies = [
+ "hash",
+ "ocamlrep",
+ "once_cell",
+ "parking_lot 0.11.2",
+]
+
+[[package]]
+name = "measure_ffi"
+version = "0.0.0"
+dependencies = [
+ "measure",
+ "ocamlrep_ocamlpool",
+]
+
+[[package]]
 name = "memchr"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

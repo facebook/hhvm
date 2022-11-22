@@ -109,15 +109,6 @@ let create () = ref SMap.empty
 
 let global : record list ref = ref [create ()]
 
-let push_global () = global := create () :: !global
-
-let pop_global () =
-  match !global with
-  | ret :: globals ->
-    global := globals;
-    ret
-  | _ -> failwith "Measure.pop_global called with empty stack"
-
 let serialize record = !record
 
 let deserialize data = ref data
@@ -375,3 +366,20 @@ let print_distributions ?record () =
       | None -> ()
       | Some _ -> print_entry_distribution ~record name)
     !record
+
+external rust_push_global : unit -> unit = "hh_measure_push_global"
+
+external rust_pop_global : unit -> record_data = "hh_measure_pop_global"
+
+let push_global () =
+  global := create () :: !global;
+  rust_push_global ()
+
+let pop_global () =
+  match !global with
+  | ret :: globals ->
+    global := globals;
+    let rust_record = deserialize (rust_pop_global ()) in
+    merge ~record:ret rust_record;
+    ret
+  | _ -> failwith "Measure.pop_global called with empty stack"

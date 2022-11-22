@@ -111,6 +111,7 @@ members = [
     "utils/ocaml_runtime",
     "utils/perf/cargo/profile",
     "utils/perf/cargo/stats",
+    "utils/rust/measure/ffi",
     "utils/stack_limit",
     "utils/test",
     "utils/test/arena_deserializer",

@@ -9,6 +9,25 @@
   (flags
    (:standard
     (:include config/build-timestamp-opt))))
- (libraries base core_kernel.caml_unix string hh_json str unix)
+ (libraries base core_kernel.caml_unix string hh_json str unix measure_ffi)
  (preprocess
   (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))
+
+(data_only_dirs rust)
+
+(library
+ (name measure_ffi)
+ (modules)
+ (wrapped false)
+ (foreign_archives measure_ffi))
+
+(rule
+ (targets libmeasure_ffi.a)
+ (deps
+  (source_tree %{workspace_root}/src))
+ (locks /cargo)
+ (action
+  (run
+   %{workspace_root}/scripts/invoke_cargo.sh
+   measure_ffi
+   measure_ffi)))

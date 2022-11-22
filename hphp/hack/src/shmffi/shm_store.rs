@@ -389,18 +389,18 @@ where
     where
         K: Borrow<[u8]>,
     {
-        shmffi::with(|segment| {
-            let v = segment.table.get(&self.hash_key(key)).map(|heap_value| {
-                extern "C" {
-                    fn caml_input_value_from_block(data: *const u8, size: usize) -> UnsafeOcamlPtr;
-                }
-                let bytes = heap_value.as_slice();
-                let bytes = self.decompress(bytes).unwrap();
-                caml_input_value_from_block(bytes.as_ptr(), bytes.len())
-            });
-            self.log_shmem_hit_rate(v.is_some());
-            v
-        })
+        extern "C" {
+            fn caml_input_value_from_block(data: *const u8, size: usize) -> UnsafeOcamlPtr;
+        }
+        let bytes_opt = shmffi::with(|segment| {
+            segment
+                .table
+                .get(&self.hash_key(key))
+                .map(|heap_value| self.decompress(heap_value.as_slice()).unwrap().into_owned())
+        });
+        let v = bytes_opt.map(|bytes| caml_input_value_from_block(bytes.as_ptr(), bytes.len()));
+        self.log_shmem_hit_rate(v.is_some());
+        v
     }
 
     fn decompress<'a>(&self, bytes: &'a [u8]) -> Result<Cow<'a, [u8]>> {
@@ -492,19 +492,22 @@ where
         if cache_val_opt.is_some() {
             return Ok(cache_val_opt);
         }
-        let hash = self.hash_key(&key);
-        let val_opt: Option<V> = shmffi::with(|segment| {
+        let bytes_opt = shmffi::with(|segment| {
             segment
                 .table
-                .get(&hash)
+                .get(&self.hash_key(&key))
                 .map(|heap_value| -> Result<_> {
-                    let bytes = self.decompress(heap_value.as_slice()).unwrap();
-                    let arena = ocamlrep::Arena::new();
-                    let value = unsafe { ocamlrep_marshal::input_value(&bytes, &arena) };
-                    Ok(V::from_ocamlrep(value)?)
+                    Ok(self.decompress(heap_value.as_slice())?.into_owned())
                 })
                 .transpose()
         })?;
+        let val_opt: Option<V> = bytes_opt
+            .map(|bytes| -> Result<_> {
+                let arena = ocamlrep::Arena::new();
+                let value = unsafe { ocamlrep_marshal::input_value(&bytes, &arena) };
+                Ok(V::from_ocamlrep(value)?)
+            })
+            .transpose()?;
         if let Some(val) = &val_opt {
             self.cache.lock().put(key, val.clone());
         }

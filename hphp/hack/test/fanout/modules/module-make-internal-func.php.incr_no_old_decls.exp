@@ -1,8 +1,0 @@
-=== base errors ===
-No errors!
-=== changed errors ===
-foo-use.php:4:3,5: Cannot access an internal element from module `A` outside of a module (Typing[4444])
-  foo-defn.php:5:19,21: This is from module `A`
-=== fanout ===
-Fun call_foo
-Fun call_foo_in_module

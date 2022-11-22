@@ -146,6 +146,7 @@ def check_output(
     ignore_error_text: bool,
     only_compare_error_lines: bool,
     verify_pessimisation: VerifyPessimisationOptions,
+    check_expected_included_in_actual: bool,
 ) -> Result:
     if only_compare_error_lines:
         (failed, out) = check_output_error_lines_only(case.file_path)
@@ -164,7 +165,12 @@ def check_output(
             out_path = os.path.realpath(out_path)
             output = "Output file " + out_path + " was not found!"
         return check_result(
-            case, default_expect_regex, ignore_error_text, verify_pessimisation, output
+            case,
+            default_expect_regex,
+            ignore_error_text,
+            verify_pessimisation,
+            check_expected_included_in_actual=check_expected_included_in_actual,
+            out=output,
         )
 
 
@@ -186,6 +192,7 @@ def run_batch_tests(
     get_flags: Callable[[str], List[str]],
     out_extension: str,
     verify_pessimisation: VerifyPessimisationOptions,
+    check_expected_included_in_actual: bool,
     only_compare_error_lines: bool = False,
 ) -> List[Result]:
     """
@@ -256,6 +263,7 @@ def run_batch_tests(
                 ignore_error_text=ignore_error_text,
                 only_compare_error_lines=only_compare_error_lines,
                 verify_pessimisation=verify_pessimisation,
+                check_expected_included_in_actual=check_expected_included_in_actual,
             )
             results.append(result)
         return results
@@ -290,6 +298,7 @@ def run_test_program(
     mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
     verify_pessimisation: VerifyPessimisationOptions,
+    check_expected_included_in_actual: bool,
     timeout: Optional[float] = None,
 ) -> List[Result]:
 
@@ -338,7 +347,8 @@ def run_test_program(
             default_expect_regex,
             ignore_error_text,
             verify_pessimisation,
-            output,
+            check_expected_included_in_actual=check_expected_included_in_actual,
+            out=output,
         )
 
     executor = ThreadPoolExecutor(max_workers=max_workers)
@@ -415,6 +425,26 @@ def check_result(
     default_expect_regex: Optional[str],
     ignore_error_messages: bool,
     verify_pessimisation: VerifyPessimisationOptions,
+    check_expected_included_in_actual: bool,
+    out: str,
+) -> Result:
+    if check_expected_included_in_actual:
+        return check_included(test_case, out)
+    else:
+        return check_expected_equal_actual(
+            test_case,
+            default_expect_regex,
+            ignore_error_messages,
+            verify_pessimisation,
+            out,
+        )
+
+
+def check_expected_equal_actual(
+    test_case: TestCase,
+    default_expect_regex: Optional[str],
+    ignore_error_messages: bool,
+    verify_pessimisation: VerifyPessimisationOptions,
     out: str,
 ) -> Result:
     """
@@ -445,6 +475,21 @@ def check_result(
         )
     )
     return Result(test_case=test_case, output=out, is_failure=not is_ok)
+
+
+def check_included(test_case: TestCase, output: str) -> Result:
+    elts = set(output.splitlines())
+    expected_elts = set(test_case.expected.splitlines())
+    is_failure = False
+    for expected_elt in expected_elts:
+        if expected_elt not in elts:
+            is_failure = True
+            break
+    output = ""
+    if is_failure:
+        for elt in expected_elts.intersection(elts):
+            output += elt + "\n"
+    return Result(test_case, output, is_failure)
 
 
 def record_results(results: List[Result], out_ext: str) -> None:
@@ -649,6 +694,7 @@ def run_tests(
     verify_pessimisation: VerifyPessimisationOptions,
     mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
+    check_expected_included_in_actual: bool,
     timeout: Optional[float] = None,
     only_compare_error_lines: bool = False,
 ) -> List[Result]:
@@ -674,6 +720,7 @@ def run_tests(
             get_flags,
             out_extension,
             verify_pessimisation,
+            check_expected_included_in_actual,
             only_compare_error_lines,
         )
     else:
@@ -687,6 +734,7 @@ def run_tests(
             mode_flag,
             get_flags,
             verify_pessimisation,
+            check_expected_included_in_actual=check_expected_included_in_actual,
             timeout=timeout,
         )
 
@@ -722,6 +770,7 @@ def run_idempotence_tests(
     default_expect_regex: Optional[str],
     mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
+    check_expected_included_in_actual: bool,
 ) -> None:
     idempotence_test_cases = [
         TestCase(
@@ -742,6 +791,7 @@ def run_idempotence_tests(
         mode_flag,
         get_flags,
         VerifyPessimisationOptions.no,
+        check_expected_included_in_actual=check_expected_included_in_actual,
     )
 
     num_idempotence_results = len(idempotence_results)
@@ -840,6 +890,12 @@ if __name__ == "__main__":
         "but only compare the error line numbers.",
     )
     parser.add_argument(
+        "--check-expected-included-in-actual",
+        action="store_true",
+        help="Check that the set of lines in the expected file is included in the set"
+        " of lines in the output",
+    )
+    parser.add_argument(
         "--timeout",
         type=int,
         help="Timeout in seconds for each test, in non-batch mode.",
@@ -922,6 +978,7 @@ if __name__ == "__main__":
         args.verify_pessimisation,
         mode_flag,
         get_flags,
+        check_expected_included_in_actual=args.check_expected_included_in_actual,
         timeout=args.timeout,
         only_compare_error_lines=args.only_compare_error_lines,
     )
@@ -938,4 +995,5 @@ if __name__ == "__main__":
             args.default_expect_regex,
             mode_flag,
             get_flags,
+            check_expected_included_in_actual=args.check_expected_included_in_actual,
         )

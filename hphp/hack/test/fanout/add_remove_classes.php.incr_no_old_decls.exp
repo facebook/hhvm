@@ -1,9 +1,0 @@
-=== base errors ===
-f.php:4:7,7: Unbound name: `A` (an object type) (Naming[2049])
-=== changed errors ===
-g.php:4:7,7: Unbound name: `B` (an object type) (Naming[2049])
-=== fanout ===
-Fun f
-Fun g
-Type A
-Type B

@@ -1,8 +1,0 @@
-=== base errors ===
-No errors!
-=== changed errors ===
-a.php:5:17,21: Invalid argument (Typing[4110])
-  a.php:2:22,27: Expected `string`
-  foo.php:2:17,19: But got `int`
-=== fanout ===
-Type A

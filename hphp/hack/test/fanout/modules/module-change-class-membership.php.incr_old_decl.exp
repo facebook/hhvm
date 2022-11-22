@@ -1,8 +1,0 @@
-=== base errors ===
-No errors!
-=== changed errors ===
-bing.php:5:35,40: Cannot access an internal element from module `B` in module `A` (Typing[4444])
-  foobar.php:5:16,21: This is from module `B`
-=== fanout ===
-Type Bing
-Type Foobar

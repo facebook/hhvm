@@ -1,9 +1,0 @@
-=== base errors ===
-No errors!
-=== changed errors ===
-f.php:3:7,7: Too few arguments (required 2 but got 1) (Typing[4104])
-  b.php:3:19,29: Definition is here
-=== fanout ===
-Fun f
-Type B
-Type C

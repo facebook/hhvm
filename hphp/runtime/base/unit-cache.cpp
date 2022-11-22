@@ -240,40 +240,36 @@ struct CachedFile {
   CachedFile& operator=(const CachedFile&) = delete;
 
   CachedFile(const CachedUnit& src,
-             const struct stat* statInfo,
+             const struct stat& statInfo,
              const RepoOptions& options)
     : cu(src)
     , repoOptionsHash(options.flags().cacheKeySha1())
   {
-    if (statInfo) {
 #ifdef _MSC_VER
-      mtime      = statInfo->st_mtime;
+    mtime      = statInfo.st_mtime;
 #else
-      mtime      = statInfo->st_mtim;
-      ctime      = statInfo->st_ctim;
+    mtime      = statInfo.st_mtim;
+    ctime      = statInfo.st_ctim;
 #endif
-      ino        = statInfo->st_ino;
-      devId      = statInfo->st_dev;
-    }
+    ino        = statInfo.st_ino;
+    devId      = statInfo.st_dev;
     if (cu.unit) cu.unit->acquireCacheRefCount();
   }
 
   // Create a new CachedFile entry, sharing a Unit with another one,
   // but with a new stat info.
-  CachedFile(const CachedFile& o, const struct stat* statInfo)
+  CachedFile(const CachedFile& o, const struct stat& statInfo)
     : cu{o.cu}
     , repoOptionsHash(o.repoOptionsHash)
   {
-    if (statInfo) {
 #ifdef _MSC_VER
-      mtime      = statInfo->st_mtime;
+    mtime      = statInfo.st_mtime;
 #else
-      mtime      = statInfo->st_mtim;
-      ctime      = statInfo->st_ctim;
+    mtime      = statInfo.st_mtim;
+    ctime      = statInfo.st_ctim;
 #endif
-      ino        = statInfo->st_ino;
-      devId      = statInfo->st_dev;
-    }
+    ino        = statInfo.st_ino;
+    devId      = statInfo.st_dev;
     if (cu.unit) {
       // Since this is sharing it, we should already have a ref.
       assertx(cu.unit->hasCacheRef());
@@ -530,7 +526,11 @@ enum class UnitChange {
   /* The repo options between this request and the cached unit differ, so
    * we should never use the cached bytecode for this unit.
    */
-  REPO_OPTION_DIFF
+  REPO_OPTION_DIFF,
+  /* The cached file pointer or the underlying unit are null: we must
+   * recompile this file.
+   */
+  EMPTY_UNIT
 };
 
 /*
@@ -591,7 +591,7 @@ bool anyDepsChanged(
  */
 UnitChange changeReason(
   const CachedFilePtr& cachedUnit,
-  const struct stat* s,
+  const struct stat& s,
   const RepoOptions& options,
   Stream::Wrapper* wrapper
 ) {
@@ -599,16 +599,14 @@ UnitChange changeReason(
   // case someone created the file).  This case should only happen if something
   // successfully stat'd the file, but then it was gone by the time we tried to
   // open() it.
-  if (!s) return UnitChange::NONE;
-  auto const fileChanged = !cachedUnit ||
-         cachedUnit->cu.unit == nullptr ||
-         timespecCompare(cachedUnit->mtime, s->st_mtim) < 0 ||
-         timespecCompare(cachedUnit->ctime, s->st_ctim) < 0 ||
-         cachedUnit->ino != s->st_ino ||
-         cachedUnit->devId != s->st_dev;
-  if (fileChanged) return UnitChange::STAT;
-  if (cachedUnit->cu.unit &&
-      anyDepsChanged(cachedUnit->cu.unit, options, wrapper))
+  if (cachedUnit.isNull() || cachedUnit->cu.unit == nullptr)
+    return UnitChange::EMPTY_UNIT;
+  if (timespecCompare(cachedUnit->mtime, s.st_mtim) < 0 ||
+      timespecCompare(cachedUnit->ctime, s.st_ctim) < 0 ||
+      cachedUnit->ino != s.st_ino ||
+      cachedUnit->devId != s.st_dev)
+    return UnitChange::STAT;
+  if (anyDepsChanged(cachedUnit->cu.unit, options, wrapper))
       return UnitChange::DEPS;
   if (UNLIKELY(cachedUnit->repoOptionsHash != options.flags().cacheKeySha1()))
     return UnitChange::REPO_OPTION_DIFF;
@@ -759,12 +757,10 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
                                  AutoloadMap* map,
                                  const RepoOptions& options,
                                  FileLoadFlags& flags,
-                                 const struct stat* statInfo,
+                                 const struct stat& statInfo,
                                  CachedFilePtr orig,
                                  bool forPrefetch,
                                  UnitChange reason) {
-  assertx(statInfo);
-
   auto const impl = [&] (bool tryLazy) {
     tracing::BlockNoTrace _{"create-unit-from-file"};
 
@@ -773,7 +769,7 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
       wrapper,
       options.flags(),
       options.dir(),
-      (size_t)statInfo->st_size,
+      (size_t)statInfo.st_size,
       !tryLazy
     };
     SCOPE_EXIT {
@@ -1178,7 +1174,7 @@ void logTearing(const CachedFilePtr& ptr) {
 CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
                                NonRepoUnitCache& cache,
                                Stream::Wrapper* wrapper,
-                               const struct stat* statInfo,
+                               const struct stat& statInfo,
                                OptLog& ent,
                                const Native::FuncTable& nativeFuncs,
                                const RepoOptions& options,
@@ -1280,7 +1276,7 @@ CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
 }
 
 CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
-                                 const struct stat* statInfo,
+                                 const struct stat& statInfo,
                                  OptLog& ent,
                                  const Native::FuncTable& nativeFuncs,
                                  FileLoadFlags& flags,
@@ -1509,7 +1505,7 @@ CachedUnit checkoutFile(
 ) {
   return RuntimeOption::RepoAuthoritative
     ? lookupUnitRepoAuth(path, nativeFuncs)
-    : lookupUnitNonRepoAuth(path, &statInfo, ent,
+    : lookupUnitNonRepoAuth(path, statInfo, ent,
                             nativeFuncs, flags,
                             alreadyRealpath, forPrefetch);
 }
@@ -1907,7 +1903,7 @@ void prefetchUnit(StringData* requestedPath,
       // Unit was created. If not, there's nothing to do.
       auto changeRes = UnitChange::NONE;
       if (auto const tmp = cachedUnit.copy()) {
-        changeRes = changeReason(tmp, fileStat.get_pointer(), options, w);
+        changeRes = changeReason(tmp, *fileStat, options, w);
         if (changeRes == UnitChange::NONE) return;
       }
 
@@ -1922,9 +1918,8 @@ void prefetchUnit(StringData* requestedPath,
         return createUnitFromFile(rpath, nullptr, &releaseUnit, optLog,
                                   Native::s_noNativeFuncs,
                                   map.get(),
-                                  options, flags,
-                                  fileStat.get_pointer(),
-                                  std::move(orig), true, changeRes);
+                                  options, flags, *fileStat, std::move(orig),
+                                  true, changeRes);
       }();
 
       // We don't want to prefetch ICE units (they can be

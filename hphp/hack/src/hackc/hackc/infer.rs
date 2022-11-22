@@ -54,6 +54,8 @@ pub fn run(opts: Opts) -> Result<()> {
 
     let files = opts.files.gather_input_files()?;
 
+    writeln!(writer.lock(), "// TEXTUAL UNIT COUNT {}", files.len())?;
+
     if opts.keep_going {
         files
             .into_par_iter()

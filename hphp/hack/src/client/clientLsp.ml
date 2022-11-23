@@ -2634,7 +2634,7 @@ let docblock_to_markdown (raw_docblock : DocblockService.result) :
   | docblock ->
     Some
       (Completion.MarkedStringsDocumentation
-         (Core_kernel.List.fold docblock ~init:[] ~f:(fun acc elt ->
+         (Core.List.fold docblock ~init:[] ~f:(fun acc elt ->
               match elt with
               | DocblockService.Markdown txt -> MarkedString txt :: acc
               | DocblockService.HackSnippet txt ->

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Core
 
 (** [Lazy_string_table.t] provides a memoization cache for any
     [(string * 'a) Sequence.t] where:

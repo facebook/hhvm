@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Core
 
 let curr_module_name_ref = ref None
 

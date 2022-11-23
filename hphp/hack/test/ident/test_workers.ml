@@ -1,4 +1,4 @@
-module Hh_bucket = Bucket (* Bucket is shadowed by Core_kernel *)
+module Hh_bucket = Bucket (* Bucket is shadowed by Core/Core_kernel *)
 
 open Hh_prelude
 

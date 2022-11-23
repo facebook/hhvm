@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Core
 open Asttypes
 open Longident
 open Parsetree

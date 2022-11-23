@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Core
 module Sys = Stdlib.Sys
 open Printf
 open Reordered_argument_collections

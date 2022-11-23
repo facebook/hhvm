@@ -116,8 +116,7 @@ let format_message (msg : string) (pos : Pos.absolute) ~is_first ~col_width :
 
 (* Work out the column width needed for each file. Files with many
    lines need a wider column due to the higher line numbers. *)
-let col_widths (msgs : Pos.absolute Message.t list) :
-    int Core_kernel.String.Map.t =
+let col_widths (msgs : Pos.absolute Message.t list) : int Core.String.Map.t =
   (* Find the longest line number for every file in msgs. *)
   let longest_lines =
     List.fold msgs ~init:String.Map.empty ~f:(fun acc msg ->

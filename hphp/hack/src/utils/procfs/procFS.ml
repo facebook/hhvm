@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  *)
 
-open Core_kernel
+open Core
 module Sys = Stdlib.Sys
 open Result.Monad_infix
 

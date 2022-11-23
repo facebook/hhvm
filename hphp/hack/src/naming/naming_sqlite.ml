@@ -325,7 +325,7 @@ module FileInfoTable = struct
       | None -> Sqlite3.Data.NULL
     in
     let names_to_data_type names =
-      let open Core_kernel in
+      let open Core in
       let names =
         String.concat ~sep:"|" (List.map names ~f:(fun (_, x, _) -> x))
       in
@@ -357,7 +357,7 @@ module FileInfoTable = struct
     let to_ids ~value ~name_type =
       match value with
       | Sqlite3.Data.TEXT s ->
-        Core_kernel.(
+        Core.(
           List.map (String.split s ~on:'|') ~f:(fun name ->
               (FileInfo.File (name_type, path), name, None)))
       | Sqlite3.Data.NULL -> []
@@ -610,7 +610,7 @@ let free_db_cache () : unit = db_cache := `Not_yet_cached
 
 let save_file_info db stmt_cache relative_path checksum file_info : save_result
     =
-  let open Core_kernel in
+  let open Core in
   FileInfoTable.insert
     db
     stmt_cache

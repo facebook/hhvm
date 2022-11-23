@@ -110,7 +110,7 @@ let rec chmod ~(recursive : bool) (path : string) (mode : int) : unit =
     Unix.chmod path mode;
     if recursive then
       let contents = Sys.readdir path in
-      Core_kernel.List.iter
+      Core.List.iter
         ~f:
           begin
             fun name ->
@@ -128,7 +128,7 @@ let rec readpath (path : string) : string list =
   match stats.st_kind with
   | S_DIR ->
     let contents = Sys.readdir path in
-    Core_kernel.List.fold
+    Core.List.fold
       ~init:[]
       ~f:
         begin
@@ -160,7 +160,7 @@ let rec treesize path : int =
   | S_DIR ->
     let contents = Sys.readdir path in
     size
-    + Core_kernel.List.fold
+    + Core.List.fold
         ~init:0
         ~f:
           begin

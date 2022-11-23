@@ -234,7 +234,7 @@ let get_primary_owner () =
   if not (Disk.file_exists owners_file) then
     logged_in_user
   else
-    let lines = Core_kernel.String.split_lines (Disk.cat owners_file) in
+    let lines = Core.String.split_lines (Disk.cat owners_file) in
     if List.mem lines logged_in_user ~equal:String.( = ) then
       logged_in_user
     else

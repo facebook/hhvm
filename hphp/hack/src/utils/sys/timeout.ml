@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Core
 module Unix = Caml_unix
 
 type timings = {

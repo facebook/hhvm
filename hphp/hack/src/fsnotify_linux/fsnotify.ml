@@ -7,7 +7,7 @@
  *
  *)
 
-module List = Core_kernel.List
+module List = Core.List
 
 exception Error of string * Unix.error
 

@@ -110,7 +110,7 @@ module TShapeField = struct
     | (TSFlit_str (_, s1), TSFlit_str (_, s2)) -> String.compare s1 s2
     | (TSFclass_const ((_, s1), (_, s1')), TSFclass_const ((_, s2), (_, s2')))
       ->
-      Core_kernel.Tuple.T2.compare
+      Core.Tuple.T2.compare
         ~cmp1:String.compare
         ~cmp2:String.compare
         (s1, s1')
@@ -120,7 +120,7 @@ module TShapeField = struct
     | (TSFlit_str _, _) -> -1
     | (TSFclass_const _, _) -> 1
 
-  let equal x y = Core_kernel.Int.equal 0 (compare x y)
+  let equal x y = Core.Int.equal 0 (compare x y)
 end
 
 module TShapeMap = struct

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Core
 open Option.Monad_infix
 
 (** This is made of sequence [seq] and a hash table [tbl].

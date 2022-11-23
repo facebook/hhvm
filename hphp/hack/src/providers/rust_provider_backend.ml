@@ -237,7 +237,7 @@ module Decl = struct
 
     let compare (cls1, elt1) (cls2, elt2) =
       let r = String.compare cls1 cls2 in
-      if not (Core_kernel.Int.equal r 0) then
+      if not (Core.Int.equal r 0) then
         r
       else
         String.compare elt1 elt2

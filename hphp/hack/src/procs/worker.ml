@@ -173,7 +173,7 @@ let read_and_process_job ic oc : job_outcome =
     start_major_collections := gc.Gc.major_collections;
     start_wall_time := Unix.gettimeofday ();
     start_proc_fs_status :=
-      ProcFS.status_for_pid (Unix.getpid ()) |> Core_kernel.Result.ok;
+      ProcFS.status_for_pid (Unix.getpid ()) |> Core.Result.ok;
     HackEventLogger.deserialize_globals log_globals;
     Mem_profile.start ();
     do_process { send = send_result };

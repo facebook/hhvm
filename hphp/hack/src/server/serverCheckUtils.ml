@@ -60,7 +60,7 @@ let extend_defs_per_file_batch
     | Naming_table.File_info_not_found -> acc
   in
   let job (acc : FileInfo.names Relative_path.Map.t) additional_files =
-    Core_kernel.(
+    Core.(
       let result = List.fold_left additional_files ~f:get_one ~init:acc in
       result)
   in

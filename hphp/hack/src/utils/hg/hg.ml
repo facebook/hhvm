@@ -66,7 +66,6 @@ module Hg_actual = struct
     let (q3 : global_rev Future.t) =
       global_rev_process (Printf.sprintf "ancestor(master,%s)" rev)
     in
-    (* let open Core_kernel in *)
     let take_first
         (r1 : (global_rev, Future.error) result)
         (r2 : (global_rev, Future.error) result) :

@@ -49,10 +49,8 @@ let print_ast_check_errors errors =
     (fun e ->
       let text = Errors.to_string (User_error.to_absolute e) in
       if
-        Core_kernel.String.is_substring
-          text
-          ~substring:SyntaxError.this_in_static
-        || Core_kernel.String.is_substring
+        Core.String.is_substring text ~substring:SyntaxError.this_in_static
+        || Core.String.is_substring
              text
              ~substring:SyntaxError.toplevel_await_use
       then

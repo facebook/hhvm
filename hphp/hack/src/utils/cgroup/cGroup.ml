@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Core
 module Unix = Caml_unix
 module Sys = Stdlib.Sys
 open Result.Monad_infix

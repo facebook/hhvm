@@ -22,7 +22,7 @@
 
 *)
 
-module List = Core_kernel.List
+module List = Core.List
 
 (* Abstract data type for notifier context. *)
 type fsenv

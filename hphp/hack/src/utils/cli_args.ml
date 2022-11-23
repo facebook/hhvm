@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Core
 include Cli_args_sig.Types
 
 let files_to_check_range_to_json (range : files_to_check_range) : Hh_json.json =

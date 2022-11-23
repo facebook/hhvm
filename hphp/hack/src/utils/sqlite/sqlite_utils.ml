@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core_kernel
+open Core
 
 (* Check a sqlite result, and crash if it is invalid *)
 let check_rc (db : Sqlite3.db) (rc : Sqlite3.Rc.t) : unit =

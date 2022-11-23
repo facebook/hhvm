@@ -67,7 +67,7 @@ let init
   let gc_control =
     match gc_control with
     | Some c -> c
-    | None -> Core_kernel.Gc.get ()
+    | None -> Core.Gc.get ()
   in
   let (ctx, state) = init_state ~root ~popt ~tcopt ~deps_mode in
   let workers =

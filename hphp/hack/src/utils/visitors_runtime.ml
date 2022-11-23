@@ -67,7 +67,7 @@
  * [foo] and [bar] are), the abstract base class should be used instead.
  *)
 
-open Core_kernel
+open Core
 
 class ['s] monoid = ['s] VisitorsRuntime.monoid
 

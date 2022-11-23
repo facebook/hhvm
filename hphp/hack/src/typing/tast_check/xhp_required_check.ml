@@ -10,7 +10,7 @@ open Hh_prelude
 open Aast
 open Typing_defs
 open Utils
-module S = Core_kernel.Sequence
+module S = Core.Sequence
 module Cls = Decl_provider.Class
 module Env = Tast_env
 

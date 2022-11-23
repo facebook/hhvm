@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Core
 
 let assert_eq v =
   let ocaml_marshaled = Marshal.to_string v [] in

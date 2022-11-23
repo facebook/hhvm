@@ -24,6 +24,12 @@ use relative_path::RelativePath;
 /// - References the source text to avoid spending time or space copying
 ///   identifiers into the arena (when possible).
 /// - Excludes user attributes which are irrelevant to typechecking.
+///
+/// WARNING
+/// This function (1) doesn't respect po_deregister_php_stdlib which filters+adjusts certain
+/// decls from hhi files, (2) produces decls in reverse order, (3) includes subsequent decls
+/// in case of name-clash, rather than just the first. Unless you the caller have thought
+/// through your desired semantics in these cases, you're probably buggy.
 pub fn parse_decls_for_typechecking<'a>(
     opts: &DeclParserOptions,
     filename: RelativePath,
@@ -46,6 +52,12 @@ pub fn parse_decls_for_typechecking<'a>(
 ///   keep the source text in memory when caching decls.
 /// - As in parse_decls_for_typechecking, it excludes user attributes which
 ///   are irrelevant to typechecking.
+///
+/// WARNING
+/// This function (1) doesn't respect po_deregister_php_stdlib which filters+adjusts certain
+/// decls from hhi files, (2) produces decls in reverse order, (3) includes subsequent decls
+/// in case of name-clash, rather than just the first. Unless you the caller have thought
+/// through your desired semantics in these cases, you're probably buggy.
 pub fn parse_decls_for_typechecking_without_reference_text<'a, 'text>(
     opts: &DeclParserOptions,
     filename: RelativePath,

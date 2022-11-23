@@ -10,7 +10,6 @@ use hh24_types::ToplevelSymbolHash;
 use oxidized::file_info;
 use oxidized::file_info::NameType;
 use oxidized_by_ref::direct_decl_parser::Decl;
-use oxidized_by_ref::direct_decl_parser::ParsedFile;
 use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use relative_path::RelativePath;
 use serde::Deserialize;
@@ -43,6 +42,12 @@ impl FileSummary {
         Self::from_fwd_filtered_decls(&file)
     }
 
+    /// As the function name says, this should only be called after the input
+    /// has undergone remove_php_stlib_decls_and_rev or similar, i.e.
+    /// (1) for hhi files, some functions and attributes should have been removed,
+    /// (2) the decls should be in lexical order.
+    ///
+    /// Callers may consider using `from_hashed_decls` instead, which does this.
     pub fn from_fwd_filtered_decls<'a>(file: &ParsedFileWithHashes<'a>) -> Self {
         Self {
             mode: file.mode,
@@ -56,15 +61,6 @@ impl FileSummary {
                     hash,
                 })
                 .collect(),
-        }
-    }
-
-    /// DEPRECATED: behaves differently from the OCaml
-    pub fn from_decls(file: ParsedFile<'_>) -> Self {
-        Self {
-            mode: file.mode,
-            hash: crate::hash_decls(&file.decls),
-            decls: file.decls.iter().map(DeclSummary::from).collect(),
         }
     }
 

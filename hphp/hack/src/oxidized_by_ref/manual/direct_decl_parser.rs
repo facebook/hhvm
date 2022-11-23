@@ -52,6 +52,9 @@ pub struct ParsedFileWithHashes<'a> {
     pub hash: hh24_types::FileDeclsHash,
 
     /// Decls along with a position insensitive hash.
+    /// WARNING: these decls and decl-hashes represent the decls after DeclParseOptions have been
+    /// taken into account, and the decls further reflect if you've called the mutating
+    /// function `remove_php_stdlib_decls`. Therefore, decl and decl-hash might be inconsistent.
     pub decls: Vec<(&'a str, Decl<'a>, hh24_types::DeclHash)>,
 }
 

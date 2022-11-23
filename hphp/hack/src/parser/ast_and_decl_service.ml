@@ -22,6 +22,9 @@ let process_parse_result
   let start_parse_time = start_time in
   let start_process_time = Unix.gettimeofday () in
   let { Parser_return.file_mode; comments = _; ast; content } = ast in
+  (* This surely is a bug?? We're now degistering php_stdlib from the AST, but
+     the decls we got (and which we're now about to cache) have not been deregistered.
+     The two will be inconsistent! *)
   let ast =
     if
       Relative_path.(is_hhi (Relative_path.prefix fn))

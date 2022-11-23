@@ -21,12 +21,15 @@ type parsed_file_with_hashes = {
   pfh_decls: (string * Shallow_decl_defs.decl * Int64.t) list;
 }
 
+(** NOTE: this doesn't respect deregister_php_lib, and has decls in reverse lexical order. *)
 val parse_decls :
   DeclParserOptions.t -> Relative_path.t -> string -> parsed_file
 
+(** NOTE: this doesn't respect deregister_php_lib, and has decls in reverse lexical order *)
 val parse_and_hash_decls :
   DeclParserOptions.t -> Relative_path.t -> string -> parsed_file_with_hashes
 
 val decls_hash : decls -> Int64.t
 
+(** NOTE: this takes input in reverse-lexical-order, and emits FileInfo.t in forward lexical order *)
 val decls_to_fileinfo : Relative_path.t -> parsed_file_with_hashes -> FileInfo.t

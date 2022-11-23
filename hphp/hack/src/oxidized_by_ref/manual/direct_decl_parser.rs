@@ -52,9 +52,6 @@ pub struct ParsedFileWithHashes<'a> {
     pub hash: hh24_types::FileDeclsHash,
 
     /// Decls along with a position insensitive hash.
-    /// WARNING: these decls and decl-hashes represent the decls after DeclParseOptions have been
-    /// taken into account, and the decls further reflect if you've called the mutating
-    /// function `remove_php_stdlib_decls`. Therefore, decl and decl-hash might be inconsistent.
     pub decls: Vec<(&'a str, Decl<'a>, hh24_types::DeclHash)>,
 }
 
@@ -83,16 +80,22 @@ impl<'a> From<ParsedFile<'a>> for ParsedFileWithHashes<'a> {
 impl<'a> ParsedFileWithHashes<'a> {
     pub fn remove_php_stdlib_decls(&mut self, arena: &'a bumpalo::Bump) {
         self.decls = (self.decls.drain(..))
-            .filter_map(|(name, decl, hash)| {
-                filter_php_stdlib_decls(arena, decl).map(|decl| (name, decl, hash))
+            .filter_map(|(name, decl, _hash)| {
+                filter_php_stdlib_decls(arena, decl).map(|decl| {
+                    let hash = hh24_types::DeclHash::from_u64(hh_hash::hash(&decl));
+                    (name, decl, hash)
+                })
             })
             .collect();
     }
 
     pub fn remove_php_stdlib_decls_and_rev(&mut self, arena: &'a bumpalo::Bump) {
         self.decls = (self.decls.drain(..).rev())
-            .filter_map(|(name, decl, hash)| {
-                filter_php_stdlib_decls(arena, decl).map(|decl| (name, decl, hash))
+            .filter_map(|(name, decl, _hash)| {
+                filter_php_stdlib_decls(arena, decl).map(|decl| {
+                    let hash = hh24_types::DeclHash::from_u64(hh_hash::hash(&decl));
+                    (name, decl, hash)
+                })
             })
             .collect();
     }

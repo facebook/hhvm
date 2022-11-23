@@ -109,8 +109,7 @@ TEST(SlidingBloomReplayCacheTest, TestCacheErrorRate) {
 TEST(SlidingBloomReplayCacheTest, TestTimeBucketing) {
   const int numTries = 1 << 14;
   folly::ScopedEventBaseThread evbThread_;
-  SlidingBloomReplayCache cache(
-      12, numTries, 0.0005, evbThread_.getEventBase());
+  SlidingBloomReplayCache cache(1, numTries, 0.0005, evbThread_.getEventBase());
 
   std::vector<std::string> history(numTries);
   folly::via(evbThread_.getEventBase(), [&]() {
@@ -121,7 +120,7 @@ TEST(SlidingBloomReplayCacheTest, TestTimeBucketing) {
   }).get();
 
   folly::EventBase evb;
-  // 6 seconds in, all values should still be set
+  // 0.5 seconds in, all values should still be set
   evb.scheduleAt(
       [&] {
         folly::via(evbThread_.getEventBase(), [&]() {
@@ -130,9 +129,9 @@ TEST(SlidingBloomReplayCacheTest, TestTimeBucketing) {
           }
         }).get();
       },
-      evb.now() + std::chrono::seconds(6));
+      evb.now() + std::chrono::milliseconds(500));
 
-  // 13 seconds in, all should be gone.
+  // 1.5 seconds in, all should be gone.
   evb.scheduleAt(
       [&] {
         folly::via(evbThread_.getEventBase(), [&]() {
@@ -142,7 +141,7 @@ TEST(SlidingBloomReplayCacheTest, TestTimeBucketing) {
         }).get();
         evb.terminateLoopSoon();
       },
-      evb.now() + std::chrono::seconds(13));
+      evb.now() + std::chrono::seconds(1));
   evb.loop();
 }
 

@@ -1282,6 +1282,10 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
         in
         (env, (ety1, Error (ety1, ty_expect), Ok tkey, Ok ty2))
       | Tclass ((_, cn), _, _)
+        when String.equal cn SN.Collections.cAnyArray
+             && env.Typing_env_types.in_support_dynamic_type_method_check ->
+        got_dynamic ()
+      | Tclass ((_, cn), _, _)
         when String.equal cn SN.Collections.cKeyedContainer
              || String.equal cn SN.Collections.cAnyArray
              || String.equal cn SN.Collections.cPair ->

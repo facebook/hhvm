@@ -413,7 +413,7 @@ void record_perf_mem_event(PerfEvent kind, const perf_event_sample* sample) {
     if (jit::mcgen::initialized() && jit::tc::code().isValidCodeAddress(tca)) {
       return record_tc_mem_event(tca, record);
     }
-    if (uintptr_t(addr) <= 0xffffffff) {
+    if (uintptr_t(addr) <= kLowArenaMaxAddr) {
       return record_low_mem_event(addr, record);
     }
     if (uintptr_t(addr) - s_stackLimit < s_stackSize) {

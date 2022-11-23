@@ -138,6 +138,10 @@ struct Options {
   int ExternWorkerTimeoutSecs = 0;
   int ExternWorkerThrottleRetries = -1;
   int ExternWorkerThrottleBaseWaitMSecs = -1;
+  size_t ExternWorkerCASConnectionCount = 16;
+  size_t ExternWorkerEngineConnectionCount = 4;
+  size_t ExternWorkerActionCacheConnectionCount = 16;
+  std::string ExternWorkerFeaturesFile;
 
   template <typename SerDe> void serde(SerDe& sd) {
     sd(TraceFunctions, string_lessi{}, std::less<std::string>{})

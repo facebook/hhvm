@@ -476,7 +476,11 @@ extern_worker::Options make_extern_worker_options() {
     .setUseRichClient(options.ExternWorkerUseRichClient)
     .setUseZippyRichClient(options.ExternWorkerUseZippyRichClient)
     .setUseP2P(options.ExternWorkerUseP2P)
-    .setVerboseLogging(options.ExternWorkerVerboseLogging);
+    .setVerboseLogging(options.ExternWorkerVerboseLogging)
+    .setCasConnectionCount(options.ExternWorkerCASConnectionCount)
+    .setEngineConnectionCount(options.ExternWorkerEngineConnectionCount)
+    .setAcConnectionCount(options.ExternWorkerActionCacheConnectionCount)
+    .setFeaturesFile(options.ExternWorkerFeaturesFile);
   if (options.ExternWorkerTimeoutSecs > 0) {
     opts.setTimeout(std::chrono::seconds{options.ExternWorkerTimeoutSecs});
   }

@@ -8,8 +8,6 @@
  *
  *)
 
-[@@@warning "-3"]
-
 (* These are basically the same tests as in
  * test/integration_ml/saved_state/test_naming_table_sqlite_fallback.ml, but
  * as stripped down to just the basics as possible to make finding the root
@@ -654,7 +652,7 @@ let test_naming_table_hash () =
       let hash = Typing_deps.Dep.to_int64 dep in
       (* "%16x" on a negative integer will produce a hex version as if it were unsigned, e.g. -2 is printed as 7ffffffffffffffe rather than -0000000000000002. *)
       let i_str = Printf.sprintf "0x%016x" i in
-      let hash_str = Caml.Int64.format "0x%016x" hash in
+      let hash_str = Printf.sprintf "0x%016Lx" hash in
       Asserter.String_asserter.assert_equals
         i_str
         hash_str

@@ -13,8 +13,6 @@ open Hh_prelude
 (* Types, constants *)
 (*****************************************************************************)
 
-type mode = Ai of Ai_options.t
-
 type options = {
   files: string list;
   extra_builtins: string list;

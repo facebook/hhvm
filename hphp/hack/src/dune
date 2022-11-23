@@ -1,7 +1,7 @@
 (env
  (_
   (flags
-   (:standard -w @a-3-4-29-32-34-35-37-41-42-44-45-48-50-60-70 \ -strict-sequence))))
+   (:standard -w @a-4-29-35-41-42-44-45-48-50-70 \ -strict-sequence))))
 
 (subdir hhi/hsl_src/ (dirs :standard _Private))
 (subdir hhi/hsl_src/file (dirs :standard _Private))
@@ -19,6 +19,7 @@
   (:standard
    (:include dune_config/ld-opts.sexp)))
  (libraries
+  camlp-streams
   ifc
   ifc_lib
   client_color_file

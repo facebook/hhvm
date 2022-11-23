@@ -6,6 +6,7 @@ export HACK_OPAM_DEPS=(
   base.v0.15.1
   base64.3.5.0
   camlp4.4.14+1
+  camlp-streams.5.0.1
   cmdliner.1.1.1
   core_kernel.v0.15.0
   core_unix.v0.15.2

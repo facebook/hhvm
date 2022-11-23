@@ -8,8 +8,6 @@
  *)
 
 open Hh_prelude
-module SyntaxTree = Full_fidelity_syntax_tree
-module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
 module Logger = HackfmtEventLogger
 module FEnv = Format_env

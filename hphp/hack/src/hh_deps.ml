@@ -7,8 +7,6 @@
  *
  *)
 
-[@@@warning "-3"]
-
 open Hh_prelude
 
 let children_files (file_list : String.t list) =
@@ -17,7 +15,7 @@ let children_files (file_list : String.t list) =
       acc (parent : String.t) (file_list : String.t list) =
     let file_list =
       List.map file_list ~f:(fun s ->
-          if parent == "" then
+          if String.equal parent "" then
             s
           else
             parent ^ "/" ^ s)

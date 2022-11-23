@@ -27,7 +27,11 @@ val parse_decls :
 
 (** NOTE: this doesn't respect deregister_php_lib, and has decls in reverse lexical order *)
 val parse_and_hash_decls :
-  DeclParserOptions.t -> Relative_path.t -> string -> parsed_file_with_hashes
+  DeclParserOptions.t ->
+  bool ->
+  Relative_path.t ->
+  string ->
+  parsed_file_with_hashes
 
 val decls_hash : decls -> Int64.t
 

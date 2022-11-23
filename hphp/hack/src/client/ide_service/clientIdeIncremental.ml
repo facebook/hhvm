@@ -58,6 +58,7 @@ let compute_fileinfo_for_path
     Some
       (Direct_decl_parser.parse_and_hash_decls
          (DeclParserOptions.from_parser_options popt)
+         (ParserOptions.deregister_php_stdlib popt)
          path
          contents
       |> Direct_decl_parser.decls_to_fileinfo path)

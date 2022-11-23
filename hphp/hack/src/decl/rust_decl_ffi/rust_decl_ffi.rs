@@ -74,16 +74,26 @@ ocaml_ffi_arena_result! {
     fn hh_parse_and_hash_decls_ffi<'a>(
         arena: &'a Bump,
         opts: DeclParserOptions,
+        deregister_php_stdlib_if_hhi: bool,
         filename: RelativePath,
         text: UnsafeOcamlPtr,
     ) -> OcamlParsedFileWithHashes<'a> {
+        let is_hhi = filename.prefix() == relative_path::Prefix::Hhi;
         // SAFETY: Borrow the contents of the source file from the value on the
         // OCaml heap rather than copying it over. This is safe as long as we
         // don't call into OCaml within this function scope.
         let text_value: ocamlrep::Value<'a> = unsafe { text.as_value() };
         let text = bytes_from_ocamlrep(text_value).expect("expected string");
+        // 1. Parse the file, and get back decls in reverse lexical order
         let parsed_file = direct_decl_parser::parse_decls_for_typechecking(&opts, filename, text, arena);
-        let with_hashes = ParsedFileWithHashes::from(parsed_file);
+        // 2. Calculate file hash, and individual decl hashes
+        let mut with_hashes = ParsedFileWithHashes::from(parsed_file);
+        // 3. remove some decls, and alter others
+        if deregister_php_stdlib_if_hhi && is_hhi {
+            with_hashes.remove_php_stdlib_decls(arena);
+        }
+
+        // Note: we're expected to return decls in reverse lexical order
         with_hashes.into()
     }
 }

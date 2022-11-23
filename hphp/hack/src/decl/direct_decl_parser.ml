@@ -32,8 +32,11 @@ external parse_decls :
   = "hh_parse_decls_ffi"
 
 external parse_and_hash_decls :
-  DeclParserOptions.t -> Relative_path.t -> string -> parsed_file_with_hashes
-  = "hh_parse_and_hash_decls_ffi"
+  DeclParserOptions.t ->
+  bool ->
+  Relative_path.t ->
+  string ->
+  parsed_file_with_hashes = "hh_parse_and_hash_decls_ffi"
 
 external decls_hash : decls -> Int64.t = "decls_hash"
 

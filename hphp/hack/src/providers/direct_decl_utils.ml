@@ -185,46 +185,15 @@ let direct_decl_parse ?(ignore_file_content_caches = false) ctx file =
   | Some contents ->
     let popt = Provider_context.get_popt ctx in
     let opts = DeclParserOptions.from_parser_options popt in
-    let parsed_file =
-      Direct_decl_parser.parse_and_hash_decls opts file contents
-    in
-    let deregister_php_stdlib =
-      Relative_path.is_hhi (Relative_path.prefix file)
-      && ParserOptions.deregister_php_stdlib popt
-    in
-    let is_stdlib_fun fun_decl = fun_decl.Typing_defs.fe_php_std_lib in
-    let is_stdlib_class c =
-      List.exists c.Shallow_decl_defs.sc_user_attributes ~f:(fun a ->
-          String.equal
-            Naming_special_names.UserAttributes.uaPHPStdLib
-            (snd a.Typing_defs_core.ua_name))
+    let deregister_php_stdlib_if_hhi =
+      ParserOptions.deregister_php_stdlib popt
     in
     let parsed_file =
-      if not deregister_php_stdlib then
-        parsed_file
-      else
-        let open Shallow_decl_defs in
-        let decls =
-          List.filter_map parsed_file.pfh_decls ~f:(function
-              | (_, Fun f, _) when is_stdlib_fun f -> None
-              | (_, Class c, _) when is_stdlib_class c -> None
-              | (name, Class c, hash) ->
-                let keep_prop sp = not (sp_php_std_lib sp) in
-                let keep_meth sm = not (sm_php_std_lib sm) in
-                let c =
-                  {
-                    c with
-                    sc_props = List.filter c.sc_props ~f:keep_prop;
-                    sc_sprops = List.filter c.sc_sprops ~f:keep_prop;
-                    sc_methods = List.filter c.sc_methods ~f:keep_meth;
-                    sc_static_methods =
-                      List.filter c.sc_static_methods ~f:keep_meth;
-                  }
-                in
-                Some (name, Class c, hash)
-              | name_decl_and_hash -> Some name_decl_and_hash)
-        in
-        { parsed_file with pfh_decls = decls }
+      Direct_decl_parser.parse_and_hash_decls
+        opts
+        deregister_php_stdlib_if_hhi
+        file
+        contents
     in
     Some parsed_file
 

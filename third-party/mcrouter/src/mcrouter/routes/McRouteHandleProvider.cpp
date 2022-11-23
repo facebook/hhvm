@@ -265,10 +265,10 @@ template <>
 std::shared_ptr<MemcacheRouterInfo::RouteHandleIf>
 McRouteHandleProvider<MemcacheRouterInfo>::createSRRoute(
     RouteHandleFactory<MemcacheRouterInfo::RouteHandleIf>& factory,
-    const folly::dynamic& json) {
-  checkLogic(makeSRRoute, "SRRoute is not implemented for this router");
+    const folly::dynamic& json,
+    const RouteHandleFactoryFuncWithProxy& factoryFunc) {
   checkLogic(json.isObject(), "SRRoute should be object");
-  auto route = makeSRRoute(factory, json, proxy_);
+  auto route = factoryFunc(factory, json, proxy_);
   // Track the SRRoute created so that we can save it to SRRoute map later
   auto srRoute = route;
 
@@ -370,10 +370,6 @@ McRouteHandleProvider<MemcacheRouterInfo>::buildRouteMap() {
        }},
       {"RoutingGroupRoute", &makeRoutingGroupRoute<MemcacheRouterInfo>},
       {"StagingRoute", &makeStagingRoute},
-      {"SRRoute",
-       [this](McRouteHandleFactory& factory, const folly::dynamic& json) {
-         return createSRRoute(factory, json);
-       }},
       {"WarmUpRoute", &makeWarmUpRoute},
   };
   return map;
@@ -383,7 +379,10 @@ template <>
 typename McRouteHandleProvider<
     MemcacheRouterInfo>::RouteHandleFactoryMapWithProxy
 McRouteHandleProvider<MemcacheRouterInfo>::buildRouteMapWithProxy() {
-  return RouteHandleFactoryMapWithProxy();
+  RouteHandleFactoryMapWithProxy map{
+      {"SRRoute", &makeSRRoute},
+  };
+  return map;
 }
 
 } // namespace mcrouter

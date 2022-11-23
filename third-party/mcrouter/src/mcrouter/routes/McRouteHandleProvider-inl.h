@@ -444,10 +444,10 @@ template <class RouterInfo>
 std::shared_ptr<typename RouterInfo::RouteHandleIf>
 McRouteHandleProvider<RouterInfo>::createSRRoute(
     RouteHandleFactory<typename RouterInfo::RouteHandleIf>& factory,
-    const folly::dynamic& json) {
-  checkLogic(makeSRRoute, "SRRoute is not implemented for this router");
+    const folly::dynamic& json,
+    const RouteHandleFactoryFuncWithProxy& factoryFunc) {
   checkLogic(json.isObject(), "SRRoute should be object");
-  auto route = makeSRRoute(factory, json, proxy_);
+  auto route = factoryFunc(factory, json, proxy_);
 
   if (auto maxOutstandingJson = json.get_ptr("max_outstanding")) {
     auto v = parseInt(
@@ -473,7 +473,8 @@ template <>
 std::shared_ptr<MemcacheRouterInfo::RouteHandleIf>
 McRouteHandleProvider<MemcacheRouterInfo>::createSRRoute(
     RouteHandleFactory<MemcacheRouterInfo::RouteHandleIf>& factory,
-    const folly::dynamic& json);
+    const folly::dynamic& json,
+    const RouteHandleFactoryFuncWithProxy& factoryFunc);
 
 template <class RouterInfo>
 std::shared_ptr<typename RouterInfo::RouteHandleIf>
@@ -692,6 +693,12 @@ McRouteHandleProvider<RouterInfo>::create(
     return {makeFailoverRoute(factory, json, *extraProvider_)};
   } else if (type == "PoolRoute") {
     return {makePoolRoute(factory, json)};
+  } else if (type == "SRRoute") {
+    auto it = routeMapWithProxy_.find(type);
+    checkLogic(
+        it != routeMapWithProxy_.end(),
+        "SRRoute is not implemented for this router");
+    return {createSRRoute(factory, json, it->second)};
   }
 
   auto it = routeMap_.find(type);

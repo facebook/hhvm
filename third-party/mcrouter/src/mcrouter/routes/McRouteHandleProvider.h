@@ -182,7 +182,8 @@ class McRouteHandleProvider
 
   RouteHandlePtr createSRRoute(
       RouteHandleFactory<RouteHandleIf>& factory,
-      const folly::dynamic& json);
+      const folly::dynamic& json,
+      const RouteHandleFactoryFuncWithProxy& factoryFunc);
 
   RouteHandlePtr createAsynclogRoute(
       RouteHandlePtr route,

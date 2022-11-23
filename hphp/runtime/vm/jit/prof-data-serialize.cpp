@@ -744,13 +744,13 @@ struct TargetProfileVisitor : boost::static_visitor<void> {
   void process(T& out, const StringData* name) {
     write_raw(ser, size);
     write_string(ser, name);
-    write_raw(ser, sym);
+    auto& p = boost::get<rds::Profile>(sym);
+    write_raw(ser, p.kind);
+    write_raw(ser, p.transId);
+    write_raw(ser, p.bcOff);
+    write_string(ser, p.name);
     TargetProfile<T>::reduce(out, handle, size);
-    if (size == sizeof(T)) {
-      write_maybe_serializable(ser, out);
-    } else {
-      write_raw(ser, &out, size);
-    }
+    write_maybe_serializable(ser, out);
   }
 
   template<typename T> void operator()(const T&) {}
@@ -894,11 +894,7 @@ struct SymbolFixup : boost::static_visitor<void> {
     auto prof = TargetProfile<T>::deserialize(
       {pt.transId}, TransKind::Profile, pt.bcOff, name, size - sizeof(T));
 
-    if (size == sizeof(T)) {
-      read_maybe_serializable(ser, prof.value());
-    } else {
-      read_raw(ser, &prof.value(), size);
-    }
+    read_maybe_serializable(ser, prof.value());
     maybe_output_target_profile_trace(name, prof, pt);
   }
 
@@ -927,7 +923,14 @@ void read_target_profiles(ProfDataDeserializer& ser) {
     auto const size = read_raw<uint32_t>(ser);
     if (!size) break;
     auto const name = read_string(ser);
-    auto sym = read_raw<rds::Symbol>(ser);
+
+    // For now, we only write rds::Profile.
+    rds::Profile profile{};
+    profile.kind = read_raw<rds::ProfileKind>(ser);
+    profile.transId = read_raw<TransID>(ser);
+    profile.bcOff = read_raw<Offset>(ser);
+    profile.name = read_string(ser);
+    rds::Symbol sym{profile};
     auto sf = SymbolFixup{ser, name, size};
     boost::apply_visitor(sf, sym);
   }

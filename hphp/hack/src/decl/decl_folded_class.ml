@@ -414,6 +414,7 @@ let class_class_decl (class_id : Typing_defs.pos_id) : Typing_defs.class_const =
 
 let build_prop_sprop_ty
     ~(ctx : Provider_context.t)
+    ~(this_class : shallow_class option)
     ~(is_static : bool)
     ~(elt_origin : string)
     (sp : Shallow_decl_defs.shallow_prop) : Typing_defs.decl_ty =
@@ -422,7 +423,8 @@ let build_prop_sprop_ty
   let ty =
     match sp.sp_type with
     | None -> mk (Reason.Rwitness_from_decl sp_pos, Typing_defs.make_tany ())
-    | Some ty' -> Decl_enforceability.maybe_pessimise_type ~is_xhp_attr ctx ty'
+    | Some ty' ->
+      Decl_enforceability.maybe_pessimise_type ~is_xhp_attr ~this_class ctx ty'
   in
   (if member_heaps_enabled ctx then
     if is_static then
@@ -438,7 +440,14 @@ let prop_decl_eager
     (sp : Shallow_decl_defs.shallow_prop) :
     (Decl_defs.element * Typing_defs.decl_ty option) SMap.t =
   let elt_origin = snd c.sc_name in
-  let ty = build_prop_sprop_ty ~ctx ~is_static:false ~elt_origin sp in
+  let ty =
+    build_prop_sprop_ty
+      ~ctx
+      ~this_class:(Some c)
+      ~is_static:false
+      ~elt_origin
+      sp
+  in
   let vis = visibility (snd c.sc_name) c.sc_module sp.sp_visibility in
   let elt =
     {
@@ -480,7 +489,14 @@ let prop_decl_lazy
            String.equal (snd prop.sp_name) sp_name)
      with
     | None -> Error LMLEMemberNotFound
-    | Some sp -> Ok (build_prop_sprop_ty ~ctx ~is_static:false ~elt_origin sp))
+    | Some sp ->
+      Ok
+        (build_prop_sprop_ty
+           ~ctx
+           ~this_class:(Some class_)
+           ~is_static:false
+           ~elt_origin
+           sp))
 
 let static_prop_decl_eager
     ~(ctx : Provider_context.t)
@@ -489,7 +505,9 @@ let static_prop_decl_eager
     (sp : Shallow_decl_defs.shallow_prop) :
     (Decl_defs.element * Typing_defs.decl_ty option) SMap.t =
   let elt_origin = snd c.sc_name in
-  let ty = build_prop_sprop_ty ~ctx ~is_static:true ~elt_origin sp in
+  let ty =
+    build_prop_sprop_ty ~ctx ~this_class:(Some c) ~is_static:true ~elt_origin sp
+  in
   let vis = visibility (snd c.sc_name) c.sc_module sp.sp_visibility in
   let elt =
     {
@@ -531,7 +549,14 @@ let static_prop_decl_lazy
            String.equal (snd prop.sp_name) sp_name)
      with
     | None -> Error LMLEMemberNotFound
-    | Some sp -> Ok (build_prop_sprop_ty ~ctx ~is_static:true ~elt_origin sp))
+    | Some sp ->
+      Ok
+        (build_prop_sprop_ty
+           ~ctx
+           ~this_class:(Some class_)
+           ~is_static:true
+           ~elt_origin
+           sp))
 
 (* each concrete type constant T = <sometype> implicitly defines a
 class constant with the same name which is TypeStructure<sometype> *)
@@ -632,6 +657,7 @@ let typeconst_fold
 
 let build_method_fun_elt
     ~(ctx : Provider_context.t)
+    ~(this_class : shallow_class option)
     ~(is_static : bool)
     ~(elt_origin : string)
     (m : Shallow_decl_defs.shallow_method) : Typing_defs.fun_elt =
@@ -651,6 +677,7 @@ let build_method_fun_elt
                 Abstract_method
               else
                 Concrete_method)
+            ~this_class
             ctx
             pos
             m.sm_type);
@@ -708,7 +735,14 @@ let method_decl_eager
       elt_deprecated = m.sm_deprecated;
     }
   in
-  let fe = build_method_fun_elt ~ctx ~is_static ~elt_origin:elt.elt_origin m in
+  let fe =
+    build_method_fun_elt
+      ~ctx
+      ~this_class:(Some c)
+      ~is_static
+      ~elt_origin:elt.elt_origin
+      m
+  in
   let acc = SMap.add id (elt, Some fe) acc in
   acc
 
@@ -733,7 +767,14 @@ let method_decl_lazy
        List.find methods ~f:(fun m -> String.equal (snd m.sm_name) sm_name)
      with
     | None -> Error LMLEMemberNotFound
-    | Some sm -> Ok (build_method_fun_elt ~ctx ~is_static ~elt_origin sm))
+    | Some sm ->
+      Ok
+        (build_method_fun_elt
+           ~this_class:(Some class_)
+           ~ctx
+           ~is_static
+           ~elt_origin
+           sm))
 
 let rec declare_class_and_parents
     ~(sh : SharedMem.uses)

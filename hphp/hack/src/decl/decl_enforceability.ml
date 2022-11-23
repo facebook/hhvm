@@ -8,6 +8,8 @@
 open Hh_prelude
 open Typing_defs
 
+let ( let* ) = Caml.Option.bind
+
 let is_typedef ctx x =
   match Naming_provider.get_type_kind ctx x with
   | Some Naming_types.TTypedef -> true
@@ -33,13 +35,131 @@ let get_class_or_typedef ctx x =
     | None -> None
     | Some cd -> Some (ClassResult cd)
 
+let get_typeconst_type ctx c id =
+  let open Shallow_decl_defs in
+  (* Look for id directly defined in the given shallow class. Assume there is
+     only one, since it is an error to have multiple definitions. *)
+  let find_locally c =
+    List.find_map
+      ~f:(fun stc ->
+        if String.equal id (snd stc.stc_name) then
+          Some stc.stc_kind
+        else
+          None)
+      c.sc_typeconsts
+  in
+  let class_type_to_shallow_class cty =
+    match get_node cty with
+    | Tapply ((_, class_name), _) -> Shallow_classes_provider.get ctx class_name
+    | _ -> None
+  in
+  (* Find the first concrete definition of id in the list. If there is none, return
+     the first abstract one, kept in found_abstract *)
+  let rec find_in_list visited found_abstract ctys =
+    match ctys with
+    | [] -> found_abstract
+    | cty :: ctys ->
+      let c = class_type_to_shallow_class cty in
+      (match c with
+      | None -> find_in_list visited found_abstract ctys
+      | Some c ->
+        (match find_in_class visited c with
+        | None -> find_in_list visited found_abstract ctys
+        | Some (TCAbstract _) as new_abstract ->
+          (match found_abstract with
+          | None -> find_in_list visited new_abstract ctys
+          | _ -> find_in_list visited found_abstract ctys)
+        | Some (TCConcrete _ as res) -> Some res))
+  (* Look for id in c, either locally, or inherited *)
+  and find_in_class visited c =
+    if SSet.mem (snd c.sc_name) visited then
+      None
+    else
+      match find_locally c with
+      | Some tc -> Some tc
+      | None ->
+        find_in_list
+          (SSet.add (snd c.sc_name) visited)
+          None
+          (List.concat
+             [
+               c.sc_extends;
+               c.sc_implements;
+               c.sc_uses;
+               c.sc_req_extends;
+               c.sc_req_implements;
+             ])
+  in
+  let* tc = find_in_class SSet.empty c in
+  match tc with
+  | TCAbstract abstract -> abstract.atc_as_constraint
+  | TCConcrete concrete -> Some concrete.tc_type
+
 let make_unenforced ty =
   match ty with
   | Enforced ty -> Unenforced (Some ty)
   | Unenforced _ -> ty
 
-let get_enforcement ~return_from_async (ctx : Provider_context.t) (ty : decl_ty)
-    : enf =
+module VisitedSet = Caml.Set.Make (struct
+  type t = string * string
+
+  let compare (s1, r1) (s2, r2) =
+    let c1 = String.compare s1 s2 in
+    if c1 = 0 then
+      String.compare r1 r2
+    else
+      c1
+end)
+
+(* We need to maintain a visited set because there can be cycles between bounds on type constants *)
+let add_to_visited visited cd ty =
+  let name = snd cd.Shallow_decl_defs.sc_name in
+  VisitedSet.add (name, ty) visited
+
+let mem_visited visited cd ty =
+  let name = snd cd.Shallow_decl_defs.sc_name in
+  VisitedSet.mem (name, ty) visited
+
+(* Find the class definition that ty represents, by expanding Taccess. Since
+   expanding one Taccess might give us another type containing Taccess, we
+   keep a set of visited type constant definitions and terminate if we reach
+   a cycle. *)
+let rec get_owner ~this_class visited ctx ty =
+  match get_node ty with
+  | Tthis -> this_class
+  | Tapply ((_, name), _) -> Shallow_classes_provider.get ctx name
+  | Taccess (ty, (_, tcname)) ->
+    let* (visited, cd, ty) =
+      get_owner_and_type ~this_class visited ctx ty tcname
+    in
+    get_owner ~this_class:(Some cd) visited ctx ty
+  | _ -> None
+
+(* Lookup tcname in the class that ty represents. *)
+and get_owner_and_type ~this_class visited ctx ty tcname =
+  let* cd = get_owner ~this_class visited ctx ty in
+  if mem_visited visited cd tcname then
+    None
+  else
+    let* ty = get_typeconst_type ctx cd tcname in
+    Some (add_to_visited visited cd tcname, cd, ty)
+
+(* Resolve an access t::T to a type that is not an access *)
+let resolve_access ~this_class ctx ty tcname =
+  let rec resolve_access ~this_class visited ctx ty tcname =
+    let* (visited, cd, ty) =
+      get_owner_and_type ~this_class visited ctx ty tcname
+    in
+    match get_node ty with
+    | Taccess (sub_ty, (_, tcname)) ->
+      resolve_access ~this_class:(Some cd) visited ctx sub_ty tcname
+    | _ -> Some ty
+  in
+  resolve_access ~this_class VisitedSet.empty ctx ty tcname
+
+let get_enforcement
+    ~this_class ~return_from_async (ctx : Provider_context.t) (ty : decl_ty) :
+    enf =
   let tcopt = Provider_context.get_tcopt ctx in
   let enable_sound_dynamic = TypecheckerOptions.enable_sound_dynamic tcopt in
   (* is_dynamic_enforceable controls whether the type dynamic is considered enforceable.
@@ -127,7 +247,10 @@ let get_enforcement ~return_from_async (ctx : Provider_context.t) (ty : decl_ty)
        *)
       Unenforced None
     | Trefinement _ -> Unenforced None
-    | Taccess _ -> Unenforced None
+    | Taccess (ty, (_, id)) ->
+      (match resolve_access ~this_class ctx ty id with
+      | None -> Unenforced None
+      | Some ty -> enforcement ~is_dynamic_enforceable ctx visited ty)
     | Tlike ty when enable_sound_dynamic ->
       enforcement ~is_dynamic_enforceable ctx visited ty
     | Tlike _ -> Unenforced None
@@ -192,9 +315,9 @@ let get_enforcement ~return_from_async (ctx : Provider_context.t) (ty : decl_ty)
   else
     enforcement ~is_dynamic_enforceable:false ctx SSet.empty ty
 
-let is_enforceable ~return_from_async (ctx : Provider_context.t) (ty : decl_ty)
-    =
-  match get_enforcement ~return_from_async ctx ty with
+let is_enforceable
+    ~return_from_async ~this_class (ctx : Provider_context.t) (ty : decl_ty) =
+  match get_enforcement ~return_from_async ~this_class ctx ty with
   | Enforced _ -> true
   | Unenforced _ -> false
 
@@ -241,15 +364,18 @@ let maybe_add_supportdyn_constraints ctx p tparams =
   else
     tparams
 
-let pessimise_type ~is_xhp_attr ctx ty =
-  if (not is_xhp_attr) && is_enforceable ~return_from_async:false ctx ty then
+let pessimise_type ~is_xhp_attr ~this_class ctx ty =
+  if
+    (not is_xhp_attr)
+    && is_enforceable ~return_from_async:false ~this_class ctx ty
+  then
     ty
   else
     make_like_type ~return_from_async:false ty
 
-let maybe_pessimise_type ~is_xhp_attr ctx ty =
+let maybe_pessimise_type ~is_xhp_attr ~this_class ctx ty =
   if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
-    pessimise_type ~is_xhp_attr ctx ty
+    pessimise_type ~is_xhp_attr ~this_class ctx ty
   else
     ty
 
@@ -285,7 +411,7 @@ let intersect_enforceable ~fun_kind ret_ty ty_to_wrap =
   avoid hierarchy errors.
 
 *)
-let pessimise_fun_type ~fun_kind ctx p ty =
+let pessimise_fun_type ~fun_kind ~this_class ctx p ty =
   match get_node ty with
   | Tfun ft ->
     let return_from_async = get_ft_async ft in
@@ -307,7 +433,7 @@ let pessimise_fun_type ~fun_kind ctx p ty =
           Tfun (update_return_ty ft (make_like_type ~return_from_async ret_ty))
         )
     | _ ->
-      (match get_enforcement ~return_from_async ctx ret_ty with
+      (match get_enforcement ~return_from_async ~this_class ctx ret_ty with
       | Enforced _ -> mk (get_reason ty, Tfun ft)
       | Unenforced enf_ty_opt ->
         mk
@@ -321,8 +447,8 @@ let pessimise_fun_type ~fun_kind ctx p ty =
                     (make_like_type ~return_from_async ret_ty))) )))
   | _ -> ty
 
-let maybe_pessimise_fun_type ~fun_kind ctx p ty =
+let maybe_pessimise_fun_type ~fun_kind ~this_class ctx p ty =
   if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
-    pessimise_fun_type ~fun_kind ctx p ty
+    pessimise_fun_type ~fun_kind ~this_class ctx p ty
   else
     ty

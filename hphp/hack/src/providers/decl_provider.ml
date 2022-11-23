@@ -154,6 +154,7 @@ let maybe_pessimise_fun_decl ctx fun_decl =
           Decl_enforceability.(
             pessimise_fun_type
               ~fun_kind:Function
+              ~this_class:None
               ctx
               fun_decl.fe_pos
               fun_decl.fe_type);

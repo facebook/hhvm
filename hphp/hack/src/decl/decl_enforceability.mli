@@ -10,12 +10,17 @@
     If the function is async, then the contents of the Awaitable return are
     enforced. Otherwise they aren't. *)
 val is_enforceable :
-  return_from_async:bool -> Provider_context.t -> Typing_defs.decl_ty -> bool
+  return_from_async:bool ->
+  this_class:Shallow_decl_defs.shallow_class option ->
+  Provider_context.t ->
+  Typing_defs.decl_ty ->
+  bool
 
 (** If the type is not enforceable, turn it into a like type (~ty) otherwise
     return the type *)
 val pessimise_type :
   is_xhp_attr:bool ->
+  this_class:Shallow_decl_defs.shallow_class option ->
   Provider_context.t ->
   Typing_defs.decl_ty ->
   Typing_defs.decl_ty
@@ -24,6 +29,7 @@ val pessimise_type :
     return the type *)
 val maybe_pessimise_type :
   is_xhp_attr:bool ->
+  this_class:Shallow_decl_defs.shallow_class option ->
   Provider_context.t ->
   Typing_defs.decl_ty ->
   Typing_defs.decl_ty
@@ -37,6 +43,7 @@ type fun_kind =
     return the original function type. Also add supportdyn<mixed> to the type parameters. *)
 val pessimise_fun_type :
   fun_kind:fun_kind ->
+  this_class:Shallow_decl_defs.shallow_class option ->
   Provider_context.t ->
   Pos_or_decl.t ->
   Typing_defs.decl_ty ->
@@ -46,6 +53,7 @@ val pessimise_fun_type :
     return the type *)
 val maybe_pessimise_fun_type :
   fun_kind:fun_kind ->
+  this_class:Shallow_decl_defs.shallow_class option ->
   Provider_context.t ->
   Pos_or_decl.t ->
   Typing_defs.decl_ty ->

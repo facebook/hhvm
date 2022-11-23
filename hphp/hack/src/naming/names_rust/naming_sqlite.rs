@@ -650,7 +650,7 @@ impl Names {
         let prefix_type = path_rel.prefix() as u8; // TODO(ljw): shouldn't this use prefix_to_i64?
         let suffix = path_rel.path().to_str().unwrap();
         let type_checker_mode = crate::datatypes::convert::mode_to_i64(file_summary.mode);
-        let hash = file_summary.hash;
+        let file_decls_hash = file_summary.file_decls_hash;
 
         self.conn
             .prepare_cached(
@@ -671,7 +671,7 @@ impl Names {
                 prefix_type,
                 suffix,
                 type_checker_mode,
-                hash,
+                file_decls_hash,
                 Self::join_with_pipe(file_summary.classes()),
                 Self::join_with_pipe(file_summary.consts()),
                 Self::join_with_pipe(file_summary.funs()),

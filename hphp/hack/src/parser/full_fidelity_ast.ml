@@ -115,6 +115,7 @@ external rust_from_text_ffi :
   (Rust_aast_parser_types.result, Rust_aast_parser_types.error) result
   = "from_text"
 
+(** Note: this doesn't respect deregister_php_stdlib *)
 external parse_ast_and_decls_ffi :
   Rust_aast_parser_types.env ->
   SourceText.t ->
@@ -182,6 +183,7 @@ let from_text_rust (env : env) (source_text : SourceText.t) :
     source_text
     (rust_from_text_ffi rust_env source_text)
 
+(** note: this doesn't respect deregister_php_stdlib *)
 let ast_and_decls_from_text_rust (env : env) (source_text : SourceText.t) :
     Rust_aast_parser_types.result * Direct_decl_parser.parsed_file_with_hashes =
   let rust_env = make_rust_env env in
@@ -212,6 +214,7 @@ let process_lowerer_result
 let from_text (env : env) (source_text : SourceText.t) : aast_result =
   process_lowerer_result env source_text (from_text_rust env source_text)
 
+(** note: this doesn't respect deregister_php_stdlib *)
 let ast_and_decls_from_text (env : env) (source_text : SourceText.t) :
     aast_result * Direct_decl_parser.parsed_file_with_hashes =
   let (ast_result, decls) = ast_and_decls_from_text_rust env source_text in
@@ -238,6 +241,7 @@ let from_source_text_with_legacy
     (env : env) (source_text : Full_fidelity_source_text.t) : Parser_return.t =
   legacy @@ from_text env source_text
 
+(** note: this doesn't respect deregister_php_stdlib *)
 let ast_and_decls_from_source_text_with_legacy
     (env : env) (source_text : Full_fidelity_source_text.t) :
     Parser_return.t * Direct_decl_parser.parsed_file_with_hashes =
@@ -309,6 +313,7 @@ let defensive_from_file ?quick ?show_all_errors popt fn =
   in
   defensive_program ?quick ?show_all_errors popt fn content
 
+(** note: this doesn't respect deregister_php_stdlib *)
 let ast_and_decls_from_file
     ?(quick = false) ?(show_all_errors = false) parser_options fn =
   let content =

@@ -61,6 +61,7 @@ val defensive_from_file :
 val from_text_rust :
   env -> Full_fidelity_source_text.t -> Rust_aast_parser_types.result
 
+(** note: this doesn't respect deregister_php_stdlib *)
 val ast_and_decls_from_file :
   ?quick:bool ->
   ?show_all_errors:bool ->

@@ -2776,7 +2776,6 @@ name = "names"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bumpalo",
  "crossbeam",
  "hh24_types",
  "hh_hash",

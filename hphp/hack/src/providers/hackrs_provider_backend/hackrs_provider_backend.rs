@@ -163,11 +163,10 @@ impl HhServerProviderBackend {
         text: &'a [u8],
         arena: &'a bumpalo::Bump,
     ) -> Result<ParsedFileWithHashes<'a>> {
-        let hashed_file = self.decl_parser.parse_impl_rev(path, text, arena);
+        let hashed_file = self.decl_parser.parse_impl(path, text, arena);
         self.lazy_shallow_decl_provider.dedup_and_add_decls(
             path,
-            (hashed_file.decls.iter().rev())
-                .map(|(name, decl, _)| NamedDecl::from(&(*name, *decl))),
+            (hashed_file.iter()).map(|(name, decl, _)| NamedDecl::from(&(*name, *decl))),
         )?;
         Ok(hashed_file)
     }

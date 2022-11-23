@@ -21,39 +21,16 @@ use serde::Serialize;
 #[derive(Clone, Debug, Hash, Serialize, Deserialize)]
 pub struct FileSummary {
     pub mode: Option<file_info::Mode>,
-    pub hash: FileDeclsHash,
+    pub file_decls_hash: FileDeclsHash,
     pub decls: Vec<DeclSummary>,
 }
 
 impl FileSummary {
-    pub fn from_hashed_decls<'a>(
-        mut file: ParsedFileWithHashes<'a>,
-        remove_php_stdlib: bool,
-        arena: &'a bumpalo::Bump,
-    ) -> Self {
-        // TODO: The direct decl parser should return decls in the same
-        // order as they are declared in the file. At the moment it reverses
-        // them. Reverse them again to match the syntactic order.
-        if remove_php_stdlib {
-            file.remove_php_stdlib_decls_and_rev(arena);
-        } else {
-            file.rev();
-        }
-        Self::from_fwd_filtered_decls(&file)
-    }
-
-    /// As the function name says, this should only be called after the input
-    /// has undergone remove_php_stlib_decls_and_rev or similar, i.e.
-    /// (1) for hhi files, some functions and attributes should have been removed,
-    /// (2) the decls should be in lexical order.
-    ///
-    /// Callers may consider using `from_hashed_decls` instead, which does this.
-    pub fn from_fwd_filtered_decls<'a>(file: &ParsedFileWithHashes<'a>) -> Self {
+    pub fn new<'a>(parsed_file: &ParsedFileWithHashes<'a>) -> Self {
         Self {
-            mode: file.mode,
-            hash: file.hash,
-            decls: file
-                .decls
+            mode: parsed_file.mode,
+            file_decls_hash: parsed_file.file_decls_hash,
+            decls: parsed_file
                 .iter()
                 .map(|&(symbol, decl, hash)| DeclSummary {
                     name_type: decl.kind(),

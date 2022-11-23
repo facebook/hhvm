@@ -17,7 +17,11 @@ use crate::file_info;
 use crate::shallow_decl_defs;
 use crate::typing_defs;
 
-// NB: Must keep in sync with OCaml type Direct_decl_parser.parsed_file
+/// WARNING: This type has not undergone the processing that you often expect in the typechecker,
+/// e.g. deregistering PHPStdLib symbols, or putting into forward lexical order, or removing
+/// duplicates. It's often a good idea to use ParsedFileWithHashes instead (or rather, one of
+/// its wrappers).
+/// NB: Must keep in sync with OCaml type Direct_decl_parser.parsed_file
 #[derive(Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[derive(Deserialize, FromOcamlRepIn, NoPosHash, Serialize, ToOcamlRep)]
 pub struct ParsedFile<'a> {
@@ -41,69 +45,102 @@ pub struct ParsedFile<'a> {
     pub has_first_pass_parse_errors: bool,
 }
 
-// NB: Must keep in sync with OCaml type `Direct_decl_parser.parsed_file_with_hashes`
-#[derive(Debug, Clone)]
+/// This is a store of decls. It allows iteration of decls in forward lexical order,
+/// and you can .rev() to iterate in reverse lexical order.
+/// By construction, you can safely trust that whoever constructed this object has explicitly
+/// passed `deregister_php_stdlib`, which we hope and trust they got from .hhconfig.
+#[derive(Clone, Debug)]
 pub struct ParsedFileWithHashes<'a> {
     pub mode: Option<file_info::Mode>,
 
-    /// FileDeclHash must be computed before php stdlib decls are removed,
-    /// and must be computed over the decls in reverse file order
-    /// (the hash is order sensitive).
-    pub hash: hh24_types::FileDeclsHash,
+    /// `file_decls_hash` is computed before php stdlib decls and duplicates
+    /// are removed, as is computed over the decls in reverse lexical order
+    /// (the hash is order-sensitive)
+    pub file_decls_hash: hh24_types::FileDeclsHash,
 
-    /// Decls along with a position insensitive hash.
-    pub decls: Vec<(&'a str, Decl<'a>, hh24_types::DeclHash)>,
-}
-
-impl<'a> From<ParsedFile<'a>> for ParsedFileWithHashes<'a> {
-    fn from(parsed_file: ParsedFile<'a>) -> ParsedFileWithHashes<'a> {
-        let file_decls_hash = hh24_types::FileDeclsHash::from_u64(
-            hh_hash::position_insensitive_hash(&parsed_file.decls),
-        );
-        let decls = (parsed_file.decls.into_iter())
-            .map(|(name, decl)| {
-                (
-                    name,
-                    decl,
-                    hh24_types::DeclHash::from_u64(hh_hash::hash(&decl)),
-                )
-            })
-            .collect();
-        ParsedFileWithHashes {
-            mode: parsed_file.mode,
-            hash: file_decls_hash,
-            decls,
-        }
-    }
+    /// Decls along with a position insensitive hash. Internally they're stored in reverse
+    /// lexical order. The choice of what to go into this list (remove dupes? remove php_stdlib
+    /// in hhi files? transform class decls by removing php_stdlib members?) is determined
+    /// by how it was constructed. The field is private: the only way to access it
+    /// are through accessors .iter() and .into_iter(), which give the illusion of it being
+    /// in forward lexical order.
+    decls: Vec<(&'a str, Decl<'a>, hh24_types::DeclHash)>,
 }
 
 impl<'a> ParsedFileWithHashes<'a> {
-    pub fn remove_php_stdlib_decls(&mut self, arena: &'a bumpalo::Bump) {
-        self.decls = (self.decls.drain(..))
-            .filter_map(|(name, decl, _hash)| {
-                filter_php_stdlib_decls(arena, decl).map(|decl| {
-                    let hash = hh24_types::DeclHash::from_u64(hh_hash::hash(&decl));
-                    (name, decl, hash)
-                })
+    pub fn new(
+        parsed_file: ParsedFile<'a>,
+        deregister_php_stdlib_if_hhi: bool,
+        prefix: relative_path::Prefix,
+        arena: &'a bumpalo::Bump,
+    ) -> Self {
+        let file_decls_hash = hh24_types::FileDeclsHash::from_u64(
+            hh_hash::position_insensitive_hash(&parsed_file.decls),
+        );
+        // Note: parsed_file.decls is in reverse lexical order, and our self.decls must also be in reverse
+        // lexical order, so that as `OcamlReverseParsedFileWithHashes` we ffi correctly to ocaml.
+        let decls = parsed_file
+            .decls
+            .into_iter()
+            .filter_map(|(name, mut decl)| {
+                if deregister_php_stdlib_if_hhi && prefix == relative_path::Prefix::Hhi {
+                    match filter_php_stdlib_decls(arena, decl) {
+                        Some(altered_decl) => decl = altered_decl,
+                        None => return None,
+                    }
+                }
+                let hash = hh24_types::DeclHash::from_u64(hh_hash::hash(&decl));
+                Some((name, decl, hash))
             })
             .collect();
+        Self {
+            mode: parsed_file.mode,
+            file_decls_hash,
+            decls,
+        }
     }
 
-    pub fn remove_php_stdlib_decls_and_rev(&mut self, arena: &'a bumpalo::Bump) {
-        self.decls = (self.decls.drain(..).rev())
-            .filter_map(|(name, decl, _hash)| {
-                filter_php_stdlib_decls(arena, decl).map(|decl| {
-                    let hash = hh24_types::DeclHash::from_u64(hh_hash::hash(&decl));
-                    (name, decl, hash)
-                })
+    /// This method is a code smell. It shows that the caller didn't take into account
+    /// the .hhconfig flag `deregister_php_stdlib`.
+    pub fn new_without_deregistering_do_not_use(parsed_file: ParsedFile<'a>) -> Self {
+        let file_decls_hash = hh24_types::FileDeclsHash::from_u64(
+            hh_hash::position_insensitive_hash(&parsed_file.decls),
+        );
+        let decls = parsed_file
+            .decls
+            .into_iter()
+            .map(|(name, decl)| {
+                let hash = hh24_types::DeclHash::from_u64(hh_hash::hash(&decl));
+                (name, decl, hash)
             })
             .collect();
+        Self {
+            mode: parsed_file.mode,
+            file_decls_hash,
+            decls,
+        }
     }
 
-    /// NB do not call this unless you must. To visit decls in forward order,
-    /// use self.decls.iter().rev()
-    pub fn rev(&mut self) {
-        self.decls.reverse()
+    /// This iterates the decls in forward lexical order
+    /// (Use iter().rev() if you want reverse order)
+    pub fn iter(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = &(&'a str, shallow_decl_defs::Decl<'a>, hh24_types::DeclHash)>
+    {
+        // Note that our `self.decls` are stored in reverse order, so we have to reverse now.
+        self.decls.iter().rev()
+    }
+}
+
+impl<'a> IntoIterator for ParsedFileWithHashes<'a> {
+    type Item = (&'a str, shallow_decl_defs::Decl<'a>, hh24_types::DeclHash);
+    type IntoIter = std::iter::Rev<std::vec::IntoIter<Self::Item>>;
+
+    /// This iterates the decls in forward lexical order
+    /// (Use into_iter().rev() if you want reverse order)
+    fn into_iter(self) -> Self::IntoIter {
+        // Note that our `self.decls` are stored in reverse order, so we have to reverse now.
+        self.decls.into_iter().rev()
     }
 }
 
@@ -119,6 +156,9 @@ arena_deserializer::impl_deserialize_in_arena!(Decls<'arena>);
 
 impl<'a> TrivialDrop for Decls<'a> {}
 
+/// WARNING! These decls do not respect the `deregister_php_stdlib` flag in .hhconfig,
+/// and are in reverse declaration order, and have not been de-duped. You should
+/// probably be consuming ParsedFileWithHashes instead.
 impl<'a> Decls<'a> {
     pub const fn empty() -> Self {
         Self(List::empty())
@@ -183,14 +223,6 @@ impl<'a> Decls<'a> {
             Decl::Module(decl) => Some((*name, decl)),
             _ => None,
         })
-    }
-
-    pub fn remove_php_stdlib_decls_and_rev(&mut self, arena: &'a bumpalo::Bump) {
-        self.0 = List::rev_from_iter_in(
-            (self.0.iter().copied())
-                .filter_map(|(name, d)| filter_php_stdlib_decls(arena, d).map(|d| (name, d))),
-            arena,
-        );
     }
 }
 

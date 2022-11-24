@@ -11,8 +11,9 @@ open Decl_provider
 open Typing_defs
 module TPEnv = Type_parameter_env
 
-type class_or_typedef_result =
-  | ClassResult of Typing_classes_heap.Api.t
+type 'a class_or_typedef_result =
+      'a Decl_enforceability.class_or_typedef_result =
+  | ClassResult of 'a
   | TypedefResult of Typing_defs.typedef_type
 
 val simplify_unions_ref : (env -> locl_ty -> env * locl_ty) ref
@@ -128,7 +129,8 @@ val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
 (** Get type alias declaration from the appropriate backend and add dependency. *)
 val get_typedef : env -> type_key -> typedef_decl option
 
-val get_class_or_typedef : env -> type_key -> class_or_typedef_result option
+val get_class_or_typedef :
+  env -> type_key -> Typing_classes_heap.Api.t class_or_typedef_result option
 
 (** Get class constant declaration from the appropriate backend and add dependency. *)
 val get_const : env -> class_decl -> string -> class_const option

@@ -21,8 +21,8 @@ type enf =
   (* The type is not fully enforced, but is enforced at the given ty, if present *)
   | Unenforced of decl_ty option
 
-type class_or_typedef_result =
-  | ClassResult of Shallow_decl_defs.shallow_class
+type 'a class_or_typedef_result =
+  | ClassResult of 'a
   | TypedefResult of Typing_defs.typedef_type
 
 let get_class_or_typedef ctx x =
@@ -111,215 +111,308 @@ module VisitedSet = Caml.Set.Make (struct
       c1
 end)
 
-(* We need to maintain a visited set because there can be cycles between bounds on type constants *)
-let add_to_visited visited cd ty =
-  let name = snd cd.Shallow_decl_defs.sc_name in
-  VisitedSet.add (name, ty) visited
+module type ContextAccess = sig
+  (** [t] is the type of the context that classes and typedefs can be found in *)
+  type t
 
-let mem_visited visited cd ty =
-  let name = snd cd.Shallow_decl_defs.sc_name in
-  VisitedSet.mem (name, ty) visited
+  (** [class_t] is the type that represents a class *)
+  type class_t
 
-(* Find the class definition that ty represents, by expanding Taccess. Since
-   expanding one Taccess might give us another type containing Taccess, we
-   keep a set of visited type constant definitions and terminate if we reach
-   a cycle. *)
-let rec get_owner ~this_class visited ctx ty =
-  match get_node ty with
-  | Tthis -> this_class
-  | Tapply ((_, name), _) -> Shallow_classes_provider.get ctx name
-  | Taccess (ty, (_, tcname)) ->
-    let* (visited, cd, ty) =
-      get_owner_and_type ~this_class visited ctx ty tcname
-    in
-    get_owner ~this_class:(Some cd) visited ctx ty
-  | _ -> None
+  val get_tcopt : t -> TypecheckerOptions.t
 
-(* Lookup tcname in the class that ty represents. *)
-and get_owner_and_type ~this_class visited ctx ty tcname =
-  let* cd = get_owner ~this_class visited ctx ty in
-  if mem_visited visited cd tcname then
-    None
-  else
-    let* ty = get_typeconst_type ctx cd tcname in
-    Some (add_to_visited visited cd tcname, cd, ty)
+  val get_class_or_typedef :
+    t -> string -> class_t class_or_typedef_result option
 
-(* Resolve an access t::T to a type that is not an access *)
-let resolve_access ~this_class ctx ty tcname =
-  let rec resolve_access ~this_class visited ctx ty tcname =
-    let* (visited, cd, ty) =
-      get_owner_and_type ~this_class visited ctx ty tcname
-    in
+  val get_typedef : t -> string -> typedef_type option
+
+  val get_class : t -> string -> class_t option
+
+  (** [get_typeconst ctx cls name] gets the definition of the type constant
+      [name] from [cls] or ancestor if it exists. *)
+  val get_typeconst_type : t -> class_t -> string -> decl_ty option
+
+  val get_tparams : class_t -> decl_tparam list
+
+  val get_name : class_t -> string
+
+  (** [get_enum_type cls] returns the enumeration type if [cls] is an enum. *)
+  val get_enum_type : class_t -> enum_type option
+end
+
+module type Enforcement = sig
+  type ctx
+
+  type class_t
+
+  val get_enforcement :
+    return_from_async:bool ->
+    this_class:class_t option ->
+    ctx ->
+    Typing_defs.decl_ty ->
+    enf
+
+  val is_enforceable :
+    return_from_async:bool ->
+    this_class:class_t option ->
+    ctx ->
+    Typing_defs.decl_ty ->
+    bool
+end
+
+module Enforce (ContextAccess : ContextAccess) :
+  Enforcement
+    with type ctx = ContextAccess.t
+     and type class_t = ContextAccess.class_t = struct
+  type ctx = ContextAccess.t
+
+  type class_t = ContextAccess.class_t
+
+  let add_to_visited visited cd ty =
+    let name = ContextAccess.get_name cd in
+    VisitedSet.add (name, ty) visited
+
+  let mem_visited visited cd ty =
+    let name = ContextAccess.get_name cd in
+    VisitedSet.mem (name, ty) visited
+
+  (* Find the class definition that ty represents, by expanding Taccess. Since
+     expanding one Taccess might give us another type containing Taccess, we
+     keep a set of visited type constant definitions and terminate if we reach
+     a cycle. *)
+  let rec get_owner ~this_class visited (ctx : ContextAccess.t) ty =
     match get_node ty with
-    | Taccess (sub_ty, (_, tcname)) ->
-      resolve_access ~this_class:(Some cd) visited ctx sub_ty tcname
-    | _ -> Some ty
-  in
-  resolve_access ~this_class VisitedSet.empty ctx ty tcname
+    | Tthis -> this_class
+    | Tapply ((_, name), _) -> ContextAccess.get_class ctx name
+    | Taccess (ty, (_, tcname)) ->
+      let* (visited, cd, ty) =
+        get_owner_and_type ~this_class visited ctx ty tcname
+      in
+      get_owner ~this_class:(Some cd) visited ctx ty
+    | _ -> None
 
-let get_enforcement
-    ~this_class ~return_from_async (ctx : Provider_context.t) (ty : decl_ty) :
-    enf =
-  let tcopt = Provider_context.get_tcopt ctx in
-  let enable_sound_dynamic = TypecheckerOptions.enable_sound_dynamic tcopt in
-  (* is_dynamic_enforceable controls whether the type dynamic is considered enforceable.
-     It isn't at the top-level of a type, but is as an argument to a reified generic. *)
-  let rec enforcement ~is_dynamic_enforceable ctx visited ty =
-    match get_node ty with
-    | Tthis -> Unenforced None
-    | Tapply ((_, name), tyl) ->
-      (* Cyclic type definition error will be produced elsewhere *)
-      if SSet.mem name visited then
+  (* Lookup tcname in the class that ty represents. *)
+  and get_owner_and_type ~this_class visited (ctx : ContextAccess.t) ty tcname =
+    let* cd = get_owner ~this_class visited ctx ty in
+    if mem_visited visited cd tcname then
+      None
+    else
+      let* ty = ContextAccess.get_typeconst_type ctx cd tcname in
+      Some (add_to_visited visited cd tcname, cd, ty)
+
+  (* Resolve an access t::T to a type that is not an access *)
+  let resolve_access ~this_class (ctx : ContextAccess.t) ty tcname =
+    (* We need to maintain a visited set because there can be cycles between bounds on type constants *)
+    let rec resolve_access ~this_class visited (ctx : ContextAccess.t) ty tcname
+        =
+      let* (visited, cd, ty) =
+        get_owner_and_type ~this_class visited ctx ty tcname
+      in
+      match get_node ty with
+      | Taccess (sub_ty, (_, tcname)) ->
+        resolve_access ~this_class:(Some cd) visited ctx sub_ty tcname
+      | _ -> Some ty
+    in
+    resolve_access ~this_class VisitedSet.empty ctx ty tcname
+
+  let get_enforcement
+      ~return_from_async ~this_class (ctx : ContextAccess.t) (ty : decl_ty) :
+      enf =
+    let tcopt = ContextAccess.get_tcopt ctx in
+    let enable_sound_dynamic = TypecheckerOptions.enable_sound_dynamic tcopt in
+    let everything_sdt = TypecheckerOptions.everything_sdt tcopt in
+    (* is_dynamic_enforceable controls whether the type dynamic is considered enforceable.
+       It isn't at the top-level of a type, but is as an argument to a reified generic. *)
+    let rec enforcement
+        ~is_dynamic_enforceable (ctx : ContextAccess.t) visited ty =
+      match get_node ty with
+      | Tthis ->
+        Unenforced None (* Look through supportdyn, just as we look through ~ *)
+      | Tapply ((_, name), [ty])
+        when String.equal name Naming_special_names.Classes.cSupportDyn
+             && enable_sound_dynamic ->
+        enforcement ~is_dynamic_enforceable ctx visited ty
+      | Tapply ((_, name), tyl) ->
+        (* Cyclic type definition error will be produced elsewhere *)
+        if SSet.mem name visited then
+          Unenforced None
+        else begin
+          (* The pessimised definition depends on the class or typedef being referenced,
+             but we aren't adding any dependency edges here. It is therefore critical that
+             we are sure thay are added elsewhere. Currently, that is when we revisit this type
+             in Typing_enforceability when we are typechecking the function/property definition
+             it is part of. *)
+          match ContextAccess.get_class_or_typedef ctx name with
+          | Some (TypedefResult { td_vis; td_type; _ }) ->
+            (* Expand type definition one step and compute its enforcement. *)
+            let exp_ty =
+              enforcement
+                ~is_dynamic_enforceable
+                ctx
+                (SSet.add name visited)
+                td_type
+            in
+            Aast.(
+              (match td_vis with
+              | Transparent -> exp_ty
+              | Opaque -> make_unenforced exp_ty
+              | OpaqueModule -> Unenforced None))
+          | Some (ClassResult cls) ->
+            (match ContextAccess.get_enum_type cls with
+            | Some et ->
+              make_unenforced
+                (enforcement
+                   ~is_dynamic_enforceable
+                   ctx
+                   (SSet.add name visited)
+                   et.te_base)
+            | None ->
+              List.Or_unequal_lengths.(
+                (match
+                   List.for_all2
+                     tyl
+                     (ContextAccess.get_tparams cls)
+                     ~f:(fun targ tparam ->
+                       match get_node targ with
+                       | Tdynamic
+                       (* We accept the inner type being dynamic regardless of reification *)
+                       | Tlike _
+                         when not enable_sound_dynamic ->
+                         true
+                       | _ ->
+                         (match tparam.tp_reified with
+                         | Aast.Erased -> false
+                         | Aast.SoftReified -> false
+                         | Aast.Reified ->
+                           (match
+                              enforcement
+                                ~is_dynamic_enforceable:true
+                                ctx
+                                visited
+                                targ
+                            with
+                           | Unenforced _ -> false
+                           | Enforced _ -> true)))
+                 with
+                | Ok false
+                | Unequal_lengths ->
+                  Unenforced None
+                | Ok true -> Enforced ty)))
+          | None -> Unenforced None
+        end
+      | Tgeneric _ ->
+        (* Previously we allowed dynamic ~> T when T is an __Enforceable generic,
+         * that is, when it's valid on the RHS of an `is` or `as` expression.
+         * However, `is` / `as` checks have different behavior than runtime checks
+         * for `tuple`s and `shapes`s; `is` / `as` will shallow-ly check declared
+         * fields but typehint enforcement only checks that we have the right
+         * array type (`varray` for `tuple`, `darray` for `shape`). This means
+         * it's unsound to allow this coercion.
+         *
+         * Additionally, higher kinded generics (i.e., with type arguments) cannot
+         * be enforced at the moment; they are disallowed to have upper bounds.
+         *)
         Unenforced None
-      else begin
-        (* The pessimised definition depends on the class or typedef being referenced,
-           but we aren't adding any dependency edges here. It is therefore critical that
-           we are sure thay are added elsewhere. Currently, that is when we revisit this type
-           in Typing_enforceability when we are typechecking the function/property definition
-           it is part of. *)
-        match get_class_or_typedef ctx name with
-        | Some (TypedefResult { td_vis; td_type; _ }) ->
-          (* Expand type definition one step and compute its enforcement. *)
-          let exp_ty =
-            enforcement
-              ~is_dynamic_enforceable
-              ctx
-              (SSet.add name visited)
-              td_type
-          in
-          Aast.(
-            (match td_vis with
-            | Transparent -> exp_ty
-            | Opaque -> make_unenforced exp_ty
-            | OpaqueModule -> Unenforced None))
-        | Some (ClassResult { Shallow_decl_defs.sc_enum_type = Some et; _ }) ->
-          make_unenforced
-            (enforcement
-               ~is_dynamic_enforceable
-               ctx
-               (SSet.add name visited)
-               et.te_base)
-        | Some (ClassResult sc) ->
-          List.Or_unequal_lengths.(
-            (match
-               List.for_all2
-                 tyl
-                 sc.Shallow_decl_defs.sc_tparams
-                 ~f:(fun targ tparam ->
-                   match get_node targ with
-                   | Tdynamic
-                   (* We accept the inner type being dynamic regardless of reification *)
-                   | Tlike _
-                     when not enable_sound_dynamic ->
-                     true
-                   | _ ->
-                     (match tparam.tp_reified with
-                     | Aast.Erased -> false
-                     | Aast.SoftReified -> false
-                     | Aast.Reified ->
-                       (match
-                          enforcement
-                            ~is_dynamic_enforceable:true
-                            ctx
-                            visited
-                            targ
-                        with
-                       | Unenforced _ -> false
-                       | Enforced _ -> true)))
-             with
-            | Ok false
-            | Unequal_lengths ->
-              Unenforced None
-            | Ok true -> Enforced ty))
+      | Trefinement _ -> Unenforced None
+      | Taccess (ty, (_, id)) when enable_sound_dynamic && everything_sdt ->
+        (match resolve_access ~this_class ctx ty id with
         | None -> Unenforced None
-      end
-    | Tgeneric _ ->
-      (* Previously we allowed dynamic ~> T when T is an __Enforceable generic,
-       * that is, when it's valid on the RHS of an `is` or `as` expression.
-       * However, `is` / `as` checks have different behavior than runtime checks
-       * for `tuple`s and `shapes`s; `is` / `as` will shallow-ly check declared
-       * fields but typehint enforcement only checks that we have the right
-       * array type (`varray` for `tuple`, `darray` for `shape`). This means
-       * it's unsound to allow this coercion.
-       *
-       * Additionally, higher kinded generics (i.e., with type arguments) cannot
-       * be enforced at the moment; they are disallowed to have upper bounds.
-       *)
-      Unenforced None
-    | Trefinement _ -> Unenforced None
-    | Taccess (ty, (_, id)) ->
-      (match resolve_access ~this_class ctx ty id with
-      | None -> Unenforced None
-      | Some ty -> enforcement ~is_dynamic_enforceable ctx visited ty)
-    | Tlike ty when enable_sound_dynamic ->
-      enforcement ~is_dynamic_enforceable ctx visited ty
-    | Tlike _ -> Unenforced None
-    | Tprim prim ->
-      begin
-        match prim with
-        | Aast.Tvoid -> Unenforced None
-        | _ -> Enforced ty
-      end
-    | Tany _ -> Enforced ty
-    | Terr -> Enforced ty
-    | Tnonnull -> Enforced ty
-    | Tdynamic ->
-      if (not enable_sound_dynamic) || is_dynamic_enforceable then
-        Enforced ty
-      else
-        Unenforced None
-    | Tfun _ -> Unenforced None
-    | Ttuple _ -> Unenforced None
-    | Tunion [] -> Enforced ty
-    | Tunion _ -> Unenforced None
-    | Tintersection _ -> Unenforced None
-    | Tshape _ -> Unenforced None
-    | Tmixed -> Enforced ty
-    | Tvar _ -> Unenforced None
-    (* With no parameters, we enforce varray_or_darray just like array *)
-    | Tvec_or_dict (_, el_ty) ->
-      if is_any el_ty then
-        Enforced ty
-      else
-        Unenforced None
-    | Toption ty ->
-      (match enforcement ~is_dynamic_enforceable ctx visited ty with
-      | Enforced _ -> Enforced ty
-      | Unenforced (Some ety) ->
-        Unenforced (Some (mk (get_reason ty, Toption ety)))
-      | Unenforced None -> Unenforced None)
-    | Tnewtype (name, _, _) ->
-      if SSet.mem name visited then
-        Unenforced None
-      else (
-        match Typedef_provider.get_typedef ctx name with
-        | Some { td_vis = Aast.Opaque; td_type; _ } ->
-          let exp_ty =
-            enforcement
-              ~is_dynamic_enforceable
-              ctx
-              (SSet.add name visited)
-              td_type
-          in
-          make_unenforced exp_ty
-        | Some { td_vis = Aast.OpaqueModule; _ } -> Unenforced None
-        | _ -> failwith "should never happen"
-      )
-  in
-  if return_from_async then
-    match get_node ty with
-    | Tapply ((_, name), [ty])
-      when String.equal Naming_special_names.Classes.cAwaitable name ->
-      enforcement ~is_dynamic_enforceable:false ctx SSet.empty ty
-    | _ -> enforcement ~is_dynamic_enforceable:false ctx SSet.empty ty
-  else
-    enforcement ~is_dynamic_enforceable:false ctx SSet.empty ty
+        | Some ty -> enforcement ~is_dynamic_enforceable ctx visited ty)
+      | Taccess _ -> Unenforced None
+      | Tlike ty when enable_sound_dynamic ->
+        enforcement ~is_dynamic_enforceable ctx visited ty
+      | Tlike _ -> Unenforced None
+      | Tprim Aast.(Tvoid | Tnoreturn) -> Unenforced None
+      | Tprim _ -> Enforced ty
+      | Tany _ -> Enforced ty
+      | Terr -> Enforced ty
+      | Tnonnull -> Enforced ty
+      | Tdynamic ->
+        if (not enable_sound_dynamic) || is_dynamic_enforceable then
+          Enforced ty
+        else
+          Unenforced None
+      | Tfun _ -> Unenforced None
+      | Ttuple _ -> Unenforced None
+      | Tunion [] -> Enforced ty
+      | Tunion _ -> Unenforced None
+      | Tintersection _ -> Unenforced None
+      | Tshape _ -> Unenforced None
+      | Tmixed -> Enforced ty
+      | Tvar _ -> Unenforced None
+      (* With no parameters, we enforce varray_or_darray just like array *)
+      | Tvec_or_dict (_, el_ty) ->
+        if is_any el_ty then
+          Enforced ty
+        else
+          Unenforced None
+      | Toption ty ->
+        (match enforcement ~is_dynamic_enforceable ctx visited ty with
+        | Enforced _ -> Enforced ty
+        | Unenforced (Some ety) ->
+          Unenforced (Some (mk (get_reason ty, Toption ety)))
+        | Unenforced None -> Unenforced None)
+      | Tnewtype (name, _, _) ->
+        if SSet.mem name visited then
+          Unenforced None
+        else (
+          match ContextAccess.get_typedef ctx name with
+          | Some { td_vis = Aast.Opaque; td_type; _ } ->
+            let exp_ty =
+              enforcement
+                ~is_dynamic_enforceable
+                ctx
+                (SSet.add name visited)
+                td_type
+            in
+            make_unenforced exp_ty
+          | Some { td_vis = Aast.OpaqueModule; _ } -> Unenforced None
+          | _ -> failwith "should never happen"
+        )
+    in
 
-let is_enforceable
-    ~return_from_async ~this_class (ctx : Provider_context.t) (ty : decl_ty) =
-  match get_enforcement ~return_from_async ~this_class ctx ty with
-  | Enforced _ -> true
-  | Unenforced _ -> false
+    if return_from_async then
+      match get_node ty with
+      | Tapply ((_, name), [ty])
+        when String.equal Naming_special_names.Classes.cAwaitable name ->
+        enforcement ~is_dynamic_enforceable:false ctx SSet.empty ty
+      | _ -> enforcement ~is_dynamic_enforceable:false ctx SSet.empty ty
+    else
+      enforcement ~is_dynamic_enforceable:false ctx SSet.empty ty
+
+  let is_enforceable
+      ~return_from_async ~this_class (ctx : ContextAccess.t) (ty : decl_ty) =
+    match get_enforcement ~return_from_async ~this_class ctx ty with
+    | Enforced _ -> true
+    | Unenforced _ -> false
+end
+
+module ShallowContextAccess :
+  ContextAccess
+    with type t = Provider_context.t
+     and type class_t = Shallow_decl_defs.shallow_class = struct
+  type t = Provider_context.t
+
+  type class_t = Shallow_decl_defs.shallow_class
+
+  let get_tcopt = Provider_context.get_tcopt
+
+  let get_class_or_typedef = get_class_or_typedef
+
+  let get_typedef = Typedef_provider.get_typedef
+
+  let get_class = Shallow_classes_provider.get
+
+  let get_typeconst_type = get_typeconst_type
+
+  let get_tparams sc = sc.Shallow_decl_defs.sc_tparams
+
+  let get_name cd = snd cd.Shallow_decl_defs.sc_name
+
+  let get_enum_type sc = sc.Shallow_decl_defs.sc_enum_type
+end
+
+module E = Enforce (ShallowContextAccess)
+include E
 
 let make_like_type ~return_from_async ty =
   let like_if_not_void ty =

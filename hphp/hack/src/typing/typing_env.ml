@@ -25,8 +25,9 @@ module TPEnv = Type_parameter_env
 module KDefs = Typing_kinding_defs
 module TySet = Typing_set
 
-type class_or_typedef_result =
-  | ClassResult of Typing_classes_heap.Api.t
+type 'a class_or_typedef_result =
+      'a Decl_enforceability.class_or_typedef_result =
+  | ClassResult of 'a
   | TypedefResult of Typing_defs.typedef_type
 
 let show_env _ = "<env>"

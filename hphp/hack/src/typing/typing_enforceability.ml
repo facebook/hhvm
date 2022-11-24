@@ -13,119 +13,45 @@ open Typing_env_types
 module Cls = Decl_provider.Class
 module Env = Typing_env
 
+module FoldedContextAccess :
+  Decl_enforceability.ContextAccess with type t = env and type class_t = Cls.t =
+struct
+  type t = env
+
+  type class_t = Cls.t
+
+  let get_tcopt env = env.genv.tcopt
+
+  let get_class_or_typedef ctx name =
+    (* Preserve the decl access behaviour of the enforceability code that used to be here. *)
+    ignore (Env.get_class ctx name);
+    Env.get_class_or_typedef ctx name
+
+  let get_typedef = Env.get_typedef
+
+  let get_class = Env.get_class
+
+  let get_typeconst_type _ cls name =
+    match Cls.get_typeconst cls name with
+    | None -> None
+    | Some tc ->
+      (match tc.ttc_kind with
+      | TCAbstract abstract -> abstract.atc_as_constraint
+      | TCConcrete concrete -> Some concrete.tc_type)
+
+  let get_tparams = Cls.tparams
+
+  let get_name = Cls.name
+
+  let get_enum_type = Cls.enum_type
+end
+
+module E = Decl_enforceability.Enforce (FoldedContextAccess)
+
 let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
-  let enable_sound_dynamic =
-    TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
-  in
-  let rec enforcement include_dynamic env visited ty =
-    match get_node ty with
-    | Tthis -> Unenforced
-    (* Look through supportdyn, just as we look through ~ *)
-    | Tapply ((_, name), [ty])
-      when String.equal name Naming_special_names.Classes.cSupportDyn
-           && enable_sound_dynamic ->
-      enforcement include_dynamic env visited ty
-    (* Enums are only enforced at their underlying type, in contrast to as and is
-     * tests which check for validity of values *)
-    | Tapply ((_, name), _) when Env.is_enum env name -> Unenforced
-    | Tapply ((_, name), tyl) ->
-      (* Cyclic type definition error will be produced elsewhere *)
-      if SSet.mem name visited then
-        Enforced
-      else begin
-        match Env.get_class_or_typedef env name with
-        | Some
-            (Env.TypedefResult
-              { td_vis = Aast.Transparent; td_tparams; td_type; _ }) ->
-          (* So that the check does not collide with reified generics *)
-          let env = Env.add_generic_parameters env td_tparams in
-          enforcement include_dynamic env (SSet.add name visited) td_type
-        | Some (Env.ClassResult tc) ->
-          begin
-            match tyl with
-            | [] -> Enforced
-            | targs ->
-              List.Or_unequal_lengths.(
-                begin
-                  match
-                    List.fold2
-                      ~init:Enforced
-                      targs
-                      (Cls.tparams tc)
-                      ~f:(fun acc targ tparam ->
-                        match get_node targ with
-                        | Tdynamic
-                        (* We accept the inner type being dynamic regardless of reification *)
-                        | Tlike _
-                          when not enable_sound_dynamic ->
-                          acc
-                        | _ ->
-                          (match tparam.tp_reified with
-                          | Aast.Erased -> Unenforced
-                          | Aast.SoftReified -> Unenforced
-                          | Aast.Reified ->
-                            (match acc with
-                            | Enforced -> enforcement true env visited targ
-                            | Unenforced -> Unenforced)))
-                  with
-                  | Ok new_acc -> new_acc
-                  | Unequal_lengths -> Enforced
-                end)
-          end
-        | _ -> Unenforced
-      end
-    | Tgeneric _ ->
-      (* Previously we allowed dynamic ~> T when T is an __Enforceable generic,
-       * that is, when it's valid on the RHS of an `is` or `as` expression.
-       * However, `is` / `as` checks have different behavior than runtime checks
-       * for `tuple`s and `shapes`s; `is` / `as` will shallow-ly check declared
-       * fields but typehint enforcement only checks that we have the right
-       * array type (`varray` for `tuple`, `darray` for `shape`). This means
-       * it's unsound to allow this coercion.
-       *
-       * Additionally, higher kinded generics (i.e., with type arguments) cannot
-       * be enforced at the moment; they are disallowed to have upper bounds.
-       *)
-      Unenforced
-    | Trefinement _ -> Unenforced
-    | Taccess _ -> Unenforced
-    | Tlike ty when enable_sound_dynamic ->
-      enforcement include_dynamic env visited ty
-    | Tlike _ -> Unenforced
-    | Tprim prim ->
-      begin
-        match prim with
-        | Aast.Tvoid
-        | Aast.Tnoreturn ->
-          Unenforced
-        | _ -> Enforced
-      end
-    | Tany _ -> Enforced
-    | Terr -> Enforced
-    | Tnonnull -> Enforced
-    | Tdynamic ->
-      if (not enable_sound_dynamic) || include_dynamic then
-        Enforced
-      else
-        Unenforced
-    | Tfun _ -> Unenforced
-    | Ttuple _ -> Unenforced
-    | Tunion [] -> Enforced
-    | Tunion _ -> Unenforced
-    | Tintersection _ -> Unenforced
-    | Tshape _ -> Unenforced
-    | Tmixed -> Enforced
-    | Tvar _ -> Unenforced
-    (* With no parameters, we enforce varray_or_darray just like array *)
-    | Tvec_or_dict (_, ty) ->
-      if is_any ty then
-        Enforced
-      else
-        Unenforced
-    | Toption ty -> enforcement include_dynamic env visited ty
-    | Tnewtype _ -> Unenforced
-  in
-  enforcement false env SSet.empty ty
+  match E.get_enforcement ~return_from_async:false ~this_class:None env ty with
+  | Decl_enforceability.Unenforced _ -> Unenforced
+  | Decl_enforceability.Enforced _ -> Enforced
 
 let is_enforceable (env : env) (ty : decl_ty) =
   match get_enforcement env ty with

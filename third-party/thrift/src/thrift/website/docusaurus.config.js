@@ -82,18 +82,13 @@ const config = {
             }
           ]
         },
-        ...fbInternalOnly([{
-          "to": "docs/fb/",
-          "label": "Meta Development",
-          "position": "left"
+        // Please keep GitHub link to the right for consistency.
+        {
+          href: 'https://github.com/facebook/fbthrift',
+          label: 'GitHub',
+          position: 'right'
         }
-      ]),
-      // Please keep GitHub link to the right for consistency.
-      {
-        href: 'https://github.com/facebook/fbthrift',
-        label: 'GitHub',
-        position: 'right'
-      }]
+      ]
     },
     footer: {
       style: 'dark',

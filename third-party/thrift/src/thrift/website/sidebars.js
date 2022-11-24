@@ -26,25 +26,50 @@
 const {fbContent, fbInternalOnly} = require('docusaurus-plugin-internaldocs-fb/internal');
 
 module.exports = {
-  // Public facing TOC (e.g.: Github) defined here directly
   ghSidebar: [
     'intro',
+    ...fbInternalOnly([
     {
       type: 'category',
-      label: 'Get Started',
+      label: 'Quick Start',
       link: {
         type: 'doc',
-        id: 'get-started/index',
+        id: 'fb/quick-start/index',
       },
-      collapsible: true,
-      collapsed: false,
       items: [
-        'get-started/quickstart-guide',
+        'fb/quick-start/java',
+        'fb/quick-start/python'
       ]
     },
     {
       type: 'category',
-      label: 'Specs',
+      label: 'How To',
+      link: {
+        type: 'doc',
+        id: "fb/howtos/index",
+      },
+      collapsible: true,
+      collapsed: true,
+      items: [
+        'fb/howtos/calling-python-from-hack',
+      ]
+    }]),
+    {
+      type: 'category',
+      label: 'Tutorials',
+      link: {
+        type: 'doc',
+        id: "tutorials/index",
+      },
+      collapsible: true,
+      collapsed: true,
+      items: [
+        'tutorials/docstring-annotation',
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Specification',
       link: {
         type: 'doc',
         id: 'spec/index'
@@ -107,23 +132,41 @@ module.exports = {
       collapsible: true,
       collapsed: true,
       items: [
-        // Release features
-        // Features are added to the features/ folder as a flat list
-        // Features can be moved in and out of "beta/experimental" state without affecting its URL
+        // Features are added to the features/ folder as a flat list so that
+        // they can be moved in and out of beta/experimental state without
+        // affecting their URLs.
 
-        // Beta features
+        // Released features:
+        {
+          type: 'category',
+          label: 'Streaming',
+          link: {
+            type: 'doc',
+            id: "fb/features/streaming/index",
+          },
+          items: [
+            'fb/features/streaming/sink',
+            'fb/features/streaming/java',
+            'fb/features/streaming/multicasting'
+          ]
+        },
+        'fb/features/interactions',
+
+        // Beta features:
         {
           Beta: [
-          'features/adapter',
-          'features/any',
-        ]},
-        //Experimental features
+            ...fbInternalOnly(['fb/features/adapters']),
+            'features/any',
+          ]
+        },
+        // Experimental features:
         {
           Experimental: [
             'features/hash',
             'features/patch',
             'features/schema',
             'features/yaml',
+            ...fbInternalOnly(['fb/features/metadata']),
           ]
         }
       ]
@@ -148,51 +191,244 @@ module.exports = {
           items: [
             'languages/cpp/channel',
             'languages/cpp/cpp2',
+            ...fbInternalOnly([
+            'fb/languages/cpp/generated-code',
+            'fb/languages/cpp/field-access',
+            {
+              type: 'category',
+              label: 'CodeFrameworks',
+              link: {
+                type: 'doc',
+                id: "fb/languages/cpp/code-frameworks/index",
+              },
+              items: [
+                'fb/languages/cpp/code-frameworks/binary-contracts'
+              ]
+            },
+            'fb/languages/cpp/serialization',
+            'fb/languages/cpp/visitation',
+            'fb/languages/cpp/hash',
+            'fb/languages/cpp/protocol-object',
+            {
+              type: 'category',
+              label: 'Frozen2',
+              link: {
+                type: 'doc',
+                id: "fb/languages/cpp/frozen2/index",
+              },
+              items: [
+                'fb/languages/cpp/frozen2/frozen'
+              ]
+            }
+            ])
+          ]
+        },
+        ...fbInternalOnly([
+        {
+          type: 'category',
+          label: 'Hack',
+          link: {
+            type: 'doc',
+            id: "fb/languages/hack/index",
+          },
+          items: [
+            'fb/languages/hack/adding-updating',
+            'fb/languages/hack/adding-new-files-smoothly',
+            'fb/languages/hack/auto-sync-for-existing-thrift-files',
+            'fb/languages/hack/updating-the-thrift-compiler-in-www/index',
+            'fb/languages/hack/adding-graphql-and-jsenum-support',
+            {
+              type: 'category',
+              label: 'Using Thrift Clients',
+              link: {
+                type: 'doc',
+                id: "fb/languages/hack/clients/index",
+              },
+              items: [
+                'fb/languages/hack/clients/streaming',
+                'fb/languages/hack/clients/sink',
+              ]
+            },
+            {
+              type: 'category',
+              label: 'WWW Thrift Services',
+              link: {
+                type: 'doc',
+                id: "fb/languages/hack/servers/index",
+              },
+              items: [
+                'fb/languages/hack/servers/sr-setup',
+              ]
+            },
+            'fb/languages/hack/example-of-thrift-clients-in-www'
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Java',
+          link: {
+            type: 'doc',
+            id: "fb/languages/java/index",
+          },
+          items: [
+            'fb/languages/java/hyperthrift'
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Python',
+          link: {
+            type: 'doc',
+            id: "fb/languages/python/index",
+          },
+          items: [
+            'fb/languages/python/code-frameworks'
+          ]
+        }
+        ])
+      ]
+    },
+    ...fbInternalOnly([
+    {
+      type: 'category',
+      label: 'Compiler',
+      link: {
+        type: 'doc',
+        id: "fb/compiler/index",
+      },
+      collapsible: true,
+      collapsed: true,
+      items: [
+        'fb/compiler/buck',
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Server',
+      link: {
+        type: 'doc',
+        id: "fb/server/index",
+      },
+      collapsible: true,
+      collapsed: true,
+      items: [
+        'fb/server/components',
+        'fb/server/threading-models',
+        'fb/server/thrift-server-features',
+        'fb/server/async-handling',
+        'fb/server/resource-pools',
+        'fb/server/configuration',
+        {
+          type: 'category',
+          label: 'Workload prioritization and isolation',
+          link: {
+            type: 'doc',
+            id: 'fb/server/prio-and-isolation/index',
+          },
+          collapsible: true,
+          collapsed: true,
+          items: [
+            'fb/server/prio-and-isolation/isolation-via-the-sfq-thread-manager',
+            'fb/server/prio-and-isolation/priorities-reference'
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Overload Protection',
+          link: {
+            type: 'doc',
+            id: 'fb/server/overload-protection/index',
+          },
+          collapsible: true,
+          collapsed: true,
+          items: [
+            'fb/server/overload-protection/cpuconcurrencycontroller',
+            'fb/server/overload-protection/adaptive-concurrency',
+            'fb/server/overload-protection/queue-timeouts'
           ]
         }
       ]
     },
     {
       type: 'category',
-      label: 'How To',
+      label: 'Testing',
       link: {
         type: 'doc',
-        id: "howtos/index",
+        id: "fb/testing/index",
       },
       collapsible: true,
       collapsed: true,
       items: [
-        'howtos/add-structured-annotations',
+        'fb/testing/loadgen',
+        'fb/testing/stress-test-framework',
       ]
     },
     {
       type: 'category',
-      label: 'Tutorials',
+      label: 'Best Practices',
       link: {
         type: 'doc',
-        id: "tutorials/index",
+        id: "fb/best-practices/index",
       },
       collapsible: true,
       collapsed: true,
       items: [
-        'tutorials/docstring-annotation',
+        'fb/best-practices/code-modernization',
+        'fb/best-practices/you-dont-need-facebookbase2/index',
+        'fb/best-practices/migrating-javadeprecated-to-java-swift'
       ]
-    },
+    }
+    ]),
     {
       type: 'category',
       label: 'Troubleshooting',
       link: {
         type: 'doc',
-        id: "troubleshoot/index", // SD bug?: But naming the folder "troublshooting" causes sidebar to not read this index file
+        id: "troubleshooting/index",
       },
       collapsible: true,
       collapsed: true,
       items: [
-        'troubleshoot/errors',
-        'troubleshoot/debugging-issues',
+        'troubleshooting/errors',
+        'troubleshooting/debugging-issues',
+        ...fbInternalOnly([
+        'fb/troubleshooting/faq',
+        {
+          type: 'category',
+          label: 'Exception Handling',
+          link: {
+            type: 'doc',
+            id: "fb/troubleshooting/exception-handling/index",
+          },
+          collapsible: true,
+          collapsed: true,
+          items: [
+            'fb/troubleshooting/exception-handling/error-classification',
+          ]
+        },
+        'fb/troubleshooting/thriftdbg',
+        'fb/troubleshooting/fuzzer',
+        {
+          type: 'category',
+          label: 'Dogpiles',
+          link: {
+            type: 'doc',
+            id: "fb/troubleshooting/dogpiles/index",
+          },
+          collapsible: true,
+          collapsed: true,
+          items: [
+            'fb/troubleshooting/dogpiles/io',
+          ]
+        },
+        'fb/troubleshooting/fb303-counters'
+        ])
       ]
     },
-    'references/index', // Will turn this into a category once we have generated ref docs
+
+    // Will turn this into a category once we have generated ref docs.
+    'references/index',
+
     'glossary',
     {
       type: 'category',
@@ -217,6 +453,40 @@ module.exports = {
       collapsible: true,
       collapsed: true,
       items: [
+        ...fbInternalOnly([
+        {
+          type: 'category',
+          label: 'Thrift Core',
+          link: {
+            type: 'doc',
+            id: "fb/contributions/thrift-core/index",
+          },
+          items: [
+            {
+              type: 'autogenerated',
+              dirName: "fb/contributions/thrift-core"
+            }
+          ]
+        },
+        'fb/contributions/flags',
+        'fb/contributions/server-logging',
+        'fb/contributions/bundling-annotation-library',
+        'fb/contributions/jemalloc-profiling-on-server',
+        'fb/contributions/contextprop',
+        'fb/contributions/thrift-repos',
+        'fb/contributions/internal-server-logging',
+        'fb/contributions/pcap-logging',
+        'fb/contributions/regression-test',
+        'fb/contributions/rocket-rollout-configs',
+        'fb/contributions/runbook',
+        'fb/contributions/test-coverage',
+        'fb/contributions/testing-dogpiles-locally',
+        'fb/contributions/compiler',
+        'fb/contributions/linter',
+        'fb/contributions/oss',
+        'fb/contributions/troubleshooting',
+        'fb/contributions/xplat',
+        ]),
         'contributions/conformance/index',
         {
           type: 'category',
@@ -226,10 +496,11 @@ module.exports = {
             id: "contributions/conformance/testsuite/index",
           },
           items: [
-          'contributions/conformance/testsuite/data',
-          'contributions/conformance/testsuite/client-rpc',
-          'contributions/conformance/testsuite/server-rpc',
-        ]},
+            'contributions/conformance/testsuite/data',
+            'contributions/conformance/testsuite/client-rpc',
+            'contributions/conformance/testsuite/server-rpc',
+          ]
+        },
         {
           type: 'category',
           label: 'Content',
@@ -243,8 +514,5 @@ module.exports = {
         ]},
       ]
     },
-  ],
-  // Meta employees will also see this additional nav-bar
-  // The sidebar items are defined in custom /fb/sidebars.js file
-  ...fbInternalOnly(() => require('./fb/sidebars.js')),
+  ]
 };

@@ -72,6 +72,7 @@ type mode =
   | Shape_analysis of string
   | Refactor_sound_dynamic of string * string * string
   | RemoveDeadUnsafeCasts
+  | CountImpreciseTypes
 
 type options = {
   files: string list;
@@ -860,6 +861,9 @@ let parse_options () =
       ( "--remove-dead-unsafe-casts",
         Arg.Unit (fun () -> set_mode RemoveDeadUnsafeCasts ()),
         " Removes dead unsafe casts from a file" );
+      ( "--count-imprecise-types",
+        Arg.Unit (fun () -> set_mode CountImpreciseTypes ()),
+        " Counts the number of mixed, dynamic, and nonnull types in a file" );
     ]
   in
 
@@ -2714,6 +2718,25 @@ let handle_mode
 
     (* Print the source code after applying all these quickfixes. *)
     Printf.printf "\n%s" (Quickfix.apply_all src classish_starts quickfixes)
+  | CountImpreciseTypes ->
+    let (errors, tasts, _gi_solved) =
+      compute_tasts_expand_types ctx ~verbosity files_info files_contents
+    in
+    if not @@ Errors.is_empty errors then (
+      print_errors error_format errors max_errors;
+      Printf.printf
+        "Did not count imprecise types because there are typing errors.";
+      exit 2
+    ) else
+      let tasts = Relative_path.Map.values tasts in
+      let results =
+        List.map ~f:(Count_imprecise_types.count ctx) tasts
+        |> List.fold
+             ~f:(SMap.union ~combine:(fun id _ -> failwith ("Clash at " ^ id)))
+             ~init:SMap.empty
+      in
+      let json = Count_imprecise_types.json_of_results results in
+      Printf.printf "%s" (Hh_json.json_to_string json)
 
 (*****************************************************************************)
 (* Main entry point *)

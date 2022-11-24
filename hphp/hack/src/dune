@@ -27,6 +27,7 @@
   client_find_refs_print
   client_get_definition
   client_highlight_refs
+  count_imprecise_types
   decl_parser_options
   default_injector_config
   direct_decl_parser

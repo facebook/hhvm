@@ -1,0 +1,25 @@
+(rule
+ (alias count_imprecise_types)
+ (deps
+  %{exe:../../src/hh_single_type_check.exe}
+  %{project_root}/test/verify.py
+  %{project_root}/test/review.sh
+  (glob_files %{project_root}/test/count_imprecise_types/*.php)
+  (glob_files %{project_root}/test/count_imprecise_types/*.php.exp))
+ (action
+  (run
+   %{project_root}/test/verify.py
+   %{project_root}/test/count_imprecise_types
+   --program
+   %{exe:../../src/hh_single_type_check.exe}
+   --in-extension
+   .php
+   --flags
+   --count-imprecise-types
+   --error-format
+   raw)))
+
+(alias
+ (name runtest)
+ (deps
+  (alias count_imprecise_types)))

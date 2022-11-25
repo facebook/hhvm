@@ -6,7 +6,6 @@
 #![cfg_attr(use_unstable_features, feature(test))]
 
 use std::cell::RefCell;
-use std::collections::HashSet;
 use std::collections::VecDeque;
 use std::ffi::OsString;
 use std::path::Path;
@@ -18,6 +17,7 @@ use deps_rust::DepSet;
 use deps_rust::RawTypingDepsMode;
 use deps_rust::UnsafeDepGraph;
 use deps_rust::VisitedSet;
+use hash::HashSet;
 use ocamlrep::Value;
 use ocamlrep_custom::CamlSerialize;
 use ocamlrep_custom::Custom;
@@ -193,7 +193,7 @@ ocaml_ffi! {
     }
 
     fn hh_custom_dep_graph_add_extend_deps(mode: RawTypingDepsMode, query: Custom<DepSet>) -> Custom<DepSet> {
-        let mut visited = HashSet::new();
+        let mut visited = HashSet::default();
         let mut queue = VecDeque::new();
         let mut acc = query.clone();
         for source_class in query.iter() {
@@ -350,7 +350,7 @@ unsafe fn get_extend_deps_visit(
 // Auxiliary functions for Typing_deps.DepSet/Typing_deps.VisitedSet
 ocaml_ffi! {
     fn hh_visited_set_make() -> Custom<VisitedSet> {
-        Custom::from(RefCell::new(HashSet::new()).into())
+        Custom::from(RefCell::new(HashSet::default()).into())
     }
 
     fn hh_dep_set_make() -> Custom<DepSet> {

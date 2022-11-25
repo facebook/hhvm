@@ -141,16 +141,14 @@ impl EdgesDir {
 
         let mut r = std::io::BufReader::new(f);
 
-        let mut delta = DepGraphDelta::new();
+        let mut delta = DepGraphDelta::default();
         delta.read_from(&mut r, |_, _| true).unwrap();
 
-        for (&dependency, dependents) in delta.0.iter() {
-            for &dependent in dependents.iter() {
-                // To be kept in sync with Typing_deps.ml::filter_discovered_deps_batch
-                let dependent: u64 = dependent.into();
-                let dependency: u64 = dependency.into();
-                acc.register(dependent, dependency);
-            }
+        for (dependent, dependency) in delta.iter() {
+            // To be kept in sync with Typing_deps.ml::filter_discovered_deps_batch
+            let dependent: u64 = dependent.into();
+            let dependency: u64 = dependency.into();
+            acc.register(dependent, dependency);
         }
 
         Ok(())
@@ -330,7 +328,7 @@ pub fn build(
             info!("Opening dep graph delta at {:?}", delta_file);
             let f = std::fs::OpenOptions::new().read(true).open(&delta_file)?;
             let mut r = std::io::BufReader::new(f);
-            let mut delta = DepGraphDelta::new();
+            let mut delta = DepGraphDelta::default();
             let num_read = delta.read_from(&mut r, |_, _| true)?;
             info!("Delta loaded with {} edges", num_read);
 

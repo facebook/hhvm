@@ -1110,6 +1110,7 @@ name = "dep_graph_delta"
 version = "0.0.0"
 dependencies = [
  "depgraph",
+ "hash",
 ]
 
 [[package]]
@@ -1149,10 +1150,12 @@ version = "0.0.0"
 dependencies = [
  "dep_graph_delta",
  "depgraph",
+ "hash",
  "hh_fanout_rust_ffi",
  "ocamlrep",
  "ocamlrep_custom",
  "once_cell",
+ "parking_lot 0.11.2",
  "rpds",
 ]
 
@@ -1162,6 +1165,7 @@ version = "0.0.0"
 dependencies = [
  "depgraph",
  "deps_rust",
+ "hash",
  "ocamlrep",
  "ocamlrep_custom",
  "ocamlrep_ocamlpool",

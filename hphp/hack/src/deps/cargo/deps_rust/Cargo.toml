@@ -11,8 +11,10 @@ crate-type = ["lib", "staticlib"]
 [dependencies]
 dep_graph_delta = { path = "../.." }
 depgraph = { path = "../../../depgraph/cargo/depgraph" }
+hash = { path = "../../../utils/hash" }
 hh_fanout_rust_ffi = { path = "../hh_fanout_rust_ffi" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_custom = { path = "../../../ocamlrep_custom" }
 once_cell = "1.12"
+parking_lot = { version = "0.11.2", features = ["send_guard"] }
 rpds = "0.11.0"

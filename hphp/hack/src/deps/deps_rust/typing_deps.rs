@@ -4,14 +4,13 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::cell::RefCell;
-use std::collections::HashSet;
 use std::io::Write;
-use std::sync::Mutex;
 
 use dep_graph_delta::DepGraphDelta;
 pub use depgraph::reader::Dep;
 use depgraph::reader::DepGraph;
 use depgraph::reader::DepGraphOpener;
+use hash::HashSet;
 use ocamlrep::FromError;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
@@ -19,6 +18,7 @@ use ocamlrep::Value;
 use ocamlrep_custom::caml_serialize_default_impls;
 use ocamlrep_custom::CamlSerialize;
 use once_cell::sync::OnceCell;
+use parking_lot::Mutex;
 use rpds::HashTrieSet;
 
 fn _static_assert() {
@@ -233,8 +233,7 @@ impl UnsafeDepGraph {
 }
 
 pub fn dep_graph_delta_with_cell<R>(f: impl FnOnce(&Mutex<DepGraphDelta>) -> R) -> R {
-    let cell = DEP_GRAPH_DELTA.get_or_init(|| Mutex::new(DepGraphDelta::new()));
-    f(cell)
+    f(DEP_GRAPH_DELTA.get_or_init(Default::default))
 }
 
 /// Run the closure with the dep graph delta.
@@ -246,7 +245,7 @@ pub fn dep_graph_delta_with_cell<R>(f: impl FnOnce(&Mutex<DepGraphDelta>) -> R) 
 /// `with`/`with_mut` auxiliary functions disallow the reference
 /// to escape.
 pub fn dep_graph_delta_with<R>(f: impl FnOnce(&DepGraphDelta) -> R) -> R {
-    dep_graph_delta_with_cell(|cell| f(&cell.lock().unwrap()))
+    dep_graph_delta_with_cell(|cell| f(&cell.lock()))
 }
 
 /// Run the closure with the mutable dep graph delta.
@@ -255,7 +254,7 @@ pub fn dep_graph_delta_with<R>(f: impl FnOnce(&DepGraphDelta) -> R) -> R {
 ///
 /// See `with`
 pub fn dep_graph_delta_with_mut<R>(f: impl FnOnce(&mut DepGraphDelta) -> R) -> R {
-    dep_graph_delta_with_cell(|cell| f(&mut cell.lock().unwrap()))
+    dep_graph_delta_with_cell(|cell| f(&mut cell.lock()))
 }
 
 /// Rust set of dependencies that can be transferred from

@@ -3,41 +3,44 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::HashMap;
-use std::collections::HashSet;
 use std::io;
 use std::io::Read;
 use std::io::Write;
 
 use depgraph::reader::Dep;
+use hash::HashMap;
+use hash::HashSet;
 
 /// Structure to keep track of the dependency graph delta.
-///
-/// The second field is used to keep track of the number of edges.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct DepGraphDelta(pub HashMap<Dep, HashSet<Dep>>, pub usize);
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
+pub struct DepGraphDelta {
+    /// Maps each dependency to a set of dependents
+    rdeps: HashMap<Dep, HashSet<Dep>>,
+
+    /// Total number of edges. Tracks the sum:
+    /// `rdeps.values().map(|set|set.len()).sum()`
+    num_edges: usize,
+}
 
 impl DepGraphDelta {
-    pub fn new() -> Self {
-        DepGraphDelta(HashMap::new(), 0)
-    }
-
     pub fn insert(&mut self, dependent: Dep, dependency: Dep) {
-        let depts = self.0.entry(dependency).or_default();
-        if depts.insert(dependent) {
-            self.1 += 1;
+        if (self.rdeps.entry(dependency))
+            .or_default()
+            .insert(dependent)
+        {
+            self.num_edges += 1;
         }
     }
 
     pub fn get(&self, dependency: Dep) -> Option<&HashSet<Dep>> {
-        self.0.get(&dependency)
+        self.rdeps.get(&dependency)
     }
 
     /// Return an iterator over this dependency graph delta.
     ///
     /// Iterates over (dependent, dependency) pairs
     pub fn iter(&self) -> impl Iterator<Item = (Dep, Dep)> + '_ {
-        self.0.iter().flat_map(|(&dependency, dependents_set)| {
+        self.rdeps.iter().flat_map(|(&dependency, dependents_set)| {
             dependents_set
                 .iter()
                 .map(move |&dependent| (dependent, dependency))
@@ -46,13 +49,19 @@ impl DepGraphDelta {
 
     /// Return the number of edges in the dep graph delta.
     pub fn num_edges(&self) -> usize {
-        self.1
+        self.num_edges
     }
 
     /// Write all edges in the delta to the writer in a custom format.
+    ///
+    /// The format is as follows. Each dependency hash can be followed by
+    /// an arbitrary number of accompanying dependent hashes. To distinguish
+    /// between dependency and dependent hashes, we make use of the fact that
+    /// hashes are 63-bit (due to the OCaml limitation). We set the MSB for
+    /// dependent hashes.
     pub fn write_to<W: Write>(&self, w: &mut W) -> io::Result<usize> {
         let mut edges_added = 0;
-        for (&dependency, dependents) in self.0.iter() {
+        for (&dependency, dependents) in self.rdeps.iter() {
             if dependents.is_empty() {
                 continue;
             }
@@ -81,6 +90,8 @@ impl DepGraphDelta {
     /// (in that order), the edge is added.
     ///
     /// Returns the number of edges actually read.
+    ///
+    /// See write_to() for details about the file format.
     pub fn read_from<R: Read>(
         &mut self,
         r: &mut R,
@@ -119,8 +130,8 @@ impl DepGraphDelta {
     }
 
     pub fn clear(&mut self) {
-        self.0.clear();
-        self.1 = 0;
+        self.rdeps.clear();
+        self.num_edges = 0;
     }
 }
 
@@ -130,11 +141,11 @@ mod tests {
 
     #[test]
     fn test_dep_graph_delta_serialize_empty() {
-        let x = DepGraphDelta::new();
+        let x = DepGraphDelta::default();
         let mut bytes = Vec::new();
         x.write_to(&mut bytes).unwrap();
 
-        let mut y = DepGraphDelta::new();
+        let mut y = DepGraphDelta::default();
         let mut bytes_read: &[u8] = &bytes;
         let num_loaded = y.read_from(&mut bytes_read, |_, _| true).unwrap();
 
@@ -144,7 +155,7 @@ mod tests {
 
     #[test]
     fn test_dep_graph_delta_serialize_non_empty() {
-        let mut x = DepGraphDelta::new();
+        let mut x = DepGraphDelta::default();
         x.insert(Dep::new(10), Dep::new(1));
         x.insert(Dep::new(10), Dep::new(2));
         x.insert(Dep::new(11), Dep::new(2));
@@ -152,7 +163,7 @@ mod tests {
         let mut bytes = Vec::new();
         x.write_to(&mut bytes).unwrap();
 
-        let mut y = DepGraphDelta::new();
+        let mut y = DepGraphDelta::default();
         let mut bytes_read: &[u8] = &bytes;
         let num_loaded = y.read_from(&mut bytes_read, |_, _| true).unwrap();
 
@@ -162,14 +173,14 @@ mod tests {
 
     #[test]
     fn test_dep_graph_delta_iter_empty() {
-        let x = DepGraphDelta::new();
+        let x = DepGraphDelta::default();
         let v: Vec<_> = x.iter().collect();
         assert_eq!(v.len(), 0);
     }
 
     #[test]
     fn test_dep_graph_delta_iter_non_empty() {
-        let mut x = DepGraphDelta::new();
+        let mut x = DepGraphDelta::default();
         let edges = vec![
             (Dep::new(10), Dep::new(1)),
             (Dep::new(10), Dep::new(2)),

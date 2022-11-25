@@ -9,3 +9,4 @@ path = "deps_rust/dep_graph_delta.rs"
 
 [dependencies]
 depgraph = { path = "../depgraph/cargo/depgraph" }
+hash = { path = "../utils/hash" }

@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-%>
+%><%#struct:thrift_uri%>
   static constexpr std::size_t __fbthrift_field_size_v = <%struct:fields_size%>;
 
   template<class T>
@@ -71,3 +71,4 @@
         __fbthrift_ordinal_impl,
         __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
   >;
+<%/struct:thrift_uri%>

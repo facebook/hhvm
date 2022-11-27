@@ -297,18 +297,32 @@ let unbound_name env (pos, name) e =
     | FileInfo.Mhhi -> expr_any env pos e
 
 (* Is this type Traversable<vty> or Container<vty> for some vty? *)
-let get_value_collection_inst env ty =
+let get_value_collection_inst env vc_kind ty =
+  let arraykey_or ty =
+    match vc_kind with
+    | Set
+    | ImmSet
+    | Keyset ->
+      let arraykey = MakeType.arraykey Reason.Rnone in
+      Some arraykey
+    | Vector
+    | ImmVector
+    | Vec ->
+      Some ty
+  in
   match get_node ty with
   | Tclass ((_, c), _, [vty])
     when String.equal c SN.Collections.cTraversable
          || String.equal c SN.Collections.cContainer ->
     Some vty
   (* If we're expecting a mixed or a nonnull then we can just assume
-   * that the element type is mixed *)
-  | Tnonnull -> Some (MakeType.mixed (get_reason ty))
+   * that the element type is mixed if it is a vec-like type and arraykey if it
+   * is a set-like one. *)
+  | Tnonnull -> arraykey_or (MakeType.mixed (get_reason ty))
   | Tany _ -> Some ty
   | Tdynamic when env.in_support_dynamic_type_method_check ->
-    Some ty (* interpret dynamic as Traversable<dynamic> *)
+    arraykey_or ty
+    (* interpret dynamic as Traversable<dynamic> or keyset<arraykey> *)
   | _ -> None
 
 (* Is this type KeyedTraversable<kty,vty>
@@ -356,7 +370,7 @@ let get_vc_inst env vc_kind ty =
   match get_node ty with
   | Tclass ((_, c), _, [vty]) when List.exists classnames ~f:(String.equal c) ->
     Some vty
-  | _ -> get_value_collection_inst env ty
+  | _ -> get_value_collection_inst env vc_kind ty
 
 (* Is this type one of the three key-value collection types
  * e.g. dict<kty,vty> or a supertype for some kty and vty? *)

@@ -68,6 +68,7 @@ type rollout_flags = {
   disable_naming_table_fallback_loading: bool;
   use_type_alias_heap: bool;
   override_load_state_natively: bool;
+  use_server_revision_tracker_v2: bool;
 }
 
 let flush () = ()

@@ -617,6 +617,8 @@ type t = {
   use_type_alias_heap: bool;  (** optimize type alias expansions *)
   override_load_state_natively: bool;
       (** Overrides load_state_natively on Sandcastle when true *)
+  use_server_revision_tracker_v2: bool;
+      (** control serverRevisionTracker.ml watchman subscription event tracking *)
 }
 
 let default =
@@ -732,6 +734,7 @@ let default =
     disable_naming_table_fallback_loading = false;
     use_type_alias_heap = false;
     override_load_state_natively = false;
+    use_server_revision_tracker_v2 = false;
   }
 
 let path =
@@ -1524,6 +1527,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let use_server_revision_tracker_v2 =
+    bool_if_min_version
+      "use_server_revision_tracker_v2"
+      ~default:default.use_server_revision_tracker_v2
+      ~current_version
+      config
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1644,6 +1654,7 @@ let load_ fn ~silent ~current_version overrides =
     disable_naming_table_fallback_loading;
     use_type_alias_heap;
     override_load_state_natively;
+    use_server_revision_tracker_v2;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.
@@ -1687,4 +1698,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
         options.disable_naming_table_fallback_loading;
       use_type_alias_heap = options.use_type_alias_heap;
       override_load_state_natively = options.override_load_state_natively;
+      use_server_revision_tracker_v2 = options.use_server_revision_tracker_v2;
     }

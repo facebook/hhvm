@@ -319,7 +319,7 @@ public class ThriftServerHandler extends ChannelDuplexHandler {
               : RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE;
 
       return ServerRequestPayload.create(
-          createReaderFunction(byteBufTProtocol),
+          createReaderFunction(byteBufTProtocol, frame),
           new RequestRpcMetadata.Builder()
               .setKind(kind)
               .setProtocol(protocol.getProtocolId())
@@ -334,22 +334,29 @@ public class ThriftServerHandler extends ChannelDuplexHandler {
   }
 
   @SuppressWarnings("rawtypes")
-  private static Function<List<Reader>, List<Object>> createReaderFunction(TProtocol out) {
+  private static Function<List<Reader>, List<Object>> createReaderFunction(
+      TProtocol out, ThriftFrame frame) {
     return readers -> {
-      out.readStructBegin();
-      List<Object> requestArguments = Collections.emptyList();
-      if (readers != null && !readers.isEmpty()) {
-        requestArguments = new ArrayList<>();
-        for (Reader r : readers) {
-          out.readFieldBegin();
-          requestArguments.add(r.read(out));
-          out.readFieldEnd();
+      try {
+        out.readStructBegin();
+        List<Object> requestArguments = Collections.emptyList();
+        if (readers != null && !readers.isEmpty()) {
+          requestArguments = new ArrayList<>();
+          for (Reader r : readers) {
+            out.readFieldBegin();
+            requestArguments.add(r.read(out));
+            out.readFieldEnd();
+          }
+        }
+
+        out.readStructEnd();
+        out.readMessageEnd();
+        return requestArguments;
+      } finally {
+        if (frame.refCnt() > 0) {
+          frame.release();
         }
       }
-
-      out.readStructEnd();
-      out.readMessageEnd();
-      return requestArguments;
     };
   }
 

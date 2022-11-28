@@ -1596,6 +1596,11 @@ class CompilerFailureTest(unittest.TestCase):
 
                 @EnumAnnot
                 enum TestEnum { Foo = 0, Bar = 1 }
+
+                typedef StructAnnot AliasedAnnot
+
+                @AliasedAnnot
+                struct AlsoStruct {}
                 """
             ),
         )
@@ -1610,6 +1615,7 @@ class CompilerFailureTest(unittest.TestCase):
                 [ERROR:foo.thrift:19] `FieldAnnot` cannot annotate `TestStruct`
                 [ERROR:foo.thrift:21] `EnumAnnot` cannot annotate `TestStruct`
                 [ERROR:foo.thrift:24] `StructAnnot` cannot annotate `test_field`
+                [WARNING:foo.thrift:34] Using `AliasedAnnot` as an annotation, even though it has not been enabled for any annotation scope.
                 """
             ),
         )

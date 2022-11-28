@@ -149,7 +149,7 @@ class ScopeValidatorTest : public ::testing::Test {
   source_location loc;
   t_program program{"path/to/file.thrift"};
 
-  std::unique_ptr<t_const> inst(const t_struct* ttype) {
+  std::unique_ptr<t_const> inst(const t_type* ttype) {
     auto value = std::make_unique<t_const_value>();
     value->set_map();
     value->set_ttype(t_type_ref::from_ptr(ttype));
@@ -295,5 +295,20 @@ TEST_F(ScopeValidatorTest, FieldWithNonTransitiveStructuredScope) {
        1}};
   EXPECT_THAT(result.diagnostics(), ::testing::ContainerEq(expected));
 }
+
+TEST_F(ScopeValidatorTest, StructWithTypedefedScope) {
+  t_struct strct{&program, "MyStruct"};
+  t_typedef typedf{&program, "AnnotationTypedef", annotStruct};
+  strct.add_structured_annotation(inst(&typedf));
+  auto result = validate(strct);
+  std::vector<diagnostic> expected{
+      {diagnostic_level::warning,
+       "Using `AnnotationTypedef` as an annotation, even though "
+       "it has not been enabled for any annotation scope.",
+       "path/to/file.thrift",
+       1}};
+  EXPECT_THAT(result.diagnostics(), ::testing::ContainerEq(expected));
+}
+
 } // namespace
 } // namespace apache::thrift::compiler

@@ -62,7 +62,7 @@ struct allowed_scopes {
             cache.get<allowed_scopes>(*meta_annot).types;
         types.insert(transitive_scopes.begin(), transitive_scopes.end());
       }
-      auto itr = uri_map().find(meta_annot->get_type()->get_true_type()->uri());
+      auto itr = uri_map().find(meta_annot->get_type()->uri());
       if (itr != uri_map().end()) {
         types.emplace(itr->second);
       }
@@ -89,8 +89,8 @@ void validate_annotation_scopes(diagnostic_context& ctx, const t_named& node) {
   for (const t_const* annot : node.structured_annotations()) {
     const t_type* annot_type = &*annot->type();
     // Ignore scoping annotations themselves.
-    if (uri_map().find(annot_type->get_true_type()->uri()) != uri_map().end() ||
-        annot_type->get_true_type()->uri() == kSchemaAnnotationUri) {
+    if (uri_map().find(annot_type->uri()) != uri_map().end() ||
+        annot_type->uri() == kSchemaAnnotationUri) {
       continue;
     }
 

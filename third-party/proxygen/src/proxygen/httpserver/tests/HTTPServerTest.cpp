@@ -571,12 +571,12 @@ TEST(SSL, TestResumptionWithTicketsTLS12) {
   // events to process and the loop will exit.
   evb.loop();
   ASSERT_TRUE(cb.success);
-  ASSERT_NE(nullptr, sessionCb.session);
+  ASSERT_NE(sessionCb.session.get(), nullptr);
   ASSERT_FALSE(sock->getSSLSessionReused());
 
   folly::AsyncSSLSocket::UniquePtr sock2(new folly::AsyncSSLSocket(ctx, &evb));
   auto sslSession = std::move(sessionCb.session);
-  ASSERT_NE(nullptr, sslSession);
+  ASSERT_NE(sslSession.get(), nullptr);
   sock2->setRawSSLSession(std::move(sslSession));
   Cb cb2(sock2.get());
   sock2->connect(&cb2, server->addresses().front().address, 1000);
@@ -610,12 +610,12 @@ TEST(SSL, TestResumptionWithTickets) {
   sessionCb.socket = sock.get();
   evb.loop();
   ASSERT_TRUE(cb.success);
-  ASSERT_NE(nullptr, sessionCb.session);
+  ASSERT_NE(sessionCb.session.get(), nullptr);
   ASSERT_FALSE(sock->getSSLSessionReused());
 
   folly::AsyncSSLSocket::UniquePtr sock2(new folly::AsyncSSLSocket(ctx, &evb));
   auto sslSession = std::move(sessionCb.session);
-  ASSERT_NE(nullptr, sslSession);
+  ASSERT_NE(sslSession.get(), nullptr);
   sock2->setRawSSLSession(std::move(sslSession));
   Cb cb2(sock2.get());
   sock2->connect(&cb2, server->addresses().front().address, 1000);
@@ -650,7 +650,7 @@ TEST(SSL, TestResumptionAfterUpdateFails) {
     sessionCb.socket = sock.get();
     evb.loop();
     ASSERT_TRUE(cb.success);
-    ASSERT_NE(nullptr, sessionCb.session);
+    ASSERT_NE(sessionCb.session.get(), nullptr);
     ASSERT_FALSE(sock->getSSLSessionReused());
   }
 
@@ -675,7 +675,7 @@ TEST(SSL, TestResumptionAfterUpdateFails) {
     sessionCb.socket = sock2.get();
     evb.loop();
     ASSERT_TRUE(cb2.success);
-    ASSERT_NE(nullptr, sessionCb.session);
+    ASSERT_NE(sessionCb.session.get(), nullptr);
     ASSERT_FALSE(sock2->getSSLSessionReused());
   }
 

@@ -119,13 +119,15 @@ TEST(CarbonMockMc, basic) {
     iobuf.append(iov->iov_len);
   }
   auto dataSp = getRange(iobuf);
-  auto reply = clientSock.sendRequest(dataSp, 16);
+  const size_t kMessageSize = 20;
+  auto reply = clientSock.sendRequest(dataSp, kMessageSize);
   EXPECT_EQ('^', reply[0]);
 
   CaretMessageInfo replyInfo;
   caretParseHeader((uint8_t*)reply.data(), reply.size(), replyInfo);
   EXPECT_EQ(100, replyInfo.reqId);
   EXPECT_EQ(2, replyInfo.typeId);
+  EXPECT_EQ(replyInfo.headerSize + replyInfo.bodySize, kMessageSize);
   auto readBuf = folly::IOBuf::wrapBuffer(
       reply.data() + replyInfo.headerSize, replyInfo.bodySize);
   carbon::CarbonProtocolReader reader(carbon::CarbonCursor(readBuf.get()));

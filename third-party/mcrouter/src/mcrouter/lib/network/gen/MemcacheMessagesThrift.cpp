@@ -53,6 +53,31 @@ void MemcacheRequestCommon::deserialize(carbon::CarbonProtocolReader& reader) {
   reader.readStructEnd();
 }
 
+void MemcacheReplyCommon::deserialize(carbon::CarbonProtocolReader& reader) {
+  reader.readStructBegin();
+  while (true) {
+    const auto pr = reader.readFieldHeader();
+    const auto fieldType = pr.first;
+    const auto fieldId = pr.second;
+
+    if (fieldType == carbon::FieldType::Stop) {
+      break;
+    }
+
+    switch (fieldId) {
+      case 1: {
+        reader.readField(replySourceBitMask_ref(), fieldType);
+        break;
+      }
+      default: {
+        reader.skip(fieldType);
+        break;
+      }
+    }
+  }
+  reader.readStructEnd();
+}
+
 void McGetRequest::deserialize(carbon::CarbonProtocolReader& reader) {
   reader.readStructBegin();
   while (true) {
@@ -98,6 +123,10 @@ void McGetReply::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(memcacheReplyCommon, fieldType);
+        break;
+      }
       case 1: {
         reader.readField(result_ref(), fieldType);
         break;
@@ -180,6 +209,10 @@ void McSetReply::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(memcacheReplyCommon, fieldType);
+        break;
+      }
       case 1: {
         reader.readField(result_ref(), fieldType);
         break;
@@ -266,6 +299,10 @@ void McDeleteReply::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(memcacheReplyCommon, fieldType);
+        break;
+      }
       case 1: {
         reader.readField(result_ref(), fieldType);
         break;
@@ -340,6 +377,10 @@ void McLeaseGetReply::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(memcacheReplyCommon, fieldType);
+        break;
+      }
       case 1: {
         reader.readField(result_ref(), fieldType);
         break;
@@ -430,6 +471,10 @@ void McLeaseSetReply::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(memcacheReplyCommon, fieldType);
+        break;
+      }
       case 1: {
         reader.readField(result_ref(), fieldType);
         break;
@@ -504,6 +549,10 @@ void McAddReply::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(memcacheReplyCommon, fieldType);
+        break;
+      }
       case 1: {
         reader.readField(result_ref(), fieldType);
         break;
@@ -578,6 +627,10 @@ void McReplaceReply::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(memcacheReplyCommon, fieldType);
+        break;
+      }
       case 1: {
         reader.readField(result_ref(), fieldType);
         break;
@@ -644,6 +697,10 @@ void McGetsReply::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(memcacheReplyCommon, fieldType);
+        break;
+      }
       case 1: {
         reader.readField(result_ref(), fieldType);
         break;
@@ -734,6 +791,10 @@ void McCasReply::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(memcacheReplyCommon, fieldType);
+        break;
+      }
       case 1: {
         reader.readField(result_ref(), fieldType);
         break;
@@ -800,6 +861,10 @@ void McIncrReply::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(memcacheReplyCommon, fieldType);
+        break;
+      }
       case 1: {
         reader.readField(result_ref(), fieldType);
         break;
@@ -870,6 +935,10 @@ void McDecrReply::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(memcacheReplyCommon, fieldType);
+        break;
+      }
       case 1: {
         reader.readField(result_ref(), fieldType);
         break;
@@ -936,6 +1005,10 @@ void McMetagetReply::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(memcacheReplyCommon, fieldType);
+        break;
+      }
       case 1: {
         reader.readField(result_ref(), fieldType);
         break;
@@ -1026,6 +1099,10 @@ void McAppendReply::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(memcacheReplyCommon, fieldType);
+        break;
+      }
       case 1: {
         reader.readField(result_ref(), fieldType);
         break;
@@ -1100,6 +1177,10 @@ void McPrependReply::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(memcacheReplyCommon, fieldType);
+        break;
+      }
       case 1: {
         reader.readField(result_ref(), fieldType);
         break;
@@ -1166,6 +1247,10 @@ void McTouchReply::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(memcacheReplyCommon, fieldType);
+        break;
+      }
       case 1: {
         reader.readField(result_ref(), fieldType);
         break;
@@ -1228,6 +1313,10 @@ void McFlushReReply::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(memcacheReplyCommon, fieldType);
+        break;
+      }
       case 1: {
         reader.readField(result_ref(), fieldType);
         break;
@@ -1294,6 +1383,10 @@ void McFlushAllReply::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(memcacheReplyCommon, fieldType);
+        break;
+      }
       case 1: {
         reader.readField(result_ref(), fieldType);
         break;
@@ -1360,6 +1453,10 @@ void McGatReply::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(memcacheReplyCommon, fieldType);
+        break;
+      }
       case 1: {
         reader.readField(result_ref(), fieldType);
         break;
@@ -1434,6 +1531,10 @@ void McGatsReply::deserialize(carbon::CarbonProtocolReader& reader) {
     }
 
     switch (fieldId) {
+      case -1: {
+        reader.readField(memcacheReplyCommon, fieldType);
+        break;
+      }
       case 1: {
         reader.readField(result_ref(), fieldType);
         break;

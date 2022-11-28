@@ -36,6 +36,20 @@ struct MemcacheRequestCommon {
   void deserialize(carbon::CarbonProtocolReader& reader);
 
 ")
+struct MemcacheReplyCommon {
+  1: i32 (cpp.type = "uint32_t") replySourceBitMask
+}(cpp.methods = "
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+")
 struct McGetRequest {
   -1: MemcacheRequestCommon memcacheRequestCommon (cpp.mixin)
   1: carbon.IOBufKey key
@@ -55,6 +69,7 @@ struct McGetRequest {
 cpp.virtual
 )
 struct McGetReply {
+  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: optional binary (cpp.type = "folly::IOBuf") value
   3: i64 (cpp.type = "uint64_t") flags
@@ -95,6 +110,7 @@ struct McSetRequest {
 cpp.virtual
 )
 struct McSetReply {
+  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: i64 (cpp.type = "uint64_t") flags
   3: binary (cpp.type = "folly::IOBuf") value
@@ -136,6 +152,7 @@ struct McDeleteRequest {
 cpp.virtual
 )
 struct McDeleteReply {
+  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: i64 (cpp.type = "uint64_t") flags
   3: binary (cpp.type = "folly::IOBuf") value
@@ -174,6 +191,7 @@ struct McLeaseGetRequest {
 cpp.virtual
 )
 struct McLeaseGetReply {
+  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: i64 leaseToken
   3: optional binary (cpp.type = "folly::IOBuf") value
@@ -216,6 +234,7 @@ struct McLeaseSetRequest {
 cpp.virtual
 )
 struct McLeaseSetReply {
+  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
@@ -254,6 +273,7 @@ struct McAddRequest {
 cpp.virtual
 )
 struct McAddReply {
+  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
@@ -292,6 +312,7 @@ struct McReplaceRequest {
 cpp.virtual
 )
 struct McReplaceReply {
+  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
@@ -328,6 +349,7 @@ struct McGetsRequest {
 cpp.virtual
 )
 struct McGetsReply {
+  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: i64 (cpp.type = "uint64_t") casToken
   3: optional binary (cpp.type = "folly::IOBuf") value
@@ -370,6 +392,7 @@ struct McCasRequest {
 cpp.virtual
 )
 struct McCasReply {
+  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
@@ -406,6 +429,7 @@ struct McIncrRequest {
 cpp.virtual
 )
 struct McIncrReply {
+  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: i64 delta
   3: string message
@@ -443,6 +467,7 @@ struct McDecrRequest {
 cpp.virtual
 )
 struct McDecrReply {
+  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: i64 delta
   3: string message
@@ -479,6 +504,7 @@ struct McMetagetRequest {
 cpp.virtual
 )
 struct McMetagetReply {
+  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: i32 age
   3: i32 exptime
@@ -521,6 +547,7 @@ struct McAppendRequest {
 cpp.virtual
 )
 struct McAppendReply {
+  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
@@ -559,6 +586,7 @@ struct McPrependRequest {
 cpp.virtual
 )
 struct McPrependReply {
+  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
@@ -595,6 +623,7 @@ struct McTouchRequest {
 cpp.virtual
 )
 struct McTouchReply {
+  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
@@ -630,6 +659,7 @@ struct McFlushReRequest {
 cpp.virtual
 )
 struct McFlushReReply {
+  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
@@ -666,6 +696,7 @@ struct McFlushAllRequest {
 cpp.virtual
 )
 struct McFlushAllReply {
+  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: string message
   3: i16 appSpecificErrorCode
@@ -702,6 +733,7 @@ struct McGatRequest {
 cpp.virtual
 )
 struct McGatReply {
+  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: optional binary (cpp.type = "folly::IOBuf") value
   3: i64 (cpp.type = "uint64_t") flags
@@ -740,6 +772,7 @@ struct McGatsRequest {
 cpp.virtual
 )
 struct McGatsReply {
+  -1: MemcacheReplyCommon memcacheReplyCommon (cpp.mixin)
   1: carbon_result.Result result
   2: i64 (cpp.type = "uint64_t") casToken
   3: optional binary (cpp.type = "folly::IOBuf") value

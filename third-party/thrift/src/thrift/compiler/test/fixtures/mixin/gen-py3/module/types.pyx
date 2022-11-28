@@ -13,6 +13,7 @@ from libcpp.iterator cimport inserter as cinserter
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
+from thrift.py3.types import _IsSet as _fbthrift_IsSet
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 from thrift.py3.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
@@ -81,7 +82,7 @@ cdef class Mixin1(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("Mixin1", {
+        return _fbthrift_IsSet("Mixin1", {
           "field1": deref(self._cpp_obj).field1_ref().has_value(),
         })
 
@@ -196,7 +197,7 @@ cdef class Mixin2(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("Mixin2", {
+        return _fbthrift_IsSet("Mixin2", {
           "m1": deref(self._cpp_obj).m1_ref().has_value(),
           "field2": deref(self._cpp_obj).field2_ref().has_value(),
         })
@@ -332,7 +333,7 @@ cdef class Mixin3Base(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("Mixin3Base", {
+        return _fbthrift_IsSet("Mixin3Base", {
           "field3": deref(self._cpp_obj).field3_ref().has_value(),
         })
 
@@ -447,7 +448,7 @@ cdef class Foo(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("Foo", {
+        return _fbthrift_IsSet("Foo", {
           "field4": deref(self._cpp_obj).field4_ref().has_value(),
           "m2": deref(self._cpp_obj).m2_ref().has_value(),
           "m3": deref(self._cpp_obj).m3_ref().has_value(),

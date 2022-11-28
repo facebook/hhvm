@@ -13,6 +13,7 @@ from libcpp.iterator cimport inserter as cinserter
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
+from thrift.py3.types import _IsSet as _fbthrift_IsSet
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 from thrift.py3.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
@@ -318,7 +319,7 @@ cdef class DurationStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("DurationStruct", {
+        return _fbthrift_IsSet("DurationStruct", {
           "seconds": deref(self._cpp_obj).seconds_ref().has_value(),
           "nanos": deref(self._cpp_obj).nanos_ref().has_value(),
         })
@@ -442,7 +443,7 @@ cdef class TimeStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("TimeStruct", {
+        return _fbthrift_IsSet("TimeStruct", {
           "seconds": deref(self._cpp_obj).seconds_ref().has_value(),
           "nanos": deref(self._cpp_obj).nanos_ref().has_value(),
         })
@@ -566,7 +567,7 @@ cdef class FractionStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("FractionStruct", {
+        return _fbthrift_IsSet("FractionStruct", {
           "numerator": deref(self._cpp_obj).numerator_ref().has_value(),
           "denominator": deref(self._cpp_obj).denominator_ref().has_value(),
         })
@@ -690,7 +691,7 @@ cdef class UriStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("UriStruct", {
+        return _fbthrift_IsSet("UriStruct", {
           "scheme": deref(self._cpp_obj).scheme_ref().has_value(),
           "domain": deref(self._cpp_obj).domain_ref().has_value(),
           "path": deref(self._cpp_obj).path_ref().has_value(),

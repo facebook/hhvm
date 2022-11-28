@@ -13,6 +13,7 @@ from libcpp.iterator cimport inserter as cinserter
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
+from thrift.py3.types import _IsSet as _fbthrift_IsSet
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 from thrift.py3.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
@@ -160,7 +161,7 @@ cdef class TestError(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("TestError", {
+        return _fbthrift_IsSet("TestError", {
           "test_enum": deref(self._cpp_obj).test_enum_ref().has_value(),
           "code": deref(self._cpp_obj).code_ref().has_value(),
         })
@@ -287,7 +288,7 @@ cdef class TestMixin(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("TestMixin", {
+        return _fbthrift_IsSet("TestMixin", {
           "field1": deref(self._cpp_obj).field1_ref().has_value(),
         })
 
@@ -402,7 +403,7 @@ cdef class TestStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("TestStruct", {
+        return _fbthrift_IsSet("TestStruct", {
           "bar": deref(self._cpp_obj).bar_ref().has_value(),
           "baropt": deref(self._cpp_obj).baropt_ref().has_value(),
           "test_error": deref(self._cpp_obj).test_error_ref().has_value(),

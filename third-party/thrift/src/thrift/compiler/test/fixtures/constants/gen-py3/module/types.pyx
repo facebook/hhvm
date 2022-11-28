@@ -13,6 +13,7 @@ from libcpp.iterator cimport inserter as cinserter
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
+from thrift.py3.types import _IsSet as _fbthrift_IsSet
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 from thrift.py3.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
@@ -312,7 +313,7 @@ cdef class Internship(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("Internship", {
+        return _fbthrift_IsSet("Internship", {
           "weeks": deref(self._cpp_obj).weeks_ref().has_value(),
           "title": deref(self._cpp_obj).title_ref().has_value(),
           "employer": deref(self._cpp_obj).employer_ref().has_value(),
@@ -471,7 +472,7 @@ cdef class Range(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("Range", {
+        return _fbthrift_IsSet("Range", {
           "min": deref(self._cpp_obj).min_ref().has_value(),
           "max": deref(self._cpp_obj).max_ref().has_value(),
         })
@@ -595,7 +596,7 @@ cdef class struct1(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("struct1", {
+        return _fbthrift_IsSet("struct1", {
           "a": deref(self._cpp_obj).a_ref().has_value(),
           "b": deref(self._cpp_obj).b_ref().has_value(),
         })
@@ -719,7 +720,7 @@ cdef class struct2(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("struct2", {
+        return _fbthrift_IsSet("struct2", {
           "a": deref(self._cpp_obj).a_ref().has_value(),
           "b": deref(self._cpp_obj).b_ref().has_value(),
           "c": deref(self._cpp_obj).c_ref().has_value(),
@@ -865,7 +866,7 @@ cdef class struct3(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("struct3", {
+        return _fbthrift_IsSet("struct3", {
           "a": deref(self._cpp_obj).a_ref().has_value(),
           "b": deref(self._cpp_obj).b_ref().has_value(),
           "c": deref(self._cpp_obj).c_ref().has_value(),
@@ -1000,7 +1001,7 @@ cdef class struct4(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("struct4", {
+        return _fbthrift_IsSet("struct4", {
           "a": deref(self._cpp_obj).a_ref().has_value(),
           "b": deref(self._cpp_obj).b_ref().has_value(),
           "c": deref(self._cpp_obj).c_ref().has_value(),

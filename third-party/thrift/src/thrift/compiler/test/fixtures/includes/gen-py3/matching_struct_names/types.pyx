@@ -13,6 +13,7 @@ from libcpp.iterator cimport inserter as cinserter
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
+from thrift.py3.types import _IsSet as _fbthrift_IsSet
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 from thrift.py3.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
@@ -81,7 +82,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("MyStruct", {
+        return _fbthrift_IsSet("MyStruct", {
           "field": deref(self._cpp_obj).field_ref().has_value(),
         })
 
@@ -196,7 +197,7 @@ cdef class Combo(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("Combo", {
+        return _fbthrift_IsSet("Combo", {
           "listOfOurMyStructLists": deref(self._cpp_obj).listOfOurMyStructLists_ref().has_value(),
           "theirMyStructList": deref(self._cpp_obj).theirMyStructList_ref().has_value(),
           "ourMyStructList": deref(self._cpp_obj).ourMyStructList_ref().has_value(),

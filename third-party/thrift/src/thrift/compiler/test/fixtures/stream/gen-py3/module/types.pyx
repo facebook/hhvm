@@ -13,6 +13,7 @@ from libcpp.iterator cimport inserter as cinserter
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
+from thrift.py3.types import _IsSet as _fbthrift_IsSet
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 from thrift.py3.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
@@ -71,7 +72,7 @@ cdef class FooStreamEx(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("FooStreamEx", {
+        return _fbthrift_IsSet("FooStreamEx", {
         })
 
     @staticmethod
@@ -168,7 +169,7 @@ cdef class FooEx(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("FooEx", {
+        return _fbthrift_IsSet("FooEx", {
         })
 
     @staticmethod
@@ -265,7 +266,7 @@ cdef class FooEx2(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("FooEx2", {
+        return _fbthrift_IsSet("FooEx2", {
         })
 
     @staticmethod

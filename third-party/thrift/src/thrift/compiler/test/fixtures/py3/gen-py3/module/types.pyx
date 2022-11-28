@@ -13,6 +13,7 @@ from libcpp.iterator cimport inserter as cinserter
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
+from thrift.py3.types import _IsSet as _fbthrift_IsSet
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 from thrift.py3.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
@@ -275,7 +276,7 @@ cdef class SimpleException(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("SimpleException", {
+        return _fbthrift_IsSet("SimpleException", {
           "err_code": deref(self._cpp_obj).err_code_ref().has_value(),
         })
 
@@ -391,7 +392,7 @@ cdef class OptionalRefStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("OptionalRefStruct", {
+        return _fbthrift_IsSet("OptionalRefStruct", {
           "optional_blob": deref(self._cpp_obj).optional_blob_ref().has_value(),
         })
 
@@ -512,7 +513,7 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("SimpleStruct", {
+        return _fbthrift_IsSet("SimpleStruct", {
           "is_on": deref(self._cpp_obj).is_on_ref().has_value(),
           "tiny_int": deref(self._cpp_obj).tiny_int_ref().has_value(),
           "small_int": deref(self._cpp_obj).small_int_ref().has_value(),
@@ -681,7 +682,7 @@ cdef class ComplexStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("ComplexStruct", {
+        return _fbthrift_IsSet("ComplexStruct", {
           "structOne": deref(self._cpp_obj).structOne_ref().has_value(),
           "structTwo": deref(self._cpp_obj).structTwo_ref().has_value(),
           "an_integer": deref(self._cpp_obj).an_integer_ref().has_value(),
@@ -1001,7 +1002,7 @@ cdef class BinaryUnionStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("BinaryUnionStruct", {
+        return _fbthrift_IsSet("BinaryUnionStruct", {
           "u": deref(self._cpp_obj).u_ref().has_value(),
         })
 

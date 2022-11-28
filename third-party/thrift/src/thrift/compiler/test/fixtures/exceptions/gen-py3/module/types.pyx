@@ -13,6 +13,7 @@ from libcpp.iterator cimport inserter as cinserter
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
+from thrift.py3.types import _IsSet as _fbthrift_IsSet
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 from thrift.py3.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
@@ -71,7 +72,7 @@ cdef class Fiery(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("Fiery", {
+        return _fbthrift_IsSet("Fiery", {
           "message": deref(self._cpp_obj).message_ref().has_value(),
         })
 
@@ -180,7 +181,7 @@ cdef class Serious(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("Serious", {
+        return _fbthrift_IsSet("Serious", {
           "sonnet": deref(self._cpp_obj).sonnet_ref().has_value(),
         })
 
@@ -291,7 +292,7 @@ cdef class ComplexFieldNames(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("ComplexFieldNames", {
+        return _fbthrift_IsSet("ComplexFieldNames", {
           "error_message": deref(self._cpp_obj).error_message_ref().has_value(),
           "internal_error_message": deref(self._cpp_obj).internal_error_message_ref().has_value(),
         })
@@ -409,7 +410,7 @@ cdef class CustomFieldNames(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("CustomFieldNames", {
+        return _fbthrift_IsSet("CustomFieldNames", {
           "error_message": deref(self._cpp_obj).error_message_ref().has_value(),
           "internal_error_message": deref(self._cpp_obj).internal_error_message_ref().has_value(),
         })
@@ -527,7 +528,7 @@ cdef class ExceptionWithPrimitiveField(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("ExceptionWithPrimitiveField", {
+        return _fbthrift_IsSet("ExceptionWithPrimitiveField", {
           "message": deref(self._cpp_obj).message_ref().has_value(),
           "error_code": deref(self._cpp_obj).error_code_ref().has_value(),
         })
@@ -645,7 +646,7 @@ cdef class ExceptionWithStructuredAnnotation(thrift.py3.exceptions.GeneratedErro
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("ExceptionWithStructuredAnnotation", {
+        return _fbthrift_IsSet("ExceptionWithStructuredAnnotation", {
           "message_field": deref(self._cpp_obj).message_field_ref().has_value(),
           "error_code": deref(self._cpp_obj).error_code_ref().has_value(),
         })
@@ -760,7 +761,7 @@ cdef class Banal(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("Banal", {
+        return _fbthrift_IsSet("Banal", {
         })
 
     @staticmethod

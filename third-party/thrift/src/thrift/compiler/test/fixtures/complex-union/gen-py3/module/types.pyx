@@ -13,6 +13,7 @@ from libcpp.iterator cimport inserter as cinserter
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
+from thrift.py3.types import _IsSet as _fbthrift_IsSet
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 from thrift.py3.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
@@ -818,7 +819,7 @@ cdef class Val(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("Val", {
+        return _fbthrift_IsSet("Val", {
           "strVal": deref(self._cpp_obj).strVal_ref().has_value(),
           "intVal": deref(self._cpp_obj).intVal_ref().has_value(),
           "typedefValue": deref(self._cpp_obj).typedefValue_ref().has_value(),
@@ -1243,7 +1244,7 @@ cdef class NonCopyableStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("NonCopyableStruct", {
+        return _fbthrift_IsSet("NonCopyableStruct", {
           "num": deref(self._cpp_obj).num_ref().has_value(),
         })
 

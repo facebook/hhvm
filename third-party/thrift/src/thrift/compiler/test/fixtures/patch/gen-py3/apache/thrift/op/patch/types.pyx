@@ -13,6 +13,7 @@ from libcpp.iterator cimport inserter as cinserter
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
+from thrift.py3.types import _IsSet as _fbthrift_IsSet
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 from thrift.py3.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
@@ -135,7 +136,7 @@ cdef class GeneratePatch(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("GeneratePatch", {
+        return _fbthrift_IsSet("GeneratePatch", {
         })
 
     @staticmethod
@@ -234,7 +235,7 @@ cdef class AssignOnlyPatch(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("AssignOnlyPatch", {
+        return _fbthrift_IsSet("AssignOnlyPatch", {
         })
 
     @staticmethod

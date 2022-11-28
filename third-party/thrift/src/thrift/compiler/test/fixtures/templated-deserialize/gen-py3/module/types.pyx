@@ -13,6 +13,7 @@ from libcpp.iterator cimport inserter as cinserter
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
+from thrift.py3.types import _IsSet as _fbthrift_IsSet
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 from thrift.py3.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
@@ -134,7 +135,7 @@ cdef class SmallStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("SmallStruct", {
+        return _fbthrift_IsSet("SmallStruct", {
           "small_A": deref(self._cpp_obj).small_A_ref().has_value(),
           "small_B": deref(self._cpp_obj).small_B_ref().has_value(),
         })
@@ -258,7 +259,7 @@ cdef class containerStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("containerStruct", {
+        return _fbthrift_IsSet("containerStruct", {
           "fieldA": deref(self._cpp_obj).fieldA_ref().has_value(),
           "fieldB": deref(self._cpp_obj).fieldB_ref().has_value(),
           "fieldC": deref(self._cpp_obj).fieldC_ref().has_value(),

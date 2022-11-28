@@ -13,6 +13,7 @@ from libcpp.iterator cimport inserter as cinserter
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
+from thrift.py3.types import _IsSet as _fbthrift_IsSet
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 from thrift.py3.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
@@ -79,7 +80,7 @@ cdef class InitialResponse(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("InitialResponse", {
+        return _fbthrift_IsSet("InitialResponse", {
           "content": deref(self._cpp_obj).content_ref().has_value(),
         })
 
@@ -194,7 +195,7 @@ cdef class FinalResponse(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("FinalResponse", {
+        return _fbthrift_IsSet("FinalResponse", {
           "content": deref(self._cpp_obj).content_ref().has_value(),
         })
 
@@ -309,7 +310,7 @@ cdef class SinkPayload(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("SinkPayload", {
+        return _fbthrift_IsSet("SinkPayload", {
           "content": deref(self._cpp_obj).content_ref().has_value(),
         })
 
@@ -424,7 +425,7 @@ cdef class CompatibleWithKeywordSink(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("CompatibleWithKeywordSink", {
+        return _fbthrift_IsSet("CompatibleWithKeywordSink", {
           "sink": deref(self._cpp_obj).sink_ref().has_value(),
         })
 
@@ -529,7 +530,7 @@ cdef class InitialException(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("InitialException", {
+        return _fbthrift_IsSet("InitialException", {
           "reason": deref(self._cpp_obj).reason_ref().has_value(),
         })
 
@@ -635,7 +636,7 @@ cdef class SinkException1(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("SinkException1", {
+        return _fbthrift_IsSet("SinkException1", {
           "reason": deref(self._cpp_obj).reason_ref().has_value(),
         })
 
@@ -741,7 +742,7 @@ cdef class SinkException2(thrift.py3.exceptions.GeneratedError):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("SinkException2", {
+        return _fbthrift_IsSet("SinkException2", {
           "reason": deref(self._cpp_obj).reason_ref().has_value(),
         })
 

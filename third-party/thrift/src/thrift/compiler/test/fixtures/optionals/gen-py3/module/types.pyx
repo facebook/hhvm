@@ -13,6 +13,7 @@ from libcpp.iterator cimport inserter as cinserter
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
+from thrift.py3.types import _IsSet as _fbthrift_IsSet
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 from thrift.py3.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
@@ -134,7 +135,7 @@ cdef class Color(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("Color", {
+        return _fbthrift_IsSet("Color", {
           "red": deref(self._cpp_obj).red_ref().has_value(),
           "green": deref(self._cpp_obj).green_ref().has_value(),
           "blue": deref(self._cpp_obj).blue_ref().has_value(),
@@ -276,7 +277,7 @@ cdef class Vehicle(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("Vehicle", {
+        return _fbthrift_IsSet("Vehicle", {
           "color": deref(self._cpp_obj).color_ref().has_value(),
           "licensePlate": deref(self._cpp_obj).licensePlate_ref().has_value(),
           "description": deref(self._cpp_obj).description_ref().has_value(),
@@ -435,7 +436,7 @@ cdef class Person(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("Person", {
+        return _fbthrift_IsSet("Person", {
           "id": deref(self._cpp_obj).id_ref().has_value(),
           "name": deref(self._cpp_obj).name_ref().has_value(),
           "age": deref(self._cpp_obj).age_ref().has_value(),

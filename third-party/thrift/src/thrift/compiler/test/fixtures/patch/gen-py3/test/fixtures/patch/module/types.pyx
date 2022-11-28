@@ -13,6 +13,7 @@ from libcpp.iterator cimport inserter as cinserter
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
+from thrift.py3.types import _IsSet as _fbthrift_IsSet
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 from thrift.py3.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
@@ -208,7 +209,7 @@ cdef class MyData(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("MyData", {
+        return _fbthrift_IsSet("MyData", {
         })
 
     @staticmethod
@@ -640,7 +641,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("MyStruct", {
+        return _fbthrift_IsSet("MyStruct", {
           "optBoolVal": deref(self._cpp_obj).optBoolVal_ref().has_value(),
           "optByteVal": deref(self._cpp_obj).optByteVal_ref().has_value(),
           "optI16Val": deref(self._cpp_obj).optI16Val_ref().has_value(),
@@ -1072,7 +1073,7 @@ cdef class LateDefStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("LateDefStruct", {
+        return _fbthrift_IsSet("LateDefStruct", {
         })
 
     @staticmethod
@@ -1178,7 +1179,7 @@ cdef class Recursive(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("Recursive", {
+        return _fbthrift_IsSet("Recursive", {
         })
 
     @staticmethod
@@ -1294,7 +1295,7 @@ cdef class Bar(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("Bar", {
+        return _fbthrift_IsSet("Bar", {
         })
 
     @staticmethod
@@ -1412,7 +1413,7 @@ cdef class Loop(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("Loop", {
+        return _fbthrift_IsSet("Loop", {
         })
 
     @staticmethod

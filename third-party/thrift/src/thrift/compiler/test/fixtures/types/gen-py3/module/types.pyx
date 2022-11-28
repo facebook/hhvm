@@ -13,6 +13,7 @@ from libcpp.iterator cimport inserter as cinserter
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
+from thrift.py3.types import _IsSet as _fbthrift_IsSet
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 from thrift.py3.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
@@ -250,7 +251,7 @@ cdef class decorated_struct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("decorated_struct", {
+        return _fbthrift_IsSet("decorated_struct", {
           "field": deref(self._cpp_obj).field_ref().has_value(),
         })
 
@@ -365,7 +366,7 @@ cdef class ContainerStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("ContainerStruct", {
+        return _fbthrift_IsSet("ContainerStruct", {
           "fieldA": deref(self._cpp_obj).fieldA_ref().has_value(),
           "fieldB": deref(self._cpp_obj).fieldB_ref().has_value(),
           "fieldC": deref(self._cpp_obj).fieldC_ref().has_value(),
@@ -561,7 +562,7 @@ cdef class CppTypeStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("CppTypeStruct", {
+        return _fbthrift_IsSet("CppTypeStruct", {
           "fieldA": deref(self._cpp_obj).fieldA_ref().has_value(),
         })
 
@@ -678,7 +679,7 @@ cdef class VirtualStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("VirtualStruct", {
+        return _fbthrift_IsSet("VirtualStruct", {
           "MyIntField": deref(self._cpp_obj).MyIntField_ref().has_value(),
         })
 
@@ -793,7 +794,7 @@ cdef class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("MyStructWithForwardRefEnum", {
+        return _fbthrift_IsSet("MyStructWithForwardRefEnum", {
           "a": deref(self._cpp_obj).a_ref().has_value(),
           "b": deref(self._cpp_obj).b_ref().has_value(),
         })
@@ -921,7 +922,7 @@ cdef class TrivialNumeric(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("TrivialNumeric", {
+        return _fbthrift_IsSet("TrivialNumeric", {
           "a": deref(self._cpp_obj).a_ref().has_value(),
           "b": deref(self._cpp_obj).b_ref().has_value(),
         })
@@ -1045,7 +1046,7 @@ cdef class TrivialNestedWithDefault(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("TrivialNestedWithDefault", {
+        return _fbthrift_IsSet("TrivialNestedWithDefault", {
           "z": deref(self._cpp_obj).z_ref().has_value(),
           "n": deref(self._cpp_obj).n_ref().has_value(),
         })
@@ -1171,7 +1172,7 @@ cdef class ComplexString(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("ComplexString", {
+        return _fbthrift_IsSet("ComplexString", {
           "a": deref(self._cpp_obj).a_ref().has_value(),
           "b": deref(self._cpp_obj).b_ref().has_value(),
         })
@@ -1297,7 +1298,7 @@ cdef class ComplexNestedWithDefault(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("ComplexNestedWithDefault", {
+        return _fbthrift_IsSet("ComplexNestedWithDefault", {
           "z": deref(self._cpp_obj).z_ref().has_value(),
           "n": deref(self._cpp_obj).n_ref().has_value(),
         })
@@ -1423,7 +1424,7 @@ cdef class MinPadding(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("MinPadding", {
+        return _fbthrift_IsSet("MinPadding", {
           "small": deref(self._cpp_obj).small_ref().has_value(),
           "big": deref(self._cpp_obj).big_ref().has_value(),
           "medium": deref(self._cpp_obj).medium_ref().has_value(),
@@ -1574,7 +1575,7 @@ cdef class MinPaddingWithCustomType(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("MinPaddingWithCustomType", {
+        return _fbthrift_IsSet("MinPaddingWithCustomType", {
         })
 
     @staticmethod
@@ -1720,7 +1721,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("MyStruct", {
+        return _fbthrift_IsSet("MyStruct", {
           "MyIntField": deref(self._cpp_obj).MyIntField_ref().has_value(),
           "MyStringField": deref(self._cpp_obj).MyStringField_ref().has_value(),
           "majorVer": deref(self._cpp_obj).majorVer_ref().has_value(),
@@ -1852,7 +1853,7 @@ cdef class MyDataItem(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("MyDataItem", {
+        return _fbthrift_IsSet("MyDataItem", {
         })
 
     @staticmethod
@@ -1953,7 +1954,7 @@ cdef class Renaming(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("Renaming", {
+        return _fbthrift_IsSet("Renaming", {
           "foo": deref(self._cpp_obj).foo_ref().has_value(),
         })
 
@@ -2068,7 +2069,7 @@ cdef class AnnotatedTypes(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("AnnotatedTypes", {
+        return _fbthrift_IsSet("AnnotatedTypes", {
           "binary_field": deref(self._cpp_obj).binary_field_ref().has_value(),
           "list_field": deref(self._cpp_obj).list_field_ref().has_value(),
         })
@@ -2196,7 +2197,7 @@ cdef class ForwardUsageRoot(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("ForwardUsageRoot", {
+        return _fbthrift_IsSet("ForwardUsageRoot", {
           "ForwardUsageStruct": deref(self._cpp_obj).ForwardUsageStruct_ref().has_value(),
         })
 
@@ -2327,7 +2328,7 @@ cdef class ForwardUsageStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("ForwardUsageStruct", {
+        return _fbthrift_IsSet("ForwardUsageStruct", {
         })
 
     @staticmethod
@@ -2445,7 +2446,7 @@ cdef class ForwardUsageByRef(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("ForwardUsageByRef", {
+        return _fbthrift_IsSet("ForwardUsageByRef", {
         })
 
     @staticmethod
@@ -2563,7 +2564,7 @@ cdef class IncompleteMap(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("IncompleteMap", {
+        return _fbthrift_IsSet("IncompleteMap", {
           "field": deref(self._cpp_obj).field_ref().has_value(),
         })
 
@@ -2675,7 +2676,7 @@ cdef class IncompleteMapDep(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("IncompleteMapDep", {
+        return _fbthrift_IsSet("IncompleteMapDep", {
         })
 
     @staticmethod
@@ -2781,7 +2782,7 @@ cdef class CompleteMap(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("CompleteMap", {
+        return _fbthrift_IsSet("CompleteMap", {
           "field": deref(self._cpp_obj).field_ref().has_value(),
         })
 
@@ -2895,7 +2896,7 @@ cdef class CompleteMapDep(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("CompleteMapDep", {
+        return _fbthrift_IsSet("CompleteMapDep", {
         })
 
     @staticmethod
@@ -3001,7 +3002,7 @@ cdef class IncompleteList(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("IncompleteList", {
+        return _fbthrift_IsSet("IncompleteList", {
           "field": deref(self._cpp_obj).field_ref().has_value(),
         })
 
@@ -3113,7 +3114,7 @@ cdef class IncompleteListDep(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("IncompleteListDep", {
+        return _fbthrift_IsSet("IncompleteListDep", {
         })
 
     @staticmethod
@@ -3219,7 +3220,7 @@ cdef class CompleteList(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("CompleteList", {
+        return _fbthrift_IsSet("CompleteList", {
           "field": deref(self._cpp_obj).field_ref().has_value(),
         })
 
@@ -3331,7 +3332,7 @@ cdef class CompleteListDep(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("CompleteListDep", {
+        return _fbthrift_IsSet("CompleteListDep", {
         })
 
     @staticmethod
@@ -3437,7 +3438,7 @@ cdef class AdaptedList(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("AdaptedList", {
+        return _fbthrift_IsSet("AdaptedList", {
           "field": deref(self._cpp_obj).field_ref().has_value(),
         })
 
@@ -3556,7 +3557,7 @@ cdef class DependentAdaptedList(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("DependentAdaptedList", {
+        return _fbthrift_IsSet("DependentAdaptedList", {
           "field": deref(self._cpp_obj).field_ref().has_value(),
         })
 
@@ -3675,7 +3676,7 @@ cdef class AllocatorAware(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("AllocatorAware", {
+        return _fbthrift_IsSet("AllocatorAware", {
           "aa_list": deref(self._cpp_obj).aa_list_ref().has_value(),
           "aa_set": deref(self._cpp_obj).aa_set_ref().has_value(),
           "aa_map": deref(self._cpp_obj).aa_map_ref().has_value(),
@@ -3856,7 +3857,7 @@ cdef class AllocatorAware2(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("AllocatorAware2", {
+        return _fbthrift_IsSet("AllocatorAware2", {
           "not_a_container": deref(self._cpp_obj).not_a_container_ref().has_value(),
         })
 
@@ -3971,7 +3972,7 @@ cdef class TypedefStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("TypedefStruct", {
+        return _fbthrift_IsSet("TypedefStruct", {
           "i32_field": deref(self._cpp_obj).i32_field_ref().has_value(),
           "IntTypedef_field": deref(self._cpp_obj).IntTypedef_field_ref().has_value(),
           "UintTypedef_field": deref(self._cpp_obj).UintTypedef_field_ref().has_value(),
@@ -4104,7 +4105,7 @@ cdef class StructWithDoubleUnderscores(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("StructWithDoubleUnderscores", {
+        return _fbthrift_IsSet("StructWithDoubleUnderscores", {
           "__field": deref(self._cpp_obj).__field_ref().has_value(),
         })
 

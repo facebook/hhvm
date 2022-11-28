@@ -13,6 +13,7 @@ from libcpp.iterator cimport inserter as cinserter
 from cpython cimport bool as pbool
 from cython.operator cimport dereference as deref, preincrement as inc, address as ptr_address
 import thrift.py3.types
+from thrift.py3.types import _IsSet as _fbthrift_IsSet
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 from thrift.py3.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
@@ -466,7 +467,7 @@ cdef class SomeStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("SomeStruct", {
+        return _fbthrift_IsSet("SomeStruct", {
           "reasonable": deref(self._cpp_obj).reasonable_ref().has_value(),
           "fine": deref(self._cpp_obj).fine_ref().has_value(),
           "questionable": deref(self._cpp_obj).questionable_ref().has_value(),
@@ -616,7 +617,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
         self._fields_setter.set_field(name.encode("utf-8"), value)
 
     cdef object _fbthrift_isset(self):
-        return thrift.py3.types._IsSet("MyStruct", {
+        return _fbthrift_IsSet("MyStruct", {
           "me2_3": deref(self._cpp_obj).me2_3_ref().has_value(),
           "me3_n3": deref(self._cpp_obj).me3_n3_ref().has_value(),
           "me1_t1": deref(self._cpp_obj).me1_t1_ref().has_value(),

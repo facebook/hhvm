@@ -95,7 +95,7 @@ let process_gconst_xref symbol_def pos (xrefs, prog) =
     (xrefs, prog)
 
 let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
-  let SymbolDefinition.{ name; full_name; kind; _ } = member in
+  let File_info.{ name; full_name; kind } = member in
   match Str.split (Str.regexp "::") full_name with
   | [] -> (xrefs, prog)
   | con_name :: _mem_name ->
@@ -173,12 +173,10 @@ let process_attribute_xref ctx File_info.{ occ; def } opt_info (xrefs, prog) =
       (match get_con_preds_from_name class_name with
       | None -> (xrefs, prog)
       | Some override_con_pred_types ->
-        (match Lazy.force def with
+        (match def with
         | None -> (xrefs, prog)
-        | Some sym_def ->
-          (match
-             Str.split (Str.regexp "::") sym_def.SymbolDefinition.full_name
-           with
+        | Some File_info.{ full_name; _ } ->
+          (match Str.split (Str.regexp "::") full_name with
           | [] -> (xrefs, prog)
           | base_con_name :: _mem_name ->
             (match get_con_preds_from_name base_con_name with
@@ -235,7 +233,7 @@ let process_xrefs ctx symbols prog : XRefs.t * Fact_acc.t =
         match occ.type_ with
         | Attribute info -> process_attribute_xref ctx sym info (xrefs, prog)
         | _ ->
-          (match Lazy.force def with
+          (match def with
           | None ->
             (* no symbol info - likely dynamic *)
             (match occ.type_ with
@@ -248,11 +246,10 @@ let process_xrefs ctx symbols prog : XRefs.t * Fact_acc.t =
               let xrefs = XRefs.add xrefs target_id pos target_json in
               (xrefs, prog)
             | _ -> (xrefs, prog))
-          | Some sym_def ->
+          | Some (File_info.{ name; kind; _ } as sym_def) ->
             let open SymbolDefinition in
             let proc_mem = process_member_xref ctx sym_def pos in
-            let name = sym_def.name in
-            (match sym_def.kind with
+            (match kind with
             | Class ->
               let con_kind =
                 Predicate.parent_decl_predicate Predicate.ClassContainer

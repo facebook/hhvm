@@ -30,7 +30,18 @@ type t = {
 let compute_sym_hash path symbols =
   let concat hash str = Md5.digest_string (Md5.to_binary hash ^ str) in
   let f cur sym =
-    concat cur SymbolOccurrence.(sym.occ.name ^ show_kind sym.occ.type_)
+    let open SymbolOccurrence in
+    let full_name =
+      match sym.occ.type_ with
+      | Method _ ->
+        (match Lazy.force sym.def with
+        | Some def -> def.SymbolDefinition.full_name
+        | None -> "")
+      | _ -> ""
+    in
+    concat
+      cur
+      SymbolOccurrence.(sym.occ.name ^ show_kind sym.occ.type_ ^ full_name)
   in
   let hash = List.fold ~init:(Md5.digest_string "") ~f symbols in
   concat hash path

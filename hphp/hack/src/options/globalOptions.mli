@@ -90,6 +90,8 @@ type t = {
    * [e.g. foo(&$bar)].
    *)
   tco_disallow_byref_calls: bool;
+  (* HH_FIXME should silence *any* error, not just the one specified by code *)
+  code_agnostic_fixme: bool;
   (* Error codes for which we allow HH_FIXMEs in strict mode *)
   allowed_fixme_codes_strict: ISet.t;
   (* Initial hh_log_level settings *)
@@ -375,6 +377,7 @@ val make :
   ?tco_disallow_invalid_arraykey:bool ->
   ?tco_disallow_byref_dynamic_calls:bool ->
   ?tco_disallow_byref_calls:bool ->
+  ?code_agnostic_fixme:bool ->
   ?allowed_fixme_codes_strict:ISet.t ->
   ?log_levels:int SMap.t ->
   ?po_disable_lval_as_an_expression:bool ->
@@ -501,6 +504,8 @@ val so_remote_worker_vfs_checkout_threshold : t -> int
 val so_naming_sqlite_path : t -> string option
 
 val allowed_fixme_codes_strict : t -> ISet.t
+
+val code_agnostic_fixme : t -> bool
 
 (* NOTE: set/getters for tco_* options moved to TypecheckerOptions *)
 (* NOTE: set/getters for po_* options moved to ParserOptions *)

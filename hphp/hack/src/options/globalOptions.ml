@@ -57,6 +57,7 @@ type t = {
   tco_disallow_invalid_arraykey: bool;
   tco_disallow_byref_dynamic_calls: bool;
   tco_disallow_byref_calls: bool;
+  code_agnostic_fixme: bool;
   allowed_fixme_codes_strict: ISet.t;
   log_levels: int SMap.t;
   po_disable_lval_as_an_expression: bool;
@@ -201,6 +202,7 @@ let default =
     tco_disallow_invalid_arraykey = true;
     tco_disallow_byref_dynamic_calls = false;
     tco_disallow_byref_calls = true;
+    code_agnostic_fixme = false;
     allowed_fixme_codes_strict = ISet.empty;
     log_levels = SMap.empty;
     po_disable_lval_as_an_expression = true;
@@ -344,6 +346,7 @@ let make
     ?(tco_disallow_byref_dynamic_calls =
       default.tco_disallow_byref_dynamic_calls)
     ?(tco_disallow_byref_calls = default.tco_disallow_byref_calls)
+    ?(code_agnostic_fixme = default.code_agnostic_fixme)
     ?(allowed_fixme_codes_strict = default.allowed_fixme_codes_strict)
     ?(log_levels = default.log_levels)
     ?(po_disable_lval_as_an_expression =
@@ -508,6 +511,7 @@ let make
     so_naming_sqlite_path;
     po_auto_namespace_map;
     po_codegen = false;
+    code_agnostic_fixme;
     allowed_fixme_codes_strict;
     po_deregister_php_stdlib;
     po_disallow_toplevel_requires;
@@ -638,3 +642,5 @@ let so_remote_worker_vfs_checkout_threshold t =
 let so_naming_sqlite_path t = t.so_naming_sqlite_path
 
 let allowed_fixme_codes_strict t = t.allowed_fixme_codes_strict
+
+let code_agnostic_fixme t = t.code_agnostic_fixme

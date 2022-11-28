@@ -580,6 +580,8 @@ let (get_hh_fixme_pos : (Pos.t -> error_code -> Pos.t option) ref) =
 let (is_hh_fixme_disallowed : (Pos.t -> error_code -> bool) ref) =
   ref (fun _ _ -> false)
 
+let code_agnostic_fixme = ref false
+
 (*****************************************************************************)
 (* Errors accumulator. *)
 (*****************************************************************************)

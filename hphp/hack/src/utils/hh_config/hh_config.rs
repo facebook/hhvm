@@ -141,6 +141,9 @@ impl HhConfig {
                 b"allowed_decl_fixme_codes" => {
                     go.po_allowed_decl_fixme_codes = parse_iset(value);
                 }
+                b"code_agnostic_fixme" => {
+                    go.code_agnostic_fixme = parse_json(value);
+                }
                 b"allowed_files_for_module_declarations" => {
                     go.tco_allowed_files_for_module_declarations = parse_svec(value);
                 }

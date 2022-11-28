@@ -93,6 +93,8 @@ val is_hh_fixme_disallowed : (Pos.t -> int -> bool) ref
 
 val get_hh_fixme_pos : (Pos.t -> int -> Pos.t option) ref
 
+val code_agnostic_fixme : bool ref
+
 val phase_to_string : phase -> string
 
 val phase_of_string : string -> phase option

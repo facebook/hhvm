@@ -272,7 +272,14 @@ let is_disallowed pos code =
 let () =
   (Errors.get_hh_fixme_pos :=
      fun err_pos err_code ->
-       get_fixmes_for_pos err_pos |> IMap.find_opt err_code);
+       get_fixmes_for_pos err_pos |> fun imap ->
+       if !Errors.code_agnostic_fixme then
+         if IMap.is_empty imap then
+           None
+         else
+           Some err_pos
+       else
+         IMap.find_opt err_code imap);
   (Errors.is_hh_fixme :=
      fun err_pos err_code ->
        Option.is_some (!Errors.get_hh_fixme_pos err_pos err_code));

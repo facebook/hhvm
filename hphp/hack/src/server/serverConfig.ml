@@ -342,6 +342,7 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_disallow_byref_calls:(bool_opt "disallow_byref_calls" config)
       ?po_disable_lval_as_an_expression:
         (bool_opt "disable_lval_as_an_expression" config)
+      ?code_agnostic_fixme:(bool_opt "code_agnostic_fixme" config)
       ~allowed_fixme_codes_strict:
         (prepare_iset config "allowed_fixme_codes_strict" ISet.empty)
       ~po_auto_namespace_map:(prepare_auto_namespace_map config)
@@ -512,6 +513,7 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
     GlobalOptions.allowed_fixme_codes_strict global_opts;
   Errors.report_pos_from_reason :=
     TypecheckerOptions.report_pos_from_reason global_opts;
+  Errors.code_agnostic_fixme := GlobalOptions.code_agnostic_fixme global_opts;
   ( {
       version;
       load_script_timeout;

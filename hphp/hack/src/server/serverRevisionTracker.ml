@@ -38,7 +38,6 @@ type event_list = watchman_event list
 
 type tracker_state = {
   mutable is_enabled: bool;
-  mutable outstanding_events: event_list;
   mutable current_mergebase: Hg.global_rev option;
   mutable did_change_mergebase: bool;
       (**  Do we think that this server have processed a mergebase change? If we are
@@ -60,15 +59,26 @@ type tracker_state = {
   mergebase_queries: (Hg.hg_rev, Hg.global_rev Future.t) Caml.Hashtbl.t;
 }
 
+type tracker_v1_event_state = {
+  mutable is_in_hg_update_state: bool;
+  mutable is_in_hg_transaction_state: bool;
+}
+
+type tracker_v2_event_state = { mutable outstanding_events: event_list }
+
 let tracker_state =
   {
     is_enabled = false;
     current_mergebase = None;
-    outstanding_events = [];
     did_change_mergebase = false;
     pending_queries = Queue.create ();
     mergebase_queries = Caml.Hashtbl.create 200;
   }
+
+let tracker_v1_event_state =
+  { is_in_hg_update_state = false; is_in_hg_transaction_state = false }
+
+let tracker_v2_event_state = { outstanding_events = [] }
 
 let is_in_state (outstanding : event_list) : bool =
   List.exists outstanding ~f:(fun e -> e.is_enter)
@@ -145,25 +155,38 @@ let add_query ~hg_rev root =
     Queue.enqueue tracker_state.pending_queries hg_rev
   )
 
-let on_state_enter state_name =
+let on_state_enter state_name use_tracker_v2 =
+  let event =
+    { source = state_name; timestamp = Unix.gettimeofday (); is_enter = true }
+  in
   match state_name with
-  | "hg.update"
+  | "hg.update" ->
+    if use_tracker_v2 then
+      tracker_v2_event_state.outstanding_events <-
+        transition tracker_v2_event_state.outstanding_events event
+    else
+      tracker_v1_event_state.is_in_hg_update_state <- true
   | "hg.transaction" ->
-    let event =
-      { source = state_name; timestamp = Unix.gettimeofday (); is_enter = true }
-    in
-    tracker_state.outstanding_events <-
-      transition tracker_state.outstanding_events event
+    if use_tracker_v2 then
+      tracker_v2_event_state.outstanding_events <-
+        transition tracker_v2_event_state.outstanding_events event
+    else
+      tracker_v1_event_state.is_in_hg_transaction_state <- true
   | _ -> ()
 
-let on_state_leave root state_name state_metadata =
+let on_state_leave root state_name state_metadata use_tracker_v2 =
   let event =
     { source = state_name; timestamp = Unix.gettimeofday (); is_enter = false }
   in
   match state_name with
   | "hg.update" ->
-    tracker_state.outstanding_events <-
-      transition tracker_state.outstanding_events event;
+    let _ =
+      if use_tracker_v2 then
+        tracker_v2_event_state.outstanding_events <-
+          transition tracker_v2_event_state.outstanding_events event
+      else
+        tracker_v1_event_state.is_in_hg_update_state <- false
+    in
     Hh_logger.log "ServerRevisionTracker: leaving hg.update";
     Option.Monad_infix.(
       Option.iter
@@ -174,11 +197,19 @@ let on_state_leave root state_name state_metadata =
             Hh_logger.log "ServerRevisionTracker: Ignoring merge rev %s" hg_rev
           | _ -> add_query ~hg_rev root))
   | "hg.transaction" ->
-    tracker_state.outstanding_events <-
-      transition tracker_state.outstanding_events event
+    if use_tracker_v2 then
+      tracker_v2_event_state.outstanding_events <-
+        transition tracker_v2_event_state.outstanding_events event
+    else
+      tracker_v1_event_state.is_in_hg_transaction_state <- false
   | _ -> ()
 
-let is_hg_updating () = is_in_state tracker_state.outstanding_events
+let is_hg_updating use_tracker_v2 =
+  if use_tracker_v2 then
+    is_in_state tracker_v2_event_state.outstanding_events
+  else
+    tracker_v1_event_state.is_in_hg_update_state
+    || tracker_v1_event_state.is_in_hg_transaction_state
 
 let check_query future ~timeout ~current_t =
   match Future.get ~timeout future with

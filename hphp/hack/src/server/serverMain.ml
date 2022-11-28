@@ -618,7 +618,10 @@ let serve_one_iteration genv env client_provider =
     let has_default_client_pending =
       Option.is_some env.nonpersistent_client_pending_command_needs_full_check
     in
-    let can_accept_clients = not @@ ServerRevisionTracker.is_hg_updating () in
+    let use_tracker_v2 = false in
+    let can_accept_clients =
+      not @@ ServerRevisionTracker.is_hg_updating use_tracker_v2
+    in
     match (can_accept_clients, has_default_client_pending) with
     (* If we are already blocked on some client, do not accept more of them.
      * Other clients (that connect through priority pipe, or persistent clients)
@@ -878,8 +881,9 @@ let priority_client_interrupt_handler genv client_provider :
       MultiThreadedCall.Cancel )
   ) else
     let idle_gc_slice = genv.local_config.ServerLocalConfig.idle_gc_slice in
+    let use_tracker_v2 = false in
     let select_outcome =
-      if ServerRevisionTracker.is_hg_updating () then (
+      if ServerRevisionTracker.is_hg_updating use_tracker_v2 then (
         Hh_logger.log "Won't handle client message: hg is updating.";
         ClientProvider.Not_selecting_hg_updating
       ) else

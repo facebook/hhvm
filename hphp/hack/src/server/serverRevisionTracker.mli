@@ -8,8 +8,8 @@
 
 val initialize : Hg.global_rev -> unit
 
-val on_state_enter : string -> (* state name *)
-                               unit
+(* state_name -> use_tracker_v2 *)
+val on_state_enter : string -> bool -> unit
 
 val on_state_leave :
   Path.t ->
@@ -18,9 +18,11 @@ val on_state_leave :
   (* state name *)
   Hh_json.json option ->
   (* state metadata *)
+  bool ->
+  (* use_tracker_v2 *)
   unit
 
-val is_hg_updating : unit -> bool
+val is_hg_updating : bool (* use_tracker_v2 *) -> bool
 
 val check_blocking : unit -> unit
 

@@ -88,7 +88,7 @@ let make_genv options config local_config workers =
        * Watchamn.Watchman_dead and Watchman_alive). We need to update
        * a reference to the new instance. *)
       let watchman = ref (Watchman.Watchman_alive watchman_env) in
-      let use_tracker_v2 = false in
+      let use_tracker_v2 = local_config.SLC.use_server_revision_tracker_v2 in
       ServerNotifierTypes.(
         let on_changes = function
           | Watchman.Changed_merge_base _ ->

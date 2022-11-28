@@ -61,6 +61,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.SignalType;
 
 public class ThriftServerHandler extends ChannelDuplexHandler {
   private static final Logger log = LoggerFactory.getLogger(ThriftServerHandler.class);
@@ -166,10 +167,10 @@ public class ThriftServerHandler extends ChannelDuplexHandler {
               return Mono.empty();
             })
         .doFinally(
-            __ -> {
+            st -> {
               RequestContexts.setCurrentContext(currentContext);
-              if (frame.refCnt() > 0) {
-                frame.release();
+              if (st == SignalType.CANCEL || st == SignalType.ON_ERROR) {
+                ReferenceCountUtil.safeRelease(frame);
               }
             })
         .subscribe();

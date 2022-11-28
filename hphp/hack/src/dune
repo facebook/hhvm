@@ -3,15 +3,6 @@
   (flags
    (:standard -w @a-4-29-35-41-42-44-45-48-50-70 \ -strict-sequence))))
 
-;; Dune ignores by default all directories that start with _
-(subdir hhi/hsl_src/ (dirs :standard _Private))
-(subdir hhi/hsl_src/file (dirs :standard _Private))
-(subdir hhi/hsl_src/io (dirs :standard _Private))
-(subdir hhi/hsl_src/network (dirs :standard _Private))
-(subdir hhi/hsl_src/os (dirs :standard _Private))
-(subdir hhi/hsl_src/tcp (dirs :standard _Private))
-(subdir hhi/hsl_src/unix (dirs :standard _Private))
-
 (executable
  (name hh_single_type_check)
  (modules hh_single_type_check)

@@ -9,8 +9,7 @@ if [ -z "$1" -o -z "$2" -o -z "$3" -o -z "$4" ]; then
 fi
 
 HH_PARSE="$1"
-SOURCE_DIR=$(readlink -f "$2")
-SOURCE_DIR="${SOURCE_DIR%/}"
+SOURCE_DIR="${2%/}"
 OUTPUT_DIR="${3%/}"
 STAMP_FILE="$4"
 

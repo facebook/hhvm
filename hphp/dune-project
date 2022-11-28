@@ -1,2 +1,3 @@
 (lang dune 3.4)
 (formatting (enabled_for dune))
+(using directory-targets 0.1)

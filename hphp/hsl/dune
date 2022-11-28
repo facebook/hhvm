@@ -1,2 +1,33 @@
 ;; Only src is relevant to the Ocaml build of Hack
 (data_only_dirs minitest tests)
+
+;; Dune ignores by default all directories that start with _
+;; Please update this list with any sub-directory of `src`
+;; that starts with an underscore `_`
+(subdir src/ (dirs :standard _Private))
+(subdir src/file (dirs :standard _Private))
+(subdir src/io (dirs :standard _Private))
+(subdir src/network (dirs :standard _Private))
+(subdir src/os (dirs :standard _Private))
+(subdir src/tcp (dirs :standard _Private))
+(subdir src/unix (dirs :standard _Private))
+
+;; `dir` is new in dune 3.0. It exports any file under that
+;; directory as a target of that rule
+(rule
+  (targets hsl_generated_hhis.stamp (dir generated_hhis))
+  (alias all_generated_hhis)
+  (deps
+    (source_tree src)
+    (file %{project_root}/hack/scripts/generate_hhis.sh)
+    ../hack/src/hh_parse.exe
+    (sandbox always)
+  )
+  (action (run
+    %{project_root}/hack/scripts/generate_hhis.sh
+    %{exe:../hack/src/hh_parse.exe}
+      "./src"
+      "./generated_hhis"
+      "hsl_generated_hhis.stamp")
+  )
+)

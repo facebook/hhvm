@@ -20,10 +20,10 @@
 (rule
  (targets libtyping_ser_ffi.a)
  (deps
-  (source_tree %{workspace_root}/src))
+  (source_tree %{workspace_root}/hack/src))
  (locks /cargo)
  (action
   (run
-   %{workspace_root}/scripts/invoke_cargo.sh
+   %{workspace_root}/hack/scripts/invoke_cargo.sh
    typing_ser_ffi
    typing_ser_ffi)))

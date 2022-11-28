@@ -62,10 +62,10 @@
 (rule
  (targets libdeps_rust_ffi.a)
  (deps
-  (source_tree %{workspace_root}/src))
+  (source_tree %{workspace_root}/hack/src))
  (locks /cargo)
  (action
-  (run %{workspace_root}/scripts/invoke_cargo.sh deps_rust_ffi deps_rust_ffi)))
+  (run %{workspace_root}/hack/scripts/invoke_cargo.sh deps_rust_ffi deps_rust_ffi)))
 
 (library
  (name hh_fanout_rust_ffi_externs)
@@ -83,10 +83,10 @@
 (rule
  (targets libhh_fanout_rust_ffi.a)
  (deps
-  (source_tree %{workspace_root}/src))
+  (source_tree %{workspace_root}/hack/src))
  (locks /cargo)
  (action
   (run
-   %{workspace_root}/scripts/invoke_cargo.sh
+   %{workspace_root}/hack/scripts/invoke_cargo.sh
    hh_fanout_rust_ffi
    hh_fanout_rust_ffi)))

@@ -2,16 +2,16 @@
  (alias tast_holes)
  (deps
   %{exe:../../src/hh_single_type_check.exe}
-  %{project_root}/test/verify.py
-  %{project_root}/test/review.sh
-  (glob_files %{project_root}/test/holes/*.php)
-  (glob_files %{project_root}/test/holes/*.php.holes.exp)
-  (glob_files %{project_root}/test/holes/*.php.exp)
-  (glob_files %{project_root}/test/holes/HH_FLAGS))
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/holes/*.php)
+  (glob_files %{project_root}/hack/test/holes/*.php.holes.exp)
+  (glob_files %{project_root}/hack/test/holes/*.php.exp)
+  (glob_files %{project_root}/hack/test/holes/HH_FLAGS))
  (action
   (run
-   %{project_root}/test/verify.py
-   %{project_root}/test/holes
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/holes
    --program
    %{exe:../../src/hh_single_type_check.exe}
    --in-extension

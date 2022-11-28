@@ -2,15 +2,15 @@
  (alias quickfixes)
  (deps
   %{exe:../../src/hh_single_type_check.exe}
-  %{project_root}/test/verify.py
-  %{project_root}/test/review.sh
-  (glob_files %{project_root}/test/quickfixes/HH_FLAGS)
-  (glob_files %{project_root}/test/quickfixes/*.php)
-  (glob_files %{project_root}/test/quickfixes/*.exp))
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/quickfixes/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/quickfixes/*.php)
+  (glob_files %{project_root}/hack/test/quickfixes/*.exp))
  (action
   (run
-   %{project_root}/test/verify.py
-   %{project_root}/test/quickfixes
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/quickfixes
    --program
    %{exe:../../src/hh_single_type_check.exe}
    --flags

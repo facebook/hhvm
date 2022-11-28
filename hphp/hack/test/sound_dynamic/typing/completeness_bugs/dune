@@ -2,17 +2,17 @@
  (alias sound_dynamic_typing_completeness_bugs_bad)
  (deps
   %{exe:../../../../src/hh_single_type_check.exe}
-  %{project_root}/test/verify.py
-  %{project_root}/test/review.sh
-  (glob_files %{project_root}/test/sound_dynamic/typing/completeness_bugs/HH_FLAGS)
-  (glob_files %{project_root}/test/sound_dynamic/typing/completeness_bugs/*.bad.php)
-  (glob_files %{project_root}/test/sound_dynamic/typing/completeness_bugs/*.bad.php.exp)
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/sound_dynamic/typing/completeness_bugs/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/sound_dynamic/typing/completeness_bugs/*.bad.php)
+  (glob_files %{project_root}/hack/test/sound_dynamic/typing/completeness_bugs/*.bad.php.exp)
   (glob_files
-   %{project_root}/test/sound_dynamic/typing/completeness_bugs/*.bad.php.legacy_decl.exp))
+   %{project_root}/hack/test/sound_dynamic/typing/completeness_bugs/*.bad.php.legacy_decl.exp))
  (action
   (run
-   %{project_root}/test/verify.py
-   %{project_root}/test/sound_dynamic/typing/completeness_bugs
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/sound_dynamic/typing/completeness_bugs
    --program
    %{exe:../../../../src/hh_single_type_check.exe}
    --in-extension
@@ -34,15 +34,15 @@
  (alias sound_dynamic_typing_completeness_bugs_shallow_decl_bad)
  (deps
   %{exe:../../../../src/hh_single_type_check.exe}
-  %{project_root}/test/verify.py
-  %{project_root}/test/review.sh
-  (glob_files %{project_root}/test/sound_dynamic/typing/completeness_bugs/HH_FLAGS)
-  (glob_files %{project_root}/test/sound_dynamic/typing/completeness_bugs/*.bad.php)
-  (glob_files %{project_root}/test/sound_dynamic/typing/completeness_bugs/*.bad.php.exp))
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/sound_dynamic/typing/completeness_bugs/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/sound_dynamic/typing/completeness_bugs/*.bad.php)
+  (glob_files %{project_root}/hack/test/sound_dynamic/typing/completeness_bugs/*.bad.php.exp))
  (action
   (run
-   %{project_root}/test/verify.py
-   %{project_root}/test/sound_dynamic/typing/completeness_bugs
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/sound_dynamic/typing/completeness_bugs
    --program
    %{exe:../../../../src/hh_single_type_check.exe}
    --in-extension

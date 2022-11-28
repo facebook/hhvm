@@ -2,14 +2,14 @@
  (alias color)
  (deps
   %{exe:../../src/hh_single_type_check.exe}
-  %{project_root}/test/verify.py
-  %{project_root}/test/review.sh
-  (glob_files %{project_root}/test/color/*.php)
-  (glob_files %{project_root}/test/color/*.exp))
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/color/*.php)
+  (glob_files %{project_root}/hack/test/color/*.exp))
  (action
   (run
-   %{project_root}/test/verify.py
-   %{project_root}/test/color
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/color
    --program
    %{exe:../../src/hh_single_type_check.exe}
    --flags
@@ -19,14 +19,14 @@
  (alias colour)
  (deps
   %{exe:../../src/hh_single_type_check.exe}
-  %{project_root}/test/verify.py
-  %{project_root}/test/review.sh
-  (glob_files %{project_root}/test/color/*.php)
-  (glob_files %{project_root}/test/color/*.exp))
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/color/*.php)
+  (glob_files %{project_root}/hack/test/color/*.exp))
  (action
   (run
-   %{project_root}/test/verify.py
-   %{project_root}/test/color
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/color
    --program
    %{exe:../../src/hh_single_type_check.exe}
    --flags

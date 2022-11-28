@@ -1,0 +1,3 @@
+;; Only hack (with actual ocaml code) and hsl (with some php files Hack needs)
+;; are relevant to the OSS ocaml build of Hack. Ban all other directories
+(data_only_dirs bin compiler doc facebook hhbbc hhvm neo public_tld runtime system test tools util vixl zend)

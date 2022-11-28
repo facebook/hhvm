@@ -1,0 +1,2 @@
+;; Only src is relevant to the Ocaml build of Hack
+(data_only_dirs minitest tests)

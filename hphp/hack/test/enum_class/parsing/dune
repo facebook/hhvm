@@ -2,15 +2,15 @@
  (alias enum_class_parsing_good)
  (deps
   %{exe:../../../src/hh_parse.exe}
-  %{project_root}/test/verify.py
-  %{project_root}/test/review.sh
-  (glob_files %{project_root}/test/enum_class/parsing/HH_FLAGS)
-  (glob_files %{project_root}/test/enum_class/parsing/*.good.php)
-  (glob_files %{project_root}/test/enum_class/parsing/*.good.php.exp))
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/enum_class/parsing/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/enum_class/parsing/*.good.php)
+  (glob_files %{project_root}/hack/test/enum_class/parsing/*.good.php.exp))
  (action
   (run
-   %{project_root}/test/verify.py
-   %{project_root}/test/enum_class/parsing
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/enum_class/parsing
    --program
    %{exe:../../../src/hh_parse.exe}
    --in-extension
@@ -25,15 +25,15 @@
  (alias enum_class_parsing_bad)
  (deps
   %{exe:../../../src/hh_parse.exe}
-  %{project_root}/test/verify.py
-  %{project_root}/test/review.sh
-  (glob_files %{project_root}/test/enum_class/parsing/HH_FLAGS)
-  (glob_files %{project_root}/test/enum_class/parsing/*.bad.php)
-  (glob_files %{project_root}/test/enum_class/parsing/*.bad.php.exp))
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/enum_class/parsing/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/enum_class/parsing/*.bad.php)
+  (glob_files %{project_root}/hack/test/enum_class/parsing/*.bad.php.exp))
  (action
   (run
-   %{project_root}/test/verify.py
-   %{project_root}/test/enum_class/parsing
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/enum_class/parsing
    --program
    %{exe:../../../src/hh_parse.exe}
    --in-extension

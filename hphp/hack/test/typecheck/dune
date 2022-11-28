@@ -22,7 +22,7 @@ let rec sub_folder f acc abs_path rel_path =
 let generate_sub_folders dir rel_dir =
   sub_folder (fun x y -> x :: y) [] dir rel_dir
 
-let generate_glob file = Printf.sprintf "(glob_files %%{project_root}/%s)" file
+let generate_glob file = Printf.sprintf "(glob_files %%{project_root}/hack/%s)" file
 
 let generate_hh_flags dirs =
   let aux acc (abs_dir, rel_dir) =
@@ -45,17 +45,17 @@ let generate_patterns dirs pattern acc =
 let deps files =
   Printf.sprintf
     "      (deps %%{exe:../../src/hh_single_type_check.exe}
-          %%{project_root}/test/verify.py
-          %%{project_root}/test/review.sh
-          %%{project_root}/test/hhi/coeffects.hhi
-          %%{project_root}/test/hhi/expr_tree.hhi
-          %%{project_root}/test/hhi/XHPTest.hhi
+          %%{project_root}/hack/test/verify.py
+          %%{project_root}/hack/test/review.sh
+          %%{project_root}/hack/test/hhi/coeffects.hhi
+          %%{project_root}/hack/test/hhi/expr_tree.hhi
+          %%{project_root}/hack/test/hhi/XHPTest.hhi
           %s)"
     (String.concat "\n          " files)
 
 let command flags =
   Printf.sprintf
-    "    (action (run %%{project_root}/test/verify.py %%{project_root}/test/typecheck
+    "    (action (run %%{project_root}/hack/test/verify.py %%{project_root}/hack/test/typecheck
           --program %%{exe:../../src/hh_single_type_check.exe}
           %s))"
     flags

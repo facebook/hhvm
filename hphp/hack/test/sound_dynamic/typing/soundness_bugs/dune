@@ -2,17 +2,17 @@
  (alias sound_dynamic_typing_soundness_bugs_good)
  (deps
   %{exe:../../../../src/hh_single_type_check.exe}
-  %{project_root}/test/verify.py
-  %{project_root}/test/review.sh
-  (glob_files %{project_root}/test/sound_dynamic/typing/soundness_bugs/HH_FLAGS)
-  (glob_files %{project_root}/test/sound_dynamic/typing/soundness_bugs/*.good.php)
-  (glob_files %{project_root}/test/sound_dynamic/typing/soundness_bugs/*.good.php.exp)
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/sound_dynamic/typing/soundness_bugs/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/sound_dynamic/typing/soundness_bugs/*.good.php)
+  (glob_files %{project_root}/hack/test/sound_dynamic/typing/soundness_bugs/*.good.php.exp)
   (glob_files
-   %{project_root}/test/sound_dynamic/typing/soundness_bugs/*.good.php.legacy_decl.exp))
+   %{project_root}/hack/test/sound_dynamic/typing/soundness_bugs/*.good.php.legacy_decl.exp))
  (action
   (run
-   %{project_root}/test/verify.py
-   %{project_root}/test/sound_dynamic/typing/soundness_bugs
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/sound_dynamic/typing/soundness_bugs
    --program
    %{exe:../../../../src/hh_single_type_check.exe}
    --in-extension
@@ -34,15 +34,15 @@
  (alias sound_dynamic_typing_soundness_bugs_shallow_decl_good)
  (deps
   %{exe:../../../../src/hh_single_type_check.exe}
-  %{project_root}/test/verify.py
-  %{project_root}/test/review.sh
-  (glob_files %{project_root}/test/sound_dynamic/typing/soundness_bugs/HH_FLAGS)
-  (glob_files %{project_root}/test/sound_dynamic/typing/soundness_bugs/*.good.php)
-  (glob_files %{project_root}/test/sound_dynamic/typing/soundness_bugs/*.good.php.exp))
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/sound_dynamic/typing/soundness_bugs/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/sound_dynamic/typing/soundness_bugs/*.good.php)
+  (glob_files %{project_root}/hack/test/sound_dynamic/typing/soundness_bugs/*.good.php.exp))
  (action
   (run
-   %{project_root}/test/verify.py
-   %{project_root}/test/sound_dynamic/typing/soundness_bugs
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/sound_dynamic/typing/soundness_bugs
    --program
    %{exe:../../../../src/hh_single_type_check.exe}
    --in-extension

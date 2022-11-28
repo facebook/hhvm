@@ -84,7 +84,7 @@ enum EnumType {
  * Enables compatibility on enums.
  */
 @scope.Program
-@scope.FbthriftInternalEnum
+@scope.Enum
 struct Enums {
   1: EnumType type;
 }

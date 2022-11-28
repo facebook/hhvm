@@ -1413,7 +1413,7 @@ class EnumType implements \IThriftSyncStruct, \IThriftStructMetadata {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Enum' => \thrift\annotation\FbthriftInternalEnum::fromShape(
+        '\thrift\annotation\Enum' => \thrift\annotation\Enum::fromShape(
           shape(
           )
         ),

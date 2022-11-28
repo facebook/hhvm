@@ -32,7 +32,7 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'Transitive', 'Schema', 'Program', 'Struct', 'Union', 'Exception', 'Field', 'Typedef', 'Service', 'Interaction', 'Function', 'EnumValue', 'Const', 'FbthriftInternalEnum', 'Structured', 'Interface', 'RootDefinition', 'Definition', 'Enum']
+__all__ = ['UTF8STRINGS', 'Transitive', 'Schema', 'Program', 'Struct', 'Union', 'Exception', 'Field', 'Typedef', 'Service', 'Interaction', 'Function', 'EnumValue', 'Const', 'Enum', 'Structured', 'Interface', 'RootDefinition', 'Definition']
 
 class Transitive:
   """
@@ -1218,7 +1218,7 @@ class Const:
   def _to_py_deprecated(self):
     return self
 
-class FbthriftInternalEnum:
+class Enum:
 
   thrift_spec = None
   thrift_field_annotations = None
@@ -1251,7 +1251,7 @@ class FbthriftInternalEnum:
     if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
       oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
       return
-    oprot.writeStructBegin('FbthriftInternalEnum')
+    oprot.writeStructBegin('Enum')
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
@@ -1293,13 +1293,13 @@ class FbthriftInternalEnum:
     import importlib
     import thrift.python.converter
     python_types = importlib.import_module("facebook.thrift.annotation.scope.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.FbthriftInternalEnum, self)
+    return thrift.python.converter.to_python_struct(python_types.Enum, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
     py3_types = importlib.import_module("facebook.thrift.annotation.scope.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.FbthriftInternalEnum, self)
+    return thrift.py3.converter.to_py3_struct(py3_types.Enum, self)
 
   def _to_py_deprecated(self):
     return self
@@ -1660,7 +1660,6 @@ class Definition:
   def _to_py_deprecated(self):
     return self
 
-Enum = FbthriftInternalEnum
 all_structs.append(Transitive)
 Transitive.thrift_spec = (
 )
@@ -1781,14 +1780,15 @@ Const.thrift_struct_annotations = {
 Const.thrift_field_annotations = {
 }
 
-all_structs.append(FbthriftInternalEnum)
-FbthriftInternalEnum.thrift_spec = (
+all_structs.append(Enum)
+Enum.thrift_spec = (
 )
 
-FbthriftInternalEnum.thrift_struct_annotations = {
+Enum.thrift_struct_annotations = {
+  "py3.hidden": "1",
   "thrift.uri": "facebook.com/thrift/annotation/Enum",
 }
-FbthriftInternalEnum.thrift_field_annotations = {
+Enum.thrift_field_annotations = {
 }
 
 all_structs.append(Structured)

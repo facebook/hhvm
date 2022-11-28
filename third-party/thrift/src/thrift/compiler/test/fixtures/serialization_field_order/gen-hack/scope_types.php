@@ -1103,10 +1103,10 @@ class TConst implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
 
 /**
  * Original thrift struct:-
- * FbthriftInternalEnum
+ * Enum
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/Enum'))>>
-class FbthriftInternalEnum implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+class Enum implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -1134,7 +1134,7 @@ class FbthriftInternalEnum implements \IThriftSyncStruct, \IThriftStructMetadata
   }
 
   public function getName()[]: string {
-    return 'FbthriftInternalEnum';
+    return 'Enum';
   }
 
   public function clearTerseFields()[write_props]: void {
@@ -1143,7 +1143,7 @@ class FbthriftInternalEnum implements \IThriftSyncStruct, \IThriftStructMetadata
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
-        "name" => "scope.FbthriftInternalEnum",
+        "name" => "scope.Enum",
         "is_union" => false,
       )
     );
@@ -1440,7 +1440,7 @@ class RootDefinition implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
           shape(
           )
         ),
-        '\thrift\annotation\FbthriftInternalEnum' => \thrift\annotation\FbthriftInternalEnum::fromShape(
+        '\thrift\annotation\Enum' => \thrift\annotation\Enum::fromShape(
           shape(
           )
         ),

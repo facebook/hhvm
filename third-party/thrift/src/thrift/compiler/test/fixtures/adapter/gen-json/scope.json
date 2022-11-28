@@ -1,23 +1,6 @@
 {
   "__fbthrift": {"@generated": 0},
   "thrift_module" : "scope",
-  "typedefs" : {
-    "Enum" : {
-      "lineno" : 121,
-      "type_enum" : "STRUCT",
-      "spec_args" : "FbthriftInternalEnum",
-      "source_range" : {
-        "begin" : {
-          "line" : 121,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 121,
-          "column" : 52
-        }
-      }
-    }
-  },
   "structs" : {
     "Transitive" : {
       "lineno" : 67,
@@ -253,7 +236,7 @@
         }
       }
     },
-    "FbthriftInternalEnum" : {
+    "Enum" : {
       "lineno" : 116,
       "is_exception" : false,
       "is_union" : false,
@@ -266,13 +249,13 @@
           "column" : 1
         },
         "end" : {
-          "line" : 118,
-          "column" : 2
+          "line" : 116,
+          "column" : 80
         }
       }
     },
     "Structured" : {
-      "lineno" : 124,
+      "lineno" : 119,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -280,17 +263,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 124,
+          "line" : 119,
           "column" : 1
         },
         "end" : {
-          "line" : 128,
+          "line" : 123,
           "column" : 21
         }
       }
     },
     "Interface" : {
-      "lineno" : 131,
+      "lineno" : 126,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -298,17 +281,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 131,
+          "line" : 126,
           "column" : 1
         },
         "end" : {
-          "line" : 134,
+          "line" : 129,
           "column" : 47
         }
       }
     },
     "RootDefinition" : {
-      "lineno" : 137,
+      "lineno" : 132,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -316,17 +299,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 137,
+          "line" : 132,
           "column" : 1
         },
         "end" : {
-          "line" : 143,
+          "line" : 138,
           "column" : 25
         }
       }
     },
     "Definition" : {
-      "lineno" : 146,
+      "lineno" : 141,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -334,11 +317,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 146,
+          "line" : 141,
           "column" : 1
         },
         "end" : {
-          "line" : 151,
+          "line" : 146,
           "column" : 21
         }
       }

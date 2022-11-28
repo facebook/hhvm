@@ -21,13 +21,6 @@ var _ = context.Background
 
 var GoUnusedProtection__ int;
 
-//The `enum` definition scope.
-type Enum = FbthriftInternalEnum
-
-func EnumPtr(v Enum) *Enum { return &v }
-
-func NewEnum() *Enum { return NewFbthriftInternalEnum() }
-
 // Indicates that the scope of sibling annotations is transitive.
 // 
 // For example:
@@ -913,29 +906,29 @@ func (p *Const) String() string {
   return fmt.Sprintf("Const({})")
 }
 
-type FbthriftInternalEnum struct {
+type Enum struct {
 }
 
-func NewFbthriftInternalEnum() *FbthriftInternalEnum {
-  return &FbthriftInternalEnum{}
+func NewEnum() *Enum {
+  return &Enum{}
 }
 
-type FbthriftInternalEnumBuilder struct {
-  obj *FbthriftInternalEnum
+type EnumBuilder struct {
+  obj *Enum
 }
 
-func NewFbthriftInternalEnumBuilder() *FbthriftInternalEnumBuilder{
-  return &FbthriftInternalEnumBuilder{
-    obj: NewFbthriftInternalEnum(),
+func NewEnumBuilder() *EnumBuilder{
+  return &EnumBuilder{
+    obj: NewEnum(),
   }
 }
 
-func (p FbthriftInternalEnumBuilder) Emit() *FbthriftInternalEnum{
-  return &FbthriftInternalEnum{
+func (p EnumBuilder) Emit() *Enum{
+  return &Enum{
   }
 }
 
-func (p *FbthriftInternalEnum) Read(iprot thrift.Protocol) error {
+func (p *Enum) Read(iprot thrift.Protocol) error {
   if _, err := iprot.ReadStructBegin(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
   }
@@ -960,8 +953,8 @@ func (p *FbthriftInternalEnum) Read(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *FbthriftInternalEnum) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("FbthriftInternalEnum"); err != nil {
+func (p *Enum) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("Enum"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if err := oprot.WriteFieldStop(); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
@@ -970,12 +963,12 @@ func (p *FbthriftInternalEnum) Write(oprot thrift.Protocol) error {
   return nil
 }
 
-func (p *FbthriftInternalEnum) String() string {
+func (p *Enum) String() string {
   if p == nil {
     return "<nil>"
   }
 
-  return fmt.Sprintf("FbthriftInternalEnum({})")
+  return fmt.Sprintf("Enum({})")
 }
 
 // A scope that includes all 'structured' definitions.

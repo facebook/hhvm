@@ -116,7 +116,7 @@
       "is_union" : false,
       "structured_annotations" : {
         "scope.Structured" : {  },
-        "scope.FbthriftInternalEnum" : {  }
+        "scope.Enum" : {  }
       },
       "fields" : {
         "ids" : {
@@ -510,7 +510,7 @@
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
-        "scope.FbthriftInternalEnum" : {  },
+        "scope.Enum" : {  },
         "scope.Program" : {  },
         "Beta" : {  }
       },
@@ -548,7 +548,7 @@
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
-        "scope.FbthriftInternalEnum" : {  },
+        "scope.Enum" : {  },
         "BitmaskEnum" : {  },
         "scope.Transitive" : {  }
       },

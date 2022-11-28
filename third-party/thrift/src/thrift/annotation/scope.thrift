@@ -113,12 +113,7 @@ struct Const {} (hack.name = "TConst")
 
 // Due to cython bug, we can not use `Enum` as class name directly
 // https://github.com/cython/cython/issues/2474
-struct FbthriftInternalEnum {} (
-  thrift.uri = "facebook.com/thrift/annotation/Enum",
-)
-
-/** The `enum` definition scope. */
-typedef FbthriftInternalEnum Enum (thrift.uri = "")
+struct Enum {} (thrift.uri = "facebook.com/thrift/annotation/Enum", py3.hidden)
 
 /** A scope that includes all 'structured' definitions. */
 @Struct
@@ -137,7 +132,7 @@ struct Interface {} (hack.name = "TInterface")
 @Structured
 @Interface
 @Typedef
-@FbthriftInternalEnum // TODO(afuller): Use the enum typedef directly.
+@Enum
 @Const
 @Transitive
 struct RootDefinition {}

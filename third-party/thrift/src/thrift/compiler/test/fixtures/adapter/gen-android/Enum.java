@@ -22,21 +22,21 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
-public class FbthriftInternalEnum implements TBase, java.io.Serializable, Cloneable {
-  private static final TStruct STRUCT_DESC = new TStruct("FbthriftInternalEnum");
+public class Enum implements TBase, java.io.Serializable, Cloneable {
+  private static final TStruct STRUCT_DESC = new TStruct("Enum");
 
 
-  public FbthriftInternalEnum() {
+  public Enum() {
   }
 
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public FbthriftInternalEnum(FbthriftInternalEnum other) {
+  public Enum(Enum other) {
   }
 
-  public FbthriftInternalEnum deepCopy() {
-    return new FbthriftInternalEnum(this);
+  public Enum deepCopy() {
+    return new Enum(this);
   }
 
   @Override
@@ -45,9 +45,9 @@ public class FbthriftInternalEnum implements TBase, java.io.Serializable, Clonea
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof FbthriftInternalEnum))
+    if (!(_that instanceof Enum))
       return false;
-    FbthriftInternalEnum that = (FbthriftInternalEnum)_that;
+    Enum that = (Enum)_that;
 
     return true;
   }
@@ -62,7 +62,7 @@ public class FbthriftInternalEnum implements TBase, java.io.Serializable, Clonea
     throw new TException("unimplemented in android immutable structure");
   }
 
-  public static FbthriftInternalEnum deserialize(TProtocol iprot) throws TException {
+  public static Enum deserialize(TProtocol iprot) throws TException {
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -81,8 +81,8 @@ public class FbthriftInternalEnum implements TBase, java.io.Serializable, Clonea
     }
     iprot.readStructEnd();
 
-    FbthriftInternalEnum _that;
-    _that = new FbthriftInternalEnum(
+    Enum _that;
+    _that = new Enum(
     );
     _that.validate();
     return _that;

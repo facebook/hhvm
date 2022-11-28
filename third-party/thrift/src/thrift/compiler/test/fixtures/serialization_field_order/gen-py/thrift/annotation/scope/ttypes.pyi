@@ -382,7 +382,7 @@ class Const:
     def _to_py_deprecated(self) -> Const: ...
 
 
-class FbthriftInternalEnum:
+class Enum:
     thrift_spec: __T.Tuple[__T.Optional[__T.Tuple[int, int, str, __T.Any, __T.Optional[int], int]]]
     thrift_field_annotations: __T.Dict[int, __T.Dict[str, str]]
     thrift_struct_annotations: __T.Dict[str, str]
@@ -405,9 +405,9 @@ class FbthriftInternalEnum:
     def __eq__(self, other: __T.Any) -> bool: ...
     def __ne__(self, other: __T.Any) -> bool: ...
     def __dir__(self) -> __T.Sequence[str]: ...
-    def _to_python(self) -> "facebook.thrift.annotation.scope.thrift_types.FbthriftInternalEnum": ...   # type: ignore
-    def _to_py3(self) -> "facebook.thrift.annotation.scope.types.FbthriftInternalEnum": ...   # type: ignore
-    def _to_py_deprecated(self) -> FbthriftInternalEnum: ...
+    def _to_python(self) -> "facebook.thrift.annotation.scope.thrift_types.Enum": ...   # type: ignore
+    def _to_py3(self) -> "facebook.thrift.annotation.scope.types.Enum": ...   # type: ignore
+    def _to_py_deprecated(self) -> Enum: ...
 
 
 class Structured:
@@ -522,4 +522,3 @@ class Definition:
     def _to_py_deprecated(self) -> Definition: ...
 
 
-Enum = FbthriftInternalEnum

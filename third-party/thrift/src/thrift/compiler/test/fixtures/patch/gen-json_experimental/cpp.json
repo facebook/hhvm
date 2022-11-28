@@ -396,7 +396,7 @@
       "EnumType" : {
         "name" : "EnumType",
         "structured_annotations": {
-          "scope.FbthriftInternalEnum" : {
+          "scope.Enum" : {
         "type" : {
   "type" : "struct",
   "name" : "Enum",

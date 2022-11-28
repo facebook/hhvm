@@ -139,10 +139,10 @@
 },
         "value" : {}
       },
-          "scope.FbthriftInternalEnum" : {
+          "scope.Enum" : {
         "type" : {
   "type" : "struct",
-  "name" : "FbthriftInternalEnum",
+  "name" : "Enum",
   "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
@@ -567,7 +567,7 @@
       "BitmaskEnum" : {
         "name" : "BitmaskEnum",
         "structured_annotations": {
-          "scope.FbthriftInternalEnum" : {
+          "scope.Enum" : {
         "type" : {
   "type" : "struct",
   "name" : "Enum",
@@ -591,10 +591,10 @@
       "GenDefaultEnumValue" : {
         "name" : "GenDefaultEnumValue",
         "structured_annotations": {
-          "scope.FbthriftInternalEnum" : {
+          "scope.Enum" : {
         "type" : {
   "type" : "struct",
-  "name" : "FbthriftInternalEnum",
+  "name" : "Enum",
   "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
@@ -634,10 +634,10 @@
       "GenEnumSet" : {
         "name" : "GenEnumSet",
         "structured_annotations": {
-          "scope.FbthriftInternalEnum" : {
+          "scope.Enum" : {
         "type" : {
   "type" : "struct",
-  "name" : "FbthriftInternalEnum",
+  "name" : "Enum",
   "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
@@ -878,7 +878,7 @@
 },
         "value" : {}
       },
-          "scope.FbthriftInternalEnum" : {
+          "scope.Enum" : {
         "type" : {
   "type" : "struct",
   "name" : "Enum",

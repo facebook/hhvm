@@ -579,7 +579,7 @@ class ReserveIds implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
           shape(
           )
         ),
-        '\thrift\annotation\FbthriftInternalEnum' => \thrift\annotation\FbthriftInternalEnum::fromShape(
+        '\thrift\annotation\Enum' => \thrift\annotation\Enum::fromShape(
           shape(
           )
         ),
@@ -1999,7 +1999,7 @@ class BitmaskEnum implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Enum' => \thrift\annotation\FbthriftInternalEnum::fromShape(
+        '\thrift\annotation\Enum' => \thrift\annotation\Enum::fromShape(
           shape(
           )
         ),
@@ -2133,7 +2133,7 @@ class GenDefaultEnumValue implements \IThriftSyncStruct, \IThriftStructMetadata,
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\FbthriftInternalEnum' => \thrift\annotation\FbthriftInternalEnum::fromShape(
+        '\thrift\annotation\Enum' => \thrift\annotation\Enum::fromShape(
           shape(
           )
         ),
@@ -2279,7 +2279,7 @@ class GenEnumSet implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\FbthriftInternalEnum' => \thrift\annotation\FbthriftInternalEnum::fromShape(
+        '\thrift\annotation\Enum' => \thrift\annotation\Enum::fromShape(
           shape(
           )
         ),
@@ -2945,7 +2945,7 @@ class GenerateRuntimeSchema implements \IThriftSyncStruct, \IThriftStructMetadat
           shape(
           )
         ),
-        '\thrift\annotation\Enum' => \thrift\annotation\FbthriftInternalEnum::fromShape(
+        '\thrift\annotation\Enum' => \thrift\annotation\Enum::fromShape(
           shape(
           )
         ),

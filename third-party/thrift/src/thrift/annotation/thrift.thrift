@@ -76,7 +76,7 @@ struct Deprecated {
  *  }
  */
 @scope.Structured
-@scope.FbthriftInternalEnum
+@scope.Enum
 struct ReserveIds {
   /** Individual ids that cannot be used. */
   1: list<i32> ids;
@@ -240,7 +240,7 @@ struct BitmaskEnum {}
 // doesn't have a default value defined.
 // TODO(afuller): Consider updating code generators to use the same name
 // they use for empty/nil/null in unions, when a zero value is not specified.
-@scope.FbthriftInternalEnum
+@scope.Enum
 @scope.Program
 @Beta
 struct GenDefaultEnumValue {
@@ -281,7 +281,7 @@ struct GenDefaultEnumValue {
  * `FlagSet` can then be used like a normal typedef.
  */
 // TODO(afuller): Implement
-@scope.FbthriftInternalEnum
+@scope.Enum
 @BitmaskEnum
 @scope.Transitive
 struct GenEnumSet {

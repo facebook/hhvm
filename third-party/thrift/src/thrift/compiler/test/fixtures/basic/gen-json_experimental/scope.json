@@ -8,18 +8,7 @@
     "py": "thrift.annotation.scope",
     "py.asyncio": "facebook_thrift_asyncio.annotation.scope"
   },
-  "global_docstring": "Annotations that indicate which IDL definition a structured annotation can\nbe place on.\n\nFor example:\n  include \"thrift/annotation/scope.thrift\"\n\n  @scope.Struct\n  struct MyStructAnnotation {...}\n\n  @MyStructAnnotation // Good.\n  struct Foo{\n    @MyStructAnnotation // Compile-time failure. MyStructAnnotation is not\n                        // allowed on fields.\n    1: i32 my_field;\n  }\n",
-  "typedefs": {
-      "Enum": {
-        "name": "Enum",
-        "type": {
-  "type" : "struct",
-  "name" : "FbthriftInternalEnum"
-},
-        "is_exception": false,
-        "lineno": 121
-      }
-  },  "structs" :
+  "global_docstring": "Annotations that indicate which IDL definition a structured annotation can\nbe place on.\n\nFor example:\n  include \"thrift/annotation/scope.thrift\"\n\n  @scope.Struct\n  struct MyStructAnnotation {...}\n\n  @MyStructAnnotation // Good.\n  struct Foo{\n    @MyStructAnnotation // Compile-time failure. MyStructAnnotation is not\n                        // allowed on fields.\n    1: i32 my_field;\n  }\n",  "structs" :
   {
       "Transitive" : {
         "name" : "Transitive",
@@ -112,8 +101,8 @@
         "is_union" : false,
         "lineno" : 112
       },
-      "FbthriftInternalEnum" : {
-        "name" : "FbthriftInternalEnum",
+      "Enum" : {
+        "name" : "Enum",
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 116
@@ -153,7 +142,7 @@
         "docstring" : "A scope that includes all 'structured' definitions.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 124
+        "lineno" : 119
       },
       "Interface" : {
         "name" : "Interface",
@@ -183,7 +172,7 @@
         "docstring" : "A scope that includes all 'interface' definitions.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 131
+        "lineno" : 126
       },
       "RootDefinition" : {
         "name" : "RootDefinition",
@@ -209,10 +198,10 @@
 },
         "value" : {}
       },
-          "scope.FbthriftInternalEnum" : {
+          "scope.Enum" : {
         "type" : {
   "type" : "struct",
-  "name" : "FbthriftInternalEnum"
+  "name" : "Enum"
 },
         "value" : {}
       },
@@ -234,7 +223,7 @@
         "docstring" : "A scope that includes all program-scoped definition.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 137
+        "lineno" : 132
       },
       "Definition" : {
         "name" : "Definition",
@@ -278,7 +267,7 @@
         "docstring" : "A scope that includes all definitions.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 146
+        "lineno" : 141
       }
       },
   "source_path" : "thrift/annotation/scope",

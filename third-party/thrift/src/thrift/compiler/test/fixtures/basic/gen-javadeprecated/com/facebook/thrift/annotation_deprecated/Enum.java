@@ -24,8 +24,8 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
-public class FbthriftInternalEnum implements TBase, java.io.Serializable, Cloneable, Comparable<FbthriftInternalEnum> {
-  private static final TStruct STRUCT_DESC = new TStruct("FbthriftInternalEnum");
+public class Enum implements TBase, java.io.Serializable, Cloneable, Comparable<Enum> {
+  private static final TStruct STRUCT_DESC = new TStruct("Enum");
 
   public static final Map<Integer, FieldMetaData> metaDataMap;
 
@@ -35,10 +35,10 @@ public class FbthriftInternalEnum implements TBase, java.io.Serializable, Clonea
   }
 
   static {
-    FieldMetaData.addStructMetaDataMap(FbthriftInternalEnum.class, metaDataMap);
+    FieldMetaData.addStructMetaDataMap(Enum.class, metaDataMap);
   }
 
-  public FbthriftInternalEnum() {
+  public Enum() {
   }
 
   public static class Builder {
@@ -46,8 +46,8 @@ public class FbthriftInternalEnum implements TBase, java.io.Serializable, Clonea
     public Builder() {
     }
 
-    public FbthriftInternalEnum build() {
-      FbthriftInternalEnum result = new FbthriftInternalEnum();
+    public Enum build() {
+      Enum result = new Enum();
       return result;
     }
   }
@@ -59,11 +59,11 @@ public class FbthriftInternalEnum implements TBase, java.io.Serializable, Clonea
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public FbthriftInternalEnum(FbthriftInternalEnum other) {
+  public Enum(Enum other) {
   }
 
-  public FbthriftInternalEnum deepCopy() {
-    return new FbthriftInternalEnum(this);
+  public Enum deepCopy() {
+    return new Enum(this);
   }
 
   public void setFieldValue(int fieldID, Object __value) {
@@ -86,9 +86,9 @@ public class FbthriftInternalEnum implements TBase, java.io.Serializable, Clonea
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof FbthriftInternalEnum))
+    if (!(_that instanceof Enum))
       return false;
-    FbthriftInternalEnum that = (FbthriftInternalEnum)_that;
+    Enum that = (Enum)_that;
 
     return true;
   }
@@ -99,7 +99,7 @@ public class FbthriftInternalEnum implements TBase, java.io.Serializable, Clonea
   }
 
   @Override
-  public int compareTo(FbthriftInternalEnum other) {
+  public int compareTo(Enum other) {
     if (other == null) {
       // See java.lang.Comparable docs
       throw new NullPointerException();
@@ -155,7 +155,7 @@ public class FbthriftInternalEnum implements TBase, java.io.Serializable, Clonea
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("FbthriftInternalEnum");
+    StringBuilder sb = new StringBuilder("Enum");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);

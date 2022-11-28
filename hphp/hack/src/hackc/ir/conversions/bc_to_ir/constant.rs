@@ -11,7 +11,7 @@ use crate::convert;
 pub(crate) fn convert_constant<'a>(
     constant: &Constant<'a>,
     strings: &StringInterner,
-) -> ir::HackConstant<'a> {
+) -> ir::HackConstant {
     let Constant {
         name,
         ref value,
@@ -22,6 +22,8 @@ pub(crate) fn convert_constant<'a>(
         .as_ref()
         .map(|tv| convert::convert_typed_value(tv, strings))
         .into();
+
+    let name = ir::ConstId::from_hhbc(name, strings);
 
     ir::HackConstant {
         name,

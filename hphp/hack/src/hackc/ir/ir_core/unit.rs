@@ -55,7 +55,7 @@ pub struct Unit<'a> {
     /// ```
     /// const MAGIC_VALUE: int = 42;
     /// ```
-    pub constants: Vec<HackConstant<'a>>,
+    pub constants: Vec<HackConstant>,
 
     /// Per-file attributes.
     ///

@@ -4,6 +4,7 @@ use std::sync::Arc;
 
 use crate::instr::HasOperands;
 use crate::CollectionType;
+use crate::ConstId;
 use crate::ConstName;
 use crate::FloatBits;
 use crate::TypedValue;
@@ -41,8 +42,8 @@ impl HasOperands for Constant<'_> {
 }
 
 #[derive(Debug)]
-pub struct HackConstant<'a> {
-    pub name: ConstName<'a>,
+pub struct HackConstant {
+    pub name: ConstId,
     pub value: Option<TypedValue>,
     pub is_abstract: bool,
 }

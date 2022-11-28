@@ -28,7 +28,7 @@ pub struct Class<'a> {
     pub base: Option<ClassId>,
 
     /// Class constants.
-    pub constants: Vec<HackConstant<'a>>,
+    pub constants: Vec<HackConstant>,
 
     // TODO: (doc coeffect constants)
     pub ctx_constants: Vec<CtxConstant<'a>>,

@@ -1237,18 +1237,14 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func<'_>, hhbc: &
     Ok(())
 }
 
-fn print_hack_constant(
-    w: &mut dyn Write,
-    c: &HackConstant<'_>,
-    strings: &StringInterner,
-) -> Result {
+fn print_hack_constant(w: &mut dyn Write, c: &HackConstant, strings: &StringInterner) -> Result {
     write!(w, "constant ")?;
 
     if c.is_abstract {
         write!(w, "abstract ")?;
     }
 
-    write!(w, "{}", FmtIdentifier(c.name.as_bytes()))?;
+    write!(w, "{}", FmtIdentifierId(c.name.id, strings))?;
 
     if let Some(value) = &c.value {
         write!(w, " = {}", FmtTypedValue(value, strings))?;

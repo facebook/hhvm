@@ -9,7 +9,7 @@ use crate::convert;
 use crate::strings::StringCache;
 
 pub(crate) fn convert_hack_constant<'a>(
-    constant: ir::HackConstant<'a>,
+    constant: ir::HackConstant,
     strings: &StringCache<'a>,
 ) -> Constant<'a> {
     let ir::HackConstant {
@@ -21,6 +21,8 @@ pub(crate) fn convert_hack_constant<'a>(
     let value = value
         .map(|v| convert::convert_typed_value(&v, strings))
         .into();
+
+    let name = strings.lookup_const_name(name);
 
     Constant {
         name,

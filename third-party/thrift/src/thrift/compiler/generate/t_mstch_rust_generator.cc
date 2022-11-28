@@ -154,7 +154,11 @@ std::string camelcase(const std::string& name) {
   return camel.str();
 }
 
-std::string quote(const std::string& data) {
+// If we've got a string literal token from the AST then it will already be
+// partially quoted according to Thrift's rules - specifically `\` should be
+// passed through as-is since they'll be part of Thrift source-level escapted
+// sequence (which will likely also be Rust-compatible syntax).
+std::string quote(const std::string& data, bool do_backslash) {
   std::ostringstream quoted;
   quoted << '"';
 
@@ -165,7 +169,7 @@ std::string quote(const std::string& data) {
       quoted << '\\' << 'r';
     } else if (ch == '\n') {
       quoted << '\\' << 'n';
-    } else if (ch == '\\' || ch == '"') {
+    } else if ((do_backslash && ch == '\\') || ch == '"') {
       quoted << '\\' << ch;
     } else if (ch < '\x7f') {
       quoted << ch;
@@ -190,7 +194,7 @@ std::string quoted_rust_doc(const t_node* node) {
   }
 
   const auto last = doc.find_last_not_of(whitespace);
-  return quote(doc.substr(first, last - first + 1));
+  return quote(doc.substr(first, last - first + 1), true);
 }
 
 bool can_derive_ord(const t_type* type) {
@@ -972,7 +976,9 @@ class mstch_rust_value : public mstch_base {
   }
   mstch::node is_string() { return type_->is_string(); }
   mstch::node is_binary() { return type_->is_binary(); }
-  mstch::node string_quoted() { return quote(const_value_->get_string()); }
+  mstch::node string_quoted() {
+    return quote(const_value_->get_string(), false);
+  }
   mstch::node is_list() {
     return type_->is_list() &&
         (const_value_->get_type() == value_type::CV_LIST ||
@@ -1456,7 +1462,7 @@ class rust_mstch_deprecated_annotation : public mstch_deprecated_annotation {
   mstch::node rust_name() {
     return boost::algorithm::replace_all_copy(key_, ".", "_");
   }
-  mstch::node rust_value() { return quote(val_.value); }
+  mstch::node rust_value() { return quote(val_.value, true); }
 };
 
 mstch::node rust_mstch_service::rust_functions() {

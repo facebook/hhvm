@@ -237,10 +237,10 @@ foreach(wat_header
     sys/vfs.h
     valgrind/valgrind.h
 )
-  CHECK_INCLUDE_FILES(${wat_header} have_${wat_header})
-  if (have_${wat_header})
-    string(TOUPPER have_${wat_header} sym)
-    string(REGEX REPLACE [./] _ sym ${sym})
+  string(TOUPPER have_${wat_header} sym)
+  string(REGEX REPLACE [./] _ sym ${sym})
+  CHECK_INCLUDE_FILES(${wat_header} ${sym})
+  if (${sym})
     config_h("#define ${sym} 1")
   endif()
 endforeach(wat_header)

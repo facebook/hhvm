@@ -84,6 +84,26 @@ using MemcacheRoutableRequests = carbon::List<
     McReplaceRequest,
     McSetRequest,
     McTouchRequest>;
+using MemcacheRoutableReplies = carbon::List<
+    McAddReply,
+    McAppendReply,
+    McCasReply,
+    McDecrReply,
+    McDeleteReply,
+    McFlushAllReply,
+    McFlushReReply,
+    McGatReply,
+    McGatsReply,
+    McGetReply,
+    McGetsReply,
+    McIncrReply,
+    McLeaseGetReply,
+    McLeaseSetReply,
+    McMetagetReply,
+    McPrependReply,
+    McReplaceReply,
+    McSetReply,
+    McTouchReply>;
 using MemcacheAllRequests = carbon::List<
     McAddRequest,
     McAppendRequest,
@@ -121,6 +141,7 @@ struct MemcacheRouterInfo {
   template <class Route>
   using RouteHandle = MemcacheRouteHandle<Route>;
   using RoutableRequests = detail::MemcacheRoutableRequests;
+  using RoutableReplies = detail::MemcacheRoutableReplies;
   using AllRequests = detail::MemcacheAllRequests;
   using AdditionalLogger = facebook::memcache::mcrouter::AdditionalProxyRequestLogger;
   using RouterStats = carbon::Stats<MemcacheRouterStatsConfig>;

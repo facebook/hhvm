@@ -55,6 +55,9 @@ namespace detail {
 using HelloGoodbyeRoutableRequests = carbon::List<
     GoodbyeRequest,
     HelloRequest>;
+using HelloGoodbyeRoutableReplies = carbon::List<
+    GoodbyeReply,
+    HelloReply>;
 using HelloGoodbyeAllRequests = carbon::List<
     GoodbyeRequest,
     HelloRequest,
@@ -75,6 +78,7 @@ struct HelloGoodbyeRouterInfo {
   template <class Route>
   using RouteHandle = HelloGoodbyeRouteHandle<Route>;
   using RoutableRequests = detail::HelloGoodbyeRoutableRequests;
+  using RoutableReplies = detail::HelloGoodbyeRoutableReplies;
   using AllRequests = detail::HelloGoodbyeAllRequests;
   
   using RouterStats = carbon::Stats<HelloGoodbyeRouterStatsConfig>;

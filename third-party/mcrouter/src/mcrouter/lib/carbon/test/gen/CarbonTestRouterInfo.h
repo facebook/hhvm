@@ -58,6 +58,9 @@ namespace detail {
 using CarbonTestRoutableRequests = carbon::List<
     TestRequest,
     TestRequestStringKey>;
+using CarbonTestRoutableReplies = carbon::List<
+    TestReply,
+    TestReplyStringKey>;
 using CarbonTestAllRequests = carbon::List<
     TestRequest,
     TestRequestStringKey,
@@ -78,6 +81,7 @@ struct CarbonTestRouterInfo {
   template <class Route>
   using RouteHandle = CarbonTestRouteHandle<Route>;
   using RoutableRequests = detail::CarbonTestRoutableRequests;
+  using RoutableReplies = detail::CarbonTestRoutableReplies;
   using AllRequests = detail::CarbonTestAllRequests;
   
   using RouterStats = carbon::Stats<CarbonTestRouterStatsConfig>;

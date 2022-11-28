@@ -59,6 +59,10 @@ using CarbonThriftTestRoutableRequests = carbon::List<
     CustomRequest,
     DummyThriftRequest,
     ThriftTestRequest>;
+using CarbonThriftTestRoutableReplies = carbon::List<
+    CustomReply,
+    DummyThriftReply,
+    ThriftTestReply>;
 using CarbonThriftTestAllRequests = carbon::List<
     CustomRequest,
     DummyThriftRequest,
@@ -80,6 +84,7 @@ struct CarbonThriftTestRouterInfo {
   template <class Route>
   using RouteHandle = CarbonThriftTestRouteHandle<Route>;
   using RoutableRequests = detail::CarbonThriftTestRoutableRequests;
+  using RoutableReplies = detail::CarbonThriftTestRoutableReplies;
   using AllRequests = detail::CarbonThriftTestAllRequests;
   
   using RouterStats = carbon::Stats<CarbonThriftTestRouterStatsConfig>;

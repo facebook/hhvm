@@ -22,13 +22,13 @@ type pos = {
 [@@deriving ord]
 
 (* A pretty printer which returns a user friendly
-   type representation, and the list of symbols with
+   type representation, and the list of class names with
    their position within the string.
 
    Currently, only consider class names, but should be
    extended to other types of symbols *)
 val hint_to_string_and_symbols :
-  Provider_context.t -> Aast.hint -> string * (Aast.class_name * pos list) list
+  Provider_context.t -> Aast.hint -> string * (string * pos list) list
 
 val get_context_from_hint : Provider_context.t -> Aast.hint -> string
 

@@ -236,8 +236,7 @@ let type_info ~ty sym_pos progress =
   in
   Fact_acc.add_fact Predicate.(Hack TypeInfo) json progress
 
-let class_name_to_target ctx ((_, sid) : Aast.class_name) progress :
-    Hh_json.json option * Fact_acc.t =
+let class_name_to_target ctx sid progress : Hh_json.json option * Fact_acc.t =
   match ServerSymbolDefinition.get_class_by_name ctx sid with
   | None -> (None, progress)
   | Some cls ->

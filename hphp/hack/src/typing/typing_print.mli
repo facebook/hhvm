@@ -121,3 +121,5 @@ val json_to_locl_ty :
 
 val set_deferred_member_inits :
   (env -> Shallow_decl_defs.shallow_class -> SSet.t * SSet.t) -> unit
+
+val strip_ns : string -> string

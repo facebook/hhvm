@@ -143,10 +143,76 @@ type pos = {
 }
 [@@deriving ord]
 
-(* TODO complete this *)
+exception Not_implemented
+
+(* Pretty-printer for hints. Also generate
+   xrefs.  TODO: This covers most of the types but needs
+   to be extended OR move the xrefs generartion logic
+   to Typing_print.full_strip_ns_decl *)
+let string_of_type (t : Aast.hint) =
+  let queue = Queue.create () in
+  let class_pos = Hashtbl.create (module Base.String) in
+  let cur = ref 0 in
+  let enqueue ?annot str =
+    let length = String.length str in
+    let pos = { start = !cur; length } in
+    Queue.enqueue queue str;
+    Option.iter annot ~f:(fun cn ->
+        let f = function
+          | None -> [pos]
+          | Some prev -> pos :: prev
+        in
+        Hashtbl.update class_pos cn ~f);
+    cur := !cur + length
+  in
+  let rec parse t =
+    let open Aast in
+    match snd t with
+    | Hoption t ->
+      enqueue "?";
+      parse t
+    | Hlike t ->
+      enqueue "~";
+      parse t
+    | Hsoft t ->
+      enqueue "@";
+      parse t
+    | Happly ((_, cn), hs) ->
+      enqueue ~annot:cn (Typing_print.strip_ns cn);
+      parse_list ("<", ">") hs
+    | Htuple hs -> parse_list ("(", ")") hs
+    | Hprim p -> enqueue (Aast_defs.string_of_tprim p)
+    | _ -> raise Not_implemented
+  and parse_list (op, cl) = function
+    | [] -> ()
+    | [h] ->
+      enqueue op;
+      parse h;
+      enqueue cl
+    | h :: hs ->
+      enqueue op;
+      parse h;
+      List.iter hs ~f:(fun h ->
+          enqueue ", ";
+          parse h);
+      enqueue cl
+  in
+  parse t;
+  let toks = Queue.to_list queue in
+  let xrefs = Hashtbl.to_alist class_pos in
+  (String.concat toks, xrefs)
+
+(* Generate xrefs when we can, otherwise fallback on second pretty-printer.
+   This covers most type *)
 let hint_to_string_and_symbols ctx h =
-  let ty_pp = get_type_from_hint_strip_ns ctx h in
-  match h with
-  | (_, Aast.Happly (class_name, [])) ->
-    (ty_pp, [(class_name, [{ start = 0; length = String.length ty_pp }])])
-  | _ -> (ty_pp, [])
+  let ty_pp_ref = get_type_from_hint_strip_ns ctx h in
+  try
+    let (ty_pp, xrefs) = string_of_type h in
+    (* to test pretty printer *)
+    (* if not (String.equal ty_pp ty_pp_ref) then
+       Hh_logger.log "pretty-printers mismatch: %s %s" ty_pp ty_pp_ref; *)
+    (ty_pp, xrefs)
+  with
+  | Not_implemented ->
+    (* Hh_logger.log "Not implemented %s %s" ty_pp_ref (Aast_defs.show_hint h); *)
+    (ty_pp_ref, [])

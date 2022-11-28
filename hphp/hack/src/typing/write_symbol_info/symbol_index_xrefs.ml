@@ -141,7 +141,7 @@ let process_container_xref (con_type, decl_pred) symbol_name pos (xrefs, prog) =
     pos
     (xrefs, prog)
 
-let process_attribute_xref ctx attr opt_info (xrefs, prog) =
+let process_attribute_xref ctx File_info.{ occ; def } opt_info (xrefs, prog) =
   let get_con_preds_from_name con_name =
     let con_name_with_ns = Utils.add_ns con_name in
     match ServerSymbolDefinition.get_class_by_name ctx con_name_with_ns with
@@ -163,7 +163,7 @@ let process_attribute_xref ctx attr opt_info (xrefs, prog) =
   in
   (* Process <<__Override>>, for which we write a MethodOverrides fact
      instead of a cross-reference *)
-  let SymbolOccurrence.{ name; pos; _ } = attr in
+  let SymbolOccurrence.{ name; pos; _ } = occ in
   if String.equal name "__Override" then
     match opt_info with
     | None ->
@@ -173,7 +173,7 @@ let process_attribute_xref ctx attr opt_info (xrefs, prog) =
       (match get_con_preds_from_name class_name with
       | None -> (xrefs, prog)
       | Some override_con_pred_types ->
-        (match ServerSymbolDefinition.go ctx None attr with
+        (match Lazy.force def with
         | None -> (xrefs, prog)
         | Some sym_def ->
           (match
@@ -199,7 +199,7 @@ let process_attribute_xref ctx attr opt_info (xrefs, prog) =
                   prog
               in
               (* Cross-references for overrides could be added to xefs by calling
-                 'process_member_xref' here with 'sym_def' and 'attr.pos' *)
+                 'process_member_xref' here with 'sym_def' and 'occ.pos' *)
               (xrefs, prog)))))
   (* Ignore other built-in attributes *)
   else if String.is_prefix name ~prefix:"__" then
@@ -224,16 +224,18 @@ let process_attribute_xref ctx attr opt_info (xrefs, prog) =
 (* given symbols occurring in a file, compute the maps of xrefs *)
 let process_xrefs ctx symbols prog : XRefs.t * Fact_acc.t =
   let open SymbolOccurrence in
-  List.fold symbols ~init:(XRefs.empty, prog) ~f:(fun (xrefs, prog) occ ->
+  List.fold
+    symbols
+    ~init:(XRefs.empty, prog)
+    ~f:(fun (xrefs, prog) (File_info.{ occ; def } as sym) ->
       if occ.is_declaration then
         (xrefs, prog)
       else
         let pos = occ.pos in
         match occ.type_ with
-        | Attribute info -> process_attribute_xref ctx occ info (xrefs, prog)
+        | Attribute info -> process_attribute_xref ctx sym info (xrefs, prog)
         | _ ->
-          let symbol_def_res = ServerSymbolDefinition.go ctx None occ in
-          (match symbol_def_res with
+          (match Lazy.force def with
           | None ->
             (* no symbol info - likely dynamic *)
             (match occ.type_ with

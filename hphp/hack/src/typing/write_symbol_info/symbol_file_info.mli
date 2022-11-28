@@ -9,6 +9,11 @@
 open Hh_prelude
 module Indexable = Symbol_indexable
 
+type symbol = private {
+  occ: Relative_path.t SymbolOccurrence.t;
+  def: Relative_path.t SymbolDefinition.t option Lazy.t;
+}
+
 (** [fanout] flag is used in incremental mode. It identifies files which are
     unchanged compared to the base db. Such files don't need to be re-indexed
    if an identical [sym_hash] exists on the base db. [sym_hash] captures the
@@ -19,7 +24,7 @@ type t = private {
   cst: Full_fidelity_positioned_syntax.t;
   tast: Tast.program;
   source_text: Full_fidelity_source_text.t;
-  symbols: Relative_path.t SymbolOccurrence.t list;
+  symbols: symbol list;
   sym_hash: Md5.t option;
   fanout: bool;
 }

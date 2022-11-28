@@ -59,6 +59,19 @@ type tracker_state = {
   mergebase_queries: (Hg.hg_rev, Hg.global_rev Future.t) Caml.Hashtbl.t;
 }
 
+type state_handler = {
+  is_hg_updating: unit -> bool;
+  on_state_enter: string -> unit;
+  on_state_leave:
+    Path.t ->
+    (* project root *)
+    string ->
+    (* state name *)
+    Hh_json.json option ->
+    (* state metadata *)
+    unit;
+}
+
 type tracker_v1_event_state = {
   mutable is_in_hg_update_state: bool;
   mutable is_in_hg_transaction_state: bool;
@@ -75,71 +88,6 @@ let tracker_state =
     mergebase_queries = Caml.Hashtbl.create 200;
   }
 
-let tracker_v1_event_state =
-  { is_in_hg_update_state = false; is_in_hg_transaction_state = false }
-
-let tracker_v2_event_state = { outstanding_events = [] }
-
-let is_in_state (outstanding : event_list) : bool =
-  List.exists outstanding ~f:(fun e -> e.is_enter)
-
-let transition (outstanding : event_list) (e : watchman_event) : event_list =
-  (* Note: we blindly trusting that e.timestamp is newer than anything in the list.
-     The consequence if not is mild; it just means the 10s criterion will be slightly off. *)
-
-  (* consider S301212, which manifests as the following
-       transaction/leave
-       transaction/leave
-       transaction/leave
-       transaction/enter
-       transaction/enter
-
-     all with the same timestamp. How do we resolve a stale leave at the bottom?
-     Simply throw it away if another event comes in 10+ seconds after,
-  *)
-  let outstanding =
-    if is_in_state outstanding then
-      outstanding
-    else
-      match List.filter outstanding ~f:(fun e -> not e.is_enter) with
-      | { timestamp; _ } :: _ when Float.(timestamp < e.timestamp -. 10.) ->
-        (* the most recent event (which must be a leave based on our if-branch)
-            is old. Throw away current state of events
-        *)
-        let telemetry =
-          Telemetry.create ()
-          |> Telemetry.string_opt ~key:"event_source" ~value:(Some e.source)
-          |> Telemetry.bool_ ~key:"flushed_by_new_event" ~value:true
-        in
-        HackEventLogger.server_revision_tracker_forced_reset ~telemetry;
-        []
-      | _ -> outstanding
-  in
-
-  (* Strip the first pair, if there is one *)
-  let rec strip_first_match outstanding =
-    match outstanding with
-    (* if there is an event of matching source and opposite is_enter,
-       assume that's the pair to our incoming event and remove it *)
-    | { source; is_enter; _ } :: rest
-      when String.equal source e.source && Bool.(is_enter = not e.is_enter) ->
-      rest
-    | olde :: rest -> olde :: strip_first_match rest
-    | [] -> []
-  in
-  let new_outstanding = strip_first_match outstanding in
-
-  (* Otherwise prepend our new event
-     In other words, if we were able to remove a pair to the incoming event,
-     then the new event list is new_outstanding.
-
-     If we didn't find a pair, then the new event list is the old list + our new one
-  *)
-  if List.length new_outstanding < List.length outstanding then
-    new_outstanding
-  else
-    e :: outstanding
-
 let initialize mergebase =
   Hh_logger.log "ServerRevisionTracker: Initializing mergebase to r%d" mergebase;
   tracker_state.is_enabled <- true;
@@ -155,61 +103,169 @@ let add_query ~hg_rev root =
     Queue.enqueue tracker_state.pending_queries hg_rev
   )
 
-let on_state_enter state_name use_tracker_v2 =
-  let event =
-    { source = state_name; timestamp = Unix.gettimeofday (); is_enter = true }
+let v1_handler_fn () : state_handler =
+  let state =
+    { is_in_hg_update_state = false; is_in_hg_transaction_state = false }
   in
-  match state_name with
-  | "hg.update" ->
-    if use_tracker_v2 then
-      tracker_v2_event_state.outstanding_events <-
-        transition tracker_v2_event_state.outstanding_events event
+  let on_state_enter state_name =
+    match state_name with
+    | "hg.update" -> state.is_in_hg_update_state <- true
+    | "hg.transaction" -> state.is_in_hg_transaction_state <- true
+    | _ -> ()
+  in
+  let on_state_leave root state_name state_metadata =
+    match state_name with
+    | "hg.update" ->
+      if not state.is_in_hg_update_state then
+        HackEventLogger.invalid_mercurial_state_transition ~state:state_name;
+      state.is_in_hg_update_state <- false;
+      Hh_logger.log "ServerRevisionTracker: leaving hg.update";
+      Option.Monad_infix.(
+        Option.iter
+          (state_metadata >>= Watchman_utils.rev_in_state_change)
+          ~f:(fun hg_rev ->
+            match state_metadata >>= Watchman_utils.merge_in_state_change with
+            | Some true ->
+              Hh_logger.log
+                "ServerRevisionTracker: Ignoring merge rev %s"
+                hg_rev
+            | _ -> add_query ~hg_rev root))
+    | "hg.transaction" ->
+      if not state.is_in_hg_transaction_state then
+        HackEventLogger.invalid_mercurial_state_transition ~state:state_name;
+      state.is_in_hg_transaction_state <- false
+    | _ -> ()
+  in
+  let is_hg_updating () =
+    state.is_in_hg_transaction_state || state.is_in_hg_update_state
+  in
+  { on_state_enter; on_state_leave; is_hg_updating }
+
+let v2_handler_fn () =
+  let state = { outstanding_events = [] } in
+  let is_in_state (outstanding : event_list) : bool =
+    List.exists outstanding ~f:(fun e -> e.is_enter)
+  in
+
+  let transition (outstanding : event_list) (e : watchman_event) : event_list =
+    (* Note: we blindly trusting that e.timestamp is newer than anything in the list.
+       The consequence if not is mild; it just means the 10s criterion will be slightly off. *)
+
+    (* consider S301212, which manifests as the following
+         transaction/leave
+         transaction/leave
+         transaction/leave
+         transaction/enter
+         transaction/enter
+
+       all with the same timestamp. How do we resolve a stale leave at the bottom?
+       Simply throw it away if another event comes in 10+ seconds after,
+    *)
+    let outstanding =
+      if is_in_state outstanding then
+        outstanding
+      else
+        match List.filter outstanding ~f:(fun e -> not e.is_enter) with
+        | { timestamp; _ } :: _ when Float.(timestamp < e.timestamp -. 10.) ->
+          (* the most recent event (which must be a leave based on our if-branch)
+              is old. Throw away current state of events
+          *)
+          let telemetry =
+            Telemetry.create ()
+            |> Telemetry.string_opt ~key:"event_source" ~value:(Some e.source)
+            |> Telemetry.bool_ ~key:"flushed_by_new_event" ~value:true
+          in
+          HackEventLogger.server_revision_tracker_forced_reset ~telemetry;
+          []
+        | _ -> outstanding
+    in
+
+    (* Strip the first pair, if there is one *)
+    let rec strip_first_match outstanding =
+      match outstanding with
+      (* if there is an event of matching source and opposite is_enter,
+         assume that's the pair to our incoming event and remove it *)
+      | { source; is_enter; _ } :: rest
+        when String.equal source e.source && Bool.(is_enter = not e.is_enter) ->
+        rest
+      | olde :: rest -> olde :: strip_first_match rest
+      | [] -> []
+    in
+    let new_outstanding = strip_first_match outstanding in
+
+    (* Otherwise prepend our new event
+       In other words, if we were able to remove a pair to the incoming event,
+       then the new event list is new_outstanding.
+
+       If we didn't find a pair, then the new event list is the old list + our new one
+    *)
+    if List.length new_outstanding < List.length outstanding then
+      new_outstanding
     else
-      tracker_v1_event_state.is_in_hg_update_state <- true
-  | "hg.transaction" ->
-    if use_tracker_v2 then
-      tracker_v2_event_state.outstanding_events <-
-        transition tracker_v2_event_state.outstanding_events event
-    else
-      tracker_v1_event_state.is_in_hg_transaction_state <- true
-  | _ -> ()
+      e :: outstanding
+  in
+  let on_state_enter state_name =
+    let event =
+      { source = state_name; timestamp = Unix.gettimeofday (); is_enter = true }
+    in
+    match state_name with
+    | "hg.update"
+    | "hg.transaction" ->
+      state.outstanding_events <- transition state.outstanding_events event
+    | _ -> ()
+  in
+  let on_state_leave root state_name state_metadata =
+    let event =
+      {
+        source = state_name;
+        timestamp = Unix.gettimeofday ();
+        is_enter = false;
+      }
+    in
+    match state_name with
+    | "hg.update" ->
+      let _ =
+        state.outstanding_events <- transition state.outstanding_events event
+      in
+      Hh_logger.log "ServerRevisionTracker: leaving hg.update";
+      Option.Monad_infix.(
+        Option.iter
+          (state_metadata >>= Watchman_utils.rev_in_state_change)
+          ~f:(fun hg_rev ->
+            match state_metadata >>= Watchman_utils.merge_in_state_change with
+            | Some true ->
+              Hh_logger.log
+                "ServerRevisionTracker: Ignoring merge rev %s"
+                hg_rev
+            | _ -> add_query ~hg_rev root))
+    | "hg.transaction" ->
+      state.outstanding_events <- transition state.outstanding_events event
+    | _ -> ()
+  in
+  let is_hg_updating () = is_in_state state.outstanding_events in
+  { on_state_enter; on_state_leave; is_hg_updating }
+
+let v1_handler = v1_handler_fn ()
+
+let v2_handler = v2_handler_fn ()
+
+let on_state_enter state_name use_tracker_v2 =
+  if use_tracker_v2 then
+    v2_handler.on_state_enter state_name
+  else
+    v1_handler.on_state_enter state_name
 
 let on_state_leave root state_name state_metadata use_tracker_v2 =
-  let event =
-    { source = state_name; timestamp = Unix.gettimeofday (); is_enter = false }
-  in
-  match state_name with
-  | "hg.update" ->
-    let _ =
-      if use_tracker_v2 then
-        tracker_v2_event_state.outstanding_events <-
-          transition tracker_v2_event_state.outstanding_events event
-      else
-        tracker_v1_event_state.is_in_hg_update_state <- false
-    in
-    Hh_logger.log "ServerRevisionTracker: leaving hg.update";
-    Option.Monad_infix.(
-      Option.iter
-        (state_metadata >>= Watchman_utils.rev_in_state_change)
-        ~f:(fun hg_rev ->
-          match state_metadata >>= Watchman_utils.merge_in_state_change with
-          | Some true ->
-            Hh_logger.log "ServerRevisionTracker: Ignoring merge rev %s" hg_rev
-          | _ -> add_query ~hg_rev root))
-  | "hg.transaction" ->
-    if use_tracker_v2 then
-      tracker_v2_event_state.outstanding_events <-
-        transition tracker_v2_event_state.outstanding_events event
-    else
-      tracker_v1_event_state.is_in_hg_transaction_state <- false
-  | _ -> ()
+  if use_tracker_v2 then
+    v2_handler.on_state_leave root state_name state_metadata
+  else
+    v1_handler.on_state_leave root state_name state_metadata
 
 let is_hg_updating use_tracker_v2 =
   if use_tracker_v2 then
-    is_in_state tracker_v2_event_state.outstanding_events
+    v2_handler.is_hg_updating ()
   else
-    tracker_v1_event_state.is_in_hg_update_state
-    || tracker_v1_event_state.is_in_hg_transaction_state
+    v1_handler.is_hg_updating ()
 
 let check_query future ~timeout ~current_t =
   match Future.get ~timeout future with

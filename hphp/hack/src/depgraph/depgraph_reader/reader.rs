@@ -48,6 +48,13 @@ impl DepGraphOpener {
     }
 }
 
+/// An opaque token that identifies a HashList.
+///
+/// This can be used to get a HashList from a DepGraph, and also to see whether
+/// two Deps share the same HashList in a DepGraph.
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
+pub struct HashListId(u32);
+
 /// An open dependency graph.
 ///
 /// The lifetime parameter represents the lifetime of the underlying
@@ -112,17 +119,23 @@ impl<'bytes> DepGraph<'bytes> {
     /// Panics if the file is corrupt. Use `validate_hash_lists` when
     /// initializing the reader to avoid these panics.
     pub fn hash_list_for(&self, hash: Dep) -> Option<HashList<'bytes>> {
-        let index = self.indexer.find(hash.into())?;
-        self.hash_list_for_index(index)
+        self.hash_list_id_for_dep(hash)
+            .map(|id| self.hash_list_for_id(id))
     }
 
-    /// Query the hash list for a given hash index.
+    /// Map a `Dep` to the `HashListId` that uniquely identifies its `HashList`.
     ///
-    /// Returns `None` if there is no hash list related to the hash.
-    ///
-    fn hash_list_for_index(&self, index: u32) -> Option<HashList<'bytes>> {
-        let list_offset = self.lookup_table.get(index)?;
-        Some(HashList::new(&self.data[list_offset as usize..]).unwrap())
+    /// Unless you are interested in `HashList` identity, you want to call
+    /// `hash_list_for` instead.
+    pub fn hash_list_id_for_dep(&self, hash: Dep) -> Option<HashListId> {
+        let index = self.indexer.find(hash.into())?;
+        Some(HashListId(self.lookup_table.get(index)?))
+    }
+
+    /// Maps a `HashListId` to its `HashList`.
+    pub fn hash_list_for_id(&self, id: HashListId) -> HashList<'bytes> {
+        let list_offset = id.0;
+        HashList::new(&self.data[list_offset as usize..]).unwrap()
     }
 
     /// Return `true` iff the given hash list contains the index for the given hash.
@@ -394,10 +407,8 @@ impl<'bytes> HashList<'bytes> {
     }
 
     /// Return all raw hash indices in this list.
-    ///
-    /// Provides raw access to the underlying list.
-    pub fn hash_indices(&self) -> &'bytes [u32] {
-        self.indices
+    pub fn hash_indices(&self) -> impl Iterator<Item = u32> + std::iter::FusedIterator + '_ {
+        self.indices.iter().copied()
     }
 }
 

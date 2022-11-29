@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use anyhow::Error;
+use hash::HashSet;
 
 use crate::hack::Builtin;
 use crate::hack::Hhbc;
@@ -13,11 +14,21 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 
 /// This is emitted with every SIL file to declare the "standard" definitions
 /// that we use.
-pub(crate) fn write_decls(txf: &mut TextualFile<'_>) -> Result<()> {
+pub(crate) fn write_decls(txf: &mut TextualFile<'_>, subset: &HashSet<Builtin>) -> Result<()> {
     txf.write_comment("----- BUILTIN DECLS STARTS HERE -----")?;
 
-    Builtin::write_decls(txf)?;
-    Hhbc::write_decls(txf)?;
+    Builtin::write_decls(txf, subset)?;
+
+    let hhbc_subset = subset
+        .iter()
+        .filter_map(|builtin| match builtin {
+            Builtin::Hhbc(hhbc) => Some(*hhbc),
+            _ => None,
+        })
+        .collect();
+
+    Hhbc::write_decls(txf, &hhbc_subset)?;
+    txf.debug_separator()?;
 
     Ok(())
 }

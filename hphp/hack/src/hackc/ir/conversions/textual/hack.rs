@@ -4,6 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use anyhow::Error;
+use hash::HashSet;
+use strum_macros::EnumIter;
 use textual_macros::TextualDecl;
 
 use crate::textual;
@@ -16,7 +18,7 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 /// the names should match the HHBC name except when they are compound bytecodes
 /// (like Cmp with a parameter of Eq becoming CmpEq). Documentation can be found
 /// in hphp/doc/bytecode.specification.
-#[derive(Copy, Clone, TextualDecl)]
+#[derive(Copy, Clone, TextualDecl, Eq, PartialEq, Hash, EnumIter)]
 pub(crate) enum Hhbc {
     #[decl(fn hhbc_add(*HackMixed, *HackMixed) -> *HackMixed)]
     Add,
@@ -126,7 +128,14 @@ pub(crate) enum Hhbc {
     VerifyParamTypeTS,
 }
 
-#[derive(TextualDecl)]
+// Needed for EnumIter
+impl Default for Hhbc {
+    fn default() -> Self {
+        Hhbc::Add
+    }
+}
+
+#[derive(Copy, Clone, TextualDecl, Eq, PartialEq, Hash, EnumIter)]
 pub(crate) enum Builtin {
     /// Allocate an array with the given number of words (a word is a
     /// pointer-sized value).
@@ -196,9 +205,9 @@ pub(crate) fn call_builtin(
     target: Builtin,
     params: impl textual::VarArgs,
 ) -> Result<Sid> {
-    fb.call(&target.to_string(), params)
+    fb.call(target.as_str(), params)
 }
 
 pub(crate) fn expr_builtin(target: Builtin, params: impl textual::VarArgs) -> textual::Expr {
-    textual::Expr::call(target.to_string(), params)
+    textual::Expr::call(target.as_str(), params)
 }

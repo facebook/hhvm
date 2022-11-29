@@ -12,6 +12,8 @@ use std::sync::Arc;
 
 use anyhow::Error;
 use ascii::AsciiString;
+use hash::HashMap;
+use hash::HashSet;
 use ir::func::SrcLoc;
 use ir::BlockId;
 use ir::LocalId;
@@ -26,11 +28,20 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 pub(crate) struct TextualFile<'a> {
     w: &'a mut dyn std::io::Write,
     strings: Arc<StringInterner>,
+    pub(crate) internal_functions: HashSet<String>,
+    pub(crate) called_functions: HashSet<String>,
+    pub(crate) globals: HashMap<String, Ty>,
 }
 
 impl<'a> TextualFile<'a> {
     pub(crate) fn new(w: &'a mut dyn std::io::Write, strings: Arc<StringInterner>) -> Self {
-        TextualFile { w, strings }
+        TextualFile {
+            w,
+            strings,
+            internal_functions: Default::default(),
+            called_functions: Default::default(),
+            globals: Default::default(),
+        }
     }
 
     pub(crate) fn debug_separator(&mut self) -> Result {
@@ -51,12 +62,11 @@ impl<'a> TextualFile<'a> {
         Ok(())
     }
 
-    pub(crate) fn declare_global(&mut self, name: &str, ty: &Ty) -> Result {
-        writeln!(self.w, "global {name} : {}", FmtTy(ty))?;
-        Ok(())
+    pub(crate) fn declare_global(&mut self, name: String, ty: Ty) {
+        self.globals.insert(name, ty);
     }
 
-    pub(crate) fn declare_unknown_function(&mut self, name: &str) -> Result {
+    fn declare_unknown_function(&mut self, name: &str) -> Result {
         writeln!(self.w, "declare {name}(...): *HackMixed")?;
         Ok(())
     }
@@ -70,6 +80,10 @@ impl<'a> TextualFile<'a> {
         locals: &[(LocalId, Ty)],
         body: impl FnOnce(&mut FuncBuilder<'_, '_>) -> Result<R>,
     ) -> Result<R> {
+        if !self.internal_functions.contains(name) {
+            self.internal_functions.insert(name.to_owned());
+        }
+
         self.write_full_loc(loc)?;
 
         write!(self.w, "define {name}(")?;
@@ -149,6 +163,37 @@ impl<'a> TextualFile<'a> {
     pub(crate) fn write_comment(&mut self, msg: &str) -> Result {
         writeln!(self.w, "// {msg}")?;
         Ok(())
+    }
+
+    pub(crate) fn write_epilogue<T: Eq + std::hash::Hash + Copy>(
+        &mut self,
+        builtins: &HashMap<&str, T>,
+    ) -> Result<HashSet<T>> {
+        if !self.globals.is_empty() {
+            self.write_comment("----- GLOBALS -----")?;
+            for (name, ty) in self.globals.iter() {
+                writeln!(self.w, "global {name} : {}", FmtTy(ty))?;
+            }
+            self.debug_separator()?;
+        }
+
+        let (builtins, mut non_builtins): (HashSet<T>, Vec<String>) = (&self.called_functions
+            - &self.internal_functions)
+            .into_iter()
+            .partition_map(|f| match builtins.get(&f as &str) {
+                Some(b) => itertools::Either::Left(b),
+                None => itertools::Either::Right(f),
+            });
+        non_builtins.sort();
+        if !non_builtins.is_empty() {
+            self.write_comment("----- EXTERNALS -----")?;
+            for name in non_builtins {
+                self.declare_unknown_function(&name)?;
+            }
+            self.debug_separator()?;
+        }
+
+        Ok(builtins)
     }
 
     fn write_full_loc(&mut self, src_loc: &SrcLoc) -> Result {
@@ -364,36 +409,6 @@ impl From<Sid> for Expr {
     }
 }
 
-struct FmtExpr<'a>(&'a StringInterner, &'a Expr);
-
-impl fmt::Display for FmtExpr<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let FmtExpr(strings, expr) = *self;
-        match *expr {
-            Expr::Call(ref target, ref params) => {
-                write!(f, "{}(", target)?;
-                let mut sep = "";
-                for param in params.iter() {
-                    write!(f, "{sep}{}", FmtExpr(strings, param))?;
-                    sep = ", ";
-                }
-                write!(f, ")")
-            }
-            Expr::Const(ref c) => FmtConst(c).fmt(f),
-            Expr::Deref(ref var) => write!(f, "&{}", FmtVar(strings, var)),
-            Expr::Index(ref base, ref offset) => {
-                write!(
-                    f,
-                    "{}[{}]",
-                    FmtExpr(strings, base),
-                    FmtExpr(strings, offset)
-                )
-            }
-            Expr::Sid(sid) => FmtSid(sid).fmt(f),
-        }
-    }
-}
-
 pub(crate) trait VarArgs {
     fn into_exprs(self) -> Vec<Expr>;
 }
@@ -490,7 +505,7 @@ pub(crate) enum Attribute {
 pub(crate) struct FuncBuilder<'a, 'b> {
     cur_loc: SrcLoc,
     next_id: Sid,
-    txf: &'a mut TextualFile<'b>,
+    pub(crate) txf: &'a mut TextualFile<'b>,
 }
 
 impl FuncBuilder<'_, '_> {
@@ -517,7 +532,8 @@ impl FuncBuilder<'_, '_> {
                 write!(self.txf.w, "(")?;
                 let mut sep2 = "";
                 for param in params.iter() {
-                    write!(self.txf.w, "{sep2}{}", FmtExpr(&self.txf.strings, param))?;
+                    self.txf.w.write_all(sep2.as_bytes())?;
+                    self.write_expr(param)?;
                     sep2 = ", ";
                 }
                 write!(self.txf.w, ")")?;
@@ -531,6 +547,34 @@ impl FuncBuilder<'_, '_> {
 
     pub(crate) fn write_exception_handler(&mut self, target: BlockId) -> Result {
         writeln!(self.txf.w, "{INDENT}.handlers {}", FmtBid(target))?;
+        Ok(())
+    }
+
+    fn write_expr(&mut self, expr: &Expr) -> Result {
+        match *expr {
+            Expr::Call(ref target, ref params) => {
+                if !self.txf.called_functions.contains(target) {
+                    self.txf.called_functions.insert(target.to_owned());
+                }
+                write!(self.txf.w, "{}(", target)?;
+                let mut sep = "";
+                for param in params.iter() {
+                    self.txf.w.write_all(sep.as_bytes())?;
+                    self.write_expr(param)?;
+                    sep = ", ";
+                }
+                write!(self.txf.w, ")")?;
+            }
+            Expr::Const(ref c) => write!(self.txf.w, "{}", FmtConst(c))?,
+            Expr::Deref(ref var) => write!(self.txf.w, "&{}", FmtVar(&self.txf.strings, var))?,
+            Expr::Index(ref base, ref offset) => {
+                self.write_expr(base)?;
+                self.txf.w.write_all(b"[")?;
+                self.write_expr(offset)?;
+                self.txf.w.write_all(b"]")?;
+            }
+            Expr::Sid(sid) => write!(self.txf.w, "{}", FmtSid(sid))?,
+        }
         Ok(())
     }
 
@@ -577,16 +621,16 @@ impl FuncBuilder<'_, '_> {
         this: Expr,
         params: impl VarArgs,
     ) -> Result<Sid> {
+        if !self.txf.called_functions.contains(target) {
+            self.txf.called_functions.insert(target.to_owned());
+        }
         let dst = self.alloc_sid();
-        write!(
-            self.txf.w,
-            "{INDENT}{dst} = {target}({this}",
-            dst = FmtSid(dst),
-            this = FmtExpr(&self.txf.strings, &this)
-        )?;
+        write!(self.txf.w, "{INDENT}{dst} = {target}(", dst = FmtSid(dst),)?;
+        self.write_expr(&this)?;
         let params = params.into_exprs();
         for param in params {
-            write!(self.txf.w, ", {}", FmtExpr(&self.txf.strings, &param))?;
+            self.txf.w.write_all(b", ")?;
+            self.write_expr(&param)?;
         }
         writeln!(self.txf.w, ")")?;
         Ok(dst)
@@ -599,17 +643,18 @@ impl FuncBuilder<'_, '_> {
         this: Expr,
         params: impl VarArgs,
     ) -> Result<Sid> {
+        if !self.txf.called_functions.contains(target) {
+            self.txf.called_functions.insert(target.to_owned());
+        }
         let dst = self.alloc_sid();
-        write!(
-            self.txf.w,
-            "{INDENT}{dst} = {this}.{target}(",
-            dst = FmtSid(dst),
-            this = FmtExpr(&self.txf.strings, &this)
-        )?;
+        write!(self.txf.w, "{INDENT}{dst} = ", dst = FmtSid(dst),)?;
+        self.write_expr(&this)?;
+        write!(self.txf.w, ".{target}(")?;
         let params = params.into_exprs();
         let mut sep = "";
         for param in params {
-            write!(self.txf.w, "{sep}{}", FmtExpr(&self.txf.strings, &param))?;
+            self.txf.w.write_all(sep.as_bytes())?;
+            self.write_expr(&param)?;
             sep = ", ";
         }
         writeln!(self.txf.w, ")")?;
@@ -617,12 +662,16 @@ impl FuncBuilder<'_, '_> {
     }
 
     pub(crate) fn call(&mut self, target: &str, params: impl VarArgs) -> Result<Sid> {
+        if !self.txf.called_functions.contains(target) {
+            self.txf.called_functions.insert(target.to_owned());
+        }
         let dst = self.alloc_sid();
         write!(self.txf.w, "{INDENT}{dst} = {target}(", dst = FmtSid(dst))?;
         let mut sep = "";
         let params = params.into_exprs();
         for param in params {
-            write!(self.txf.w, "{sep}{}", FmtExpr(&self.txf.strings, &param))?;
+            self.txf.w.write_all(sep.as_bytes())?;
+            self.write_expr(&param)?;
             sep = ", ";
         }
         writeln!(self.txf.w, ")")?;
@@ -637,57 +686,49 @@ impl FuncBuilder<'_, '_> {
     pub(crate) fn copy(&mut self, src: impl Into<Expr>) -> Result<Sid> {
         let src = src.into();
         let dst = self.alloc_sid();
-        writeln!(
-            self.txf.w,
-            "{INDENT}{dst} = {src}",
-            dst = FmtSid(dst),
-            src = FmtExpr(&self.txf.strings, &src)
-        )?;
+        write!(self.txf.w, "{INDENT}{dst} = ", dst = FmtSid(dst),)?;
+        self.write_expr(&src)?;
+        writeln!(self.txf.w)?;
         Ok(dst)
     }
 
     pub(crate) fn load(&mut self, ty: Ty, src: impl Into<Expr>) -> Result<Sid> {
         let src = src.into();
         let dst = self.alloc_sid();
-        writeln!(
+        write!(
             self.txf.w,
-            "{INDENT}{dst}: {ty} = load {src}",
+            "{INDENT}{dst}: {ty} = load ",
             dst = FmtSid(dst),
             ty = FmtTy(&ty),
-            src = FmtExpr(&self.txf.strings, &src)
         )?;
+        self.write_expr(&src)?;
+        writeln!(self.txf.w)?;
         Ok(dst)
     }
 
     // Terminate this branch if `expr` is false.
     pub(crate) fn prune(&mut self, expr: impl Into<Expr>) -> Result {
         let expr = expr.into();
-        writeln!(
-            self.txf.w,
-            "{INDENT}prune {}",
-            FmtExpr(&self.txf.strings, &expr)
-        )?;
+        write!(self.txf.w, "{INDENT}prune ")?;
+        self.write_expr(&expr)?;
+        writeln!(self.txf.w)?;
         Ok(())
     }
 
     // Terminate this branch if `expr` is true.
     pub(crate) fn prune_not(&mut self, expr: impl Into<Expr>) -> Result {
         let expr = expr.into();
-        writeln!(
-            self.txf.w,
-            "{INDENT}prune ! {}",
-            FmtExpr(&self.txf.strings, &expr)
-        )?;
+        write!(self.txf.w, "{INDENT}prune ! ")?;
+        self.write_expr(&expr)?;
+        writeln!(self.txf.w)?;
         Ok(())
     }
 
     pub(crate) fn ret(&mut self, expr: impl Into<Expr>) -> Result {
         let expr = expr.into();
-        writeln!(
-            self.txf.w,
-            "{INDENT}ret {}",
-            FmtExpr(&self.txf.strings, &expr)
-        )?;
+        write!(self.txf.w, "{INDENT}ret ",)?;
+        self.write_expr(&expr)?;
+        writeln!(self.txf.w)?;
         Ok(())
     }
 
@@ -699,13 +740,11 @@ impl FuncBuilder<'_, '_> {
     ) -> Result {
         let dst = dst.into();
         let src = src.into();
-        writeln!(
-            self.txf.w,
-            "{INDENT}store {dst} <- {src}: {ty}",
-            dst = FmtExpr(&self.txf.strings, &dst),
-            src = FmtExpr(&self.txf.strings, &src),
-            ty = FmtTy(&src_ty),
-        )?;
+        write!(self.txf.w, "{INDENT}store ")?;
+        self.write_expr(&dst)?;
+        self.txf.w.write_all(b" <- ")?;
+        self.write_expr(&src)?;
+        writeln!(self.txf.w, ": {ty}", ty = FmtTy(&src_ty))?;
         Ok(())
     }
 

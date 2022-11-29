@@ -169,7 +169,7 @@ fn write_final(
                 MemberKey::W => { }
             }
             let _ = operands.next();
-            write_todo(fb, state, "SetOpM")
+            write_todo(fb, "SetOpM")
         },
         FinalOp::UnsetM { ref key, .. } => textual_todo! {
             match *key {
@@ -183,7 +183,7 @@ fn write_final(
                 MemberKey::QT(_) => { }
                 MemberKey::W => { }
             }
-            write_todo(fb, state, "UnsetM")
+            write_todo(fb, "UnsetM")
         },
     }
 }

@@ -37,8 +37,6 @@ use crate::hack;
 use crate::lower;
 use crate::mangle::Mangle as _;
 use crate::mangle::MangleWithClass as _;
-use crate::state;
-use crate::state::FuncDeclKind;
 use crate::state::UnitState;
 use crate::textual;
 use crate::textual::Sid;
@@ -129,7 +127,7 @@ pub(crate) fn write_func(
     locals.push((base, tx_ty!(*HackMixed)));
 
     let span = func.loc(func.loc_id).clone();
-    let decls = txf.define_function(name, &span, &params, ret_ty, &locals, |fb| {
+    txf.define_function(name, &span, &params, ret_ty, &locals, |fb| {
         let mut func = rewrite_jmp_ops(func);
         ir::passes::clean::run(&mut func);
 
@@ -139,11 +137,8 @@ pub(crate) fn write_func(
             write_block(fb, &mut state, bid)?;
         }
 
-        Ok(state.decls)
+        Ok(())
     })?;
-
-    unit_state.decls.declare_func(name, FuncDeclKind::Internal);
-    unit_state.decls.merge(decls);
 
     Ok(())
 }
@@ -202,7 +197,7 @@ fn write_instr(
         Instr::Hhbc(Hhbc::CGetL(lid, _)) => write_load_var(fb, state, iid, lid)?,
         Instr::Hhbc(Hhbc::IncDecL(lid, op, _)) => write_inc_dec_l(fb, state, iid, lid, op)?,
         Instr::Hhbc(Hhbc::ResolveClass(cid, _)) => {
-            let vid = class::load_static_class(fb, cid, state.strings, &mut state.decls)?;
+            let vid = class::load_static_class(fb, cid, state.strings)?;
             state.set_iid(iid, vid);
         }
         Instr::Hhbc(Hhbc::SetL(vid, lid, _)) => {
@@ -248,7 +243,8 @@ fn write_instr(
         Instr::Special(Special::Param) => todo!(),
         Instr::Special(Special::Select(vid, _idx)) => {
             textual_todo! {
-                state.set_iid(iid, fb.copy(state.lookup_vid(vid))?);
+                let expr = state.lookup_vid(vid);
+                state.set_iid(iid, fb.copy(expr)?);
             }
         }
         Instr::Special(Special::Tmp(..)) => todo!(),
@@ -262,9 +258,6 @@ fn write_instr(
             textual_todo! {
                 use ir::instr::HasOperands;
                 let name = format!("TODO_hhbc_{}", hhbc);
-                state
-                    .decls
-                    .declare_func(&name, FuncDeclKind::External);
                 let output = fb.call(
                     &name,
                     instr
@@ -298,7 +291,7 @@ fn write_copy(
         ir::FullInstrId::Constant(cid) => {
             let constant = state.func.constant(cid);
             let expr = match constant {
-                Constant::Array(tv) => typed_value_expr(tv, &state.strings),
+                Constant::Array(tv) => typed_value_expr(tv, state.strings),
                 Constant::Bool(false) => Expr::Const(Const::False),
                 Constant::Bool(true) => Expr::Const(Const::True),
                 Constant::Dir => todo!(),
@@ -381,14 +374,13 @@ fn write_terminator(
         | Terminator::SSwitch { .. }
         | Terminator::Switch { .. }
         | Terminator::ThrowAsTypeStructException { .. } => {
-            write_todo(fb, state, &format!("{}", terminator))?;
+            write_todo(fb, &format!("{}", terminator))?;
             fb.unreachable()?;
         }
 
         Terminator::Throw(vid, _) => {
             textual_todo! {
-                let expr = state.lookup_vid(vid);
-                fb.call("TODO_throw", [expr])?;
+                fb.call("TODO_throw", [state.lookup_vid(vid)])?;
                 fb.unreachable()?;
             }
         }
@@ -554,31 +546,25 @@ fn write_call(
     let args = detail.args(operands);
 
     let mut output = match *detail {
-        CallDetail::FCallClsMethod { .. } => write_todo(fb, state, "FCallClsMethod")?,
+        CallDetail::FCallClsMethod { .. } => write_todo(fb, "FCallClsMethod")?,
         CallDetail::FCallClsMethodD { clsid, method } => {
             // C::foo()
             let target = method.mangle(clsid, state.strings);
-            state
-                .decls
-                .declare_func(target.to_string(), FuncDeclKind::External);
-            let this = class::load_static_class(fb, clsid, state.strings, &mut state.decls)?;
+            let this = class::load_static_class(fb, clsid, state.strings)?;
             fb.call_static(
                 &target,
                 this.into(),
                 args.iter().copied().map(|vid| state.lookup_vid(vid)),
             )?
         }
-        CallDetail::FCallClsMethodM { .. } => write_todo(fb, state, "TODO_FCallClsMethodM")?,
-        CallDetail::FCallClsMethodS { .. } => write_todo(fb, state, "TODO_FCallClsMethodS")?,
-        CallDetail::FCallClsMethodSD { .. } => write_todo(fb, state, "TODO_FCallClsMethodSD")?,
+        CallDetail::FCallClsMethodM { .. } => write_todo(fb, "TODO_FCallClsMethodM")?,
+        CallDetail::FCallClsMethodS { .. } => write_todo(fb, "TODO_FCallClsMethodS")?,
+        CallDetail::FCallClsMethodSD { .. } => write_todo(fb, "TODO_FCallClsMethodSD")?,
         CallDetail::FCallCtor => unreachable!(),
-        CallDetail::FCallFunc => write_todo(fb, state, "TODO_FCallFunc")?,
+        CallDetail::FCallFunc => write_todo(fb, "TODO_FCallFunc")?,
         CallDetail::FCallFuncD { func } => {
             // foo()
             let target = func.mangle(state.strings);
-            state
-                .decls
-                .declare_func(target.to_string(), FuncDeclKind::External);
             // A top-level function is called like a class static in a special
             // top-level class. Its 'this' pointer is null.
             fb.call_static(
@@ -587,7 +573,7 @@ fn write_call(
                 args.iter().copied().map(|vid| state.lookup_vid(vid)),
             )?
         }
-        CallDetail::FCallObjMethod { .. } => write_todo(fb, state, "FCallObjMethod")?,
+        CallDetail::FCallObjMethod { .. } => write_todo(fb, "FCallObjMethod")?,
         CallDetail::FCallObjMethodD { flavor, method } => {
             // $x->y()
             if flavor == ir::ObjMethodOp::NullSafe {
@@ -600,9 +586,6 @@ fn write_call(
             // TODO: need to try to figure out the type.
             let ty = ClassName::new(Str::new(b"HackMixed"));
             let target = method.mangle(&ty, state.strings);
-            state
-                .decls
-                .declare_func(target.to_string(), FuncDeclKind::External);
             fb.call_virtual(
                 &target,
                 state.lookup_vid(detail.obj(operands)),
@@ -650,7 +633,6 @@ fn write_inc_dec_l<'a>(
 }
 
 pub(crate) struct FuncState<'a> {
-    decls: state::Decls,
     func: &'a ir::Func<'a>,
     iid_mapping: ir::InstrIdMap<textual::Expr>,
     method_info: Option<&'a MethodInfo<'a>>,
@@ -664,7 +646,6 @@ impl<'a> FuncState<'a> {
         method_info: Option<&'a MethodInfo<'a>>,
     ) -> Self {
         Self {
-            decls: Default::default(),
             func,
             iid_mapping: Default::default(),
             method_info,
@@ -686,7 +667,7 @@ impl<'a> FuncState<'a> {
     /// it. For InstrIds and complex ConstIds return an Expr containing the
     /// (already emitted) Sid. For simple ConstIds use an Expr representing the
     /// value directly.
-    pub fn lookup_vid(&self, vid: ValueId) -> textual::Expr {
+    pub fn lookup_vid(&mut self, vid: ValueId) -> textual::Expr {
         match vid.full() {
             ir::FullInstrId::Instr(iid) => self.lookup_iid(iid),
             ir::FullInstrId::Constant(c) => {
@@ -838,17 +819,10 @@ fn cmp_lid(strings: &StringInterner, x: &LocalId, y: &LocalId) -> std::cmp::Orde
     }
 }
 
-pub(crate) fn write_todo(
-    fb: &mut textual::FuncBuilder<'_, '_>,
-    state: &mut FuncState<'_>,
-    msg: &str,
-) -> Result<Sid> {
+pub(crate) fn write_todo(fb: &mut textual::FuncBuilder<'_, '_>, msg: &str) -> Result<Sid> {
     trace!("TODO: {}", msg);
     textual_todo! {
         let target = format!("$todo.{msg}");
-        state
-            .decls
-            .declare_func(&target, FuncDeclKind::External);
         fb.call(&target, ())
     }
 }

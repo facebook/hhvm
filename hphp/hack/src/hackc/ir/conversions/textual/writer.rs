@@ -8,8 +8,11 @@ use std::sync::Arc;
 
 use anyhow::bail;
 use anyhow::Result;
+use hash::HashMap;
+use strum::IntoEnumIterator;
 
 use crate::decls;
+use crate::hack;
 use crate::state::UnitState;
 use crate::textual;
 use crate::textual::TextualFile;
@@ -42,19 +45,15 @@ pub fn textual_writer(
         crate::func::write_function(&mut txf, &mut state, func)?;
     }
 
-    txf.write_comment("----- GLOBALS -----")?;
-    for (name, ty) in state.decls.globals.iter() {
-        txf.declare_global(name, ty)?;
-    }
-    txf.debug_separator()?;
+    let all_builtins: HashMap<&str, hack::Builtin> = hack::Builtin::iter()
+        .map(|b| (b.as_str(), b))
+        .chain(hack::Hhbc::iter().map(|b| (b.as_str(), hack::Builtin::Hhbc(b))))
+        .collect();
 
-    txf.write_comment("----- EXTERNALS -----")?;
-    for name in state.decls.external_funcs() {
-        txf.declare_unknown_function(name)?;
-    }
+    let builtins = txf.write_epilogue(&all_builtins)?;
 
     if !no_builtins {
-        decls::write_decls(&mut txf)?;
+        decls::write_decls(&mut txf, &builtins)?;
     }
 
     txf.write_comment(&format!("{UNIT_END_MARKER} {escaped_path}"))?;

@@ -22,7 +22,6 @@ use super::textual;
 use crate::func::MethodInfo;
 use crate::mangle::Mangle;
 use crate::mangle::MangleWithClass as _;
-use crate::state;
 use crate::state::UnitState;
 use crate::textual::TextualFile;
 use crate::types::convert_ty;
@@ -188,9 +187,10 @@ fn write_init_static(
     class: &ir::Class<'_>,
 ) -> Result {
     let singleton_name = static_singleton_name(class.name, &state.strings);
-    state
-        .decls
-        .declare_global(&singleton_name, static_ty(class.name, &state.strings));
+    txf.declare_global(
+        singleton_name.clone(),
+        static_ty(class.name, &state.strings),
+    );
 
     txf.define_function(
         &init_static_name(class.name, &state.strings),
@@ -249,11 +249,11 @@ pub(crate) fn load_static_class(
     fb: &mut textual::FuncBuilder<'_, '_>,
     class: ir::ClassId,
     strings: &ir::StringInterner,
-    decls: &mut state::Decls,
 ) -> Result<textual::Sid> {
     // Blindly load the static singleton, assuming it's already been initialized.
     let singleton_name = static_singleton_name(class, strings);
-    decls.declare_global(&singleton_name, static_ty(class, strings));
+    fb.txf
+        .declare_global(singleton_name.clone(), static_ty(class, strings));
     let singleton_expr = textual::Expr::deref(textual::Var::named(singleton_name));
     let value = fb.load(static_ty(class, strings), singleton_expr)?;
     hack::call_builtin(fb, hack::Builtin::SilLazyInitialize, [value])?;

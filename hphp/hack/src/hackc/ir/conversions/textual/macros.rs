@@ -86,15 +86,18 @@ pub fn textual_decl_derive(input: proc_macro::TokenStream) -> proc_macro::TokenS
                             quote!(tx_ty!(#p))
                         };
 
-                        let decl =
-                            quote!(txf.declare_function( #builtin_name, &[#(#params),*], #ret)?;);
+                        let decl = quote! {
+                            if subset.contains(&#name::#variant_name) {
+                                txf.declare_function(#builtin_name, &[#(#params),*], #ret)?;
+                            }
+                        };
                         decls.push(decl);
 
-                        let display = quote!(#name::#variant_name => w.write_str(#builtin_name),);
+                        let display = quote!(#name::#variant_name => #builtin_name,);
                         displays.push(display);
                     }
                     Decl::Skip => {
-                        displays.push(quote!(#name::#variant_name(f) => f.fmt(w),));
+                        displays.push(quote!(#name::#variant_name(f) => f.as_str(),));
                     }
                 }
             }
@@ -105,14 +108,12 @@ pub fn textual_decl_derive(input: proc_macro::TokenStream) -> proc_macro::TokenS
 
     let output = quote! {
         impl #impl_generics #name #ty_generics #where_clause {
-            #vis fn write_decls(txf: &mut TextualFile<'_>) -> Result<()> {
+            #vis fn write_decls(txf: &mut TextualFile<'_>, subset: &HashSet<#name #ty_generics>) -> Result<()> {
                 #(#decls)*
                 Ok(())
             }
-        }
 
-        impl #impl_generics std::fmt::Display for #name #ty_generics #where_clause {
-            fn fmt(&self, w: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            #vis fn as_str(&self) -> &'static str {
                 match self {
                     #(#displays)*
                 }

@@ -4523,6 +4523,8 @@ dependencies = [
  "itertools 0.10.3",
  "log",
  "newtype",
+ "strum",
+ "strum_macros",
  "textual_macros",
 ]
 

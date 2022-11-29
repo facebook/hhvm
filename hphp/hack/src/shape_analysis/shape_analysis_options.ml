@@ -10,8 +10,17 @@ open Hh_prelude
 open Shape_analysis_types
 
 let parse_mode str =
-  let parse_command = function
+  let parse_command ~constraints_dir = function
     | "dump" -> Some DumpConstraints
+    | "dump-marshalled" ->
+      begin
+        match constraints_dir with
+        | Some constraints_dir ->
+          Some (DumpMarshalledConstraints { constraints_dir })
+        | None ->
+          failwith
+            "expected 'dump-marshalled:$MODE:$CONSTRAINTS_DIR' but constraints_dir was not privided"
+      end
     | "dump-derived" -> Some DumpDerivedConstraints
     | "simplify" -> Some SimplifyConstraints
     | "codemod" -> Some Codemod
@@ -27,8 +36,12 @@ let parse_mode str =
   let components = String.split str ~on:':' in
   let open Option.Monad_infix in
   match components with
+  | [command; mode; constraints_dir] ->
+    parse_command command ~constraints_dir:(Some constraints_dir)
+    >>= fun command ->
+    parse_mode mode >>= fun mode -> Some (command, mode)
   | [command; mode] ->
-    parse_command command >>= fun command ->
+    parse_command command ~constraints_dir:None >>= fun command ->
     parse_mode mode >>= fun mode -> Some (command, mode)
   | _ -> None
 

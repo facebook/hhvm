@@ -131,6 +131,8 @@ let class_name_of_class_id pos tenv class_id =
          (Aast_names_utils.expr_name e)
   | CI (_, id) -> Some id
 
+let to_marshallable_ty = Wipe_type_reason.wipe
+
 let add_key_constraint
     ~(pos : Pos.t)
     ~(origin : int)
@@ -141,7 +143,7 @@ let add_key_constraint
     (env : env)
     entity : env =
   let add_key key =
-    let ty = Tast_env.fully_expand env.tast_env ty in
+    let ty = ty |> Tast_env.fully_expand env.tast_env |> to_marshallable_ty in
     let add_static_key env variety =
       let constraint_ = Static_key (variety, certainty, entity, key, ty) in
       Env.add_constraint env { hack_pos = pos; origin; constraint_ }

@@ -6,9 +6,10 @@
  *
  *)
 
-module JSON = Hh_json
 open Hh_prelude
 open Shape_analysis_types
+module JSON = Hh_json
+module Hashtbl = Stdlib.Hashtbl
 
 let of_pos pos =
   let (line, scol, ecol) = Pos.info_pos pos in
@@ -53,3 +54,33 @@ let group_of_results ~error_count env results =
   in
   JSON.JSON_Object
     [("directives", directives); ("error_count", JSON.int_ error_count)]
+
+let to_singletons = List.map ~f:(fun l -> [l])
+
+let codemods_of_entries env ~(solve : solve_entries) ~atomic constraint_entries
+    : Hh_json.json list =
+  let errors = Hashtbl.create (List.length constraint_entries) in
+  let () =
+    let add_errors ConstraintEntry.{ id; error_count; _ } =
+      let _ = Hashtbl.add errors id error_count in
+      ()
+    in
+    constraint_entries |> List.iter ~f:add_errors
+  in
+  let add_errors_back id shape_result =
+    let error_count = Option.value ~default:0 @@ Hashtbl.find_opt errors id in
+    (error_count, shape_result)
+  in
+  let groups_of_results (error_count, shape_result) =
+    let shape_results =
+      if not atomic then
+        to_singletons shape_result
+      else
+        [shape_result]
+    in
+    List.map shape_results ~f:(group_of_results ~error_count env)
+  in
+  solve env constraint_entries
+  |> SMap.mapi add_errors_back
+  |> SMap.values
+  |> List.bind ~f:groups_of_results

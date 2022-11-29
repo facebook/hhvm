@@ -29,3 +29,7 @@ val callable :
 val do_ : options -> Provider_context.t -> Tast.program -> unit
 
 val show_shape_result : Typing_env_types.env -> shape_result -> string
+
+val shape_results_using_hips : solve_entries
+
+val shape_results_no_hips : solve_entries

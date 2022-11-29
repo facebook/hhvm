@@ -33,6 +33,7 @@ type potential_targets = {
 
 type command =
   | DumpConstraints
+  | DumpMarshalledConstraints of { constraints_dir: string }
   | DumpDerivedConstraints
   | SimplifyConstraints
   | Codemod
@@ -176,3 +177,15 @@ type log = {
 
 type any_constraint = (constraint_, inter_constraint_) HT.any_constraint_
 [@@deriving ord]
+
+module ConstraintEntry = struct
+  type t = {
+    source_file: Relative_path.t;
+    id: string;
+    constraints: any_constraint list;
+    error_count: int;
+  }
+end
+
+type solve_entries =
+  Typing_env_types.env -> ConstraintEntry.t list -> shape_result list SMap.t

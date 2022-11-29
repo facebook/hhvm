@@ -539,7 +539,7 @@ struct SSLSessionReadCallback
   }
   void readErr(const folly::AsyncSocketException&) noexcept override {
   }
-  folly::AsyncSocket* socket;
+  folly::AsyncSocket* socket{nullptr};
   folly::ssl::SSLSessionUniquePtr session;
 
  private:

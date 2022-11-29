@@ -187,9 +187,7 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
     }
     if (!next.toThrift().append()->empty()) {
       decltype(auto) rhs = *std::forward<U>(next).toThrift().append();
-      data_.append()->reserve(data_.append()->size() + rhs.size());
-      auto inserter = std::back_inserter(*data_.append());
-      std::copy_n(rhs.begin(), rhs.size(), inserter);
+      data_.append()->insert(data_.append()->end(), rhs.begin(), rhs.end());
     }
   }
 

@@ -36,6 +36,8 @@ static_assert(::apache::thrift::adapt_detail::has_inplace_toThrift<
 
 using ListPatch =
     std::decay_t<decltype(*std::declval<MyStructFieldPatch>()->optListVal())>;
+using ListDequePatch =
+    std::decay_t<decltype(*std::declval<MyStructFieldPatch>()->longList())>;
 using SetPatch =
     std::decay_t<decltype(*std::declval<MyStructFieldPatch>()->optSetVal())>;
 using MapPatch =
@@ -403,6 +405,38 @@ TEST(StructPatchTest, ListPatch) {
       removePatch, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {5, 6, 7, 8, 9, 10});
 
   ListPatch elementPatch;
+  elementPatch.patchAt(0) += 1;
+  test::expectPatch(elementPatch, {1, 2, 3}, {2, 2, 3}, {3, 2, 3});
+}
+
+TEST(StructPatchTest, ListDequePatch) {
+  ListDequePatch patch;
+  patch.prepend({3, 4});
+  patch.emplace_front(2);
+  patch.push_front(1);
+  ListDequePatch::value_type actual{5, 6};
+  patch.append({7, 8});
+  patch.emplace_back(9);
+  patch.push_back(10);
+  test::expectPatch(
+      patch,
+      actual,
+      {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+      {1, 2, 3, 4, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 7, 8, 9, 10});
+
+  ListDequePatch erasePatch;
+  erasePatch.erase(1);
+  test::expectPatch(
+      erasePatch,
+      {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+      {2, 3, 4, 5, 6, 7, 8, 9, 10});
+
+  ListDequePatch removePatch;
+  removePatch.remove({1, 2, 3, 4});
+  test::expectPatch(
+      removePatch, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {5, 6, 7, 8, 9, 10});
+
+  ListDequePatch elementPatch;
   elementPatch.patchAt(0) += 1;
   test::expectPatch(elementPatch, {1, 2, 3}, {2, 2, 3}, {3, 2, 3});
 }

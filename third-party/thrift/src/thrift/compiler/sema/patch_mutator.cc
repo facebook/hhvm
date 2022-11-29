@@ -543,10 +543,9 @@ t_struct& patch_generator::gen_patch(
     gen.patchList(inst_map(t_base_type::t_i32(), elem_patch_type));
     // TODO(afuller): Support sets for all types in all languages, and switch
     // this to a set instead of a list.
-    auto list_type = inst_list(list->elem_type());
-    gen.remove(list_type);
-    gen.prepend(list_type);
-    gen.append(list_type);
+    gen.remove(inst_list(list->elem_type()));
+    gen.prepend(type);
+    gen.append(type);
     gen.set_adapter("ListPatchAdapter", program_);
   } else if (auto* set = dynamic_cast<const t_set*>(ttype)) {
     // TODO(afuller): support 'replace' op.

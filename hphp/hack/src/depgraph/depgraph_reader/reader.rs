@@ -148,12 +148,11 @@ impl<'bytes> DepGraph<'bytes> {
     }
 
     /// Return an iterator over all hashes in a hash list.
-    pub fn hash_list_hashes(&self, hash_list: HashList<'bytes>) -> HashListIter<'bytes> {
-        HashListIter {
-            indexer: self.indexer,
-            current: 0,
-            indices: hash_list.indices,
-        }
+    pub fn hash_list_hashes(&self, hash_list: HashList<'bytes>) -> impl Iterator<Item = Dep> + '_ {
+        hash_list
+            .indices
+            .iter()
+            .map(|&index| Dep::new(self.indexer.get(index).unwrap()))
     }
 
     /// Return whether the given dependent-to-dependency edge is in the graph.
@@ -409,29 +408,5 @@ impl<'bytes> HashList<'bytes> {
     /// Return all raw hash indices in this list.
     pub fn hash_indices(&self) -> impl Iterator<Item = u32> + std::iter::FusedIterator + '_ {
         self.indices.iter().copied()
-    }
-}
-
-/// Hash list iterator.
-///
-/// Iterates over the hashes in a hash list.
-pub struct HashListIter<'bytes> {
-    indexer: Indexer<'bytes>,
-    current: usize,
-    indices: &'bytes [u32],
-}
-
-impl<'a> Iterator for HashListIter<'a> {
-    type Item = Dep;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.current >= self.indices.len() {
-            None
-        } else {
-            let index = self.indices[self.current];
-            let hash = self.indexer.get(index);
-            self.current += 1;
-            hash.map(Dep::new)
-        }
     }
 }

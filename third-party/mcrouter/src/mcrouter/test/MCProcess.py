@@ -174,7 +174,7 @@ class MCProcess(ProcessBase):
     def _fdread(self, n):
         data = self.fd.read(n)
         if data is not None and type(data) is not str:
-            data = data.decode('utf8')
+            data = data.decode('utf8', errors='backslashreplace')
         return data
 
     def _fdreadline(self):

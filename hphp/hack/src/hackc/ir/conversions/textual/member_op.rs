@@ -37,7 +37,7 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 //   Final refers to a function that takes a **HackMixed and returns a value.
 //
 pub(crate) fn write(
-    w: &mut textual::FuncWriter<'_, '_>,
+    fb: &mut textual::FuncBuilder<'_, '_>,
     state: &mut FuncState<'_>,
     iid: InstrId,
     mop: &ir::instr::MemberOp,
@@ -45,11 +45,11 @@ pub(crate) fn write(
     let mut locals = mop.locals.iter().copied();
     let mut operands = mop.operands.iter().copied();
 
-    let mut base = write_base(w, &mop.base_op, &mut locals, &mut operands, state)?;
+    let mut base = write_base(fb, &mop.base_op, &mut locals, &mut operands, state)?;
 
     for intermediate in mop.intermediate_ops.iter() {
         base = write_entry(
-            w,
+            fb,
             state,
             base,
             &intermediate.key,
@@ -61,7 +61,7 @@ pub(crate) fn write(
     match &mop.final_op {
         FinalOp::SetRangeM { .. } => todo!(),
         op => {
-            let output = write_final(w, state, op, base, &mut locals, &mut operands)?;
+            let output = write_final(fb, state, op, base, &mut locals, &mut operands)?;
             state.set_iid(iid, output);
         }
     }
@@ -73,7 +73,7 @@ pub(crate) fn write(
 }
 
 fn write_base(
-    w: &mut textual::FuncWriter<'_, '_>,
+    fb: &mut textual::FuncBuilder<'_, '_>,
     base_op: &BaseOp,
     locals: &mut impl Iterator<Item = LocalId>,
     operands: &mut impl Iterator<Item = ValueId>,
@@ -82,20 +82,20 @@ fn write_base(
     match *base_op {
         BaseOp::BaseC { .. } => {
             // Get base from value.
-            let base = base_from_vid(w, state, operands.next().unwrap())?;
-            w.copy(base)
+            let base = base_from_vid(fb, state, operands.next().unwrap())?;
+            fb.copy(base)
         }
         BaseOp::BaseGC { .. } => {
             // Get base from global name.
             let src = state.lookup_vid(operands.next().unwrap());
-            hack::call_builtin(w, hack::Builtin::BaseGetSuperglobal, [src])
+            hack::call_builtin(fb, hack::Builtin::BaseGetSuperglobal, [src])
         }
         BaseOp::BaseH { loc: _ } => {
             // Get base from $this.
             // Just pretend to be a BaseL w/ $this.
             let lid = LocalId::Named(state.strings.intern_str("$this"));
             let base = base_from_lid(lid);
-            w.copy(base)
+            fb.copy(base)
         }
         BaseOp::BaseL {
             mode: _,
@@ -104,7 +104,7 @@ fn write_base(
         } => {
             // Get base from local.
             let base = base_from_lid(locals.next().unwrap());
-            w.copy(base)
+            fb.copy(base)
         }
         BaseOp::BaseSC {
             mode: _,
@@ -112,15 +112,15 @@ fn write_base(
             loc: _,
         } => {
             // Get base from static property.
-            let base = base_from_vid(w, state, operands.next().unwrap())?;
+            let base = base_from_vid(fb, state, operands.next().unwrap())?;
             let prop = state.lookup_vid(operands.next().unwrap());
-            hack::call_builtin(w, hack::Builtin::DimFieldGet, (base, prop))
+            hack::call_builtin(fb, hack::Builtin::DimFieldGet, (base, prop))
         }
     }
 }
 
 fn write_final(
-    w: &mut textual::FuncWriter<'_, '_>,
+    fb: &mut textual::FuncBuilder<'_, '_>,
     state: &mut FuncState<'_>,
     final_op: &FinalOp,
     base: Sid,
@@ -128,11 +128,11 @@ fn write_final(
     operands: &mut impl Iterator<Item = ValueId>,
 ) -> Result<Sid> {
     let key = final_op.key().unwrap();
-    let base = write_entry(w, state, base, key, locals, operands)?;
+    let base = write_entry(fb, state, base, key, locals, operands)?;
 
     match *final_op {
         FinalOp::IncDecM { inc_dec_op, .. } => {
-            let src = w.load(tx_ty!(*HackMixed), base)?;
+            let src = fb.load(tx_ty!(*HackMixed), base)?;
             let op = match inc_dec_op {
                 ir::IncDecOp::PreInc | ir::IncDecOp::PostInc => hack::Hhbc::Add,
                 ir::IncDecOp::PreDec | ir::IncDecOp::PostDec => hack::Hhbc::Sub,
@@ -140,19 +140,19 @@ fn write_final(
             };
             let incr = hack::expr_builtin(hack::Builtin::Int, [1]);
             let dst =
-                w.write_expr_stmt(hack::expr_builtin(hack::Builtin::Hhbc(op), (src, incr)))?;
-            w.store(base, dst, tx_ty!(*HackMixed))?;
+                fb.write_expr_stmt(hack::expr_builtin(hack::Builtin::Hhbc(op), (src, incr)))?;
+            fb.store(base, dst, tx_ty!(*HackMixed))?;
             Ok(match inc_dec_op {
                 ir::IncDecOp::PreInc | ir::IncDecOp::PreDec => dst,
                 ir::IncDecOp::PostInc | ir::IncDecOp::PostDec => src,
                 _ => unreachable!(),
             })
         }
-        FinalOp::QueryM { .. } => w.load(tx_ty!(*HackMixed), base),
+        FinalOp::QueryM { .. } => fb.load(tx_ty!(*HackMixed), base),
         FinalOp::SetM { .. } => {
             let src = state.lookup_vid(operands.next().unwrap());
-            let src = w.write_expr_stmt(src)?;
-            w.store(base, src, tx_ty!(*HackMixed))?;
+            let src = fb.write_expr_stmt(src)?;
+            fb.store(base, src, tx_ty!(*HackMixed))?;
             Ok(src)
         }
         FinalOp::SetRangeM { .. } => unreachable!(),
@@ -169,7 +169,7 @@ fn write_final(
                 MemberKey::W => { }
             }
             let _ = operands.next();
-            write_todo(w, state, "SetOpM")
+            write_todo(fb, state, "SetOpM")
         },
         FinalOp::UnsetM { ref key, .. } => textual_todo! {
             match *key {
@@ -183,13 +183,13 @@ fn write_final(
                 MemberKey::QT(_) => { }
                 MemberKey::W => { }
             }
-            write_todo(w, state, "UnsetM")
+            write_todo(fb, state, "UnsetM")
         },
     }
 }
 
 fn write_entry(
-    w: &mut textual::FuncWriter<'_, '_>,
+    fb: &mut textual::FuncBuilder<'_, '_>,
     state: &mut FuncState<'_>,
     base: Sid,
     key: &MemberKey,
@@ -200,54 +200,54 @@ fn write_entry(
         MemberKey::EC => {
             // $a[foo()]
             let key = state.lookup_vid(operands.next().unwrap());
-            hack::call_builtin(w, hack::Builtin::DimArrayGet, (base, key))
+            hack::call_builtin(fb, hack::Builtin::DimArrayGet, (base, key))
         }
         MemberKey::EI(i) => {
             // $a[3]
-            let idx = hack::call_builtin(w, hack::Builtin::Int, [i])?;
-            hack::call_builtin(w, hack::Builtin::DimArrayGet, (base, idx))
+            let idx = hack::call_builtin(fb, hack::Builtin::Int, [i])?;
+            hack::call_builtin(fb, hack::Builtin::DimArrayGet, (base, idx))
         }
         MemberKey::EL => {
             // $a[$b]
             let key = locals.next().unwrap();
-            let key = w.load(tx_ty!(*HackMixed), textual::Expr::deref(key))?;
-            hack::call_builtin(w, hack::Builtin::DimArrayGet, (base, key))
+            let key = fb.load(tx_ty!(*HackMixed), textual::Expr::deref(key))?;
+            hack::call_builtin(fb, hack::Builtin::DimArrayGet, (base, key))
         }
         MemberKey::ET(s) => {
             // $a["hello"]
             let key = state.strings.lookup_bytes(s);
             let key = crate::util::escaped_string(&key);
-            let key = hack::call_builtin(w, hack::Builtin::String, [key])?;
-            hack::call_builtin(w, hack::Builtin::DimArrayGet, (base, key))
+            let key = hack::call_builtin(fb, hack::Builtin::String, [key])?;
+            hack::call_builtin(fb, hack::Builtin::DimArrayGet, (base, key))
         }
         MemberKey::PC => {
             // $a->{foo()}
             let key = state.lookup_vid(operands.next().unwrap());
-            hack::call_builtin(w, hack::Builtin::DimFieldGet, (base, key))
+            hack::call_builtin(fb, hack::Builtin::DimFieldGet, (base, key))
         }
         MemberKey::PL => {
             // $a->{$b}
             let key = locals.next().unwrap();
-            let key = w.load(tx_ty!(*HackMixed), textual::Expr::deref(key))?;
-            hack::call_builtin(w, hack::Builtin::DimFieldGet, (base, key))
+            let key = fb.load(tx_ty!(*HackMixed), textual::Expr::deref(key))?;
+            hack::call_builtin(fb, hack::Builtin::DimFieldGet, (base, key))
         }
         MemberKey::PT(prop) => {
             // $a->hello
             let key = state.strings.lookup_bytes(prop.id);
             let key = crate::util::escaped_string(&key);
-            let key = hack::call_builtin(w, hack::Builtin::String, [key])?;
-            hack::call_builtin(w, hack::Builtin::DimFieldGet, (base, key))
+            let key = hack::call_builtin(fb, hack::Builtin::String, [key])?;
+            hack::call_builtin(fb, hack::Builtin::DimFieldGet, (base, key))
         }
         MemberKey::QT(prop) => {
             // $a?->hello
             let key = state.strings.lookup_bytes(prop.id);
             let key = crate::util::escaped_string(&key);
-            let key = hack::call_builtin(w, hack::Builtin::String, [key])?;
-            hack::call_builtin(w, hack::Builtin::DimFieldGetOrNull, (base, key))
+            let key = hack::call_builtin(fb, hack::Builtin::String, [key])?;
+            hack::call_builtin(fb, hack::Builtin::DimFieldGetOrNull, (base, key))
         }
         MemberKey::W => {
             // $a[]
-            hack::call_builtin(w, hack::Builtin::DimArrayAppend, [base])
+            hack::call_builtin(fb, hack::Builtin::DimArrayAppend, [base])
         }
     }
 }
@@ -259,7 +259,7 @@ pub(crate) fn base_var(strings: &StringInterner) -> LocalId {
 }
 
 fn base_from_vid(
-    w: &mut textual::FuncWriter<'_, '_>,
+    fb: &mut textual::FuncBuilder<'_, '_>,
     state: &mut FuncState<'_>,
     src: ValueId,
 ) -> Result<textual::Expr> {
@@ -268,7 +268,7 @@ fn base_from_vid(
     // to `base`.
     let src = state.lookup_vid(src);
     let base_lid = base_var(state.strings);
-    w.store(textual::Expr::deref(base_lid), src, tx_ty!(*HackMixed))?;
+    fb.store(textual::Expr::deref(base_lid), src, tx_ty!(*HackMixed))?;
     Ok(base_from_lid(base_lid))
 }
 

@@ -192,11 +192,11 @@ pub(crate) enum Builtin {
 }
 
 pub(crate) fn call_builtin(
-    w: &mut textual::FuncWriter<'_, '_>,
+    fb: &mut textual::FuncBuilder<'_, '_>,
     target: Builtin,
     params: impl textual::VarArgs,
 ) -> Result<Sid> {
-    w.call(&target.to_string(), params)
+    fb.call(&target.to_string(), params)
 }
 
 pub(crate) fn expr_builtin(target: Builtin, params: impl textual::VarArgs) -> textual::Expr {

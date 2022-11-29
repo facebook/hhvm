@@ -198,14 +198,14 @@ fn write_init_static(
         &[],
         tx_ty!(void),
         &[],
-        |w| {
+        |fb| {
             let sz = 0; // TODO: properties
-            let p = hack::call_builtin(w, hack::Builtin::AllocWords, [sz])?;
+            let p = hack::call_builtin(fb, hack::Builtin::AllocWords, [sz])?;
 
             let singleton_expr = textual::Expr::deref(textual::Var::named(singleton_name));
-            w.store(singleton_expr, p, static_ty(class.name, &state.strings))?;
+            fb.store(singleton_expr, p, static_ty(class.name, &state.strings))?;
 
-            w.ret(0)?;
+            fb.ret(0)?;
             Ok(())
         },
     )
@@ -246,7 +246,7 @@ fn write_method(
 
 /// Loads the static singleton for a class.
 pub(crate) fn load_static_class(
-    w: &mut textual::FuncWriter<'_, '_>,
+    fb: &mut textual::FuncBuilder<'_, '_>,
     class: ir::ClassId,
     strings: &ir::StringInterner,
     decls: &mut state::Decls,
@@ -255,7 +255,7 @@ pub(crate) fn load_static_class(
     let singleton_name = static_singleton_name(class, strings);
     decls.declare_global(&singleton_name, static_ty(class, strings));
     let singleton_expr = textual::Expr::deref(textual::Var::named(singleton_name));
-    let value = w.load(static_ty(class, strings), singleton_expr)?;
-    hack::call_builtin(w, hack::Builtin::SilLazyInitialize, [value])?;
+    let value = fb.load(static_ty(class, strings), singleton_expr)?;
+    hack::call_builtin(fb, hack::Builtin::SilLazyInitialize, [value])?;
     Ok(value)
 }

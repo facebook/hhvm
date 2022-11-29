@@ -68,7 +68,7 @@ impl<'a> TextualFile<'a> {
         params: &[(&str, Ty)],
         ret_ty: Ty,
         locals: &[(LocalId, Ty)],
-        body: impl FnOnce(&mut FuncWriter<'_, '_>) -> Result<R>,
+        body: impl FnOnce(&mut FuncBuilder<'_, '_>) -> Result<R>,
     ) -> Result<R> {
         self.write_full_loc(loc)?;
 
@@ -95,7 +95,7 @@ impl<'a> TextualFile<'a> {
             writeln!(self.w)?;
         }
 
-        let mut writer = FuncWriter {
+        let mut writer = FuncBuilder {
             cur_loc: loc.clone(),
             next_id: Sid::from_usize(0),
             txf: self,
@@ -487,13 +487,13 @@ pub(crate) enum Attribute {
     SourceLanguage(String),
 }
 
-pub(crate) struct FuncWriter<'a, 'b> {
+pub(crate) struct FuncBuilder<'a, 'b> {
     cur_loc: SrcLoc,
     next_id: Sid,
     txf: &'a mut TextualFile<'b>,
 }
 
-impl FuncWriter<'_, '_> {
+impl FuncBuilder<'_, '_> {
     pub fn alloc_sid(&mut self) -> Sid {
         let id = self.next_id;
         self.next_id = Sid::from_usize(id.as_usize() + 1);
@@ -501,7 +501,7 @@ impl FuncWriter<'_, '_> {
     }
 }
 
-impl FuncWriter<'_, '_> {
+impl FuncBuilder<'_, '_> {
     pub(crate) fn jmp(&mut self, targets: &[BlockId], params: impl VarArgs) -> Result {
         assert!(!targets.is_empty());
 

@@ -8,6 +8,7 @@ use textual_macros::TextualDecl;
 
 use crate::textual;
 use crate::textual::Sid;
+use crate::textual::TextualFile;
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
 
@@ -191,7 +192,7 @@ pub(crate) enum Builtin {
 }
 
 pub(crate) fn call_builtin(
-    w: &mut textual::FuncWriter<'_>,
+    w: &mut textual::FuncWriter<'_, '_>,
     target: Builtin,
     params: impl textual::VarArgs,
 ) -> Result<Sid> {

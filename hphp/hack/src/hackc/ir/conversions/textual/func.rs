@@ -42,6 +42,7 @@ use crate::state::FuncDeclKind;
 use crate::state::UnitState;
 use crate::textual;
 use crate::textual::Sid;
+use crate::textual::TextualFile;
 use crate::typed_value;
 use crate::types::convert_ty;
 use crate::util;
@@ -52,14 +53,14 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 ///
 /// f(params: HackParams): mixed;
 pub(crate) fn write_function(
-    w: &mut dyn std::io::Write,
+    txf: &mut TextualFile<'_>,
     state: &mut UnitState,
     function: ir::Function<'_>,
 ) -> Result {
     trace!("Convert Function {}", function.name.as_bstr(&state.strings));
 
     write_func(
-        w,
+        txf,
         state,
         &function.name.mangle(&state.strings),
         tx_ty!(*void),
@@ -69,7 +70,7 @@ pub(crate) fn write_function(
 }
 
 pub(crate) fn write_func(
-    w: &mut dyn std::io::Write,
+    txf: &mut TextualFile<'_>,
     unit_state: &mut UnitState,
     name: &str,
     this_ty: textual::Ty,
@@ -128,27 +129,18 @@ pub(crate) fn write_func(
     locals.push((base, tx_ty!(*HackMixed)));
 
     let span = func.loc(func.loc_id).clone();
-    let decls = textual::write_function(
-        w,
-        &unit_state.strings,
-        name,
-        &span,
-        &params,
-        ret_ty,
-        &locals,
-        |w| {
-            let mut func = rewrite_jmp_ops(func);
-            ir::passes::clean::run(&mut func);
+    let decls = txf.define_function(name, &span, &params, ret_ty, &locals, |w| {
+        let mut func = rewrite_jmp_ops(func);
+        ir::passes::clean::run(&mut func);
 
-            let mut state = FuncState::new(&unit_state.strings, &func, method_info);
+        let mut state = FuncState::new(&unit_state.strings, &func, method_info);
 
-            for bid in func.block_ids() {
-                write_block(w, &mut state, bid)?;
-            }
+        for bid in func.block_ids() {
+            write_block(w, &mut state, bid)?;
+        }
 
-            Ok(state.decls)
-        },
-    )?;
+        Ok(state.decls)
+    })?;
 
     unit_state.decls.declare_func(name, FuncDeclKind::Internal);
     unit_state.decls.merge(decls);
@@ -156,7 +148,11 @@ pub(crate) fn write_func(
     Ok(())
 }
 
-fn write_block(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, bid: BlockId) -> Result {
+fn write_block(
+    w: &mut textual::FuncWriter<'_, '_>,
+    state: &mut FuncState<'_>,
+    bid: BlockId,
+) -> Result {
     trace!("  Block {bid}");
     let block = state.func.block(bid);
 
@@ -188,7 +184,11 @@ fn write_block(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, bid: 
     Ok(())
 }
 
-fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: InstrId) -> Result {
+fn write_instr(
+    w: &mut textual::FuncWriter<'_, '_>,
+    state: &mut FuncState<'_>,
+    iid: InstrId,
+) -> Result {
     let instr = state.func.instr(iid);
     trace!("    Instr {iid}: {instr:?}");
 
@@ -284,7 +284,7 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
 }
 
 fn write_copy(
-    w: &mut textual::FuncWriter<'_>,
+    w: &mut textual::FuncWriter<'_, '_>,
     state: &mut FuncState<'_>,
     iid: InstrId,
     vid: ValueId,
@@ -317,7 +317,7 @@ fn write_copy(
                 Constant::Uninit => Expr::Const(Const::Null),
             };
 
-            state.set_iid(iid, w.write_expr(expr)?);
+            state.set_iid(iid, w.write_expr_stmt(expr)?);
         }
         ir::FullInstrId::Instr(instr) => state.copy_iid(iid, ValueId::from_instr(instr)),
         ir::FullInstrId::None => unreachable!(),
@@ -326,7 +326,7 @@ fn write_copy(
 }
 
 fn write_terminator(
-    w: &mut textual::FuncWriter<'_>,
+    w: &mut textual::FuncWriter<'_, '_>,
     state: &mut FuncState<'_>,
     iid: InstrId,
 ) -> Result {
@@ -398,7 +398,7 @@ fn write_terminator(
 }
 
 fn write_builtin(
-    w: &mut textual::FuncWriter<'_>,
+    w: &mut textual::FuncWriter<'_, '_>,
     state: &mut FuncState<'_>,
     iid: InstrId,
     target: &str,
@@ -414,7 +414,7 @@ fn write_builtin(
 }
 
 fn write_load_this(
-    w: &mut textual::FuncWriter<'_>,
+    w: &mut textual::FuncWriter<'_, '_>,
     state: &mut FuncState<'_>,
     iid: InstrId,
 ) -> Result {
@@ -428,7 +428,7 @@ fn write_load_this(
 }
 
 fn write_load_var(
-    w: &mut textual::FuncWriter<'_>,
+    w: &mut textual::FuncWriter<'_, '_>,
     state: &mut FuncState<'_>,
     iid: InstrId,
     lid: LocalId,
@@ -439,7 +439,7 @@ fn write_load_var(
 }
 
 fn write_set_var(
-    w: &mut textual::FuncWriter<'_>,
+    w: &mut textual::FuncWriter<'_, '_>,
     state: &mut FuncState<'_>,
     lid: LocalId,
     vid: ValueId,
@@ -452,7 +452,7 @@ fn write_set_var(
 }
 
 fn write_call(
-    w: &mut textual::FuncWriter<'_>,
+    w: &mut textual::FuncWriter<'_, '_>,
     state: &mut FuncState<'_>,
     iid: InstrId,
     call: &ir::Call,
@@ -620,7 +620,7 @@ fn write_call(
 }
 
 fn write_inc_dec_l<'a>(
-    w: &mut textual::FuncWriter<'_>,
+    w: &mut textual::FuncWriter<'_, '_>,
     state: &mut FuncState<'a>,
     iid: InstrId,
     lid: LocalId,
@@ -672,7 +672,7 @@ impl<'a> FuncState<'a> {
         }
     }
 
-    pub fn alloc_sid_for_iid(&mut self, w: &mut textual::FuncWriter<'_>, iid: InstrId) -> Sid {
+    pub fn alloc_sid_for_iid(&mut self, w: &mut textual::FuncWriter<'_, '_>, iid: InstrId) -> Sid {
         let sid = w.alloc_sid();
         self.set_iid(iid, sid);
         sid
@@ -754,7 +754,7 @@ impl<'a> FuncState<'a> {
         self.set_iid(iid, expr);
     }
 
-    pub(crate) fn update_loc(&mut self, w: &mut textual::FuncWriter<'_>, loc: LocId) -> Result {
+    pub(crate) fn update_loc(&mut self, w: &mut textual::FuncWriter<'_, '_>, loc: LocId) -> Result {
         if loc != LocId::NONE {
             let new = &self.func.locs[loc];
             w.write_loc(new)?;
@@ -831,7 +831,7 @@ fn cmp_lid(strings: &StringInterner, x: &LocalId, y: &LocalId) -> std::cmp::Orde
 }
 
 pub(crate) fn write_todo(
-    w: &mut textual::FuncWriter<'_>,
+    w: &mut textual::FuncWriter<'_, '_>,
     state: &mut FuncState<'_>,
     msg: &str,
 ) -> Result<Sid> {

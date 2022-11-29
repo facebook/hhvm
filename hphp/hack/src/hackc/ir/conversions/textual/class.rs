@@ -24,6 +24,7 @@ use crate::mangle::Mangle;
 use crate::mangle::MangleWithClass as _;
 use crate::state;
 use crate::state::UnitState;
+use crate::textual::TextualFile;
 use crate::types::convert_ty;
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
@@ -47,7 +48,7 @@ impl Mangle for StaticClassId {
 /// type NAME = [ properties*; ]
 ///
 pub(crate) fn write_class(
-    w: &mut dyn std::io::Write,
+    txf: &mut TextualFile<'_>,
     state: &mut UnitState,
     class: ir::Class<'_>,
 ) -> Result {
@@ -55,14 +56,14 @@ pub(crate) fn write_class(
 
     let mut class = crate::lower::lower_class(class, Arc::clone(&state.strings));
 
-    write_type(w, state, &class, IsStatic::Static)?;
-    write_type(w, state, &class, IsStatic::NonStatic)?;
+    write_type(txf, state, &class, IsStatic::Static)?;
+    write_type(txf, state, &class, IsStatic::NonStatic)?;
 
-    write_init_static(w, state, &class)?;
+    write_init_static(txf, state, &class)?;
 
     let methods = std::mem::take(&mut class.methods);
     for method in methods {
-        write_method(w, state, &class, method)?;
+        write_method(txf, state, &class, method)?;
     }
 
     Ok(())
@@ -105,7 +106,7 @@ fn static_singleton_name(class: ir::ClassId, strings: &ir::StringInterner) -> St
 
 /// Write the type for a (class, is_static) with the properties of the class.
 fn write_type(
-    w: &mut dyn std::io::Write,
+    txf: &mut TextualFile<'_>,
     state: &mut UnitState,
     class: &ir::Class<'_>,
     is_static: IsStatic,
@@ -113,13 +114,13 @@ fn write_type(
     let mut fields: Vec<(String, textual::Ty, textual::Visibility)> = Vec::new();
     for prop in &class.properties {
         let ir::Property {
-            name,              // hhbc::PropName<'arena>,
-            mut flags,         //: Attr,
-            ref attributes,    //: Vec<Attribute<'arena>>,
-            visibility,        //: hhbc::Visibility,
-            ref initial_value, //: Option<TypedValue>,
-            ref type_info,     //: hhbc::TypeInfo<'arena>,
-            doc_comment: _,    //: ffi::Maybe<Str<'arena>>,
+            name,
+            mut flags,
+            ref attributes,
+            visibility,
+            ref initial_value,
+            ref type_info,
+            doc_comment: _,
         } = *prop;
 
         let instance_match = match is_static {
@@ -147,16 +148,16 @@ fn write_type(
 
         if !flags.is_empty() {
             trace!("CLASS FLAGS: {:?}", flags);
-            textual_todo! { writeln!(w, "// TODO: class flags: {:?}", flags)? };
+            textual_todo! { txf.write_comment(&format!("TODO: class flags: {flags:?}"))? };
         }
         if !attributes.is_empty() {
-            textual_todo! { writeln!(w, "// TODO: class attributes: {:?}", attributes)? };
+            textual_todo! { txf.write_comment(&format!("TODO: class attributes: {attributes:?}"))? };
         }
         if visibility == ir::Visibility::Private {
-            writeln!(w, "// TODO: private {}", name)?;
+            txf.write_comment(&format!("TODO: private {name}"))?;
         }
         if let Some(initial_value) = initial_value {
-            writeln!(w, "// TODO: initial value {:?}", initial_value)?;
+            txf.write_comment(&format!("TODO: initial value {initial_value:?}"))?;
         }
 
         let ty = convert_ty(type_info.enforced.clone(), &state.strings);
@@ -171,7 +172,7 @@ fn write_type(
     });
 
     let cname = mangled_class_name(class.name, is_static, &state.strings);
-    textual::write_type(w, &cname, &class.src_loc, fields, &state.strings)?;
+    txf.define_type(&cname, &class.src_loc, fields)?;
     Ok(())
 }
 
@@ -182,7 +183,7 @@ fn write_type(
 /// Writes the `init_static` function itself which initializes the globals and
 /// returns the memoized static singleton.
 fn write_init_static(
-    w: &mut dyn std::io::Write,
+    txf: &mut TextualFile<'_>,
     state: &mut UnitState,
     class: &ir::Class<'_>,
 ) -> Result {
@@ -191,9 +192,7 @@ fn write_init_static(
         .decls
         .declare_global(&singleton_name, static_ty(class.name, &state.strings));
 
-    textual::write_function(
-        w,
-        &state.strings,
+    txf.define_function(
         &init_static_name(class.name, &state.strings),
         &class.src_loc,
         &[],
@@ -213,7 +212,7 @@ fn write_init_static(
 }
 
 fn write_method(
-    w: &mut dyn std::io::Write,
+    txf: &mut TextualFile<'_>,
     state: &mut UnitState,
     class: &ir::Class<'_>,
     method: ir::Method<'_>,
@@ -236,7 +235,7 @@ fn write_method(
     };
 
     func::write_func(
-        w,
+        txf,
         state,
         &method.name.mangle(class.name, &state.strings),
         this_ty,
@@ -247,7 +246,7 @@ fn write_method(
 
 /// Loads the static singleton for a class.
 pub(crate) fn load_static_class(
-    w: &mut textual::FuncWriter<'_>,
+    w: &mut textual::FuncWriter<'_, '_>,
     class: ir::ClassId,
     strings: &ir::StringInterner,
     decls: &mut state::Decls,

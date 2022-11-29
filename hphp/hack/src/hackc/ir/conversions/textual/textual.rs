@@ -8,6 +8,7 @@
 //! Textual.
 
 use std::fmt;
+use std::sync::Arc;
 
 use anyhow::Error;
 use ascii::AsciiString;
@@ -21,6 +22,148 @@ use newtype::newtype_int;
 pub(crate) const INDENT: &str = "  ";
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
+
+pub(crate) struct TextualFile<'a> {
+    w: &'a mut dyn std::io::Write,
+    strings: Arc<StringInterner>,
+}
+
+impl<'a> TextualFile<'a> {
+    pub(crate) fn new(w: &'a mut dyn std::io::Write, strings: Arc<StringInterner>) -> Self {
+        TextualFile { w, strings }
+    }
+
+    pub(crate) fn debug_separator(&mut self) -> Result {
+        writeln!(self.w)?;
+        Ok(())
+    }
+
+    pub(crate) fn declare_function(&mut self, name: &str, tys: &[Ty], ret_ty: Ty) -> Result {
+        write!(self.w, "declare {name}(")?;
+
+        let mut sep = "";
+        for ty in tys {
+            write!(self.w, "{sep}{}", FmtTy(ty))?;
+            sep = ", ";
+        }
+
+        writeln!(self.w, "): {}", FmtTy(&ret_ty))?;
+        Ok(())
+    }
+
+    pub(crate) fn declare_global(&mut self, name: &str, ty: &Ty) -> Result {
+        writeln!(self.w, "global {name} : {}", FmtTy(ty))?;
+        Ok(())
+    }
+
+    pub(crate) fn declare_unknown_function(&mut self, name: &str) -> Result {
+        writeln!(self.w, "declare {name}(...): *HackMixed")?;
+        Ok(())
+    }
+
+    pub(crate) fn define_function<R>(
+        &mut self,
+        name: &str,
+        loc: &SrcLoc,
+        params: &[(&str, Ty)],
+        ret_ty: Ty,
+        locals: &[(LocalId, Ty)],
+        body: impl FnOnce(&mut FuncWriter<'_, '_>) -> Result<R>,
+    ) -> Result<R> {
+        self.write_full_loc(loc)?;
+
+        write!(self.w, "define {name}(")?;
+        let mut sep = "";
+        for (name, ty) in params {
+            write!(self.w, "{sep}{name}: {ty}", ty = FmtTy(ty))?;
+            sep = ", ";
+        }
+        writeln!(self.w, ") : {} {{", FmtTy(&ret_ty))?;
+
+        if !locals.is_empty() {
+            let mut sep = "";
+            write!(self.w, "local ")?;
+            for (lid, ty) in locals {
+                write!(
+                    self.w,
+                    "{sep}{name}: {ty}",
+                    name = FmtLid(&self.strings, *lid),
+                    ty = FmtTy(ty)
+                )?;
+                sep = ", ";
+            }
+            writeln!(self.w)?;
+        }
+
+        let mut writer = FuncWriter {
+            cur_loc: loc.clone(),
+            next_id: Sid::from_usize(0),
+            txf: self,
+        };
+
+        writer.write_label(BlockId::from_usize(0), &[])?;
+        let result = body(&mut writer)?;
+
+        writeln!(self.w, "}}")?;
+        writeln!(self.w)?;
+        Ok(result)
+    }
+
+    pub(crate) fn define_type<'s>(
+        &mut self,
+        name: &str,
+        src_loc: &SrcLoc,
+        fields: impl Iterator<Item = Field<'s>>,
+    ) -> Result {
+        self.write_full_loc(src_loc)?;
+
+        writeln!(self.w, "type {name} = {{")?;
+
+        let mut sep = "\n";
+        for f in fields {
+            write!(
+                self.w,
+                "{sep}{INDENT}{name}: {vis} {ty}",
+                name = f.name,
+                ty = FmtTy(f.ty),
+                vis = f.visibility.decl()
+            )?;
+            sep = ";\n";
+        }
+
+        writeln!(self.w, "\n}}")?;
+        writeln!(self.w)?;
+
+        Ok(())
+    }
+
+    pub(crate) fn set_attribute(&mut self, attr: Attribute) -> Result {
+        match attr {
+            Attribute::SourceLanguage(lang) => {
+                writeln!(self.w, ".source_language = \"{lang}\"")?;
+            }
+        }
+        Ok(())
+    }
+
+    pub(crate) fn write_comment(&mut self, msg: &str) -> Result {
+        writeln!(self.w, "// {msg}")?;
+        Ok(())
+    }
+
+    fn write_full_loc(&mut self, src_loc: &SrcLoc) -> Result {
+        let filename = self.strings.lookup_bstr(src_loc.filename.0);
+        writeln!(self.w, "// .file \"{filename}\"")?;
+        drop(filename);
+        self.write_line_loc(src_loc)?;
+        Ok(())
+    }
+
+    fn write_line_loc(&mut self, src_loc: &SrcLoc) -> Result {
+        writeln!(self.w, "// .line {}", src_loc.line_begin)?;
+        Ok(())
+    }
+}
 
 newtype_int!(Sid, u32, SidMap, SidSet);
 
@@ -48,7 +191,7 @@ impl fmt::Display for FmtLid<'_> {
     }
 }
 
-pub(crate) struct FmtSid(pub Sid);
+struct FmtSid(Sid);
 
 impl fmt::Display for FmtSid {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -340,93 +483,17 @@ where
     }
 }
 
-pub(crate) fn write_full_loc(
-    w: &mut dyn std::io::Write,
-    src_loc: &SrcLoc,
-    strings: &StringInterner,
-) -> Result {
-    let filename = strings.lookup_bstr(src_loc.filename.0);
-    writeln!(w, "// .file \"{filename}\"")?;
-    write_line_loc(w, src_loc)?;
-    Ok(())
-}
-
-pub(crate) fn write_line_loc(w: &mut dyn std::io::Write, src_loc: &SrcLoc) -> Result {
-    writeln!(w, "// .line {}", src_loc.line_begin)?;
-    Ok(())
-}
-
 pub(crate) enum Attribute {
     SourceLanguage(String),
 }
 
-pub(crate) fn write_attribute(w: &mut dyn std::io::Write, attr: Attribute) -> Result {
-    match attr {
-        Attribute::SourceLanguage(lang) => {
-            writeln!(w, ".source_language = \"{lang}\"")?;
-        }
-    }
-    Ok(())
-}
-
-pub(crate) fn write_function<R>(
-    w: &mut dyn std::io::Write,
-    strings: &StringInterner,
-    name: &str,
-    loc: &SrcLoc,
-    params: &[(&str, Ty)],
-    ret_ty: Ty,
-    locals: &[(LocalId, Ty)],
-    body: impl FnOnce(&mut FuncWriter<'_>) -> Result<R>,
-) -> Result<R> {
-    write_full_loc(w, loc, strings)?;
-
-    write!(w, "define {name}(")?;
-    let mut sep = "";
-    for (name, ty) in params {
-        write!(w, "{sep}{name}: {ty}", ty = FmtTy(ty))?;
-        sep = ", ";
-    }
-    writeln!(w, ") : {} {{", FmtTy(&ret_ty))?;
-
-    if !locals.is_empty() {
-        let mut sep = "";
-        write!(w, "local ")?;
-        for (lid, ty) in locals {
-            write!(
-                w,
-                "{sep}{name}: {ty}",
-                name = FmtLid(strings, *lid),
-                ty = FmtTy(ty)
-            )?;
-            sep = ", ";
-        }
-        writeln!(w)?;
-    }
-
-    let mut writer = FuncWriter {
-        cur_loc: loc.clone(),
-        next_id: Sid::from_usize(0),
-        strings,
-        w,
-    };
-
-    writer.write_label(BlockId::from_usize(0), &[])?;
-    let result = body(&mut writer)?;
-
-    writeln!(w, "}}")?;
-    writeln!(w)?;
-    Ok(result)
-}
-
-pub(crate) struct FuncWriter<'a> {
+pub(crate) struct FuncWriter<'a, 'b> {
     cur_loc: SrcLoc,
     next_id: Sid,
-    strings: &'a StringInterner,
-    w: &'a mut dyn std::io::Write,
+    txf: &'a mut TextualFile<'b>,
 }
 
-impl<'a> FuncWriter<'a> {
+impl FuncWriter<'_, '_> {
     pub fn alloc_sid(&mut self) -> Sid {
         let id = self.next_id;
         self.next_id = Sid::from_usize(id.as_usize() + 1);
@@ -434,40 +501,40 @@ impl<'a> FuncWriter<'a> {
     }
 }
 
-impl<'a> FuncWriter<'a> {
+impl FuncWriter<'_, '_> {
     pub(crate) fn jmp(&mut self, targets: &[BlockId], params: impl VarArgs) -> Result {
         assert!(!targets.is_empty());
 
         let params = params.into_exprs();
-        write!(self.w, "{INDENT}jmp ")?;
+        write!(self.txf.w, "{INDENT}jmp ")?;
 
         let mut sep1 = "";
         for &target in targets {
-            write!(self.w, "{sep1}{}", FmtBid(target))?;
+            write!(self.txf.w, "{sep1}{}", FmtBid(target))?;
             sep1 = ", ";
 
             if !params.is_empty() {
-                write!(self.w, "(")?;
+                write!(self.txf.w, "(")?;
                 let mut sep2 = "";
                 for param in params.iter() {
-                    write!(self.w, "{sep2}{}", FmtExpr(self.strings, param))?;
+                    write!(self.txf.w, "{sep2}{}", FmtExpr(&self.txf.strings, param))?;
                     sep2 = ", ";
                 }
-                write!(self.w, ")")?;
+                write!(self.txf.w, ")")?;
             }
         }
 
-        writeln!(self.w)?;
+        writeln!(self.txf.w)?;
 
         Ok(())
     }
 
     pub(crate) fn write_exception_handler(&mut self, target: BlockId) -> Result {
-        writeln!(self.w, "{INDENT}.handlers {}", FmtBid(target))?;
+        writeln!(self.txf.w, "{INDENT}.handlers {}", FmtBid(target))?;
         Ok(())
     }
 
-    pub(crate) fn write_expr(&mut self, expr: impl Into<Expr>) -> Result<Sid> {
+    pub(crate) fn write_expr_stmt(&mut self, expr: impl Into<Expr>) -> Result<Sid> {
         let expr = expr.into();
         match expr {
             Expr::Sid(sid) => Ok(sid),
@@ -475,7 +542,7 @@ impl<'a> FuncWriter<'a> {
             Expr::Const(c) => {
                 let sid = self.alloc_sid();
                 writeln!(
-                    self.w,
+                    self.txf.w,
                     "{INDENT}{dst} = {src}",
                     dst = FmtSid(sid),
                     src = FmtConst(&c)
@@ -490,15 +557,15 @@ impl<'a> FuncWriter<'a> {
 
     pub(crate) fn write_label(&mut self, bid: BlockId, params: &[Sid]) -> Result {
         if params.is_empty() {
-            writeln!(self.w, "#{}:", FmtBid(bid))?;
+            writeln!(self.txf.w, "#{}:", FmtBid(bid))?;
         } else {
-            write!(self.w, "#{}(", FmtBid(bid))?;
+            write!(self.txf.w, "#{}(", FmtBid(bid))?;
             let mut sep = "";
             for sid in params {
-                write!(self.w, "{sep}{}: *HackMixed", FmtSid(*sid))?;
+                write!(self.txf.w, "{sep}{}: *HackMixed", FmtSid(*sid))?;
                 sep = ", ";
             }
-            writeln!(self.w, "):")?;
+            writeln!(self.txf.w, "):")?;
         }
         Ok(())
     }
@@ -512,16 +579,16 @@ impl<'a> FuncWriter<'a> {
     ) -> Result<Sid> {
         let dst = self.alloc_sid();
         write!(
-            self.w,
+            self.txf.w,
             "{INDENT}{dst} = {target}({this}",
             dst = FmtSid(dst),
-            this = FmtExpr(self.strings, &this)
+            this = FmtExpr(&self.txf.strings, &this)
         )?;
         let params = params.into_exprs();
         for param in params {
-            write!(self.w, ", {}", FmtExpr(self.strings, &param))?;
+            write!(self.txf.w, ", {}", FmtExpr(&self.txf.strings, &param))?;
         }
-        writeln!(self.w, ")")?;
+        writeln!(self.txf.w, ")")?;
         Ok(dst)
     }
 
@@ -534,36 +601,36 @@ impl<'a> FuncWriter<'a> {
     ) -> Result<Sid> {
         let dst = self.alloc_sid();
         write!(
-            self.w,
+            self.txf.w,
             "{INDENT}{dst} = {this}.{target}(",
             dst = FmtSid(dst),
-            this = FmtExpr(self.strings, &this)
+            this = FmtExpr(&self.txf.strings, &this)
         )?;
         let params = params.into_exprs();
         let mut sep = "";
         for param in params {
-            write!(self.w, "{sep}{}", FmtExpr(self.strings, &param))?;
+            write!(self.txf.w, "{sep}{}", FmtExpr(&self.txf.strings, &param))?;
             sep = ", ";
         }
-        writeln!(self.w, ")")?;
+        writeln!(self.txf.w, ")")?;
         Ok(dst)
     }
 
     pub(crate) fn call(&mut self, target: &str, params: impl VarArgs) -> Result<Sid> {
         let dst = self.alloc_sid();
-        write!(self.w, "{INDENT}{dst} = {target}(", dst = FmtSid(dst))?;
+        write!(self.txf.w, "{INDENT}{dst} = {target}(", dst = FmtSid(dst))?;
         let mut sep = "";
         let params = params.into_exprs();
         for param in params {
-            write!(self.w, "{sep}{}", FmtExpr(self.strings, &param))?;
+            write!(self.txf.w, "{sep}{}", FmtExpr(&self.txf.strings, &param))?;
             sep = ", ";
         }
-        writeln!(self.w, ")")?;
+        writeln!(self.txf.w, ")")?;
         Ok(dst)
     }
 
     pub(crate) fn comment(&mut self, msg: &str) -> Result<()> {
-        writeln!(self.w, "// {msg}")?;
+        writeln!(self.txf.w, "// {msg}")?;
         Ok(())
     }
 
@@ -571,10 +638,10 @@ impl<'a> FuncWriter<'a> {
         let src = src.into();
         let dst = self.alloc_sid();
         writeln!(
-            self.w,
+            self.txf.w,
             "{INDENT}{dst} = {src}",
             dst = FmtSid(dst),
-            src = FmtExpr(self.strings, &src)
+            src = FmtExpr(&self.txf.strings, &src)
         )?;
         Ok(dst)
     }
@@ -583,11 +650,11 @@ impl<'a> FuncWriter<'a> {
         let src = src.into();
         let dst = self.alloc_sid();
         writeln!(
-            self.w,
+            self.txf.w,
             "{INDENT}{dst}: {ty} = load {src}",
             dst = FmtSid(dst),
             ty = FmtTy(&ty),
-            src = FmtExpr(self.strings, &src)
+            src = FmtExpr(&self.txf.strings, &src)
         )?;
         Ok(dst)
     }
@@ -595,20 +662,32 @@ impl<'a> FuncWriter<'a> {
     // Terminate this branch if `expr` is false.
     pub(crate) fn prune(&mut self, expr: impl Into<Expr>) -> Result {
         let expr = expr.into();
-        writeln!(self.w, "{INDENT}prune {}", FmtExpr(self.strings, &expr))?;
+        writeln!(
+            self.txf.w,
+            "{INDENT}prune {}",
+            FmtExpr(&self.txf.strings, &expr)
+        )?;
         Ok(())
     }
 
     // Terminate this branch if `expr` is true.
     pub(crate) fn prune_not(&mut self, expr: impl Into<Expr>) -> Result {
         let expr = expr.into();
-        writeln!(self.w, "{INDENT}prune ! {}", FmtExpr(self.strings, &expr))?;
+        writeln!(
+            self.txf.w,
+            "{INDENT}prune ! {}",
+            FmtExpr(&self.txf.strings, &expr)
+        )?;
         Ok(())
     }
 
     pub(crate) fn ret(&mut self, expr: impl Into<Expr>) -> Result {
         let expr = expr.into();
-        writeln!(self.w, "{INDENT}ret {}", FmtExpr(self.strings, &expr))?;
+        writeln!(
+            self.txf.w,
+            "{INDENT}ret {}",
+            FmtExpr(&self.txf.strings, &expr)
+        )?;
         Ok(())
     }
 
@@ -621,26 +700,26 @@ impl<'a> FuncWriter<'a> {
         let dst = dst.into();
         let src = src.into();
         writeln!(
-            self.w,
+            self.txf.w,
             "{INDENT}store {dst} <- {src}: {ty}",
-            dst = FmtExpr(self.strings, &dst),
-            src = FmtExpr(self.strings, &src),
+            dst = FmtExpr(&self.txf.strings, &dst),
+            src = FmtExpr(&self.txf.strings, &src),
             ty = FmtTy(&src_ty),
         )?;
         Ok(())
     }
 
     pub(crate) fn unreachable(&mut self) -> Result {
-        writeln!(self.w, "{INDENT}unreachable")?;
+        writeln!(self.txf.w, "{INDENT}unreachable")?;
         Ok(())
     }
 
     pub(crate) fn write_loc(&mut self, src_loc: &SrcLoc) -> Result {
         if src_loc.filename != self.cur_loc.filename {
-            write_full_loc(self.w, src_loc, self.strings)?;
+            self.txf.write_full_loc(src_loc)?;
             self.cur_loc = src_loc.clone();
         } else if src_loc.line_begin != self.cur_loc.line_begin {
-            write_line_loc(self.w, src_loc)?;
+            self.txf.write_line_loc(src_loc)?;
             self.cur_loc = src_loc.clone();
         }
         Ok(())
@@ -668,61 +747,4 @@ pub(crate) struct Field<'a> {
     pub name: &'a str,
     pub ty: &'a Ty,
     pub visibility: Visibility,
-}
-
-pub(crate) fn write_type<'a>(
-    w: &mut dyn std::io::Write,
-    name: &str,
-    src_loc: &SrcLoc,
-    fields: impl Iterator<Item = Field<'a>>,
-    strings: &StringInterner,
-) -> Result {
-    write_full_loc(w, src_loc, strings)?;
-
-    writeln!(w, "type {name} = {{")?;
-
-    let mut sep = "";
-    for f in fields {
-        write!(
-            w,
-            "{sep}{INDENT}{name}: {vis} {ty}",
-            name = f.name,
-            ty = FmtTy(f.ty),
-            vis = f.visibility.decl()
-        )?;
-        sep = ";\n";
-    }
-
-    writeln!(w, "\n}}")?;
-    writeln!(w)?;
-
-    Ok(())
-}
-
-pub(crate) fn declare_global(w: &mut dyn std::io::Write, name: &str, ty: &Ty) -> Result {
-    writeln!(w, "global {name} : {}", FmtTy(ty))?;
-    Ok(())
-}
-
-pub(crate) fn declare_function(
-    w: &mut dyn std::io::Write,
-    name: &str,
-    tys: &[Ty],
-    ret_ty: Ty,
-) -> Result {
-    write!(w, "declare {name}(")?;
-
-    let mut sep = "";
-    for ty in tys {
-        write!(w, "{sep}{}", FmtTy(ty))?;
-        sep = ", ";
-    }
-
-    writeln!(w, "): {}", FmtTy(&ret_ty))?;
-    Ok(())
-}
-
-pub(crate) fn declare_unknown_function(w: &mut dyn std::io::Write, name: &str) -> Result {
-    writeln!(w, "declare {name}(...): *HackMixed")?;
-    Ok(())
 }

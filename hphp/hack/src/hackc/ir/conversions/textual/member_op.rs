@@ -37,7 +37,7 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 //   Final refers to a function that takes a **HackMixed and returns a value.
 //
 pub(crate) fn write(
-    w: &mut textual::FuncWriter<'_>,
+    w: &mut textual::FuncWriter<'_, '_>,
     state: &mut FuncState<'_>,
     iid: InstrId,
     mop: &ir::instr::MemberOp,
@@ -73,7 +73,7 @@ pub(crate) fn write(
 }
 
 fn write_base(
-    w: &mut textual::FuncWriter<'_>,
+    w: &mut textual::FuncWriter<'_, '_>,
     base_op: &BaseOp,
     locals: &mut impl Iterator<Item = LocalId>,
     operands: &mut impl Iterator<Item = ValueId>,
@@ -120,7 +120,7 @@ fn write_base(
 }
 
 fn write_final(
-    w: &mut textual::FuncWriter<'_>,
+    w: &mut textual::FuncWriter<'_, '_>,
     state: &mut FuncState<'_>,
     final_op: &FinalOp,
     base: Sid,
@@ -139,7 +139,8 @@ fn write_final(
                 _ => unreachable!(),
             };
             let incr = hack::expr_builtin(hack::Builtin::Int, [1]);
-            let dst = w.write_expr(hack::expr_builtin(hack::Builtin::Hhbc(op), (src, incr)))?;
+            let dst =
+                w.write_expr_stmt(hack::expr_builtin(hack::Builtin::Hhbc(op), (src, incr)))?;
             w.store(base, dst, tx_ty!(*HackMixed))?;
             Ok(match inc_dec_op {
                 ir::IncDecOp::PreInc | ir::IncDecOp::PreDec => dst,
@@ -150,7 +151,7 @@ fn write_final(
         FinalOp::QueryM { .. } => w.load(tx_ty!(*HackMixed), base),
         FinalOp::SetM { .. } => {
             let src = state.lookup_vid(operands.next().unwrap());
-            let src = w.write_expr(src)?;
+            let src = w.write_expr_stmt(src)?;
             w.store(base, src, tx_ty!(*HackMixed))?;
             Ok(src)
         }
@@ -188,7 +189,7 @@ fn write_final(
 }
 
 fn write_entry(
-    w: &mut textual::FuncWriter<'_>,
+    w: &mut textual::FuncWriter<'_, '_>,
     state: &mut FuncState<'_>,
     base: Sid,
     key: &MemberKey,
@@ -258,7 +259,7 @@ pub(crate) fn base_var(strings: &StringInterner) -> LocalId {
 }
 
 fn base_from_vid(
-    w: &mut textual::FuncWriter<'_>,
+    w: &mut textual::FuncWriter<'_, '_>,
     state: &mut FuncState<'_>,
     src: ValueId,
 ) -> Result<textual::Expr> {

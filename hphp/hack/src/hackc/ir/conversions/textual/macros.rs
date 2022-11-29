@@ -31,7 +31,7 @@ use syn::Token;
 ///
 /// and it generates an impl containing a write_decls() method:
 ///   impl ... {
-///     fn write_decls(w: &mut dyn std::io::Write) -> Result<()> { ... }
+///     fn write_decls(w: &mut TextualFile<'_>) -> Result<()> { ... }
 ///   }
 ///
 /// It also implements the Display trait for the enum.
@@ -86,7 +86,8 @@ pub fn textual_decl_derive(input: proc_macro::TokenStream) -> proc_macro::TokenS
                             quote!(tx_ty!(#p))
                         };
 
-                        let decl = quote!(textual::declare_function(w, #builtin_name, &[#(#params),*], #ret)?;);
+                        let decl =
+                            quote!(txf.declare_function( #builtin_name, &[#(#params),*], #ret)?;);
                         decls.push(decl);
 
                         let display = quote!(#name::#variant_name => w.write_str(#builtin_name),);
@@ -104,7 +105,7 @@ pub fn textual_decl_derive(input: proc_macro::TokenStream) -> proc_macro::TokenS
 
     let output = quote! {
         impl #impl_generics #name #ty_generics #where_clause {
-            #vis fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
+            #vis fn write_decls(txf: &mut TextualFile<'_>) -> Result<()> {
                 #(#decls)*
                 Ok(())
             }

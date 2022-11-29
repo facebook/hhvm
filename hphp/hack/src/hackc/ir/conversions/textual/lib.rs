@@ -82,5 +82,4 @@ mod types;
 mod util;
 mod writer;
 
-pub use decls::write_decls;
 pub use writer::textual_writer;

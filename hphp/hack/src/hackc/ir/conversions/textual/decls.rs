@@ -7,16 +7,17 @@ use anyhow::Error;
 
 use crate::hack::Builtin;
 use crate::hack::Hhbc;
+use crate::textual::TextualFile;
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
 
 /// This is emitted with every SIL file to declare the "standard" definitions
 /// that we use.
-pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
-    writeln!(w, "// ----- BUILTIN DECLS STARTS HERE -----")?;
+pub(crate) fn write_decls(txf: &mut TextualFile<'_>) -> Result<()> {
+    txf.write_comment("----- BUILTIN DECLS STARTS HERE -----")?;
 
-    Builtin::write_decls(w)?;
-    Hhbc::write_decls(w)?;
+    Builtin::write_decls(txf)?;
+    Hhbc::write_decls(txf)?;
 
     Ok(())
 }

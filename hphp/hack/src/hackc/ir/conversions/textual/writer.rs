@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::path::Path;
+use std::sync::Arc;
 
 use anyhow::bail;
 use anyhow::Result;
@@ -11,6 +12,7 @@ use anyhow::Result;
 use crate::decls;
 use crate::state::UnitState;
 use crate::textual;
+use crate::textual::TextualFile;
 
 const UNIT_START_MARKER: &str = "TEXTUAL UNIT START";
 const UNIT_END_MARKER: &str = "TEXTUAL UNIT END";
@@ -18,47 +20,45 @@ const UNIT_END_MARKER: &str = "TEXTUAL UNIT END";
 pub fn textual_writer(
     w: &mut dyn std::io::Write,
     path: &Path,
-    mut unit: ir::Unit<'_>,
+    unit: ir::Unit<'_>,
     no_builtins: bool,
 ) -> Result<()> {
-    // steal the StringInterner so we can mutate it while reading the Unit.
-    let strings = std::mem::take(&mut unit.strings);
+    let mut txf = TextualFile::new(w, Arc::clone(&unit.strings));
 
     let escaped_path = escaper::escape(path.display().to_string());
+    txf.write_comment(&format!("{UNIT_START_MARKER} {escaped_path}"))?;
 
-    writeln!(w, "// {} {}", UNIT_START_MARKER, escaped_path)?;
+    txf.set_attribute(textual::Attribute::SourceLanguage("hack".to_string()))?;
+    txf.debug_separator()?;
 
-    textual::write_attribute(w, textual::Attribute::SourceLanguage("hack".to_string()))?;
-    writeln!(w)?;
-
-    let mut state = UnitState::new(strings);
+    let mut state = UnitState::new(Arc::clone(&unit.strings));
     check_fatal(path, unit.fatal.as_ref())?;
 
     for cls in unit.classes {
-        crate::class::write_class(w, &mut state, cls)?;
+        crate::class::write_class(&mut txf, &mut state, cls)?;
     }
 
     for func in unit.functions {
-        crate::func::write_function(w, &mut state, func)?;
+        crate::func::write_function(&mut txf, &mut state, func)?;
     }
 
-    writeln!(w, "// ----- GLOBALS -----")?;
+    txf.write_comment("----- GLOBALS -----")?;
     for (name, ty) in state.decls.globals.iter() {
-        textual::declare_global(w, name, ty)?;
+        txf.declare_global(name, ty)?;
     }
-    writeln!(w)?;
+    txf.debug_separator()?;
 
-    writeln!(w, "// ----- EXTERNALS -----")?;
+    txf.write_comment("----- EXTERNALS -----")?;
     for name in state.decls.external_funcs() {
-        textual::declare_unknown_function(w, name)?;
+        txf.declare_unknown_function(name)?;
     }
 
     if !no_builtins {
-        decls::write_decls(w)?;
+        decls::write_decls(&mut txf)?;
     }
 
-    writeln!(w, "// {} {}", UNIT_END_MARKER, escaped_path)?;
-    writeln!(w)?;
+    txf.write_comment(&format!("{UNIT_END_MARKER} {escaped_path}"))?;
+    txf.debug_separator()?;
 
     Ok(())
 }

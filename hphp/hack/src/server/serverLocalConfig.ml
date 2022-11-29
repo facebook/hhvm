@@ -1409,7 +1409,7 @@ let load_ fn ~silent ~current_version overrides =
   let fetch_remote_old_decls =
     if fetch_remote_old_decls && not force_shallow_decl_fanout then (
       Hh_logger.warn
-        "You have fetch_remote_old_decls=true but force_shallow_decl_fanout=false. This is incompatible. Turning off force_load_hot_shallow_decls";
+        "You have fetch_remote_old_decls=true but force_shallow_decl_fanout=false. This is incompatible. Turning off fetch_remote_old_decls";
       false
     ) else
       fetch_remote_old_decls
@@ -1478,6 +1478,22 @@ let load_ fn ~silent ~current_version overrides =
     if rust_provider_backend && not shm_use_sharded_hashtbl then (
       Hh_logger.warn
         "You have rust_provider_backend=true but shm_use_sharded_hashtbl=false. This is incompatible. Turning off rust_provider_backend";
+      false
+    ) else
+      rust_provider_backend
+  in
+  let rust_provider_backend =
+    if rust_provider_backend && populate_member_heaps then (
+      Hh_logger.warn
+        "You have rust_provider_backend=true but populate_member_heaps=true. This is incompatible. Turning off rust_provider_backend";
+      false
+    ) else
+      rust_provider_backend
+  in
+  let rust_provider_backend =
+    if rust_provider_backend && not force_shallow_decl_fanout then (
+      Hh_logger.warn
+        "You have rust_provider_backend=true but force_shallow_decl_fanout=false. This is incompatible. Turning off rust_provider_backend";
       false
     ) else
       rust_provider_backend

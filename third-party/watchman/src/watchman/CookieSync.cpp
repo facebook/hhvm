@@ -49,10 +49,13 @@ void CookieSync::removeCookieDir(const w_string& dir) {
   // Cancel the cookies in the removed directory. These are considered to be
   // serviced.
   auto cookies = cookies_.wlock();
-  for (const auto& [cookiePath, cookie] : *cookies) {
+  for (auto it = cookies->begin(); it != cookies->end();) {
+    auto& [cookiePath, cookie] = *it;
     if (cookiePath.piece().startsWith(dir)) {
       cookie->notify();
-      cookies->erase(cookiePath);
+      it = cookies->erase(it);
+    } else {
+      ++it;
     }
   }
 }

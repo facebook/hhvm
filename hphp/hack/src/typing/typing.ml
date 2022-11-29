@@ -3606,7 +3606,12 @@ and expr_
       Errors.add_typing_error
         Typing_error.(expr_tree @@ Primary.Expr_tree.This_var_in_expr_tree p);
     if not accept_using_var then check_escaping_var env (p, this);
-    let ty = Env.get_local env this in
+    let ty =
+      if check_defined then
+        Env.get_local_check_defined env (p, this)
+      else
+        Env.get_local env this
+    in
     let r = Reason.Rwitness p in
     let ty = mk (r, get_node ty) in
     make_result env p Aast.This ty

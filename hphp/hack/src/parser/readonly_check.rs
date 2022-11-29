@@ -4,10 +4,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::HashMap;
-use std::collections::HashSet;
-
 use aast::Expr_ as E_;
+use hash::HashMap;
+use hash::HashSet;
 use hh_autoimport_rust::is_hh_autoimport_fun;
 use naming_special_names_rust::special_idents;
 use naming_special_names_rust::typehints;
@@ -26,19 +25,13 @@ use parser_core_types::syntax_error::Error as ErrorMsg;
 use parser_core_types::syntax_error::SyntaxError;
 
 // Local environment which keeps track of how many readonly values it has
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, Default)]
 struct Lenv {
     pub lenv: HashMap<String, Rty>,
     pub num_readonly: u32,
 }
 
 impl Lenv {
-    pub fn new() -> Lenv {
-        Lenv {
-            lenv: HashMap::new(),
-            num_readonly: 0,
-        }
-    }
     pub fn insert(&mut self, var_name: String, rty: Rty) {
         let result = self.lenv.insert(var_name, rty);
         match (rty, result) {
@@ -78,10 +71,10 @@ struct Context {
 impl Context {
     fn new(readonly_ret: Rty, this_ty: Rty, is_typechecker: bool) -> Self {
         Self {
-            locals: Lenv::new(),
+            locals: Lenv::default(),
             readonly_return: readonly_ret,
             this_ty,
-            inout_params: HashSet::new(),
+            inout_params: HashSet::default(),
             is_typechecker,
         }
     }

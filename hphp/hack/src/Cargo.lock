@@ -10,6 +10,7 @@ dependencies = [
  "bumpalo",
  "core_utils_rust",
  "decl_mode_parser",
+ "hash",
  "hh_autoimport_rust",
  "lowerer",
  "mode_parser",
@@ -161,6 +162,7 @@ dependencies = [
  "bumpalo",
  "escaper",
  "ffi",
+ "hash",
  "hhbc",
  "hhvm_types_ffi",
  "log",
@@ -1275,6 +1277,7 @@ name = "elaborate_namespaces_visitor"
 version = "0.0.0"
 dependencies = [
  "core_utils_rust",
+ "hash",
  "lazy_static",
  "namespaces_rust",
  "naming_special_names_rust",
@@ -3492,6 +3495,7 @@ name = "print_opcode_impl"
 version = "0.0.0"
 dependencies = [
  "convert_case",
+ "hash",
  "hhbc-gen",
  "macro_test_util",
  "opcode_test_data",
@@ -4671,6 +4675,7 @@ name = "types"
 version = "0.0.0"
 dependencies = [
  "decl_provider",
+ "hash",
  "hh_autoimport_rust",
  "itertools 0.10.3",
  "lazy_static",

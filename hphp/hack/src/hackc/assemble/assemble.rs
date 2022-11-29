@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::fs;
 use std::os::unix::ffi::OsStrExt;
@@ -19,6 +18,7 @@ use bumpalo::Bump;
 use ffi::Maybe;
 use ffi::Slice;
 use ffi::Str;
+use hash::HashMap;
 use log::trace;
 use naming_special_names_rust::coeffects::Ctx;
 use parse_macro::parse;
@@ -472,7 +472,7 @@ fn assemble_method<'arena>(
     let return_type_info =
         assemble_type_info_opt(token_iter, alloc, TypeInfoKind::NotEnumOrTypeDef)?;
     let name = assemble_method_name(alloc, token_iter)?;
-    let mut decl_map = HashMap::new();
+    let mut decl_map = HashMap::default();
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
     let flags = assemble_method_flags(token_iter)?;
     let (body, coeffects) = assemble_body(
@@ -1089,7 +1089,7 @@ fn assemble_function<'arena>(
 
     let name = assemble_function_name(token_iter, alloc)?;
     // Will store decls in this order: params, decl_vars, unnamed
-    let mut decl_map = HashMap::new();
+    let mut decl_map = HashMap::default();
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
     let flags = assemble_function_flags(name, token_iter)?;
     let shadowed_tparams = Default::default();

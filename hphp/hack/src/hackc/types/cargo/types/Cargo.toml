@@ -9,6 +9,7 @@ path = "../../lib.rs"
 
 [dependencies]
 decl_provider = { path = "../../../decl_provider" }
+hash = { path = "../../../../utils/hash" }
 hh_autoimport_rust = { path = "../../../../parser/cargo/hh_autoimport" }
 itertools = "0.10.3"
 lazy_static = "1.4"

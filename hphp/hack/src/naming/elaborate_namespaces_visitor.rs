@@ -3,9 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::HashSet;
-
 use core_utils_rust as core_utils;
+use hash::HashSet;
 use namespaces_rust as namespaces;
 use naming_special_names_rust as sn;
 use oxidized::aast_visitor::AstParams;
@@ -46,7 +45,7 @@ impl Env {
     fn make(namespace: ocamlrep::rc::RcOc<namespace_env::Env>) -> Self {
         Self {
             namespace,
-            type_params: HashSet::new(),
+            type_params: HashSet::default(),
         }
     }
 

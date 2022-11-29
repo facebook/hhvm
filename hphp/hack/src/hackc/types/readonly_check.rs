@@ -7,10 +7,10 @@
 //// Keep this file in sync with ../../parser/readonly_check.rs *except* for @HACKC_ADDED parts.
 //// TODO(T128733540): we should have only one readonly_check.rs
 use std::borrow::Cow;
-use std::collections::HashMap;
-use std::collections::HashSet;
 
 use aast::Expr_ as E_;
+use hash::HashMap;
+use hash::HashSet;
 use hh_autoimport_rust::is_hh_autoimport_fun;
 use lazy_static::lazy_static;
 use naming_special_names_rust::special_idents;
@@ -50,7 +50,7 @@ struct Lenv {
 impl Lenv {
     pub fn new() -> Lenv {
         Lenv {
-            lenv: HashMap::new(),
+            lenv: HashMap::default(),
             num_readonly: 0,
         }
     }
@@ -96,7 +96,7 @@ impl Context {
             locals: Lenv::new(),
             readonly_return: readonly_ret,
             this_ty,
-            inout_params: HashSet::new(),
+            inout_params: HashSet::default(),
             is_typechecker,
         }
     }

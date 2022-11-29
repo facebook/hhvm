@@ -229,8 +229,7 @@ pub mod members {
 }
 
 pub mod user_attributes {
-    use std::collections::HashSet;
-
+    use hash::HashSet;
     use lazy_static::lazy_static;
 
     pub const OVERRIDE: &str = "__Override";
@@ -501,8 +500,7 @@ pub mod special_idents {
 }
 
 pub mod pseudo_functions {
-    use std::collections::HashSet;
-
+    use hash::HashSet;
     use lazy_static::lazy_static;
 
     pub const ISSET: &str = "\\isset";
@@ -594,8 +592,7 @@ pub mod std_lib_functions {
 }
 
 pub mod typehints {
-    use std::collections::HashSet;
-
+    use hash::HashSet;
     use lazy_static::lazy_static;
 
     pub const NULL: &str = "null";
@@ -767,8 +764,7 @@ pub mod literal {
 }
 
 pub mod pseudo_consts {
-    use std::collections::HashSet;
-
+    use hash::HashSet;
     use lazy_static::lazy_static;
 
     pub const G__LINE__: &str = "\\__LINE__";
@@ -848,9 +844,9 @@ pub mod readonly {
 }
 
 pub mod coeffects {
-    use std::collections::HashSet;
     use std::fmt;
 
+    use hash::HashSet;
     use lazy_static::lazy_static;
     use serde::Serialize;
 
@@ -1084,9 +1080,9 @@ pub mod shapes {
 }
 
 pub mod superglobals {
-    use std::collections::HashSet;
-
+    use hash::HashSet;
     use lazy_static::lazy_static;
+
     pub const GLOBALS: &str = "$GLOBALS";
 
     pub static SUPERGLOBALS: &[&str] = &[

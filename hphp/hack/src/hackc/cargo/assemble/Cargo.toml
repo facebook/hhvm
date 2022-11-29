@@ -13,6 +13,7 @@ assemble_opcode_macro = { path = "../assemble_opcode_macro" }
 bumpalo = { version = "3.11.1", features = ["collections"] }
 escaper = { path = "../../../utils/escaper" }
 ffi = { path = "../../../utils/ffi" }
+hash = { path = "../../../utils/hash" }
 hhbc = { path = "../../hhbc/cargo/hhbc" }
 hhvm_types_ffi = { path = "../../hhvm_cxx/hhvm_types" }
 log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }

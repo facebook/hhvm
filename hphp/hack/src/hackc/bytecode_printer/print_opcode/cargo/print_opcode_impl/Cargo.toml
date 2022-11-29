@@ -9,6 +9,7 @@ path = "../../print_opcode_impl.rs"
 
 [dependencies]
 convert_case = "0.4.0"
+hash = { path = "../../../../../utils/hash" }
 hhbc-gen = { path = "../../../../../../../tools/hhbc-gen" }
 proc-macro2 = "1.0.46"
 quote = "1.0"

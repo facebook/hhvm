@@ -60,9 +60,7 @@ class HTTPSink {
   virtual void getCurrentTransportInfo(wangle::TransportInfo* tinfo) const = 0;
   // Flow control
   virtual void pauseIngress() = 0;
-  virtual void pauseEgress() = 0;
   virtual void resumeIngress() = 0;
-  virtual void resumeEgress() = 0;
   [[nodiscard]] virtual bool isIngressPaused() const = 0;
   [[nodiscard]] virtual bool isEgressPaused() const = 0;
   virtual void setEgressRateLimit(uint64_t bitsPerSecond) = 0;

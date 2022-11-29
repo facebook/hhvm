@@ -110,14 +110,8 @@ class NullHTTPSink : public HTTPSink {
   void pauseIngress() override {
     XLOG(ERR) << "pauseIngress event is not expected for NullHTTPSink";
   }
-  void pauseEgress() override {
-    XLOG(ERR) << "pauseEgress event is not expected for NullHTTPSink";
-  }
   void resumeIngress() override {
     XLOG(ERR) << "resumeIngress event is not expected for NullHTTPSink";
-  }
-  void resumeEgress() override {
-    XLOG(ERR) << "resumeEgress event is not expected for NullHTTPSink";
   }
   [[nodiscard]] bool isIngressPaused() const override {
     XLOG(ERR) << "isIngressPaused not expected for NullHTTPSink";

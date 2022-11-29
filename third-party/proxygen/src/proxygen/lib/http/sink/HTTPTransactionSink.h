@@ -102,14 +102,8 @@ class HTTPTransactionSink : public HTTPSink {
   void pauseIngress() override {
     httpTransaction_->pauseIngress();
   }
-  void pauseEgress() override {
-    httpTransaction_->pauseEgress();
-  }
   void resumeIngress() override {
     httpTransaction_->resumeIngress();
-  }
-  void resumeEgress() override {
-    httpTransaction_->resumeEgress();
   }
   [[nodiscard]] bool isIngressPaused() const override {
     return httpTransaction_->isIngressPaused();

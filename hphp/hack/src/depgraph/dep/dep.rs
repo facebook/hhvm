@@ -2,6 +2,10 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::fmt::LowerHex;
+
 use ocamlrep::from;
 use ocamlrep::Allocator;
 use ocamlrep::FromError;
@@ -27,6 +31,18 @@ impl Dep {
         } else {
             Some(Dep(self.0 & (!1)))
         }
+    }
+}
+
+impl Display for Dep {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(&self.0, f)
+    }
+}
+
+impl LowerHex for Dep {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        LowerHex::fmt(&self.0, f)
     }
 }
 

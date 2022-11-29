@@ -182,8 +182,7 @@ impl Nodes {
                 format!("{kind:?} {sym}")
             }
             None => {
-                let h: u64 = dep.into();
-                format!("{h:016x} ({h})")
+                format!("{dep:016x} ({dep})")
             }
         }
     }

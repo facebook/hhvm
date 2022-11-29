@@ -11,4 +11,5 @@ crate-type = ["lib", "staticlib"]
 [dependencies]
 dep = { path = "../dep" }
 memmap = "0.7"
+rayon = "1.2"
 rpds = "0.11.0"

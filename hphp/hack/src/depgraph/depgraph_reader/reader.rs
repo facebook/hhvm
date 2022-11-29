@@ -7,6 +7,7 @@ mod byteutils;
 use std::ops::Deref;
 
 pub use dep::Dep;
+use rayon::prelude::*;
 use rpds::HashTrieSet;
 
 /// Use a `DepGraphOpener` to initialize a dependency graph from a file.
@@ -182,11 +183,20 @@ impl<'bytes> DepGraph<'bytes> {
         acc
     }
 
-    /// A slice that contains all unique dependency hashes in the graph.
-    ///
-    /// This gives direct access to the `indexer` table.
-    pub fn all_hashes(&self) -> &'bytes [u64] {
-        self.indexer.hashes
+    pub fn contains(&self, dep: Dep) -> bool {
+        self.indexer.find(dep.into()).is_some()
+    }
+
+    /// All unique dependency hashes in the graph.
+    pub fn all_hashes(
+        &self,
+    ) -> impl Iterator<Item = Dep> + ExactSizeIterator + std::iter::FusedIterator + 'bytes {
+        self.indexer.hashes.iter().copied().map(Dep::new)
+    }
+
+    /// All unique dependency hashes in the graph, in parallel.
+    pub fn par_all_hashes(&self) -> impl IndexedParallelIterator<Item = Dep> + 'bytes {
+        self.indexer.hashes.par_iter().copied().map(Dep::new)
     }
 }
 

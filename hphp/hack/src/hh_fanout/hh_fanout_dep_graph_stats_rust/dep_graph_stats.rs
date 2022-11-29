@@ -5,7 +5,6 @@
 use std::collections::HashSet;
 use std::ffi::OsString;
 
-use depgraph_reader::Dep;
 use depgraph_reader::DepGraphOpener;
 use log::info;
 use ocamlrep_ocamlpool::ocaml_ffi;
@@ -31,8 +30,8 @@ fn main(dep_graph: OsString) {
     let mut all_hash_list_ids = HashSet::new();
     let mut num_total_edges = 0;
     let mut num_stored_edges = 0;
-    for &hash in depgraph.all_hashes().iter() {
-        if let Some(hash_list_id) = depgraph.hash_list_id_for_dep(Dep::new(hash)) {
+    for hash in depgraph.all_hashes() {
+        if let Some(hash_list_id) = depgraph.hash_list_id_for_dep(hash) {
             let num_hash_indices = depgraph.hash_list_for_id(hash_list_id).len() as u64;
             num_total_edges += num_hash_indices;
             if all_hash_list_ids.insert(hash_list_id) {

@@ -13,7 +13,6 @@ use std::io::Read;
 use std::path::Path;
 
 use dep_graph_delta::DepGraphDelta;
-use depgraph_reader::Dep;
 use depgraph_reader::DepGraph;
 use depgraph_reader::DepGraphOpener;
 use depgraph_writer::DepGraphWriter;
@@ -270,10 +269,7 @@ impl<'a> HashListsIndices<'a> {
 /// Extend a collection of edges by adding all edges from the given
 /// dependency graph.
 fn extend_edges_from_dep_graph(all_edges: &Edges, graph: &DepGraph<'_>) {
-    let all_hashes = graph.all_hashes();
-
-    all_hashes.par_iter().for_each(|dependency| {
-        let dependency = Dep::new(*dependency);
+    graph.par_all_hashes().for_each(|dependency| {
         if let Some(hash_list) = graph.hash_list_for(dependency) {
             for dependent in graph.hash_list_hashes(hash_list) {
                 all_edges.register(dependent.into(), dependency.into());

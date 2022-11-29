@@ -1138,6 +1138,7 @@ version = "0.0.0"
 dependencies = [
  "dep",
  "memmap",
+ "rayon",
  "rpds",
 ]
 

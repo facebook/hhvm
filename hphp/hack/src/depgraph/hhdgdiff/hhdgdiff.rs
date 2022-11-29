@@ -49,15 +49,15 @@ fn main() -> Result<()> {
             .collect::<Result<_>>()?;
 
         // list unknown nodes in dg1
-        for &h in dg1.all_hashes().iter() {
-            if !nodes.map.contains_key(&Dep::new(h)) {
+        for h in dg1.all_hashes() {
+            if !nodes.map.contains_key(&h) {
                 println!("{}: {h:016x} ({h}): unknown hash", opts.dg1.display());
             }
         }
 
         // list unknown nodes in dg2
-        for &h in dg2.all_hashes().iter() {
-            if !nodes.map.contains_key(&Dep::new(h)) {
+        for h in dg2.all_hashes() {
+            if !nodes.map.contains_key(&h) {
                 println!("{}: {h:016x} ({h}): unknown hash", opts.dg2.display());
             }
         }
@@ -66,20 +66,21 @@ fn main() -> Result<()> {
     let mut different = 0;
 
     // list nodes in dg1 that are not in dg2
-    for &h in dg1.all_hashes().iter() {
-        if dg2.all_hashes().binary_search(&h).is_err() {
+    for h in dg1.all_hashes() {
+        if !dg2.contains(h) {
             different += 1;
-            println!("- {} {}", h, nodes.fmt(Dep::new(h)));
+            println!("- {} {}", h, nodes.fmt(h));
         }
     }
 
     // list edges in dg1 that are not in dg2
-    different += (dg1.all_hashes().par_iter())
+    different += dg1
+        .par_all_hashes()
         .with_min_len(1)
         .with_max_len(1)
-        .filter(|&&h| {
+        .filter(|&h| {
             let mut different = false;
-            let dependency = Dep::new(h);
+            let dependency = h;
             if let Some(list) = dg1.hash_list_for(dependency) {
                 for dependent in dg1.hash_list_hashes(list) {
                     if !dg2.dependent_dependency_edge_exists(dependent, dependency) {
@@ -93,20 +94,21 @@ fn main() -> Result<()> {
         .count();
 
     // list nodes in dg2 that are not in dg1
-    for &h in dg2.all_hashes().iter() {
-        if dg1.all_hashes().binary_search(&h).is_err() {
+    for h in dg2.all_hashes() {
+        if !dg1.contains(h) {
             different += 1;
-            println!("+ {} {}", h, nodes.fmt(Dep::new(h)));
+            println!("+ {} {}", h, nodes.fmt(h));
         }
     }
 
     // list edges in dg2 that are not in dg1
-    different += (dg2.all_hashes().par_iter())
+    different += dg2
+        .par_all_hashes()
         .with_min_len(1)
         .with_max_len(1)
-        .filter(|&&h| {
+        .filter(|&h| {
             let mut different = false;
-            let dependency = Dep::new(h);
+            let dependency = h;
             if let Some(list) = dg2.hash_list_for(dependency) {
                 for dependent in dg2.hash_list_hashes(list) {
                     if !dg1.dependent_dependency_edge_exists(dependent, dependency) {

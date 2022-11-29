@@ -4,6 +4,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use depgraph_reader::Dep;
+
 #[derive(Debug)]
 enum Error {
     IoError(std::io::Error),
@@ -38,7 +40,7 @@ fn print_edges_header() {
 }
 
 /// Auxiliary function to print a 64-bit edge
-fn print_edge_u64(dependency: u64, dependent: u64, hex_dump: bool) {
+fn print_edge_u64(dependency: Dep, dependent: Dep, hex_dump: bool) {
     if hex_dump {
         println!(
             "  {dependency:#016x} {dependent:#016x}",
@@ -63,20 +65,20 @@ fn add_edges<T: Ord + Clone>(es: &mut Vec<(T, T)>, k: T, vs: &std::collections::
 /// Retrieve the adjacency list for `k` in `g`.
 ///
 /// This is the analog of `value_vertex` for 64-bit depgraphs.
-fn hashes(g: &depgraph_reader::DepGraph<'_>, k: u64) -> std::collections::BTreeSet<u64> {
-    match g.hash_list_for(depgraph_reader::Dep::new(k)) {
-        None => std::collections::BTreeSet::<u64>::new(),
-        Some(hashes) => g.hash_list_hashes(hashes).map(|x| x.into()).collect(),
+fn hashes(g: &depgraph_reader::DepGraph<'_>, k: Dep) -> std::collections::BTreeSet<Dep> {
+    match g.hash_list_for(k) {
+        None => std::collections::BTreeSet::new(),
+        Some(hashes) => g.hash_list_hashes(hashes).collect(),
     }
 }
 
 /// Print an ASCII representation of a 64-bit depgraph to stdout.
-fn dump_depgraph64(file: &str, dependency_hash: Option<u64>, hex_dump: bool) -> Result<()> {
+fn dump_depgraph64(file: &str, dependency_hash: Option<Dep>, hex_dump: bool) -> Result<()> {
     let o = depgraph_reader::DepGraphOpener::from_path(file)?;
     let dg = o.open().map_err(Error::DepgraphError)?;
     let () = dg.validate_hash_lists().map_err(Error::DepgraphError)?;
 
-    let print_edges_for_key = |key: u64| {
+    let print_edges_for_key = |key: Dep| {
         let dests = hashes(&dg, key);
         for dst in dests {
             print_edge_u64(key, dst, hex_dump);
@@ -85,7 +87,7 @@ fn dump_depgraph64(file: &str, dependency_hash: Option<u64>, hex_dump: bool) -> 
 
     match dependency_hash {
         None => {
-            for &key in dg.all_hashes().iter() {
+            for key in dg.all_hashes() {
                 print_edges_for_key(key)
             }
         }
@@ -114,12 +116,11 @@ fn comp_depgraph64(
             l_depgraph.validate_hash_lists()?,
             r_depgraph.validate_hash_lists()?,
         );
-        let (l_dependencies, r_dependencies) = (l_depgraph.all_hashes(), r_depgraph.all_hashes());
-        let (lnum_keys, rnum_keys) = (l_dependencies.len(), r_dependencies.len());
+        let (mut l_dependencies_iter, mut r_dependencies_iter) =
+            (l_depgraph.all_hashes(), r_depgraph.all_hashes());
+        let (lnum_keys, rnum_keys) = (l_dependencies_iter.len(), r_dependencies_iter.len());
         let (mut lproc, mut rproc) = (0, 0);
         let (mut in_r_not_l, mut in_l_not_r) = (vec![], vec![]);
-        let (mut l_dependencies_iter, mut r_dependencies_iter) =
-            (l_dependencies.iter(), r_dependencies.iter());
         let (mut l_dependency_opt, mut r_dependency_opt) =
             (l_dependencies_iter.next(), r_dependencies_iter.next());
         let (mut ledge_count, mut redge_count) = (0, 0);
@@ -135,7 +136,7 @@ fn comp_depgraph64(
         };
         while l_dependency_opt.is_some() || r_dependency_opt.is_some() {
             match (l_dependency_opt, r_dependency_opt) {
-                (None, Some(&r_dependency)) => {
+                (None, Some(r_dependency)) => {
                     // These edges are in `r` and not in `l`.
                     let dependency = r_dependency;
                     let dependents = hashes(&r_depgraph, dependency);
@@ -147,7 +148,7 @@ fn comp_depgraph64(
                         bar.as_ref().unwrap().inc(1); // We advanced `r` and there are more keys in `r` than `l`.
                     }
                 }
-                (Some(&l_dependency), None) => {
+                (Some(l_dependency), None) => {
                     // These edges are in `l` and not in `r`.
                     let dependency = l_dependency;
                     let dependents = hashes(&l_depgraph, dependency);
@@ -159,7 +160,7 @@ fn comp_depgraph64(
                         bar.as_ref().unwrap().inc(1); // We advanced `l` and there are more keys in `l` than `r`.
                     }
                 }
-                (Some(&l_dependency), Some(&r_dependency)) => {
+                (Some(l_dependency), Some(r_dependency)) => {
                     let (l_dependencies, r_dependencies) = (
                         hashes(&l_depgraph, l_dependency),
                         hashes(&r_depgraph, r_dependency),
@@ -188,7 +189,7 @@ fn comp_depgraph64(
                     }
                     ledge_count += l_dependencies.len();
                     redge_count += r_dependencies.len();
-                    let mut dests: std::collections::BTreeSet<u64> =
+                    let mut dests: std::collections::BTreeSet<Dep> =
                         std::collections::BTreeSet::new();
                     dests.extend(
                         r_dependencies
@@ -314,7 +315,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
             dependency_hash,
             print_hex,
             ..
-        } => dump_depgraph64(&file, dependency_hash, print_hex),
+        } => dump_depgraph64(&file, dependency_hash.map(Dep::new), print_hex),
         Opt {
             with_progress_bar,
             test: Some(test),

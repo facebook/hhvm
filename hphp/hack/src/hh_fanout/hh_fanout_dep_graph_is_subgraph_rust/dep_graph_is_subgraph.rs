@@ -19,7 +19,6 @@ struct MissingEdge {
 fn find_missing_edge(sub_graph: &DepGraph<'_>, super_graph: &DepGraph<'_>) -> Option<MissingEdge> {
     let sub_hashes = sub_graph.all_hashes();
     for dependency in sub_hashes {
-        let dependency = Dep::new(*dependency);
         if let Some(hash_list) = sub_graph.hash_list_for(dependency) {
             for dependent in sub_graph.hash_list_hashes(hash_list) {
                 if !super_graph.dependent_dependency_edge_exists(dependent, dependency) {

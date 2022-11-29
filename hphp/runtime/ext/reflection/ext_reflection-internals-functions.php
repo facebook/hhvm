@@ -64,15 +64,16 @@ function hphp_create_object_without_constructor(string $name)[]: object;
  *
  * @param object $obj  - The object to get the property from.
  * @param string $cls  - The name of the class that the property is accessible
- *                       in or null to only get a public property.
+ *                       in
  * @param string $prop - The name of the property.
  * @return mixed - The value of the property.
  */
 <<__Native("NoInjection")>>
 function hphp_get_property(
   object $obj,
-  string $cls = "", // null will convert to this and do what we expect
-  string $prop)[]: mixed;
+  string $cls,
+  string $prop,
+)[]: mixed;
 
 /**
  * hphp_set_property() - Used by ReflectionProperty to set the value of a
@@ -80,16 +81,17 @@ function hphp_get_property(
  *
  * @param object $obj  - The object to set the property on.
  * @param string $cls  - The name of the class that the property is accessible
- *                       in or null to only set a public property.
+ *                       in
  * @param string $prop - The name of the property.
  * @param mixed $value - The value to set the property to.
  */
 <<__Native("NoInjection")>>
 function hphp_set_property(
   object $obj,
-  string $cls = "", // null will convert to this and do what we expect
+  string $cls,
   string $prop,
-  mixed $value)[write_props]: void;
+  mixed $value,
+)[write_props]: void;
 
 /**
  * hphp_get_static_property() - Used by ReflectionProperty to get the value of a
@@ -102,8 +104,11 @@ function hphp_set_property(
  * @return mixed - The value of the property
  */
 <<__Native("NoInjection")>>
-function hphp_get_static_property(string $cls, string $prop,
-                                  bool $force)[read_globals]: mixed;
+function hphp_get_static_property(
+  string $cls,
+  string $prop,
+  bool $force,
+)[read_globals]: mixed;
 
 /**
  * hphp_set_static_property() - Used by ReflectionProperty to set the value of a
@@ -116,5 +121,9 @@ function hphp_get_static_property(string $cls, string $prop,
  *                       (true) or only public ones (false)
  */
 <<__Native("NoInjection")>>
-function hphp_set_static_property(string $cls, string $prop, mixed $value,
-                                  bool $force)[globals]: void;
+function hphp_set_static_property(
+  string $cls,
+  string $prop,
+  mixed $value,
+  bool $force,
+)[globals]: void;

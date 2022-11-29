@@ -677,6 +677,23 @@ void parsing_driver::maybe_allocate_field_id(
   }
 }
 
+template <typename T>
+T parsing_driver::narrow_int(
+    source_location loc, int64_t value, const char* name) {
+  using limits = std::numeric_limits<T>;
+  if (mode == parsing_mode::PROGRAM &&
+      (value < limits::min() || value > limits::max())) {
+    diags_.error(
+        loc,
+        "Integer constant {} outside the range of {} ([{}, {}]).",
+        value,
+        name,
+        limits::min(),
+        limits::max());
+  }
+  return value;
+}
+
 std::string parsing_driver::strip_doctext(fmt::string_view text) {
   if (mode != apache::thrift::compiler::parsing_mode::PROGRAM) {
     return {};
@@ -776,6 +793,124 @@ std::unique_ptr<t_service> parsing_driver::on_service(
   service->set_src_range(range);
   set_functions(*service, std::move(functions));
   return service;
+}
+
+t_type_ref parsing_driver::on_list_type(
+    t_type_ref element_type, std::unique_ptr<t_annotations> annotations) {
+  return new_type_ref(
+      std::make_unique<t_list>(std::move(element_type)),
+      std::move(annotations));
+}
+
+t_type_ref parsing_driver::on_set_type(
+    t_type_ref key_type, std::unique_ptr<t_annotations> annotations) {
+  return new_type_ref(
+      std::make_unique<t_set>(std::move(key_type)), std::move(annotations));
+}
+
+t_type_ref parsing_driver::on_map_type(
+    t_type_ref key_type,
+    t_type_ref value_type,
+    std::unique_ptr<t_annotations> annotations) {
+  return new_type_ref(
+      std::make_unique<t_map>(std::move(key_type), std::move(value_type)),
+      std::move(annotations));
+}
+
+std::unique_ptr<t_function> parsing_driver::on_performs(
+    source_range range, t_type_ref type) {
+  std::string name = type.get_type() ? "create" + type.get_type()->get_name()
+                                     : "<interaction placeholder>";
+  auto function =
+      std::make_unique<t_function>(program, std::move(type), std::move(name));
+  function->set_src_range(range);
+  function->set_is_interaction_constructor();
+  return function;
+}
+
+std::unique_ptr<t_throws> parsing_driver::on_throws(t_field_list exceptions) {
+  return new_throws(std::make_unique<t_field_list>(std::move(exceptions)));
+}
+
+std::unique_ptr<t_typedef> parsing_driver::on_typedef(
+    source_range range, t_type_ref type, const identifier& name) {
+  auto typedef_node = std::make_unique<t_typedef>(
+      program, fmt::to_string(name.str), std::move(type));
+  typedef_node->set_src_range(range);
+  return typedef_node;
+}
+
+std::unique_ptr<t_struct> parsing_driver::on_struct(
+    source_range range, const identifier& name, t_field_list fields) {
+  auto struct_node =
+      std::make_unique<t_struct>(program, fmt::to_string(name.str));
+  struct_node->set_src_range(range);
+  set_fields(*struct_node, std::move(fields));
+  return struct_node;
+}
+
+std::unique_ptr<t_union> parsing_driver::on_union(
+    source_range range, const identifier& name, t_field_list fields) {
+  auto union_node =
+      std::make_unique<t_union>(program, fmt::to_string(name.str));
+  union_node->set_src_range(range);
+  set_fields(*union_node, std::move(fields));
+  return union_node;
+}
+
+std::unique_ptr<t_exception> parsing_driver::on_exception(
+    source_range range,
+    t_error_safety safety,
+    t_error_kind kind,
+    t_error_blame blame,
+    const identifier& name,
+    t_field_list fields) {
+  auto exception =
+      std::make_unique<t_exception>(program, fmt::to_string(name.str));
+  exception->set_src_range(range);
+  exception->set_safety(safety);
+  exception->set_kind(kind);
+  exception->set_blame(blame);
+  set_fields(*exception, std::move(fields));
+  return exception;
+}
+
+std::unique_ptr<t_field> parsing_driver::on_field(
+    source_range range,
+    std::unique_ptr<stmt_attrs> attrs,
+    boost::optional<int64_t> id,
+    t_field_qualifier qual,
+    t_type_ref type,
+    const identifier& name,
+    std::unique_ptr<t_const_value> value,
+    std::unique_ptr<t_annotations> annotations,
+    boost::optional<comment> doc) {
+  auto valid_id = id ? narrow_int<t_field_id>(range.begin, *id, "field ids")
+                     : boost::optional<t_field_id>();
+  auto field = std::make_unique<t_field>(
+      std::move(type), fmt::to_string(name.str), valid_id);
+  field->set_qualifier(qual);
+  if (mode == parsing_mode::PROGRAM) {
+    field->set_default_value(std::move(value));
+  }
+  field->set_src_range(range);
+  set_attributes(*field, std::move(attrs), std::move(annotations), range);
+  if (doc) {
+    set_doctext(*field, doc);
+  }
+  return field;
+}
+
+t_type_ref parsing_driver::on_field_type(
+    const t_base_type& type, std::unique_ptr<t_annotations> annotations) {
+  return new_type_ref(type, std::move(annotations));
+}
+
+t_type_ref parsing_driver::on_field_type(
+    source_range range,
+    fmt::string_view name,
+    std::unique_ptr<t_annotations> annotations) {
+  return new_type_ref(fmt::to_string(name), std::move(annotations), range);
 }
 
 std::unique_ptr<t_enum> parsing_driver::on_enum(

@@ -16,7 +16,10 @@ module Env = Tast_env
 type logger_mode =
   | LogLocally
   | LogScuba
-  | LogCodemod of { atomic: bool }  (** 'atomic' is described in D40008464 *)
+  | LogCodemod of {
+      atomic: bool;
+          (** 'atomic' is described in D40008464. TODO(T138659101) remove option. *)
+    }
 
 let parse_logger_mode_exn typing_env =
   let level_int =

@@ -39,6 +39,7 @@ type command =
   | SolveConstraints
   | CloseConstraints [@deriving eq]
 
+(* TODO(T138659530): remove when using global everywhere is unblocked*)
 type mode =
   | Local
   | Global

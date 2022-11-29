@@ -112,16 +112,6 @@ oxidized::ast_defs::Variance
 oxidized::ast_defs::Visibility
 oxidized::decl_defs::LinearizationKind
 oxidized::decl_defs::SourceType
-oxidized::error_codes::Init
-oxidized::error_codes::Naming
-oxidized::error_codes::NastCheck
-oxidized::error_codes::Parsing
-oxidized::error_codes::Typing
-oxidized::error_codes::GlobalAccessCheck
-oxidized::errors::ErrorCode
-oxidized::errors::Format
-oxidized::errors::NameContext
-oxidized::errors::Phase
 oxidized::file_info::Mode
 oxidized::file_info::NameType
 oxidized::naming_types::KindOfType
@@ -139,7 +129,6 @@ oxidized::typing_reason::BlameSource
 oxidized::user_error::Severity
 oxidized::xhp_attribute::Tag
 oxidized::xhp_attribute::XhpAttribute
-phase_map::PhaseMap
 prim_defs::Comment
 prop_flags::PropFlags
 quickfix::QfPos

@@ -20,7 +20,6 @@ pub mod local_id;
 pub mod local_id_map;
 pub mod method_flags;
 pub mod opaque_digest;
-pub mod phase_map;
 pub mod pos;
 pub mod prop_flags;
 pub mod relative_path;
@@ -38,7 +37,6 @@ pub mod typing_logic;
 pub mod typing_set;
 
 mod ast_defs_impl;
-mod errors_impl;
 mod global_options_impl;
 mod tast_impl;
 mod typing_defs_core_impl;

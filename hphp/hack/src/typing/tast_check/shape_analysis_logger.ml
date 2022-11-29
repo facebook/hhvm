@@ -13,6 +13,10 @@ module SA = Shape_analysis
 module SAC = Shape_analysis_codemod
 module Env = Tast_env
 
+let constraints_dir = "/tmp/shape_analysis_constraints"
+
+let constraints_dir_created = ref false
+
 type logger_mode =
   | LogLocally
   | LogScuba
@@ -20,6 +24,14 @@ type logger_mode =
       atomic: bool;
           (** 'atomic' is described in D40008464. TODO(T138659101) remove option. *)
     }
+  | LogConstraints of { mode: mode }
+
+let mode_of_logger_mode = function
+  | LogConstraints { mode } -> mode
+  | LogCodemod { atomic = _ } -> Local
+  | LogLocally
+  | LogScuba ->
+    Local
 
 let parse_logger_mode_exn typing_env =
   let level_int =
@@ -32,6 +44,8 @@ let parse_logger_mode_exn typing_env =
   | 2 -> LogScuba
   | 3 -> LogCodemod { atomic = false }
   | 4 -> LogCodemod { atomic = true }
+  | 5 -> LogConstraints { mode = Local }
+  | 6 -> LogConstraints { mode = Global }
   | n -> failwith @@ Printf.sprintf "Unrecognized logger mode %d" n
 
 let channel_opt = ref None
@@ -99,49 +113,73 @@ let log_events tast_env =
   | LogLocally -> log_events_locally typing_env
   | LogScuba -> Shape_analysis_scuba.log_events_remotely typing_env
   | LogCodemod _ -> log_events_as_codemod typing_env
+  | LogConstraints _ -> ignore
 
-let compute_results tast_env id params return body =
+let compute_results source_file tast_env id params return body =
   let strip_decorations { constraint_; _ } = constraint_ in
   let typing_env = Tast_env.tast_env_as_typing_env tast_env in
+  let logger_mode = parse_logger_mode_exn typing_env in
+  let mode = mode_of_logger_mode logger_mode in
   try
-    let (constraints, errors) =
-      SA.callable Local id tast_env params ~return body
+    let (decorated_constraints, errors) =
+      SA.callable mode id tast_env params ~return body
     in
-    let error_count = List.length errors in
-    let successes =
-      fst constraints
-      |> DecoratedConstraintSet.elements
-      |> List.map ~f:strip_decorations
-      |> SA.simplify typing_env
-      |> List.filter ~f:SA.is_shape_like_dict
-    in
-    let successes =
-      match parse_logger_mode_exn typing_env with
-      | LogCodemod { atomic = true } ->
-        if List.is_empty successes then
-          []
-        else
-          [
-            {
-              location = id;
-              result = Either.First { results = successes; error_count };
-            };
-          ]
-      | _ ->
+    match logger_mode with
+    | LogConstraints { mode = _ } ->
+      let () =
+        if not !constraints_dir_created then begin
+          Sys_utils.mkdir_p constraints_dir;
+          constraints_dir_created := true
+        end;
+        let constraints =
+          SA.any_constraints_of_decorated_constraints decorated_constraints
+        in
+        let worker = Option.value ~default:0 !Typing_deps.worker_id in
+        Shape_analysis_files.write_constraints
+          ~constraints_dir
+          ~worker
+          ConstraintEntry.
+            { source_file; id; constraints; error_count = List.length errors }
+      in
+      []
+    | LogLocally
+    | LogScuba
+    | LogCodemod _ ->
+      let error_count = List.length errors in
+      let successes =
+        fst decorated_constraints
+        |> DecoratedConstraintSet.elements
+        |> List.map ~f:strip_decorations
+        |> SA.simplify typing_env
+        |> List.filter ~f:SA.is_shape_like_dict
+      in
+      let successes =
+        match logger_mode with
+        | LogCodemod { atomic = true } ->
+          if List.is_empty successes then
+            []
+          else
+            [
+              {
+                location = id;
+                result = Either.First { results = successes; error_count };
+              };
+            ]
+        | _ ->
+          List.map
+            ~f:(fun success ->
+              {
+                location = id;
+                result = Either.First { results = [success]; error_count };
+              })
+            successes
+      in
+      let failures =
         List.map
-          ~f:(fun success ->
-            {
-              location = id;
-              result = Either.First { results = [success]; error_count };
-            })
-          successes
-    in
-    let failures =
-      List.map
-        ~f:(fun err -> { location = id; result = Either.Second err })
-        errors
-    in
-    successes @ failures
+          ~f:(fun err -> { location = id; result = Either.Second err })
+          errors
+      in
+      successes @ failures
   with
   | SA.Shape_analysis_exn error_message ->
     (* Logging failures is expensive because there are so many of them right
@@ -161,7 +199,8 @@ let handler =
       let collect_method_events
           A.{ m_body; m_name = (_, method_name); m_params; m_ret; _ } =
         let id = class_name ^ "::" ^ method_name in
-        compute_results tast_env id m_params m_ret m_body
+        let source_file = Tast_env.get_file tast_env in
+        compute_results source_file tast_env id m_params m_ret m_body
       in
       if should_not_skip tast_env then
         List.concat_map ~f:collect_method_events c_methods
@@ -169,6 +208,8 @@ let handler =
 
     method! at_fun_def tast_env fd =
       let A.{ f_body; f_name = (_, id); f_params; f_ret; _ } = fd.A.fd_fun in
+      let source_file = Tast_env.get_file tast_env in
       if should_not_skip tast_env then
-        compute_results tast_env id f_params f_ret f_body |> log_events tast_env
+        compute_results source_file tast_env id f_params f_ret f_body
+        |> log_events tast_env
   end

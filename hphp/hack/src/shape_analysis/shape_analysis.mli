@@ -33,3 +33,7 @@ val show_shape_result : Typing_env_types.env -> shape_result -> string
 val shape_results_using_hips : solve_entries
 
 val shape_results_no_hips : solve_entries
+
+val any_constraints_of_decorated_constraints :
+  decorated_constraints ->
+  (constraint_, inter_constraint_) HT.any_constraint_ list

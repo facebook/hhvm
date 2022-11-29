@@ -41,6 +41,23 @@ let intra_constraints_of_any_constraints =
       | HT.Intra intra_constr -> Some intra_constr
       | HT.Inter _ -> None)
 
+let strip_decorations { constraint_; _ } = constraint_
+
+let any_constraints_of_decorated_constraints decorated_constraints =
+  let intra_constraints =
+    fst decorated_constraints
+    |> DecoratedConstraintSet.elements
+    |> List.map ~f:strip_decorations
+    |> List.map ~f:(fun c -> HT.Intra c)
+  in
+  let inter_constraints =
+    snd decorated_constraints
+    |> DecoratedInterConstraintSet.elements
+    |> List.map ~f:strip_decorations
+    |> List.map ~f:(fun c -> HT.Inter c)
+  in
+  List.append intra_constraints inter_constraints
+
 let analyse (constraints : any_constraint list SMap.t) ~verbose :
     any_constraint list SMap.t =
   constraints |> Inter_shape.analyse ~verbose |> function
@@ -188,7 +205,6 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
       List.iter results ~f:(fun result ->
           Format.printf "%s\n" (show_shape_result empty_typing_env result))
     in
-    let strip_decorations { constraint_; _ } = constraint_ in
     let process_callable id constraints =
       simplify empty_typing_env constraints |> print_callable_summary id
     in

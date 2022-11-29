@@ -36,6 +36,8 @@ module.exports = {
         type: 'doc',
         id: 'fb/quick-start/index',
       },
+      collapsible: true,
+      collapsed: true,
       items: [
         'fb/quick-start/java',
         'fb/quick-start/python'
@@ -54,19 +56,6 @@ module.exports = {
         'fb/howtos/calling-python-from-hack',
       ]
     }]),
-    {
-      type: 'category',
-      label: 'Tutorials',
-      link: {
-        type: 'doc',
-        id: "tutorials/index",
-      },
-      collapsible: true,
-      collapsed: true,
-      items: [
-        'tutorials/docstring-annotation',
-      ]
-    },
     {
       type: 'category',
       label: 'Specification',
@@ -233,7 +222,7 @@ module.exports = {
           },
           items: [
             'fb/languages/hack/adding-updating',
-            'fb/languages/hack/adding-new-files-smoothly',
+            'fb/languages/hack/adding-new-files',
             'fb/languages/hack/auto-sync-for-existing-thrift-files',
             'fb/languages/hack/updating-the-thrift-compiler-in-www/index',
             'fb/languages/hack/adding-graphql-and-jsenum-support',
@@ -470,9 +459,21 @@ module.exports = {
         },
         'fb/contributions/flags',
         'fb/contributions/server-logging',
-        'fb/contributions/bundling-annotation-library',
+        'fb/contributions/syncing-annotation-library',
         'fb/contributions/jemalloc-profiling-on-server',
-        'fb/contributions/contextprop',
+        {
+          type: 'category',
+          label: 'ContextProp',
+          link: {
+            type: 'doc',
+            id: "fb/contributions/contextprop/index",
+          },
+          items: [
+            'fb/contributions/contextprop/testing',
+            'fb/contributions/contextprop/design-and-implementation',
+            'fb/contributions/contextprop/extending-fields'
+          ]
+        },
         'fb/contributions/thrift-repos',
         'fb/contributions/internal-server-logging',
         'fb/contributions/pcap-logging',

@@ -21,7 +21,7 @@ let stub_method_action
     ~(is_static : bool)
     (class_name : string)
     (parent_name : string)
-    ((meth_name, meth) : string * Typing_defs.class_elt) : Quickfix.t =
+    ((meth_name, meth) : string * Typing_defs.class_elt) : Pos.t Quickfix.t =
   let new_text =
     Typing_skeleton.of_method ~is_static ~is_override:true meth_name meth
   in
@@ -37,7 +37,7 @@ let stub_method_action
    overrides one in [parent_name]. *)
 let override_method_quickfixes
     (env : Tast_env.env) (cls : Tast.class_) (parent_name : string) :
-    Quickfix.t list =
+    Pos.t Quickfix.t list =
   let (_, class_name) = cls.Aast.c_name in
   let existing_methods =
     SSet.of_list (List.map cls.Aast.c_methods ~f:(fun m -> snd m.Aast.m_name))
@@ -88,13 +88,14 @@ let refactorings_at ~start_line ~start_col =
       List.concat meth_actions @ acc
   end
 
-let text_edits (classish_starts : Pos.t SMap.t) (quickfix : Quickfix.t) :
+let text_edits (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
     Lsp.TextEdit.t list =
   let edits = Quickfix.get_edits ~classish_starts quickfix in
   List.map edits ~f:(fun (new_text, pos) ->
       { Lsp.TextEdit.range = to_range pos; newText = new_text })
 
-let fix_action path (classish_starts : Pos.t SMap.t) (quickfix : Quickfix.t) :
+let fix_action
+    path (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
     Lsp.CodeAction.command_or_action =
   let open Lsp in
   let changes = SMap.singleton path (text_edits classish_starts quickfix) in
@@ -110,7 +111,7 @@ let fix_action path (classish_starts : Pos.t SMap.t) (quickfix : Quickfix.t) :
     }
 
 let refactor_action
-    path (classish_starts : Pos.t SMap.t) (quickfix : Quickfix.t) :
+    path (classish_starts : Pos.t SMap.t) (quickfix : Pos.t Quickfix.t) :
     Lsp.CodeAction.command_or_action =
   let open Lsp in
   let changes = SMap.singleton path (text_edits classish_starts quickfix) in

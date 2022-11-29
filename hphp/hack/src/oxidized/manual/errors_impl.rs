@@ -17,9 +17,9 @@ impl<PP, P> UserError<PP, P> {
         code: ErrorCode,
         claim: Message<PP>,
         reasons: Vec<Message<P>>,
-        quickfixes: Vec<Quickfix>,
+        quickfixes: Vec<Quickfix<PP>>,
     ) -> Self {
-        UserError {
+        Self {
             code,
             claim,
             reasons,

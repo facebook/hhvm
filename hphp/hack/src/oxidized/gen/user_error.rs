@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<082ec983bdf346d4aa5cb6e956960835>>
+// @generated SignedSource<<7f8f7d8f34c53193bfe44d6e43be5d66>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -39,7 +39,7 @@ pub struct UserError<PrimPos, Pos> {
     pub code: isize,
     pub claim: message::Message<PrimPos>,
     pub reasons: Vec<message::Message<Pos>>,
-    pub quickfixes: Vec<quickfix::Quickfix>,
+    pub quickfixes: Vec<quickfix::Quickfix<PrimPos>>,
     pub is_fixmed: bool,
 }
 

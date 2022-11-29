@@ -158,7 +158,7 @@ end
 
 type on_error =
   ?code:int ->
-  ?quickfixes:Quickfix.t list ->
+  ?quickfixes:Pos.t Quickfix.t list ->
   Pos_or_decl.t Message.t list ->
   unit
 
@@ -166,7 +166,7 @@ type error =
   Error_code.t
   * Pos.t Message.t Lazy.t
   * Pos_or_decl.t Message.t list Lazy.t
-  * Quickfix.t list
+  * Pos.t Quickfix.t list
 
 module Common = struct
   let map2 ~f x y = Lazy.(x >>= fun x -> map ~f:(fun y -> f x y) y)
@@ -1863,7 +1863,7 @@ module Primary = struct
         pos: Pos.t;
         member_name: string;
         decl_pos: Pos_or_decl.t;
-        quickfixes: Quickfix.t list;
+        quickfixes: Pos.t Quickfix.t list;
       }
     | Attribute_too_many_arguments of {
         pos: Pos.t;
@@ -2459,7 +2459,7 @@ module Primary = struct
         trace: Pos_or_decl.t Message.t list Lazy.t;
         name: string;
         kind: [ `meth | `prop | `const | `ty_const ];
-        quickfixes: Quickfix.t list;
+        quickfixes: Pos.t Quickfix.t list;
       }
     | Abstract_member_in_concrete_class of {
         pos: Pos.t;
@@ -2609,7 +2609,7 @@ module Primary = struct
         class_pos: Pos_or_decl.t;
         member_name: string;
         hint: ([ `instance | `static ] * Pos_or_decl.t * string) option;
-        quickfixes: Quickfix.t list;
+        quickfixes: Pos.t Quickfix.t list;
       }
     | Type_arity_mismatch of {
         pos: Pos.t;
@@ -6397,7 +6397,7 @@ and Secondary : sig
         member_name: string;
         closest_member_name: string option;
         hint: ([ `instance | `static ] * Pos_or_decl.t * string) option;
-        quickfixes: Quickfix.t list;
+        quickfixes: Pos.t Quickfix.t list;
       }
     | Type_arity_mismatch of {
         pos: Pos_or_decl.t;
@@ -6656,7 +6656,7 @@ and Secondary : sig
   val eval :
     t ->
     current_span:Pos.t ->
-    (Error_code.t * Pos_or_decl.t Message.t list Lazy.t * Quickfix.t list)
+    (Error_code.t * Pos_or_decl.t Message.t list Lazy.t * Pos.t Quickfix.t list)
     Eval_result.t
 end = struct
   type t =
@@ -6675,7 +6675,7 @@ end = struct
         member_name: string;
         closest_member_name: string option;
         hint: ([ `instance | `static ] * Pos_or_decl.t * string) option;
-        quickfixes: Quickfix.t list;
+        quickfixes: Pos.t Quickfix.t list;
       }
     | Type_arity_mismatch of {
         pos: Pos_or_decl.t;
@@ -7631,7 +7631,9 @@ end = struct
       [] )
 
   let eval t ~current_span :
-      (Error_code.t * Pos_or_decl.t Message.t list Lazy.t * Quickfix.t list)
+      (Error_code.t
+      * Pos_or_decl.t Message.t list Lazy.t
+      * Pos.t Quickfix.t list)
       Eval_result.t =
     match t with
     | Of_error err ->
@@ -7819,7 +7821,7 @@ and Callback : sig
   val apply :
     ?code:Error_code.t ->
     ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
-    ?quickfixes:Quickfix.t list ->
+    ?quickfixes:Pos.t Quickfix.t list ->
     t ->
     claim:Pos.t Message.t Lazy.t ->
     error option
@@ -7883,7 +7885,7 @@ end = struct
   type t =
     | Always of Primary.t
     | With_claim_as_reason of t * Primary.t
-    | With_code of Error_code.t * Quickfix.t list
+    | With_code of Error_code.t * Pos.t Quickfix.t list
     | Retain_code of t
     | With_side_effect of t * (unit -> unit)
 
@@ -7905,7 +7907,7 @@ end = struct
     code_opt: Error_code.t option;
     claim_opt: Pos.t Message.t Lazy.t option;
     reasons: Pos_or_decl.t Message.t list Lazy.t;
-    quickfixes: Quickfix.t list;
+    quickfixes: Pos.t Quickfix.t list;
   }
 
   let with_code code { claim_opt; reasons; quickfixes; _ } =
@@ -8072,7 +8074,7 @@ and Reasons_callback : sig
     ?code:Error_code.t ->
     ?claim:Pos.t Message.t Lazy.t ->
     ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
-    ?quickfixes:Quickfix.t list ->
+    ?quickfixes:Pos.t Quickfix.t list ->
     t ->
     current_span:Pos.t ->
     error Eval_result.t
@@ -8081,7 +8083,7 @@ and Reasons_callback : sig
     ?code:Error_code.t ->
     ?claim:Pos.t Message.t Lazy.t ->
     ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
-    ?quickfixes:Quickfix.t list ->
+    ?quickfixes:Pos.t Quickfix.t list ->
     t ->
     current_span:Pos.t ->
     (Pos.t, Pos_or_decl.t) User_error.t Eval_result.t
@@ -8214,7 +8216,7 @@ end = struct
       code_opt: Error_code.t option;
       claim_opt: Pos.t Message.t Lazy.t option;
       reasons_opt: Pos_or_decl.t Message.t list Lazy.t option;
-      quickfixes_opt: Quickfix.t list option;
+      quickfixes_opt: Pos.t Quickfix.t list option;
     }
 
     let with_code t code_opt =

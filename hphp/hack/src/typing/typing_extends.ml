@@ -275,7 +275,7 @@ let stub_meth_quickfix
     ~(meth_name : string)
     (meth : class_elt)
     ~(is_override : bool)
-    (member_kind : MemberKind.t) : Quickfix.t =
+    (member_kind : MemberKind.t) : Pos.t Quickfix.t =
   let title =
     Printf.sprintf
       "Add stub method %s"

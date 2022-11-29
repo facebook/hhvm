@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<47e5183e6ce1e188b5f5c46baf795780>>
+// @generated SignedSource<<b63800277691d071702e9766e3aced3f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -35,8 +35,8 @@ use crate::*;
 )]
 #[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C, u8)]
-pub enum QfPos {
-    Qpos(pos::Pos),
+pub enum QfPos<Pos> {
+    Qpos(Pos),
     #[rust_to_ocaml(name = "Qclassish_start")]
     QclassishStart(String),
 }
@@ -58,7 +58,7 @@ pub enum QfPos {
 )]
 #[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C)]
-pub struct Edit(pub String, pub QfPos);
+pub struct Edit<Pos>(pub String, pub QfPos<Pos>);
 
 #[derive(
     Clone,
@@ -77,7 +77,7 @@ pub struct Edit(pub String, pub QfPos);
 )]
 #[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
 #[repr(C)]
-pub struct Quickfix {
+pub struct Quickfix<Pos> {
     pub title: String,
-    pub edits: Vec<Edit>,
+    pub edits: Vec<Edit<Pos>>,
 }

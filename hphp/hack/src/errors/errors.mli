@@ -70,7 +70,7 @@ val apply_error_from_reasons_callback :
   ?code:Typing.t ->
   ?claim:Pos.t Message.t Lazy.t ->
   ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
-  ?quickfixes:Quickfix.t list ->
+  ?quickfixes:Pos.t Quickfix.t list ->
   Typing_error.Reasons_callback.t ->
   unit
 

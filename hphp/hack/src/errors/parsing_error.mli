@@ -12,7 +12,7 @@ type t =
   | Parsing_error of {
       pos: Pos.t;
       msg: string;
-      quickfixes: Quickfix.t list;
+      quickfixes: Pos.t Quickfix.t list;
     }
   | Xhp_parsing_error of {
       pos: Pos.t;

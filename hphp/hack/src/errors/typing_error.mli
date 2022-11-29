@@ -612,7 +612,7 @@ module Primary : sig
         pos: Pos.t;
         member_name: string;
         decl_pos: Pos_or_decl.t;
-        quickfixes: Quickfix.t list;
+        quickfixes: Pos.t Quickfix.t list;
       }
     | Attribute_too_many_arguments of {
         pos: Pos.t;
@@ -1208,7 +1208,7 @@ module Primary : sig
         trace: Pos_or_decl.t Message.t list Lazy.t;
         name: string;
         kind: [ `meth | `prop | `const | `ty_const ];
-        quickfixes: Quickfix.t list;
+        quickfixes: Pos.t Quickfix.t list;
       }
     | Abstract_member_in_concrete_class of {
         pos: Pos.t;
@@ -1358,7 +1358,7 @@ module Primary : sig
         class_pos: Pos_or_decl.t;
         member_name: string;
         hint: ([ `instance | `static ] * Pos_or_decl.t * string) option;
-        quickfixes: Quickfix.t list;
+        quickfixes: Pos.t Quickfix.t list;
       }
     | Type_arity_mismatch of {
         pos: Pos.t;
@@ -1411,7 +1411,7 @@ module Secondary : sig
         member_name: string;
         closest_member_name: string option;
         hint: ([ `instance | `static ] * Pos_or_decl.t * string) option;
-        quickfixes: Quickfix.t list;
+        quickfixes: Pos.t Quickfix.t list;
       }
     | Type_arity_mismatch of {
         pos: Pos_or_decl.t;
@@ -1757,7 +1757,7 @@ module Reasons_callback : sig
     ?code:Error_code.t ->
     ?claim:Pos.t Message.t Lazy.t ->
     ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
-    ?quickfixes:Quickfix.t list ->
+    ?quickfixes:Pos.t Quickfix.t list ->
     t ->
     current_span:Pos.t ->
     (Pos.t, Pos_or_decl.t) User_error.t Eval_result.t
@@ -1768,7 +1768,7 @@ module Reasons_callback : sig
       migrated *)
   val from_on_error :
     (?code:int ->
-    ?quickfixes:Quickfix.t list ->
+    ?quickfixes:Pos.t Quickfix.t list ->
     Pos_or_decl.t Message.t list ->
     unit) ->
     t

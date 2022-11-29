@@ -9,7 +9,7 @@ type ('prim_pos, 'pos) t = {
   code: int;
   claim: 'prim_pos Message.t;
   reasons: 'pos Message.t list;
-  quickfixes: Quickfix.t list;
+  quickfixes: 'prim_pos Quickfix.t list;
   is_fixmed: bool;
 }
 [@@deriving eq, ord, show]
@@ -21,7 +21,7 @@ type severity =
 val make :
   int ->
   ?is_fixmed:bool ->
-  ?quickfixes:Quickfix.t list ->
+  ?quickfixes:'a Quickfix.t list ->
   'a Message.t ->
   'b Message.t list ->
   ('a, 'b) t
@@ -30,7 +30,7 @@ val get_code : ('a, 'b) t -> int
 
 val get_pos : ('a, 'b) t -> 'a
 
-val quickfixes : ('a, 'b) t -> Quickfix.t list
+val quickfixes : ('a, 'b) t -> 'a Quickfix.t list
 
 val get_code_severity : int -> severity
 

@@ -1,6 +1,0 @@
-file,ocaml,rust_no_pos,pct_change_no_pos,rust_with_pos,pct_change_with_pos
-method_call_box.php,3.344335,3.310045,-1%,3.823358,14%
-method_call_nested_box.php,4.667217,4.038304,-13%,4.941469,6%
-sequential_assign.php,1.021930,1.288952,26%,1.478564,45%
-sequential_function_calls_with_prim_args.php,2.456961,2.1573450000000003,-12%,2.5350859999999997,3%
-sequential_method_calls_with_prim_args.php,2.973774,2.848733,-4%,3.354849,13%

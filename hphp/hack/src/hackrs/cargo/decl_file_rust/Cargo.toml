@@ -9,7 +9,6 @@ name = "decl_file_rust"
 path = "../../decl_file_rust.rs"
 
 [dependencies]
-datastore = { path = "../../datastore" }
 decl_parser = { path = "../../decl_parser/cargo/decl_parser" }
 file_provider = { path = "../../file_provider/cargo/file_provider" }
 folded_decl_provider = { path = "../../folded_decl_provider/cargo/folded_decl_provider" }
@@ -17,7 +16,6 @@ hackrs_test_utils = { path = "../../hackrs_test_utils/cargo/hackrs_test_utils" }
 hhi = { path = "../../../hhi/rust" }
 jwalk = "0.6"
 pos = { path = "../../pos/cargo/pos" }
-rupro = { path = "../../rupro/cargo/rupro" }
 structopt = "0.3.23"
 tempdir = "0.3"
 ty = { path = "../../ty/cargo/ty" }

@@ -16,8 +16,6 @@ use jwalk::WalkDir;
 use pos::Prefix;
 use pos::RelativePath;
 use pos::RelativePathCtx;
-use rupro::typing_decl_provider::FoldingTypingDeclProvider;
-use rupro::typing_decl_provider::TypingDeclProvider;
 use structopt::StructOpt;
 use ty::decl::shallow;
 use ty::reason::BReason;
@@ -49,17 +47,13 @@ struct CliOptions {
     /// Print the folded decls of the classes in the file.
     #[structopt(long)]
     folded: bool,
-
-    /// Print the typing decls (i.e., folded decls with member types) of the classes in the file.
-    #[structopt(long)]
-    typing: bool,
 }
 
 fn main() {
     let mut opts = CliOptions::from_args();
 
     // If no modes were specified, print the shallow decls at least.
-    if !opts.shallow && !opts.folded && !opts.typing {
+    if !opts.shallow && !opts.folded {
         opts.shallow = true;
     }
 
@@ -103,7 +97,7 @@ fn decl_files<R: Reason>(opts: &CliOptions) {
         .collect::<Vec<_>>();
     let file_provider: Arc<dyn file_provider::FileProvider> =
         Arc::new(file_provider::DiskProvider::new(path_ctx, Some(hhi_root)));
-    let decl_parser = DeclParser::new(Arc::clone(&file_provider));
+    let decl_parser = DeclParser::<R>::new(Arc::clone(&file_provider));
     all_filenames.extend(&filenames);
 
     let shallow_decl_store = make_shallow_decl_store(StoreOpts::Unserialized);
@@ -114,11 +108,6 @@ fn decl_files<R: Reason>(opts: &CliOptions) {
         opts.naming_table.as_ref(),
         shallow_decl_store,
         decl_parser.clone(),
-    ));
-
-    let typing_decl_provider = Arc::new(FoldingTypingDeclProvider::new(
-        Box::new(datastore::NonEvictingLocalStore::new()),
-        Arc::clone(&folded_decl_provider) as Arc<dyn FoldedDeclProvider<R>>,
     ));
 
     let mut saw_err = false;
@@ -132,18 +121,6 @@ fn decl_files<R: Reason>(opts: &CliOptions) {
                     }
                     if opts.folded {
                         match folded_decl_provider.get_class(name.into(), name) {
-                            Ok(decl) => println!(
-                                "{:#?}",
-                                decl.expect("expected decl provider to return Some")
-                            ),
-                            Err(e) => {
-                                saw_err = true;
-                                eprintln!("Error: {}", e);
-                            }
-                        }
-                    }
-                    if opts.typing {
-                        match typing_decl_provider.get_class(name.into(), name) {
                             Ok(decl) => println!(
                                 "{:#?}",
                                 decl.expect("expected decl provider to return Some")

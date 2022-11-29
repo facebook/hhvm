@@ -19,7 +19,9 @@ use ir::instr::Special;
 use ir::instr::Terminator;
 use ir::instr::Textual;
 use ir::BlockId;
+use ir::ClassId;
 use ir::ClassName;
+use ir::ConstId;
 use ir::Constant;
 use ir::Func;
 use ir::IncDecOp;
@@ -194,6 +196,10 @@ fn write_instr(
 
     match *instr {
         Instr::Call(ref call) => write_call(fb, state, iid, call)?,
+        Instr::Hhbc(Hhbc::ClsCnsD(const_id, cid, _)) => {
+            let vid = write_get_class_const(fb, state, cid, const_id)?;
+            state.set_iid(iid, vid);
+        }
         Instr::Hhbc(Hhbc::CGetL(lid, _)) => write_load_var(fb, state, iid, lid)?,
         Instr::Hhbc(Hhbc::IncDecL(lid, op, _)) => write_inc_dec_l(fb, state, iid, lid, op)?,
         Instr::Hhbc(Hhbc::ResolveClass(cid, _)) => {
@@ -316,6 +322,20 @@ fn write_copy(
         ir::FullInstrId::None => unreachable!(),
     }
     Ok(())
+}
+
+fn write_get_class_const(
+    fb: &mut textual::FuncBuilder<'_, '_>,
+    state: &mut FuncState<'_>,
+    class: ClassId,
+    cid: ConstId,
+) -> Result<Sid> {
+    // TODO: should we load the class static to ensure that the constants are initialized?
+    // let this = class::load_static_class(w, class, &state.strings, &mut state.decls)?;
+
+    let name = cid.mangle(class, state.strings);
+    let var = textual::Var::Named(name);
+    fb.load(tx_ty!(*HackMixed), textual::Expr::deref(var))
 }
 
 fn write_terminator(

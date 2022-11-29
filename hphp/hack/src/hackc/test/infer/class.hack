@@ -15,6 +15,7 @@
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.alloc_words(0)
 // CHECK:   store &static_singleton::C <- n0: *C$static
+// CHECK:   store &C::MY_CONSTANT <- $builtins.hack_int(7): *HackMixed
 // CHECK:   ret 0
 // CHECK: }
 
@@ -24,6 +25,8 @@ class C {
   public string $prop2 = "hello";
   public static float $prop3 = 3.14;
   public static mixed $prop4 = null;
+
+  const int MY_CONSTANT = 7;
 
   // Test reserved token.
   public int $type = 2;
@@ -92,6 +95,18 @@ class C {
       echo "unequal";
     }
   }
+
+  // CHECK: define C.test_const(this: *C) : *HackMixed {
+  // CHECK: local $x: *void, base: *HackMixed
+  // CHECK: #b0:
+  // CHECK:   n0: *HackMixed = load &C::MY_CONSTANT
+  // CHECK:   store &$x <- n0: *HackMixed
+  // CHECK:   ret $builtins.hack_null()
+  // CHECK: }
+  public function test_const(): void {
+    $x = C::MY_CONSTANT;
+  }
 }
 
+// CHECK: global C::MY_CONSTANT : *HackMixed
 // CHECK: global static_singleton::C : *C$static

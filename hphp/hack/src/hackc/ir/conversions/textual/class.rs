@@ -24,6 +24,7 @@ use crate::mangle::Mangle;
 use crate::mangle::MangleWithClass as _;
 use crate::state::UnitState;
 use crate::textual::TextualFile;
+use crate::typed_value;
 use crate::types::convert_ty;
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
@@ -32,6 +33,12 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 pub(crate) enum IsStatic {
     Static,
     NonStatic,
+}
+
+impl IsStatic {
+    pub(crate) fn as_bool(&self) -> bool {
+        matches!(self, IsStatic::Static)
+    }
 }
 
 pub(crate) struct StaticClassId(pub(crate) ir::ClassId);
@@ -57,6 +64,12 @@ pub(crate) fn write_class(
 
     write_type(txf, state, &class, IsStatic::Static)?;
     write_type(txf, state, &class, IsStatic::NonStatic)?;
+
+    // Class constants are not inherited so we just turn them into globals.
+    for constant in &class.constants {
+        let name = constant.name.mangle(class.name, &state.strings);
+        txf.declare_global(name, tx_ty!(*HackMixed));
+    }
 
     write_init_static(txf, state, &class)?;
 
@@ -112,56 +125,9 @@ fn write_type(
 ) -> Result {
     let mut fields: Vec<(String, textual::Ty, textual::Visibility)> = Vec::new();
     for prop in &class.properties {
-        let ir::Property {
-            name,
-            mut flags,
-            ref attributes,
-            visibility,
-            ref initial_value,
-            ref type_info,
-            doc_comment: _,
-        } = *prop;
-
-        let instance_match = match is_static {
-            IsStatic::Static => flags.is_static(),
-            IsStatic::NonStatic => !flags.is_static(),
-        };
-        if !instance_match {
-            continue;
+        if prop.flags.is_static() == is_static.as_bool() {
+            write_property(txf, &mut fields, state, prop)?;
         }
-        flags.clear(ir::Attr::AttrStatic);
-
-        let name = name.mangle(&state.strings);
-
-        let vis = if flags.is_private() {
-            textual::Visibility::Private
-        } else if flags.is_protected() {
-            textual::Visibility::Protected
-        } else {
-            textual::Visibility::Public
-        };
-        flags.clear(ir::Attr::AttrPrivate);
-        flags.clear(ir::Attr::AttrProtected);
-        flags.clear(ir::Attr::AttrPublic);
-        flags.clear(ir::Attr::AttrSystemInitialValue);
-
-        if !flags.is_empty() {
-            trace!("CLASS FLAGS: {:?}", flags);
-            textual_todo! { txf.write_comment(&format!("TODO: class flags: {flags:?}"))? };
-        }
-        if !attributes.is_empty() {
-            textual_todo! { txf.write_comment(&format!("TODO: class attributes: {attributes:?}"))? };
-        }
-        if visibility == ir::Visibility::Private {
-            txf.write_comment(&format!("TODO: private {name}"))?;
-        }
-        if let Some(initial_value) = initial_value {
-            txf.write_comment(&format!("TODO: initial value {initial_value:?}"))?;
-        }
-
-        let ty = convert_ty(type_info.enforced.clone(), &state.strings);
-
-        fields.push((name, ty, vis));
     }
 
     let fields = fields.iter().map(|(name, ty, visibility)| textual::Field {
@@ -172,6 +138,59 @@ fn write_type(
 
     let cname = mangled_class_name(class.name, is_static, &state.strings);
     txf.define_type(&cname, &class.src_loc, fields)?;
+
+    Ok(())
+}
+
+fn write_property(
+    txf: &mut TextualFile<'_>,
+    fields: &mut Vec<(String, textual::Ty, textual::Visibility)>,
+    state: &mut UnitState,
+    prop: &ir::Property<'_>,
+) -> Result {
+    let ir::Property {
+        name,
+        mut flags,
+        ref attributes,
+        visibility,
+        ref initial_value,
+        ref type_info,
+        doc_comment: _,
+    } = *prop;
+
+    flags.clear(ir::Attr::AttrStatic);
+
+    let name = name.mangle(&state.strings);
+
+    let vis = if flags.is_private() {
+        textual::Visibility::Private
+    } else if flags.is_protected() {
+        textual::Visibility::Protected
+    } else {
+        textual::Visibility::Public
+    };
+    flags.clear(ir::Attr::AttrPrivate);
+    flags.clear(ir::Attr::AttrProtected);
+    flags.clear(ir::Attr::AttrPublic);
+    flags.clear(ir::Attr::AttrSystemInitialValue);
+
+    if !flags.is_empty() {
+        trace!("CLASS FLAGS: {:?}", flags);
+        textual_todo! { txf.write_comment(&format!("TODO: class flags: {flags:?}"))? };
+    }
+    if !attributes.is_empty() {
+        textual_todo! { txf.write_comment(&format!("TODO: class attributes: {attributes:?}"))? };
+    }
+    if visibility == ir::Visibility::Private {
+        txf.write_comment(&format!("TODO: private {name}"))?;
+    }
+    if let Some(initial_value) = initial_value {
+        txf.write_comment(&format!("TODO: initial value {initial_value:?}"))?;
+    }
+
+    let ty = convert_ty(type_info.enforced.clone(), &state.strings);
+
+    fields.push((name, ty, vis));
     Ok(())
 }
 
@@ -204,6 +223,16 @@ fn write_init_static(
 
             let singleton_expr = textual::Expr::deref(textual::Var::named(singleton_name));
             fb.store(singleton_expr, p, static_ty(class.name, &state.strings))?;
+
+            // constants
+            for constant in &class.constants {
+                if let Some(value) = constant.value.as_ref() {
+                    let name = constant.name.mangle(class.name, &state.strings);
+                    let var = textual::Var::named(name);
+                    let value = typed_value::typed_value_expr(value, &state.strings);
+                    fb.store(textual::Expr::deref(var), value, tx_ty!(*HackMixed))?;
+                }
+            }
 
             fb.ret(0)?;
             Ok(())

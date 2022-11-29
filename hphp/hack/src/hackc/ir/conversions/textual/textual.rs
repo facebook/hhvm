@@ -131,7 +131,7 @@ impl<'a> TextualFile<'a> {
     ) -> Result {
         self.write_full_loc(src_loc)?;
 
-        writeln!(self.w, "type {name} = {{")?;
+        write!(self.w, "type {name} = {{")?;
 
         let mut sep = "\n";
         for f in fields {
@@ -335,17 +335,19 @@ impl fmt::Display for FmtConst<'_> {
 
 #[derive(Clone, Debug)]
 pub(crate) enum Expr {
-    Sid(Sid),
-    /// *Variable
-    Deref(Var),
-    // Field(String),
-    /// a[b]
-    Index(Box<Expr>, Box<Expr>),
-    /// 0, null, etc
-    Const(Const),
     /// foo(1, 2, 3)
     Call(String, Box<[Expr]>),
+    /// 0, null, etc
+    Const(Const),
+    /// *Variable
+    Deref(Box<Expr>),
+    /// a.b
+    Field(Box<Expr>, String),
+    /// a[b]
+    Index(Box<Expr>, Box<Expr>),
+    Sid(Sid),
     // TyAscription(Box<Expr>, Ty),
+    Var(Var),
 }
 
 impl Expr {
@@ -353,8 +355,15 @@ impl Expr {
         Expr::Call(target.to_string(), params.into_exprs().into_boxed_slice())
     }
 
-    pub(crate) fn deref(v: impl Into<Var>) -> Expr {
-        Expr::Deref(v.into())
+    pub(crate) fn deref(v: impl Into<Expr>) -> Expr {
+        Expr::Deref(Box::new(v.into()))
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn field(base: impl Into<Expr>, name: impl Into<String>) -> Expr {
+        let base = base.into();
+        let name = name.into();
+        Expr::Field(Box::new(base), name)
     }
 
     #[allow(dead_code)]
@@ -406,6 +415,18 @@ impl From<i64> for Expr {
 impl From<Sid> for Expr {
     fn from(sid: Sid) -> Self {
         Expr::Sid(sid)
+    }
+}
+
+impl From<Var> for Expr {
+    fn from(var: Var) -> Self {
+        Expr::Var(var)
+    }
+}
+
+impl From<LocalId> for Expr {
+    fn from(lid: LocalId) -> Expr {
+        Expr::Var(lid.into())
     }
 }
 
@@ -566,7 +587,14 @@ impl FuncBuilder<'_, '_> {
                 write!(self.txf.w, ")")?;
             }
             Expr::Const(ref c) => write!(self.txf.w, "{}", FmtConst(c))?,
-            Expr::Deref(ref var) => write!(self.txf.w, "&{}", FmtVar(&self.txf.strings, var))?,
+            Expr::Deref(ref var) => {
+                self.txf.w.write_all(b"&")?;
+                self.write_expr(var)?;
+            }
+            Expr::Field(ref base, ref name) => {
+                self.write_expr(base)?;
+                write!(self.txf.w, ".{name}")?;
+            }
             Expr::Index(ref base, ref offset) => {
                 self.write_expr(base)?;
                 self.txf.w.write_all(b"[")?;
@@ -574,6 +602,7 @@ impl FuncBuilder<'_, '_> {
                 self.txf.w.write_all(b"]")?;
             }
             Expr::Sid(sid) => write!(self.txf.w, "{}", FmtSid(sid))?,
+            Expr::Var(ref var) => write!(self.txf.w, "{}", FmtVar(&self.txf.strings, var))?,
         }
         Ok(())
     }
@@ -593,7 +622,7 @@ impl FuncBuilder<'_, '_> {
                 )?;
                 Ok(sid)
             }
-            Expr::Deref(_) | Expr::Index(_, _) => {
+            Expr::Deref(_) | Expr::Field(_, _) | Expr::Index(_, _) | Expr::Var(_) => {
                 todo!("EXPR: {expr:?}")
             }
         }

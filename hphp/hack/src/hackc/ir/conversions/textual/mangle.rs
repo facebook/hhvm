@@ -143,3 +143,13 @@ impl Mangle for ir::PropId {
         self.as_bytes(strings).mangle(strings)
     }
 }
+
+impl MangleWithClass for ir::ConstId {
+    fn mangle(&self, class: impl ManglableClass, strings: &StringInterner) -> String {
+        format!(
+            "{}::{}",
+            class.mangle_class(strings),
+            self.as_bytes(strings).mangle(strings)
+        )
+    }
+}

@@ -7,9 +7,9 @@ use std::cell::RefCell;
 use std::io::Write;
 
 use dep_graph_delta::DepGraphDelta;
-pub use depgraph::reader::Dep;
-use depgraph::reader::DepGraph;
-use depgraph::reader::DepGraphOpener;
+pub use depgraph_reader::Dep;
+use depgraph_reader::DepGraph;
+use depgraph_reader::DepGraphOpener;
 use hash::HashSet;
 use ocamlrep::FromError;
 use ocamlrep::FromOcamlRep;

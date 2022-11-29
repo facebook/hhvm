@@ -10,7 +10,7 @@ use std::collections::VecDeque;
 use std::ffi::OsString;
 use std::path::Path;
 
-use depgraph::reader::Dep;
+use dep::Dep;
 use deps_rust::dep_graph_delta_with;
 use deps_rust::dep_graph_delta_with_mut;
 use deps_rust::DepSet;

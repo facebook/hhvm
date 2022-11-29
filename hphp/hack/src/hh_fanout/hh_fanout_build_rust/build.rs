@@ -13,9 +13,9 @@ use std::io::Read;
 use std::path::Path;
 
 use dep_graph_delta::DepGraphDelta;
-use depgraph::dep::Dep;
-use depgraph::reader::DepGraph;
-use depgraph::reader::DepGraphOpener;
+use depgraph_reader::Dep;
+use depgraph_reader::DepGraph;
+use depgraph_reader::DepGraphOpener;
 use depgraph_writer::DepGraphWriter;
 use depgraph_writer::HashListIndex;
 use depgraph_writer::LookupTableWriter;

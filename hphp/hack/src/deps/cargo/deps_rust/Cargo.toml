@@ -10,7 +10,7 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 dep_graph_delta = { path = "../.." }
-depgraph = { path = "../../../depgraph/cargo/depgraph" }
+depgraph_reader = { path = "../../../depgraph/cargo/depgraph_reader" }
 hash = { path = "../../../utils/hash" }
 hh_fanout_rust_ffi = { path = "../hh_fanout_rust_ffi" }
 ocamlrep = { path = "../../../ocamlrep" }

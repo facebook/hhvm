@@ -9,7 +9,7 @@ path = "../../deps_rust/deps_rust_ffi.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-depgraph = { path = "../../../depgraph/cargo/depgraph" }
+dep = { path = "../../../depgraph/cargo/dep" }
 deps_rust = { path = "../deps_rust" }
 hash = { path = "../../../utils/hash" }
 ocamlrep = { path = "../../../ocamlrep" }

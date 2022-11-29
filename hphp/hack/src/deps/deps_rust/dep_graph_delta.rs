@@ -7,7 +7,7 @@ use std::io;
 use std::io::Read;
 use std::io::Write;
 
-use depgraph::reader::Dep;
+use dep::Dep;
 use hash::HashMap;
 use hash::HashSet;
 

@@ -8,5 +8,5 @@ edition = "2021"
 path = "deps_rust/dep_graph_delta.rs"
 
 [dependencies]
-depgraph = { path = "../depgraph/cargo/depgraph" }
+dep = { path = "../depgraph/cargo/dep" }
 hash = { path = "../utils/hash" }

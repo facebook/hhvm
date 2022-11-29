@@ -8,7 +8,7 @@ edition = "2021"
 path = "../../depgraph_api.rs"
 
 [dependencies]
-depgraph = { path = "../../../../depgraph/cargo/depgraph" }
+dep = { path = "../../../../depgraph/cargo/dep" }
 pos = { path = "../../../pos/cargo/pos" }
 thiserror = "1.0.36"
 typing_deps_hash = { path = "../../../../deps/cargo/typing_deps_hash" }

@@ -11,7 +11,7 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-depgraph = { path = "../../../depgraph/cargo/depgraph" }
+depgraph_reader = { path = "../../../depgraph/cargo/depgraph_reader" }
 env_logger = "0.7"
 log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }

@@ -1106,37 +1106,45 @@ dependencies = [
 ]
 
 [[package]]
-name = "dep_graph_delta"
+name = "dep"
 version = "0.0.0"
 dependencies = [
- "depgraph",
- "hash",
+ "ocamlrep",
 ]
 
 [[package]]
-name = "depgraph"
+name = "dep_graph_delta"
 version = "0.0.0"
 dependencies = [
- "memmap",
- "ocamlrep",
- "rpds",
+ "dep",
+ "hash",
 ]
 
 [[package]]
 name = "depgraph_api"
 version = "0.0.0"
 dependencies = [
- "depgraph",
+ "dep",
  "pos",
  "thiserror",
  "typing_deps_hash",
 ]
 
 [[package]]
+name = "depgraph_reader"
+version = "0.0.0"
+dependencies = [
+ "dep",
+ "memmap",
+ "rpds",
+]
+
+[[package]]
 name = "depgraph_writer"
 version = "0.0.0"
 dependencies = [
- "depgraph",
+ "dep",
+ "depgraph_reader",
  "hash",
  "memmap",
  "parking_lot 0.11.2",
@@ -1149,7 +1157,7 @@ name = "deps_rust"
 version = "0.0.0"
 dependencies = [
  "dep_graph_delta",
- "depgraph",
+ "depgraph_reader",
  "hash",
  "hh_fanout_rust_ffi",
  "ocamlrep",
@@ -1163,7 +1171,7 @@ dependencies = [
 name = "deps_rust_ffi"
 version = "0.0.0"
 dependencies = [
- "depgraph",
+ "dep",
  "deps_rust",
  "hash",
  "ocamlrep",
@@ -1251,7 +1259,7 @@ dependencies = [
 name = "dump_saved_state_depgraph"
 version = "0.0.0"
 dependencies = [
- "depgraph",
+ "depgraph_reader",
  "indicatif",
  "structopt",
 ]
@@ -1894,7 +1902,7 @@ dependencies = [
  "dashmap",
  "datastore",
  "decl_parser",
- "depgraph",
+ "dep",
  "depgraph_api",
  "folded_decl_provider",
  "indicatif",
@@ -2068,7 +2076,7 @@ name = "hh_fanout_build"
 version = "0.0.0"
 dependencies = [
  "dep_graph_delta",
- "depgraph",
+ "depgraph_reader",
  "depgraph_writer",
  "hash",
  "log",
@@ -2089,7 +2097,7 @@ dependencies = [
 name = "hh_fanout_dep_graph_is_subgraph_rust"
 version = "0.0.0"
 dependencies = [
- "depgraph",
+ "depgraph_reader",
  "env_logger 0.7.1",
  "log",
  "ocamlrep_ocamlpool",
@@ -2099,7 +2107,7 @@ dependencies = [
 name = "hh_fanout_dep_graph_stats_rust"
 version = "0.0.0"
 dependencies = [
- "depgraph",
+ "depgraph_reader",
  "env_logger 0.7.1",
  "json",
  "log",

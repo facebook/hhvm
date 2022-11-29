@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use std::io::Write;
 
-pub use depgraph::dep::Dep;
+pub use dep::Dep;
 use hash::DashMap;
 use hash::HashMap;
 use memmap::MmapMut;
@@ -340,7 +340,7 @@ mod tests {
     use std::collections::BTreeSet;
     use std::fs;
 
-    use depgraph::reader::DepGraphOpener;
+    use depgraph_reader::DepGraphOpener;
     use hash::HashSet;
     use tempfile::NamedTempFile;
 

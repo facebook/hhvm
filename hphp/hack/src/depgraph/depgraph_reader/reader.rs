@@ -2,13 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+mod byteutils;
 
 use std::ops::Deref;
 
+pub use dep::Dep;
 use rpds::HashTrieSet;
-
-use crate::byteutils;
-pub use crate::dep::Dep;
 
 /// Use a `DepGraphOpener` to initialize a dependency graph from a file.
 ///
@@ -372,7 +371,7 @@ impl<'bytes> HashList<'bytes> {
             .ok_or_else(|| "hash list: not properly aligned".to_string())?;
 
         let len: u32 = *data
-            .get(0)
+            .first()
             .ok_or_else(|| "hash list: couldn't read length".to_string())?;
         let len: usize = len as usize;
 

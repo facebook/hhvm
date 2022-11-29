@@ -63,8 +63,8 @@ fn add_edges<T: Ord + Clone>(es: &mut Vec<(T, T)>, k: T, vs: &std::collections::
 /// Retrieve the adjacency list for `k` in `g`.
 ///
 /// This is the analog of `value_vertex` for 64-bit depgraphs.
-fn hashes(g: &depgraph::reader::DepGraph<'_>, k: u64) -> std::collections::BTreeSet<u64> {
-    match g.hash_list_for(depgraph::dep::Dep::new(k)) {
+fn hashes(g: &depgraph_reader::DepGraph<'_>, k: u64) -> std::collections::BTreeSet<u64> {
+    match g.hash_list_for(depgraph_reader::Dep::new(k)) {
         None => std::collections::BTreeSet::<u64>::new(),
         Some(hashes) => g.hash_list_hashes(hashes).map(|x| x.into()).collect(),
     }
@@ -72,7 +72,7 @@ fn hashes(g: &depgraph::reader::DepGraph<'_>, k: u64) -> std::collections::BTree
 
 /// Print an ASCII representation of a 64-bit depgraph to stdout.
 fn dump_depgraph64(file: &str, dependency_hash: Option<u64>, hex_dump: bool) -> Result<()> {
-    let o = depgraph::reader::DepGraphOpener::from_path(file)?;
+    let o = depgraph_reader::DepGraphOpener::from_path(file)?;
     let dg = o.open().map_err(Error::DepgraphError)?;
     let () = dg.validate_hash_lists().map_err(Error::DepgraphError)?;
 
@@ -105,8 +105,8 @@ fn comp_depgraph64(
     control_file: &str,
     hex_dump: bool,
 ) -> Result<()> {
-    let l_opener = depgraph::reader::DepGraphOpener::from_path(test_file)?;
-    let r_opener = depgraph::reader::DepGraphOpener::from_path(control_file)?;
+    let l_opener = depgraph_reader::DepGraphOpener::from_path(test_file)?;
+    let r_opener = depgraph_reader::DepGraphOpener::from_path(control_file)?;
     let mut num_edges_missing = 0;
     match (|| {
         let (l_depgraph, r_depgraph) = (l_opener.open()?, r_opener.open()?);

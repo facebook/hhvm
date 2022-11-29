@@ -1,15 +1,15 @@
-(data_only_dirs cargo depgraph depgraph_writer)
+(data_only_dirs cargo depgraph_reader depgraph_writer)
 
 (library
- (name depgraph)
+ (name depgraph_reader)
  (modules)
  (wrapped false)
- (foreign_archives depgraph))
+ (foreign_archives depgraph_reader))
 
 (rule
- (targets libdepgraph.a)
+ (targets libdepgraph_reader.a)
  (deps
   (source_tree %{workspace_root}/hack/src))
  (locks /cargo)
  (action
-  (run %{workspace_root}/hack/scripts/invoke_cargo.sh depgraph depgraph)))
+  (run %{workspace_root}/hack/scripts/invoke_cargo.sh depgraph_reader depgraph_reader)))

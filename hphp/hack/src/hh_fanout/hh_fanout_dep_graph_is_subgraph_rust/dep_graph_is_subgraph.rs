@@ -5,9 +5,9 @@
 use std::ffi::OsString;
 use std::io;
 
-use depgraph::reader::Dep;
-use depgraph::reader::DepGraph;
-use depgraph::reader::DepGraphOpener;
+use depgraph_reader::Dep;
+use depgraph_reader::DepGraph;
+use depgraph_reader::DepGraphOpener;
 use log::info;
 use ocamlrep_ocamlpool::ocaml_ffi;
 

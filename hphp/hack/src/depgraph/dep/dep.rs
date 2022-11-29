@@ -30,9 +30,9 @@ impl Dep {
     }
 }
 
-impl Into<u64> for Dep {
-    fn into(self) -> u64 {
-        self.0
+impl From<Dep> for u64 {
+    fn from(dep: Dep) -> Self {
+        dep.0
     }
 }
 

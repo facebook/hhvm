@@ -40,7 +40,7 @@ impl DepGraphReader for DependencyGraph {
     fn get_dependents(
         &self,
         dependency: DependencyName,
-    ) -> Box<dyn Iterator<Item = depgraph::dep::Dep> + '_> {
+    ) -> Box<dyn Iterator<Item = dep::Dep> + '_> {
         match self.rdeps.get(&dependency) {
             Some(e) => Box::new(e.value().clone().into_iter().map(|n| n.hash1())),
             None => Box::new(std::iter::empty()),

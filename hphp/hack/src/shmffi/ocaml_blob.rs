@@ -33,6 +33,16 @@ impl From<HeapValueHeaderFields> for HeapValueHeader {
 pub struct HeapValueHeader(u64);
 
 impl HeapValueHeader {
+    pub const RAW_SIZE: usize = std::mem::size_of::<u64>();
+
+    pub fn from_raw(raw: [u8; Self::RAW_SIZE]) -> Self {
+        HeapValueHeader(u64::from_le_bytes(raw))
+    }
+
+    pub fn to_raw(&self) -> [u8; Self::RAW_SIZE] {
+        self.0.to_le_bytes()
+    }
+
     fn new(fields: HeapValueHeaderFields) -> Self {
         let buffer_size: u32 = fields.buffer_size.try_into().unwrap();
         let uncompressed_size: u32 = fields.uncompressed_size.try_into().unwrap();
@@ -41,7 +51,7 @@ impl HeapValueHeader {
         // evictable or not.
         //
         // Note that we can use the full 64-bits. This header never escapes into the
-        // OCaml world.
+        // OCaml world in bare form.
         assert_eq!(buffer_size & (1 << 31), 0);
         assert_eq!(uncompressed_size & (1 << 31), 0);
 
@@ -253,10 +263,8 @@ impl<'a> SerializedValue<'a> {
         }
     }
 
-    pub fn to_heap_value_in(&self, is_evictable: bool, buffer: &mut [u8]) -> HeapValue {
+    pub fn make_header(&self, is_evictable: bool) -> HeapValueHeader {
         let slice = self.as_slice();
-        buffer.copy_from_slice(slice);
-
         use SerializedValue::*;
         let header = match self {
             BStr(..) => HeapValueHeaderFields {
@@ -280,9 +288,15 @@ impl<'a> SerializedValue<'a> {
                 is_evictable,
             },
         };
+        header.into()
+    }
+
+    pub fn to_heap_value_in(&self, is_evictable: bool, buffer: &mut [u8]) -> HeapValue {
+        let slice = self.as_slice();
+        buffer.copy_from_slice(slice);
 
         HeapValue {
-            header: header.into(),
+            header: self.make_header(is_evictable),
             data: NonNull::from(buffer).cast(),
         }
     }

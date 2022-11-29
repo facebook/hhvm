@@ -234,6 +234,10 @@ extern value shmffi_remove(uint64_t hash);
 extern value shmffi_allocated_bytes();
 extern value shmffi_num_entries();
 
+extern value shmffi_add_raw(uint64_t hash, value data);
+extern value shmffi_get_raw(uint64_t hash);
+extern value shmffi_deserialize_raw(value data);
+extern value shmffi_serialize_raw(value data);
 
 /*****************************************************************************/
 /* Config settings (essentially constants, so they don't need to live in shared
@@ -286,7 +290,7 @@ typedef enum {
 #else
 #  define SHARED_MEM_INIT ((char *) 0x500000000000ll)
 #  define SHARDED_HASHTBL_MEM_ADDR ((char *) 0x510000000000ll)
-#  define SHARDED_HASHTBL_MEM_SIZE ((size_t)100 * 1024 * 1024 * 1024)
+#  define SHARDED_HASHTBL_MEM_SIZE ((size_t)200 * 1024 * 1024 * 1024)
 #endif
 
 /* As a sanity check when loading from a file */
@@ -1375,7 +1379,7 @@ value hh_serialize_raw(value data) {
   size_t uncompressed_size = 0;
   storage_kind kind = 0;
   if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+    CAMLreturn(shmffi_serialize_raw(data));
   }
 
   // If the data is an Ocaml string it is more efficient to copy its contents
@@ -1723,11 +1727,11 @@ static value write_raw_at(unsigned int slot, value data) {
 /*****************************************************************************/
 CAMLprim value hh_add_raw(value key, value data) {
   CAMLparam2(key, data);
+  uint64_t hash = get_hash(key);
   if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+    CAMLreturn(shmffi_add_raw(hash, data));
   }
   check_should_exit();
-  uint64_t hash = get_hash(key);
   unsigned int slot = hash & (hashtbl_size - 1);
   unsigned int init_slot = slot;
   while(1) {
@@ -1917,7 +1921,7 @@ CAMLprim value hh_get_and_deserialize(value key) {
 CAMLprim value hh_get_raw(value key) {
   CAMLparam1(key);
   if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+    CAMLreturn(shmffi_get_raw(get_hash(key)));
   }
   check_should_exit();
   CAMLlocal2(result, bytes);
@@ -1944,7 +1948,7 @@ CAMLprim value hh_deserialize_raw(value heap_entry) {
   CAMLparam1(heap_entry);
   CAMLlocal1(result);
   if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+    CAMLreturn(shmffi_deserialize_raw(heap_entry));
   }
 
   heap_entry_t* entry = (heap_entry_t*)Bytes_val(heap_entry);

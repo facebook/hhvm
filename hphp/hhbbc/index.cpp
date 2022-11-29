@@ -9808,7 +9808,12 @@ void make_local(IndexData& index) {
   // Unlike other cases, we want to bound each bucket to roughly the
   // same total byte size (since ultimately we're going to download
   // everything).
-  constexpr size_t kSizePerBucket = 10*1024*1024;
+  auto const usingSubprocess = index.client->usingSubprocess();
+  // We can be more aggressive in subprocess mode because there's no
+  // actual aggregation.
+  auto const sizePerBucket = usingSubprocess
+    ? 256*1024*1024
+    : 10*1024*1024;
 
   /*
    * We'll use the names of the various items as the items to
@@ -9861,7 +9866,7 @@ void make_local(IndexData& index) {
 
   // Back out the number of buckets we want from the total size of
   // everything and the target size of a bucket.
-  auto const numBuckets = (totalSize + kSizePerBucket - 1) / kSizePerBucket;
+  auto const numBuckets = (totalSize + sizePerBucket - 1) / sizePerBucket;
   auto buckets = consistently_bucketize(
     items,
     (items.size() + numBuckets - 1) / numBuckets
@@ -9918,30 +9923,61 @@ void make_local(IndexData& index) {
       }
     }
 
-    Client::ExecMetadata metadata{
-      .job_key = folly::sformat("aggregate {}", chunks[0])
-    };
+    AggregateJob::Bundle chunk;
+    if (!usingSubprocess) {
+      Client::ExecMetadata metadata{
+        .job_key = folly::sformat("aggregate {}", chunks[0])
+      };
 
-    // Aggregate the data, which makes downloading it more efficient.
-    auto config = HPHP_CORO_AWAIT(index.configRef->getCopy());
-    auto outputs = HPHP_CORO_AWAIT(index.client->exec(
-      s_aggregateJob,
-      std::move(config),
-      singleton_vec(
-        std::make_tuple(
-          std::move(classes),
-          std::move(classInfos),
-          std::move(funcs),
-          std::move(units)
-        )
-      ),
-      std::move(metadata)
-    ));
-    assertx(outputs.size() == 1);
+      // Aggregate the data, which makes downloading it more efficient.
+      auto config = HPHP_CORO_AWAIT(index.configRef->getCopy());
+      auto outputs = HPHP_CORO_AWAIT(index.client->exec(
+        s_aggregateJob,
+        std::move(config),
+        singleton_vec(
+          std::make_tuple(
+            std::move(classes),
+            std::move(classInfos),
+            std::move(funcs),
+            std::move(units)
+          )
+        ),
+        std::move(metadata)
+      ));
+      assertx(outputs.size() == 1);
 
-    // Download the aggregate chunks.
-    auto chunk =
-      HPHP_CORO_AWAIT(index.client->load(std::move(outputs[0])));
+      // Download the aggregate chunks.
+      chunk = HPHP_CORO_AWAIT(index.client->load(std::move(outputs[0])));
+    } else {
+      // If we're using subprocess mode, we don't need to aggregate
+      // and we can just download the items directly.
+      auto [c, cinfo, f, u] = HPHP_CORO_AWAIT(coro::collect(
+        index.client->load(std::move(classes)),
+        index.client->load(std::move(classInfos)),
+        index.client->load(std::move(funcs)),
+        index.client->load(std::move(units))
+      ));
+      chunk.classes.insert(
+        end(chunk.classes),
+        std::make_move_iterator(begin(c)),
+        std::make_move_iterator(end(c))
+      );
+      chunk.classInfos.insert(
+        end(chunk.classInfos),
+        std::make_move_iterator(begin(cinfo)),
+        std::make_move_iterator(end(cinfo))
+      );
+      chunk.funcs.insert(
+        end(chunk.funcs),
+        std::make_move_iterator(begin(f)),
+        std::make_move_iterator(end(f))
+      );
+      chunk.units.insert(
+        end(chunk.units),
+        std::make_move_iterator(begin(u)),
+        std::make_move_iterator(end(u))
+      );
+    }
 
     // And add it to our php::Program.
     {

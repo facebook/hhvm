@@ -49,7 +49,7 @@ pub(crate) fn convert_function<'a>(
         coeffects: convert_coeffects(&src.coeffects),
         func,
         flags: src.flags,
-        name: src.name,
+        name: ir::FunctionId::from_hhbc(src.name, &unit.strings),
     };
 
     unit.functions.push(function);
@@ -89,7 +89,7 @@ pub(crate) fn convert_method<'a>(
         coeffects: convert_coeffects(&src.coeffects),
         flags: src.flags,
         func,
-        name: src.name,
+        name: ir::MethodId::from_hhbc(src.name, &unit.strings),
         visibility: src.visibility,
     };
 

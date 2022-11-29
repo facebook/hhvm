@@ -221,7 +221,7 @@ fn write_method(
     trace!(
         "Convert Method {}::{}",
         class.name.as_bstr(&state.strings),
-        method.name.as_bstr()
+        method.name.as_bstr(&state.strings)
     );
 
     let this_ty = if method.attrs.is_static() {

@@ -20,14 +20,14 @@ use crate::Coeffects;
 use crate::Constant;
 use crate::ConstantId;
 use crate::FunctionFlags;
-use crate::FunctionName;
+use crate::FunctionId;
 use crate::HasEdges;
 use crate::Instr;
 use crate::InstrId;
 use crate::LocId;
 use crate::LocalId;
 use crate::MethodFlags;
-use crate::MethodName;
+use crate::MethodId;
 use crate::TypeInfo;
 use crate::UnitBytesId;
 use crate::ValueId;
@@ -449,7 +449,7 @@ pub struct Function<'a> {
     pub attrs: Attr,
     pub coeffects: Coeffects<'a>,
     pub flags: FunctionFlags,
-    pub name: FunctionName<'a>,
+    pub name: FunctionId,
     pub func: Func<'a>,
 }
 
@@ -461,7 +461,7 @@ pub struct Method<'a> {
     pub coeffects: Coeffects<'a>,
     pub flags: MethodFlags,
     pub func: Func<'a>,
-    pub name: MethodName<'a>,
+    pub name: MethodId,
     pub visibility: Visibility,
 }
 

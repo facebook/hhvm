@@ -56,7 +56,7 @@ pub(crate) fn write_function(
     state: &mut UnitState,
     function: ir::Function<'_>,
 ) -> Result {
-    trace!("Convert Function {}", function.name.as_bstr());
+    trace!("Convert Function {}", function.name.as_bstr(&state.strings));
 
     write_func(
         w,

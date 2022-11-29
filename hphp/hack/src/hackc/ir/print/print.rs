@@ -369,7 +369,7 @@ fn print_class(w: &mut dyn Write, class: &Class<'_>, strings: &StringInterner) -
     }
 
     for method in &class.methods {
-        writeln!(w, "  method {}", FmtIdentifier(method.name.as_bytes()))?;
+        writeln!(w, "  method {}", FmtIdentifierId(method.name.id, strings))?;
     }
 
     writeln!(w, "}}")?;
@@ -555,7 +555,7 @@ fn print_function(
     writeln!(
         w,
         "function {name}{tparams}{params}{shadowed_tparams} {{",
-        name = FmtIdentifier(f.name.as_bytes()),
+        name = FmtIdentifierId(f.name.id, strings),
         tparams = FmtTParams(&f.func.tparams, strings),
         shadowed_tparams = FmtShadowedTParams(&f.func.shadowed_tparams, strings),
         params = FmtFuncParams(&f.func, strings)
@@ -1657,7 +1657,7 @@ fn print_method(
         w,
         "method {clsid}::{method}{tparams}{params}{shadowed_tparams} {vis} {{",
         clsid = FmtIdentifierId(clsid.id, strings),
-        method = FmtIdentifier(method.name.as_bytes()),
+        method = FmtIdentifierId(method.name.id, strings),
         tparams = FmtTParams(&method.func.tparams, strings),
         shadowed_tparams = FmtShadowedTParams(&method.func.shadowed_tparams, strings),
         params = FmtFuncParams(&method.func, strings),

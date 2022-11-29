@@ -59,6 +59,12 @@ type TANY_MARKER<+T> = T;
 type POISON_MARKER<+T> = T;
 
 /**
+ * We haven't written the type for every property in the codebase yet.
+ * Properties which are missing their types have this placeholder instead.
+ */
+type MISSING_PROP_TYPE = TANY_MARKER<dynamic>;
+
+/**
  * We haven't written the return type for every function in the codebase yet.
  * Functions which are still missing return types have this placeholder
  * instead.

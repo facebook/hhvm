@@ -133,7 +133,7 @@ class ReflectionException extends Exception {
 
 abstract class ReflectionFunctionAbstract implements Reflector {
 
-  public $name = '';
+  public HH\FIXME\MISSING_PROP_TYPE $name = '';
 
   // Methods
   public function getName()[]: string;
@@ -177,7 +177,7 @@ class ReflectionFunction
   extends ReflectionFunctionAbstract
   implements Reflector {
 
-  public $name = '';
+  public HH\FIXME\MISSING_PROP_TYPE $name = '';
 
   public function __construct($name)[];
   public function __toString()[]: string;
@@ -203,8 +203,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   const int IS_ABSTRACT;
   const int IS_FINAL;
 
-  public $name = '';
-  public $class = '';
+  public HH\FIXME\MISSING_PROP_TYPE $name = '';
+  public HH\FIXME\MISSING_PROP_TYPE $class = '';
 
   public static function export(
     string $class,
@@ -245,7 +245,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
 }
 
 class ReflectionParameter implements Reflector {
-  public $name = '';
+  public HH\FIXME\MISSING_PROP_TYPE $name = '';
 
   private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
   public static function export(
@@ -292,8 +292,8 @@ class ReflectionProperty implements Reflector {
   const int IS_PROTECTED;
   const int IS_PRIVATE;
 
-  public $name = '';
-  public $class = '';
+  public HH\FIXME\MISSING_PROP_TYPE $name = '';
+  public HH\FIXME\MISSING_PROP_TYPE $class = '';
 
   private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
   public static function export(
@@ -330,7 +330,7 @@ class ReflectionProperty implements Reflector {
 
 class ReflectionExtension implements Reflector {
 
-  public $name = '';
+  public HH\FIXME\MISSING_PROP_TYPE $name = '';
 
   private function __clone(): HH\FIXME\MISSING_RETURN_TYPE;
   public static function export(

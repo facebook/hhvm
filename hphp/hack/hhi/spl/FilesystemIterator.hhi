@@ -24,7 +24,7 @@ class FilesystemIterator extends DirectoryIterator {
   const int UNIX_PATHS;
 
   // Properties
-  protected $flags;
+  protected HH\FIXME\MISSING_PROP_TYPE $flags;
 
   // Methods
   public function __construct($path, $flags = null);

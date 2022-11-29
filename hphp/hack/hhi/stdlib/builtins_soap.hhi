@@ -179,13 +179,13 @@ class SoapHeader {
 class SoapFault extends Exception {
 
   // Properties
-  public $faultcode;
-  public $faultcodens;
-  public $faultstring;
-  public $faultactor;
-  public $detail;
-  public $_name;
-  public $headerfault;
+  public HH\FIXME\MISSING_PROP_TYPE $faultcode;
+  public HH\FIXME\MISSING_PROP_TYPE $faultcodens;
+  public HH\FIXME\MISSING_PROP_TYPE $faultstring;
+  public HH\FIXME\MISSING_PROP_TYPE $faultactor;
+  public HH\FIXME\MISSING_PROP_TYPE $detail;
+  public HH\FIXME\MISSING_PROP_TYPE $_name;
+  public HH\FIXME\MISSING_PROP_TYPE $headerfault;
 
   // Methods
   public function __construct(

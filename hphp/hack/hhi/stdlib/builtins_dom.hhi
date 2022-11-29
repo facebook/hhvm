@@ -109,7 +109,7 @@ class DOMNode {
   /* readonly */ public string $nodeName;
   public string $nodeValue;
   /* readonly */ public int $nodeType;
-  /* readonly */ public $parentNode;
+  /* readonly */ public HH\FIXME\MISSING_PROP_TYPE $parentNode;
   /* readonly */ public DOMNodeList<DOMNode> $childNodes;
   /* readonly */ public ?DOMNode $firstChild;
   /* readonly */ public ?DOMNode $lastChild;

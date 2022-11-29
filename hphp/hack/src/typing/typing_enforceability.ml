@@ -48,13 +48,14 @@ end
 
 module E = Decl_enforceability.Enforce (FoldedContextAccess)
 
-let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
-  match E.get_enforcement ~return_from_async:false ~this_class:None env ty with
+let get_enforcement ~this_class (env : env) (ty : decl_ty) :
+    Typing_defs.enforcement =
+  match E.get_enforcement ~return_from_async:false ~this_class env ty with
   | Decl_enforceability.Unenforced _ -> Unenforced
   | Decl_enforceability.Enforced _ -> Enforced
 
-let is_enforceable (env : env) (ty : decl_ty) =
-  match get_enforcement env ty with
+let is_enforceable ~this_class (env : env) (ty : decl_ty) =
+  match get_enforcement ~this_class env ty with
   | Enforced -> true
   | Unenforced -> false
 
@@ -72,43 +73,45 @@ let unenforced_hhi pos_or_decl =
       (String.is_prefix suffix ~prefix:"hsl_generated/"
       || String.is_prefix suffix ~prefix:"hsl/")
 
-let get_enforced env ~explicitly_untrusted ty =
+let get_enforced ~this_class env ~explicitly_untrusted ty =
   if explicitly_untrusted || unenforced_hhi (get_pos ty) then
     Unenforced
   else
-    get_enforcement env ty
+    get_enforcement ~this_class env ty
 
-let compute_enforced_ty env ?(explicitly_untrusted = false) (ty : decl_ty) =
-  let et_enforced = get_enforced env ~explicitly_untrusted ty in
+let compute_enforced_ty
+    ~this_class env ?(explicitly_untrusted = false) (ty : decl_ty) =
+  let et_enforced = get_enforced ~this_class env ~explicitly_untrusted ty in
   { et_type = ty; et_enforced }
 
 let compute_enforced_and_pessimize_ty
-    env ?(explicitly_untrusted = false) (ty : decl_ty) =
-  compute_enforced_ty env ~explicitly_untrusted ty
+    ~this_class env ?(explicitly_untrusted = false) (ty : decl_ty) =
+  compute_enforced_ty ~this_class env ~explicitly_untrusted ty
 
-let handle_awaitable_return env ft_fun_kind (ft_ret : decl_possibly_enforced_ty)
-    =
+let handle_awaitable_return
+    ~this_class env ft_fun_kind (ft_ret : decl_possibly_enforced_ty) =
   let { et_type = return_type; _ } = ft_ret in
   match (ft_fun_kind, get_node return_type) with
   | (Ast_defs.FAsync, Tapply ((_, name), [inner_ty]))
     when String.equal name Naming_special_names.Classes.cAwaitable ->
-    let { et_enforced; _ } = compute_enforced_ty env inner_ty in
+    let { et_enforced; _ } = compute_enforced_ty ~this_class env inner_ty in
     { et_type = return_type; et_enforced }
-  | _ -> compute_enforced_and_pessimize_ty env return_type
+  | _ -> compute_enforced_and_pessimize_ty ~this_class env return_type
 
-let compute_enforced_and_pessimize_fun_type env (ft : decl_fun_type) =
+let compute_enforced_and_pessimize_fun_type ~this_class env (ft : decl_fun_type)
+    =
   let { ft_params; ft_ret; _ } = ft in
   let ft_fun_kind = get_ft_fun_kind ft in
-  let ft_ret = handle_awaitable_return env ft_fun_kind ft_ret in
+  let ft_ret = handle_awaitable_return ~this_class env ft_fun_kind ft_ret in
   let ft_params =
     List.map
       ~f:(fun fp ->
         let { fp_type = { et_type; _ }; _ } = fp in
         let f =
           if equal_param_mode (get_fp_mode fp) FPinout then
-            compute_enforced_and_pessimize_ty
+            compute_enforced_and_pessimize_ty ~this_class
           else
-            compute_enforced_ty
+            compute_enforced_ty ~this_class
         in
         let fp_type = f env et_type in
         { fp with fp_type })

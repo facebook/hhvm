@@ -246,6 +246,7 @@ let sound_dynamic_err_opt args env ((_, id_str) as id) read_context =
              locl_ty
       else
         Typing_dynamic.check_property_sound_for_dynamic_write
+          ~this_class:(Some self_class)
           ~on_error:(fun pos prop_name class_name (prop_pos, prop_type) ->
             Typing_error.(
               primary
@@ -748,7 +749,10 @@ and obj_get_concrete_class_with_member_info
           (List.map ~f:snd args.explicit_targs)
       in
       let ft =
-        Typing_enforceability.compute_enforced_and_pessimize_fun_type env ft
+        Typing_enforceability.compute_enforced_and_pessimize_fun_type
+          ~this_class:(Some class_info)
+          env
+          ft
       in
       let ((env, ft1_ty_err_opt), ft1) =
         Phase.(
@@ -806,6 +810,7 @@ and obj_get_concrete_class_with_member_info
       let is_xhp_attr = Option.is_some (get_ce_xhp_attr member_info) in
       let { et_type; et_enforced } =
         Typing_enforceability.compute_enforced_and_pessimize_ty
+          ~this_class:(Some class_info)
           env
           member_decl_ty
           ~explicitly_untrusted:is_xhp_attr

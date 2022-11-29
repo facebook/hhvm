@@ -1167,7 +1167,10 @@ let fun_type_of_id env x tal el =
       in
       Option.iter ~f:Errors.add_typing_error ty_err_opt1;
       let ft =
-        Typing_enforceability.compute_enforced_and_pessimize_fun_type env ft
+        Typing_enforceability.compute_enforced_and_pessimize_fun_type
+          ~this_class:None
+          env
+          ft
       in
       let use_pos = fst x in
       let def_pos = fd.fe_pos in
@@ -2098,7 +2101,11 @@ let rec bind_param
       let enforced =
         match decl_hint with
         | None -> Unenforced
-        | Some ty -> Typing_enforceability.get_enforcement env ty
+        | Some ty ->
+          Typing_enforceability.get_enforcement
+            ~this_class:(Env.get_self_class env)
+            env
+            ty
       in
       let ty1_enforced = { et_type = ty1; et_enforced = enforced } in
       let expected =
@@ -2201,7 +2208,11 @@ let rec bind_param
       let enforced =
         match decl_hint with
         | None -> Unenforced
-        | Some ty -> Typing_enforceability.get_enforcement env ty
+        | Some ty ->
+          Typing_enforceability.get_enforcement
+            ~this_class:(Env.get_self_class env)
+            env
+            ty
       in
 
       begin
@@ -3929,7 +3940,10 @@ and expr_
         (match get_node ty with
         | Tfun ft ->
           let ft =
-            Typing_enforceability.compute_enforced_and_pessimize_fun_type env ft
+            Typing_enforceability.compute_enforced_and_pessimize_fun_type
+              ~this_class:(Some class_)
+              env
+              ft
           in
           let def_pos = ce_pos in
           let ((env, ty_err_opt1), tal) =
@@ -4991,7 +5005,7 @@ and class_const ?(incl_tc = false) env p (cid, mid) =
   in
   make_result env p (Aast.Class_const (ce, mid)) const_ty
 
-and function_dynamically_callable env f params_decl_ty ret_locl_ty =
+and function_dynamically_callable ~this_class env f params_decl_ty ret_locl_ty =
   let env = { env with in_support_dynamic_type_method_check = true } in
   (* If any of the parameters doesn't have an explicit hint, then we have
    * to treat this is non-enforceable and therefore not dynamically callable
@@ -5000,6 +5014,7 @@ and function_dynamically_callable env f params_decl_ty ret_locl_ty =
     List.for_all f.f_params ~f:(fun param ->
         Option.is_some (snd param.param_type_hint))
     && Typing_dynamic.sound_dynamic_interface_check
+         ~this_class
          env
          params_decl_ty
          ret_locl_ty
@@ -5098,6 +5113,7 @@ and lambda ~is_anon ?expected p env f idl =
   in
   let declared_decl_ft =
     Typing_enforceability.compute_enforced_and_pessimize_fun_type
+      ~this_class:(Env.get_self_class env)
       env
       declared_ft
   in
@@ -5446,7 +5462,12 @@ and closure_bind_param params (env, t_params) ty : env * Tast.fun_param list =
     (match hint_of_type_hint param.param_type_hint with
     | Some h ->
       let decl_ty = Decl_hint.hint env.decl_env h in
-      (match Typing_enforceability.get_enforcement env decl_ty with
+      (match
+         Typing_enforceability.get_enforcement
+           ~this_class:(Env.get_self_class env)
+           env
+           decl_ty
+       with
       | Unenforced ->
         Typing_log.log_pessimise_param
           env
@@ -5678,9 +5699,11 @@ and closure_make
     empty_expand_env_with_on_error
       (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
   in
+  let this_class = Env.get_self_class env in
   let (env, hret) =
     Typing_return.make_return_type
       ~ety_env
+      ~this_class
       ~is_toplevel:false
       env
       ~hint_pos
@@ -5726,6 +5749,7 @@ and closure_make
     && support_dynamic_type
   then
     function_dynamically_callable
+      ~this_class
       sound_dynamic_check_saved_env
       f
       params_decl_ty
@@ -7832,6 +7856,7 @@ and class_get_inner
               Option.iter ~f:Errors.add_typing_error ty_err_opt1;
               let ft =
                 Typing_enforceability.compute_enforced_and_pessimize_fun_type
+                  ~this_class:(Some class_)
                   env
                   ft
               in
@@ -7859,6 +7884,7 @@ and class_get_inner
             | _ ->
               let { et_type; et_enforced } =
                 Typing_enforceability.compute_enforced_and_pessimize_ty
+                  ~this_class:(Some class_)
                   env
                   member_decl_ty
               in
@@ -8337,7 +8363,10 @@ and call_construct
       match get_node m with
       | Tfun ft ->
         let ft =
-          Typing_enforceability.compute_enforced_and_pessimize_fun_type env ft
+          Typing_enforceability.compute_enforced_and_pessimize_fun_type
+            ~this_class:(Some class_)
+            env
+            ft
         in
         (* This creates type variables for non-denotable type parameters on constructors.
          * These are notably different from the tparams on the class, which are handled

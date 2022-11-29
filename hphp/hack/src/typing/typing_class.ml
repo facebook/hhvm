@@ -54,6 +54,7 @@ let method_dynamically_callable env cls m params_decl_ty return =
   let ret_locl_ty = return.Typing_env_return_info.return_type.et_type in
   let interface_check =
     Typing_dynamic.sound_dynamic_interface_check
+      ~this_class:(Some cls)
       env_with_require_dynamic
       params_decl_ty
       ret_locl_ty
@@ -157,7 +158,7 @@ let method_dynamically_callable env cls m params_decl_ty return =
   in
   if not interface_check then method_body_check ()
 
-let method_return env m ret_decl_ty =
+let method_return env cls m ret_decl_ty =
   let hint_pos =
     match snd m.m_ret with
     | Some (hint_pos, _) -> hint_pos
@@ -176,6 +177,7 @@ let method_return env m ret_decl_ty =
   let (env, ret_ty) =
     Typing_return.make_return_type
       ~ety_env
+      ~this_class:(Some cls)
       env
       ~hint_pos
       ~explicit:ret_decl_ty
@@ -260,7 +262,7 @@ let method_def ~is_disposable env cls m =
     merge_decl_header_with_hints ~params:m.m_params ~ret:m.m_ret decl_header env
   in
   let env = Env.set_fn_kind env m.m_fun_kind in
-  let (env, return) = method_return env m ret_decl_ty in
+  let (env, return) = method_return env cls m ret_decl_ty in
   let sound_dynamic_check_saved_env = env in
   let (env, param_tys) =
     Typing_param.make_param_local_tys
@@ -918,7 +920,7 @@ let typeconst_def
       Aast.c_tconst_is_ctx;
     } )
 
-let class_const_def ~in_enum_class c env cc =
+let class_const_def ~in_enum_class c cls env cc =
   let tcopt = Env.get_tcopt env in
   Profile.measure_elapsed_time_and_report tcopt (Some env) cc.cc_id @@ fun () ->
   let { cc_type = h; cc_id = id; cc_kind = k; _ } = cc in
@@ -949,7 +951,9 @@ let class_const_def ~in_enum_class c env cc =
       (env, MakeType.unenforced ty, None)
     | Some h ->
       let ty = Decl_hint.hint env.decl_env h in
-      let ty = Typing_enforceability.compute_enforced_ty env ty in
+      let ty =
+        Typing_enforceability.compute_enforced_ty ~this_class:(Some cls) env ty
+      in
       let ((env, ty_err_opt), ty) =
         Phase.localize_possibly_enforced_no_subst env ~ignore_errors:false ty
       in
@@ -1076,7 +1080,12 @@ let class_var_def ~is_static cls env cv =
     match decl_cty with
     | None -> (env, None)
     | Some decl_cty ->
-      let decl_cty = Typing_enforceability.compute_enforced_ty env decl_cty in
+      let decl_cty =
+        Typing_enforceability.compute_enforced_ty
+          ~this_class:(Some cls)
+          env
+          decl_cty
+      in
       let ((env, ty_err_opt), cty) =
         Phase.localize_possibly_enforced_no_subst
           env
@@ -1171,6 +1180,7 @@ let class_var_def ~is_static cls env cv =
     Option.iter ~f:Errors.add_typing_error
     @@ Option.bind decl_cty ~f:(fun ty ->
            Typing_dynamic.check_property_sound_for_dynamic_write
+             ~this_class:(Some cls)
              ~on_error:(fun pos prop_name class_name (prop_pos, prop_type) ->
                Typing_error.(
                  primary
@@ -1711,7 +1721,7 @@ let check_class_members env c tc =
   in
   let in_enum_class = Env.is_enum_class env (snd c.c_name) in
   let (env, consts) =
-    List.map_env env c.c_consts ~f:(class_const_def ~in_enum_class c)
+    List.map_env env c.c_consts ~f:(class_const_def ~in_enum_class c tc)
   in
   let (typed_consts, const_types) = List.unzip consts in
   let env = Typing_enum.enum_class_check env tc c.c_consts const_types in

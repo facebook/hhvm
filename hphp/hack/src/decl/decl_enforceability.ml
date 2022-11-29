@@ -225,8 +225,8 @@ module Enforce (ContextAccess : ContextAccess) :
     let rec enforcement
         ~is_dynamic_enforceable (ctx : ContextAccess.t) visited ty =
       match get_node ty with
-      | Tthis ->
-        Unenforced None (* Look through supportdyn, just as we look through ~ *)
+      | Tthis -> Unenforced None
+      (* Look through supportdyn, just as we look through ~ *)
       | Tapply ((_, name), [ty])
         when String.equal name Naming_special_names.Classes.cSupportDyn
              && enable_sound_dynamic ->

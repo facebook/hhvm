@@ -131,6 +131,7 @@ let force_return_kind ~is_toplevel env p ety =
 
 let make_return_type
     ~ety_env
+    ~this_class
     env
     ~hint_pos
     ~(explicit : decl_ty option)
@@ -179,7 +180,9 @@ let make_return_type
         in
         (env, { et_type; et_enforced = Unenforced })
       ) else
-        let et_enforced = Typing_enforceability.get_enforcement env dty in
+        let et_enforced =
+          Typing_enforceability.get_enforcement ~this_class env dty
+        in
         let et_enforced =
           match et_enforced with
           | Unenforced ->
@@ -249,8 +252,11 @@ let make_return_type
     | _ -> localize ~wrap:false env ty)
 
 let make_return_type
-    ~ety_env ?(is_toplevel = true) env ~hint_pos ~explicit ~default =
-  let (env, ty) = make_return_type ~ety_env env ~hint_pos ~explicit ~default in
+    ~ety_env ~this_class ?(is_toplevel = true) env ~hint_pos ~explicit ~default
+    =
+  let (env, ty) =
+    make_return_type ~ety_env ~this_class env ~hint_pos ~explicit ~default
+  in
   force_return_kind ~is_toplevel env hint_pos ty
 
 let implicit_return env pos ~expected ~actual ~hint_pos ~is_async =

@@ -93,6 +93,7 @@ let make_param_local_ty ~dynamic_mode env decl_hint param =
     | Some ty ->
       let { et_type = ty; et_enforced } =
         Typing_enforceability.compute_enforced_and_pessimize_ty
+          ~this_class:(Env.get_self_class env)
           ~explicitly_untrusted:param.param_is_variadic
           env
           ty
@@ -156,7 +157,11 @@ let make_param_local_tys ~dynamic_mode env decl_tys params =
                     (Pos_or_decl.of_raw_pos param.param_pos))
              in
              match hint with
-             | Some ty when Typing_enforceability.is_enforceable env ty ->
+             | Some ty
+               when Typing_enforceability.is_enforceable
+                      ~this_class:(Env.get_self_class env)
+                      env
+                      ty ->
                Some
                  (Typing_make_type.intersection
                     (Reason.Rsupport_dynamic_type Pos_or_decl.none)

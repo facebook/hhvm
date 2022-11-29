@@ -670,8 +670,14 @@ let maybe_poison_ancestors
     let parent_return_ty = get_return_value_type ft_parent in
     let child_return_ty = get_return_value_type ft_child in
     match
-      ( Typing_enforceability.get_enforcement env parent_return_ty,
-        Typing_enforceability.get_enforcement env child_return_ty )
+      ( Typing_enforceability.get_enforcement
+          ~this_class:(Some parent_class)
+          env
+          parent_return_ty,
+        Typing_enforceability.get_enforcement
+          ~this_class:(Some child_class)
+          env
+          child_return_ty )
     with
     (* If the parent itself overrides a fully-enforced return type
      * then we need to "copy down" any intersection, so record this in the log
@@ -1179,6 +1185,7 @@ let check_inherited_member_is_dynamically_callable
               if
                 not
                   (Typing_dynamic.sound_dynamic_interface_check_from_fun_ty
+                     ~this_class:(Some parent_class)
                      env
                      fun_ty)
               then

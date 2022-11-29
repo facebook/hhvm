@@ -30,6 +30,7 @@ val implicit_return :
 
 val make_return_type :
   ety_env:Typing_defs.expand_env ->
+  this_class:Decl_provider.Class.t option ->
   ?is_toplevel:bool ->
   env ->
   (* Position of return type hint, or function name, if absent *)

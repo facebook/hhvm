@@ -107,6 +107,7 @@ let fun_def ctx fd :
   let (env, return_ty) =
     Typing_return.make_return_type
       ~ety_env
+      ~this_class:None
       env
       ~hint_pos
       ~explicit:return_decl_ty
@@ -187,6 +188,7 @@ let fun_def ctx fd :
     && Env.get_support_dynamic_type env
   then
     Typing.function_dynamically_callable
+      ~this_class:None
       sound_dynamic_check_saved_env
       f
       params_decl_ty
@@ -248,7 +250,9 @@ let gconst_def ctx cst =
       (te, (env, None))
     | (Some hint, _) ->
       let ty = Decl_hint.hint env.decl_env hint in
-      let ty = Typing_enforceability.compute_enforced_ty env ty in
+      let ty =
+        Typing_enforceability.compute_enforced_ty ~this_class:None env ty
+      in
       let ((env, ty_err_opt1), dty) =
         Phase.localize_possibly_enforced_no_subst env ~ignore_errors:false ty
       in

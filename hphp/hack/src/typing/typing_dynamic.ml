@@ -66,9 +66,9 @@ let check_property_sound_for_dynamic_read ~on_error env classname id ty =
 (* The optional ty should be (if not None) the localisation of the decl_ty.
    This lets us avoid re-localising the decl type when the caller has already
   localised it *)
-let check_property_sound_for_dynamic_write ~on_error env classname id decl_ty ty
-    =
-  let te_check = Typing_enforceability.is_enforceable env decl_ty in
+let check_property_sound_for_dynamic_write
+    ~this_class ~on_error env classname id decl_ty ty =
+  let te_check = Typing_enforceability.is_enforceable ~this_class env decl_ty in
   (* If the property type isn't enforceable, but is a supertype of dynamic,
      then the property will still be safe to write via a receiver expression of type
      dynamic. *)
@@ -102,7 +102,7 @@ let check_property_sound_for_dynamic_write ~on_error env classname id decl_ty ty
   ) else
     None
 
-let sound_dynamic_interface_check env params_decl_ty ret_locl_ty =
+let sound_dynamic_interface_check ~this_class env params_decl_ty ret_locl_ty =
   (* 1. check if all the parameters of the method are enforceable *)
   let enforceable_params =
     List.for_all params_decl_ty ~f:(fun dtyopt ->
@@ -111,7 +111,7 @@ let sound_dynamic_interface_check env params_decl_ty ret_locl_ty =
           (* If a parameter isn't enforceable, but is just typed as dynamic,
              the method will still be safe to call via a receiver expression of type
              dynamic. *)
-          Typing_enforceability.is_enforceable env dty
+          Typing_enforceability.is_enforceable ~this_class env dty
           || is_dynamic_decl env dty
         | None -> true)
   in
@@ -121,7 +121,7 @@ let sound_dynamic_interface_check env params_decl_ty ret_locl_ty =
   in
   enforceable_params && coercible_return_type
 
-let sound_dynamic_interface_check_from_fun_ty env fun_ty =
+let sound_dynamic_interface_check_from_fun_ty ~this_class env fun_ty =
   let params_decl_ty =
     List.map fun_ty.ft_params ~f:(fun fun_param ->
         Some fun_param.fp_type.et_type)
@@ -130,12 +130,17 @@ let sound_dynamic_interface_check_from_fun_ty env fun_ty =
     snd
       (Typing_return.make_return_type
          ~ety_env:empty_expand_env
+         ~this_class
          env
          ~hint_pos:Pos.none
          ~explicit:(Some fun_ty.ft_ret.et_type)
          ~default:None)
   in
-  sound_dynamic_interface_check env params_decl_ty ret_locl_ty.et_type
+  sound_dynamic_interface_check
+    ~this_class
+    env
+    params_decl_ty
+    ret_locl_ty.et_type
 
 (* Given t, construct ~t.
  * acc is a boolean that remains false if no change was made (e.g. t = dynamic)

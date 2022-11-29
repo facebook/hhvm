@@ -26,6 +26,9 @@ class H1QUpstreamSession
   }
 
   ~H1QUpstreamSession() override {
+    for (auto session : sessions_) {
+      session->setInfoCallback(nullptr);
+    }
     if (sock_) {
       sock_->close(folly::none);
       sock_->setConnectionCallback(nullptr);
@@ -53,22 +56,23 @@ class H1QUpstreamSession
         std::move(codec),
         tinfo,
         this);
+    sessions_.insert(session);
     session->startNow();
     return session->newTransaction(handler);
   }
-  void onCreate(const proxygen::HTTPSessionBase&) override {
-    txns_++;
+  void onCreate(const proxygen::HTTPSessionBase& session) override {
   }
 
-  void onDestroy(const proxygen::HTTPSessionBase&) override {
-    if (--txns_ == 0 && draining_) {
+  void onDestroy(const proxygen::HTTPSessionBase& session) override {
+    sessions_.erase(const_cast<proxygen::HTTPSessionBase*>(&session));
+    if (sessions_.empty() && draining_) {
       delete this;
     }
   }
 
   void drain() {
     draining_ = true;
-    if (txns_ == 0) {
+    if (sessions_.empty()) {
       delete this;
     }
   }
@@ -107,7 +111,7 @@ class H1QUpstreamSession
 
  private:
   std::shared_ptr<quic::QuicSocket> sock_;
-  uint64_t txns_{0};
+  std::set<proxygen::HTTPSessionBase*> sessions_;
   bool draining_ = false;
 };
 

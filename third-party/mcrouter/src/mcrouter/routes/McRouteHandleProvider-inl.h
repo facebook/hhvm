@@ -592,9 +592,14 @@ McRouteHandleProvider<RouterInfo>::buildCheckedRouteMap() {
         [factoryFunc = std::move(it.second), rhName = it.first](
             RouteHandleFactory<RouteHandleIf>& factory,
             const folly::dynamic& json) {
-          auto rh = factoryFunc(factory, json);
-          checkLogic(rh != nullptr, "make{} returned nullptr", rhName);
-          return rh;
+          try {
+            auto rh = factoryFunc(factory, json);
+            checkLogic(rh != nullptr, "make{} returned nullptr", rhName);
+            return rh;
+          } catch (const std::exception& e) {
+            throw std::logic_error(folly::sformat(
+                "make{} throws when contructing: {}", rhName, e.what()));
+          }
         });
   }
 
@@ -619,9 +624,14 @@ McRouteHandleProvider<RouterInfo>::buildCheckedRouteMapWithProxy() {
             RouteHandleFactory<RouteHandleIf>& factory,
             const folly::dynamic& json,
             ProxyBase& proxy) {
-          auto rh = factoryFunc(factory, json, proxy);
-          checkLogic(rh != nullptr, "make{} returned nullptr", rhName);
-          return rh;
+          try {
+            auto rh = factoryFunc(factory, json, proxy);
+            checkLogic(rh != nullptr, "make{} returned nullptr", rhName);
+            return rh;
+          } catch (const std::exception& e) {
+            throw std::logic_error(folly::sformat(
+                "make{} throws when contructing: {}", rhName, e.what()));
+          }
         });
   }
 

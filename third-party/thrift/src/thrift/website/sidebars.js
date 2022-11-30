@@ -36,8 +36,6 @@ module.exports = {
         type: 'doc',
         id: 'fb/quick-start/index',
       },
-      collapsible: true,
-      collapsed: true,
       items: [
         'fb/quick-start/java',
         'fb/quick-start/python'
@@ -50,8 +48,6 @@ module.exports = {
         type: 'doc',
         id: "fb/howtos/index",
       },
-      collapsible: true,
-      collapsed: true,
       items: [
         'fb/howtos/calling-python-from-hack',
       ]
@@ -63,8 +59,6 @@ module.exports = {
         type: 'doc',
         id: 'spec/index'
       },
-      collapsible: true,
-      collapsed: true,
       items: [
         "spec/about",
         "spec/idl",
@@ -118,8 +112,6 @@ module.exports = {
         type: 'doc',
         id: 'features/index',
       },
-      collapsible: true,
-      collapsed: true,
       items: [
         // Features are added to the features/ folder as a flat list so that
         // they can be moved in and out of beta/experimental state without
@@ -285,8 +277,6 @@ module.exports = {
         type: 'doc',
         id: "fb/compiler/index",
       },
-      collapsible: true,
-      collapsed: true,
       items: [
         'fb/compiler/buck',
       ]
@@ -298,8 +288,6 @@ module.exports = {
         type: 'doc',
         id: "fb/server/index",
       },
-      collapsible: true,
-      collapsed: true,
       items: [
         'fb/server/components',
         'fb/server/threading-models',
@@ -314,8 +302,6 @@ module.exports = {
             type: 'doc',
             id: 'fb/server/prio-and-isolation/index',
           },
-          collapsible: true,
-          collapsed: true,
           items: [
             'fb/server/prio-and-isolation/isolation-via-the-sfq-thread-manager',
             'fb/server/prio-and-isolation/priorities-reference'
@@ -328,8 +314,6 @@ module.exports = {
             type: 'doc',
             id: 'fb/server/overload-protection/index',
           },
-          collapsible: true,
-          collapsed: true,
           items: [
             'fb/server/overload-protection/cpuconcurrencycontroller',
             'fb/server/overload-protection/adaptive-concurrency',
@@ -345,8 +329,6 @@ module.exports = {
         type: 'doc',
         id: "fb/testing/index",
       },
-      collapsible: true,
-      collapsed: true,
       items: [
         'fb/testing/loadgen',
         'fb/testing/stress-test-framework',
@@ -359,11 +341,21 @@ module.exports = {
         type: 'doc',
         id: "fb/best-practices/index",
       },
-      collapsible: true,
-      collapsed: true,
       items: [
         'fb/best-practices/code-modernization',
-        'fb/best-practices/you-dont-need-facebookbase2/index',
+        {
+          type: 'category',
+          label: 'You don\'t need FacebookBase2!',
+          link: {
+            type: 'doc',
+            id: "fb/best-practices/you-dont-need-facebookbase2/index",
+          },
+          items: [
+            'fb/best-practices/you-dont-need-facebookbase2/facebookbase2-deprecation-bootcamp-instructions',
+            'fb/best-practices/you-dont-need-facebookbase2/facebookbase2-deprecation-migration-bootcamp-tasks-oncall-runbook',
+            'fb/best-practices/you-dont-need-facebookbase2/facebookbase2-deprecation-migration'
+          ]
+        },
         'fb/best-practices/migrating-javadeprecated-to-java-swift'
       ]
     }
@@ -375,8 +367,6 @@ module.exports = {
         type: 'doc',
         id: "troubleshooting/index",
       },
-      collapsible: true,
-      collapsed: true,
       items: [
         'troubleshooting/errors',
         'troubleshooting/debugging-issues',
@@ -389,8 +379,6 @@ module.exports = {
             type: 'doc',
             id: "fb/troubleshooting/exception-handling/index",
           },
-          collapsible: true,
-          collapsed: true,
           items: [
             'fb/troubleshooting/exception-handling/error-classification',
           ]
@@ -404,8 +392,6 @@ module.exports = {
             type: 'doc',
             id: "fb/troubleshooting/dogpiles/index",
           },
-          collapsible: true,
-          collapsed: true,
           items: [
             'fb/troubleshooting/dogpiles/io',
           ]
@@ -414,11 +400,6 @@ module.exports = {
         ])
       ]
     },
-
-    // Will turn this into a category once we have generated ref docs.
-    'references/index',
-
-    'glossary',
     {
       type: 'category',
       label: 'Releases',
@@ -426,12 +407,12 @@ module.exports = {
         type: 'doc',
         id: "releases/index",
       },
-      collapsible: true,
-      collapsed: true,
       items: [
         'releases/release-notes-v1',
       ]
     },
+
+    // Documentation for the Thrift team and contributors.
     {
       type: 'category',
       label: 'Contributions',
@@ -439,8 +420,6 @@ module.exports = {
         type: 'doc',
         id: "contributions/index",
       },
-      collapsible: true,
-      collapsed: true,
       items: [
         ...fbInternalOnly([
         {
@@ -504,16 +483,18 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Content',
+          label: 'Documentation',
           link: {
             type: 'doc',
-            id: "contributions/content/index",
+            id: "contributions/documentation/index",
           },
           items: [
-          'contributions/content/site-structure',
-          'contributions/content/local-preview',
+          'contributions/documentation/site-structure',
+          'contributions/documentation/local-preview',
         ]},
       ]
     },
+
+    'glossary'
   ]
 };

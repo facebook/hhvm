@@ -21,13 +21,6 @@
 #include <quic/server/QuicSharedUDPSocketFactory.h>
 
 using fizz::server::FizzServerContext;
-using proxygen::HQDownstreamSession;
-using proxygen::HQSession;
-using proxygen::HTTPException;
-using proxygen::HTTPMessage;
-using proxygen::HTTPSessionBase;
-using proxygen::HTTPTransaction;
-using proxygen::HTTPTransactionHandler;
 using quic::QuicServerTransport;
 using quic::QuicSocket;
 

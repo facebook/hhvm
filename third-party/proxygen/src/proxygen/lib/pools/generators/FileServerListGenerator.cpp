@@ -71,7 +71,7 @@ void FileServerListGenerator::FileGenerator::run(milliseconds /*timeout*/) {
       for (const auto& e : poolMembers) {
         SocketAddress address;
         address.setFromHostPort(e.asString());
-        servers.emplace_back(ServerConfig(address.getAddressStr(), address));
+        servers.emplace_back(address.getAddressStr(), address);
       }
     } catch (const std::exception&) {
       callback_->serverListError(std::current_exception());
@@ -91,8 +91,9 @@ void FileServerListGenerator::FileGenerator::run(milliseconds /*timeout*/) {
 
 FileServerListGenerator::FileServerListGenerator(const string& fileName,
                                                  const FileType fileType,
-                                                 const string& poolName)
-    : params_(fileName, fileType, poolName) {
+                                                 const string& poolName,
+                                                 const uint16_t port)
+    : params_(fileName, fileType, poolName, port) {
   if (fileType == FileType::PLAIN_TEXT && !poolName.empty()) {
     throw std::invalid_argument(
         "FileServerListGenerator cannot accept a non-empty poolName parameter "

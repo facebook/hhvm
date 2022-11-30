@@ -165,11 +165,7 @@ module type LocalServerApi = sig
 end
 
 type delegate_env = {
-  (* The amount of time to wait between heartbeat checks, in seconds *)
-  heartbeat_period: int;
   init_id: string;
-  (* Whether to use mergebase to calculate changed files or not *)
-  use_mergebase: bool;
   mergebase: Hg.hg_rev option;
   num_workers: int;
   recheck_id: string;
@@ -189,8 +185,6 @@ type delegate_env = {
   version_specifier: string option;
   (* The minimum log level workers should be logging at *)
   worker_min_log_level: Hh_logger.Level.t;
-  (* Optional transport channel used by remote type checking. None means default. *)
-  transport_channel: string option;
   naming_table_manifold_path: string option;
   (* Function that returns a future of result of the manifold path and changed_files list.
      This largely exists to allow unit tests to run without making saved state calls to watchman.

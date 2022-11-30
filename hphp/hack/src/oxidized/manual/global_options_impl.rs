@@ -22,11 +22,8 @@ impl Default for GlobalOptions {
             tco_remote_type_check: true,
             tco_remote_worker_key: None,
             tco_remote_check_id: None,
-            tco_remote_max_batch_size: 8000,
-            tco_remote_min_batch_size: 5000,
             tco_num_remote_workers: 0, // 4 in ocaml
             so_remote_version_specifier: None,
-            so_remote_worker_vfs_checkout_threshold: 0, // 10000 in ocaml
             so_naming_sqlite_path: None,
             po_auto_namespace_map: vec![],
             po_codegen: false,

@@ -98,33 +98,12 @@ module RemoteTypeCheck = struct
     (* A non-interactive host is, e.g., a dev host not currently associated with a user,
         or a host used for non-interactive jobs (e.g., CI) *)
     enabled_for_noninteractive_hosts: bool;
-    (* Indicates how long to wait between heartbeats (in seconds) *)
-    heartbeat_period: int;
-    load_naming_table_on_full_init: bool;
-    max_batch_size: int;
-    min_batch_size: int;
     (* Dictates the number of remote type checking workers *)
     num_workers: int;
     (* The sandcastle tenant used to spawn remote workers *)
     remote_worker_sandcastle_tenant: string;
-    (* Indicates whether files-to-declare should be fetched by VFS
-        (see `declaration_threshold`) *)
     prefetch_deferred_files: bool;
     worker_min_log_level: Hh_logger.Level.t;
-    (* Indicates the size of the job below which a virtual file system should
-       be used by the remote worker *)
-    worker_vfs_checkout_threshold: int;
-    (* File system mode used by ArtifactStore *)
-    file_system_mode: ArtifactStore.file_system_mode;
-    (* Max artifact size to use CAS; otherwise use everstore *)
-    max_cas_bytes: int;
-    (* Max artifact size to inline into transport channel *)
-    max_artifact_inline_bytes: int;
-    (* [0.0 - 1.0] ratio that specifies how much portion of the total payload
-       should be used in remote workers initial payload. Default is 0.0 which means
-       one bucket and no special bundling for initial payload *)
-    remote_initial_payload_ratio: float;
-    (* Configure remote typechecking activation threshold *)
     remote_type_check_recheck_threshold: int;
   }
 
@@ -134,20 +113,10 @@ module RemoteTypeCheck = struct
       enabled_for_noninteractive_hosts = false;
       declaration_threshold = 50;
       disabled_on_errors = [];
-      (* Indicates how long to wait between heartbeats (in seconds) *)
-      heartbeat_period = 15;
-      load_naming_table_on_full_init = false;
-      max_batch_size = 25_000;
-      min_batch_size = 5_000;
       num_workers = 4;
       remote_worker_sandcastle_tenant = "interactive";
       prefetch_deferred_files = false;
       worker_min_log_level = Hh_logger.Level.Info;
-      worker_vfs_checkout_threshold = 10_000;
-      file_system_mode = ArtifactStore.Distributed;
-      max_cas_bytes = 50_000_000;
-      max_artifact_inline_bytes = 2000;
-      remote_initial_payload_ratio = 0.0;
       remote_type_check_recheck_threshold = 1_000_000;
     }
 
@@ -158,34 +127,6 @@ module RemoteTypeCheck = struct
         ~default:default.declaration_threshold
         config
     in
-
-    let file_system_mode =
-      let open ArtifactStore in
-      let file_system_mode =
-        string_
-          "remote_type_check_file_system_mode"
-          ~default:(string_of_file_system_mode Distributed)
-          config
-      in
-      match file_system_mode_of_string file_system_mode with
-      | Some mode -> mode
-      | None -> Distributed
-    in
-
-    let max_cas_bytes =
-      int_
-        "remote_type_check_max_cas_bytes"
-        ~default:default.max_cas_bytes
-        config
-    in
-
-    let max_artifact_inline_bytes =
-      int_
-        "remote_type_check_max_artifact_inline_bytes"
-        ~default:default.max_artifact_inline_bytes
-        config
-    in
-
     let enabled_on_errors =
       string_list
         "remote_type_check_enabled_on_errors"
@@ -204,12 +145,6 @@ module RemoteTypeCheck = struct
             (List.exists enabled_on_errors ~f:(fun enabled_phase ->
                  Errors.equal_phase enabled_phase phase)))
     in
-    let heartbeat_period =
-      int_
-        "remote_type_check_heartbeat_period"
-        ~default:default.heartbeat_period
-        config
-    in
     let num_workers =
       int_ "remote_type_check_num_workers" ~default:default.num_workers config
     in
@@ -217,18 +152,6 @@ module RemoteTypeCheck = struct
       string_
         "remote_worker_sandcastle_tenant"
         ~default:default.remote_worker_sandcastle_tenant
-        config
-    in
-    let max_batch_size =
-      int_
-        "remote_type_check_max_batch_size"
-        ~default:default.max_batch_size
-        config
-    in
-    let min_batch_size =
-      int_
-        "remote_type_check_min_batch_size"
-        ~default:default.min_batch_size
         config
     in
     let prefetch_deferred_files =
@@ -242,19 +165,6 @@ module RemoteTypeCheck = struct
       int_
         "remote_type_check_recheck_threshold"
         ~default:default.remote_type_check_recheck_threshold
-        config
-    in
-    let remote_initial_payload_ratio =
-      float_
-        "remote_type_check_remote_initial_payload_ratio"
-        ~default:default.remote_initial_payload_ratio
-        config
-    in
-    let load_naming_table_on_full_init =
-      bool_if_min_version
-        "remote_type_check_load_naming_table_on_full_init"
-        ~default:default.load_naming_table_on_full_init
-        ~current_version
         config
     in
     let enabled =
@@ -284,30 +194,15 @@ module RemoteTypeCheck = struct
       | Some level -> level
       | None -> Hh_logger.Level.Debug
     in
-    let worker_vfs_checkout_threshold =
-      int_
-        "remote_type_check_worker_vfs_checkout_threshold"
-        ~default:default.worker_vfs_checkout_threshold
-        config
-    in
     {
       declaration_threshold;
       disabled_on_errors;
       enabled;
       enabled_for_noninteractive_hosts;
-      heartbeat_period;
-      load_naming_table_on_full_init;
-      max_batch_size;
-      min_batch_size;
       num_workers;
       prefetch_deferred_files;
       remote_type_check_recheck_threshold;
       worker_min_log_level;
-      worker_vfs_checkout_threshold;
-      file_system_mode;
-      max_cas_bytes;
-      max_artifact_inline_bytes;
-      remote_initial_payload_ratio;
       remote_worker_sandcastle_tenant;
     }
 end
@@ -551,8 +446,6 @@ type t = {
       (** Indicates whether the remote version specifier is required for remote type check from non-prod server *)
   remote_version_specifier: string option;
       (** The version of the package the remote worker is to install *)
-  remote_transport_channel: string option;
-      (** Name of the transport channel used by remote type checking. TODO: move into remote_type_check. *)
   remote_worker_saved_state_manifold_path: string option;
       (** A manifold path to a naming table to be used for Hulk Lite when typechecking. *)
   rust_provider_backend: bool;
@@ -577,8 +470,6 @@ type t = {
   allow_unstable_features: bool;
       (** Allows unstabled features to be enabled within a file via the '__EnableUnstableFeatures' attribute *)
   watchman: Watchman.t;
-  save_and_upload_naming_table: bool;
-      (** If enabled, saves naming table into a temp folder and uploads it to the remote typechecker *)
   log_from_client_when_slow_monitor_connections: bool;
       (**  Alerts hh users what processes are using hh_server when hh_client is slow to connect. *)
   log_saved_state_age_and_distance: bool;
@@ -698,7 +589,6 @@ let default =
     remote_check_id = None;
     remote_version_specifier_required = true;
     remote_version_specifier = None;
-    remote_transport_channel = None;
     remote_worker_saved_state_manifold_path = None;
     rust_provider_backend = false;
     naming_sqlite_path = None;
@@ -716,7 +606,6 @@ let default =
     go_to_implementation = true;
     allow_unstable_features = false;
     watchman = Watchman.default;
-    save_and_upload_naming_table = false;
     log_from_client_when_slow_monitor_connections = false;
     naming_sqlite_in_hack_64 = false;
     workload_quantile = None;
@@ -1252,7 +1141,6 @@ let load_ fn ~silent ~current_version overrides =
       config
   in
   let remote_version_specifier = string_opt "remote_version_specifier" config in
-  let remote_transport_channel = string_opt "remote_transport_channel" config in
   let enable_naming_table_fallback =
     bool_if_min_version
       "enable_naming_table_fallback"
@@ -1367,13 +1255,6 @@ let load_ fn ~silent ~current_version overrides =
     bool_if_min_version
       "allow_unstable_features"
       ~default:default.allow_unstable_features
-      ~current_version
-      config
-  in
-  let save_and_upload_naming_table =
-    bool_if_min_version
-      "save_and_upload_naming_table"
-      ~default:default.save_and_upload_naming_table
       ~current_version
       config
   in
@@ -1626,7 +1507,6 @@ let load_ fn ~silent ~current_version overrides =
     remote_check_id;
     remote_version_specifier_required;
     remote_version_specifier;
-    remote_transport_channel;
     remote_worker_saved_state_manifold_path;
     rust_provider_backend;
     naming_sqlite_path;
@@ -1652,7 +1532,6 @@ let load_ fn ~silent ~current_version overrides =
     allow_unstable_features;
     watchman;
     force_remote_type_check;
-    save_and_upload_naming_table;
     log_from_client_when_slow_monitor_connections;
     naming_sqlite_in_hack_64;
     workload_quantile;

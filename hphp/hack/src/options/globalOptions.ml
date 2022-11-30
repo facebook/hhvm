@@ -39,11 +39,8 @@ type t = {
   tco_remote_type_check: bool;
   tco_remote_worker_key: string option;
   tco_remote_check_id: string option;
-  tco_remote_max_batch_size: int;
-  tco_remote_min_batch_size: int;
   tco_num_remote_workers: int;
   so_remote_version_specifier: string option;
-  so_remote_worker_vfs_checkout_threshold: int;
   so_naming_sqlite_path: string option;
   po_auto_namespace_map: (string * string) list;
   po_codegen: bool;
@@ -184,11 +181,8 @@ let default =
     tco_remote_type_check = true;
     tco_remote_worker_key = None;
     tco_remote_check_id = None;
-    tco_remote_max_batch_size = 8_000;
-    tco_remote_min_batch_size = 5_000;
     tco_num_remote_workers = 4;
     so_remote_version_specifier = None;
-    so_remote_worker_vfs_checkout_threshold = 10000;
     so_naming_sqlite_path = None;
     po_auto_namespace_map = [];
     po_codegen = false;
@@ -332,12 +326,8 @@ let make
     ?(tco_remote_type_check = default.tco_remote_type_check)
     ?tco_remote_worker_key
     ?tco_remote_check_id
-    ?(tco_remote_max_batch_size = default.tco_remote_max_batch_size)
-    ?(tco_remote_min_batch_size = default.tco_remote_min_batch_size)
     ?(tco_num_remote_workers = default.tco_num_remote_workers)
     ?so_remote_version_specifier
-    ?(so_remote_worker_vfs_checkout_threshold =
-      default.so_remote_worker_vfs_checkout_threshold)
     ?so_naming_sqlite_path
     ?(po_auto_namespace_map = default.po_auto_namespace_map)
     ?(tco_language_feature_logging = default.tco_language_feature_logging)
@@ -503,11 +493,8 @@ let make
     tco_remote_type_check;
     tco_remote_worker_key;
     tco_remote_check_id;
-    tco_remote_max_batch_size;
-    tco_remote_min_batch_size;
     tco_num_remote_workers;
     so_remote_version_specifier;
-    so_remote_worker_vfs_checkout_threshold;
     so_naming_sqlite_path;
     po_auto_namespace_map;
     po_codegen = false;
@@ -635,9 +622,6 @@ let make
   }
 
 let so_remote_version_specifier t = t.so_remote_version_specifier
-
-let so_remote_worker_vfs_checkout_threshold t =
-  t.so_remote_worker_vfs_checkout_threshold
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path
 

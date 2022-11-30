@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<84d4ca27d39d0121e96497e42a6af8d9>>
+// @generated SignedSource<<bb45e0d012df3e3880e633605ee8709c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -44,11 +44,8 @@ pub struct GlobalOptions {
     pub tco_remote_type_check: bool,
     pub tco_remote_worker_key: Option<String>,
     pub tco_remote_check_id: Option<String>,
-    pub tco_remote_max_batch_size: isize,
-    pub tco_remote_min_batch_size: isize,
     pub tco_num_remote_workers: isize,
     pub so_remote_version_specifier: Option<String>,
-    pub so_remote_worker_vfs_checkout_threshold: isize,
     pub so_naming_sqlite_path: Option<String>,
     pub po_auto_namespace_map: Vec<(String, String)>,
     pub po_codegen: bool,

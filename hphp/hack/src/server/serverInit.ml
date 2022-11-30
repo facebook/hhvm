@@ -110,9 +110,6 @@ let remote_init genv env root worker_key nonce check_id _profiling =
     genv.local_config.ServerLocalConfig.use_shallow_decls_saved_state
   in
   let open ServerLocalConfig in
-  let { recli_version; remote_transport_channel = transport_channel; _ } =
-    genv.local_config
-  in
   let { init_id; ci_info; init_start_t; _ } = env.init_env in
   ServerRemoteInit.init
     ctx
@@ -120,9 +117,6 @@ let remote_init genv env root worker_key nonce check_id _profiling =
     ~worker_key
     ~nonce
     ~check_id
-    ~recli_version
-    ~transport_channel
-    ~remote_type_check_config:genv.local_config.remote_type_check
     ~ci_info
     ~init_id
     ~init_start_t

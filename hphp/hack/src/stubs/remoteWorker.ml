@@ -55,7 +55,6 @@ module type RemoteServerApi = sig
 end
 
 type 'naming_table work_env = {
-  artifact_store_config: ArtifactStore.config;
   bin_root: Path.t;
   check_id: string;
   ci_info: Ci_util.info option Future.t option;
@@ -64,7 +63,6 @@ type 'naming_table work_env = {
   init_start_t: float;
   key: string;
   nonce: Int64.t;
-  transport_channel: string option;
   root: Path.t;
   naming_table_base: 'naming_table;
   timeout: int;
@@ -84,18 +82,15 @@ let make_env
     ~(init_start_t : float)
     ~(key : string)
     ~(nonce : Int64.t)
-    ~(transport_channel : string option)
     ~(root : Path.t)
     ~(cache_remote_decls : bool)
     ~(use_shallow_decls_saved_state : bool)
     ~(saved_state_manifold_path : string option)
     ~(shallow_decls_manifold_path : string option)
     ?(timeout = (600 : int))
-    (artifact_store_config : ArtifactStore.config)
     (server : (module RemoteServerApi with type naming_table = 'naming_table)) :
     'naming_table work_env =
   {
-    artifact_store_config;
     bin_root;
     check_id;
     ci_info;
@@ -104,7 +99,6 @@ let make_env
     init_start_t;
     key;
     nonce;
-    transport_channel;
     naming_table_base = None;
     root;
     cache_remote_decls;

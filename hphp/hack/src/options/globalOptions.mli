@@ -42,15 +42,9 @@ type t = {
   tco_remote_worker_key: string option;
   (* If set, uses the check ID when logging events in the context of remove init/work *)
   tco_remote_check_id: string option;
-  (* The max batch size that a remote worker can receive to type check *)
-  tco_remote_max_batch_size: int;
-  (* The min batch size that a remote worker can receive to type check *)
-  tco_remote_min_batch_size: int;
   (* Dictates the number of remote type checking workers *)
   tco_num_remote_workers: int;
   so_remote_version_specifier: string option;
-  (* Above this threshold of files to check, the remote type checking worker will not use Eden *)
-  so_remote_worker_vfs_checkout_threshold: int;
   (* Enables the reverse naming table to fall back to SQLite for queries. *)
   so_naming_sqlite_path: string option;
   (* Namespace aliasing map *)
@@ -365,11 +359,8 @@ val make :
   ?tco_remote_type_check:bool ->
   ?tco_remote_worker_key:string ->
   ?tco_remote_check_id:string ->
-  ?tco_remote_max_batch_size:int ->
-  ?tco_remote_min_batch_size:int ->
   ?tco_num_remote_workers:int ->
   ?so_remote_version_specifier:string ->
-  ?so_remote_worker_vfs_checkout_threshold:int ->
   ?so_naming_sqlite_path:string ->
   ?po_auto_namespace_map:(string * string) list ->
   ?tco_language_feature_logging:bool ->
@@ -498,8 +489,6 @@ val default : t
 (* NOTE: set/getters for po_* options moved to ParserOptions *)
 
 val so_remote_version_specifier : t -> string option
-
-val so_remote_worker_vfs_checkout_threshold : t -> int
 
 val so_naming_sqlite_path : t -> string option
 

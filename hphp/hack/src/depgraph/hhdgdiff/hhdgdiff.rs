@@ -12,6 +12,7 @@ use anyhow::Context;
 use anyhow::Result;
 use clap::Parser;
 use depgraph_reader::Dep;
+use depgraph_reader::DepGraph;
 use depgraph_reader::DepGraphOpener;
 use hash::DashMap;
 use hash::HashSet;
@@ -29,6 +30,52 @@ pub struct Opts {
 
     /// Optional .txt files providing human-readable hash -> (kind, Dependency) pairs
     depmaps: Vec<PathBuf>,
+}
+
+/// Report nodes and edges in dg1 but not in dg2.
+///
+/// Returns the total number of differences found.
+fn compare(dg1: &DepGraph<'_>, dg2: &DepGraph<'_>, prefix: &str, nodes: &Nodes) -> usize {
+    let mut num_different = 0;
+
+    // list nodes in dg1 that are not in dg2
+    for h in dg1.all_hashes() {
+        if !dg2.contains(h) {
+            num_different += 1;
+            println!("{prefix} {h} {}", nodes.fmt(h));
+        }
+    }
+
+    // list edges in dg1 that are not in dg2
+    num_different += dg1
+        .par_all_hashes()
+        .with_min_len(1)
+        .with_max_len(1)
+        .filter(|&dependency| {
+            let mut different = false;
+
+            if let Some(dg1_hash_list) = dg1.hash_list_for(dependency) {
+                let dg2_hashes: HashSet<Dep> = dg2
+                    .hash_list_for(dependency)
+                    .map_or_else(HashSet::default, |hl| dg2.hash_list_hashes(hl).collect());
+
+                for dependent in dg1.hash_list_hashes(dg1_hash_list) {
+                    if !dg2_hashes.contains(&dependent) {
+                        different = true;
+                        println!(
+                            "{prefix} {} -> {}",
+                            nodes.fmt(dependent),
+                            nodes.fmt(dependency)
+                        );
+                    }
+                }
+            }
+
+            different
+        })
+        .count();
+
+    num_different
 }
 
 fn main() -> Result<()> {
@@ -64,75 +111,9 @@ fn main() -> Result<()> {
         }
     }
 
-    let mut different = 0;
+    let num_different = compare(&dg1, &dg2, "-", &nodes) + compare(&dg2, &dg1, "+", &nodes);
 
-    // list nodes in dg1 that are not in dg2
-    for h in dg1.all_hashes() {
-        if !dg2.contains(h) {
-            different += 1;
-            println!("- {} {}", h, nodes.fmt(h));
-        }
-    }
-
-    // list edges in dg1 that are not in dg2
-    different += dg1
-        .par_all_hashes()
-        .with_min_len(1)
-        .with_max_len(1)
-        .filter(|&dependency| {
-            let mut different = false;
-
-            if let Some(dg1_hash_list) = dg1.hash_list_for(dependency) {
-                let dg2_hashes: HashSet<Dep> = dg2
-                    .hash_list_for(dependency)
-                    .map_or_else(HashSet::default, |hl| dg2.hash_list_hashes(hl).collect());
-
-                for dependent in dg1.hash_list_hashes(dg1_hash_list) {
-                    if !dg2_hashes.contains(&dependent) {
-                        different = true;
-                        println!("- {} -> {}", nodes.fmt(dependent), nodes.fmt(dependency));
-                    }
-                }
-            }
-
-            different
-        })
-        .count();
-
-    // list nodes in dg2 that are not in dg1
-    for h in dg2.all_hashes() {
-        if !dg1.contains(h) {
-            different += 1;
-            println!("+ {} {}", h, nodes.fmt(h));
-        }
-    }
-
-    // list edges in dg2 that are not in dg1
-    different += dg2
-        .par_all_hashes()
-        .with_min_len(1)
-        .with_max_len(1)
-        .filter(|&dependency| {
-            let mut different = false;
-
-            if let Some(dg2_hash_list) = dg2.hash_list_for(dependency) {
-                let dg1_hashes: HashSet<Dep> = dg1
-                    .hash_list_for(dependency)
-                    .map_or_else(HashSet::default, |hl| dg1.hash_list_hashes(hl).collect());
-
-                for dependent in dg2.hash_list_hashes(dg2_hash_list) {
-                    if !dg1_hashes.contains(&dependent) {
-                        different = true;
-                        println!("+ {} -> {}", nodes.fmt(dependent), nodes.fmt(dependency));
-                    }
-                }
-            }
-
-            different
-        })
-        .count();
-
-    if different != 0 {
+    if num_different != 0 {
         std::process::exit(1);
     }
     Ok(())

@@ -44,7 +44,7 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
  * Try to inline a FCall.
  */
 bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
-                         Offset asyncEagerOffset);
+                         Offset asyncEagerOffset, SSATmp* calleeFP);
 
 /*
  * Super inlining.

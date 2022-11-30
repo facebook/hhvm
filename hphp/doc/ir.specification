@@ -1559,12 +1559,14 @@ To string conversions:
 
 | BeginInlining<func, offset>, D(FramePtr), S(StkPtr), NF
 
-  Marks the start of an inlined function whose stack resides offset cells below
-  the SP.
-
   Defines a new frame pointer for an ActRec at callBCOff for use in an inlined
   region. In resumed contexts the new frame is computed relative to S0 as S1 is
   not a stack location.
+
+| EnterInlineFrame, ND, S(FramePtr), NF
+
+  Marks the start of an inlined function whose stack resides offset cells below
+  the SP.
 
 | EndInlining, ND, S(FramePtr), NF
 

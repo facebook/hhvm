@@ -692,6 +692,7 @@ bool canDCE(const IRInstruction& inst) {
   case FinishMemberOp:
   case BeginInlining:
   case EndInlining:
+  case EnterInlineFrame:
   case SetOpTV:
   case OutlineSetOp:
   case ConjureUse:

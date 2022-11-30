@@ -313,9 +313,9 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   };
 
   switch (inst->op()) {
-  case BeginInlining:  trackBeginInlining(inst); break;
-  case EndInlining:    trackEndInlining(); break;
-  case InlineCall:     trackInlineCall(inst); break;
+  case EnterInlineFrame: trackEnterInlineFrame(inst); break;
+  case EndInlining:      trackEndInlining(); break;
+  case InlineCall:       trackInlineCall(inst); break;
   case StFrameCtx:
     setFrameCtx(inst->src(0), inst->src(1));
     break;
@@ -1031,11 +1031,11 @@ void FrameStateMgr::uninitStack() {
   cur().stack.clear();
 }
 
-void FrameStateMgr::trackBeginInlining(const IRInstruction* inst) {
-  assertx(inst->is(BeginInlining));
+void FrameStateMgr::trackEnterInlineFrame(const IRInstruction* inst) {
+  assertx(inst->is(EnterInlineFrame));
   assertx(cur().checkMInstrStateDead());
 
-  auto const extra = inst->extra<BeginInlining>();
+  auto const extra = inst->src(0)->inst()->extra<BeginInlining>();
   auto const callee = extra->func;
   auto const spOffset = extra->spOffset;
   assertx(cur().bcSPOff == spOffset.to<SBInvOffset>(irSPOff()));
@@ -1059,7 +1059,7 @@ void FrameStateMgr::trackBeginInlining(const IRInstruction* inst) {
   m_stack.emplace_back(FrameState{callee});
 
   // Set up the callee's frame.
-  cur().fpValue = inst->dst();
+  cur().fpValue = inst->src(0);
   cur().fixupFPValue = caller().fixupFPValue;
 
   /*

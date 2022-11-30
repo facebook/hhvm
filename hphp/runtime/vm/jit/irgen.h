@@ -212,7 +212,8 @@ void beginInlining(IRGS& env,
                    SSATmp* ctx,
                    Offset callBcOffset,
                    InlineReturnTarget returnTarget,
-                   int cost);
+                   int cost,
+                   SSATmp* calleeFP);
 
 /*
  * End the current inlined frame, after all its blocks have been emitted.

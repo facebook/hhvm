@@ -496,7 +496,7 @@ private:
   void handleMInstr(const IRInstruction*);
   void initStack(SSATmp* sp, SBInvOffset irSPOff, SBInvOffset bcSPOff);
   void uninitStack();
-  void trackBeginInlining(const IRInstruction* inst);
+  void trackEnterInlineFrame(const IRInstruction* inst);
   void trackEndInlining();
   void trackInlineCall(const IRInstruction* inst);
 

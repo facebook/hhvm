@@ -267,6 +267,14 @@ struct Vunit {
    * its blocks before being emitted.
    */
   bool needsFramesComputed() const;
+  /*
+   * Allocate a new VFrame for an EnterInlineFrame instruction or return the
+   * id of an existing already created frame for that FP.
+   *
+   * If the frame already exists its entry weight will be increased by the
+   * weight specified here.
+   */
+  int allocFrame(const Vinstr& inst, int parent_frame, uint64_t entry_weight);
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
@@ -277,6 +285,7 @@ struct Vunit {
   jit::vector<Vblock> blocks;
   jit::hash_map<Vconst,Vreg,Vconst::Hash> constToReg;
   jit::hash_map<size_t,Vconst> regToConst;
+  jit::hash_map<const SSATmp*,int> fpToFrame;
   jit::vector<VregList> tuples;
   jit::vector<VcallArgs> vcallArgs;
   jit::vector<VdataBlock> dataBlocks;

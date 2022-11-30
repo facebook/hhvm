@@ -25,6 +25,41 @@ namespace HPHP::jit {
 constexpr int Vframe::Top;
 constexpr int Vframe::Root;
 
+int Vunit::allocFrame(const Vinstr& inst, int parent_frame,
+                      uint64_t entry_weight) {
+  assertx(inst.op == Vinstr::inlinestart);
+  assertx(inst.origin->is(EnterInlineFrame));
+
+  auto const fp = inst.origin->src(0);
+  auto const [it, inserted] = fpToFrame.emplace(fp, frames.size());
+  if (!inserted) {
+    always_assert(frames[it->second].parent == parent_frame);
+    frames[it->second].entry_weight += entry_weight;
+    return it->second;
+  }
+
+  for (auto f = parent_frame; f != Vframe::Top; f = frames[f].parent) {
+    frames[f].inclusive_cost += inst.inlinestart_.cost;
+    frames[f].num_inner_frames++;
+  }
+
+  auto const sbToRootSbOff =
+    frames[parent_frame].sbToRootSbOff +
+    inst.origin->marker().bcSPOff().offset +
+    inst.inlinestart_.func->numSlotsInFrame();
+
+  frames.emplace_back(
+    inst.inlinestart_.func,
+    inst.origin->marker().bcOff(),
+    sbToRootSbOff,
+    parent_frame,
+    inst.inlinestart_.cost,
+    entry_weight
+  );
+
+  return it->second;
+}
+
 Vlabel Vunit::makeBlock(AreaIndex area, uint64_t weight) {
   auto i = blocks.size();
   blocks.emplace_back(area, weight);

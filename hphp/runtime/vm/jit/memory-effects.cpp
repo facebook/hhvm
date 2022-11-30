@@ -471,12 +471,21 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * defines a new FP for the callee but does not perform any stores or
    * otherwise initialize the FP.
    */
-  case BeginInlining: {
+  case BeginInlining:
+    return IrrelevantEffects {};
+
+  /*
+   * EnterInlineFrame marks that an inline frame pointer allocated using
+   * BeginInlining is now live. The frame pointer should not be accessed
+   * prior to this instruction as it may alias locations that overlap with
+   * live stack locations in the caller.
+   */
+  case EnterInlineFrame: {
     /*
      * SP relative offset of the firstin the inlined call.
      */
     auto inlineStackOff =
-      inst.extra<BeginInlining>()->spOffset + kNumActRecCells;
+      inst.src(0)->inst()->extra<BeginInlining>()->spOffset + kNumActRecCells;
     return may_load_store_kill(
       AEmpty,
       AEmpty,

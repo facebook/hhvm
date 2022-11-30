@@ -962,7 +962,7 @@ bool irGenTrySuperInlineFCall(irgen::IRGS& irgs, const Func* callee,
 }
 
 bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
-                         Offset asyncEagerOffset) {
+                         Offset asyncEagerOffset, SSATmp* calleeFP) {
   assertx(entry.funcEntry());
   ctx = ctx ? ctx : cns(irgs, nullptr);
 
@@ -997,7 +997,8 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, SrcKey entry, SSATmp* ctx,
   };
   auto const callFuncOff = bcOff(irgs);
 
-  irgen::beginInlining(irgs, entry, ctx, callFuncOff, returnTarget, calleeCost);
+  irgen::beginInlining(irgs, entry, ctx, callFuncOff, returnTarget, calleeCost,
+                       calleeFP);
 
   SCOPE_ASSERT_DETAIL("Inlined-RegionDesc")
     { return show(*calleeRegion); };

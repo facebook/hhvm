@@ -36,6 +36,7 @@
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
+#include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
@@ -548,11 +549,19 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
       RuntimeCoeffects::none()  // coeffects not needed, passed via SSA arg
     ).value());
 
+    // We defer emitting parameter type checks until after allocating the frame
+    // pointer (but before we pop the parameters from the stack and make the
+    // frame live) so that CheckTypes from within the body of the function can
+    // be hoisted through the parameter checks.
+    auto const calleeFP = genCalleeFP(env, callee);
+
     // Callee checks and input initialization.
     emitCalleeGenericsChecks(env, callee, prologueFlags, fca.hasGenerics());
     emitCalleeArgumentArityChecks(env, callee, numArgsInclUnpack);
-    emitCalleeArgumentTypeChecks(env, callee, numArgsInclUnpack,
-                                 objOrClass ? objOrClass : cns(env, nullptr));
+    emitCalleeArgumentTypeChecks(
+      env, callee, numArgsInclUnpack,
+      objOrClass ? objOrClass : cns(env, nullptr)
+    );
     emitCalleeDynamicCallChecks(env, callee, prologueFlags);
     emitCalleeCoeffectChecks(env, callee, prologueFlags, coeffects,
                              fca.skipCoeffectsCheck(),
@@ -573,10 +582,14 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     auto const entry = SrcKey { callee, numArgs, SrcKey::FuncEntryTag {} };
 
     if (isFCall(curSrcKey(env).op()) && !hasRdsCache) {
-      if (irGenTryInlineFCall(env, entry, objOrClass, asyncEagerOffset)) {
+      if (irGenTryInlineFCall(env, entry, objOrClass, asyncEagerOffset,
+                              calleeFP)) {
         return;
       }
     }
+
+    // We didn't end up inlining the callee, discard the frame pointer
+    if (!calleeFP->isA(TBottom)) calleeFP->inst()->convertToNop();
 
     if (hasRdsCache) {
       verifyImplicitContextState(env, callee);

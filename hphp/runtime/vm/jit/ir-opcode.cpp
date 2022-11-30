@@ -612,6 +612,7 @@ bool opcodeMayRaise(Opcode opc) {
   case EndGuards:
   case EndInlining:
   case EnterFrame:
+  case EnterInlineFrame:
   case EnterPrologue:
   case EnterTCUnwind:
   case EnterTranslation:

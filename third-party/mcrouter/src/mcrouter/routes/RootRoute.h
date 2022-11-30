@@ -153,7 +153,7 @@ class RootRoute {
     }
     if (!rh.empty()) {
       auto reqCopy = std::make_shared<const Request>(req);
-      for (size_t i = 1; i < rh.size(); ++i) {
+      for (size_t i = 1, e = rh.size(); i < e; ++i) {
         auto r = rh[i];
         folly::fibers::addTask([r, reqCopy]() { r->route(*reqCopy); });
       }

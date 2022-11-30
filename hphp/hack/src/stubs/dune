@@ -15,14 +15,6 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
- (name artifact_store_stubs)
- (wrapped false)
- (modules artifactStore)
- (libraries errors)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
  (name build)
  (wrapped false)
  (modules buildMain)
@@ -99,7 +91,6 @@
  (wrapped false)
  (modules remoteWorker)
  (libraries
-  artifact_store_stubs
   ci_util_stubs
   errors
   file_info
@@ -122,7 +113,7 @@
  (name state_loader_stubs)
  (wrapped false)
  (modules saved_state_loader state_loader_futures state_loader_lwt)
- (libraries artifact_store_stubs hg server_monitor)
+ (libraries hg server_monitor)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 

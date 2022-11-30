@@ -80,18 +80,6 @@ class HTTPTransactionSink : public HTTPSink {
       sendAbort();
     }
   }
-  HTTPTransaction* newPushedTransaction(
-      HTTPPushTransactionHandler* handler,
-      ProxygenError* error = nullptr) override {
-    return httpTransaction_->newPushedTransaction(handler, error);
-  }
-  HTTPTransaction* newExTransaction(HTTPTransaction::Handler* handler,
-                                    bool unidirectional) override {
-    return httpTransaction_->newExTransaction(handler, unidirectional);
-  }
-  [[nodiscard]] bool extraResponseExpected() const override {
-    return httpTransaction_->extraResponseExpected();
-  }
   const wangle::TransportInfo& getSetupTransportInfo() const noexcept override {
     return httpTransaction_->getSetupTransportInfo();
   }

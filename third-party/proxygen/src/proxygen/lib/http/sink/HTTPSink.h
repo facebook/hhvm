@@ -48,13 +48,9 @@ class HTTPSink {
   virtual void sendEOM() = 0;
   virtual void sendAbort() = 0;
   virtual void sendAbortIfIncomplete() = 0;
-  virtual HTTPTransaction* newPushedTransaction(
-      HTTPPushTransactionHandler* handler, ProxygenError* error = nullptr) = 0;
-  virtual HTTPTransaction* newExTransaction(HTTPTransaction::Handler* handler,
-                                            bool unidirectional) = 0;
+
   // Check state
   [[nodiscard]] virtual bool canSendHeaders() const = 0;
-  [[nodiscard]] virtual bool extraResponseExpected() const = 0;
   virtual const wangle::TransportInfo& getSetupTransportInfo()
       const noexcept = 0;
   virtual void getCurrentTransportInfo(wangle::TransportInfo* tinfo) const = 0;

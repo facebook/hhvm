@@ -115,42 +115,6 @@ const byte defaultTypeHashBytes = 16;
 @thrift.Experimental // TODO(afuller): Adapt!
 typedef standard.DurationStruct Duration (thrift.uri = "")
 
-/**
- * A 'normal' Time.
- *
- * This representation is always safe to 'normalize' or 'saturate' at
- * the infinite future/past, instead of overflowing.
- */
-// TODO(afuller): Provide const definitions for infinite future/past.
-@thrift.Experimental // TODO(afuller): Adapt!
-typedef standard.TimeStruct Time (thrift.uri = "")
-
-/**
- * An 'internet timestamp' as described in [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt).
- *
- * Similar to `Time`, but can only represent values in the range
- * 0001-01-01T00:00:00Z to 9999-12-31T23:59:59Z inclusive, for compatibility
- * with the 'date string' format. Thus `seconds` must be in the range
- * -62'135'769'600 to 253'402'300'799 inclusive, when `normal`.
- *
- * This representation is always safe to 'normalize' or 'saturate' at the
- * min/max allowed 'date string' values, instead of overflowing.
- */
-@thrift.Experimental // TODO(afuller): Adapt!
-typedef standard.TimeStruct Timestamp
-
-/**
- * The minimum timestamp allowed by [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt).
- */
-// TODO(afuller): Ignore single quote (') in number literals.
-// TODO(afuller): Allow unquoted identifiers as field names/string map keys.
-const Timestamp minTimestamp = {"seconds": -62135769600};
-
-/**
- * The maximum timestamp allowed by [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt).
- */
-const Timestamp maxTimestamp = {"seconds": 253402300799, "nanos": 999999999};
-
 @cpp.Adapter{
   name = "::apache::thrift::InlineAdapter<::apache::thrift::type::Protocol>",
 }

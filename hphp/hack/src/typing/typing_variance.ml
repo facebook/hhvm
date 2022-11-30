@@ -154,9 +154,9 @@ let reason_to_string ~sign (_, descr, variance) =
     "`where _ super _` constraints are contravariant on the left, covariant on the right"
   | Rfun_inout_parameter ->
     "Inout/ref function parameters are both covariant and contravariant"
-  | Rrefinement_eq -> "`=` refinement members are invariant"
-  | Rrefinement_as -> "`as` refinement members are covariant"
-  | Rrefinement_super -> "`super` refinement members are contravariant"
+  | Rrefinement_eq -> "exact refinements are invariant"
+  | Rrefinement_as -> "`as` refinement bounds are covariant"
+  | Rrefinement_super -> "`super` refinement bounds are contravariant"
 
 let detailed_message variance pos stack =
   match stack with
@@ -302,6 +302,9 @@ let rec get_typarams_union ~tracked tenv acc (ty : decl_ty) =
 and get_typarams ~tracked tenv (ty : decl_ty) =
   let empty = (SMap.empty, SMap.empty) in
   let get_typarams_union = get_typarams_union ~tracked tenv in
+  let get_typarams_list tyl =
+    List.fold_left tyl ~init:empty ~f:get_typarams_union
+  in
   let get_typarams = get_typarams ~tracked tenv in
   let single id pos = (SMap.singleton id [pos], SMap.empty) in
   let rec get_typarams_variance_list acc variancel tyl =
@@ -345,13 +348,24 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
         | TRexact bnd ->
           let tp = get_typarams bnd in
           union acc @@ union (flip tp) tp
-        | TRloose _ -> (* TODO(type-refinements) implement later *) empty)
+        | TRloose bnds ->
+          (* Lower bounds on type members are contravariant
+           * while upper bounds are covariant. Interestingly,
+           * this differs from where constraints because,
+           * logically, those sit on the LHS of an
+           * implication while refinements are on the RHS.
+           *   (A => B) |- (A' => B ) if A' |- A
+           *   (A => B) |- (A  => B') if B  |- B'
+           *)
+          union
+            (flip (get_typarams_list bnds.tr_lower))
+            (get_typarams_list bnds.tr_upper))
       rs.cr_types
       (get_typarams ty)
   | Tunion tyl
   | Tintersection tyl
   | Ttuple tyl ->
-    List.fold_left tyl ~init:empty ~f:get_typarams_union
+    get_typarams_list tyl
   | Tshape (_, m) ->
     TShapeMap.fold
       (fun _ { sft_ty; _ } res -> get_typarams_union res sft_ty)
@@ -481,14 +495,12 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
 
     (* If a type parameter appears covariantly, then treat its lower bounds as covariant *)
     let propagate_covariant_to_lower_bounds tp =
-      let tyl = get_lower_bounds tp in
-      List.fold_left tyl ~init:empty ~f:get_typarams_union
+      get_typarams_list (get_lower_bounds tp)
     in
 
     (* If a type parameter appears contravariantly, then treat its upper bounds as contravariant *)
     let propagate_contravariant_to_upper_bounds tp =
-      let tyl = get_upper_bounds tp in
-      flip (List.fold_left tyl ~init:empty ~f:get_typarams_union)
+      flip (get_typarams_list (get_upper_bounds tp))
     in
 
     (* Given a type parameter, propagate its variance (co and/or contra) to lower and upper bounds

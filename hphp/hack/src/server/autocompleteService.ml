@@ -1589,7 +1589,9 @@ let class_member_start_keywords filename s (ctx : Ast_defs.classish_kind option)
   let const_type_keywords = ["const"; "abstract"] in
   (* Keywords allowed on class and trait methods, but not allowed on interface methods. *)
   let concrete_method_keywords = ["private"; "final"] in
-  let trait_member_keywords = ["require extends"; "require implements"] in
+  let trait_member_keywords =
+    ["require extends"; "require implements"; "require class"]
+  in
   let inclusion_keywords = ["use"] in
 
   let possible_keywords =

@@ -1,4 +1,5 @@
 use keyword
+require class keyword
 require implements keyword
 require extends keyword
 final keyword

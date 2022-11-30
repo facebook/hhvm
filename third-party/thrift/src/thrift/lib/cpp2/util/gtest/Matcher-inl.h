@@ -20,11 +20,15 @@
 #include <string_view>
 #include <type_traits>
 #include <utility>
+
 #include <fatal/type/enum.h>
 #include <fatal/type/variant_traits.h>
 #include <folly/Overload.h>
 #include <folly/Traits.h>
 #include <folly/lang/Pretty.h>
+#include <folly/portability/GMock.h>
+
+#include <thrift/lib/cpp2/Thrift.h>
 
 namespace apache::thrift {
 

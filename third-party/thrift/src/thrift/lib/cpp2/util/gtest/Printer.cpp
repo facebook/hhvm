@@ -14,6 +14,4 @@
  * limitations under the License.
  */
 
-#pragma once
-
-#include <thrift/lib/cpp2/util/gtest/Matcher.h>
+#include <thrift/lib/cpp2/util/gtest/Printer.h>

@@ -15,6 +15,7 @@ module Predicate = Symbol_predicate
 module Fact_id = Symbol_fact_id
 module Fact_acc = Symbol_predicate.Fact_acc
 module XRefs = Symbol_xrefs
+module Sym_def = Symbol_sym_def
 
 let namespace_decl name progress =
   let json_fields =
@@ -237,12 +238,12 @@ let type_info ~ty sym_pos progress =
   Fact_acc.add_fact Predicate.(Hack TypeInfo) json progress
 
 let class_name_to_target ctx sid progress : Hh_json.json option * Fact_acc.t =
-  match ServerSymbolDefinition.get_class_by_name ctx sid with
+  match Sym_def.get_kind ctx sid with
   | None -> (None, progress)
-  | Some cls ->
+  | Some kind ->
     let (predicate, container_kind) =
       let open Ast_defs in
-      match cls.c_kind with
+      match kind with
       | Cclass _ -> (Predicate.ClassDeclaration, "class_")
       | Cinterface -> (Predicate.InterfaceDeclaration, "interface_")
       | Ctrait -> (Predicate.TraitDeclaration, "trait")

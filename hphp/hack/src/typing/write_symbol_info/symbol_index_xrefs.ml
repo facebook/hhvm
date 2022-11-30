@@ -6,16 +6,15 @@
  *
  *)
 
-open Aast
 open Hh_prelude
 module Add_fact = Symbol_add_fact
 module Fact_acc = Symbol_predicate.Fact_acc
 module Fact_id = Symbol_fact_id
-module Util = Symbol_json_util
 module Build = Symbol_build_json
 module Predicate = Symbol_predicate
 module File_info = Symbol_file_info
 module XRefs = Symbol_xrefs
+module Sym_def = Symbol_sym_def
 
 let call_handler ~path progress_ref (pos_map : XRefs.pos_map) =
   object (_self)
@@ -95,43 +94,42 @@ let process_gconst_xref symbol_def pos (xrefs, prog) =
     (xrefs, prog)
 
 let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
-  let File_info.{ name; full_name; kind } = member in
+  let Sym_def.{ name; full_name; kind } = member in
   match Str.split (Str.regexp "::") full_name with
   | [] -> (xrefs, prog)
   | con_name :: _mem_name ->
     let con_name_with_ns = Utils.add_ns con_name in
-    (match ServerSymbolDefinition.get_class_by_name ctx con_name_with_ns with
-    | None ->
+    (match Sym_def.get_class_by_name ctx con_name_with_ns with
+    | `None ->
       Hh_logger.log
         "WARNING: could not find parent container %s processing reference to %s"
         con_name_with_ns
         full_name;
       (xrefs, prog)
-    | Some cls ->
-      if Util.is_enum_or_enum_class cls.c_kind then
-        match kind with
-        | SymbolDefinition.ClassConst ->
-          let (enum_id, prog) = Add_fact.enum_decl con_name prog in
-          process_xref
-            (Add_fact.enumerator enum_id)
-            Build.build_enumerator_decl_json_ref
-            name
-            pos
-            (xrefs, prog)
-        (* This includes references to built-in enum methods *)
-        | _ -> (xrefs, prog)
-      else
-        let con_kind = Predicate.get_parent_kind cls in
-        let (con_type, decl_pred) = Predicate.parent_decl_predicate con_kind in
-        let (con_decl_id, prog) =
-          Add_fact.container_decl decl_pred con_name prog
-        in
+    | `Enum ->
+      (match kind with
+      | SymbolDefinition.ClassConst ->
+        let (enum_id, prog) = Add_fact.enum_decl con_name prog in
         process_xref
-          (mem_decl_fun con_type con_decl_id)
-          ref_fun
+          (Add_fact.enumerator enum_id)
+          Build.build_enumerator_decl_json_ref
           name
           pos
-          (xrefs, prog))
+          (xrefs, prog)
+      (* This includes references to built-in enum methods *)
+      | _ -> (xrefs, prog))
+    | `Class cls ->
+      let con_kind = Predicate.get_parent_kind cls in
+      let (con_type, decl_pred) = Predicate.parent_decl_predicate con_kind in
+      let (con_decl_id, prog) =
+        Add_fact.container_decl decl_pred con_name prog
+      in
+      process_xref
+        (mem_decl_fun con_type con_decl_id)
+        ref_fun
+        name
+        pos
+        (xrefs, prog))
 
 let process_container_xref (con_type, decl_pred) symbol_name pos (xrefs, prog) =
   process_xref
@@ -144,22 +142,20 @@ let process_container_xref (con_type, decl_pred) symbol_name pos (xrefs, prog) =
 let process_attribute_xref ctx File_info.{ occ; def } opt_info (xrefs, prog) =
   let get_con_preds_from_name con_name =
     let con_name_with_ns = Utils.add_ns con_name in
-    match ServerSymbolDefinition.get_class_by_name ctx con_name_with_ns with
-    | None ->
+    match Sym_def.get_class_by_name ctx con_name_with_ns with
+    | `None ->
       Hh_logger.log
         "WARNING: could not find declaration container %s for attribute reference to %s"
         con_name_with_ns
         con_name;
       None
-    | Some cls ->
-      if Util.is_enum_or_enum_class cls.c_kind then (
-        Hh_logger.log
-          "WARNING: unexpected enum %s processing attribute reference %s"
-          con_name_with_ns
-          con_name;
-        None
-      ) else
-        Some Predicate.(parent_decl_predicate (get_parent_kind cls))
+    | `Enum ->
+      Hh_logger.log
+        "WARNING: unexpected enum %s processing attribute reference %s"
+        con_name_with_ns
+        con_name;
+      None
+    | `Class cls -> Some Predicate.(parent_decl_predicate (get_parent_kind cls))
   in
   (* Process <<__Override>>, for which we write a MethodOverrides fact
      instead of a cross-reference *)
@@ -175,7 +171,7 @@ let process_attribute_xref ctx File_info.{ occ; def } opt_info (xrefs, prog) =
       | Some override_con_pred_types ->
         (match def with
         | None -> (xrefs, prog)
-        | Some File_info.{ full_name; _ } ->
+        | Some Sym_def.{ full_name; _ } ->
           (match Str.split (Str.regexp "::") full_name with
           | [] -> (xrefs, prog)
           | base_con_name :: _mem_name ->
@@ -246,7 +242,7 @@ let process_xrefs ctx symbols prog : XRefs.t * Fact_acc.t =
               let xrefs = XRefs.add xrefs target_id pos target_json in
               (xrefs, prog)
             | _ -> (xrefs, prog))
-          | Some (File_info.{ name; kind; _ } as sym_def) ->
+          | Some (Sym_def.{ name; kind; _ } as sym_def) ->
             let open SymbolDefinition in
             let proc_mem = process_member_xref ctx sym_def pos in
             (match kind with

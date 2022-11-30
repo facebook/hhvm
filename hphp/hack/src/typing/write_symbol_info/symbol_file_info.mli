@@ -8,16 +8,11 @@
 
 open Hh_prelude
 module Indexable = Symbol_indexable
-
-type def = {
-  kind: SymbolDefinition.kind;
-  name: string;
-  full_name: string;
-}
+module Sym_def = Symbol_sym_def
 
 type symbol = private {
   occ: Relative_path.t SymbolOccurrence.t;
-  def: def option;
+  def: Sym_def.t option;
 }
 
 (** [fanout] flag is used in incremental mode. It identifies files which are

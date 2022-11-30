@@ -2,6 +2,7 @@
  (name write_symbol_info)
  (wrapped false)
  (modules
+  symbol_sym_def
   symbol_gencode
   symbol_indexable
   symbol_file_info

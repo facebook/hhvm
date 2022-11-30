@@ -7,9 +7,12 @@
  */
 
 void assert_master() {}
+void caml_add_to_heap(void) {}
 void caml_alloc(void) {}
+void caml_alloc_for_heap(void) {}
 void caml_alloc_small(void) {}
 void caml_alloc_tuple(void) {}
+void caml_allocation_color(void) {}
 void caml_array_length(void) {}
 void caml_initialize(void) {}
 void caml_is_double_array(void) {}

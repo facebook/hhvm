@@ -81,7 +81,6 @@ void HQUnidirStreamDispatcher::onDataAvailable(
   }
 
   switch (type.value()) {
-    case hq::UnidirectionalStreamType::H1Q_CONTROL:
     case hq::UnidirectionalStreamType::CONTROL:
     case hq::UnidirectionalStreamType::QPACK_ENCODER:
     case hq::UnidirectionalStreamType::QPACK_DECODER: {

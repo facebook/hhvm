@@ -67,13 +67,6 @@ ParseResult HQControlCodec::checkFrameAllowed(FrameType type) {
     }
   }
 
-  // Only GOAWAY from Server to Client are allowed in H1Q
-  if (getStreamType() == hq::UnidirectionalStreamType::H1Q_CONTROL &&
-      (transportDirection_ == TransportDirection::DOWNSTREAM ||
-       type != hq::FrameType::GOAWAY)) {
-    return HTTP3::ErrorCode::HTTP_FRAME_UNEXPECTED;
-  }
-
   return folly::none;
 }
 

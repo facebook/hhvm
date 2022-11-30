@@ -43,24 +43,15 @@ constexpr quic::StreamId kQPACKDecoderEgressStreamId = 10;
 
 std::pair<HTTPCodec::StreamID, std::unique_ptr<HTTPCodec>>
 HQUpstreamSessionTest::makeCodec(HTTPCodec::StreamID id) {
-  if (IS_HQ) {
-    return {id,
-            std::make_unique<hq::HQStreamCodec>(
-                id,
-                TransportDirection::DOWNSTREAM,
-                qpackCodec_,
-                encoderWriteBuf_,
-                decoderWriteBuf_,
-                [] { return std::numeric_limits<uint64_t>::max(); },
-                ingressSettings_)};
-  } else {
-    auto codec = std::make_unique<HTTP1xCodec>(TransportDirection::DOWNSTREAM);
-    // When the codec is created, need to fake the request
-    FakeHTTPCodecCallback cb;
-    codec->setCallback(&cb);
-    codec->onIngress(*folly::IOBuf::copyBuffer("GET / HTTP/1.1\r\n\r\n"));
-    return {1, std::move(codec)};
-  }
+  return {id,
+          std::make_unique<hq::HQStreamCodec>(
+              id,
+              TransportDirection::DOWNSTREAM,
+              qpackCodec_,
+              encoderWriteBuf_,
+              decoderWriteBuf_,
+              [] { return std::numeric_limits<uint64_t>::max(); },
+              ingressSettings_)};
 }
 
 void HQUpstreamSessionTest::sendResponse(quic::StreamId id,
@@ -113,23 +104,19 @@ void HQUpstreamSessionTest::SetUp() {
   createControlStreams();
 
   flushAndLoop();
-  if (IS_HQ) {
-    EXPECT_EQ(httpCallbacks_.settings, 1);
-  }
+  EXPECT_EQ(httpCallbacks_.settings, 1);
 }
 
 void HQUpstreamSessionTest::TearDown() {
-  if (!IS_H1Q_FB_V1) {
-    // With control streams we may need an extra loop for proper shutdown
-    if (!socketDriver_->isClosed()) {
-      // Send the first GOAWAY with MAX_STREAM_ID immediately
-      sendGoaway(HTTPCodec::MaxStreamID);
-      // Schedule the second GOAWAY with the last seen stream ID, after some
-      // delay
-      sendGoaway(socketDriver_->getMaxStreamId(), milliseconds(50));
-    }
-    eventBase_.loopOnce();
+  // With control streams we may need an extra loop for proper shutdown
+  if (!socketDriver_->isClosed()) {
+    // Send the first GOAWAY with MAX_STREAM_ID immediately
+    sendGoaway(HTTPCodec::MaxStreamID);
+    // Schedule the second GOAWAY with the last seen stream ID, after some
+    // delay
+    sendGoaway(socketDriver_->getMaxStreamId(), milliseconds(50));
   }
+  eventBase_.loopOnce();
 }
 
 void HQUpstreamSessionTest::sendGoaway(quic::StreamId lastStreamId,
@@ -220,16 +207,12 @@ StrictMock<MockController>& HQUpstreamSessionTest::getMockController() {
   return controllerContainer_.mockController;
 }
 
-// Use this test class for h1q-fb-v1 only tests
-using HQUpstreamSessionTestH1qv1 = HQUpstreamSessionTest;
-// Use this test class for h1q-fb-v2 and hq tests
-using HQUpstreamSessionTestH1qv2HQ = HQUpstreamSessionTest;
 // Use this test class for hq only tests
-using HQUpstreamSessionTestHQ = HQUpstreamSessionTest;
+using HQUpstreamSessionTest = HQUpstreamSessionTest;
 // Use this test class for hq only tests with qpack encoder streams on/off
 using HQUpstreamSessionTestQPACK = HQUpstreamSessionTest;
 // Use this test class for hq only tests with Datagram support
-using HQUpstreamSessionTestHQDatagram = HQUpstreamSessionTest;
+using HQUpstreamSessionTestDatagram = HQUpstreamSessionTest;
 
 TEST_P(HQUpstreamSessionTest, SimpleGet) {
   auto handler = openTransaction();
@@ -248,9 +231,7 @@ TEST_P(HQUpstreamSessionTest, SimpleGet) {
   hqSession_->closeWhenIdle();
 }
 
-// H1Q does not support trailers, since it requires the messages to use HTTP
-// chunk encoding
-TEST_P(HQUpstreamSessionTestHQ, GetWithTrailers) {
+TEST_P(HQUpstreamSessionTest, GetWithTrailers) {
   auto handler = openTransaction();
   auto req = getGetRequest();
   handler->txn_->sendHeaders(req);
@@ -279,26 +260,24 @@ TEST_P(HQUpstreamSessionTestHQ, GetWithTrailers) {
 }
 
 TEST_P(HQUpstreamSessionTest, PriorityUpdateIntoTransport) {
-  if (IS_HQ) {
-    auto handler = openTransaction();
-    auto req = getGetRequest();
-    req.getHeaders().add(HTTP_HEADER_PRIORITY, "u=3, i");
-    EXPECT_CALL(*socketDriver_->getSocket(), setStreamPriority(_, 3, true));
-    handler->txn_->sendHeadersWithEOM(req);
+  auto handler = openTransaction();
+  auto req = getGetRequest();
+  req.getHeaders().add(HTTP_HEADER_PRIORITY, "u=3, i");
+  EXPECT_CALL(*socketDriver_->getSocket(), setStreamPriority(_, 3, true));
+  handler->txn_->sendHeadersWithEOM(req);
 
-    handler->expectHeaders();
-    handler->expectBody();
-    handler->expectEOM();
-    handler->expectDetachTransaction();
-    auto resp = makeResponse(200, 100);
-    std::get<0>(resp)->getHeaders().add(HTTP_HEADER_PRIORITY, "u=5");
-    sendResponse(handler->txn_->getID(),
-                 *std::get<0>(resp),
-                 std::move(std::get<1>(resp)),
-                 true);
-    EXPECT_CALL(*socketDriver_->getSocket(), setStreamPriority(_, 5, false));
-    flushAndLoop();
-  }
+  handler->expectHeaders();
+  handler->expectBody();
+  handler->expectEOM();
+  handler->expectDetachTransaction();
+  auto resp = makeResponse(200, 100);
+  std::get<0>(resp)->getHeaders().add(HTTP_HEADER_PRIORITY, "u=5");
+  sendResponse(handler->txn_->getID(),
+               *std::get<0>(resp),
+               std::move(std::get<1>(resp)),
+               true);
+  EXPECT_CALL(*socketDriver_->getSocket(), setStreamPriority(_, 5, false));
+  flushAndLoop();
   hqSession_->closeWhenIdle();
 }
 
@@ -341,50 +320,46 @@ TEST_P(HQUpstreamSessionTest, TestSupportsMoreTransactions) {
 }
 
 TEST_P(HQUpstreamSessionTest, SendPriorityUpdate) {
-  if (IS_HQ) {
-    auto handler = openTransaction();
-    handler->txn_->sendHeaders(getGetRequest());
-    handler->expectHeaders();
-    handler->expectBody([&]() {
-      EXPECT_CALL(*socketDriver_->getSocket(),
-                  setStreamPriority(handler->txn_->getID(), 5, true));
-      handler->txn_->updateAndSendPriority(5, true);
-    });
-    handler->txn_->sendEOM();
-    handler->expectEOM();
-    handler->expectDetachTransaction();
-    auto resp = makeResponse(200, 100);
-    sendResponse(handler->txn_->getID(),
-                 *std::get<0>(resp),
-                 std::move(std::get<1>(resp)),
-                 true);
-    flushAndLoop();
-  }
+  auto handler = openTransaction();
+  handler->txn_->sendHeaders(getGetRequest());
+  handler->expectHeaders();
+  handler->expectBody([&]() {
+    EXPECT_CALL(*socketDriver_->getSocket(),
+                setStreamPriority(handler->txn_->getID(), 5, true));
+    handler->txn_->updateAndSendPriority(5, true);
+  });
+  handler->txn_->sendEOM();
+  handler->expectEOM();
+  handler->expectDetachTransaction();
+  auto resp = makeResponse(200, 100);
+  sendResponse(handler->txn_->getID(),
+               *std::get<0>(resp),
+               std::move(std::get<1>(resp)),
+               true);
+  flushAndLoop();
   hqSession_->closeWhenIdle();
 }
 
 TEST_P(HQUpstreamSessionTest, SkipPriorityUpdateAfterSeenEOM) {
-  if (IS_HQ) {
-    auto handler = openTransaction();
-    handler->txn_->sendHeaders(getGetRequest());
-    handler->expectHeaders();
-    handler->expectBody();
-    handler->expectEOM([&]() {
-      EXPECT_CALL(*socketDriver_->getSocket(),
-                  setStreamPriority(handler->txn_->getID(), 5, true))
-          .Times(0);
-      handler->txn_->updateAndSendPriority(5, true);
-    });
-    handler->txn_->sendEOM();
+  auto handler = openTransaction();
+  handler->txn_->sendHeaders(getGetRequest());
+  handler->expectHeaders();
+  handler->expectBody();
+  handler->expectEOM([&]() {
+    EXPECT_CALL(*socketDriver_->getSocket(),
+                setStreamPriority(handler->txn_->getID(), 5, true))
+        .Times(0);
+    handler->txn_->updateAndSendPriority(5, true);
+  });
+  handler->txn_->sendEOM();
 
-    handler->expectDetachTransaction();
-    auto resp = makeResponse(200, 100);
-    sendResponse(handler->txn_->getID(),
-                 *std::get<0>(resp),
-                 std::move(std::get<1>(resp)),
-                 true);
-    flushAndLoop();
-  }
+  handler->expectDetachTransaction();
+  auto resp = makeResponse(200, 100);
+  sendResponse(handler->txn_->getID(),
+               *std::get<0>(resp),
+               std::move(std::get<1>(resp)),
+               true);
+  flushAndLoop();
   hqSession_->closeWhenIdle();
 }
 
@@ -789,7 +764,7 @@ TEST_P(HQUpstreamSessionTest, RejectDelegateSending) {
   hqSession_->closeWhenIdle();
 }
 
-TEST_P(HQUpstreamSessionTestH1qv2HQ, GoawayStreamsUnacknowledged) {
+TEST_P(HQUpstreamSessionTest, GoawayStreamsUnacknowledged) {
   std::vector<std::unique_ptr<StrictMock<MockHTTPHandler>>> handlers;
   auto numStreams = 4;
   quic::StreamId goawayId = (numStreams * 4) / 2 + 4;
@@ -840,7 +815,7 @@ TEST_P(HQUpstreamSessionTestH1qv2HQ, GoawayStreamsUnacknowledged) {
   flushAndLoop();
 }
 
-TEST_P(HQUpstreamSessionTestHQ, GoawayIncreased) {
+TEST_P(HQUpstreamSessionTest, GoawayIncreased) {
   folly::IOBufQueue writeBuf{folly::IOBufQueue::cacheChainLength()};
   egressControlCodec_->generateGoaway(writeBuf, 12, ErrorCode::NO_ERROR);
   socketDriver_->addReadEvent(connControlStreamId_, writeBuf.move());
@@ -857,7 +832,7 @@ TEST_P(HQUpstreamSessionTestHQ, GoawayIncreased) {
             HTTP3::ErrorCode::HTTP_ID_ERROR);
 }
 
-TEST_P(HQUpstreamSessionTestHQ, DelayedQPACK) {
+TEST_P(HQUpstreamSessionTest, DelayedQPACK) {
   InSequence enforceOrder;
   auto handler = openTransaction();
   handler->txn_->sendHeaders(getGetRequest());
@@ -884,7 +859,7 @@ TEST_P(HQUpstreamSessionTestHQ, DelayedQPACK) {
   hqSession_->closeWhenIdle();
 }
 
-TEST_P(HQUpstreamSessionTestHQ, DelayedQPACKTimeout) {
+TEST_P(HQUpstreamSessionTest, DelayedQPACKTimeout) {
   InSequence enforceOrder;
   auto handler = openTransaction();
   handler->txn_->sendHeaders(getGetRequest());
@@ -907,7 +882,7 @@ TEST_P(HQUpstreamSessionTestHQ, DelayedQPACKTimeout) {
   flushAndLoop();
 }
 
-TEST_P(HQUpstreamSessionTestHQ, QPACKDecoderStreamFlushed) {
+TEST_P(HQUpstreamSessionTest, QPACKDecoderStreamFlushed) {
   InSequence enforceOrder;
   auto handler = openTransaction();
   handler->txn_->sendHeadersWithOptionalEOM(getGetRequest(), true);
@@ -940,7 +915,7 @@ TEST_P(HQUpstreamSessionTestHQ, QPACKDecoderStreamFlushed) {
   EXPECT_EQ(decoderStream.writeBuf.chainLength(), 3);
 }
 
-TEST_P(HQUpstreamSessionTestHQ, DelayedQPACKAfterReset) {
+TEST_P(HQUpstreamSessionTest, DelayedQPACKAfterReset) {
   // Stand on your head and spit wooden nickels
   // Ensure the session does not deliver input data to a transaction detached
   // earlier the same loop
@@ -1032,7 +1007,7 @@ TEST_P(HQUpstreamSessionTestQPACK, QPACKQueuedOnClose) {
   eventBase_.loop();
 }
 
-TEST_P(HQUpstreamSessionTestHQ, TestDropConnectionSynchronously) {
+TEST_P(HQUpstreamSessionTest, TestDropConnectionSynchronously) {
   std::unique_ptr<testing::NiceMock<proxygen::MockHTTPSessionInfoCallback>>
       infoCb = std::make_unique<
           testing::NiceMock<proxygen::MockHTTPSessionInfoCallback>>();
@@ -1049,7 +1024,7 @@ TEST_P(HQUpstreamSessionTestHQ, TestDropConnectionSynchronously) {
   eventBase_.loopOnce();
 }
 
-TEST_P(HQUpstreamSessionTestHQ, TestOnStopSendingHTTPRequestRejected) {
+TEST_P(HQUpstreamSessionTest, TestOnStopSendingHTTPRequestRejected) {
   auto handler = openTransaction();
   auto streamId = handler->txn_->getID();
   handler->txn_->sendHeaders(getGetRequest());
@@ -1074,7 +1049,7 @@ TEST_P(HQUpstreamSessionTestHQ, TestOnStopSendingHTTPRequestRejected) {
   hqSession_->closeWhenIdle();
 }
 
-TEST_P(HQUpstreamSessionTestHQ, TestGreaseFramePerSession) {
+TEST_P(HQUpstreamSessionTest, TestGreaseFramePerSession) {
   // a grease frame is created when creating the first transaction
   auto handler1 = openTransaction();
   auto streamId1 = handler1->txn_->getID();
@@ -1130,7 +1105,7 @@ TEST_P(HQUpstreamSessionTestHQ, TestGreaseFramePerSession) {
   hqSession_->closeWhenIdle();
 }
 
-TEST_P(HQUpstreamSessionTestHQ, TestIngressLimitedSessionWithNewRequests) {
+TEST_P(HQUpstreamSessionTest, TestIngressLimitedSessionWithNewRequests) {
   auto infoCb = std::make_unique<
       testing::NiceMock<proxygen::MockHTTPSessionInfoCallback>>();
   hqSession_->setInfoCallback(infoCb.get());
@@ -1170,12 +1145,9 @@ TEST_P(HQUpstreamSessionTestHQ, TestIngressLimitedSessionWithNewRequests) {
   hqSession_->closeWhenIdle();
 }
 
-// This test is checking two different scenarios for different protocol
 //   - in HQ we already have sent SETTINGS in SetUp, so tests that multiple
 //     setting frames are not allowed
-//   - in h1q-fb-v2 tests that receiving even a single SETTINGS frame errors
-//     out the connection
-TEST_P(HQUpstreamSessionTestH1qv2HQ, ExtraSettings) {
+TEST_P(HQUpstreamSessionTest, ExtraSettings) {
   auto handler = openTransaction();
   handler->txn_->sendHeaders(getGetRequest());
   handler->txn_->sendEOM();
@@ -1188,7 +1160,7 @@ TEST_P(HQUpstreamSessionTestH1qv2HQ, ExtraSettings) {
                                   TransportDirection::DOWNSTREAM,
                                   StreamDirection::EGRESS,
                                   egressSettings_,
-                                  UnidirectionalStreamType::H1Q_CONTROL};
+                                  UnidirectionalStreamType::CONTROL};
   folly::IOBufQueue writeBuf{folly::IOBufQueue::cacheChainLength()};
   auxControlCodec_.generateSettings(writeBuf);
   socketDriver_->addReadEvent(
@@ -1201,10 +1173,10 @@ TEST_P(HQUpstreamSessionTestH1qv2HQ, ExtraSettings) {
 }
 
 // Test Cases for which Settings are not sent in the test SetUp
-using HQUpstreamSessionTestHQNoSettings = HQUpstreamSessionTest;
+using HQUpstreamSessionTestNoSettings = HQUpstreamSessionTest;
 
 INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
-                         HQUpstreamSessionTestHQNoSettings,
+                         HQUpstreamSessionTestNoSettings,
                          Values([] {
                            TestParams tp;
                            tp.alpn_ = "h3";
@@ -1212,13 +1184,13 @@ INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
                            return tp;
                          }()),
                          paramsToTestName);
-TEST_P(HQUpstreamSessionTestHQNoSettings, SimpleGet) {
+TEST_P(HQUpstreamSessionTestNoSettings, SimpleGet) {
   EXPECT_CALL(connectCb_, connectError(_)).Times(1);
   socketDriver_->deliverConnectionError(
       {quic::LocalErrorCode::CONNECT_FAILED, "Peer closed"});
 }
 
-TEST_P(HQUpstreamSessionTestHQNoSettings, GoawayBeforeSettings) {
+TEST_P(HQUpstreamSessionTestNoSettings, GoawayBeforeSettings) {
   auto handler = openTransaction();
   handler->txn_->sendHeaders(getGetRequest());
   handler->txn_->sendEOM();
@@ -1232,30 +1204,11 @@ TEST_P(HQUpstreamSessionTestHQNoSettings, GoawayBeforeSettings) {
             HTTP3::ErrorCode::HTTP_MISSING_SETTINGS);
 }
 
-TEST_P(HQUpstreamSessionTestH1qv1, TestConnectionClose) {
-  hqSession_->drain();
-  auto handler = openTransaction();
-  handler->txn_->sendHeaders(getGetRequest());
-  handler->txn_->sendEOM();
-  handler->expectHeaders();
-  handler->expectBody();
-  handler->expectEOM();
-  handler->expectDetachTransaction();
-  auto resp = makeResponse(200, 100);
-  std::get<0>(resp)->getHeaders().set(HTTP_HEADER_CONNECTION, "close");
-  sendResponse(handler->txn_->getID(),
-               *std::get<0>(resp),
-               std::move(std::get<1>(resp)),
-               true);
-  hqSession_->closeWhenIdle();
-  flushAndLoop();
-}
-
 /**
  * Push tests
  */
 
-class HQUpstreamSessionTestHQPush : public HQUpstreamSessionTest {
+class HQUpstreamSessionTestPush : public HQUpstreamSessionTest {
  public:
   void SetUp() override {
     HQUpstreamSessionTest::SetUp();
@@ -1578,7 +1531,7 @@ class HQUpstreamSessionTestHQPush : public HQUpstreamSessionTest {
   std::unique_ptr<MockServerPushLifecycleCallback> SLCcallback_;
 };
 
-TEST_P(HQUpstreamSessionTestHQPush, DelayedQPACKPush) {
+TEST_P(HQUpstreamSessionTestPush, DelayedQPACKPush) {
   assocHandler_->txn_->sendAbort();
   assocHandler_ = openTransaction();
   assocHandler_->txn_->sendHeaders(getGetRequest());
@@ -1620,7 +1573,7 @@ TEST_P(HQUpstreamSessionTestHQPush, DelayedQPACKPush) {
   hqSession_->closeWhenIdle();
 }
 
-TEST_P(HQUpstreamSessionTestHQPush, TestPushPromiseCallbacksInvoked) {
+TEST_P(HQUpstreamSessionTestPush, TestPushPromiseCallbacksInvoked) {
   // the push promise is not followed by a push stream, and the eof is not
   // set.
   // The transaction is supposed to stay open and to time out eventually.
@@ -1686,7 +1639,7 @@ TEST_P(HQUpstreamSessionTestHQPush, TestPushPromiseCallbacksInvoked) {
   flushAndLoop();
 }
 
-TEST_P(HQUpstreamSessionTestHQPush, TestIngressPushStream) {
+TEST_P(HQUpstreamSessionTestPush, TestIngressPushStream) {
 
   hq::PushId pushId = nextPushId();
 
@@ -1732,7 +1685,7 @@ TEST_P(HQUpstreamSessionTestHQPush, TestIngressPushStream) {
                   // enough?
 }
 
-TEST_P(HQUpstreamSessionTestHQPush, TestPushPromiseFollowedByPushStream) {
+TEST_P(HQUpstreamSessionTestPush, TestPushPromiseFollowedByPushStream) {
   // the transaction is expected to timeout, since the PushPromise does not have
   // EOF set, and it is not followed by a PushStream.
   assocHandler_->expectError();
@@ -1803,7 +1756,7 @@ TEST_P(HQUpstreamSessionTestHQPush, TestPushPromiseFollowedByPushStream) {
   flushAndLoop();
 }
 
-TEST_P(HQUpstreamSessionTestHQPush, TestAbortedPushedTransactionAfterPromise) {
+TEST_P(HQUpstreamSessionTestPush, TestAbortedPushedTransactionAfterPromise) {
   assocHandler_->txn_->sendAbort();
   assocHandler_ = openTransaction();
   assocHandler_->txn_->sendHeaders(getGetRequest());
@@ -1838,7 +1791,7 @@ TEST_P(HQUpstreamSessionTestHQPush, TestAbortedPushedTransactionAfterPromise) {
   hqSession_->closeWhenIdle();
 }
 
-TEST_P(HQUpstreamSessionTestHQPush, TestAbortedPushedTransactionAfterResponse) {
+TEST_P(HQUpstreamSessionTestPush, TestAbortedPushedTransactionAfterResponse) {
   assocHandler_->txn_->sendAbort();
   assocHandler_ = openTransaction();
   assocHandler_->txn_->sendHeaders(getGetRequest());
@@ -1881,7 +1834,7 @@ TEST_P(HQUpstreamSessionTestHQPush, TestAbortedPushedTransactionAfterResponse) {
   hqSession_->closeWhenIdle();
 }
 
-TEST_P(HQUpstreamSessionTestHQPush, TestOnPushedTransaction) {
+TEST_P(HQUpstreamSessionTestPush, TestOnPushedTransaction) {
   // the transaction is expected to timeout, since the PushPromise does not have
   // EOF set, and it is not followed by a PushStream.
   assocHandler_->expectError();
@@ -1912,7 +1865,7 @@ TEST_P(HQUpstreamSessionTestHQPush, TestOnPushedTransaction) {
   flushAndLoop();
 }
 
-TEST_P(HQUpstreamSessionTestHQPush, TestOnPushedTransactionOutOfOrder) {
+TEST_P(HQUpstreamSessionTestPush, TestOnPushedTransactionOutOfOrder) {
   // the transaction is expected to timeout, since the PushPromise does not have
   // EOF set, and it is not followed by a PushStream.
   assocHandler_->expectError();
@@ -1941,7 +1894,7 @@ TEST_P(HQUpstreamSessionTestHQPush, TestOnPushedTransactionOutOfOrder) {
   flushAndLoop();
 }
 
-TEST_P(HQUpstreamSessionTestHQPush, TestCloseDroppedConnection) {
+TEST_P(HQUpstreamSessionTestPush, TestCloseDroppedConnection) {
   HQSession::DestructorGuard dg(hqSession_);
   // Two "onError" calls are expected:
   // the first when MockQuicSocketDriver closes the socket
@@ -1959,7 +1912,7 @@ TEST_P(HQUpstreamSessionTestHQPush, TestCloseDroppedConnection) {
   flushAndLoop();
 }
 
-TEST_P(HQUpstreamSessionTestHQPush, TestOrphanedPushStream) {
+TEST_P(HQUpstreamSessionTestPush, TestOrphanedPushStream) {
   // the transaction is expected to timeout, since the PushPromise does not have
   // EOF set, and it is not followed by a PushStream.
   assocHandler_->expectError();
@@ -1976,7 +1929,7 @@ TEST_P(HQUpstreamSessionTestHQPush, TestOrphanedPushStream) {
   flushAndLoop();
 }
 
-TEST_P(HQUpstreamSessionTestHQ, TestNoDatagram) {
+TEST_P(HQUpstreamSessionTest, TestNoDatagram) {
   EXPECT_FALSE(httpCallbacks_.datagramEnabled);
   auto handler = openTransaction();
   EXPECT_EQ(handler->txn_->getDatagramSizeLimit(), 0);
@@ -1995,7 +1948,7 @@ TEST_P(HQUpstreamSessionTestHQ, TestNoDatagram) {
   flushAndLoop();
 }
 
-TEST_P(HQUpstreamSessionTestHQDatagram, TestDatagramSettings) {
+TEST_P(HQUpstreamSessionTestDatagram, TestDatagramSettings) {
   EXPECT_TRUE(httpCallbacks_.datagramEnabled);
   auto handler = openTransaction();
   EXPECT_GT(handler->txn_->getDatagramSizeLimit(), 0);
@@ -2014,7 +1967,7 @@ TEST_P(HQUpstreamSessionTestHQDatagram, TestDatagramSettings) {
   flushAndLoop();
 }
 
-TEST_P(HQUpstreamSessionTestHQDatagram, TestReceiveDatagram) {
+TEST_P(HQUpstreamSessionTestDatagram, TestReceiveDatagram) {
   EXPECT_TRUE(httpCallbacks_.datagramEnabled);
   auto handler = openTransaction();
   auto id = handler->txn_->getID();
@@ -2042,7 +1995,7 @@ TEST_P(HQUpstreamSessionTestHQDatagram, TestReceiveDatagram) {
   flushAndLoop();
 }
 
-TEST_P(HQUpstreamSessionTestHQDatagram, TestReceiveEarlyDatagramsSingleStream) {
+TEST_P(HQUpstreamSessionTestDatagram, TestReceiveEarlyDatagramsSingleStream) {
   EXPECT_TRUE(httpCallbacks_.datagramEnabled);
   auto handler = openTransaction();
   auto id = handler->txn_->getID();
@@ -2071,7 +2024,7 @@ TEST_P(HQUpstreamSessionTestHQDatagram, TestReceiveEarlyDatagramsSingleStream) {
   flushAndLoop();
 }
 
-TEST_P(HQUpstreamSessionTestHQDatagram, TestReceiveEarlyDatagramsMultiStream) {
+TEST_P(HQUpstreamSessionTestDatagram, TestReceiveEarlyDatagramsMultiStream) {
   auto deliveredDatagrams = 0;
   EXPECT_TRUE(httpCallbacks_.datagramEnabled);
   std::vector<std::unique_ptr<StrictMock<MockHTTPHandler>>> handlers;
@@ -2117,53 +2070,6 @@ TEST_P(HQUpstreamSessionTestHQDatagram, TestReceiveEarlyDatagramsMultiStream) {
 // Make sure all the tests keep working with all the supported protocol versions
 INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
                          HQUpstreamSessionTest,
-                         Values(
-                             [] {
-                               TestParams tp;
-                               tp.alpn_ = "h1q-fb";
-                               return tp;
-                             }(),
-                             [] {
-                               TestParams tp;
-                               tp.alpn_ = "h1q-fb-v2";
-                               return tp;
-                             }(),
-                             [] {
-                               TestParams tp;
-                               tp.alpn_ = "h3";
-                               return tp;
-                             }()),
-                         paramsToTestName);
-
-// Instantiate h1q-fb-v2 and hq only tests (goaway tests)
-INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
-                         HQUpstreamSessionTestH1qv2HQ,
-                         Values(
-                             [] {
-                               TestParams tp;
-                               tp.alpn_ = "h1q-fb-v2";
-                               return tp;
-                             }(),
-                             [] {
-                               TestParams tp;
-                               tp.alpn_ = "h3";
-                               return tp;
-                             }()),
-                         paramsToTestName);
-
-// Instantiate h1q-fb-v1 only tests
-INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
-                         HQUpstreamSessionTestH1qv1,
-                         Values([] {
-                           TestParams tp;
-                           tp.alpn_ = "h1q-fb";
-                           return tp;
-                         }()),
-                         paramsToTestName);
-
-// Instantiate hq only tests
-INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
-                         HQUpstreamSessionTestHQ,
                          Values([] {
                            TestParams tp;
                            tp.alpn_ = "h3";
@@ -2173,7 +2079,7 @@ INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
 
 // Instantiate tests for H3 Push functionality (requires HQ)
 INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
-                         HQUpstreamSessionTestHQPush,
+                         HQUpstreamSessionTestPush,
                          Values([] {
                            TestParams tp;
                            tp.alpn_ = "h3";
@@ -2201,7 +2107,7 @@ INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
 
 // Instantiate h3 datagram tests
 INSTANTIATE_TEST_SUITE_P(HQUpstreamSessionTest,
-                         HQUpstreamSessionTestHQDatagram,
+                         HQUpstreamSessionTestDatagram,
                          Values([] {
                            TestParams tp;
                            tp.alpn_ = "h3";

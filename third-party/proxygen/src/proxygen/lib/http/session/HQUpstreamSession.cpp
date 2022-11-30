@@ -357,7 +357,7 @@ void HQUpstreamSession::HQIngressPushStream::bindTo(quic::StreamId streamId) {
   HQUpstreamSession& session = static_cast<HQUpstreamSession&>(session_);
 #endif
   // Initialize this stream's codec with the id of the transport stream
-  auto codec = session.versionUtils_->createCodec(streamId);
+  auto codec = session.createCodec(streamId);
   initCodec(std::move(codec), __func__);
   DCHECK_EQ(*codecStreamId_, streamId);
 

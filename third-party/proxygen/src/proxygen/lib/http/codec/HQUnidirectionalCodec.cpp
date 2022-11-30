@@ -15,7 +15,6 @@ namespace proxygen { namespace hq {
 
 std::ostream& operator<<(std::ostream& os, UnidirectionalStreamType type) {
   switch (type) {
-    case UnidirectionalStreamType::H1Q_CONTROL:
     case UnidirectionalStreamType::CONTROL:
       os << "control";
       break;

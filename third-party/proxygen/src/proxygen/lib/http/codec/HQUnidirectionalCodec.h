@@ -21,10 +21,6 @@ enum class UnidirectionalStreamType : uint64_t {
   PUSH = 0x01,
   QPACK_ENCODER = 0x02,
   QPACK_DECODER = 0x03,
-  // any possible varint encoding for this does not conflict
-  // with any character that is allowed as the first character in HTTP/1.1
-  // 0x20 (' '), 0x4020 ('@'), 0x80000020, 0xC000000000000020
-  H1Q_CONTROL = 0x20,
 };
 using StreamTypeType = std::underlying_type<UnidirectionalStreamType>::type;
 std::ostream& operator<<(std::ostream& os, UnidirectionalStreamType type);
@@ -46,7 +42,6 @@ folly::Optional<Ret> withType(uint64_t typeval,
     case UnidirectionalStreamType::PUSH:
     case UnidirectionalStreamType::QPACK_ENCODER:
     case UnidirectionalStreamType::QPACK_DECODER:
-    case UnidirectionalStreamType::H1Q_CONTROL:
       return functor(casted);
     default:
       return folly::none;

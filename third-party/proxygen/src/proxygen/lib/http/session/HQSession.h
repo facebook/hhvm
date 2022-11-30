@@ -38,7 +38,6 @@ namespace proxygen {
 
 class HTTPSessionController;
 class HQSession;
-class VersionUtils;
 
 namespace hq {
 class HQStreamCodec;
@@ -47,8 +46,7 @@ class HQStreamCodec;
 std::ostream& operator<<(std::ostream& os, const HQSession& session);
 
 enum class HQVersion : uint8_t {
-  H1Q_FB_V1, // HTTP1.1 on each stream, no control stream
-  H1Q_FB_V2, // HTTP1.1 on each stream, control stream for GOAWAY
+  H1Q_FB_V1, // HTTP1.1 on each stream, no control stream. For Interop only
   HQ,        // The real McCoy
 };
 
@@ -56,6 +54,7 @@ extern const std::string kH3;
 extern const std::string kH3AliasV1;
 extern const std::string kHQ;
 extern const std::string kH3FBCurrentDraft;
+// TODO: Remove these constants, the session no longer negotiates these
 extern const std::string kH3CurrentDraft;
 extern const std::string kHQCurrentDraft;
 
@@ -148,9 +147,6 @@ class HQSession
 
  private:
   class HQControlStream;
-  class H1QFBV1VersionUtils;
-  class H1QFBV2VersionUtils;
-  class HQVersionUtils;
 
   static constexpr uint8_t kMaxCodecStackDepth = 3;
 
@@ -333,11 +329,7 @@ class HQSession
   }
 
   CodecProtocol getCodecProtocol() const override {
-    if (!versionUtils_) {
-      // return a default protocol before alpn is set
-      return CodecProtocol::HTTP_1_1;
-    }
-    return versionUtils_->getCodecProtocol();
+    return CodecProtocol::HTTP_3;
   }
 
   // for testing only
@@ -380,7 +372,7 @@ class HQSession
         egressSettings_.getSetting(SettingsId::MAX_HEADER_LIST_SIZE);
     if (maxHeaderListSize) {
       versionUtilsReady_.then([this, size = maxHeaderListSize->value] {
-        versionUtils_->setMaxUncompressed(size);
+        qpackCodec_.setMaxUncompressed(size);
       });
     }
     auto datagramEnabled = egressSettings_.getSetting(SettingsId::_HQ_DATAGRAM);
@@ -487,8 +479,7 @@ class HQSession
       wangle::TransportInfo* /*tinfo*/) const override;
 
   void setHeaderCodecStats(HeaderCodec::Stats* stats) override {
-    versionUtilsReady_.then(
-        [this, stats] { versionUtils_->setHeaderCodecStats(stats); });
+    versionUtilsReady_.then([this, stats] { qpackCodec_.setStats(stats); });
   }
 
   void enableDoubleGoawayDrain() override {
@@ -1015,7 +1006,6 @@ class HQSession
     void createEgressCodec() {
       CHECK(type_.has_value());
       switch (*type_) {
-        case hq::UnidirectionalStreamType::H1Q_CONTROL:
         case hq::UnidirectionalStreamType::CONTROL:
           realCodec_ =
               std::make_unique<hq::HQControlCodec>(getEgressStreamId(),
@@ -1529,8 +1519,6 @@ class HQSession
       return session_.connectionToken_;
     }
 
-    void generateGoaway();
-
     void trackEgressBodyOffset(uint64_t bodyOffset,
                                proxygen::ByteEvent::EventFlags flags) override;
 
@@ -1830,202 +1818,20 @@ class HQSession
 #pragma warning(pop)
 #endif
 
+  std::unique_ptr<HTTPCodec> createCodec(quic::StreamId id);
+  bool checkNewStream(quic::StreamId id);
+
  private:
-  class VersionUtils {
-   public:
-    explicit VersionUtils(HQSession& session) : session_(session) {
-    }
-    virtual ~VersionUtils() {
-    }
+  void sendGoaway();
 
-    // Checks whether it is allowed to process a new stream, depending on the
-    // stream type, draining state/goaway. If not allowed, it resets the stream
-    virtual CodecProtocol getCodecProtocol() const = 0;
-    virtual bool checkNewStream(quic::StreamId id) = 0;
-    virtual std::unique_ptr<HTTPCodec> createCodec(quic::StreamId id) = 0;
-    virtual std::unique_ptr<hq::HQUnidirectionalCodec> createControlCodec(
-        hq::UnidirectionalStreamType type, HQControlStream& controlStream) = 0;
-    virtual folly::Optional<hq::UnidirectionalStreamType> parseStreamPreface(
-        uint64_t preface) = 0;
-    virtual void sendGoaway() = 0;
-    virtual void sendGoawayOnRequestStream(
-        HQSession::HQStreamTransport& stream) = 0;
-    virtual void headersComplete(HTTPMessage* msg) = 0;
-    virtual void checkSendingGoaway(const HTTPMessage& msg) = 0;
-    virtual size_t sendSettings() = 0;
-    virtual bool createEgressControlStreams() = 0;
-    virtual void applySettings(const SettingsList& settings) = 0;
-    virtual void onSettings(const SettingsList& settings) = 0;
-    virtual void readDataProcessed() = 0;
-    virtual void abortStream(quic::StreamId id) = 0;
-    virtual void setMaxUncompressed(uint64_t) {
-    }
-    virtual void setHeaderCodecStats(HeaderCodec::Stats*) {
-    }
-    virtual void onConnectionEnd() {
-    }
+  std::unique_ptr<hq::HQUnidirectionalCodec> createControlCodec(
+      hq::UnidirectionalStreamType type, HQControlStream& controlStream);
 
-    HQSession& session_;
-  };
+  void headersComplete(HTTPMessage* /*msg*/);
 
-  class H1QFBV1VersionUtils : public VersionUtils {
-   public:
-    explicit H1QFBV1VersionUtils(HQSession& session) : VersionUtils(session) {
-    }
+  void readDataProcessed();
 
-    CodecProtocol getCodecProtocol() const override {
-      return CodecProtocol::HTTP_1_1;
-    }
-
-    bool checkNewStream(quic::StreamId id) override;
-
-    std::unique_ptr<HTTPCodec> createCodec(quic::StreamId id) override;
-
-    std::unique_ptr<hq::HQUnidirectionalCodec> createControlCodec(
-        hq::UnidirectionalStreamType, HQControlStream&) override {
-      return nullptr; // no control streams
-    }
-
-    folly::Optional<hq::UnidirectionalStreamType> parseStreamPreface(
-        uint64_t /*preface*/) override {
-      LOG(FATAL) << "H1Q does not use stream preface";
-      folly::assume_unreachable();
-    }
-
-    void sendGoaway() override;
-    void sendGoawayOnRequestStream(
-        HQSession::HQStreamTransport& stream) override;
-    void headersComplete(HTTPMessage* msg) override;
-    void checkSendingGoaway(const HTTPMessage& msg) override;
-
-    size_t sendSettings() override {
-      return 0;
-    }
-
-    bool createEgressControlStreams() override {
-      return true;
-    }
-
-    void applySettings(const SettingsList& /*settings*/) override {
-    }
-
-    void onSettings(const SettingsList& /*settings*/) override {
-      CHECK(false) << "SETTINGS frame received for h1q-fb-v1 protocol";
-    }
-
-    void readDataProcessed() override {
-    }
-
-    void abortStream(quic::StreamId /*id*/) override {
-    }
-  };
-
-  class GoawayUtils {
-   public:
-    static bool checkNewStream(HQSession& session, quic::StreamId id);
-    static void sendGoaway(HQSession& session);
-  };
-
-  class HQVersionUtils : public VersionUtils {
-   public:
-    explicit HQVersionUtils(HQSession& session) : VersionUtils(session) {
-    }
-
-    CodecProtocol getCodecProtocol() const override {
-      return CodecProtocol::HQ;
-    }
-
-    std::unique_ptr<HTTPCodec> createCodec(quic::StreamId id) override;
-
-    std::unique_ptr<hq::HQUnidirectionalCodec> createControlCodec(
-        hq::UnidirectionalStreamType type,
-        HQControlStream& controlStream) override;
-
-    bool checkNewStream(quic::StreamId id) override {
-      return GoawayUtils::checkNewStream(session_, id);
-    }
-    folly::Optional<hq::UnidirectionalStreamType> parseStreamPreface(
-        uint64_t preface) override;
-
-    void sendGoaway() override {
-      GoawayUtils::sendGoaway(session_);
-    }
-
-    void sendGoawayOnRequestStream(
-        HQSession::HQStreamTransport& /*stream*/) override {
-    }
-
-    void headersComplete(HTTPMessage* /*msg*/) override;
-
-    void checkSendingGoaway(const HTTPMessage& /*msg*/) override {
-    }
-
-    size_t sendSettings() override;
-
-    bool createEgressControlStreams() override;
-
-    void applySettings(const SettingsList& settings) override;
-
-    void onSettings(const SettingsList& settings) override;
-
-    void readDataProcessed() override;
-
-    void abortStream(quic::StreamId /*id*/) override;
-
-    void setMaxUncompressed(uint64_t value) override {
-      qpackCodec_.setMaxUncompressed(value);
-    }
-
-    void setHeaderCodecStats(HeaderCodec::Stats* stats) override {
-      qpackCodec_.setStats(stats);
-    }
-    void onConnectionEnd() override;
-
-   private:
-    QPACKCodec qpackCodec_;
-    hq::HQStreamCodec* hqStreamCodecPtr_{nullptr};
-  };
-
-  class H1QFBV2VersionUtils : public H1QFBV1VersionUtils {
-   public:
-    explicit H1QFBV2VersionUtils(HQSession& session)
-        : H1QFBV1VersionUtils(session) {
-    }
-
-    bool checkNewStream(quic::StreamId id) override {
-      return GoawayUtils::checkNewStream(session_, id);
-    }
-    std::unique_ptr<hq::HQUnidirectionalCodec> createControlCodec(
-        hq::UnidirectionalStreamType, HQControlStream&) override;
-
-    folly::Optional<hq::UnidirectionalStreamType> parseStreamPreface(
-        uint64_t preface) override;
-
-    bool createEgressControlStreams() override;
-
-    void onSettings(const SettingsList& /*settings*/) override {
-      session_.handleSessionError(
-          CHECK_NOTNULL(session_.findControlStream(
-              hq::UnidirectionalStreamType::H1Q_CONTROL)),
-          hq::StreamDirection::INGRESS,
-          HTTP3::ErrorCode::HTTP_GENERAL_PROTOCOL_ERROR,
-          kErrorConnection);
-    }
-
-    void sendGoaway() override {
-      GoawayUtils::sendGoaway(session_);
-    }
-
-    void sendGoawayOnRequestStream(
-        HQSession::HQStreamTransport& /*stream*/) override {
-    }
-
-    void headersComplete(HTTPMessage* /*msg*/) override {
-    }
-
-    void checkSendingGoaway(const HTTPMessage& /*msg*/) override {
-    }
-  };
+  void abortStream(quic::StreamId /*id*/);
 
   uint32_t getMaxConcurrentOutgoingStreamsRemote() const override {
     // need transport API
@@ -2058,6 +1864,7 @@ class HQSession
   std::unordered_map<hq::UnidirectionalStreamType, HQControlStream>
       controlStreams_;
   HQUnidirStreamDispatcher unidirectionalReadDispatcher_;
+  QPACKCodec qpackCodec_;
 
   // Min Stream ID we haven't seen so far
   quic::StreamId minUnseenIncomingStreamId_{0};
@@ -2098,7 +1905,6 @@ class HQSession
   HTTPSettings ingressSettings_;
   uint64_t minUnseenIncomingPushId_{0};
 
-  std::unique_ptr<VersionUtils> versionUtils_;
   ReadyGate versionUtilsReady_;
 
   // NOTE: introduce better decoupling between the streams

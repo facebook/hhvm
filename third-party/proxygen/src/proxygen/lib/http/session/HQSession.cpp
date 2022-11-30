@@ -41,8 +41,6 @@
 namespace {
 static const uint16_t kMaxReadsPerLoop = 16;
 static const std::string kNoProtocolString("");
-static const std::string kH1QV1ProtocolString("h1q-fb");
-static const std::string kH1QV2ProtocolString("h1q-fb-v2");
 static const std::string kQUICProtocolName("QUIC");
 constexpr uint64_t kMaxQuarterStreamId = (1ull << 60) - 1;
 
@@ -91,10 +89,12 @@ namespace proxygen {
 
 const std::string kH3FBCurrentDraft("h3-fb-05");
 const std::string kH3AliasV1("h3-alias-01");
-const std::string kH3CurrentDraft("h3-29");
-const std::string kHQCurrentDraft("hq-29");
 const std::string kH3("h3");
 const std::string kHQ("hq-interop");
+
+// TODO: remove these constants, the library no longer negotiates them
+const std::string kH3CurrentDraft("h3-29");
+const std::string kHQCurrentDraft("hq-29");
 
 const http2::PriorityUpdate hqDefaultPriority{kSessionStreamId, false, 15};
 
@@ -114,9 +114,7 @@ void HQSession::onNewBidirectionalStream(quic::StreamId id) noexcept {
   VLOG(4) << __func__ << " sess=" << *this << ": new streamID=" << id;
   // The transport should never call onNewBidirectionalStream before
   // onTransportReady
-  DCHECK(versionUtils_) << "The transport should never call " << __func__
-                        << " before onTransportReady";
-  if (!versionUtils_->checkNewStream(id)) {
+  if (!checkNewStream(id)) {
     return;
   }
   auto hqStream = findNonDetachedStream(id);
@@ -159,9 +157,7 @@ void HQSession::onNewUnidirectionalStream(quic::StreamId id) noexcept {
   VLOG(4) << __func__ << " sess=" << *this << ": new streamID=" << id;
   // The transport should never call onNewUnidirectionalStream
   // before onTransportReady
-  DCHECK(versionUtils_) << "The transport should never call " << __func__
-                        << " before onTransportReady";
-  if (!versionUtils_->checkNewStream(id)) {
+  if (!checkNewStream(id)) {
     return;
   }
 
@@ -196,39 +192,24 @@ void HQSession::onKnob(uint64_t knobSpace,
                            knobBlob->length());
 }
 
-bool HQSession::H1QFBV1VersionUtils::checkNewStream(quic::StreamId id) {
-  // Reject all unidirectional streams and all server-initiated streams
-  if (session_.sock_->isUnidirectionalStream(id) ||
-      session_.sock_->isServerStream(id)) {
-    session_.abortStream(HTTPException::Direction::INGRESS_AND_EGRESS,
-                         id,
-                         HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
-    return false;
-  }
-  return true;
-}
-
-bool HQSession::GoawayUtils::checkNewStream(HQSession& session,
-                                            quic::StreamId id) {
+bool HQSession::checkNewStream(quic::StreamId id) {
   // Reject all bidirectional, server-initiated streams
   if (id == kMaxClientBidiStreamId ||
-      (session.sock_->isBidirectionalStream(id) &&
-       session.sock_->isServerStream(id))) {
-    session.abortStream(HTTPException::Direction::INGRESS_AND_EGRESS,
-                        id,
-                        HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
+      (sock_->isBidirectionalStream(id) && sock_->isServerStream(id))) {
+    abortStream(HTTPException::Direction::INGRESS_AND_EGRESS,
+                id,
+                HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
     return false;
   }
   // Cancel any stream that is out of the range allowed by GOAWAY
-  if (session.drainState_ != DrainState::NONE) {
+  if (drainState_ != DrainState::NONE) {
     // You can't check upstream here, because upstream GOAWAY sends PUSH IDs.
     // It could be checked in HQUpstreamSesssion::onNewPushStream
-    if (session.direction_ == TransportDirection::DOWNSTREAM &&
-        session.sock_->isBidirectionalStream(id) &&
-        id >= session.getGoawayStreamId()) {
-      session.abortStream(HTTPException::Direction::INGRESS_AND_EGRESS,
-                          id,
-                          HTTP3::ErrorCode::HTTP_REQUEST_REJECTED);
+    if (direction_ == TransportDirection::DOWNSTREAM &&
+        sock_->isBidirectionalStream(id) && id >= getGoawayStreamId()) {
+      abortStream(HTTPException::Direction::INGRESS_AND_EGRESS,
+                  id,
+                  HTTP3::ErrorCode::HTTP_REQUEST_REJECTED);
       return false;
     }
   }
@@ -252,7 +233,7 @@ bool HQSession::onTransportReadyCommon() noexcept {
   transportInfo_.setupTime = millisecondsSince(transportStart_);
   transportInfo_.connectLatency = millisecondsSince(transportStart_).count();
   transportInfo_.protocolInfo = quicInfo_;
-  if (!versionUtils_->createEgressControlStreams()) {
+  if (!createEgressControlStreams()) {
     return false;
   }
   // Apply the default settings
@@ -265,37 +246,26 @@ bool HQSession::onTransportReadyCommon() noexcept {
   }
   sock_->setPingCallback(this);
   // TODO: 0-RTT settings
-  versionUtils_->applySettings(defaultSettings);
+  applySettings(defaultSettings);
   // notifyPendingShutdown may be invoked before onTransportReady,
   // so we need to address that here by kicking the GOAWAY logic if needed
   if (drainState_ == DrainState::PENDING) {
-    versionUtils_->sendGoaway();
+    sendGoaway();
   }
 
   informSessionControllerTransportReady();
   return true;
 }
 
-bool HQSession::H1QFBV2VersionUtils::createEgressControlStreams() {
-  if (!session_.createEgressControlStream(
-          UnidirectionalStreamType::H1Q_CONTROL)) {
-    return false;
-  }
-  session_.scheduleWrite();
-  return true;
-}
-
-bool HQSession::HQVersionUtils::createEgressControlStreams() {
-  if (!session_.createEgressControlStream(UnidirectionalStreamType::CONTROL) ||
-      !session_.createEgressControlStream(
-          UnidirectionalStreamType::QPACK_ENCODER) ||
-      !session_.createEgressControlStream(
-          UnidirectionalStreamType::QPACK_DECODER)) {
+bool HQSession::createEgressControlStreams() {
+  if (!createEgressControlStream(UnidirectionalStreamType::CONTROL) ||
+      !createEgressControlStream(UnidirectionalStreamType::QPACK_ENCODER) ||
+      !createEgressControlStream(UnidirectionalStreamType::QPACK_DECODER)) {
     return false;
   }
 
-  session_.sendSettings();
-  session_.scheduleWrite();
+  sendSettings();
+  scheduleWrite();
   return true;
 }
 
@@ -344,41 +314,19 @@ HQSession::createIngressControlStream(quic::StreamId id,
   }
 
   ctrlStream->setIngressStreamId(id);
-  ctrlStream->setIngressCodec(
-      versionUtils_->createControlCodec(streamType, *ctrlStream));
+  ctrlStream->setIngressCodec(createControlCodec(streamType, *ctrlStream));
   return ctrlStream;
 }
 
-std::unique_ptr<hq::HQUnidirectionalCodec>
-HQSession::H1QFBV2VersionUtils::createControlCodec(
+std::unique_ptr<hq::HQUnidirectionalCodec> HQSession::createControlCodec(
     hq::UnidirectionalStreamType type, HQControlStream& controlStream) {
-  switch (type) {
-    case hq::UnidirectionalStreamType::H1Q_CONTROL: {
-      auto codec = std::make_unique<hq::HQControlCodec>(
-          controlStream.getIngressStreamId(),
-          session_.direction_,
-          hq::StreamDirection::INGRESS,
-          session_.ingressSettings_,
-          type);
-      codec->setCallback(&controlStream);
-      return codec;
-    }
-    default:
-      CHECK(false);
-      return nullptr;
-  }
-}
-
-std::unique_ptr<hq::HQUnidirectionalCodec>
-HQSession::HQVersionUtils::createControlCodec(hq::UnidirectionalStreamType type,
-                                              HQControlStream& controlStream) {
   switch (type) {
     case hq::UnidirectionalStreamType::CONTROL: {
       auto codec = std::make_unique<hq::HQControlCodec>(
           controlStream.getIngressStreamId(),
-          session_.direction_,
+          direction_,
           hq::StreamDirection::INGRESS,
-          session_.ingressSettings_,
+          ingressSettings_,
           type);
       codec->setCallback(&controlStream);
       return codec;
@@ -402,13 +350,7 @@ bool HQSession::getAndCheckApplicationProtocol() {
   CHECK(sock_);
   auto alpn = sock_->getAppProtocol();
   if (alpn) {
-    if (alpn == kH1QV1ProtocolString || alpn == kHQCurrentDraft ||
-        alpn == kHQ) {
-      version_ = HQVersion::H1Q_FB_V1;
-    } else if (alpn == kH1QV2ProtocolString) {
-      version_ = HQVersion::H1Q_FB_V2;
-    } else if (alpn == kH3FBCurrentDraft || alpn == kH3AliasV1 || alpn == kH3 ||
-               alpn == kH3CurrentDraft) {
+    if (alpn == kH3FBCurrentDraft || alpn == kH3AliasV1 || alpn == kH3) {
       version_ = HQVersion::HQ;
     }
   }
@@ -423,26 +365,8 @@ bool HQSession::getAndCheckApplicationProtocol() {
     return false;
   }
   alpn_ = *alpn;
-  setVersionUtils();
-  return true;
-}
-
-void HQSession::setVersionUtils() {
-  DCHECK(version_);
-  switch (*version_) {
-    case HQVersion::H1Q_FB_V1:
-      versionUtils_ = std::make_unique<H1QFBV1VersionUtils>(*this);
-      break;
-    case HQVersion::H1Q_FB_V2:
-      versionUtils_ = std::make_unique<H1QFBV2VersionUtils>(*this);
-      break;
-    case HQVersion::HQ:
-      versionUtils_ = std::make_unique<HQVersionUtils>(*this);
-      break;
-    default:
-      LOG(FATAL) << "No Version Utils for version " << alpn_;
-  }
   versionUtilsReady_.set();
+  return true;
 }
 
 void HQSession::onReplaySafe() noexcept {
@@ -473,17 +397,9 @@ void HQSession::onConnectionEnd() noexcept {
   // so there is no need for us here to handle re-entrancy
   // checkForShutdown->close->onConnectionEnd.
   drainState_ = DrainState::DONE;
-  if (versionUtils_) {
-    versionUtils_->onConnectionEnd();
-  }
-  closeWhenIdle();
-}
-
-void HQSession::HQVersionUtils::onConnectionEnd() {
-  // Ignore any connection level decode errors from the QPACK codec, the
-  // connection is being torn down anyways.
   qpackCodec_.encoderStreamEnd();
   qpackCodec_.decoderStreamEnd();
+  closeWhenIdle();
 }
 
 void HQSession::onConnectionSetupError(quic::QuicError code) noexcept {
@@ -598,9 +514,6 @@ bool HQSession::getCurrentStreamTransportInfo(QuicStreamProtocolInfo* qspinfo,
 }
 
 size_t HQSession::sendPriority(HTTPCodec::StreamID id, HTTPPriority priority) {
-  // On one hand i think this should be done inside VersionUtil.
-  // On the other hand, why are we keeping h1q?
-
   if (streams_.find(id) == streams_.end() && !findPushStream(id)) {
     return 0;
   }
@@ -665,18 +578,6 @@ size_t HQSession::HQStreamTransportBase::sendPriority(
   return 0;
 }
 
-void HQSession::HQStreamTransportBase::generateGoaway() {
-  folly::IOBufQueue dummyBuf{folly::IOBufQueue::cacheChainLength()};
-  if (!codecStreamId_) {
-    codecStreamId_ = 0;
-  }
-  auto g = folly::makeGuard(setActiveCodec(__func__));
-  if (codecFilterChain->isReusable() || codecFilterChain->isWaitingToDrain()) {
-    codecFilterChain->generateGoaway(
-        dummyBuf, *codecStreamId_, ErrorCode::NO_ERROR);
-  }
-}
-
 size_t HQSession::HQStreamTransportBase::writeBufferSize() const {
   return writeBuf_.chainLength() + bufMeta_.length;
 }
@@ -716,72 +617,59 @@ void HQSession::drainImpl() {
     return;
   }
   drainState_ = DrainState::PENDING;
-  if (versionUtils_) {
-    versionUtils_->sendGoaway();
-  }
+  sendGoaway();
   setCloseReason(ConnectionCloseReason::SHUTDOWN);
 }
 
-void HQSession::H1QFBV1VersionUtils::sendGoaway() {
-  session_.invokeOnAllStreams(
-      [](HQStreamTransportBase* stream) { stream->generateGoaway(); });
-}
-
-void HQSession::GoawayUtils::sendGoaway(HQSession& session) {
-  if (session.direction_ == TransportDirection::UPSTREAM) {
-    return;
-  }
-  if (session.drainState_ == DrainState::DONE) {
+void HQSession::sendGoaway() {
+  if (direction_ == TransportDirection::UPSTREAM ||
+      drainState_ == DrainState::DONE ||
+      !versionUtilsReady_.allConditionsMet()) {
     return;
   }
   // send GOAWAY frame on the control stream
-  DCHECK(session.drainState_ == DrainState::PENDING ||
-         session.drainState_ == DrainState::FIRST_GOAWAY);
+  DCHECK(drainState_ == DrainState::PENDING ||
+         drainState_ == DrainState::FIRST_GOAWAY);
 
-  auto connCtrlStream =
-      session.findControlStream((session.version_ == HQVersion::H1Q_FB_V2)
-                                    ? UnidirectionalStreamType::H1Q_CONTROL
-                                    : UnidirectionalStreamType::CONTROL);
+  auto connCtrlStream = findControlStream(UnidirectionalStreamType::CONTROL);
   auto g = folly::makeGuard(connCtrlStream->setActiveCodec(__func__));
-  // cannot get here before onTransportReady, since the VersionUtils are being
-  // set after ALPN is available
   DCHECK(connCtrlStream);
-  auto goawayStreamId = session.getGoawayStreamId();
+  auto goawayStreamId = getGoawayStreamId();
   auto generated = connCtrlStream->codecFilterChain->generateGoaway(
       connCtrlStream->writeBuf_, goawayStreamId, ErrorCode::NO_ERROR);
   auto writeOffset =
-      session.sock_->getStreamWriteOffset(connCtrlStream->getEgressStreamId());
-  auto writeBufferedBytes = session.sock_->getStreamWriteBufferedBytes(
-      connCtrlStream->getEgressStreamId());
+      sock_->getStreamWriteOffset(connCtrlStream->getEgressStreamId());
+  auto writeBufferedBytes =
+      sock_->getStreamWriteBufferedBytes(connCtrlStream->getEgressStreamId());
   if (generated == 0 || writeOffset.hasError() ||
       writeBufferedBytes.hasError()) {
     // shortcut to shutdown
-    LOG(ERROR) << " error generating GOAWAY sess=" << session;
-    session.drainState_ = DrainState::DONE;
+    LOG(ERROR) << " error generating GOAWAY sess=" << *this;
+    drainState_ = DrainState::DONE;
     return;
   }
   VLOG(3) << "generated GOAWAY maxStreamID=" << goawayStreamId
-          << " sess=" << session;
+          << " sess=" << *this;
 
   auto totalStreamLength = *writeOffset + *writeBufferedBytes +
                            connCtrlStream->writeBuf_.chainLength();
   CHECK_GT(totalStreamLength, 0);
-  auto res = session.sock_->registerDeliveryCallback(
-      connCtrlStream->getEgressStreamId(),
-      totalStreamLength - 1,
-      connCtrlStream);
+  auto res =
+      sock_->registerDeliveryCallback(connCtrlStream->getEgressStreamId(),
+                                      totalStreamLength - 1,
+                                      connCtrlStream);
   if (res.hasError()) {
     // shortcut to shutdown
-    LOG(ERROR) << " error generating GOAWAY sess=" << session;
-    session.drainState_ = DrainState::DONE;
+    LOG(ERROR) << " error generating GOAWAY sess=" << *this;
+    drainState_ = DrainState::DONE;
     return;
   }
-  session.scheduleWrite();
-  if (session.drainState_ == DrainState::PENDING) {
-    session.drainState_ = DrainState::FIRST_GOAWAY;
+  scheduleWrite();
+  if (drainState_ == DrainState::PENDING) {
+    drainState_ = DrainState::FIRST_GOAWAY;
   } else {
-    DCHECK_EQ(session.drainState_, DrainState::FIRST_GOAWAY);
-    session.drainState_ = DrainState::SECOND_GOAWAY;
+    DCHECK_EQ(drainState_, DrainState::FIRST_GOAWAY);
+    drainState_ = DrainState::SECOND_GOAWAY;
   }
 }
 
@@ -796,13 +684,7 @@ quic::StreamId HQSession::getGoawayStreamId() {
 }
 
 size_t HQSession::sendSettings() {
-  DCHECK(versionUtils_) << "The transport should never call " << __func__
-                        << " before onTransportReady";
-  return versionUtils_->sendSettings();
-}
-
-size_t HQSession::HQVersionUtils::sendSettings() {
-  for (auto& setting : session_.egressSettings_.getAllSettings()) {
+  for (auto& setting : egressSettings_.getAllSettings()) {
     auto id = httpToHqSettingsId(setting.id);
     if (id) {
       switch (*id) {
@@ -821,13 +703,12 @@ size_t HQSession::HQVersionUtils::sendSettings() {
     }
   }
 
-  auto connCtrlStream =
-      session_.findControlStream(UnidirectionalStreamType::CONTROL);
+  auto connCtrlStream = findControlStream(UnidirectionalStreamType::CONTROL);
   auto g = folly::makeGuard(connCtrlStream->setActiveCodec(__func__));
   DCHECK(connCtrlStream);
   auto generated = connCtrlStream->codecFilterChain->generateSettings(
       connCtrlStream->writeBuf_);
-  session_.scheduleWrite();
+  scheduleWrite();
   return generated;
 }
 
@@ -839,9 +720,6 @@ void HQSession::notifyPendingShutdown() {
 void HQSession::closeWhenIdle() {
   VLOG(4) << __func__ << " sess=" << *this;
   drainImpl();
-  if (version_ == HQVersion::H1Q_FB_V1) {
-    drainState_ = DrainState::DONE;
-  }
   cleanupPendingStreams();
   checkForShutdown();
 }
@@ -920,10 +798,7 @@ void HQSession::checkForShutdown() {
   // state to DONE, so that it will just shut down the socket when all the
   // request streams are done. In the process it will still be able to receive
   // and process GOAWAYs from the server
-  // NOTE: this cannot be moved in VersionUtils, since we need to be able to
-  // shutdown even before versionUtils is set in onTransportReady
-  if (version_ != HQVersion::H1Q_FB_V1 &&
-      direction_ == TransportDirection::UPSTREAM &&
+  if (direction_ == TransportDirection::UPSTREAM &&
       drainState_ == DrainState::PENDING) {
     if (VLOG_IS_ON(5)) {
       unidirectionalReadDispatcher_.invokeOnPendingStreamIDs(
@@ -1112,7 +987,7 @@ void HQSession::runLoopCallback() noexcept {
   //   - and maybe resume reads on the stream
   processReadData();
 
-  versionUtils_->readDataProcessed();
+  readDataProcessed();
 
   // Then handle the writes
   // Write all the control streams first
@@ -1140,11 +1015,11 @@ void HQSession::runLoopCallback() noexcept {
   // checkForShutdown is now in ScopeGuard
 }
 
-void HQSession::HQVersionUtils::readDataProcessed() {
+void HQSession::readDataProcessed() {
   auto ici = qpackCodec_.encodeInsertCountInc();
   if (ici) {
     auto QPACKDecoderStream =
-        session_.findControlStream(UnidirectionalStreamType::QPACK_DECODER);
+        findControlStream(UnidirectionalStreamType::QPACK_DECODER);
     DCHECK(QPACKDecoderStream);
     QPACKDecoderStream->writeBuf_.append(std::move(ici));
     // don't need to explicitly schedule write because this is called in the
@@ -1283,7 +1158,7 @@ void HQSession::timeoutExpired() noexcept {
 
 HQSession::HQControlStream* FOLLY_NULLABLE
 HQSession::tryCreateIngressControlStream(quic::StreamId id, uint64_t preface) {
-  auto res = versionUtils_->parseStreamPreface(preface);
+  auto res = parseStreamPreface(preface);
   if (!res) {
     LOG(ERROR) << "Got unidirectional stream with unknown preface "
                << static_cast<uint64_t>(preface) << " streamID=" << id
@@ -1300,22 +1175,8 @@ HQSession::tryCreateIngressControlStream(quic::StreamId id, uint64_t preface) {
   return ctrlStream;
 }
 
-folly::Optional<UnidirectionalStreamType>
-HQSession::H1QFBV2VersionUtils::parseStreamPreface(uint64_t preface) {
-  hq::UnidirectionalTypeF parse = [](hq::UnidirectionalStreamType type)
-      -> folly::Optional<UnidirectionalStreamType> {
-    switch (type) {
-      case UnidirectionalStreamType::H1Q_CONTROL:
-        return type;
-      default:
-        return folly::none;
-    }
-  };
-  return hq::withType(preface, parse);
-}
-
-folly::Optional<UnidirectionalStreamType>
-HQSession::HQVersionUtils::parseStreamPreface(uint64_t preface) {
+folly::Optional<UnidirectionalStreamType> HQSession::parseStreamPreface(
+    uint64_t preface) {
   hq::UnidirectionalTypeF parse = [](hq::UnidirectionalStreamType type)
       -> folly::Optional<UnidirectionalStreamType> {
     switch (type) {
@@ -1420,11 +1281,6 @@ void HQSession::rejectStream(quic::StreamId id) {
   sock_->setReadCallback(
       id, nullptr, HTTP3::ErrorCode::HTTP_STREAM_CREATION_ERROR);
   sock_->setPeekCallback(id, nullptr);
-}
-
-folly::Optional<hq::UnidirectionalStreamType> HQSession::parseStreamPreface(
-    uint64_t preface) {
-  return versionUtils_->parseStreamPreface(preface);
 }
 
 size_t HQSession::cleanupPendingStreams() {
@@ -1572,56 +1428,26 @@ void HQSession::processReadData() {
   }
 }
 
-void HQSession::H1QFBV1VersionUtils::headersComplete(HTTPMessage* msg) {
-  // for h1q-fb-v1 start draining on receipt of a Connection:: close header
-  if (session_.drainState_ == DrainState::DONE) {
-    return;
-  }
-  if (msg->checkForHeaderToken(HTTP_HEADER_CONNECTION, "close", false)) {
-    if (session_.drainState_ == DrainState::CLOSE_SENT) {
-      session_.drainState_ = DrainState::DONE;
-    } else {
-      if (session_.drainState_ == DrainState::NONE) {
-        session_.drainImpl();
-      }
-      session_.drainState_ = DrainState::CLOSE_RECEIVED;
-    }
-  }
-}
-
-void HQSession::HQVersionUtils::headersComplete(HTTPMessage* /*msg*/) {
+void HQSession::headersComplete(HTTPMessage* /*msg*/) {
   auto QPACKDecoderStream =
-      session_.findControlStream(UnidirectionalStreamType::QPACK_DECODER);
+      findControlStream(UnidirectionalStreamType::QPACK_DECODER);
 
   if (QPACKDecoderStream && !QPACKDecoderStream->writeBuf_.empty()) {
-    session_.scheduleWrite();
-  }
-}
-
-void HQSession::H1QFBV1VersionUtils::checkSendingGoaway(
-    const HTTPMessage& msg) {
-  if (session_.drainState_ == DrainState::NONE && !msg.wantsKeepalive()) {
-    // Initiate the drain if the message explicitly requires no keepalive
-    // NOTE: this will set the state to PENDING
-    session_.notifyPendingShutdown();
-  }
-
-  if (session_.drainState_ == DrainState::CLOSE_RECEIVED) {
-    session_.drainState_ = DONE;
-  } else if (session_.drainState_ == DrainState::PENDING) {
-    session_.drainState_ = DrainState::CLOSE_SENT;
+    scheduleWrite();
   }
 }
 
 void HQSession::onSettings(const SettingsList& settings) {
-  CHECK(versionUtils_);
-  versionUtils_->onSettings(settings);
+  applySettings(settings);
+  if (infoCallback_) {
+    infoCallback_->onSettings(*this, settings);
+  }
   receivedSettings_ = true;
 }
 
-void HQSession::HQVersionUtils::applySettings(const SettingsList& settings) {
-  DestructorGuard g(&session_);
-  VLOG(3) << "Got SETTINGS sess=" << session_;
+void HQSession::applySettings(const SettingsList& settings) {
+  DestructorGuard g(this);
+  VLOG(3) << "Got SETTINGS sess=" << *this;
 
   uint32_t tableSize = kDefaultIngressHeaderTableSize;
   uint32_t blocked = kDefaultIngressQpackBlockedStream;
@@ -1652,25 +1478,18 @@ void HQSession::HQVersionUtils::applySettings(const SettingsList& settings) {
 
   // If H3 datagram is enabled but datagram was not negotiated at the
   // transport, close the connection
-  if (datagram && session_.sock_->getDatagramSizeLimit() == 0) {
-    session_.dropConnectionAsync(
+  if (datagram && sock_->getDatagramSizeLimit() == 0) {
+    dropConnectionAsync(
         quic::QuicError(HTTP3::ErrorCode::HTTP_SETTINGS_ERROR,
                         "H3_DATAGRAM without transport support"),
         kErrorConnection);
   }
   // H3 Datagram flows are bi-directional, enable only of local and peer
   // support it
-  session_.datagramEnabled_ &= datagram;
+  datagramEnabled_ &= datagram;
 
-  VLOG(3) << "Applied SETTINGS sess=" << session_ << " size=" << tableSize
+  VLOG(3) << "Applied SETTINGS sess=" << *this << " size=" << tableSize
           << " blocked=" << blocked;
-}
-
-void HQSession::HQVersionUtils::onSettings(const SettingsList& settings) {
-  applySettings(settings);
-  if (session_.infoCallback_) {
-    session_.infoCallback_->onSettings(session_, settings);
-  }
 }
 
 void HQSession::onGoaway(uint64_t minUnseenId,
@@ -1683,7 +1502,6 @@ void HQSession::onGoaway(uint64_t minUnseenId,
             << " sess=" << *this;
     return;
   }
-  DCHECK(version_ != HQVersion::H1Q_FB_V1);
   VLOG(3) << "Got GOAWAY minUnseenId=" << minUnseenId << " sess=" << *this;
   if (minUnseenId > minPeerUnseenId_) {
     LOG(ERROR) << "Goaway id increased=" << minUnseenId << " sess=" << *this;
@@ -2242,7 +2060,7 @@ void HQSession::HQControlStream::onCanceled(quic::StreamId id,
 
 void HQSession::onGoawayAck() {
   if (drainState_ == DrainState::FIRST_GOAWAY) {
-    versionUtils_->sendGoaway();
+    sendGoaway();
   } else if (drainState_ == DrainState::SECOND_GOAWAY) {
     drainState_ = DrainState::DONE;
   }
@@ -2280,9 +2098,7 @@ HQSession::createStreamTransport(quic::StreamId streamId) {
 
   // The transport should never call createStreamTransport before
   // onTransportReady
-  DCHECK(versionUtils_) << "The transport should never call " << __func__
-                        << " before onTransportReady";
-  std::unique_ptr<HTTPCodec> codec = versionUtils_->createCodec(streamId);
+  std::unique_ptr<HTTPCodec> codec = createCodec(streamId);
   auto matchPair = streams_.emplace(
       std::piecewise_construct,
       std::forward_as_tuple(streamId),
@@ -2301,56 +2117,38 @@ HQSession::createStreamTransport(quic::StreamId streamId) {
   CHECK(matchPair.second) << "Emplacement failed, despite earlier "
                              "existence check.";
 
-  if (versionUtils_ && drainState_ != DrainState::NONE) {
-    versionUtils_->sendGoawayOnRequestStream(matchPair.first->second);
-  }
-
   // tracks max historical streams
   HTTPSessionBase::onNewOutgoingStream(getNumOutgoingStreams());
 
   return &matchPair.first->second;
 }
 
-std::unique_ptr<HTTPCodec> HQSession::H1QFBV1VersionUtils::createCodec(
-    quic::StreamId /*streamId*/) {
-  return std::make_unique<HTTP1xCodec>(session_.direction_,
-                                       session_.forceUpstream1_1_,
-                                       session_.strictValidation_);
-}
-
-std::unique_ptr<HTTPCodec> HQSession::HQVersionUtils::createCodec(
-    quic::StreamId streamId) {
+std::unique_ptr<HTTPCodec> HQSession::createCodec(quic::StreamId streamId) {
   auto QPACKEncoderStream =
-      session_.findControlStream(UnidirectionalStreamType::QPACK_ENCODER);
+      findControlStream(UnidirectionalStreamType::QPACK_ENCODER);
   DCHECK(QPACKEncoderStream);
   auto QPACKDecoderStream =
-      session_.findControlStream(UnidirectionalStreamType::QPACK_DECODER);
+      findControlStream(UnidirectionalStreamType::QPACK_DECODER);
   DCHECK(QPACKDecoderStream);
   auto codec = std::make_unique<hq::HQStreamCodec>(
       streamId,
-      session_.direction_,
+      direction_,
       qpackCodec_,
       QPACKEncoderStream->writeBuf_,
       QPACKDecoderStream->writeBuf_,
       [this, id = QPACKEncoderStream->getEgressStreamId()] {
-        if (!session_.sock_) {
+        if (!sock_) {
           return uint64_t(0);
         }
-        auto res = session_.sock_->getStreamFlowControl(id);
+        auto res = sock_->getStreamFlowControl(id);
         if (res.hasError()) {
           return uint64_t(0);
         }
         return res->sendWindowAvailable;
       },
-      session_.ingressSettings_);
-  codec->setStrictValidation(session_.strictValidation_);
-  hqStreamCodecPtr_ = codec.get();
+      ingressSettings_);
+  codec->setStrictValidation(strictValidation_);
   return codec;
-}
-
-void HQSession::H1QFBV1VersionUtils::sendGoawayOnRequestStream(
-    HQSession::HQStreamTransport& stream) {
-  stream.generateGoaway();
 }
 
 HQSession::HQStreamTransportBase::HQStreamTransportBase(
@@ -2565,8 +2363,7 @@ void HQSession::detachStreamTransport(HQStreamTransportBase* hqStream) {
 }
 
 void HQSession::HQControlStream::processReadData() {
-  bool isControl = (*type_ == hq::UnidirectionalStreamType::H1Q_CONTROL ||
-                    *type_ == hq::UnidirectionalStreamType::CONTROL);
+  bool isControl = (*type_ == hq::UnidirectionalStreamType::CONTROL);
   std::unique_ptr<HTTPCodec> savedCodec;
   HQUnidirectionalCodec* ingressCodecPtr = ingressCodec_.get();
   if (isControl) {
@@ -2657,7 +2454,7 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
     HTTPCodec::StreamID streamID, std::unique_ptr<HTTPMessage> msg) {
   VLOG(4) << __func__ << " txn=" << txn_;
   msg->dumpMessage(3);
-  // TODO: the codec will set this for non-H1Q
+  // TODO: the codec will set this
   msg->setAdvancedProtocolString(session_.alpn_);
   msg->setSecure(true);
   CHECK(codecStreamId_);
@@ -2677,10 +2474,10 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
     return;
   }
 
+  // TODO: cleanup this comment
   // for h1q-fb-v1 start draining on receipt of a Connection:: close header
   // if we are getting a response, transportReady has been called!
-  DCHECK(session_.versionUtils_);
-  session_.versionUtils_->headersComplete(msg.get());
+  session_.headersComplete(msg.get());
 
   // onHeadersComplete can be triggered by data from a different stream ID
   // - specifically, the QPACK encoder stream.  If that's true, then there may
@@ -2821,7 +2618,7 @@ void HQSession::abortStream(HTTPException::Direction dir,
   if (dir != HTTPException::Direction::EGRESS &&
       (sock_->isBidirectionalStream(id) || isPeerUniStream(id))) {
     // Any INGRESS abort generates a QPACK cancel
-    versionUtils_->abortStream(id);
+    abortStream(id);
     // This will do the stopSending for us.
     sock_->setReadCallback(id, nullptr, err);
     sock_->setPeekCallback(id, nullptr);
@@ -2832,18 +2629,17 @@ void HQSession::abortStream(HTTPException::Direction dir,
   }
 }
 
-void HQSession::HQVersionUtils::abortStream(quic::StreamId id) {
-  auto sock = session_.sock_;
-  if (sock && sock->getState() && sock->getState()->qLogger) {
-    sock->getState()->qLogger->addStreamStateUpdate(
+void HQSession::abortStream(quic::StreamId id) {
+  if (sock_ && sock_->getState() && sock_->getState()->qLogger) {
+    sock_->getState()->qLogger->addStreamStateUpdate(
         id, quic::kAbort, folly::none);
   }
   auto cancel = qpackCodec_.encodeCancelStream(id);
   auto QPACKDecoderStream =
-      session_.findControlStream(hq::UnidirectionalStreamType::QPACK_DECODER);
+      findControlStream(hq::UnidirectionalStreamType::QPACK_DECODER);
   DCHECK(QPACKDecoderStream);
   QPACKDecoderStream->writeBuf_.append(std::move(cancel));
-  session_.scheduleWrite();
+  scheduleWrite();
 }
 
 void HQSession::HQStreamTransportBase::updatePriority(
@@ -2975,13 +2771,6 @@ void HQSession::HQStreamTransportBase::sendHeaders(HTTPTransaction* txn,
   VLOG(4) << __func__ << " txn=" << txn_;
   CHECK(hasEgressStreamId()) << __func__ << " invoked on stream without egress";
   DCHECK(txn == &txn_);
-
-  if (session_.versionUtils_) {
-    // for h1q-fb-v1 initiate shutdown when sending a request
-    // a good client should always wait for onTransportReady before sending
-    // data
-    session_.versionUtils_->checkSendingGoaway(headers);
-  }
 
   updatePriority(headers);
   // If this is a push promise, send it on the parent stream.
@@ -3508,7 +3297,6 @@ void HQSession::HQStreamTransportBase::handleHeadersAcked(
 void HQSession::HQStreamTransportBase::handleBodyEvent(
     uint64_t streamOffset, quic::QuicSocket::ByteEvent::Type type) {
   auto g = folly::makeGuard(setActiveCodec(__func__));
-  CHECK(session_.versionUtils_);
 
   auto bodyOffset = resetEgressBodyEventOffset(streamOffset);
   if (!bodyOffset) {
@@ -3530,7 +3318,6 @@ void HQSession::HQStreamTransportBase::handleBodyEvent(
 void HQSession::HQStreamTransportBase::handleBodyEventCancelled(
     uint64_t streamOffset, quic::QuicSocket::ByteEvent::Type) {
   auto g = folly::makeGuard(setActiveCodec(__func__));
-  CHECK(session_.versionUtils_);
 
   auto bodyOffset = resetEgressBodyEventOffset(streamOffset);
   if (!bodyOffset) {

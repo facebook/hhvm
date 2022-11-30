@@ -14,6 +14,7 @@ use clap::Parser;
 use depgraph_reader::Dep;
 use depgraph_reader::DepGraphOpener;
 use hash::DashMap;
+use hash::HashSet;
 use rayon::prelude::*;
 use typing_deps_hash::DepType;
 
@@ -78,17 +79,22 @@ fn main() -> Result<()> {
         .par_all_hashes()
         .with_min_len(1)
         .with_max_len(1)
-        .filter(|&h| {
+        .filter(|&dependency| {
             let mut different = false;
-            let dependency = h;
-            if let Some(list) = dg1.hash_list_for(dependency) {
-                for dependent in dg1.hash_list_hashes(list) {
-                    if !dg2.dependent_dependency_edge_exists(dependent, dependency) {
+
+            if let Some(dg1_hash_list) = dg1.hash_list_for(dependency) {
+                let dg2_hashes: HashSet<Dep> = dg2
+                    .hash_list_for(dependency)
+                    .map_or_else(HashSet::default, |hl| dg2.hash_list_hashes(hl).collect());
+
+                for dependent in dg1.hash_list_hashes(dg1_hash_list) {
+                    if !dg2_hashes.contains(&dependent) {
                         different = true;
                         println!("- {} -> {}", nodes.fmt(dependent), nodes.fmt(dependency));
                     }
                 }
             }
+
             different
         })
         .count();
@@ -106,17 +112,22 @@ fn main() -> Result<()> {
         .par_all_hashes()
         .with_min_len(1)
         .with_max_len(1)
-        .filter(|&h| {
+        .filter(|&dependency| {
             let mut different = false;
-            let dependency = h;
-            if let Some(list) = dg2.hash_list_for(dependency) {
-                for dependent in dg2.hash_list_hashes(list) {
-                    if !dg1.dependent_dependency_edge_exists(dependent, dependency) {
+
+            if let Some(dg2_hash_list) = dg2.hash_list_for(dependency) {
+                let dg1_hashes: HashSet<Dep> = dg1
+                    .hash_list_for(dependency)
+                    .map_or_else(HashSet::default, |hl| dg1.hash_list_hashes(hl).collect());
+
+                for dependent in dg2.hash_list_hashes(dg2_hash_list) {
+                    if !dg1_hashes.contains(&dependent) {
                         different = true;
                         println!("+ {} -> {}", nodes.fmt(dependent), nodes.fmt(dependency));
                     }
                 }
             }
+
             different
         })
         .count();

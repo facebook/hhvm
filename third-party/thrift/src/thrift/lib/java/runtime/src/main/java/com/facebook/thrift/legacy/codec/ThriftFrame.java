@@ -56,7 +56,6 @@ public class ThriftFrame implements ReferenceCounted {
   }
 
   public ByteBuf getMessage() {
-    checkRelease();
     return message;
   }
 
@@ -82,66 +81,41 @@ public class ThriftFrame implements ReferenceCounted {
 
   @Override
   public int refCnt() {
-    synchronized (message) {
-      return message.refCnt();
-    }
+    return message.refCnt();
   }
 
   @Override
   public ThriftFrame retain() {
-    synchronized (message) {
-      message.retain();
-    }
+    message.retain();
     return this;
   }
 
   @Override
   public ThriftFrame retain(int increment) {
-    synchronized (message) {
-      message.retain(increment);
-    }
+    message.retain(increment);
     return this;
   }
 
   @Override
   public ThriftFrame touch() {
-    synchronized (message) {
-      message.touch();
-    }
+    message.touch();
     return this;
   }
 
   @Override
   public ThriftFrame touch(Object hint) {
-    synchronized (message) {
-      message.touch(hint);
-    }
+    message.touch(hint);
     return this;
   }
 
   @CheckReturnValue(when = UNKNOWN)
   @Override
   public boolean release() {
-    final boolean b;
-    synchronized (message) {
-      b = message.release();
-    }
-
-    return b;
+    return message.release();
   }
 
   @Override
   public boolean release(int decrement) {
-    final boolean b;
-    synchronized (message) {
-      b = message.release(decrement);
-    }
-    return b;
-  }
-
-  private void checkRelease() {
-    if (refCnt() < 1) {
-      throw new IllegalStateException("trying to access ThriftFrame after it has been released");
-    }
+    return message.release(decrement);
   }
 }

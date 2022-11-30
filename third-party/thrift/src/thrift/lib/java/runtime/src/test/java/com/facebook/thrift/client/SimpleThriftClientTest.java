@@ -27,7 +27,6 @@ import com.facebook.thrift.example.ping.PingService.Reactive;
 import com.facebook.thrift.example.ping.PingServiceRpcServerHandler;
 import com.facebook.thrift.legacy.server.LegacyServerTransport;
 import com.facebook.thrift.legacy.server.LegacyServerTransportFactory;
-import com.facebook.thrift.legacy.server.testservices.AsyncPingService;
 import com.facebook.thrift.legacy.server.testservices.BlockingPingService;
 import com.facebook.thrift.server.RpcServerHandler;
 import com.facebook.thrift.util.FutureUtil;
@@ -379,7 +378,7 @@ public class SimpleThriftClientTest {
   private void sendNAsyncPingPongs(int n) {
     System.out.println("create server handler");
     RpcServerHandler serverHandler =
-        new PingServiceRpcServerHandler(new AsyncPingService(), Collections.emptyList());
+        new PingServiceRpcServerHandler(new BlockingPingService(), Collections.emptyList());
 
     System.out.println("starting server");
     LegacyServerTransportFactory transportFactory =
@@ -405,11 +404,9 @@ public class SimpleThriftClientTest {
     Flux.range(0, n)
         .flatMap(
             i -> {
-              String s = "ping" + i;
-              PingRequest pingRequest = new PingRequest.Builder().setRequest(s).build();
+              PingRequest pingRequest = new PingRequest.Builder().setRequest("ping").build();
               ListenableFuture<PingResponse> ping = pingService.ping(pingRequest);
-              return FutureUtil.toMono(() -> ping)
-                  .doOnNext(pingResponse -> Assert.assertEquals(s, pingResponse.getResponse()));
+              return FutureUtil.toMono(ping);
             },
             32)
         .blockLast();

@@ -27,7 +27,6 @@ import com.google.common.collect.ImmutableMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -156,8 +155,9 @@ public final class HeaderTransportCodec extends ChannelDuplexHandler {
       // header size
       frameHeader.writeShort(paddedHeaderSize >> 2);
 
-      return Unpooled.wrappedUnmodifiableBuffer(
-          frameHeader, encodedInfo, encodedHeaders, frame.getMessage());
+      return alloc
+          .compositeBuffer()
+          .addComponents(true, frameHeader, encodedInfo, encodedHeaders, frame.getMessage());
     } catch (Throwable t) {
       if (encodedInfo != null && encodedInfo.refCnt() > 0) {
         encodedInfo.release();

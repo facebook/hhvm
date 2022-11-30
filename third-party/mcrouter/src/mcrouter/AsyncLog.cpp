@@ -230,9 +230,8 @@ bool AsyncLog::writeDelete(
     json["h"] = folly::sformat("[{}]:{}", host, port);
     json["p"] = poolName.str();
     json["k"] = key.str();
-    if (attributes.size() != 0) {
-      json["a"] = folly::toDynamic(attributes);
-    }
+    attributes.emplace(AsyncLog::kAsyncLogMarker, 1);
+    json["a"] = folly::toDynamic(attributes);
   } else {
     /* ["host", port, escaped_command] */
     json.push_back(host);

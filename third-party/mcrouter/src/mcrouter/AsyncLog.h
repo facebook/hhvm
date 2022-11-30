@@ -23,6 +23,8 @@ namespace mcrouter {
 
 class AsyncLog {
  public:
+  static constexpr folly::StringPiece kAsyncLogMarker{"al"};
+
   explicit AsyncLog(const McrouterOptions& options);
 
   /**

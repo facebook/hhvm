@@ -71,6 +71,7 @@ class TestAsyncFilesAttr(McrouterTestCase):
             file_json = json.load(f)
             self.assertEqual(file_json[3]["a"]["a1"], 1000)
             self.assertEqual(file_json[3]["a"]["a2"], 2000)
+            self.assertEqual(file_json[3]["a"]["al"], 1)
 
         # check stats
         (file_stat, file_startup_options, file_config_sources) = \

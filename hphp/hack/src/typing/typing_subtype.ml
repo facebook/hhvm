@@ -2344,27 +2344,6 @@ and simplify_subtype_i
               in
               if not (exact_match || is_final) then
                 invalid_env env
-              else if
-                (* We handle the case where a generic A<T> is used as A *)
-                Int.( <> ) (List.length tyl_sub) (List.length tyl_super)
-              then
-                let n_sub = List.length tyl_sub in
-                let n_super = List.length tyl_super in
-                invalid_env_with
-                  env
-                  (Option.map
-                     subtype_env.on_error
-                     ~f:
-                       Typing_error.(
-                         fun on_error ->
-                           apply_reasons ~on_error
-                           @@ Secondary.Type_arity_mismatch
-                                {
-                                  pos = fst x_super;
-                                  actual = n_super;
-                                  decl_pos = fst x_sub;
-                                  expected = n_sub;
-                                }))
               else
                 let variance_reifiedl =
                   if List.is_empty tyl_sub then

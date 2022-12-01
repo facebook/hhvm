@@ -393,21 +393,22 @@ where
             fn caml_input_value_from_block(data: *const u8, size: usize) -> UnsafeOcamlPtr;
         }
         let bytes_opt = shmffi::with(|segment| {
-            segment
-                .table
-                .get(&self.hash_key(key))
-                .map(|heap_value| self.decompress(heap_value.as_slice()).unwrap().into_owned())
+            segment.table.get(&self.hash_key(key)).map(|heap_value| {
+                self.decompress(heap_value.as_slice(), heap_value.header.uncompressed_size())
+                    .unwrap()
+                    .into_owned()
+            })
         });
         let v = bytes_opt.map(|bytes| caml_input_value_from_block(bytes.as_ptr(), bytes.len()));
         self.log_shmem_hit_rate(v.is_some());
         v
     }
 
-    fn decompress<'a>(&self, bytes: &'a [u8]) -> Result<Cow<'a, [u8]>> {
+    fn decompress<'a>(&self, bytes: &'a [u8], uncompressed_size: usize) -> Result<Cow<'a, [u8]>> {
         self.log_deserialize(bytes.len());
         Ok(match self.compression {
             Compression::None => Cow::Borrowed(bytes),
-            Compression::Lz4 { .. } => Cow::Owned(lz4_decompress(bytes)?),
+            Compression::Lz4 { .. } => Cow::Owned(lz4_decompress(bytes, uncompressed_size)?),
             Compression::Zstd { .. } => Cow::Owned(zstd_decompress(bytes)?),
         })
     }
@@ -497,7 +498,9 @@ where
                 .table
                 .get(&self.hash_key(&key))
                 .map(|heap_value| -> Result<_> {
-                    Ok(self.decompress(heap_value.as_slice())?.into_owned())
+                    Ok(self
+                        .decompress(heap_value.as_slice(), heap_value.header.uncompressed_size())?
+                        .into_owned())
                 })
                 .transpose()
         })?;
@@ -528,18 +531,29 @@ where
         let uncompressed_size = bytes.len();
         let bytes = match self.compression {
             Compression::None => bytes,
-            Compression::Lz4 { compression_level } => lz4_compress(&bytes, compression_level)?,
+            Compression::Lz4 { .. } => lz4_compress(&bytes)?,
             Compression::Zstd { compression_level } => zstd_compress(&bytes, compression_level)?,
         };
         let compressed_size = bytes.len();
         self.cache.lock().put(key, val);
-        let blob = ocaml_blob::SerializedValue::BStr(&bytes);
         let did_insert = shmffi::with(|segment| {
             segment.table.insert(
                 self.hash_key(&key),
-                Some(Layout::from_size_align(blob.as_slice().len(), 1).unwrap()),
+                Some(Layout::from_size_align(bytes.len(), 1).unwrap()),
                 self.evictable,
-                |buffer| blob.to_heap_value_in(self.evictable, buffer),
+                |buffer| {
+                    buffer.copy_from_slice(&bytes);
+                    let header = ocaml_blob::HeapValueHeaderFields {
+                        buffer_size: bytes.len(),
+                        uncompressed_size,
+                        is_serialized: true,
+                        is_evictable: self.evictable,
+                    };
+                    ocaml_blob::HeapValue {
+                        header: header.into(),
+                        data: std::ptr::NonNull::from(buffer).cast(),
+                    }
+                },
             )
         });
         if did_insert {
@@ -598,19 +612,15 @@ where
     }
 }
 
-fn lz4_compress(mut bytes: &[u8], level: u32) -> Result<Vec<u8>> {
-    let mut encoder = lz4::EncoderBuilder::new().level(level).build(vec![])?;
-    std::io::copy(&mut bytes, &mut encoder)?;
-    let (compressed, result) = encoder.finish();
-    result?;
-    Ok(compressed)
+fn lz4_compress(bytes: &[u8]) -> Result<Vec<u8>> {
+    Ok(lz4::block::compress(bytes, None, false)?)
 }
 
-fn lz4_decompress(compressed: &[u8]) -> Result<Vec<u8>> {
-    let mut decompressed = vec![];
-    let mut decoder = lz4::Decoder::new(compressed)?;
-    std::io::copy(&mut decoder, &mut decompressed)?;
-    Ok(decompressed)
+fn lz4_decompress(compressed: &[u8], uncompressed_size: usize) -> Result<Vec<u8>> {
+    Ok(lz4::block::decompress(
+        compressed,
+        Some(uncompressed_size.try_into().unwrap()),
+    )?)
 }
 
 fn zstd_compress(mut bytes: &[u8], level: i32) -> Result<Vec<u8>> {

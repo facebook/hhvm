@@ -16,11 +16,11 @@ extern "C" {
 
 /// A struct to make sure we don't mix up fields in `HeapValueHeader` that
 /// have the same type.
-struct HeapValueHeaderFields {
-    buffer_size: usize,
-    uncompressed_size: usize,
-    is_serialized: bool,
-    is_evictable: bool,
+pub struct HeapValueHeaderFields {
+    pub buffer_size: usize,
+    pub uncompressed_size: usize,
+    pub is_serialized: bool,
+    pub is_evictable: bool,
 }
 
 impl From<HeapValueHeaderFields> for HeapValueHeader {

@@ -11,11 +11,11 @@
 // CHECK:   type_: .public *HackInt
 // CHECK: }
 
-// CHECK: define C.$init_static() : void {
+// CHECK: define C$static.$init_static() : void {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.alloc_words(0)
-// CHECK:   store &static_singleton::C <- n0: *C$static
-// CHECK:   store &C::MY_CONSTANT <- $builtins.hack_int(7): *HackMixed
+// CHECK:   store &C$static::static_singleton <- n0: *C$static
+// CHECK:   store &C$static::MY_CONSTANT <- $builtins.hack_int(7): *HackMixed
 // CHECK:   ret 0
 // CHECK: }
 
@@ -52,7 +52,7 @@ class C {
 
   // CHECK: define C.cons_self(this: *C) : *HackMixed {
   // ...
-  // CHECK:   n2: *C$static = load &static_singleton::C
+  // CHECK:   n2: *C$static = load &C$static::static_singleton
   // CHECK:   n3 = $builtins.lazy_initialize(n2)
   // CHECK:   n4 = n2.HackMixed.__factory()
   // CHECK:   store &$2 <- n4: *HackMixed
@@ -68,10 +68,10 @@ class C {
 
   // CHECK: define C.cons_inst(this: *C) : *HackMixed {
   // ...
-  // CHECK:   n0: *C$static = load &static_singleton::C
+  // CHECK:   n0: *C$static = load &C$static::static_singleton
   // CHECK:   n1 = $builtins.lazy_initialize(n0)
   // ...
-  // CHECK:   n2: *C$static = load &static_singleton::C
+  // CHECK:   n2: *C$static = load &C$static::static_singleton
   // CHECK:   n3 = $builtins.lazy_initialize(n2)
   // CHECK:   n4 = n2.HackMixed.__factory()
   // CHECK:   store &$2 <- n4: *HackMixed
@@ -85,7 +85,7 @@ class C {
     $a = new C(1, 2, 3);
   }
 
-  // CHECK: define C.static_signature(this: *C$static, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
+  // CHECK: define C$static.static_signature(this: *C$static, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
   // Lots of stuff elided here...
   // CHECK: }
   public static function static_signature(mixed $a, mixed $b): void {
@@ -99,7 +99,7 @@ class C {
   // CHECK: define C.test_const(this: *C) : *HackMixed {
   // CHECK: local $x: *void, base: *HackMixed
   // CHECK: #b0:
-  // CHECK:   n0: *HackMixed = load &C::MY_CONSTANT
+  // CHECK:   n0: *HackMixed = load &C$static::MY_CONSTANT
   // CHECK:   store &$x <- n0: *HackMixed
   // CHECK:   ret $builtins.hack_null()
   // CHECK: }
@@ -108,5 +108,5 @@ class C {
   }
 }
 
-// CHECK: global C::MY_CONSTANT : *HackMixed
-// CHECK: global static_singleton::C : *C$static
+// CHECK: global C$static::MY_CONSTANT : *HackMixed
+// CHECK: global C$static::static_singleton : *C$static

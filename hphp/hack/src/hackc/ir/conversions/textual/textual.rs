@@ -171,7 +171,8 @@ impl<'a> TextualFile<'a> {
     ) -> Result<HashSet<T>> {
         if !self.globals.is_empty() {
             self.write_comment("----- GLOBALS -----")?;
-            for (name, ty) in self.globals.iter() {
+
+            for (name, ty) in self.globals.iter().sorted_by(|(n1, _), (n2, _)| n1.cmp(n2)) {
                 writeln!(self.w, "global {name} : {}", FmtTy(ty))?;
             }
             self.debug_separator()?;

@@ -7,7 +7,8 @@ use ir::StringInterner;
 use ir::TypeConstraintFlags;
 use log::trace;
 
-use crate::mangle::Mangle as _;
+use crate::class::IsStatic;
+use crate::mangle::MangleClass as _;
 use crate::textual;
 
 pub(crate) fn convert_ty(ty: ir::EnforceableType, strings: &StringInterner) -> textual::Ty {
@@ -38,7 +39,7 @@ fn convert_base(ty: ir::BaseType, strings: &StringInterner) -> textual::Ty {
     use ir::BaseType;
     match ty {
         BaseType::Void => textual::Ty::Void,
-        BaseType::Class(cid) => textual::Ty::Type(cid.mangle(strings)),
+        BaseType::Class(cid) => textual::Ty::Type(cid.mangle_class(IsStatic::NonStatic, strings)),
         BaseType::RawPtr(box base) => textual::Ty::Ptr(Box::new(convert_base(base, strings))),
         _ => {
             trace!("BaseType: {ty:?}");

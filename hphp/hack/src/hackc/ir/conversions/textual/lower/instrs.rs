@@ -24,6 +24,7 @@ use ir::SpecialClsRef;
 use ir::ValueId;
 
 use super::func_builder::FuncBuilderEx as _;
+use crate::class::IsStatic;
 use crate::func::MethodInfo;
 use crate::hack;
 
@@ -193,12 +194,15 @@ impl TransformInstr for LowerInstrs<'_> {
                 builder.hack_builtin(Builtin::IsType, &[vid, cid], loc)
             }
             Instr::Hhbc(Hhbc::LateBoundCls(loc)) => {
-                if self.method_info.as_ref().unwrap().is_static {
-                    let this = builder.emit(Instr::Hhbc(Hhbc::This(loc)));
-                    builder.hack_builtin(Builtin::GetClass, &[this], loc)
-                } else {
-                    let this = builder.emit(Instr::Hhbc(Hhbc::This(loc)));
-                    builder.hack_builtin(Builtin::GetStaticClass, &[this], loc)
+                match self.method_info.as_ref().unwrap().is_static {
+                    IsStatic::Static => {
+                        let this = builder.emit(Instr::Hhbc(Hhbc::This(loc)));
+                        builder.hack_builtin(Builtin::GetClass, &[this], loc)
+                    }
+                    IsStatic::NonStatic => {
+                        let this = builder.emit(Instr::Hhbc(Hhbc::This(loc)));
+                        builder.hack_builtin(Builtin::GetStaticClass, &[this], loc)
+                    }
                 }
             }
             Instr::Hhbc(Hhbc::LockObj(obj, loc)) => {

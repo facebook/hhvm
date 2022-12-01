@@ -35,6 +35,7 @@ use itertools::Itertools;
 use log::trace;
 
 use crate::class;
+use crate::class::IsStatic;
 use crate::hack;
 use crate::lower;
 use crate::mangle::Mangle as _;
@@ -326,7 +327,7 @@ fn write_get_class_const(
     // TODO: should we load the class static to ensure that the constants are initialized?
     // let this = state.load_static_class(class)?;
 
-    let name = cid.mangle(class, &state.strings);
+    let name = cid.mangle_with_class(class, IsStatic::Static, &state.strings);
     let var = textual::Var::Named(name);
     state.fb.load(tx_ty!(*HackMixed), textual::Expr::deref(var))
 }
@@ -545,7 +546,7 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
         CallDetail::FCallClsMethod { .. } => write_todo(state.fb, "FCallClsMethod")?,
         CallDetail::FCallClsMethodD { clsid, method } => {
             // C::foo()
-            let target = method.mangle(clsid, &state.strings);
+            let target = method.mangle_with_class(clsid, IsStatic::Static, &state.strings);
             let this = state.load_static_class(clsid)?;
             let args = args
                 .iter()
@@ -583,7 +584,7 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
 
             // TODO: need to try to figure out the type.
             let ty = ClassName::new(Str::new(b"HackMixed"));
-            let target = method.mangle(&ty, &state.strings);
+            let target = method.mangle_with_class(&ty, IsStatic::NonStatic, &state.strings);
             let obj = state.lookup_vid(detail.obj(operands));
             let args = args
                 .iter()
@@ -816,7 +817,7 @@ fn rewrite_jmp_ops<'a>(mut func: ir::Func<'a>) -> ir::Func<'a> {
 
 pub(crate) struct MethodInfo<'a> {
     pub(crate) class: &'a ir::Class<'a>,
-    pub(crate) is_static: bool,
+    pub(crate) is_static: IsStatic,
 }
 
 /// Compare locals such that named ones go first followed by unnamed ones.

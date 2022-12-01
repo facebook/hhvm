@@ -5,6 +5,8 @@
 
 use ir::StringInterner;
 
+use crate::class::IsStatic;
+
 const TOP_LEVELS_CLASS: &str = "$root";
 
 /// Used for things that can mangle themselves directly.
@@ -12,25 +14,38 @@ pub(crate) trait Mangle {
     fn mangle(&self, strings: &StringInterner) -> String;
 }
 
-pub(crate) trait ManglableClass {
-    fn mangle_class(&self, strings: &StringInterner) -> String;
+pub(crate) trait MangleClass {
+    fn mangle_class(&self, is_static: IsStatic, strings: &StringInterner) -> String;
 }
 
-impl ManglableClass for ir::ClassId {
-    fn mangle_class(&self, strings: &StringInterner) -> String {
-        self.mangle(strings)
+impl MangleClass for ir::ClassId {
+    fn mangle_class(&self, is_static: IsStatic, strings: &StringInterner) -> String {
+        let cls = self.as_bytes(strings).mangle(strings);
+        match is_static {
+            IsStatic::Static => format!("{cls}$static"),
+            IsStatic::NonStatic => cls,
+        }
     }
 }
 
-impl ManglableClass for &ir::ClassName<'_> {
-    fn mangle_class(&self, strings: &StringInterner) -> String {
-        self.mangle(strings)
+impl MangleClass for &ir::ClassName<'_> {
+    fn mangle_class(&self, is_static: IsStatic, strings: &StringInterner) -> String {
+        let cls = self.as_bytes().mangle(strings);
+        match is_static {
+            IsStatic::Static => format!("{cls}$static"),
+            IsStatic::NonStatic => cls,
+        }
     }
 }
 
 /// Used for things that need to be mangled relative to a Class.
 pub(crate) trait MangleWithClass {
-    fn mangle(&self, class: impl ManglableClass, strings: &StringInterner) -> String;
+    fn mangle_with_class(
+        &self,
+        class: impl MangleClass,
+        is_static: IsStatic,
+        strings: &StringInterner,
+    ) -> String;
 }
 
 impl Mangle for [u8] {
@@ -97,18 +112,6 @@ impl Mangle for ir::FunctionName<'_> {
     }
 }
 
-impl Mangle for ir::ClassId {
-    fn mangle(&self, strings: &StringInterner) -> String {
-        self.as_bytes(strings).mangle(strings)
-    }
-}
-
-impl Mangle for ir::ClassName<'_> {
-    fn mangle(&self, strings: &StringInterner) -> String {
-        self.as_bytes().mangle(strings)
-    }
-}
-
 impl Mangle for ir::FunctionId {
     fn mangle(&self, strings: &StringInterner) -> String {
         format!(
@@ -119,20 +122,30 @@ impl Mangle for ir::FunctionId {
 }
 
 impl MangleWithClass for ir::MethodName<'_> {
-    fn mangle(&self, class: impl ManglableClass, strings: &StringInterner) -> String {
+    fn mangle_with_class(
+        &self,
+        class: impl MangleClass,
+        is_static: IsStatic,
+        strings: &StringInterner,
+    ) -> String {
         format!(
             "{}.{}",
-            class.mangle_class(strings),
+            class.mangle_class(is_static, strings),
             self.as_bytes().mangle(strings)
         )
     }
 }
 
 impl MangleWithClass for ir::MethodId {
-    fn mangle(&self, class: impl ManglableClass, strings: &StringInterner) -> String {
+    fn mangle_with_class(
+        &self,
+        class: impl MangleClass,
+        is_static: IsStatic,
+        strings: &StringInterner,
+    ) -> String {
         format!(
             "{}.{}",
-            class.mangle_class(strings),
+            class.mangle_class(is_static, strings),
             self.as_bytes(strings).mangle(strings)
         )
     }
@@ -145,10 +158,15 @@ impl Mangle for ir::PropId {
 }
 
 impl MangleWithClass for ir::ConstId {
-    fn mangle(&self, class: impl ManglableClass, strings: &StringInterner) -> String {
+    fn mangle_with_class(
+        &self,
+        class: impl MangleClass,
+        is_static: IsStatic,
+        strings: &StringInterner,
+    ) -> String {
         format!(
             "{}::{}",
-            class.mangle_class(strings),
+            class.mangle_class(is_static, strings),
             self.as_bytes(strings).mangle(strings)
         )
     }

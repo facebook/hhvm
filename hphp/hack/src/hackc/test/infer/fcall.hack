@@ -10,9 +10,9 @@ function fcall_func(): void {
 
 // CHECK: define $root.fcall_static(this: *void) : *HackMixed {
 // CHECK: #b0:
-// CHECK:   n0: *C$static = load &static_singleton::C
+// CHECK:   n0: *C$static = load &C$static::static_singleton
 // CHECK:   n1 = $builtins.lazy_initialize(n0)
-// CHECK:   n2 = C.f(n0, $builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
+// CHECK:   n2 = C$static.f(n0, $builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
 // CHECK:   ret $builtins.hack_null()
 function fcall_static(): void {
   C::f(1, 2, 3);
@@ -27,4 +27,4 @@ function fcall_method(C $a): void {
   $a->b(1, 2, 3);
 }
 
-// CHECK: declare C.f(...): *HackMixed
+// CHECK: declare C$static.f(...): *HackMixed

@@ -21,6 +21,7 @@ use super::hack;
 use super::textual;
 use crate::func::MethodInfo;
 use crate::mangle::Mangle;
+use crate::mangle::MangleClass as _;
 use crate::mangle::MangleWithClass as _;
 use crate::state::UnitState;
 use crate::textual::TextualFile;
@@ -38,14 +39,6 @@ pub(crate) enum IsStatic {
 impl IsStatic {
     pub(crate) fn as_bool(&self) -> bool {
         matches!(self, IsStatic::Static)
-    }
-}
-
-pub(crate) struct StaticClassId(pub(crate) ir::ClassId);
-
-impl Mangle for StaticClassId {
-    fn mangle(&self, strings: &ir::StringInterner) -> String {
-        format!("{}$static", self.0.mangle(strings))
     }
 }
 
@@ -67,7 +60,9 @@ pub(crate) fn write_class(
 
     // Class constants are not inherited so we just turn them into globals.
     for constant in &class.constants {
-        let name = constant.name.mangle(class.name, &state.strings);
+        let name = constant
+            .name
+            .mangle_with_class(class.name, IsStatic::Static, &state.strings);
         txf.declare_global(name, tx_ty!(*HackMixed));
     }
 
@@ -81,39 +76,35 @@ pub(crate) fn write_class(
     Ok(())
 }
 
-pub(crate) fn mangled_class_name(
-    name: ir::ClassId,
-    is_static: IsStatic,
-    strings: &ir::StringInterner,
-) -> String {
-    match is_static {
-        IsStatic::Static => StaticClassId(name).mangle(strings),
-        IsStatic::NonStatic => name.mangle(strings),
-    }
-}
-
 /// For a given class return the Ty for its non-static (instance) type.
 pub(crate) fn non_static_ty(class: ir::ClassId, strings: &ir::StringInterner) -> textual::Ty {
-    let cname = mangled_class_name(class, IsStatic::NonStatic, strings);
+    let cname = class.mangle_class(IsStatic::NonStatic, strings);
     textual::Ty::Ptr(Box::new(textual::Ty::Type(cname)))
 }
 
 /// For a given class return the Ty for its static type.
 pub(crate) fn static_ty(class: ir::ClassId, strings: &ir::StringInterner) -> textual::Ty {
-    let cname = mangled_class_name(class, IsStatic::Static, strings);
+    let cname = class.mangle_class(IsStatic::Static, strings);
     textual::Ty::Ptr(Box::new(textual::Ty::Type(cname)))
+}
+
+fn class_ty(class: ir::ClassId, is_static: IsStatic, strings: &ir::StringInterner) -> textual::Ty {
+    match is_static {
+        IsStatic::Static => static_ty(class, strings),
+        IsStatic::NonStatic => non_static_ty(class, strings),
+    }
 }
 
 /// For a given class return the Ty for its non-static type.
 fn init_static_name(class: ir::ClassId, strings: &ir::StringInterner) -> String {
     let method = ir::MethodName::new(ffi::Slice::new(b"$init_static"));
-    method.mangle(class, strings)
+    method.mangle_with_class(class, IsStatic::Static, strings)
 }
 
 /// The name of the global singleton for a static class.
 fn static_singleton_name(class: ir::ClassId, strings: &ir::StringInterner) -> String {
-    let cname = class.mangle(strings);
-    format!("static_singleton::{cname}")
+    let name = ir::ConstId::new(strings.intern_str("static_singleton"));
+    name.mangle_with_class(class, IsStatic::Static, strings)
 }
 
 /// Write the type for a (class, is_static) with the properties of the class.
@@ -136,7 +127,7 @@ fn write_type(
         visibility: *visibility,
     });
 
-    let cname = mangled_class_name(class.name, is_static, &state.strings);
+    let cname = class.name.mangle_class(is_static, &state.strings);
     txf.define_type(&cname, &class.src_loc, fields)?;
 
     Ok(())
@@ -227,7 +218,11 @@ fn write_init_static(
             // constants
             for constant in &class.constants {
                 if let Some(value) = constant.value.as_ref() {
-                    let name = constant.name.mangle(class.name, &state.strings);
+                    let name = constant.name.mangle_with_class(
+                        class.name,
+                        IsStatic::Static,
+                        &state.strings,
+                    );
                     let var = textual::Var::named(name);
                     let value = typed_value::typed_value_expr(value, &state.strings);
                     fb.store(textual::Expr::deref(var), value, tx_ty!(*HackMixed))?;
@@ -252,21 +247,20 @@ fn write_method(
         method.name.as_bstr(&state.strings)
     );
 
-    let this_ty = if method.attrs.is_static() {
-        static_ty(class.name, &state.strings)
-    } else {
-        non_static_ty(class.name, &state.strings)
+    let is_static = match method.attrs.is_static() {
+        true => IsStatic::Static,
+        false => IsStatic::NonStatic,
     };
 
-    let method_info = Arc::new(MethodInfo {
-        class,
-        is_static: method.attrs.is_static(),
-    });
+    let this_ty = class_ty(class.name, is_static, &state.strings);
+    let method_info = Arc::new(MethodInfo { class, is_static });
 
     func::write_func(
         txf,
         state,
-        &method.name.mangle(class.name, &state.strings),
+        &method
+            .name
+            .mangle_with_class(class.name, is_static, &state.strings),
         this_ty,
         method.func,
         Some(method_info),

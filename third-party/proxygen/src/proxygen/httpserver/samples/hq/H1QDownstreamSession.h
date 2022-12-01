@@ -22,9 +22,13 @@ class H1QDownstreamSession : public quic::QuicSocket::ConnectionCallback {
                        wangle::ConnectionManager* connMgr)
       : sock_(std::move(sock)), controller_(controller), connMgr_(connMgr) {
     sock_->setConnectionCallback(this);
+    // hold a place for this container session (HQSessionController doesn't
+    // use the arg)
+    controller_->attachSession(nullptr);
   }
 
   ~H1QDownstreamSession() override {
+    controller_->detachSession(nullptr);
     if (sock_) {
       sock_->setConnectionCallback(nullptr);
     }

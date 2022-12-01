@@ -290,11 +290,21 @@ Watcher::ConsumeNotifyRet KQueueWatcher::consumeNotify(
       wlock->fd_to_name.erase(fd);
     }
 
-    // TODO: W_PENDING_VIA_NOTIFY should always be set
-    coll.add(
-        path,
-        now,
-        is_dir ? PendingFlags{} : (W_PENDING_RECURSIVE | W_PENDING_VIA_NOTIFY));
+    PendingFlags flags = W_PENDING_VIA_NOTIFY;
+    if (!is_dir) {
+      // TODO(xavierd): I believe we need this in case a file is replaced by a
+      // directory.
+      flags |= W_PENDING_RECURSIVE;
+    } else {
+      // You might be tempted to use W_PENDING_NONRECURSIVE_SCAN here, but this
+      // would lead to scanning the changed directories too, which when used in
+      // the kqueue+fsevents watcher will lead to cookies being discovered
+      // prior to FSEvents reporting them!
+      // TODO(xavierd): It's unclear to me why not specifying
+      // W_PENDING_NONRECURSIVE_SCAN here still allows cookies to be
+      // discovered...
+    }
+    coll.add(path, now, flags);
   }
 
   return {false};

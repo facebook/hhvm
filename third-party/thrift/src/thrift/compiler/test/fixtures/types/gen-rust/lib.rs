@@ -25,6 +25,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::some_service::BounceMapError> for BounceMapExn {
+            fn from(err: crate::errors::some_service::BounceMapError) -> Self {
+                match err {
+                    crate::errors::some_service::BounceMapError::ApplicationException(aexn) => BounceMapExn::ApplicationException(aexn),
+                    crate::errors::some_service::BounceMapError::ThriftError(err) => BounceMapExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for BounceMapExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)
@@ -146,6 +158,18 @@ pub mod services {
             #[doc(hidden)]
             Success(::std::collections::BTreeMap<crate::types::TBinary, ::std::primitive::i64>),
             ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<crate::errors::some_service::BinaryKeyedMapError> for BinaryKeyedMapExn {
+            fn from(err: crate::errors::some_service::BinaryKeyedMapError) -> Self {
+                match err {
+                    crate::errors::some_service::BinaryKeyedMapError::ApplicationException(aexn) => BinaryKeyedMapExn::ApplicationException(aexn),
+                    crate::errors::some_service::BinaryKeyedMapError::ThriftError(err) => BinaryKeyedMapExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
         }
 
         impl ::std::convert::From<::fbthrift::ApplicationException> for BinaryKeyedMapExn {

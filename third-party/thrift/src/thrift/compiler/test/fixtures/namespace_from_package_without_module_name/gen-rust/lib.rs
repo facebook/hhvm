@@ -22,6 +22,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::test_service::InitError> for InitExn {
+            fn from(err: crate::errors::test_service::InitError) -> Self {
+                match err {
+                    crate::errors::test_service::InitError::ApplicationException(aexn) => InitExn::ApplicationException(aexn),
+                    crate::errors::test_service::InitError::ThriftError(err) => InitExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for InitExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)

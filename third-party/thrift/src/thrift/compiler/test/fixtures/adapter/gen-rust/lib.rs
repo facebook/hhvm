@@ -94,6 +94,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::service::FuncError> for FuncExn {
+            fn from(err: crate::errors::service::FuncError) -> Self {
+                match err {
+                    crate::errors::service::FuncError::ApplicationException(aexn) => FuncExn::ApplicationException(aexn),
+                    crate::errors::service::FuncError::ThriftError(err) => FuncExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for FuncExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)
@@ -219,6 +231,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::adapter_service::CountError> for CountExn {
+            fn from(err: crate::errors::adapter_service::CountError) -> Self {
+                match err {
+                    crate::errors::adapter_service::CountError::ApplicationException(aexn) => CountExn::ApplicationException(aexn),
+                    crate::errors::adapter_service::CountError::ThriftError(err) => CountExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for CountExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)
@@ -340,6 +364,18 @@ pub mod services {
             #[doc(hidden)]
             Success(crate::types::HeapAllocated),
             ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<crate::errors::adapter_service::AdaptedTypesError> for AdaptedTypesExn {
+            fn from(err: crate::errors::adapter_service::AdaptedTypesError) -> Self {
+                match err {
+                    crate::errors::adapter_service::AdaptedTypesError::ApplicationException(aexn) => AdaptedTypesExn::ApplicationException(aexn),
+                    crate::errors::adapter_service::AdaptedTypesError::ThriftError(err) => AdaptedTypesExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
         }
 
         impl ::std::convert::From<::fbthrift::ApplicationException> for AdaptedTypesExn {

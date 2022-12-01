@@ -19,6 +19,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::nested_containers::MapListError> for MapListExn {
+            fn from(err: crate::errors::nested_containers::MapListError) -> Self {
+                match err {
+                    crate::errors::nested_containers::MapListError::ApplicationException(aexn) => MapListExn::ApplicationException(aexn),
+                    crate::errors::nested_containers::MapListError::ThriftError(err) => MapListExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for MapListExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)
@@ -134,6 +146,18 @@ pub mod services {
             #[doc(hidden)]
             Success(()),
             ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<crate::errors::nested_containers::MapSetError> for MapSetExn {
+            fn from(err: crate::errors::nested_containers::MapSetError) -> Self {
+                match err {
+                    crate::errors::nested_containers::MapSetError::ApplicationException(aexn) => MapSetExn::ApplicationException(aexn),
+                    crate::errors::nested_containers::MapSetError::ThriftError(err) => MapSetExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
         }
 
         impl ::std::convert::From<::fbthrift::ApplicationException> for MapSetExn {
@@ -253,6 +277,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::nested_containers::ListMapError> for ListMapExn {
+            fn from(err: crate::errors::nested_containers::ListMapError) -> Self {
+                match err {
+                    crate::errors::nested_containers::ListMapError::ApplicationException(aexn) => ListMapExn::ApplicationException(aexn),
+                    crate::errors::nested_containers::ListMapError::ThriftError(err) => ListMapExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for ListMapExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)
@@ -370,6 +406,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::nested_containers::ListSetError> for ListSetExn {
+            fn from(err: crate::errors::nested_containers::ListSetError) -> Self {
+                match err {
+                    crate::errors::nested_containers::ListSetError::ApplicationException(aexn) => ListSetExn::ApplicationException(aexn),
+                    crate::errors::nested_containers::ListSetError::ThriftError(err) => ListSetExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for ListSetExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)
@@ -485,6 +533,18 @@ pub mod services {
             #[doc(hidden)]
             Success(()),
             ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<crate::errors::nested_containers::TurtlesError> for TurtlesExn {
+            fn from(err: crate::errors::nested_containers::TurtlesError) -> Self {
+                match err {
+                    crate::errors::nested_containers::TurtlesError::ApplicationException(aexn) => TurtlesExn::ApplicationException(aexn),
+                    crate::errors::nested_containers::TurtlesError::ThriftError(err) => TurtlesExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
         }
 
         impl ::std::convert::From<::fbthrift::ApplicationException> for TurtlesExn {

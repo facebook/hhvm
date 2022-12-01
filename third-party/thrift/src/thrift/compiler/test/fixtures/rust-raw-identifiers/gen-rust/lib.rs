@@ -22,6 +22,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::foo::ReturnError> for ReturnExn {
+            fn from(err: crate::errors::foo::ReturnError) -> Self {
+                match err {
+                    crate::errors::foo::ReturnError::ApplicationException(aexn) => ReturnExn::ApplicationException(aexn),
+                    crate::errors::foo::ReturnError::ThriftError(err) => ReturnExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for ReturnExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)
@@ -137,6 +149,18 @@ pub mod services {
             #[doc(hidden)]
             Success(()),
             ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<crate::errors::foo::SuperError> for SuperExn {
+            fn from(err: crate::errors::foo::SuperError) -> Self {
+                match err {
+                    crate::errors::foo::SuperError::ApplicationException(aexn) => SuperExn::ApplicationException(aexn),
+                    crate::errors::foo::SuperError::ThriftError(err) => SuperExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
         }
 
         impl ::std::convert::From<::fbthrift::ApplicationException> for SuperExn {

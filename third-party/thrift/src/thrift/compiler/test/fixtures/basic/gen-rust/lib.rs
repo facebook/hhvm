@@ -23,6 +23,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::foo_service::SimpleRpcError> for SimpleRpcExn {
+            fn from(err: crate::errors::foo_service::SimpleRpcError) -> Self {
+                match err {
+                    crate::errors::foo_service::SimpleRpcError::ApplicationException(aexn) => SimpleRpcExn::ApplicationException(aexn),
+                    crate::errors::foo_service::SimpleRpcError::ThriftError(err) => SimpleRpcExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for SimpleRpcExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)
@@ -140,6 +152,18 @@ pub mod services {
             #[doc(hidden)]
             Success(crate::types::ReservedKeyword),
             ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<crate::errors::f_b303_service::SimpleRpcError> for SimpleRpcExn {
+            fn from(err: crate::errors::f_b303_service::SimpleRpcError) -> Self {
+                match err {
+                    crate::errors::f_b303_service::SimpleRpcError::ApplicationException(aexn) => SimpleRpcExn::ApplicationException(aexn),
+                    crate::errors::f_b303_service::SimpleRpcError::ThriftError(err) => SimpleRpcExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
         }
 
         impl ::std::convert::From<::fbthrift::ApplicationException> for SimpleRpcExn {
@@ -267,6 +291,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::my_service::PingError> for PingExn {
+            fn from(err: crate::errors::my_service::PingError) -> Self {
+                match err {
+                    crate::errors::my_service::PingError::ApplicationException(aexn) => PingExn::ApplicationException(aexn),
+                    crate::errors::my_service::PingError::ThriftError(err) => PingExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for PingExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)
@@ -382,6 +418,18 @@ pub mod services {
             #[doc(hidden)]
             Success(::std::string::String),
             ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<crate::errors::my_service::GetRandomDataError> for GetRandomDataExn {
+            fn from(err: crate::errors::my_service::GetRandomDataError) -> Self {
+                match err {
+                    crate::errors::my_service::GetRandomDataError::ApplicationException(aexn) => GetRandomDataExn::ApplicationException(aexn),
+                    crate::errors::my_service::GetRandomDataError::ThriftError(err) => GetRandomDataExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
         }
 
         impl ::std::convert::From<::fbthrift::ApplicationException> for GetRandomDataExn {
@@ -507,6 +555,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::my_service::SinkError> for SinkExn {
+            fn from(err: crate::errors::my_service::SinkError) -> Self {
+                match err {
+                    crate::errors::my_service::SinkError::ApplicationException(aexn) => SinkExn::ApplicationException(aexn),
+                    crate::errors::my_service::SinkError::ThriftError(err) => SinkExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for SinkExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)
@@ -624,6 +684,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::my_service::PutDataByIdError> for PutDataByIdExn {
+            fn from(err: crate::errors::my_service::PutDataByIdError) -> Self {
+                match err {
+                    crate::errors::my_service::PutDataByIdError::ApplicationException(aexn) => PutDataByIdExn::ApplicationException(aexn),
+                    crate::errors::my_service::PutDataByIdError::ThriftError(err) => PutDataByIdExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for PutDataByIdExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)
@@ -739,6 +811,18 @@ pub mod services {
             #[doc(hidden)]
             Success(::std::primitive::bool),
             ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<crate::errors::my_service::HasDataByIdError> for HasDataByIdExn {
+            fn from(err: crate::errors::my_service::HasDataByIdError) -> Self {
+                match err {
+                    crate::errors::my_service::HasDataByIdError::ApplicationException(aexn) => HasDataByIdExn::ApplicationException(aexn),
+                    crate::errors::my_service::HasDataByIdError::ThriftError(err) => HasDataByIdExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
         }
 
         impl ::std::convert::From<::fbthrift::ApplicationException> for HasDataByIdExn {
@@ -864,6 +948,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::my_service::GetDataByIdError> for GetDataByIdExn {
+            fn from(err: crate::errors::my_service::GetDataByIdError) -> Self {
+                match err {
+                    crate::errors::my_service::GetDataByIdError::ApplicationException(aexn) => GetDataByIdExn::ApplicationException(aexn),
+                    crate::errors::my_service::GetDataByIdError::ThriftError(err) => GetDataByIdExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for GetDataByIdExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)
@@ -987,6 +1083,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::my_service::DeleteDataByIdError> for DeleteDataByIdExn {
+            fn from(err: crate::errors::my_service::DeleteDataByIdError) -> Self {
+                match err {
+                    crate::errors::my_service::DeleteDataByIdError::ApplicationException(aexn) => DeleteDataByIdExn::ApplicationException(aexn),
+                    crate::errors::my_service::DeleteDataByIdError::ThriftError(err) => DeleteDataByIdExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for DeleteDataByIdExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)
@@ -1104,6 +1212,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::my_service::LobDataByIdError> for LobDataByIdExn {
+            fn from(err: crate::errors::my_service::LobDataByIdError) -> Self {
+                match err {
+                    crate::errors::my_service::LobDataByIdError::ApplicationException(aexn) => LobDataByIdExn::ApplicationException(aexn),
+                    crate::errors::my_service::LobDataByIdError::ThriftError(err) => LobDataByIdExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for LobDataByIdExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)
@@ -1219,6 +1339,18 @@ pub mod services {
             #[doc(hidden)]
             Success(::std::collections::BTreeSet<::fbthrift::export::OrderedFloat<::std::primitive::f32>>),
             ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<crate::errors::my_service::InvalidReturnForHackError> for InvalidReturnForHackExn {
+            fn from(err: crate::errors::my_service::InvalidReturnForHackError) -> Self {
+                match err {
+                    crate::errors::my_service::InvalidReturnForHackError::ApplicationException(aexn) => InvalidReturnForHackExn::ApplicationException(aexn),
+                    crate::errors::my_service::InvalidReturnForHackError::ThriftError(err) => InvalidReturnForHackExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
         }
 
         impl ::std::convert::From<::fbthrift::ApplicationException> for InvalidReturnForHackExn {
@@ -1344,6 +1476,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::my_service::RpcSkippedCodegenError> for RpcSkippedCodegenExn {
+            fn from(err: crate::errors::my_service::RpcSkippedCodegenError) -> Self {
+                match err {
+                    crate::errors::my_service::RpcSkippedCodegenError::ApplicationException(aexn) => RpcSkippedCodegenExn::ApplicationException(aexn),
+                    crate::errors::my_service::RpcSkippedCodegenError::ThriftError(err) => RpcSkippedCodegenExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for RpcSkippedCodegenExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)
@@ -1461,6 +1605,18 @@ pub mod services {
             #[doc(hidden)]
             Success(::std::vec::Vec<::std::primitive::u8>),
             ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<crate::errors::db_mixed_stack_arguments::GetDataByKey0Error> for GetDataByKey0Exn {
+            fn from(err: crate::errors::db_mixed_stack_arguments::GetDataByKey0Error) -> Self {
+                match err {
+                    crate::errors::db_mixed_stack_arguments::GetDataByKey0Error::ApplicationException(aexn) => GetDataByKey0Exn::ApplicationException(aexn),
+                    crate::errors::db_mixed_stack_arguments::GetDataByKey0Error::ThriftError(err) => GetDataByKey0Exn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
         }
 
         impl ::std::convert::From<::fbthrift::ApplicationException> for GetDataByKey0Exn {
@@ -1584,6 +1740,18 @@ pub mod services {
             #[doc(hidden)]
             Success(::std::vec::Vec<::std::primitive::u8>),
             ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<crate::errors::db_mixed_stack_arguments::GetDataByKey1Error> for GetDataByKey1Exn {
+            fn from(err: crate::errors::db_mixed_stack_arguments::GetDataByKey1Error) -> Self {
+                match err {
+                    crate::errors::db_mixed_stack_arguments::GetDataByKey1Error::ApplicationException(aexn) => GetDataByKey1Exn::ApplicationException(aexn),
+                    crate::errors::db_mixed_stack_arguments::GetDataByKey1Error::ThriftError(err) => GetDataByKey1Exn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
         }
 
         impl ::std::convert::From<::fbthrift::ApplicationException> for GetDataByKey1Exn {

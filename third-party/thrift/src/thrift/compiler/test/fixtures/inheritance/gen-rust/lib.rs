@@ -19,6 +19,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::my_root::DoRootError> for DoRootExn {
+            fn from(err: crate::errors::my_root::DoRootError) -> Self {
+                match err {
+                    crate::errors::my_root::DoRootError::ApplicationException(aexn) => DoRootExn::ApplicationException(aexn),
+                    crate::errors::my_root::DoRootError::ThriftError(err) => DoRootExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for DoRootExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)
@@ -138,6 +150,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::my_node::DoMidError> for DoMidExn {
+            fn from(err: crate::errors::my_node::DoMidError) -> Self {
+                match err {
+                    crate::errors::my_node::DoMidError::ApplicationException(aexn) => DoMidExn::ApplicationException(aexn),
+                    crate::errors::my_node::DoMidError::ThriftError(err) => DoMidExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for DoMidExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)
@@ -255,6 +279,18 @@ pub mod services {
             #[doc(hidden)]
             Success(()),
             ApplicationException(::fbthrift::ApplicationException),
+        }
+
+        impl ::std::convert::From<crate::errors::my_leaf::DoLeafError> for DoLeafExn {
+            fn from(err: crate::errors::my_leaf::DoLeafError) -> Self {
+                match err {
+                    crate::errors::my_leaf::DoLeafError::ApplicationException(aexn) => DoLeafExn::ApplicationException(aexn),
+                    crate::errors::my_leaf::DoLeafError::ThriftError(err) => DoLeafExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
         }
 
         impl ::std::convert::From<::fbthrift::ApplicationException> for DoLeafExn {

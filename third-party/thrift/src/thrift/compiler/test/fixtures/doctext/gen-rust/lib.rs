@@ -39,6 +39,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::c::FError> for FExn {
+            fn from(err: crate::errors::c::FError) -> Self {
+                match err {
+                    crate::errors::c::FError::ApplicationException(aexn) => FExn::ApplicationException(aexn),
+                    crate::errors::c::FError::ThriftError(err) => FExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for FExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)
@@ -398,6 +410,18 @@ pub mod services {
             ApplicationException(::fbthrift::ApplicationException),
         }
 
+        impl ::std::convert::From<crate::errors::c::NumbersError> for NumbersExn {
+            fn from(err: crate::errors::c::NumbersError) -> Self {
+                match err {
+                    crate::errors::c::NumbersError::ApplicationException(aexn) => NumbersExn::ApplicationException(aexn),
+                    crate::errors::c::NumbersError::ThriftError(err) => NumbersExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
+            }
+        }
+
         impl ::std::convert::From<::fbthrift::ApplicationException> for NumbersExn {
             fn from(exn: ::fbthrift::ApplicationException) -> Self {
                 Self::ApplicationException(exn)
@@ -453,6 +477,19 @@ pub mod services {
         impl ::std::convert::From<crate::types::Bang> for ThingExn {
             fn from(exn: crate::types::Bang) -> Self {
                 Self::bang(exn)
+            }
+        }
+
+        impl ::std::convert::From<crate::errors::c::ThingError> for ThingExn {
+            fn from(err: crate::errors::c::ThingError) -> Self {
+                match err {
+                    crate::errors::c::ThingError::bang(err) => ThingExn::bang(err),
+                    crate::errors::c::ThingError::ApplicationException(aexn) => ThingExn::ApplicationException(aexn),
+                    crate::errors::c::ThingError::ThriftError(err) => ThingExn::ApplicationException(::fbthrift::ApplicationException {
+                        message: err.to_string(),
+                        type_: ::fbthrift::ApplicationExceptionErrorCode::InternalError,
+                    }),
+                }
             }
         }
 

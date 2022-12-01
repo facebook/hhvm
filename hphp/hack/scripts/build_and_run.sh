@@ -27,7 +27,7 @@ function dune_build() {
       cd "${HACK_ROOT}"
       "${DUNE}" build "${HACK_SUBDIR}/${TARGET}.exe"
     )
-    exec "${DUNE_BUILD_DIR}/default/$HACK_SUBDIR/${TARGET}.exe" "${ARGS[@]}"
+    exec "${DUNE_BUILD_DIR}/default/hack/$HACK_SUBDIR/${TARGET}.exe" "${ARGS[@]}"
   fi
 
   # Rust

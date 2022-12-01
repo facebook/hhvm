@@ -1200,10 +1200,16 @@ let get_local_pos env x =
   let (_, ty, pos) = get_local_in_next_continuation env x in
   (ty, pos)
 
-let get_locals env plids =
+let get_locals ?(quiet = false) env plids =
   let next_cont = next_cont_opt env in
   List.fold plids ~init:LID.Map.empty ~f:(fun locals (p, lid) ->
-      match get_local_in_ctx ~error_if_undef_at_pos:p lid next_cont with
+      let error_if_undef_at_pos =
+        if quiet then
+          None
+        else
+          Some p
+      in
+      match get_local_in_ctx ?error_if_undef_at_pos lid next_cont with
       | None -> locals
       | Some ty_eid -> LID.Map.add lid ty_eid locals)
 

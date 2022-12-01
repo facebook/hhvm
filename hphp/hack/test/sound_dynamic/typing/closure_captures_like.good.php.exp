@@ -1,0 +1,25 @@
+File "closure_captures_like.good.php", line 9, characters 3-13:
+  A
+File "closure_captures_like.good.php", line 12, characters 5-15:
+  ~A
+File "closure_captures_like.good.php", line 13, characters 5-15:
+  B
+File "closure_captures_like.good.php", line 16, characters 7-17:
+  ~A
+File "closure_captures_like.good.php", line 17, characters 7-17:
+  ~B
+File "closure_captures_like.good.php", line 18, characters 7-17:
+  C
+File "closure_captures_like.good.php", line 16, characters 7-17:[2]
+  ~A
+File "closure_captures_like.good.php", line 17, characters 7-17:[2]
+  ~B
+File "closure_captures_like.good.php", line 18, characters 7-17:[2]
+  dynamic
+File "closure_captures_like.good.php", line 12, characters 5-15:[2]
+  ~A
+File "closure_captures_like.good.php", line 13, characters 5-15:[2]
+  dynamic
+File "closure_captures_like.good.php", line 9, characters 3-13:[2]
+  dynamic
+No errors

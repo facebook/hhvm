@@ -5173,30 +5173,10 @@ and lambda ~is_anon ?expected p env f idl =
     expand_expected_and_get_node ~strip_supportdyn:true env expected
   in
   match eexpected with
-  | Some (_pos, _ur, _, tdyn, Tdynamic)
-    when env.in_support_dynamic_type_method_check ->
-    let make_dynamic { et_type; et_enforced } =
-      let et_type =
-        match (get_node et_type, et_enforced) with
-        | (Tany _, _) (* lambda param without type hint *)
-        | (_, Unenforced) ->
-          tdyn
-        | (_, Enforced) ->
-          MakeType.intersection
-            (Reason.Rsupport_dynamic_type (get_pos tdyn))
-            [tdyn; et_type]
-      in
-      { et_type; et_enforced }
-    in
-    let ft_params =
-      List.map declared_ft.ft_params ~f:(function param ->
-          { param with fp_type = make_dynamic param.fp_type })
-    in
-    check_body_under_known_params
-      env
-      ~ret_ty:tdyn
-      ~supportdyn:true
-      { declared_ft with ft_params }
+  | _ when env.in_support_dynamic_type_method_check ->
+    (* When we're in a dynamic pass of a function (or closure) don't type inner closures
+     * at all, simply assign them a dynamic type. *)
+    make_result env p Aast.Omitted (MakeType.dynamic (Reason.Rwitness p))
   | Some (_pos, _ur, supportdyn, ty, Tfun expected_ft) ->
     (* First check that arities match up *)
     check_lambda_arity p (get_pos ty) declared_ft expected_ft;
@@ -5604,6 +5584,53 @@ and closure_make
       (env, cap_ty)
   in
   let ft = { ft with ft_implicit_params = { capability = CapTy capability } } in
+  (* Check attributes on the lambda *)
+  let (env, user_attributes) =
+    attributes_check_def env SN.AttributeKinds.lambda f.f_user_attributes
+  in
+  (* Regard a lambda as supporting dynamic if
+     *   it has the attribute <<__SupportDynamicType>>;
+     *   or its enclosing method, function or class has the attribute <<__SupportDynamicType>>;
+     *   or it must support dynamic because of the expected type
+  *)
+  let support_dynamic_type =
+    Naming_attributes.mem SN.UserAttributes.uaSupportDynamicType user_attributes
+    || Env.get_support_dynamic_type env
+    || supportdyn
+  in
+  (* A closure typed in env with parameters p1..pn and captured variables c1..cn
+   * roughly compiles to
+   *
+   * class Closure$name {
+   *   private env(c1) c1;
+   *   ...
+   *   private env(cn) cn;
+   *   public static function __invoke(p1, ..., pn) {
+   *     /* closure body, references to cn are replaced with $this->cn */
+   *   }
+   * }
+   *
+   * To make a class SDT without considering enforcement, we make its properties
+   * like types so that they may be written values with type `dynamic`. The following
+   * fold analogously makes an SDT closure's captured variables be like types, and
+   * elsewhere we skip typing closures entirely when typing the dynamic pass of a function.
+   *
+   * This is clearly a less precise way to type closures, but it allows us to avoid typing
+   * SDT closures 2^depth times.
+   *)
+  let env =
+    if support_dynamic_type then
+      (* quiet to avoid duplicate error about capturing an undefined variable *)
+      let locals = Env.get_locals ~quiet:true env idl in
+      let like_locals =
+        Local_id.Map.map
+          (Tuple.T3.map_fst ~f:(Typing_utils.make_like env))
+          locals
+      in
+      Env.set_locals env like_locals
+    else
+      env
+  in
   let env = Env.clear_params env in
   let non_variadic_ft_params =
     if get_ft_variadic ft then
@@ -5657,20 +5684,6 @@ and closure_make
       ~f:(closure_bind_param params)
       ~init:(env, [])
       (List.map non_variadic_ft_params ~f:(fun x -> x.fp_type.et_type))
-  in
-  (* Check attributes on the lambda *)
-  let (env, user_attributes) =
-    attributes_check_def env SN.AttributeKinds.lambda f.f_user_attributes
-  in
-  (* Regard a lambda as supporting dynamic if
-   *   it has the attribute <<__SupportDynamicType>>;
-   *   or its enclosing method, function or class has the attribute <<__SupportDynamicType>>;
-   *   or it must support dynamic because of the expected type
-   *)
-  let support_dynamic_type =
-    Naming_attributes.mem SN.UserAttributes.uaSupportDynamicType user_attributes
-    || Env.get_support_dynamic_type env
-    || supportdyn
   in
   let env = List.fold_left ~f:closure_bind_opt_param ~init:env !params in
   let env =

@@ -329,7 +329,7 @@ val get_local : env -> Local_id.t -> locl_ty
 
 val get_local_pos : env -> Local_id.t -> locl_ty * Pos.t
 
-val get_locals : env -> Aast.lid list -> Typing_local_types.t
+val get_locals : ?quiet:bool -> env -> Aast.lid list -> Typing_local_types.t
 
 val set_locals : env -> Typing_local_types.t -> env
 

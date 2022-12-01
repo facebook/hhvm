@@ -6,7 +6,7 @@ namespace {
 /** An iterator implementation for iterating over a Map.
  */
 <<__NativeData("MapIterator")>>
-final class MapIterator implements HH\KeyedIterator {
+final class MapIterator<Tk as arraykey, Tv> implements HH\KeyedIterator<Tk, Tv> {
 
   public function __construct()[]: void {}
 
@@ -14,13 +14,13 @@ final class MapIterator implements HH\KeyedIterator {
    * @return mixed
    */
   <<__Native>>
-  public function current()[]: mixed;
+  public function current()[]: Tv;
 
   /** Returns the current key that the iterator points to.
    * @return mixed
    */
   <<__Native>>
-  public function key()[]: mixed;
+  public function key()[]: Tk;
 
   /** Returns true if the iterator points to a valid value, returns false
    * otherwise.
@@ -45,7 +45,7 @@ namespace HH {
 
 /** An ordered dictionary-style collection.
  */
-final class Map implements \MutableMap {
+final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
 
   /** Returns a Map built from the keys and values produced by the specified
    * KeyedIterable.
@@ -70,14 +70,16 @@ final class Map implements \MutableMap {
   /** Returns an Iterable that produces the key/value Pairs from this Map.
    * @return object
    */
+  /* HH_FIXME[2049] Symbol not found, yet to be exposed to typed systemlib */
   public function items()[]: \LazyKVZipIterable {
+    /* HH_FIXME[2049] Symbol not found, yet to be exposed to typed systemlib */
     return new \LazyKVZipIterable($this);
   }
 
   /** Returns a Vector built from the keys of this Map.
    * @return Vector
    */
-  public readonly function keys()[]: \HH\Vector {
+  public readonly function keys()[]: \HH\Vector<Tk> {
     $res = vec[];
     foreach (dict($this) as $k => $_) {
       $res[] = $k;
@@ -88,7 +90,9 @@ final class Map implements \MutableMap {
   /** Returns a lazy iterable view of this Map.
    * @return object
    */
+  /* HH_FIXME[2049] Symbol not found, yet to be exposed to typed systemlib */
   public function lazy()[]: \LazyKeyedIterableView {
+    /* HH_FIXME[2049] Symbol not found, yet to be exposed to typed systemlib */
     return new \LazyKeyedIterableView($this);
   }
 
@@ -98,7 +102,7 @@ final class Map implements \MutableMap {
    * @return mixed
    */
   <<__Native>>
-  public function at(mixed $key)[]: mixed;
+  public function at(Tk $key)[]: Tv;
 
   /** Returns the value at the specified key. If the key is not present, null is
    * returned.
@@ -106,10 +110,10 @@ final class Map implements \MutableMap {
    * @return mixed
    */
   <<__Native>>
-  public function get(mixed $key)[]: mixed;
+  public function get(Tk $key)[]: ?Tv;
 
   <<__Native>>
-  private function setNative(mixed $key, mixed $value)[write_props]: void;
+  private function setNative(Tk $key, mixed $value)[write_props]: void;
 
   /** Stores a value into the Map with the specified key, overwriting any
    * previous value that was associated with the key.
@@ -119,9 +123,11 @@ final class Map implements \MutableMap {
    */
   public function set(
     mixed $key,
-    mixed $value,
+    Tv $value,
   )[write_props]: this {
-    $this->setNative($key, $value);
+    // TODO(T125046752): Pushing `Tk` to the function boundary would add a
+    // upper bound generic check (as `arraykey`).
+    $this->setNative(HH\FIXME\UNSAFE_CAST<mixed, Tk>($key), $value);
     return $this;
   }
 
@@ -131,7 +137,9 @@ final class Map implements \MutableMap {
    * @param ?KeyedTraversable $iterable
    * @return Map
    */
-  public function setAll(?\HH\KeyedTraversable $iterable)[write_props]: \HH\Map {
+  public function setAll(
+    ?\HH\KeyedTraversable<Tk, Tv> $iterable,
+  )[write_props]: this {
     if ($iterable is null) return $this;
 
     foreach ($iterable as $k => $v) {
@@ -166,14 +174,16 @@ final class Map implements \MutableMap {
   public readonly function containsKey(mixed $key)[]: bool;
 
   <<__Native>>
-  private function removeKeyNative(mixed $key)[]: void;
+  private function removeKeyNative(Tk $key)[]: void;
 
   /** Removes the specified key from this Map.
    * @param mixed $key
    * @return object
    */
   public function remove(mixed $key)[]: this {
-    $this->removeKeyNative($key);
+    // TODO(T125046752): Pushing `Tk` to the function boundary would add a
+    // upper bound generic check (as `arraykey`).
+    $this->removeKeyNative(HH\FIXME\UNSAFE_CAST<mixed, Tk>($key));
     return $this;
   }
 
@@ -182,7 +192,9 @@ final class Map implements \MutableMap {
    * @return object
    */
   public function removeKey(mixed $key)[]: this {
-    $this->removeKeyNative($key);
+    // TODO(T125046752): Pushing `Tk` to the function boundary would add a
+    // upper bound generic check (as `arraykey`).
+    $this->removeKeyNative(HH\FIXME\UNSAFE_CAST<mixed, Tk>($key));
     return $this;
   }
 
@@ -218,14 +230,14 @@ final class Map implements \MutableMap {
   <<__Native>>
   public function reserve(int $sz)[]: void;
 
-  public function toVArray()[]: varray {
+  public function toVArray()[]: varray<Tv> {
     return $this->toValuesArray();
   }
 
   /** Returns a darray built from the keys and values from this Map.
    * @return darray
    */
-  public function toDArray()[]: darray {
+  public function toDArray()[]: darray<Tk, Tv> {
     return dict($this);
   }
 
@@ -233,13 +245,13 @@ final class Map implements \MutableMap {
    * @return object
    */
   <<__Native>>
-  public function toVector()[]: object;
+  public function toVector()[]: Vector<Tv>;
 
   /** Returns a ImmVector built from the values of this Map.
    * @return object
    */
   <<__Native>>
-  public function toImmVector()[]: object;
+  public function toImmVector()[]: ImmVector<Tv>;
 
   /** Returns a copy of this Map.
    * @return object
@@ -252,39 +264,38 @@ final class Map implements \MutableMap {
    * @return object
    */
   <<__Native>>
-  public function toImmMap()[]: object;
+  public function toImmMap()[]: ImmMap<Tk, Tv>;
 
   /** Returns a Set built from the values of this Map.
    * @return object
    */
   <<__Native>>
-  public function toSet()[]: object;
+  public function toSet()[]: Set<Tv> where Tv as arraykey;
 
   /** Returns a ImmSet built from the values of this Map.
    * @return object
    */
   <<__Native>>
-  public function toImmSet()[]: object;
+  public function toImmSet()[]: ImmSet<Tv> where Tv as arraykey;
 
   /** Returns an immutable version of this collection.
    * @return object
    */
-  public function immutable()[]: \HH\ImmMap {
+  public function immutable()[]: ImmMap<Tk, Tv> {
     return $this->toImmMap();
   }
 
   /** Returns a Vector built from the values of this Map.
    * @return Vector
    */
-  public function values()[]: \HH\Vector {
-    $res = vec(dict($this));
-    return new \HH\Vector($res);
+  public function values()[]: Vector<Tv> {
+    return new Vector(vec(dict($this)));
   }
 
   /** Returns a varray built from the keys from this Map.
    * @return varray
    */
-  public function toKeysArray()[]: varray {
+  public function toKeysArray()[]: varray<Tk> {
     $keys = varray[];
     foreach (dict($this) as $k => $_) {
       $keys[] = $k;
@@ -295,40 +306,42 @@ final class Map implements \MutableMap {
   /** Returns a varray built from the values from this Map.
    * @return varray
    */
-  public function toValuesArray()[]: varray {
+  public function toValuesArray()[]: varray<Tv> {
     return vec(dict($this));
   }
 
   /** @param mixed $it
    * @return Map
    */
-  public function differenceByKey(\HH\KeyedTraversable $it)[]: \HH\Map {
+  public function differenceByKey(KeyedTraversable<Tk, mixed> $it)[]: this {
     $res = dict($this);
     foreach ($it as $k => $_) {
       if (\array_key_exists($k, $res)) {
         unset($res[$k]);
       }
     }
-    return new \HH\Map($res);
+    return new Map($res);
   }
 
   /** Returns an iterator that points to beginning of this Map.
    * @return object
    */
   <<__Native>>
-  public function getIterator()[]: object;
+  public function getIterator()[]: \MapIterator<Tk, Tv>;
 
   /** Returns a Map of the keys/values produced by applying the specified
    * callback on each value from this Map.
    * @param mixed $callback
    * @return object
    */
-  public function map((function()[_]: void) $callback)[ctx $callback]: \HH\Map {
-    $res = new \HH\Map($this);
+  public function map<To>(
+    (function(Tv)[_]: To) $callback,
+  )[ctx $callback]: Map<Tk, To> {
+    $res = dict[];
     foreach (dict($this) as $k => $v) {
       $res[$k] = $callback($v);
     }
-    return $res;
+    return new self($res);
   }
 
   /** Returns a Map of the keys/values produced by applying the specified
@@ -336,12 +349,14 @@ final class Map implements \MutableMap {
    * @param mixed $callback
    * @return object
    */
-  public function mapWithKey((function()[_]: void) $callback)[ctx $callback]: \HH\Map {
-    $res = new \HH\Map($this);
+  public function mapWithKey<To>(
+    (function(Tk, Tv)[_]: To) $callback,
+  )[ctx $callback]: Map<Tk, To> {
+    $res = dict[];
     foreach (dict($this) as $k => $v) {
       $res[$k] = $callback($k, $v);
     }
-    return $res;
+    return new self($res);
   }
 
   /** Returns a new Map of all the keys/values from this Map for which the
@@ -349,14 +364,16 @@ final class Map implements \MutableMap {
    * @param mixed $callback
    * @return object
    */
-  public function filter((function()[_]: void) $callback)[ctx $callback]: \HH\Map {
+  public function filter(
+    (function(Tv)[_]: bool) $callback,
+  )[ctx $callback]: this {
     $res = dict[];
     foreach (dict($this) as $k => $v) {
       if ($callback($v)) {
         $res[$k] = $v;
       }
     }
-    return new \HH\Map($res);
+    return new self($res);
   }
 
   /** Returns a new Map of all the keys/values from this Map for which the
@@ -364,14 +381,16 @@ final class Map implements \MutableMap {
    * @param mixed $callback
    * @return object
    */
-  public function filterWithKey((function()[_]: void) $callback)[ctx $callback]: \HH\Map {
+  public function filterWithKey(
+    (function(Tk, Tv)[_]: bool) $callback,
+  )[ctx $callback]: this {
     $res = dict[];
     foreach (dict($this) as $k => $v) {
       if ($callback($k, $v)) {
         $res[$k] = $v;
       }
     }
-    return new \HH\Map($res);
+    return new self($res);
   }
 
   /** Ensures that this Map contains only keys/values for which the specified
@@ -379,7 +398,7 @@ final class Map implements \MutableMap {
    * @param mixed $callback
    * @return object
    */
-  public function retain(mixed $callback): \HH\Map {
+  public function retain((function(Tv): bool) $callback): this {
     foreach (dict($this) as $k => $v) {
       if (!$callback($v)) {
         $this->removeKeyNative($k);
@@ -393,7 +412,7 @@ final class Map implements \MutableMap {
    * @param mixed $callback
    * @return object
    */
-  public function retainWithKey(mixed $callback): \HH\Map {
+  public function retainWithKey((function(Tk, Tv): bool) $callback): this {
     foreach (dict($this) as $k => $v) {
       if (!$callback($k, $v)) {
         $this->removeKeyNative($k);
@@ -407,7 +426,9 @@ final class Map implements \MutableMap {
    * @param Traversable $iterable
    * @return Map
    */
-  public function zip(\HH\Traversable $iterable)[write_props]: \HH\Map {
+  public function zip<To>(
+    Traversable<To> $iterable,
+  )[write_props]: Map<Tk, Pair<Tv, To>> {
     $res = dict[];
     $it = $this->getIterator();
     foreach ($iterable as $v) {
@@ -415,27 +436,28 @@ final class Map implements \MutableMap {
       $res[$it->key()] = Pair { $it->current(), $v };
       $it->next();
     }
-    return new \HH\Map($res);
+    return new self($res);
   }
 
   /** Returns a Map containing the first n key/value pairs of this Map.
    * @param int $n
    * @return Map
    */
-  public function take(int $n)[]: \HH\Map {
+  public function take(int $n)[]: this {
     if ($n >= $this->count()) {
       return $this->toMap();
     } else if ($n <= 0) {
-      return new \HH\Map();
+      return new self();
     }
 
     $res = dict[];
     foreach (dict($this) as $k => $v) {
       $res[$k] = $v;
-      if (--$n == 0) break;
+      $n--;
+      if ($n == 0) break;
     }
 
-    return new \HH\Map($res);
+    return new self($res);
   }
 
   /** Returns a Map containing the key/value pairs of this Map up to but not
@@ -444,7 +466,9 @@ final class Map implements \MutableMap {
    * @param mixed $callback
    * @return object
    */
-  public function takeWhile((function()[_]: void) $callback)[ctx $callback]: \HH\Map {
+  public function takeWhile(
+    (function(Tv)[_]: bool) $callback,
+  )[ctx $callback]: this {
     $res = dict[];
     foreach (dict($this) as $k => $v) {
       if (!$callback($v)) {
@@ -452,7 +476,7 @@ final class Map implements \MutableMap {
       }
       $res[$k] = $v;
     }
-    return new \HH\Map($res);
+    return new self($res);
   }
 
   /** Returns a Map containing all key/value pairs except the first n of this
@@ -460,18 +484,19 @@ final class Map implements \MutableMap {
    * @param int $n
    * @return Map
    */
-  public function skip(int $n)[]: \HH\Map {
+  public function skip(int $n)[]: this {
     if ($n <= 0) {
       return $this->toMap();
     }
 
     $res = dict[];
     foreach (dict($this) as $k => $v) {
-      if ($n-- > 0) continue;
+      $n--;
+      if ($n >= 0) continue;
       $res[$k] = $v;
     }
 
-    return new \HH\Map($res);
+    return new self($res);
   }
 
   /** Returns a Map containing the key/value pairs of this Map excluding the
@@ -479,7 +504,7 @@ final class Map implements \MutableMap {
    * @param mixed $fn
    * @return object
    */
-  public function skipWhile((function()[_]: void) $fn)[ctx $fn]: \HH\Map {
+  public function skipWhile((function(Tv)[_]: bool) $fn)[ctx $fn]: this {
     $res = dict[];
     $skipping = true;
     foreach (dict($this) as $k => $v) {
@@ -491,7 +516,7 @@ final class Map implements \MutableMap {
       }
       $res[$k] = $v;
     }
-    return new \HH\Map($res);
+    return new self($res);
   }
 
   /** Returns a Map containing the specified range of key/value pairs from this
@@ -501,12 +526,12 @@ final class Map implements \MutableMap {
    * @param int $len
    * @return Map
    */
-  public function slice(int $start, int $len)[]: \HH\Map {
+  public function slice(int $start, int $len)[]: this {
     if ($start < 0) {
-      throw new InvalidArgumentException("Parameter start must be a non-negative integer");
+      throw new \InvalidArgumentException("Parameter start must be a non-negative integer");
     }
     if ($len < 0) {
-      throw new InvalidArgumentException("Parameter len must be a non-negative integer");
+      throw new \InvalidArgumentException("Parameter len must be a non-negative integer");
     }
 
     $i = 0;
@@ -524,7 +549,7 @@ final class Map implements \MutableMap {
       $i++;
     }
 
-    return new \HH\Map($res);
+    return new self($res);
   }
 
   /** Builds a new Vector by concatenating the values of this Map with the
@@ -533,39 +558,39 @@ final class Map implements \MutableMap {
    * @param Traversable $iterable
    * @return Vector
    */
-  public function concat(\HH\Traversable $iterable)[]: \HH\Vector {
+  public function concat<To super Tv>(Traversable<To> $iterable)[]: Vector<To> {
     $res = vec(dict($this));
 
     foreach ($iterable as $v) {
       $res[] = $v;
     }
 
-    return new \HH\Vector($res);
+    return new Vector($res);
   }
 
   /** Returns the first value from this Map, or null if this Map is empty.
    * @return mixed
    */
   <<__Native>>
-  public function firstValue()[]: mixed;
+  public function firstValue()[]: ?Tv;
 
   /** Returns the first key from this Map, or null if this Map is empty.
    * @return mixed
    */
   <<__Native>>
-  public readonly function firstKey()[]: mixed;
+  public readonly function firstKey()[]: ?Tk;
 
   /** Returns the last value from this Map, or null if this Map is empty.
    * @return mixed
    */
   <<__Native>>
-  public function lastValue()[]: mixed;
+  public function lastValue()[]: ?Tv;
 
   /** Returns the last key from this Map, or null if this Map is empty.
    * @return mixed
    */
   <<__Native>>
-  public readonly function lastKey()[]: mixed;
+  public readonly function lastKey()[]: ?Tk;
 
   /** @return string
    */
@@ -576,33 +601,33 @@ final class Map implements \MutableMap {
    * @param ?Traversable $iterable
    * @return Map
    */
-  public static function fromItems(?\HH\Traversable $iterable)[]: \HH\Map {
-    if ($iterable is null) return new \HH\Map();
+  public static function fromItems(?Traversable<Pair<Tk, Tv>> $iterable)[]: this {
+    if ($iterable is null) return new self();
 
     $res = dict[];
     foreach ($iterable as $pair) {
-      if ($pair is \HH\Pair) {
+      if ($pair is Pair<_, _>) {
         $res[$pair[0]] = $pair[1];
       } else {
-        throw new InvalidArgumentException("Parameter must be an instance of Iterable<Pair>");
+        throw new \InvalidArgumentException("Parameter must be an instance of Iterable<Pair>");
       }
     }
 
-    return new \HH\Map($res);
+    return new self($res);
   }
 
   /** Returns a Map built from the keys and values from the specified array.
    * @param mixed $mp
    * @return Map
    */
-  public static function fromArray(mixed $mp): \HH\Map {
+  public static function fromArray(mixed $mp): \HH\Map<arraykey, mixed> {
     return new \HH\Map($mp);
   }
 }
 
 /** An immutable ordered dictionary-style collection.
  */
-final class ImmMap implements \ConstMap {
+final class ImmMap<Tk as arraykey, Tv> implements \ConstMap<Tk, Tv> {
 
   /** Returns a ImmMap built from the keys and values produced by the specified
    * KeyedIterable.
@@ -627,25 +652,29 @@ final class ImmMap implements \ConstMap {
   /** Returns an Iterable that produces the key/value Pairs from this ImmMap.
    * @return object
    */
+  /* HH_FIXME[2049] Symbol not found, yet to be exposed to typed systemlib */
   public function items()[]: \LazyKVZipIterable {
+    /* HH_FIXME[2049] Symbol not found, yet to be exposed to typed systemlib */
     return new \LazyKVZipIterable($this);
   }
 
   /** Returns a ImmVector built from the keys of this ImmMap.
    * @return ImmVector
    */
-  public readonly function keys()[]: \HH\ImmVector {
+  public readonly function keys()[]: ImmVector<Tk> {
     $res = vec[];
     foreach (dict($this) as $k => $_) {
       $res[] = $k;
     }
-    return new \HH\ImmVector($res);
+    return new ImmVector($res);
   }
 
   /** Returns a lazy iterable view of this ImmMap.
    * @return object
    */
+  /* HH_FIXME[2049] Symbol not found, yet to be exposed to typed systemlib */
   public function lazy()[]: \LazyKeyedIterableView {
+    /* HH_FIXME[2049] Symbol not found, yet to be exposed to typed systemlib */
     return new \LazyKeyedIterableView($this);
   }
 
@@ -655,7 +684,7 @@ final class ImmMap implements \ConstMap {
    * @return mixed
    */
   <<__Native>>
-  public function at(mixed $key)[]: mixed;
+  public function at(Tk $key)[]: Tv;
 
   /** Returns the value at the specified key. If the key is not present, null is
    * returned.
@@ -663,7 +692,7 @@ final class ImmMap implements \ConstMap {
    * @return mixed
    */
   <<__Native>>
-  public function get(mixed $key)[]: mixed;
+  public function get(Tk $key)[]: ?Tv;
 
   /** Returns true if the specified key is present in the ImmMap, false
    * otherwise.
@@ -681,14 +710,14 @@ final class ImmMap implements \ConstMap {
   <<__Native>>
   public readonly function containsKey(mixed $key)[]: bool;
 
-  public function toVArray()[]: varray {
+  public function toVArray()[]: varray<Tv> {
     return $this->toValuesArray();
   }
 
   /** Returns a darray built from the keys and values from this ImmMap.
    * @return darray
    */
-  public function toDArray()[]: darray {
+  public function toDArray()[]: darray<Tk, Tv> {
     return dict($this);
   }
 
@@ -696,19 +725,19 @@ final class ImmMap implements \ConstMap {
    * @return object
    */
   <<__Native>>
-  public function toVector()[]: object;
+  public function toVector()[]: Vector<Tv>;
 
   /** Returns a ImmVector built from the values of this ImmMap.
    * @return object
    */
   <<__Native>>
-  public function toImmVector()[]: object;
+  public function toImmVector()[]: ImmVector<Tv>;
 
   /** Returns a Map built from the keys and values of this ImmMap.
    * @return object
    */
   <<__Native>>
-  public function toMap()[]: object;
+  public function toMap()[]: Map<Tk, Tv>;
 
   /** Returns an immutable version of this collection.
    * @return object
@@ -721,13 +750,13 @@ final class ImmMap implements \ConstMap {
    * @return object
    */
   <<__Native>>
-  public function toSet()[]: object;
+  public function toSet()[]: Set<Tv> where Tv as arraykey;
 
   /** Returns a ImmSet built from the values of this ImmMap.
    * @return object
    */
   <<__Native>>
-  public function toImmSet()[]: object;
+  public function toImmSet()[]: ImmSet<Tv> where Tv as arraykey;
 
   /** Returns an immutable version of this collection.
    * @return object
@@ -739,7 +768,7 @@ final class ImmMap implements \ConstMap {
   /** Returns a ImmVector built from the values of this ImmMap.
    * @return ImmVector
    */
-  public function values()[]: \HH\ImmVector {
+  public function values()[]: \HH\ImmVector<Tv> {
     $res = vec(dict($this));
     return new \HH\ImmVector($res);
   }
@@ -747,7 +776,7 @@ final class ImmMap implements \ConstMap {
   /** Returns a varray built from the keys from this ImmMap.
    * @return varray
    */
-  public function toKeysArray()[]: varray {
+  public function toKeysArray()[]: varray<Tk> {
     $keys = varray[];
     foreach (dict($this) as $k => $_) {
       $keys[] = $k;
@@ -758,38 +787,38 @@ final class ImmMap implements \ConstMap {
   /** Returns a varray built from the values from this ImmMap.
    * @return varray
    */
-  public function toValuesArray()[]: varray {
+  public function toValuesArray()[]: varray<Tv> {
     return vec(dict($this));
   }
 
   /** @param mixed $it
    * @return ImmMap
    */
-  public function differenceByKey(\HH\KeyedTraversable $it)[]: \HH\ImmMap {
+  public function differenceByKey(\HH\KeyedTraversable<Tk, Tv> $it)[]: this {
     $res = dict($this);
     foreach ($it as $k => $_) {
       unset($res[$k]);
     }
-    return new \HH\ImmMap($res);
+    return new self($res);
   }
 
   /** Returns an iterator that points to beginning of this ImmMap.
    * @return object
    */
   <<__Native>>
-  public function getIterator()[]: object;
+  public function getIterator()[]: \MapIterator<Tk, Tv>;
 
   /** Returns a ImmMap of the keys/values produced by applying the specified
    * callback on each value from this ImmMap.
    * @param mixed $callback
    * @return object
    */
-  public function map((function()[_]: void) $callback)[ctx $callback]: \HH\ImmMap {
-    $res = $this->toMap();
+  public function map<To>((function(Tv)[_]: To) $callback)[ctx $callback]: ImmMap<Tk, To> {
+    $res = dict[];
     foreach (dict($this) as $k => $v) {
       $res[$k] = $callback($v);
     }
-    return $res->toImmMap();
+    return new self($res);
   }
 
   /** Returns a ImmMap of the keys/values produced by applying the specified
@@ -797,12 +826,12 @@ final class ImmMap implements \ConstMap {
    * @param mixed $callback
    * @return object
    */
-  public function mapWithKey((function()[_]: void) $callback)[ctx $callback]: \HH\ImmMap {
-    $res = $this->toMap();
+  public function mapWithKey<To>((function(Tk, Tv)[_]: To) $callback)[ctx $callback]: ImmMap<Tk, To> {
+    $res = dict[];
     foreach (dict($this) as $k => $v) {
       $res[$k] = $callback($k, $v);
     }
-    return $res->toImmMap();
+    return new self($res);
   }
 
   /** Returns a ImmMap of all the keys/values from this ImmMap for which the
@@ -810,14 +839,16 @@ final class ImmMap implements \ConstMap {
    * @param mixed $callback
    * @return object
    */
-  public function filter((function()[_]: void) $callback)[ctx $callback]: \HH\ImmMap {
+  public function filter(
+    (function(Tv)[_]: bool) $callback,
+  )[ctx $callback]: this {
     $res = dict[];
     foreach (dict($this) as $k => $v) {
       if ($callback($v)) {
         $res[$k] = $v;
       }
     }
-    return new \HH\ImmMap($res);
+    return new self($res);
   }
 
   /** Returns a ImmMap of all the keys/values from this ImmMap for which the
@@ -825,14 +856,16 @@ final class ImmMap implements \ConstMap {
    * @param mixed $callback
    * @return object
    */
-  public function filterWithKey((function()[_]: void) $callback)[ctx $callback]: \HH\ImmMap {
+  public function filterWithKey(
+    (function(Tk, Tv)[_]: bool) $callback,
+  )[ctx $callback]: this {
     $res = dict[];
     foreach (dict($this) as $k => $v) {
       if ($callback($k, $v)) {
         $res[$k] = $v;
       }
     }
-    return new \HH\ImmMap($res);
+    return new self($res);
   }
 
   /** Returns a KeyedIterable produced by combined the specified Iterables
@@ -840,35 +873,43 @@ final class ImmMap implements \ConstMap {
    * @param Traversable $iterable
    * @return ImmMap
    */
-  public function zip(\HH\Traversable $iterable)[]: \HH\ImmMap {
+  public function zip<To>(
+    Traversable<To> $iterable,
+  )[]: ImmMap<Tk, Pair<Tv, To>> {
     $res = dict[];
     $it = $this->getIterator();
     foreach ($iterable as $v) {
       if (!$it->valid()) break;
       $res[$it->key()] = Pair { $it->current(), $v };
+      /* HH_FIXME[4390] This method call, Iterator::next, requires the
+       * `write_props` context, which which this method does not provide, so
+       * this line unconditionally throws an exception when coeffects are
+       * enforced.
+       */
       $it->next();
     }
-    return new \HH\ImmMap($res);
+    return new self($res);
   }
 
   /** Returns a ImmMap containing the first n key/value pairs of this ImmMap.
    * @param int $n
    * @return ImmMap
    */
-  public function take(int $n)[]: \HH\ImmMap {
+  public function take(int $n)[]: this {
     if ($n >= $this->count()) {
       return $this;
     } else if ($n <= 0) {
-      return new \HH\ImmMap();
+      return new self();
     }
 
     $res = dict[];
     foreach (dict($this) as $k => $v) {
       $res[$k] = $v;
-      if (--$n == 0) break;
+      $n--;
+      if ($n == 0) break;
     }
 
-    return new \HH\ImmMap($res);
+    return new self($res);
   }
 
   /** Returns a ImmMap containing the key/value pairs of this ImmMap up to but
@@ -877,7 +918,9 @@ final class ImmMap implements \ConstMap {
    * @param mixed $callback
    * @return object
    */
-  public function takeWhile((function()[_]: void) $callback)[ctx $callback]: \HH\ImmMap {
+  public function takeWhile(
+    (function(Tv)[_]: bool) $callback,
+  )[ctx $callback]: this {
     $res = dict[];
     foreach (dict($this) as $k => $v) {
       if (!$callback($v)) {
@@ -885,7 +928,7 @@ final class ImmMap implements \ConstMap {
       }
       $res[$k] = $v;
     }
-    return new \HH\ImmMap($res);
+    return new self($res);
   }
 
   /** Returns a ImmMap containing all key/value pairs except the first n of this
@@ -893,18 +936,19 @@ final class ImmMap implements \ConstMap {
    * @param int $n
    * @return object
    */
-  public function skip(int $n)[]: \HH\ImmMap {
+  public function skip(int $n)[]: this {
     if ($n <= 0) {
       return $this;
     }
 
     $res = dict[];
     foreach (dict($this) as $k => $v) {
-      if ($n-- > 0) continue;
+      $n--;
+      if ($n >= 0) continue;
       $res[$k] = $v;
     }
 
-    return new \HH\ImmMap($res);
+    return new self($res);
   }
 
   /** Returns a ImmMap containing the key/value pairs of this ImmMap excluding
@@ -912,7 +956,7 @@ final class ImmMap implements \ConstMap {
    * @param mixed $fn
    * @return object
    */
-  public function skipWhile((function()[_]: void) $fn)[ctx $fn]: \HH\ImmMap {
+  public function skipWhile((function(Tv)[_]: bool) $fn)[ctx $fn]: this {
     $res = dict[];
     $skipping = true;
     foreach (dict($this) as $k => $v) {
@@ -924,7 +968,7 @@ final class ImmMap implements \ConstMap {
       }
       $res[$k] = $v;
     }
-    return new \HH\ImmMap($res);
+    return new self($res);
   }
 
   /** Returns a ImmMap containing the specified range of key/value pairs from
@@ -934,12 +978,12 @@ final class ImmMap implements \ConstMap {
    * @param int $len
    * @return ImmMap
    */
-  public function slice(int $start, int $len)[]: \HH\ImmMap {
+  public function slice(int $start, int $len)[]: this {
     if ($start < 0) {
-      throw new InvalidArgumentException("Parameter start must be a non-negative integer");
+      throw new \InvalidArgumentException("Parameter start must be a non-negative integer");
     }
     if ($len < 0) {
-      throw new InvalidArgumentException("Parameter len must be a non-negative integer");
+      throw new \InvalidArgumentException("Parameter len must be a non-negative integer");
     }
 
     $i = 0;
@@ -957,7 +1001,7 @@ final class ImmMap implements \ConstMap {
       $i++;
     }
 
-    return new \HH\ImmMap($res);
+    return new self($res);
   }
 
   /** Builds a new ImmVector by concatenating the values of this ImmMap with the
@@ -966,39 +1010,39 @@ final class ImmMap implements \ConstMap {
    * @param Traversable $iterable
    * @return ImmVector
    */
-  public function concat(\HH\Traversable $iterable)[]: \HH\ImmVector {
+  public function concat<To super Tv>(Traversable<To> $iterable)[]: ImmVector<To> {
     $res = vec(dict($this));
 
     foreach ($iterable as $v) {
       $res[] = $v;
     }
 
-    return new \HH\ImmVector($res);
+    return new ImmVector($res);
   }
 
   /** Returns the first value from this ImmMap, or null if this ImmMap is empty.
    * @return mixed
    */
   <<__Native>>
-  public function firstValue()[]: mixed;
+  public function firstValue()[]: ?Tv;
 
   /** Returns the first key from this ImmMap, or null if this ImmMap is empty.
    * @return mixed
    */
   <<__Native>>
-  public readonly function firstKey()[]: mixed;
+  public readonly function firstKey()[]: ?Tk;
 
   /** Returns the last value from this ImmMap, or null if this ImmMap is empty.
    * @return mixed
    */
   <<__Native>>
-  public function lastValue()[]: mixed;
+  public function lastValue()[]: ?Tv;
 
   /** Returns the last key from this ImmMap, or null if this ImmMap is empty.
    * @return mixed
    */
   <<__Native>>
-  public readonly function lastKey()[]: mixed;
+  public readonly function lastKey()[]: ?Tk;
 
   /** @return string
    */
@@ -1009,19 +1053,19 @@ final class ImmMap implements \ConstMap {
    * @param ?Traversable $iterable
    * @return ImmMap
    */
-  public static function fromItems(?\HH\Traversable $iterable)[]: \HH\ImmMap {
-    if ($iterable is null) return new \HH\ImmMap();
+  public static function fromItems(?Traversable<Pair<Tk, Tv>> $iterable)[]: this {
+    if ($iterable is null) return new self();
 
     $res = dict[];
     foreach ($iterable as $pair) {
-      if ($pair is \HH\Pair) {
+      if ($pair is Pair<_, _>) {
         $res[$pair[0]] = $pair[1];
       } else {
-        throw new InvalidArgumentException("Parameter must be an instance of Iterable<Pair>");
+        throw new \InvalidArgumentException("Parameter must be an instance of Iterable<Pair>");
       }
     }
 
-    return new \HH\ImmMap($res);
+    return new self($res);
   }
 }
 

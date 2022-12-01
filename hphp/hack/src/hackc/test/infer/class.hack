@@ -34,9 +34,9 @@ class C {
   public function __construct(int $a, int $b, int $c) {
   }
 
-  // CHECK: define C.cons_static(this: *C) : *HackMixed {
+  // CHECK: define C.cons_static($this: *C) : *HackMixed {
   // ...
-  // CHECK:   n2: *C = load &this
+  // CHECK:   n2: *C = load &$this
   // CHECK:   n3 = $builtins.hack_get_static_class(n2)
   // CHECK:   n4 = n3.HackMixed.__factory()
   // CHECK:   store &$2 <- n4: *HackMixed
@@ -50,7 +50,7 @@ class C {
     $a = new static(1, 2, 3);
   }
 
-  // CHECK: define C.cons_self(this: *C) : *HackMixed {
+  // CHECK: define C.cons_self($this: *C) : *HackMixed {
   // ...
   // CHECK:   n2: *C$static = load &C$static::static_singleton
   // CHECK:   n3 = $builtins.lazy_initialize(n2)
@@ -66,7 +66,7 @@ class C {
     $a = new self(1, 2, 3);
   }
 
-  // CHECK: define C.cons_inst(this: *C) : *HackMixed {
+  // CHECK: define C.cons_inst($this: *C) : *HackMixed {
   // ...
   // CHECK:   n0: *C$static = load &C$static::static_singleton
   // CHECK:   n1 = $builtins.lazy_initialize(n0)
@@ -85,7 +85,7 @@ class C {
     $a = new C(1, 2, 3);
   }
 
-  // CHECK: define C$static.static_signature(this: *C$static, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
+  // CHECK: define C$static.static_signature($this: *C$static, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
   // Lots of stuff elided here...
   // CHECK: }
   public static function static_signature(mixed $a, mixed $b): void {
@@ -96,7 +96,7 @@ class C {
     }
   }
 
-  // CHECK: define C.test_const(this: *C) : *HackMixed {
+  // CHECK: define C.test_const($this: *C) : *HackMixed {
   // CHECK: local $x: *void, base: *HackMixed
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &C$static::MY_CONSTANT

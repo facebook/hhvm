@@ -86,20 +86,19 @@ pub(crate) fn write_func(
     ir::verify::verify_func(&func, &Default::default(), &unit_state.strings)?;
 
     let params = std::mem::take(&mut func.params);
-    let param_lids = params
-        .iter()
-        .map(|p| LocalId::Named(p.name))
-        .collect::<HashSet<_>>();
 
     // Prepend the 'this' parameter.
-    let this_name = AsciiString::from_str("this").unwrap();
+    let this_name = AsciiString::from_str("$this").unwrap();
+    let this_lid = LocalId::Named(unit_state.strings.intern_str("$this"));
     let mut param_names = vec![this_name];
     let mut param_tys = vec![this_ty];
+    let mut param_lids: HashSet<LocalId> = [this_lid].into_iter().collect();
     for p in params {
         let name_bytes = unit_state.strings.lookup_bytes(p.name);
         let name_string = util::escaped_string(&name_bytes);
         param_names.push(name_string);
         param_tys.push(convert_ty(&p.ty.enforced, &unit_state.strings));
+        param_lids.insert(LocalId::Named(p.name));
     }
 
     let params = param_names
@@ -417,7 +416,7 @@ fn write_load_this(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
         .class;
     let sid = state.fb.load(
         &class::non_static_ty(class.name, &state.strings),
-        textual::Expr::deref(textual::Var::named("this")),
+        textual::Expr::deref(textual::Var::named("$this")),
     )?;
     state.set_iid(iid, sid);
     Ok(())

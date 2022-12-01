@@ -2,7 +2,7 @@
 
 // Random instruction tests.
 
-// CHECK: define $root.binops(this: *void, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
+// CHECK: define $root.binops($this: *void, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
 function binops(int $a, int $b): void {
   // CHECK:  n{{[0-9]+}} = $builtins.hhbc_add(n{{[0-9]+}}, n{{[0-9]+}})
   $c = $a + $b;
@@ -34,7 +34,7 @@ function binops(int $a, int $b): void {
   $c = $a - $b;
 }
 
-// CHECK: define $root.unops(this: *void, $a: *HackMixed) : *HackMixed {
+// CHECK: define $root.unops($this: *void, $a: *HackMixed) : *HackMixed {
 function unops(int $a): void {
   // CHECK:  n{{[0-9]+}} = $builtins.hhbc_not(n{{[0-9]+}})
   $c = ! $a;

@@ -1,7 +1,7 @@
 // RUN: %hackc compile-infer %s | FileCheck %s
 // CHECK: .source_language = "hack"
 
-// CHECK: define $root.main(this: *void) : *HackMixed {
+// CHECK: define $root.main($this: *void) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("Hello, World!\n")
 // CHECK:   n1 = $builtins.hhbc_print(n0)
@@ -10,7 +10,7 @@ function main(): void {
   echo "Hello, World!\n";
 }
 
-// CHECK: define $root.escaped_string(this: *void) : *HackMixed {
+// CHECK: define $root.escaped_string($this: *void) : *HackMixed {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("This string has \042 a quote")
@@ -21,7 +21,7 @@ function escaped_string(): void {
   echo 'This string has " a quote';
 }
 
-// CHECK: define $root.cmp(this: *void, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
+// CHECK: define $root.cmp($this: *void, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("equal")
 // CHECK:   n1 = $builtins.hack_string("unequal")
@@ -47,7 +47,7 @@ function cmp(mixed $a, mixed $b): void {
   }
 }
 
-// CHECK: define $root.cmp2(this: *void, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
+// CHECK: define $root.cmp2($this: *void, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("equal")
 // CHECK:   n1 = $builtins.hack_string("unequal")
@@ -73,7 +73,7 @@ function cmp2(int $a, int $b): void {
   }
 }
 
-// CHECK: define $root.ret_str(this: *void) : *HackMixed {
+// CHECK: define $root.ret_str($this: *void) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("hello, world\n")
 // CHECK:   n1 = $builtins.hhbc_is_type_str(n0)
@@ -83,7 +83,7 @@ function ret_str(): string {
   return "hello, world\n";
 }
 
-// CHECK: define $root.bool_call(this: *void) : *HackMixed {
+// CHECK: define $root.bool_call($this: *void) : *HackMixed {
 // CHECK: #b0:
 // CHECK:   n0 = $root.f_bool(null, $builtins.hack_bool(false))
 // CHECK:   n1 = $root.f_bool(null, $builtins.hack_bool(true))
@@ -93,7 +93,7 @@ function bool_call(): void {
   f_bool(true);
 }
 
-// CHECK: define $root.test_const(this: *void) : *HackMixed {
+// CHECK: define $root.test_const($this: *void) : *HackMixed {
 // CHECK: local $a: *void, $b: *void, $c: *void
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_new_vec($builtins.hack_string("x"), $builtins.hack_float(2.0), $builtins.hack_int(3), $builtins.hack_bool(true))
@@ -110,7 +110,7 @@ function test_const(): void {
   $c = keyset["xyzzy", 2];
 }
 
-// CHECK: define $root.float_arg(this: *void) : *HackMixed {
+// CHECK: define $root.float_arg($this: *void) : *HackMixed {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $root.f_float(null, $builtins.hack_float(3.14))

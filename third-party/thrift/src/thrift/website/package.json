@@ -56,6 +56,7 @@
     "@braintree/sanitize-url": "^6.0.0",
     "d3-color": "^3.1.0",
     "got": "^11.8.5",
+    "loader-utils": "^2.0.3",
     "mermaid": "^9.1.2",
     "minimatch": "^3.0.5",
     "trim": "^0.0.3"

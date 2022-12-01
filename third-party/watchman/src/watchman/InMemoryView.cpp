@@ -351,7 +351,6 @@ const watchman_dir* ViewDatabase::resolveDir(const w_string& dir_name) const {
 }
 
 watchman_file* ViewDatabase::getOrCreateChildFile(
-    Watcher& watcher,
     watchman_dir* dir,
     const w_string& file_name,
     ClockStamp ctime) {
@@ -370,19 +369,10 @@ watchman_file* ViewDatabase::getOrCreateChildFile(
 
   file_ptr->ctime = ctime;
 
-  watcher.startWatchFile(file_ptr.get());
-
   return file_ptr.get();
 }
 
-void ViewDatabase::markFileChanged(
-    Watcher& watcher,
-    watchman_file* file,
-    ClockStamp otime) {
-  if (file->exists) {
-    watcher.startWatchFile(file);
-  }
-
+void ViewDatabase::markFileChanged(watchman_file* file, ClockStamp otime) {
   file->otime = otime;
 
   if (latestFile_ != file) {
@@ -395,7 +385,6 @@ void ViewDatabase::markFileChanged(
 }
 
 void ViewDatabase::markDirDeleted(
-    Watcher& watcher,
     watchman_dir* dir,
     ClockStamp otime,
     bool recursive) {
@@ -412,7 +401,7 @@ void ViewDatabase::markDirDeleted(
       auto full_name = dir->getFullPathToChild(file->getName());
       logf(DBG, "mark_deleted: {}\n", full_name);
       file->exists = false;
-      markFileChanged(watcher, file, otime);
+      markFileChanged(file, otime);
     }
   }
 
@@ -420,7 +409,7 @@ void ViewDatabase::markDirDeleted(
     for (auto& it : dir->dirs) {
       auto child = it.second.get();
 
-      markDirDeleted(watcher, child, otime, true);
+      markDirDeleted(child, otime, true);
     }
   }
 }

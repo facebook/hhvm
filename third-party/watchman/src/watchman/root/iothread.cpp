@@ -467,7 +467,7 @@ void InMemoryView::crawler(
           pending.now,
           "getFileInformation",
           err.code());
-      view.markDirDeleted(*watcher_, dir, getClock(pending.now), true);
+      view.markDirDeleted(dir, getClock(pending.now), true);
       return;
     }
   }
@@ -493,7 +493,7 @@ void InMemoryView::crawler(
     logf(DBG, "startWatchDir({}) threw {}\n", path, err.what());
     handle_open_errno(
         *root, dir->getFullPath(), pending.now, "opendir", err.code());
-    view.markDirDeleted(*watcher_, dir, getClock(pending.now), true);
+    view.markDirDeleted(dir, getClock(pending.now), true);
     return;
   }
 
@@ -886,7 +886,7 @@ void InMemoryView::statPath(
       errcode == error_code::not_a_directory) {
     /* it's not there, update our state */
     if (dir_ent) {
-      view.markDirDeleted(*watcher_, dir_ent, getClock(pending.now), true);
+      view.markDirDeleted(dir_ent, getClock(pending.now), true);
       log(DBG,
           "getFileInformation(",
           path,
@@ -905,7 +905,7 @@ void InMemoryView::statPath(
             file->getName(),
             " deleted\n");
         file->exists = false;
-        view.markFileChanged(*watcher_, file, getClock(pending.now));
+        view.markFileChanged(file, getClock(pending.now));
       }
     } else {
       // It was created and removed before we could ever observe it
@@ -913,7 +913,7 @@ void InMemoryView::statPath(
       // representation of it now, so that subscription clients can
       // be notified of this event
       file = view.getOrCreateChildFile(
-          *watcher_, parentDir, file_name, getClock(pending.now));
+          parentDir, file_name, getClock(pending.now));
       log(DBG,
           "getFileInformation(",
           path,
@@ -922,7 +922,7 @@ void InMemoryView::statPath(
           " and file node was NULL. "
           "Generating a deleted node.\n");
       file->exists = false;
-      view.markFileChanged(*watcher_, file, getClock(pending.now));
+      view.markFileChanged(file, getClock(pending.now));
     }
 
     if (!viaPwalk &&
@@ -957,7 +957,7 @@ void InMemoryView::statPath(
   } else {
     if (!file) {
       file = view.getOrCreateChildFile(
-          *watcher_, parentDir, file_name, getClock(pending.now));
+          parentDir, file_name, getClock(pending.now));
     }
 
     if (!file->exists) {
@@ -980,7 +980,7 @@ void InMemoryView::statPath(
           st.size,
           path);
       file->exists = true;
-      view.markFileChanged(*watcher_, file, getClock(pending.now));
+      view.markFileChanged(file, getClock(pending.now));
 
       // If the inode number changed then we definitely need to recursively
       // examine any children because we cannot assume that the kernel will
@@ -992,6 +992,7 @@ void InMemoryView::statPath(
     }
 
     memcpy(&file->stat, &st, sizeof(file->stat));
+    watcher_->startWatchFile(file);
 
     if (st.isDir()) {
       if (dir_ent == NULL) {
@@ -1040,7 +1041,7 @@ void InMemoryView::statPath(
     } else if (dir_ent) {
       // We transitioned from dir to file (see fishy.php), so we should prune
       // our former tree here
-      view.markDirDeleted(*watcher_, dir_ent, getClock(pending.now), true);
+      view.markDirDeleted(dir_ent, getClock(pending.now), true);
     }
   }
 }

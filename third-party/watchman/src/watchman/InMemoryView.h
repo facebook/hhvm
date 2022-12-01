@@ -103,7 +103,6 @@ class ViewDatabase {
    * that entry and returns it.
    */
   watchman_file* getOrCreateChildFile(
-      Watcher& watcher,
       watchman_dir* dir,
       const w_string& file_name,
       ClockStamp ctime);
@@ -112,18 +111,14 @@ class ViewDatabase {
    * Updates the otime for the file and bubbles it to the front of recency
    * index.
    */
-  void markFileChanged(Watcher& watcher, watchman_file* file, ClockStamp otime);
+  void markFileChanged(watchman_file* file, ClockStamp otime);
 
   /**
    * Mark a directory as being removed from the view. Marks the contained set of
    * files as deleted. If recursive is true, is recursively invoked on child
    * dirs.
    */
-  void markDirDeleted(
-      Watcher& watcher,
-      watchman_dir* dir,
-      ClockStamp otime,
-      bool recursive);
+  void markDirDeleted(watchman_dir* dir, ClockStamp otime, bool recursive);
 
  private:
   void insertAtHeadOfFileList(struct watchman_file* file);

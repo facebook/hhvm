@@ -488,10 +488,19 @@ let visitor =
           | _ -> self#zero
         else
           match expr_ with
-          | Aast.Id id -> process_fun_id id
-          | Aast.Obj_get (((ty, _, _) as obj), (_, _, Aast.Id mid), _, _) ->
+          | Aast.Id id ->
+            (* E.g. foo() *)
+            process_fun_id id
+          | Aast.Obj_get
+              (((ty, _, _) as obj), (_, _, Aast.Id mid), _, Aast.Is_method) ->
+            (* E.g. $bar->foo() *)
             self#on_expr env obj + typed_method env ty mid
+          | Aast.Obj_get
+              (((ty, _, _) as obj), (_, _, Aast.Id mid), _, Aast.Is_prop) ->
+            (* E.g. ($bar->foo)() *)
+            self#on_expr env obj + typed_property env ty mid
           | Aast.Class_const (((ty, _, _) as cid), mid) ->
+            (* E.g. Bar::foo() *)
             self#on_class_id env cid + typed_method env ty mid
           | _ -> self#on_expr env e
       in

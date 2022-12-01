@@ -108,6 +108,9 @@ class CookieSync {
     w_string cookiePrefix_;
   };
 
+  std::unordered_set<w_string> cookiePrefixLocked(
+      const CookieDirectories& guard) const;
+
   FileSystem& fileSystem_;
 
   folly::Synchronized<CookieDirectories> cookieDirs_;

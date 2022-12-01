@@ -186,6 +186,10 @@ folly::SemiFuture<folly::Unit> KQueueAndFSEventsWatcher::flushPendingEvents() {
 std::unique_ptr<DirHandle> KQueueAndFSEventsWatcher::startWatchDir(
     const std::shared_ptr<Root>& root,
     const char* path) {
+  // Open the directory first to validate that the path is the canonical one.
+  // This will throw an exception if it's not.
+  auto ret = openDir(path);
+
   if (root->root_path == path) {
     logf(DBG, "Watching root directory with kqueue\n");
     // This is the root, let's watch it with kqueue.
@@ -215,11 +219,11 @@ std::unique_ptr<DirHandle> KQueueAndFSEventsWatcher::startWatchDir(
     }
   }
 
-  return openDir(path);
+  return ret;
 }
 
 bool KQueueAndFSEventsWatcher::startWatchFile(struct watchman_file* file) {
-  if (file->parent->parent == nullptr) {
+  if (file->parent->parent == nullptr && !file->stat.isDir()) {
     // File at the root, watch it with kqueue.
     return kqueueWatcher_->startWatchFile(file);
   }

@@ -36,11 +36,13 @@ CookieSync::~CookieSync() {
 }
 
 void CookieSync::addCookieDir(const w_string& dir) {
+  logf(DBG, "Adding cookie dir: {}\n", dir);
   auto guard = cookieDirs_.wlock();
   guard->dirs_.insert(dir);
 }
 
 void CookieSync::removeCookieDir(const w_string& dir) {
+  logf(DBG, "Removing cookie dir: {}\n", dir);
   {
     auto guard = cookieDirs_.wlock();
     guard->dirs_.erase(dir);
@@ -77,59 +79,68 @@ std::vector<w_string> CookieSync::getOutstandingCookieFileList() const {
 }
 
 folly::SemiFuture<CookieSync::SyncResult> CookieSync::sync() {
-  auto prefixes = cookiePrefix();
-  auto serial = serial_++;
-
-  auto cookie = std::make_shared<Cookie>(prefixes.size());
-
-  // Even though we only write to the cookie at the end of the function, we
-  // need to hold it while the files are written on disk to avoid a race where
-  // cookies are detected on disk by the watcher, and notifyCookie is called
-  // prior to all the pending cookies being added to cookies_. Holding the lock
-  // will make sure that notifyCookie will be serialized with this code.
-  auto cookiesLock = cookies_.wlock();
-
-  CookieMap pendingCookies;
-  std::optional<std::tuple<w_string, int>> lastError;
-
+  std::shared_ptr<Cookie> cookie;
   std::vector<w_string> cookieFileNames;
-  cookieFileNames.reserve(prefixes.size());
-  for (const auto& prefix : prefixes) {
-    auto path_str = w_string::build(prefix, serial);
-    cookieFileNames.push_back(path_str);
+  {
+    // We need to hold the cookieDirs lock while we lay cookies on disk to
+    // avoid a race where a cookie directory is removed after collecting all
+    // the cookie directories. In that case, this function would lay cookies on
+    // disk, but the cookie directory removal wouldn't be able to notify them,
+    // thus leaving them in a never notified state.
+    auto cookieDirsGuard = cookieDirs_.rlock();
+    auto prefixes = cookiePrefixLocked(*cookieDirsGuard);
+    auto serial = serial_++;
 
-    /* then touch the file */
-    try {
-      fileSystem_.touch(path_str.c_str());
-    } catch (const std::system_error& e) {
-      lastError = {path_str, e.code().value()};
-      cookie->numPending.fetch_sub(1, std::memory_order_acq_rel);
-      logf(
-          ERR,
-          "sync cookie {} couldn't be created: {}\n",
-          path_str,
-          folly::errnoStr(e.code().value()));
-      continue;
+    cookie = std::make_shared<Cookie>(prefixes.size());
+
+    // Even though we only write to the cookie at the end of the function, we
+    // need to hold it while the files are written on disk to avoid a race where
+    // cookies are detected on disk by the watcher, and notifyCookie is called
+    // prior to all the pending cookies being added to cookies_. Holding the
+    // lock will make sure that notifyCookie will be serialized with this code.
+    auto cookiesLock = cookies_.wlock();
+
+    CookieMap pendingCookies;
+    std::optional<std::tuple<w_string, int>> lastError;
+
+    cookieFileNames.reserve(prefixes.size());
+    for (const auto& prefix : prefixes) {
+      auto path_str = w_string::build(prefix, serial);
+      cookieFileNames.push_back(path_str);
+
+      /* then touch the file */
+      try {
+        fileSystem_.touch(path_str.c_str());
+      } catch (const std::system_error& e) {
+        lastError = {path_str, e.code().value()};
+        cookie->numPending.fetch_sub(1, std::memory_order_acq_rel);
+        logf(
+            ERR,
+            "sync cookie {} couldn't be created: {}\n",
+            path_str,
+            folly::errnoStr(e.code().value()));
+        continue;
+      }
+
+      /* insert the cookie into the temporary map */
+      pendingCookies[path_str] = cookie;
+      logf(DBG, "sync created cookie file {}\n", path_str);
     }
 
-    /* insert the cookie into the temporary map */
-    pendingCookies[path_str] = cookie;
-    logf(DBG, "sync created cookie file {}\n", path_str);
-  }
+    if (pendingCookies.size() == 0) {
+      w_assert(lastError.has_value(), "no cookies written, but no errors set");
+      auto errCode = std::get<int>(*lastError);
+      throw std::system_error(
+          errCode,
+          std::generic_category(),
+          fmt::format(
+              "sync: creat({}) failed: {}",
+              std::get<w_string>(*lastError),
+              folly::errnoStr(errCode)));
+    }
 
-  if (pendingCookies.size() == 0) {
-    w_assert(lastError.has_value(), "no cookies written, but no errors set");
-    auto errCode = std::get<int>(*lastError);
-    throw std::system_error(
-        errCode,
-        std::generic_category(),
-        fmt::format(
-            "sync: creat({}) failed: {}",
-            std::get<w_string>(*lastError),
-            folly::errnoStr(errCode)));
+    cookiesLock->insert(pendingCookies.begin(), pendingCookies.end());
   }
-
-  cookiesLock->insert(pendingCookies.begin(), pendingCookies.end());
 
   return cookie->promise.getSemiFuture().deferValue(
       [cookieFileNames = std::move(cookieFileNames)](folly::Unit) mutable {
@@ -246,13 +257,18 @@ bool CookieSync::isCookieDir(w_string_piece path) const {
   return false;
 }
 
-std::unordered_set<w_string> CookieSync::cookiePrefix() const {
+std::unordered_set<w_string> CookieSync::cookiePrefixLocked(
+    const CookieSync::CookieDirectories& guard) const {
   std::unordered_set<w_string> res;
-  auto guard = cookieDirs_.rlock();
-  for (const auto& dir : guard->dirs_) {
-    res.insert(w_string::build(dir, "/", guard->cookiePrefix_));
+  for (const auto& dir : guard.dirs_) {
+    res.insert(w_string::build(dir, "/", guard.cookiePrefix_));
   }
   return res;
+}
+
+std::unordered_set<w_string> CookieSync::cookiePrefix() const {
+  auto guard = cookieDirs_.rlock();
+  return cookiePrefixLocked(*guard);
 }
 
 std::unordered_set<w_string> CookieSync::cookieDirs() const {

@@ -38,10 +38,25 @@ impl UnsafeOcamlPtr {
         self.0.get()
     }
 
+    #[inline(always)]
+    pub const fn is_immediate(self) -> bool {
+        // SAFETY: `Value::is_immediate` only checks the low bit, so it's safe
+        // to interpret `self.0` as a value (we don't attempt to dereference it)
+        unsafe { self.as_value().is_immediate() }
+    }
+
+    #[inline(always)]
+    pub const fn is_block(self) -> bool {
+        // SAFETY: `Value::is_block` only checks the low bit, so it's safe
+        // to interpret `self.0` as a value (we don't attempt to dereference it)
+        unsafe { self.as_value().is_block() }
+    }
+
     /// Interpret this pointer as an OCaml value which is valid for lifetime 'a.
     /// The OCaml garbage collector must not run during this lifetime (even if
     /// the value is rooted).
-    pub unsafe fn as_value<'a>(self) -> Value<'a> {
+    #[inline(always)]
+    pub const unsafe fn as_value<'a>(self) -> Value<'a> {
         Value::from_bits(self.0.get())
     }
 }

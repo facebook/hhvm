@@ -734,28 +734,28 @@ impl HhServerProviderBackend {
     /// triggered after this method returns.
     pub unsafe fn get_ocaml_shallow_class(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
         if self.shallow_decl_changes_store.classes.has_local_changes() { None }
-        else { self.shallow_decl_changes_store.classes_shm.get_ocaml_value(name) }
+        else { self.shallow_decl_changes_store.classes_shm.get_ocaml_by_byte_string(name) }
     }
     pub unsafe fn get_ocaml_typedef(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
         if self.shallow_decl_changes_store.typedefs.has_local_changes() { None }
-        else { self.shallow_decl_changes_store.typedefs_shm.get_ocaml_value(name) }
+        else { self.shallow_decl_changes_store.typedefs_shm.get_ocaml_by_byte_string(name) }
     }
     pub unsafe fn get_ocaml_fun(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
         if self.shallow_decl_changes_store.funs.has_local_changes() { None }
-        else { self.shallow_decl_changes_store.funs_shm.get_ocaml_value(name) }
+        else { self.shallow_decl_changes_store.funs_shm.get_ocaml_by_byte_string(name) }
     }
     pub unsafe fn get_ocaml_const(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
         if self.shallow_decl_changes_store.consts.has_local_changes() { None }
-        else { self.shallow_decl_changes_store.consts_shm.get_ocaml_value(name) }
+        else { self.shallow_decl_changes_store.consts_shm.get_ocaml_by_byte_string(name) }
     }
     pub unsafe fn get_ocaml_module(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
         if self.shallow_decl_changes_store.modules.has_local_changes() { None }
-        else { self.shallow_decl_changes_store.modules_shm.get_ocaml_value(name) }
+        else { self.shallow_decl_changes_store.modules_shm.get_ocaml_by_byte_string(name) }
     }
 
     pub unsafe fn get_ocaml_folded_class(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
         if self.folded_classes_store.has_local_changes() { None }
-        else { self.folded_classes_shm.get_ocaml_value(name) }
+        else { self.folded_classes_shm.get_ocaml_by_byte_string(name) }
     }
 }
 

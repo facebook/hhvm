@@ -1007,20 +1007,34 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_naming_types_get_pos(
         backend: Backend,
-        name: pos::TypeName,
-    ) -> Option<(file_info::Pos, naming_types::KindOfType)> {
+        name: UnsafeOcamlPtr,
+    ) -> UnsafeOcamlPtr {
+        // SAFETY: We have to make sure not to use this value after calling into
+        // the OCaml runtime (e.g. after invoking `backend.get_ocaml_*`).
+        let name = unsafe { name.as_value().as_byte_string().unwrap() };
         if let Some(backend) = backend.as_hh_server_backend() {
-            backend.naming_table().get_type_pos(name).unwrap()
-        } else {
-            backend.naming_provider()
-                .get_type_path_and_kind(name).unwrap()
-                .map(|(path, kind)| {
-                    (
-                        file_info::Pos::File(kind.into(), RcOc::new(path.into())),
-                        kind,
-                    )
-                })
+            let ocaml_value = if let Some(opt) = unsafe { backend.naming_table().get_ocaml_type_pos(name) } {
+                // Subtle: `get_ocaml_*_pos` returns `Option<UnsafeOcamlPtr>` where
+                // the `UnsafeOcamlPtr` is a value of OCaml type `FileInfo.pos option`.
+                // We want to just convert `opt` to an OCaml value here, not
+                // `Some(opt)` (as we do for the decl getter FFIs).
+                to_ocaml(&opt)
+            } else {
+                let name = pos::TypeName::from(std::str::from_utf8(name).unwrap());
+                to_ocaml(&backend.naming_table().get_type_pos(name).unwrap())
+            };
+            return ocaml_value;
         }
+        let name = pos::TypeName::from(std::str::from_utf8(name).unwrap());
+        let res: Option<(file_info::Pos, naming_types::KindOfType)> = backend.naming_provider()
+            .get_type_path_and_kind(name).unwrap()
+            .map(|(path, kind)| {
+                (
+                    file_info::Pos::File(kind.into(), RcOc::new(path.into())),
+                    kind,
+                )
+            });
+        to_ocaml(&res)
     }
 
     fn hh_rust_provider_backend_naming_types_remove_batch(
@@ -1061,15 +1075,25 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_naming_funs_get_pos(
         backend: Backend,
-        name: pos::FunName,
-    ) -> Option<file_info::Pos> {
+        name: UnsafeOcamlPtr,
+    ) -> UnsafeOcamlPtr {
+        // SAFETY: We have to make sure not to use this value after calling into
+        // the OCaml runtime (e.g. after invoking `backend.get_ocaml_*`).
+        let name = unsafe { name.as_value().as_byte_string().unwrap() };
         if let Some(backend) = backend.as_hh_server_backend() {
-            backend.naming_table().get_fun_pos(name).unwrap()
-        } else {
-            backend.naming_provider()
-                .get_fun_path(name).unwrap()
-                .map(|path| file_info::Pos::File(file_info::NameType::Fun, RcOc::new(path.into())))
+            let ocaml_value = if let Some(opt) = unsafe { backend.naming_table().get_ocaml_fun_pos(name) } {
+                to_ocaml(&opt)
+            } else {
+                let name = pos::FunName::from(std::str::from_utf8(name).unwrap());
+                to_ocaml(&backend.naming_table().get_fun_pos(name).unwrap())
+            };
+            return ocaml_value;
         }
+        let name = pos::FunName::from(std::str::from_utf8(name).unwrap());
+        let res: Option<file_info::Pos> = backend.naming_provider()
+            .get_fun_path(name).unwrap()
+            .map(|path| file_info::Pos::File(file_info::NameType::Fun, RcOc::new(path.into())));
+        to_ocaml(&res)
     }
 
     fn hh_rust_provider_backend_naming_funs_remove_batch(
@@ -1110,15 +1134,25 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_naming_consts_get_pos(
         backend: Backend,
-        name: pos::ConstName,
-    ) -> Option<file_info::Pos> {
+        name: UnsafeOcamlPtr,
+    ) -> UnsafeOcamlPtr {
+        // SAFETY: We have to make sure not to use this value after calling into
+        // the OCaml runtime (e.g. after invoking `backend.get_ocaml_*`).
+        let name = unsafe { name.as_value().as_byte_string().unwrap() };
         if let Some(backend) = backend.as_hh_server_backend() {
-            backend.naming_table().get_const_pos(name).unwrap()
-        } else {
-            backend.naming_provider()
-                .get_const_path(name).unwrap()
-                .map(|path| file_info::Pos::File(file_info::NameType::Const, RcOc::new(path.into())))
+            let ocaml_value = if let Some(opt) = unsafe { backend.naming_table().get_ocaml_const_pos(name) } {
+                to_ocaml(&opt)
+            } else {
+                let name = pos::ConstName::from(std::str::from_utf8(name).unwrap());
+                to_ocaml(&backend.naming_table().get_const_pos(name).unwrap())
+            };
+            return ocaml_value;
         }
+        let name = pos::ConstName::from(std::str::from_utf8(name).unwrap());
+        let res: Option<file_info::Pos> = backend.naming_provider()
+            .get_const_path(name).unwrap()
+            .map(|path| file_info::Pos::File(file_info::NameType::Const, RcOc::new(path.into())));
+        to_ocaml(&res)
     }
 
     fn hh_rust_provider_backend_naming_consts_remove_batch(
@@ -1146,15 +1180,25 @@ ocaml_ffi! {
 
     fn hh_rust_provider_backend_naming_modules_get_pos(
         backend: Backend,
-        name: pos::ModuleName,
-    ) -> Option<file_info::Pos> {
+        name: UnsafeOcamlPtr,
+    ) -> UnsafeOcamlPtr {
+        // SAFETY: We have to make sure not to use this value after calling into
+        // the OCaml runtime (e.g. after invoking `backend.get_ocaml_*`).
+        let name = unsafe { name.as_value().as_byte_string().unwrap() };
         if let Some(backend) = backend.as_hh_server_backend() {
-            backend.naming_table().get_module_pos(name).unwrap()
-        } else {
-            backend.naming_provider()
-                .get_module_path(name).unwrap()
-                .map(|path| file_info::Pos::File(file_info::NameType::Module, RcOc::new(path.into())))
+            let ocaml_value = if let Some(opt) = unsafe { backend.naming_table().get_ocaml_module_pos(name) } {
+                to_ocaml(&opt)
+            } else {
+                let name = pos::ModuleName::from(std::str::from_utf8(name).unwrap());
+                to_ocaml(&backend.naming_table().get_module_pos(name).unwrap())
+            };
+            return ocaml_value;
         }
+        let name = pos::ModuleName::from(std::str::from_utf8(name).unwrap());
+        let res: Option<file_info::Pos> = backend.naming_provider()
+            .get_module_path(name).unwrap()
+            .map(|path| file_info::Pos::File(file_info::NameType::Module, RcOc::new(path.into())));
+        to_ocaml(&res)
     }
 
     fn hh_rust_provider_backend_naming_modules_remove_batch(

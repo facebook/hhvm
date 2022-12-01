@@ -13,8 +13,8 @@ use datastore::ReadonlyStore;
 use hh24_types::ToplevelCanonSymbolHash;
 use hh24_types::ToplevelSymbolHash;
 use naming_provider::NamingProvider;
+use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::rc::RcOc;
-use oxidized::file_info;
 use oxidized::file_info::NameType;
 use oxidized::naming_types;
 use parking_lot::Mutex;
@@ -31,7 +31,9 @@ pub struct NamingTable {
     types: ReverseNamingTable<TypeName, (Pos, naming_types::KindOfType)>,
     funs: ReverseNamingTable<FunName, Pos>,
     consts: ChangesStore<ToplevelSymbolHash, Pos>,
+    consts_shm: Arc<OcamlShmStore<ToplevelSymbolHash, Option<Pos>>>,
     modules: ChangesStore<ToplevelSymbolHash, Pos>,
+    modules_shm: Arc<OcamlShmStore<ToplevelSymbolHash, Option<Pos>>>,
     db: Arc<MaybeNamingDb>,
 }
 
@@ -41,6 +43,16 @@ impl NamingTable {
         if let Some(db_path) = db_path {
             db.set_db_path(db_path)?;
         }
+        let consts_shm = Arc::new(OcamlShmStore::new(
+            "Naming_ConstPos",
+            shm_store::Evictability::NonEvictable,
+            shm_store::Compression::None,
+        ));
+        let modules_shm = Arc::new(OcamlShmStore::new(
+            "Naming_ModulePos",
+            shm_store::Evictability::NonEvictable,
+            shm_store::Compression::None,
+        ));
         Ok(Self {
             types: ReverseNamingTable::new(
                 Arc::new(TypeDb(Arc::clone(&db))),
@@ -53,21 +65,15 @@ impl NamingTable {
                 "Naming_FunCanon",
             ),
             consts: ChangesStore::new(Arc::new(DeltaStore::new(
-                Arc::new(OcamlShmStore::new(
-                    "Naming_ConstPos",
-                    shm_store::Evictability::NonEvictable,
-                    shm_store::Compression::None,
-                )),
+                Arc::clone(&consts_shm) as _,
                 Arc::new(ConstDb(Arc::clone(&db))),
             ))),
             modules: ChangesStore::new(Arc::new(DeltaStore::new(
-                Arc::new(OcamlShmStore::new(
-                    "Naming_ModulePos",
-                    shm_store::Evictability::NonEvictable,
-                    shm_store::Compression::None,
-                )),
+                Arc::clone(&modules_shm) as _,
                 Arc::new(ModuleDb(Arc::clone(&db))),
             ))),
+            consts_shm,
+            modules_shm,
             db,
         })
     }
@@ -187,6 +193,61 @@ impl NamingTable {
             .with_db(|db| db.get_path_by_symbol_hash(hash))?
             .as_ref()
             .map(Into::into))
+    }
+}
+
+impl NamingTable {
+    /// Returns `Option<UnsafeOcamlPtr>` where the `UnsafeOcamlPtr` is a value
+    /// of OCaml type `FileInfo.pos option`.
+    ///
+    /// SAFETY: This method (and all other `get_ocaml_` methods) call into the
+    /// OCaml runtime and may trigger a GC. Must be invoked from the main thread
+    /// with no concurrent interaction with the OCaml runtime. The returned
+    /// `UnsafeOcamlPtr` is unrooted and could be invalidated if the GC is
+    /// triggered after this method returns.
+    pub unsafe fn get_ocaml_type_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+        self.types
+            .get_ocaml_pos_by_hash(ToplevelSymbolHash::from_byte_string(
+                // NameType::Class and NameType::Typedef are handled the same here
+                file_info::NameType::Class,
+                name,
+            ))
+            // The heap has values of type Option<Pos>, and they've already been
+            // converted to an OCaml value here. Map `Some(ocaml_none)` to
+            // `None` so that the caller doesn't need to inspect the value.
+            .filter(|ptr| ptr.is_block())
+    }
+    pub unsafe fn get_ocaml_fun_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+        self.funs
+            .get_ocaml_pos_by_hash(ToplevelSymbolHash::from_byte_string(
+                file_info::NameType::Fun,
+                name,
+            ))
+            .filter(|ptr| ptr.is_block())
+    }
+    pub unsafe fn get_ocaml_const_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+        if self.consts.has_local_changes() {
+            None
+        } else {
+            self.consts_shm
+                .get_ocaml(ToplevelSymbolHash::from_byte_string(
+                    file_info::NameType::Const,
+                    name,
+                ))
+                .filter(|ptr| ptr.is_block())
+        }
+    }
+    pub unsafe fn get_ocaml_module_pos(&self, name: &[u8]) -> Option<UnsafeOcamlPtr> {
+        if self.modules.has_local_changes() {
+            None
+        } else {
+            self.modules_shm
+                .get_ocaml(ToplevelSymbolHash::from_byte_string(
+                    file_info::NameType::Module,
+                    name,
+                ))
+                .filter(|ptr| ptr.is_block())
+        }
     }
 }
 
@@ -405,6 +466,7 @@ mod reverse_naming_table {
     /// and funs).
     pub struct ReverseNamingTable<K, P> {
         positions: ChangesStore<ToplevelSymbolHash, P>,
+        positions_shm: Arc<OcamlShmStore<ToplevelSymbolHash, Option<P>>>,
         canon_names: ChangesStore<ToplevelCanonSymbolHash, K>,
     }
 
@@ -425,15 +487,17 @@ mod reverse_naming_table {
                 + ReadonlyStore<ToplevelCanonSymbolHash, K>
                 + 'static,
         {
+            let positions_shm = Arc::new(OcamlShmStore::new(
+                pos_prefix,
+                shm_store::Evictability::NonEvictable,
+                shm_store::Compression::None,
+            ));
             Self {
                 positions: ChangesStore::new(Arc::new(DeltaStore::new(
-                    Arc::new(OcamlShmStore::new(
-                        pos_prefix,
-                        shm_store::Evictability::NonEvictable,
-                        shm_store::Compression::None,
-                    )),
+                    Arc::clone(&positions_shm) as _,
                     Arc::clone(&fallback) as _,
                 ))),
+                positions_shm,
                 canon_names: ChangesStore::new(Arc::new(DeltaStore::new(
                     Arc::new(ShmStore::new(
                         canon_prefix,
@@ -471,6 +535,17 @@ mod reverse_naming_table {
         pub fn pop_local_changes(&self) {
             self.canon_names.pop_local_changes();
             self.positions.pop_local_changes();
+        }
+
+        pub unsafe fn get_ocaml_pos_by_hash(
+            &self,
+            hash: ToplevelSymbolHash,
+        ) -> Option<ocamlrep::ptr::UnsafeOcamlPtr> {
+            if self.positions.has_local_changes() {
+                None
+            } else {
+                self.positions_shm.get_ocaml(hash)
+            }
         }
 
         pub fn remove_batch<I: Iterator<Item = K> + Clone>(&self, keys: I) -> Result<()> {

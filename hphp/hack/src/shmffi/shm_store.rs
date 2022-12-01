@@ -379,21 +379,42 @@ where
         }
     }
 
+    /// Fetch the value corresponding to the given key and deserialize it
+    /// directly onto the OCaml heap.
+    ///
     /// # Safety
     ///
     /// Must be invoked on the main thread. Calls into the OCaml runtime and may
     /// trigger a GC, so no unrooted OCaml values may exist. The returned
     /// `UnsafeOcamlPtr` is unrooted and could be invalidated if the GC is
     /// triggered after this method returns.
-    pub unsafe fn get_ocaml_value(&self, key: &[u8]) -> Option<UnsafeOcamlPtr>
+    pub unsafe fn get_ocaml(&self, key: K) -> Option<UnsafeOcamlPtr> {
+        self.get_ocaml_by_hash(self.hash_key(&key))
+    }
+
+    /// Fetch the value corresponding to the given key (when the key type `K`
+    /// can be represented with a byte string, and implements `Borrow<[u8]>`)
+    /// and deserialize it directly onto the OCaml heap.
+    ///
+    /// # Safety
+    ///
+    /// Must be invoked on the main thread. Calls into the OCaml runtime and may
+    /// trigger a GC, so no unrooted OCaml values may exist. The returned
+    /// `UnsafeOcamlPtr` is unrooted and could be invalidated if the GC is
+    /// triggered after this method returns.
+    pub unsafe fn get_ocaml_by_byte_string(&self, key: &[u8]) -> Option<UnsafeOcamlPtr>
     where
         K: Borrow<[u8]>,
     {
+        self.get_ocaml_by_hash(self.hash_key(key))
+    }
+
+    unsafe fn get_ocaml_by_hash(&self, hash: u64) -> Option<UnsafeOcamlPtr> {
         extern "C" {
             fn caml_input_value_from_block(data: *const u8, size: usize) -> UnsafeOcamlPtr;
         }
         let bytes_opt = shmffi::with(|segment| {
-            segment.table.get(&self.hash_key(key)).map(|heap_value| {
+            segment.table.get(&hash).map(|heap_value| {
                 self.decompress(heap_value.as_slice(), heap_value.header.uncompressed_size())
                     .unwrap()
                     .into_owned()

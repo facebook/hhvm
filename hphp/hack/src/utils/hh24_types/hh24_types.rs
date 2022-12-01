@@ -307,7 +307,11 @@ u64_hash_wrapper_impls! { ToplevelSymbolHash }
 
 impl ToplevelSymbolHash {
     pub fn new(kind: file_info::NameType, symbol: &str) -> Self {
-        Self(typing_deps_hash::hash1(kind.into(), symbol.as_bytes()))
+        Self::from_byte_string(kind, symbol.as_bytes())
+    }
+
+    pub fn from_byte_string(kind: file_info::NameType, symbol: &[u8]) -> Self {
+        Self(typing_deps_hash::hash1(kind.into(), symbol))
     }
 
     pub fn from_type(symbol: &str) -> Self {

@@ -29,13 +29,8 @@ except ImportError:
     "win or root or bad ldap",
 )
 class TestSockPerms(unittest.TestCase):
-    def _new_instance(self, config, expect_success: bool = True):
-        if expect_success:
-            start_timeout = 20
-        else:
-            # If the instance is going to fail anyway then there's no point
-            # waiting so long
-            start_timeout = 5
+    def _new_instance(self, config):
+        start_timeout = 20
         return WatchmanInstance.InstanceWithStateDir(
             config=config, start_timeout=start_timeout
         )
@@ -84,7 +79,7 @@ class TestSockPerms(unittest.TestCase):
         self.fail(message)
 
     def test_too_open_user_dir(self) -> None:
-        instance = self._new_instance({}, expect_success=False)
+        instance = self._new_instance({})
         os.makedirs(instance.user_dir)
         os.chmod(instance.user_dir, 0o777)
         with self.assertRaises(pywatchman.SocketConnectError) as ctx:
@@ -110,7 +105,7 @@ class TestSockPerms(unittest.TestCase):
             except KeyError:
                 break
 
-        instance = self._new_instance({"sock_group": group_name}, expect_success=False)
+        instance = self._new_instance({"sock_group": group_name})
         with self.assertRaises(pywatchman.SocketConnectError) as ctx:
             instance.start()
         self.assertEqual(ctx.exception.sockpath, instance.getSockPath().unix_domain)
@@ -131,9 +126,7 @@ class TestSockPerms(unittest.TestCase):
 
     def test_user_not_in_sock_group(self) -> None:
         group = self._get_non_member_group()
-        instance = self._new_instance(
-            {"sock_group": group.gr_name}, expect_success=False
-        )
+        instance = self._new_instance({"sock_group": group.gr_name})
         with self.assertRaises(pywatchman.SocketConnectError) as ctx:
             instance.start()
         self.assertEqual(ctx.exception.sockpath, instance.getSockPath().unix_domain)
@@ -194,7 +187,7 @@ class TestSockPerms(unittest.TestCase):
         self.assertWaitFor(lambda: wanted in instance.getServerLogContents())
 
     def test_invalid_sock_access(self) -> None:
-        instance = self._new_instance({"sock_access": "bogus"}, expect_success=False)
+        instance = self._new_instance({"sock_access": "bogus"})
         with self.assertRaises(pywatchman.SocketConnectError) as ctx:
             instance.start()
         self.assertEqual(ctx.exception.sockpath, instance.getSockPath().unix_domain)
@@ -204,9 +197,7 @@ class TestSockPerms(unittest.TestCase):
             get_debug_output=lambda: instance.getCLILogContents(),
         )
 
-        instance = self._new_instance(
-            {"sock_access": {"group": "oui"}}, expect_success=False
-        )
+        instance = self._new_instance({"sock_access": {"group": "oui"}})
         with self.assertRaises(pywatchman.SocketConnectError) as ctx:
             instance.start()
         self.assertEqual(ctx.exception.sockpath, instance.getSockPath().unix_domain)

@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
 
 public class CompressionUtil {
-
   private static final Logger LOGGER = LoggerFactory.getLogger(CompressionUtil.class);
   private static final int BYTE_BUFFER_ZLIB_BUFFER_SIZE = 1 << 20;
   private static final int ZLIB_BUFFER_SIZE;
@@ -103,15 +102,13 @@ public class CompressionUtil {
   }
 
   static void inflate(ByteBufAllocator alloc, Inflater inflater, CompositeByteBuf out) {
-    ByteBuf byteBuf = null;
     try {
-      byteBuf = alloc.directBuffer(ZLIB_BUFFER_SIZE, ZLIB_BUFFER_SIZE);
+      ByteBuf byteBuf = alloc.directBuffer(ZLIB_BUFFER_SIZE, ZLIB_BUFFER_SIZE);
       ByteBuffer byteBuffer = byteBuf.internalNioBuffer(0, ZLIB_BUFFER_SIZE);
       int r = (int) INFLATE_METHOD_HANDLE.invokeExact(inflater, byteBuffer);
       byteBuf.writerIndex(r);
       out.addComponent(true, byteBuf);
     } catch (Throwable e) {
-      ReferenceCountUtil.safeRelease(byteBuf);
       throw Exceptions.propagate(e);
     }
   }
@@ -124,9 +121,10 @@ public class CompressionUtil {
       while (!inflater.finished()) {
         inflate(alloc, inflater, out);
       }
-
     } catch (Throwable e) {
-      ReferenceCountUtil.safeRelease(out);
+      if (out != null && out.refCnt() > 0) {
+        out.release();
+      }
       throw Exceptions.propagate(e);
     }
 
@@ -157,7 +155,10 @@ public class CompressionUtil {
 
       return out;
     } catch (Throwable e) {
-      ReferenceCountUtil.safeRelease(out);
+      if (out != null) {
+        ReferenceCountUtil.safeRelease(out);
+      }
+
       throw Exceptions.propagate(e);
     } finally {
       if (buf != null && buf.refCnt() > 0) {

@@ -519,9 +519,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
     kVerifyVerboseSystem || getenv("HHVM_VERIFY_VERBOSE");
 
   const bool isSystemLib = FileUtil::isSystemName(m_filepath->slice());
-  // For incremental testing Hackc Translator, its helpful to not need to pass verifier
-  const bool doVerify = (kVerify && !RO::EvalTranslateHackC) ||
-    boost::ends_with(m_filepath->data(), ".hhas");
+  const bool doVerify = kVerify || boost::ends_with(m_filepath->data(), ".hhas");
   if (doVerify) {
     // The verifier needs the bytecode available, but we don't want to
     // necessarily force it to load (otherwise it would defeat the

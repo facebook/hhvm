@@ -1613,7 +1613,8 @@ void ThriftServer::watchTicketPathForChanges(const std::string& ticketPath) {
 
 PreprocessResult ThriftServer::preprocess(
     const PreprocessParams& params) const {
-  if (preprocess_) {
+  const auto& method = params.method;
+  if (preprocess_ && !getMethodsBypassMaxRequestsLimit().contains(method)) {
     return preprocess_(params);
   }
   return {};
@@ -1623,7 +1624,11 @@ folly::Optional<server::ServerConfigs::ErrorCodeAndMessage>
 ThriftServer::checkOverload(
     const transport::THeader::StringToStringMap* readHeaders,
     const std::string* method) {
-  if (UNLIKELY(isOverloaded_ && isOverloaded_(readHeaders, method))) {
+  if (UNLIKELY(
+          isOverloaded_ &&
+          (method == nullptr ||
+           !getMethodsBypassMaxRequestsLimit().contains(*method)) &&
+          isOverloaded_(readHeaders, method))) {
     return {std::make_pair(
         kAppOverloadedErrorCode,
         "load shedding due to custom isOverloaded() callback")};

@@ -1,0 +1,19 @@
+{
+  "errors":[
+    {
+      "descr":"Method `foo` is also defined on `MyParent`, but this method is missing `<<__Override>>`.",
+      "severity":"error",
+      "path":"test_missing_override_existing_attribute.php",
+      "line":10,
+      "start":19,
+      "end":21,
+      "code":5616,
+      "bypass_changed_lines":false,
+      "original":"",
+      "replacement":"__Override, ",
+      "start_offset":112,
+      "width":0
+    }
+  ],
+  "version":" Wed Dec 31 16:00:00 1969"
+}

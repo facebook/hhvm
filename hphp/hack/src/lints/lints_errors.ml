@@ -234,14 +234,27 @@ let invalid_switch_case_value_type
        (Markdown_lite.md_codify @@ Lazy.force case_value_ty)
        (Markdown_lite.md_codify @@ Lazy.force scrutinee_ty)
 
-let missing_override_attribute p ~class_name ~method_name =
+let missing_override_attribute
+    ~meth_pos ~first_attr_pos ~name_pos ~class_name ~method_name =
   let msg =
     Printf.sprintf
       "Method %s is also defined on %s, but this method is missing `<<__Override>>`."
       (Markdown_lite.md_codify method_name)
       (Utils.strip_ns class_name |> Markdown_lite.md_codify)
   in
-  Lints.add Codes.missing_override_attribute Lint_error p @@ msg
+  let autofix =
+    match first_attr_pos with
+    | Some first_attr_pos ->
+      (* The method already has <<Foo, Bar>> attributes, add __Override. *)
+      let fix_pos = Pos.shrink_to_start first_attr_pos in
+      Some ("__Override, ", fix_pos)
+    | None ->
+      (* The method has no attributes. *)
+      let fix_pos = Pos.shrink_to_start meth_pos in
+      Some ("<<__Override>>\n  ", fix_pos)
+  in
+
+  Lints.add ~autofix Codes.missing_override_attribute Lint_error name_pos @@ msg
 
 let sketchy_null_check pos name kind =
   let name = Option.value name ~default:"$x" in

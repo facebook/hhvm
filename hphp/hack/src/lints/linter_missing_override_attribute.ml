@@ -98,8 +98,16 @@ let check_methods ctx c cls ~static =
          match matching_ancestor with
          | Some ancestor ->
            (* ...then this method should have had the override attribute. *)
+           let first_attr_pos =
+             Option.map
+               ~f:(fun ua -> fst ua.ua_name)
+               (List.hd m.m_user_attributes)
+           in
+
            Lints_errors.missing_override_attribute
-             p
+             ~meth_pos:m.m_span
+             ~name_pos:p
+             ~first_attr_pos
              ~class_name:(Cls.name ancestor)
              ~method_name:mid
          | None -> ())

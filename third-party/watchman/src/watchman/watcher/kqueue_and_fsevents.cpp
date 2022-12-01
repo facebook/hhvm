@@ -207,7 +207,7 @@ std::unique_ptr<DirHandle> KQueueAndFSEventsWatcher::startWatchDir(
         auto [it, _] = wlock->emplace(
             fullPath,
             std::make_shared<FSEventsWatcher>(
-                false, root->config, std::optional(fullPath)));
+                root->root_path, root->config, std::optional(fullPath)));
         const auto& watcher = it->second;
         if (!watcher->start(root)) {
           throw std::runtime_error("couldn't start fsEvent");

@@ -23,12 +23,6 @@
 namespace apache::thrift::conformance {
 namespace {
 
-TEST(ThriftTypeInfoTest, Constants) {
-  EXPECT_EQ(kMinTypeHashBytes, type::type_constants::minTypeHashBytes());
-  EXPECT_EQ(
-      kDefaultTypeHashBytes, type::type_constants::defaultTypeHashBytes());
-}
-
 TEST(ThriftTypeInfoTest, ValidateThriftTypeInfo) {
   const auto bad = "foo.com:42/my/typeInfo";
   const auto good1 = "foo.com/my/typeInfo";

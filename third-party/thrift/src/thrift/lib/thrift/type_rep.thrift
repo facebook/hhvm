@@ -57,35 +57,3 @@ struct TypeStruct {
   /** The type params, if appropriate. */
   2: list<TypeStruct> params;
 } (thrift.uri = "facebook.com/thrift/type/Type")
-
-/**
- * A specific location in source.
- */
-@thrift.Experimental // TODO: Adapt!
-struct SourceLocation {
-  /** The external id of the source code. */
-  1: id.SourceId source;
-  /** The 0-based byte offset into the source. */
-  2: i32 offset;
-  /** The 1-based line number, if known. */
-  3: i32 line;
-  /** The 1-based column number, if known. */
-  4: i32 col;
-}
-
-/**
- * A Range of positions in a single source file.
- *
- * Condidered to be 'invalid' when `end.source` is *not* equal to either
- * `id.noId` or `begin.source`.
- * Considered to be 'normal' when `end.source` is `id.noId`.
- */
-// TODO(afuller) Add support for 'parameterized' types and replace with:
-// `typedef Range<SourceLocation> SourceRange`.
-@thrift.Experimental // TODO: Adapt!
-struct SourceRange {
-  /** The beginning of the source range. */
-  1: SourceLocation begin;
-  /** The end of the source range. */
-  2: SourceLocation end;
-}

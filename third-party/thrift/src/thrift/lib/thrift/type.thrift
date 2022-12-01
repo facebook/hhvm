@@ -23,7 +23,6 @@ include "thrift/lib/thrift/type_rep.thrift"
 cpp_include "<thrift/lib/cpp2/type/BaseType.h>"
 cpp_include "<thrift/lib/cpp2/type/Protocol.h>"
 cpp_include "<thrift/lib/cpp2/type/Type.h>"
-cpp_include "<thrift/lib/cpp2/type/UniversalHashAlgorithm.h>"
 
 /** Canonical representations for well-known Thrift types. */
 @thrift.v1alpha
@@ -83,27 +82,6 @@ enum BaseTypeEnum {
   Set = 15,
   Map = 16,
 }
-
-/** The hash algorithms that can be used with type names. */
-@cpp.Adapter{
-  name = "::apache::thrift::StaticCastAdapter<::apache::thrift::type::UniversalHashAlgorithm, ::apache::thrift::type::UniversalHashAlgorithmEnum>",
-}
-typedef UniversalHashAlgorithmEnum UniversalHashAlgorithm
-enum UniversalHashAlgorithmEnum {
-  Sha2_256 = 2, // = getFieldId(TypeUri::typeHashPrefixSha2_256).
-}
-
-/**
- * The minimum and default number of bytes that can be used to identify
- * a type.
- *
- * The expected number of types that can be hashed before a
- * collision is 2^(8*{numBytes}/2).
- * Which is ~4.3 billion types for the min, and ~18.45 quintillion
- * types for the default.
- */
-const byte minTypeHashBytes = 8;
-const byte defaultTypeHashBytes = 16;
 
 /**
  * A 'normal' Duration.

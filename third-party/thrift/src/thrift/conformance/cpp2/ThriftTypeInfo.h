@@ -23,16 +23,21 @@
 #include <thrift/conformance/if/gen-cpp2/type_types.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/type/UniversalName.h>
-#include <thrift/lib/thrift/gen-cpp2/type_constants.h>
 #include <thrift/lib/thrift/gen-cpp2/type_types.h>
 
 namespace apache::thrift::conformance {
 
 inline constexpr type::hash_size_t kTypeHashBytesNotSpecified = -1;
-inline constexpr type::hash_size_t kMinTypeHashBytes =
-    type::type_constants::minTypeHashBytes();
-inline constexpr type::hash_size_t kDefaultTypeHashBytes =
-    type::type_constants::defaultTypeHashBytes();
+
+// The minimum and default number of bytes that can be used to identify
+// a type.
+//
+// The expected number of types that can be hashed before a
+// collision is 2^(8*{numBytes}/2).
+// Which is ~4.3 billion types for the min, and ~18.45 quintillion
+// types for the default.
+inline constexpr type::hash_size_t kMinTypeHashBytes = 8;
+inline constexpr type::hash_size_t kDefaultTypeHashBytes = 16;
 
 // Creates an ThriftTypeInfo struct with the given names and configuration.
 //

@@ -42,11 +42,15 @@ import java.util.function.Function;
 import org.apache.thrift.RequestRpcMetadata;
 import org.apache.thrift.RpcKind;
 import org.apache.thrift.protocol.TProtocol;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class ThriftServerRSocket implements RSocket {
+  private static final Logger LOGGER = LoggerFactory.getLogger(ThriftServerRSocket.class);
+
   private final RpcServerHandler rpcServerHandler;
   private final ByteBufAllocator alloc;
 
@@ -64,6 +68,8 @@ public class ThriftServerRSocket implements RSocket {
 
       ServerRequestPayload requestPayload =
           deserializeRequest(payload, requestRpcMetadata, requestContext);
+
+      payload.release();
 
       assert requestPayload.getRequestRpcMetadata().getKind()
           == RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE;
@@ -86,6 +92,8 @@ public class ThriftServerRSocket implements RSocket {
 
       ServerRequestPayload requestPayload =
           deserializeRequest(payload, requestRpcMetadata, requestContext);
+
+      payload.release();
 
       assert requestPayload.getRequestRpcMetadata().getKind()
           == RpcKind.SINGLE_REQUEST_STREAMING_RESPONSE;
@@ -136,7 +144,7 @@ public class ThriftServerRSocket implements RSocket {
       Payload payload, RequestRpcMetadata requestRpcMetadata, RequestContext requestContext) {
     ByteBufTProtocol out =
         TProtocolType.fromProtocolId(requestRpcMetadata.getProtocol()).apply(payload.sliceData());
-    Function<List<Reader>, List<Object>> readerTransformer = createReaderFunction(out, payload);
+    Function<List<Reader>, List<Object>> readerTransformer = createReaderFunction(out);
     return ServerRequestPayload.create(readerTransformer, requestRpcMetadata, requestContext);
   }
 
@@ -209,6 +217,8 @@ public class ThriftServerRSocket implements RSocket {
       ServerRequestPayload requestPayload =
           deserializeRequest(payload, requestRpcMetadata, requestContext);
 
+      payload.release();
+
       assert requestPayload.getRequestRpcMetadata().getKind() == RpcKind.SINGLE_REQUEST_NO_RESPONSE;
 
       return rpcServerHandler.singleRequestNoResponse(requestPayload);
@@ -219,29 +229,22 @@ public class ThriftServerRSocket implements RSocket {
   }
 
   @SuppressWarnings("rawtypes")
-  private static Function<List<Reader>, List<Object>> createReaderFunction(
-      TProtocol out, Payload payload) {
+  private static Function<List<Reader>, List<Object>> createReaderFunction(TProtocol out) {
     return readers -> {
-      try {
-        out.readStructBegin();
-        List<Object> requestArguments = Collections.emptyList();
-        if (readers != null && !readers.isEmpty()) {
-          requestArguments = new ArrayList<>();
-          for (Reader r : readers) {
-            out.readFieldBegin();
-            requestArguments.add(r.read(out));
-            out.readFieldEnd();
-          }
-        }
-
-        out.readStructEnd();
-        out.readMessageEnd();
-        return requestArguments;
-      } finally {
-        if (payload.refCnt() > 0) {
-          payload.release();
+      out.readStructBegin();
+      List<Object> requestArguments = Collections.emptyList();
+      if (readers != null && !readers.isEmpty()) {
+        requestArguments = new ArrayList<>();
+        for (Reader r : readers) {
+          out.readFieldBegin();
+          requestArguments.add(r.read(out));
+          out.readFieldEnd();
         }
       }
+
+      out.readStructEnd();
+      out.readMessageEnd();
+      return requestArguments;
     };
   }
 }

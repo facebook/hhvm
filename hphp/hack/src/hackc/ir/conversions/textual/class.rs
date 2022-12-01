@@ -258,10 +258,10 @@ fn write_method(
         non_static_ty(class.name, &state.strings)
     };
 
-    let method_info = MethodInfo {
+    let method_info = Arc::new(MethodInfo {
         class,
         is_static: method.attrs.is_static(),
-    };
+    });
 
     func::write_func(
         txf,
@@ -269,7 +269,7 @@ fn write_method(
         &method.name.mangle(class.name, &state.strings),
         this_ty,
         method.func,
-        Some(&method_info),
+        Some(method_info),
     )
 }
 

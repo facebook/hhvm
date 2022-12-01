@@ -15,7 +15,7 @@ use crate::lower::types::ty_hack_mixed;
 
 pub(crate) fn lower_func<'a>(
     mut func: Func<'a>,
-    method_info: Option<&MethodInfo<'_>>,
+    method_info: Option<Arc<MethodInfo<'_>>>,
     strings: Arc<StringInterner>,
 ) -> Func<'a> {
     trace!(

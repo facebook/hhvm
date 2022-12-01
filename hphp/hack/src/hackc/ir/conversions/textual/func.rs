@@ -75,9 +75,13 @@ pub(crate) fn write_func(
     name: &str,
     this_ty: textual::Ty,
     func: ir::Func<'_>,
-    method_info: Option<&MethodInfo<'_>>,
+    method_info: Option<Arc<MethodInfo<'_>>>,
 ) -> Result {
-    let mut func = lower::lower_func(func, method_info, Arc::clone(&unit_state.strings));
+    let mut func = lower::lower_func(
+        func,
+        method_info.as_ref().map(Arc::clone),
+        Arc::clone(&unit_state.strings),
+    );
     ir::verify::verify_func(&func, &Default::default(), &unit_state.strings)?;
 
     let params = std::mem::take(&mut func.params);
@@ -133,10 +137,10 @@ pub(crate) fn write_func(
         let mut func = rewrite_jmp_ops(func);
         ir::passes::clean::run(&mut func);
 
-        let mut state = FuncState::new(&unit_state.strings, &func, method_info);
+        let mut state = FuncState::new(fb, Arc::clone(&unit_state.strings), &func, method_info);
 
         for bid in func.block_ids() {
-            write_block(fb, &mut state, bid)?;
+            write_block(&mut state, bid)?;
         }
 
         Ok(())
@@ -145,112 +149,108 @@ pub(crate) fn write_func(
     Ok(())
 }
 
-fn write_block(
-    fb: &mut textual::FuncBuilder<'_, '_>,
-    state: &mut FuncState<'_>,
-    bid: BlockId,
-) -> Result {
+fn write_block(state: &mut FuncState<'_, '_, '_>, bid: BlockId) -> Result {
     trace!("  Block {bid}");
     let block = state.func.block(bid);
 
     let params = block
         .params
         .iter()
-        .map(|iid| state.alloc_sid_for_iid(fb, *iid))
+        .map(|iid| state.alloc_sid_for_iid(*iid))
         .collect_vec();
     // The entry BID is always included for us.
     if bid != Func::ENTRY_BID {
-        fb.write_label(bid, &params)?;
+        state.fb.write_label(bid, &params)?;
     }
 
     // All the non-terminators.
     let n_iids = block.iids.len() - 1;
     for iid in &block.iids[..n_iids] {
-        write_instr(fb, state, *iid)?;
+        write_instr(state, *iid)?;
     }
 
     // The terminator.
-    write_terminator(fb, state, block.terminator_iid())?;
+    write_terminator(state, block.terminator_iid())?;
 
     // Exception handler.
     let handler = state.func.catch_target(bid);
     if handler != BlockId::NONE {
-        fb.write_exception_handler(handler)?;
+        state.fb.write_exception_handler(handler)?;
     }
 
     Ok(())
 }
 
-fn write_instr(
-    fb: &mut textual::FuncBuilder<'_, '_>,
-    state: &mut FuncState<'_>,
-    iid: InstrId,
-) -> Result {
+fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
     let instr = state.func.instr(iid);
     trace!("    Instr {iid}: {instr:?}");
 
-    state.update_loc(fb, instr.loc_id())?;
+    state.update_loc(instr.loc_id())?;
 
     // In general don't write directly to `w` here - isolate the formatting to
     // the `textual` crate.
 
     match *instr {
-        Instr::Call(ref call) => write_call(fb, state, iid, call)?,
+        Instr::Call(ref call) => write_call(state, iid, call)?,
         Instr::Hhbc(Hhbc::ClsCnsD(const_id, cid, _)) => {
-            let vid = write_get_class_const(fb, state, cid, const_id)?;
+            let vid = write_get_class_const(state, cid, const_id)?;
             state.set_iid(iid, vid);
         }
-        Instr::Hhbc(Hhbc::CGetL(lid, _)) => write_load_var(fb, state, iid, lid)?,
-        Instr::Hhbc(Hhbc::IncDecL(lid, op, _)) => write_inc_dec_l(fb, state, iid, lid, op)?,
+        Instr::Hhbc(Hhbc::CGetL(lid, _)) => write_load_var(state, iid, lid)?,
+        Instr::Hhbc(Hhbc::IncDecL(lid, op, _)) => write_inc_dec_l(state, iid, lid, op)?,
         Instr::Hhbc(Hhbc::ResolveClass(cid, _)) => {
-            let vid = class::load_static_class(fb, cid, state.strings)?;
+            let vid = state.load_static_class(cid)?;
             state.set_iid(iid, vid);
         }
         Instr::Hhbc(Hhbc::SetL(vid, lid, _)) => {
-            write_set_var(fb, state, lid, vid)?;
+            write_set_var(state, lid, vid)?;
             // SetL emits the input as the output.
             state.copy_iid(iid, vid);
         }
-        Instr::Hhbc(Hhbc::This(_)) => write_load_this(fb, state, iid)?,
+        Instr::Hhbc(Hhbc::This(_)) => write_load_this(state, iid)?,
         Instr::Hhbc(Hhbc::UnsetL(lid, _)) => {
-            fb.store(
+            state.fb.store(
                 textual::Expr::deref(lid),
                 textual::Expr::Const(textual::Const::Null),
                 tx_ty!(*HackMixed),
             )?;
         }
-        Instr::MemberOp(ref mop) => crate::member_op::write(fb, state, iid, mop)?,
+        Instr::MemberOp(ref mop) => crate::member_op::write(state, iid, mop)?,
         Instr::Special(Special::Textual(Textual::AssertFalse(vid, _))) => {
             // I think "prune_not" means "stop if this expression IS true"...
             let pred = hack::expr_builtin(hack::Builtin::IsTrue, [state.lookup_vid(vid)]);
-            fb.prune_not(pred)?;
+            state.fb.prune_not(pred)?;
         }
         Instr::Special(Special::Textual(Textual::AssertTrue(vid, _))) => {
             // I think "prune" means "stop if this expression IS NOT true"...
             let pred = hack::expr_builtin(hack::Builtin::IsTrue, [state.lookup_vid(vid)]);
-            fb.prune(pred)?;
+            state.fb.prune(pred)?;
         }
         Instr::Special(Special::Textual(Textual::HackBuiltin {
             ref target,
             ref values,
             loc: _,
-        })) => write_builtin(fb, state, iid, target, values)?,
+        })) => write_builtin(state, iid, target, values)?,
         Instr::Special(Special::Textual(Textual::String(s))) => {
-            let s = state.strings.lookup_bstr(s);
-            let s = util::escaped_string(&s);
-            let s = hack::expr_builtin(hack::Builtin::String, [s]);
-            state.set_iid(iid, fb.copy(s)?);
+            let expr = {
+                let s = state.strings.lookup_bstr(s);
+                let s = util::escaped_string(&s);
+                let s = hack::expr_builtin(hack::Builtin::String, [s]);
+                state.fb.copy(s)?
+            };
+            state.set_iid(iid, expr);
         }
 
         Instr::Special(Special::Copy(vid)) => {
-            write_copy(fb, state, iid, vid)?;
+            write_copy(state, iid, vid)?;
         }
         Instr::Special(Special::IrToBc(..)) => todo!(),
         Instr::Special(Special::Param) => todo!(),
         Instr::Special(Special::Select(vid, _idx)) => {
             textual_todo! {
-                let expr = state.lookup_vid(vid);
-                state.set_iid(iid, fb.copy(expr)?);
+                let vid = state.lookup_vid(vid);
+                let expr = state.fb.copy(vid)?;
+                state.set_iid(iid, expr);
             }
         }
         Instr::Special(Special::Tmp(..)) => todo!(),
@@ -264,14 +264,12 @@ fn write_instr(
             textual_todo! {
                 use ir::instr::HasOperands;
                 let name = format!("TODO_hhbc_{}", hhbc);
-                let output = fb.call(
-                    &name,
-                    instr
-                        .operands()
-                        .iter()
-                        .map(|vid| state.lookup_vid(*vid))
-                        .collect_vec(),
-                )?;
+                let operands = instr
+                    .operands()
+                    .iter()
+                    .map(|vid| state.lookup_vid(*vid))
+                    .collect_vec();
+                let output = state.fb.call(&name,operands)?;
                 state.set_iid(iid, output);
             }
         }
@@ -282,12 +280,7 @@ fn write_instr(
     Ok(())
 }
 
-fn write_copy(
-    fb: &mut textual::FuncBuilder<'_, '_>,
-    state: &mut FuncState<'_>,
-    iid: InstrId,
-    vid: ValueId,
-) -> Result {
+fn write_copy(state: &mut FuncState<'_, '_, '_>, iid: InstrId, vid: ValueId) -> Result {
     use hack::Builtin;
     use textual::Const;
     use textual::Expr;
@@ -297,7 +290,7 @@ fn write_copy(
         ir::FullInstrId::Constant(cid) => {
             let constant = state.func.constant(cid);
             let expr = match constant {
-                Constant::Array(tv) => typed_value_expr(tv, state.strings),
+                Constant::Array(tv) => typed_value_expr(tv, &state.strings),
                 Constant::Bool(false) => Expr::Const(Const::False),
                 Constant::Bool(true) => Expr::Const(Const::True),
                 Constant::Dir => todo!(),
@@ -316,7 +309,8 @@ fn write_copy(
                 Constant::Uninit => Expr::Const(Const::Null),
             };
 
-            state.set_iid(iid, fb.write_expr_stmt(expr)?);
+            let expr = state.fb.write_expr_stmt(expr)?;
+            state.set_iid(iid, expr);
         }
         ir::FullInstrId::Instr(instr) => state.copy_iid(iid, ValueId::from_instr(instr)),
         ir::FullInstrId::None => unreachable!(),
@@ -325,44 +319,37 @@ fn write_copy(
 }
 
 fn write_get_class_const(
-    fb: &mut textual::FuncBuilder<'_, '_>,
-    state: &mut FuncState<'_>,
+    state: &mut FuncState<'_, '_, '_>,
     class: ClassId,
     cid: ConstId,
 ) -> Result<Sid> {
     // TODO: should we load the class static to ensure that the constants are initialized?
-    // let this = class::load_static_class(w, class, &state.strings, &mut state.decls)?;
+    // let this = state.load_static_class(class)?;
 
-    let name = cid.mangle(class, state.strings);
+    let name = cid.mangle(class, &state.strings);
     let var = textual::Var::Named(name);
-    fb.load(tx_ty!(*HackMixed), textual::Expr::deref(var))
+    state.fb.load(tx_ty!(*HackMixed), textual::Expr::deref(var))
 }
 
-fn write_terminator(
-    fb: &mut textual::FuncBuilder<'_, '_>,
-    state: &mut FuncState<'_>,
-    iid: InstrId,
-) -> Result {
+fn write_terminator(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
     let terminator = match state.func.instr(iid) {
         Instr::Terminator(terminator) => terminator,
         _ => unreachable!(),
     };
     trace!("    Instr {iid}: {terminator:?}");
 
-    state.update_loc(fb, terminator.loc_id())?;
+    state.update_loc(terminator.loc_id())?;
 
     // In general don't write directly to `w` here - isolate the formatting to
     // the `textual` crate.
 
     match *terminator {
         Terminator::Enter(bid, _) | Terminator::Jmp(bid, _) => {
-            fb.jmp(&[bid], ())?;
+            state.fb.jmp(&[bid], ())?;
         }
         Terminator::JmpArgs(bid, ref params, _) => {
-            fb.jmp(
-                &[bid],
-                params.iter().map(|v| state.lookup_vid(*v)).collect_vec(),
-            )?;
+            let params = params.iter().map(|v| state.lookup_vid(*v)).collect_vec();
+            state.fb.jmp(&[bid], params)?;
         }
         Terminator::JmpOp {
             cond: _,
@@ -372,13 +359,14 @@ fn write_terminator(
         } => {
             // We just need to emit the jmp - the rewrite_jmp_ops() pass should
             // have already inserted assert in place on the target bids.
-            fb.jmp(&[true_bid, false_bid], ())?;
+            state.fb.jmp(&[true_bid, false_bid], ())?;
         }
         Terminator::Ret(vid, _) => {
-            fb.ret(state.lookup_vid(vid))?;
+            let sid = state.lookup_vid(vid);
+            state.fb.ret(sid)?;
         }
         Terminator::Unreachable => {
-            fb.unreachable()?;
+            state.fb.unreachable()?;
         }
 
         Terminator::CallAsync(..)
@@ -394,14 +382,15 @@ fn write_terminator(
         | Terminator::SSwitch { .. }
         | Terminator::Switch { .. }
         | Terminator::ThrowAsTypeStructException { .. } => {
-            write_todo(fb, &format!("{}", terminator))?;
-            fb.unreachable()?;
+            state.write_todo(&format!("{}", terminator))?;
+            state.fb.unreachable()?;
         }
 
         Terminator::Throw(vid, _) => {
             textual_todo! {
-                fb.call("TODO_throw", [state.lookup_vid(vid)])?;
-                fb.unreachable()?;
+                let expr = state.lookup_vid(vid);
+                state.fb.call("TODO_throw", [expr])?;
+                state.fb.unreachable()?;
             }
         }
     }
@@ -410,8 +399,7 @@ fn write_terminator(
 }
 
 fn write_builtin(
-    fb: &mut textual::FuncBuilder<'_, '_>,
-    state: &mut FuncState<'_>,
+    state: &mut FuncState<'_, '_, '_>,
     iid: InstrId,
     target: &str,
     values: &[ValueId],
@@ -420,55 +408,41 @@ fn write_builtin(
         .iter()
         .map(|vid| state.lookup_vid(*vid))
         .collect_vec();
-    let output = fb.call(target, params)?;
+    let output = state.fb.call(target, params)?;
     state.set_iid(iid, output);
     Ok(())
 }
 
-fn write_load_this(
-    fb: &mut textual::FuncBuilder<'_, '_>,
-    state: &mut FuncState<'_>,
-    iid: InstrId,
-) -> Result {
-    let class = state.method_info.unwrap().class;
-    let sid = fb.load(
-        class::non_static_ty(class.name, state.strings),
+fn write_load_this(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
+    let class = state
+        .method_info
+        .as_ref()
+        .expect("not in class context")
+        .class;
+    let sid = state.fb.load(
+        class::non_static_ty(class.name, &state.strings),
         textual::Expr::deref(textual::Var::named("this")),
     )?;
     state.set_iid(iid, sid);
     Ok(())
 }
 
-fn write_load_var(
-    fb: &mut textual::FuncBuilder<'_, '_>,
-    state: &mut FuncState<'_>,
-    iid: InstrId,
-    lid: LocalId,
-) -> Result {
-    let sid = fb.load(tx_ty!(*HackMixed), textual::Expr::deref(lid))?;
+fn write_load_var(state: &mut FuncState<'_, '_, '_>, iid: InstrId, lid: LocalId) -> Result {
+    let sid = state
+        .fb
+        .load(tx_ty!(*HackMixed), textual::Expr::deref(lid))?;
     state.set_iid(iid, sid);
     Ok(())
 }
 
-fn write_set_var(
-    fb: &mut textual::FuncBuilder<'_, '_>,
-    state: &mut FuncState<'_>,
-    lid: LocalId,
-    vid: ValueId,
-) -> Result {
-    fb.store(
-        textual::Expr::deref(lid),
-        state.lookup_vid(vid),
-        tx_ty!(*HackMixed),
-    )
+fn write_set_var(state: &mut FuncState<'_, '_, '_>, lid: LocalId, vid: ValueId) -> Result {
+    let value = state.lookup_vid(vid);
+    state
+        .fb
+        .store(textual::Expr::deref(lid), value, tx_ty!(*HackMixed))
 }
 
-fn write_call(
-    fb: &mut textual::FuncBuilder<'_, '_>,
-    state: &mut FuncState<'_>,
-    iid: InstrId,
-    call: &ir::Call,
-) -> Result {
+fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) -> Result {
     use ir::instr::CallDetail;
     use ir::FCallArgsFlags;
 
@@ -485,7 +459,7 @@ fn write_call(
 
     if !inouts.as_ref().map_or(true, |inouts| inouts.is_empty()) {
         textual_todo! {
-            fb.comment("TODO: inouts")?;
+            state.fb.comment("TODO: inouts")?;
         }
     }
 
@@ -493,15 +467,17 @@ fn write_call(
 
     if num_rets >= 2 {
         textual_todo! {
-            fb.comment("TODO: num_rets >= 2")?;
+            state.fb.comment("TODO: num_rets >= 2")?;
         }
     }
 
-    let context = state.strings.lookup_bytes_or_none(context);
-    if let Some(context) = context {
-        if !context.is_empty() {
-            textual_todo! {
-                fb.comment("TODO: write_call(Context: {context:?})")?;
+    {
+        let context = state.strings.lookup_bytes_or_none(context);
+        if let Some(context) = context {
+            if !context.is_empty() {
+                textual_todo! {
+                    state.fb.comment("TODO: write_call(Context: {context:?})")?;
+                }
             }
         }
     }
@@ -511,22 +487,22 @@ fn write_call(
 
     if flags & FCallArgsFlags::HasUnpack != 0 {
         textual_todo! {
-            fb.comment("TODO: FCallArgsFlags::HasUnpack")?;
+            state.fb.comment("TODO: FCallArgsFlags::HasUnpack")?;
         }
     }
     if flags & FCallArgsFlags::HasGenerics != 0 {
         textual_todo! {
-            fb.comment("TODO: FCallArgsFlags::HasGenerics")?;
+            state.fb.comment("TODO: FCallArgsFlags::HasGenerics")?;
         }
     }
     if flags & FCallArgsFlags::SkipRepack != 0 {
         textual_todo! {
-            fb.comment("TODO: FCallArgsFlags::SkipRepack")?;
+            state.fb.comment("TODO: FCallArgsFlags::SkipRepack")?;
         }
     }
     if flags & FCallArgsFlags::SkipCoeffectsCheck != 0 {
         textual_todo! {
-            fb.comment("TODO: FCallArgsFlags::SkipCoeffectsCheck")?;
+            state.fb.comment("TODO: FCallArgsFlags::SkipCoeffectsCheck")?;
         }
     }
     if flags & FCallArgsFlags::EnforceMutableReturn != 0 {
@@ -534,97 +510,100 @@ fn write_call(
     }
     if flags & FCallArgsFlags::EnforceReadonlyThis != 0 {
         textual_todo! {
-            fb.comment("TODO: FCallArgsFlags::EnforceReadonlyThis")?;
+            state.fb.comment("TODO: FCallArgsFlags::EnforceReadonlyThis")?;
         }
     }
     if flags & FCallArgsFlags::ExplicitContext != 0 {
         textual_todo! {
-            fb.comment("TODO: FCallArgsFlags::ExplicitContext")?;
+            state.fb.comment("TODO: FCallArgsFlags::ExplicitContext")?;
         }
     }
     if flags & FCallArgsFlags::HasInOut != 0 {
         textual_todo! {
-            fb.comment("TODO: FCallArgsFlags::HasInOut")?;
+            state.fb.comment("TODO: FCallArgsFlags::HasInOut")?;
         }
     }
     if flags & FCallArgsFlags::EnforceInOut != 0 {
         textual_todo! {
-            fb.comment("TODO: FCallArgsFlags::EnforceInOut")?;
+            state.fb.comment("TODO: FCallArgsFlags::EnforceInOut")?;
         }
     }
     if flags & FCallArgsFlags::EnforceReadonly != 0 {
         textual_todo! {
-            fb.comment("TODO: FCallArgsFlags::EnforceReadonly")?;
+            state.fb.comment("TODO: FCallArgsFlags::EnforceReadonly")?;
         }
     }
     if flags & FCallArgsFlags::NumArgsStart != 0 {
         textual_todo! {
-            fb.comment("TODO: FCallArgsFlags::NumArgsStart")?;
+            state.fb.comment("TODO: FCallArgsFlags::NumArgsStart")?;
         }
     }
 
     let args = detail.args(operands);
 
     let mut output = match *detail {
-        CallDetail::FCallClsMethod { .. } => write_todo(fb, "FCallClsMethod")?,
+        CallDetail::FCallClsMethod { .. } => write_todo(state.fb, "FCallClsMethod")?,
         CallDetail::FCallClsMethodD { clsid, method } => {
             // C::foo()
-            let target = method.mangle(clsid, state.strings);
-            let this = class::load_static_class(fb, clsid, state.strings)?;
-            fb.call_static(
-                &target,
-                this.into(),
-                args.iter().copied().map(|vid| state.lookup_vid(vid)),
-            )?
+            let target = method.mangle(clsid, &state.strings);
+            let this = state.load_static_class(clsid)?;
+            let args = args
+                .iter()
+                .copied()
+                .map(|vid| state.lookup_vid(vid))
+                .collect_vec();
+            state.fb.call_static(&target, this.into(), args)?
         }
-        CallDetail::FCallClsMethodM { .. } => write_todo(fb, "TODO_FCallClsMethodM")?,
-        CallDetail::FCallClsMethodS { .. } => write_todo(fb, "TODO_FCallClsMethodS")?,
-        CallDetail::FCallClsMethodSD { .. } => write_todo(fb, "TODO_FCallClsMethodSD")?,
+        CallDetail::FCallClsMethodM { .. } => state.write_todo("TODO_FCallClsMethodM")?,
+        CallDetail::FCallClsMethodS { .. } => state.write_todo("TODO_FCallClsMethodS")?,
+        CallDetail::FCallClsMethodSD { .. } => state.write_todo("TODO_FCallClsMethodSD")?,
         CallDetail::FCallCtor => unreachable!(),
-        CallDetail::FCallFunc => write_todo(fb, "TODO_FCallFunc")?,
+        CallDetail::FCallFunc => state.write_todo("TODO_FCallFunc")?,
         CallDetail::FCallFuncD { func } => {
             // foo()
-            let target = func.mangle(state.strings);
+            let target = func.mangle(&state.strings);
+            let args = args
+                .iter()
+                .copied()
+                .map(|vid| state.lookup_vid(vid))
+                .collect_vec();
             // A top-level function is called like a class static in a special
             // top-level class. Its 'this' pointer is null.
-            fb.call_static(
-                &target,
-                textual::Expr::null(),
-                args.iter().copied().map(|vid| state.lookup_vid(vid)),
-            )?
+            state.fb.call_static(&target, textual::Expr::null(), args)?
         }
-        CallDetail::FCallObjMethod { .. } => write_todo(fb, "FCallObjMethod")?,
+        CallDetail::FCallObjMethod { .. } => state.write_todo("FCallObjMethod")?,
         CallDetail::FCallObjMethodD { flavor, method } => {
             // $x->y()
             if flavor == ir::ObjMethodOp::NullSafe {
                 // Handle this in lowering.
                 textual_todo! {
-                    fb.comment("TODO: NullSafe")?;
+                    state.fb.comment("TODO: NullSafe")?;
                 }
             }
 
             // TODO: need to try to figure out the type.
             let ty = ClassName::new(Str::new(b"HackMixed"));
-            let target = method.mangle(&ty, state.strings);
-            fb.call_virtual(
-                &target,
-                state.lookup_vid(detail.obj(operands)),
-                args.iter().copied().map(|vid| state.lookup_vid(vid)),
-            )?
+            let target = method.mangle(&ty, &state.strings);
+            let obj = state.lookup_vid(detail.obj(operands));
+            let args = args
+                .iter()
+                .copied()
+                .map(|vid| state.lookup_vid(vid))
+                .collect_vec();
+            state.fb.call_virtual(&target, obj, args)?
         }
     };
 
     if is_async {
-        output = hack::call_builtin(fb, hack::Builtin::Await, [output])?;
+        output = state.call_builtin(hack::Builtin::Await, [output])?;
     }
 
     state.set_iid(iid, output);
     Ok(())
 }
 
-fn write_inc_dec_l<'a>(
-    fb: &mut textual::FuncBuilder<'_, '_>,
-    state: &mut FuncState<'a>,
+fn write_inc_dec_l(
+    state: &mut FuncState<'_, '_, '_>,
     iid: InstrId,
     lid: LocalId,
     op: IncDecOp,
@@ -637,10 +616,14 @@ fn write_inc_dec_l<'a>(
         _ => unreachable!(),
     };
 
-    let pre = fb.load(tx_ty!(*HackMixed), textual::Expr::deref(lid))?;
-    let one = hack::call_builtin(fb, hack::Builtin::Int, [1])?;
-    let post = hack::call_builtin(fb, hack::Builtin::Hhbc(builtin), (pre, one))?;
-    fb.store(textual::Expr::deref(lid), post, tx_ty!(*HackMixed))?;
+    let pre = state
+        .fb
+        .load(tx_ty!(*HackMixed), textual::Expr::deref(lid))?;
+    let one = state.call_builtin(hack::Builtin::Int, [1])?;
+    let post = state.call_builtin(hack::Builtin::Hhbc(builtin), (pre, one))?;
+    state
+        .fb
+        .store(textual::Expr::deref(lid), post, tx_ty!(*HackMixed))?;
 
     let sid = match op {
         IncDecOp::PreInc | IncDecOp::PreDec => pre,
@@ -652,20 +635,23 @@ fn write_inc_dec_l<'a>(
     Ok(())
 }
 
-pub(crate) struct FuncState<'a> {
+pub(crate) struct FuncState<'a, 'b, 'c> {
+    pub(crate) fb: &'a mut textual::FuncBuilder<'b, 'c>,
     func: &'a ir::Func<'a>,
     iid_mapping: ir::InstrIdMap<textual::Expr>,
-    method_info: Option<&'a MethodInfo<'a>>,
-    pub(crate) strings: &'a StringInterner,
+    method_info: Option<Arc<MethodInfo<'a>>>,
+    pub(crate) strings: Arc<StringInterner>,
 }
 
-impl<'a> FuncState<'a> {
+impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
     fn new(
-        strings: &'a StringInterner,
+        fb: &'a mut textual::FuncBuilder<'b, 'c>,
+        strings: Arc<StringInterner>,
         func: &'a ir::Func<'a>,
-        method_info: Option<&'a MethodInfo<'a>>,
+        method_info: Option<Arc<MethodInfo<'a>>>,
     ) -> Self {
         Self {
+            fb,
             func,
             iid_mapping: Default::default(),
             method_info,
@@ -673,21 +659,42 @@ impl<'a> FuncState<'a> {
         }
     }
 
-    pub fn alloc_sid_for_iid(
-        &mut self,
-        fb: &mut textual::FuncBuilder<'_, '_>,
-        iid: InstrId,
-    ) -> Sid {
-        let sid = fb.alloc_sid();
+    pub fn alloc_sid_for_iid(&mut self, iid: InstrId) -> Sid {
+        let sid = self.fb.alloc_sid();
         self.set_iid(iid, sid);
         sid
+    }
+
+    pub(crate) fn call_builtin(
+        &mut self,
+        target: hack::Builtin,
+        params: impl textual::VarArgs,
+    ) -> Result<Sid> {
+        hack::call_builtin(self.fb, target, params)
+    }
+
+    pub(crate) fn copy_iid(&mut self, iid: InstrId, input: ValueId) {
+        let expr = self.lookup_vid(input);
+        self.set_iid(iid, expr);
+    }
+
+    fn load_static_class(&mut self, cid: ClassId) -> Result<textual::Sid> {
+        class::load_static_class(self.fb, cid, &self.strings)
+    }
+
+    pub(crate) fn lookup_iid(&self, iid: InstrId) -> textual::Expr {
+        self.iid_mapping
+            .get(&iid)
+            .cloned()
+            .ok_or_else(|| anyhow!("looking for {iid:?}"))
+            .unwrap()
     }
 
     /// Look up a ValueId in the FuncState and return an Expr representing
     /// it. For InstrIds and complex ConstIds return an Expr containing the
     /// (already emitted) Sid. For simple ConstIds use an Expr representing the
     /// value directly.
-    pub fn lookup_vid(&mut self, vid: ValueId) -> textual::Expr {
+    pub(crate) fn lookup_vid(&mut self, vid: ValueId) -> textual::Expr {
         match vid.full() {
             ir::FullInstrId::Instr(iid) => self.lookup_iid(iid),
             ir::FullInstrId::Constant(c) => {
@@ -740,35 +747,26 @@ impl<'a> FuncState<'a> {
         }
     }
 
-    pub fn lookup_iid(&self, iid: InstrId) -> textual::Expr {
-        self.iid_mapping
-            .get(&iid)
-            .cloned()
-            .ok_or_else(|| anyhow!("looking for {iid:?}"))
-            .unwrap()
-    }
-
     pub(crate) fn set_iid(&mut self, iid: InstrId, expr: impl Into<textual::Expr>) {
         let expr = expr.into();
         let old = self.iid_mapping.insert(iid, expr);
         assert!(old.is_none());
     }
 
-    pub(crate) fn copy_iid(&mut self, iid: InstrId, input: ValueId) {
-        let expr = self.lookup_vid(input);
-        self.set_iid(iid, expr);
-    }
-
-    pub(crate) fn update_loc(
-        &mut self,
-        fb: &mut textual::FuncBuilder<'_, '_>,
-        loc: LocId,
-    ) -> Result {
+    pub(crate) fn update_loc(&mut self, loc: LocId) -> Result {
         if loc != LocId::NONE {
             let new = &self.func.locs[loc];
-            fb.write_loc(new)?;
+            self.fb.write_loc(new)?;
         }
         Ok(())
+    }
+
+    pub(crate) fn write_todo(&mut self, msg: &str) -> Result<Sid> {
+        trace!("TODO: {}", msg);
+        textual_todo! {
+            let target = format!("$todo.{msg}");
+            self.fb.call(&target, ())
+        }
     }
 }
 

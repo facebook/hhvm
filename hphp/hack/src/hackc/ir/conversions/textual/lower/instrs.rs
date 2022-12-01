@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::sync::Arc;
+
 use ir::func_builder::TransformInstr;
 use ir::instr::CmpOp;
 use ir::instr::HasLoc;
@@ -26,7 +28,10 @@ use crate::func::MethodInfo;
 use crate::hack;
 
 /// Lower individual Instrs in the Func to simpler forms.
-pub(crate) fn lower_instrs(builder: &mut FuncBuilder<'_>, method_info: Option<&MethodInfo<'_>>) {
+pub(crate) fn lower_instrs(
+    builder: &mut FuncBuilder<'_>,
+    method_info: Option<Arc<MethodInfo<'_>>>,
+) {
     let mut lowerer = LowerInstrs {
         changed: false,
         method_info,
@@ -48,7 +53,7 @@ pub(crate) fn lower_instrs(builder: &mut FuncBuilder<'_>, method_info: Option<&M
 
 struct LowerInstrs<'a> {
     changed: bool,
-    method_info: Option<&'a MethodInfo<'a>>,
+    method_info: Option<Arc<MethodInfo<'a>>>,
 }
 
 impl LowerInstrs<'_> {
@@ -188,7 +193,7 @@ impl TransformInstr for LowerInstrs<'_> {
                 builder.hack_builtin(Builtin::IsType, &[vid, cid], loc)
             }
             Instr::Hhbc(Hhbc::LateBoundCls(loc)) => {
-                if self.method_info.unwrap().is_static {
+                if self.method_info.as_ref().unwrap().is_static {
                     let this = builder.emit(Instr::Hhbc(Hhbc::This(loc)));
                     builder.hack_builtin(Builtin::GetClass, &[this], loc)
                 } else {

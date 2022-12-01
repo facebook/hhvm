@@ -65,11 +65,31 @@ const i32 IntConst = 11;
 @thrift.GenerateRuntimeSchema
 const list<i32> ListConst = [2, 3, 5, 7, IntConst];
 
+// @lint-ignore THRIFTCHECKS
+exception NonSchematizedException {}
+
+struct NonSchematizedStruct {
+  1: i32 none;
+  2: i32 some = 42;
+}
+
+enum NonSchematizedEnum {
+  unspecified = 0,
+  test = 22,
+}
+
+union NonSchematizedUnion {}
+
 @thrift.GenerateRuntimeSchema
 service TestService {
   void noParamsNoReturnNoEx();
   i32 noParamsPrimitiveReturnNoEx();
-  void primitiveParamsNoReturnEx(1: i32 param0) throws (1: SimpleException ex0);
+  void primitiveParamsNoReturnEx(1: i32 param0) throws (
+    1: NonSchematizedException ex0,
+  );
+  NonSchematizedStruct unionParamStructReturnNoEx(
+    1: NonSchematizedUnion param0,
+  );
 }
 
 @thrift.GenerateRuntimeSchema

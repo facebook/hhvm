@@ -348,7 +348,7 @@ void generate_exception_schema(
 void generate_service_schema(
     diagnostic_context& ctx, mutator_context& mCtx, t_service& node) {
   generate_runtime_schema<t_service&>(
-      ctx, mCtx, true, "facebook.com/thrift/type/Service", node, [&node]() {
+      ctx, mCtx, true, "facebook.com/thrift/type/Schema", node, [&node]() {
         return schematizer().gen_schema(node);
       });
 }

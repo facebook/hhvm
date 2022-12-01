@@ -49,7 +49,22 @@ void add_definition(t_const_value& schema, const t_named& node) {
   schema.add_map(val("attrs"), std::move(definition));
 }
 
-std::unique_ptr<t_const_value> gen_type(const t_type& type) {
+void add_as_definition(
+    t_const_value& defns_schema,
+    const std::string& defn_field,
+    std::unique_ptr<t_const_value> schema) {
+  auto defn_schema = val();
+  defn_schema->set_map();
+  defn_schema->add_map(val(defn_field), std::move(schema));
+
+  defns_schema.add_list(std::move(defn_schema));
+}
+
+std::unique_ptr<t_const_value> gen_type(
+    schematizer* generator,
+    const t_program* program,
+    t_const_value* defns_schema,
+    const t_type& type) {
   auto schema = val();
   schema->set_map();
   auto type_name = val();
@@ -105,13 +120,21 @@ std::unique_ptr<t_const_value> gen_type(const t_type& type) {
       type_name->add_map(val("listType"), val(0));
       params = val();
       params->set_list();
-      params->add_list(gen_type(*static_cast<const t_list&>(type).elem_type()));
+      params->add_list(gen_type(
+          generator,
+          program,
+          defns_schema,
+          *static_cast<const t_list&>(type).elem_type()));
       break;
     case t_type::type::t_set:
       type_name->add_map(val("setType"), val(0));
       params = val();
       params->set_list();
-      params->add_list(gen_type(*static_cast<const t_set&>(type).elem_type()));
+      params->add_list(gen_type(
+          generator,
+          program,
+          defns_schema,
+          *static_cast<const t_set&>(type).elem_type()));
       break;
     case t_type::type::t_map:
       type_name->add_map(val("mapType"), val(0));
@@ -119,14 +142,44 @@ std::unique_ptr<t_const_value> gen_type(const t_type& type) {
       params->set_list();
       {
         const auto& map = static_cast<const t_map&>(type);
-        params->add_list(gen_type(*map.key_type()));
-        params->add_list(gen_type(*map.val_type()));
+        params->add_list(
+            gen_type(generator, program, defns_schema, *map.key_type()));
+        params->add_list(
+            gen_type(generator, program, defns_schema, *map.val_type()));
       }
       break;
     case t_type::type::t_enum:
+      if (defns_schema && program && generator) {
+        auto foundType =
+            dynamic_cast<const t_enum*>(program->scope()->find_def(type.uri()));
+        if (foundType) {
+          auto enum_schema = generator->gen_schema(*foundType);
+          add_as_definition(*defns_schema, "enumDef", std::move(enum_schema));
+        }
+      }
       type_name->add_map(val("enumType"), val(type.uri()));
       break;
     case t_type::type::t_struct: {
+      if (defns_schema && program && generator) {
+        auto raw_type = program->scope()->find_def(type.uri());
+        auto is_union = dynamic_cast<const t_union*>(raw_type);
+        if (is_union) {
+          auto union_schema = generator->gen_schema(*is_union);
+          add_as_definition(*defns_schema, "unionDef", std::move(union_schema));
+        } else {
+          auto is_exception = dynamic_cast<const t_exception*>(raw_type);
+          if (is_exception) {
+            auto ex_schema = generator->gen_schema(*is_exception);
+            add_as_definition(
+                *defns_schema, "exceptionDef", std::move(ex_schema));
+          } else {
+            auto struct_def = dynamic_cast<const t_struct*>(raw_type);
+            auto struct_schema = generator->gen_schema(*struct_def);
+            add_as_definition(
+                *defns_schema, "structDef", std::move(struct_schema));
+          }
+        }
+      }
       auto structured = val();
       structured->set_map();
       structured->add_map(val("uri"), val(type.uri()));
@@ -153,7 +206,11 @@ std::unique_ptr<t_const_value> gen_type(const t_type& type) {
   return schema;
 }
 
-const t_enum* find_enum(const t_program* program, std::string enum_uri) {
+std::unique_ptr<t_const_value> gen_type(const t_type& type) {
+  return gen_type(nullptr, nullptr, nullptr, type);
+}
+
+const t_enum* find_enum(const t_program* program, const std::string& enum_uri) {
   // May be null in unit tests.
   return program
       ? dynamic_cast<const t_enum*>(program->scope()->find_def(enum_uri))
@@ -171,9 +228,11 @@ void add_qualifier(const t_enum* t_enum, t_const_value& schema, int enum_val) {
 }
 
 void add_fields(
+    schematizer* generator,
     const t_program* program,
+    t_const_value* defns_schema,
     t_const_value& schema,
-    std::string fields_name,
+    const std::string& fields_name,
     node_list_view<const t_field> fields,
     schematizer::InternFunc& intern_value) {
   auto fields_schema = val();
@@ -202,7 +261,8 @@ void add_fields(
       return 0; // Default
     }());
 
-    field_schema->add_map(val("type"), gen_type(*field.type()));
+    field_schema->add_map(
+        val("type"), gen_type(generator, program, defns_schema, *field.type()));
     if (auto deflt = field.default_value()) {
       assert(program);
       auto id = intern_value(
@@ -221,7 +281,14 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(
   auto schema = val();
   schema->set_map();
   add_definition(*schema, node);
-  add_fields(node.program(), *schema, "fields", node.fields(), intern_value_);
+  add_fields(
+      this,
+      node.program(),
+      nullptr,
+      *schema,
+      "fields",
+      node.fields(),
+      intern_value_);
 
   if (node.is_exception()) {
     const auto& ex = static_cast<const t_exception&>(node);
@@ -236,7 +303,13 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(
 std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
   auto schema = val();
   schema->set_map();
-  add_definition(*schema, node);
+
+  auto dfns_schema = val();
+  dfns_schema->set_list();
+
+  auto svc_schema = val();
+  svc_schema->set_map();
+  add_definition(*svc_schema, node);
 
   auto functions_schema = val();
   functions_schema->set_list();
@@ -272,7 +345,12 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
         auto return_type_schema = val();
         return_type_schema->set_map();
         return_type_schema->add_map(
-            val("thriftType"), gen_type(*ret->get_true_type()));
+            val("thriftType"),
+            gen_type(
+                this,
+                node.program(),
+                dfns_schema.get(),
+                *ret->get_true_type()));
         return_types_schema->add_list(std::move(return_type_schema));
       }
     }
@@ -281,7 +359,9 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
     auto param_list_schema = val();
     param_list_schema->set_map();
     add_fields(
+        this,
         node.program(),
+        dfns_schema.get(),
         *param_list_schema,
         "fields",
         func.params().fields(),
@@ -290,7 +370,9 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
 
     if (func.exceptions()) {
       add_fields(
+          this,
           node.program(),
+          dfns_schema.get(),
           *func_schema,
           "exceptions",
           func.exceptions()->fields(),
@@ -299,10 +381,12 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
 
     functions_schema->add_list(std::move(func_schema));
   }
-  schema->add_map(val("functions"), std::move(functions_schema));
+  svc_schema->add_map(val("functions"), std::move(functions_schema));
 
   // TODO: add inheritedService
 
+  add_as_definition(*dfns_schema, "serviceDef", std::move(svc_schema));
+  schema->add_map(val("definitions"), std::move(dfns_schema));
   return schema;
 }
 

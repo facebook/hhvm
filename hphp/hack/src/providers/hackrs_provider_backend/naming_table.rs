@@ -24,7 +24,7 @@ use pos::ModuleName;
 use pos::RelativePath;
 use pos::TypeName;
 use reverse_naming_table::ReverseNamingTable;
-use shm_store::ShmStore;
+use shm_store::OcamlShmStore;
 
 /// Designed after naming_heap.ml.
 pub struct NamingTable {
@@ -53,7 +53,7 @@ impl NamingTable {
                 "Naming_FunCanon",
             ),
             consts: ChangesStore::new(Arc::new(DeltaStore::new(
-                Arc::new(ShmStore::new(
+                Arc::new(OcamlShmStore::new(
                     "Naming_ConstPos",
                     shm_store::Evictability::NonEvictable,
                     shm_store::Compression::None,
@@ -61,7 +61,7 @@ impl NamingTable {
                 Arc::new(ConstDb(Arc::clone(&db))),
             ))),
             modules: ChangesStore::new(Arc::new(DeltaStore::new(
-                Arc::new(ShmStore::new(
+                Arc::new(OcamlShmStore::new(
                     "Naming_ModulePos",
                     shm_store::Evictability::NonEvictable,
                     shm_store::Compression::None,
@@ -217,6 +217,7 @@ impl std::fmt::Debug for NamingTable {
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(ocamlrep::ToOcamlRep, ocamlrep::FromOcamlRep)]
 enum Pos {
     Full(pos::BPos),
     File(NameType, RelativePath),
@@ -397,6 +398,7 @@ mod reverse_naming_table {
     use hh24_types::ToplevelSymbolHash;
     use serde::de::DeserializeOwned;
     use serde::Serialize;
+    use shm_store::OcamlShmStore;
     use shm_store::ShmStore;
 
     /// In-memory delta for symbols which support a canon-name lookup API (types
@@ -411,6 +413,7 @@ mod reverse_naming_table {
         K: Copy + Hash + Eq + Send + Sync + 'static + Serialize + DeserializeOwned,
         K: Into<ToplevelSymbolHash> + Into<ToplevelCanonSymbolHash>,
         P: Clone + Send + Sync + 'static + Serialize + DeserializeOwned,
+        P: ocamlrep::ToOcamlRep + ocamlrep::FromOcamlRep,
     {
         pub fn new<F>(
             fallback: Arc<F>,
@@ -424,7 +427,7 @@ mod reverse_naming_table {
         {
             Self {
                 positions: ChangesStore::new(Arc::new(DeltaStore::new(
-                    Arc::new(ShmStore::new(
+                    Arc::new(OcamlShmStore::new(
                         pos_prefix,
                         shm_store::Evictability::NonEvictable,
                         shm_store::Compression::None,

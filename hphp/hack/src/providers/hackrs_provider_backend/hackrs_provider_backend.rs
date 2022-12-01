@@ -38,7 +38,6 @@ use shallow_decl_provider::LazyShallowDeclProvider;
 use shallow_decl_provider::ShallowDeclProvider;
 use shallow_decl_provider::ShallowDeclStore;
 use shm_store::OcamlShmStore;
-use shm_store::ShmStore;
 use ty::decl;
 use ty::decl::folded::FoldedClass;
 use ty::decl::shallow::NamedDecl;
@@ -76,7 +75,7 @@ impl HhServerProviderBackend {
             db_path,
         } = config;
         let path_ctx = Arc::new(path_ctx);
-        let file_store = Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
+        let file_store = Arc::new(ChangesStore::new(Arc::new(OcamlShmStore::new(
             "File",
             shm_store::Evictability::NonEvictable,
             shm_store::Compression::default(),

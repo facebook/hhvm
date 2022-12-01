@@ -108,7 +108,7 @@ extern int low_arena_flags;
 extern int lower_arena_flags;
 extern int low_cold_arena_flags;
 extern int high_cold_arena_flags;
-extern __thread int high_arena_flags;
+extern int high_arena_flags;
 extern __thread int local_arena_flags;
 
 struct PageSpec {
@@ -315,18 +315,24 @@ void* mallocx_on_node(size_t size, int node, size_t align);
   }
 #endif
 
-DEF_ALLOC_FUNCS(vm, high_arena_flags, )
+#if USE_JEMALLOC_EXTENT_HOOKS
+#define HIGH_ARENA_FLAGS (high_arena_flags | MALLOCX_TCACHE(high_arena_tcache))
+#else
+#define HIGH_ARENA_FLAGS 0
+#endif
+
+DEF_ALLOC_FUNCS(vm, HIGH_ARENA_FLAGS, )
 DEF_ALLOC_FUNCS(vm_cold, high_cold_arena_flags, )
 
 // Allocations that are guaranteed to live below kUncountedMaxAddr when
 // USE_JEMALLOC_EXTENT_HOOKS. This provides a new way to check for countedness
 // for arrays and strings.
-DEF_ALLOC_FUNCS(uncounted, high_arena_flags, )
+DEF_ALLOC_FUNCS(uncounted, HIGH_ARENA_FLAGS, )
 
 // Allocations for the APC but do not necessarily live below kUncountedMaxAddr,
 // e.g., APCObject, or the hash table. Currently they live below
 // kUncountedMaxAddr anyway, but this may change later.
-DEF_ALLOC_FUNCS(apc, high_arena_flags, )
+DEF_ALLOC_FUNCS(apc, HIGH_ARENA_FLAGS, )
 
 // Thread-local allocations that are not accessed outside the thread.
 DEF_ALLOC_FUNCS(local, local_arena_flags, )

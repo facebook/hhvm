@@ -169,7 +169,7 @@ int low_arena_flags = 0;
 int lower_arena_flags = 0;
 int low_cold_arena_flags = 0;
 int high_cold_arena_flags = 0;
-__thread int high_arena_flags = 0;
+int high_arena_flags = 0;
 __thread int local_arena_flags = 0;
 
 #if USE_JEMALLOC_EXTENT_HOOKS
@@ -330,6 +330,8 @@ void setup_high_arena(PageSpec s) {
   auto arena = HighArena::CreateAt(&g_highArena);
   arena->appendMapper(range.getLowMapper());
   high_arena = arena->id();
+  // The flag will be combined with thread-local tcache
+  high_arena_flags = MALLOCX_ARENA(high_arena);
 
   auto& fileRange = getRange(AddrRangeClass::UncountedCold);
   cold_file_mapper = new BumpFileMapper(fileRange);
@@ -420,8 +422,6 @@ DefaultArena* next_extra_arena(int node) {
 void arenas_thread_init() {
   if (high_arena_tcache == -1) {
     mallctlRead<int, true>("tcache.create", &high_arena_tcache);
-    high_arena_flags =
-      MALLOCX_ARENA(high_arena) | MALLOCX_TCACHE(high_arena_tcache);
   }
   if (local_arena_tcache == -1) {
     local_arena = get_local_arena(s_numaNode);
@@ -453,8 +453,6 @@ void arenas_thread_exit() {
   if (high_arena_tcache != -1) {
     mallctlWrite<int, true>("tcache.destroy", high_arena_tcache);
     high_arena_tcache = -1;
-    // Ideally we shouldn't read high_arena_flags any more, but just in case.
-    high_arena_flags = MALLOCX_ARENA(high_arena) | MALLOCX_TCACHE_NONE;
   }
   if (local_arena_tcache != -1) {
     mallctlWrite<int, true>("tcache.destroy", local_arena_tcache);

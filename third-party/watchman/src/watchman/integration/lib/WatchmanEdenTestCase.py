@@ -138,7 +138,7 @@ else:
             return hgrepo.HgRepository(path, system_hgrc=self.system_hgrc)
 
         def setDefaultConfiguration(self):
-            self.setConfiguration("local", "bser", False)
+            self.setConfiguration("local", "bser", False, False)
 
         def isCaseSensitiveMount(self, path) -> bool:
             # Ideally we'd ask Eden somehow, but this is close enough for use in

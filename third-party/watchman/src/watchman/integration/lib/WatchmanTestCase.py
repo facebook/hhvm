@@ -11,6 +11,7 @@ import inspect
 import json
 import os
 import os.path
+import sys
 import tempfile
 import time
 import unittest
@@ -85,6 +86,7 @@ class WatchmanTestCase(TempDirPerTestMixin, unittest.TestCase):
     transport: str
     encoding: str
     parallelCrawl: bool
+    splitWatcher: bool
 
     def __init__(self, methodName: str = "run") -> None:
         super(WatchmanTestCase, self).__init__(methodName)
@@ -221,10 +223,13 @@ class WatchmanTestCase(TempDirPerTestMixin, unittest.TestCase):
         """
         return self.watchmanInstance().getServerLogContents().split("\n")
 
-    def setConfiguration(self, transport, encoding, parallelCrawl) -> None:
+    def setConfiguration(
+        self, transport, encoding, parallelCrawl, splitWatcher
+    ) -> None:
         self.transport = transport
         self.encoding = encoding
         self.parallelCrawl = parallelCrawl
+        self.splitWatcher = splitWatcher
 
     def removeRelative(self, base, *fname) -> None:
         fname = os.path.join(base, *fname)
@@ -265,7 +270,10 @@ class WatchmanTestCase(TempDirPerTestMixin, unittest.TestCase):
 
     def watchmanConfig(self):
         """Watchman config for this test case"""
-        config = {"enable_parallel_crawl": self.parallelCrawl}
+        config = {
+            "enable_parallel_crawl": self.parallelCrawl,
+            "prefer_split_fsevents_watcher": self.splitWatcher,
+        }
         return config
 
     def _waitForCheck(self, cond, res_check, timeout: float):
@@ -525,13 +533,18 @@ def expand_matrix(test_class) -> None:
     """
 
     matrix = [
-        ("unix", "bser", "parallel", "UnixBser2"),
-        ("unix", "json", "serial", "UnixJson"),
-        ("cli", "json", "parallel", "CliJson"),
+        ("unix", "bser", "parallel", False, "UnixBser2"),
+        ("unix", "json", "serial", False, "UnixJson"),
+        ("cli", "json", "parallel", False, "CliJson"),
     ]
 
     if os.name == "nt":
-        matrix += [("namedpipe", "bser", "serial", "NamedPipeBser2")]
+        matrix += [("namedpipe", "bser", "serial", False, "NamedPipeBser2")]
+
+    if sys.platform == "darwin":
+        matrix += [
+            ("unix", "bser", "parallel", True, "KQueueAndFSEventsUnixBser2"),
+        ]
 
     # We do some rather hacky things here to define new test class types
     # in our caller's scope.  This is needed so that the unittest TestLoader
@@ -539,13 +552,13 @@ def expand_matrix(test_class) -> None:
     # pyre-fixme[16]: Optional type has no attribute `f_back`.
     caller_scope = inspect.currentframe().f_back.f_locals
 
-    def make_class(transport, encoding, suffix, parallel):
+    def make_class(transport, encoding, suffix, parallel, split):
         subclass_name = test_class.__name__ + suffix
 
         # Define a new class that derives from the input class
         class MatrixTest(test_class):
             def setDefaultConfiguration(self):
-                self.setConfiguration(transport, encoding, parallel)
+                self.setConfiguration(transport, encoding, parallel, split)
 
         # Set the name and module information on our new subclass
         MatrixTest.__name__ = subclass_name
@@ -562,7 +575,7 @@ def expand_matrix(test_class) -> None:
         except unittest.SkipTest:
             pass
 
-    for (transport, encoding, parallel, suffix) in matrix:
-        make_class(transport, encoding, suffix, parallel == "parallel")
+    for (transport, encoding, parallel, split, suffix) in matrix:
+        make_class(transport, encoding, suffix, parallel == "parallel", split)
 
     return None

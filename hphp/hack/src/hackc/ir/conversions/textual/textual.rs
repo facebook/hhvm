@@ -49,7 +49,7 @@ impl<'a> TextualFile<'a> {
         Ok(())
     }
 
-    pub(crate) fn declare_function(&mut self, name: &str, tys: &[Ty], ret_ty: Ty) -> Result {
+    pub(crate) fn declare_function(&mut self, name: &str, tys: &[Ty], ret_ty: &Ty) -> Result {
         write!(self.w, "declare {name}(")?;
 
         let mut sep = "";
@@ -75,9 +75,9 @@ impl<'a> TextualFile<'a> {
         &mut self,
         name: &str,
         loc: &SrcLoc,
-        params: &[(&str, Ty)],
-        ret_ty: Ty,
-        locals: &[(LocalId, Ty)],
+        params: &[(&str, &Ty)],
+        ret_ty: &Ty,
+        locals: &[(LocalId, &Ty)],
         body: impl FnOnce(&mut FuncBuilder<'_, '_>) -> Result<R>,
     ) -> Result<R> {
         if !self.internal_functions.contains(name) {
@@ -250,12 +250,26 @@ impl fmt::Display for FmtSid {
 pub(crate) enum Ty {
     Ellipsis,
     Float,
+    HackMixedPtr,
     Int,
     Noreturn,
     Ptr(Box<Ty>),
     Type(String),
     String,
     Void,
+    VoidPtr,
+}
+
+impl From<Ty> for std::borrow::Cow<'_, Ty> {
+    fn from(ty: Ty) -> Self {
+        Self::Owned(ty)
+    }
+}
+
+impl<'a> From<&'a Ty> for std::borrow::Cow<'a, Ty> {
+    fn from(ty: &'a Ty) -> Self {
+        Self::Borrowed(ty)
+    }
 }
 
 struct FmtTy<'a>(&'a Ty);
@@ -265,12 +279,14 @@ impl fmt::Display for FmtTy<'_> {
         match self.0 {
             Ty::Ellipsis => write!(f, "..."),
             Ty::Float => write!(f, "float"),
+            Ty::HackMixedPtr => f.write_str("*HackMixed"),
             Ty::Int => write!(f, "int"),
             Ty::Noreturn => f.write_str("noreturn"),
             Ty::Ptr(sub) => write!(f, "*{}", FmtTy(sub)),
             Ty::String => write!(f, "*string"),
             Ty::Type(s) => write!(f, "{s}"),
             Ty::Void => f.write_str("void"),
+            Ty::VoidPtr => f.write_str("*void"),
         }
     }
 }
@@ -722,7 +738,7 @@ impl FuncBuilder<'_, '_> {
         Ok(dst)
     }
 
-    pub(crate) fn load(&mut self, ty: Ty, src: impl Into<Expr>) -> Result<Sid> {
+    pub(crate) fn load(&mut self, ty: &Ty, src: impl Into<Expr>) -> Result<Sid> {
         let src = src.into();
         let dst = self.alloc_sid();
         write!(
@@ -766,7 +782,7 @@ impl FuncBuilder<'_, '_> {
         &mut self,
         dst: impl Into<Expr>,
         src: impl Into<Expr>,
-        src_ty: Ty,
+        src_ty: &Ty,
     ) -> Result {
         let dst = dst.into();
         let src = src.into();

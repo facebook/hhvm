@@ -12,45 +12,6 @@
 
 #![feature(box_patterns)]
 
-/// Helper for tx_ty! Called like `tx_ty_sub!(AllowNaked Pat)` where
-/// AllowNaked=0 means naked raw-types not allowed and AllowNaked=1 means naked
-/// raw-types are allowed.
-macro_rules! tx_ty_sub {
-    ($_:tt float) => {
-        textual::Ty::Float
-    };
-    ($_:tt int) => {
-        textual::Ty::Int
-    };
-    ($_:tt noreturn) => {
-        crate::textual::Ty::Noreturn
-    };
-    ($_:tt string) => {
-        textual::Ty::String
-    };
-    ($_:tt void) => {
-        textual::Ty::Void
-    };
-    (1 $name:ident) => {
-        crate::textual::Ty::Type(stringify!($name).to_owned())
-    };
-    (0 ...) => {
-        textual::Ty::Ellipsis
-    };
-    ($_:tt * $($rest:tt)+) => {
-        crate::textual::Ty::Ptr(Box::new(tx_ty_sub!(1 $($rest)+)))
-    };
-}
-
-/// Build a textual::Ty for a well-defined type.  Handles primitives like `int`
-/// or `string` as well as pointer types like `*int` or `*Foo`.  Doesn't allow
-/// naked raw-types like `Foo`.
-macro_rules! tx_ty {
-    ( $($rest:tt)+ ) => {
-        tx_ty_sub!(0 $($rest)+)
-    };
-}
-
 pub static KEEP_GOING: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
 // If KEEP_GOING is false then execute a 'todo!' otherwise call the function.

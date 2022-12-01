@@ -11,8 +11,8 @@ use crate::class::IsStatic;
 use crate::mangle::MangleClass as _;
 use crate::textual;
 
-pub(crate) fn convert_ty(ty: ir::EnforceableType, strings: &StringInterner) -> textual::Ty {
-    let mut base = convert_base(ty.ty, strings);
+pub(crate) fn convert_ty(ty: &ir::EnforceableType, strings: &StringInterner) -> textual::Ty {
+    let mut base = convert_base(&ty.ty, strings);
 
     let mut modifiers = ty.modifiers;
 
@@ -35,7 +35,7 @@ pub(crate) fn convert_ty(ty: ir::EnforceableType, strings: &StringInterner) -> t
     base
 }
 
-fn convert_base(ty: ir::BaseType, strings: &StringInterner) -> textual::Ty {
+fn convert_base(ty: &ir::BaseType, strings: &StringInterner) -> textual::Ty {
     use ir::BaseType;
     match ty {
         BaseType::Void => textual::Ty::Void,

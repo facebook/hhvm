@@ -121,7 +121,7 @@ fn write_final(
 
     match *final_op {
         FinalOp::IncDecM { inc_dec_op, .. } => {
-            let src = state.fb.load(tx_ty!(*HackMixed), base)?;
+            let src = state.load_mixed(base)?;
             let op = match inc_dec_op {
                 ir::IncDecOp::PreInc | ir::IncDecOp::PostInc => hack::Hhbc::Add,
                 ir::IncDecOp::PreDec | ir::IncDecOp::PostDec => hack::Hhbc::Sub,
@@ -131,18 +131,18 @@ fn write_final(
             let dst = state
                 .fb
                 .write_expr_stmt(hack::expr_builtin(hack::Builtin::Hhbc(op), (src, incr)))?;
-            state.fb.store(base, dst, tx_ty!(*HackMixed))?;
+            state.store_mixed(base, dst)?;
             Ok(match inc_dec_op {
                 ir::IncDecOp::PreInc | ir::IncDecOp::PreDec => dst,
                 ir::IncDecOp::PostInc | ir::IncDecOp::PostDec => src,
                 _ => unreachable!(),
             })
         }
-        FinalOp::QueryM { .. } => state.fb.load(tx_ty!(*HackMixed), base),
+        FinalOp::QueryM { .. } => state.load_mixed(base),
         FinalOp::SetM { .. } => {
             let src = state.lookup_vid(operands.next().unwrap());
             let src = state.fb.write_expr_stmt(src)?;
-            state.fb.store(base, src, tx_ty!(*HackMixed))?;
+            state.store_mixed(base, src)?;
             Ok(src)
         }
         FinalOp::SetRangeM { .. } => unreachable!(),
@@ -199,9 +199,7 @@ fn write_entry(
         MemberKey::EL => {
             // $a[$b]
             let key = locals.next().unwrap();
-            let key = state
-                .fb
-                .load(tx_ty!(*HackMixed), textual::Expr::deref(key))?;
+            let key = state.load_mixed(textual::Expr::deref(key))?;
             state.call_builtin(hack::Builtin::DimArrayGet, (base, key))
         }
         MemberKey::ET(s) => {
@@ -221,9 +219,7 @@ fn write_entry(
         MemberKey::PL => {
             // $a->{$b}
             let key = locals.next().unwrap();
-            let key = state
-                .fb
-                .load(tx_ty!(*HackMixed), textual::Expr::deref(key))?;
+            let key = state.load_mixed(textual::Expr::deref(key))?;
             state.call_builtin(hack::Builtin::DimFieldGet, (base, key))
         }
         MemberKey::PT(prop) => {
@@ -263,9 +259,7 @@ fn base_from_vid(state: &mut FuncState<'_, '_, '_>, src: ValueId) -> Result<text
     // to `base`.
     let src = state.lookup_vid(src);
     let base_lid = base_var(&state.strings);
-    state
-        .fb
-        .store(textual::Expr::deref(base_lid), src, tx_ty!(*HackMixed))?;
+    state.store_mixed(textual::Expr::deref(base_lid), src)?;
     Ok(base_from_lid(base_lid))
 }
 

@@ -2,16 +2,15 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+#![feature(box_patterns)]
 
 use itertools::Itertools;
 use proc_macro2::Literal;
 use proc_macro2::TokenStream;
-use proc_macro2::TokenTree;
 use proc_macro_error::abort;
 use proc_macro_error::proc_macro_error;
 use proc_macro_error::ResultExt;
 use quote::quote;
-use quote::TokenStreamExt;
 use syn::parenthesized;
 use syn::parse::Parse;
 use syn::parse::ParseStream;
@@ -77,18 +76,18 @@ pub fn textual_decl_derive(input: proc_macro::TokenStream) -> proc_macro::TokenS
                             .parameters
                             .iter()
                             .map(|p| {
-                                let p = &p.ty;
-                                quote!(tx_ty!(#p))
+                                let (ty, owned) = p.ty.tokenize();
+                                if owned { quote!(#ty) } else { ty }
                             })
                             .collect_vec();
                         let ret = {
-                            let p = &signature.ret.ty;
-                            quote!(tx_ty!(#p))
+                            let (ty, owned) = signature.ret.tokenize();
+                            if owned { quote!(#ty) } else { ty }
                         };
 
                         let decl = quote! {
                             if subset.contains(&#name::#variant_name) {
-                                txf.declare_function(#builtin_name, &[#(#params),*], #ret)?;
+                                txf.declare_function(#builtin_name, &[#(#params),*], &#ret)?;
                             }
                         };
                         decls.push(decl);
@@ -186,13 +185,13 @@ struct DeclSig {
     parameters: Punctuated<DeclArg, token::Comma>,
     #[allow(dead_code)]
     arrow: token::RArrow,
-    ret: DeclArg,
+    ret: DeclTy,
 }
 
 struct DeclArg {
     #[allow(dead_code)]
     name: Option<(Ident, token::Colon)>,
-    ty: TokenStream,
+    ty: DeclTy,
 }
 
 impl Parse for DeclArg {
@@ -205,11 +204,79 @@ impl Parse for DeclArg {
             None
         };
 
-        let mut ty = TokenStream::new();
-        while !input.is_empty() && !input.peek(Token![,]) {
-            ty.append(input.parse::<TokenTree>()?);
-        }
+        let ty = input.parse()?;
 
         Ok(DeclArg { name, ty })
+    }
+}
+
+#[derive(Debug)]
+enum DeclTy {
+    Ellipsis(token::Dot3),
+    Float(Ident),
+    Int(Ident),
+    Noreturn(Ident),
+    Ptr(token::Star, Box<DeclTy>),
+    String(Ident),
+    Type(Ident),
+    Void(Ident),
+}
+
+impl Parse for DeclTy {
+    fn parse(input: ParseStream<'_>) -> Result<Self> {
+        if input.peek(Token![*]) {
+            Ok(DeclTy::Ptr(input.parse()?, Box::new(input.parse()?)))
+        } else if input.peek(Token![...]) {
+            Ok(DeclTy::Ellipsis(input.parse()?))
+        } else if input.peek(Ident) {
+            let id: Ident = input.parse()?;
+            if id == "float" {
+                Ok(DeclTy::Float(id))
+            } else if id == "int" {
+                Ok(DeclTy::Int(id))
+            } else if id == "noreturn" {
+                Ok(DeclTy::Noreturn(id))
+            } else if id == "string" {
+                Ok(DeclTy::String(id))
+            } else if id == "void" {
+                Ok(DeclTy::Void(id))
+            } else {
+                Ok(DeclTy::Type(id))
+            }
+        } else {
+            use syn::ext::IdentExt;
+            let id = Ident::parse_any(input)?;
+            abort!(id, "Unexpected token");
+        }
+    }
+}
+
+impl DeclTy {
+    fn tokenize(&self) -> (TokenStream, bool) {
+        match self {
+            // a couple special cases first
+            DeclTy::Ptr(_, box DeclTy::Void(_)) => (quote!(textual::Ty::VoidPtr), false),
+            DeclTy::Ptr(_, box DeclTy::Type(id)) if id == "HackMixed" => {
+                (quote!(textual::Ty::HackMixedPtr), false)
+            }
+
+            DeclTy::Ellipsis(_) => (quote!(textual::Ty::Ellipsis), true),
+            DeclTy::Float(_) => (quote!(textual::Ty::Float), true),
+            DeclTy::Int(_) => (quote!(textual::Ty::Int), true),
+            DeclTy::Noreturn(_) => (quote!(textual::Ty::Noreturn), true),
+            DeclTy::Ptr(_, box sub) => {
+                let (mut sub, sub_owned) = sub.tokenize();
+                if !sub_owned {
+                    sub = quote!(#sub.clone());
+                }
+                (quote!(textual::Ty::Ptr(Box::new(#sub))), true)
+            }
+            DeclTy::String(_) => (quote!(textual::Ty::String), true),
+            DeclTy::Type(name) => {
+                let name = format!("{name}");
+                (quote!(textual::Ty::Type(#name.to_owned())), true)
+            }
+            DeclTy::Void(_) => (quote!(textual::Ty::Void), true),
+        }
     }
 }

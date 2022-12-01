@@ -64,7 +64,7 @@ pub(crate) fn write_function(
         txf,
         state,
         &function.name.mangle(&state.strings),
-        tx_ty!(*void),
+        textual::Ty::VoidPtr,
         function.func,
         None,
     )
@@ -90,51 +90,47 @@ pub(crate) fn write_func(
         .iter()
         .map(|p| LocalId::Named(p.name))
         .collect::<HashSet<_>>();
-    let mut params = params
-        .into_iter()
-        .map(|p| {
-            let name_bytes = unit_state.strings.lookup_bytes(p.name);
-            let name_string = util::escaped_string(&name_bytes);
-            (name_string, convert_ty(p.ty.enforced, &unit_state.strings))
-        })
-        .collect_vec();
 
     // Prepend the 'this' parameter.
     let this_name = AsciiString::from_str("this").unwrap();
-    params.insert(0, (this_name, this_ty));
+    let mut param_names = vec![this_name];
+    let mut param_tys = vec![this_ty];
+    for p in params {
+        let name_bytes = unit_state.strings.lookup_bytes(p.name);
+        let name_string = util::escaped_string(&name_bytes);
+        param_names.push(name_string);
+        param_tys.push(convert_ty(&p.ty.enforced, &unit_state.strings));
+    }
 
-    let params = params
+    let params = param_names
         .iter()
-        .map(|(name, ty)| (name.as_str(), ty.clone()))
+        .map(|s| s.as_str())
+        .zip(param_tys.iter())
         .collect_vec();
 
-    let ret_ty = convert_ty(
-        std::mem::take(&mut func.return_type.enforced),
-        &unit_state.strings,
-    );
+    let ret_ty = convert_ty(&func.return_type.enforced, &unit_state.strings);
 
     let lids = func
         .body_instrs()
         .flat_map(HasLocals::locals)
         .cloned()
         .collect::<HashSet<_>>();
+    // TODO(arr): figure out how to provide more precise types
+    let local_ty = textual::Ty::VoidPtr;
     let mut locals = lids
         .into_iter()
         .filter(|lid| !param_lids.contains(lid))
         .sorted_by(|x, y| cmp_lid(&unit_state.strings, x, y))
-        .map(|lid| {
-            // TODO(arr): figure out how to provide more precise types
-            let ty = tx_ty!(*void);
-            (lid, ty)
-        })
+        .zip(std::iter::repeat(&local_ty))
         .collect::<Vec<_>>();
 
     // Always add a temp var for use by member_ops.
     let base = crate::member_op::base_var(&unit_state.strings);
-    locals.push((base, tx_ty!(*HackMixed)));
+    let base_ty = textual::Ty::HackMixedPtr;
+    locals.push((base, &base_ty));
 
     let span = func.loc(func.loc_id).clone();
-    txf.define_function(name, &span, &params, ret_ty, &locals, |fb| {
+    txf.define_function(name, &span, &params, &ret_ty, &locals, |fb| {
         let mut func = rewrite_jmp_ops(func);
         ir::passes::clean::run(&mut func);
 
@@ -210,10 +206,9 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
         }
         Instr::Hhbc(Hhbc::This(_)) => write_load_this(state, iid)?,
         Instr::Hhbc(Hhbc::UnsetL(lid, _)) => {
-            state.fb.store(
+            state.store_mixed(
                 textual::Expr::deref(lid),
                 textual::Expr::Const(textual::Const::Null),
-                tx_ty!(*HackMixed),
             )?;
         }
         Instr::MemberOp(ref mop) => crate::member_op::write(state, iid, mop)?,
@@ -329,7 +324,7 @@ fn write_get_class_const(
 
     let name = cid.mangle_with_class(class, IsStatic::Static, &state.strings);
     let var = textual::Var::Named(name);
-    state.fb.load(tx_ty!(*HackMixed), textual::Expr::deref(var))
+    state.load_mixed(textual::Expr::deref(var))
 }
 
 fn write_terminator(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
@@ -421,7 +416,7 @@ fn write_load_this(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
         .expect("not in class context")
         .class;
     let sid = state.fb.load(
-        class::non_static_ty(class.name, &state.strings),
+        &class::non_static_ty(class.name, &state.strings),
         textual::Expr::deref(textual::Var::named("this")),
     )?;
     state.set_iid(iid, sid);
@@ -429,18 +424,14 @@ fn write_load_this(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
 }
 
 fn write_load_var(state: &mut FuncState<'_, '_, '_>, iid: InstrId, lid: LocalId) -> Result {
-    let sid = state
-        .fb
-        .load(tx_ty!(*HackMixed), textual::Expr::deref(lid))?;
+    let sid = state.load_mixed(textual::Expr::deref(lid))?;
     state.set_iid(iid, sid);
     Ok(())
 }
 
 fn write_set_var(state: &mut FuncState<'_, '_, '_>, lid: LocalId, vid: ValueId) -> Result {
     let value = state.lookup_vid(vid);
-    state
-        .fb
-        .store(textual::Expr::deref(lid), value, tx_ty!(*HackMixed))
+    state.store_mixed(textual::Expr::deref(lid), value)
 }
 
 fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) -> Result {
@@ -617,14 +608,10 @@ fn write_inc_dec_l(
         _ => unreachable!(),
     };
 
-    let pre = state
-        .fb
-        .load(tx_ty!(*HackMixed), textual::Expr::deref(lid))?;
+    let pre = state.load_mixed(textual::Expr::deref(lid))?;
     let one = state.call_builtin(hack::Builtin::Int, [1])?;
     let post = state.call_builtin(hack::Builtin::Hhbc(builtin), (pre, one))?;
-    state
-        .fb
-        .store(textual::Expr::deref(lid), post, tx_ty!(*HackMixed))?;
+    state.store_mixed(textual::Expr::deref(lid), post)?;
 
     let sid = match op {
         IncDecOp::PreInc | IncDecOp::PreDec => pre,
@@ -681,6 +668,10 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
 
     fn load_static_class(&mut self, cid: ClassId) -> Result<textual::Sid> {
         class::load_static_class(self.fb, cid, &self.strings)
+    }
+
+    pub(crate) fn load_mixed(&mut self, src: impl Into<textual::Expr>) -> Result<Sid> {
+        self.fb.load(&textual::Ty::HackMixedPtr, src)
     }
 
     pub(crate) fn lookup_iid(&self, iid: InstrId) -> textual::Expr {
@@ -752,6 +743,14 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
         let expr = expr.into();
         let old = self.iid_mapping.insert(iid, expr);
         assert!(old.is_none());
+    }
+
+    pub(crate) fn store_mixed(
+        &mut self,
+        dst: impl Into<textual::Expr>,
+        src: impl Into<textual::Expr>,
+    ) -> Result {
+        self.fb.store(dst, src, &textual::Ty::HackMixedPtr)
     }
 
     pub(crate) fn update_loc(&mut self, loc: LocId) -> Result {

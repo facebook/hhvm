@@ -63,7 +63,7 @@ pub(crate) fn write_class(
         let name = constant
             .name
             .mangle_with_class(class.name, IsStatic::Static, &state.strings);
-        txf.declare_global(name, tx_ty!(*HackMixed));
+        txf.declare_global(name, textual::Ty::HackMixedPtr);
     }
 
     write_init_static(txf, state, &class)?;
@@ -179,7 +179,7 @@ fn write_property(
         txf.write_comment(&format!("TODO: initial value {initial_value:?}"))?;
     }
 
-    let ty = convert_ty(type_info.enforced.clone(), &state.strings);
+    let ty = convert_ty(&type_info.enforced, &state.strings);
 
     fields.push((name, ty, vis));
     Ok(())
@@ -206,14 +206,14 @@ fn write_init_static(
         &init_static_name(class.name, &state.strings),
         &class.src_loc,
         &[],
-        tx_ty!(void),
+        &textual::Ty::Void,
         &[],
         |fb| {
             let sz = 0; // TODO: properties
             let p = hack::call_builtin(fb, hack::Builtin::AllocWords, [sz])?;
 
             let singleton_expr = textual::Expr::deref(textual::Var::named(singleton_name));
-            fb.store(singleton_expr, p, static_ty(class.name, &state.strings))?;
+            fb.store(singleton_expr, p, &static_ty(class.name, &state.strings))?;
 
             // constants
             for constant in &class.constants {
@@ -225,7 +225,7 @@ fn write_init_static(
                     );
                     let var = textual::Var::named(name);
                     let value = typed_value::typed_value_expr(value, &state.strings);
-                    fb.store(textual::Expr::deref(var), value, tx_ty!(*HackMixed))?;
+                    fb.store(textual::Expr::deref(var), value, &textual::Ty::HackMixedPtr)?;
                 }
             }
 
@@ -278,7 +278,7 @@ pub(crate) fn load_static_class(
     fb.txf
         .declare_global(singleton_name.clone(), static_ty(class, strings));
     let singleton_expr = textual::Expr::deref(textual::Var::named(singleton_name));
-    let value = fb.load(static_ty(class, strings), singleton_expr)?;
+    let value = fb.load(&static_ty(class, strings), singleton_expr)?;
     hack::call_builtin(fb, hack::Builtin::SilLazyInitialize, [value])?;
     Ok(value)
 }

@@ -40,8 +40,6 @@ function my_option_map(): OptionInfoMap {
 'hdf[]'           => Pair { '',  'An .hdf configuration file or CLI option' },
 'no-defaults'     => Pair { '',
                             'Do not use the default wrapper runtime options'},
-'build-root:'     => Pair { '',
-                            'Override the default directory for hhvm and hphp'},
 'perf:'           => Pair { '', 'Run perf record'},
   };
 }
@@ -51,30 +49,24 @@ function get_hhvm_path(OptionMap $opts): string {
     return $opts['bin'];
   }
 
-  $root = __DIR__.'/..';
-  $buck = __DIR__.'/../../buck-out/gen/hphp';
-  if (is_dir($buck)) {
-    $root = $buck;
-  }
+  $buck = __DIR__.'/../../buck-out/gen/hphp/hhvm/hhvm/hhvm';
+  $buck2 = __DIR__.'/../../../buck-out/v2/gen/fbcode/hphp/hhvm/out/hhvm';
 
-  $fbbuild = __DIR__.'/../../_bin/hphp';
-  if (is_dir($fbbuild)) {
+  $bins = vec[$buck, $buck2] |> HH\Lib\Vec\filter($$, $bin ==> file_exists($bin));
 
-    if ($root === $buck) {
-      echo "Multiple build directories found.\n";
-      echo " - " . $fbbuild . "\n";
-      echo " - " . $buck . "\n";
-      error("Delete one of them, or use the --build-root flag.");
+  if (HH\Lib\C\is_empty($bins)) {
+    echo "Couldn't find an HHVM binary in the following locations:\n";
+    echo " - " . $buck . "\n";
+    echo " - " . $buck2 . "\n";
+    error("Build HHVM first.");
+  } else if (HH\Lib\C\count($bins) > 1) {
+    echo "Multiple HHVM binaries found:\n";
+    foreach ($bins as $bin) {
+      echo " - " . $bin . "\n";
     }
-
-    $root = $fbbuild;
+    error("Delete one of them or use the --bin flag.");
   }
-
-  if ($opts->containsKey('build-root')) {
-    $root = realpath($opts['build-root']);
-  }
-
-  return $root === $buck ? $root.'/hhvm/hhvm/hhvm' : $root.'/hhvm/hhvm';
+  return $bins[0];
 }
 
 function determine_flags(OptionMap $opts): string {

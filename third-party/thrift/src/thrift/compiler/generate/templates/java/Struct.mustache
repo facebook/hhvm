@@ -46,24 +46,8 @@ public final class {{struct:javaCapitalName}} implements com.facebook.thrift.pay
     {{> struct/ThriftConstructor}}
 
     {{> struct/StructBuilder}}
+    {{> struct/AdapterDefinition}}
 
-    {{#struct:fields}}
-    {{#field:hasAdapter?}}
-    private static final com.facebook.thrift.adapter.TypeAdapter<{{#field:type}}{{> BoxedType}}{{/field:type}}, {{field:typeClassName}}> _{{field:javaName}}_Adapter = new {{field:adapterClassName}}();
-    {{#field:hasMultipleTypeAdapters?}}
-    private static final com.facebook.thrift.adapter.TypeAdapter<{{field:typeClassName}}, {{field:secondTypeClassName}}> _{{field:javaName}}_Adapter2 = new {{field:secondAdapterClassName}}();
-    {{/field:hasMultipleTypeAdapters?}}
-    {{/field:hasAdapter?}}
-    {{#field:hasWrapper?}}
-    private static final com.facebook.thrift.adapter.Wrapper<{{!
-      }}{{#field:hasAdapter?}}{{!
-        }}{{#field:hasMultipleTypeAdapters?}}{{field:secondTypeClassName}}{{/field:hasMultipleTypeAdapters?}}{{!
-        }}{{^field:hasMultipleTypeAdapters?}}{{field:typeClassName}}{{/field:hasMultipleTypeAdapters?}}{{!
-      }}{{/field:hasAdapter?}}{{!
-      }}{{^field:hasAdapter?}}{{#field:type}}{{> BoxedType}}{{/field:type}}{{/field:hasAdapter?}}{{!
-      }}, {{field:wrapperType}}, com.facebook.thrift.payload.ThriftSerializable> _{{field:javaName}}_Wrapper = new {{field:wrapper}}();
-    {{/field:hasWrapper?}}
-    {{/struct:fields}}
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();

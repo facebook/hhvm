@@ -18,6 +18,8 @@ package com.facebook.thrift.adapter;
 
 import static org.junit.Assert.*;
 
+import com.facebook.thrift.adapter.test.Wrapper;
+import com.facebook.thrift.test.adapter.AdaptedTestException;
 import com.facebook.thrift.test.adapter.AdaptedTestStruct;
 import com.facebook.thrift.test.adapter.AdaptedTestStructWithoutDefaults;
 import com.facebook.thrift.test.adapter.TestStruct;
@@ -26,6 +28,7 @@ import com.facebook.thrift.util.SerializerUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,15 +44,31 @@ import org.junit.runners.Parameterized;
 @RunWith(Parameterized.class)
 public class TypeAdapterStructTest {
 
+  private static class Param {
+    protected SerializationProtocol protocol;
+    protected boolean exception;
+
+    public Param(SerializationProtocol protocol, boolean exception) {
+      this.protocol = protocol;
+      this.exception = exception;
+    }
+  }
+
   @Parameterized.Parameters
-  public static Collection<Object> data() {
-    return Arrays.asList(SerializationProtocol.TCompact, SerializationProtocol.TBinary);
+  public static Collection<Param> data() {
+    return Arrays.asList(
+        new Param(SerializationProtocol.TCompact, false),
+        new Param(SerializationProtocol.TCompact, true),
+        new Param(SerializationProtocol.TBinary, false),
+        new Param(SerializationProtocol.TBinary, true));
   }
 
   private final SerializationProtocol protocol;
+  private final boolean exception;
 
-  public TypeAdapterStructTest(SerializationProtocol protocol) {
-    this.protocol = protocol;
+  public TypeAdapterStructTest(Param param) {
+    this.protocol = param.protocol;
+    this.exception = param.exception;
   }
 
   private static ByteBuf generateByteBuf() {
@@ -66,7 +85,29 @@ public class TypeAdapterStructTest {
     return SerializerUtil.toByteArray(struct, protocol);
   }
 
+  private AdaptedTestStruct copy(AdaptedTestException from) {
+    AdaptedTestStruct.Builder to = new AdaptedTestStruct.Builder();
+
+    for (Field f : from.getClass().getDeclaredFields()) {
+      try {
+        Field t = to.getClass().getDeclaredField(f.getName());
+        f.setAccessible(true);
+        t.setAccessible(true);
+        t.set(to, f.get(from));
+      } catch (Throwable t) {
+        // ignore
+      }
+    }
+
+    return to.build();
+  }
+
   private AdaptedTestStruct deserializeAdapted(byte[] bytes) {
+    // test both Struct and Exception
+    if (exception) {
+      return copy(SerializerUtil.fromByteArray(AdaptedTestException.asReader(), bytes, protocol));
+    }
+
     return SerializerUtil.fromByteArray(AdaptedTestStruct.asReader(), bytes, protocol);
   }
 
@@ -532,5 +573,15 @@ public class TypeAdapterStructTest {
     assertEquals(60, received.getMultipleTypedefIntField());
     assertEquals("50", adapted.getMultipleTypedefAdaptedIntDefault());
     assertEquals(50, received.getMultipleTypedefIntDefault());
+  }
+
+  @Test
+  public void testGenericTypeAdapter() {
+    byte[] bytes =
+        serializeAdapted(defaultInstance().setGenericAdapterField(new Wrapper(23.45d)).build());
+    AdaptedTestStruct adapted = deserializeAdapted(bytes);
+    TestStruct received = deserialize(bytes);
+
+    assertEquals(23.45d, adapted.getGenericAdapterField().getValue());
   }
 }

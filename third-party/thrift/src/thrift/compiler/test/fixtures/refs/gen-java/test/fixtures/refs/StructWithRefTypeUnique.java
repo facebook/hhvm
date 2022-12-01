@@ -88,7 +88,7 @@ public final class StructWithRefTypeUnique implements com.facebook.thrift.payloa
             return result;
         }
     }
-    
+        
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();

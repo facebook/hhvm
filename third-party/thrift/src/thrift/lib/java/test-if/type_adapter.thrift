@@ -212,6 +212,7 @@ struct TestStruct {
   206: i32 doubleTypedefInt_field;
   207: i32 multipleTypedefInt_field;
   208: i32 multipleTypedefInt_default;
+  300: double generic_adapter_field;
 }
 
 // Adapted version of TestStruct.
@@ -287,6 +288,12 @@ struct AdaptedTestStruct {
   206: doubleTypedefInt doubleTypedefAdaptedInt_field;
   207: multipleTypedefInt multipleTypedefAdaptedInt_field;
   208: multipleTypedefInt multipleTypedefAdaptedInt_default = 50;
+
+  @java.Adapter{
+    adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter',
+    typeClassName = 'com.facebook.thrift.adapter.test.Wrapper',
+  }
+  300: double generic_adapter_field;
 }
 
 struct AdaptedTestStructWithoutDefaults {
@@ -400,4 +407,85 @@ union AdaptedTestUnion {
   205: adaptedInt doubleAdaptedInt_default = 3000;
   206: doubleTypedefInt doubleTypedefAdaptedInt_field;
   207: multipleTypedefInt multipleTypedefAdaptedInt_field;
+}
+
+// Adapted version of TestStruct.
+safe permanent client exception AdaptedTestException {
+  1: adaptedBoolean adaptedBoolean_field;
+  2: adaptedByte adaptedByte_field;
+  3: adaptedShort adaptedShort_field;
+  4: adaptedInt adaptedInt_field;
+  5: adaptedLong adaptedLong_field;
+  6: adaptedFloat adaptedFloat_field;
+  7: adaptedDouble adaptedDouble_field;
+  8: adaptedString adaptedString_field;
+  9: TestEnum testEnum_field;
+  10: SlicedByteBuf b1;
+  11: CopiedByteBuf b2;
+  12: UnpooledByteBuf b3;
+  13: Date date_field;
+  20: adaptedIntList adaptedIntList_field;
+  21: adaptedBinaryList adaptedBinaryList_field;
+  22: adaptedListIntList adaptedListIntList_field;
+  23: adaptedIntSet adaptedIntSet_field;
+  24: adaptedBinarySet adaptedBinarySet_field;
+  25: adaptedIntMap adaptedIntMap_field;
+  26: adaptedIntBinaryMap adaptedIntBinaryMap_field;
+  27: adaptedIntStringMap adaptedIntStringMap_field;
+  28: adaptedIntBinaryStringMap adaptedIntBinaryStringMap_field;
+  29: adaptedIntBinaryListMap adaptedIntBinaryListMap_field;
+  51: adaptedBoolean adaptedBoolean_default = true;
+  52: adaptedByte adaptedByte_default = 9;
+  53: adaptedShort adaptedShort_default = 101;
+  54: adaptedInt adaptedInt_default = 1024;
+  55: adaptedLong adaptedLong_default = 5000;
+  56: adaptedFloat adaptedFloat_default = 2.3;
+  57: adaptedDouble adaptedDouble_default = 5.67;
+  58: adaptedString adaptedString_default = "test";
+  59: adaptedIntList adaptedIntList_default = [2, 4];
+  60: adaptedIntSet adaptedIntSet_default = [10, 20];
+  61: adaptedIntMap adaptedIntMap_default = {1: 7};
+  62: SlicedByteBuf b1_default = "b1b1";
+  63: CopiedByteBuf b2_default = "b2b2";
+  64: UnpooledByteBuf b3_default = "b3b3";
+  65: adaptedBinaryList adaptedBinaryList_default = ["aa", "bb"];
+  66: adaptedIntBinaryMap adaptedIntBinaryMap_default = {8: "foo"};
+  67: adaptedBinarySet adaptedBinarySet_default = ["foo", "bar"];
+  68: adaptedIntBinaryListMap adaptedIntBinaryListMap_default = {
+    7: ["foo", "bar"],
+  };
+  101: optional adaptedBoolean optionalAdaptedBoolean_field;
+  102: optional SlicedByteBuf optional_b1;
+  @java.Adapter{
+    adapterClassName = "com.facebook.thrift.adapter.test.BooleanToStringTypeAdapter",
+    typeClassName = "java.lang.String",
+  }
+  201: bool adaptedBoolean_field2;
+  @java.Adapter{
+    adapterClassName = "com.facebook.thrift.adapter.test.ListToHexTypeAdapter",
+    typeClassName = "java.lang.String",
+  }
+  202: list<binary> adaptedBinaryList_field2;
+
+  @java.Adapter{
+    adapterClassName = "com.facebook.thrift.adapter.test.StringToLongTypeAdapter",
+    typeClassName = "java.lang.Long",
+  }
+  204: adaptedInt doubleAdaptedInt_field;
+
+  @java.Adapter{
+    adapterClassName = "com.facebook.thrift.adapter.test.StringToLongTypeAdapter",
+    typeClassName = "java.lang.Long",
+  }
+  205: adaptedInt doubleAdaptedInt_default = 3000;
+
+  206: doubleTypedefInt doubleTypedefAdaptedInt_field;
+  207: multipleTypedefInt multipleTypedefAdaptedInt_field;
+  208: multipleTypedefInt multipleTypedefAdaptedInt_default = 50;
+
+  @java.Adapter{
+    adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter',
+    typeClassName = 'com.facebook.thrift.adapter.test.Wrapper',
+  }
+  300: double generic_adapter_field;
 }

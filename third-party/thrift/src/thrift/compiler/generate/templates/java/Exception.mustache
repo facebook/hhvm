@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 import org.apache.thrift.*;
 import org.apache.thrift.transport.*;
 import org.apache.thrift.protocol.*;
+import com.google.common.collect.*;
 
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct("{{struct:name}}"){{> common/ObjectCustomAnnotation}}
@@ -36,6 +37,7 @@ public final class {{struct:javaCapitalName}} extends org.apache.thrift.TBaseExc
     {{#struct:enableIsSet?}}
     private BitSet __isset_bit_vector = new BitSet();
     {{/struct:enableIsSet?}}
+    {{> struct/AdapterDefinition}}
 
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();

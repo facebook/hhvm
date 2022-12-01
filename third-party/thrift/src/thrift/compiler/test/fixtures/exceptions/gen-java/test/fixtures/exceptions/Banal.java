@@ -15,13 +15,14 @@ import javax.annotation.Nullable;
 import org.apache.thrift.*;
 import org.apache.thrift.transport.*;
 import org.apache.thrift.protocol.*;
+import com.google.common.collect.*;
 
 @SwiftGenerated
 @com.facebook.swift.codec.ThriftStruct("Banal")
 public final class Banal extends org.apache.thrift.TBaseException implements com.facebook.thrift.payload.ThriftSerializable {
     private static final long serialVersionUID = 1L;
 
-
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();

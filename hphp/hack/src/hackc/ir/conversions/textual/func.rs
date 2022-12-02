@@ -29,7 +29,9 @@ use ir::Instr;
 use ir::InstrId;
 use ir::LocId;
 use ir::LocalId;
+use ir::SpecialClsRef;
 use ir::StringInterner;
+use ir::UnitBytesId;
 use ir::ValueId;
 use itertools::Itertools;
 use log::trace;
@@ -60,33 +62,24 @@ pub(crate) fn write_function(
 ) -> Result {
     trace!("Convert Function {}", function.name.as_bstr(&state.strings));
 
+    let func = lower::lower_func(function.func, None, Arc::clone(&state.strings));
+    ir::verify::verify_func(&func, &Default::default(), &state.strings)?;
+
     write_func(
         txf,
         state,
-        &function.name.mangle(&state.strings),
+        function.name.id,
         textual::Ty::VoidPtr,
-        function.func,
+        func,
         None,
     )
 }
 
-pub(crate) fn write_func(
-    txf: &mut TextualFile<'_>,
-    unit_state: &mut UnitState,
-    name: &str,
+pub(crate) fn compute_func_params<'a>(
+    params: &Vec<ir::Param<'_>>,
+    unit_state: &'a mut UnitState,
     this_ty: textual::Ty,
-    func: ir::Func<'_>,
-    method_info: Option<Arc<MethodInfo<'_>>>,
-) -> Result {
-    let mut func = lower::lower_func(
-        func,
-        method_info.as_ref().map(Arc::clone),
-        Arc::clone(&unit_state.strings),
-    );
-    ir::verify::verify_func(&func, &Default::default(), &unit_state.strings)?;
-
-    let params = std::mem::take(&mut func.params);
-
+) -> Result<(Vec<AsciiString>, Vec<textual::Ty>, HashSet<LocalId>)> {
     // Prepend the 'this' parameter.
     let this_name = AsciiString::from_str("$this").unwrap();
     let this_lid = LocalId::Named(unit_state.strings.intern_str("$this"));
@@ -101,7 +94,20 @@ pub(crate) fn write_func(
         param_lids.insert(LocalId::Named(p.name));
     }
 
-    let params = param_names
+    Ok((param_names, param_tys, param_lids))
+}
+
+pub(crate) fn write_func(
+    txf: &mut TextualFile<'_>,
+    unit_state: &mut UnitState,
+    name: UnitBytesId,
+    this_ty: textual::Ty,
+    mut func: ir::Func<'_>,
+    method_info: Option<Arc<MethodInfo<'_>>>,
+) -> Result {
+    let params = std::mem::take(&mut func.params);
+    let (param_names, param_tys, param_lids) = compute_func_params(&params, unit_state, this_ty)?;
+    let tx_params = param_names
         .iter()
         .map(|s| s.as_str())
         .zip(param_tys.iter())
@@ -128,17 +134,98 @@ pub(crate) fn write_func(
     let base_ty = textual::Ty::HackMixedPtr;
     locals.push((base, &base_ty));
 
+    let name_str = if let Some(method_info) = method_info.as_ref() {
+        ir::MethodId::new(name).mangle_with_class(
+            method_info.class.name,
+            method_info.is_static,
+            &unit_state.strings,
+        )
+    } else {
+        ir::FunctionId::new(name).mangle(&unit_state.strings)
+    };
+
     let span = func.loc(func.loc_id).clone();
-    txf.define_function(name, &span, &params, &ret_ty, &locals, |fb| {
-        let mut func = rewrite_jmp_ops(func);
-        ir::passes::clean::run(&mut func);
+    txf.define_function(&name_str, &span, &tx_params, &ret_ty, &locals, {
+        let method_info = method_info.as_ref().map(Arc::clone);
+        |fb| {
+            let mut func = rewrite_jmp_ops(func);
+            ir::passes::clean::run(&mut func);
 
-        let mut state = FuncState::new(fb, Arc::clone(&unit_state.strings), &func, method_info);
+            let mut state = FuncState::new(fb, Arc::clone(&unit_state.strings), &func, method_info);
 
-        for bid in func.block_ids() {
-            write_block(&mut state, bid)?;
+            for bid in func.block_ids() {
+                write_block(&mut state, bid)?;
+            }
+
+            Ok(())
         }
+    })?;
 
+    // For a static method also generate an instance stub which forwards to the
+    // static method.
+
+    if let Some(method_info) = &method_info {
+        if method_info.is_static == IsStatic::Static {
+            write_instance_stub(
+                txf,
+                unit_state,
+                name,
+                method_info,
+                &tx_params,
+                &ret_ty,
+                &span,
+            )?;
+        }
+    }
+
+    Ok(())
+}
+
+/// For each static method we also write a non-static version of the method so
+/// that callers of 'self::foo()' don't have to know if foo is static or
+/// non-static.
+fn write_instance_stub(
+    txf: &mut TextualFile<'_>,
+    unit_state: &mut UnitState,
+    name: UnitBytesId,
+    method_info: &MethodInfo<'_>,
+    tx_params: &[(&str, &textual::Ty)],
+    ret_ty: &textual::Ty,
+    span: &ir::SrcLoc,
+) -> Result {
+    let strings = &unit_state.strings;
+    let name_str = ir::MethodId::new(name).mangle_with_class(
+        method_info.class.name,
+        IsStatic::NonStatic,
+        strings,
+    );
+
+    let mut tx_params = tx_params.to_vec();
+    let inst_ty = method_info.non_static_ty();
+    tx_params[0].1 = &inst_ty;
+
+    let locals = Vec::default();
+    txf.define_function(&name_str, span, &tx_params, ret_ty, &locals, |fb| {
+        fb.comment("forward to the static method")?;
+        let this_str = strings.intern_str("$this");
+        let this_lid = LocalId::Named(this_str);
+        let this = fb.load(&inst_ty, textual::Expr::deref(this_lid))?;
+        let static_this = hack::call_builtin(fb, hack::Builtin::GetStaticClass, [this])?;
+        let target = ir::MethodId::new(name).mangle_with_class(
+            method_info.class.name,
+            IsStatic::Static,
+            strings,
+        );
+
+        let params: Vec<Sid> = std::iter::once(Ok(static_this))
+            .chain(tx_params.iter().skip(1).map(|(name, ty)| {
+                let lid = LocalId::Named(strings.intern_str(*name));
+                fb.load(ty, textual::Expr::deref(lid))
+            }))
+            .try_collect()?;
+
+        let call = fb.call(&target, params)?;
+        fb.ret(call)?;
         Ok(())
     })?;
 
@@ -195,6 +282,15 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
         Instr::Hhbc(Hhbc::CGetL(lid, _)) => write_load_var(state, iid, lid)?,
         Instr::Hhbc(Hhbc::IncDecL(lid, op, _)) => write_inc_dec_l(state, iid, lid, op)?,
         Instr::Hhbc(Hhbc::ResolveClass(cid, _)) => {
+            let vid = state.load_static_class(cid)?;
+            state.set_iid(iid, vid);
+        }
+        Instr::Hhbc(Hhbc::SelfCls(_)) => {
+            let method_info = state
+                .method_info
+                .as_ref()
+                .expect("SelfCls used in non-method context");
+            let cid = method_info.class.name;
             let vid = state.load_static_class(cid)?;
             state.set_iid(iid, vid);
         }
@@ -409,15 +505,7 @@ fn write_builtin(
 }
 
 fn write_load_this(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
-    let class = state
-        .method_info
-        .as_ref()
-        .expect("not in class context")
-        .class;
-    let sid = state.fb.load(
-        &class::non_static_ty(class.name, &state.strings),
-        textual::Expr::deref(textual::Var::named("$this")),
-    )?;
+    let sid = state.load_this()?;
     state.set_iid(iid, sid);
     Ok(())
 }
@@ -531,6 +619,11 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
     }
 
     let args = detail.args(operands);
+    let args = args
+        .iter()
+        .copied()
+        .map(|vid| state.lookup_vid(vid))
+        .collect_vec();
 
     let mut output = match *detail {
         CallDetail::FCallClsMethod { .. } => write_todo(state.fb, "FCallClsMethod")?,
@@ -538,26 +631,40 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
             // C::foo()
             let target = method.mangle_with_class(clsid, IsStatic::Static, &state.strings);
             let this = state.load_static_class(clsid)?;
-            let args = args
-                .iter()
-                .copied()
-                .map(|vid| state.lookup_vid(vid))
-                .collect_vec();
             state.fb.call_static(&target, this.into(), args)?
         }
         CallDetail::FCallClsMethodM { .. } => state.write_todo("TODO_FCallClsMethodM")?,
         CallDetail::FCallClsMethodS { .. } => state.write_todo("TODO_FCallClsMethodS")?,
-        CallDetail::FCallClsMethodSD { .. } => state.write_todo("TODO_FCallClsMethodSD")?,
+        CallDetail::FCallClsMethodSD { clsref, method } => match clsref {
+            SpecialClsRef::SelfCls => {
+                // self::foo() - Static call to the method in the current class.
+                let mi = state.expect_method_info();
+                let target = method.mangle_with_class(mi.class.name, mi.is_static, &state.strings);
+                let this = state.load_this()?;
+                state.fb.call_static(&target, this.into(), args)?
+            }
+            SpecialClsRef::LateBoundCls => {
+                // static::foo() - Virtual call to the method in the current class.
+                let mi = state.expect_method_info();
+                let target = method.mangle_with_class(mi.class.name, mi.is_static, &state.strings);
+                let this = state.load_this()?;
+                state.fb.call_virtual(&target, this.into(), args)?
+            }
+            SpecialClsRef::ParentCls => {
+                // parent::foo() - Static call to the method in the parent class.
+                let mi = state.expect_method_info();
+                let target =
+                    method.mangle_with_class(mi.class.base.unwrap(), mi.is_static, &state.strings);
+                let this = state.load_this()?;
+                state.fb.call_static(&target, this.into(), args)?
+            }
+            _ => unreachable!(),
+        },
         CallDetail::FCallCtor => unreachable!(),
         CallDetail::FCallFunc => state.write_todo("TODO_FCallFunc")?,
         CallDetail::FCallFuncD { func } => {
             // foo()
             let target = func.mangle(&state.strings);
-            let args = args
-                .iter()
-                .copied()
-                .map(|vid| state.lookup_vid(vid))
-                .collect_vec();
             // A top-level function is called like a class static in a special
             // top-level class. Its 'this' pointer is null.
             state.fb.call_static(&target, textual::Expr::null(), args)?
@@ -576,11 +683,6 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
             let ty = ClassName::new(Str::new(b"HackMixed"));
             let target = method.mangle_with_class(&ty, IsStatic::NonStatic, &state.strings);
             let obj = state.lookup_vid(detail.obj(operands));
-            let args = args
-                .iter()
-                .copied()
-                .map(|vid| state.lookup_vid(vid))
-                .collect_vec();
             state.fb.call_virtual(&target, obj, args)?
         }
     };
@@ -665,12 +767,24 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
         self.set_iid(iid, expr);
     }
 
+    fn expect_method_info(&self) -> &MethodInfo<'_> {
+        self.method_info.as_ref().expect("not in class context")
+    }
+
     fn load_static_class(&mut self, cid: ClassId) -> Result<textual::Sid> {
         class::load_static_class(self.fb, cid, &self.strings)
     }
 
     pub(crate) fn load_mixed(&mut self, src: impl Into<textual::Expr>) -> Result<Sid> {
         self.fb.load(&textual::Ty::HackMixedPtr, src)
+    }
+
+    fn load_this(&mut self) -> Result<textual::Sid> {
+        let var = textual::Var::named("$this");
+        let mi = self.expect_method_info();
+        let ty = mi.class_ty();
+        let this = self.fb.load(&ty, textual::Expr::deref(var))?;
+        Ok(this)
     }
 
     pub(crate) fn lookup_iid(&self, iid: InstrId) -> textual::Expr {
@@ -816,6 +930,17 @@ fn rewrite_jmp_ops<'a>(mut func: ir::Func<'a>) -> ir::Func<'a> {
 pub(crate) struct MethodInfo<'a> {
     pub(crate) class: &'a ir::Class<'a>,
     pub(crate) is_static: IsStatic,
+    pub(crate) strings: Arc<ir::StringInterner>,
+}
+
+impl MethodInfo<'_> {
+    pub(crate) fn non_static_ty(&self) -> textual::Ty {
+        class::non_static_ty(self.class.name, &self.strings)
+    }
+
+    pub(crate) fn class_ty(&self) -> textual::Ty {
+        class::class_ty(self.class.name, self.is_static, &self.strings)
+    }
 }
 
 /// Compare locals such that named ones go first followed by unnamed ones.

@@ -6,12 +6,16 @@
 use std::sync::Arc;
 
 use ir::func_builder::TransformInstr;
+use ir::instr::CallDetail;
 use ir::instr::CmpOp;
 use ir::instr::HasLoc;
 use ir::instr::HasOperands;
 use ir::instr::Hhbc;
 use ir::instr::Terminator;
+use ir::BareThisOp;
+use ir::Call;
 use ir::Constant;
+use ir::FCallArgsFlags;
 use ir::Func;
 use ir::FuncBuilder;
 use ir::FuncBuilderEx as _;
@@ -20,7 +24,10 @@ use ir::InstrId;
 use ir::IsTypeOp;
 use ir::LocId;
 use ir::LocalId;
+use ir::MethodId;
+use ir::ObjMethodOp;
 use ir::SpecialClsRef;
+use ir::UnitBytesId;
 use ir::ValueId;
 
 use super::func_builder::FuncBuilderEx as _;
@@ -155,6 +162,20 @@ impl LowerInstrs<'_> {
         builder.emit_hack_builtin(hack::Builtin::VerifyTypePred, &[obj, pred], loc);
         Instr::copy(obj)
     }
+
+    fn emit_special_cls_ref(
+        &mut self,
+        builder: &mut FuncBuilder<'_>,
+        clsref: SpecialClsRef,
+        loc: LocId,
+    ) -> ValueId {
+        match clsref {
+            SpecialClsRef::SelfCls => builder.emit(Instr::Hhbc(Hhbc::SelfCls(loc))),
+            SpecialClsRef::LateBoundCls => builder.emit(Instr::Hhbc(Hhbc::LateBoundCls(loc))),
+            SpecialClsRef::ParentCls => builder.emit(Instr::Hhbc(Hhbc::ParentCls(loc))),
+            _ => unreachable!(),
+        }
+    }
 }
 
 impl TransformInstr for LowerInstrs<'_> {
@@ -167,15 +188,18 @@ impl TransformInstr for LowerInstrs<'_> {
         }
 
         let instr = match instr {
+            // NOTE: Be careful trying to lower most Instr::Call - the details
+            // matter and it's hard to rewrite them to preserve those details
+            // properly.
             Instr::Call(
-                box mut call @ ir::Call {
-                    detail: ir::instr::CallDetail::FCallCtor,
+                box mut call @ Call {
+                    detail: CallDetail::FCallCtor,
                     ..
                 },
             ) => {
-                let flavor = ir::ObjMethodOp::NullThrows;
-                let method = ir::MethodId::from_str("__construct", &builder.strings);
-                call.detail = ir::instr::CallDetail::FCallObjMethodD { flavor, method };
+                let flavor = ObjMethodOp::NullThrows;
+                let method = MethodId::from_str("__construct", &builder.strings);
+                call.detail = CallDetail::FCallObjMethodD { flavor, method };
                 Instr::Call(Box::new(call))
             }
             Instr::Hhbc(Hhbc::BareThis(_op, loc)) => {
@@ -185,7 +209,7 @@ impl TransformInstr for LowerInstrs<'_> {
             }
             Instr::Hhbc(Hhbc::CheckThis(loc)) => {
                 let builtin = hack::Hhbc::CheckThis;
-                let op = ir::BareThisOp::NoNotice;
+                let op = BareThisOp::NoNotice;
                 let this = builder.emit(Instr::Hhbc(Hhbc::BareThis(op, loc)));
                 builder.hhbc_builtin(builtin, &[this], loc)
             }
@@ -210,13 +234,13 @@ impl TransformInstr for LowerInstrs<'_> {
                 Instr::copy(obj)
             }
             Instr::Hhbc(Hhbc::NewObj(cls, loc)) => {
-                let method = ir::MethodId::from_str("__factory", &builder.strings);
+                let method = MethodId::from_str("__factory", &builder.strings);
                 let operands = vec![cls].into_boxed_slice();
-                let context = ir::UnitBytesId::NONE;
-                let flavor = ir::ObjMethodOp::NullThrows;
-                let detail = ir::instr::CallDetail::FCallObjMethodD { flavor, method };
-                let flags = ir::FCallArgsFlags::default();
-                Instr::Call(Box::new(ir::instr::Call {
+                let context = UnitBytesId::NONE;
+                let flavor = ObjMethodOp::NullThrows;
+                let detail = CallDetail::FCallObjMethodD { flavor, method };
+                let flags = FCallArgsFlags::default();
+                Instr::Call(Box::new(Call {
                     operands,
                     context,
                     detail,
@@ -229,13 +253,13 @@ impl TransformInstr for LowerInstrs<'_> {
             }
             Instr::Hhbc(Hhbc::NewObjD(clsid, loc)) => {
                 let cls = builder.emit(Instr::Hhbc(Hhbc::ResolveClass(clsid, loc)));
-                let method = ir::MethodId::from_str("__factory", &builder.strings);
+                let method = MethodId::from_str("__factory", &builder.strings);
                 let operands = vec![cls].into_boxed_slice();
-                let context = ir::UnitBytesId::NONE;
-                let flavor = ir::ObjMethodOp::NullThrows;
-                let detail = ir::instr::CallDetail::FCallObjMethodD { flavor, method };
-                let flags = ir::FCallArgsFlags::default();
-                Instr::Call(Box::new(ir::instr::Call {
+                let context = UnitBytesId::NONE;
+                let flavor = ObjMethodOp::NullThrows;
+                let detail = CallDetail::FCallObjMethodD { flavor, method };
+                let flags = FCallArgsFlags::default();
+                Instr::Call(Box::new(Call {
                     operands,
                     context,
                     detail,
@@ -247,14 +271,7 @@ impl TransformInstr for LowerInstrs<'_> {
                 }))
             }
             Instr::Hhbc(Hhbc::NewObjS(clsref, loc)) => {
-                let cls = match clsref {
-                    SpecialClsRef::SelfCls => builder.emit(Instr::Hhbc(Hhbc::SelfCls(loc))),
-                    SpecialClsRef::LateBoundCls => {
-                        builder.emit(Instr::Hhbc(Hhbc::LateBoundCls(loc)))
-                    }
-                    SpecialClsRef::ParentCls => builder.emit(Instr::Hhbc(Hhbc::ParentCls(loc))),
-                    _ => unreachable!(),
-                };
+                let cls = self.emit_special_cls_ref(builder, clsref, loc);
                 Instr::Hhbc(Hhbc::NewObj(cls, loc))
             }
             Instr::Hhbc(Hhbc::VerifyOutType(vid, lid, loc)) => {

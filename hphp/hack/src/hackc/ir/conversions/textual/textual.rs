@@ -58,7 +58,7 @@ impl<'a> TextualFile<'a> {
             sep = ", ";
         }
 
-        writeln!(self.w, "): {}", FmtTy(&ret_ty))?;
+        writeln!(self.w, "): {}", FmtTy(ret_ty))?;
         Ok(())
     }
 
@@ -92,7 +92,7 @@ impl<'a> TextualFile<'a> {
             write!(self.w, "{sep}{name}: {ty}", ty = FmtTy(ty))?;
             sep = ", ";
         }
-        writeln!(self.w, ") : {} {{", FmtTy(&ret_ty))?;
+        writeln!(self.w, ") : {} {{", FmtTy(ret_ty))?;
 
         if !locals.is_empty() {
             let mut sep = "";
@@ -745,7 +745,7 @@ impl FuncBuilder<'_, '_> {
             self.txf.w,
             "{INDENT}{dst}: {ty} = load ",
             dst = FmtSid(dst),
-            ty = FmtTy(&ty),
+            ty = FmtTy(ty),
         )?;
         self.write_expr(&src)?;
         writeln!(self.txf.w)?;
@@ -790,7 +790,7 @@ impl FuncBuilder<'_, '_> {
         self.write_expr(&dst)?;
         self.txf.w.write_all(b" <- ")?;
         self.write_expr(&src)?;
-        writeln!(self.txf.w, ": {ty}", ty = FmtTy(&src_ty))?;
+        writeln!(self.txf.w, ": {ty}", ty = FmtTy(src_ty))?;
         Ok(())
     }
 

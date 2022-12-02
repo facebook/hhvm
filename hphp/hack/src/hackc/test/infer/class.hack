@@ -88,6 +88,17 @@ class C {
   // CHECK: define C$static.static_signature($this: *C$static, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
   // Lots of stuff elided here...
   // CHECK: }
+  //
+  // CHECK: define C.static_signature($this: *C, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
+  // CHECK-NEXT: #b0:
+  // CHECK-NEXT: // forward to the static method
+  // CHECK-NEXT:   n0: *C = load &$this
+  // CHECK-NEXT:   n1 = $builtins.hack_get_static_class(n0)
+  // CHECK-NEXT:   n2: *HackMixed = load &$a
+  // CHECK-NEXT:   n3: *HackMixed = load &$b
+  // CHECK-NEXT:   n4 = C$static.static_signature(n1, n2, n3)
+  // CHECK-NEXT:   ret n4
+  // CHECK-NEXT: }
   public static function static_signature(mixed $a, mixed $b): void {
     if ($a == $b) {
       echo "equal";

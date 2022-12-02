@@ -20,6 +20,7 @@ use super::func;
 use super::hack;
 use super::textual;
 use crate::func::MethodInfo;
+use crate::lower;
 use crate::mangle::Mangle;
 use crate::mangle::MangleClass as _;
 use crate::mangle::MangleWithClass as _;
@@ -88,7 +89,11 @@ pub(crate) fn static_ty(class: ir::ClassId, strings: &ir::StringInterner) -> tex
     textual::Ty::Ptr(Box::new(textual::Ty::Type(cname)))
 }
 
-fn class_ty(class: ir::ClassId, is_static: IsStatic, strings: &ir::StringInterner) -> textual::Ty {
+pub(crate) fn class_ty(
+    class: ir::ClassId,
+    is_static: IsStatic,
+    strings: &ir::StringInterner,
+) -> textual::Ty {
     match is_static {
         IsStatic::Static => static_ty(class, strings),
         IsStatic::NonStatic => non_static_ty(class, strings),
@@ -253,18 +258,22 @@ fn write_method(
     };
 
     let this_ty = class_ty(class.name, is_static, &state.strings);
-    let method_info = Arc::new(MethodInfo { class, is_static });
+    let method_info = Arc::new(MethodInfo {
+        class,
+        is_static,
+        strings: Arc::clone(&state.strings),
+    });
 
-    func::write_func(
-        txf,
-        state,
-        &method
-            .name
-            .mangle_with_class(class.name, is_static, &state.strings),
-        this_ty,
+    let func = lower::lower_func(
         method.func,
-        Some(method_info),
-    )
+        Some(Arc::clone(&method_info)),
+        Arc::clone(&state.strings),
+    );
+    ir::verify::verify_func(&func, &Default::default(), &state.strings)?;
+
+    func::write_func(txf, state, method.name.id, this_ty, func, Some(method_info))?;
+
+    Ok(())
 }
 
 /// Loads the static singleton for a class.

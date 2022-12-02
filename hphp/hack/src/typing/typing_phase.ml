@@ -949,6 +949,16 @@ and check_tparams_constraints ~use_pos ~ety_env env tparams =
 
 and check_where_constraints
     ~in_class ~use_pos ~ety_env ~definition_pos env cstrl =
+  let ety_env =
+    let on_error =
+      Some
+        (Typing_error.Reasons_callback.explain_where_constraint
+           use_pos
+           ~in_class
+           ~decl_pos:definition_pos)
+    in
+    { ety_env with on_error }
+  in
   let (env, ty_errs) =
     List.fold_left
       cstrl

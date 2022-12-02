@@ -48,6 +48,8 @@ pub(crate) enum Hhbc {
     CmpNeq,
     #[decl(fn hhbc_cmp_same(*HackMixed, *HackMixed) -> *HackMixed)]
     CmpSame,
+    #[decl(fn hhbc_combine_and_resolve_type_struct(...) -> *HackMixed)]
+    CombineAndResolveTypeStruct,
     #[decl(fn hhbc_concat(*HackMixed, *HackMixed) -> *HackMixed)]
     Concat,
     #[decl(fn hhbc_div(*HackMixed, *HackMixed) -> *HackMixed)]
@@ -120,6 +122,8 @@ pub(crate) enum Hhbc {
     Not,
     #[decl(fn hhbc_print(*HackMixed) -> *HackMixed)]
     Print,
+    #[decl(fn hhbc_record_reified_generic(*HackMixed) -> *HackMixed)]
+    RecordReifiedGeneric,
     #[decl(fn hhbc_sub(*HackMixed, *HackMixed) -> *HackMixed)]
     Sub,
     #[decl(fn hhbc_throw(*HackMixed) -> noreturn)]

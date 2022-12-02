@@ -80,6 +80,7 @@ impl LowerInstrs<'_> {
             Hhbc::CmpOp(_, CmpOp::NSame, _) => hack::Hhbc::CmpNSame,
             Hhbc::CmpOp(_, CmpOp::Neq, _) => hack::Hhbc::CmpNeq,
             Hhbc::CmpOp(_, CmpOp::Same, _) => hack::Hhbc::CmpSame,
+            Hhbc::CombineAndResolveTypeStruct(..) => hack::Hhbc::CombineAndResolveTypeStruct,
             Hhbc::Concat(..) => hack::Hhbc::Concat,
             Hhbc::Div(..) => hack::Hhbc::Div,
             Hhbc::GetClsRGProp(..) => hack::Hhbc::GetClsRGProp,
@@ -106,6 +107,7 @@ impl LowerInstrs<'_> {
             Hhbc::NewVec(..) => hack::Hhbc::NewVec,
             Hhbc::Not(..) => hack::Hhbc::Not,
             Hhbc::Print(..) => hack::Hhbc::Print,
+            Hhbc::RecordReifiedGeneric(..) => hack::Hhbc::RecordReifiedGeneric,
             Hhbc::Sub(..) => hack::Hhbc::Sub,
             _ => return None,
         };
@@ -160,6 +162,18 @@ impl LowerInstrs<'_> {
         let return_type = builder.func.return_type.enforced.clone();
         let pred = builder.emit_is(obj, &return_type, loc);
         builder.emit_hack_builtin(hack::Builtin::VerifyTypePred, &[obj, pred], loc);
+        Instr::copy(obj)
+    }
+
+    fn verify_ret_type_ts(
+        &self,
+        builder: &mut FuncBuilder<'_>,
+        obj: ValueId,
+        ts: ValueId,
+        loc: LocId,
+    ) -> Instr {
+        let builtin = hack::Hhbc::VerifyParamTypeTS;
+        builder.emit_hhbc_builtin(builtin, &[obj, ts], loc);
         Instr::copy(obj)
     }
 
@@ -282,6 +296,9 @@ impl TransformInstr for LowerInstrs<'_> {
             }
             Instr::Hhbc(Hhbc::VerifyRetTypeC(vid, loc)) => {
                 self.verify_ret_type_c(builder, vid, loc)
+            }
+            Instr::Hhbc(Hhbc::VerifyRetTypeTS([obj, ts], loc)) => {
+                self.verify_ret_type_ts(builder, obj, ts, loc)
             }
             Instr::Terminator(Terminator::Exit(ops, loc)) => {
                 let builtin = hack::Hhbc::Exit;

@@ -24,14 +24,20 @@ type file_type = Rust_provider_backend.File.file_type =
 
 exception File_provider_stale
 
-module FileHeap =
-  SharedMem.Heap
-    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (Relative_path.S)
-    (struct
-      type t = file_type
+module FileHeap = struct
+  include
+    SharedMem.Heap
+      (SharedMem.ImmediateBackend (SharedMem.Evictable)) (Relative_path.S)
+      (struct
+        type t = file_type
 
-      let description = "File"
-    end)
+        let description = "File"
+      end)
+
+  let replace_nonatomic key value =
+    if mem key then remove key;
+    add key value
+end
 
 let read_file_contents_from_disk (fn : Relative_path.t) : string option =
   try Some (Sys_utils.cat (Relative_path.to_absolute fn)) with
@@ -122,7 +128,7 @@ let provide_file_for_tests fn contents =
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
-    FileHeap.add fn (Disk contents)
+    FileHeap.replace_nonatomic fn (Disk contents)
   | Provider_backend.Rust_provider_backend backend ->
     Rust_provider_backend.File.provide_file_for_tests backend fn contents
   | Provider_backend.Local_memory _

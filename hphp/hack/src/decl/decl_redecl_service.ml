@@ -153,7 +153,11 @@ let compare_decls_and_get_fanout
   let (old_funs, old_types, old_consts, old_modules) =
     match Provider_backend.get () with
     | Provider_backend.Rust_provider_backend be ->
-      Rust_provider_backend.Decl.get_old_defs be all_defs
+      let non_class_defs = FileInfo.{ all_defs with n_classes = SSet.empty } in
+      let (_classes, old_funs, old_types, old_consts, old_modules) =
+        Rust_provider_backend.Decl.get_old_defs be non_class_defs
+      in
+      (old_funs, old_types, old_consts, old_modules)
     | _ ->
       ( Decl_heap.Funs.get_old_batch n_funs,
         Decl_heap.Typedefs.get_old_batch n_types,
@@ -337,7 +341,7 @@ let[@warning "-21"] oldify_defs (* -21 for dune stubs *)
     ~(collect_garbage : bool) : unit =
   match Provider_backend.get () with
   | Provider_backend.Rust_provider_backend be ->
-    Rust_provider_backend.Decl.oldify_defs be (names, elems)
+    Rust_provider_backend.Decl.oldify_defs be names
   | _ ->
     Decl_heap.Funs.oldify_batch n_funs;
     Decl_class_elements.oldify_all elems;
@@ -355,7 +359,7 @@ let[@warning "-21"] remove_old_defs (* -21 for dune stubs *)
     (elems : Decl_class_elements.t SMap.t) : unit =
   match Provider_backend.get () with
   | Provider_backend.Rust_provider_backend be ->
-    Rust_provider_backend.Decl.remove_old_defs be (names, elems)
+    Rust_provider_backend.Decl.remove_old_defs be names
   | _ ->
     Decl_heap.Funs.remove_old_batch n_funs;
     Decl_class_elements.remove_old_all elems;
@@ -374,7 +378,7 @@ let[@warning "-21"] remove_defs (* -21 for dune stubs *)
     ~(collect_garbage : bool) : unit =
   match Provider_backend.get () with
   | Provider_backend.Rust_provider_backend be ->
-    Rust_provider_backend.Decl.remove_defs be (names, elems)
+    Rust_provider_backend.Decl.remove_defs be names
   | _ ->
     Decl_heap.Funs.remove_batch n_funs;
     Decl_class_elements.remove_all elems;

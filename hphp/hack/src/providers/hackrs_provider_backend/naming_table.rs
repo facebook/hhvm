@@ -83,7 +83,7 @@ impl NamingTable {
     }
 
     pub fn set_db_path(&self, db_path: PathBuf) -> Result<()> {
-        Ok(self.db.set_db_path(db_path)?)
+        self.db.set_db_path(db_path)
     }
 
     pub fn add_type(

@@ -1,0 +1,4 @@
+File "override_attr_09.php", line 17, characters 7-8:
+`ATr::foo` is marked `__Override` but `C1` does not define or inherit a `foo` method. (Typing[4071])
+  File "", line 0, characters 0-0:
+  Declaration of `foo` is here

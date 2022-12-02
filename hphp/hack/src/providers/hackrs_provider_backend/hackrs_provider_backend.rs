@@ -8,6 +8,7 @@ pub mod naming_table;
 #[cfg(test)]
 mod test_naming_table;
 
+use std::collections::BTreeMap;
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -26,11 +27,6 @@ use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use oxidized::global_options::GlobalOptions;
 use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
-use pos::ConstName;
-use pos::FunName;
-use pos::MethodName;
-use pos::ModuleName;
-use pos::PropName;
 use pos::RelativePath;
 use pos::RelativePathCtx;
 use pos::TypeName;
@@ -88,8 +84,7 @@ impl HhServerProviderBackend {
         let dependency_graph = Arc::new(depgraph_api::NoDepGraph::new());
         let naming_table = Arc::new(NamingTable::new(db_path)?);
 
-        let shallow_decl_changes_store =
-            Arc::new(ShallowStoreWithChanges::new(opts.tco_populate_member_heaps));
+        let shallow_decl_changes_store = Arc::new(ShallowStoreWithChanges::new());
         let shallow_decl_store = shallow_decl_changes_store.as_shallow_decl_store();
 
         let lazy_shallow_decl_provider = Arc::new(LazyShallowDeclProvider::new(
@@ -194,517 +189,36 @@ impl HhServerProviderBackend {
         self.folded_classes_store.pop_local_changes();
     }
 
-    // ---
-    // Deletion support
-
-    pub fn oldify_funs_batch(&self, names: &[FunName]) -> Result<()> {
-        let funs: &ChangesStore<FunName, _> = &self.shallow_decl_changes_store.funs;
-        let mut moves = Vec::new();
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = FunName::new(format!("old${}", name));
-            if funs.contains_key(name)? {
-                moves.push((name, old_name));
-            } else if funs.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        funs.move_batch(&mut moves.into_iter())?;
-        funs.remove_batch(&mut deletes.into_iter())?;
-        Ok(())
-    }
-    pub fn remove_funs_batch(&self, names: &[FunName]) -> Result<()> {
-        self.shallow_decl_changes_store
-            .funs
-            .remove_batch(&mut names.iter().copied())
-    }
-    pub fn get_old_funs_batch(
-        &self,
-        names: &[FunName],
-    ) -> Result<std::collections::BTreeMap<FunName, Option<Arc<decl::FunDecl<BR>>>>> {
-        let funs: &ChangesStore<FunName, _> = &self.shallow_decl_changes_store.funs;
-        let mut res = std::collections::BTreeMap::new();
-        for &name in names.iter() {
-            let old_name = FunName::new(format!("old${}", name));
-            res.insert(name, funs.get(old_name)?);
-        }
-        Ok(res)
-    }
-    pub fn remove_old_funs_batch(&self, names: &[FunName]) -> Result<()> {
-        let funs: &ChangesStore<FunName, _> = &self.shallow_decl_changes_store.funs;
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = FunName::new(format!("old${}", name));
-            if funs.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        funs.remove_batch(&mut deletes.into_iter())
-    }
-
-    pub fn oldify_shallow_classes_batch(&self, names: &[TypeName]) -> Result<()> {
-        let classes: &ChangesStore<TypeName, _> = &self.shallow_decl_changes_store.classes;
-        let mut moves = Vec::new();
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = TypeName::new(format!("old${}", name));
-            if classes.contains_key(name)? {
-                moves.push((name, old_name));
-            } else if classes.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        classes.move_batch(&mut moves.into_iter())?;
-        classes.remove_batch(&mut deletes.iter().copied())?;
-        Ok(())
-    }
-    pub fn get_old_shallow_classes_batch(
-        &self,
-        names: &[TypeName],
-    ) -> Result<std::collections::BTreeMap<TypeName, Option<Arc<decl::ShallowClass<BR>>>>> {
-        let classes: &ChangesStore<TypeName, _> = &self.shallow_decl_changes_store.classes;
-        let mut res = std::collections::BTreeMap::new();
-        for &name in names.iter() {
-            let old_name = TypeName::new(format!("old${}", name));
-            res.insert(name, classes.get(old_name)?);
-        }
-        Ok(res)
-    }
-    pub fn remove_shallow_classes_batch(&self, names: &[TypeName]) -> Result<()> {
-        self.shallow_decl_changes_store
-            .classes
-            .remove_batch(&mut names.iter().copied())
-    }
-    pub fn remove_old_shallow_classes_batch(&self, names: &[TypeName]) -> Result<()> {
-        let classes: &ChangesStore<TypeName, _> = &self.shallow_decl_changes_store.classes;
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = TypeName::new(format!("old${}", name));
-            if classes.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        classes.remove_batch(&mut deletes.into_iter())
-    }
-
-    pub fn oldify_folded_classes_batch(&self, names: &[TypeName]) -> Result<()> {
-        let classes: &ChangesStore<TypeName, _> = &self.folded_classes_store;
-        let mut moves = Vec::new();
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = TypeName::new(format!("old${}", name));
-            if classes.contains_key(name)? {
-                moves.push((name, old_name));
-            } else if classes.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        classes.move_batch(&mut moves.into_iter())?;
-        classes.remove_batch(&mut deletes.iter().copied())?;
-        Ok(())
-    }
-    pub fn get_old_folded_classes_batch(
-        &self,
-        names: &[TypeName],
-    ) -> Result<std::collections::BTreeMap<TypeName, Option<Arc<FoldedClass<BR>>>>> {
-        let classes: &ChangesStore<TypeName, _> = &self.folded_classes_store;
-        let mut res = std::collections::BTreeMap::new();
-        for &name in names.iter() {
-            let old_name = TypeName::new(format!("old${}", name));
-            res.insert(name, classes.get(old_name)?);
-        }
-        Ok(res)
-    }
-    pub fn remove_folded_classes_batch(&self, names: &[TypeName]) -> Result<()> {
+    pub fn oldify_defs(&self, names: &file_info::Names) -> Result<()> {
         self.folded_classes_store
-            .remove_batch(&mut names.iter().copied())
-    }
-    pub fn remove_old_folded_classes_batch(&self, names: &[TypeName]) -> Result<()> {
-        let classes: &ChangesStore<TypeName, _> = &self.folded_classes_store;
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = TypeName::new(format!("old${}", name));
-            if classes.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        classes.remove_batch(&mut deletes.into_iter())
+            .remove_batch(&mut names.classes.iter().map(Into::into))?;
+        self.shallow_decl_changes_store.oldify_defs(names)
     }
 
-    pub fn oldify_typedefs_batch(&self, names: &[TypeName]) -> Result<()> {
-        let typedefs: &ChangesStore<TypeName, _> = &self.shallow_decl_changes_store.typedefs;
-        let mut moves = Vec::new();
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = TypeName::new(format!("old${}", name));
-            if typedefs.contains_key(name)? {
-                moves.push((name, TypeName::new(format!("old${}", name))));
-            } else if typedefs.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        typedefs.move_batch(&mut moves.into_iter())?;
-        typedefs.remove_batch(&mut deletes.iter().copied())?;
-        Ok(())
+    pub fn remove_old_defs(&self, names: &file_info::Names) -> Result<()> {
+        self.folded_classes_store
+            .remove_batch(&mut names.classes.iter().map(Into::into))?;
+        self.shallow_decl_changes_store.remove_old_defs(names)
     }
-    pub fn remove_typedefs_batch(&self, names: &[TypeName]) -> Result<()> {
-        self.shallow_decl_changes_store
-            .typedefs
-            .remove_batch(&mut names.iter().copied())
+
+    pub fn remove_defs(&self, names: &file_info::Names) -> Result<()> {
+        self.folded_classes_store
+            .remove_batch(&mut names.classes.iter().map(Into::into))?;
+        self.shallow_decl_changes_store.remove_defs(names)
     }
-    pub fn get_old_typedefs_batch(
+
+    pub fn get_old_defs(
         &self,
-        names: &[TypeName],
-    ) -> Result<std::collections::BTreeMap<TypeName, Option<Arc<decl::TypedefDecl<BR>>>>> {
-        let typedefs: &ChangesStore<TypeName, _> = &self.shallow_decl_changes_store.typedefs;
-        let mut res = std::collections::BTreeMap::new();
-        for &name in names.iter() {
-            let old_name = TypeName::new(format!("old${}", name));
-            res.insert(name, typedefs.get(old_name)?);
-        }
-        Ok(res)
+        names: &file_info::Names,
+    ) -> Result<(
+        BTreeMap<pos::TypeName, Option<Arc<decl::ShallowClass<BR>>>>,
+        BTreeMap<pos::FunName, Option<Arc<decl::FunDecl<BR>>>>,
+        BTreeMap<pos::TypeName, Option<Arc<decl::TypedefDecl<BR>>>>,
+        BTreeMap<pos::ConstName, Option<Arc<decl::ConstDecl<BR>>>>,
+        BTreeMap<pos::ModuleName, Option<Arc<decl::ModuleDecl<BR>>>>,
+    )> {
+        self.shallow_decl_changes_store.get_old_defs(names)
     }
-    pub fn remove_old_typedefs_batch(&self, names: &[TypeName]) -> Result<()> {
-        let typedefs: &ChangesStore<TypeName, _> = &self.shallow_decl_changes_store.typedefs;
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = TypeName::new(format!("old${}", name));
-            if typedefs.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        typedefs.remove_batch(&mut deletes.into_iter())
-    }
-
-    pub fn oldify_gconsts_batch(&self, names: &[ConstName]) -> Result<()> {
-        let consts: &ChangesStore<ConstName, _> = &self.shallow_decl_changes_store.consts;
-        let mut moves = Vec::new();
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = ConstName::new(format!("old${}", name));
-            if consts.contains_key(name)? {
-                moves.push((name, old_name));
-            } else if consts.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        consts.move_batch(&mut moves.into_iter())?;
-        consts.remove_batch(&mut deletes.iter().copied())?;
-        Ok(())
-    }
-    pub fn remove_gconsts_batch(&self, names: &[ConstName]) -> Result<()> {
-        self.shallow_decl_changes_store
-            .consts
-            .remove_batch(&mut names.iter().copied())
-    }
-    pub fn get_old_gconsts_batch(
-        &self,
-        names: &[ConstName],
-    ) -> Result<std::collections::BTreeMap<ConstName, Option<Arc<decl::ConstDecl<BR>>>>> {
-        let consts: &ChangesStore<ConstName, _> = &self.shallow_decl_changes_store.consts;
-        let mut res = std::collections::BTreeMap::new();
-        for &name in names.iter() {
-            let old_name = ConstName::new(format!("old${}", name));
-            res.insert(name, consts.get(old_name)?);
-        }
-        Ok(res)
-    }
-    pub fn remove_old_gconsts_batch(&self, names: &[ConstName]) -> Result<()> {
-        let consts: &ChangesStore<ConstName, _> = &self.shallow_decl_changes_store.consts;
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = ConstName::new(format!("old${}", name));
-            if consts.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        consts.remove_batch(&mut deletes.into_iter())
-    }
-
-    pub fn oldify_modules_batch(&self, names: &[ModuleName]) -> Result<()> {
-        let modules: &ChangesStore<ModuleName, _> = &self.shallow_decl_changes_store.modules;
-        let mut moves = Vec::new();
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = ModuleName::new(format!("old${}", name));
-            if modules.contains_key(name)? {
-                moves.push((name, old_name));
-            } else if modules.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        modules.move_batch(&mut moves.into_iter())?;
-        modules.remove_batch(&mut deletes.iter().copied())?;
-        Ok(())
-    }
-    pub fn remove_modules_batch(&self, names: &[ModuleName]) -> Result<()> {
-        self.shallow_decl_changes_store
-            .modules
-            .remove_batch(&mut names.iter().copied())
-    }
-    pub fn get_old_modules_batch(
-        &self,
-        names: &[ModuleName],
-    ) -> Result<std::collections::BTreeMap<ModuleName, Option<Arc<decl::ModuleDecl<BR>>>>> {
-        let modules: &ChangesStore<ModuleName, _> = &self.shallow_decl_changes_store.modules;
-        let mut res = std::collections::BTreeMap::new();
-        for &name in names.iter() {
-            let old_name = ModuleName::new(format!("old${}", name));
-            res.insert(name, modules.get(old_name)?);
-        }
-        Ok(res)
-    }
-    pub fn remove_old_modules_batch(&self, names: &[ModuleName]) -> Result<()> {
-        let modules: &ChangesStore<ModuleName, _> = &self.shallow_decl_changes_store.modules;
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = ModuleName::new(format!("old${}", name));
-            if modules.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        modules.remove_batch(&mut deletes.into_iter())
-    }
-
-    pub fn oldify_props_batch(&self, names: &[(TypeName, PropName)]) -> Result<()> {
-        let props: &ChangesStore<(TypeName, PropName), _> = &self.shallow_decl_changes_store.props;
-        let mut moves = Vec::new();
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
-            if props.contains_key(name)? {
-                moves.push((name, old_name));
-            } else if props.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        props.move_batch(&mut moves.into_iter())?;
-        props.remove_batch(&mut deletes.iter().copied())?;
-        Ok(())
-    }
-    pub fn remove_props_batch(&self, names: &[(TypeName, PropName)]) -> Result<()> {
-        self.shallow_decl_changes_store
-            .props
-            .remove_batch(&mut names.iter().copied())
-    }
-    pub fn get_old_props_batch(
-        &self,
-        names: &[(TypeName, PropName)],
-    ) -> Result<std::collections::BTreeMap<(TypeName, PropName), Option<decl::Ty<BR>>>> {
-        let props: &ChangesStore<(TypeName, PropName), _> = &self.shallow_decl_changes_store.props;
-        let mut res = std::collections::BTreeMap::new();
-        for &name in names.iter() {
-            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
-            res.insert(name, props.get(old_name)?);
-        }
-        Ok(res)
-    }
-    pub fn remove_old_props_batch(&self, names: &[(TypeName, PropName)]) -> Result<()> {
-        let props: &ChangesStore<(TypeName, PropName), _> = &self.shallow_decl_changes_store.props;
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
-            if props.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        props.remove_batch(&mut deletes.iter().copied())
-    }
-
-    pub fn oldify_static_props_batch(&self, names: &[(TypeName, PropName)]) -> Result<()> {
-        let static_props: &ChangesStore<(TypeName, PropName), _> =
-            &self.shallow_decl_changes_store.static_props;
-        let mut moves = Vec::new();
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
-            if static_props.contains_key(name)? {
-                moves.push((name, old_name));
-            } else if static_props.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        static_props.move_batch(&mut moves.into_iter())?;
-        static_props.remove_batch(&mut deletes.iter().copied())?;
-        Ok(())
-    }
-    pub fn remove_static_props_batch(&self, names: &[(TypeName, PropName)]) -> Result<()> {
-        self.shallow_decl_changes_store
-            .static_props
-            .remove_batch(&mut names.iter().copied())
-    }
-    pub fn get_old_static_props_batch(
-        &self,
-        names: &[(TypeName, PropName)],
-    ) -> Result<std::collections::BTreeMap<(TypeName, PropName), Option<decl::Ty<BR>>>> {
-        let static_props: &ChangesStore<(TypeName, PropName), _> =
-            &self.shallow_decl_changes_store.static_props;
-        let mut res = std::collections::BTreeMap::new();
-        for &name in names.iter() {
-            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
-            res.insert(name, static_props.get(old_name)?);
-        }
-        Ok(res)
-    }
-    pub fn remove_old_static_props_batch(&self, names: &[(TypeName, PropName)]) -> Result<()> {
-        let static_props: &ChangesStore<(TypeName, PropName), _> =
-            &self.shallow_decl_changes_store.static_props;
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
-            if static_props.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        static_props.remove_batch(&mut deletes.iter().copied())
-    }
-
-    pub fn oldify_methods_batch(&self, names: &[(TypeName, MethodName)]) -> Result<()> {
-        let methods: &ChangesStore<(TypeName, MethodName), _> =
-            &self.shallow_decl_changes_store.methods;
-        let mut moves = Vec::new();
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
-            if methods.contains_key(name)? {
-                moves.push((name, old_name));
-            } else if methods.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        methods.move_batch(&mut moves.into_iter())?;
-        methods.remove_batch(&mut deletes.iter().copied())?;
-        Ok(())
-    }
-    pub fn get_old_methods_batch(
-        &self,
-        names: &[(TypeName, MethodName)],
-    ) -> Result<std::collections::BTreeMap<(TypeName, MethodName), Option<decl::Ty<BR>>>> {
-        let methods: &ChangesStore<(TypeName, MethodName), _> =
-            &self.shallow_decl_changes_store.methods;
-        let mut res = std::collections::BTreeMap::new();
-        for &name in names.iter() {
-            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
-            res.insert(name, methods.get(old_name)?);
-        }
-        Ok(res)
-    }
-    pub fn remove_methods_batch(&self, names: &[(TypeName, MethodName)]) -> Result<()> {
-        self.shallow_decl_changes_store
-            .methods
-            .remove_batch(&mut names.iter().copied())
-    }
-    pub fn remove_old_methods_batch(&self, names: &[(TypeName, MethodName)]) -> Result<()> {
-        let methods: &ChangesStore<(TypeName, MethodName), _> =
-            &self.shallow_decl_changes_store.methods;
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
-            if methods.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        methods.remove_batch(&mut deletes.iter().copied())
-    }
-
-    pub fn oldify_static_methods_batch(&self, names: &[(TypeName, MethodName)]) -> Result<()> {
-        let static_methods: &ChangesStore<(TypeName, MethodName), _> =
-            &self.shallow_decl_changes_store.static_methods;
-        let mut moves = Vec::new();
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
-            if static_methods.contains_key(name)? {
-                moves.push((name, old_name));
-            } else if static_methods.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        static_methods.move_batch(&mut moves.into_iter())?;
-        static_methods.remove_batch(&mut deletes.iter().copied())?;
-        Ok(())
-    }
-    pub fn remove_static_methods_batch(&self, names: &[(TypeName, MethodName)]) -> Result<()> {
-        self.shallow_decl_changes_store
-            .static_methods
-            .remove_batch(&mut names.iter().copied())
-    }
-    pub fn get_old_static_methods_batch(
-        &self,
-        names: &[(TypeName, MethodName)],
-    ) -> Result<std::collections::BTreeMap<(TypeName, MethodName), Option<decl::Ty<BR>>>> {
-        let static_methods: &ChangesStore<(TypeName, MethodName), _> =
-            &self.shallow_decl_changes_store.static_methods;
-        let mut res = std::collections::BTreeMap::new();
-        for &name in names.iter() {
-            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
-            res.insert(name, static_methods.get(old_name)?);
-        }
-        Ok(res)
-    }
-    pub fn remove_old_static_methods_batch(&self, names: &[(TypeName, MethodName)]) -> Result<()> {
-        let static_methods: &ChangesStore<(TypeName, MethodName), _> =
-            &self.shallow_decl_changes_store.static_methods;
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
-            if static_methods.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        static_methods.remove_batch(&mut deletes.iter().copied())
-    }
-
-    pub fn oldify_constructors_batch(&self, names: &[TypeName]) -> Result<()> {
-        let constructors: &ChangesStore<TypeName, _> =
-            &self.shallow_decl_changes_store.constructors;
-        let mut moves = Vec::new();
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = TypeName::new(format!("old${}", name));
-            if constructors.contains_key(name)? {
-                moves.push((name, old_name));
-            } else if constructors.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        constructors.move_batch(&mut moves.into_iter())?;
-        constructors.remove_batch(&mut deletes.into_iter())?;
-        Ok(())
-    }
-    pub fn remove_constructors_batch(&self, names: &[TypeName]) -> Result<()> {
-        self.shallow_decl_changes_store
-            .constructors
-            .remove_batch(&mut names.iter().copied())
-    }
-    pub fn get_old_constructors_batch(
-        &self,
-        names: &[TypeName],
-    ) -> Result<std::collections::BTreeMap<TypeName, Option<decl::Ty<BR>>>> {
-        let constructors: &ChangesStore<TypeName, _> =
-            &self.shallow_decl_changes_store.constructors;
-        let mut res = std::collections::BTreeMap::new();
-        for &name in names.iter() {
-            let old_name = TypeName::new(format!("old${}", name));
-            res.insert(name, constructors.get(old_name)?);
-        }
-        Ok(res)
-    }
-    pub fn remove_old_constructors_batch(&self, names: &[TypeName]) -> Result<()> {
-        let constructors: &ChangesStore<TypeName, _> =
-            &self.shallow_decl_changes_store.constructors;
-        let mut deletes = Vec::new();
-        for &name in names.iter() {
-            let old_name = TypeName::new(format!("old${}", name));
-            if constructors.contains_key(old_name)? {
-                deletes.push(old_name);
-            }
-        }
-        constructors.remove_batch(&mut deletes.into_iter())
-    }
-
-    //
-    // ---
 }
 
 impl rust_provider_backend_api::RustProviderBackend<BR> for HhServerProviderBackend {
@@ -761,83 +275,48 @@ impl HhServerProviderBackend {
 
 #[rustfmt::skip]
 struct ShallowStoreWithChanges {
-    classes:            Arc<ChangesStore <TypeName, Arc<decl::ShallowClass<BR>>>>,
-    classes_shm:        Arc<OcamlShmStore<TypeName, Arc<decl::ShallowClass<BR>>>>,
-    typedefs:           Arc<ChangesStore <TypeName, Arc<decl::TypedefDecl<BR>>>>,
-    typedefs_shm:       Arc<OcamlShmStore<TypeName, Arc<decl::TypedefDecl<BR>>>>,
-    funs:               Arc<ChangesStore <pos::FunName, Arc<decl::FunDecl<BR>>>>,
-    funs_shm:           Arc<OcamlShmStore<pos::FunName, Arc<decl::FunDecl<BR>>>>,
-    consts:             Arc<ChangesStore <pos::ConstName, Arc<decl::ConstDecl<BR>>>>,
-    consts_shm:         Arc<OcamlShmStore<pos::ConstName, Arc<decl::ConstDecl<BR>>>>,
-    modules:            Arc<ChangesStore <pos::ModuleName, Arc<decl::ModuleDecl<BR>>>>,
-    modules_shm:        Arc<OcamlShmStore<pos::ModuleName, Arc<decl::ModuleDecl<BR>>>>,
-    props:              Arc<ChangesStore <(TypeName, pos::PropName), decl::Ty<BR>>>,
-    static_props:       Arc<ChangesStore <(TypeName, pos::PropName), decl::Ty<BR>>>,
-    methods:            Arc<ChangesStore <(TypeName, pos::MethodName), decl::Ty<BR>>>,
-    static_methods:     Arc<ChangesStore <(TypeName, pos::MethodName), decl::Ty<BR>>>,
-    constructors:       Arc<ChangesStore <TypeName, decl::Ty<BR>>>,
+    classes:      Arc<ChangesStore <TypeName, Arc<decl::ShallowClass<BR>>>>,
+    classes_shm:  Arc<OcamlShmStore<TypeName, Arc<decl::ShallowClass<BR>>>>,
+    typedefs:     Arc<ChangesStore <TypeName, Arc<decl::TypedefDecl<BR>>>>,
+    typedefs_shm: Arc<OcamlShmStore<TypeName, Arc<decl::TypedefDecl<BR>>>>,
+    funs:         Arc<ChangesStore <pos::FunName, Arc<decl::FunDecl<BR>>>>,
+    funs_shm:     Arc<OcamlShmStore<pos::FunName, Arc<decl::FunDecl<BR>>>>,
+    consts:       Arc<ChangesStore <pos::ConstName, Arc<decl::ConstDecl<BR>>>>,
+    consts_shm:   Arc<OcamlShmStore<pos::ConstName, Arc<decl::ConstDecl<BR>>>>,
+    modules:      Arc<ChangesStore <pos::ModuleName, Arc<decl::ModuleDecl<BR>>>>,
+    modules_shm:  Arc<OcamlShmStore<pos::ModuleName, Arc<decl::ModuleDecl<BR>>>>,
     store_view: Arc<ShallowDeclStore<BR>>,
 }
 
 impl ShallowStoreWithChanges {
     #[rustfmt::skip]
-    fn new(populate_member_heaps: bool) -> Self {
+    fn new() -> Self {
         use shm_store::{Compression, Evictability::{Evictable, NonEvictable}};
-        let classes_shm =        Arc::new(OcamlShmStore::new("Decl_ShallowClass", NonEvictable, Compression::default()));
-        let typedefs_shm =       Arc::new(OcamlShmStore::new("Decl_Typedef", Evictable, Compression::default()));
-        let funs_shm =           Arc::new(OcamlShmStore::new("Decl_Fun", Evictable, Compression::default()));
-        let consts_shm =         Arc::new(OcamlShmStore::new("Decl_GConst", Evictable, Compression::default()));
-        let modules_shm =        Arc::new(OcamlShmStore::new("Decl_Module", Evictable, Compression::default()));
-        let props_shm =          Arc::new(OcamlShmStore::new("Decl_Property", Evictable, Compression::default()));
-        let static_props_shm =   Arc::new(OcamlShmStore::new("Decl_StaticProperty", Evictable, Compression::default()));
-        let methods_shm =        Arc::new(OcamlShmStore::new("Decl_Method", Evictable, Compression::default()));
-        let static_methods_shm = Arc::new(OcamlShmStore::new("Decl_StaticMethod", Evictable, Compression::default()));
-        let constructors_shm =   Arc::new(OcamlShmStore::new("Decl_Constructor", Evictable, Compression::default()));
+        let classes_shm =  Arc::new(OcamlShmStore::new("Decl_ShallowClass", NonEvictable, Compression::default()));
+        let typedefs_shm = Arc::new(OcamlShmStore::new("Decl_Typedef", Evictable, Compression::default()));
+        let funs_shm =     Arc::new(OcamlShmStore::new("Decl_Fun", Evictable, Compression::default()));
+        let consts_shm =   Arc::new(OcamlShmStore::new("Decl_GConst", Evictable, Compression::default()));
+        let modules_shm =  Arc::new(OcamlShmStore::new("Decl_Module", Evictable, Compression::default()));
 
-        let classes =        Arc::new(ChangesStore::new(Arc::clone(&classes_shm) as _));
-        let typedefs =       Arc::new(ChangesStore::new(Arc::clone(&typedefs_shm) as _));
-        let funs =           Arc::new(ChangesStore::new(Arc::clone(&funs_shm) as _));
-        let consts =         Arc::new(ChangesStore::new(Arc::clone(&consts_shm) as _));
-        let modules =        Arc::new(ChangesStore::new(Arc::clone(&modules_shm) as _));
-        let props =          Arc::new(ChangesStore::new(props_shm));
-        let static_props =   Arc::new(ChangesStore::new(static_props_shm));
-        let methods =        Arc::new(ChangesStore::new(methods_shm));
-        let static_methods = Arc::new(ChangesStore::new(static_methods_shm));
-        let constructors =   Arc::new(ChangesStore::new(constructors_shm));
+        let classes =  Arc::new(ChangesStore::new(Arc::clone(&classes_shm) as _));
+        let typedefs = Arc::new(ChangesStore::new(Arc::clone(&typedefs_shm) as _));
+        let funs =     Arc::new(ChangesStore::new(Arc::clone(&funs_shm) as _));
+        let consts =   Arc::new(ChangesStore::new(Arc::clone(&consts_shm) as _));
+        let modules =  Arc::new(ChangesStore::new(Arc::clone(&modules_shm) as _));
 
-        let store_view = if populate_member_heaps {
-            Arc::new(ShallowDeclStore::new(
-                Arc::clone(&classes) as _,
-                Arc::clone(&typedefs) as _,
-                Arc::clone(&funs) as _,
-                Arc::clone(&consts) as _,
-                Arc::clone(&modules) as _,
-                Arc::clone(&props) as _,
-                Arc::clone(&static_props) as _,
-                Arc::clone(&methods) as _,
-                Arc::clone(&static_methods) as _,
-                Arc::clone(&constructors) as _,
-            ))
-        } else {
-            Arc::new(ShallowDeclStore::with_no_member_stores(
-                Arc::clone(&classes) as _,
-                Arc::clone(&typedefs) as _,
-                Arc::clone(&funs) as _,
-                Arc::clone(&consts) as _,
-                Arc::clone(&modules) as _,
-            ))
-        };
+        let store_view = Arc::new(ShallowDeclStore::with_no_member_stores(
+            Arc::clone(&classes) as _,
+            Arc::clone(&typedefs) as _,
+            Arc::clone(&funs) as _,
+            Arc::clone(&consts) as _,
+            Arc::clone(&modules) as _,
+        ));
         Self {
             classes,
             typedefs,
             funs,
             consts,
             modules,
-            props,
-            static_props,
-            methods,
-            static_methods,
-            constructors,
             classes_shm,
             typedefs_shm,
             funs_shm,
@@ -853,11 +332,6 @@ impl ShallowStoreWithChanges {
         self.funs.push_local_changes();
         self.consts.push_local_changes();
         self.modules.push_local_changes();
-        self.props.push_local_changes();
-        self.static_props.push_local_changes();
-        self.methods.push_local_changes();
-        self.static_methods.push_local_changes();
-        self.constructors.push_local_changes();
     }
 
     fn pop_local_changes(&self) {
@@ -866,15 +340,118 @@ impl ShallowStoreWithChanges {
         self.funs.pop_local_changes();
         self.consts.pop_local_changes();
         self.modules.pop_local_changes();
-        self.props.pop_local_changes();
-        self.static_props.pop_local_changes();
-        self.methods.pop_local_changes();
-        self.static_methods.pop_local_changes();
-        self.constructors.pop_local_changes();
     }
 
     fn as_shallow_decl_store(&self) -> Arc<ShallowDeclStore<BR>> {
         Arc::clone(&self.store_view)
+    }
+
+    fn to_old_key<K: AsRef<str> + From<String> + Copy>(key: K) -> K {
+        format!("old${}", key.as_ref()).into()
+    }
+
+    fn oldify<K, V>(
+        &self,
+        store: &dyn Store<K, V>,
+        names: &mut dyn Iterator<Item = K>,
+    ) -> Result<()>
+    where
+        K: AsRef<str> + From<String> + Copy,
+    {
+        let mut moves = vec![];
+        let mut deletes = vec![];
+        for name in names {
+            let old_name = Self::to_old_key(name);
+            if store.contains_key(name)? {
+                moves.push((name, old_name));
+            } else if store.contains_key(old_name)? {
+                deletes.push(old_name);
+            }
+        }
+        store.move_batch(&mut moves.into_iter())?;
+        store.remove_batch(&mut deletes.into_iter())?;
+        Ok(())
+    }
+
+    fn remove_old<K, V>(
+        &self,
+        store: &dyn Store<K, V>,
+        names: &mut dyn Iterator<Item = K>,
+    ) -> Result<()>
+    where
+        K: AsRef<str> + From<String> + Copy,
+    {
+        let mut deletes = vec![];
+        for name in names {
+            let old_name = Self::to_old_key(name);
+            if store.contains_key(old_name)? {
+                deletes.push(old_name);
+            }
+        }
+        store.remove_batch(&mut deletes.into_iter())
+    }
+
+    fn get_old<K, V>(
+        &self,
+        store: &dyn Store<K, V>,
+        names: &mut dyn Iterator<Item = K>,
+    ) -> Result<BTreeMap<K, Option<V>>>
+    where
+        K: AsRef<str> + From<String> + Copy + Ord,
+    {
+        names
+            .map(|name| Ok((name, store.get(Self::to_old_key(name))?)))
+            .collect()
+    }
+
+    #[rustfmt::skip]
+    fn oldify_defs(&self, names: &file_info::Names) -> Result<()> {
+        self.oldify(&*self.classes,  &mut names.classes.iter().map(Into::into))?;
+        self.oldify(&*self.funs,     &mut names.funs.iter().map(Into::into))?;
+        self.oldify(&*self.typedefs, &mut names.types.iter().map(Into::into))?;
+        self.oldify(&*self.consts,   &mut names.consts.iter().map(Into::into))?;
+        self.oldify(&*self.modules,  &mut names.modules.iter().map(Into::into))?;
+        Ok(())
+    }
+
+    #[rustfmt::skip]
+    fn remove_old_defs(&self, names: &file_info::Names) -> Result<()> {
+        self.remove_old(&*self.classes,  &mut names.classes.iter().map(Into::into))?;
+        self.remove_old(&*self.funs,     &mut names.funs.iter().map(Into::into))?;
+        self.remove_old(&*self.typedefs, &mut names.types.iter().map(Into::into))?;
+        self.remove_old(&*self.consts,   &mut names.consts.iter().map(Into::into))?;
+        self.remove_old(&*self.modules,  &mut names.modules.iter().map(Into::into))?;
+        Ok(())
+    }
+
+    #[rustfmt::skip]
+    fn remove_defs(&self, names: &file_info::Names) -> Result<()> {
+        self.classes .remove_batch(&mut names.classes.iter().map(Into::into))?;
+        self.funs    .remove_batch(&mut names.funs.iter().map(Into::into))?;
+        self.typedefs.remove_batch(&mut names.types.iter().map(Into::into))?;
+        self.consts  .remove_batch(&mut names.consts.iter().map(Into::into))?;
+        self.modules .remove_batch(&mut names.modules.iter().map(Into::into))?;
+        Ok(())
+    }
+
+    #[rustfmt::skip]
+    fn get_old_defs(
+        &self,
+        names: &file_info::Names,
+    ) -> Result<(
+        BTreeMap<pos::TypeName, Option<Arc<decl::ShallowClass<BR>>>>,
+        BTreeMap<pos::FunName, Option<Arc<decl::FunDecl<BR>>>>,
+        BTreeMap<pos::TypeName, Option<Arc<decl::TypedefDecl<BR>>>>,
+        BTreeMap<pos::ConstName, Option<Arc<decl::ConstDecl<BR>>>>,
+        BTreeMap<pos::ModuleName, Option<Arc<decl::ModuleDecl<BR>>>>,
+    )> {
+        Ok((
+            self.get_old(&*self.classes,  &mut names.classes.iter().map(Into::into))?,
+            self.get_old(&*self.funs,     &mut names.funs.iter().map(Into::into))?,
+            self.get_old(&*self.typedefs, &mut names.types.iter().map(Into::into))?,
+            self.get_old(&*self.consts,   &mut names.consts.iter().map(Into::into))?,
+            self.get_old(&*self.modules,  &mut names.modules.iter().map(Into::into))?,
+        ))
     }
 }
 

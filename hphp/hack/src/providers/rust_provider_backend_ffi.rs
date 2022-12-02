@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -18,7 +19,6 @@ use ocamlrep_custom::Custom;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
 use ocamlrep_ocamlpool::Bump;
-use oxidized::file_info;
 use oxidized::global_options::GlobalOptions;
 use oxidized::naming_types;
 use oxidized_by_ref::shallow_decl_defs;
@@ -329,17 +329,15 @@ ocaml_ffi! {
         backend: Backend,
         name: UnsafeOcamlPtr,
     ) -> UnsafeOcamlPtr {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            // If we're not populating member heaps, return None to trigger lazy
-            // member lookup behavior in OCaml. Our shallow decl store will do
-            // lazy member lookup as well (since we constructed it with
-            // ShallowDeclStore::with_no_member_stores), but it's faster to
+        if backend.as_hh_server_backend().is_some() {
+            // Since we don't support populating member heaps, return None to
+            // trigger lazy member lookup behavior in OCaml. Our shallow decl
+            // store will do lazy member lookup as well (since we constructed it
+            // with ShallowDeclStore::with_no_member_stores), but it's faster to
             // unmarshal the shallow class into OCaml and let OCaml find the
             // member than to unmarshal it, convert to a Rust value, find the
             // member, then convert the member to OCaml.
-            if !backend.opts().tco_populate_member_heaps {
-                return to_ocaml(&None::<()>);
-            }
+            return to_ocaml(&None::<()>);
         }
         let name = <(pos::TypeName, pos::PropName)>::from_ocamlrep(unsafe { name.as_value() }).unwrap();
         match &*backend {
@@ -362,11 +360,9 @@ ocaml_ffi! {
         backend: Backend,
         name: UnsafeOcamlPtr,
     ) -> UnsafeOcamlPtr {
-        if let Some(backend) = backend.as_hh_server_backend() {
+        if backend.as_hh_server_backend().is_some() {
             // Let OCaml do the lazy member lookup
-            if !backend.opts().tco_populate_member_heaps {
-                return to_ocaml(&None::<()>);
-            }
+            return to_ocaml(&None::<()>);
         }
         let name = <(pos::TypeName, pos::PropName)>::from_ocamlrep(unsafe { name.as_value() }).unwrap();
         match &*backend {
@@ -389,11 +385,9 @@ ocaml_ffi! {
         backend: Backend,
         name: UnsafeOcamlPtr,
     ) -> UnsafeOcamlPtr {
-        if let Some(backend) = backend.as_hh_server_backend() {
+        if backend.as_hh_server_backend().is_some() {
             // Let OCaml do the lazy member lookup
-            if !backend.opts().tco_populate_member_heaps {
-                return to_ocaml(&None::<()>);
-            }
+            return to_ocaml(&None::<()>);
         }
         let name = <(pos::TypeName, pos::MethodName)>::from_ocamlrep(unsafe { name.as_value() }).unwrap();
         match &*backend {
@@ -416,11 +410,9 @@ ocaml_ffi! {
         backend: Backend,
         name: UnsafeOcamlPtr,
     ) -> UnsafeOcamlPtr {
-        if let Some(backend) = backend.as_hh_server_backend() {
+        if backend.as_hh_server_backend().is_some() {
             // Let OCaml do the lazy member lookup
-            if !backend.opts().tco_populate_member_heaps {
-                return to_ocaml(&None::<()>);
-            }
+            return to_ocaml(&None::<()>);
         }
         let name = <(pos::TypeName, pos::MethodName)>::from_ocamlrep(unsafe { name.as_value() }).unwrap();
         match &*backend {
@@ -443,11 +435,9 @@ ocaml_ffi! {
         backend: Backend,
         name: UnsafeOcamlPtr,
     ) -> UnsafeOcamlPtr {
-        if let Some(backend) = backend.as_hh_server_backend() {
+        if backend.as_hh_server_backend().is_some() {
             // Let OCaml do the lazy member lookup
-            if !backend.opts().tco_populate_member_heaps {
-                return to_ocaml(&None::<()>);
-            }
+            return to_ocaml(&None::<()>);
         }
         let name = pos::TypeName::from_ocamlrep(unsafe { name.as_value() }).unwrap();
         match &*backend {
@@ -505,413 +495,56 @@ ocaml_ffi! {
         }
     }
 
-    // ---
-    // Deletion support
-
-    fn hh_rust_provider_backend_oldify_funs_batch(
+    fn hh_rust_provider_backend_oldify_defs(
         backend: Backend,
-        names: Vec<pos::FunName>) {
+        names: file_info::Names,
+    ) {
         if let Some(backend) = backend.as_hh_server_backend() {
-            backend.oldify_funs_batch(&names).unwrap()
+            backend.oldify_defs(&names).unwrap()
         }
         else {
-            unimplemented!("oldify_funs_batch: {UNIMPLEMENTED_MESSAGE}")
+            unimplemented!("oldify_defs: {UNIMPLEMENTED_MESSAGE}")
         }
     }
-    fn hh_rust_provider_backend_remove_funs_batch(
+    fn hh_rust_provider_backend_remove_old_defs(
         backend: Backend,
-        names: Vec<pos::FunName>) {
+        names: file_info::Names,
+    ) {
         if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_funs_batch(&names).unwrap()
+            backend.remove_old_defs(&names).unwrap()
         }
         else {
-            unimplemented!("remove_funs_batch: {UNIMPLEMENTED_MESSAGE}")
+            unimplemented!("remove_old_defs: {UNIMPLEMENTED_MESSAGE}")
         }
     }
-    fn hh_rust_provider_backend_get_old_funs_batch(
+    fn hh_rust_provider_backend_remove_defs(
         backend: Backend,
-        names: Vec<pos::FunName>) -> std::collections::BTreeMap<pos::FunName, Option<Arc<decl::FunDecl<BReason>>>> {
+        names: file_info::Names,
+    ) {
         if let Some(backend) = backend.as_hh_server_backend() {
-            backend.get_old_funs_batch(&names).unwrap()
+            backend.remove_defs(&names).unwrap()
         }
         else {
-            unimplemented!("get_old_funs_batch: {UNIMPLEMENTED_MESSAGE}")
+            unimplemented!("remove_defs: {UNIMPLEMENTED_MESSAGE}")
         }
     }
-    fn hh_rust_provider_backend_remove_old_funs_batch(
+    fn hh_rust_provider_backend_get_old_defs(
         backend: Backend,
-        names: Vec<pos::FunName>) {
+        names: file_info::Names,
+    ) -> (
+        BTreeMap<pos::TypeName, Option<Arc<decl::ShallowClass<BReason>>>>,
+        BTreeMap<pos::FunName, Option<Arc<decl::FunDecl<BReason>>>>,
+        BTreeMap<pos::TypeName, Option<Arc<decl::TypedefDecl<BReason>>>>,
+        BTreeMap<pos::ConstName, Option<Arc<decl::ConstDecl<BReason>>>>,
+        BTreeMap<pos::ModuleName, Option<Arc<decl::ModuleDecl<BReason>>>>,
+    ) {
         if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_old_funs_batch(&names).unwrap()
+            backend.get_old_defs(&names).unwrap()
         }
         else {
-            unimplemented!("remove_old_funs_batch: {UNIMPLEMENTED_MESSAGE}")
+            unimplemented!("get_old_defs: {UNIMPLEMENTED_MESSAGE}")
         }
     }
-
-    fn hh_rust_provider_backend_oldify_shallow_classes_batch(
-        backend: Backend,
-        names: Vec<pos::TypeName>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.oldify_shallow_classes_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("oldify_shallow_classes_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_remove_shallow_classes_batch(
-        backend: Backend,
-        names: Vec<pos::TypeName>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_shallow_classes_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_shallow_classes_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_get_old_shallow_classes_batch(
-        backend: Backend,
-        names: Vec<pos::TypeName>) -> std::collections::BTreeMap<pos::TypeName, Option<Arc<decl::ShallowClass<BReason>>>> {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.get_old_shallow_classes_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("get_old_shallow_classes_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_remove_old_shallow_classes_batch(
-        backend: Backend,
-        names: Vec<pos::TypeName>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_old_shallow_classes_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_old_shallow_classes_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-
-    fn hh_rust_provider_backend_oldify_folded_classes_batch(
-        backend: Backend,
-        names: Vec<pos::TypeName>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.oldify_folded_classes_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("oldify_folded_classes_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_remove_folded_classes_batch(
-        backend: Backend,
-        names: Vec<pos::TypeName>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_folded_classes_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_folded_classes_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_get_old_folded_classes_batch(
-        backend: Backend,
-        names: Vec<pos::TypeName>) -> std::collections::BTreeMap<pos::TypeName, Option<Arc<decl::FoldedClass<BReason>>>> {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.get_old_folded_classes_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("get_old_folded_classes_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_remove_old_folded_classes_batch(
-        backend: Backend,
-        names: Vec<pos::TypeName>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_old_folded_classes_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_old_folded_classes_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-
-    fn hh_rust_provider_backend_oldify_typedefs_batch(
-        backend: Backend,
-        names: Vec<pos::TypeName>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.oldify_typedefs_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("oldify_typedefs_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_remove_typedefs_batch(
-        backend: Backend,
-        names: Vec<pos::TypeName>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_typedefs_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_typedefs_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_get_old_typedefs_batch(
-        backend: Backend,
-        names: Vec<pos::TypeName>) -> std::collections::BTreeMap<pos::TypeName, Option<Arc<decl::TypedefDecl<BReason>>>> {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.get_old_typedefs_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("get_old_typedefs_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_remove_old_typedefs_batch(
-        backend: Backend,
-        names: Vec<pos::TypeName>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_old_typedefs_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_old_typedefs_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-
-    fn hh_rust_provider_backend_oldify_gconsts_batch(
-        backend: Backend,
-        names: Vec<pos::ConstName>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.oldify_gconsts_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("oldify_gconsts_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_remove_gconsts_batch(
-        backend: Backend,
-        names: Vec<pos::ConstName>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_gconsts_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_gconsts_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_get_old_gconsts_batch(
-        backend: Backend,
-        names: Vec<pos::ConstName>) -> std::collections::BTreeMap<pos::ConstName, Option<Arc<decl::ConstDecl<BReason>>>> {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.get_old_gconsts_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("get_old_gconsts_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_remove_old_gconsts_batch(
-        backend: Backend,
-        names: Vec<pos::ConstName>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_old_gconsts_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_old_gconsts_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-
-    fn hh_rust_provider_backend_oldify_modules_batch(
-        backend: Backend,
-        names: Vec<pos::ModuleName>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.oldify_modules_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("oldify_modules_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_remove_modules_batch(
-        backend: Backend,
-        names: Vec<pos::ModuleName>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_modules_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_modules_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_get_old_modules_batch(
-        backend: Backend,
-        names: Vec<pos::ModuleName>) -> std::collections::BTreeMap<pos::ModuleName, Option<Arc<decl::ModuleDecl<BReason>>>> {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.get_old_modules_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("get_old_modules_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_remove_old_modules_batch(
-        backend: Backend,
-        names: Vec<pos::ModuleName>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_old_modules_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_old_modules_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-
-    fn hh_rust_provider_backend_oldify_props_batch(
-        backend: Backend,
-        names: Vec<(pos::TypeName, pos::PropName)>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.oldify_props_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("oldify_props_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_remove_props_batch(
-        backend: Backend,
-        names: Vec<(pos::TypeName, pos::PropName)>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_props_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_props_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-
-    fn hh_rust_provider_backend_remove_old_props_batch(
-        backend: Backend,
-        names: Vec<(pos::TypeName, pos::PropName)>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_old_props_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_old_props_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-
-    fn hh_rust_provider_backend_oldify_static_props_batch(
-        backend: Backend,
-        names: Vec<(pos::TypeName, pos::PropName)>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.oldify_static_props_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("oldify_static_props_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_remove_static_props_batch(
-        backend: Backend,
-        names: Vec<(pos::TypeName, pos::PropName)>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_static_props_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_static_props_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_remove_old_static_props_batch(
-        backend: Backend,
-        names: Vec<(pos::TypeName, pos::PropName)>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_old_static_props_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_old_static_props_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-
-    fn hh_rust_provider_backend_oldify_methods_batch(
-        backend: Backend,
-        names: Vec<(pos::TypeName, pos::MethodName)>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.oldify_methods_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("oldify_methods_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_remove_methods_batch(
-        backend: Backend,
-        names: Vec<(pos::TypeName, pos::MethodName)>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_methods_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_methods_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_remove_old_methods_batch(
-        backend: Backend,
-        names: Vec<(pos::TypeName, pos::MethodName)>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_old_methods_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_old_methods_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-
-    fn hh_rust_provider_backend_oldify_static_methods_batch(
-        backend: Backend,
-        names: Vec<(pos::TypeName, pos::MethodName)>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.oldify_static_methods_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("oldify_static_methods_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_remove_static_methods_batch(
-        backend: Backend,
-        names: Vec<(pos::TypeName, pos::MethodName)>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_static_methods_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_static_methods_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_remove_old_static_methods_batch(
-        backend: Backend,
-        names: Vec<(pos::TypeName, pos::MethodName)>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_old_static_methods_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_old_static_methods_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-
-    fn hh_rust_provider_backend_oldify_constructors_batch(
-        backend: Backend,
-        names: Vec<pos::TypeName>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.oldify_constructors_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("oldify_constructors_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_remove_constructors_batch(
-        backend: Backend,
-        names: Vec<pos::TypeName>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_constructors_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_constructors_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-    fn hh_rust_provider_backend_remove_old_constructors_batch(
-        backend: Backend,
-        names: Vec<pos::TypeName>) {
-        if let Some(backend) = backend.as_hh_server_backend() {
-            backend.remove_old_constructors_batch(&names).unwrap()
-        }
-        else {
-            unimplemented!("remove_old_constructors_batch: {UNIMPLEMENTED_MESSAGE}")
-        }
-    }
-
-    //
-    // ---
 }
 
 // File_provider ////////////////////////////////////////////////////////////

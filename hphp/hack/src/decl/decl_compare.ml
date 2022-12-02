@@ -332,7 +332,13 @@ let get_extend_deps mode cid_hash to_redecl =
 (*****************************************************************************)
 let get_fun_deps
     ~mode old_funs fid ((changed, to_redecl, to_recheck), old_funs_missing) =
-  match (SMap.find fid old_funs, Decl_heap.Funs.get fid) with
+  match
+    ( SMap.find fid old_funs,
+      match Provider_backend.get () with
+      | Provider_backend.Rust_provider_backend backend ->
+        Rust_provider_backend.Decl.get_fun backend fid
+      | _ -> Decl_heap.Funs.get fid )
+  with
   (* Note that we must include all dependencies even if we get the None, None
    * case. Due to the fact we can declare types lazily, there may be no
    * existing declaration in the old Decl_heap that corresponds to a function
@@ -372,7 +378,13 @@ let get_funs_deps ~ctx old_funs funs =
 (*****************************************************************************)
 let get_type_deps ~mode old_types tid ((changed, to_recheck), old_types_missing)
     =
-  match (SMap.find tid old_types, Decl_heap.Typedefs.get tid) with
+  match
+    ( SMap.find tid old_types,
+      match Provider_backend.get () with
+      | Provider_backend.Rust_provider_backend backend ->
+        Rust_provider_backend.Decl.get_typedef backend tid
+      | _ -> Decl_heap.Typedefs.get tid )
+  with
   | (None, _)
   | (_, None) ->
     let dep = Dep.Type tid in
@@ -409,7 +421,12 @@ let get_gconst_deps
     cst_id
     ((changed, to_redecl, to_recheck), old_gconsts_missing) =
   let cst1 = SMap.find cst_id old_gconsts in
-  let cst2 = Decl_heap.GConsts.get cst_id in
+  let cst2 =
+    match Provider_backend.get () with
+    | Provider_backend.Rust_provider_backend backend ->
+      Rust_provider_backend.Decl.get_gconst backend cst_id
+    | _ -> Decl_heap.GConsts.get cst_id
+  in
   match (cst1, cst2) with
   | (None, _)
   | (_, None) ->
@@ -558,7 +575,13 @@ let rules_changed rules1 rules2 =
 let get_module_deps
     ~mode old_modules mid ((changed, to_redecl, to_recheck), old_modules_missing)
     =
-  match (SMap.find mid old_modules, Decl_heap.Modules.get mid) with
+  match
+    ( SMap.find mid old_modules,
+      match Provider_backend.get () with
+      | Provider_backend.Rust_provider_backend backend ->
+        Rust_provider_backend.Decl.get_module backend mid
+      | _ -> Decl_heap.Modules.get mid )
+  with
   | (None, _)
   | (_, None) ->
     let dep = Dep.Module mid in

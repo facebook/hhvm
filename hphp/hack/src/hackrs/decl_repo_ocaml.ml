@@ -83,11 +83,6 @@ let init
            ("shm_cache_size", string_of_int (60 * (1024 * 1024 * 1024)));
            ("force_shallow_decl_fanout", "true");
            ("populate_member_heaps", "false");
-           ( "log_sharedmem_stats",
-             if log_sharedmem_stats then
-               "1"
-             else
-               "0" );
          ]
         @ config server_args))
   in

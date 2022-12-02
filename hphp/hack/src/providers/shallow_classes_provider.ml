@@ -126,10 +126,10 @@ let get_old_batch
     failwith "invalid"
   (* TODO(sf, 2022-10-20): Reduce duplication between the following two cases. *)
   | Provider_backend.Rust_provider_backend be ->
-    let old_classes =
-      Rust_provider_backend.Decl.get_old_shallow_classes_batch
+    let (old_classes, _funs, _typedefs, _consts, _modules) =
+      Rust_provider_backend.Decl.get_old_defs
         be
-        (SSet.elements names)
+        FileInfo.{ empty_names with n_classes = names }
     in
     if fetch_remote_old_decls ctx then
       let missing_old_classes =

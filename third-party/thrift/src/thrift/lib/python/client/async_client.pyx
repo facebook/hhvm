@@ -28,6 +28,7 @@ from folly.iobuf cimport IOBuf
 from libcpp.memory cimport make_unique, static_pointer_cast
 from libcpp.utility cimport move as cmove
 from thrift.python.client.omni_client cimport cOmniClientResponseWithHeaders, RpcKind, cOmniInteractionClient, createOmniInteractionClient, cData, FunctionQualifier, InteractionMethodPosition
+from thrift.python.client.request_channel cimport RequestChannel
 from thrift.python.exceptions cimport create_py_exception
 from thrift.python.exceptions import ApplicationError, ApplicationErrorType
 from thrift.python.serializer import serialize_iobuf, deserialize
@@ -47,6 +48,10 @@ cdef class AsyncClient:
 
     def __init__(AsyncClient self):
         self._aexit_callbacks = []
+
+    def _set_channel(AsyncClient self, RequestChannel channel):
+        self.bind_client(cmove(channel._cpp_obj))
+        self._connect_future.set_result(None)
 
     cdef bind_client(self, cRequestChannel_ptr channel):
         self._omni_client = make_unique[cOmniClient](cmove(channel))
@@ -94,6 +99,11 @@ cdef class AsyncClient:
             <PyObject *> interactionClient,
         )
         return interactionClient
+
+    def clear_event_handlers(AsyncClient self):
+        if not self._omni_client:
+            raise RuntimeError("Connection already closed")
+        deref(self._omni_client).clearEventHandlers()
 
     async def _send_request(
         AsyncClient self,

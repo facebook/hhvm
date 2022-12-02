@@ -615,7 +615,14 @@ and obj_get_concrete_class
                       (make_subst (Cls.tparams self_class) tyargs)
                       ce)
                 in
-                (Some ce, true)
+                (* if a trait T has a require class C constraint, and both T and C
+                 * define a private member with the same name, then the two members
+                 * are aliased, not shadowed.  In this case, self_class is the trait
+                 * and the ancestor is the required class.  We can set the `shadowed`
+                 * bit by checking if self_class is a class or trait, there is
+                 * no need to additionally check if the trait has a require class
+                 * attribute. *)
+                (Some ce, Ast_defs.is_c_class (Cls.kind self_class))
               | _ -> (old_member_info, false)
             end
         end

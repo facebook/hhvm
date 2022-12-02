@@ -5,5 +5,5 @@ class C {
 }
 
 function test(): void {
-  hh_show(C::T);
+  $x = C::T;
 }

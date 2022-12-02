@@ -109,6 +109,10 @@ struct RepoOptionsFlags {
   H(bool,           EnableEnumClasses,                true)           \
   H(bool,           DisallowFunAndClsMethPseudoFuncs, false)          \
   H(bool,           DisallowInstMeth,                 false)          \
+  /* Allow omission of some `readonly` annotations based on           \
+   * nonlocal inference powered by decl directed bytecode             \
+   */                                                                 \
+  H(bool,           ReadonlyNonlocalInference,        false)          \
   /**/
 
   /**/

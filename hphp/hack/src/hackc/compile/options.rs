@@ -86,6 +86,7 @@ pub struct HhbcFlags {
     pub emit_meth_caller_func_pointers: bool,
     pub array_provenance: bool,
     pub fold_lazy_class_keys: bool,
+    pub readonly_nonlocal_infer: bool,
 }
 
 impl Default for HhbcFlags {
@@ -101,6 +102,7 @@ impl Default for HhbcFlags {
             emit_meth_caller_func_pointers: true,
             array_provenance: false,
             fold_lazy_class_keys: true,
+            readonly_nonlocal_infer: false,
         }
     }
 }

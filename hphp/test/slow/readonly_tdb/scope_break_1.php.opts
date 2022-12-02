@@ -1,3 +1,4 @@
 -vEval.EnableDecl=true
 -vAutoload.Enabled=true
 -vLog.Level=None
+-vHack.Lang.ReadonlyNonlocalInference=true

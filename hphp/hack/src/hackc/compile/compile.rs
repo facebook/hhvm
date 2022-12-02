@@ -296,10 +296,11 @@ fn check_readonly_and_emit<'arena, 'decl>(
     ast: &mut ast::Program,
     profile: &mut Profile,
 ) -> Result<Unit<'arena>, Error> {
-    // TODO: T128303794 Experimental. Add more gating before emitter.decl_provider available in prod.
     match &emitter.decl_provider {
-        None => (),
-        Some(decl_provider) => {
+        // If a decl provider is available (DDB is enabled) *and*
+        // `Hack.Lang.ReadonlyNonlocalInference` is set, then we can rewrite the
+        // AST to automagically insert `readonly` annotations where needed.
+        Some(decl_provider) if emitter.options().hhbc.readonly_nonlocal_infer => {
             let mut new_ast = readonly_nonlocal_infer::infer(ast, decl_provider.clone());
             let res = readonly_check::check_program(&mut new_ast, false);
             // Ignores all errors after the first...
@@ -308,6 +309,7 @@ fn check_readonly_and_emit<'arena, 'decl>(
             }
             *ast = new_ast;
         }
+        None | Some(_) => (),
     }
     rewrite_and_emit(emitter, namespace_env, ast, profile)
 }

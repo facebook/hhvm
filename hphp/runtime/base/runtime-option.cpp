@@ -326,6 +326,7 @@ void RepoOptionsFlags::initDeclConfig(hackc::DeclParserConfig& config) const {
 void RepoOptionsFlags::initHhbcFlags(hackc::HhbcFlags& flags) const {
   flags.ltr_assign = LTRAssign;
   flags.uvs = UVS;
+  flags.readonly_nonlocal_infer = ReadonlyNonlocalInference;
 }
 
 void RepoOptionsFlags::initParserFlags(hackc::ParserFlags& flags) const {

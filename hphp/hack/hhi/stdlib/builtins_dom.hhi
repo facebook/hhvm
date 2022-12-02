@@ -267,9 +267,9 @@ class DOMElement extends DOMNode {
   /* readonly */ public string $tagName;
   /* readonly */ public bool $schemaTypeInfo;
 
-  /* HH_FIXME[4110]: $attributes is nullable in the parent but not here */
-  /* HH_FIXME[4341]: $attributes is nullable in the parent but not here */
-  /* readonly */ public DOMNamedNodeMap<DOMAttr> $attributes;
+  // $attributes is nullable in the parent but not here, however this violates
+  // hierarchy rules so users must handle the nullability themselves
+  /* public DOMNamedNodeMap<DOMAttr> $attributes; */
 
   // methods
   public function __construct(

@@ -7,7 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
-<<file: __EnableUnstableFeatures('readonly')>>
+<<file: __EnableUnstableFeatures('readonly', 'union_intersection_type_hints')>>
 
 /**
  * This file provides type information for some of HHVM's builtin classes.
@@ -44,7 +44,7 @@ namespace HH {
    */
   <<__SupportDynamicType>>
   final class Pair<<<__RequireDynamic>> +Tv1, <<__RequireDynamic>> +Tv2>
-    implements \ConstVector<mixed> {
+    implements \ConstVector<(Tv1 | Tv2)> {
     /**
      * @internal
      *
@@ -59,12 +59,7 @@ namespace HH {
      *
      * @return - an `array` containing the values from the current `Pair`.
      */
-  /* HH_FIXME[4110] pair needs to extend ConstVector<Tv1|Tv2> */
-  /* HH_FIXME[4341] pair needs to extend ConstVector<Tv1|Tv2> */
-  public function toValuesArray<Tu>()[]: varray<Tu>
-    where
-      Tv1 as Tu,
-      Tv2 as Tu;
+    public function toValuesArray()[]: varray<(Tv1 | Tv2)>;
 
     /**
      * Returns an `array` whose values are the keys from the current `Pair`.
@@ -88,7 +83,7 @@ namespace HH {
       *
       * @return - an `ImmVector` with the elements of the current `Pair`.
       */
-    public function toImmVector()[]: ImmVector<mixed>;
+    public function toImmVector()[]: ImmVector<(Tv1 | Tv2)>;
 
     /**
      * Returns an integer-keyed `Map` based on the elements of the current `Pair`.
@@ -107,25 +102,27 @@ namespace HH {
      *
      * @return - an `ImmMap` with the values of the current `Pair`.
      */
-    public function toImmMap()[]: ImmMap<int, mixed>;
+    public function toImmMap()[]: ImmMap<int, (Tv1 | Tv2)>;
 
     /**
      * Returns a `Set` with the values of the current `Pair`.
      *
      * @return - a `Set` with the current values of the current `Pair`.
      */
-  /* HH_FIXME[4110] pair needs to extend ConstVector<Tv1|Tv2> */
-  /* HH_FIXME[4341] pair needs to extend ConstVector<Tv1|Tv2> */
-  public function toSet()[]: Set<arraykey> where Tv1 as arraykey, Tv2 as arraykey;
+    public function toSet()[]: Set<arraykey>
+    where
+      Tv1 as arraykey,
+      Tv2 as arraykey;
 
     /**
      * Returns an immutable set (`ImmSet`) with the values of the current `Pair`.
      *
      * @return - an `ImmSet` with the current values of the current `Pair`.
      */
-  /* HH_FIXME[4110] pair needs to extend ConstVector<Tv1|Tv2> */
-  /* HH_FIXME[4341] pair needs to extend ConstVector<Tv1|Tv2> */
-  public function toImmSet()[]: ImmSet<arraykey> where Tv1 as arraykey, Tv2 as arraykey;
+    public function toImmSet()[]: ImmSet<(Tv1 | Tv2)>
+    where
+      Tv1 as arraykey,
+      Tv2 as arraykey;
 
     /**
      * Returns a lazy, access elements only when needed view of the current
@@ -143,7 +140,7 @@ namespace HH {
      *
      * @guide /hack/collections/examples
      */
-    public function lazy()[]: KeyedIterable<int, mixed>;
+    public function lazy()[]: KeyedIterable<int, (Tv1 | Tv2)>;
 
     /**
      * Returns an `ImmVector` containing the values of the current `Pair`.
@@ -152,7 +149,7 @@ namespace HH {
      *
      * @return - an `ImmVector` containing the values of the current `Pair`.
      */
-    public function values()[]: ImmVector<mixed>;
+    public function values()[]: ImmVector<(Tv1 | Tv2)>;
 
     /**
      * Returns an `ImmVector` with the values being the keys of the current
@@ -182,7 +179,7 @@ namespace HH {
      * @guide /hack/collections/examples
      */
     public function map<Tu>(
-      (function(mixed)[_]: Tu) $fn,
+      (function((Tv1 | Tv2))[_]: Tu) $fn,
     )[ctx $fn]: ImmVector<Tu>;
 
     /**
@@ -200,7 +197,7 @@ namespace HH {
      *           operation on the current `Pair`'s keys and values is applied.
      */
     public function mapWithKey<Tu>(
-      (function(int, mixed)[_]: Tu) $fn,
+      (function(int, (Tv1 | Tv2))[_]: Tu) $fn,
     )[ctx $fn]: ImmVector<Tu>;
 
     /**
@@ -219,8 +216,8 @@ namespace HH {
      * @guide /hack/collections/examples
      */
     public function filter(
-      (function(mixed)[_]: bool) $fn,
-    )[ctx $fn]: ImmVector<mixed>;
+      (function((Tv1 | Tv2))[_]: bool) $fn,
+    )[ctx $fn]: ImmVector<(Tv1 | Tv2)>;
 
     /**
      * Returns an `ImmVector` containing the values of the current `Pair` that
@@ -238,8 +235,8 @@ namespace HH {
      *           `Pair`.
      */
     public function filterWithKey(
-      (function(int, mixed)[_]: bool) $fn,
-    )[ctx $fn]: ImmVector<mixed>;
+      (function(int, (Tv1 | Tv2))[_]: bool) $fn,
+    )[ctx $fn]: ImmVector<(Tv1 | Tv2)>;
 
     /**
      * Returns an `ImmVector` where each element is a `Pair` that combines each
@@ -258,7 +255,7 @@ namespace HH {
      */
     public function zip<Tu>(
       Traversable<Tu> $traversable,
-    )[]: ImmVector<Pair<mixed, Tu>>;
+    )[]: ImmVector<Pair<(Tv1 | Tv2), Tu>>;
 
     /**
      * Returns an `ImmVector` containing the first `n` values of the current
@@ -273,7 +270,7 @@ namespace HH {
      * @return - An `ImmVector` containing the first `n` values of the current
      *           `Pair`.
      */
-    public function take(int $n)[]: ImmVector<mixed>;
+    public function take(int $n)[]: ImmVector<(Tv1 | Tv2)>;
 
     /**
      * Returns an `ImmVector` containing the values of the current `Pair` up to
@@ -286,8 +283,8 @@ namespace HH {
      *           until the callback returns `false`.
      */
     public function takeWhile(
-      (function(mixed)[_]: bool) $fn,
-    )[ctx $fn]: ImmVector<mixed>;
+      (function((Tv1 | Tv2))[_]: bool) $fn,
+    )[ctx $fn]: ImmVector<(Tv1 | Tv2)>;
 
     /**
      * Returns an `ImmVector` containing the values after the `n`-th element of
@@ -304,7 +301,7 @@ namespace HH {
      * @return - An `ImmVector` that contains values after the specified `n`-th
      *           element in the current `Pair`.
      */
-    public function skip(int $n)[]: ImmVector<mixed>;
+    public function skip(int $n)[]: ImmVector<(Tv1 | Tv2)>;
 
     /**
      * Returns an `ImmVector` containing the values of the current `Pair` starting
@@ -318,8 +315,8 @@ namespace HH {
      *           starting after the callback returns `true`.
      */
     public function skipWhile(
-      (function(mixed)[_]: bool) $fn,
-    )[ctx $fn]: ImmVector<mixed>;
+      (function((Tv1 | Tv2))[_]: bool) $fn,
+    )[ctx $fn]: ImmVector<(Tv1 | Tv2)>;
 
     /**
      * Returns a subset of the current `Pair` starting from a given key up to,
@@ -336,7 +333,7 @@ namespace HH {
      * @return - An `ImmVector` with values from the current `Pair` starting at
      *           `$start` up to but not including the element `$start + $len`.
      */
-    public function slice(int $start, int $len)[]: ImmVector<mixed>;
+    public function slice(int $start, int $len)[]: ImmVector<(Tv1 | Tv2)>;
 
     /**
      * Returns an `ImmVector` that is the concatenation of the values of the
@@ -352,7 +349,9 @@ namespace HH {
      *
      * @guide /hack/generics/constraints
      */
-    public function concat(Traversable<mixed> $traversable)[]: ImmVector<mixed>;
+    public function concat<Tu super Tv1 super Tv2>(
+      Traversable<Tu> $traversable,
+    )[]: ImmVector<Tu>;
 
     /**
      * Returns the first value in the current `Pair`.
@@ -422,7 +421,7 @@ namespace HH {
      *
      * @return - The `Iterable` view of the current `Pair`.
      */
-    public function items()[]: Iterable<mixed>;
+    public function items()[]: Iterable<(Tv1 | Tv2)>;
 
     /**
      * Returns the value at the specified key in the current `Pair`.
@@ -438,7 +437,7 @@ namespace HH {
      * @return - The value at the specified key; or an exception if the key does
      *           not exist.
      */
-    public function at(int $k)[]: mixed;
+    public function at(int $k)[]: (Tv1 | Tv2);
 
     /**
      * Returns the value at the specified key in the current `Pair`.
@@ -451,7 +450,7 @@ namespace HH {
      * @return - The value at the specified key; or `null` if the key does not
      *           exist.
      */
-    public function get(int $k)[]: mixed;
+    public function get(int $k)[]: ?(Tv1 | Tv2);
 
     /**
      * Checks whether a provided key exists in the current `Pair`.
@@ -472,7 +471,7 @@ namespace HH {
      *
      * @return - A `KeyedIterator` that allows you to traverse the current `Pair`.
      */
-    public function getIterator()[]: KeyedIterator<int, mixed>;
+    public function getIterator()[]: KeyedIterator<int, (Tv1 | Tv2)>;
 
     /**
      * Returns the `string` version of the current `Pair`, which is `"Pair"`.
@@ -481,7 +480,7 @@ namespace HH {
      */
     public function __toString()[]: string;
     public function toVArray()[]: varray;
-    public function toDArray()[]: darray<int, mixed>;
+    public function toDArray()[]: darray<int, (Tv1 | Tv2)>;
   }
 
 } // namespace HH

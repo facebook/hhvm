@@ -4,7 +4,7 @@
 
 class strclass {
   public $str = "bad";
-  static $statstr = "bad";
+  public static $statstr = "bad";
 }
 
 
@@ -16,7 +16,7 @@ function foo() {
 
 class c {
   public $val = 10;
-  static $stat = 20;
+  public static $stat = 20;
 }
 <<__EntryPoint>>
 function entrypoint_execution_order(): void {

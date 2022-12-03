@@ -7,7 +7,7 @@ type Something = nonnull;
 newtype Foo = nonnull;
 
 class C {
-  static vec<nonnull> $z;
+  public static vec<nonnull> $z;
   const type T = nonnull;
 
 }

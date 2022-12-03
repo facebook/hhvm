@@ -11,8 +11,8 @@ interface A {
 class B implements A {
  }
 class C {
-  static $A_CONSTANT = A::CONSTANT;
-  static $B_CONSTANT = B::CONSTANT;
+  public static $A_CONSTANT = A::CONSTANT;
+  public static $B_CONSTANT = B::CONSTANT;
 }
 
 <<__EntryPoint>>

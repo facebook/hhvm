@@ -1,6 +1,6 @@
 <?hh
 class C {
-  static $cls = 'C';
+  public static $cls = 'C';
   public function __construct() {
     var_dump(isset($this));
     var_dump(static::$cls);
@@ -19,7 +19,7 @@ class C {
 }
 
 class D extends C {
-  static $cls = 'D';
+  public static $cls = 'D';
   public function __construct() {
     var_dump(isset($this));
     var_dump(static::$cls);

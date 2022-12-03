@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  static $y = darray['a' => 17, 'b' => 34];
+  public static $y = darray['a' => 17, 'b' => 34];
 
   static function go() {
     unset(self::$y['a']);

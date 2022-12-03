@@ -1,8 +1,8 @@
 <?hh
 
 class C {
-  static vec<int> $x = vec[];
-  static vec<Foo> $y = vec[];
+  public static vec<int> $x = vec[];
+  public static vec<Foo> $y = vec[];
 }
 
 class Foo {}

@@ -589,14 +589,6 @@ fn list_first_duplicate_token<'a>(node: S<'a>) -> Option<S<'a>> {
     None
 }
 
-fn is_empty_list_or_missing(node: S<'_>) -> bool {
-    match &node.children {
-        SyntaxList(x) if x.is_empty() => true,
-        Missing => true,
-        _ => false,
-    }
-}
-
 fn token_kind(node: S<'_>) -> Option<TokenKind> {
     if let Token(t) = &node.children {
         return Some(t.kind());
@@ -4702,7 +4694,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             });
 
             self.produce_error(
-                |_, x| is_empty_list_or_missing(x),
+                |_, x| !syntax_to_list_no_separators(x).any(is_visibility),
                 property_modifiers,
                 || errors::property_requires_visibility,
                 node,

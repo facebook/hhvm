@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  static $x = null;
+  public static $x = null;
   function a() {
     self::$x = new stdClass();
     self::$x->foo = 2;

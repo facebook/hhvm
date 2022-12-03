@@ -1,4 +1,7 @@
 (5,3)-(5,29) A `const static` property must have an initializer.
+(5,3)-(5,29) Property declarations require a visibility modifier such as `public`, `private` or `protected`.
+(6,3)-(6,33) Property declarations require a visibility modifier such as `public`, `private` or `protected`.
 (7,3)-(7,37) A `const static` property must have an initializer.
+(7,3)-(7,37) Property declarations require a visibility modifier such as `public`, `private` or `protected`.
 (8,14)-(8,14) A concrete constant declaration must have an initializer.
 (10,14)-(10,14) A concrete constant declaration must have an initializer.

@@ -2,8 +2,8 @@
 
 class Foo {
   const int bar = 42;
-  static string $bar = 'bar';
-  static (function(): float) $baz = Foo::g<>;
+  public static string $bar = 'bar';
+  public static (function(): float) $baz = Foo::g<>;
   public static function bar(): bool {
     return true;
   }

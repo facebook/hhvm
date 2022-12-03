@@ -1,6 +1,6 @@
 <?hh
 
-class Info { static bool $sawHackArrNotice = false; }
+class Info { public static bool $sawHackArrNotice = false; }
 function handler($_errno, $errstr, ...) {
   if (
     !Info::$sawHackArrNotice &&

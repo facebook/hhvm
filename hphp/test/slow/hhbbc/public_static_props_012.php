@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  static $y = 'asd';
+  public static $y = 'asd';
 }
 
 abstract class IDunno {

@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Test {
-  static ?stdClass $stash = null;
+  public static ?stdClass $stash = null;
 
   static function get(int $count): WeakRef<stdClass> {
     $obj = new stdClass();

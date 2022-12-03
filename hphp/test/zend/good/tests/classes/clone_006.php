@@ -1,7 +1,7 @@
 <?hh
 
 class MyCloneable {
-  static $id = 0;
+  public static $id = 0;
 
   function __construct() {
     $this->id = self::$id++;

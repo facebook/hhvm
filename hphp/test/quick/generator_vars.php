@@ -1,7 +1,7 @@
 <?hh
 
 class logger {
-  static $x = 0;
+  public static $x = 0;
   private $idx;
   function __construct() {
     $this->idx = self::$x++;

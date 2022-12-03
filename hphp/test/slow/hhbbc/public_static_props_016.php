@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  static $y = varray[];
+  public static $y = varray[];
 
   static function z() {
     self::$y[] = 2;

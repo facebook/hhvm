@@ -1,7 +1,7 @@
 <?hh
 
 class Asd {
-  static $heh = Map { 'a' => 'b' };
+  public static $heh = Map { 'a' => 'b' };
 
   function other() { self::$heh = new stdClass; }
 

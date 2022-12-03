@@ -1,7 +1,7 @@
 <?hh
 
   class A {
-    static $a = 'A';
+    public static $a = 'A';
     static function f() {
  echo static::$a;
  }

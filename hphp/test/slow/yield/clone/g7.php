@@ -1,5 +1,5 @@
 <?hh
-class State { static $x = 1; }
+class State { public static $x = 1; }
 function foo() {
   State::$x += 10;
   yield State::$x;

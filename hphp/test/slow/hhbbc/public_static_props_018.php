@@ -3,7 +3,7 @@
 class Something {}
 
 class Asd {
-  static $SOMETHING = 'Something';
+  public static $SOMETHING = 'Something';
 }
 
 function foo($y) {

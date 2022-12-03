@@ -1,8 +1,8 @@
 <?hh
 
 class Counter {
-  static int $noArg = 0;
-  static int $withArg = 0;
+  public static int $noArg = 0;
+  public static int $withArg = 0;
 }
 
 <<__Memoize(#KeyedByIC)>>

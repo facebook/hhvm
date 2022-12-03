@@ -3,7 +3,7 @@ class Foo {
  public function __construct() {
   eval("class Bar extends Foo {}");
  }
- <<__LSB>> static $i = 0;
+ <<__LSB>> public static $i = 0;
  public static function test() {
   var_dump(++static::$i);
  }

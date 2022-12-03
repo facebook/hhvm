@@ -1,7 +1,7 @@
 <?hh
 
 final class WilfredDemo2 {
-  static mixed $f = null;
+  public static mixed $f = null;
 
   public static function accessMethodDynamically(): void {
     WilfredDemo2::$f = () ==> {};

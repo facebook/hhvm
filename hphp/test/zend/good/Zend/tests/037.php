@@ -2,7 +2,7 @@
 
 namespace Closure;
 
-class Closure { static $x = 1;}
+class Closure { public static $x = 1;}
 <<__EntryPoint>> function main(): void {
 $x = __NAMESPACE__;
 \var_dump(Closure::$x);

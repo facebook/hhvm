@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  static mixed $bar;
+  public static mixed $bar;
 }
 
 async function y($n = 'D') {

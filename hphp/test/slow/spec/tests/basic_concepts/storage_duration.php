@@ -29,7 +29,7 @@ class Point
   }
 }
 
-class State { static $sv1 = TRUE; static $sv2 = 0; static $sv3 = NULL; }
+class State { public static $sv1 = TRUE; public static $sv2 = 0; public static $sv3 = NULL; }
 
 function doit($p1)
 {

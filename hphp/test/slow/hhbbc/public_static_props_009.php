@@ -1,9 +1,9 @@
 <?hh
 
 class Asd {
-  static $x = 2;
-  static $y = null;
-  static $z = null;
+  public static $x = 2;
+  public static $y = null;
+  public static $z = null;
   function heh() { self::$y = "asd"; }
   function foo() {
     return isset(self::$x);

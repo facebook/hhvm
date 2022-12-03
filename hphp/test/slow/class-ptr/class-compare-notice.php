@@ -1,6 +1,6 @@
 <?hh
 
-class Info { static bool $SawError = false; }
+class Info { public static bool $SawError = false; }
 function handle_error($_errno, $msg, ...) {
   //if (!Info::$SawError && $msg === "Class to string conversion") {
   if ($msg === "Class to string conversion") {

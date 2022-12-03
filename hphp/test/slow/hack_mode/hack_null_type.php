@@ -9,7 +9,7 @@ type Something = null;
 newtype Foo = null;
 
 class C {
-  static vec<null> $z;
+  public static vec<null> $z;
   const type T = null;
 }
 

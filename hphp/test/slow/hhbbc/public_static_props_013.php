@@ -1,6 +1,6 @@
 <?hh
 
-class X        { static $x = darray[]; }
+class X        { public static $x = darray[]; }
 function go()  { X::$x[0] = 2; }
 function go2() { var_dump((bool)X::$x); }
 

@@ -5,7 +5,7 @@ const SOME_CONSTANT = "some string";
 //===============================================================================
 // ReflectionFunction.
 
-class State { static $staticX = 4; }
+class State { public static $staticX = 4; }
 
 /**
  * This is f's doc comment.
@@ -64,9 +64,9 @@ class A implements H {
 class B extends A implements I, K {
   const C0 = "B::C0";
   const C1 = "B::C1";
-  static $s0 = 42;
-  static $s1 = "hello";
-  static $s2;
+  public static $s0 = 42;
+  public static $s1 = "hello";
+  public static $s2;
   private $p0 = 1;
   protected $p1 = 2;
   public $p2 = 3;

@@ -21,6 +21,7 @@ type type_member =
   | Error of Typing_error.t option
   | Exact of locl_ty
   | Abstract of {
+      name: pos_id;
       lower: locl_ty option;
       upper: locl_ty option;
     }

@@ -37,11 +37,27 @@ let make_type_const_equal
       (env, Typing_error.multiple_opt @@ List.filter_map ~f:Fn.id [e1; e2; e3])
     | ConstraintType ty ->
       (match deref_constraint_type ty with
-      | (_, Thas_type_member (type_id, ty))
-        when String.equal type_id (snd tconstid) ->
-        let (env, e1) = Utils.sub_type env ty tvar subtype_error in
-        let (env, e2) = Utils.sub_type env tvar ty subtype_error in
-        (env, Option.merge ~f:Typing_error.both e1 e2)
+      | (r, Thas_type_member { htm_id; htm_upper = up_ty; htm_lower = lo_ty })
+        when String.equal htm_id (snd tconstid) ->
+        let (env, e) = Utils.sub_type env up_ty lo_ty on_error in
+        (match e with
+        | Some _ ->
+          let err_opt =
+            Option.map
+              ~f:(fun on_error ->
+                Typing_error.(
+                  apply_reasons
+                    ~on_error
+                    (Secondary.Inexact_tconst_access (Reason.to_pos r, tconstid))))
+              on_error
+          in
+          (env, err_opt)
+        | None ->
+          (* We constrain the upper and lower bounds to be equal
+           * between themselves and with the type variable. *)
+          let (env, e1) = Utils.sub_type env up_ty tvar subtype_error in
+          let (env, e2) = Utils.sub_type env tvar lo_ty subtype_error in
+          (env, Option.merge ~f:Typing_error.both e1 e2))
       | (_, Thas_type_member _)
       | (_, Thas_member _)
       | (_, Tcan_index _)

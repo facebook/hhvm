@@ -13,6 +13,6 @@ Invalid argument (Typing[4323])
   File "invariant-delegate.php", line 17, characters 11-34:
   This type constraint is violated
   File "invariant-delegate.php", line 17, characters 11-34:
-  Expected an object with `type T = _`
+  Expected a class with `{type T = _}`
   File "invariant-delegate.php", line 39, characters 33-35:
   But got `Box`

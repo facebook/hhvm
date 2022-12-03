@@ -6649,6 +6649,10 @@ and Secondary : sig
         class_id: string;
         type_id: string;
       }
+    | Inexact_tconst_access of Pos_or_decl.t * (Pos_or_decl.t * string)
+    | Violated_refinement_constraint of {
+        cstr: [ `As | `Super ] * Pos_or_decl.t;
+      }
 
   val iter :
     t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
@@ -6926,6 +6930,10 @@ end = struct
         pos: Pos_or_decl.t;
         class_id: string;
         type_id: string;
+      }
+    | Inexact_tconst_access of Pos_or_decl.t * (Pos_or_decl.t * string)
+    | Violated_refinement_constraint of {
+        cstr: [ `As | `Super ] * Pos_or_decl.t;
       }
 
   let iter t ~on_prim ~on_snd =
@@ -7630,6 +7638,25 @@ end = struct
         ],
       [] )
 
+  let inexact_tconst_access pos id =
+    ( Error_code.InternalError,
+      lazy
+        [
+          (fst id, "Type member `" ^ snd id ^ "` cannot be accessed");
+          (pos, "  on a loose refinement");
+        ],
+      [] )
+
+  let violated_refinement_constraint (kind, pos) =
+    let kind =
+      match kind with
+      | `As -> "`as` or `=`"
+      | `Super -> "`super`"
+    in
+    ( Error_code.UnifyError,
+      lazy [(pos, "This " ^ kind ^ " refinement constraint is violated")],
+      [] )
+
   let eval t ~current_span :
       (Error_code.t
       * Pos_or_decl.t Message.t list Lazy.t
@@ -7811,6 +7838,10 @@ end = struct
       Eval_result.single (unsupported_class_refinement pos)
     | Missing_type_constant { pos; class_id; type_id } ->
       Eval_result.single (missing_type_constant pos class_id type_id)
+    | Inexact_tconst_access (pos, id) ->
+      Eval_result.single (inexact_tconst_access pos id)
+    | Violated_refinement_constraint { cstr } ->
+      Eval_result.single (violated_refinement_constraint cstr)
 end
 
 and Callback : sig
@@ -8068,6 +8099,8 @@ and Reasons_callback : sig
 
   val prepend_on_apply : t -> Secondary.t -> t
 
+  val drop_reasons_on_apply : t -> t
+
   val assert_in_current_decl : Error_code.t -> ctx:Pos_or_decl.ctx -> t
 
   val apply_help :
@@ -8155,6 +8188,7 @@ end = struct
     | From_on_error of on_error
     | Prepend_on_apply of t * Secondary.t
     | Assert_in_current_decl of Error_code.t * Pos_or_decl.ctx
+    | Drop_reasons_on_apply of t
 
   let iter t ~on_prim ~on_snd =
     let rec aux = function
@@ -8167,7 +8201,8 @@ end = struct
       | With_code (t, _)
       | With_reasons (t, _)
       | Add_reason (t, _, _)
-      | Prepend_on_apply (t, _) ->
+      | Prepend_on_apply (t, _)
+      | Drop_reasons_on_apply t ->
         aux t
       | From_on_error _
       | Assert_in_current_decl _ ->
@@ -8206,6 +8241,8 @@ end = struct
   let always err = Always err
 
   let prepend_on_apply t snd_err = Prepend_on_apply (t, snd_err)
+
+  let drop_reasons_on_apply t = Drop_reasons_on_apply t
 
   let assert_in_current_decl code ~ctx = Assert_in_current_decl (code, ctx)
 
@@ -8310,6 +8347,9 @@ end = struct
         Eval_result.bind
           ~f:(aux t)
           (Error_state.prepend_secondary st snd_err ~current_span)
+      | Drop_reasons_on_apply t ->
+        let st = Error_state.{ st with reasons_opt = Some (lazy []) } in
+        aux t st
     and aux_reason_op op err base_reason (Error_state.{ reasons_opt; _ } as st)
         =
       let reasons_opt =

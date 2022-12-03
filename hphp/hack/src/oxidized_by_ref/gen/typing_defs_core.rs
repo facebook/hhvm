@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e7d7d108fdb8797b0ff7a60cbf27e043>>
+// @generated SignedSource<<fe5b48e3671786ca5e3ff0aa6295a0e9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -971,6 +971,35 @@ arena_deserializer::impl_deserialize_in_arena!(CanTraverse<'arena>);
 
 #[derive(
     Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "htm_")]
+#[repr(C)]
+pub struct HasTypeMember<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub id: &'a str,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub lower: &'a Ty<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub upper: &'a Ty<'a>,
+}
+impl<'a> TrivialDrop for HasTypeMember<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(HasTypeMember<'arena>);
+
+#[derive(
+    Clone,
     Copy,
     Debug,
     Deserialize,
@@ -991,8 +1020,7 @@ pub enum ConstraintType_<'a> {
     ThasMember(&'a HasMember<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Thas_type_member")]
-    #[rust_to_ocaml(inline_tuple)]
-    ThasTypeMember(&'a (&'a str, &'a Ty<'a>)),
+    ThasTypeMember(&'a HasTypeMember<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Tcan_index")]
     TcanIndex(&'a CanIndex<'a>),

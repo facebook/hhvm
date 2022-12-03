@@ -358,8 +358,8 @@ and 'phase class_refinement = { cr_types: 'phase class_type_refinement SMap.t }
 and 'phase class_type_refinement =
   | TRexact : 'phase ty -> 'phase class_type_refinement
   | TRloose :
-      decl_phase class_type_refinement_bounds
-      -> decl_phase class_type_refinement
+      'phase class_type_refinement_bounds
+      -> 'phase class_type_refinement
 
 and 'phase class_type_refinement_bounds = {
   tr_lower: 'phase ty list;
@@ -1059,9 +1059,16 @@ type can_traverse = {
 }
 [@@deriving show]
 
+type has_type_member = {
+  htm_id: string;
+  htm_lower: locl_ty;
+  htm_upper: locl_ty;
+}
+[@@deriving show]
+
 type constraint_type_ =
   | Thas_member of has_member
-  | Thas_type_member of string * locl_ty
+  | Thas_type_member of has_type_member
   | Tcan_index of can_index
   | Tcan_traverse of can_traverse
   | Tdestructure of destructure

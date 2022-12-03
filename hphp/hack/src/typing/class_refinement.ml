@@ -60,7 +60,7 @@ let fold_map (f : 'acc -> decl_ty -> 'acc * decl_ty) acc { cr_types = trs } :
   let (acc, trs) = SMap.map_env (fold_map_type_refinement f) acc trs in
   (acc, { cr_types = trs })
 
-let fold_type_refinement r ~init:acc ~f =
+let fold_types_in_refinement r ~init:acc ~f =
   match r with
   | TRexact ty -> f acc ty
   | TRloose { tr_lower = ls; tr_upper = us } ->
@@ -69,7 +69,7 @@ let fold_type_refinement r ~init:acc ~f =
     acc
 
 let fold { cr_types = trs } ~init:acc ~f =
-  SMap.fold (fun _ tr acc -> fold_type_refinement tr ~init:acc ~f) trs acc
+  SMap.fold (fun _ tr acc -> fold_types_in_refinement tr ~init:acc ~f) trs acc
 
 let iter f r = fold r ~init:() ~f:(fun () -> f)
 

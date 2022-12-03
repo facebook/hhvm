@@ -341,6 +341,16 @@ type simplify_unions =
 
 val simplify_unions_ref : simplify_unions ref
 
+type intersect_list =
+  Typing_env_types.env ->
+  Typing_reason.t ->
+  Typing_defs.locl_ty list ->
+  Typing_env_types.env * Typing_defs.locl_ty
+
+val intersect_list_ref : intersect_list ref
+
+val intersect_list : intersect_list
+
 val contains_tvar_decl : Typing_defs.decl_ty -> bool
 
 val contains_generic_decl : Typing_defs.decl_ty -> Pos_or_decl.t option

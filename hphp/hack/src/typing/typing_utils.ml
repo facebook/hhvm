@@ -190,6 +190,13 @@ let (simplify_unions_ref : simplify_unions ref) =
 
 let simplify_unions x = !simplify_unions_ref x
 
+type intersect_list = env -> Reason.t -> locl_ty list -> env * locl_ty
+
+let (intersect_list_ref : intersect_list ref) =
+  ref (not_implemented "intersect_list")
+
+let intersect_list x = !intersect_list_ref x
+
 type approx =
   | ApproxUp
   | ApproxDown

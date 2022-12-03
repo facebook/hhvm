@@ -462,7 +462,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
   | Rexpr_dep_type (r, p, e) ->
     to_string prefix r @ [(p, "  " ^ expr_dep_type_reason_string e)]
   | Rtconst_no_cstr (_, n) ->
-    [(p, prefix ^ " because the type constant " ^ n ^ " has no constraints")]
+    [(p, prefix ^ " because the type constant " ^ n ^ " lacks a constraint")]
   | Rpredicated (_, f) ->
     [(p, prefix ^ " from the argument to this " ^ f ^ " test")]
   | Ris _ -> [(p, prefix ^ " from this `is` expression test")]

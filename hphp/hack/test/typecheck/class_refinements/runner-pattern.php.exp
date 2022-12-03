@@ -3,7 +3,7 @@ A `where` type constraint is violated here (Typing[4323])
   File "runner-pattern.php", line 24, characters 19-24:
   This is the method with `where` type constraints
   File "runner-pattern.php", line 25, characters 17-39:
-  Expected an object with `type T = _`
+  Expected a class with `{type T = _}`
   File "runner-pattern.php", line 16, characters 20-23:
   But got `TBox as Box`
   File "runner-pattern.php", line 25, characters 9-12:

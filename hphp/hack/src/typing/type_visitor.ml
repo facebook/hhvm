@@ -341,7 +341,9 @@ class type ['a] internal_type_visitor_type =
 
     method on_has_member : 'a -> Reason.t -> has_member -> 'a
 
-    method on_thas_type_member : 'a -> Reason.t -> string * locl_ty -> 'a
+    method on_thas_type_member : 'a -> Reason.t -> has_type_member -> 'a
+
+    method on_has_type_member : 'a -> Reason.t -> has_type_member -> 'a
 
     method on_tcan_index : 'a -> Reason.t -> can_index -> 'a
 
@@ -372,7 +374,7 @@ class ['a] internal_type_visitor : ['a] internal_type_visitor_type =
       let (r, ty) = deref_constraint_type ty in
       match ty with
       | Thas_member hm -> this#on_thas_member acc r hm
-      | Thas_type_member (id, lty) -> this#on_thas_type_member acc r (id, lty)
+      | Thas_type_member htm -> this#on_thas_type_member acc r htm
       | Tcan_index ci -> this#on_tcan_index acc r ci
       | Tcan_traverse ct -> this#on_tcan_traverse acc r ct
       | Tdestructure des -> this#on_tdestructure acc r des
@@ -395,7 +397,13 @@ class ['a] internal_type_visitor : ['a] internal_type_visitor_type =
       in
       this#on_locl_type acc hm_type
 
-    method on_thas_type_member acc _r (_id, lty) = this#on_locl_type acc lty
+    method on_thas_type_member acc r htm = this#on_has_type_member acc r htm
+
+    method on_has_type_member acc _r htm =
+      let { htm_id = _; htm_lower; htm_upper } = htm in
+      let acc = this#on_locl_type acc htm_lower in
+      let acc = this#on_locl_type acc htm_upper in
+      acc
 
     method on_tcan_index acc r hm = this#on_can_index acc r hm
 
@@ -406,11 +414,9 @@ class ['a] internal_type_visitor : ['a] internal_type_visitor_type =
       this#on_locl_type acc ci.ci_val
 
     method on_can_traverse acc _r ct =
-      match ct.ct_key with
-      | None -> this#on_locl_type acc ct.ct_val
-      | Some ct_key ->
-        let acc = this#on_locl_type acc ct_key in
-        this#on_locl_type acc ct.ct_val
+      let acc = this#on_locl_type_option acc ct.ct_key in
+      let acc = this#on_locl_type acc ct.ct_val in
+      acc
 
     method on_tdestructure acc r des = this#on_destructure acc r des
 

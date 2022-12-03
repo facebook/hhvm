@@ -23,6 +23,15 @@ module MakeType = Typing_make_type
    also X. So Exact is propagated down the <: relation, see `update_class_name`
    below where this behavior is encoded. *)
 
+(** When the access code is going to return a `Tgeneric "Foo::Bar"`,
+    we use the following type to tell the difference between legit
+    accesses from known concrete types (`this`, or expression-
+    dependent types), and unsound accesses from arbitrary generic
+    variables. *)
+type root_kind =
+  | ConcreteClass
+  | GenericType
+
 type context = {
   id: pos_id;  (** The T in the type access C::T *)
   ety_env: expand_env;
@@ -42,6 +51,7 @@ type context = {
       subject to the constraint TC as C and we would like to expand TC::T we
       will expand C::T with base set to `Some (Tgeneric "TC")` (and root set
       to C). If it is None the base is exactly the current root. *)
+  root_kind: root_kind;  (** See documentation for the [root_kind] type. *)
 }
 
 (** The result of an expansion
@@ -397,10 +407,42 @@ let rec expand ctx env root =
     let ((env, ty_err_opt), res) = expand ctx env ty in
     let name = Printf.sprintf "<cls#%s>" name in
     ((env, ty_err_opt), update_class_name env ctx.id name res)
-  | Tclass (_, Nonexact cr, _) when Class_refinement.has_type_ref ctx.id cr ->
+  | Tclass (cid, Nonexact cr, targs)
+    when Class_refinement.has_type_ref ctx.id cr ->
     begin
       match Class_refinement.get_type_ref ctx.id cr with
       | Some (TRexact ty) -> ((env, None), Exact ty)
+      | Some (TRloose { tr_lower; tr_upper }) ->
+        let alt_root = mk (get_reason root, Tclass (cid, nonexact, targs)) in
+        let ((env, ty_err_opt), result) = expand ctx env alt_root in
+        (match result with
+        | Exact _
+        | Missing _ ->
+          ((env, ty_err_opt), result)
+        | Abstract abstr ->
+          (* Flag an error if the root is not a concrete class type. *)
+          let ty_err_opt' =
+            match ctx.root_kind with
+            | ConcreteClass -> None
+            | GenericType ->
+              let pos = Reason.to_pos (get_reason root) in
+              Option.map ctx.ety_env.on_error ~f:(fun on_error ->
+                  Typing_error.apply_reasons
+                    ~on_error
+                    (Typing_error.Secondary.Inexact_tconst_access (pos, ctx.id)))
+          in
+          let ty_err_opt = Option.first_some ty_err_opt' ty_err_opt in
+          let add_bounds tyset bnds =
+            List.fold bnds ~init:tyset ~f:(fun tyset t -> TySet.add t tyset)
+          in
+          let abstr =
+            {
+              abstr with
+              lower_bounds = add_bounds abstr.lower_bounds tr_lower;
+              upper_bounds = add_bounds abstr.upper_bounds tr_upper;
+            }
+          in
+          ((env, ty_err_opt), Abstract abstr))
       | None -> (* unreachable *) ((env, None), Missing None)
     end
   | Tclass (cls, _, _) ->
@@ -422,11 +464,26 @@ let rec expand ctx env root =
     end
   | Tgeneric (s, tyargs) ->
     let ctx =
+      let root_kind =
+        let this_name = Naming_special_names.SpecialIdents.this in
+        (* The `this` type stands for a concrete class. *)
+        if String.equal s this_name then
+          ConcreteClass
+        else
+          ctx.root_kind
+      in
       let generics_seen = TySet.add root ctx.generics_seen in
       let base = Some (Option.value ctx.base ~default:root) in
       let allow_abstract = true in
       let abstract_as_tyvar_at_pos = None in
-      { ctx with generics_seen; base; allow_abstract; abstract_as_tyvar_at_pos }
+      {
+        ctx with
+        generics_seen;
+        base;
+        allow_abstract;
+        abstract_as_tyvar_at_pos;
+        root_kind;
+      }
     in
 
     (* Ignore seen bounds to avoid infinite loops *)
@@ -451,10 +508,11 @@ let rec expand ctx env root =
     ((env, ty_err_opt), update_class_name env ctx.id s res)
   | Tdependent (dep_ty, ty) ->
     let ctx =
+      let root_kind = ConcreteClass in
       let base = Some (Option.value ctx.base ~default:root) in
       let allow_abstract = true in
       let abstract_as_tyvar_at_pos = None in
-      { ctx with base; allow_abstract; abstract_as_tyvar_at_pos }
+      { ctx with base; allow_abstract; abstract_as_tyvar_at_pos; root_kind }
     in
     let ((env, ty_err_opt), res) = expand ctx env ty in
     ( (env, ty_err_opt),
@@ -545,6 +603,9 @@ let expand_with_env
         generics_seen = TySet.empty;
         allow_abstract = allow_abstract_tconst;
         abstract_as_tyvar_at_pos = as_tyvar_with_cnstr;
+        root_kind =
+          GenericType
+          (* Worst-case assumption; may be refined during [expand]. *);
       }
     in
     let ((env, e1), res) = expand ctx env root in

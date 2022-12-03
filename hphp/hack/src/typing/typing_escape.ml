@@ -347,6 +347,13 @@ and refresh_types_w_variance renv v vl tl =
   in
   with_default ~default:tl (go renv Unchanged vl tl [])
 
+let refresh_type_opt renv v tyo =
+  match tyo with
+  | None -> (renv, None, Unchanged)
+  | Some ty ->
+    let (renv, ty, ch) = refresh_type renv v ty in
+    (renv, Some ty, ch)
+
 let rec refresh_ctype renv v cty_orig =
   let inv = Ast_defs.Invariant in
   with_default ~default:cty_orig
@@ -356,9 +363,13 @@ let rec refresh_ctype renv v cty_orig =
     let { hm_type; hm_name = _; hm_class_id = _; hm_explicit_targs = _ } = hm in
     let (renv, hm_type, changed) = refresh_type renv inv hm_type in
     (renv, mk_constraint_type (r, Thas_member { hm with hm_type }), changed)
-  | (r, Thas_type_member (id, lty)) ->
-    let (renv, lty, changed) = refresh_type renv inv lty in
-    (renv, mk_constraint_type (r, Thas_type_member (id, lty)), changed)
+  | (r, Thas_type_member htm) ->
+    let { htm_id; htm_lower; htm_upper } = htm in
+    let v' = Ast_defs.swap_variance v in
+    let (renv, htm_upper, ch1) = refresh_type renv v htm_upper in
+    let (renv, htm_lower, ch2) = refresh_type renv v' htm_lower in
+    let htm = { htm_id; htm_lower; htm_upper } in
+    (renv, mk_constraint_type (r, Thas_type_member htm), ch1 || ch2)
   | (r, Tcan_index ci) ->
     let (renv, ci_val, ch1) = refresh_type renv inv ci.ci_val in
     let (renv, ci_key, ch2) = refresh_type renv inv ci.ci_key in
@@ -380,13 +391,7 @@ let rec refresh_ctype renv v cty_orig =
   | (r, Tdestructure { d_required; d_optional; d_variadic; d_kind }) ->
     let (renv, d_required, ch1) = refresh_types renv inv d_required in
     let (renv, d_optional, ch2) = refresh_types renv inv d_optional in
-    let (renv, d_variadic, ch3) =
-      match d_variadic with
-      | Some ty ->
-        let (renv, ty, ch) = refresh_type renv inv ty in
-        (renv, Some ty, ch)
-      | None -> (renv, None, Unchanged)
-    in
+    let (renv, d_variadic, ch3) = refresh_type_opt renv inv d_variadic in
     let des = { d_required; d_optional; d_variadic; d_kind } in
     (renv, mk_constraint_type (r, Tdestructure des), ch1 || ch2 || ch3)
   | (r, TCunion (lty, cty)) ->

@@ -1052,17 +1052,27 @@ and localize_refinement ~ety_env env r root decl_cr =
     let both_err e1 e2 = Option.merge e1 e2 ~f:Typing_error.both in
     let ((env, ty_err_opt), cr) =
       Class_refinement.fold_type_refs
-        decl_cr
+        ~f:(fun id type_ref ((env, ty_err_opt), cr) ->
+          let ((env, ty_err_opt'), type_ref) =
+            match type_ref with
+            | TRexact ty ->
+              let (env_err, ty) = localize ~ety_env env ty in
+              (env_err, TRexact ty)
+            | TRloose { tr_lower; tr_upper } ->
+              let localize_list env tyl =
+                List.map_env (env, None) tyl ~f:(fun (env, ty_err_opt) ty ->
+                    let ((env, ty_err_opt'), ty) = localize ~ety_env env ty in
+                    ((env, both_err ty_err_opt ty_err_opt'), ty))
+              in
+              let ((env, ty_err_opt1), tr_lower) = localize_list env tr_lower in
+              let ((env, ty_err_opt2), tr_upper) = localize_list env tr_upper in
+              ( (env, both_err ty_err_opt1 ty_err_opt2),
+                TRloose { tr_lower; tr_upper } )
+          in
+          let cr = Class_refinement.add_type_ref id type_ref cr in
+          ((env, both_err ty_err_opt ty_err_opt'), cr))
         ~init:((env, ty_err_opt), cr)
-        ~f:(fun id tr ((env, ty_err_opt), cr) ->
-          match tr with
-          | TRexact ty ->
-            let ((env, ty_err_opt'), ty) = localize ~ety_env env ty in
-            let cr = Class_refinement.add_type_ref id (TRexact ty) cr in
-            ((env, both_err ty_err_opt ty_err_opt'), cr)
-          | TRloose _ ->
-            let err = mk_unsupported_err () in
-            ((env, both_err ty_err_opt err), cr))
+        decl_cr
     in
     ((env, ty_err_opt), mk (r, Tclass (cid, Nonexact cr, tyl)))
   | _ -> ((env, mk_unsupported_err ()), TUtils.terr env r)

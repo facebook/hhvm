@@ -1393,7 +1393,8 @@ end
 module Secondary : sig
   (** Specific error information which needs to be given a primary position from
        the AST being typed to be transformable into a user error.
-       This can be done via applying a [Reason_callback.t] using [apply_reasons].
+       This can be done via applying a [Reasons_callback.t] using
+       [apply_reasons].
   *)
   type t =
     | Of_error of Error.t
@@ -1663,6 +1664,10 @@ module Secondary : sig
         class_id: string;
         type_id: string;
       }
+    | Inexact_tconst_access of Pos_or_decl.t * (Pos_or_decl.t * string)
+    | Violated_refinement_constraint of {
+        cstr: [ `As | `Super ] * Pos_or_decl.t;
+      }
 end
 
 module Callback : sig
@@ -1854,6 +1859,12 @@ module Reasons_callback : sig
        `snd_err2`.
   *)
   val prepend_on_apply : t -> Secondary.t -> t
+
+  (** Creates a callback that ignores the secondary reasons that are passed
+      when it is applied and then proceeds with the callback it wraps. This
+      construct is only helpful if the wrapped callback contains enough
+      context to generate a usable error message. *)
+  val drop_reasons_on_apply : t -> t
 
   (* Applying the `Reasons_callback.t` `(assert_in_current_decl code ctx) err`
      will evaluate the `Secondary.t` `err` then use the head of the list of

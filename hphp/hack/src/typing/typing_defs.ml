@@ -1112,9 +1112,14 @@ let rec constraint_ty_compare ?(normalize_lists = false) ty1 ty2 =
   match (ty1, ty2) with
   | (Thas_member hm1, Thas_member hm2) ->
     has_member_compare ~normalize_lists hm1 hm2
-  | (Thas_type_member (id1, lty1), Thas_type_member (id2, lty2)) ->
+  | (Thas_type_member htm1, Thas_type_member htm2) ->
+    let { htm_id = id1; htm_lower = lower1; htm_upper = upper1 } = htm1
+    and { htm_id = id2; htm_lower = lower2; htm_upper = upper2 } = htm2 in
     (match String.compare id1 id2 with
-    | 0 -> ty_compare lty1 lty2
+    | 0 ->
+      (match ty_compare lower1 lower2 with
+      | 0 -> ty_compare upper1 upper2
+      | comp -> comp)
     | comp -> comp)
   | (Tcan_index ci1, Tcan_index ci2) ->
     can_index_compare ~normalize_lists ci1 ci2

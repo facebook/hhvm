@@ -455,3 +455,5 @@ let rec intersect_i env r ty1 lty2 =
 let () = Utils.negate_type_ref := negate_type
 
 let () = Utils.simplify_intersections_ref := simplify_intersections
+
+let () = Utils.intersect_list_ref := intersect_list

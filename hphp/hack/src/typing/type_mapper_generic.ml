@@ -285,7 +285,7 @@ class type ['env] constraint_type_mapper_type =
       'env -> Reason.t -> has_member -> 'env * constraint_type
 
     method on_Thas_type_member :
-      'env -> Reason.t -> string * locl_ty -> 'env * constraint_type
+      'env -> Reason.t -> has_type_member -> 'env * constraint_type
 
     method on_Tcan_index :
       'env -> Reason.t -> can_index -> 'env * constraint_type
@@ -321,7 +321,7 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
     method on_constraint_type_ env r ty_ =
       match ty_ with
       | Thas_member hm -> this#on_Thas_member env r hm
-      | Thas_type_member (id, ty) -> this#on_Thas_type_member env r (id, ty)
+      | Thas_type_member htm -> this#on_Thas_type_member env r htm
       | Tcan_index ci -> this#on_Tcan_index env r ci
       | Tcan_traverse ct -> this#on_Tcan_traverse env r ct
       | Tdestructure tyl -> this#on_Tdestructure env r tyl
@@ -334,9 +334,12 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
       let hm = { hm_name; hm_type; hm_class_id; hm_explicit_targs } in
       (env, mk_constraint_type (r, Thas_member hm))
 
-    method on_Thas_type_member env r (id, lty) =
-      let (env, lty) = this#on_type env lty in
-      (env, mk_constraint_type (r, Thas_type_member (id, lty)))
+    method on_Thas_type_member env r htm =
+      let { htm_id; htm_lower; htm_upper } = htm in
+      let (env, htm_lower) = this#on_type env htm_lower in
+      let (env, htm_upper) = this#on_type env htm_upper in
+      let htm = { htm_id; htm_lower; htm_upper } in
+      (env, mk_constraint_type (r, Thas_type_member htm))
 
     method on_Tcan_index env r ci =
       let { ci_key; ci_shape; ci_val; ci_expr_pos; ci_index_pos } = ci in
@@ -347,13 +350,7 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
 
     method on_Tcan_traverse env r ct =
       let { ct_key; ct_val; ct_is_await; ct_reason } = ct in
-      let (env, ct_key) =
-        match ct_key with
-        | None -> (env, None)
-        | Some ct_key ->
-          let (env, ct_key) = this#on_type env ct_key in
-          (env, Some ct_key)
-      in
+      let (env, ct_key) = this#on_opt_type env ct_key in
       let (env, ct_val) = this#on_type env ct_val in
       let ct = { ct_key; ct_val; ct_is_await; ct_reason } in
       (env, mk_constraint_type (r, Tcan_traverse ct))
@@ -362,13 +359,7 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
         =
       let (env, d_required) = this#on_locl_ty_list env d_required in
       let (env, d_optional) = this#on_locl_ty_list env d_optional in
-      let (env, d_variadic) =
-        match d_variadic with
-        | None -> (env, d_variadic)
-        | Some v ->
-          let (env, v) = this#on_type env v in
-          (env, Some v)
-      in
+      let (env, d_variadic) = this#on_opt_type env d_variadic in
       ( env,
         mk_constraint_type
           (r, Tdestructure { d_required; d_optional; d_variadic; d_kind }) )

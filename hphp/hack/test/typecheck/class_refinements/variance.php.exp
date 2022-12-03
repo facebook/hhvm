@@ -1,15 +1,3 @@
-File "variance.php", line 12, characters 35-57:
-Unsupported class refinement (Other[0000])
-File "variance.php", line 13, characters 35-60:
-Unsupported class refinement (Other[0000])
-File "variance.php", line 14, characters 35-57:
-Unsupported class refinement (Other[0000])
-File "variance.php", line 15, characters 35-60:
-Unsupported class refinement (Other[0000])
-File "variance.php", line 28, characters 35-57:
-Unsupported class refinement (Other[0000])
-File "variance.php", line 32, characters 35-60:
-Unsupported class refinement (Other[0000])
 File "variance.php", line 20, characters 54-55:
 Illegal usage of a covariant type parameter (Typing[4120])
   File "variance.php", line 19, characters 22-23:

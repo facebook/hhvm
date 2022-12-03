@@ -15,6 +15,7 @@ type type_member =
   | Error of Typing_error.t option
   | Exact of locl_ty
   | Abstract of {
+      name: pos_id;
       (* The bounds are optional: None for lower is equivalent
        * to nothing and None for upper is equivalent to mixed.
        * Having them optional ensures that [collect_bounds] below
@@ -55,7 +56,7 @@ let lookup_class_decl_type_member env ~on_error ~this_ty cls_id type_id =
           (match err_opt with
           | Some _ -> Error err_opt
           | None -> Exact lty) )
-      | Some { ttc_kind = TCAbstract tca; _ } ->
+      | Some { ttc_kind = TCAbstract tca; ttc_name = name; _ } ->
         let ((env, err_opt_1), lty_as) =
           match tca.atc_as_constraint with
           | Some decl_ty ->
@@ -73,25 +74,52 @@ let lookup_class_decl_type_member env ~on_error ~this_ty cls_id type_id =
         ( env,
           (match Option.first_some err_opt_1 err_opt_2 with
           | Some _ as err_opt -> Error err_opt
-          | None -> Abstract { lower = lty_super; upper = lty_as }) )
+          | None -> Abstract { name; lower = lty_super; upper = lty_as }) )
     end
 
 let lookup_class_type_member env ~on_error ~this_ty (cls_id, exact) type_id =
-  let refined_type_member =
+  let ulist = Typing_utils.union_list ~approx_cancel_neg:false in
+  let ilist = Typing_utils.intersect_list in
+  let combine env ~f = function
+    | [] -> (env, None)
+    | bounds ->
+      let (env, ty) = f env Reason.Rnone bounds in
+      (env, Some ty)
+  in
+  let (env, refined_type_member) =
     match exact with
     | Nonexact cr ->
       begin
         match Class_refinement.get_type_ref type_id cr with
-        | Some (TRexact ty) -> Exact ty
-        (* TODO(refinements): For `TRloose _` we will return `Abstract _` *)
-        | None -> Error None
+        | Some (TRexact ty) -> (env, Exact ty)
+        | Some (TRloose { tr_lower; tr_upper }) ->
+          let (env, lower) = combine ~f:ulist env tr_lower in
+          let (env, upper) = combine ~f:ilist env tr_upper in
+          (* FIXME(refinements): The position is pointing at
+           * the class when we would like to point in the
+           * refinement. *)
+          let name = (fst cls_id, snd type_id) in
+          (env, Abstract { name; lower; upper })
+        | None -> (env, Error None)
       end
-    | _ -> Error None
+    | _ -> (env, Error None)
   in
   match refined_type_member with
   | Exact _ -> (env, refined_type_member)
-  (* TODO(refinements): `Abstract _` will lookup the type member in the
-   * class and combine the two results. *)
+  | Abstract { name = _; lower = mem_lower; upper = mem_upper } ->
+    (* In this case, we still lookup the class decl to potentially
+     * obtain more information on the type member. *)
+    (match
+       lookup_class_decl_type_member env ~on_error ~this_ty cls_id type_id
+     with
+    | (env, Error _) -> (env, refined_type_member)
+    | (_env, Exact _) as result -> result
+    | (env, Abstract { name = cls_name; lower = cls_lower; upper = cls_upper })
+      ->
+      let to_list b1 b2 = List.filter_map ~f:Fn.id [b1; b2] in
+      let (env, lower) = combine ~f:ulist env (to_list mem_lower cls_lower) in
+      let (env, upper) = combine ~f:ilist env (to_list mem_upper cls_upper) in
+      (env, Abstract { name = cls_name; lower; upper }))
   | _ -> lookup_class_decl_type_member env ~on_error ~this_ty cls_id type_id
 
 let make_type_member env ~on_error ~this_ty ucc_kind bnd_tys type_id =
@@ -112,7 +140,7 @@ let make_type_member env ~on_error ~this_ty ucc_kind bnd_tys type_id =
           match type_member with
           | Error _ -> (lo_bnds, up_bnds)
           | Exact ty -> (ty :: lo_bnds, ty :: up_bnds)
-          | Abstract { lower; upper } ->
+          | Abstract { name = _; lower; upper } ->
             let maybe_add bnds =
               Option.fold ~init:bnds ~f:(Fun.flip List.cons)
             in

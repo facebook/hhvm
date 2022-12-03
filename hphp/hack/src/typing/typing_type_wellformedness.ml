@@ -70,7 +70,16 @@ let check_hrefinement unchecked_tparams env h =
       Class_refinement.fold_type_refs
         cr
         ~init:(env, None)
-        ~f:(fun type_id (TRexact ty) (env, ty_err_opt) ->
+        ~f:(fun type_id type_ref (env, ty_err_opt) ->
+          let (lo_ty, up_ty) =
+            match type_ref with
+            | TRexact ty -> (ty, ty)
+            | TRloose { tr_lower = lo_tys; tr_upper = up_tys } ->
+              let r = get_reason locl_ty in
+              let lo_ty = Typing_make_type.union r lo_tys in
+              let up_ty = Typing_make_type.intersection r up_tys in
+              (lo_ty, up_ty)
+          in
           let (env, type_member) =
             (* FIXME(refinements): the this type below is plain sketchy *)
             Typing_type_member.lookup_class_type_member
@@ -85,24 +94,24 @@ let check_hrefinement unchecked_tparams env h =
             (env, both_err ty_err_opt ty_err_opt')
           | Typing_type_member.Exact ty' ->
             let (env, ty_err_opt') =
-              Typing_utils.sub_type env ty' ty on_error
+              Typing_utils.sub_type env ty' lo_ty on_error
             in
             let (env, ty_err_opt') =
               match ty_err_opt with
-              | None -> Typing_utils.sub_type env ty ty' on_error
+              | None -> Typing_utils.sub_type env up_ty ty' on_error
               | Some _ -> (env, ty_err_opt')
             in
             (env, both_err ty_err_opt ty_err_opt')
-          | Typing_type_member.Abstract { lower; upper } ->
+          | Typing_type_member.Abstract { name = _; lower; upper } ->
             let (env, ty_err_opt') =
               Option.value_map upper ~default:(env, None) ~f:(fun up ->
-                  Typing_utils.sub_type env ty up on_error)
+                  Typing_utils.sub_type env up_ty up on_error)
             in
             let (env, ty_err_opt') =
               match ty_err_opt' with
               | None ->
                 Option.value_map lower ~default:(env, None) ~f:(fun lo ->
-                    Typing_utils.sub_type env lo ty on_error)
+                    Typing_utils.sub_type env lo lo_ty on_error)
               | Some _ -> (env, ty_err_opt')
             in
             (env, both_err ty_err_opt ty_err_opt'))

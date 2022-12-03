@@ -399,11 +399,27 @@ let rec describe_ty_super ~is_coeffect env ty =
       (match targs with
       | None -> Printf.sprintf "an object with property `%s`" name
       | Some _ -> Printf.sprintf "an object with method `%s`" name)
-    | (_, Thas_type_member (id, ty)) ->
-      Printf.sprintf
-        "an object with `type %s = %s`"
-        id
-        (describe_ty ~is_coeffect:false env (LoclType ty))
+    | (_, Thas_type_member htm) ->
+      let { htm_id = id; htm_lower = lo; htm_upper = up } = htm in
+      if phys_equal lo up then
+        (* We use physical equality as a heuristic to generate
+           slightly more readable descriptions. *)
+        Printf.sprintf
+          "a class with `{type %s = %s}`"
+          id
+          (describe_ty ~is_coeffect:false env (LoclType lo))
+      else
+        let bound_desc ~prefix ~is_trivial bnd =
+          if is_trivial env bnd then
+            ""
+          else
+            prefix ^ describe_ty ~is_coeffect:false env (LoclType bnd)
+        in
+        Printf.sprintf
+          "a class with `{type %s%s%s}`"
+          id
+          (bound_desc ~prefix:" super " ~is_trivial:Typing_utils.is_nothing lo)
+          (bound_desc ~prefix:" as " ~is_trivial:Typing_utils.is_mixed up)
     | (_, Tcan_traverse _) -> "an array that can be traversed with foreach"
     | (_, Tcan_index _) -> "an array that can be indexed"
     | (_, Tdestructure _) ->
@@ -881,7 +897,7 @@ and simplify_subtype_i
       ~r_sub:(reason ety_sub)
       ~r_super:(reason ety_super)
   in
-  let fail_with_suffix snd_err_opt =
+  let fail_snd_err =
     let reasons =
       lazy
         (let r_super = reason ety_super in
@@ -903,37 +919,28 @@ and simplify_subtype_i
          let right = Reason.to_string ("But got " ^ ty_sub_descr) r_sub in
          left @ right)
     in
-    let err_opt =
-      let open Typing_error in
+    match subtype_env.tparam_constraints with
+    | [] -> Typing_error.Secondary.Subtyping_error reasons
+    | cstrs -> Typing_error.Secondary.Violated_constraint { cstrs; reasons }
+  in
+  let fail_with_suffix snd_err_opt =
+    let open Typing_error in
+    let maybe_retain_code =
       match subtype_env.tparam_constraints with
-      | [] ->
-        let snd_err1 = Secondary.Subtyping_error reasons in
-        (match snd_err_opt with
-        | Some snd_err2 ->
-          Option.map subtype_env.on_error ~f:(fun on_error ->
-              apply_reasons
-                ~on_error:
-                  Reasons_callback.(
-                    prepend_on_apply (retain_code on_error) snd_err1)
-                snd_err2)
-        | _ ->
-          Option.map subtype_env.on_error ~f:(fun on_error ->
-              apply_reasons
-                ~on_error:(Reasons_callback.retain_code on_error)
-                snd_err1))
-      | cstrs ->
-        let snd_err1 = Secondary.Violated_constraint { cstrs; reasons } in
-        (match snd_err_opt with
-        | Some snd_err2 ->
-          Option.map subtype_env.on_error ~f:(fun on_error ->
-              apply_reasons
-                ~on_error:(Reasons_callback.prepend_on_apply on_error snd_err1)
-                snd_err2)
-        | None ->
-          Option.map subtype_env.on_error ~f:(fun on_error ->
-              apply_reasons ~on_error snd_err1))
+      | [] -> Reasons_callback.retain_code
+      | _ -> Fn.id
     in
-    err_opt
+    match snd_err_opt with
+    | Some snd_err ->
+      Option.map subtype_env.on_error ~f:(fun on_error ->
+          apply_reasons
+            ~on_error:
+              Reasons_callback.(
+                prepend_on_apply (maybe_retain_code on_error) fail_snd_err)
+            snd_err)
+    | _ ->
+      Option.map subtype_env.on_error ~f:(fun on_error ->
+          apply_reasons ~on_error:(maybe_retain_code on_error) fail_snd_err)
   in
 
   let fail = fail_with_suffix None in
@@ -1246,13 +1253,21 @@ and simplify_subtype_i
           ety_sub
           (r, has_member_ty)
           env
-      | (r, Thas_type_member (id, ty)) ->
+      | (r, Thas_type_member htm) ->
+        (* Contextualize errors that may be generated when
+         * checking refinement bounds. *)
+        let on_error =
+          Option.map subtype_env.on_error ~f:(fun on_error ->
+              let open Typing_error.Reasons_callback in
+              prepend_on_apply on_error fail_snd_err)
+        in
+        let subtype_env = { subtype_env with on_error } in
         simplify_subtype_has_type_member
           ~subtype_env
           ~this_ty
           ~fail
           ety_sub
-          (r, id, ty)
+          (r, htm)
           env
     end
   (* Next deal with all locl types *)
@@ -2266,11 +2281,20 @@ and simplify_subtype_i
       Class_refinement.fold_type_refs
         cr_super
         ~init:(valid env)
-        ~f:(fun type_id (TRexact ty) (env, prop) ->
+        ~f:(fun type_id type_ref (env, prop) ->
           (env, prop)
           &&&
+          let (htm_lower, htm_upper) =
+            match type_ref with
+            | TRexact ty -> (ty, ty)
+            | TRloose { tr_lower; tr_upper } ->
+              let loty = MakeType.union r_super tr_lower in
+              let upty = MakeType.intersection r_super tr_upper in
+              (loty, upty)
+          in
           let htm_ty =
-            mk_constraint_type (r_super, Thas_type_member (type_id, ty))
+            let htm = { htm_id = type_id; htm_lower; htm_upper } in
+            mk_constraint_type (r_super, Thas_type_member htm)
           in
           simplify_subtype_i
             ~subtype_env
@@ -2692,10 +2716,9 @@ and simplify_subtype_can_traverse
     | _ -> default_subtype ~subtype_env ~this_ty ~fail env ty_sub ty_super)
 
 and simplify_subtype_has_type_member
-    ~subtype_env ~this_ty ~fail ty_sub (r, memid, memty) env =
-  let htmty =
-    ConstraintType (mk_constraint_type (r, Thas_type_member (memid, memty)))
-  in
+    ~subtype_env ~this_ty ~fail ty_sub (r, htm) env =
+  let { htm_id = memid; htm_lower = memloty; htm_upper = memupty } = htm in
+  let htmty = ConstraintType (mk_constraint_type (r, Thas_type_member htm)) in
   log_subtype_i
     ~level:2
     ~this_ty
@@ -2706,6 +2729,21 @@ and simplify_subtype_has_type_member
   let (env, ety_sub) = Env.expand_internal_type env ty_sub in
   let default_subtype env =
     default_subtype ~subtype_env ~this_ty ~fail env ety_sub htmty
+  in
+  let simplify_subtype_bound kind ~bound ty env =
+    let on_error =
+      Option.map subtype_env.on_error ~f:(fun on_error ->
+          let open Typing_error in
+          let pos = Reason.to_pos (get_reason bound) in
+          Reasons_callback.prepend_on_apply
+            on_error
+            (Secondary.Violated_refinement_constraint { cstr = (kind, pos) }))
+    in
+    let subtype_env = { subtype_env with on_error } in
+    let this_ty = None in
+    match kind with
+    | `As -> simplify_subtype ~subtype_env ~this_ty ty bound env
+    | `Super -> simplify_subtype ~subtype_env ~this_ty bound ty env
   in
   match ety_sub with
   | ConstraintType _ -> invalid ~fail env
@@ -2729,8 +2767,8 @@ and simplify_subtype_has_type_member
           bndtys
           (Reason.to_pos r, memid)
       in
-      simplify_subtype ~subtype_env ~this_ty dtmemty memty env
-      &&& simplify_subtype ~subtype_env ~this_ty memty dtmemty
+      simplify_subtype_bound `As dtmemty ~bound:memupty env
+      &&& simplify_subtype_bound `Super ~bound:memloty dtmemty
     in
     (match deref ty_sub with
     | (_r_sub, Tclass (x_sub, exact_sub, _tyl_sub)) ->
@@ -2750,10 +2788,29 @@ and simplify_subtype_has_type_member
       (match type_member with
       | Typing_type_member.Error err -> invalid ~fail:err env
       | Typing_type_member.Exact ty ->
-        let this_ty = None in
-        simplify_subtype ~subtype_env ~this_ty ty memty env
-        &&& simplify_subtype ~subtype_env ~this_ty memty ty
-      | Typing_type_member.Abstract _ -> invalid ~fail env)
+        simplify_subtype_bound `As ty ~bound:memupty env
+        &&& simplify_subtype_bound `Super ~bound:memloty ty
+      | Typing_type_member.Abstract { name; lower = loty; upper = upty } ->
+        let r_bnd = Reason.Rtconst_no_cstr name in
+        let loty = Option.value ~default:(MakeType.nothing r_bnd) loty in
+        let upty = Option.value ~default:(MakeType.mixed r_bnd) upty in
+        (* In case the refinement is exact we check that upty <: loty;
+         * doing the check early gives us a better chance at generating
+         * good error messages. The unification errors we get when
+         * doing this check are usually unhelpful, so we drop them. *)
+        let is_exact = phys_equal memloty memupty in
+        (if is_exact then
+          let drop_sub_reasons =
+            Option.map
+              subtype_env.on_error
+              ~f:Typing_error.Reasons_callback.drop_reasons_on_apply
+          in
+          let subtype_env = { subtype_env with on_error = drop_sub_reasons } in
+          simplify_subtype ~subtype_env ~this_ty upty loty env
+        else
+          valid env)
+        &&& simplify_subtype_bound `As upty ~bound:memupty
+        &&& simplify_subtype_bound `Super ~bound:memloty loty)
     | (_r_sub, Tdependent (DTexpr eid, bndty)) ->
       concrete_rigid_tvar_access env (Typing_type_member.EDT eid) [bndty]
     | (_r_sub, Tgeneric (s, ty_args))
@@ -4555,8 +4612,13 @@ and decompose_subtype_add_prop env prop =
   | TL.IsSubtype (coerce, LoclType ty1, LoclType ty2) ->
     decompose_subtype_add_bound ~coerce env ty1 ty2
   | TL.IsSubtype _ ->
+    (* Subtyping queries between locl types are not creating
+       constraint types only if require_soundness is unset.
+       Otherwise type refinement subtyping queries may create
+       Thas_type_member() constraint types. *)
     failwith
-      "Subtyping locl types should yield propositions involving locl types only."
+      ("Subtyping locl types in completeness mode should yield "
+      ^ "propositions involving locl types only.")
 
 (* Decompose a general constraint *)
 and decompose_constraint

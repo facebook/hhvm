@@ -1544,10 +1544,11 @@ and get_tyvars_i env (ty : internal_type) =
         hm
       in
       get_tyvars env hm_type
-    | (_, Thas_type_member (_, ty)) ->
-      let (env, pos, neg) = get_tyvars env ty in
-      let posneg = ISet.union pos neg in
-      (env, posneg, posneg)
+    | (_, Thas_type_member htm) ->
+      let { htm_id = _; htm_lower; htm_upper } = htm in
+      let (env, poslo, neglo) = get_tyvars env htm_lower in
+      let (env, posup, negup) = get_tyvars env htm_upper in
+      (env, ISet.union posup neglo, ISet.union poslo negup)
     | (_, Tcan_index ci) ->
       let (env, pos1, neg1) = get_tyvars env ci.ci_val in
       let (env, pos2, neg2) = get_tyvars env ci.ci_key in

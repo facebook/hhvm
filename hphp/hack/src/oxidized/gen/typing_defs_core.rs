@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a68a9995bc4a306c19c174abbaf497cc>>
+// @generated SignedSource<<b6087da6b6b3f3913df4e7ff7011a66e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1002,6 +1002,30 @@ pub struct CanTraverse {
     Debug,
     Deserialize,
     Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "htm_")]
+#[repr(C)]
+pub struct HasTypeMember {
+    pub id: String,
+    pub lower: Ty,
+    pub upper: Ty,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -1016,7 +1040,7 @@ pub enum ConstraintType_ {
     #[rust_to_ocaml(name = "Thas_member")]
     ThasMember(HasMember),
     #[rust_to_ocaml(name = "Thas_type_member")]
-    ThasTypeMember(String, Ty),
+    ThasTypeMember(HasTypeMember),
     #[rust_to_ocaml(name = "Tcan_index")]
     TcanIndex(CanIndex),
     #[rust_to_ocaml(name = "Tcan_traverse")]

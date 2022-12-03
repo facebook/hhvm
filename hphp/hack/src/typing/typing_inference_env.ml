@@ -905,15 +905,9 @@ module Size = struct
       + type_size_list env d_required
       + type_size_list env d_optional
       + type_size_option ~f:(ty_size env) d_variadic
-    | (_, Thas_member hm) ->
-      1
-      +
-      let { hm_type = ty; hm_name = _; hm_class_id = _; hm_explicit_targs = _ }
-          =
-        hm
-      in
-      ty_size env ty
-    | (_, Thas_type_member (_, ty)) -> 1 + ty_size env ty
+    | (_, Thas_member hm) -> 1 + ty_size env hm.hm_type
+    | (_, Thas_type_member htm) ->
+      1 + ty_size env htm.htm_lower + ty_size env htm.htm_upper
     | (_, Tcan_index ci) -> 1 + ty_size env ci.ci_val + ty_size env ci.ci_key
     | (_, Tcan_traverse ct) ->
       1 + ty_size env ct.ct_val + type_size_option ~f:(ty_size env) ct.ct_key

@@ -297,32 +297,34 @@ let unbound_name env (pos, name) e =
     | FileInfo.Mhhi -> expr_any env pos e
 
 (* Is this type Traversable<vty> or Container<vty> for some vty? *)
-let get_value_collection_inst env vc_kind ty =
-  let arraykey_or ty =
+let get_value_collection_inst env p vc_kind ty =
+  let arraykey_on ty =
     match vc_kind with
     | Set
     | ImmSet
     | Keyset ->
-      let arraykey = MakeType.arraykey Reason.Rnone in
-      Some arraykey
+      let reason = Reason.Rset_element p in
+      let arraykey = MakeType.arraykey reason in
+      let (env, ty) = Typing_intersection.intersect env ~r:reason arraykey ty in
+      Some (env, ty)
     | Vector
     | ImmVector
     | Vec ->
-      Some ty
+      Some (env, ty)
   in
   match get_node ty with
   | Tclass ((_, c), _, [vty])
     when String.equal c SN.Collections.cTraversable
          || String.equal c SN.Collections.cContainer ->
-    Some vty
+    arraykey_on vty
   (* If we're expecting a mixed or a nonnull then we can just assume
    * that the element type is mixed if it is a vec-like type and arraykey if it
    * is a set-like one. *)
-  | Tnonnull -> arraykey_or (MakeType.mixed (get_reason ty))
-  | Tany _ -> Some ty
+  | Tnonnull -> arraykey_on (MakeType.mixed (get_reason ty))
+  | Tany _ -> Some (env, ty)
   | Tdynamic when env.in_support_dynamic_type_method_check ->
-    arraykey_or ty
     (* interpret dynamic as Traversable<dynamic> or keyset<arraykey> *)
+    arraykey_on ty
   | _ -> None
 
 (* Is this type KeyedTraversable<kty,vty>
@@ -334,18 +336,21 @@ let get_key_value_collection_inst env p ty =
   | Tclass ((_, c), _, [kty; vty])
     when String.equal c SN.Collections.cKeyedTraversable
          || String.equal c SN.Collections.cKeyedContainer ->
-    Some (kty, vty)
+    let reason = Reason.Rkey_value_collection_key p in
+    let arraykey = MakeType.arraykey reason in
+    let (env, kty) = Typing_intersection.intersect env ~r:reason kty arraykey in
+    Some (env, kty, vty)
   (* If we're expecting a mixed or a nonnull then we can just assume
    * that the key type is arraykey and the value type is mixed *)
   | Tnonnull ->
     let arraykey = MakeType.arraykey (Reason.Rkey_value_collection_key p) in
     let mixed = MakeType.mixed (Reason.Rwitness p) in
-    Some (arraykey, mixed)
-  | Tany _ -> Some (ty, ty)
+    Some (env, arraykey, mixed)
+  | Tany _ -> Some (env, ty, ty)
   | Tdynamic when env.in_support_dynamic_type_method_check ->
     (* interpret dynamic as KeyedTraversable<arraykey, dynamic> *)
     let arraykey = MakeType.arraykey (Reason.Rkey_value_collection_key p) in
-    Some (arraykey, ty)
+    Some (env, arraykey, ty)
   | _ -> None
 
 (* Is this type varray<vty> or a supertype for some vty? *)
@@ -365,12 +370,12 @@ let kvc_kind_to_supers kind =
   | Dict -> [SN.Collections.cDict]
 
 (* Is this type one of the value collection types with element type vty? *)
-let get_vc_inst env vc_kind ty =
+let get_vc_inst env p vc_kind ty =
   let classnames = vc_kind_to_supers vc_kind in
   match get_node ty with
   | Tclass ((_, c), _, [vty]) when List.exists classnames ~f:(String.equal c) ->
-    Some vty
-  | _ -> get_value_collection_inst env vc_kind ty
+    Some (env, vty)
+  | _ -> get_value_collection_inst env p vc_kind ty
 
 (* Is this type one of the three key-value collection types
  * e.g. dict<kty,vty> or a supertype for some kty and vty? *)
@@ -379,7 +384,7 @@ let get_kvc_inst env p kvc_kind ty =
   match get_node ty with
   | Tclass ((_, c), _, [kty; vty])
     when List.exists classnames ~f:(String.equal c) ->
-    Some (kty, vty)
+    Some (env, kty, vty)
   | _ -> get_key_value_collection_inst env p ty
 
 (* Check whether this is a function type that (a) either returns a disposable
@@ -3441,7 +3446,7 @@ and expr_
           | Vec ->
             (array_value, false, None)
         in
-        ( get_vc_inst env kind,
+        ( get_vc_inst env p kind,
           class_name,
           subtype_val,
           coerce_for_op,
@@ -3450,7 +3455,7 @@ and expr_
             MakeType.class_type (Reason.Rwitness p) class_name [value_ty]),
           key_bound )
       | Varray _ ->
-        ( get_vc_inst env Vec,
+        ( get_vc_inst env p Vec,
           "varray",
           array_value,
           false,
@@ -3475,7 +3480,7 @@ and expr_
           | (env, Some (pos, ur, _, ety, _)) ->
             begin
               match get_expected_kind ety with
-              | Some vty -> (env, Some (ExpectedTy.make pos ur vty), None)
+              | Some (env, vty) -> (env, Some (ExpectedTy.make pos ur vty), None)
               | None -> (env, None, None)
             end
           | _ -> (env, None, None)
@@ -3533,7 +3538,7 @@ and expr_
           | (env, Some (pos, reason, _, ety, _)) ->
             begin
               match get_expected_kind ety with
-              | Some (kty, vty) ->
+              | Some (env, kty, vty) ->
                 let k_expected = ExpectedTy.make pos reason kty in
                 let v_expected = ExpectedTy.make pos reason vty in
                 (env, Some k_expected, Some v_expected, None)

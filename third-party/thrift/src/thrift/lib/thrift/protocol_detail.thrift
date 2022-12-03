@@ -47,7 +47,11 @@ struct Object {
   // The members of the object.
   // TODO(ytj): use schema.FieldId as key
   2: map<i16, Value> members;
-} (cpp.virtual, thrift.uri = "facebook.com/thrift/protocol/Object")
+} (cpp.virtual, thrift.uri = "facebook.com/thrift/protocol/Object", rust.ord)
+
+// We need this to use float/double as set/map key in rust
+typedef float Float (rust.newtype, rust.type = "OrderedFloat<f32>", rust.ord)
+typedef double Double (rust.newtype, rust.type = "OrderedFloat<f64>", rust.ord)
 
 // A dynamic value.
 @cpp.Adapter{
@@ -65,8 +69,8 @@ union Value {
   5: i64 i64Value;
 
   // Floats.
-  6: float floatValue;
-  7: double doubleValue;
+  6: Float floatValue;
+  7: Double doubleValue;
 
   // Strings.
   8: string stringValue;
@@ -84,4 +88,4 @@ union Value {
   15: set<Value> setValue;
   @hack.SkipCodegen{reason = "Map keys can only be integer/string/binary/enum"}
   16: map<Value, Value> mapValue;
-} (cpp.virtual, thrift.uri = "facebook.com/thrift/protocol/Value")
+} (cpp.virtual, thrift.uri = "facebook.com/thrift/protocol/Value", rust.ord)

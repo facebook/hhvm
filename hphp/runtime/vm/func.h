@@ -1053,14 +1053,6 @@ public:
   // JIT data.
 
   /*
-   * Get the RDS handle for the function with this function's name.
-   *
-   * We can burn these into the TC even when functions are not persistent,
-   * since only a single name-to-function mapping will exist per request.
-   */
-  rds::Handle funcHandle() const;
-
-  /*
    * Get, set and reset the function body code pointer.
    */
   jit::TCA getFuncEntry() const;

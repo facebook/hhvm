@@ -2209,11 +2209,11 @@ module PrintTypedef = struct
       (fuel, typedef_str)
 end
 
-let supply_fuel tcopt printer =
+let supply_fuel ?(msg = true) tcopt printer =
   let type_printer_fuel = TypecheckerOptions.type_printer_fuel tcopt in
   let fuel = Fuel.init type_printer_fuel in
   let (fuel, str) = printer ~fuel in
-  if Fuel.has_enough fuel then
+  if Fuel.has_enough fuel || not msg then
     str
   else
     Printf.sprintf
@@ -2251,8 +2251,9 @@ let full_strip_ns_i env ty =
     env.genv.tcopt
     (Full.to_string_strip_ns ~ty:Full.internal_type (Loclenv env) ty)
 
-let full_strip_ns_decl env ty =
+let full_strip_ns_decl ?(msg = true) env ty =
   supply_fuel
+    ~msg
     env.genv.tcopt
     (Full.to_string_strip_ns ~ty:Full.decl_ty (Loclenv env) ty)
 
@@ -2261,7 +2262,8 @@ let full_with_identity env x occurrence definition_opt =
     env.genv.tcopt
     (Full.to_string_with_identity env x occurrence definition_opt)
 
-let full_decl tcopt ty = supply_fuel tcopt (Full.to_string_decl ty)
+let full_decl ?(msg = true) tcopt ty =
+  supply_fuel ~msg tcopt (Full.to_string_decl ty)
 
 let debug env ty =
   Full.debug_mode := true;

@@ -20,7 +20,7 @@ type class_or_typedef_result =
 (** Return a string representation of the given type using Hack-like syntax. *)
 val print_ty : env -> Typing_defs.locl_ty -> string
 
-val print_decl_ty : env -> Typing_defs.decl_ty -> string
+val print_decl_ty : ?msg:bool -> env -> Typing_defs.decl_ty -> string
 
 val print_error_ty :
   ?ignore_dynamic:bool -> env -> Typing_defs.locl_ty -> string

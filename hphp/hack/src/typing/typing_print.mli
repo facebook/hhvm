@@ -25,9 +25,12 @@ val full_strip_ns : env -> Typing_defs.locl_ty -> string
 
 val full_strip_ns_i : env -> Typing_defs.internal_type -> string
 
-val full_strip_ns_decl : env -> Typing_defs.decl_ty -> string
+(* if fuel reaches 0, if msg = true, an error message is added to the
+   type representation. msg is true by default *)
+val full_strip_ns_decl : ?msg:bool -> env -> Typing_defs.decl_ty -> string
 
-val full_decl : TypecheckerOptions.t -> Typing_defs.decl_ty -> string
+val full_decl :
+  ?msg:bool -> TypecheckerOptions.t -> Typing_defs.decl_ty -> string
 
 val fun_type : TypecheckerOptions.t -> Typing_defs.decl_fun_type -> string
 

@@ -293,23 +293,7 @@ class SerializerTests(unittest.TestCase):
             self.assertEqual(length, len(encoded))
 
         # Set fields to their intrinsic default.
-        obj = FieldLevelTerseStruct(
-            bool_field=False,
-            byte_field=0,
-            short_field=0,
-            int_field=0,
-            long_field=0,
-            float_field=0,
-            double_field=0,
-            string_field="",
-            binary_field=b"",
-            enum_field=MyEnum.ME0,
-            list_field=[],
-            set_field=set(),
-            map_field={},
-            struct_field=MyStruct(field1=0),
-            union_field=MyUnion(),
-        )
+        obj = FieldLevelTerseStruct()
         for proto in Protocol:
             encoded = serialize(obj, protocol=proto)
             encoded_empty = serialize(empty, protocol=proto)

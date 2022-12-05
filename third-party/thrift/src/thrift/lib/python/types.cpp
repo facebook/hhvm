@@ -155,7 +155,7 @@ PyObject* createStructTuple(const detail::StructInfo& structInfo) {
       *static_cast<const FieldValueMap*>(structInfo.customExt);
   for (int i = 0; i < numFields; ++i) {
     auto fieldInfo = structInfo.fieldInfos[i];
-    if (fieldInfo.qualifier != detail::FieldQualifier::Unqualified) {
+    if (fieldInfo.qualifier == detail::FieldQualifier::Optional) {
       PyTuple_SET_ITEM(tuple.get(), i + 1, Py_None);
       Py_INCREF(Py_None);
     } else {

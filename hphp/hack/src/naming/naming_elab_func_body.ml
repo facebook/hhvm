@@ -28,10 +28,13 @@ let visitor =
     method on_'en _ en = en
 
     method! on_func_body mode func_body =
-      if FileInfo.is_hhi mode then
-        Aast.{ fb_ast = [] }
-      else
-        func_body
+      let func_body =
+        if FileInfo.is_hhi mode then
+          Aast.{ fb_ast = [] }
+        else
+          func_body
+      in
+      super#on_func_body mode func_body
 
     method! on_class_ _ c = super#on_class_ c.Aast.c_mode c
 

@@ -22,7 +22,9 @@ let visitor =
 
     method on_'en _ en = en
 
-    method! on_block env stmts = self#concat_blocks env stmts
+    method! on_block env stmts =
+      let stmts = self#concat_blocks env stmts in
+      super#on_block env stmts
 
     (* TODO[mjt] I don't think this is actually necessary? *)
     method! on_using_stmt env us =
@@ -31,12 +33,8 @@ let visitor =
     method private concat_blocks env stmts =
       match stmts with
       | [] -> []
-      | (_, Aast.Block b) :: rest ->
-        let b = self#concat_blocks env b in
-        let rest = self#concat_blocks env rest in
-        b @ rest
+      | (_, Aast.Block b) :: rest -> self#concat_blocks env (b @ rest)
       | next :: rest ->
-        let next = super#on_stmt env next in
         let rest = self#concat_blocks env rest in
         next :: rest
   end

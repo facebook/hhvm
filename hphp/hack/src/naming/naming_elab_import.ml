@@ -20,10 +20,16 @@ let visitor =
 
     method on_'en _ en = en
 
-    method! on_expr env ((annot, pos, expr_) as expr) =
-      match expr_ with
-      | Aast.Import _ -> (annot, pos, Naming_phase_error.invalid_expr_ pos)
-      | _ -> super#on_expr env expr
+    method! on_expr env expr =
+      let res =
+        match expr with
+        | (annot, pos, Aast.Import _) ->
+          Error (annot, pos, Naming_phase_error.invalid_expr_ pos)
+        | _ -> Ok expr
+      in
+      match res with
+      | Ok expr -> super#on_expr env expr
+      | Error expr -> expr
   end
 
 let elab f ?(env = Env.empty) elem = f env elem

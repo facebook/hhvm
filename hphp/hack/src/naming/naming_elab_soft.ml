@@ -22,19 +22,22 @@ let visitor =
 
     method on_'en _ en = en
 
-    method! on_hint soft_as_like ((pos, hint_) as hint) =
-      match hint_ with
-      | Aast.Hsoft soft_hint ->
-        let soft_hint = super#on_hint soft_as_like soft_hint in
-        let hint_ =
-          if soft_as_like then
-            Aast.Hlike soft_hint
-          else
-            (* TODO[mjt] are we intentionally stripping `Hsoft` here? *)
-            snd soft_hint
-        in
-        (pos, hint_)
-      | _ -> super#on_hint soft_as_like hint
+    method! on_hint soft_as_like hint =
+      let hint =
+        match hint with
+        | (pos, Aast.Hsoft soft_hint) ->
+          let soft_hint = super#on_hint soft_as_like soft_hint in
+          let hint_ =
+            if soft_as_like then
+              Aast.Hlike soft_hint
+            else
+              (* TODO[mjt] are we intentionally stripping `Hsoft` here? *)
+              snd soft_hint
+          in
+          (pos, hint_)
+        | _ -> hint
+      in
+      super#on_hint soft_as_like hint
   end
 
 let elab f ?(env = Env.empty) elem = f env elem

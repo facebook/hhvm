@@ -37,23 +37,20 @@ let visitor =
       super#on_As Env.{ env with in_is_as = true } expr hint is_final
 
     method! on_hint (Env.{ in_is_as; _ } as env) hint =
-      let (pos, hint_) = super#on_hint env hint in
-      let hint_ =
-        match hint_ with
-        | Aast.(Hmixed | Hnonnull) when not in_is_as ->
-          wrap_supportdyn pos hint_
-        | Aast.Hshape Aast.{ nsi_allows_unknown_fields = true; _ } ->
-          wrap_supportdyn pos hint_
-        | Aast.Hfun hint_fun ->
-          let ((hf_return_pos, _) as hf_return_ty) =
-            hint_fun.Aast.hf_return_ty
-          in
-          let hf_return_ty = (hf_return_pos, Aast.Hlike hf_return_ty) in
-          let hint_ = Aast.(Hfun { hint_fun with hf_return_ty }) in
-          wrap_supportdyn pos hint_
-        | _ -> hint_
-      in
-      (pos, hint_)
+      let hint = super#on_hint env hint in
+      match hint with
+      | (pos, (Aast.(Hmixed | Hnonnull) as hint_)) when not in_is_as ->
+        (pos, wrap_supportdyn pos hint_)
+      | ( pos,
+          (Aast.Hshape Aast.{ nsi_allows_unknown_fields = true; _ } as hint_) )
+        ->
+        (pos, wrap_supportdyn pos hint_)
+      | (pos, Aast.Hfun hint_fun) ->
+        let ((hf_return_pos, _) as hf_return_ty) = hint_fun.Aast.hf_return_ty in
+        let hf_return_ty = (hf_return_pos, Aast.Hlike hf_return_ty) in
+        let hint_ = Aast.(Hfun { hint_fun with hf_return_ty }) in
+        (pos, wrap_supportdyn pos hint_)
+      | _ -> hint
 
     method! on_fun_ env f =
       let f = super#on_fun_ env f in

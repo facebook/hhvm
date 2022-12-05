@@ -121,10 +121,10 @@ let ordered_all =
     Hack TraitDeclaration;
     Hack ClassDeclaration;
     Hack EnumDeclaration;
-    Hack TypeInfo;
     Hack Enumerator;
     Hack FunctionDeclaration;
     Hack TypeConstDeclaration;
+    Hack TypeInfo;
     Hack PropertyDeclaration;
     Hack ClassConstDeclaration;
     Hack MethodDeclaration;

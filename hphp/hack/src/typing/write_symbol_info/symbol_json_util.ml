@@ -177,9 +177,9 @@ let string_of_type ctx (t : Aast.hint) =
     | Hprim p -> enqueue (Aast_defs.string_of_tprim p)
     | Haccess (h, sids) ->
       parse h;
-      List.iter sids ~f:(fun (_, sid) ->
+      List.iter sids ~f:(fun (file_pos, sid) ->
           enqueue "::";
-          enqueue sid)
+          enqueue ~annot:file_pos sid)
     | _ ->
       (* fall back on old pretty printer - without xrefs - for things
          not implemented yet *)

@@ -175,6 +175,7 @@ module.exports = {
             ...fbInternalOnly([
             'fb/languages/cpp/generated-code',
             'fb/languages/cpp/field-access',
+            'fb/languages/cpp/isset-bitpacking',
             {
               type: 'category',
               label: 'CodeFrameworks',
@@ -183,7 +184,8 @@ module.exports = {
                 id: "fb/languages/cpp/code-frameworks/index",
               },
               items: [
-                'fb/languages/cpp/code-frameworks/binary-contracts'
+                'fb/languages/cpp/code-frameworks/binary-contracts',
+                'fb/languages/cpp/code-frameworks/migration'
               ]
             },
             'fb/languages/cpp/serialization',
@@ -216,7 +218,17 @@ module.exports = {
             'fb/languages/hack/adding-updating',
             'fb/languages/hack/adding-new-files',
             'fb/languages/hack/auto-sync-for-existing-thrift-files',
-            'fb/languages/hack/updating-the-thrift-compiler-in-www/index',
+            {
+              type: 'category',
+              label: 'Updating the thrift compiler in www',
+              link: {
+                type: 'doc',
+                id: "fb/languages/hack/updating-the-thrift-compiler-in-www/index",
+              },
+              items: [
+                'fb/languages/hack/updating-the-thrift-compiler-in-www/repo-lock',
+              ]
+            },
             'fb/languages/hack/adding-graphql-and-jsenum-support',
             {
               type: 'category',
@@ -342,6 +354,7 @@ module.exports = {
         id: "fb/best-practices/index",
       },
       items: [
+        'best-practices/style-guide',
         'fb/best-practices/code-modernization',
         {
           type: 'category',
@@ -369,7 +382,6 @@ module.exports = {
       },
       items: [
         'troubleshooting/errors',
-        'troubleshooting/debugging-issues',
         ...fbInternalOnly([
         'fb/troubleshooting/faq',
         {
@@ -383,7 +395,7 @@ module.exports = {
             'fb/troubleshooting/exception-handling/error-classification',
           ]
         },
-        'fb/troubleshooting/thriftdbg',
+        'fb/troubleshooting/debugging-tools',
         'fb/troubleshooting/fuzzer',
         {
           type: 'category',

@@ -156,16 +156,6 @@ end
 let elaborate_namespaces =
   new Naming_elaborate_namespaces_endo.generic_elaborator
 
-let check_repetition s param =
-  let name = param.Aast.param_name in
-  if SSet.mem name s then
-    Errors.add_naming_error
-    @@ Naming_error.Already_bound { pos = param.Aast.param_pos; name };
-  if not (String.equal name SN.SpecialIdents.placeholder) then
-    SSet.add name s
-  else
-    s
-
 let invalid_expr_ (p : Pos.t) : Nast.expr_ =
   let throw : Nast.stmt =
     ( p,
@@ -559,9 +549,7 @@ and fun_param env (param : Nast.fun_param) =
   in
   Aast.{ param with param_annotation = (); param_expr; param_user_attributes }
 
-and fun_paraml env paraml =
-  let _ = List.fold_left ~f:check_repetition ~init:SSet.empty paraml in
-  List.map ~f:(fun_param env) paraml
+and fun_paraml env paraml = List.map ~f:(fun_param env) paraml
 
 (**************************************************************************)
 (* User attrs *)
@@ -1077,6 +1065,7 @@ type 'elem pipeline = {
   elab_class_id: (Naming_elab_class_id.Env.t, 'elem) elabidation;
   elab_dynamic_class_name:
     (Naming_elab_dynamic_class_name.Env.t, 'elem) elabidation;
+  validate_fun_params: (Naming_validate_fun_params.Env.t, 'elem) validation;
   validate_xhp: (Naming_validate_xhp_name.Env.t, 'elem) validation;
   validate_builtin_enum: (Naming_validate_builtin_enum.Env.t, 'elem) validation;
   validate_enum_class_typeconst:
@@ -1109,6 +1098,7 @@ let elab_elem
       elab_enum_class;
       elab_class_id;
       elab_dynamic_class_name;
+      validate_fun_params;
       validate_xhp;
       validate_builtin_enum;
       validate_enum_class_typeconst;
@@ -1172,6 +1162,8 @@ let elab_elem
   let elem = elab_lvar elem in
 
   let (elem, err) = elab_as_expr ~init:err elem in
+
+  let err = validate_fun_params ~init:err elem in
 
   (* General expression / statement / xhp elaboration & validation *)
   let elem = elab_help ctx env elem in
@@ -1295,6 +1287,7 @@ let program ctx ast =
       elab_enum_class = Naming_elab_enum_class.elab_program;
       elab_class_id = Naming_elab_class_id.elab_program;
       elab_dynamic_class_name = Naming_elab_dynamic_class_name.elab_program;
+      validate_fun_params = Naming_validate_fun_params.validate_program;
       validate_xhp = Naming_validate_xhp_name.validate_program;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_program;
       validate_enum_class_typeconst =
@@ -1331,6 +1324,7 @@ let fun_def ctx fd =
       elab_enum_class = Naming_elab_enum_class.elab_fun_def;
       elab_class_id = Naming_elab_class_id.elab_fun_def;
       elab_dynamic_class_name = Naming_elab_dynamic_class_name.elab_fun_def;
+      validate_fun_params = Naming_validate_fun_params.validate_fun_def;
       validate_xhp = Naming_validate_xhp_name.validate_fun_def;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_fun_def;
       validate_enum_class_typeconst =
@@ -1367,6 +1361,7 @@ let class_ ctx c =
       elab_enum_class = Naming_elab_enum_class.elab_class;
       elab_class_id = Naming_elab_class_id.elab_class;
       elab_dynamic_class_name = Naming_elab_dynamic_class_name.elab_class;
+      validate_fun_params = Naming_validate_fun_params.validate_class;
       validate_xhp = Naming_validate_xhp_name.validate_class;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_class;
       validate_enum_class_typeconst =
@@ -1403,6 +1398,7 @@ let module_ ctx module_ =
       elab_enum_class = Naming_elab_enum_class.elab_module_def;
       elab_class_id = Naming_elab_class_id.elab_module_def;
       elab_dynamic_class_name = Naming_elab_dynamic_class_name.elab_module_def;
+      validate_fun_params = Naming_validate_fun_params.validate_module_def;
       validate_xhp = Naming_validate_xhp_name.validate_module_def;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_module_def;
       validate_enum_class_typeconst =
@@ -1439,6 +1435,7 @@ let global_const ctx cst =
       elab_enum_class = Naming_elab_enum_class.elab_gconst;
       elab_class_id = Naming_elab_class_id.elab_gconst;
       elab_dynamic_class_name = Naming_elab_dynamic_class_name.elab_gconst;
+      validate_fun_params = Naming_validate_fun_params.validate_gconst;
       validate_xhp = Naming_validate_xhp_name.validate_gconst;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_gconst;
       validate_enum_class_typeconst =
@@ -1475,6 +1472,7 @@ let typedef ctx tdef =
       elab_enum_class = Naming_elab_enum_class.elab_typedef;
       elab_class_id = Naming_elab_class_id.elab_typedef;
       elab_dynamic_class_name = Naming_elab_dynamic_class_name.elab_typedef;
+      validate_fun_params = Naming_validate_fun_params.validate_typedef;
       validate_xhp = Naming_validate_xhp_name.validate_typedef;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_typedef;
       validate_enum_class_typeconst =

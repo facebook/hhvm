@@ -149,6 +149,7 @@
   naming_phase_sigs
   naming_validate_builtin_enum
   naming_validate_enum_class_typeconst
+  naming_validate_fun_params
   naming_validate_supportdyn
   naming_validate_xhp_name)
  (libraries

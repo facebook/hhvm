@@ -56,6 +56,13 @@ class TAsyncSSLSocket : public folly::AsyncSSLSocket {
       folly::AsyncSSLSocket::Options&& options)
       : folly::AsyncSSLSocket(ctx, evb, std::move(options)) {}
 
+  TAsyncSSLSocket(
+      std::shared_ptr<folly::SSLContext> ctx,
+      folly::AsyncSocket::UniquePtr oldAsyncSocket,
+      folly::AsyncSSLSocket::Options&& options)
+      : folly::AsyncSSLSocket(
+            ctx, std::move(oldAsyncSocket), std::move(options)) {}
+
   static TAsyncSSLSocket::UniquePtr newSocket(
       const std::shared_ptr<folly::SSLContext>& ctx, folly::EventBase* evb) {
     return TAsyncSSLSocket::UniquePtr(new TAsyncSSLSocket(ctx, evb));

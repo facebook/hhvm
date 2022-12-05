@@ -264,8 +264,8 @@ StructMetadata<::test::fixtures::patch::MyDataFieldPatchStruct>::gen(ThriftMetad
   module_MyDataFieldPatch.is_union() = false;
   static const auto* const
   module_MyDataFieldPatch_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "data1", false, std::make_unique<Struct<::apache::thrift::op::StringPatchStruct>>("patch.StringPatch"), std::vector<ThriftConstStruct>{}},
-    {2, "data2", false, std::make_unique<Struct<::apache::thrift::op::I32PatchStruct>>("patch.I32Patch"), std::vector<ThriftConstStruct>{}},
+    {1, "data1", false, std::make_unique<Struct<::apache::thrift::op::StringPatchStruct>>("patch.StringPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {2, "data2", false, std::make_unique<Struct<::apache::thrift::op::I32PatchStruct>>("patch.I32Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_MyDataFieldPatch_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -319,7 +319,7 @@ StructMetadata<::test::fixtures::patch::InnerUnionFieldPatchStruct>::gen(ThriftM
   module_InnerUnionFieldPatch.is_union() = false;
   static const auto* const
   module_InnerUnionFieldPatch_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "innerOption", false, std::make_unique<Struct<::apache::thrift::op::BinaryPatchStruct>>("patch.BinaryPatch"), std::vector<ThriftConstStruct>{}},
+    {1, "innerOption", false, std::make_unique<Struct<::apache::thrift::op::BinaryPatchStruct>>("patch.BinaryPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_InnerUnionFieldPatch_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -373,9 +373,9 @@ StructMetadata<::test::fixtures::patch::MyUnionFieldPatchStruct>::gen(ThriftMeta
   module_MyUnionFieldPatch.is_union() = false;
   static const auto* const
   module_MyUnionFieldPatch_fields = new std::array<EncodedThriftField, 3>{{
-    {1, "option1", false, std::make_unique<Struct<::apache::thrift::op::StringPatchStruct>>("patch.StringPatch"), std::vector<ThriftConstStruct>{}},
-    {2, "option2", false, std::make_unique<Struct<::apache::thrift::op::I32PatchStruct>>("patch.I32Patch"), std::vector<ThriftConstStruct>{}},
-    {3, "option3", false, std::make_unique<Struct<::test::fixtures::patch::InnerUnionPatchStruct>>("module.InnerUnionPatch"), std::vector<ThriftConstStruct>{}},
+    {1, "option1", false, std::make_unique<Struct<::apache::thrift::op::StringPatchStruct>>("patch.StringPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {2, "option2", false, std::make_unique<Struct<::apache::thrift::op::I32PatchStruct>>("patch.I32Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {3, "option3", false, std::make_unique<Struct<::test::fixtures::patch::InnerUnionPatchStruct>>("module.InnerUnionPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_MyUnionFieldPatch_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -693,38 +693,38 @@ StructMetadata<::test::fixtures::patch::MyStructFieldPatchStruct>::gen(ThriftMet
   module_MyStructFieldPatch.is_union() = false;
   static const auto* const
   module_MyStructFieldPatch_fields = new std::array<EncodedThriftField, 32>{{
-    {-32, "mapMap", false, std::make_unique<Struct<::test::fixtures::patch::MyStructField32PatchStruct>>("module.MyStructField32Patch"), std::vector<ThriftConstStruct>{}},
-    {-31, "listMap", false, std::make_unique<Struct<::test::fixtures::patch::MyStructField31PatchStruct>>("module.MyStructField31Patch"), std::vector<ThriftConstStruct>{}},
-    {-30, "optMapVal", false, std::make_unique<Struct<::test::fixtures::patch::MyStructField30PatchStruct>>("module.MyStructField30Patch"), std::vector<ThriftConstStruct>{}},
-    {-29, "optSetVal", false, std::make_unique<Struct<::test::fixtures::patch::MyStructField29PatchStruct>>("module.MyStructField29Patch"), std::vector<ThriftConstStruct>{}},
-    {-28, "optListVal", false, std::make_unique<Struct<::test::fixtures::patch::MyStructField28PatchStruct>>("module.MyStructField28Patch"), std::vector<ThriftConstStruct>{}},
-    {-27, "optLateStructVal", false, std::make_unique<Typedef>("module.LateDefStructPatch", std::make_unique<Struct<::test::fixtures::patch::LateDefStructPatchStruct>>("module.LateDefStructPatch"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
-    {-26, "optStructVal", false, std::make_unique<Struct<::test::fixtures::patch::MyDataPatchStruct>>("module.MyDataPatch"), std::vector<ThriftConstStruct>{}},
-    {-25, "optEnumVal", false, std::make_unique<Struct<::test::fixtures::patch::MyStructField25PatchStruct>>("module.MyStructField25Patch"), std::vector<ThriftConstStruct>{}},
-    {-24, "optBinaryVal", false, std::make_unique<Struct<::apache::thrift::op::BinaryPatchStruct>>("patch.BinaryPatch"), std::vector<ThriftConstStruct>{}},
-    {-23, "optStringVal", false, std::make_unique<Struct<::apache::thrift::op::StringPatchStruct>>("patch.StringPatch"), std::vector<ThriftConstStruct>{}},
-    {-22, "optDoubleVal", false, std::make_unique<Struct<::apache::thrift::op::DoublePatchStruct>>("patch.DoublePatch"), std::vector<ThriftConstStruct>{}},
-    {-21, "optFloatVal", false, std::make_unique<Struct<::apache::thrift::op::FloatPatchStruct>>("patch.FloatPatch"), std::vector<ThriftConstStruct>{}},
-    {-20, "optI64Val", false, std::make_unique<Struct<::apache::thrift::op::I64PatchStruct>>("patch.I64Patch"), std::vector<ThriftConstStruct>{}},
-    {-19, "optI32Val", false, std::make_unique<Struct<::apache::thrift::op::I32PatchStruct>>("patch.I32Patch"), std::vector<ThriftConstStruct>{}},
-    {-18, "optI16Val", false, std::make_unique<Struct<::apache::thrift::op::I16PatchStruct>>("patch.I16Patch"), std::vector<ThriftConstStruct>{}},
-    {-17, "optByteVal", false, std::make_unique<Struct<::apache::thrift::op::BytePatchStruct>>("patch.BytePatch"), std::vector<ThriftConstStruct>{}},
-    {-16, "optBoolVal", false, std::make_unique<Struct<::apache::thrift::op::BoolPatchStruct>>("patch.BoolPatch"), std::vector<ThriftConstStruct>{}},
-    {-15, "timeVal", false, std::make_unique<Struct<::apache::thrift::op::TimeStructPatch>>("patch.TimePatch"), std::vector<ThriftConstStruct>{}},
-    {-14, "durationVal", false, std::make_unique<Struct<::apache::thrift::op::DurationStructPatch>>("patch.DurationPatch"), std::vector<ThriftConstStruct>{}},
-    {-13, "lateStructVal", false, std::make_unique<Typedef>("module.LateDefStructPatch", std::make_unique<Struct<::test::fixtures::patch::LateDefStructPatchStruct>>("module.LateDefStructPatch"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
-    {-12, "unionVal", false, std::make_unique<Struct<::test::fixtures::patch::MyUnionPatchStruct>>("module.MyUnionPatch"), std::vector<ThriftConstStruct>{}},
-    {-11, "structVal", false, std::make_unique<Struct<::test::fixtures::patch::MyDataPatchStruct>>("module.MyDataPatch"), std::vector<ThriftConstStruct>{}},
-    {-10, "enumVal", false, std::make_unique<Struct<::test::fixtures::patch::MyStructField10PatchStruct>>("module.MyStructField10Patch"), std::vector<ThriftConstStruct>{}},
-    {-9, "binaryVal", false, std::make_unique<Struct<::apache::thrift::op::BinaryPatchStruct>>("patch.BinaryPatch"), std::vector<ThriftConstStruct>{}},
-    {-8, "stringVal", false, std::make_unique<Struct<::apache::thrift::op::StringPatchStruct>>("patch.StringPatch"), std::vector<ThriftConstStruct>{}},
-    {-7, "doubleVal", false, std::make_unique<Struct<::apache::thrift::op::DoublePatchStruct>>("patch.DoublePatch"), std::vector<ThriftConstStruct>{}},
-    {-6, "floatVal", false, std::make_unique<Struct<::apache::thrift::op::FloatPatchStruct>>("patch.FloatPatch"), std::vector<ThriftConstStruct>{}},
-    {-5, "i64Val", false, std::make_unique<Struct<::apache::thrift::op::I64PatchStruct>>("patch.I64Patch"), std::vector<ThriftConstStruct>{}},
-    {-4, "i32Val", false, std::make_unique<Struct<::apache::thrift::op::I32PatchStruct>>("patch.I32Patch"), std::vector<ThriftConstStruct>{}},
-    {-3, "i16Val", false, std::make_unique<Struct<::apache::thrift::op::I16PatchStruct>>("patch.I16Patch"), std::vector<ThriftConstStruct>{}},
-    {-2, "byteVal", false, std::make_unique<Struct<::apache::thrift::op::BytePatchStruct>>("patch.BytePatch"), std::vector<ThriftConstStruct>{}},
-    {-1, "boolVal", false, std::make_unique<Struct<::apache::thrift::op::BoolPatchStruct>>("patch.BoolPatch"), std::vector<ThriftConstStruct>{}},
+    {-32, "mapMap", false, std::make_unique<Struct<::test::fixtures::patch::MyStructField32PatchStruct>>("module.MyStructField32Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-31, "listMap", false, std::make_unique<Struct<::test::fixtures::patch::MyStructField31PatchStruct>>("module.MyStructField31Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-30, "optMapVal", false, std::make_unique<Struct<::test::fixtures::patch::MyStructField30PatchStruct>>("module.MyStructField30Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-29, "optSetVal", false, std::make_unique<Struct<::test::fixtures::patch::MyStructField29PatchStruct>>("module.MyStructField29Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-28, "optListVal", false, std::make_unique<Struct<::test::fixtures::patch::MyStructField28PatchStruct>>("module.MyStructField28Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-27, "optLateStructVal", false, std::make_unique<Typedef>("module.LateDefStructPatch", std::make_unique<Struct<::test::fixtures::patch::LateDefStructPatchStruct>>("module.LateDefStructPatch"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-26, "optStructVal", false, std::make_unique<Struct<::test::fixtures::patch::MyDataPatchStruct>>("module.MyDataPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-25, "optEnumVal", false, std::make_unique<Struct<::test::fixtures::patch::MyStructField25PatchStruct>>("module.MyStructField25Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-24, "optBinaryVal", false, std::make_unique<Struct<::apache::thrift::op::BinaryPatchStruct>>("patch.BinaryPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-23, "optStringVal", false, std::make_unique<Struct<::apache::thrift::op::StringPatchStruct>>("patch.StringPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-22, "optDoubleVal", false, std::make_unique<Struct<::apache::thrift::op::DoublePatchStruct>>("patch.DoublePatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-21, "optFloatVal", false, std::make_unique<Struct<::apache::thrift::op::FloatPatchStruct>>("patch.FloatPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-20, "optI64Val", false, std::make_unique<Struct<::apache::thrift::op::I64PatchStruct>>("patch.I64Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-19, "optI32Val", false, std::make_unique<Struct<::apache::thrift::op::I32PatchStruct>>("patch.I32Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-18, "optI16Val", false, std::make_unique<Struct<::apache::thrift::op::I16PatchStruct>>("patch.I16Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-17, "optByteVal", false, std::make_unique<Struct<::apache::thrift::op::BytePatchStruct>>("patch.BytePatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-16, "optBoolVal", false, std::make_unique<Struct<::apache::thrift::op::BoolPatchStruct>>("patch.BoolPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-15, "timeVal", false, std::make_unique<Struct<::apache::thrift::op::TimeStructPatch>>("patch.TimePatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-14, "durationVal", false, std::make_unique<Struct<::apache::thrift::op::DurationStructPatch>>("patch.DurationPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-13, "lateStructVal", false, std::make_unique<Typedef>("module.LateDefStructPatch", std::make_unique<Struct<::test::fixtures::patch::LateDefStructPatchStruct>>("module.LateDefStructPatch"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-12, "unionVal", false, std::make_unique<Struct<::test::fixtures::patch::MyUnionPatchStruct>>("module.MyUnionPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-11, "structVal", false, std::make_unique<Struct<::test::fixtures::patch::MyDataPatchStruct>>("module.MyDataPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-10, "enumVal", false, std::make_unique<Struct<::test::fixtures::patch::MyStructField10PatchStruct>>("module.MyStructField10Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-9, "binaryVal", false, std::make_unique<Struct<::apache::thrift::op::BinaryPatchStruct>>("patch.BinaryPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-8, "stringVal", false, std::make_unique<Struct<::apache::thrift::op::StringPatchStruct>>("patch.StringPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-7, "doubleVal", false, std::make_unique<Struct<::apache::thrift::op::DoublePatchStruct>>("patch.DoublePatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-6, "floatVal", false, std::make_unique<Struct<::apache::thrift::op::FloatPatchStruct>>("patch.FloatPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-5, "i64Val", false, std::make_unique<Struct<::apache::thrift::op::I64PatchStruct>>("patch.I64Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-4, "i32Val", false, std::make_unique<Struct<::apache::thrift::op::I32PatchStruct>>("patch.I32Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-3, "i16Val", false, std::make_unique<Struct<::apache::thrift::op::I16PatchStruct>>("patch.I16Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-2, "byteVal", false, std::make_unique<Struct<::apache::thrift::op::BytePatchStruct>>("patch.BytePatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {-1, "boolVal", false, std::make_unique<Struct<::apache::thrift::op::BoolPatchStruct>>("patch.BoolPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_MyStructFieldPatch_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -845,7 +845,7 @@ StructMetadata<::test::fixtures::patch::RecursiveFieldPatchStruct>::gen(ThriftMe
   module_RecursiveFieldPatch.is_union() = false;
   static const auto* const
   module_RecursiveFieldPatch_fields = new std::array<EncodedThriftField, 1>{{
-    {-1, "nodes", false, std::make_unique<Struct<::test::fixtures::patch::RecursiveField1PatchStruct>>("module.RecursiveField1Patch"), std::vector<ThriftConstStruct>{}},
+    {-1, "nodes", false, std::make_unique<Struct<::test::fixtures::patch::RecursiveField1PatchStruct>>("module.RecursiveField1Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_RecursiveFieldPatch_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -899,7 +899,7 @@ StructMetadata<::test::fixtures::patch::BarFieldPatchStruct>::gen(ThriftMetadata
   module_BarFieldPatch.is_union() = false;
   static const auto* const
   module_BarFieldPatch_fields = new std::array<EncodedThriftField, 1>{{
-    {-1, "loop", false, std::make_unique<Typedef>("module.LoopPatch", std::make_unique<Struct<::test::fixtures::patch::LoopPatchStruct>>("module.LoopPatch"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
+    {-1, "loop", false, std::make_unique<Typedef>("module.LoopPatch", std::make_unique<Struct<::test::fixtures::patch::LoopPatchStruct>>("module.LoopPatch"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_BarFieldPatch_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -953,7 +953,7 @@ StructMetadata<::test::fixtures::patch::LoopFieldPatchStruct>::gen(ThriftMetadat
   module_LoopFieldPatch.is_union() = false;
   static const auto* const
   module_LoopFieldPatch_fields = new std::array<EncodedThriftField, 1>{{
-    {-1, "bar", false, std::make_unique<Struct<::test::fixtures::patch::BarPatchStruct>>("module.BarPatch"), std::vector<ThriftConstStruct>{}},
+    {-1, "bar", false, std::make_unique<Struct<::test::fixtures::patch::BarPatchStruct>>("module.BarPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_LoopFieldPatch_fields) {
     ::apache::thrift::metadata::ThriftField field;

@@ -3,12 +3,8 @@ Errors:
   [110:8-10] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [111:7-9] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [120:8-10] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [120:8-10] Variable `$_` is undefined, or not always defined.
-  [107:28-30] Did you mean `$x` instead?
   [125:9-11] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [130:9-11] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [130:9-11] Variable `$_` is undefined, or not always defined.
-  [107:28-30] Did you mean `$x` instead?
   [133:9-14] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [134:9-30] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [135:9-28] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
@@ -16,15 +12,9 @@ Errors:
   [139:9-22] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [141:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [143:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [143:10-12] Variable `$_` is undefined, or not always defined.
-  [107:28-30] Did you mean `$x` instead?
   [145:9-15] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [147:9-15] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [147:12-14] Variable `$_` is undefined, or not always defined.
-  [107:28-30] Did you mean `$x` instead?
   [149:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [151:9-11] Variable `$_` is undefined, or not always defined.
-  [107:28-30] Did you mean `$x` instead?
   [151:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [153:9-155:4] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [154:1-6] Variable `$much` is undefined, or not always defined.
@@ -149,6 +139,15 @@ Errors:
   [126:10-12] No class variable `$x` in `Foo`
   [10:17-34] Did you mean `$_` instead?
   [7:13-16] Declaration of `Foo` is here
+  [143:10-12] Expected an object convertible to string but got void
+  [143:10-12] You are using the return value of a `void` function
+  [143:10-12] A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used)
+  [147:12-14] Expected an object convertible to string but got void
+  [147:12-14] You are using the return value of a `void` function
+  [147:12-14] A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used)
+  [151:9-11] You are using the return value of a `void` function
+  [151:9-11] A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used)
+  [151:9-13] This call is invalid, this is not a function, it is void
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -350,7 +349,7 @@ Errors:
              ([120:3-13],
               (Expr
                  ((_), [120:3-12],
-                  (Call (((_), [120:3-10], (Class_get (((Foo), [120:3-6], (CI ([120:3-6], "\\Foo"))), (CGexpr ((_), [120:8-10], (Lvar ([120:8-10], $_)))), Is_method))), [], [], None)))));
+                  (Call (((_), [120:3-10], (Class_get (((Foo), [120:3-6], (CI ([120:3-6], "\\Foo"))), (CGexpr ((_), [120:8-10], (Lplaceholder [120:8-10]))), Is_method))), [], [], None)))));
              ([121:3-15],
               (Expr ((int), [121:3-14], (Call ((((function(): int)), [121:4-11], (Class_get (((Foo), [121:4-7], (CI ([121:4-7], "\\Foo"))), (CGstring ([121:9-11], "$_")), Is_prop))), [], [], None)))));
              ([123:3-13], (Expr ((_), [123:3-12], (Class_get (((Foo), [123:3-6], (CI ([123:3-6], "\\Foo"))), (CGstring ([123:9-11], "$x")), Is_prop)))));
@@ -365,7 +364,7 @@ Errors:
              ([130:3-15],
               (Expr
                  ((_), [130:3-14],
-                  (Call (((_), [130:3-12], (Class_get (((Foo), [130:3-6], (CI ([130:3-6], "\\Foo"))), (CGexpr ((_), [130:9-11], (Lvar ([130:9-11], $_)))), Is_method))), [], [], None)))));
+                  (Call (((_), [130:3-12], (Class_get (((Foo), [130:3-6], (CI ([130:3-6], "\\Foo"))), (CGexpr ((_), [130:9-11], (Lplaceholder [130:9-11]))), Is_method))), [], [], None)))));
              ([131:3-17],
               (Expr ((int), [131:3-16], (Call ((((function(): int)), [131:4-13], (Class_get (((Foo), [131:4-7], (CI ([131:4-7], "\\Foo"))), (CGstring ([131:10-12], "$_")), Is_prop))), [], [], None)))));
              ([133:3-18],
@@ -424,7 +423,8 @@ Errors:
               (Expr
                  ((_), [143:3-16],
                   (Call (
-                     ((_), [143:3-14], (Class_get (((Foo), [143:3-6], (CI ([143:3-6], "\\Foo"))), (CGexpr ((_), [143:9-13], (String2 [((_), [143:10-12], (Lvar ([143:10-12], $_)))]))), Is_method))),
+                     ((_), [143:3-14],
+                      (Class_get (((Foo), [143:3-6], (CI ([143:3-6], "\\Foo"))), (CGexpr ((_), [143:9-13], (String2 [((void), [143:10-12], (Lplaceholder [143:10-12]))]))), Is_method))),
                      [], [], None)))));
              ([145:3-19],
               (Expr
@@ -440,7 +440,7 @@ Errors:
                   (Call (
                      ((_), [147:3-16],
                       (Class_get (((Foo), [147:3-6], (CI ([147:3-6], "\\Foo"))),
-                         (CGexpr ((_), [147:9-15], (String2 [((string), [147:10-12], (String "ba")); ((_), [147:12-14], (Lvar ([147:12-14], $_)))]))), Is_method))),
+                         (CGexpr ((_), [147:9-15], (String2 [((string), [147:10-12], (String "ba")); ((void), [147:12-14], (Lplaceholder [147:12-14]))]))), Is_method))),
                      [], [], None)))));
              ([149:3-17],
               (Expr
@@ -454,7 +454,7 @@ Errors:
                  ((_), [151:3-16],
                   (Call (
                      ((_), [151:3-14],
-                      (Class_get (((Foo), [151:3-6], (CI ([151:3-6], "\\Foo"))), (CGexpr ((_), [151:9-13], (Call (((_), [151:9-11], (Lvar ([151:9-11], $_))), [], [], None)))), Is_method))),
+                      (Class_get (((Foo), [151:3-6], (CI ([151:3-6], "\\Foo"))), (CGexpr ((_), [151:9-13], (Call (((void), [151:9-11], (Lplaceholder [151:9-11])), [], [], None)))), Is_method))),
                      [], [], None)))));
              ([153:3-156:7],
               (Expr

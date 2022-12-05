@@ -113,7 +113,7 @@
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
-         { fb_ast = [([20:3-30], (Foreach (((), [20:11-14], (Lvar ([20:11-14], $xs))), (As_kv (((), [20:18-20], (Lvar ([20:18-20], $_))), ((), [20:24-26], (Lvar ([20:24-26], $v))))), [])))] };
+         { fb_ast = [([20:3-30], (Foreach (((), [20:11-14], (Lvar ([20:11-14], $xs))), (As_kv (((), [20:18-20], (Lplaceholder [20:18-20])), ((), [20:24-26], (Lvar ([20:24-26], $v))))), [])))] };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
        fd_internal = false; fd_module = None });
@@ -136,7 +136,7 @@
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
-         { fb_ast = [([24:3-30], (Foreach (((), [24:11-14], (Lvar ([24:11-14], $xs))), (As_kv (((), [24:18-20], (Lvar ([24:18-20], $_))), ((), [24:24-26], (Lplaceholder [24:24-26])))), [])))] };
+         { fb_ast = [([24:3-30], (Foreach (((), [24:11-14], (Lvar ([24:11-14], $xs))), (As_kv (((), [24:18-20], (Lplaceholder [24:18-20])), ((), [24:24-26], (Lplaceholder [24:24-26])))), [])))] };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
        fd_internal = false; fd_module = None })

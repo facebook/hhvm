@@ -2973,10 +2973,18 @@ and bind_as_expr env p ty1 ty2 aexpr =
     let (env, te, _, _) = assign p env ev p ty2 in
     let tk = Tast.make_typed_expr p ty1 (Aast.Lvar id) in
     (env, Aast.As_kv (tk, te))
+  | As_kv ((_, p, (Lplaceholder _ as k)), ev) ->
+    let (env, te, _, _) = assign p env ev p ty2 in
+    let tk = Tast.make_typed_expr p ty1 k in
+    (env, Aast.As_kv (tk, te))
   | Await_as_kv (p, (_, p1, Lvar ((_, k) as id)), ev) ->
     let env = set_valid_rvalue p env k ty1 in
     let (env, te, _, _) = assign p env ev p ty2 in
     let tk = Tast.make_typed_expr p1 ty1 (Aast.Lvar id) in
+    (env, Aast.Await_as_kv (p, tk, te))
+  | Await_as_kv (p, (_, p1, (Lplaceholder _ as k)), ev) ->
+    let (env, te, _, _) = assign p env ev p ty2 in
+    let tk = Tast.make_typed_expr p1 ty1 k in
     (env, Aast.Await_as_kv (p, tk, te))
   | _ ->
     (* TODO Probably impossible, should check that *)

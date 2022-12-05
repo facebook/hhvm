@@ -809,7 +809,7 @@ let cow_array ~pos renv ty =
 let assign_helper
     ?(use_pc = true) ~expr ~pos renv env (lhs_ty, _, lhs_exp) rhs_pty =
   match lhs_exp with
-  | A.Lvar (_, lid) ->
+  | A.(Lvar (_, lid) | Dollardollar (_, lid)) ->
     let prefix = Local_id.to_string lid in
     let lhs_pty = Lift.ty ~prefix renv lhs_ty in
     let env = Env.set_local_type env lid lhs_pty in

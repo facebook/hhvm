@@ -109,6 +109,8 @@ let class_id_to_str = function
   | CIstatic -> SN.Classes.cStatic
   | CIexpr (_, _, This) -> SN.SpecialIdents.this
   | CIexpr (_, _, Lvar (_, x)) -> "$" ^ Local_id.to_string x
+  | CIexpr (_, _, Lplaceholder _) -> SN.SpecialIdents.placeholder
+  | CIexpr (_, _, Dollardollar _) -> SN.SpecialIdents.dollardollar
   | CIexpr _ -> assert false
   | CI (_, x) -> x
 

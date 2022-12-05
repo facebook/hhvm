@@ -1,5 +1,5 @@
 File "accessloose.php", line 45, characters 18-20:
-Invalid argument (Other[0000])
+Invalid argument (Typing[4468])
   File "accessloose.php", line 19, characters 62-62:
   Type member `T` cannot be accessed
   File "accessloose.php", line 39, characters 19-44:

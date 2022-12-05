@@ -746,6 +746,9 @@ module Typing = struct
     | AbstractMemberInConcreteClass [@value 4465]
     | TraitNotUsed [@value 4466]
     | OverrideAsync [@value 4467]
+    | InexactTConstAccess [@value 4468]
+    | UnsupportedRefinement [@value 4469]
+    | InvalidClassRefinement [@value 4470]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

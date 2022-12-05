@@ -65,7 +65,7 @@ let check_hrefinement unchecked_tparams env h =
     | Tclass (cls, Nonexact cr, _) ->
       let both_err e1 e2 = Option.merge e1 e2 ~f:Typing_error.both in
       let on_error =
-        Some (Typing_error.Reasons_callback.bad_class_refinement hint_pos)
+        Some (Typing_error.Reasons_callback.invalid_class_refinement hint_pos)
       in
       Class_refinement.fold_type_refs
         cr

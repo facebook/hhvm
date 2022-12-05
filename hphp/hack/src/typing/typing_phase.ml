@@ -1056,7 +1056,7 @@ and localize_refinement ~ety_env env r root decl_cr =
     let pos = Reason.to_pos r in
     Option.map ety_env.on_error ~f:(fun on_error ->
         Typing_error.(
-          apply_reasons ~on_error (Secondary.Unsupported_class_refinement pos)))
+          apply_reasons ~on_error (Secondary.Unsupported_refinement pos)))
   in
   let ((env, ty_err_opt), root) = localize ~ety_env env root in
   match get_node root with

@@ -1703,7 +1703,7 @@ module Primary = struct
         name: string;
         parent_name: string;
       }
-    | Bad_class_refinement of { pos: Pos.t }
+    | Invalid_class_refinement of { pos: Pos.t }
     | Explain_where_constraint of {
         pos: Pos.t;
         in_class: bool;
@@ -2726,8 +2726,8 @@ module Primary = struct
       lazy [],
       [] )
 
-  let bad_class_refinement pos =
-    ( Error_code.InternalError,
+  let invalid_class_refinement pos =
+    ( Error_code.InvalidClassRefinement,
       lazy (pos, "Invalid class refinement"),
       lazy [],
       [] )
@@ -5611,7 +5611,7 @@ module Primary = struct
       bad_conditional_support_dynamic pos child parent ty_name self_ty_name
     | Bad_decl_override { pos; name; parent_name } ->
       bad_decl_override name pos parent_name
-    | Bad_class_refinement { pos } -> bad_class_refinement pos
+    | Invalid_class_refinement { pos } -> invalid_class_refinement pos
     | Explain_where_constraint { pos; decl_pos; in_class } ->
       explain_where_constraint pos decl_pos in_class
     | Explain_constraint pos -> explain_constraint pos
@@ -6643,7 +6643,7 @@ and Secondary : sig
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
       }
-    | Unsupported_class_refinement of Pos_or_decl.t
+    | Unsupported_refinement of Pos_or_decl.t
     | Missing_type_constant of {
         pos: Pos_or_decl.t;
         class_id: string;
@@ -6925,7 +6925,7 @@ end = struct
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
       }
-    | Unsupported_class_refinement of Pos_or_decl.t
+    | Unsupported_refinement of Pos_or_decl.t
     | Missing_type_constant of {
         pos: Pos_or_decl.t;
         class_id: string;
@@ -7623,11 +7623,13 @@ end = struct
         ],
       [] )
 
-  let unsupported_class_refinement pos =
-    (Error_code.InternalError, lazy [(pos, "Unsupported class refinement")], [])
+  let unsupported_refinement pos =
+    ( Error_code.UnsupportedRefinement,
+      lazy [(pos, "Unsupported refinement, only class types can be refined")],
+      [] )
 
   let missing_type_constant pos class_id type_id =
-    ( Error_code.InternalError,
+    ( Error_code.SmemberNotFound,
       lazy
         [
           ( pos,
@@ -7639,7 +7641,7 @@ end = struct
       [] )
 
   let inexact_tconst_access pos id =
-    ( Error_code.InternalError,
+    ( Error_code.InexactTConstAccess,
       lazy
         [
           (fst id, "Type member `" ^ snd id ^ "` cannot be accessed");
@@ -7834,8 +7836,8 @@ end = struct
       Eval_result.single (should_not_be_override pos class_id id)
     | Override_no_default_typeconst { pos; parent_pos } ->
       Eval_result.single (override_no_default_typeconst pos parent_pos)
-    | Unsupported_class_refinement pos ->
-      Eval_result.single (unsupported_class_refinement pos)
+    | Unsupported_refinement pos ->
+      Eval_result.single (unsupported_refinement pos)
     | Missing_type_constant { pos; class_id; type_id } ->
       Eval_result.single (missing_type_constant pos class_id type_id)
     | Inexact_tconst_access (pos, id) ->
@@ -8136,7 +8138,7 @@ and Reasons_callback : sig
   val bad_decl_override :
     name:string -> parent_pos:Pos.t -> parent_name:string -> t
 
-  val bad_class_refinement : Pos.t -> t
+  val invalid_class_refinement : Pos.t -> t
 
   val explain_where_constraint :
     Pos.t -> in_class:bool -> decl_pos:Pos_or_decl.t -> t
@@ -8438,12 +8440,12 @@ end = struct
     @@ of_primary_error
     @@ Primary.Bad_decl_override { name; pos = parent_pos; parent_name }
 
-  let bad_class_refinement pos =
+  let invalid_class_refinement pos =
     append_incoming_reasons
     @@ retain_code
     @@ retain_quickfixes
     @@ of_primary_error
-    @@ Primary.Bad_class_refinement { pos }
+    @@ Primary.Invalid_class_refinement { pos }
 
   let explain_where_constraint pos ~in_class ~decl_pos =
     append_incoming_reasons

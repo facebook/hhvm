@@ -151,20 +151,22 @@ let on_enum_ (env, e, err) =
 let top_down_pass =
   Naming_phase_pass.(
     top_down
-      {
-        identity with
-        on_class_ = Some on_class_top_down;
-        on_expr_ = Some on_expr_;
-      })
+      Ast_transform.
+        {
+          identity with
+          on_class_ = Some on_class_top_down;
+          on_expr_ = Some on_expr_;
+        })
 
 let bottom_up_pass =
   Naming_phase_pass.(
     bottom_up
-      {
-        identity with
-        on_hint = Some on_hint;
-        on_fun_ = Some on_fun_;
-        on_tparam = Some on_tparam;
-        on_class_ = Some on_class_;
-        on_enum_ = Some on_enum_;
-      })
+      Ast_transform.
+        {
+          identity with
+          on_hint = Some on_hint;
+          on_fun_ = Some on_fun_;
+          on_tparam = Some on_tparam;
+          on_class_ = Some on_class_;
+          on_enum_ = Some on_enum_;
+        })

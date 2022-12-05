@@ -38,4 +38,5 @@ let on_fun_ (env, f, errs) =
 let pass =
   Naming_phase_pass.(
     top_down
-      { identity with on_method_ = Some on_method_; on_fun_ = Some on_fun_ })
+      Ast_transform.
+        { identity with on_method_ = Some on_method_; on_fun_ = Some on_fun_ })

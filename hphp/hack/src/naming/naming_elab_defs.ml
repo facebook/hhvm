@@ -36,4 +36,5 @@ let on_program (env, program, err) =
   Ok (env, program, err)
 
 let pass =
-  Naming_phase_pass.(top_down { identity with on_program = Some on_program })
+  Naming_phase_pass.(
+    top_down Ast_transform.{ identity with on_program = Some on_program })

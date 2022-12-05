@@ -204,11 +204,12 @@ let on_class_
 let pass =
   Naming_phase_pass.(
     bottom_up
-      {
-        identity with
-        on_typedef = Some on_typedef;
-        on_gconst = Some on_gconst;
-        on_fun_def = Some on_fun_def;
-        on_module_def = Some on_module_def;
-        on_class_ = Some on_class_;
-      })
+      Ast_transform.
+        {
+          identity with
+          on_typedef = Some on_typedef;
+          on_gconst = Some on_gconst;
+          on_fun_def = Some on_fun_def;
+          on_module_def = Some on_module_def;
+          on_class_ = Some on_class_;
+        })

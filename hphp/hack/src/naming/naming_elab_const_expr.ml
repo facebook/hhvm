@@ -145,20 +145,22 @@ let on_gconst_cst_value (env, cst_value, err_acc) =
 let top_down_pass =
   Naming_phase_pass.(
     top_down
-      {
-        identity with
-        on_class_ = Some on_class_;
-        on_gconst = Some on_gconst;
-        on_typedef = Some on_typedef;
-        on_fun_def = Some on_fun_def;
-        on_module_def = Some on_module_def;
-      })
+      Ast_transform.
+        {
+          identity with
+          on_class_ = Some on_class_;
+          on_gconst = Some on_gconst;
+          on_typedef = Some on_typedef;
+          on_fun_def = Some on_fun_def;
+          on_module_def = Some on_module_def;
+        })
 
 let bottom_up_pass =
   Naming_phase_pass.(
     bottom_up
-      {
-        identity with
-        on_class_const_kind = Some on_class_const_kind;
-        on_gconst_cst_value = Some on_gconst_cst_value;
-      })
+      Ast_transform.
+        {
+          identity with
+          on_class_const_kind = Some on_class_const_kind;
+          on_gconst_cst_value = Some on_gconst_cst_value;
+        })

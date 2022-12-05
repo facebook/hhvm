@@ -28,4 +28,6 @@ let on_user_attributes (env, us, err_acc) =
 
 let pass =
   Naming_phase_pass.(
-    top_down { identity with on_user_attributes = Some on_user_attributes })
+    top_down
+      Ast_transform.
+        { identity with on_user_attributes = Some on_user_attributes })

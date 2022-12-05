@@ -345,7 +345,9 @@ let on_expr_ (env, expr_, err_acc) =
 let on_class_ (env, c, err) = Ok (Env.in_class env c, c, err)
 
 let top_down_pass =
-  Naming_phase_pass.(top_down { identity with on_class_ = Some on_class_ })
+  Naming_phase_pass.(
+    top_down Ast_transform.{ identity with on_class_ = Some on_class_ })
 
 let bottom_up_pass =
-  Naming_phase_pass.(bottom_up { identity with on_expr_ = Some on_expr_ })
+  Naming_phase_pass.(
+    bottom_up Ast_transform.{ identity with on_expr_ = Some on_expr_ })

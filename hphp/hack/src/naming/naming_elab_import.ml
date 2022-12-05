@@ -12,4 +12,6 @@ let on_expr (env, expr, err_acc) =
     Error (env, (annot, pos, Naming_phase_error.invalid_expr_ pos), err_acc)
   | _ -> Ok (env, expr, err_acc)
 
-let pass = Naming_phase_pass.(top_down { identity with on_expr = Some on_expr })
+let pass =
+  Naming_phase_pass.(
+    top_down Ast_transform.{ identity with on_expr = Some on_expr })

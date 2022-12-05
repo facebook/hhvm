@@ -49,12 +49,13 @@ let on_module_def (env, md, err) =
 let pass =
   Naming_phase_pass.(
     top_down
-      {
-        identity with
-        on_func_body = Some on_func_body;
-        on_class_ = Some on_class_;
-        on_typedef = Some on_typedef;
-        on_gconst = Some on_gconst;
-        on_fun_def = Some on_fun_def;
-        on_module_def = Some on_module_def;
-      })
+      Ast_transform.
+        {
+          identity with
+          on_func_body = Some on_func_body;
+          on_class_ = Some on_class_;
+          on_typedef = Some on_typedef;
+          on_gconst = Some on_gconst;
+          on_fun_def = Some on_fun_def;
+          on_module_def = Some on_module_def;
+        })

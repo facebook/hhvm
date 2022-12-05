@@ -123,21 +123,22 @@ let on_targ (env, targ, err_acc) =
 let pass =
   Naming_phase_pass.(
     top_down
-      {
-        identity with
-        on_class_c_tparams = Some on_class_c_tparams;
-        on_class_c_extends = Some on_class_c_extends;
-        on_class_c_uses = Some on_class_c_uses;
-        on_class_c_xhp_attrs = Some on_class_c_xhp_attrs;
-        on_class_c_xhp_attr_uses = Some on_class_c_xhp_attr_uses;
-        on_class_c_reqs = Some on_class_c_reqs;
-        on_class_c_implements = Some on_class_c_implements;
-        on_class_var = Some on_class_var;
-        on_class_var_cv_type = Some on_class_var_cv_type;
-        on_fun_f_ret = Some on_fun_f_ret;
-        on_expr_ = Some on_expr_;
-        on_hint = Some on_hint;
-        on_shape_field_info = Some on_shape_field_info;
-        on_hint_fun_hf_return_ty = Some on_hint_fun_hf_return_ty;
-        on_targ = Some on_targ;
-      })
+      Ast_transform.
+        {
+          identity with
+          on_class_c_tparams = Some on_class_c_tparams;
+          on_class_c_extends = Some on_class_c_extends;
+          on_class_c_uses = Some on_class_c_uses;
+          on_class_c_xhp_attrs = Some on_class_c_xhp_attrs;
+          on_class_c_xhp_attr_uses = Some on_class_c_xhp_attr_uses;
+          on_class_c_reqs = Some on_class_c_reqs;
+          on_class_c_implements = Some on_class_c_implements;
+          on_class_var = Some on_class_var;
+          on_class_var_cv_type = Some on_class_var_cv_type;
+          on_fun_f_ret = Some on_fun_f_ret;
+          on_expr_ = Some on_expr_;
+          on_hint = Some on_hint;
+          on_shape_field_info = Some on_shape_field_info;
+          on_hint_fun_hf_return_ty = Some on_hint_fun_hf_return_ty;
+          on_targ = Some on_targ;
+        })

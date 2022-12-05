@@ -40,4 +40,5 @@ let on_hint_ (env, hint_, err_acc) =
   Ok (env, hint_, err)
 
 let pass =
-  Naming_phase_pass.(top_down { identity with on_hint_ = Some on_hint_ })
+  Naming_phase_pass.(
+    top_down Ast_transform.{ identity with on_hint_ = Some on_hint_ })

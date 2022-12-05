@@ -71,4 +71,5 @@ let on_stmt (env, stmt, err_acc) =
     Error (env, stmt, err)
 
 let pass =
-  Naming_phase_pass.(bottom_up { identity with on_stmt = Some on_stmt })
+  Naming_phase_pass.(
+    bottom_up Ast_transform.{ identity with on_stmt = Some on_stmt })

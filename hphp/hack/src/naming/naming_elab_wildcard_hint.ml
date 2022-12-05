@@ -109,12 +109,13 @@ let on_hint (env, hint, err_acc) =
 let pass =
   Naming_phase_pass.(
     top_down
-      {
-        identity with
-        on_expr_ = Some on_expr_;
-        on_targ = Some on_targ;
-        on_hint_ = Some on_hint_;
-        on_shape_field_info = Some on_shape_field_info;
-        on_context = Some on_context;
-        on_hint = Some on_hint;
-      })
+      Ast_transform.
+        {
+          identity with
+          on_expr_ = Some on_expr_;
+          on_targ = Some on_targ;
+          on_hint_ = Some on_hint_;
+          on_shape_field_info = Some on_shape_field_info;
+          on_context = Some on_context;
+          on_hint = Some on_hint;
+        })

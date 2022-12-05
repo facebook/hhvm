@@ -67,4 +67,5 @@ let on_class_ (env, (Aast.{ c_kind; c_enum; c_name; _ } as c), err) =
 let pass =
   Naming_phase_pass.(
     bottom_up
-      { identity with on_hint_ = Some on_hint_; on_class_ = Some on_class_ })
+      Ast_transform.
+        { identity with on_hint_ = Some on_hint_; on_class_ = Some on_class_ })

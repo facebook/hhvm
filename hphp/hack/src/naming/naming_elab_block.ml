@@ -24,8 +24,9 @@ let on_using_stmt (env, us, err) =
 let pass =
   Naming_phase_pass.(
     top_down
-      {
-        identity with
-        on_block = Some on_block;
-        on_using_stmt = Some on_using_stmt;
-      })
+      Ast_transform.
+        {
+          identity with
+          on_block = Some on_block;
+          on_using_stmt = Some on_using_stmt;
+        })

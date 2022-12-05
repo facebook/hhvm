@@ -26,4 +26,4 @@ let on_module_def (env, (Aast.{ md_span; _ } as md), err_acc) =
 
 let pass =
   Naming_phase_pass.(
-    top_down { identity with on_module_def = Some on_module_def })
+    top_down Ast_transform.{ identity with on_module_def = Some on_module_def })

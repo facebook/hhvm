@@ -46,4 +46,5 @@ let on_class_
   Ok (env, c, err)
 
 let pass =
-  Naming_phase_pass.(top_down { identity with on_class_ = Some on_class_ })
+  Naming_phase_pass.(
+    top_down Ast_transform.{ identity with on_class_ = Some on_class_ })

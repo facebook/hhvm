@@ -130,10 +130,11 @@ let on_hint (env, hint, err_acc) =
 let pass =
   Naming_phase_pass.(
     top_down
-      {
-        identity with
-        on_class_ = Some on_class_;
-        on_where_constraint_hint = Some on_where_constraint_hint;
-        on_contexts = Some on_contexts;
-        on_hint = Some on_hint;
-      })
+      Ast_transform.
+        {
+          identity with
+          on_class_ = Some on_class_;
+          on_where_constraint_hint = Some on_where_constraint_hint;
+          on_contexts = Some on_contexts;
+          on_hint = Some on_hint;
+        })

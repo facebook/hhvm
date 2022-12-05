@@ -39,4 +39,5 @@ let on_tparam
 let pass =
   Naming_phase_pass.(
     top_down
-      { identity with on_hint = Some on_hint; on_tparam = Some on_tparam })
+      Ast_transform.
+        { identity with on_hint = Some on_hint; on_tparam = Some on_tparam })

@@ -60,11 +60,12 @@ let on_hint (env, hint, err_acc) =
 let pass =
   Naming_phase_pass.(
     top_down
-      {
-        identity with
-        on_hint = Some on_hint;
-        on_targ = Some on_targ;
-        on_hint_fun_hf_return_ty = Some on_hint_fun_hf_return_ty;
-        on_fun_f_ret = Some on_fun_f_ret;
-        on_method_m_ret = Some on_method_m_ret;
-      })
+      Ast_transform.
+        {
+          identity with
+          on_hint = Some on_hint;
+          on_targ = Some on_targ;
+          on_hint_fun_hf_return_ty = Some on_hint_fun_hf_return_ty;
+          on_fun_f_ret = Some on_fun_f_ret;
+          on_method_m_ret = Some on_method_m_ret;
+        })

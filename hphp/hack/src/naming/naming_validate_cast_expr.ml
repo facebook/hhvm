@@ -30,4 +30,5 @@ let on_expr_ (env, expr_, err_acc) =
   Ok (env, expr_, err)
 
 let pass =
-  Naming_phase_pass.(bottom_up { identity with on_expr_ = Some on_expr_ })
+  Naming_phase_pass.(
+    bottom_up Ast_transform.{ identity with on_expr_ = Some on_expr_ })

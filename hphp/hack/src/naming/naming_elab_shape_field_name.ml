@@ -74,13 +74,15 @@ let on_shape_field_info (env, (Aast.{ sfi_name; _ } as sfi), err_acc) =
     Error (env, Aast.{ sfi with sfi_name }, err :: err_acc)
 
 let top_down_pass =
-  Naming_phase_pass.(top_down { identity with on_class_ = Some on_class_ })
+  Naming_phase_pass.(
+    top_down Ast_transform.{ identity with on_class_ = Some on_class_ })
 
 let bottom_up_pass =
   Naming_phase_pass.(
     bottom_up
-      {
-        identity with
-        on_expr_ = Some on_expr_;
-        on_shape_field_info = Some on_shape_field_info;
-      })
+      Ast_transform.
+        {
+          identity with
+          on_expr_ = Some on_expr_;
+          on_shape_field_info = Some on_shape_field_info;
+        })

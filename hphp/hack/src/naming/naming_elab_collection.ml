@@ -89,4 +89,5 @@ let on_expr_ (env, expr_, err_acc) =
   | Error (pos, errs) -> Error (env, Err.invalid_expr_ pos, errs @ err_acc)
 
 let pass =
-  Naming_phase_pass.(top_down { identity with on_expr_ = Some on_expr_ })
+  Naming_phase_pass.(
+    top_down Ast_transform.{ identity with on_expr_ = Some on_expr_ })

@@ -19,4 +19,6 @@ let on_hint (env, hint, err) =
   in
   Ok (env, hint, err)
 
-let pass = Naming_phase_pass.(top_down { identity with on_hint = Some on_hint })
+let pass =
+  Naming_phase_pass.(
+    top_down Ast_transform.{ identity with on_hint = Some on_hint })

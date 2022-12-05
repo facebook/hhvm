@@ -80,9 +80,10 @@ let on_class_id (env, class_id, err_acc) =
 let pass =
   Naming_phase_pass.(
     top_down
-      {
-        identity with
-        on_class_ = Some on_class_;
-        on_class_c_user_attributes = Some on_class_c_user_attributes;
-        on_class_id = Some on_class_id;
-      })
+      Ast_transform.
+        {
+          identity with
+          on_class_ = Some on_class_;
+          on_class_c_user_attributes = Some on_class_c_user_attributes;
+          on_class_id = Some on_class_id;
+        })

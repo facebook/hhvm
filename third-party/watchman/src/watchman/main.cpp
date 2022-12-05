@@ -989,7 +989,7 @@ static int inner_main(int argc, char** argv) {
   // handling.  In the future we will integrate this properly.
   folly::SingletonVault::singleton()->registrationComplete();
   SCOPE_EXIT {
-    folly::SingletonVault::singleton()->destroyInstances();
+    folly::SingletonVault::singleton()->destroyInstancesFinal();
   };
 
   auto daemon_argv = parse_cmdline(&argc, &argv);

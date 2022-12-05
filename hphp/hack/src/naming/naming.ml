@@ -561,23 +561,11 @@ and user_attributes env attrl =
   every Ti is in scope of the constraints of all other Tj, and in the constraints on T itself.
 *)
 and type_param ~forbid_this genv t =
-  let hk_types_enabled =
-    TypecheckerOptions.higher_kinded_types (Provider_context.get_tcopt genv.ctx)
-  in
-  let (pos, name) = t.Aast.tp_name in
-
-  if (not hk_types_enabled) && (not @@ List.is_empty t.Aast.tp_parameters) then
-    Errors.add_naming_error
-    @@ Naming_error.Tparam_with_tparam { pos; tparam_name = name };
-
   (* Bring all type parameters into scope at once before traversing nested tparams,
      as per the note above *)
   let env = extend_tparams genv t.Aast.tp_parameters in
   let tp_parameters =
-    if hk_types_enabled then
-      List.map t.Aast.tp_parameters ~f:(type_param ~forbid_this env)
-    else
-      []
+    List.map t.Aast.tp_parameters ~f:(type_param ~forbid_this env)
   in
   (* Use the env with all nested tparams still in scope *)
   let tp_constraints = t.Aast.tp_constraints in

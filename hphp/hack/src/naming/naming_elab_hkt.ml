@@ -32,6 +32,21 @@ let visitor =
         in
         ((pos, Aast.Habstr (name, [])), err)
       | _ -> super#on_hint env hint
+
+    method! on_tparam
+        env (Aast.{ tp_parameters; tp_name = (pos, tparam_name); _ } as tparam)
+        =
+      let (tparam, err) =
+        match tp_parameters with
+        | [] -> (tparam, self#zero)
+        | _ ->
+          let err =
+            Err.naming @@ Naming_error.Tparam_with_tparam { pos; tparam_name }
+          in
+          (Aast.{ tparam with tp_parameters = [] }, err)
+      in
+      let (tparam, super_err) = super#on_tparam env tparam in
+      (tparam, self#plus err super_err)
   end
 
 let elab f ?init ?(env = Env.empty) elem =

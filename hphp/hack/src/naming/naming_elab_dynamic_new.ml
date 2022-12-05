@@ -7,6 +7,7 @@
  *)
 open Hh_prelude
 module Err = Naming_phase_error
+module SN = Naming_special_names
 
 module Env = struct
   type t = unit
@@ -20,18 +21,24 @@ let visitor =
 
     inherit Err.monoid
 
-    method! on_hint env hint =
-      match hint with
-      | (pos, Aast.Habstr (name, hints)) ->
-        let err =
-          match hints with
-          | [] -> self#zero
-          | _ ->
-            Err.naming
-            @@ Naming_error.Tparam_applied_to_type { pos; tparam_name = name }
-        in
-        ((pos, Aast.Habstr (name, [])), err)
-      | _ -> super#on_hint env hint
+    method! on_New env ((_, pos, ci) as class_id) targs exprs expr_opt ex =
+      let (class_id, err) =
+        match ci with
+        | Aast.CIparent
+        | Aast.CIself
+        | Aast.CIstatic
+        | Aast.CI _
+        | Aast.(CIexpr (_, _, (This | Lvar _))) ->
+          (class_id, self#zero)
+        | Aast.CIexpr (_, ci_pos, _e) ->
+          let err = Err.naming @@ Naming_error.Dynamic_new_in_strict_mode pos in
+          let class_id = ((), pos, Aast.CI (ci_pos, SN.Classes.cUnknown)) in
+          (class_id, err)
+      in
+      let (expr, err_super) =
+        super#on_New env class_id targs exprs expr_opt ex
+      in
+      (expr, self#plus err_super err)
   end
 
 let elab f ?init ?(env = Env.empty) elem =

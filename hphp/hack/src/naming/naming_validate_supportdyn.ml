@@ -33,20 +33,21 @@ let visitor =
       self#plus err_super err
   end
 
-let validate_program ?init ?(env = Env.empty) prog =
-  Err.from_monoid ?init @@ visitor#on_program env prog
+let validate f ?init ?(env = Env.empty) elem =
+  Err.from_monoid ?init @@ f env elem
 
-let validate_module_def ?init ?(env = Env.empty) module_def =
-  Err.from_monoid ?init @@ visitor#on_module_def env module_def
+let validate_program ?init ?env elem =
+  validate visitor#on_program ?init ?env elem
 
-let validate_class ?init ?(env = Env.empty) class_ =
-  Err.from_monoid ?init @@ visitor#on_class_ env class_
+let validate_module_def ?init ?env elem =
+  validate visitor#on_module_def ?init ?env elem
 
-let validate_typedef ?init ?(env = Env.empty) typedef =
-  Err.from_monoid ?init @@ visitor#on_typedef env typedef
+let validate_class ?init ?env elem = validate visitor#on_class_ ?init ?env elem
 
-let validate_fun_def ?init ?(env = Env.empty) fun_def =
-  Err.from_monoid ?init @@ visitor#on_fun_def env fun_def
+let validate_typedef ?init ?env elem =
+  validate visitor#on_typedef ?init ?env elem
 
-let validate_gconst ?init ?(env = Env.empty) gconst =
-  Err.from_monoid ?init @@ visitor#on_gconst env gconst
+let validate_fun_def ?init ?env elem =
+  validate visitor#on_fun_def ?init ?env elem
+
+let validate_gconst ?init ?env elem = validate visitor#on_gconst ?init ?env elem

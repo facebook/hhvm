@@ -1171,32 +1171,17 @@ let visitor =
       List.fold_right ~init:self#zero ~f:self#plus errs
   end
 
-let elab_fun_def ?init ?(env = Env.empty) fd =
-  let (fd, err) = visitor#on_fun_def env fd in
-  let errors = Err.from_monoid ?init err in
-  (fd, errors)
+let elab f ?init ?(env = Env.empty) elem =
+  Tuple2.map_snd ~f:(Err.from_monoid ?init) @@ f env elem
 
-let elab_typedef ?init ?(env = Env.empty) td =
-  let (td, err) = visitor#on_typedef env td in
-  let errors = Err.from_monoid ?init err in
-  (td, errors)
+let elab_fun_def ?init ?env elem = elab visitor#on_fun_def ?init ?env elem
 
-let elab_module_def ?init ?(env = Env.empty) md =
-  let (md, err) = visitor#on_module_def env md in
-  let errors = Err.from_monoid ?init err in
-  (md, errors)
+let elab_typedef ?init ?env elem = elab visitor#on_typedef ?init ?env elem
 
-let elab_gconst ?init ?(env = Env.empty) gc =
-  let (gc, err) = visitor#on_gconst env gc in
-  let errors = Err.from_monoid ?init err in
-  (gc, errors)
+let elab_module_def ?init ?env elem = elab visitor#on_module_def ?init ?env elem
 
-let elab_class ?init ?(env = Env.empty) cls =
-  let (cls, err) = visitor#on_class_ env cls in
-  let errors = Err.from_monoid ?init err in
-  (cls, errors)
+let elab_gconst ?init ?env elem = elab visitor#on_gconst ?init ?env elem
 
-let elab_program ?init ?(env = Env.empty) prog =
-  let (prog, err) = visitor#on_program env prog in
-  let errors = Err.from_monoid ?init err in
-  (prog, errors)
+let elab_class ?init ?env elem = elab visitor#on_class_ ?init ?env elem
+
+let elab_program ?init ?env elem = elab visitor#on_program ?init ?env elem

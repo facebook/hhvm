@@ -37,14 +37,16 @@ let visitor =
       | _ -> super#on_hint soft_as_like hint
   end
 
-let elab_fun_def ?(env = Env.empty) fd = visitor#on_fun_def env fd
+let elab f ?(env = Env.empty) elem = f env elem
 
-let elab_typedef ?(env = Env.empty) td = visitor#on_typedef env td
+let elab_fun_def ?env elem = elab visitor#on_fun_def ?env elem
 
-let elab_module_def ?(env = Env.empty) m = visitor#on_module_def env m
+let elab_typedef ?env elem = elab visitor#on_typedef ?env elem
 
-let elab_gconst ?(env = Env.empty) gc = visitor#on_gconst env gc
+let elab_module_def ?env elem = elab visitor#on_module_def ?env elem
 
-let elab_class ?(env = Env.empty) cls = visitor#on_class_ env cls
+let elab_gconst ?env elem = elab visitor#on_gconst ?env elem
 
-let elab_program ?(env = Env.empty) prog = visitor#on_program env prog
+let elab_class ?env elem = elab visitor#on_class_ ?env elem
+
+let elab_program ?env elem = elab visitor#on_program ?env elem

@@ -428,41 +428,6 @@ let class_help ctx env c =
     }
 
 (**************************************************************************)
-(* Module declarations *)
-(**************************************************************************)
-
-let module_help ctx _ module_ =
-  (* TODO[mjt]: pull this into tcopt validation pass *)
-  let tcopts = Provider_context.get_tcopt ctx in
-  let allowed_files =
-    TypecheckerOptions.allowed_files_for_module_declarations tcopts
-  in
-  let allow_all_files =
-    TypecheckerOptions.allow_all_files_for_module_declarations tcopts
-  in
-  let open Aast in
-  let module_file = Relative_path.suffix @@ Pos.filename module_.md_span in
-  if
-    (not allow_all_files)
-    && not
-         (List.exists allowed_files ~f:(fun allowed_file ->
-              let len = String.length allowed_file in
-              if len > 0 then
-                match allowed_file.[len - 1] with
-                | '*' ->
-                  let allowed_dir =
-                    String.sub allowed_file ~pos:0 ~len:(len - 1)
-                  in
-                  String_utils.string_starts_with module_file allowed_dir
-                | _ -> String.equal allowed_file module_file
-              else
-                false))
-  then
-    Errors.add_naming_error
-    @@ Naming_error.Module_declaration_outside_allowed_files module_.md_span;
-  { module_ with md_annotation = () }
-
-(**************************************************************************)
 (* Programs *)
 (**************************************************************************)
 
@@ -489,9 +454,7 @@ let program_help ctx env ast =
       let genv = { genv with namespace = nsenv } in
       top_level_env := genv;
       acc
-    | Aast.Module md ->
-      let env = Env.make_module_env ctx md in
-      N.Module (module_help ctx env md) :: acc
+    | Aast.Module md -> N.Module md :: acc
     | Aast.SetModule sm -> N.SetModule sm :: acc
     (* These are elaborated away in Namespaces.elaborate_toplevel_defs *)
     | Aast.FileAttributes _ -> acc
@@ -535,6 +498,7 @@ type 'elem pipeline = {
   validate_enum_class_typeconst:
     (Naming_validate_enum_class_typeconst.Env.t, 'elem) validation;
   validate_supportdyn: (Naming_validate_supportdyn.Env.t, 'elem) validation;
+  validate_module: (Naming_validate_module.Env.t, 'elem) validation;
 }
 
 (* Apply our elaboration and validation steps to a given ast element *)
@@ -570,6 +534,7 @@ let elab_elem
       validate_builtin_enum;
       validate_enum_class_typeconst;
       validate_supportdyn;
+      validate_module;
     } =
   let tcopt = Provider_context.get_tcopt ctx in
   (* Elaborate namespaces *)
@@ -699,18 +664,44 @@ let elab_elem
      For internal testing, we provide a global "enable" flag to just
      enable them. This is off by default except in hh_single_type_check.
   *)
-  let class_dir = Filename.dirname @@ Relative_path.suffix filename in
+  let file_str = Relative_path.suffix filename in
+  let dir_str = Filename.dirname file_str in
+
   let err =
     if
       TypecheckerOptions.allow_all_locations_for_type_constant_in_enum_class
         tcopt
-      || List.exists ~f:(String.equal class_dir)
+      || List.exists ~f:(String.equal dir_str)
          @@ TypecheckerOptions.allowed_locations_for_type_constant_in_enum_class
               tcopt
     then
       err
     else
       validate_enum_class_typeconst ~init:err elem
+  in
+
+  (* modules *)
+  let err =
+    if
+      TypecheckerOptions.allow_all_files_for_module_declarations tcopt
+      || List.exists
+           ~f:(fun allowed_file ->
+             let len = String.length allowed_file in
+             if len > 0 then
+               match allowed_file.[len - 1] with
+               | '*' ->
+                 let allowed_dir =
+                   String.sub allowed_file ~pos:0 ~len:(len - 1)
+                 in
+                 String_utils.string_starts_with file_str allowed_dir
+               | _ -> String.equal allowed_file file_str
+             else
+               false)
+           (TypecheckerOptions.allowed_files_for_module_declarations tcopt)
+    then
+      err
+    else
+      validate_module ~init:err elem
   in
 
   Naming_phase_error.emit err;
@@ -769,6 +760,7 @@ let program ctx ast =
       validate_enum_class_typeconst =
         Naming_validate_enum_class_typeconst.validate_program;
       validate_supportdyn = Naming_validate_supportdyn.validate_program;
+      validate_module = Naming_validate_module.validate_program;
     }
 
 let fun_def ctx fd =
@@ -809,6 +801,7 @@ let fun_def ctx fd =
       validate_enum_class_typeconst =
         Naming_validate_enum_class_typeconst.validate_fun_def;
       validate_supportdyn = Naming_validate_supportdyn.validate_fun_def;
+      validate_module = Naming_validate_module.validate_fun_def;
     }
 
 let class_ ctx c =
@@ -849,6 +842,7 @@ let class_ ctx c =
       validate_enum_class_typeconst =
         Naming_validate_enum_class_typeconst.validate_class;
       validate_supportdyn = Naming_validate_supportdyn.validate_class;
+      validate_module = Naming_validate_module.validate_class;
     }
 
 let module_ ctx module_ =
@@ -876,7 +870,7 @@ let module_ ctx module_ =
       elab_block = Naming_elab_block.elab_module_def;
       elab_pipe = Naming_elab_pipe.elab_module_def;
       elab_func_body = Naming_elab_func_body.elab_module_def;
-      elab_help = module_help;
+      elab_help = (fun _ _ elem -> elem);
       elab_soft = Naming_elab_soft.elab_module_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_module_def;
       elab_hkt = Naming_elab_hkt.elab_module_def;
@@ -889,6 +883,7 @@ let module_ ctx module_ =
       validate_enum_class_typeconst =
         Naming_validate_enum_class_typeconst.validate_module_def;
       validate_supportdyn = Naming_validate_supportdyn.validate_module_def;
+      validate_module = Naming_validate_module.validate_module_def;
     }
 
 let global_const ctx cst =
@@ -929,6 +924,7 @@ let global_const ctx cst =
       validate_enum_class_typeconst =
         Naming_validate_enum_class_typeconst.validate_gconst;
       validate_supportdyn = Naming_validate_supportdyn.validate_gconst;
+      validate_module = Naming_validate_module.validate_gconst;
     }
 
 let typedef ctx tdef =
@@ -969,4 +965,5 @@ let typedef ctx tdef =
       validate_enum_class_typeconst =
         Naming_validate_enum_class_typeconst.validate_typedef;
       validate_supportdyn = Naming_validate_supportdyn.validate_typedef;
+      validate_module = Naming_validate_module.validate_typedef;
     }

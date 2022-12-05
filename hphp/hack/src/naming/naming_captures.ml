@@ -184,3 +184,24 @@ let populate_fun_def (fd : Nast.fun_def) : Nast.fun_def =
 
 let populate_class_ (c : Nast.class_) : Nast.class_ =
   (populate_visitor ())#on_class_ () c
+
+module Env = struct
+  type t = unit
+
+  let empty = ()
+end
+
+let elab f ?(env = Env.empty) elem = f env elem
+
+let elab_fun_def ?env elem = elab (populate_visitor ())#on_fun_def ?env elem
+
+let elab_typedef ?env elem = elab (populate_visitor ())#on_typedef ?env elem
+
+let elab_module_def ?env elem =
+  elab (populate_visitor ())#on_module_def ?env elem
+
+let elab_gconst ?env elem = elab (populate_visitor ())#on_gconst ?env elem
+
+let elab_class ?env elem = elab (populate_visitor ())#on_class_ ?env elem
+
+let elab_program ?env elem = elab (populate_visitor ())#on_program ?env elem

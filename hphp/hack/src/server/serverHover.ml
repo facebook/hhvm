@@ -240,6 +240,48 @@ let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
   in
 
   match khi with
+  | SymbolOccurrence.Class ->
+    "A `class` contains methods, properties and constants that together solve a problem."
+  | SymbolOccurrence.Interface ->
+    "An `interface` defines signatures for methods that classes must implement."
+  | SymbolOccurrence.Trait ->
+    "A `trait` provides methods and properties that can be `use`d in classes."
+    ^ "\n\nTraits are often used to provide default implementations for methods declared in an `interface`."
+    ^ "\n\nWhen in doubt, use a class rather than a trait. You only need a trait when you want the same method in multiple classes that don't inherit from each other."
+  | SymbolOccurrence.Enum ->
+    "An `enum` is a fixed set of string or integer values."
+    ^ "\n\nYou can use `switch` with an `enum` and the type checker will ensure you handle every possible value."
+  | SymbolOccurrence.EnumClass ->
+    "An `enum class` is a fixed set of values that can be used as typed constants."
+    ^ "\n\nEnum classes enable you to write generic getter and setter methods."
+    ^ "\n\n```
+enum class PersonFields: BaseField {
+  Field<string> name = Field::string();
+  Field<string> email = Field::string();
+  Field<int> age = Field::int();
+}
+```"
+    ^ "\n\nYou can refer to items within an enum class by name (using the `#` syntax), and Hack knows the exact type."
+    ^ "\n\n```
+function person_get(
+  Person $p,
+  HH\\EnumClass\\Label<PersonFields, Field<T>> $field_name
+  ): T {
+  // ... implementation here ...
+}
+
+person_get($a_person, #email); // string
+```"
+    ^ "\n\nSee also `HH\\EnumClass\\Label` and `HH\\MemberOf`."
+  | SymbolOccurrence.Type ->
+    "A `type` is an alias for another type."
+    ^ "\n\n`type` aliases are transparent, so you can use the original type and its alias interchangeably."
+    ^ "\n\nSee also `newtype` for opaque type aliases."
+  | SymbolOccurrence.Newtype ->
+    "A `newtype` is a type alias that is opaque."
+    ^ "\n\nInside the current file, code can see the underlying type. In all other files, code cannot see the underlying type."
+    ^ " This enables you to hide implementation details."
+    ^ "\n\nSee also `type` for transparent type aliases."
   | SymbolOccurrence.FinalOnClass ->
     "A `final` class cannot be extended by other classes.\n\nTo restrict which classes can extend this, use `<<__Sealed()>>`."
   | SymbolOccurrence.FinalOnMethod ->

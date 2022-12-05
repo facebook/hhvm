@@ -827,6 +827,7 @@ let visitor =
 type classish_decl_kind =
   | DKclass
   | DKinterface
+  | DKenumclass
 
 type module_decl_kind =
   | DKModuleDeclaration
@@ -903,6 +904,11 @@ let keywords tree : Result_set.elt list =
       in
       let ctx = Some (ClassishDecl classish_decl_kind) in
       List.fold (children s) ~init:acc ~f:(aux ctx)
+    | EnumClassDeclaration _ ->
+      List.fold
+        (children s)
+        ~init:acc
+        ~f:(aux (Some (ClassishDecl DKenumclass)))
     | MethodishDeclaration _ ->
       List.fold (children s) ~init:acc ~f:(aux (Some Method))
     | FunctionDeclarationHeader fdh ->
@@ -943,6 +949,72 @@ let keywords tree : Result_set.elt list =
         acc
     | Token t ->
       (match t.Token.kind with
+      | Token.TokenKind.Class ->
+        (match ctx with
+        | Some (ClassishDecl DKenumclass) ->
+          {
+            name = "enum class";
+            type_ = Keyword EnumClass;
+            is_declaration = false;
+            pos = token_pos t;
+          }
+        | _ ->
+          {
+            name = "class";
+            type_ = Keyword Class;
+            is_declaration = false;
+            pos = token_pos t;
+          })
+        :: acc
+      | Token.TokenKind.Interface ->
+        {
+          name = "interface";
+          type_ = Keyword Interface;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+        :: acc
+      | Token.TokenKind.Trait ->
+        {
+          name = "trait";
+          type_ = Keyword Trait;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+        :: acc
+      | Token.TokenKind.Enum ->
+        (match ctx with
+        | Some (ClassishDecl DKenumclass) ->
+          {
+            name = "enum class";
+            type_ = Keyword EnumClass;
+            is_declaration = false;
+            pos = token_pos t;
+          }
+        | _ ->
+          {
+            name = "enum";
+            type_ = Keyword Enum;
+            is_declaration = false;
+            pos = token_pos t;
+          })
+        :: acc
+      | Token.TokenKind.Type ->
+        {
+          name = "type";
+          type_ = Keyword Type;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+        :: acc
+      | Token.TokenKind.Newtype ->
+        {
+          name = "newtype";
+          type_ = Keyword Newtype;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+        :: acc
       | Token.TokenKind.Extends ->
         {
           name = "extends";

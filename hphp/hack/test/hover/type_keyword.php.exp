@@ -1,0 +1,6 @@
+type
+A `type` is an alias for another type.
+
+`type` aliases are transparent, so you can use the original type and its alias interchangeably.
+
+See also `newtype` for opaque type aliases.

@@ -31,6 +31,13 @@ type receiver_class =
 [@@deriving ord, eq]
 
 type keyword_with_hover_docs =
+  | Class
+  | Interface
+  | Trait
+  | Enum
+  | EnumClass
+  | Type
+  | Newtype
   | FinalOnClass
   | FinalOnMethod
   | AbstractOnClass

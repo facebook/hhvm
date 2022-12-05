@@ -1,0 +1,6 @@
+trait
+A `trait` provides methods and properties that can be `use`d in classes.
+
+Traits are often used to provide default implementations for methods declared in an `interface`.
+
+When in doubt, use a class rather than a trait. You only need a trait when you want the same method in multiple classes that don't inherit from each other.

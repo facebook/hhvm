@@ -30,10 +30,6 @@ type genv = {
   in_mode: FileInfo.mode;
   (* various options that control the strictness of the typechecker *)
   ctx: Provider_context.t;
-  (* In function foo<T1, ..., Tn> or class<T1, ..., Tn>, the field
-   * type_params knows T1 .. Tn. It is able to find out about the
-   * constraint on these parameters. *)
-  type_params: SSet.t;
   (* Namespace environment, e.g., what namespace we're in and what use
    * declarations are in play. *)
   namespace: Namespace_env.env;
@@ -49,21 +45,12 @@ module Env : sig
 
   val make_fun_decl_genv : Provider_context.t -> Nast.fun_def -> genv
 
-  val make_file_attributes_env :
-    Provider_context.t -> FileInfo.mode -> Aast.nsenv -> genv
-
   val make_const_env : Provider_context.t -> Nast.gconst -> genv
 
   val make_module_env : Provider_context.t -> Nast.module_def -> genv
 end = struct
-  let get_tparam_names paraml =
-    List.fold_right
-      ~init:SSet.empty
-      ~f:(fun { Aast.tp_name = (_, x); _ } acc -> SSet.add x acc)
-      paraml
-
-  let make_class_genv ctx tparams mode _ namespace _ =
-    { in_mode = mode; ctx; type_params = get_tparam_names tparams; namespace }
+  let make_class_genv ctx _ mode _ namespace _ =
+    { in_mode = mode; ctx; namespace }
 
   let make_class_env ctx c =
     let genv =
@@ -77,13 +64,8 @@ end = struct
     in
     genv
 
-  let make_typedef_genv ctx tparams tdef_namespace =
-    {
-      in_mode = FileInfo.Mstrict;
-      ctx;
-      type_params = get_tparam_names tparams;
-      namespace = tdef_namespace;
-    }
+  let make_typedef_genv ctx _ tdef_namespace =
+    { in_mode = FileInfo.Mstrict; ctx; namespace = tdef_namespace }
 
   let make_typedef_env ctx tdef =
     let genv =
@@ -91,13 +73,8 @@ end = struct
     in
     genv
 
-  let make_fun_genv ctx params f_mode f_namespace =
-    {
-      in_mode = f_mode;
-      ctx;
-      type_params = get_tparam_names params;
-      namespace = f_namespace;
-    }
+  let make_fun_genv ctx _ f_mode f_namespace =
+    { in_mode = f_mode; ctx; namespace = f_namespace }
 
   let make_fun_decl_genv ctx f =
     make_fun_genv
@@ -107,30 +84,17 @@ end = struct
       f.Aast.fd_namespace
 
   let make_const_genv ctx cst =
-    {
-      in_mode = cst.Aast.cst_mode;
-      ctx;
-      type_params = SSet.empty;
-      namespace = cst.Aast.cst_namespace;
-    }
+    { in_mode = cst.Aast.cst_mode; ctx; namespace = cst.Aast.cst_namespace }
 
   let make_top_level_genv ctx =
     {
       in_mode = FileInfo.Mstrict;
       ctx;
-      type_params = SSet.empty;
       namespace = Namespace_env.empty_with_default;
     }
 
   let make_top_level_env ctx =
     let genv = make_top_level_genv ctx in
-    genv
-
-  let make_file_attributes_genv ctx mode namespace =
-    { in_mode = mode; ctx; type_params = SSet.empty; namespace }
-
-  let make_file_attributes_env ctx mode namespace =
-    let genv = make_file_attributes_genv ctx mode namespace in
     genv
 
   let make_const_env ctx cst =
@@ -141,7 +105,6 @@ end = struct
     {
       in_mode = FileInfo.Mstrict;
       ctx;
-      type_params = SSet.empty;
       namespace = Namespace_env.empty_with_default;
     }
 
@@ -217,419 +180,42 @@ let interface c constructor methods smethods =
     let smethods = add_abstractl smethods in
     (constructor, methods, smethods)
 
-let extend_tparams genv paraml =
-  let params =
-    List.fold_right
-      paraml
-      ~init:genv.type_params
-      ~f:(fun { Aast.tp_name = (_, x); _ } acc -> SSet.add x acc)
-  in
-  { genv with type_params = params }
-
 let make_xhp_attr = function
   | true -> Some { N.xai_like = None; N.xai_tag = None; N.xai_enum_values = [] }
   | false -> None
 
 (**************************************************************************)
-(* Statements *)
-(**************************************************************************)
-
-let rec stmt env (pos, st) =
-  let stmt =
-    match st with
-    | Aast.Block _ -> failwith "stmt block error"
-    | Aast.Fallthrough -> N.Fallthrough
-    | Aast.Noop -> N.Noop
-    | Aast.Markup _ -> N.Noop
-    | Aast.AssertEnv _ -> N.Noop
-    | Aast.Break -> Aast.Break
-    | Aast.Continue -> Aast.Continue
-    | Aast.Throw e -> N.Throw (expr env e)
-    | Aast.Return e -> N.Return (Option.map e ~f:(expr env))
-    | Aast.Yield_break -> N.Yield_break
-    | Aast.Awaitall (el, b) -> awaitall_stmt env el b
-    | Aast.If (e, b1, b2) -> if_stmt env e b1 b2
-    | Aast.Do (b, e) -> do_stmt env b e
-    | Aast.While (e, b) -> N.While (expr env e, block env b)
-    | Aast.Using s ->
-      using_stmt env s.Aast.us_has_await s.Aast.us_exprs s.Aast.us_block
-    | Aast.For (st1, e, st2, b) -> for_stmt env st1 e st2 b
-    | Aast.Switch (e, cl, dfl) -> switch_stmt env e cl dfl
-    | Aast.Foreach (e, ae, b) -> foreach_stmt env e ae b
-    | Aast.Try (b, cl, fb) -> try_stmt env b cl fb
-    | Aast.Expr e -> N.Expr (expr env e)
-  in
-  (pos, stmt)
-
-and awaitall_stmt env el b =
-  let el =
-    List.map
-      ~f:(fun (e1, e2) ->
-        let e2 = expr env e2 in
-        (e1, e2))
-      el
-  in
-  let s = block env b in
-  N.Awaitall (el, s)
-
-and if_stmt env e b1 b2 =
-  let e = expr env e in
-  let b1 = branch env b1 in
-  let b2 = branch env b2 in
-  N.If (e, b1, b2)
-
-and do_stmt env b e =
-  let b = block ~new_scope:false env b in
-  let e = expr env e in
-  N.Do (b, e)
-
-(* Scoping is essentially that of do: block is always executed *)
-and using_stmt env has_await (loc, e) b =
-  let e = List.map ~f:(expr env) e in
-  let b = block ~new_scope:false env b in
-  N.Using
-    N.
-      {
-        us_is_block_scoped = false;
-        (* This isn't used for naming so provide a default *)
-        us_has_await = has_await;
-        us_exprs = (loc, e);
-        us_block = b;
-      }
-
-and for_stmt env e1 e2 e3 b =
-  let e1 = exprl env e1 in
-  let e2 = oexpr env e2 in
-  let b = block ~new_scope:false env b in
-  let e3 = exprl env e3 in
-  N.For (e1, e2, e3, b)
-
-and switch_stmt env e cl dfl =
-  let e = expr env e in
-  let cl = casel env cl in
-  let dfl = Option.map ~f:(fun (pos, b) -> (pos, branch env b)) dfl in
-  N.Switch (e, cl, dfl)
-
-and foreach_stmt env e ae b =
-  let e = expr env e in
-  let ae = as_expr env ae in
-  let b = block env b in
-  N.Foreach (e, ae, b)
-
-and as_expr env ae =
-  match ae with
-  | Aast.As_v ev -> N.As_v (expr env ev)
-  | Aast.As_kv (k, ev) -> N.As_kv (expr env k, expr env ev)
-  | N.Await_as_v (p, ev) -> N.Await_as_v (p, expr env ev)
-  | N.Await_as_kv (p, k, ev) -> N.Await_as_kv (p, expr env k, expr env ev)
-
-and try_stmt env b cl fb =
-  let fb = branch env fb in
-  let b = branch env b in
-  let cl = catchl env cl in
-  N.Try (b, cl, fb)
-
-and block ?(new_scope = true) env stl =
-  let _ = new_scope in
-  List.map ~f:(stmt env) stl
-
-and branch env stmt_l = List.map ~f:(stmt env) stmt_l
-
-(**************************************************************************)
-(* Expressions *)
-(**************************************************************************)
-and expr env ((), p, e) = ((), p, expr_ env p e)
-
-and expr_ env p (e : Nast.expr_) =
-  match e with
-  | Aast.Varray (ta, l) -> N.Varray (ta, List.map l ~f:(expr env))
-  | Aast.Darray (tap, l) ->
-    N.Darray (tap, List.map l ~f:(fun (e1, e2) -> (expr env e1, expr env e2)))
-  | Aast.ValCollection (kind, ta, exprs) ->
-    Aast.ValCollection (kind, ta, List.map exprs ~f:(expr env))
-  | Aast.KeyValCollection (kind, ta, fields) ->
-    Aast.KeyValCollection
-      ( kind,
-        ta,
-        List.map fields ~f:(fun (expr_key, expr_val) ->
-            (expr env expr_key, expr env expr_val)) )
-  | Aast.Clone e -> N.Clone (expr env e)
-  | Aast.Null -> N.Null
-  | Aast.True -> N.True
-  | Aast.False -> N.False
-  | Aast.Int s -> N.Int s
-  | Aast.Float s -> N.Float s
-  | Aast.String s -> N.String s
-  | Aast.String2 idl -> N.String2 (string2 env idl)
-  | Aast.PrefixedString (n, e) -> N.PrefixedString (n, expr env e)
-  | Aast.Id x -> N.Id x
-  | Aast.Lvar x -> N.Lvar x
-  | Aast.This -> N.This
-  | Aast.Dollardollar lid -> N.Dollardollar lid
-  | Aast.Lplaceholder pos -> N.Lplaceholder pos
-  | Aast.Obj_get (e1, e2, nullsafe, prop_or_method) ->
-    (* If we encounter Obj_get(_,_,true) by itself, then it means "?->"
-       is being used for instance property access; see the case below for
-       handling nullsafe instance method calls to see how this works *)
-    N.Obj_get (expr env e1, expr_obj_get_name env e2, nullsafe, prop_or_method)
-  | Aast.Array_get (e1, e2) -> N.Array_get (expr env e1, oexpr env e2)
-  | Aast.(Class_get (class_id, cg_expr, prop_or_method)) ->
-    N.Class_get (class_id, cg_expr, prop_or_method)
-  | Aast.Class_const (class_id, pstring) -> N.Class_const (class_id, pstring)
-  | Aast.Tuple el -> N.Tuple (exprl env el)
-  | Aast.Call (e, tal, el, unpacked_element) ->
-    N.Call (expr env e, tal, expr_call_args env el, oexpr env unpacked_element)
-  | Aast.FunctionPointer (fid, targs) -> N.FunctionPointer (fid, targs)
-  | Aast.Yield e -> N.Yield (afield env e)
-  | Aast.Await e -> N.Await (expr env e)
-  | Aast.List el -> N.List (exprl env el)
-  | Aast.Cast (ty, e2) -> N.Cast (ty, expr env e2)
-  | Aast.ExpressionTree et ->
-    N.ExpressionTree
-      N.
-        {
-          et_hint = et.et_hint;
-          et_splices = block env et.et_splices;
-          et_function_pointers = block env et.et_function_pointers;
-          et_virtualized_expr = expr env et.et_virtualized_expr;
-          et_runtime_expr = expr env et.et_runtime_expr;
-          et_dollardollar_pos = et.et_dollardollar_pos;
-        }
-  | Aast.ET_Splice e -> N.ET_Splice (expr env e)
-  | Aast.Unop (uop, e) -> N.Unop (uop, expr env e)
-  | Aast.Binop ((Ast_defs.Eq _ as bop), e1, e2) ->
-    N.Binop (bop, expr env e1, expr env e2)
-  | Aast.Binop (bop, e1, e2) -> N.Binop (bop, expr env e1, expr env e2)
-  | Aast.Pipe (dollardollar, e1, e2) ->
-    N.Pipe (dollardollar, expr env e1, expr env e2)
-  | Aast.Eif (e1, e2opt, e3) ->
-    (* The order matters here, of course -- e1 can define vars that need to
-     * be available in e2 and e3. *)
-    let e1 = expr env e1 in
-    let (e2opt, e3) =
-      let e2opt = oexpr env e2opt in
-      let e3 = expr env e3 in
-      (e2opt, e3)
-    in
-    N.Eif (e1, e2opt, e3)
-  | Aast.Is (e, h) -> N.Is (expr env e, h)
-  | Aast.As (e, h, b) -> N.As (expr env e, h, b)
-  | Aast.Upcast (e, h) -> N.Upcast (expr env e, h)
-  | Aast.New (class_id, tal, el, unpacked_element, _) ->
-    N.New (class_id, tal, exprl env el, oexpr env unpacked_element, ())
-  | Aast.Efun (f, idl) ->
-    let f = expr_lambda env f in
-    N.Efun (f, idl)
-  | Aast.Lfun (f, idl) ->
-    let f = expr_lambda env f in
-    N.Lfun (f, idl)
-  | Aast.Xml (x, al, el) -> N.Xml (x, attrl env al, exprl env el)
-  | Aast.Shape fdl ->
-    let shp = List.map fdl ~f:(fun (pname, value) -> (pname, expr env value)) in
-    N.Shape shp
-  (* This has been elaborated away - we will remove this entire function in a
-     subsequent diff so no special handling of the invariant is applied for now
-  *)
-  | Aast.Import (imp, ex) -> N.Import (imp, ex)
-  | Aast.Omitted -> N.Omitted
-  | Aast.EnumClassLabel (opt_sid, x) -> N.EnumClassLabel (opt_sid, x)
-  | Aast.ReadonlyExpr e -> N.ReadonlyExpr (expr env e)
-  | Aast.Pair (targs_opt, e1, e2) -> N.Pair (targs_opt, expr env e1, expr env e2)
-  | Aast.Fun_id nm -> N.Fun_id nm
-  | Aast.Method_id (instance, meth) -> N.Method_id (expr env instance, meth)
-  | Aast.Method_caller (c, meth) -> N.Method_caller (c, meth)
-  | Aast.Smethod_id (cid, pstring) -> N.Smethod_id (cid, pstring)
-  (* The below were not found on the AST.ml so they are not implemented here *)
-  | Aast.Collection _
-  | Aast.Hole _ ->
-    Errors.internal_error
-      p
-      "Malformed expr: Expr not found on legacy AST: T39599317";
-    invalid_expr_ p
-
-and expr_obj_get_name env expr_ =
-  match expr_ with
-  | (_, p, Aast.Id x) -> ((), p, N.Id x)
-  | (_, p, e) -> expr env ((), p, e)
-
-and exprl env l = List.map ~f:(expr env) l
-
-and expr_call_args env = List.map ~f:(fun (pk, e) -> (pk, expr env e))
-
-and oexpr env e = Option.map e ~f:(expr env)
-
-and expr_lambda env f =
-  let f_params = fun_paraml env f.Aast.f_params in
-  (* The bodies of lambdas go through naming in the containing local
-   * environment *)
-  let fb_ast = f_body env f.Aast.f_body in
-  (* These could all be probably be replaced with a {... where ...} *)
-  let f_body = Aast.{ fb_ast } in
-  let f_user_attributes = user_attributes env f.Aast.f_user_attributes in
-  Aast.
-    {
-      f with
-      f_annotation = ();
-      f_params;
-      f_body;
-      f_tparams = [];
-      f_where_constraints = [];
-      f_user_attributes;
-    }
-
-and f_body env f_body = block env f_body.Aast.fb_ast
-
-and casel env l = List.map l ~f:(case env)
-
-and case env (e, b) =
-  let e = expr env e in
-  let b = branch env b in
-  (e, b)
-
-and catchl env l = List.map l ~f:(catch env)
-
-and catch env ((p1, lid1), (p2, lid2), b) =
-  let b = branch env b in
-  ((p1, lid1), (p2, lid2), b)
-
-and afield env field =
-  match field with
-  | Aast.AFvalue e -> N.AFvalue (expr env e)
-  | Aast.AFkvalue (e1, e2) -> N.AFkvalue (expr env e1, expr env e2)
-
-and attr env at =
-  match at with
-  | Aast.Xhp_simple { Aast.xs_name; xs_type; xs_expr = e } ->
-    N.Xhp_simple { Aast.xs_name; xs_type; xs_expr = expr env e }
-  | Aast.Xhp_spread e -> N.Xhp_spread (expr env e)
-
-and attrl env l = List.map ~f:(attr env) l
-
-and string2 env idl = List.map idl ~f:(expr env)
-
-(**************************************************************************)
 (* Functions *)
 (**************************************************************************)
-and fun_ genv f =
-  let env = genv in
-  let f_params = fun_paraml env f.Aast.f_params in
-  let f_tparams = type_paraml env f.Aast.f_tparams in
+let fun_ genv f =
   (* TODO[mjt] pull out into elaboration pass *)
   let f_body =
     match genv.in_mode with
     | FileInfo.Mhhi -> { N.fb_ast = [] }
     | FileInfo.Mstrict ->
-      let fb_ast = block env f.Aast.f_body.Aast.fb_ast in
+      let fb_ast = f.Aast.f_body.Aast.fb_ast in
       { N.fb_ast }
   in
-  let f_user_attributes = user_attributes env f.Aast.f_user_attributes in
-  Aast.
-    { f with f_annotation = (); f_tparams; f_params; f_body; f_user_attributes }
-
-(* Variadic params are removed from the list *)
-and fun_param env (param : Nast.fun_param) =
-  let param_expr = Option.map param.Aast.param_expr ~f:(expr env) in
-  let param_user_attributes =
-    user_attributes env param.Aast.param_user_attributes
-  in
-  Aast.{ param with param_annotation = (); param_expr; param_user_attributes }
-
-and fun_paraml env paraml = List.map ~f:(fun_param env) paraml
-
-(**************************************************************************)
-(* User attrs *)
-(**************************************************************************)
-and user_attributes env attrl =
-  let on_attr acc { Aast.ua_name; ua_params } =
-    let attr = { N.ua_name; N.ua_params = List.map ~f:(expr env) ua_params } in
-    attr :: acc
-  in
-  List.fold_left ~init:[] ~f:on_attr attrl
-
-(**************************************************************************)
-(* Type parameters *)
-(**************************************************************************)
-(*
-  We need to be careful regarding the scoping of type variables:
-  Type parameters are always in scope simultaneously: Given
-  class C<T1 ... , T2 ... , Tn ...>,
-  all type parameters are in scope in the constraints of all other ones (and the where constraints,
-  in case of functions).
-  For consitency, the same holds for nested type parameters (i.e., type parameters of type
-  parameters). Given
-  class Foo<T<T1 ... , ...., Tn ... > ... >
-  every Ti is in scope of the constraints of all other Tj, and in the constraints on T itself.
-*)
-and type_param ~forbid_this genv t =
-  (* Bring all type parameters into scope at once before traversing nested tparams,
-     as per the note above *)
-  let env = extend_tparams genv t.Aast.tp_parameters in
-  let tp_parameters =
-    List.map t.Aast.tp_parameters ~f:(type_param ~forbid_this env)
-  in
-  (* Use the env with all nested tparams still in scope *)
-  let tp_constraints = t.Aast.tp_constraints in
-  {
-    N.tp_variance = t.Aast.tp_variance;
-    tp_name = t.Aast.tp_name;
-    tp_parameters;
-    tp_constraints;
-    tp_reified = t.Aast.tp_reified;
-    tp_user_attributes = user_attributes env t.Aast.tp_user_attributes;
-  }
-
-and type_paraml ?(forbid_this = false) env tparams =
-  List.map tparams ~f:(type_param ~forbid_this env)
-
-(**************************************************************************)
-(* Type constants *)
-(**************************************************************************)
-
-let typeconst env t =
-  let open Aast in
-  let tconst = t.c_tconst_kind in
-  let attrs = user_attributes env t.Aast.c_tconst_user_attributes in
-  N.
-    {
-      c_tconst_user_attributes = attrs;
-      c_tconst_name = t.Aast.c_tconst_name;
-      c_tconst_kind = tconst;
-      c_tconst_span = t.Aast.c_tconst_span;
-      c_tconst_doc_comment = t.Aast.c_tconst_doc_comment;
-      c_tconst_is_ctx = t.Aast.c_tconst_is_ctx;
-    }
+  Aast.{ f with f_annotation = (); f_body }
 
 (**************************************************************************)
 (* Methods *)
 (**************************************************************************)
 
 let method_ genv m =
-  let genv = extend_tparams genv m.Aast.m_tparams in
-  let env = genv in
-  (* Cannot use 'this' if it is a public instance method *)
-  let m_params = fun_paraml env m.Aast.m_params in
-  let m_tparams = type_paraml env m.Aast.m_tparams in
+  (* TODO[mjt] pull out into elaboration pass *)
   let m_body =
     match genv.in_mode with
     | FileInfo.Mhhi -> { N.fb_ast = [] }
     | FileInfo.Mstrict ->
-      let fub_ast = block env m.N.m_body.N.fb_ast in
+      let fub_ast = m.N.m_body.N.fb_ast in
       { N.fb_ast = fub_ast }
   in
-  let m_user_attributes = user_attributes env m.Aast.m_user_attributes in
-  Aast.
-    { m with m_annotation = (); m_tparams; m_params; m_body; m_user_attributes }
+  Aast.{ m with m_annotation = (); m_body }
 
 (**************************************************************************)
 (* Top level function definitions *)
 (**************************************************************************)
-
-let file_attribute ctx mode fa =
-  let env = Env.make_file_attributes_env ctx mode fa.Aast.fa_namespace in
-  let ua = user_attributes env fa.Aast.fa_user_attributes in
-  N.{ fa_user_attributes = ua; fa_namespace = fa.Aast.fa_namespace }
-
-let file_attributes ctx mode fal = List.map ~f:(file_attribute ctx mode) fal
 
 let fun_def_help ctx genv fd =
   (* TODO[mjt] pull out into a tcopt elaboration pass *)
@@ -644,19 +230,15 @@ let fun_def_help ctx genv fd =
   in
   (* TODO[mjt] pull out into an elaboration pass *)
   let fd = Naming_captures.populate_fun_def fd in
-
-  let fd_file_attributes =
-    file_attributes ctx fd.Aast.fd_mode fd.Aast.fd_file_attributes
-  in
   let fd_fun = fun_ genv fd.Aast.fd_fun in
-  Aast.{ fd with fd_fun; fd_file_attributes }
+  Aast.{ fd with fd_fun }
 
 (**************************************************************************)
 (* Classes *)
 (**************************************************************************)
 
 let class_prop_expr_is_xhp env cv =
-  let expr = Option.map cv.Aast.cv_expr ~f:(expr env) in
+  let expr = cv.Aast.cv_expr in
   let expr =
     if FileInfo.is_hhi env.in_mode && Option.is_none expr then
       let pos = fst cv.Aast.cv_id in
@@ -671,15 +253,14 @@ let class_prop_expr_is_xhp env cv =
   (expr, is_xhp)
 
 let class_prop_static env cv =
-  let cv_user_attributes = user_attributes env cv.Aast.cv_user_attributes in
   let (cv_expr, is_xhp) = class_prop_expr_is_xhp env cv in
   let cv_xhp_attr = make_xhp_attr is_xhp in
-  Aast.{ cv with cv_xhp_attr; cv_expr; cv_user_attributes }
+  Aast.{ cv with cv_xhp_attr; cv_expr }
 
 let class_prop_non_static env ?(const = None) cv =
   (* if class is __Const, make all member fields __Const *)
   let cv_user_attributes =
-    let attrs = user_attributes env cv.Aast.cv_user_attributes in
+    let attrs = cv.Aast.cv_user_attributes in
     match const with
     | Some c ->
       if not (Naming_attributes.mem SN.UserAttributes.uaConst attrs) then
@@ -691,13 +272,6 @@ let class_prop_non_static env ?(const = None) cv =
   let (cv_expr, is_xhp) = class_prop_expr_is_xhp env cv in
   let cv_xhp_attr = make_xhp_attr is_xhp in
   Aast.{ cv with cv_xhp_attr; cv_expr; cv_user_attributes }
-
-let class_const env ~in_enum_class:_ cc =
-  Aast.
-    {
-      cc with
-      cc_user_attributes = user_attributes env cc.Aast.cc_user_attributes;
-    }
 
 (* h cv is_required maybe_enum *)
 let xhp_attribute_decl env (h, cv, tag, maybe_enum) =
@@ -798,23 +372,12 @@ let class_help ctx env c =
   let smethods = List.map ~f:(method_ env) smethods in
   let (sprops, props) = Aast.split_vars c.Aast.c_vars in
   let sprops = List.map ~f:(class_prop_static env) sprops in
-  (* The attributes applied to a class exist outside the current class so references to `self` are invalid *)
-  let attrs = user_attributes env c.Aast.c_user_attributes in
+  let attrs = c.Aast.c_user_attributes in
   let const = Naming_attributes.find SN.UserAttributes.uaConst attrs in
   let props = List.map ~f:(class_prop_non_static ~const env) props in
   let xhp_attrs = List.map ~f:(xhp_attribute_decl env) c.Aast.c_xhp_attrs in
   (* These would be out of order with the old attributes, but that shouldn't matter? *)
   let props = props @ xhp_attrs in
-  let in_enum_class =
-    let open Ast_defs in
-    match c.Aast.c_kind with
-    | Cenum_class _ -> true
-    | Cclass _
-    | Cinterface
-    | Cenum
-    | Ctrait ->
-      false
-  in
   let methods = List.map ~f:(method_ env) methods in
   let uses = c.Aast.c_uses in
   let xhp_attr_uses = c.Aast.c_xhp_attr_uses in
@@ -874,16 +437,10 @@ let class_help ctx env c =
   (* Setting a class type parameters constraint to the 'this' type is weird
    * so lets forbid it for now.
    *)
-  let c_tparams = type_paraml env c.Aast.c_tparams in
-  let consts = List.map ~f:(class_const env ~in_enum_class) c.Aast.c_consts in
-  let typeconsts = List.map ~f:(typeconst env) c.Aast.c_typeconsts in
   let implements = c.Aast.c_implements in
   let constructor = Option.map constructor ~f:(method_ env) in
   let (constructor, methods, smethods) =
     interface c constructor methods smethods
-  in
-  let file_attributes =
-    file_attributes ctx c.Aast.c_mode c.Aast.c_file_attributes
   in
   let methods =
     match constructor with
@@ -893,52 +450,22 @@ let class_help ctx env c =
   Aast.
     {
       c with
-      c_annotation = ();
-      c_tparams;
       c_uses = uses;
       c_xhp_attr_uses = xhp_attr_uses;
       c_reqs = req_extends @ req_implements @ req_class;
       c_implements = implements;
-      c_consts = consts;
-      c_typeconsts = typeconsts;
       c_vars = sprops @ props;
       c_methods = methods;
       c_user_attributes = attrs;
-      c_file_attributes = file_attributes;
       (* Naming and typechecking shouldn't use these fields *)
       c_xhp_attrs = [];
     }
 
 (**************************************************************************)
-(* Typedefs *)
-(**************************************************************************)
-
-let typedef_help ctx env tdef =
-  let t_user_attributes = user_attributes env tdef.Aast.t_user_attributes in
-  let t_file_attributes =
-    file_attributes ctx tdef.Aast.t_mode tdef.Aast.t_file_attributes
-  in
-  let t_tparams = type_paraml env tdef.Aast.t_tparams in
-  Aast.
-    {
-      tdef with
-      t_tparams;
-      t_user_attributes;
-      t_file_attributes;
-      t_annotation = ();
-    }
-
-(**************************************************************************)
-(* Global constants *)
-(**************************************************************************)
-
-let global_const_help _ _env cst = Aast.{ cst with cst_annotation = () }
-
-(**************************************************************************)
 (* Module declarations *)
 (**************************************************************************)
 
-let module_help ctx env module_ =
+let module_help ctx _ module_ =
   (* TODO[mjt]: pull this into tcopt validation pass *)
   let tcopts = Provider_context.get_tcopt ctx in
   let allowed_files =
@@ -967,8 +494,7 @@ let module_help ctx env module_ =
   then
     Errors.add_naming_error
     @@ Naming_error.Module_declaration_outside_allowed_files module_.md_span;
-  let md_user_attributes = user_attributes env module_.md_user_attributes in
-  { module_ with md_annotation = (); md_user_attributes }
+  { module_ with md_annotation = () }
 
 (**************************************************************************)
 (* Programs *)
@@ -987,13 +513,9 @@ let program_help ctx env ast =
     | Aast.Stmt (_, Aast.Noop)
     | Aast.Stmt (_, Aast.Markup _) ->
       acc
-    | Aast.Stmt s -> N.Stmt (stmt !top_level_env s) :: acc
-    | Aast.Typedef t ->
-      let env = Env.make_typedef_env ctx t in
-      N.Typedef (typedef_help ctx env t) :: acc
-    | Aast.Constant cst ->
-      let env = Env.make_const_env ctx cst in
-      N.Constant (global_const_help ctx env cst) :: acc
+    | Aast.Stmt s -> Aast.Stmt s :: acc
+    | Aast.Typedef t -> N.Typedef t :: acc
+    | Aast.Constant cst -> N.Constant cst :: acc
     | Aast.Namespace (_ns, aast) -> List.fold_left ~f:aux ~init:[] aast @ acc
     | Aast.NamespaceUse _ -> acc
     | Aast.SetNamespaceEnv nsenv ->
@@ -1419,7 +941,7 @@ let global_const ctx cst =
       elab_as_expr = Naming_elab_as_expr.elab_gconst;
       elab_block = Naming_elab_block.elab_gconst;
       elab_pipe = Naming_elab_pipe.elab_gconst;
-      elab_help = global_const_help;
+      elab_help = (fun _ _ elem -> elem);
       elab_soft = Naming_elab_soft.elab_gconst;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_gconst;
       elab_hkt = Naming_elab_hkt.elab_gconst;
@@ -1458,7 +980,7 @@ let typedef ctx tdef =
       elab_as_expr = Naming_elab_as_expr.elab_typedef;
       elab_block = Naming_elab_block.elab_typedef;
       elab_pipe = Naming_elab_pipe.elab_typedef;
-      elab_help = typedef_help;
+      elab_help = (fun _ _ elem -> elem);
       elab_soft = Naming_elab_soft.elab_typedef;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_typedef;
       elab_hkt = Naming_elab_hkt.elab_typedef;

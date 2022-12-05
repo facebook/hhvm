@@ -29,6 +29,8 @@ type err
 
 val naming : Naming_error.t -> err Free_monoid.t
 
+val nast_check : Nast_check_error.t -> err Free_monoid.t
+
 val typing : Typing_error.Primary.t -> err Free_monoid.t
 
 val like_type : Pos.t -> err Free_monoid.t

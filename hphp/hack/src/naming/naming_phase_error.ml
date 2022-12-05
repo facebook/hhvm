@@ -12,6 +12,9 @@ type t = {
   (* TODO[mjt] either these errors shouldn't be raised in naming or they aren't
      really typing errors *)
   typing: Typing_error.Primary.t list;
+  (* TODO[mjt] as above, either these should be naming errors or we should
+     be raising in NAST checks *)
+  nast_check: Nast_check_error.t list;
   (* TODO[mjt] these errors are not represented by any of our conventional
      phase errors; presumably they should all be naming errors? *)
   like_types: Pos.t list;
@@ -24,6 +27,7 @@ let empty =
   {
     naming = [];
     typing = [];
+    nast_check = [];
     like_types = [];
     unexpected_hints = [];
     malformed_accesses = [];
@@ -36,12 +40,14 @@ let emit
     {
       naming;
       typing;
+      nast_check;
       like_types;
       unexpected_hints;
       malformed_accesses;
       supportdyns;
     } =
   List.iter ~f:Errors.add_naming_error naming;
+  List.iter ~f:Errors.add_nast_check_error nast_check;
   List.iter
     ~f:(fun err -> Errors.add_typing_error @@ Typing_error.primary err)
     typing;
@@ -102,12 +108,15 @@ end
 type err =
   | Naming of Naming_error.t
   | Typing of Typing_error.Primary.t
+  | Nast_check of Nast_check_error.t
   | Like_type of Pos.t
   | Unexpected_hint of Pos.t
   | Malformed_access of Pos.t
   | Supportdyn of Pos.t
 
 let naming err = Free_monoid.mk @@ Naming err
+
+let nast_check err = Free_monoid.mk @@ Nast_check err
 
 let typing err = Free_monoid.mk @@ Typing err
 
@@ -126,6 +135,7 @@ let from_monoid ?(init = empty) err =
   let f acc = function
     | Naming err -> { acc with naming = err :: acc.naming }
     | Typing err -> { acc with typing = err :: acc.typing }
+    | Nast_check err -> { acc with nast_check = err :: acc.nast_check }
     | Like_type pos -> { acc with like_types = pos :: acc.like_types }
     | Unexpected_hint pos ->
       { acc with unexpected_hints = pos :: acc.unexpected_hints }

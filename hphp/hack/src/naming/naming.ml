@@ -25,8 +25,6 @@ module SN = Naming_special_names
 (* The types *)
 (*****************************************************************************)
 
-type is_final = bool
-
 type genv = {
   (* strict? decl?  *)
   in_mode: FileInfo.mode;
@@ -36,8 +34,6 @@ type genv = {
    * type_params knows T1 .. Tn. It is able to find out about the
    * constraint on these parameters. *)
   type_params: SSet.t;
-  (* The current class, None if we are in a function *)
-  current_cls: (Ast_defs.id * Ast_defs.classish_kind * is_final) option;
   (* Namespace environment, e.g., what namespace we're in and what use
    * declarations are in play. *)
   namespace: Namespace_env.env;
@@ -66,14 +62,8 @@ end = struct
       ~f:(fun { Aast.tp_name = (_, x); _ } acc -> SSet.add x acc)
       paraml
 
-  let make_class_genv ctx tparams mode (cid, ckind) namespace final =
-    {
-      in_mode = mode;
-      ctx;
-      type_params = get_tparam_names tparams;
-      current_cls = Some (cid, ckind, final);
-      namespace;
-    }
+  let make_class_genv ctx tparams mode _ namespace _ =
+    { in_mode = mode; ctx; type_params = get_tparam_names tparams; namespace }
 
   let make_class_env ctx c =
     let genv =
@@ -92,7 +82,6 @@ end = struct
       in_mode = FileInfo.Mstrict;
       ctx;
       type_params = get_tparam_names tparams;
-      current_cls = None;
       namespace = tdef_namespace;
     }
 
@@ -107,7 +96,6 @@ end = struct
       in_mode = f_mode;
       ctx;
       type_params = get_tparam_names params;
-      current_cls = None;
       namespace = f_namespace;
     }
 
@@ -123,7 +111,6 @@ end = struct
       in_mode = cst.Aast.cst_mode;
       ctx;
       type_params = SSet.empty;
-      current_cls = None;
       namespace = cst.Aast.cst_namespace;
     }
 
@@ -132,7 +119,6 @@ end = struct
       in_mode = FileInfo.Mstrict;
       ctx;
       type_params = SSet.empty;
-      current_cls = None;
       namespace = Namespace_env.empty_with_default;
     }
 
@@ -141,13 +127,7 @@ end = struct
     genv
 
   let make_file_attributes_genv ctx mode namespace =
-    {
-      in_mode = mode;
-      ctx;
-      type_params = SSet.empty;
-      current_cls = None;
-      namespace;
-    }
+    { in_mode = mode; ctx; type_params = SSet.empty; namespace }
 
   let make_file_attributes_env ctx mode namespace =
     let genv = make_file_attributes_genv ctx mode namespace in
@@ -162,7 +142,6 @@ end = struct
       in_mode = FileInfo.Mstrict;
       ctx;
       type_params = SSet.empty;
-      current_cls = None;
       namespace = Namespace_env.empty_with_default;
     }
 
@@ -517,209 +496,12 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.(Class_get (class_id, cg_expr, prop_or_method)) ->
     N.Class_get (class_id, cg_expr, prop_or_method)
   | Aast.Class_const (class_id, pstring) -> N.Class_const (class_id, pstring)
-  | Aast.Call ((_, _, Aast.Id (p, pseudo_func)), tal, el, unpacked_element)
-    when String.equal pseudo_func SN.SpecialFunctions.echo ->
-    arg_unpack_unexpected unpacked_element;
-    N.Call (((), p, N.Id (p, pseudo_func)), tal, expr_call_args env el, None)
-  | Aast.Call ((_, p, Aast.Id (_, cn)), tal, el, _)
-    when String.equal cn SN.StdlibFunctions.call_user_func ->
-    Errors.add_typing_error
-      Typing_error.(
-        primary
-        @@ Primary.Deprecated_use
-             {
-               pos = p;
-               decl_pos_opt = None;
-               msg =
-                 "The builtin "
-                 ^ Markdown_lite.md_codify (Utils.strip_ns cn)
-                 ^ " is deprecated.";
-             });
-    begin
-      match el with
-      | [] ->
-        Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
-        invalid_expr_ p
-      | (Ast_defs.Pnormal, f) :: el ->
-        N.Call (expr env f, tal, expr_call_args env el, None)
-      | (Ast_defs.Pinout pk_pos, ((_, f_pos, _) as f)) :: el ->
-        Errors.add_nast_check_error
-        @@ Nast_check_error.Inout_in_transformed_pseudofunction
-             { pos = Pos.merge pk_pos f_pos; fn_name = "call_user_func" };
-        N.Call (expr env f, tal, expr_call_args env el, None)
-    end
-  | Aast.Call ((_, p, Aast.Id (_, cn)), _, el, unpacked_element)
-    when String.equal cn SN.AutoimportedFunctions.fun_ ->
-    arg_unpack_unexpected unpacked_element;
-    begin
-      match el with
-      | [] ->
-        Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
-        invalid_expr_ p
-      | [(Ast_defs.Pnormal, (_, p, Aast.String x))] -> N.Fun_id (p, x)
-      | [(_, (_, p, _))] ->
-        Errors.add_naming_error @@ Naming_error.Illegal_fun p;
-        invalid_expr_ p
-      | _ ->
-        Errors.add_naming_error @@ Naming_error.Too_many_arguments p;
-        invalid_expr_ p
-    end
-  | Aast.Call ((_, p, Aast.Id (_, cn)), _, el, unpacked_element)
-    when String.equal cn SN.AutoimportedFunctions.inst_meth ->
-    arg_unpack_unexpected unpacked_element;
-    begin
-      match el with
-      | []
-      | [_] ->
-        Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
-        invalid_expr_ p
-      | [
-       (Ast_defs.Pnormal, instance); (Ast_defs.Pnormal, (_, p, Aast.String meth));
-      ] ->
-        N.Method_id (expr env instance, (p, meth))
-      | [(_, (_, p, _)); _] ->
-        Errors.add_naming_error @@ Naming_error.Illegal_inst_meth p;
-        invalid_expr_ p
-      | _ ->
-        Errors.add_naming_error @@ Naming_error.Too_many_arguments p;
-        invalid_expr_ p
-    end
-  | Aast.Call ((_, p, Aast.Id (_, cn)), _, el, unpacked_element)
-    when String.equal cn SN.AutoimportedFunctions.meth_caller ->
-    arg_unpack_unexpected unpacked_element;
-    begin
-      match el with
-      | []
-      | [_] ->
-        Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
-        invalid_expr_ p
-      | [(Ast_defs.Pnormal, e1); (Ast_defs.Pnormal, e2)] ->
-        begin
-          match (expr env e1, expr env e2) with
-          | ((_, pc, N.String cl), (_, pm, N.String meth)) ->
-            N.Method_caller ((pc, cl), (pm, meth))
-          | ( (_, _, N.Class_const ((_, _, N.CI cl), (_, mem))),
-              (_, pm, N.String meth) )
-            when String.equal mem SN.Members.mClass ->
-            N.Method_caller (cl, (pm, meth))
-          | ((_, p, _), _) ->
-            Errors.add_naming_error @@ Naming_error.Illegal_meth_caller p;
-            invalid_expr_ p
-        end
-      | [(Ast_defs.Pinout _, _); _]
-      | [_; (Ast_defs.Pinout _, _)] ->
-        Errors.add_naming_error @@ Naming_error.Illegal_meth_caller p;
-        invalid_expr_ p
-      | _ ->
-        Errors.add_naming_error @@ Naming_error.Too_many_arguments p;
-        invalid_expr_ p
-    end
-  | Aast.Call ((_, p, Aast.Id (_, cn)), _, el, unpacked_element)
-    when String.equal cn SN.AutoimportedFunctions.class_meth ->
-    arg_unpack_unexpected unpacked_element;
-    begin
-      match el with
-      | []
-      | [_] ->
-        Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
-        invalid_expr_ p
-      | [(Ast_defs.Pnormal, e1); (Ast_defs.Pnormal, e2)] ->
-        begin
-          match (expr env e1, expr env e2) with
-          | ((_, pc, N.String cl), (_, pm, N.String meth)) ->
-            let cid = N.CI (pc, cl) in
-            N.Smethod_id (((), pc, cid), (pm, meth))
-          | ((_, _, N.Id (pc, const)), (_, pm, N.String meth))
-            when String.equal const SN.PseudoConsts.g__CLASS__ ->
-            (* All of these that use current_cls aren't quite correct
-             * inside a trait, as the class should be the using class.
-             * It's sufficient for typechecking purposes (we require
-             * subclass to be compatible with the trait member/method
-             * declarations).
-             *)
-            (match env.current_cls with
-            | Some (cid, _, true) ->
-              let cid = N.CI (pc, snd cid) in
-              N.Smethod_id (((), p, cid), (pm, meth))
-            | Some (cid, kind, false) ->
-              let is_trait = Ast_defs.is_c_trait kind in
-              let class_name = snd cid in
-              Errors.add_naming_error
-              @@ Naming_error.Class_meth_non_final_CLASS
-                   { pos = p; is_trait; class_name };
-
-              invalid_expr_ p
-            | None ->
-              Errors.add_naming_error @@ Naming_error.Illegal_class_meth p;
-              invalid_expr_ p)
-          | ( (_, _, N.Class_const ((_, pc, N.CI cl), (_, mem))),
-              (_, pm, N.String meth) )
-            when String.equal mem SN.Members.mClass ->
-            let cid = N.CI cl in
-            N.Smethod_id (((), pc, cid), (pm, meth))
-          | ( (_, p, N.Class_const ((_, pc, N.CIself), (_, mem))),
-              (_, pm, N.String meth) )
-            when String.equal mem SN.Members.mClass ->
-            (match env.current_cls with
-            | Some (_cid, _, true) ->
-              N.Smethod_id (((), pc, N.CIself), (pm, meth))
-            | Some (cid, _, false) ->
-              let class_name = snd cid in
-              Errors.add_naming_error
-              @@ Naming_error.Class_meth_non_final_self { pos = p; class_name };
-              invalid_expr_ p
-            | None ->
-              Errors.add_naming_error @@ Naming_error.Illegal_class_meth p;
-              invalid_expr_ p)
-          | ( (_, p, N.Class_const ((_, pc, N.CIstatic), (_, mem))),
-              (_, pm, N.String meth) )
-            when String.equal mem SN.Members.mClass ->
-            (match env.current_cls with
-            | Some (_cid, _, _) ->
-              N.Smethod_id (((), pc, N.CIstatic), (pm, meth))
-            | None ->
-              Errors.add_naming_error @@ Naming_error.Illegal_class_meth p;
-              invalid_expr_ p)
-          | ((_, p, _), _) ->
-            Errors.add_naming_error @@ Naming_error.Illegal_class_meth p;
-            invalid_expr_ p
-        end
-      | [(Ast_defs.Pinout _, _); _]
-      | [_; (Ast_defs.Pinout _, _)] ->
-        Errors.add_naming_error @@ Naming_error.Illegal_class_meth p;
-        invalid_expr_ p
-      | _ ->
-        Errors.add_naming_error @@ Naming_error.Too_many_arguments p;
-        invalid_expr_ p
-    end
   | Aast.Tuple el ->
     (match el with
     | [] ->
       Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
       invalid_expr_ p
     | el -> N.Tuple (exprl env el))
-  | Aast.Call ((_, p, Aast.Id f), tal, el, unpacked_element) ->
-    N.Call
-      (((), p, N.Id f), tal, expr_call_args env el, oexpr env unpacked_element)
-  (* match *)
-  (* Handle nullsafe instance method calls here. Because Obj_get is used
-     for both instance property access and instance method calls, we need
-     to match the entire "Call(Obj_get(..), ..)" pattern here so that we
-     only match instance method calls *)
-  | Aast.Call
-      ( (_, p, Aast.Obj_get (e1, e2, Aast.OG_nullsafe, in_parens)),
-        tal,
-        el,
-        unpacked_element ) ->
-    N.Call
-      ( ( (),
-          p,
-          N.Obj_get
-            (expr env e1, expr_obj_get_name env e2, N.OG_nullsafe, in_parens) ),
-        tal,
-        expr_call_args env el,
-        oexpr env unpacked_element )
-  (* Handle all kinds of calls that weren't handled by any of the cases above *)
   | Aast.Call (e, tal, el, unpacked_element) ->
     N.Call (expr env e, tal, expr_call_args env el, oexpr env unpacked_element)
   | Aast.FunctionPointer (fid, targs) -> N.FunctionPointer (fid, targs)
@@ -781,15 +563,15 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.EnumClassLabel (opt_sid, x) -> N.EnumClassLabel (opt_sid, x)
   | Aast.ReadonlyExpr e -> N.ReadonlyExpr (expr env e)
   | Aast.Pair (targs_opt, e1, e2) -> N.Pair (targs_opt, expr env e1, expr env e2)
+  | Aast.Fun_id nm -> N.Fun_id nm
+  | Aast.Method_id (instance, meth) -> N.Method_id (expr env instance, meth)
+  | Aast.Method_caller (c, meth) -> N.Method_caller (c, meth)
+  | Aast.Smethod_id (cid, pstring) -> N.Smethod_id (cid, pstring)
   (* The below were not found on the AST.ml so they are not implemented here *)
   | Aast.Collection _
   | Aast.This
   | Aast.Dollardollar _
   | Aast.Lplaceholder _
-  | Aast.Fun_id _
-  | Aast.Method_id _
-  | Aast.Method_caller _
-  | Aast.Smethod_id _
   | Aast.Hole _ ->
     Errors.internal_error
       p
@@ -1113,13 +895,13 @@ let rec check_constant_expr env expr =
     (* Only check the values because shape field names are always legal *)
     List.for_all fdl ~f:(fun (_, e) -> check_constant_expr env e)
   | Aast.Call ((_, _, Aast.Id (_, cn)), _, el, unpacked_element)
-    when String.equal cn SN.AutoimportedFunctions.fun_
-         || String.equal cn SN.AutoimportedFunctions.class_meth
-         || String.equal cn SN.StdlibFunctions.array_mark_legacy
+    when String.equal cn SN.StdlibFunctions.array_mark_legacy
          || String.equal cn SN.PseudoFunctions.unsafe_cast
          || String.equal cn SN.PseudoFunctions.unsafe_nonnull_cast ->
     arg_unpack_unexpected unpacked_element;
     List.for_all el ~f:(fun (_, e) -> check_constant_expr env e)
+  | Aast.Smethod_id (_, _) -> true
+  | Aast.Fun_id (_, _) -> true
   | Aast.Tuple el -> List.for_all el ~f:(check_constant_expr env)
   | Aast.FunctionPointer ((Aast.FP_id _ | Aast.FP_class_const _), _) -> true
   | Aast.ValCollection ((Aast.Vec | Aast.Keyset), _, l) ->
@@ -1281,9 +1063,7 @@ let class_help ctx env c =
   let (sprops, props) = Aast.split_vars c.Aast.c_vars in
   let sprops = List.map ~f:(class_prop_static env) sprops in
   (* The attributes applied to a class exist outside the current class so references to `self` are invalid *)
-  let attrs =
-    user_attributes { env with current_cls = None } c.Aast.c_user_attributes
-  in
+  let attrs = user_attributes env c.Aast.c_user_attributes in
   let const = Naming_attributes.find SN.UserAttributes.uaConst attrs in
   let props = List.map ~f:(class_prop_non_static ~const env) props in
   let xhp_attrs = List.map ~f:(xhp_attribute_decl env) c.Aast.c_xhp_attrs in
@@ -1508,6 +1288,7 @@ type 'elem pipeline = {
   elab_ns: 'elem -> 'elem;
   elab_hints: (Naming_elab_hints.Env.t, 'elem) elabidation;
   elab_collection: (Naming_elab_collection.Env.t, 'elem) elabidation;
+  elab_call: (Naming_elab_call.Env.t, 'elem) elabidation;
   elab_help: Provider_context.t -> genv -> 'elem -> 'elem;
   elab_soft: (Naming_elab_soft.Env.t, 'elem) elaboration;
   elab_everything_sdt: (Naming_elab_everything_sdt.Env.t, 'elem) elaboration;
@@ -1533,6 +1314,7 @@ let elab_elem
       elab_ns;
       elab_hints;
       elab_collection;
+      elab_call;
       elab_help;
       elab_soft;
       elab_everything_sdt;
@@ -1587,6 +1369,8 @@ let elab_elem
 
   (* Elaboration `Collection` to `ValCollection` or `KeyValCollection *)
   let (elem, err) = elab_collection ~init:err elem in
+
+  let (elem, err) = elab_call ~init:err elem in
 
   (* General expression / statement / xhp elaboration & validation *)
   let elem = elab_help ctx env elem in
@@ -1695,6 +1479,7 @@ let program ctx ast =
              Namespace_env.empty_with_default);
       elab_hints = Naming_elab_hints.elab_program;
       elab_collection = Naming_elab_collection.elab_program;
+      elab_call = Naming_elab_call.elab_program;
       elab_help = program_help;
       elab_soft = Naming_elab_soft.elab_program;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_program;
@@ -1723,6 +1508,7 @@ let fun_def ctx fd =
           (Naming_elaborate_namespaces_endo.make_env env.namespace);
       elab_hints = Naming_elab_hints.elab_fun_def;
       elab_collection = Naming_elab_collection.elab_fun_def;
+      elab_call = Naming_elab_call.elab_fun_def;
       elab_help = fun_def_help;
       elab_soft = Naming_elab_soft.elab_fun_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_fun_def;
@@ -1751,6 +1537,7 @@ let class_ ctx c =
           (Naming_elaborate_namespaces_endo.make_env env.namespace);
       elab_hints = Naming_elab_hints.elab_class;
       elab_collection = Naming_elab_collection.elab_class;
+      elab_call = Naming_elab_call.elab_class;
       elab_help = class_help;
       elab_soft = Naming_elab_soft.elab_class;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_class;
@@ -1779,6 +1566,7 @@ let module_ ctx module_ =
           (Naming_elaborate_namespaces_endo.make_env env.namespace);
       elab_hints = Naming_elab_hints.elab_module_def;
       elab_collection = Naming_elab_collection.elab_module_def;
+      elab_call = Naming_elab_call.elab_module_def;
       elab_help = module_help;
       elab_soft = Naming_elab_soft.elab_module_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_module_def;
@@ -1807,6 +1595,7 @@ let global_const ctx cst =
           (Naming_elaborate_namespaces_endo.make_env env.namespace);
       elab_hints = Naming_elab_hints.elab_gconst;
       elab_collection = Naming_elab_collection.elab_gconst;
+      elab_call = Naming_elab_call.elab_gconst;
       elab_help = global_const_help;
       elab_soft = Naming_elab_soft.elab_gconst;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_gconst;
@@ -1835,6 +1624,7 @@ let typedef ctx tdef =
           (Naming_elaborate_namespaces_endo.make_env env.namespace);
       elab_hints = Naming_elab_hints.elab_typedef;
       elab_collection = Naming_elab_collection.elab_typedef;
+      elab_call = Naming_elab_call.elab_typedef;
       elab_help = typedef_help;
       elab_soft = Naming_elab_soft.elab_typedef;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_typedef;

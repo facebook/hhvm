@@ -129,6 +129,7 @@
  (name naming)
  (modules
   naming
+  naming_elab_call
   naming_elab_class_id
   naming_elab_collection
   naming_elab_dynamic_class_name

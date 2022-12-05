@@ -130,6 +130,7 @@
  (modules
   naming
   naming_elab_as_expr
+  naming_elab_block
   naming_elab_call
   naming_elab_class_id
   naming_elab_collection

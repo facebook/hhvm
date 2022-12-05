@@ -329,23 +329,11 @@ and try_stmt env b cl fb =
   let cl = catchl env cl in
   N.Try (b, cl, fb)
 
-and stmt_list stl env =
-  match stl with
-  | [] -> []
-  | (_, Aast.Block b) :: rest ->
-    let b = stmt_list b env in
-    let rest = stmt_list rest env in
-    b @ rest
-  | x :: rest ->
-    let x = stmt env x in
-    let rest = stmt_list rest env in
-    x :: rest
-
 and block ?(new_scope = true) env stl =
   let _ = new_scope in
-  stmt_list stl env
+  List.map ~f:(stmt env) stl
 
-and branch env stmt_l = stmt_list stmt_l env
+and branch env stmt_l = List.map ~f:(stmt env) stmt_l
 
 (**************************************************************************)
 (* Expressions *)
@@ -1057,6 +1045,7 @@ type 'elem pipeline = {
   elab_import: (Naming_elab_import.Env.t, 'elem) elaboration;
   elab_lvar: (Naming_elab_lvar.Env.t, 'elem) elaboration;
   elab_as_expr: (Naming_elab_as_expr.Env.t, 'elem) elabidation;
+  elab_block: (Naming_elab_block.Env.t, 'elem) elaboration;
   elab_help: Provider_context.t -> genv -> 'elem -> 'elem;
   elab_soft: (Naming_elab_soft.Env.t, 'elem) elaboration;
   elab_everything_sdt: (Naming_elab_everything_sdt.Env.t, 'elem) elaboration;
@@ -1091,6 +1080,7 @@ let elab_elem
       elab_import;
       elab_lvar;
       elab_as_expr;
+      elab_block;
       elab_help;
       elab_soft;
       elab_everything_sdt;
@@ -1164,6 +1154,8 @@ let elab_elem
   let (elem, err) = elab_as_expr ~init:err elem in
 
   let err = validate_fun_params ~init:err elem in
+
+  let elem = elab_block elem in
 
   (* General expression / statement / xhp elaboration & validation *)
   let elem = elab_help ctx env elem in
@@ -1280,6 +1272,7 @@ let program ctx ast =
       elab_import = Naming_elab_import.elab_program;
       elab_lvar = Naming_elab_lvar.elab_program;
       elab_as_expr = Naming_elab_as_expr.elab_program;
+      elab_block = Naming_elab_block.elab_program;
       elab_help = program_help;
       elab_soft = Naming_elab_soft.elab_program;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_program;
@@ -1317,6 +1310,7 @@ let fun_def ctx fd =
       elab_import = Naming_elab_import.elab_fun_def;
       elab_lvar = Naming_elab_lvar.elab_fun_def;
       elab_as_expr = Naming_elab_as_expr.elab_fun_def;
+      elab_block = Naming_elab_block.elab_fun_def;
       elab_help = fun_def_help;
       elab_soft = Naming_elab_soft.elab_fun_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_fun_def;
@@ -1354,6 +1348,7 @@ let class_ ctx c =
       elab_import = Naming_elab_import.elab_class;
       elab_lvar = Naming_elab_lvar.elab_class;
       elab_as_expr = Naming_elab_as_expr.elab_class;
+      elab_block = Naming_elab_block.elab_class;
       elab_help = class_help;
       elab_soft = Naming_elab_soft.elab_class;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_class;
@@ -1391,6 +1386,7 @@ let module_ ctx module_ =
       elab_import = Naming_elab_import.elab_module_def;
       elab_lvar = Naming_elab_lvar.elab_module_def;
       elab_as_expr = Naming_elab_as_expr.elab_module_def;
+      elab_block = Naming_elab_block.elab_module_def;
       elab_help = module_help;
       elab_soft = Naming_elab_soft.elab_module_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_module_def;
@@ -1428,6 +1424,7 @@ let global_const ctx cst =
       elab_import = Naming_elab_import.elab_gconst;
       elab_lvar = Naming_elab_lvar.elab_gconst;
       elab_as_expr = Naming_elab_as_expr.elab_gconst;
+      elab_block = Naming_elab_block.elab_gconst;
       elab_help = global_const_help;
       elab_soft = Naming_elab_soft.elab_gconst;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_gconst;
@@ -1465,6 +1462,7 @@ let typedef ctx tdef =
       elab_import = Naming_elab_import.elab_typedef;
       elab_lvar = Naming_elab_lvar.elab_typedef;
       elab_as_expr = Naming_elab_as_expr.elab_typedef;
+      elab_block = Naming_elab_block.elab_typedef;
       elab_help = typedef_help;
       elab_soft = Naming_elab_soft.elab_typedef;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_typedef;

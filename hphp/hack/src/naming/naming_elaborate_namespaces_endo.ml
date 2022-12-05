@@ -281,6 +281,13 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         (self#on_param_kind env_ pk, self#on_expr env_ e)
       in
       match expr with
+      | Collection (id, c_targ_opt, flds) ->
+        let id = NS.elaborate_id env.namespace NS.ElaborateClass id
+        and flds = super#on_list super#on_afield env flds
+        and c_targ_opt =
+          super#on_option super#on_collection_targ env c_targ_opt
+        in
+        Collection (id, c_targ_opt, flds)
       | Call ((ty, p, Id (p2, cn)), targs, el, uarg)
         when SN.SpecialFunctions.is_special_function cn ->
         Call

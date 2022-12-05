@@ -20,7 +20,6 @@ open String_utils
 open Naming_phase_sigs
 module N = Aast
 module SN = Naming_special_names
-module NS = Namespaces
 
 (*****************************************************************************)
 (* The types *)
@@ -478,8 +477,7 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Varray (ta, l) -> N.Varray (ta, List.map l ~f:(expr env))
   | Aast.Darray (tap, l) ->
     N.Darray (tap, List.map l ~f:(fun (e1, e2) -> (expr env e1, expr env e2)))
-  | Aast.Collection (id, tal, l) ->
-    let (p, cn) = NS.elaborate_id env.namespace NS.ElaborateClass id in
+  | Aast.Collection ((p, cn), tal, l) ->
     begin
       match cn with
       | x when Nast.is_vc_kind x ->
@@ -1192,8 +1190,7 @@ let rec check_constant_expr env expr =
     List.for_all el ~f:(fun (_, e) -> check_constant_expr env e)
   | Aast.Tuple el -> List.for_all el ~f:(check_constant_expr env)
   | Aast.FunctionPointer ((Aast.FP_id _ | Aast.FP_class_const _), _) -> true
-  | Aast.Collection (id, _, l) ->
-    let (p, cn) = NS.elaborate_id env.namespace NS.ElaborateClass id in
+  | Aast.Collection ((p, cn), _, l) ->
     (* Only vec/keyset/dict are allowed because they are value types *)
     if
       String.equal cn SN.Collections.cVec
@@ -1212,8 +1209,7 @@ let rec check_constant_expr env expr =
     (* Only dict is allowed because it is a value type *)
     List.for_all l ~f:(check_field_constant_expr env)
   | Aast.As (e, (_, Aast.Hlike _), _) -> check_constant_expr env e
-  | Aast.As (e, (_, Aast.Happly (id, [_])), _) ->
-    let (p, cn) = NS.elaborate_id env.namespace NS.ElaborateClass id in
+  | Aast.As (e, (_, Aast.Happly ((p, cn), [_])), _) ->
     if String.equal cn SN.FB.cIncorrectType then
       check_constant_expr env e
     else (

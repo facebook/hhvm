@@ -8,39 +8,38 @@
 
 open Hh_prelude
 
-module Env = struct
-  type t = bool
+module Env : sig
+  type t
 
-  let empty = false
+  val empty : t
+
+  val soft_as_like : t -> bool
+
+  val set_soft_as_like : t -> soft_as_like:bool -> t
+end = struct
+  type t = { soft_as_like: bool }
+
+  let empty = { soft_as_like = false }
+
+  let soft_as_like { soft_as_like } = soft_as_like
+
+  let set_soft_as_like _ ~soft_as_like = { soft_as_like }
 end
 
-let visitor =
-  object (_self)
-    inherit [_] Aast_defs.endo as super
+let on_hint (env, hint, err) =
+  let hint =
+    match hint with
+    | (pos, Aast.Hsoft hint) when Env.soft_as_like env -> (pos, Aast.Hlike hint)
+    | (pos, Aast.Hsoft (_, hint_)) -> (pos, hint_)
+    | _ -> hint
+  in
+  Naming_phase_pass.Cont.next (env, hint, err)
 
-    method on_'ex _ ex = ex
+let pass = Naming_phase_pass.(top_down { identity with on_hint = Some on_hint })
 
-    method on_'en _ en = en
+let visitor = Naming_phase_pass.mk_visitor [pass]
 
-    method! on_hint soft_as_like hint =
-      let hint =
-        match hint with
-        | (pos, Aast.Hsoft soft_hint) ->
-          let soft_hint = super#on_hint soft_as_like soft_hint in
-          let hint_ =
-            if soft_as_like then
-              Aast.Hlike soft_hint
-            else
-              (* TODO[mjt] are we intentionally stripping `Hsoft` here? *)
-              snd soft_hint
-          in
-          (pos, hint_)
-        | _ -> hint
-      in
-      super#on_hint soft_as_like hint
-  end
-
-let elab f ?(env = Env.empty) elem = f env elem
+let elab f ?(env = Env.empty) elem = fst @@ f env elem
 
 let elab_fun_def ?env elem = elab visitor#on_fun_def ?env elem
 

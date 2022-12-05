@@ -12,12 +12,5 @@
 
   It is intended for use when the `--everything-sdt` typechecker option is set
 *)
-module Env : sig
-  type t
 
-  val empty : t
-
-  val create : ?in_is_as:bool -> ?in_enum_class:bool -> unit -> t
-end
-
-include Naming_phase_sigs.Elaboration with module Env := Env
+include Naming_phase_sigs.Elaboration

@@ -8,35 +8,38 @@
 open Hh_prelude
 module Err = Naming_phase_error
 
-module Env = struct
+module Env : sig
+  type t
+
+  val empty : t
+end = struct
   type t = unit
 
   let empty = ()
 end
 
-let visitor =
-  object (self)
-    inherit [_] Aast_defs.reduce as super
+let on_hint_ (env, hint_, err) =
+  let err =
+    match hint_ with
+    (* some common Xhp screw ups *)
+    | Aast.Happly ((pos, ty_name), _hints)
+      when String.(
+             equal ty_name "Xhp" || equal ty_name ":Xhp" || equal ty_name "XHP")
+      ->
+      Err.Free_monoid.plus err
+      @@ Err.naming
+      @@ Naming_error.Disallowed_xhp_type { pos; ty_name }
+    | _ -> err
+  in
+  Naming_phase_pass.Cont.next (env, hint_, err)
 
-    inherit Err.monoid
+let pass =
+  Naming_phase_pass.(top_down { identity with on_hint_ = Some on_hint_ })
 
-    method! on_Happly env (pos, ty_name) hints =
-      let err_super = super#on_Happly env (pos, ty_name) hints in
-      let err =
-        (* some common Xhp screw ups *)
-        if
-          String.(
-            equal ty_name "Xhp" || equal ty_name ":Xhp" || equal ty_name "XHP")
-        then
-          Err.naming @@ Naming_error.Disallowed_xhp_type { pos; ty_name }
-        else
-          self#zero
-      in
-      self#plus err_super err
-  end
+let visitor = Naming_phase_pass.mk_visitor [pass]
 
 let validate f ?init ?(env = Env.empty) elem =
-  Err.from_monoid ?init @@ f env elem
+  Err.from_monoid ?init @@ snd @@ f env elem
 
 let validate_program ?init ?env elem =
   validate visitor#on_program ?init ?env elem

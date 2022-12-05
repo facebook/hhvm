@@ -9,98 +9,122 @@ open Hh_prelude
 module Err = Naming_phase_error
 module SN = Naming_special_names
 
-module Env = struct
+module Env : sig
+  type t
+
+  val empty : t
+end = struct
   type t = unit
 
   let empty = ()
 end
 
-let visitor =
-  object (self)
-    inherit [_] Naming_visitors.mapreduce as super
+let afield_value cname afield =
+  match afield with
+  | Aast.AFvalue e -> (e, None)
+  | Aast.AFkvalue (((_, pos, _) as e), _) ->
+    (e, Some (Err.naming @@ Naming_error.Unexpected_arrow { pos; cname }))
 
-    method! on_expr_ env expr_ =
-      let res =
-        match expr_ with
-        | Aast.Collection ((pos, cname), c_targ_opt, afields)
-          when Nast.is_vc_kind cname ->
-          let (targ_opt, targ_err) =
-            match c_targ_opt with
-            | Some (Aast.CollectionTV tv) -> (Some tv, self#zero)
-            | Some (Aast.CollectionTKV _) ->
-              (None, Err.naming @@ Naming_error.Too_many_arguments pos)
-            | _ -> (None, self#zero)
-          in
-          let (exprs, fields_err) =
-            super#on_list (self#afield_value cname) env afields
-          in
-          let vc_kind = Nast.get_vc_kind cname in
-          Ok
-            ( Aast.ValCollection (vc_kind, targ_opt, exprs),
-              self#plus targ_err fields_err )
-        | Aast.Collection ((pos, cname), c_targ_opt, afields)
-          when Nast.is_kvc_kind cname ->
-          let (targs_opt, targ_err) =
-            match c_targ_opt with
-            | Some (Aast.CollectionTKV (tk, tv)) -> (Some (tk, tv), self#zero)
-            | Some (Aast.CollectionTV _) ->
-              (None, Err.naming @@ Naming_error.Too_few_arguments pos)
-            | _ -> (None, self#zero)
-          in
-          let (fields, fields_err) =
-            super#on_list (self#afield_key_value cname) env afields
-          in
-          let kvc_kind = Nast.get_kvc_kind cname in
-          Ok
-            ( Aast.KeyValCollection (kvc_kind, targs_opt, fields),
-              self#plus targ_err fields_err )
-        | Aast.Collection ((pos, cname), _, [])
-          when String.equal SN.Collections.cPair cname ->
-          Error (pos, Err.naming @@ Naming_error.Too_few_arguments pos)
-        | Aast.Collection ((pos, cname), c_targ_opt, [fst; snd])
-          when String.equal SN.Collections.cPair cname ->
-          let (targs_opt, targ_err) =
-            match c_targ_opt with
-            | Some (Aast.CollectionTKV (tk, tv)) -> (Some (tk, tv), self#zero)
-            | Some (Aast.CollectionTV _) ->
-              (None, Err.naming @@ Naming_error.Too_few_arguments pos)
-            | _ -> (None, self#zero)
-          in
-          let (fst, fst_err) = self#afield_value SN.Collections.cPair env fst
-          and (snd, snd_err) = self#afield_value SN.Collections.cPair env snd in
-          let err = self#plus targ_err (self#plus fst_err snd_err) in
-          Ok (Aast.Pair (targs_opt, fst, snd), err)
-        | Aast.Collection ((pos, cname), _, _)
-          when String.equal SN.Collections.cPair cname ->
-          Error (pos, Err.naming @@ Naming_error.Too_many_arguments pos)
-        | Aast.Collection ((pos, cname), _, _) ->
-          Error
-            (pos, Err.naming @@ Naming_error.Expected_collection { pos; cname })
-        | _ -> Ok (expr_, self#zero)
+let afield_key_value cname afield =
+  match afield with
+  | Aast.AFkvalue (ek, ev) -> ((ek, ev), None)
+  | Aast.AFvalue ((_, pos, _) as ek) ->
+    let ev =
+      ((), pos, Aast.Lvar (pos, Local_id.make_unscoped "__internal_placeholder"))
+    in
+    ((ek, ev), Some (Err.naming @@ Naming_error.Missing_arrow { pos; cname }))
+
+let on_expr_ (env, expr_, err_acc) =
+  let res =
+    match expr_ with
+    | Aast.Collection ((pos, cname), c_targ_opt, afields)
+      when Nast.is_vc_kind cname ->
+      let (targ_opt, targ_err_opt) =
+        match c_targ_opt with
+        | Some (Aast.CollectionTV tv) -> (Some tv, None)
+        | Some (Aast.CollectionTKV _) ->
+          (None, Some (Err.naming @@ Naming_error.Too_many_arguments pos))
+        | _ -> (None, None)
       in
-      match res with
-      | Ok (expr_, err) ->
-        let (expr_, super_err) = super#on_expr_ env expr_ in
-        (expr_, self#plus err super_err)
-      | Error (pos, err) -> (Err.invalid_expr_ pos, err)
+      let (exprs, fields_err_opts) =
+        List.unzip @@ List.map ~f:(afield_value cname) afields
+      in
+      let vc_kind = Nast.get_vc_kind cname in
 
-    method private afield_value cname _env afield =
-      match afield with
-      | Aast.AFvalue e -> (e, self#zero)
-      | Aast.AFkvalue (((_, pos, _) as e), _) ->
-        (e, Err.naming @@ Naming_error.Unexpected_arrow { pos; cname })
+      let err =
+        List.fold_right
+          ~init:targ_err_opt
+          ~f:(fun err_opt acc ->
+            Option.merge ~f:Err.Free_monoid.plus acc err_opt)
+          fields_err_opts
+      in
+      Ok (Aast.ValCollection (vc_kind, targ_opt, exprs), err)
+    | Aast.Collection ((pos, cname), c_targ_opt, afields)
+      when Nast.is_kvc_kind cname ->
+      let (targs_opt, targ_err_opt) =
+        match c_targ_opt with
+        | Some (Aast.CollectionTKV (tk, tv)) -> (Some (tk, tv), None)
+        | Some (Aast.CollectionTV _) ->
+          (None, Some (Err.naming @@ Naming_error.Too_few_arguments pos))
+        | _ -> (None, None)
+      in
+      let (fields, fields_err_opts) =
+        List.unzip @@ List.map ~f:(afield_key_value cname) afields
+      in
+      let kvc_kind = Nast.get_kvc_kind cname in
+      let err =
+        List.fold_right
+          ~init:targ_err_opt
+          ~f:(fun err_opt acc ->
+            Option.merge ~f:Err.Free_monoid.plus acc err_opt)
+          fields_err_opts
+      in
+      Ok (Aast.KeyValCollection (kvc_kind, targs_opt, fields), err)
+    | Aast.Collection ((pos, cname), _, [])
+      when String.equal SN.Collections.cPair cname ->
+      Error (pos, Err.naming @@ Naming_error.Too_few_arguments pos)
+    | Aast.Collection ((pos, cname), c_targ_opt, [fst; snd])
+      when String.equal SN.Collections.cPair cname ->
+      let (targs_opt, targ_err_opt) =
+        match c_targ_opt with
+        | Some (Aast.CollectionTKV (tk, tv)) -> (Some (tk, tv), None)
+        | Some (Aast.CollectionTV _) ->
+          (None, Some (Err.naming @@ Naming_error.Too_few_arguments pos))
+        | _ -> (None, None)
+      in
+      let (fst, fst_err_opt) = afield_value SN.Collections.cPair fst
+      and (snd, snd_err_opt) = afield_value SN.Collections.cPair snd in
+      let err =
+        List.fold_right
+          ~init:targ_err_opt
+          ~f:(fun err_opt acc ->
+            Option.merge ~f:Err.Free_monoid.plus acc err_opt)
+          [fst_err_opt; snd_err_opt]
+      in
+      Ok (Aast.Pair (targs_opt, fst, snd), err)
+    | Aast.Collection ((pos, cname), _, _)
+      when String.equal SN.Collections.cPair cname ->
+      Error (pos, Err.naming @@ Naming_error.Too_many_arguments pos)
+    | Aast.Collection ((pos, cname), _, _) ->
+      Error (pos, Err.naming @@ Naming_error.Expected_collection { pos; cname })
+    | _ -> Ok (expr_, None)
+  in
+  match res with
+  | Ok (expr_, err_opt) ->
+    Naming_phase_pass.Cont.next
+      ( env,
+        expr_,
+        Option.value_map
+          ~default:err_acc
+          ~f:(Err.Free_monoid.plus err_acc)
+          err_opt )
+  | Error (pos, err) ->
+    Naming_phase_pass.Cont.finish (env, Err.invalid_expr_ pos, err)
 
-    method private afield_key_value cname _env afield =
-      match afield with
-      | Aast.AFkvalue (ek, ev) -> ((ek, ev), self#zero)
-      | Aast.AFvalue ((_, pos, _) as ek) ->
-        let ev =
-          ( (),
-            pos,
-            Aast.Lvar (pos, Local_id.make_unscoped "__internal_placeholder") )
-        in
-        ((ek, ev), Err.naming @@ Naming_error.Missing_arrow { pos; cname })
-  end
+let pass =
+  Naming_phase_pass.(top_down { identity with on_expr_ = Some on_expr_ })
+
+let visitor = Naming_phase_pass.mk_visitor [pass]
 
 let elab f ?init ?(env = Env.empty) elem =
   Tuple2.map_snd ~f:(Err.from_monoid ?init) @@ f env elem

@@ -9,48 +9,57 @@ open Hh_prelude
 module Err = Naming_phase_error
 module SN = Naming_special_names
 
-module Env = struct
+module Env : sig
+  type t
+
+  val empty : t
+end = struct
   type t = unit
 
   let empty = ()
 end
 
-let visitor =
-  object (self)
-    inherit [_] Aast_defs.reduce as super
+let validate_fun_params params =
+  snd
+  @@ List.fold_left
+       params
+       ~init:(SSet.empty, [])
+       ~f:(fun (seen, errs) Aast.{ param_name; param_pos; _ } ->
+         if String.equal SN.SpecialIdents.placeholder param_name then
+           (seen, errs)
+         else if SSet.mem param_name seen then
+           let err =
+             Err.naming
+             @@ Naming_error.Already_bound
+                  { pos = param_pos; name = param_name }
+           in
+           (seen, err :: errs)
+         else
+           (SSet.add param_name seen, errs))
 
-    inherit Err.monoid
+let on_method_ (env, m, err) =
+  let err =
+    List.fold_right ~init:err ~f:Err.Free_monoid.plus
+    @@ validate_fun_params m.Aast.m_params
+  in
+  Naming_phase_pass.Cont.next (env, m, err)
 
-    method private validate_fun_params params =
-      snd
-      @@ List.fold_left
-           params
-           ~init:(SSet.empty, self#zero)
-           ~f:(fun (seen, err) Aast.{ param_name; param_pos; _ } ->
-             if String.equal SN.SpecialIdents.placeholder param_name then
-               (seen, err)
-             else if SSet.mem param_name seen then
-               ( seen,
-                 self#plus err
-                 @@ Err.naming
-                 @@ Naming_error.Already_bound
-                      { pos = param_pos; name = param_name } )
-             else
-               (SSet.add param_name seen, err))
+let on_fun_ (env, f, err) =
+  let err =
+    List.fold_right ~init:err ~f:Err.Free_monoid.plus
+    @@ validate_fun_params f.Aast.f_params
+  in
+  Naming_phase_pass.Cont.next (env, f, err)
 
-    method! on_method_ env m =
-      let err = self#validate_fun_params m.Aast.m_params in
-      let super_err = super#on_method_ env m in
-      self#plus err super_err
+let pass =
+  Naming_phase_pass.(
+    top_down
+      { identity with on_method_ = Some on_method_; on_fun_ = Some on_fun_ })
 
-    method! on_fun_ env f =
-      let err = self#validate_fun_params f.Aast.f_params in
-      let super_err = super#on_fun_ env f in
-      self#plus err super_err
-  end
+let visitor = Naming_phase_pass.mk_visitor [pass]
 
 let validate f ?init ?(env = Env.empty) elem =
-  Err.from_monoid ?init @@ f env elem
+  Err.from_monoid ?init @@ snd @@ f env elem
 
 let validate_program ?init ?env elem =
   validate visitor#on_program ?init ?env elem

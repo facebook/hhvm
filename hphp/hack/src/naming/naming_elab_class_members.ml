@@ -16,10 +16,22 @@ open Hh_prelude
 module SN = Naming_special_names
 module Err = Naming_phase_error
 
-module Env = struct
-  type t = FileInfo.mode
+module Env : sig
+  type t
 
-  let empty = FileInfo.Mstrict
+  val empty : t
+
+  val in_mode : t -> FileInfo.mode
+
+  val set_mode : t -> in_mode:FileInfo.mode -> t
+end = struct
+  type t = { in_mode: FileInfo.mode }
+
+  let empty = { in_mode = FileInfo.Mstrict }
+
+  let in_mode { in_mode } = in_mode
+
+  let set_mode _ ~in_mode = { in_mode }
 end
 
 let exists_both p1 p2 xs =
@@ -52,138 +64,152 @@ let is_xhp cv_name =
   try String.(sub cv_name ~pos:0 ~len:1 = ":") with
   | Invalid_argument _ -> false
 
-let visitor =
-  object (self)
-    inherit [_] Naming_visitors.mapreduce as super
+let elab_cv_expr mode pos cv_expr =
+  match cv_expr with
+  | None when FileInfo.is_hhi mode -> Some ((), pos, Err.invalid_expr_ pos)
+  | cv_expr -> cv_expr
 
-    method! on_typedef _ t = super#on_typedef t.Aast.t_mode t
+let elab_class_prop mode (Aast.{ cv_expr; cv_id = (pos, cv_name); _ } as cv) =
+  let cv_expr = elab_cv_expr mode pos cv_expr in
+  let cv_xhp_attr =
+    if is_xhp cv_name then
+      Some Aast.{ xai_like = None; xai_tag = None; xai_enum_values = [] }
+    else
+      None
+  in
+  Aast.{ cv with cv_expr; cv_xhp_attr }
 
-    method! on_gconst _ cst = super#on_gconst cst.Aast.cst_mode cst
+let elab_non_static_class_prop
+    const_attr_opt mode (Aast.{ cv_user_attributes; _ } as cv) =
+  let cv = elab_class_prop mode cv in
+  let cv_user_attributes =
+    match const_attr_opt with
+    | Some ua
+      when not
+           @@ Naming_attributes.mem SN.UserAttributes.uaConst cv_user_attributes
+      ->
+      ua :: cv_user_attributes
+    | _ -> cv_user_attributes
+  in
+  Aast.{ cv with cv_user_attributes }
 
-    method! on_fun_def _ fd = super#on_fun_def fd.Aast.fd_mode fd
-
-    method! on_module_def _ md = super#on_module_def md.Aast.md_mode md
-
-    method! on_class_
-        _
-        (Aast.{ c_vars; c_xhp_attrs; c_methods; c_user_attributes; c_mode; _ }
-        as c) =
-      let env = c_mode in
-
-      let (c, err) =
-        let (c_vars, err) =
-          let (static_props, props) = Aast.split_vars c_vars in
-          let const_attr_opt =
-            Naming_attributes.find SN.UserAttributes.uaConst c_user_attributes
+let elab_xhp_attr mode (type_hint, cv, xhp_attr_tag_opt, enum_opt) =
+  let is_required = Option.is_some xhp_attr_tag_opt
+  and has_default =
+    Option.value_map
+      ~default:false
+      ~f:(function
+        | (_, _, Aast.Null) -> false
+        | _ -> true)
+      cv.Aast.cv_expr
+  in
+  let (xai_like, xai_enum_values) =
+    match cv.Aast.cv_xhp_attr with
+    | Some xai -> (xai.Aast.xai_like, xai.Aast.xai_enum_values)
+    | None -> (None, [])
+  in
+  let hint_opt =
+    Option.value_map
+      enum_opt
+      ~default:(Aast.hint_of_type_hint type_hint)
+      ~f:(fun (pos, items) -> Some (pos, xhp_attr_hint items))
+  in
+  let (hint_opt, req_attr_err) =
+    Option.value_map
+      hint_opt
+      ~default:(None, None)
+      ~f:(fun ((pos, hint_) as hint) ->
+        match strip_like hint_ with
+        | Aast.Hoption _ ->
+          let err =
+            if is_required then
+              Some
+                (Err.naming
+                @@ Naming_error.Xhp_optional_required_attr
+                     { pos; attr_name = snd @@ cv.Aast.cv_id })
+            else
+              None
           in
-          let static_props = List.map ~f:(self#elab_class_prop env) static_props
-          and props =
-            List.map
-              ~f:(self#elab_non_static_class_prop const_attr_opt env)
-              props
-          and (xhp_attrs, xhp_attrs_err) =
-            super#on_list self#elab_xhp_attr env c_xhp_attrs
-          in
-          (static_props @ props @ xhp_attrs, xhp_attrs_err)
-        in
-        let c_methods =
-          if Ast_defs.is_c_interface c.Aast.c_kind then
-            List.map c_methods ~f:(fun m -> Aast.{ m with m_abstract = true })
-          else
-            c_methods
-        in
-        (Aast.{ c with c_methods; c_vars; c_xhp_attrs = [] }, err)
-      in
-      let (c, super_err) = super#on_class_ env c in
-      (c, self#plus super_err err)
+          (Some hint, err)
+        | Aast.Hmixed -> (Some hint, None)
+        | _ when is_required || has_default -> (Some hint, None)
+        | _ -> (Some (pos, Aast.Hoption hint), None))
+  in
 
-    method private elab_cv_expr env pos cv_expr =
-      match cv_expr with
-      | None when FileInfo.is_hhi env -> Some ((), pos, Err.invalid_expr_ pos)
-      | cv_expr -> cv_expr
+  let (hint_opt, like_err) =
+    Option.value ~default:(hint_opt, None)
+    @@ Option.map2 hint_opt xai_like ~f:(fun hint pos ->
+           (Some (pos, Aast.Hlike hint), Some (Err.like_type pos)))
+  in
+  let cv_type = ((), hint_opt)
+  and cv_xhp_attr =
+    Some Aast.{ xai_like; xai_tag = xhp_attr_tag_opt; xai_enum_values }
+  and cv_expr = elab_cv_expr mode (fst cv.Aast.cv_id) cv.Aast.cv_expr in
+  let err = Option.merge ~f:Err.Free_monoid.plus req_attr_err like_err in
+  (Aast.{ cv with cv_xhp_attr; cv_type; cv_expr; cv_user_attributes = [] }, err)
 
-    method private elab_class_prop
-        env (Aast.{ cv_expr; cv_id = (pos, cv_name); _ } as cv) =
-      let cv_expr = self#elab_cv_expr env pos cv_expr in
-      let cv_xhp_attr =
-        if is_xhp cv_name then
-          Some Aast.{ xai_like = None; xai_tag = None; xai_enum_values = [] }
-        else
-          None
-      in
-      Aast.{ cv with cv_expr; cv_xhp_attr }
+let on_typedef (env, t, err) =
+  Naming_phase_pass.Cont.next (Env.set_mode env ~in_mode:t.Aast.t_mode, t, err)
 
-    method private elab_non_static_class_prop
-        const_attr_opt env (Aast.{ cv_user_attributes; _ } as cv) =
-      let cv = self#elab_class_prop env cv in
-      let cv_user_attributes =
-        match const_attr_opt with
-        | Some ua
-          when not
-               @@ Naming_attributes.mem
-                    SN.UserAttributes.uaConst
-                    cv_user_attributes ->
-          ua :: cv_user_attributes
-        | _ -> cv_user_attributes
-      in
-      Aast.{ cv with cv_user_attributes }
+let on_gconst (env, cst, err) =
+  Naming_phase_pass.Cont.next
+    (Env.set_mode env ~in_mode:cst.Aast.cst_mode, cst, err)
 
-    method private elab_xhp_attr env (type_hint, cv, xhp_attr_tag_opt, enum_opt)
-        =
-      let is_required = Option.is_some xhp_attr_tag_opt
-      and has_default =
-        Option.value_map
-          ~default:false
-          ~f:(function
-            | (_, _, Aast.Null) -> false
-            | _ -> true)
-          cv.Aast.cv_expr
-      in
-      let (xai_like, xai_enum_values) =
-        match cv.Aast.cv_xhp_attr with
-        | Some xai -> (xai.Aast.xai_like, xai.Aast.xai_enum_values)
-        | None -> (None, [])
-      in
-      let hint_opt =
-        Option.value_map
-          enum_opt
-          ~default:(Aast.hint_of_type_hint type_hint)
-          ~f:(fun (pos, items) -> Some (pos, xhp_attr_hint items))
-      in
-      let (hint_opt, req_attr_err) =
-        Option.value_map
-          hint_opt
-          ~default:(None, self#zero)
-          ~f:(fun ((pos, hint_) as hint) ->
-            match strip_like hint_ with
-            | Aast.Hoption _ ->
-              let err =
-                if is_required then
-                  Err.naming
-                  @@ Naming_error.Xhp_optional_required_attr
-                       { pos; attr_name = snd @@ cv.Aast.cv_id }
-                else
-                  self#zero
-              in
-              (Some hint, err)
-            | Aast.Hmixed -> (Some hint, self#zero)
-            | _ when is_required || has_default -> (Some hint, self#zero)
-            | _ -> (Some (pos, Aast.Hoption hint), self#zero))
-      in
+let on_fun_def (env, fd, err) =
+  Naming_phase_pass.Cont.next
+    (Env.set_mode env ~in_mode:fd.Aast.fd_mode, fd, err)
 
-      let (hint_opt, like_err) =
-        Option.value ~default:(hint_opt, self#zero)
-        @@ Option.map2 hint_opt xai_like ~f:(fun hint pos ->
-               (Some (pos, Aast.Hlike hint), Err.like_type pos))
+let on_module_def (env, md, err) =
+  Naming_phase_pass.Cont.next
+    (Env.set_mode env ~in_mode:md.Aast.md_mode, md, err)
+
+let on_class_
+    ( env,
+      (Aast.{ c_vars; c_xhp_attrs; c_methods; c_user_attributes; c_mode; _ } as
+      c),
+      err_acc ) =
+  let env = Env.set_mode env ~in_mode:c_mode in
+  let (c, errs) =
+    let (c_vars, err) =
+      let (static_props, props) = Aast.split_vars c_vars in
+      let const_attr_opt =
+        Naming_attributes.find SN.UserAttributes.uaConst c_user_attributes
       in
-      let cv_type = ((), hint_opt)
-      and cv_xhp_attr =
-        Some Aast.{ xai_like; xai_tag = xhp_attr_tag_opt; xai_enum_values }
-      and cv_expr = self#elab_cv_expr env (fst cv.Aast.cv_id) cv.Aast.cv_expr in
-      let err = self#plus req_attr_err like_err in
-      ( Aast.{ cv with cv_xhp_attr; cv_type; cv_expr; cv_user_attributes = [] },
-        err )
-  end
+      let static_props =
+        List.map ~f:(elab_class_prop @@ Env.in_mode env) static_props
+      and props =
+        List.map
+          ~f:(elab_non_static_class_prop const_attr_opt @@ Env.in_mode env)
+          props
+      and (xhp_attrs, xhp_attrs_err) =
+        List.unzip @@ List.map ~f:(elab_xhp_attr @@ Env.in_mode env) c_xhp_attrs
+      in
+      (static_props @ props @ xhp_attrs, List.filter_map ~f:Fn.id xhp_attrs_err)
+    in
+    let c_methods =
+      if Ast_defs.is_c_interface c.Aast.c_kind then
+        List.map c_methods ~f:(fun m -> Aast.{ m with m_abstract = true })
+      else
+        c_methods
+    in
+    (Aast.{ c with c_methods; c_vars; c_xhp_attrs = [] }, err)
+  in
+  let err = List.fold_right ~init:err_acc ~f:Err.Free_monoid.plus errs in
+  Naming_phase_pass.Cont.next (env, c, err)
+
+let pass =
+  Naming_phase_pass.(
+    top_down
+      {
+        identity with
+        on_typedef = Some on_typedef;
+        on_gconst = Some on_gconst;
+        on_fun_def = Some on_fun_def;
+        on_module_def = Some on_module_def;
+        on_class_ = Some on_class_;
+      })
+
+let visitor = Naming_phase_pass.mk_visitor [pass]
 
 let elab f ?init ?(env = Env.empty) elem =
   Tuple2.map_snd ~f:(Err.from_monoid ?init) @@ f env elem

@@ -8,47 +8,77 @@
 open Hh_prelude
 module Err = Naming_phase_error
 
-module Env = struct
+module Env : sig
+  type t
+
+  val empty : t
+
+  val allow_retonly : t -> bool
+
+  val set_allow_retonly : t -> allow_retonly:bool -> t
+end = struct
   type t = { allow_retonly: bool }
 
   let empty = { allow_retonly = false }
+
+  let allow_retonly { allow_retonly } = allow_retonly
+
+  let set_allow_retonly _ ~allow_retonly = { allow_retonly }
 end
 
-let visitor =
-  object (_self)
-    inherit [_] Naming_visitors.mapreduce as super
+let on_targ (env, targ, err) =
+  let env = Env.set_allow_retonly env ~allow_retonly:true in
+  Naming_phase_pass.Cont.next (env, targ, err)
 
-    method! on_hint (Env.{ allow_retonly } as env) hint =
-      let res =
-        match hint with
-        | (pos, Aast.(Hprim Tvoid)) when not allow_retonly ->
-          Error
-            ( (pos, Aast.Herr),
-              Err.naming
-              @@ Naming_error.Return_only_typehint { pos; kind = `void } )
-        | (pos, Aast.(Hprim Tnoreturn)) when not allow_retonly ->
-          Error
-            ( (pos, Aast.Herr),
-              Err.naming
-              @@ Naming_error.Return_only_typehint { pos; kind = `noreturn } )
-        | (_, Aast.(Happly _ | Habstr _)) ->
-          Ok (Env.{ allow_retonly = true }, hint)
-        | _ -> Ok (env, hint)
-      in
-      match res with
-      | Ok (env, hint) -> super#on_hint env hint
-      | Error (hint, err) -> (hint, err)
+let on_hint_fun_hf_return_ty (env, t, err) =
+  let env = Env.set_allow_retonly env ~allow_retonly:true in
+  Naming_phase_pass.Cont.next (env, t, err)
 
-    method! on_targ _ targ = super#on_targ Env.{ allow_retonly = true } targ
+let on_fun_f_ret (env, f, err) =
+  let env = Env.set_allow_retonly env ~allow_retonly:true in
+  Naming_phase_pass.Cont.next (env, f, err)
 
-    method! on_hint_fun_hf_return_ty _ t =
-      super#on_hint_fun_hf_return_ty Env.{ allow_retonly = true } t
+let on_method_m_ret (env, m, err) =
+  let env = Env.set_allow_retonly env ~allow_retonly:true in
+  Naming_phase_pass.Cont.next (env, m, err)
 
-    method! on_fun_f_ret _ f = super#on_fun_f_ret Env.{ allow_retonly = true } f
+let on_hint (env, hint, err_acc) =
+  let allow_retonly = Env.allow_retonly env in
+  let res =
+    match hint with
+    | (pos, Aast.(Hprim Tvoid)) when not allow_retonly ->
+      Error
+        ( (pos, Aast.Herr),
+          Err.naming @@ Naming_error.Return_only_typehint { pos; kind = `void }
+        )
+    | (pos, Aast.(Hprim Tnoreturn)) when not allow_retonly ->
+      Error
+        ( (pos, Aast.Herr),
+          Err.naming
+          @@ Naming_error.Return_only_typehint { pos; kind = `noreturn } )
+    | (_, Aast.(Happly _ | Habstr _)) ->
+      let env = Env.set_allow_retonly env ~allow_retonly:true in
+      Ok (env, hint)
+    | _ -> Ok (env, hint)
+  in
+  match res with
+  | Ok (env, hint) -> Naming_phase_pass.Cont.next (env, hint, err_acc)
+  | Error (hint, err) ->
+    Naming_phase_pass.Cont.finish (env, hint, Err.Free_monoid.plus err_acc err)
 
-    method! on_method_m_ret _ m =
-      super#on_method_m_ret Env.{ allow_retonly = true } m
-  end
+let pass =
+  Naming_phase_pass.(
+    top_down
+      {
+        identity with
+        on_hint = Some on_hint;
+        on_targ = Some on_targ;
+        on_hint_fun_hf_return_ty = Some on_hint_fun_hf_return_ty;
+        on_fun_f_ret = Some on_fun_f_ret;
+        on_method_m_ret = Some on_method_m_ret;
+      })
+
+let visitor = Naming_phase_pass.mk_visitor [pass]
 
 let elab f ?init ?(env = Env.empty) elem =
   Tuple2.map_snd ~f:(Err.from_monoid ?init) @@ f env elem

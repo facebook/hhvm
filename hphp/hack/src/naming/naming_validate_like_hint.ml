@@ -8,52 +8,64 @@
 open Hh_prelude
 module Err = Naming_phase_error
 
-module Env = struct
+module Env : sig
+  type t
+
+  val empty : t
+
+  val allow_like : t -> bool
+
+  val set_allow_like : t -> allow_like:bool -> t
+end = struct
   type t = { allow_like: bool }
 
-  let create ?(allow_like = false) () = { allow_like }
-
   let empty = { allow_like = false }
+
+  let set_allow_like _ ~allow_like = { allow_like }
+
+  let allow_like { allow_like } = allow_like
 end
 
-let visitor =
-  object (self)
-    inherit [_] Aast_defs.reduce as super
+let on_expr_ (env, expr_, err) =
+  let env =
+    match expr_ with
+    | Aast.(Is _ | As _ | Upcast _) -> Env.set_allow_like env ~allow_like:true
+    | _ -> env
+  in
+  Naming_phase_pass.Cont.next (env, expr_, err)
 
-    inherit Err.monoid
+let on_hint_ (env, hint_, err) =
+  let env =
+    match hint_ with
+    | Aast.(Hfun _ | Happly _ | Haccess _ | Habstr _ | Hvec_or_dict _) ->
+      Env.set_allow_like env ~allow_like:false
+    | _ -> env
+  in
+  Naming_phase_pass.Cont.next (env, hint_, err)
 
-    method! on_Is _env expr hint =
-      let env = Env.create ~allow_like:true () in
-      super#on_Is env expr hint
+let on_hint (env, hint, err) =
+  let err =
+    match hint with
+    | (pos, Aast.Hlike _) when not @@ Env.allow_like env ->
+      Err.Free_monoid.plus err @@ Err.like_type pos
+    | _ -> err
+  in
+  Naming_phase_pass.Cont.next (env, hint, err)
 
-    method! on_As _env expr hint is_final =
-      let env = Env.create ~allow_like:true () in
-      super#on_As env expr hint is_final
+let pass =
+  Naming_phase_pass.(
+    top_down
+      {
+        identity with
+        on_expr_ = Some on_expr_;
+        on_hint_ = Some on_hint_;
+        on_hint = Some on_hint;
+      })
 
-    method! on_Upcast _env expr hint =
-      let env = Env.create ~allow_like:true () in
-      super#on_Upcast env expr hint
-
-    method! on_Hfun _env hfun = super#on_Hfun Env.empty hfun
-
-    method! on_Happly _env tycon hints = super#on_Happly Env.empty tycon hints
-
-    method! on_Haccess _env hint ids = super#on_Haccess Env.empty hint ids
-
-    method! on_Habstr _env name hints = super#on_Habstr Env.empty name hints
-
-    method! on_Hvec_or_dict _env hk_opt hv =
-      super#on_Hvec_or_dict Env.empty hk_opt hv
-
-    method! on_hint (Env.{ allow_like } as env) hint =
-      match hint with
-      | (pos, Aast.Hlike inner) when not allow_like ->
-        self#plus (Err.like_type pos) @@ self#on_hint env inner
-      | _ -> super#on_hint env hint
-  end
+let visitor = Naming_phase_pass.mk_visitor [pass]
 
 let validate f ?init ?(env = Env.empty) elem =
-  Err.from_monoid ?init @@ f env elem
+  Err.from_monoid ?init @@ snd @@ f env elem
 
 let validate_program ?init ?env elem =
   validate visitor#on_program ?init ?env elem

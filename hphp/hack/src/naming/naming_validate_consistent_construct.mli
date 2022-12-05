@@ -10,7 +10,9 @@ module Env : sig
 
   val empty : t
 
-  val create : int -> t
+  val consistent_ctor_level : t -> int
+
+  val set_consistent_ctor_level : t -> consistent_ctor_level:int -> t
 end
 
 include Naming_phase_sigs.Validation with module Env := Env

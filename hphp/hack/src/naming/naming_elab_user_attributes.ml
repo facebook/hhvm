@@ -8,34 +8,40 @@
 open Hh_prelude
 module Err = Naming_phase_error
 
-module Env = struct
+module Env : sig
+  type t
+
+  val empty : t
+end = struct
   type t = unit
 
   let empty = ()
 end
 
-let visitor =
-  object (self)
-    inherit [_] Naming_visitors.mapreduce as super
-
-    method! on_user_attributes env us =
-      let seen = Caml.Hashtbl.create 0 in
-      let dedup (attrs, err) (Aast.{ ua_name = (pos, attr_name); _ } as attr) =
-        match Caml.Hashtbl.find_opt seen attr_name with
-        | Some prev_pos ->
-          ( attrs,
-            self#plus err
-            @@ Err.naming
-            @@ Naming_error.Duplicate_user_attribute
-                 { pos; prev_pos; attr_name } )
-        | _ ->
-          Caml.Hashtbl.add seen attr_name pos;
-          let (attr, attr_err) = super#on_user_attribute env attr in
-          (attr :: attrs, self#plus err attr_err)
+let on_user_attributes (env, us, err_acc) =
+  let seen = Caml.Hashtbl.create 0 in
+  let dedup (attrs, err_acc) (Aast.{ ua_name = (pos, attr_name); _ } as attr) =
+    match Caml.Hashtbl.find_opt seen attr_name with
+    | Some prev_pos ->
+      let err =
+        Err.naming
+        @@ Naming_error.Duplicate_user_attribute { pos; prev_pos; attr_name }
       in
-      Tuple2.map_fst ~f:List.rev
-      @@ List.fold_left us ~init:([], self#zero) ~f:dedup
-  end
+      (attrs, Err.Free_monoid.plus err_acc err)
+    | _ ->
+      Caml.Hashtbl.add seen attr_name pos;
+      (attr :: attrs, err_acc)
+  in
+  let (us, err) =
+    Tuple2.map_fst ~f:List.rev @@ List.fold_left us ~init:([], err_acc) ~f:dedup
+  in
+  Naming_phase_pass.Cont.next (env, us, err)
+
+let pass =
+  Naming_phase_pass.(
+    top_down { identity with on_user_attributes = Some on_user_attributes })
+
+let visitor = Naming_phase_pass.mk_visitor [pass]
 
 let elab f ?init ?(env = Env.empty) elem =
   Tuple2.map_snd ~f:(Err.from_monoid ?init) @@ f env elem

@@ -8,46 +8,49 @@
 open Hh_prelude
 module Err = Naming_phase_error
 
-module Env = struct
+module Env : sig
+  type t
+
+  val empty : t
+end = struct
   type t = unit
 
   let empty = ()
 end
 
-let visitor =
-  object (self)
-    inherit [_] Aast_defs.reduce as super
+let on_class_ (env, (Aast.{ c_kind; c_typeconsts; c_span; _ } as c), err_acc) =
+  let err =
+    if (not (List.is_empty c_typeconsts)) && Ast_defs.is_c_enum_class c_kind
+    then
+      Err.Free_monoid.plus err_acc
+      @@ Err.naming
+      @@ Naming_error.Type_constant_in_enum_class_outside_allowed_locations
+           c_span
+    else
+      err_acc
+  in
+  Naming_phase_pass.Cont.next (env, c, err)
 
-    inherit Err.monoid
+let pass =
+  Naming_phase_pass.(top_down { identity with on_class_ = Some on_class_ })
 
-    method! on_class_ env (Aast.{ c_kind; c_typeconsts; c_span; _ } as c) =
-      let err_super = super#on_class_ env c in
-      let err =
-        if (not (List.is_empty c_typeconsts)) && Ast_defs.is_c_enum_class c_kind
-        then
-          Err.naming
-          @@ Naming_error.Type_constant_in_enum_class_outside_allowed_locations
-               c_span
-        else
-          self#zero
-      in
-      self#plus err_super err
-  end
+let visitor = Naming_phase_pass.mk_visitor [pass]
 
-let validate_program ?init ?(env = Env.empty) prog =
-  Err.from_monoid ?init @@ visitor#on_program env prog
+let validate ?init ?(env = Env.empty) f elem =
+  Err.from_monoid ?init @@ snd @@ f env elem
 
-let validate_module_def ?init ?(env = Env.empty) module_def =
-  Err.from_monoid ?init @@ visitor#on_module_def env module_def
+let validate_program ?init ?env prog =
+  validate ?init ?env visitor#on_program prog
 
-let validate_class ?init ?(env = Env.empty) class_ =
-  Err.from_monoid ?init @@ visitor#on_class_ env class_
+let validate_module_def ?init ?env elem =
+  validate ?init ?env visitor#on_module_def elem
 
-let validate_typedef ?init ?(env = Env.empty) typedef =
-  Err.from_monoid ?init @@ visitor#on_typedef env typedef
+let validate_class ?init ?env elem = validate ?init ?env visitor#on_class_ elem
 
-let validate_fun_def ?init ?(env = Env.empty) fun_def =
-  Err.from_monoid ?init @@ visitor#on_fun_def env fun_def
+let validate_typedef ?init ?env elem =
+  validate ?init ?env visitor#on_typedef elem
 
-let validate_gconst ?init ?(env = Env.empty) gconst =
-  Err.from_monoid ?init @@ visitor#on_gconst env gconst
+let validate_fun_def ?init ?env elem =
+  validate ?init ?env visitor#on_fun_def elem
+
+let validate_gconst ?init ?env elem = validate ?init ?env visitor#on_gconst elem

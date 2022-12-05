@@ -10,13 +10,37 @@ open Common
 module Err = Naming_phase_error
 module SN = Naming_special_names
 
-module Env = struct
+module Env : sig
+  type t
+
+  val empty : t
+
+  val tparams : t -> SSet.t
+
+  val in_mode : t -> FileInfo.mode
+
+  val extend_tparams : t -> ('ex, 'en) Aast.tparam list -> t
+
+  val in_class : t -> ('ex, 'en) Aast.class_ -> t
+
+  val in_fun_def : t -> ('ex, 'en) Aast.fun_def -> t
+
+  val in_typedef : t -> ('ex, 'en) Aast.typedef -> t
+
+  val in_gconst : t -> ('ex, 'en) Aast.gconst -> t
+
+  val in_module_def : t -> ('ex, 'en) Aast.module_def -> t
+end = struct
   type t = {
     tparams: SSet.t;
     in_mode: FileInfo.mode;
   }
 
   let empty = { tparams = SSet.empty; in_mode = FileInfo.Mstrict }
+
+  let tparams { tparams; _ } = tparams
+
+  let in_mode { in_mode; _ } = in_mode
 
   let add_tparams ps init =
     List.fold
@@ -28,22 +52,22 @@ module Env = struct
     let tparams = add_tparams ps env.tparams in
     { env with tparams }
 
-  let in_class Aast.{ c_mode; c_tparams; _ } =
+  let in_class _ Aast.{ c_mode; c_tparams; _ } =
     { in_mode = c_mode; tparams = add_tparams c_tparams SSet.empty }
 
-  let in_fun_def Aast.{ fd_fun; fd_mode; _ } =
+  let in_fun_def _ Aast.{ fd_fun; fd_mode; _ } =
     {
       in_mode = fd_mode;
       tparams = add_tparams fd_fun.Aast.f_tparams SSet.empty;
     }
 
-  let in_typedef Aast.{ t_tparams; t_mode; _ } =
+  let in_typedef _ Aast.{ t_tparams; t_mode; _ } =
     { in_mode = t_mode; tparams = add_tparams t_tparams SSet.empty }
 
-  let in_gconst Aast.{ cst_mode; _ } =
+  let in_gconst _ Aast.{ cst_mode; _ } =
     { in_mode = cst_mode; tparams = SSet.empty }
 
-  let in_module_def Aast.{ md_mode; _ } =
+  let in_module_def _ Aast.{ md_mode; _ } =
     { in_mode = md_mode; tparams = SSet.empty }
 end
 
@@ -57,7 +81,7 @@ type canon_result =
   | Varray of Pos.t
   | Darray of Pos.t
   | Vec_or_dict of Pos.t
-  | Error of Naming_error.t
+  | CanonErr of Naming_error.t
 
 (* A number of hints are represented by `Happly` after lowering; we elaborate
    to the canonical representation here taking care to separate the result
@@ -124,7 +148,7 @@ let canonical_tycon typarams (pos, name) =
       || equal name ("\\" ^ SN.Typehints.arraykey)
       || equal name ("\\" ^ SN.Typehints.nothing))
   then
-    Error (Naming_error.Primitive_top_level pos)
+    CanonErr (Naming_error.Primitive_top_level pos)
   (* TODO[mjt] why wouldn't be have a fully qualified name here? *)
   else if String.(equal name SN.Classes.cClassname || equal name "classname")
   then
@@ -134,169 +158,200 @@ let canonical_tycon typarams (pos, name) =
   else
     Tycon (pos, name)
 
-let visitor =
-  object (self)
-    inherit [_] Naming_visitors.mapreduce as super
+(* TODO[mjt] should we really be special casing `darray`? *)
+let canonicalise_darray in_mode hint_pos pos hints =
+  match hints with
+  | [] ->
+    let err =
+      if not @@ FileInfo.is_hhi in_mode then
+        Some (Err.naming @@ Naming_error.Too_few_type_arguments hint_pos)
+      else
+        None
+    in
+    let any = (pos, Aast.Hany) in
+    Ok ((hint_pos, Aast.Happly ((pos, SN.Collections.cDict), [any; any])), err)
+  | [_] ->
+    let err =
+      if not @@ FileInfo.is_hhi in_mode then
+        Some (Err.naming @@ Naming_error.Too_few_type_arguments hint_pos)
+      else
+        None
+    in
+    Ok ((hint_pos, Aast.Hany), err)
+  | [key_hint; val_hint] ->
+    Ok
+      ( ( hint_pos,
+          Aast.Happly ((pos, SN.Collections.cDict), [key_hint; val_hint]) ),
+        None )
+  | _ ->
+    let err = Err.naming @@ Naming_error.Too_many_type_arguments hint_pos in
+    Error ((hint_pos, Aast.Hany), err)
 
-    method! on_typedef _ t = super#on_typedef Env.(in_typedef t) t
+(* TODO[mjt] should we really be special casing `varray`? *)
+let canonicalise_varray in_mode hint_pos pos hints =
+  match hints with
+  | [] ->
+    let err =
+      if not @@ FileInfo.is_hhi in_mode then
+        Some (Err.naming @@ Naming_error.Too_few_type_arguments hint_pos)
+      else
+        None
+    in
+    let any = (pos, Aast.Hany) in
+    Ok ((hint_pos, Aast.Happly ((pos, SN.Collections.cVec), [any])), err)
+  | [val_hint] ->
+    Ok ((hint_pos, Aast.Happly ((pos, SN.Collections.cVec), [val_hint])), None)
+  | _ ->
+    let err = Err.naming @@ Naming_error.Too_many_type_arguments hint_pos in
+    Error ((hint_pos, Aast.Hany), err)
 
-    method! on_gconst _ cst = super#on_gconst Env.(in_gconst cst) cst
+(* TODO[mjt] should we really be special casing `vec_or_dict` both in
+   its representation and error handling? *)
+let canonicalise_vec_or_dict in_mode hint_pos pos hints =
+  match hints with
+  | [] ->
+    let err =
+      if not @@ FileInfo.is_hhi in_mode then
+        Some (Err.naming @@ Naming_error.Too_few_type_arguments hint_pos)
+      else
+        None
+    in
+    let any = (pos, Aast.Hany) in
+    Ok ((hint_pos, Aast.Hvec_or_dict (None, any)), err)
+  | [val_hint] -> Ok ((hint_pos, Aast.Hvec_or_dict (None, val_hint)), None)
+  | [key_hint; val_hint] ->
+    Ok ((hint_pos, Aast.Hvec_or_dict (Some key_hint, val_hint)), None)
+  | _ ->
+    let err = Err.naming @@ Naming_error.Too_many_type_arguments hint_pos in
+    Error ((hint_pos, Aast.Hany), err)
 
-    method! on_fun_def _ fd = super#on_fun_def Env.(in_fun_def fd) fd
-
-    method! on_module_def _ md = super#on_module_def Env.(in_module_def md) md
-
-    method! on_class_ _ c = super#on_class_ Env.(in_class c) c
-
-    method! on_method_ env m =
-      let env = Env.extend_tparams env m.Aast.m_tparams in
-      super#on_method_ env m
-
-    method! on_tparam env tp =
-      (* TODO[mjt] do we want to maintain the HKT code? *)
-      let env = Env.extend_tparams env tp.Aast.tp_parameters in
-      super#on_tparam env tp
-
-    method! on_hint env hint =
-      let (hint, canon_err) =
-        match hint with
-        | (hint_pos, Aast.Happly (tycon, hints)) ->
-          (* After lowering many hints are represented as `Happly(...,...)`. Here
-             we canonicalise the representation of type constructor then handle
-             errors and further elaboration *)
-          begin
-            match canonical_tycon env.Env.tparams tycon with
-            (* The hint was malformed *)
-            | Error err -> ((hint_pos, Aast.Herr), Err.naming err)
-            (* The type constructors canonical representation is a concrete type *)
-            | Concrete (pos, hint_) ->
-              (* We can't represent a concrete type applied to other types
-                 so we raise an error here *)
-              let err =
-                if not @@ List.is_empty hints then
-                  Err.naming @@ Naming_error.Unexpected_type_arguments pos
-                else
-                  self#zero
-              in
-              ((hint_pos, hint_), err)
-            (* The type constructors corresponds to an in-scope type parameter *)
-            | Typaram name ->
-              let hint_ = Aast.Habstr (name, hints) in
-              ((hint_pos, hint_), self#zero)
-            (* The type constructors canonical representation is `Happly` but
-               additional elaboration / validation is required *)
-            | This pos ->
-              let err =
-                if not @@ List.is_empty hints then
-                  Err.naming @@ Naming_error.This_no_argument hint_pos
-                else
-                  self#zero
-              in
-              ((pos, Aast.Hthis), err)
-            | Wildcard pos ->
-              if not (List.is_empty hints) then
-                let err =
-                  Err.naming
-                  @@ Naming_error.Tparam_applied_to_type
-                       { pos = hint_pos; tparam_name = SN.Typehints.wildcard }
-                in
-                ((hint_pos, Aast.Herr), err)
-              else
-                ( (hint_pos, Aast.Happly ((pos, SN.Typehints.wildcard), [])),
-                  self#zero )
-            | Classname pos ->
-              (* TODO[mjt] currently if `classname` is not applied to exactly
-                 one type parameter, it canonicalizes to `Hprim Tstring`.
-                 Investigate why this happens and if we can delay treatment to
-                 typing *)
-              (match hints with
-              | [_] ->
-                let hint_ = Aast.Happly ((pos, SN.Classes.cClassname), hints) in
-                ((hint_pos, hint_), self#zero)
-              | _ ->
-                ( (hint_pos, Aast.(Hprim Tstring)),
-                  Err.naming @@ Naming_error.Classname_param pos ))
-            | Darray pos -> self#canonicalise_darray env hint_pos pos hints
-            | Varray pos -> self#canonicalise_varray env hint_pos pos hints
-            | Vec_or_dict pos ->
-              self#canonicalise_vec_or_dict env hint_pos pos hints
-            (* The type constructors canonical representation is `Happly` *)
-            | Tycon (pos, tycon) ->
-              let hint_ = Aast.Happly ((pos, tycon), hints) in
-              ((hint_pos, hint_), self#zero)
-          end
-        | _ -> (hint, self#zero)
+(* After lowering many hints are represented as `Happly(...,...)`. Here
+   we canonicalise the representation of type constructor then handle
+   errors and further elaboration *)
+let canonicalize_happly in_mode tparams hint_pos tycon hints =
+  match canonical_tycon tparams tycon with
+  (* The hint was malformed *)
+  | CanonErr err -> Error ((hint_pos, Aast.Herr), Err.naming err)
+  (* The type constructors canonical representation is a concrete type *)
+  | Concrete (pos, hint_) ->
+    (* We can't represent a concrete type applied to other types
+       so we raise an error here *)
+    let err_opt =
+      if not @@ List.is_empty hints then
+        Some (Err.naming @@ Naming_error.Unexpected_type_arguments pos)
+      else
+        None
+    in
+    Ok ((hint_pos, hint_), err_opt)
+  (* The type constructors corresponds to an in-scope type parameter *)
+  | Typaram name ->
+    let hint_ = Aast.Habstr (name, hints) in
+    Ok ((hint_pos, hint_), None)
+  (* The type constructors canonical representation is `Happly` but
+     additional elaboration / validation is required *)
+  | This pos ->
+    let err_opt =
+      if not @@ List.is_empty hints then
+        Some (Err.naming @@ Naming_error.This_no_argument hint_pos)
+      else
+        None
+    in
+    Ok ((pos, Aast.Hthis), err_opt)
+  | Wildcard pos ->
+    if not (List.is_empty hints) then
+      let err =
+        Err.naming
+        @@ Naming_error.Tparam_applied_to_type
+             { pos = hint_pos; tparam_name = SN.Typehints.wildcard }
       in
-      let (hint, super_err) = super#on_hint env hint in
-      (hint, self#plus canon_err super_err)
+      Error ((hint_pos, Aast.Herr), err)
+    else
+      Ok ((hint_pos, Aast.Happly ((pos, SN.Typehints.wildcard), [])), None)
+  | Classname pos ->
+    (* TODO[mjt] currently if `classname` is not applied to exactly
+       one type parameter, it canonicalizes to `Hprim Tstring`.
+       Investigate why this happens and if we can delay treatment to
+       typing *)
+    (match hints with
+    | [_] ->
+      let hint_ = Aast.Happly ((pos, SN.Classes.cClassname), hints) in
+      Ok ((hint_pos, hint_), None)
+    | _ ->
+      Ok
+        ( (hint_pos, Aast.(Hprim Tstring)),
+          Some (Err.naming @@ Naming_error.Classname_param pos) ))
+  | Darray pos -> canonicalise_darray in_mode hint_pos pos hints
+  | Varray pos -> canonicalise_varray in_mode hint_pos pos hints
+  | Vec_or_dict pos -> canonicalise_vec_or_dict in_mode hint_pos pos hints
+  (* The type constructors canonical representation is `Happly` *)
+  | Tycon (pos, tycon) ->
+    let hint_ = Aast.Happly ((pos, tycon), hints) in
+    Ok ((hint_pos, hint_), None)
 
-    (* TODO[mjt] should we really be special casing `darray`? *)
-    method private canonicalise_darray env hint_pos pos hints =
-      match hints with
-      | [] ->
-        let err =
-          if not @@ FileInfo.is_hhi env.Env.in_mode then
-            Err.naming @@ Naming_error.Too_few_type_arguments hint_pos
-          else
-            self#zero
-        in
-        let any = (pos, Aast.Hany) in
-        ((hint_pos, Aast.Happly ((pos, SN.Collections.cDict), [any; any])), err)
-      | [_] ->
-        let err =
-          if not @@ FileInfo.is_hhi env.Env.in_mode then
-            Err.naming @@ Naming_error.Too_few_type_arguments hint_pos
-          else
-            self#zero
-        in
-        ((hint_pos, Aast.Hany), err)
-      | [key_hint; val_hint] ->
-        ( ( hint_pos,
-            Aast.Happly ((pos, SN.Collections.cDict), [key_hint; val_hint]) ),
-          self#zero )
-      | _ ->
-        let err = Err.naming @@ Naming_error.Too_many_type_arguments hint_pos in
-        ((hint_pos, Aast.Hany), err)
+let on_typedef (env, t, err) =
+  Naming_phase_pass.Cont.next (Env.in_typedef env t, t, err)
 
-    (* TODO[mjt] should we really be special casing `varray`? *)
-    method private canonicalise_varray env hint_pos pos hints =
-      match hints with
-      | [] ->
-        let err =
-          if not @@ FileInfo.is_hhi env.Env.in_mode then
-            Err.naming @@ Naming_error.Too_few_type_arguments hint_pos
-          else
-            self#zero
-        in
-        let any = (pos, Aast.Hany) in
-        ((hint_pos, Aast.Happly ((pos, SN.Collections.cVec), [any])), err)
-      | [val_hint] ->
-        ( (hint_pos, Aast.Happly ((pos, SN.Collections.cVec), [val_hint])),
-          self#zero )
-      | _ ->
-        let err = Err.naming @@ Naming_error.Too_many_type_arguments hint_pos in
-        ((hint_pos, Aast.Hany), err)
+let on_gconst (env, cst, err) =
+  Naming_phase_pass.Cont.next (Env.in_gconst env cst, cst, err)
 
-    (* TODO[mjt] should we really be special casing `vec_or_dict` both in
-       its representation and error handling? *)
-    method private canonicalise_vec_or_dict env hint_pos pos hints =
-      match hints with
-      | [] ->
-        let err =
-          if not @@ FileInfo.is_hhi env.Env.in_mode then
-            Err.naming @@ Naming_error.Too_few_type_arguments hint_pos
-          else
-            self#zero
-        in
-        let any = (pos, Aast.Hany) in
-        ((hint_pos, Aast.Hvec_or_dict (None, any)), err)
-      | [val_hint] -> ((hint_pos, Aast.Hvec_or_dict (None, val_hint)), self#zero)
-      | [key_hint; val_hint] ->
-        ((hint_pos, Aast.Hvec_or_dict (Some key_hint, val_hint)), self#zero)
-      | _ ->
-        let err = Err.naming @@ Naming_error.Too_many_type_arguments hint_pos in
-        ((hint_pos, Aast.Hany), err)
-  end
+let on_fun_def (env, fd, err) =
+  Naming_phase_pass.Cont.next (Env.in_fun_def env fd, fd, err)
+
+let on_module_def (env, md, err) =
+  Naming_phase_pass.Cont.next (Env.in_module_def env md, md, err)
+
+let on_class_ (env, c, err) =
+  Naming_phase_pass.Cont.next (Env.in_class env c, c, err)
+
+let on_method_ (env, m, err) =
+  let env = Env.extend_tparams env m.Aast.m_tparams in
+  Naming_phase_pass.Cont.next (env, m, err)
+
+let on_tparam (env, tp, err) =
+  (* TODO[mjt] do we want to maintain the HKT code? *)
+  let env = Env.extend_tparams env tp.Aast.tp_parameters in
+  Naming_phase_pass.Cont.next (env, tp, err)
+
+let on_hint (env, hint, err_acc) =
+  let res =
+    match hint with
+    | (hint_pos, Aast.Happly (tycon, hints)) ->
+      canonicalize_happly
+        (Env.in_mode env)
+        (Env.tparams env)
+        hint_pos
+        tycon
+        hints
+    | _ -> Ok (hint, None)
+  in
+  match res with
+  | Ok (hint, err_opt) ->
+    let err =
+      Option.value_map
+        err_opt
+        ~default:err_acc
+        ~f:(Err.Free_monoid.plus err_acc)
+    in
+    Naming_phase_pass.Cont.next (env, hint, err)
+  | Error (hint, err) ->
+    Naming_phase_pass.Cont.finish (env, hint, Err.Free_monoid.plus err_acc err)
+
+let pass =
+  Naming_phase_pass.(
+    top_down
+      {
+        identity with
+        on_typedef = Some on_typedef;
+        on_gconst = Some on_gconst;
+        on_fun_def = Some on_fun_def;
+        on_module_def = Some on_module_def;
+        on_class_ = Some on_class_;
+        on_method_ = Some on_method_;
+        on_tparam = Some on_tparam;
+        on_hint = Some on_hint;
+      })
+
+let visitor = Naming_phase_pass.mk_visitor [pass]
 
 let elab f ?init ?(env = Env.empty) elem =
   Tuple2.map_snd ~f:(Err.from_monoid ?init) @@ f env elem

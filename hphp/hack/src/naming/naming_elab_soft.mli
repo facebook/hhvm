@@ -11,9 +11,13 @@
     is enabled
 *)
 module Env : sig
-  type t = bool
+  type t
 
   val empty : t
+
+  val soft_as_like : t -> bool
+
+  val set_soft_as_like : t -> soft_as_like:bool -> t
 end
 
 include Naming_phase_sigs.Elaboration with module Env := Env

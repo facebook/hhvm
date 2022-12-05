@@ -196,9 +196,14 @@ let elab_elem
   let err = validate_class_req ~init:err elem in
 
   let err =
-    let level = TypecheckerOptions.explicit_consistent_constructors tcopt in
-    if level > 0 then
-      let env = Naming_validate_consistent_construct.Env.create level in
+    let consistent_ctor_level =
+      TypecheckerOptions.explicit_consistent_constructors tcopt
+    in
+    if consistent_ctor_level > 0 then
+      let env =
+        Naming_validate_consistent_construct.(
+          Env.set_consistent_ctor_level ~consistent_ctor_level @@ Env.empty)
+      in
       validate_consistent_construct ~init:err ~env elem
     else
       err
@@ -216,7 +221,10 @@ let elab_elem
   let soft_as_like =
     TypecheckerOptions.interpret_soft_types_as_like_types tcopt
   in
-  let elem = elab_soft elem ~env:soft_as_like in
+  let elem =
+    let env = Naming_elab_soft.(Env.set_soft_as_like Env.empty ~soft_as_like) in
+    elab_soft elem ~env
+  in
 
   (* If HKTs are not enabled, we remove type parameter here and generate
      specific errors rather than arity errors in typing *)

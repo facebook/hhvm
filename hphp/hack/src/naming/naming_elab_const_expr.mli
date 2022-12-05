@@ -6,12 +6,4 @@
  *
  *)
 
-module Env : sig
-  type t
-
-  val empty : t
-
-  val create : ?in_enum_class:bool -> ?in_mode:FileInfo.mode -> unit -> t
-end
-
-include Naming_phase_sigs.Elabidation with module Env := Env
+include Naming_phase_sigs.Elabidation

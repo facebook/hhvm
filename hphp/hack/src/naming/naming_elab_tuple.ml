@@ -8,28 +8,32 @@
 open Hh_prelude
 module Err = Naming_phase_error
 
-module Env = struct
+module Env : sig
+  type t
+
+  val empty : t
+end = struct
   type t = unit
 
   let empty = ()
 end
 
-let visitor =
-  object (_self)
-    inherit [_] Naming_visitors.mapreduce as super
+let on_expr (env, expr, err_acc) =
+  let res =
+    match expr with
+    | (annot, pos, Aast.Tuple []) ->
+      let err = Err.naming @@ Naming_error.Too_few_arguments pos in
+      Error ((annot, pos, Err.invalid_expr_ pos), err)
+    | _ -> Ok expr
+  in
+  match res with
+  | Ok expr -> Naming_phase_pass.Cont.next (env, expr, err_acc)
+  | Error (expr, err) ->
+    Naming_phase_pass.Cont.finish (env, expr, Err.Free_monoid.plus err_acc err)
 
-    method! on_expr env expr =
-      let res =
-        match expr with
-        | (annot, pos, Aast.Tuple []) ->
-          let err = Err.naming @@ Naming_error.Too_few_arguments pos in
-          Error ((annot, pos, Err.invalid_expr_ pos), err)
-        | _ -> Ok expr
-      in
-      match res with
-      | Ok expr -> super#on_expr env expr
-      | Error (expr, err) -> (expr, err)
-  end
+let pass = Naming_phase_pass.(top_down { identity with on_expr = Some on_expr })
+
+let visitor = Naming_phase_pass.mk_visitor [pass]
 
 let elab f ?init ?(env = Env.empty) elem =
   Tuple2.map_snd ~f:(Err.from_monoid ?init) @@ f env elem

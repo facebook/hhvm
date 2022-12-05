@@ -6,33 +6,28 @@
  *
  *)
 
-module Env = struct
+module Env : sig
+  type t
+
+  val empty : t
+end = struct
   type t = unit
 
   let empty = ()
 end
 
-let visitor =
-  object (_self)
-    inherit [_] Aast_defs.endo as super
+let on_expr (env, expr, err_acc) =
+  match expr with
+  | (annot, pos, Aast.Import _) ->
+    Naming_phase_pass.Cont.finish
+      (env, (annot, pos, Naming_phase_error.invalid_expr_ pos), err_acc)
+  | _ -> Naming_phase_pass.Cont.next (env, expr, err_acc)
 
-    method on_'ex _ ex = ex
+let pass = Naming_phase_pass.(top_down { identity with on_expr = Some on_expr })
 
-    method on_'en _ en = en
+let visitor = Naming_phase_pass.mk_visitor [pass]
 
-    method! on_expr env expr =
-      let res =
-        match expr with
-        | (annot, pos, Aast.Import _) ->
-          Error (annot, pos, Naming_phase_error.invalid_expr_ pos)
-        | _ -> Ok expr
-      in
-      match res with
-      | Ok expr -> super#on_expr env expr
-      | Error expr -> expr
-  end
-
-let elab f ?(env = Env.empty) elem = f env elem
+let elab f ?(env = Env.empty) elem = fst @@ f env elem
 
 let elab_fun_def ?env elem = elab visitor#on_fun_def ?env elem
 

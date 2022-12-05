@@ -8,38 +8,43 @@
 
 open Hh_prelude
 
-module Env = struct
-  type t = bool
+module Env : sig
+  type t
 
-  let empty = false
+  val empty : t
+end = struct
+  type t = unit
+
+  let empty = ()
 end
 
-let visitor =
-  object (self)
-    inherit [_] Aast_defs.endo as super
+let rec concat_blocks stmts =
+  match stmts with
+  | [] -> []
+  | (_, Aast.Block b) :: rest -> concat_blocks (b @ rest)
+  | next :: rest ->
+    let rest = concat_blocks rest in
+    next :: rest
 
-    method on_'ex _ ex = ex
+let on_block (env, stmts, err) =
+  Naming_phase_pass.Cont.next (env, concat_blocks stmts, err)
 
-    method on_'en _ en = en
+let on_using_stmt (env, us, err) =
+  Naming_phase_pass.Cont.next
+    (env, Aast.{ us with us_is_block_scoped = false }, err)
 
-    method! on_block env stmts =
-      let stmts = self#concat_blocks env stmts in
-      super#on_block env stmts
+let pass =
+  Naming_phase_pass.(
+    top_down
+      {
+        identity with
+        on_block = Some on_block;
+        on_using_stmt = Some on_using_stmt;
+      })
 
-    (* TODO[mjt] I don't think this is actually necessary? *)
-    method! on_using_stmt env us =
-      super#on_using_stmt env Aast.{ us with us_is_block_scoped = false }
+let visitor = Naming_phase_pass.mk_visitor [pass]
 
-    method private concat_blocks env stmts =
-      match stmts with
-      | [] -> []
-      | (_, Aast.Block b) :: rest -> self#concat_blocks env (b @ rest)
-      | next :: rest ->
-        let rest = self#concat_blocks env rest in
-        next :: rest
-  end
-
-let elab f ?(env = Env.empty) elem = f env elem
+let elab f ?(env = Env.empty) elem = fst @@ f env elem
 
 let elab_fun_def ?env elem = elab visitor#on_fun_def ?env elem
 

@@ -8,27 +8,32 @@
 open Hh_prelude
 module Err = Naming_phase_error
 
-module Env = struct
+module Env : sig
+  type t
+
+  val empty : t
+end = struct
   type t = unit
 
   let empty = ()
 end
 
-let visitor =
-  object (self)
-    inherit [_] Aast_defs.reduce as super
+let on_module_def (env, (Aast.{ md_span; _ } as md), err) =
+  let err =
+    Err.Free_monoid.plus err
+    @@ Err.naming
+    @@ Naming_error.Module_declaration_outside_allowed_files md_span
+  in
+  Naming_phase_pass.Cont.next (env, md, err)
 
-    inherit Err.monoid
+let pass =
+  Naming_phase_pass.(
+    top_down { identity with on_module_def = Some on_module_def })
 
-    method! on_module_def env (Aast.{ md_span; _ } as md) =
-      let super_err = super#on_module_def env md in
-      self#plus super_err
-      @@ Err.naming
-      @@ Naming_error.Module_declaration_outside_allowed_files md_span
-  end
+let visitor = Naming_phase_pass.mk_visitor [pass]
 
 let validate f ?init ?(env = Env.empty) elem =
-  Err.from_monoid ?init @@ f env elem
+  Err.from_monoid ?init @@ snd @@ f env elem
 
 let validate_program ?init ?env elem =
   validate visitor#on_program ?init ?env elem

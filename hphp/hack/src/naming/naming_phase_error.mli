@@ -17,6 +17,10 @@ val emit : t -> unit
 module Free_monoid : sig
   type 'a t
 
+  val zero : 'a t
+
+  val plus : 'a t -> 'a t -> 'a t
+
   class virtual ['a] monoid :
     object
       method private plus : 'a t -> 'a t -> 'a t

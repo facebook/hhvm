@@ -7,34 +7,32 @@
  *)
 module SN = Naming_special_names
 
-module Env = struct
+module Env : sig
+  type t
+
+  val empty : t
+end = struct
   type t = unit
 
   let empty = ()
 end
 
-let visitor =
-  object (_self)
-    inherit [_] Aast_defs.endo as super
+let on_expr_ (env, expr_, err) =
+  let expr_ =
+    match expr_ with
+    | Aast.Pipe ((pos, _), e1, e2) ->
+      let lid = (pos, Local_id.make_unscoped SN.SpecialIdents.dollardollar) in
+      Aast.Pipe (lid, e1, e2)
+    | _ -> expr_
+  in
+  Naming_phase_pass.Cont.next (env, expr_, err)
 
-    method on_'ex _ ex = ex
+let pass =
+  Naming_phase_pass.(top_down { identity with on_expr_ = Some on_expr_ })
 
-    method on_'en _ en = en
+let visitor = Naming_phase_pass.mk_visitor [pass]
 
-    method! on_expr_ env expr_ =
-      let expr_ =
-        match expr_ with
-        | Aast.Pipe ((pos, _), e1, e2) ->
-          let lid =
-            (pos, Local_id.make_unscoped SN.SpecialIdents.dollardollar)
-          in
-          Aast.Pipe (lid, e1, e2)
-        | _ -> expr_
-      in
-      super#on_expr_ env expr_
-  end
-
-let elab f ?(env = Env.empty) elem = f env elem
+let elab f ?(env = Env.empty) elem = fst @@ f env elem
 
 let elab_fun_def ?env elem = elab visitor#on_fun_def ?env elem
 

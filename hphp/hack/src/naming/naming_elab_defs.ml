@@ -8,7 +8,11 @@
 
 open Hh_prelude
 
-module Env = struct
+module Env : sig
+  type t
+
+  val empty : t
+end = struct
   type t = unit
 
   let empty = ()
@@ -18,7 +22,7 @@ end
    for instance, we can't guarantee that `Noop` or `Markup`
    are not contained in say, a function body. We should either
    move these to top-level defs _or_ fully recurse to remove them *)
-let program_help ast =
+let on_program (env, program, err) =
   let rec aux acc def =
     match def with
     (* These are elaborated away in Namespaces.elaborate_toplevel_defs *)
@@ -38,20 +42,24 @@ let program_help ast =
       def :: acc
     | Aast.Namespace (_ns, aast) -> List.fold_left ~f:aux ~init:[] aast @ acc
   in
-  let on_program aast =
-    let nast = List.fold_left ~f:aux ~init:[] aast in
-    List.rev nast
-  in
-  on_program ast
+  let program = List.rev @@ List.fold_left ~f:aux ~init:[] program in
+  Naming_phase_pass.Cont.finish (env, program, err)
 
-let elab_fun_def ?env:_ elem = elem
+let pass =
+  Naming_phase_pass.(top_down { identity with on_program = Some on_program })
 
-let elab_typedef ?env:_ elem = elem
+let visitor = Naming_phase_pass.mk_visitor [pass]
 
-let elab_module_def ?env:_ elem = elem
+let elab f ?(env = Env.empty) elem = fst @@ f env elem
 
-let elab_gconst ?env:_ elem = elem
+let elab_fun_def ?env elem = elab visitor#on_fun_def ?env elem
 
-let elab_class ?env:_ elem = elem
+let elab_typedef ?env elem = elab visitor#on_typedef ?env elem
 
-let elab_program ?env:_ elem = program_help elem
+let elab_module_def ?env elem = elab visitor#on_module_def ?env elem
+
+let elab_gconst ?env elem = elab visitor#on_gconst ?env elem
+
+let elab_class ?env elem = elab visitor#on_class_ ?env elem
+
+let elab_program ?env elem = elab visitor#on_program ?env elem

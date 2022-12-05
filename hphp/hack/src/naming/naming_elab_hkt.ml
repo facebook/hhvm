@@ -8,49 +8,52 @@
 open Hh_prelude
 module Err = Naming_phase_error
 
-module Env = struct
+module Env : sig
+  type t
+
+  val empty : t
+end = struct
   type t = unit
 
   let empty = ()
 end
 
-let visitor =
-  object (self)
-    inherit [_] Naming_visitors.mapreduce as super
+let on_hint (env, hint, err_acc) =
+  match hint with
+  | (pos, Aast.Habstr (name, hints)) ->
+    let err =
+      match hints with
+      | [] -> err_acc
+      | _ ->
+        Err.Free_monoid.plus
+          err_acc
+          (Err.naming
+          @@ Naming_error.Tparam_applied_to_type { pos; tparam_name = name })
+    in
+    Naming_phase_pass.Cont.next (env, (pos, Aast.Habstr (name, [])), err)
+  | _ -> Naming_phase_pass.Cont.next (env, hint, err_acc)
 
-    method! on_hint env hint =
-      let res =
-        match hint with
-        | (pos, Aast.Habstr (name, hints)) ->
-          let err =
-            match hints with
-            | [] -> self#zero
-            | _ ->
-              Err.naming
-              @@ Naming_error.Tparam_applied_to_type { pos; tparam_name = name }
-          in
-          Error ((pos, Aast.Habstr (name, [])), err)
-        | _ -> Ok hint
-      in
-      match res with
-      | Ok hint -> super#on_hint env hint
-      | Error (hint, err) -> (hint, err)
+let on_tparam
+    ( env,
+      (Aast.{ tp_parameters; tp_name = (pos, tparam_name); _ } as tparam),
+      err_acc ) =
+  match tp_parameters with
+  | [] -> Naming_phase_pass.Cont.next (env, tparam, err_acc)
+  | _ ->
+    let err =
+      Err.Free_monoid.plus err_acc
+      @@ Err.naming
+      @@ Naming_error.Tparam_with_tparam { pos; tparam_name }
+    in
+    Naming_phase_pass.Cont.next
+      (env, Aast.{ tparam with tp_parameters = [] }, err)
 
-    method! on_tparam
-        env (Aast.{ tp_parameters; tp_name = (pos, tparam_name); _ } as tparam)
-        =
-      let (tparam, err) =
-        match tp_parameters with
-        | [] -> (tparam, self#zero)
-        | _ ->
-          let err =
-            Err.naming @@ Naming_error.Tparam_with_tparam { pos; tparam_name }
-          in
-          (Aast.{ tparam with tp_parameters = [] }, err)
-      in
-      let (tparam, super_err) = super#on_tparam env tparam in
-      (tparam, self#plus err super_err)
-  end
+let pass =
+  Naming_phase_pass.(
+    top_down
+      { identity with on_hint = Some on_hint; on_tparam = Some on_tparam })
+
+let visitor = Naming_phase_pass.mk_visitor [pass]
 
 let elab f ?init ?(env = Env.empty) elem =
   Tuple2.map_snd ~f:(Err.from_monoid ?init) @@ f env elem

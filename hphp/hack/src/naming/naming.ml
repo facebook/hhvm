@@ -16,7 +16,6 @@
 
 open Hh_prelude
 open Common
-open Utils
 open String_utils
 module N = Aast
 module SN = Naming_special_names
@@ -188,20 +187,6 @@ let check_repetition s param =
   else
     s
 
-let check_name ctx (p, name) =
-  (* We perform this check here because currently, naming edits the AST to add
-   * a parent node of this class to enums during the AST transform *)
-  if
-    (String.equal name SN.Classes.cHH_BuiltinEnum
-    || String.equal name SN.Classes.cHH_BuiltinEnumClass
-    || String.equal name SN.Classes.cHH_BuiltinAbstractEnumClass)
-    && not
-         (string_ends_with (Relative_path.suffix (Pos.filename p)) ".hhi"
-         || TypecheckerOptions.is_systemlib (Provider_context.get_tcopt ctx))
-  then
-    Errors.add_naming_error
-    @@ Naming_error.Using_internal_class { pos = p; class_name = strip_ns name }
-
 let arg_unpack_unexpected = function
   | None -> ()
   | Some (_, pos, _) ->
@@ -321,9 +306,7 @@ let make_class_id env ((p, x) as cid) =
     | x when Char.equal x.[0] '$' ->
       let lid = Local_id.make_unscoped x in
       N.CIexpr ((), p, N.Lvar (p, lid))
-    | _ ->
-      let () = check_name env.ctx cid in
-      N.CI cid )
+    | _ -> N.CI cid )
 
 let extend_tparams genv paraml =
   let params =
@@ -759,12 +742,10 @@ and expr_ env p (e : Nast.expr_) =
         begin
           match (expr env e1, expr env e2) with
           | ((_, pc, N.String cl), (_, pm, N.String meth)) ->
-            let () = check_name env.ctx (pc, cl) in
             N.Method_caller ((pc, cl), (pm, meth))
           | ( (_, _, N.Class_const ((_, _, N.CI cl), (_, mem))),
               (_, pm, N.String meth) )
             when String.equal mem SN.Members.mClass ->
-            let () = check_name env.ctx cl in
             N.Method_caller (cl, (pm, meth))
           | ((_, p, _), _) ->
             Errors.add_naming_error @@ Naming_error.Illegal_meth_caller p;
@@ -791,7 +772,6 @@ and expr_ env p (e : Nast.expr_) =
         begin
           match (expr env e1, expr env e2) with
           | ((_, pc, N.String cl), (_, pm, N.String meth)) ->
-            let () = check_name env.ctx (pc, cl) in
             let cid = N.CI (pc, cl) in
             N.Smethod_id (((), pc, cid), (pm, meth))
           | ((_, _, N.Id (pc, const)), (_, pm, N.String meth))
@@ -820,7 +800,6 @@ and expr_ env p (e : Nast.expr_) =
           | ( (_, _, N.Class_const ((_, pc, N.CI cl), (_, mem))),
               (_, pm, N.String meth) )
             when String.equal mem SN.Members.mClass ->
-            let () = check_name env.ctx cl in
             let cid = N.CI cl in
             N.Smethod_id (((), pc, cid), (pm, meth))
           | ( (_, p, N.Class_const ((_, pc, N.CIself), (_, mem))),
@@ -972,17 +951,13 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Lfun (f, idl) ->
     let f = expr_lambda env f in
     N.Lfun (f, idl)
-  | Aast.Xml (x, al, el) ->
-    let () = check_name env.ctx x in
-    N.Xml (x, attrl env al, exprl env el)
+  | Aast.Xml (x, al, el) -> N.Xml (x, attrl env al, exprl env el)
   | Aast.Shape fdl ->
     let shp = List.map fdl ~f:(fun (pname, value) -> (pname, expr env value)) in
     N.Shape shp
   | Aast.Import _ -> ignored_expr_ p
   | Aast.Omitted -> N.Omitted
-  | Aast.EnumClassLabel (opt_sid, x) ->
-    let () = Option.iter ~f:(check_name env.ctx) opt_sid in
-    N.EnumClassLabel (opt_sid, x)
+  | Aast.EnumClassLabel (opt_sid, x) -> N.EnumClassLabel (opt_sid, x)
   | Aast.ReadonlyExpr e -> N.ReadonlyExpr (expr env e)
   (* The below were not found on the AST.ml so they are not implemented here *)
   | Aast.This
@@ -1042,7 +1017,6 @@ and catchl env l = List.map l ~f:(catch env)
 
 and catch env ((p1, lid1), (p2, lid2), b) =
   let b = branch env b in
-  let () = check_name env.ctx (p1, lid1) in
   ((p1, lid1), (p2, lid2), b)
 
 and afield env field =
@@ -1128,7 +1102,6 @@ and user_attributes env attrl =
       true
   in
   let on_attr acc { Aast.ua_name; ua_params } =
-    let () = check_name env.ctx ua_name in
     if not (validate_seen ua_name) then
       acc
     else

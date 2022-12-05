@@ -166,12 +166,6 @@ let check_repetition s param =
   else
     s
 
-let arg_unpack_unexpected = function
-  | None -> ()
-  | Some (_, pos, _) ->
-    Errors.add_naming_error @@ Naming_error.Too_few_arguments pos;
-    ()
-
 let invalid_expr_ (p : Pos.t) : Nast.expr_ =
   let throw : Nast.stmt =
     ( p,
@@ -211,8 +205,6 @@ let invalid_expr_ (p : Pos.t) : Nast.expr_ =
       [],
       [],
       None )
-
-let invalid_expr p : Nast.expr = ((), p, invalid_expr_ p)
 
 let ignored_expr_ p : Nast.expr_ = invalid_expr_ p
 
@@ -790,112 +782,12 @@ let class_prop_non_static env ?(const = None) cv =
   let cv_xhp_attr = make_xhp_attr is_xhp in
   Aast.{ cv with cv_xhp_attr; cv_expr; cv_user_attributes }
 
-let rec check_constant_expr env expr =
-  let (_, pos, e) = expr in
-  match e with
-  | Aast.Id _
-  | Aast.Null
-  | Aast.True
-  | Aast.False
-  | Aast.Int _
-  | Aast.Float _
-  | Aast.String _ ->
-    true
-  | Aast.(Class_const ((_, _, (CIparent | CIself | CI _)), _)) -> true
-  | Aast.(Class_const ((_, _, Aast.CIexpr (_, _, (This | Id _))), _)) -> true
-  | Aast.Upcast (e, _) -> check_constant_expr env e
-  | Aast.Unop
-      ((Ast_defs.Uplus | Ast_defs.Uminus | Ast_defs.Utild | Ast_defs.Unot), e)
-    ->
-    check_constant_expr env e
-  | Aast.Binop (op, e1, e2) ->
-    (* Only assignment is invalid *)
-    begin
-      match op with
-      | Ast_defs.Eq _ ->
-        Errors.add_naming_error @@ Naming_error.Illegal_constant pos;
-        false
-      | _ -> check_constant_expr env e1 && check_constant_expr env e2
-    end
-  | Aast.Eif (e1, e2, e3) ->
-    check_constant_expr env e1
-    && Option.for_all e2 ~f:(check_constant_expr env)
-    && check_constant_expr env e3
-  | Aast.Darray (_, l) ->
-    List.for_all l ~f:(fun (e1, e2) ->
-        check_constant_expr env e1 && check_constant_expr env e2)
-  | Aast.Varray (_, l) -> List.for_all l ~f:(check_constant_expr env)
-  | Aast.Shape fdl ->
-    (* Only check the values because shape field names are always legal *)
-    List.for_all fdl ~f:(fun (_, e) -> check_constant_expr env e)
-  | Aast.Call ((_, _, Aast.Id (_, cn)), _, el, unpacked_element)
-    when String.equal cn SN.StdlibFunctions.array_mark_legacy
-         || String.equal cn SN.PseudoFunctions.unsafe_cast
-         || String.equal cn SN.PseudoFunctions.unsafe_nonnull_cast ->
-    arg_unpack_unexpected unpacked_element;
-    List.for_all el ~f:(fun (_, e) -> check_constant_expr env e)
-  | Aast.Smethod_id (_, _) -> true
-  | Aast.Fun_id (_, _) -> true
-  | Aast.Tuple el -> List.for_all el ~f:(check_constant_expr env)
-  | Aast.FunctionPointer ((Aast.FP_id _ | Aast.FP_class_const _), _) -> true
-  | Aast.ValCollection ((Aast.Vec | Aast.Keyset), _, l) ->
-    (* Only vec/keyset are allowed because they are value types *)
-    List.for_all l ~f:(check_constant_expr env)
-  | Aast.KeyValCollection (Aast.Dict, _, l) ->
-    (* Only dict is allowed because it is a value type *)
-    List.for_all l ~f:(check_field_constant_expr env)
-  | Aast.As (e, (_, Aast.Hlike _), _) -> check_constant_expr env e
-  | Aast.As (e, (_, Aast.Happly ((p, cn), [_])), _) ->
-    if String.equal cn SN.FB.cIncorrectType then
-      check_constant_expr env e
-    else (
-      Errors.add_naming_error @@ Naming_error.Illegal_constant p;
-      false
-    )
-  | Aast.Omitted when FileInfo.is_hhi env.in_mode ->
-    (* Only allowed in HHI positions where we don't care about the value *)
-    true
-  | _ ->
-    Errors.add_naming_error @@ Naming_error.Illegal_constant pos;
-    false
-
-and check_field_constant_expr env (e1, e2) =
-  check_constant_expr env e1 && check_constant_expr env e2
-
-let check_constant_expression env ~in_enum_class (ty, pos, e) =
-  if not in_enum_class then
-    check_constant_expr env (ty, pos, e)
-  else
-    true
-
-let constant_expr env ~in_enum_class e =
-  let valid_constant_expression =
-    check_constant_expression env ~in_enum_class e
-  in
-  if valid_constant_expression then
-    expr env e
-  else
-    let (_, p, _) = e in
-    invalid_expr p
-
-let class_const_kind env ~in_enum_class kind =
-  match kind with
-  | Aast.CCConcrete e -> N.CCConcrete (constant_expr env ~in_enum_class e)
-  | Aast.CCAbstract default ->
-    let default = Option.map default ~f:(constant_expr env ~in_enum_class) in
-    N.CCAbstract default
-
-let class_const env ~in_enum_class cc =
-  let h = cc.Aast.cc_type in
-  let kind = class_const_kind env ~in_enum_class cc.Aast.cc_kind in
-  {
-    N.cc_type = h;
-    N.cc_id = cc.Aast.cc_id;
-    N.cc_kind = kind;
-    N.cc_doc_comment = cc.Aast.cc_doc_comment;
-    N.cc_span = cc.Aast.cc_span;
-    N.cc_user_attributes = user_attributes env cc.Aast.cc_user_attributes;
-  }
+let class_const env ~in_enum_class:_ cc =
+  Aast.
+    {
+      cc with
+      cc_user_attributes = user_attributes env cc.Aast.cc_user_attributes;
+    }
 
 (* h cv is_required maybe_enum *)
 let xhp_attribute_decl env (h, cv, tag, maybe_enum) =
@@ -1130,9 +1022,7 @@ let typedef_help ctx env tdef =
 (* Global constants *)
 (**************************************************************************)
 
-let global_const_help _ env cst =
-  let cst_value = constant_expr env ~in_enum_class:false cst.Aast.cst_value in
-  Aast.{ cst with cst_value; cst_annotation = () }
+let global_const_help _ _env cst = Aast.{ cst with cst_annotation = () }
 
 (**************************************************************************)
 (* Module declarations *)
@@ -1225,6 +1115,7 @@ type 'elem pipeline = {
   elab_call: (Naming_elab_call.Env.t, 'elem) elabidation;
   elab_tuple: (Naming_elab_tuple.Env.t, 'elem) elabidation;
   elab_invariant: (Naming_elab_invariant.Env.t, 'elem) elabidation;
+  elab_const_expr: (Naming_elab_const_expr.Env.t, 'elem) elabidation;
   elab_help: Provider_context.t -> genv -> 'elem -> 'elem;
   elab_soft: (Naming_elab_soft.Env.t, 'elem) elaboration;
   elab_everything_sdt: (Naming_elab_everything_sdt.Env.t, 'elem) elaboration;
@@ -1253,6 +1144,7 @@ let elab_elem
       elab_call;
       elab_tuple;
       elab_invariant;
+      elab_const_expr;
       elab_help;
       elab_soft;
       elab_everything_sdt;
@@ -1313,6 +1205,8 @@ let elab_elem
   let (elem, err) = elab_tuple ~init:err elem in
 
   let (elem, err) = elab_invariant ~init:err elem in
+
+  let (elem, err) = elab_const_expr ~init:err elem in
 
   (* General expression / statement / xhp elaboration & validation *)
   let elem = elab_help ctx env elem in
@@ -1424,6 +1318,7 @@ let program ctx ast =
       elab_call = Naming_elab_call.elab_program;
       elab_tuple = Naming_elab_tuple.elab_program;
       elab_invariant = Naming_elab_invariant.elab_program;
+      elab_const_expr = Naming_elab_const_expr.elab_program;
       elab_help = program_help;
       elab_soft = Naming_elab_soft.elab_program;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_program;
@@ -1455,6 +1350,7 @@ let fun_def ctx fd =
       elab_call = Naming_elab_call.elab_fun_def;
       elab_tuple = Naming_elab_tuple.elab_fun_def;
       elab_invariant = Naming_elab_invariant.elab_fun_def;
+      elab_const_expr = Naming_elab_const_expr.elab_fun_def;
       elab_help = fun_def_help;
       elab_soft = Naming_elab_soft.elab_fun_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_fun_def;
@@ -1486,6 +1382,7 @@ let class_ ctx c =
       elab_call = Naming_elab_call.elab_class;
       elab_tuple = Naming_elab_tuple.elab_class;
       elab_invariant = Naming_elab_invariant.elab_class;
+      elab_const_expr = Naming_elab_const_expr.elab_class;
       elab_help = class_help;
       elab_soft = Naming_elab_soft.elab_class;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_class;
@@ -1517,6 +1414,7 @@ let module_ ctx module_ =
       elab_call = Naming_elab_call.elab_module_def;
       elab_tuple = Naming_elab_tuple.elab_module_def;
       elab_invariant = Naming_elab_invariant.elab_module_def;
+      elab_const_expr = Naming_elab_const_expr.elab_module_def;
       elab_help = module_help;
       elab_soft = Naming_elab_soft.elab_module_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_module_def;
@@ -1548,6 +1446,7 @@ let global_const ctx cst =
       elab_call = Naming_elab_call.elab_gconst;
       elab_tuple = Naming_elab_tuple.elab_gconst;
       elab_invariant = Naming_elab_invariant.elab_gconst;
+      elab_const_expr = Naming_elab_const_expr.elab_gconst;
       elab_help = global_const_help;
       elab_soft = Naming_elab_soft.elab_gconst;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_gconst;
@@ -1579,6 +1478,7 @@ let typedef ctx tdef =
       elab_call = Naming_elab_call.elab_typedef;
       elab_tuple = Naming_elab_tuple.elab_typedef;
       elab_invariant = Naming_elab_invariant.elab_typedef;
+      elab_const_expr = Naming_elab_const_expr.elab_typedef;
       elab_help = typedef_help;
       elab_soft = Naming_elab_soft.elab_typedef;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_typedef;

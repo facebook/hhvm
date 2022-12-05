@@ -132,6 +132,7 @@
   naming_elab_call
   naming_elab_class_id
   naming_elab_collection
+  naming_elab_const_expr
   naming_elab_dynamic_class_name
   naming_elab_enum_class
   naming_elab_everything_sdt

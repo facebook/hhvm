@@ -28,36 +28,6 @@ let elaborate_namespaces =
 let invalid_expr_ = Naming_phase_error.invalid_expr_
 
 (**************************************************************************)
-(* Programs *)
-(**************************************************************************)
-
-let program_help ast =
-  let rec aux acc def =
-    match def with
-    (* These are elaborated away in Namespaces.elaborate_toplevel_defs *)
-    | Aast.FileAttributes _
-    | Aast.Stmt (_, Aast.Noop)
-    | Aast.Stmt (_, Aast.Markup _)
-    | Aast.NamespaceUse _
-    | Aast.SetNamespaceEnv _ ->
-      acc
-    | Aast.Stmt _
-    | Aast.Fun _
-    | Aast.Class _
-    | Aast.Typedef _
-    | Aast.Constant _
-    | Aast.Module _
-    | Aast.SetModule _ ->
-      def :: acc
-    | Aast.Namespace (_ns, aast) -> List.fold_left ~f:aux ~init:[] aast @ acc
-  in
-  let on_program aast =
-    let nast = List.fold_left ~f:aux ~init:[] aast in
-    List.rev nast
-  in
-  on_program ast
-
-(**************************************************************************)
 (* The entry points to CHECK the program, and transform the program *)
 (**************************************************************************)
 
@@ -78,7 +48,7 @@ type 'elem pipeline = {
   elab_func_body: (Naming_elab_func_body.Env.t, 'elem) elaboration;
   elab_lambda_captures: (Naming_captures.Env.t, 'elem) elaboration;
   elab_class_members: (Naming_elab_class_members.Env.t, 'elem) elabidation;
-  elab_help: 'elem -> 'elem;
+  elab_defs: (Naming_elab_defs.Env.t, 'elem) elaboration;
   elab_soft: (Naming_elab_soft.Env.t, 'elem) elaboration;
   elab_everything_sdt: (Naming_elab_everything_sdt.Env.t, 'elem) elaboration;
   elab_hkt: (Naming_elab_hkt.Env.t, 'elem) elabidation;
@@ -105,6 +75,7 @@ let elab_elem
     ~filename
     {
       elab_ns;
+      elab_defs;
       elab_hints;
       elab_collection;
       elab_call;
@@ -120,7 +91,6 @@ let elab_elem
       elab_func_body;
       elab_lambda_captures;
       elab_class_members;
-      elab_help;
       elab_soft;
       elab_everything_sdt;
       elab_hkt;
@@ -139,6 +109,9 @@ let elab_elem
   let tcopt = Provider_context.get_tcopt ctx in
   (* Elaborate namespaces *)
   let elem = elab_ns elem in
+
+  (* Remove or flatten top level defs *)
+  let elem = elab_defs elem in
 
   (* Elaborate hints, collect errors and report them *)
   let (elem, err) = elab_hints elem in
@@ -210,9 +183,6 @@ let elab_elem
   in
 
   let (elem, err) = elab_class_members ~init:err elem in
-
-  (* General expression / statement / xhp elaboration & validation *)
-  let elem = elab_help elem in
 
   (* Miscellaneous validation  *)
   (* TODO[mjt] move these to NAST checks*)
@@ -348,6 +318,7 @@ let program ctx ast =
         elaborate_namespaces#on_program
           (Naming_elaborate_namespaces_endo.make_env
              Namespace_env.empty_with_default);
+      elab_defs = Naming_elab_defs.elab_program;
       elab_hints = Naming_elab_hints.elab_program;
       elab_collection = Naming_elab_collection.elab_program;
       elab_call = Naming_elab_call.elab_program;
@@ -363,7 +334,6 @@ let program ctx ast =
       elab_func_body = Naming_elab_func_body.elab_program;
       elab_lambda_captures = Naming_captures.elab_program;
       elab_class_members = Naming_elab_class_members.elab_program;
-      elab_help = program_help;
       elab_soft = Naming_elab_soft.elab_program;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_program;
       elab_hkt = Naming_elab_hkt.elab_program;
@@ -392,6 +362,7 @@ let fun_def ctx fd =
       elab_ns =
         elaborate_namespaces#on_fun_def
           (Naming_elaborate_namespaces_endo.make_env fd.Aast.fd_namespace);
+      elab_defs = Naming_elab_defs.elab_fun_def;
       elab_hints = Naming_elab_hints.elab_fun_def;
       elab_collection = Naming_elab_collection.elab_fun_def;
       elab_call = Naming_elab_call.elab_fun_def;
@@ -407,7 +378,6 @@ let fun_def ctx fd =
       elab_func_body = Naming_elab_func_body.elab_fun_def;
       elab_lambda_captures = Naming_captures.elab_fun_def;
       elab_class_members = Naming_elab_class_members.elab_fun_def;
-      elab_help = (fun elem -> elem);
       elab_soft = Naming_elab_soft.elab_fun_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_fun_def;
       elab_hkt = Naming_elab_hkt.elab_fun_def;
@@ -436,6 +406,7 @@ let class_ ctx c =
       elab_ns =
         elaborate_namespaces#on_class_
           (Naming_elaborate_namespaces_endo.make_env c.Aast.c_namespace);
+      elab_defs = Naming_elab_defs.elab_class;
       elab_hints = Naming_elab_hints.elab_class;
       elab_collection = Naming_elab_collection.elab_class;
       elab_call = Naming_elab_call.elab_class;
@@ -451,7 +422,6 @@ let class_ ctx c =
       elab_func_body = Naming_elab_func_body.elab_class;
       elab_lambda_captures = Naming_captures.elab_class;
       elab_class_members = Naming_elab_class_members.elab_class;
-      elab_help = (fun elem -> elem);
       elab_soft = Naming_elab_soft.elab_class;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_class;
       elab_hkt = Naming_elab_hkt.elab_class;
@@ -481,6 +451,7 @@ let module_ ctx module_ =
         elaborate_namespaces#on_module_def
           (Naming_elaborate_namespaces_endo.make_env
              Namespace_env.empty_with_default);
+      elab_defs = Naming_elab_defs.elab_module_def;
       elab_hints = Naming_elab_hints.elab_module_def;
       elab_collection = Naming_elab_collection.elab_module_def;
       elab_call = Naming_elab_call.elab_module_def;
@@ -496,7 +467,6 @@ let module_ ctx module_ =
       elab_func_body = Naming_elab_func_body.elab_module_def;
       elab_lambda_captures = Naming_captures.elab_module_def;
       elab_class_members = Naming_elab_class_members.elab_module_def;
-      elab_help = (fun elem -> elem);
       elab_soft = Naming_elab_soft.elab_module_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_module_def;
       elab_hkt = Naming_elab_hkt.elab_module_def;
@@ -525,6 +495,7 @@ let global_const ctx cst =
       elab_ns =
         elaborate_namespaces#on_gconst
           (Naming_elaborate_namespaces_endo.make_env cst.Aast.cst_namespace);
+      elab_defs = Naming_elab_defs.elab_gconst;
       elab_hints = Naming_elab_hints.elab_gconst;
       elab_collection = Naming_elab_collection.elab_gconst;
       elab_call = Naming_elab_call.elab_gconst;
@@ -540,7 +511,6 @@ let global_const ctx cst =
       elab_func_body = Naming_elab_func_body.elab_gconst;
       elab_lambda_captures = Naming_captures.elab_gconst;
       elab_class_members = Naming_elab_class_members.elab_gconst;
-      elab_help = (fun elem -> elem);
       elab_soft = Naming_elab_soft.elab_gconst;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_gconst;
       elab_hkt = Naming_elab_hkt.elab_gconst;
@@ -569,6 +539,7 @@ let typedef ctx tdef =
       elab_ns =
         elaborate_namespaces#on_typedef
           (Naming_elaborate_namespaces_endo.make_env tdef.Aast.t_namespace);
+      elab_defs = Naming_elab_defs.elab_typedef;
       elab_hints = Naming_elab_hints.elab_typedef;
       elab_collection = Naming_elab_collection.elab_typedef;
       elab_call = Naming_elab_call.elab_typedef;
@@ -584,7 +555,6 @@ let typedef ctx tdef =
       elab_func_body = Naming_elab_func_body.elab_typedef;
       elab_lambda_captures = Naming_captures.elab_typedef;
       elab_class_members = Naming_elab_class_members.elab_typedef;
-      elab_help = (fun elem -> elem);
       elab_soft = Naming_elab_soft.elab_typedef;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_typedef;
       elab_hkt = Naming_elab_hkt.elab_typedef;

@@ -25,10 +25,10 @@ type pos = {
    type representation, and the list of class names with
    their position within the string.
 
-   Currently, only consider class names, but should be
-   extended to other types of symbols *)
+   Symbols are identified by their position `Pos.t` within the file *)
+
 val hint_to_string_and_symbols :
-  Provider_context.t -> Aast.hint -> string * (string * pos list) list
+  Provider_context.t -> Aast.hint -> string * (Pos.t * pos) list
 
 val get_context_from_hint : Provider_context.t -> Aast.hint -> string
 

@@ -225,6 +225,7 @@ module Fact_acc = struct
     resultJson: owned_facts Map.t;
     factIds: Fact_id.t JsonPredicateMap.t;
     mutable ownership_unit: ownership_unit;
+    mutable xrefs: Symbol_xrefs.pos_map option;
     ownership: bool;
   }
 
@@ -299,6 +300,7 @@ module Fact_acc = struct
       factIds = JsonPredicateMap.empty;
       ownership_unit = None;
       ownership;
+      xrefs = None;
     }
 
   let set_ownership_unit t ou = t.ownership_unit <- ou
@@ -324,4 +326,8 @@ module Fact_acc = struct
         ordered_all
     in
     List.concat_map preds ~f:(owned_facts_to_json ~ownership)
+
+  let set_pos_map t xrefs = t.xrefs <- Some xrefs
+
+  let get_pos_map t = t.xrefs
 end

@@ -149,19 +149,14 @@ type pos = {
    to Typing_print.full_strip_ns_decl *)
 let string_of_type ctx (t : Aast.hint) =
   let queue = Queue.create () in
-  let class_pos = Hashtbl.create (module Base.String) in
   let cur = ref 0 in
+  let xrefs = ref [] in
   let enqueue ?annot str =
     let length = String.length str in
     let pos = { start = !cur; length } in
     Queue.enqueue queue str;
-    Option.iter annot ~f:(fun cn ->
-        let f = function
-          | None -> [pos]
-          | Some prev -> pos :: prev
-        in
-        Hashtbl.update class_pos cn ~f);
-    cur := !cur + length
+    cur := !cur + length;
+    Option.iter annot ~f:(fun file_pos -> xrefs := (file_pos, pos) :: !xrefs)
   in
   let rec parse t =
     let open Aast in
@@ -175,8 +170,8 @@ let string_of_type ctx (t : Aast.hint) =
     | Hsoft t ->
       enqueue "@";
       parse t
-    | Happly ((_, cn), hs) ->
-      enqueue ~annot:cn (Typing_print.strip_ns cn);
+    | Happly ((file_pos, cn), hs) ->
+      enqueue ~annot:file_pos (Typing_print.strip_ns cn);
       parse_list ("<", ">") hs
     | Htuple hs -> parse_list ("(", ")") hs
     | Hprim p -> enqueue (Aast_defs.string_of_tprim p)
@@ -205,8 +200,7 @@ let string_of_type ctx (t : Aast.hint) =
   in
   parse t;
   let toks = Queue.to_list queue in
-  let xrefs = Hashtbl.to_alist class_pos in
-  (String.concat toks, xrefs)
+  (String.concat toks, !xrefs)
 
 let hint_to_string_and_symbols ctx h =
   let ty_pp_ref = get_type_from_hint_strip_ns ctx h in

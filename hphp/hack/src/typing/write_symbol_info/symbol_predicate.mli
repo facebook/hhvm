@@ -69,8 +69,9 @@ val parent_decl_predicate : parent_container_type -> string * t
 val get_parent_kind : ('a, 'b) Aast.class_ -> parent_container_type
 
 module Fact_acc : sig
-  (* fact accumulator. This is used to store facts generated from
-     a batch of files. *)
+  (* fact accumulator. This is used to maintain state through indexing
+     a batch. State is mostly generated facts *)
+
   type t
 
   val init : ownership:bool -> t
@@ -86,6 +87,10 @@ module Fact_acc : sig
      which corresponds to fact with no owners. If [ownership] is false,
      the ownership_unit is ignored. *)
   val set_ownership_unit : t -> string option -> unit
+
+  val set_pos_map : t -> Symbol_xrefs.pos_map -> unit
+
+  val get_pos_map : t -> Symbol_xrefs.pos_map option
 
   (** [add_fact pred fact t] returns an [id] and a new accumulator [t'].
      If a fact already exists in [t] for this [pred], returns [t] unchanged

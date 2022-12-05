@@ -16,6 +16,7 @@ module File_info = Symbol_file_info
 module Gencode = Symbol_gencode
 module Add_fact = Symbol_add_fact
 module Fact_acc = Symbol_predicate.Fact_acc
+module XRefs = Symbol_xrefs
 
 let process_source_text _ctx prog File_info.{ path; source_text; _ } =
   let text = Full_fidelity_source_text.text source_text in
@@ -44,9 +45,10 @@ let build_json ctx files_info ~ownership =
   let index_file progress file_info =
     Fact_acc.set_ownership_unit progress (Some file_info.File_info.path);
     let progress = process_source_text ctx progress file_info in
-    let (progress, _xrefs) =
+    let (progress, xrefs) =
       Symbol_index_xrefs.process_xrefs_and_calls ctx progress file_info
     in
+    Fact_acc.set_pos_map progress xrefs.XRefs.pos_map;
     Symbol_index_decls.process_decls ctx progress file_info
   in
   let progress = Fact_acc.init ~ownership in

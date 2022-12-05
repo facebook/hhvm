@@ -15,7 +15,6 @@ module Predicate = Symbol_predicate
 module Fact_id = Symbol_fact_id
 module Fact_acc = Symbol_predicate.Fact_acc
 module XRefs = Symbol_xrefs
-module Sym_def = Symbol_sym_def
 
 let namespace_decl name progress =
   let json_fields =
@@ -237,45 +236,38 @@ let type_info ~ty sym_pos progress =
   in
   Fact_acc.add_fact Predicate.(Hack TypeInfo) json progress
 
-let class_name_to_target ctx sid progress : Hh_json.json option * Fact_acc.t =
-  match Sym_def.get_kind ctx sid with
-  | None -> (None, progress)
-  | Some kind ->
-    let (predicate, container_kind) =
-      let open Ast_defs in
-      match kind with
-      | Cclass _ -> (Predicate.ClassDeclaration, "class_")
-      | Cinterface -> (Predicate.InterfaceDeclaration, "interface_")
-      | Ctrait -> (Predicate.TraitDeclaration, "trait")
-      | Cenum
-      | Cenum_class _ ->
-        (Predicate.EnumDeclaration, "enum_")
-    in
-    let (fact_id, progress) =
-      container_decl (Predicate.Hack predicate) sid progress
-    in
-    ( Some
-        (Build_json.build_decl_target_json
-           (Build_json.build_container_decl_json_ref container_kind fact_id)),
-      progress )
+let aggregate_pos (json_pos_list : (json * Util.pos) list) :
+    (json * Util.pos list) list =
+  let jmap =
+    List.fold json_pos_list ~init:JMap.empty ~f:(fun acc (json, pos) ->
+        let f = function
+          | None -> Some [pos]
+          | Some prev -> Some (pos :: prev)
+        in
+        JMap.update json f acc)
+  in
+  JMap.to_seq jmap |> Caml.List.of_seq
 
-let build_signature ctx source_text params ctxs ret progress =
+let build_signature ctx pos_map_opt source_text params ctxs ret progress =
+  let pos_map =
+    match pos_map_opt with
+    | Some pos_map -> pos_map
+    | None -> failwith "Internal error: pos_map should be set in previous phase"
+  in
   let hint_to_str_opt h progress =
     match hint_of_type_hint h with
     | None -> (None, None, progress)
     | Some hint ->
       let legacy_ty = Util.get_type_from_hint ctx hint in
       let (ty, sym_pos) = Util.hint_to_string_and_symbols ctx hint in
-      let (decl_json_pos, progress) =
-        List.fold
-          sym_pos
-          ~init:([], progress)
-          ~f:(fun (decl_refs, prog) (decl, pos) ->
-            match class_name_to_target ctx decl prog with
-            | (None, prog) -> (decl_refs, prog)
-            | (Some json, prog) -> ((json, pos) :: decl_refs, prog))
+      let decl_json_pos =
+        List.filter_map sym_pos ~f:(fun (source_pos, pos) ->
+            match XRefs.PosMap.find_opt source_pos pos_map with
+            | None -> None
+            | Some json -> Some (json, pos))
       in
-      let (fact_id, progress) = type_info ~ty decl_json_pos progress in
+      let decl_json_aggr_pos = aggregate_pos decl_json_pos in
+      let (fact_id, progress) = type_info ~ty decl_json_aggr_pos progress in
       (Some legacy_ty, Some fact_id, progress)
   in
   let (params, progress) =
@@ -307,6 +299,7 @@ let method_defn ctx source_text meth decl_id progress =
   let (signature, progress) =
     build_signature
       ctx
+      (Fact_acc.get_pos_map progress)
       source_text
       meth.m_params
       meth.m_ctxs
@@ -489,7 +482,14 @@ let func_defn ctx source_text fd decl_id progress =
   in
   let (mf, prog) = module_field fd.fd_module fd.fd_internal prog in
   let (signature, prog) =
-    build_signature ctx source_text elem.f_params elem.f_ctxs elem.f_ret prog
+    build_signature
+      ctx
+      (Fact_acc.get_pos_map progress)
+      source_text
+      elem.f_params
+      elem.f_ctxs
+      elem.f_ret
+      prog
   in
   let json_fields =
     mf

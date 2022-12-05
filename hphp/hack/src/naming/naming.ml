@@ -1520,33 +1520,6 @@ let xhp_attribute_decl env (h, cv, tag, maybe_enum) =
   in
   Aast.{ cv with cv_xhp_attr; cv_type; cv_expr; cv_user_attributes = [] }
 
-let enum_ _env enum_name ~in_enum_class ~abstract_enum_class e =
-  let open Aast in
-  let pos = fst enum_name in
-  let enum_hint = (pos, Happly (enum_name, [])) in
-  let old_base = e.e_base in
-  let new_base = old_base in
-  let bound =
-    if in_enum_class then
-      if abstract_enum_class then
-        []
-      else
-        (* Turn the base type of the enum class into MemberOf<E, base> *)
-        let elt = (pos, SN.Classes.cMemberOf) in
-        let h = (pos, Happly (elt, [enum_hint; old_base])) in
-        [h]
-    else
-      [enum_hint]
-  in
-  let enum =
-    {
-      N.e_base = new_base;
-      N.e_constraint = e.e_constraint;
-      N.e_includes = e.e_includes;
-    }
-  in
-  (Some bound, Some enum)
-
 let typeconsts ctx env c =
   let open Aast in
   (* Normal move, just run the algorithm on the declared type constants *)
@@ -1602,43 +1575,15 @@ let class_help ctx env c =
   let xhp_attrs = List.map ~f:(xhp_attribute_decl env) c.Aast.c_xhp_attrs in
   (* These would be out of order with the old attributes, but that shouldn't matter? *)
   let props = props @ xhp_attrs in
-  let (in_enum_class, abstract_enum_class) =
+  let in_enum_class =
     let open Ast_defs in
     match c.Aast.c_kind with
-    | Cenum_class Concrete -> (true, false)
-    | Cenum_class Abstract -> (true, true)
+    | Cenum_class _ -> true
     | Cclass _
     | Cinterface
     | Cenum
     | Ctrait ->
-      (false, false)
-  in
-  let (enum_bound, enum) =
-    match c.Aast.c_enum with
-    | Some enum ->
-      enum_ env c.Aast.c_name ~in_enum_class ~abstract_enum_class enum
-    | None -> (None, None)
-  in
-  let parents = c.Aast.c_extends in
-  let parents =
-    match enum_bound with
-    (* Make enums implicitly extend the BuiltinEnum/BuiltinEnumClass classes in
-     * order to provide utility methods.
-     *)
-    | Some bounds_list ->
-      let pos = fst c.Aast.c_name in
-      let builtin =
-        if in_enum_class then
-          if abstract_enum_class then
-            SN.Classes.cHH_BuiltinAbstractEnumClass
-          else
-            SN.Classes.cHH_BuiltinEnumClass
-        else
-          SN.Classes.cHH_BuiltinEnum
-      in
-      let parent = (pos, N.Happly ((pos, builtin), bounds_list)) in
-      parent :: parents
-    | None -> parents
+      false
   in
   let methods = List.map ~f:(method_ env) methods in
   let uses = c.Aast.c_uses in
@@ -1720,7 +1665,6 @@ let class_help ctx env c =
       c with
       c_annotation = ();
       c_tparams;
-      c_extends = parents;
       c_uses = uses;
       c_xhp_attr_uses = xhp_attr_uses;
       c_reqs = req_extends @ req_implements @ req_class;
@@ -1731,7 +1675,6 @@ let class_help ctx env c =
       c_methods = methods;
       c_user_attributes = attrs;
       c_file_attributes = file_attributes;
-      c_enum = enum;
       (* Naming and typechecking shouldn't use these fields *)
       c_xhp_attrs = [];
     }
@@ -1862,6 +1805,7 @@ type 'elem pipeline = {
     ?env:Naming_elab_hkt.Env.t ->
     'elem ->
     'elem * Naming_phase_error.t;
+  elab_enum_class: ?env:Naming_elab_enum_class.Env.t -> 'elem -> 'elem;
   validate_xhp:
     ?init:Naming_phase_error.t ->
     ?env:Naming_validate_xhp_name.Env.t ->
@@ -1892,6 +1836,7 @@ let elab_elem
       elab_soft;
       elab_everything_sdt;
       elab_hkt;
+      elab_enum_class;
       validate_xhp;
       validate_builtin_enum;
       validate_supportdyn;
@@ -1923,9 +1868,10 @@ let elab_elem
       err
   in
 
-  (* General expression / statement / enum class / xhp elaboration & validation
-     - this is side-effecting
-  *)
+  (* Add implicit extends for enums & enum classes *)
+  let elem = elab_enum_class elem in
+
+  (* General expression / statement / xhp elaboration & validation *)
   let elem = elab_help ctx env elem in
 
   (* Miscellaneous validation  *)
@@ -2012,6 +1958,7 @@ let program ctx ast =
       elab_soft = Naming_elab_soft.elab_program;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_program;
       elab_hkt = Naming_elab_hkt.elab_program;
+      elab_enum_class = Naming_elab_enum_class.elab_program;
       validate_xhp = Naming_validate_xhp_name.validate_program;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_program;
       validate_supportdyn = Naming_validate_supportdyn.validate_program;
@@ -2034,6 +1981,7 @@ let fun_def ctx fd =
       elab_soft = Naming_elab_soft.elab_fun_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_fun_def;
       elab_hkt = Naming_elab_hkt.elab_fun_def;
+      elab_enum_class = Naming_elab_enum_class.elab_fun_def;
       validate_xhp = Naming_validate_xhp_name.validate_fun_def;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_fun_def;
       validate_supportdyn = Naming_validate_supportdyn.validate_fun_def;
@@ -2056,6 +2004,7 @@ let class_ ctx c =
       elab_soft = Naming_elab_soft.elab_class;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_class;
       elab_hkt = Naming_elab_hkt.elab_class;
+      elab_enum_class = Naming_elab_enum_class.elab_class;
       validate_xhp = Naming_validate_xhp_name.validate_class;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_class;
       validate_supportdyn = Naming_validate_supportdyn.validate_class;
@@ -2078,6 +2027,7 @@ let module_ ctx module_ =
       elab_soft = Naming_elab_soft.elab_module_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_module_def;
       elab_hkt = Naming_elab_hkt.elab_module_def;
+      elab_enum_class = Naming_elab_enum_class.elab_module_def;
       validate_xhp = Naming_validate_xhp_name.validate_module_def;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_module_def;
       validate_supportdyn = Naming_validate_supportdyn.validate_module_def;
@@ -2100,6 +2050,7 @@ let global_const ctx cst =
       elab_soft = Naming_elab_soft.elab_gconst;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_gconst;
       elab_hkt = Naming_elab_hkt.elab_gconst;
+      elab_enum_class = Naming_elab_enum_class.elab_gconst;
       validate_xhp = Naming_validate_xhp_name.validate_gconst;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_gconst;
       validate_supportdyn = Naming_validate_supportdyn.validate_gconst;
@@ -2122,6 +2073,7 @@ let typedef ctx tdef =
       elab_soft = Naming_elab_soft.elab_typedef;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_typedef;
       elab_hkt = Naming_elab_hkt.elab_typedef;
+      elab_enum_class = Naming_elab_enum_class.elab_typedef;
       validate_xhp = Naming_validate_xhp_name.validate_typedef;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_typedef;
       validate_supportdyn = Naming_validate_supportdyn.validate_typedef;

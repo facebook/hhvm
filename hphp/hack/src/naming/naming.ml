@@ -185,20 +185,6 @@ let make_xhp_attr = function
   | false -> None
 
 (**************************************************************************)
-(* Top level function definitions *)
-(**************************************************************************)
-
-let fun_def_help ctx _ fd =
-  (* TODO[mjt] pull out into a tcopt elaboration pass *)
-  if
-    Provider_context.get_tcopt ctx |> TypecheckerOptions.substitution_mutation
-    && FileInfo.equal_mode fd.Aast.fd_mode FileInfo.Mstrict
-  then
-    Substitution_mutation.mutate_fun_def fd
-  else
-    fd
-
-(**************************************************************************)
 (* Classes *)
 (**************************************************************************)
 
@@ -430,9 +416,7 @@ let program_help ctx env ast =
   let top_level_env = ref env in
   let rec aux acc def =
     match def with
-    | Aast.Fun f ->
-      let genv = Env.make_fun_decl_genv ctx f in
-      N.Fun (fun_def_help ctx genv f) :: acc
+    | Aast.Fun f -> N.Fun f :: acc
     | Aast.Class c ->
       let env = Env.make_class_env ctx c in
       N.Class (class_help ctx env c) :: acc
@@ -789,7 +773,7 @@ let fun_def ctx fd =
       elab_pipe = Naming_elab_pipe.elab_fun_def;
       elab_func_body = Naming_elab_func_body.elab_fun_def;
       elab_lambda_captures = Naming_captures.elab_fun_def;
-      elab_help = fun_def_help;
+      elab_help = (fun _ _ elem -> elem);
       elab_soft = Naming_elab_soft.elab_fun_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_fun_def;
       elab_hkt = Naming_elab_hkt.elab_fun_def;

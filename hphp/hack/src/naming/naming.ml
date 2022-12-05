@@ -477,57 +477,6 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Varray (ta, l) -> N.Varray (ta, List.map l ~f:(expr env))
   | Aast.Darray (tap, l) ->
     N.Darray (tap, List.map l ~f:(fun (e1, e2) -> (expr env e1, expr env e2)))
-  | Aast.Collection ((p, cn), tal, l) ->
-    begin
-      match cn with
-      | x when Nast.is_vc_kind x ->
-        let ta =
-          match tal with
-          | Some (Aast.CollectionTV tv) -> Some tv
-          | Some (Aast.CollectionTKV _) ->
-            Errors.add_naming_error @@ Naming_error.Too_many_arguments p;
-            None
-          | None -> None
-        in
-        N.ValCollection
-          (Nast.get_vc_kind cn, ta, List.map l ~f:(afield_value env cn))
-      | x when Nast.is_kvc_kind x ->
-        let ta =
-          match tal with
-          | Some (Aast.CollectionTV _) ->
-            Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
-            None
-          | Some (Aast.CollectionTKV (tk, tv)) -> Some (tk, tv)
-          | None -> None
-        in
-        N.KeyValCollection
-          (Nast.get_kvc_kind cn, ta, List.map l ~f:(afield_kvalue env cn))
-      | x when String.equal x SN.Collections.cPair ->
-        let ta =
-          match tal with
-          | Some (Aast.CollectionTV _) ->
-            Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
-            None
-          | Some (Aast.CollectionTKV (tk, tv)) -> Some (tk, tv)
-          | None -> None
-        in
-        begin
-          match l with
-          | [] ->
-            Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
-            invalid_expr_ p
-          | [e1; e2] ->
-            let pn = SN.Collections.cPair in
-            N.Pair (ta, afield_value env pn e1, afield_value env pn e2)
-          | _ ->
-            Errors.add_naming_error @@ Naming_error.Too_many_arguments p;
-            invalid_expr_ p
-        end
-      | _ ->
-        Errors.add_naming_error
-        @@ Naming_error.Expected_collection { pos = p; cname = cn };
-        invalid_expr_ p
-    end
   | Aast.ValCollection (kind, ta, exprs) ->
     Aast.ValCollection (kind, ta, List.map exprs ~f:(expr env))
   | Aast.KeyValCollection (kind, ta, fields) ->
@@ -831,7 +780,9 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Omitted -> N.Omitted
   | Aast.EnumClassLabel (opt_sid, x) -> N.EnumClassLabel (opt_sid, x)
   | Aast.ReadonlyExpr e -> N.ReadonlyExpr (expr env e)
+  | Aast.Pair (targs_opt, e1, e2) -> N.Pair (targs_opt, expr env e1, expr env e2)
   (* The below were not found on the AST.ml so they are not implemented here *)
+  | Aast.Collection _
   | Aast.This
   | Aast.Dollardollar _
   | Aast.Lplaceholder _
@@ -839,7 +790,6 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Method_id _
   | Aast.Method_caller _
   | Aast.Smethod_id _
-  | Aast.Pair _
   | Aast.Hole _ ->
     Errors.internal_error
       p
@@ -895,24 +845,6 @@ and afield env field =
   match field with
   | Aast.AFvalue e -> N.AFvalue (expr env e)
   | Aast.AFkvalue (e1, e2) -> N.AFkvalue (expr env e1, expr env e2)
-
-and afield_value env cname field =
-  match field with
-  | Aast.AFvalue e -> expr env e
-  | Aast.AFkvalue (((_, p, _) as e1), _e2) ->
-    Errors.add_naming_error @@ Naming_error.Unexpected_arrow { pos = p; cname };
-    expr env e1
-
-and afield_kvalue env cname field =
-  match field with
-  | Aast.AFvalue ((_, p, _) as e) ->
-    Errors.add_naming_error @@ Naming_error.Missing_arrow { pos = p; cname };
-    ( expr env e,
-      expr
-        env
-        ((), p, Aast.Lvar (p, Local_id.make_unscoped "__internal_placeholder"))
-    )
-  | Aast.AFkvalue (e1, e2) -> (expr env e1, expr env e2)
 
 and attr env at =
   match at with
@@ -1190,18 +1122,6 @@ let rec check_constant_expr env expr =
     List.for_all el ~f:(fun (_, e) -> check_constant_expr env e)
   | Aast.Tuple el -> List.for_all el ~f:(check_constant_expr env)
   | Aast.FunctionPointer ((Aast.FP_id _ | Aast.FP_class_const _), _) -> true
-  | Aast.Collection ((p, cn), _, l) ->
-    (* Only vec/keyset/dict are allowed because they are value types *)
-    if
-      String.equal cn SN.Collections.cVec
-      || String.equal cn SN.Collections.cKeyset
-      || String.equal cn SN.Collections.cDict
-    then
-      List.for_all l ~f:(check_afield_constant_expr env)
-    else (
-      Errors.add_naming_error @@ Naming_error.Illegal_constant p;
-      false
-    )
   | Aast.ValCollection ((Aast.Vec | Aast.Keyset), _, l) ->
     (* Only vec/keyset are allowed because they are value types *)
     List.for_all l ~f:(check_constant_expr env)
@@ -1222,12 +1142,6 @@ let rec check_constant_expr env expr =
   | _ ->
     Errors.add_naming_error @@ Naming_error.Illegal_constant pos;
     false
-
-and check_afield_constant_expr env afield =
-  match afield with
-  | Aast.AFvalue e -> check_constant_expr env e
-  | Aast.AFkvalue (e1, e2) ->
-    check_constant_expr env e1 && check_constant_expr env e2
 
 and check_field_constant_expr env (e1, e2) =
   check_constant_expr env e1 && check_constant_expr env e2
@@ -1593,6 +1507,7 @@ let program_help ctx env ast =
 type 'elem pipeline = {
   elab_ns: 'elem -> 'elem;
   elab_hints: (Naming_elab_hints.Env.t, 'elem) elabidation;
+  elab_collection: (Naming_elab_collection.Env.t, 'elem) elabidation;
   elab_help: Provider_context.t -> genv -> 'elem -> 'elem;
   elab_soft: (Naming_elab_soft.Env.t, 'elem) elaboration;
   elab_everything_sdt: (Naming_elab_everything_sdt.Env.t, 'elem) elaboration;
@@ -1617,6 +1532,7 @@ let elab_elem
     {
       elab_ns;
       elab_hints;
+      elab_collection;
       elab_help;
       elab_soft;
       elab_everything_sdt;
@@ -1668,6 +1584,9 @@ let elab_elem
      dynamic new's
   *)
   let (elem, err) = elab_dynamic_class_name ~init:err elem in
+
+  (* Elaboration `Collection` to `ValCollection` or `KeyValCollection *)
+  let (elem, err) = elab_collection ~init:err elem in
 
   (* General expression / statement / xhp elaboration & validation *)
   let elem = elab_help ctx env elem in
@@ -1775,6 +1694,7 @@ let program ctx ast =
           (Naming_elaborate_namespaces_endo.make_env
              Namespace_env.empty_with_default);
       elab_hints = Naming_elab_hints.elab_program;
+      elab_collection = Naming_elab_collection.elab_program;
       elab_help = program_help;
       elab_soft = Naming_elab_soft.elab_program;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_program;
@@ -1802,6 +1722,7 @@ let fun_def ctx fd =
         elaborate_namespaces#on_fun_def
           (Naming_elaborate_namespaces_endo.make_env env.namespace);
       elab_hints = Naming_elab_hints.elab_fun_def;
+      elab_collection = Naming_elab_collection.elab_fun_def;
       elab_help = fun_def_help;
       elab_soft = Naming_elab_soft.elab_fun_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_fun_def;
@@ -1829,6 +1750,7 @@ let class_ ctx c =
         elaborate_namespaces#on_class_
           (Naming_elaborate_namespaces_endo.make_env env.namespace);
       elab_hints = Naming_elab_hints.elab_class;
+      elab_collection = Naming_elab_collection.elab_class;
       elab_help = class_help;
       elab_soft = Naming_elab_soft.elab_class;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_class;
@@ -1856,6 +1778,7 @@ let module_ ctx module_ =
         elaborate_namespaces#on_module_def
           (Naming_elaborate_namespaces_endo.make_env env.namespace);
       elab_hints = Naming_elab_hints.elab_module_def;
+      elab_collection = Naming_elab_collection.elab_module_def;
       elab_help = module_help;
       elab_soft = Naming_elab_soft.elab_module_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_module_def;
@@ -1883,6 +1806,7 @@ let global_const ctx cst =
         elaborate_namespaces#on_gconst
           (Naming_elaborate_namespaces_endo.make_env env.namespace);
       elab_hints = Naming_elab_hints.elab_gconst;
+      elab_collection = Naming_elab_collection.elab_gconst;
       elab_help = global_const_help;
       elab_soft = Naming_elab_soft.elab_gconst;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_gconst;
@@ -1910,6 +1834,7 @@ let typedef ctx tdef =
         elaborate_namespaces#on_typedef
           (Naming_elaborate_namespaces_endo.make_env env.namespace);
       elab_hints = Naming_elab_hints.elab_typedef;
+      elab_collection = Naming_elab_collection.elab_typedef;
       elab_help = typedef_help;
       elab_soft = Naming_elab_soft.elab_typedef;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_typedef;

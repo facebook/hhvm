@@ -1,2 +1,2 @@
-File "alok_check1.php", line 12, characters 18-21:
+File "alok_check1.php", line 12, characters 18-25:
 `TBar` is a type parameter. Type parameters cannot take type arguments (e.g. `TBar<int>` isn't allowed) (Naming[2047])

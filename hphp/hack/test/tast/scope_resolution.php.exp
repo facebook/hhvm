@@ -12,7 +12,6 @@ Errors:
   [133:9-14] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [134:9-30] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [135:9-28] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [135:10-16] Unbound name: `string`
   [137:9-17] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [139:9-22] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [141:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
@@ -395,9 +394,7 @@ Errors:
                   (Call (
                      ((_), [135:3-29],
                       (Class_get (((Foo), [135:3-6], (CI ([135:3-6], "\\Foo"))),
-                         (CGexpr
-                            ((_), [135:9-28],
-                             (Cast (([135:10-16], (Happly (([135:10-16], "string"), []))), ((int), [135:18-27], (Binop (Plus, ((int), [135:18-21], (Int "123")), ((int), [135:24-27], (Int "456"))))))))),
+                         (CGexpr ((_), [135:9-28], (Cast (([135:10-16], (Hprim Tstring)), ((int), [135:18-27], (Binop (Plus, ((int), [135:18-21], (Int "123")), ((int), [135:24-27], (Int "456"))))))))),
                          Is_method))),
                      [], [], None)))));
              ([137:3-21],

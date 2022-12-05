@@ -7,7 +7,7 @@
         (Happly (([3:12-40], "\\HH\\BuiltinEnumClass"),
            [([3:12-40],
              (Happly (([3:12-40], "\\HH\\MemberOf"),
-                [([3:12-40], (Happly (([3:12-40], "\\PessEnumClassSupportDynBound"), []))); ([3:12-40], (Hlike ([3:43-48], (Happly (([3:43-48], "\\HH\\supportdyn"), [([3:43-48], Hmixed)])))))])))
+                [([3:12-40], (Happly (([3:12-40], "\\PessEnumClassSupportDynBound"), []))); ([3:43-48], (Hlike ([3:43-48], (Happly (([3:43-48], "\\HH\\supportdyn"), [([3:43-48], Hmixed)])))))])))
              ]
            )))
         ];
@@ -32,7 +32,7 @@
         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       c_user_attributes = [{ ua_name = ([3:12-40], "__EnumClass"); ua_params = [] }]; 
       c_file_attributes = []; c_docs_url = None;
-      c_enum = (Some { e_base = ([3:12-40], (Hlike ([3:43-48], (Happly (([3:43-48], "\\HH\\supportdyn"), [([3:43-48], Hmixed)]))))); e_constraint = None; e_includes = [] }); 
+      c_enum = (Some { e_base = ([3:43-48], (Hlike ([3:43-48], (Happly (([3:43-48], "\\HH\\supportdyn"), [([3:43-48], Hmixed)]))))); e_constraint = None; e_includes = [] }); 
       c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None });
   (Class
      { c_span = [8:1-11:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
@@ -41,7 +41,7 @@
        c_extends =
        [([8:12-25],
          (Happly (([8:12-25], "\\HH\\BuiltinEnumClass"),
-            [([8:12-25], (Happly (([8:12-25], "\\HH\\MemberOf"), [([8:12-25], (Happly (([8:12-25], "\\PessEnumClass"), []))); ([8:12-25], (Hlike ([8:28-36], (Hprim Tarraykey))))])))])))
+            [([8:12-25], (Happly (([8:12-25], "\\HH\\MemberOf"), [([8:12-25], (Happly (([8:12-25], "\\PessEnumClass"), []))); ([8:28-36], (Hlike ([8:28-36], (Hprim Tarraykey))))])))])))
          ];
        c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
        c_implements = []; c_where_constraints = [];
@@ -62,7 +62,7 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([8:12-25], "__EnumClass"); ua_params = [] }]; 
-       c_file_attributes = []; c_docs_url = None; c_enum = (Some { e_base = ([8:12-25], (Hlike ([8:28-36], (Hprim Tarraykey)))); e_constraint = None; e_includes = [] }); 
+       c_file_attributes = []; c_docs_url = None; c_enum = (Some { e_base = ([8:28-36], (Hlike ([8:28-36], (Hprim Tarraykey)))); e_constraint = None; e_includes = [] }); 
        c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None });
   (Class
      { c_span = [13:1-15:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
@@ -118,7 +118,7 @@
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
          ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes = [{ ua_name = ([17:21-40], "__EnumClass"); ua_params = [] }]; 
-       c_file_attributes = []; c_docs_url = None; c_enum = (Some { e_base = ([17:21-40], (Hlike ([17:42-50], (Happly (([17:42-50], "\\IHasName"), []))))); e_constraint = None; e_includes = [] });
+       c_file_attributes = []; c_docs_url = None; c_enum = (Some { e_base = ([17:42-50], (Hlike ([17:42-50], (Happly (([17:42-50], "\\IHasName"), []))))); e_constraint = None; e_includes = [] });
        c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None });
   (Class
      { c_span = [22:1-25:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 

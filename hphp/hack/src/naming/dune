@@ -127,7 +127,17 @@
 
 (library
  (name naming)
- (modules naming)
+ (modules
+  naming
+  naming_elab_everything_sdt
+  naming_elab_hints
+  naming_elab_hkt
+  naming_elab_soft
+  naming_phase_error
+  naming_phase_sigs
+  naming_validate_builtin_enum
+  naming_validate_supportdyn
+  naming_validate_xhp_name)
  (libraries
   ast
   ast_provider

@@ -8,7 +8,6 @@
 
 open Hh_prelude
 module A = Aast
-module SN = Naming_special_names
 
 let tparam_id tparam = snd tparam.A.tp_name
 
@@ -16,7 +15,8 @@ let mutate_type_hint tparam_mapping (hint : 'a A.type_hint) =
   (* TODO: The implementation is shallow. Use a visitor to deeply replace type
      hints. *)
   match hint with
-  | (ann, Some (pos, A.Happly ((_, id), []))) ->
+  | (ann, Some (_, A.Happly ((pos, id), [])))
+  | (ann, Some (pos, A.Habstr (id, _))) ->
     begin
       match SMap.find_opt id tparam_mapping with
       | Some hint_ -> (ann, Some (pos, hint_))
@@ -31,10 +31,9 @@ let mutate_param tparam_mapping param =
   A.{ param with param_type_hint }
 
 let mutate_tparams tparams =
-  let default_hint pos = A.(Happly ((pos, SN.Typehints.int), [])) in
+  let default_hint = A.(Hprim Tint) in
   let eliminate_tparam (tparams, mapping) tparam =
     (* TODO: Respect the bounds on the type parameter *)
-    let default_hint = default_hint (fst tparam.A.tp_name) in
     let mapping = SMap.add (tparam_id tparam) default_hint mapping in
     (tparams, mapping)
   in

@@ -332,20 +332,6 @@ let class_help ctx env c =
   let (c_req_extends, c_req_implements, c_req_class) =
     Aast.split_reqs c.Aast.c_reqs
   in
-  (* TODO[mjt] pull out into a validation pass *)
-  if
-    (not (List.is_empty c_req_implements))
-    && not (Ast_defs.is_c_trait c.Aast.c_kind)
-  then
-    Errors.add_naming_error
-    @@ Naming_error.Invalid_require_implements
-         (fst (List.hd_exn c_req_implements));
-  if
-    (not (List.is_empty c_req_class)) && not (Ast_defs.is_c_trait c.Aast.c_kind)
-  then
-    Errors.add_naming_error
-    @@ Naming_error.Invalid_require_class (fst (List.hd_exn c_req_class));
-
   let e =
     TypecheckerOptions.explicit_consistent_constructors
       (Provider_context.get_tcopt ctx)
@@ -371,13 +357,6 @@ let class_help ctx env c =
   let req_implements =
     List.map ~f:(fun h -> (h, N.RequireImplements)) req_implements
   in
-  if
-    (not (List.is_empty c_req_extends))
-    && (not (Ast_defs.is_c_trait c.Aast.c_kind))
-    && not (Ast_defs.is_c_interface c.Aast.c_kind)
-  then
-    Errors.add_naming_error
-    @@ Naming_error.Invalid_require_extends (fst (List.hd_exn c_req_extends));
   let req_extends = c_req_extends in
   let req_extends = List.map ~f:(fun h -> (h, N.RequireExtends)) req_extends in
   let req_class = c_req_class in
@@ -479,6 +458,7 @@ type 'elem pipeline = {
     (Naming_validate_enum_class_typeconst.Env.t, 'elem) validation;
   validate_supportdyn: (Naming_validate_supportdyn.Env.t, 'elem) validation;
   validate_module: (Naming_validate_module.Env.t, 'elem) validation;
+  validate_class_req: (Naming_validate_class_req.Env.t, 'elem) validation;
 }
 
 (* Apply our elaboration and validation steps to a given ast element *)
@@ -516,6 +496,7 @@ let elab_elem
       validate_enum_class_typeconst;
       validate_supportdyn;
       validate_module;
+      validate_class_req;
     } =
   let tcopt = Provider_context.get_tcopt ctx in
   (* Elaborate namespaces *)
@@ -585,6 +566,8 @@ let elab_elem
   let elem = elab_func_body elem in
 
   let elem = elab_lambda_captures elem in
+
+  let err = validate_class_req ~init:err elem in
 
   (* General expression / statement / xhp elaboration & validation *)
   let elem = elab_help ctx env elem in
@@ -745,6 +728,7 @@ let program ctx ast =
         Naming_validate_enum_class_typeconst.validate_program;
       validate_supportdyn = Naming_validate_supportdyn.validate_program;
       validate_module = Naming_validate_module.validate_program;
+      validate_class_req = Naming_validate_class_req.validate_program;
     }
 
 let fun_def ctx fd =
@@ -787,6 +771,7 @@ let fun_def ctx fd =
         Naming_validate_enum_class_typeconst.validate_fun_def;
       validate_supportdyn = Naming_validate_supportdyn.validate_fun_def;
       validate_module = Naming_validate_module.validate_fun_def;
+      validate_class_req = Naming_validate_class_req.validate_fun_def;
     }
 
 let class_ ctx c =
@@ -829,6 +814,7 @@ let class_ ctx c =
         Naming_validate_enum_class_typeconst.validate_class;
       validate_supportdyn = Naming_validate_supportdyn.validate_class;
       validate_module = Naming_validate_module.validate_class;
+      validate_class_req = Naming_validate_class_req.validate_class;
     }
 
 let module_ ctx module_ =
@@ -871,6 +857,7 @@ let module_ ctx module_ =
         Naming_validate_enum_class_typeconst.validate_module_def;
       validate_supportdyn = Naming_validate_supportdyn.validate_module_def;
       validate_module = Naming_validate_module.validate_module_def;
+      validate_class_req = Naming_validate_class_req.validate_module_def;
     }
 
 let global_const ctx cst =
@@ -913,6 +900,7 @@ let global_const ctx cst =
         Naming_validate_enum_class_typeconst.validate_gconst;
       validate_supportdyn = Naming_validate_supportdyn.validate_gconst;
       validate_module = Naming_validate_module.validate_gconst;
+      validate_class_req = Naming_validate_class_req.validate_gconst;
     }
 
 let typedef ctx tdef =
@@ -955,4 +943,5 @@ let typedef ctx tdef =
         Naming_validate_enum_class_typeconst.validate_typedef;
       validate_supportdyn = Naming_validate_supportdyn.validate_typedef;
       validate_module = Naming_validate_module.validate_typedef;
+      validate_class_req = Naming_validate_class_req.validate_typedef;
     }

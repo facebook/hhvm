@@ -25,9 +25,7 @@ end
 
 let visitor =
   object (self)
-    inherit [_] Aast_defs.mapreduce as super
-
-    inherit Err.monoid
+    inherit [_] Naming_visitors.mapreduce as super
 
     method! on_class_ env c = super#on_class_ (Env.in_class env c) c
 
@@ -40,13 +38,12 @@ let visitor =
       super#on_contexts env ctxts
 
     method! on_Haccess env hint ids =
-      let ((pos, hint_), hint_err) = super#on_hint env hint in
       let (hint, err) =
-        match hint_ with
+        match hint with
         (* TODO[mjt] we appear to be discarding type parameters on `Happly` here
            - should we change the representation of `Haccess` or handle
            erroneous type parameters? *)
-        | Aast.Happly ((tycon_pos, tycon_name), _)
+        | (pos, Aast.Happly ((tycon_pos, tycon_name), _))
           when String.equal tycon_name SN.Classes.cSelf ->
           begin
             match env.Env.current_class with
@@ -58,7 +55,7 @@ let visitor =
           end
           (* TODO[mjt] is this ever exercised? The cases is handles appear to
              be a parse errors *)
-        | Aast.Happly ((tycon_pos, tycon_name), _)
+        | (pos, Aast.Happly ((tycon_pos, tycon_name), _))
           when String.(
                  equal tycon_name SN.Classes.cStatic
                  || equal tycon_name SN.Classes.cParent) ->
@@ -66,17 +63,19 @@ let visitor =
             Err.naming
             @@ Naming_error.Invalid_type_access_root
                  { pos = tycon_pos; id = Some tycon_name } )
-        | Aast.(Hthis | Happly _) -> ((pos, hint_), self#zero)
-        | Aast.Habstr _ when env.Env.in_where_clause || env.Env.in_context ->
-          ((pos, hint_), self#zero)
+        | (_, Aast.(Hthis | Happly _)) -> (hint, self#zero)
+        | (_, Aast.Habstr _) when env.Env.in_where_clause || env.Env.in_context
+          ->
+          (hint, self#zero)
         (* TODO[mjt] why are we allow `Hvar`? *)
-        | Aast.Hvar _ -> ((pos, hint_), self#zero)
-        | _ ->
+        | (_, Aast.Hvar _) -> (hint, self#zero)
+        | (pos, _) ->
           ( (pos, Aast.Herr),
             Err.naming
             @@ Naming_error.Invalid_type_access_root { pos; id = None } )
       in
-      (Aast.Haccess (hint, ids), self#plus hint_err err)
+      let (hint, super_err) = super#on_Haccess env hint ids in
+      (hint, self#plus err super_err)
   end
 
 let elab f ?init ?(env = Env.empty) elem =

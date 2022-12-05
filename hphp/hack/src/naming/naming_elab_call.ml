@@ -20,53 +20,47 @@ end
 
 let visitor =
   object (self)
-    inherit [_] Aast_defs.mapreduce as super
+    inherit [_] Naming_visitors.mapreduce as super
 
-    inherit Err.monoid
-
-    method! on_Call
-        env
-        ((_, fn_expr_pos, fn_expr_) as fn_expr)
-        targs
-        fn_param_exprs
-        fn_unpacked_expr_opt =
-      match fn_expr_ with
-      | Aast.Id (_, fn_name) ->
-        let res =
-          if String.equal fn_name SN.SpecialFunctions.echo then
-            let unpacked_err =
-              Option.value_map
-                ~default:self#zero
-                ~f:(fun (_, pos, _) ->
-                  Err.naming @@ Naming_error.Too_few_arguments pos)
-                fn_unpacked_expr_opt
-            in
-            let (fn_param_exprs, fn_param_err) =
-              super#on_list (self#on_snd super#on_expr) env fn_param_exprs
-            and (fn_unpacked_expr_opt, fn_unpacked_expr_err) =
-              super#on_option super#on_expr env fn_unpacked_expr_opt
-            in
-            let err =
-              self#plus_all [unpacked_err; fn_param_err; fn_unpacked_expr_err]
-            in
-            let expr_ =
-              Aast.Call (fn_expr, targs, fn_param_exprs, fn_unpacked_expr_opt)
-            in
-            Ok (expr_, err)
-          else if String.equal fn_name SN.StdlibFunctions.call_user_func then
-            let depr_err =
-              Err.typing
-              @@ Typing_error.(
-                   Primary.Deprecated_use
-                     {
-                       pos = fn_expr_pos;
-                       decl_pos_opt = None;
-                       msg =
-                         "The builtin "
-                         ^ Markdown_lite.md_codify (Utils.strip_ns fn_name)
-                         ^ " is deprecated.";
-                     })
-            in
+    (* TODO[mjt] this is a very big function; we should break out the
+       individual cases and have a pass per special function *)
+    method! on_expr_ env expr_ =
+      let res =
+        match expr_ with
+        | Aast.(
+            Call
+              ( ((_, _, Id (_, fn_name)) as fn_expr),
+                targs,
+                fn_param_exprs,
+                fn_unpacked_expr_opt ))
+          when String.equal fn_name SN.SpecialFunctions.echo ->
+          let err =
+            Option.value_map
+              ~default:self#zero
+              ~f:(fun (_, pos, _) ->
+                Err.naming @@ Naming_error.Too_few_arguments pos)
+              fn_unpacked_expr_opt
+          in
+          Ok
+            ( Aast.Call (fn_expr, targs, fn_param_exprs, fn_unpacked_expr_opt),
+              err )
+        | Aast.(
+            Call ((_, fn_expr_pos, Id (_, fn_name)), targs, fn_param_exprs, _))
+          when String.equal fn_name SN.StdlibFunctions.call_user_func ->
+          let depr_err =
+            Err.typing
+            @@ Typing_error.(
+                 Primary.Deprecated_use
+                   {
+                     pos = fn_expr_pos;
+                     decl_pos_opt = None;
+                     msg =
+                       "The builtin "
+                       ^ Markdown_lite.md_codify (Utils.strip_ns fn_name)
+                       ^ " is deprecated.";
+                   })
+          in
+          begin
             match fn_param_exprs with
             | [] ->
               let args_err =
@@ -74,14 +68,8 @@ let visitor =
               in
               Error (fn_expr_pos, self#plus depr_err args_err)
             | (Ast_defs.Pnormal, fn_expr) :: fn_param_exprs ->
-              let (fn_expr, expr_err) = super#on_expr env fn_expr
-              and (fn_param_exprs, exprs_err) =
-                super#on_list (self#on_snd super#on_expr) env fn_param_exprs
-              in
               (* TODO[mjt] why are we dropping the unpacked variadic arg here? *)
-              let expr_ = Aast.Call (fn_expr, targs, fn_param_exprs, None) in
-              let err = self#plus_all [depr_err; expr_err; exprs_err] in
-              Ok (expr_, err)
+              Ok (Aast.Call (fn_expr, targs, fn_param_exprs, None), depr_err)
             | (Ast_defs.Pinout pk_pos, fn_expr) :: fn_param_exprs ->
               let (_, fn_expr_pos, _) = fn_expr in
               let pos = Pos.merge pk_pos fn_expr_pos in
@@ -90,21 +78,27 @@ let visitor =
                 @@ Nast_check_error.Inout_in_transformed_pseudofunction
                      { pos; fn_name = "call_user_func" }
               in
-              let (fn_param_exprs, fn_param_err) =
-                super#on_list (self#on_snd super#on_expr) env fn_param_exprs
-              in
+              let err = self#plus_all [depr_err; inout_err] in
               (* TODO[mjt] why are we dropping the unpacked variadic arg here? *)
-              let expr_ = Aast.Call (fn_expr, targs, fn_param_exprs, None) in
-              let err = self#plus_all [depr_err; inout_err; fn_param_err] in
-              Ok (expr_, err)
-          else if String.equal fn_name SN.AutoimportedFunctions.fun_ then
-            let unpacked_err =
-              Option.value_map
-                ~default:self#zero
-                ~f:(fun (_, pos, _) ->
-                  Err.naming @@ Naming_error.Too_few_arguments pos)
-                fn_unpacked_expr_opt
-            in
+              Ok (Aast.Call (fn_expr, targs, fn_param_exprs, None), err)
+          end
+        | Aast.(
+            Call
+              ( (_, fn_expr_pos, Id (_, fn_name)),
+                _targs,
+                fn_param_exprs,
+                fn_unpacked_expr_opt ))
+          when String.equal fn_name SN.AutoimportedFunctions.fun_ ->
+          (* TODO[mjt] targs is ignored entirely here - shouldn't we generate
+             and error to say they are invalid for this function? *)
+          let unpacked_err =
+            Option.value_map
+              ~default:self#zero
+              ~f:(fun (_, pos, _) ->
+                Err.naming @@ Naming_error.Too_few_arguments pos)
+              fn_unpacked_expr_opt
+          in
+          begin
             match fn_param_exprs with
             | [] ->
               let args_err =
@@ -121,14 +115,24 @@ let visitor =
                 Err.naming @@ Naming_error.Too_many_arguments fn_expr_pos
               in
               Error (fn_expr_pos, self#plus unpacked_err args_err)
-          else if String.equal fn_name SN.AutoimportedFunctions.inst_meth then
-            let unpacked_err =
-              Option.value_map
-                ~default:self#zero
-                ~f:(fun (_, pos, _) ->
-                  Err.naming @@ Naming_error.Too_few_arguments pos)
-                fn_unpacked_expr_opt
-            in
+          end
+        | Aast.(
+            Call
+              ( (_, fn_expr_pos, Id (_, fn_name)),
+                _targs,
+                fn_param_exprs,
+                fn_unpacked_expr_opt ))
+          when String.equal fn_name SN.AutoimportedFunctions.inst_meth ->
+          (* TODO[mjt] targs is ignored entirely here - shouldn't we generate
+             and error to say they are invalid for this function? *)
+          let unpacked_err =
+            Option.value_map
+              ~default:self#zero
+              ~f:(fun (_, pos, _) ->
+                Err.naming @@ Naming_error.Too_few_arguments pos)
+              fn_unpacked_expr_opt
+          in
+          begin
             match fn_param_exprs with
             | []
             | [_] ->
@@ -149,14 +153,24 @@ let visitor =
                 Err.naming @@ Naming_error.Too_many_arguments fn_expr_pos
               in
               Error (fn_expr_pos, self#plus unpacked_err args_err)
-          else if String.equal fn_name SN.AutoimportedFunctions.meth_caller then
-            let unpacked_err =
-              Option.value_map
-                ~default:self#zero
-                ~f:(fun (_, pos, _) ->
-                  Err.naming @@ Naming_error.Too_few_arguments pos)
-                fn_unpacked_expr_opt
-            in
+          end
+        | Aast.(
+            Call
+              ( (_, fn_expr_pos, Id (_, fn_name)),
+                _targs,
+                fn_param_exprs,
+                fn_unpacked_expr_opt ))
+          when String.equal fn_name SN.AutoimportedFunctions.meth_caller ->
+          (* TODO[mjt] targs is ignored entirely here - shouldn't we generate
+             and error to say they are invalid for this function? *)
+          let unpacked_err =
+            Option.value_map
+              ~default:self#zero
+              ~f:(fun (_, pos, _) ->
+                Err.naming @@ Naming_error.Too_few_arguments pos)
+              fn_unpacked_expr_opt
+          in
+          begin
             match fn_param_exprs with
             | []
             | [_] ->
@@ -191,14 +205,24 @@ let visitor =
                 Err.naming @@ Naming_error.Too_many_arguments fn_expr_pos
               in
               Error (fn_expr_pos, self#plus unpacked_err args_err)
-          else if String.equal fn_name SN.AutoimportedFunctions.class_meth then
-            let unpacked_err =
-              Option.value_map
-                ~default:self#zero
-                ~f:(fun (_, pos, _) ->
-                  Err.naming @@ Naming_error.Too_few_arguments pos)
-                fn_unpacked_expr_opt
-            in
+          end
+        | Aast.(
+            Call
+              ( (_, fn_expr_pos, Id (_, fn_name)),
+                _targs,
+                fn_param_exprs,
+                fn_unpacked_expr_opt ))
+          when String.equal fn_name SN.AutoimportedFunctions.class_meth ->
+          (* TODO[mjt] targs is ignored entirely here - shouldn't we generate
+             and error to say they are invalid for this function? *)
+          let unpacked_err =
+            Option.value_map
+              ~default:self#zero
+              ~f:(fun (_, pos, _) ->
+                Err.naming @@ Naming_error.Too_few_arguments pos)
+              fn_unpacked_expr_opt
+          in
+          begin
             match fn_param_exprs with
             | []
             | [_] ->
@@ -224,7 +248,7 @@ let visitor =
                   | Some (cid, _, true) ->
                     let cid = Aast.CI (pc, snd cid) in
                     Ok
-                      ( Aast.Smethod_id (((), fn_expr_pos, cid), (pm, meth)),
+                      ( Aast.(Smethod_id (((), fn_expr_pos, cid), (pm, meth))),
                         unpacked_err )
                   | Some (cid, kind, false) ->
                     let is_trait = Ast_defs.is_c_trait kind in
@@ -234,7 +258,6 @@ let visitor =
                       @@ Naming_error.Class_meth_non_final_CLASS
                            { pos = fn_expr_pos; is_trait; class_name }
                     in
-
                     Error (fn_expr_pos, self#plus unpacked_err non_final_err)
                   | None ->
                     let meth_err =
@@ -300,34 +323,18 @@ let visitor =
                 Err.naming @@ Naming_error.Too_many_arguments fn_expr_pos
               in
               Error (fn_expr_pos, self#plus unpacked_err args_err)
-          else
-            let (fn_param_exprs, fn_param_err) =
-              super#on_list (self#on_snd super#on_expr) env fn_param_exprs
-            and (fn_unpacked_expr_opt, fn_unpacked_expr_err) =
-              super#on_option super#on_expr env fn_unpacked_expr_opt
-            in
-            let err = self#plus fn_param_err fn_unpacked_expr_err in
-            Ok
-              ( Aast.Call (fn_expr, targs, fn_param_exprs, fn_unpacked_expr_opt),
-                err )
-        in
-        begin
-          match res with
-          | Ok (expr_, err) -> (expr_, err)
-          | Error (pos, err) -> (Err.invalid_expr_ pos, err)
-        end
-      | _ -> super#on_Call env fn_expr targs fn_param_exprs fn_unpacked_expr_opt
+          end
+        | _ -> Ok (expr_, self#zero)
+      in
+      match res with
+      | Ok (expr_, err) ->
+        let (expr_, super_err) = super#on_expr_ env expr_ in
+        (expr_, self#plus err super_err)
+      | Error (pos, err) -> (Err.invalid_expr_ pos, err)
 
     method! on_class_ _env c =
       let env = Env.in_class c in
       super#on_class_ env c
-
-    method private plus_all errs =
-      List.fold_left ~init:self#zero ~f:self#plus errs
-
-    method private on_snd f env (fst, snd) =
-      let (snd, err) = f env snd in
-      ((fst, snd), err)
   end
 
 let elab f ?init ?(env = Env.empty) elem =

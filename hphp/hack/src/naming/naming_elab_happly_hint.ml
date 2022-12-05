@@ -136,9 +136,7 @@ let canonical_tycon typarams (pos, name) =
 
 let visitor =
   object (self)
-    inherit [_] Aast_defs.mapreduce as super
-
-    inherit Err.monoid
+    inherit [_] Naming_visitors.mapreduce as super
 
     method! on_typedef _ t = super#on_typedef Env.(in_typedef t) t
 

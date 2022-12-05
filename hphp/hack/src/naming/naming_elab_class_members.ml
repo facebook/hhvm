@@ -54,40 +54,7 @@ let is_xhp cv_name =
 
 let visitor =
   object (self)
-    inherit [_] Aast_defs.mapreduce as super
-
-    inherit Err.monoid
-
-    method! on_class_
-        _
-        (Aast.{ c_vars; c_xhp_attrs; c_methods; c_user_attributes; c_mode; _ }
-        as c) =
-      let env = c_mode in
-
-      let (c_vars, c_vars_err) =
-        let (static_props, props) = Aast.split_vars c_vars in
-        let const_attr_opt =
-          Naming_attributes.find SN.UserAttributes.uaConst c_user_attributes
-        in
-        let static_props = List.map ~f:(self#elab_class_prop env) static_props
-        and props =
-          List.map ~f:(self#elab_non_static_class_prop const_attr_opt env) props
-        and (xhp_attrs, xhp_attrs_err) =
-          super#on_list self#elab_xhp_attr env c_xhp_attrs
-        in
-        (static_props @ props @ xhp_attrs, xhp_attrs_err)
-      in
-
-      let c_methods =
-        if Ast_defs.is_c_interface c.Aast.c_kind then
-          List.map c_methods ~f:(fun m -> Aast.{ m with m_abstract = true })
-        else
-          c_methods
-      in
-      let (c, super_err) =
-        super#on_class_ env Aast.{ c with c_methods; c_vars; c_xhp_attrs = [] }
-      in
-      (c, self#plus super_err c_vars_err)
+    inherit [_] Naming_visitors.mapreduce as super
 
     method! on_typedef _ t = super#on_typedef t.Aast.t_mode t
 
@@ -96,6 +63,39 @@ let visitor =
     method! on_fun_def _ fd = super#on_fun_def fd.Aast.fd_mode fd
 
     method! on_module_def _ md = super#on_module_def md.Aast.md_mode md
+
+    method! on_class_
+        _
+        (Aast.{ c_vars; c_xhp_attrs; c_methods; c_user_attributes; c_mode; _ }
+        as c) =
+      let env = c_mode in
+
+      let (c, err) =
+        let (c_vars, err) =
+          let (static_props, props) = Aast.split_vars c_vars in
+          let const_attr_opt =
+            Naming_attributes.find SN.UserAttributes.uaConst c_user_attributes
+          in
+          let static_props = List.map ~f:(self#elab_class_prop env) static_props
+          and props =
+            List.map
+              ~f:(self#elab_non_static_class_prop const_attr_opt env)
+              props
+          and (xhp_attrs, xhp_attrs_err) =
+            super#on_list self#elab_xhp_attr env c_xhp_attrs
+          in
+          (static_props @ props @ xhp_attrs, xhp_attrs_err)
+        in
+        let c_methods =
+          if Ast_defs.is_c_interface c.Aast.c_kind then
+            List.map c_methods ~f:(fun m -> Aast.{ m with m_abstract = true })
+          else
+            c_methods
+        in
+        (Aast.{ c with c_methods; c_vars; c_xhp_attrs = [] }, err)
+      in
+      let (c, super_err) = super#on_class_ env c in
+      (c, self#plus super_err err)
 
     method private elab_cv_expr env pos cv_expr =
       match cv_expr with

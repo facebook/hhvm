@@ -23,9 +23,7 @@ end
 
 let visitor =
   object (self)
-    inherit [_] Aast_defs.mapreduce as super
-
-    inherit Err.monoid
+    inherit [_] Naming_visitors.mapreduce as super
 
     method! on_class_ _env c =
       let in_enum_class =
@@ -33,21 +31,28 @@ let visitor =
         | Ast_defs.Cenum_class _ -> true
         | Ast_defs.(Cclass _ | Cinterface | Cenum | Ctrait) -> false
       in
-      super#on_class_ Env.(create ~in_enum_class ~in_mode:c.Aast.c_mode ()) c
+      let env = Env.(create ~in_enum_class ~in_mode:c.Aast.c_mode ()) in
+      super#on_class_ env c
 
     method! on_class_const_kind env kind =
-      match kind with
-      | Aast.CCConcrete expr ->
-        let (expr, err) = self#const_expr env expr in
-        (Aast.CCConcrete expr, err)
-      | Aast.CCAbstract expr_opt ->
-        let (expr_opt, err) = super#on_option self#const_expr env expr_opt in
-        (Aast.CCAbstract expr_opt, err)
+      let (kind, err) =
+        match kind with
+        | Aast.CCConcrete expr ->
+          let (expr, err) = self#const_expr env expr in
+          (Aast.CCConcrete expr, err)
+        | Aast.CCAbstract _ -> (kind, self#zero)
+      in
+      let (kind, super_err) = super#on_class_const_kind env kind in
+      (kind, self#plus err super_err)
 
     method! on_gconst env cst =
       let env = Env.{ env with in_mode = cst.Aast.cst_mode } in
-      let (cst_value, err) = self#const_expr env cst.Aast.cst_value in
-      (Aast.{ cst with cst_value }, err)
+      super#on_gconst env cst
+
+    method! on_gconst_cst_value env cst_value =
+      let (cst_value, err) = self#const_expr env cst_value in
+      let (cst_value, super_err) = super#on_gconst_cst_value env cst_value in
+      (cst_value, self#plus err super_err)
 
     method! on_typedef env t =
       super#on_typedef Env.{ env with in_mode = t.Aast.t_mode } t
@@ -59,16 +64,14 @@ let visitor =
       super#on_module_def Env.{ env with in_mode = md.Aast.md_mode } md
 
     method private const_expr env ((_, pos, _) as expr) =
-      let (is_const_expr, err) =
-        if env.Env.in_enum_class then
-          (true, self#zero)
-        else
-          self#is_const_expr env expr
-      in
-      if is_const_expr then
-        (expr, err)
+      if env.Env.in_enum_class then
+        (expr, self#zero)
       else
-        (((), pos, Err.invalid_expr_ pos), err)
+        let (is_const_expr, err) = self#is_const_expr env expr in
+        if is_const_expr then
+          (expr, err)
+        else
+          (((), pos, Err.invalid_expr_ pos), err)
 
     method private is_const_expr env (_, pos, expr_) =
       match expr_ with

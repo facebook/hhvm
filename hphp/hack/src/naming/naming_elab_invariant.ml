@@ -17,25 +17,24 @@ end
 
 let visitor =
   object (self)
-    inherit [_] Aast_defs.mapreduce as super
-
-    inherit Err.monoid
+    inherit [_] Naming_visitors.mapreduce as super
 
     (* We have to visit the `stmt` since
        1) we need the top level position
        2) we elaborate invariant calls (expressions) to statements *)
-    method! on_stmt env (pos, stmt_) =
-      let (stmt_, err) =
-        match stmt_ with
-        | Aast.(
-            Expr
-              ( _,
-                expr_pos,
-                Call
-                  ( (_, fn_expr_pos, Id (fn_name_pos, fn_name)),
-                    targs,
-                    exprs,
-                    unpacked_element ) ))
+    method! on_stmt env stmt =
+      let (stmt, err) =
+        match stmt with
+        | ( pos,
+            Aast.(
+              Expr
+                ( _,
+                  expr_pos,
+                  Call
+                    ( (_, fn_expr_pos, Id (fn_name_pos, fn_name)),
+                      targs,
+                      exprs,
+                      unpacked_element ) )) )
           when String.equal fn_name SN.AutoimportedFunctions.invariant ->
           (match exprs with
           | []
@@ -44,9 +43,9 @@ let visitor =
               Err.naming @@ Naming_error.Too_few_arguments fn_expr_pos
             in
             let expr = ((), fn_expr_pos, Err.invalid_expr_ fn_expr_pos) in
-            (Aast.Expr expr, err)
+            ((pos, Aast.Expr expr), err)
           | (pk, (_, cond_pos, cond)) :: exprs ->
-            let param_err =
+            let err =
               match pk with
               | Ast_defs.Pnormal -> self#zero
               | Ast_defs.Pinout pk_p ->
@@ -58,17 +57,13 @@ let visitor =
               Aast.Id (fn_name_pos, SN.AutoimportedFunctions.invariant_violation)
             in
             let fn_expr = ((), fn_expr_pos, id_expr) in
-            let (exprs, exprs_err) =
-              super#on_list (self#on_snd super#on_expr) env exprs
-            in
-            let err = self#plus exprs_err param_err in
             let violation =
               ((), expr_pos, Aast.Call (fn_expr, targs, exprs, unpacked_element))
             in
             (match cond with
             | Aast.False ->
               (* a false <condition> means unconditional invariant_violation *)
-              (Aast.Expr violation, err)
+              ((pos, Aast.Expr violation), err)
             | _ ->
               let (b1, b2) =
                 ([(expr_pos, Aast.Expr violation)], [(Pos.none, Aast.Noop)])
@@ -76,14 +71,11 @@ let visitor =
               let cond =
                 ((), cond_pos, Aast.Unop (Ast_defs.Unot, ((), cond_pos, cond)))
               in
-              (Aast.If (cond, b1, b2), err)))
-        | _ -> super#on_stmt_ env stmt_
+              ((pos, Aast.If (cond, b1, b2)), err)))
+        | _ -> (stmt, self#zero)
       in
-      ((pos, stmt_), err)
-
-    method private on_snd f env (fst, snd) =
-      let (snd, err) = f env snd in
-      ((fst, snd), err)
+      let (stmt, super_err) = super#on_stmt env stmt in
+      (stmt, super#plus err super_err)
   end
 
 let elab f ?init ?(env = Env.empty) elem =

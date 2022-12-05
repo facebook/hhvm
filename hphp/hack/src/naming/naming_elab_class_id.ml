@@ -17,115 +17,17 @@ end
 
 let visitor =
   object (self)
-    inherit [_] Aast_defs.mapreduce as super
-
-    inherit Err.monoid
+    inherit [_] Naming_visitors.mapreduce as super
 
     method! on_class_ _ c =
       let env = true in
-      let (c_tparams, tparams_err) =
-        super#on_list self#on_tparam env c.Aast.c_tparams
-      in
+      super#on_class_ env c
 
-      let (c_extends, extends_err) =
-        super#on_list self#on_hint env c.Aast.c_extends
-      in
-
-      let (c_uses, uses_err) = super#on_list self#on_hint env c.Aast.c_uses in
-
-      let (c_xhp_attrs, xhp_attrs_err) =
-        super#on_list super#on_xhp_attr env c.Aast.c_xhp_attrs
-      in
-
-      let (c_xhp_attr_uses, xhp_attr_uses_err) =
-        super#on_list self#on_hint env c.Aast.c_xhp_attr_uses
-      in
-
-      let (c_reqs, reqs_err) =
-        super#on_list (self#on_fst self#on_hint) env c.Aast.c_reqs
-      in
-
-      let (c_implements, implements_err) =
-        super#on_list self#on_hint env c.Aast.c_implements
-      in
-
-      let (c_where_constraints, where_constraints_err) =
-        super#on_list
-          self#on_where_constraint_hint
-          env
-          c.Aast.c_where_constraints
-      in
-
-      let (c_consts, consts_err) =
-        super#on_list super#on_class_const env c.Aast.c_consts
-      in
-
-      let (c_typeconsts, typeconsts_err) =
-        super#on_list super#on_class_typeconst_def env c.Aast.c_typeconsts
-      in
-
-      let (c_vars, vars_err) =
-        super#on_list self#on_class_var env c.Aast.c_vars
-      in
-
-      let (c_enum, enum_err) =
-        super#on_option super#on_enum_ env c.Aast.c_enum
-      in
-
-      let (c_methods, methods_err) =
-        super#on_list self#on_method_ env c.Aast.c_methods
-      in
-
+    method! on_class_c_user_attributes _ c_user_attributes =
       (* The attributes applied to a class exist outside the current class so
          references to `self` are invalid *)
-      let (c_user_attributes, user_attributes_err) =
-        super#on_list super#on_user_attribute false c.Aast.c_user_attributes
-      in
-      let (c_file_attributes, file_attributes_err) =
-        super#on_list super#on_file_attribute env c.Aast.c_file_attributes
-      in
-      let err =
-        self#plus_all
-          [
-            file_attributes_err;
-            user_attributes_err;
-            methods_err;
-            enum_err;
-            vars_err;
-            typeconsts_err;
-            consts_err;
-            where_constraints_err;
-            implements_err;
-            reqs_err;
-            xhp_attr_uses_err;
-            xhp_attrs_err;
-            uses_err;
-            extends_err;
-            tparams_err;
-          ]
-      in
-      let c =
-        Aast.
-          {
-            c with
-            c_tparams;
-            c_extends;
-            c_uses;
-            c_xhp_attr_uses;
-            c_reqs;
-            c_implements;
-            c_where_constraints;
-            c_consts;
-            c_typeconsts;
-            c_vars;
-            c_enum;
-            c_methods;
-            c_xhp_attrs;
-            c_user_attributes;
-            c_file_attributes;
-          }
-      in
-      (c, err)
+      let env = false in
+      super#on_class_c_user_attributes env c_user_attributes
 
     (* The lowerer will give us CIexpr (Id  _ | Lvar _ ); here we:
        - convert CIexpr(_,_,Id _) to CIparent, CIself, CIstatic and CI.
@@ -139,13 +41,13 @@ let visitor =
        the legacy code mangles positions by using the inner `class_id_` position
        in the output `class_id` tuple. This looks to be erroneous.
     *)
-    method! on_class_id in_class (_, _, class_id_) =
-      match class_id_ with
+    method! on_class_id in_class class_id =
+      match class_id with
       (* TODO[mjt] if we don't expect these from lowering should we refine the
          NAST repr? *)
-      | Aast.(CIparent | CIself | CIstatic | CI _) ->
+      | (_, _, Aast.(CIparent | CIself | CIstatic | CI _)) ->
         failwith "Error in Ast_to_nast module for Class_get"
-      | Aast.(CIexpr (_, expr_pos, Id (id_pos, cname))) ->
+      | (_, _, Aast.(CIexpr (_, expr_pos, Id (id_pos, cname)))) ->
         if String.equal cname SN.Classes.cParent then
           if not in_class then
             ( ((), expr_pos, Aast.CI (expr_pos, SN.Classes.cUnknown)),
@@ -166,23 +68,12 @@ let visitor =
             (((), expr_pos, Aast.CIstatic), self#zero)
         else
           (((), expr_pos, Aast.CI (expr_pos, cname)), self#zero)
-      | Aast.(CIexpr (_, expr_pos, Lvar (lid_pos, lid)))
+      | (_, _, Aast.(CIexpr (_, expr_pos, Lvar (lid_pos, lid))))
         when String.equal (Local_id.to_string lid) SN.SpecialIdents.this ->
         (* TODO[mjt] why is `$this` valid outside a class? *)
         (Aast.((), expr_pos, CIexpr ((), lid_pos, This)), self#zero)
-      | Aast.(CIexpr (_, expr_pos, _)) -> (((), expr_pos, class_id_), self#zero)
-
-    (* -- Helpers ----------------------------------------------------------- *)
-    method private on_fst f ctx (fst, snd) =
-      let (fst, err) = f ctx fst in
-      ((fst, snd), err)
-
-    method private on_snd f ctx (fst, snd) =
-      let (snd, err) = f ctx snd in
-      ((fst, snd), err)
-
-    method private plus_all errs =
-      List.fold_right ~init:self#zero ~f:self#plus errs
+      | (_, _, (Aast.(CIexpr (_, expr_pos, _)) as class_id_)) ->
+        (((), expr_pos, class_id_), self#zero)
   end
 
 let elab f ?init ?(env = Env.empty) elem =

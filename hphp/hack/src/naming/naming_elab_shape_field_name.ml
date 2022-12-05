@@ -22,9 +22,7 @@ end
 
 let visitor =
   object (self)
-    inherit [_] Aast_defs.mapreduce as super
-
-    inherit Err.monoid
+    inherit [_] Naming_visitors.mapreduce as super
 
     method! on_class_ _env c = super#on_class_ (Env.in_class c) c
 
@@ -70,10 +68,6 @@ let visitor =
         ( Ast_defs.SFclass_const
             ((class_pos, class_name), (const_pos, const_name)),
           err )
-
-    method private on_fst f env (fst, snd) =
-      let (fst, err) = f env fst in
-      ((fst, snd), err)
   end
 
 let elab f ?init ?(env = Env.empty) elem =

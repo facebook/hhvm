@@ -23,9 +23,7 @@ let is_dynamic = function
 
 let visitor =
   object (self)
-    inherit [_] Aast_defs.mapreduce as super
-
-    inherit Err.monoid
+    inherit [_] Naming_visitors.mapreduce as super
 
     (* TODO[mjt] we have to override `on_expr` since we need the top-level
        expression position in our error cases *)

@@ -16,16 +16,19 @@ end
 
 let visitor =
   object (_self)
-    inherit [_] Aast_defs.mapreduce as super
+    inherit [_] Naming_visitors.mapreduce as super
 
-    inherit Err.monoid
-
-    method! on_expr env ((annot, pos, expr_) as expr) =
-      match expr_ with
-      | Aast.Tuple [] ->
-        let err = Err.naming @@ Naming_error.Too_few_arguments pos in
-        ((annot, pos, Err.invalid_expr_ pos), err)
-      | _ -> super#on_expr env expr
+    method! on_expr env expr =
+      let res =
+        match expr with
+        | (annot, pos, Aast.Tuple []) ->
+          let err = Err.naming @@ Naming_error.Too_few_arguments pos in
+          Error ((annot, pos, Err.invalid_expr_ pos), err)
+        | _ -> Ok expr
+      in
+      match res with
+      | Ok expr -> super#on_expr env expr
+      | Error (expr, err) -> (expr, err)
   end
 
 let elab f ?init ?(env = Env.empty) elem =

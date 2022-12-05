@@ -16,22 +16,25 @@ end
 
 let visitor =
   object (self)
-    inherit [_] Aast_defs.mapreduce as super
-
-    inherit Err.monoid
+    inherit [_] Naming_visitors.mapreduce as super
 
     method! on_hint env hint =
-      match hint with
-      | (pos, Aast.Habstr (name, hints)) ->
-        let err =
-          match hints with
-          | [] -> self#zero
-          | _ ->
-            Err.naming
-            @@ Naming_error.Tparam_applied_to_type { pos; tparam_name = name }
-        in
-        ((pos, Aast.Habstr (name, [])), err)
-      | _ -> super#on_hint env hint
+      let res =
+        match hint with
+        | (pos, Aast.Habstr (name, hints)) ->
+          let err =
+            match hints with
+            | [] -> self#zero
+            | _ ->
+              Err.naming
+              @@ Naming_error.Tparam_applied_to_type { pos; tparam_name = name }
+          in
+          Error ((pos, Aast.Habstr (name, [])), err)
+        | _ -> Ok hint
+      in
+      match res with
+      | Ok hint -> super#on_hint env hint
+      | Error (hint, err) -> (hint, err)
 
     method! on_tparam
         env (Aast.{ tp_parameters; tp_name = (pos, tparam_name); _ } as tparam)

@@ -599,28 +599,9 @@ and fun_paraml env paraml =
 (* User attrs *)
 (**************************************************************************)
 and user_attributes env attrl =
-  let seen = Caml.Hashtbl.create 0 in
-  let validate_seen ua_name =
-    let (pos, name) = ua_name in
-    let existing_attr_pos = Caml.Hashtbl.find_opt seen name in
-    match existing_attr_pos with
-    | Some prev_pos ->
-      let (pos, attr_name) = ua_name in
-      Errors.add_naming_error
-      @@ Naming_error.Duplicate_user_attribute { pos; prev_pos; attr_name };
-      false
-    | None ->
-      Caml.Hashtbl.add seen name pos;
-      true
-  in
   let on_attr acc { Aast.ua_name; ua_params } =
-    if not (validate_seen ua_name) then
-      acc
-    else
-      let attr =
-        { N.ua_name; N.ua_params = List.map ~f:(expr env) ua_params }
-      in
-      attr :: acc
+    let attr = { N.ua_name; N.ua_params = List.map ~f:(expr env) ua_params } in
+    attr :: acc
   in
   List.fold_left ~init:[] ~f:on_attr attrl
 
@@ -1116,6 +1097,7 @@ type 'elem pipeline = {
   elab_tuple: (Naming_elab_tuple.Env.t, 'elem) elabidation;
   elab_invariant: (Naming_elab_invariant.Env.t, 'elem) elabidation;
   elab_const_expr: (Naming_elab_const_expr.Env.t, 'elem) elabidation;
+  elab_user_attrs: (Naming_elab_user_attributes.Env.t, 'elem) elabidation;
   elab_help: Provider_context.t -> genv -> 'elem -> 'elem;
   elab_soft: (Naming_elab_soft.Env.t, 'elem) elaboration;
   elab_everything_sdt: (Naming_elab_everything_sdt.Env.t, 'elem) elaboration;
@@ -1145,6 +1127,7 @@ let elab_elem
       elab_tuple;
       elab_invariant;
       elab_const_expr;
+      elab_user_attrs;
       elab_help;
       elab_soft;
       elab_everything_sdt;
@@ -1207,6 +1190,8 @@ let elab_elem
   let (elem, err) = elab_invariant ~init:err elem in
 
   let (elem, err) = elab_const_expr ~init:err elem in
+
+  let (elem, err) = elab_user_attrs ~init:err elem in
 
   (* General expression / statement / xhp elaboration & validation *)
   let elem = elab_help ctx env elem in
@@ -1319,6 +1304,7 @@ let program ctx ast =
       elab_tuple = Naming_elab_tuple.elab_program;
       elab_invariant = Naming_elab_invariant.elab_program;
       elab_const_expr = Naming_elab_const_expr.elab_program;
+      elab_user_attrs = Naming_elab_user_attributes.elab_program;
       elab_help = program_help;
       elab_soft = Naming_elab_soft.elab_program;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_program;
@@ -1351,6 +1337,7 @@ let fun_def ctx fd =
       elab_tuple = Naming_elab_tuple.elab_fun_def;
       elab_invariant = Naming_elab_invariant.elab_fun_def;
       elab_const_expr = Naming_elab_const_expr.elab_fun_def;
+      elab_user_attrs = Naming_elab_user_attributes.elab_fun_def;
       elab_help = fun_def_help;
       elab_soft = Naming_elab_soft.elab_fun_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_fun_def;
@@ -1383,6 +1370,7 @@ let class_ ctx c =
       elab_tuple = Naming_elab_tuple.elab_class;
       elab_invariant = Naming_elab_invariant.elab_class;
       elab_const_expr = Naming_elab_const_expr.elab_class;
+      elab_user_attrs = Naming_elab_user_attributes.elab_class;
       elab_help = class_help;
       elab_soft = Naming_elab_soft.elab_class;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_class;
@@ -1415,6 +1403,7 @@ let module_ ctx module_ =
       elab_tuple = Naming_elab_tuple.elab_module_def;
       elab_invariant = Naming_elab_invariant.elab_module_def;
       elab_const_expr = Naming_elab_const_expr.elab_module_def;
+      elab_user_attrs = Naming_elab_user_attributes.elab_module_def;
       elab_help = module_help;
       elab_soft = Naming_elab_soft.elab_module_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_module_def;
@@ -1447,6 +1436,7 @@ let global_const ctx cst =
       elab_tuple = Naming_elab_tuple.elab_gconst;
       elab_invariant = Naming_elab_invariant.elab_gconst;
       elab_const_expr = Naming_elab_const_expr.elab_gconst;
+      elab_user_attrs = Naming_elab_user_attributes.elab_gconst;
       elab_help = global_const_help;
       elab_soft = Naming_elab_soft.elab_gconst;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_gconst;
@@ -1479,6 +1469,7 @@ let typedef ctx tdef =
       elab_tuple = Naming_elab_tuple.elab_typedef;
       elab_invariant = Naming_elab_invariant.elab_typedef;
       elab_const_expr = Naming_elab_const_expr.elab_typedef;
+      elab_user_attrs = Naming_elab_user_attributes.elab_typedef;
       elab_help = typedef_help;
       elab_soft = Naming_elab_soft.elab_typedef;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_typedef;

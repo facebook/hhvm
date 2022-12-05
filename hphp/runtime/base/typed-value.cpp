@@ -128,7 +128,8 @@ void TypedValue::serde(BlobEncoder& encoder) const {
   }
 }
 
-void TypedValue::serde(BlobDecoder& decoder) {
+void TypedValue::serde(BlobDecoder& decoder,
+                       bool makeStatic) {
   decoder(m_type);
 
   switch (m_type) {
@@ -151,39 +152,48 @@ void TypedValue::serde(BlobDecoder& decoder) {
 
     case KindOfPersistentString: {
       const StringData* s;
-      decoder(s);
-      assertx(s && s->isStatic());
+      decoder(s, makeStatic);
+      assertx(s);
+      assertx(IMPLIES(makeStatic, s->isStatic()));
+      if (!makeStatic) m_type = KindOfString;
       m_data.pstr = const_cast<StringData*>(s);
       break;
     }
 
     case KindOfPersistentVec: {
       const ArrayData* a;
-      decoder(a);
-      assertx(a && a->isVecType() && a->isStatic());
+      decoder(a, makeStatic);
+      assertx(a && a->isVecType());
+      assertx(IMPLIES(makeStatic, a->isStatic()));
+      if (!makeStatic) m_type = KindOfVec;
       m_data.parr = const_cast<ArrayData*>(a);
       break;
     }
 
     case KindOfPersistentKeyset: {
       const ArrayData* a;
-      decoder(a);
-      assertx(a && a->isKeysetType() && a->isStatic());
+      decoder(a, makeStatic);
+      assertx(a && a->isKeysetType());
+      assertx(IMPLIES(makeStatic, a->isStatic()));
+      if (!makeStatic) m_type = KindOfKeyset;
       m_data.parr = const_cast<ArrayData*>(a);
       break;
     }
 
     case KindOfPersistentDict: {
       const ArrayData* a;
-      decoder(a);
-      assertx(a && a->isDictType() && a->isStatic());
+      decoder(a, makeStatic);
+      assertx(a && a->isDictType());
+      assertx(IMPLIES(makeStatic, a->isStatic()));
+      if (!makeStatic) m_type = KindOfDict;
       m_data.parr = const_cast<ArrayData*>(a);
       break;
     }
 
     case KindOfLazyClass: {
       const StringData* s;
-      decoder(s);
+      decoder(s); // Don't pass makeStatic here. LazyClassData
+                  // requires a static string.
       assertx(s->isStatic());
       m_data.plazyclass = LazyClassData::create(s);
       break;
@@ -211,7 +221,7 @@ void TypedValue::serde(BlobDecoder& decoder) {
         str.size(),
         VariableUnserializer::Type::Internal
       );
-      tvAsVariant(this).setEvalScalar();
+      if (makeStatic) tvAsVariant(this).setEvalScalar();
       break;
     }
 

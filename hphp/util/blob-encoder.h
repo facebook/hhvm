@@ -385,6 +385,44 @@ struct BlobEncoder {
     return *this;
   }
 
+  /* Like withSize, but uses 32-bit size */
+  template <typename F>
+  BlobEncoder& withSize32(F f) {
+    uint64_t start = m_blob.size();
+    m_blob.resize(start + sizeof(uint32_t));
+    // The size is stored before the data, but we don't know it yet,
+    // so store 0 and then patch it afterwards (this means we have to
+    // used a fixed size encoding).
+    std::memset(&m_blob[start], 0, sizeof(uint32_t));
+    f();
+    uint64_t size = m_blob.size() - start;
+    assertx(size <= std::numeric_limits<uint32_t>::max());
+    assertx(size >= sizeof(uint32_t));
+    size -= sizeof(uint32_t);
+    uint32_t s = size;
+    std::copy((char*)&s, (char*)&s + sizeof(uint32_t), &m_blob[start]);
+    return *this;
+  }
+
+  /*
+   * Run f() to encode N items. The number of encoded items is
+   * returned from f() and encoded before the items. This can be used
+   * to encode a list without knowing the size of the list before
+   * hand.
+   *
+   * The list encoded with lazyCount can be read by
+   * BlobDecoder::readWithLazyCount.
+   */
+  template <typename F>
+  BlobEncoder& lazyCount(F f) {
+    uint64_t start = m_blob.size();
+    m_blob.resize(start + sizeof(uint32_t));
+    std::memset(&m_blob[start], 0, sizeof(uint32_t));
+    uint32_t count = f();
+    std::copy((char*)&count, (char*)&count + sizeof(uint32_t), &m_blob[start]);
+    return *this;
+  }
+
   // Run f1 to encode data, then run f2 to encode more data. The data
   // encoded by f1 is encoded with a size prefix (using withSize), so
   // that it can be skipped. This is meant to be paired with
@@ -468,6 +506,9 @@ struct BlobDecoder {
   void assertDone() {
     assertx(m_p >= m_last);
   }
+
+  const unsigned char* start() const { return m_start; }
+  const unsigned char* end() const { return m_last; }
 
   const unsigned char* data() const { return m_p; }
 
@@ -780,6 +821,22 @@ struct BlobDecoder {
     return *this;
   }
 
+  template <typename F>
+  BlobDecoder& withSize32(F f) {
+    // Since we're going to read the data anyways, we don't actually
+    // need the size, but we'll assert if it doesn't match what we
+    // decode.
+    assertx(remaining() >= sizeof(uint32_t));
+    uint32_t size;
+    std::copy(m_p, m_p + sizeof(uint32_t), (unsigned char*)&size);
+    advance(sizeof(uint32_t));
+    auto const DEBUG_ONLY before = remaining();
+    assertx(before >= size);
+    f();
+    assertx(before - remaining() == size);
+    return *this;
+  }
+
   /*
    * Skip over a block of data encoded with BlobEncoder::withSize.
    */
@@ -792,6 +849,16 @@ struct BlobDecoder {
     return *this;
   }
 
+  /* Like skipWithSize, but for BlobEncoder::withSize32 */
+  BlobDecoder& skipWithSize32() {
+    assertx(remaining() >= sizeof(uint32_t));
+    uint32_t size;
+    std::copy(m_p, m_p + sizeof(uint32_t), (unsigned char*)&size);
+    assertx(remaining() >= size + sizeof(uint32_t));
+    advance(sizeof(uint32_t) + size);
+    return *this;
+  }
+
   /*
    * Read the size encoded by BlobEncoder::withSize, without advancing
    * the decoder state.
@@ -801,6 +868,28 @@ struct BlobDecoder {
     uint64_t size;
     std::copy(m_p, m_p + sizeof(uint64_t), (unsigned char*)&size);
     return size + sizeof(uint64_t);
+  }
+
+  /* Like peekSize, but for BlobEncoder::withSize32 */
+  size_t peekSize32() const {
+    assertx(remaining() >= sizeof(uint32_t));
+    uint32_t size;
+    std::copy(m_p, m_p + sizeof(uint32_t), (unsigned char*)&size);
+    return size + sizeof(uint32_t);
+  }
+
+  /*
+   * Read a list encoded with BlobEncoder::lazyCount. f() will be
+   * called N times, where N is the encoded list size.
+   */
+  template <typename F>
+  BlobDecoder& readWithLazyCount(F f) {
+    assertx(remaining() >= sizeof(uint32_t));
+    uint32_t count;
+    std::copy(m_p, m_p + sizeof(uint32_t), (unsigned char*)&count);
+    advance(sizeof(uint32_t));
+    for (size_t i = 0; i < count; ++i) f();
+    return *this;
   }
 
   // Decode data encoded by BlobEncoder::alternate. First the data

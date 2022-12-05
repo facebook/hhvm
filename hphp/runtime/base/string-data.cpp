@@ -879,9 +879,15 @@ void BlobEncoderHelper<const StringData*>::serde(BlobDecoder& decoder,
   if (auto const ue = tl_unitEmitter) {
     Id id;
     decoder(id);
-    sd = ue->lookupLitstr(id);
+    if (makeStatic) {
+      sd = ue->lookupLitstr(id);
+      assertx(!sd || sd->isStatic());
+    } else {
+      sd = ue->lookupLitstrCopy(id).detach();
+    }
     return;
   } else if (auto const u = tl_unit) {
+    assertx(makeStatic);
     Id id;
     decoder(id);
     sd = u->lookupLitstrId(id);
@@ -916,6 +922,12 @@ BlobEncoderHelper<const StringData*>::asStringPiece(BlobDecoder& decoder) {
     auto const sd = ue->lookupLitstr(id);
     if (!sd) return { nullptr, size_t{0} };
     return sd->slice();
+  } else if (auto const u = tl_unit) {
+    Id id;
+    decoder(id);
+    auto const sd = u->lookupLitstrId(id);
+    if (!sd) return { nullptr, size_t{0} };
+    return sd->slice();
   }
 
   uint32_t size;
@@ -930,7 +942,7 @@ BlobEncoderHelper<const StringData*>::asStringPiece(BlobDecoder& decoder) {
 }
 
 void BlobEncoderHelper<const StringData*>::skip(BlobDecoder& decoder) {
-  if (auto const ue = tl_unitEmitter) {
+  if (tl_unitEmitter || tl_unit) {
     Id id;
     decoder(id);
     return;
@@ -947,7 +959,7 @@ void BlobEncoderHelper<const StringData*>::skip(BlobDecoder& decoder) {
 }
 
 size_t BlobEncoderHelper<const StringData*>::peekSize(BlobDecoder& decoder) {
-  if (auto const ue = tl_unitEmitter) {
+  if (tl_unitEmitter || tl_unit) {
     auto const before = decoder.advanced();
     Id id;
     decoder(id);

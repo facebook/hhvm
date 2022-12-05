@@ -166,7 +166,7 @@ struct alignas(8) TypedValue {
   Value val() const { return m_data; }
 
   void serde(BlobEncoder&) const;
-  void serde(BlobDecoder&);
+  void serde(BlobDecoder&, bool makeStatic = true);
 
   TYPE_SCAN_CUSTOM() {
     if (isRefcountedType(m_type)) scanner.scan(m_data.pcnt);

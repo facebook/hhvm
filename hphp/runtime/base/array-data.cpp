@@ -990,6 +990,8 @@ ArrayData* ArrayData::toKeyset(bool copy) {
 // Serialization
 
 __thread UnitEmitter* BlobEncoderHelper<const ArrayData*>::tl_unitEmitter{nullptr};
+__thread Unit* BlobEncoderHelper<const ArrayData*>::tl_unit{nullptr};
+__thread bool BlobEncoderHelper<const ArrayData*>::tl_defer{false};
 
 namespace {
 
@@ -1007,7 +1009,9 @@ enum class ArrayKind {
 
 void BlobEncoderHelper<const ArrayData*>::serde(BlobEncoder& encoder,
                                                 const ArrayData* ad) {
-  if (auto const ue = tl_unitEmitter) {
+  assertx(!tl_unit);
+
+  if (auto const ue = tl_unitEmitter; ue && !tl_defer) {
     if (!ad) {
       encoder(Id{0});
       return;
@@ -1017,6 +1021,13 @@ void BlobEncoderHelper<const ArrayData*>::serde(BlobEncoder& encoder,
     encoder(id+1);
     return;
   }
+
+  auto const oldDefer = tl_defer;
+  tl_defer = false;
+  SCOPE_EXIT {
+    assertx(!tl_defer);
+    tl_defer = oldDefer;
+  };
 
   using AK = ArrayKind;
   auto const ak = [&] {
@@ -1063,17 +1074,41 @@ void BlobEncoderHelper<const ArrayData*>::serde(BlobEncoder& encoder,
 }
 
 void BlobEncoderHelper<const ArrayData*>::serde(BlobDecoder& decoder,
-                                                const ArrayData*& ad) {
-  if (auto const ue = tl_unitEmitter) {
+                                                const ArrayData*& ad,
+                                                bool makeStatic) {
+  if (auto const ue = tl_unitEmitter; ue && !tl_defer) {
     Id id;
     decoder(id);
     if (!id) {
       ad = nullptr;
       return;
     }
-    ad = ue->lookupArray(id-1);
+    if (makeStatic) {
+      ad = ue->lookupArray(id-1);
+      assertx(ad->isStatic());
+    } else {
+      ad = ue->lookupArrayCopy(id-1).detach();
+    }
+    return;
+  } else if (auto const u = tl_unit; u && !tl_defer) {
+    assertx(makeStatic);
+    Id id;
+    decoder(id);
+    if (!id) {
+      ad = nullptr;
+      return;
+    }
+    ad = u->lookupArrayId(id-1);
+    assertx(ad->isStatic());
     return;
   }
+
+  auto const oldDefer = tl_defer;
+  tl_defer = false;
+  SCOPE_EXIT {
+    assertx(!tl_defer);
+    tl_defer = oldDefer;
+  };
 
   using AK = ArrayKind;
 
@@ -1093,12 +1128,12 @@ void BlobEncoderHelper<const ArrayData*>::serde(BlobDecoder& decoder,
       VecInit v{size};
       for (size_t i = 0; i < size; ++i) {
         TypedValue tv;
-        decoder(tv);
-        v.append(tv);
+        decoder(tv, makeStatic);
+        v.append(Variant::attach(tv));
       }
       if (ak == AK::VArray) v.setLegacyArray(true);
       auto a = v.toArray();
-      a.setEvalScalar();
+      if (makeStatic) a.setEvalScalar();
       ad = a.detach();
       break;
     }
@@ -1106,11 +1141,11 @@ void BlobEncoderHelper<const ArrayData*>::serde(BlobDecoder& decoder,
       KeysetInit k{size};
       for (size_t i = 0; i < size; ++i) {
         TypedValue tv;
-        decoder(tv);
-        k.add(tv);
+        decoder(tv, makeStatic);
+        k.add(Variant::attach(tv));
       }
       auto a = k.toArray();
-      a.setEvalScalar();
+      if (makeStatic) a.setEvalScalar();
       ad = a.detach();
       break;
     }
@@ -1121,12 +1156,12 @@ void BlobEncoderHelper<const ArrayData*>::serde(BlobDecoder& decoder,
       for (size_t i = 0; i < size; ++i) {
         TypedValue k;
         TypedValue v;
-        decoder(k)(v);
+        decoder(k, makeStatic)(v, makeStatic);
         if (tvIsString(k)) {
-          d.set(k.m_data.pstr, v);
+          d.set(String::attach(k.m_data.pstr), Variant::attach(v));
         } else {
           assertx(tvIsInt(k));
-          d.set(k.m_data.num, v);
+          d.set(k.m_data.num, Variant::attach(v));
         }
       }
       if (ak == AK::DArray) d.setLegacyArray();
@@ -1136,7 +1171,7 @@ void BlobEncoderHelper<const ArrayData*>::serde(BlobDecoder& decoder,
           bespoke::TypeStructure::MakeFromVanilla(a.get());
         if (ts) a = Array::attach(ts);
       }
-      a.setEvalScalar();
+      if (makeStatic) a.setEvalScalar();
       ad = a.detach();
       break;
     }

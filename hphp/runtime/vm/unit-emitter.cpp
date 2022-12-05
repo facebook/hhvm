@@ -124,16 +124,33 @@ const ArrayData* UnitEmitter::lookupArray(Id id) const {
 
   auto const oldStrEmitter =
     BlobEncoderHelper<const StringData*>::tl_unitEmitter;
+  auto const oldArrEmitter =
+    BlobEncoderHelper<const ArrayData*>::tl_unitEmitter;
 
   BlobEncoderHelper<const StringData*>::tl_unitEmitter =
     const_cast<UnitEmitter*>(this);
+  BlobEncoderHelper<const ArrayData*>::tl_unitEmitter =
+    const_cast<UnitEmitter*>(this);
   SCOPE_EXIT {
     assertx(BlobEncoderHelper<const StringData*>::tl_unitEmitter == this);
+    assertx(BlobEncoderHelper<const ArrayData*>::tl_unitEmitter == this);
     BlobEncoderHelper<const StringData*>::tl_unitEmitter = oldStrEmitter;
+    BlobEncoderHelper<const ArrayData*>::tl_unitEmitter = oldArrEmitter;
   };
 
-  auto const array =
-    loadLitarrayFromRepo(m_sn, wrapper.token(), m_filepath, true);
+  auto const array = [&] {
+    // Check if we're eagerly loading arrays during the initial
+    // UnitEmitter deserialization.
+    if (m_litarrayBuffer) {
+      auto const offset = wrapper.token();
+      assertx(offset <= m_litarrayBufferSize);
+      return loadLitarrayFromPtr(
+        m_litarrayBuffer + offset,
+        m_litarrayBufferSize - offset
+      );
+    }
+    return loadLitarrayFromRepo(m_sn, wrapper.token(), true);
+  }();
   assertx(array);
   assertx(array->isStatic());
   lock.update(ArrayOrToken::FromPtr(array));
@@ -183,8 +200,24 @@ Array UnitEmitter::lookupArrayCopy(Id id) const {
     assertx(wrapper.ptr()->isStatic());
     return Array::attach(const_cast<ArrayData*>(wrapper.ptr()));
   }
-  auto const array =
-    loadLitarrayFromRepo(m_sn, wrapper.token(), m_filepath, false);
+
+  auto const oldStrEmitter =
+    BlobEncoderHelper<const StringData*>::tl_unitEmitter;
+  auto const oldArrEmitter =
+    BlobEncoderHelper<const ArrayData*>::tl_unitEmitter;
+
+  BlobEncoderHelper<const StringData*>::tl_unitEmitter =
+    const_cast<UnitEmitter*>(this);
+  BlobEncoderHelper<const ArrayData*>::tl_unitEmitter =
+    const_cast<UnitEmitter*>(this);
+  SCOPE_EXIT {
+    assertx(BlobEncoderHelper<const StringData*>::tl_unitEmitter == this);
+    assertx(BlobEncoderHelper<const ArrayData*>::tl_unitEmitter == this);
+    BlobEncoderHelper<const StringData*>::tl_unitEmitter = oldStrEmitter;
+    BlobEncoderHelper<const ArrayData*>::tl_unitEmitter = oldArrEmitter;
+  };
+
+  auto const array = loadLitarrayFromRepo(m_sn, wrapper.token(), false);
   assertx(array);
   return Array::attach(const_cast<ArrayData*>(array));
 }
@@ -263,6 +296,7 @@ const StringData* UnitEmitter::loadLitstrFromRepo(int64_t unitSn,
     if (actualSize <= decoder.remaining()) {
       const StringData* s;
       decoder(s, makeStatic);
+      assertx(IMPLIES(makeStatic, s->isStatic()));
       return s;
     }
   }
@@ -275,59 +309,69 @@ const StringData* UnitEmitter::loadLitstrFromRepo(int64_t unitSn,
   BlobDecoder decoder{data.get(), actualSize};
   const StringData* s;
   decoder(s, makeStatic);
+  assertx(IMPLIES(makeStatic, s->isStatic()));
   decoder.assertDone();
   return s;
 }
 
 const ArrayData* UnitEmitter::loadLitarrayFromRepo(int64_t unitSn,
                                                    RepoFile::Token token,
-                                                   const StringData* filepath,
                                                    bool makeStatic) {
   assertx(RO::RepoAuthoritative);
 
-  MemoryManager::SuppressOOM so(*tl_heap);
+  auto const oldDefer = BlobEncoderHelper<const ArrayData*>::tl_defer;
+  BlobEncoderHelper<const ArrayData*>::tl_defer = true;
+  SCOPE_EXIT {
+    assertx(BlobEncoderHelper<const ArrayData*>::tl_defer);
+    BlobEncoderHelper<const ArrayData*>::tl_defer = oldDefer;
+  };
 
-  auto const serialized = [&] {
-    auto const remaining = RepoFile::remainingSizeOfUnit(unitSn, token);
+  auto const remaining = RepoFile::remainingSizeOfUnit(unitSn, token);
+  size_t actualSize;
+  {
+    auto const size = std::min<size_t>(remaining, 64);
+    auto const data = std::make_unique<unsigned char[]>(size);
+    RepoFile::readRawFromUnit(unitSn, token, data.get(), size);
 
-    size_t actualSize;
-    {
-      auto const size = std::min<size_t>(remaining, 64);
-      auto const data = std::make_unique<unsigned char[]>(size);
-      RepoFile::readRawFromUnit(unitSn, token, data.get(), size);
-      BlobDecoder decoder{data.get(), size};
-      actualSize = decoder.peekStdStringSize();
-      if (actualSize <= decoder.remaining()) {
-        std::string serialized;
-        decoder(serialized);
-        return serialized;
-      }
+    BlobDecoder decoder{data.get(), size};
+    actualSize = decoder.peekSize32();
+    if (actualSize <= decoder.remaining()) {
+      const ArrayData* ad;
+      decoder.withSize32([&] { decoder(ad, makeStatic); });
+      assertx(ad);
+      assertx(IMPLIES(makeStatic, ad->isStatic()));
+      return ad;
     }
+  }
 
-    always_assert(actualSize <= remaining);
-    always_assert(actualSize <= std::numeric_limits<uint32_t>::max());
+  always_assert(actualSize <= remaining);
+  always_assert(actualSize <= std::numeric_limits<uint32_t>::max());
 
-    auto const data = std::make_unique<unsigned char[]>(actualSize);
-    RepoFile::readRawFromUnit(unitSn, token, data.get(), actualSize);
-    BlobDecoder decoder{data.get(), actualSize};
-    std::string serialized;
-    decoder(serialized);
-    decoder.assertDone();
-    return serialized;
-  }();
+  auto const data = std::make_unique<unsigned char[]>(actualSize);
+  RepoFile::readRawFromUnit(unitSn, token, data.get(), actualSize);
 
-  auto v = [&] {
-    VariableUnserializer vu{
-      serialized.data(),
-      serialized.size(),
-      VariableUnserializer::Type::Internal
-    };
-    vu.setUnitFilename(filepath);
-    return vu.unserialize();
-  }();
-  assertx(v.isArray());
-  auto ad = v.detach().m_data.parr;
-  if (makeStatic) ArrayData::GetScalarArray(&ad);
+  BlobDecoder decoder{data.get(), actualSize};
+  const ArrayData* ad;
+  decoder.withSize32([&] { decoder(ad, makeStatic); });
+  assertx(ad);
+  assertx(IMPLIES(makeStatic, ad->isStatic()));
+  decoder.assertDone();
+  return ad;
+}
+
+const ArrayData* UnitEmitter::loadLitarrayFromPtr(const char* ptr,
+                                                  size_t size) {
+  auto const oldDefer = BlobEncoderHelper<const ArrayData*>::tl_defer;
+  BlobEncoderHelper<const ArrayData*>::tl_defer = true;
+  SCOPE_EXIT {
+    assertx(BlobEncoderHelper<const ArrayData*>::tl_defer);
+    BlobEncoderHelper<const ArrayData*>::tl_defer = oldDefer;
+  };
+
+  BlobDecoder decoder{ptr, size};
+  const ArrayData* ad;
+  decoder.withSize32([&] { decoder(ad); });
+  assertx(ad && ad->isStatic());
   return ad;
 }
 
@@ -890,92 +934,107 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
       );
     },
     [&] {
-      // Don't access the string/array table here since we're populating it.
-      assertx(BlobEncoderHelper<const StringData*>::tl_unitEmitter == this);
-      assertx(BlobEncoderHelper<const ArrayData*>::tl_unitEmitter == this);
-      BlobEncoderHelper<const StringData*>::tl_unitEmitter = nullptr;
-      BlobEncoderHelper<const ArrayData*>::tl_unitEmitter = nullptr;
-      SCOPE_EXIT {
-        assertx(!BlobEncoderHelper<const StringData*>::tl_unitEmitter);
-        assertx(!BlobEncoderHelper<const ArrayData*>::tl_unitEmitter);
-        BlobEncoderHelper<const StringData*>::tl_unitEmitter = this;
-        BlobEncoderHelper<const ArrayData*>::tl_unitEmitter = this;
-      };
+      // Serializing arrays can add new things to the literal string
+      // table, so the string table needs to be encoded last. However,
+      // when deserializing, we need to load the string table first.
+      sd.alternate(
+        [&] {
+          // Arrays
+          assertx(BlobEncoderHelper<const ArrayData*>::tl_unitEmitter == this);
+          assertx(!BlobEncoderHelper<const ArrayData*>::tl_defer);
+          BlobEncoderHelper<const ArrayData*>::tl_defer = true;
+          SCOPE_EXIT {
+            assertx(BlobEncoderHelper<const ArrayData*>::tl_defer);
+            BlobEncoderHelper<const ArrayData*>::tl_defer = false;
+          };
 
-      // Literal strings
-      seq(
-        m_litstrs,
-        [&] (auto& sd, size_t i) {
-          if (lazy && RO::RepoLitstrLazyLoad) {
-            assertx(m_litstrs.size() == i);
-            // When lazy loading, check if the string corresponds to
-            // an already existing static string. If so, put that in
-            // the table directly. This avoids redundant loads later
-            // from the repo at very little cost, especially for very
-            // common strings which are almost certainly going to be
-            // loaded already. If not, just record the offset for
-            // later loading (if necessary).
-            auto const offset = sd.advanced();
-            auto const sp =
-              BlobEncoderHelper<const StringData*>::asStringPiece(sd);
-            if (!sp.data()) {
-              m_litstrs.emplace_back(StringOrToken::FromPtr(nullptr));
-            } else if (sp.size() == 0) {
-              m_litstrs.emplace_back(StringOrToken::FromPtr(staticEmptyString()));
-            } else if (auto const sd = lookupStaticString(sp)) {
-              m_litstrs.emplace_back(StringOrToken::FromPtr(sd));
-            } else {
-              m_litstrs.emplace_back(StringOrToken::FromToken(offset));
+          if constexpr (SerDe::deserializing) {
+            size_t count = 0;
+            // Start by encoding each array as if it would be lazy
+            // loaded.
+            sd.readWithLazyCount(
+              [&] {
+                assertx(m_arrays.size() == count);
+                m_arrays.emplace_back(ArrayOrToken::FromToken(sd.advanced()));
+                sd.skipWithSize32();
+                ++count;
+              }
+            );
+
+            if (!lazy || !RO::RepoLitstrLazyLoad) {
+              // If we're not using lazy loading, call lookupArray to
+              // triger the load of every array. We set
+              // m_litarrayBuffer to ensure lookupArray knows where to
+              // find the raw array data (without it, it would try to
+              // use the repo).
+              assertx(!m_litarrayBuffer);
+              assertx(!m_litarrayBufferSize);
+              m_litarrayBuffer = reinterpret_cast<const char*>(sd.start());
+              m_litarrayBufferSize = sd.end() - sd.start();
+              SCOPE_EXIT {
+                m_litarrayBuffer = nullptr;
+                m_litarrayBufferSize = 0;
+              };
+              for (size_t i = 0; i < count; ++i) lookupArray(i);
             }
           } else {
-            const StringData* s;
-            sd(s);
-            auto const id UNUSED = mergeLitstr(s);
-            assertx(id == i);
+            sd.lazyCount(
+              [&] {
+                for (size_t i = 0; i < m_arrays.size(); ++i) {
+                  // NB: Serializing here may increase the size of
+                  // m_arrays.
+                  sd.withSize32([&] { sd(m_arrays[i]->ptr()); });
+                }
+                return m_arrays.size();
+              }
+            );
           }
         },
-        [&] (auto& sd, auto const& wrapper) { sd(wrapper->ptr()); }
-      );
+        [&] {
+          // Literal strings
 
-      // Arrays
-      seq(
-        m_arrays,
-        [&] (auto& sd, size_t i) {
-          if (lazy && RO::RepoLitstrLazyLoad) {
-            assertx(m_arrays.size() == i);
-            m_arrays.emplace_back(ArrayOrToken::FromToken(sd.advanced()));
-            sd.skipStdString();
-          } else {
-            std::string key;
-            sd(key);
+          // Don't access the string table here since we're populating
+          // it.
+          assertx(BlobEncoderHelper<const StringData*>::tl_unitEmitter == this);
+          BlobEncoderHelper<const StringData*>::tl_unitEmitter = nullptr;
+          SCOPE_EXIT {
+            assertx(!BlobEncoderHelper<const StringData*>::tl_unitEmitter);
+            BlobEncoderHelper<const StringData*>::tl_unitEmitter = this;
+          };
 
-            auto v = [&]{
-              VariableUnserializer vu{
-                key.data(),
-                key.size(),
-                VariableUnserializer::Type::Internal
-              };
-              vu.setUnitFilename(m_filepath);
-              return vu.unserialize();
-            }();
-            assertx(v.isArray());
-            auto ad = v.detach().m_data.parr;
-            ArrayData::GetScalarArray(&ad);
-            auto const id DEBUG_ONLY = mergeArray(ad);
-            assertx(id == i);
-          }
-        },
-        [&] (auto& sd, auto const& wrapper) {
-          auto const str = [&]{
-            VariableSerializer vs{VariableSerializer::Type::Internal};
-            vs.setUnitFilename(m_filepath);
-            return
-              vs.serializeValue(
-                VarNR(const_cast<ArrayData*>(wrapper->ptr())),
-                false
-              ).toCppString();
-          }();
-          sd(str);
+          seq(
+            m_litstrs,
+            [&] (auto& sd, size_t i) {
+              if (lazy && RO::RepoLitstrLazyLoad) {
+                assertx(m_litstrs.size() == i);
+                // When lazy loading, check if the string corresponds to
+                // an already existing static string. If so, put that in
+                // the table directly. This avoids redundant loads later
+                // from the repo at very little cost, especially for very
+                // common strings which are almost certainly going to be
+                // loaded already. If not, just record the offset for
+                // later loading (if necessary).
+                auto const offset = sd.advanced();
+                auto const sp =
+                  BlobEncoderHelper<const StringData*>::asStringPiece(sd);
+                if (!sp.data()) {
+                  m_litstrs.emplace_back(StringOrToken::FromPtr(nullptr));
+                } else if (sp.size() == 0) {
+                  m_litstrs.emplace_back(StringOrToken::FromPtr(staticEmptyString()));
+                } else if (auto const sd = lookupStaticString(sp)) {
+                  m_litstrs.emplace_back(StringOrToken::FromPtr(sd));
+                } else {
+                  m_litstrs.emplace_back(StringOrToken::FromToken(offset));
+                }
+              } else {
+                const StringData* s;
+                sd(s);
+                auto const id UNUSED = mergeLitstr(s);
+                assertx(id == i);
+              }
+            },
+            [&] (auto& sd, auto const& wrapper) { sd(wrapper->ptr()); }
+          );
         }
       );
     }

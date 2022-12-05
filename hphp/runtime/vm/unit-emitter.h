@@ -147,7 +147,6 @@ struct UnitEmitter {
    */
   static const ArrayData* loadLitarrayFromRepo(int64_t unitSn,
                                                RepoFile::Token token,
-                                               const StringData* filepath,
                                                bool makeStatic);
   static const StringData* loadLitstrFromRepo(int64_t unitSn,
                                               RepoFile::Token token,
@@ -264,6 +263,8 @@ struct UnitEmitter {
 private:
   void calculateEntryPointId();
 
+  static const ArrayData* loadLitarrayFromPtr(const char*, size_t);
+
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
@@ -347,6 +348,11 @@ private:
   Id m_entryPointId{kInvalidId};
 
   bool m_entryPointIdCalculated{false};
+
+  // When deserializing, used to provide the location of raw array
+  // data to lookupArray.
+  const char* m_litarrayBuffer{nullptr};
+  size_t m_litarrayBufferSize{0};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

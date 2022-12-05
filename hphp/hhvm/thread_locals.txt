@@ -105,6 +105,8 @@ HPHP::tracing::detail::tl_active
 HPHP::jit::(anonymous namespace)::tl_ownedFunc
 HPHP::jit::tc::tl_is_jitting
 HPHP::BlobEncoderHelper<HPHP::ArrayData const*>::tl_unitEmitter
+HPHP::BlobEncoderHelper<HPHP::ArrayData const*>::tl_unit
+HPHP::BlobEncoderHelper<HPHP::ArrayData const*>::tl_defer
 HPHP::BlobEncoderHelper<HPHP::StringData const*>::tl_unitEmitter
 HPHP::BlobEncoderHelper<HPHP::StringData const*>::tl_unit
 HPHP::extern_worker::g_in_job

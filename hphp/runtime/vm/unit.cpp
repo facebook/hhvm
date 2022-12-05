@@ -278,9 +278,21 @@ const ArrayData* Unit::lookupArrayId(Id id) const {
     assertx(wrapper.ptr()->isStatic());
     return wrapper.ptr();
   }
-  auto const array = UnitEmitter::loadLitarrayFromRepo(
-    m_sn, wrapper.token(), m_origFilepath, true
-  );
+
+  auto const oldStrUnit = BlobEncoderHelper<const StringData*>::tl_unit;
+  auto const oldArrUnit = BlobEncoderHelper<const ArrayData*>::tl_unit;
+
+  BlobEncoderHelper<const StringData*>::tl_unit = const_cast<Unit*>(this);
+  BlobEncoderHelper<const ArrayData*>::tl_unit = const_cast<Unit*>(this);
+  SCOPE_EXIT {
+    assertx(BlobEncoderHelper<const StringData*>::tl_unit == this);
+    assertx(BlobEncoderHelper<const ArrayData*>::tl_unit == this);
+    BlobEncoderHelper<const StringData*>::tl_unit = oldStrUnit;
+    BlobEncoderHelper<const ArrayData*>::tl_unit = oldArrUnit;
+  };
+
+  auto const array =
+    UnitEmitter::loadLitarrayFromRepo(m_sn, wrapper.token(), true);
   assertx(array);
   assertx(array->isStatic());
   lock.update(ArrayOrToken::FromPtr(array));

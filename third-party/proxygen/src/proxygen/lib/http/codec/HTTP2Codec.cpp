@@ -27,8 +27,8 @@ using std::string;
 
 namespace {
 const size_t kDefaultGrowth = 4000;
-constexpr auto kOkhttp2 = "okhttp/2";
-constexpr int kOkhttp2GoawayLogFreq = 1000;
+constexpr auto kOkhttp = "okhttp/";
+constexpr int kOkhttpResetLogFreq = 1000;
 } // namespace
 
 namespace proxygen {
@@ -784,9 +784,8 @@ ErrorCode HTTP2Codec::parseRstStream(Cursor& cursor) {
                                       curHeader_.stream,
                                       " user-agent=",
                                       userAgent_);
-    int logFreq = userAgent_.find(kOkhttp2) == std::string::npos
-                      ? 1
-                      : kOkhttp2GoawayLogFreq;
+    int logFreq =
+        userAgent_.find(kOkhttp) == std::string::npos ? 1 : kOkhttpResetLogFreq;
     VLOG_EVERY_N(2, logFreq) << errorMsg;
   }
   deliverCallbackIfAllowed(

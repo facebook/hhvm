@@ -493,12 +493,7 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.(Class_get (class_id, cg_expr, prop_or_method)) ->
     N.Class_get (class_id, cg_expr, prop_or_method)
   | Aast.Class_const (class_id, pstring) -> N.Class_const (class_id, pstring)
-  | Aast.Tuple el ->
-    (match el with
-    | [] ->
-      Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
-      invalid_expr_ p
-    | el -> N.Tuple (exprl env el))
+  | Aast.Tuple el -> N.Tuple (exprl env el)
   | Aast.Call (e, tal, el, unpacked_element) ->
     N.Call (expr env e, tal, expr_call_args env el, oexpr env unpacked_element)
   | Aast.FunctionPointer (fid, targs) -> N.FunctionPointer (fid, targs)
@@ -1283,6 +1278,7 @@ type 'elem pipeline = {
   elab_hints: (Naming_elab_hints.Env.t, 'elem) elabidation;
   elab_collection: (Naming_elab_collection.Env.t, 'elem) elabidation;
   elab_call: (Naming_elab_call.Env.t, 'elem) elabidation;
+  elab_tuple: (Naming_elab_tuple.Env.t, 'elem) elabidation;
   elab_help: Provider_context.t -> genv -> 'elem -> 'elem;
   elab_soft: (Naming_elab_soft.Env.t, 'elem) elaboration;
   elab_everything_sdt: (Naming_elab_everything_sdt.Env.t, 'elem) elaboration;
@@ -1309,6 +1305,7 @@ let elab_elem
       elab_hints;
       elab_collection;
       elab_call;
+      elab_tuple;
       elab_help;
       elab_soft;
       elab_everything_sdt;
@@ -1365,6 +1362,8 @@ let elab_elem
   let (elem, err) = elab_collection ~init:err elem in
 
   let (elem, err) = elab_call ~init:err elem in
+
+  let (elem, err) = elab_tuple ~init:err elem in
 
   (* General expression / statement / xhp elaboration & validation *)
   let elem = elab_help ctx env elem in
@@ -1474,6 +1473,7 @@ let program ctx ast =
       elab_hints = Naming_elab_hints.elab_program;
       elab_collection = Naming_elab_collection.elab_program;
       elab_call = Naming_elab_call.elab_program;
+      elab_tuple = Naming_elab_tuple.elab_program;
       elab_help = program_help;
       elab_soft = Naming_elab_soft.elab_program;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_program;
@@ -1503,6 +1503,7 @@ let fun_def ctx fd =
       elab_hints = Naming_elab_hints.elab_fun_def;
       elab_collection = Naming_elab_collection.elab_fun_def;
       elab_call = Naming_elab_call.elab_fun_def;
+      elab_tuple = Naming_elab_tuple.elab_fun_def;
       elab_help = fun_def_help;
       elab_soft = Naming_elab_soft.elab_fun_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_fun_def;
@@ -1532,6 +1533,7 @@ let class_ ctx c =
       elab_hints = Naming_elab_hints.elab_class;
       elab_collection = Naming_elab_collection.elab_class;
       elab_call = Naming_elab_call.elab_class;
+      elab_tuple = Naming_elab_tuple.elab_class;
       elab_help = class_help;
       elab_soft = Naming_elab_soft.elab_class;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_class;
@@ -1561,6 +1563,7 @@ let module_ ctx module_ =
       elab_hints = Naming_elab_hints.elab_module_def;
       elab_collection = Naming_elab_collection.elab_module_def;
       elab_call = Naming_elab_call.elab_module_def;
+      elab_tuple = Naming_elab_tuple.elab_module_def;
       elab_help = module_help;
       elab_soft = Naming_elab_soft.elab_module_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_module_def;
@@ -1590,6 +1593,7 @@ let global_const ctx cst =
       elab_hints = Naming_elab_hints.elab_gconst;
       elab_collection = Naming_elab_collection.elab_gconst;
       elab_call = Naming_elab_call.elab_gconst;
+      elab_tuple = Naming_elab_tuple.elab_gconst;
       elab_help = global_const_help;
       elab_soft = Naming_elab_soft.elab_gconst;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_gconst;
@@ -1619,6 +1623,7 @@ let typedef ctx tdef =
       elab_hints = Naming_elab_hints.elab_typedef;
       elab_collection = Naming_elab_collection.elab_typedef;
       elab_call = Naming_elab_call.elab_typedef;
+      elab_tuple = Naming_elab_tuple.elab_typedef;
       elab_help = typedef_help;
       elab_soft = Naming_elab_soft.elab_typedef;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_typedef;

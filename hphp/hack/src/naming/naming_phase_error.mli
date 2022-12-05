@@ -42,3 +42,5 @@ val supportdyn : Pos.t -> err Free_monoid.t
 class monoid : [err] Free_monoid.monoid
 
 val from_monoid : ?init:t -> err Free_monoid.t -> t
+
+val invalid_expr_ : Pos.t -> (unit, unit) Aast.expr_

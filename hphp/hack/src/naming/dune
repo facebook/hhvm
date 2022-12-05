@@ -141,22 +141,29 @@
   naming_elab_enum_class
   naming_elab_everything_sdt
   naming_elab_func_body
-  naming_elab_hints
+  naming_elab_haccess_hint
+  naming_elab_happly_hint
   naming_elab_hkt
   naming_elab_import
   naming_elab_invariant
   naming_elab_lvar
   naming_elab_pipe
+  naming_elab_retonly_hint
+  naming_elab_shape_field_name
   naming_elab_soft
+  naming_elab_this_hint
   naming_elab_tuple
   naming_elab_user_attributes
+  naming_elab_wildcard_hint
   naming_phase_error
   naming_phase_sigs
   naming_validate_builtin_enum
+  naming_validate_cast_expr
   naming_validate_class_req
   naming_validate_consistent_construct
   naming_validate_enum_class_typeconst
   naming_validate_fun_params
+  naming_validate_like_hint
   naming_validate_module
   naming_validate_supportdyn
   naming_validate_xhp_name)

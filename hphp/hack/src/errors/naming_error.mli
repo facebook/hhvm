@@ -70,7 +70,7 @@ type t =
   | Dynamic_new_in_strict_mode of Pos.t
   | Invalid_type_access_root of {
       pos: Pos.t;
-      id: string;
+      id: string option;
     }
   | Duplicate_user_attribute of {
       pos: Pos.t;

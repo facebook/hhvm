@@ -33,7 +33,15 @@ let invalid_expr_ = Naming_phase_error.invalid_expr_
 
 type 'elem pipeline = {
   elab_ns: 'elem -> 'elem;
-  elab_hints: (Naming_elab_hints.Env.t, 'elem) elabidation;
+  elab_happly: (Naming_elab_happly_hint.Env.t, 'elem) elabidation;
+  elab_retonly: (Naming_elab_retonly_hint.Env.t, 'elem) elabidation;
+  elab_wildcard: (Naming_elab_wildcard_hint.Env.t, 'elem) elabidation;
+  validate_like: (Naming_validate_like_hint.Env.t, 'elem) validation;
+  elab_shape_field_name:
+    (Naming_elab_shape_field_name.Env.t, 'elem) elabidation;
+  elab_haccess: (Naming_elab_haccess_hint.Env.t, 'elem) elabidation;
+  elab_this: (Naming_elab_this_hint.Env.t, 'elem) elabidation;
+  validate_cast: (Naming_validate_cast_expr.Env.t, 'elem) validation;
   elab_collection: (Naming_elab_collection.Env.t, 'elem) elabidation;
   elab_call: (Naming_elab_call.Env.t, 'elem) elabidation;
   elab_tuple: (Naming_elab_tuple.Env.t, 'elem) elabidation;
@@ -76,7 +84,14 @@ let elab_elem
     {
       elab_ns;
       elab_defs;
-      elab_hints;
+      elab_happly;
+      elab_retonly;
+      elab_wildcard;
+      validate_like;
+      elab_shape_field_name;
+      elab_haccess;
+      elab_this;
+      validate_cast;
       elab_collection;
       elab_call;
       elab_tuple;
@@ -113,8 +128,15 @@ let elab_elem
   (* Remove or flatten top level defs *)
   let elem = elab_defs elem in
 
-  (* Elaborate hints, collect errors and report them *)
-  let (elem, err) = elab_hints elem in
+  (* Elaborate / validate hints *)
+  let (elem, err) = elab_happly elem in
+  let (elem, err) = elab_retonly ~init:err elem in
+  let (elem, err) = elab_wildcard ~init:err elem in
+  let err = validate_like ~init:err elem in
+  let (elem, err) = elab_shape_field_name ~init:err elem in
+  let (elem, err) = elab_this ~init:err elem in
+  let (elem, err) = elab_haccess ~init:err elem in
+  let err = validate_cast ~init:err elem in
 
   (* Check for invalid use of internal classes - note that we must have this
      validation pass _before_ we elaborate enum classes *)
@@ -319,7 +341,14 @@ let program ctx ast =
           (Naming_elaborate_namespaces_endo.make_env
              Namespace_env.empty_with_default);
       elab_defs = Naming_elab_defs.elab_program;
-      elab_hints = Naming_elab_hints.elab_program;
+      elab_happly = Naming_elab_happly_hint.elab_program;
+      elab_retonly = Naming_elab_retonly_hint.elab_program;
+      elab_wildcard = Naming_elab_wildcard_hint.elab_program;
+      elab_shape_field_name = Naming_elab_shape_field_name.elab_program;
+      validate_like = Naming_validate_like_hint.validate_program;
+      elab_this = Naming_elab_this_hint.elab_program;
+      elab_haccess = Naming_elab_haccess_hint.elab_program;
+      validate_cast = Naming_validate_cast_expr.validate_program;
       elab_collection = Naming_elab_collection.elab_program;
       elab_call = Naming_elab_call.elab_program;
       elab_tuple = Naming_elab_tuple.elab_program;
@@ -363,7 +392,14 @@ let fun_def ctx fd =
         elaborate_namespaces#on_fun_def
           (Naming_elaborate_namespaces_endo.make_env fd.Aast.fd_namespace);
       elab_defs = Naming_elab_defs.elab_fun_def;
-      elab_hints = Naming_elab_hints.elab_fun_def;
+      elab_happly = Naming_elab_happly_hint.elab_fun_def;
+      elab_retonly = Naming_elab_retonly_hint.elab_fun_def;
+      elab_wildcard = Naming_elab_wildcard_hint.elab_fun_def;
+      validate_like = Naming_validate_like_hint.validate_fun_def;
+      elab_shape_field_name = Naming_elab_shape_field_name.elab_fun_def;
+      elab_this = Naming_elab_this_hint.elab_fun_def;
+      elab_haccess = Naming_elab_haccess_hint.elab_fun_def;
+      validate_cast = Naming_validate_cast_expr.validate_fun_def;
       elab_collection = Naming_elab_collection.elab_fun_def;
       elab_call = Naming_elab_call.elab_fun_def;
       elab_tuple = Naming_elab_tuple.elab_fun_def;
@@ -407,7 +443,14 @@ let class_ ctx c =
         elaborate_namespaces#on_class_
           (Naming_elaborate_namespaces_endo.make_env c.Aast.c_namespace);
       elab_defs = Naming_elab_defs.elab_class;
-      elab_hints = Naming_elab_hints.elab_class;
+      elab_retonly = Naming_elab_retonly_hint.elab_class;
+      elab_happly = Naming_elab_happly_hint.elab_class;
+      elab_wildcard = Naming_elab_wildcard_hint.elab_class;
+      validate_like = Naming_validate_like_hint.validate_class;
+      elab_shape_field_name = Naming_elab_shape_field_name.elab_class;
+      elab_this = Naming_elab_this_hint.elab_class;
+      elab_haccess = Naming_elab_haccess_hint.elab_class;
+      validate_cast = Naming_validate_cast_expr.validate_class;
       elab_collection = Naming_elab_collection.elab_class;
       elab_call = Naming_elab_call.elab_class;
       elab_tuple = Naming_elab_tuple.elab_class;
@@ -452,7 +495,14 @@ let module_ ctx module_ =
           (Naming_elaborate_namespaces_endo.make_env
              Namespace_env.empty_with_default);
       elab_defs = Naming_elab_defs.elab_module_def;
-      elab_hints = Naming_elab_hints.elab_module_def;
+      elab_retonly = Naming_elab_retonly_hint.elab_module_def;
+      elab_happly = Naming_elab_happly_hint.elab_module_def;
+      elab_wildcard = Naming_elab_wildcard_hint.elab_module_def;
+      elab_shape_field_name = Naming_elab_shape_field_name.elab_module_def;
+      validate_like = Naming_validate_like_hint.validate_module_def;
+      elab_this = Naming_elab_this_hint.elab_module_def;
+      elab_haccess = Naming_elab_haccess_hint.elab_module_def;
+      validate_cast = Naming_validate_cast_expr.validate_module_def;
       elab_collection = Naming_elab_collection.elab_module_def;
       elab_call = Naming_elab_call.elab_module_def;
       elab_tuple = Naming_elab_tuple.elab_module_def;
@@ -496,7 +546,14 @@ let global_const ctx cst =
         elaborate_namespaces#on_gconst
           (Naming_elaborate_namespaces_endo.make_env cst.Aast.cst_namespace);
       elab_defs = Naming_elab_defs.elab_gconst;
-      elab_hints = Naming_elab_hints.elab_gconst;
+      elab_retonly = Naming_elab_retonly_hint.elab_gconst;
+      elab_happly = Naming_elab_happly_hint.elab_gconst;
+      elab_wildcard = Naming_elab_wildcard_hint.elab_gconst;
+      validate_like = Naming_validate_like_hint.validate_gconst;
+      elab_shape_field_name = Naming_elab_shape_field_name.elab_gconst;
+      elab_this = Naming_elab_this_hint.elab_gconst;
+      elab_haccess = Naming_elab_haccess_hint.elab_gconst;
+      validate_cast = Naming_validate_cast_expr.validate_gconst;
       elab_collection = Naming_elab_collection.elab_gconst;
       elab_call = Naming_elab_call.elab_gconst;
       elab_tuple = Naming_elab_tuple.elab_gconst;
@@ -540,7 +597,14 @@ let typedef ctx tdef =
         elaborate_namespaces#on_typedef
           (Naming_elaborate_namespaces_endo.make_env tdef.Aast.t_namespace);
       elab_defs = Naming_elab_defs.elab_typedef;
-      elab_hints = Naming_elab_hints.elab_typedef;
+      elab_retonly = Naming_elab_retonly_hint.elab_typedef;
+      elab_happly = Naming_elab_happly_hint.elab_typedef;
+      elab_wildcard = Naming_elab_wildcard_hint.elab_typedef;
+      validate_like = Naming_validate_like_hint.validate_typedef;
+      elab_shape_field_name = Naming_elab_shape_field_name.elab_typedef;
+      elab_this = Naming_elab_this_hint.elab_typedef;
+      elab_haccess = Naming_elab_haccess_hint.elab_typedef;
+      validate_cast = Naming_validate_cast_expr.validate_typedef;
       elab_collection = Naming_elab_collection.elab_typedef;
       elab_call = Naming_elab_call.elab_typedef;
       elab_tuple = Naming_elab_tuple.elab_typedef;

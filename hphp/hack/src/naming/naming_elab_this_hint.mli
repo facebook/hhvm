@@ -13,18 +13,4 @@
    - Elaborate missing type parameters to builtin collections to `Hany`
    - Validate the arity of certain builtin collections
 *)
-module Env : sig
-  type t
-
-  val empty : t
-
-  val in_class : ('a, 'b) Aast_defs.class_ -> t
-
-  val in_fun_def : ('a, 'b) Aast_defs.fun_def -> t
-
-  val in_typedef : ('a, 'b) Aast_defs.typedef -> t
-
-  val in_gconst : ('a, 'b) Aast_defs.gconst -> t
-end
-
-include Naming_phase_sigs.Elabidation with module Env := Env
+include Naming_phase_sigs.Elabidation

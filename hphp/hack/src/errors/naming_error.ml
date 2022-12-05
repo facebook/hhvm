@@ -74,7 +74,7 @@ type t =
   | Dynamic_new_in_strict_mode of Pos.t
   | Invalid_type_access_root of {
       pos: Pos.t;
-      id: string;
+      id: string option;
     }
   | Duplicate_user_attribute of {
       pos: Pos.t;
@@ -598,13 +598,16 @@ let dynamic_new_in_strict_mode pos =
     (pos, "Cannot use dynamic `new`.")
     []
 
-let invalid_type_access_root pos id =
-  User_error.make
-    Error_code.(to_enum InvalidTypeAccessRoot)
-    ( pos,
+let invalid_type_access_root pos id_opt =
+  let msg =
+    match id_opt with
+    | Some id ->
       Format.sprintf "%s must be an identifier for a class, `self`, or `this`"
-      @@ Markdown_lite.md_codify id )
-    []
+      @@ Markdown_lite.md_codify id
+    | _ ->
+      Format.sprintf "Type access is only valid for a class, `self`, or `this`"
+  in
+  User_error.make Error_code.(to_enum InvalidTypeAccessRoot) (pos, msg) []
 
 let duplicate_user_attribute attr_name prev_pos pos =
   User_error.make

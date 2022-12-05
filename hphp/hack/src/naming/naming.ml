@@ -317,7 +317,7 @@ let xhp_attribute_decl env (h, cv, tag, maybe_enum) =
   in
   Aast.{ cv with cv_xhp_attr; cv_type; cv_expr; cv_user_attributes = [] }
 
-let class_help ctx env c =
+let class_help _ env c =
   let (constructor, smethods, methods) = Aast.split_methods c.Aast.c_methods in
   let (sprops, props) = Aast.split_vars c.Aast.c_vars in
   let sprops = List.map ~f:(class_prop_static env) sprops in
@@ -332,27 +332,7 @@ let class_help ctx env c =
   let (c_req_extends, c_req_implements, c_req_class) =
     Aast.split_reqs c.Aast.c_reqs
   in
-  let e =
-    TypecheckerOptions.explicit_consistent_constructors
-      (Provider_context.get_tcopt ctx)
-  in
-  if e > 0 && Option.is_none constructor then
-    Option.iter
-      (Naming_attributes.mem_pos SN.UserAttributes.uaConsistentConstruct attrs)
-      ~f:(fun pos ->
-        let err_opt =
-          match c.Aast.c_kind with
-          | Ast_defs.Ctrait ->
-            Some
-              (Naming_error.Explicit_consistent_constructor
-                 { classish_kind = c.Aast.c_kind; pos })
-          | _ when e > 1 ->
-            Some
-              (Naming_error.Explicit_consistent_constructor
-                 { classish_kind = c.Aast.c_kind; pos })
-          | _ -> None
-        in
-        Option.iter err_opt ~f:Errors.add_naming_error);
+
   let req_implements = c_req_implements in
   let req_implements =
     List.map ~f:(fun h -> (h, N.RequireImplements)) req_implements
@@ -361,10 +341,6 @@ let class_help ctx env c =
   let req_extends = List.map ~f:(fun h -> (h, N.RequireExtends)) req_extends in
   let req_class = c_req_class in
   let req_class = List.map ~f:(fun h -> (h, N.RequireClass)) req_class in
-  (* Setting a class type parameters constraint to the 'this' type is weird
-   * so lets forbid it for now.
-   *)
-  let implements = c.Aast.c_implements in
   let (constructor, methods, smethods) =
     interface c constructor methods smethods
   in
@@ -379,7 +355,6 @@ let class_help ctx env c =
       c_uses = uses;
       c_xhp_attr_uses = xhp_attr_uses;
       c_reqs = req_extends @ req_implements @ req_class;
-      c_implements = implements;
       c_vars = sprops @ props;
       c_methods = methods;
       c_user_attributes = attrs;
@@ -459,6 +434,8 @@ type 'elem pipeline = {
   validate_supportdyn: (Naming_validate_supportdyn.Env.t, 'elem) validation;
   validate_module: (Naming_validate_module.Env.t, 'elem) validation;
   validate_class_req: (Naming_validate_class_req.Env.t, 'elem) validation;
+  validate_consistent_construct:
+    (Naming_validate_consistent_construct.Env.t, 'elem) validation;
 }
 
 (* Apply our elaboration and validation steps to a given ast element *)
@@ -497,6 +474,7 @@ let elab_elem
       validate_supportdyn;
       validate_module;
       validate_class_req;
+      validate_consistent_construct;
     } =
   let tcopt = Provider_context.get_tcopt ctx in
   (* Elaborate namespaces *)
@@ -568,6 +546,15 @@ let elab_elem
   let elem = elab_lambda_captures elem in
 
   let err = validate_class_req ~init:err elem in
+
+  let err =
+    let level = TypecheckerOptions.explicit_consistent_constructors tcopt in
+    if level > 0 then
+      let env = Naming_validate_consistent_construct.Env.create level in
+      validate_consistent_construct ~init:err ~env elem
+    else
+      err
+  in
 
   (* General expression / statement / xhp elaboration & validation *)
   let elem = elab_help ctx env elem in
@@ -729,6 +716,8 @@ let program ctx ast =
       validate_supportdyn = Naming_validate_supportdyn.validate_program;
       validate_module = Naming_validate_module.validate_program;
       validate_class_req = Naming_validate_class_req.validate_program;
+      validate_consistent_construct =
+        Naming_validate_consistent_construct.validate_program;
     }
 
 let fun_def ctx fd =
@@ -772,6 +761,8 @@ let fun_def ctx fd =
       validate_supportdyn = Naming_validate_supportdyn.validate_fun_def;
       validate_module = Naming_validate_module.validate_fun_def;
       validate_class_req = Naming_validate_class_req.validate_fun_def;
+      validate_consistent_construct =
+        Naming_validate_consistent_construct.validate_fun_def;
     }
 
 let class_ ctx c =
@@ -815,6 +806,8 @@ let class_ ctx c =
       validate_supportdyn = Naming_validate_supportdyn.validate_class;
       validate_module = Naming_validate_module.validate_class;
       validate_class_req = Naming_validate_class_req.validate_class;
+      validate_consistent_construct =
+        Naming_validate_consistent_construct.validate_class;
     }
 
 let module_ ctx module_ =
@@ -858,6 +851,8 @@ let module_ ctx module_ =
       validate_supportdyn = Naming_validate_supportdyn.validate_module_def;
       validate_module = Naming_validate_module.validate_module_def;
       validate_class_req = Naming_validate_class_req.validate_module_def;
+      validate_consistent_construct =
+        Naming_validate_consistent_construct.validate_module_def;
     }
 
 let global_const ctx cst =
@@ -901,6 +896,8 @@ let global_const ctx cst =
       validate_supportdyn = Naming_validate_supportdyn.validate_gconst;
       validate_module = Naming_validate_module.validate_gconst;
       validate_class_req = Naming_validate_class_req.validate_gconst;
+      validate_consistent_construct =
+        Naming_validate_consistent_construct.validate_gconst;
     }
 
 let typedef ctx tdef =
@@ -944,4 +941,6 @@ let typedef ctx tdef =
       validate_supportdyn = Naming_validate_supportdyn.validate_typedef;
       validate_module = Naming_validate_module.validate_typedef;
       validate_class_req = Naming_validate_class_req.validate_typedef;
+      validate_consistent_construct =
+        Naming_validate_consistent_construct.validate_typedef;
     }

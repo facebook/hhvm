@@ -300,7 +300,7 @@ module FileInfoTable = struct
       stmt_cache
       relative_path
       ~(type_checker_mode : FileInfo.mode option)
-      ~(decl_hash : Int64.t option)
+      ~(file_decls_hash : Int64.t option)
       ~(classes : FileInfo.id list)
       ~(consts : FileInfo.id list)
       ~(funs : FileInfo.id list)
@@ -319,9 +319,9 @@ module FileInfoTable = struct
           (Int64.of_int (FileInfo.mode_to_enum type_checker_mode))
       | None -> Sqlite3.Data.NULL
     in
-    let decl_hash =
-      match decl_hash with
-      | Some decl_hash -> Sqlite3.Data.INT decl_hash
+    let file_decls_hash =
+      match file_decls_hash with
+      | Some file_decls_hash -> Sqlite3.Data.INT file_decls_hash
       | None -> Sqlite3.Data.NULL
     in
     let names_to_data_type names =
@@ -340,7 +340,7 @@ module FileInfoTable = struct
 
     Sqlite3.bind insert_stmt 3 type_checker_mode |> check_rc db;
 
-    Sqlite3.bind insert_stmt 4 decl_hash |> check_rc db;
+    Sqlite3.bind insert_stmt 4 file_decls_hash |> check_rc db;
     Sqlite3.bind insert_stmt 5 (names_to_data_type classes) |> check_rc db;
     Sqlite3.bind insert_stmt 6 (names_to_data_type consts) |> check_rc db;
     Sqlite3.bind insert_stmt 7 (names_to_data_type funs) |> check_rc db;
@@ -616,7 +616,7 @@ let save_file_info db stmt_cache relative_path checksum file_info : save_result
     stmt_cache
     relative_path
     ~type_checker_mode:file_info.FileInfo.file_mode
-    ~decl_hash:file_info.FileInfo.hash
+    ~file_decls_hash:file_info.FileInfo.hash
     ~consts:file_info.FileInfo.consts
     ~classes:file_info.FileInfo.classes
     ~funs:file_info.FileInfo.funs

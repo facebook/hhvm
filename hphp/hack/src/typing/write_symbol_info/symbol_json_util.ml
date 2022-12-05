@@ -143,13 +143,11 @@ type pos = {
 }
 [@@deriving ord]
 
-exception Not_implemented
-
 (* Pretty-printer for hints. Also generate
    xrefs.  TODO: This covers most of the types but needs
    to be extended OR move the xrefs generartion logic
    to Typing_print.full_strip_ns_decl *)
-let string_of_type (t : Aast.hint) =
+let string_of_type ctx (t : Aast.hint) =
   let queue = Queue.create () in
   let class_pos = Hashtbl.create (module Base.String) in
   let cur = ref 0 in
@@ -182,7 +180,15 @@ let string_of_type (t : Aast.hint) =
       parse_list ("<", ">") hs
     | Htuple hs -> parse_list ("(", ")") hs
     | Hprim p -> enqueue (Aast_defs.string_of_tprim p)
-    | _ -> raise Not_implemented
+    | Haccess (h, sids) ->
+      parse h;
+      List.iter sids ~f:(fun (_, sid) ->
+          enqueue "::";
+          enqueue sid)
+    | _ ->
+      (* fall back on old pretty printer - without xrefs - for things
+         not implemented yet *)
+      enqueue (get_type_from_hint_strip_ns ctx t)
   and parse_list (op, cl) = function
     | [] -> ()
     | [h] ->
@@ -202,17 +208,14 @@ let string_of_type (t : Aast.hint) =
   let xrefs = Hashtbl.to_alist class_pos in
   (String.concat toks, xrefs)
 
-(* Generate xrefs when we can, otherwise fallback on second pretty-printer.
-   This covers most type *)
 let hint_to_string_and_symbols ctx h =
   let ty_pp_ref = get_type_from_hint_strip_ns ctx h in
-  try
-    let (ty_pp, xrefs) = string_of_type h in
-    (* to test pretty printer *)
-    (* if not (String.equal ty_pp ty_pp_ref) then
-       Hh_logger.log "pretty-printers mismatch: %s %s" ty_pp ty_pp_ref; *)
-    (ty_pp, xrefs)
-  with
-  | Not_implemented ->
-    (* Hh_logger.log "Not implemented %s %s" ty_pp_ref (Aast_defs.show_hint h); *)
+  let (ty_pp, xrefs) = string_of_type ctx h in
+  match String.equal ty_pp ty_pp_ref with
+  | true -> (ty_pp, xrefs)
+  | false ->
+    (* This is triggered only for very large (truncated) types.
+       We use ty_pp_ref in that case since it guarantees an
+       upper bound on the size of types. *)
+    Hh_logger.log "pretty-printers mismatch: %s %s" ty_pp ty_pp_ref;
     (ty_pp_ref, [])

@@ -991,6 +991,20 @@ ArrayData* ArrayData::toKeyset(bool copy) {
 
 __thread UnitEmitter* BlobEncoderHelper<const ArrayData*>::tl_unitEmitter{nullptr};
 
+namespace {
+
+enum class ArrayKind {
+  Null = 0,
+  Vec,
+  Dict,
+  Keyset,
+  BespokeTS,
+  VArray,
+  DArray
+};
+
+}
+
 void BlobEncoderHelper<const ArrayData*>::serde(BlobEncoder& encoder,
                                                 const ArrayData* ad) {
   if (auto const ue = tl_unitEmitter) {
@@ -1003,12 +1017,49 @@ void BlobEncoderHelper<const ArrayData*>::serde(BlobEncoder& encoder,
     encoder(id+1);
     return;
   }
-  if (!ad) {
-    encoder(make_tv<KindOfUninit>());
-    return;
+
+  using AK = ArrayKind;
+  auto const ak = [&] {
+    if (!ad) return AK::Null;
+    if (ad->isLegacyArray()) {
+      return ad->isVecType() ? AK::VArray : AK::DArray;
+    }
+    if (ad->isDictType()) {
+      return bespoke::TypeStructure::isBespokeTypeStructure(ad)
+        ? AK::BespokeTS
+        : AK::Dict;
+    }
+    if (ad->isVecType()) return AK::Vec;
+    assertx(ad->isKeysetType());
+    return AK::Keyset;
+  }();
+
+  encoder(ak);
+  if (ak == AK::Null) return;
+
+  assertx(ad->size() <= std::numeric_limits<uint32_t>::max());
+  encoder(static_cast<uint32_t>(ad->size()));
+
+  switch (ak) {
+    case AK::Vec:
+    case AK::VArray:
+    case AK::Keyset:
+      IterateV(ad, [&] (TypedValue v) { encoder(v); });
+      break;
+    case AK::Dict:
+    case AK::DArray:
+    case AK::BespokeTS:
+      IterateKV(
+        ad,
+        [&] (TypedValue k, TypedValue v) {
+          assertx(tvIsInt(k) || tvIsString(k));
+          encoder(k)(v);
+        }
+      );
+      break;
+    case AK::Null:
+      not_reached();
   }
-  assertx(ad->isStatic());
-  encoder(make_array_like_tv(const_cast<ArrayData*>(ad)));
 }
 
 void BlobEncoderHelper<const ArrayData*>::serde(BlobDecoder& decoder,
@@ -1024,15 +1075,74 @@ void BlobEncoderHelper<const ArrayData*>::serde(BlobDecoder& decoder,
     return;
   }
 
-  TypedValue tv;
-  decoder(tv);
-  if (tv.m_type == KindOfUninit) {
+  using AK = ArrayKind;
+
+  AK ak;
+  decoder(ak);
+  if (ak == AK::Null) {
     ad = nullptr;
     return;
   }
-  assertx(tvIsArrayLike(tv));
-  assertx(tv.m_data.parr->isStatic());
-  ad = tv.m_data.parr;
+
+  uint32_t size;
+  decoder(size);
+
+  switch (ak) {
+    case AK::Vec:
+    case AK::VArray: {
+      VecInit v{size};
+      for (size_t i = 0; i < size; ++i) {
+        TypedValue tv;
+        decoder(tv);
+        v.append(tv);
+      }
+      if (ak == AK::VArray) v.setLegacyArray(true);
+      auto a = v.toArray();
+      a.setEvalScalar();
+      ad = a.detach();
+      break;
+    }
+    case AK::Keyset: {
+      KeysetInit k{size};
+      for (size_t i = 0; i < size; ++i) {
+        TypedValue tv;
+        decoder(tv);
+        k.add(tv);
+      }
+      auto a = k.toArray();
+      a.setEvalScalar();
+      ad = a.detach();
+      break;
+    }
+    case AK::Dict:
+    case AK::DArray:
+    case AK::BespokeTS: {
+      DictInit d{size};
+      for (size_t i = 0; i < size; ++i) {
+        TypedValue k;
+        TypedValue v;
+        decoder(k)(v);
+        if (tvIsString(k)) {
+          d.set(k.m_data.pstr, v);
+        } else {
+          assertx(tvIsInt(k));
+          d.set(k.m_data.num, v);
+        }
+      }
+      if (ak == AK::DArray) d.setLegacyArray();
+      auto a = d.toArray();
+      if (ak == AK::BespokeTS) {
+        auto const ts =
+          bespoke::TypeStructure::MakeFromVanilla(a.get());
+        if (ts) a = Array::attach(ts);
+      }
+      a.setEvalScalar();
+      ad = a.detach();
+      break;
+    }
+    case AK::Null:
+      not_reached();
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

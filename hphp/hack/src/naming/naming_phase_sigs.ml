@@ -119,3 +119,14 @@ module type Elabidation = sig
     (unit, unit) Aast.program ->
     (unit, unit) Aast.program * Naming_phase_error.t
 end
+
+type ('env, 'elem) validation =
+  ?init:Naming_phase_error.t -> ?env:'env -> 'elem -> Naming_phase_error.t
+
+type ('env, 'elem) elaboration = ?env:'env -> 'elem -> 'elem
+
+type ('env, 'elem) elabidation =
+  ?init:Naming_phase_error.t ->
+  ?env:'env ->
+  'elem ->
+  'elem * Naming_phase_error.t

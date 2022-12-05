@@ -17,6 +17,7 @@
 open Hh_prelude
 open Common
 open String_utils
+open Naming_phase_sigs
 module N = Aast
 module SN = Naming_special_names
 module NS = Namespaces
@@ -1595,50 +1596,20 @@ let program_help ctx env ast =
 
 type 'elem pipeline = {
   elab_ns: 'elem -> 'elem;
-  elab_hints:
-    ?init:Naming_phase_error.t ->
-    ?env:Naming_elab_hints.Env.t ->
-    'elem ->
-    'elem * Naming_phase_error.t;
+  elab_hints: (Naming_elab_hints.Env.t, 'elem) elabidation;
   elab_help: Provider_context.t -> genv -> 'elem -> 'elem;
-  elab_soft: ?env:Naming_elab_soft.Env.t -> 'elem -> 'elem;
-  elab_everything_sdt: ?env:Naming_elab_everything_sdt.Env.t -> 'elem -> 'elem;
-  elab_hkt:
-    ?init:Naming_phase_error.t ->
-    ?env:Naming_elab_hkt.Env.t ->
-    'elem ->
-    'elem * Naming_phase_error.t;
-  elab_enum_class: ?env:Naming_elab_enum_class.Env.t -> 'elem -> 'elem;
-  elab_class_id:
-    ?init:Naming_phase_error.t ->
-    ?env:Naming_elab_class_id.Env.t ->
-    'elem ->
-    'elem * Naming_phase_error.t;
+  elab_soft: (Naming_elab_soft.Env.t, 'elem) elaboration;
+  elab_everything_sdt: (Naming_elab_everything_sdt.Env.t, 'elem) elaboration;
+  elab_hkt: (Naming_elab_hkt.Env.t, 'elem) elabidation;
+  elab_enum_class: (Naming_elab_enum_class.Env.t, 'elem) elaboration;
+  elab_class_id: (Naming_elab_class_id.Env.t, 'elem) elabidation;
   elab_dynamic_class_name:
-    ?init:Naming_phase_error.t ->
-    ?env:Naming_elab_dynamic_class_name.Env.t ->
-    'elem ->
-    'elem * Naming_phase_error.t;
-  validate_xhp:
-    ?init:Naming_phase_error.t ->
-    ?env:Naming_validate_xhp_name.Env.t ->
-    'elem ->
-    Naming_phase_error.t;
-  validate_builtin_enum:
-    ?init:Naming_phase_error.t ->
-    ?env:Naming_validate_builtin_enum.Env.t ->
-    'elem ->
-    Naming_phase_error.t;
+    (Naming_elab_dynamic_class_name.Env.t, 'elem) elabidation;
+  validate_xhp: (Naming_validate_xhp_name.Env.t, 'elem) validation;
+  validate_builtin_enum: (Naming_validate_builtin_enum.Env.t, 'elem) validation;
   validate_enum_class_typeconst:
-    ?init:Naming_phase_error.t ->
-    ?env:Naming_validate_enum_class_typeconst.Env.t ->
-    'elem ->
-    Naming_phase_error.t;
-  validate_supportdyn:
-    ?init:Naming_phase_error.t ->
-    ?env:Naming_validate_supportdyn.Env.t ->
-    'elem ->
-    Naming_phase_error.t;
+    (Naming_validate_enum_class_typeconst.Env.t, 'elem) validation;
+  validate_supportdyn: (Naming_validate_supportdyn.Env.t, 'elem) validation;
 }
 
 (* Apply our elaboration and validation steps to a given ast element *)

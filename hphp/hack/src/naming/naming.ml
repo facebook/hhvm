@@ -318,33 +318,21 @@ let xhp_attribute_decl env (h, cv, tag, maybe_enum) =
   Aast.{ cv with cv_xhp_attr; cv_type; cv_expr; cv_user_attributes = [] }
 
 let class_help _ env c =
-  let (constructor, smethods, methods) = Aast.split_methods c.Aast.c_methods in
   let (sprops, props) = Aast.split_vars c.Aast.c_vars in
   let sprops = List.map ~f:(class_prop_static env) sprops in
-  let attrs = c.Aast.c_user_attributes in
-  let const = Naming_attributes.find SN.UserAttributes.uaConst attrs in
+  let const =
+    Naming_attributes.find SN.UserAttributes.uaConst c.Aast.c_user_attributes
+  in
   let props = List.map ~f:(class_prop_non_static ~const env) props in
   let xhp_attrs = List.map ~f:(xhp_attribute_decl env) c.Aast.c_xhp_attrs in
   (* These would be out of order with the old attributes, but that shouldn't matter? *)
-  let props = props @ xhp_attrs in
-  let uses = c.Aast.c_uses in
-  let xhp_attr_uses = c.Aast.c_xhp_attr_uses in
-  let (c_req_extends, c_req_implements, c_req_class) =
-    Aast.split_reqs c.Aast.c_reqs
-  in
+  let c_vars = sprops @ props @ xhp_attrs in
 
-  let req_implements = c_req_implements in
-  let req_implements =
-    List.map ~f:(fun h -> (h, N.RequireImplements)) req_implements
-  in
-  let req_extends = c_req_extends in
-  let req_extends = List.map ~f:(fun h -> (h, N.RequireExtends)) req_extends in
-  let req_class = c_req_class in
-  let req_class = List.map ~f:(fun h -> (h, N.RequireClass)) req_class in
+  let (constructor, smethods, methods) = Aast.split_methods c.Aast.c_methods in
   let (constructor, methods, smethods) =
     interface c constructor methods smethods
   in
-  let methods =
+  let c_methods =
     match constructor with
     | None -> smethods @ methods
     | Some c -> c :: smethods @ methods
@@ -352,12 +340,8 @@ let class_help _ env c =
   Aast.
     {
       c with
-      c_uses = uses;
-      c_xhp_attr_uses = xhp_attr_uses;
-      c_reqs = req_extends @ req_implements @ req_class;
-      c_vars = sprops @ props;
-      c_methods = methods;
-      c_user_attributes = attrs;
+      c_vars;
+      c_methods;
       (* Naming and typechecking shouldn't use these fields *)
       c_xhp_attrs = [];
     }

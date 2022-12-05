@@ -1,0 +1,143 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-44]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((), (Some ([3:37-41], (Hprim Tvoid)))); 
+        f_name = ([3:10-27], "\\placeholder_param"); f_tparams = []; 
+        f_where_constraints = [];
+        f_params =
+        [{ param_annotation = (); param_type_hint = ((), (Some ([3:28-31], (Hprim Tint)))); 
+           param_is_variadic = false; param_pos = [3:32-34]; param_name = "$_"; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None };
+      fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [5:1-43]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([5:26-29], (Hprim Tint)))); 
+         f_name = ([5:10-21], "\\returns_int"); f_tparams = []; f_where_constraints = []; 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:32-41], (Return (Some ((), [5:39-40], (Int "0")))))] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [7:1-9:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([7:31-35], (Hprim Tvoid)))); 
+         f_name = ([7:10-27], "\\placeholder_local"); f_tparams = []; 
+         f_where_constraints = []; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([8:3-22], (Expr ((), [8:3-21], (Binop ((Eq None), ((), [8:3-5], (Lplaceholder [8:3-5])), ((), [8:8-21], (Call (((), [8:8-19], (Id ([8:8-19], "\\returns_int"))), [], [], None))))))))] };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [11:1-13:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([11:49-53], (Hprim Tvoid)))); 
+         f_name = ([11:10-33], "\\placeholder_foreach_val"); f_tparams = []; 
+         f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([11:34-42], (Happly (([11:34-37], "\\HH\\vec"), [([11:38-41], (Hprim Tint))]))))); 
+            param_is_variadic = false; param_pos = [11:43-46]; param_name = "$xs"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([12:3-24], (Foreach (((), [12:11-14], (Lvar ([12:11-14], $xs))), (As_v ((), [12:18-20], (Lplaceholder [12:18-20]))), [])))] };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [15:1-17:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([15:64-68], (Hprim Tvoid)))); 
+         f_name = ([15:10-40], "\\placeholder_foreach_keyval_val"); f_tparams = []; 
+         f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([15:41-57], (Happly (([15:41-45], "\\HH\\dict"), [([15:46-52], (Hprim Tstring)); ([15:53-56], (Hprim Tint))])))));
+            param_is_variadic = false; param_pos = [15:58-61]; param_name = "$xs"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast = [([16:3-30], (Foreach (((), [16:11-14], (Lvar ([16:11-14], $xs))), (As_kv (((), [16:18-20], (Lvar ([16:18-20], $k))), ((), [16:24-26], (Lplaceholder [16:24-26])))), [])))] };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [19:1-21:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([19:64-68], (Hprim Tvoid)))); 
+         f_name = ([19:10-40], "\\placeholder_foreach_keyval_key"); f_tparams = []; 
+         f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([19:41-57], (Happly (([19:41-45], "\\HH\\dict"), [([19:46-52], (Hprim Tstring)); ([19:53-56], (Hprim Tint))])))));
+            param_is_variadic = false; param_pos = [19:58-61]; param_name = "$xs"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast = [([20:3-30], (Foreach (((), [20:11-14], (Lvar ([20:11-14], $xs))), (As_kv (((), [20:18-20], (Lvar ([20:18-20], $_))), ((), [20:24-26], (Lvar ([20:24-26], $v))))), [])))] };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [23:1-25:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([23:60-64], (Hprim Tvoid)))); 
+         f_name = ([23:10-36], "\\placeholder_foreach_keyval"); f_tparams = []; 
+         f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([23:37-53], (Happly (([23:37-41], "\\HH\\dict"), [([23:42-48], (Hprim Tstring)); ([23:49-52], (Hprim Tint))])))));
+            param_is_variadic = false; param_pos = [23:54-57]; param_name = "$xs"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast = [([24:3-30], (Foreach (((), [24:11-14], (Lvar ([24:11-14], $xs))), (As_kv (((), [24:18-20], (Lvar ([24:18-20], $_))), ((), [24:24-26], (Lplaceholder [24:24-26])))), [])))] };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None })
+  ]

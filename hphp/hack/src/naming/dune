@@ -129,6 +129,7 @@
  (name naming)
  (modules
   naming
+  naming_elab_class_id
   naming_elab_enum_class
   naming_elab_everything_sdt
   naming_elab_hints

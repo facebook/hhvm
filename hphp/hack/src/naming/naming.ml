@@ -262,52 +262,6 @@ let ensure_name_not_dynamic e =
   | (_, p, _) ->
     Errors.add_naming_error @@ Naming_error.Dynamic_class_name_in_strict_mode p
 
-let make_class_id env ((p, x) as cid) =
-  ( (),
-    p,
-    match x with
-    | x when String.equal x SN.Classes.cParent ->
-      if Option.is_none env.current_cls then
-        let () =
-          Errors.add_typing_error
-            Typing_error.(primary @@ Primary.Parent_outside_class p)
-        in
-        N.CI (p, SN.Classes.cUnknown)
-      else
-        N.CIparent
-    | x when String.equal x SN.Classes.cSelf ->
-      if Option.is_none env.current_cls then
-        let () =
-          Errors.add_typing_error
-            Typing_error.(primary @@ Primary.Self_outside_class p)
-        in
-        N.CI (p, SN.Classes.cUnknown)
-      else
-        N.CIself
-    | x when String.equal x SN.Classes.cStatic ->
-      if Option.is_none env.current_cls then
-        let () =
-          Errors.add_typing_error
-            Typing_error.(primary @@ Primary.Static_outside_class p)
-        in
-        N.CI (p, SN.Classes.cUnknown)
-      else
-        N.CIstatic
-    | x when String.equal x SN.SpecialIdents.this -> N.CIexpr ((), p, N.This)
-    | x when String.equal x SN.SpecialIdents.dollardollar ->
-      (* We won't reach here for "new $$" because the parser creates a
-       * proper Ast_defs.Dollardollar node, so make_class_id won't be called with
-       * that node. In fact, the parser creates an Ast_defs.Dollardollar for all
-       * "$$" except in positions where a classname is expected, like in
-       * static member access. So, we only reach here for things
-       * like "$$::someMethod()". *)
-      N.CIexpr
-        ((), p, N.Lvar (p, Local_id.make_unscoped SN.SpecialIdents.dollardollar))
-    | x when Char.equal x.[0] '$' ->
-      let lid = Local_id.make_unscoped x in
-      N.CIexpr ((), p, N.Lvar (p, lid))
-    | _ -> N.CI cid )
-
 let extend_tparams genv paraml =
   let params =
     List.fold_right
@@ -618,29 +572,27 @@ and expr_ env p (e : Nast.expr_) =
     let id = ((), p, N.Lvar x) in
     N.Array_get (id, None)
   | Aast.Array_get (e1, e2) -> N.Array_get (expr env e1, oexpr env e2)
-  | Aast.Class_get
-      ((_, _, Aast.CIexpr (_, _, Aast.Id x1)), Aast.CGstring x2, prop_or_method)
-    ->
-    N.Class_get (make_class_id env x1, N.CGstring x2, prop_or_method)
-  | Aast.Class_get
-      ( (_, _, Aast.CIexpr (_, _, Aast.Lvar (p, lid))),
-        Aast.CGstring x2,
-        prop_or_method ) ->
-    let x1 = (p, Local_id.to_string lid) in
-    N.Class_get (make_class_id env x1, N.CGstring x2, prop_or_method)
-  | Aast.Class_get
-      ( (_, _, Aast.CIexpr (_, _, Aast.Id x1)),
-        Aast.CGexpr ((_, p, _) as x2),
-        Ast_defs.Is_method ) ->
+  (* CIexpr has already been elaborated so any remaining uses in class_id
+      position constitute malformed expressions *)
+  | Aast.(
+      Class_get
+        ( (( _,
+             _,
+             ( CI _ | CIparent | CIself | CIstatic
+             | CIexpr (_, _, (Lvar _ | This)) ) ) as class_id),
+          CGstring x2,
+          prop_or_method )) ->
+    N.Class_get (class_id, N.CGstring x2, prop_or_method)
+  | Aast.(
+      Class_get
+        ( (( _,
+             _,
+             ( CI _ | CIparent | CIself | CIstatic
+             | CIexpr (_, _, (Lvar _ | This)) ) ) as class_id),
+          CGexpr ((_, p, _) as x2),
+          Ast_defs.Is_method )) ->
     Errors.add_naming_error @@ Naming_error.Dynamic_method_access p;
-    N.Class_get (make_class_id env x1, N.CGexpr x2, Ast_defs.Is_method)
-  | Aast.Class_get
-      ( (_, _, Aast.CIexpr (_, _, Aast.Lvar (p1, lid))),
-        Aast.CGexpr ((_, p, _) as x2),
-        Ast_defs.Is_method ) ->
-    Errors.add_naming_error @@ Naming_error.Dynamic_method_access p;
-    let x1 = (p1, Local_id.to_string lid) in
-    N.Class_get (make_class_id env x1, N.CGexpr x2, Ast_defs.Is_method)
+    N.Class_get (class_id, N.CGexpr x2, Ast_defs.Is_method)
   | Aast.Class_get ((_, _, Aast.CIexpr x1), Aast.CGstring _, _) ->
     ensure_name_not_dynamic x1;
     ignored_expr_ p
@@ -648,18 +600,17 @@ and expr_ env p (e : Nast.expr_) =
     ensure_name_not_dynamic x1;
     ensure_name_not_dynamic x2;
     ignored_expr_ p
-  | Aast.Class_get
-      ((_, _, (Aast.CIparent | Aast.CIself | Aast.CIstatic | Aast.CI _)), _, _)
-    ->
-    failwith "Error in Ast_to_nast module for Class_get"
-  | Aast.Class_const ((_, _, Aast.CIexpr (_, _, Aast.Id x1)), ((_, str) as x2))
-    when String.equal str "class" ->
-    N.Class_const (make_class_id env x1, x2)
-  | Aast.Class_const ((_, _, Aast.CIexpr (_, _, Aast.Id x1)), x2) ->
-    N.Class_const (make_class_id env x1, x2)
-  | Aast.Class_const ((_, _, Aast.CIexpr (_, _, Aast.Lvar (p, lid))), x2) ->
-    let x1 = (p, Local_id.to_string lid) in
-    N.Class_const (make_class_id env x1, x2)
+  | Aast.Class_get (_, Aast.CGexpr x2, _) ->
+    ensure_name_not_dynamic x2;
+    ignored_expr_ p
+  | Aast.(
+      Class_const
+        ( (( _,
+             _,
+             ( CIparent | CIself | CIstatic | CI _
+             | CIexpr (_, _, (This | Lvar _)) ) ) as class_id),
+          pstring )) ->
+    N.Class_const (class_id, pstring)
   | Aast.Class_const _ ->
     (* TODO: report error in strict mode *) ignored_expr_ p
   | Aast.Call ((_, _, Aast.Id (p, pseudo_func)), tal, el, unpacked_element)
@@ -870,14 +821,15 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.FunctionPointer (Aast.FP_id fid, targs) ->
     N.FunctionPointer (N.FP_id fid, targs)
   | Aast.FunctionPointer
-      (Aast.FP_class_const ((_, _, Aast.CIexpr (_, _, Aast.Id x1)), x2), targs)
-    ->
-    N.FunctionPointer (N.FP_class_const (make_class_id env x1, x2), targs)
-  | Aast.FunctionPointer
-      ( Aast.FP_class_const ((_, _, Aast.CIexpr (_, _, Aast.Lvar (p, lid))), x2),
+      ( Aast.FP_class_const
+          ( (( _,
+               _,
+               Aast.(
+                 ( CIparent | CIself | CIstatic | CI _
+                 | CIexpr (_, _, (This | Lvar _)) )) ) as class_id),
+            x2 ),
         targs ) ->
-    let x1 = (p, Local_id.to_string lid) in
-    N.FunctionPointer (N.FP_class_const (make_class_id env x1, x2), targs)
+    N.FunctionPointer (N.FP_class_const (class_id, x2), targs)
   | Aast.FunctionPointer _ -> ignored_expr_ p
   | Aast.Yield e -> N.Yield (afield env e)
   | Aast.Await e -> N.Await (expr env e)
@@ -921,30 +873,25 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.As (e, h, b) -> N.As (expr env e, h, b)
   | Aast.Upcast (e, h) -> N.Upcast (expr env e, h)
   | Aast.New
-      ((_, _, Aast.CIexpr (_, _, Aast.Id x)), tal, el, unpacked_element, _) ->
-    N.New
-      (make_class_id env x, tal, exprl env el, oexpr env unpacked_element, ())
-  | Aast.New
-      ( (_, _, Aast.CIexpr (_, _, Aast.Lvar (pos, x))),
+      ( (( _,
+           _,
+           Aast.(
+             CIparent | CIself | CIstatic | CI _ | CIexpr (_, _, (This | Lvar _)))
+         ) as class_id),
         tal,
         el,
         unpacked_element,
-        p ) ->
+        _ ) ->
+    N.New (class_id, tal, exprl env el, oexpr env unpacked_element, ())
+  | Aast.New
+      ((_, pos, Aast.CIexpr (_, ci_pos, _e)), tal, el, unpacked_element, _) ->
+    Errors.add_naming_error @@ Naming_error.Dynamic_new_in_strict_mode pos;
     N.New
-      ( make_class_id env (pos, Local_id.to_string x),
-        tal,
-        exprl env el,
-        oexpr env unpacked_element,
-        p )
-  | Aast.New ((_, _, Aast.CIexpr (_, p, _e)), tal, el, unpacked_element, _) ->
-    Errors.add_naming_error @@ Naming_error.Dynamic_new_in_strict_mode p;
-    N.New
-      ( make_class_id env (p, SN.Classes.cUnknown),
+      ( ((), pos, Aast.CI (ci_pos, SN.Classes.cUnknown)),
         tal,
         exprl env el,
         oexpr env unpacked_element,
         () )
-  | Aast.New _ -> failwith "ast_to_nast aast.new"
   | Aast.Efun (f, idl) ->
     let f = expr_lambda env f in
     N.Efun (f, idl)
@@ -1281,11 +1228,8 @@ let rec check_constant_expr env expr =
   | Aast.Float _
   | Aast.String _ ->
     true
-  | Aast.Class_const ((_, _, Aast.CIexpr (_, _, cls)), _)
-    when match cls with
-         | Aast.Id (_, "static") -> false
-         | _ -> true ->
-    true
+  | Aast.(Class_const ((_, _, (CIparent | CIself | CI _)), _)) -> true
+  | Aast.(Class_const ((_, _, Aast.CIexpr (_, _, (This | Id _))), _)) -> true
   | Aast.Upcast (e, _) -> check_constant_expr env e
   | Aast.Unop
       ((Ast_defs.Uplus | Ast_defs.Uminus | Ast_defs.Utild | Ast_defs.Unot), e)
@@ -1779,6 +1723,11 @@ type 'elem pipeline = {
     'elem ->
     'elem * Naming_phase_error.t;
   elab_enum_class: ?env:Naming_elab_enum_class.Env.t -> 'elem -> 'elem;
+  elab_class_id:
+    ?init:Naming_phase_error.t ->
+    ?env:Naming_elab_class_id.Env.t ->
+    'elem ->
+    'elem * Naming_phase_error.t;
   validate_xhp:
     ?init:Naming_phase_error.t ->
     ?env:Naming_validate_xhp_name.Env.t ->
@@ -1810,6 +1759,7 @@ let elab_elem
       elab_everything_sdt;
       elab_hkt;
       elab_enum_class;
+      elab_class_id;
       validate_xhp;
       validate_builtin_enum;
       validate_supportdyn;
@@ -1843,6 +1793,9 @@ let elab_elem
 
   (* Add implicit extends for enums & enum classes *)
   let elem = elab_enum_class elem in
+
+  (* Use canonical class_ids and validate usage of special names outside classes *)
+  let (elem, err) = elab_class_id ~init:err elem in
 
   (* General expression / statement / xhp elaboration & validation *)
   let elem = elab_help ctx env elem in
@@ -1932,6 +1885,7 @@ let program ctx ast =
       elab_everything_sdt = Naming_elab_everything_sdt.elab_program;
       elab_hkt = Naming_elab_hkt.elab_program;
       elab_enum_class = Naming_elab_enum_class.elab_program;
+      elab_class_id = Naming_elab_class_id.elab_program;
       validate_xhp = Naming_validate_xhp_name.validate_program;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_program;
       validate_supportdyn = Naming_validate_supportdyn.validate_program;
@@ -1955,6 +1909,7 @@ let fun_def ctx fd =
       elab_everything_sdt = Naming_elab_everything_sdt.elab_fun_def;
       elab_hkt = Naming_elab_hkt.elab_fun_def;
       elab_enum_class = Naming_elab_enum_class.elab_fun_def;
+      elab_class_id = Naming_elab_class_id.elab_fun_def;
       validate_xhp = Naming_validate_xhp_name.validate_fun_def;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_fun_def;
       validate_supportdyn = Naming_validate_supportdyn.validate_fun_def;
@@ -1978,6 +1933,7 @@ let class_ ctx c =
       elab_everything_sdt = Naming_elab_everything_sdt.elab_class;
       elab_hkt = Naming_elab_hkt.elab_class;
       elab_enum_class = Naming_elab_enum_class.elab_class;
+      elab_class_id = Naming_elab_class_id.elab_class;
       validate_xhp = Naming_validate_xhp_name.validate_class;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_class;
       validate_supportdyn = Naming_validate_supportdyn.validate_class;
@@ -2001,6 +1957,7 @@ let module_ ctx module_ =
       elab_everything_sdt = Naming_elab_everything_sdt.elab_module_def;
       elab_hkt = Naming_elab_hkt.elab_module_def;
       elab_enum_class = Naming_elab_enum_class.elab_module_def;
+      elab_class_id = Naming_elab_class_id.elab_module_def;
       validate_xhp = Naming_validate_xhp_name.validate_module_def;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_module_def;
       validate_supportdyn = Naming_validate_supportdyn.validate_module_def;
@@ -2024,6 +1981,7 @@ let global_const ctx cst =
       elab_everything_sdt = Naming_elab_everything_sdt.elab_gconst;
       elab_hkt = Naming_elab_hkt.elab_gconst;
       elab_enum_class = Naming_elab_enum_class.elab_gconst;
+      elab_class_id = Naming_elab_class_id.elab_gconst;
       validate_xhp = Naming_validate_xhp_name.validate_gconst;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_gconst;
       validate_supportdyn = Naming_validate_supportdyn.validate_gconst;
@@ -2047,6 +2005,7 @@ let typedef ctx tdef =
       elab_everything_sdt = Naming_elab_everything_sdt.elab_typedef;
       elab_hkt = Naming_elab_hkt.elab_typedef;
       elab_enum_class = Naming_elab_enum_class.elab_typedef;
+      elab_class_id = Naming_elab_class_id.elab_typedef;
       validate_xhp = Naming_validate_xhp_name.validate_typedef;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_typedef;
       validate_supportdyn = Naming_validate_supportdyn.validate_typedef;

@@ -35,31 +35,31 @@ end
 
 let on_class_c_tparams (env, c_tparams, err_acc) =
   let env = Env.set_forbid_this env ~forbid_this:true in
-  Naming_phase_pass.Cont.next (env, c_tparams, err_acc)
+  Ok (env, c_tparams, err_acc)
 
 let on_class_c_extends (env, c_extends, err_acc) =
   let env = Env.set_forbid_this env ~forbid_this:false in
-  Naming_phase_pass.Cont.next (env, c_extends, err_acc)
+  Ok (env, c_extends, err_acc)
 
 let on_class_c_uses (env, c_uses, err_acc) =
   let env = Env.set_forbid_this env ~forbid_this:false in
-  Naming_phase_pass.Cont.next (env, c_uses, err_acc)
+  Ok (env, c_uses, err_acc)
 
 let on_class_c_xhp_attrs (env, c_xhp_attrs, err_acc) =
   let env = Env.set_forbid_this env ~forbid_this:false in
-  Naming_phase_pass.Cont.next (env, c_xhp_attrs, err_acc)
+  Ok (env, c_xhp_attrs, err_acc)
 
 let on_class_c_xhp_attr_uses (env, c_xhp_attr_uses, err_acc) =
   let env = Env.set_forbid_this env ~forbid_this:false in
-  Naming_phase_pass.Cont.next (env, c_xhp_attr_uses, err_acc)
+  Ok (env, c_xhp_attr_uses, err_acc)
 
 let on_class_c_reqs (env, c_reqs, err_acc) =
   let env = Env.set_forbid_this env ~forbid_this:false in
-  Naming_phase_pass.Cont.next (env, c_reqs, err_acc)
+  Ok (env, c_reqs, err_acc)
 
 let on_class_c_implements (env, c_implements, err_acc) =
   let env = Env.set_forbid_this env ~forbid_this:false in
-  Naming_phase_pass.Cont.next (env, c_implements, err_acc)
+  Ok (env, c_implements, err_acc)
 
 let on_class_var
     (env, (Aast.{ cv_is_static; cv_user_attributes; _ } as cv), err_acc) =
@@ -71,18 +71,18 @@ let on_class_var
       None
   in
   let env = Env.set_lsb env ~lsb in
-  Naming_phase_pass.Cont.next (env, cv, err_acc)
+  Ok (env, cv, err_acc)
 
 let on_class_var_cv_type (env, cv_type, err_acc) =
   let forbid_this = Option.value ~default:false @@ Env.lsb env in
   let env = Env.set_lsb ~lsb:None @@ Env.set_forbid_this ~forbid_this env in
-  Naming_phase_pass.Cont.next (env, cv_type, err_acc)
+  Ok (env, cv_type, err_acc)
 
 let on_fun_f_ret (env, f_ret, err_acc) =
   let env =
     Env.set_forbid_this ~forbid_this:false @@ Env.set_lsb ~lsb:None env
   in
-  Naming_phase_pass.Cont.next (env, f_ret, err_acc)
+  Ok (env, f_ret, err_acc)
 
 let on_expr_ (env, expr_, err_acc) =
   let env =
@@ -91,7 +91,7 @@ let on_expr_ (env, expr_, err_acc) =
       Env.set_forbid_this ~forbid_this:false @@ Env.set_lsb ~lsb:None env
     | _ -> env
   in
-  Naming_phase_pass.Cont.next (env, expr_, err_acc)
+  Ok (env, expr_, err_acc)
 
 let on_hint (env, hint, err_acc) =
   match hint with
@@ -99,26 +99,26 @@ let on_hint (env, hint, err_acc) =
     let err =
       Naming_phase_error.naming @@ Naming_error.This_type_forbidden pos
     in
-    Naming_phase_pass.Cont.next (env, (pos, Aast.Herr), err :: err_acc)
-  | _ -> Naming_phase_pass.Cont.next (env, hint, err_acc)
+    Ok (env, (pos, Aast.Herr), err :: err_acc)
+  | _ -> Ok (env, hint, err_acc)
 
 let on_shape_field_info (env, sfi, err_acc) =
   let env =
     Env.set_forbid_this ~forbid_this:false @@ Env.set_lsb ~lsb:None env
   in
-  Naming_phase_pass.Cont.next (env, sfi, err_acc)
+  Ok (env, sfi, err_acc)
 
 let on_hint_fun_hf_return_ty (env, hf_return_ty, err_acc) =
   let env =
     Env.set_forbid_this ~forbid_this:false @@ Env.set_lsb ~lsb:None env
   in
-  Naming_phase_pass.Cont.next (env, hf_return_ty, err_acc)
+  Ok (env, hf_return_ty, err_acc)
 
 let on_targ (env, targ, err_acc) =
   let env =
     Env.set_forbid_this ~forbid_this:false @@ Env.set_lsb ~lsb:None env
   in
-  Naming_phase_pass.Cont.next (env, targ, err_acc)
+  Ok (env, targ, err_acc)
 
 let pass =
   Naming_phase_pass.(

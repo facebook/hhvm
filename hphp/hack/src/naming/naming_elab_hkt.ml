@@ -20,8 +20,8 @@ let on_hint (env, hint, err_acc) =
       @@ Naming_error.Tparam_applied_to_type { pos; tparam_name = name })
       :: err_acc
     in
-    Naming_phase_pass.Cont.next (env, (pos, Aast.Habstr (name, [])), err)
-  | _ -> Naming_phase_pass.Cont.next (env, hint, err_acc)
+    Ok (env, (pos, Aast.Habstr (name, [])), err)
+  | _ -> Ok (env, hint, err_acc)
 
 let on_tparam
     ( env,
@@ -33,9 +33,8 @@ let on_tparam
       (Err.naming @@ Naming_error.Tparam_with_tparam { pos; tparam_name })
       :: err_acc
     in
-    Naming_phase_pass.Cont.next
-      (env, Aast.{ tparam with tp_parameters = [] }, err)
-  | _ -> Naming_phase_pass.Cont.next (env, tparam, err_acc)
+    Ok (env, Aast.{ tparam with tp_parameters = [] }, err)
+  | _ -> Ok (env, tparam, err_acc)
 
 let pass =
   Naming_phase_pass.(

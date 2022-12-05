@@ -69,9 +69,8 @@ let on_expr (env, (ex, pos, expr_), err_acc) =
     | _ -> Ok (expr_, err_acc)
   in
   match res with
-  | Error errs ->
-    Naming_phase_pass.Cont.finish (env, (ex, pos, Err.invalid_expr_ pos), errs)
-  | Ok (expr_, errs) -> Naming_phase_pass.Cont.next (env, (ex, pos, expr_), errs)
+  | Error errs -> Error (env, (ex, pos, Err.invalid_expr_ pos), errs)
+  | Ok (expr_, errs) -> Ok (env, (ex, pos, expr_), errs)
 
 let pass =
   Naming_phase_pass.(bottom_up { identity with on_expr = Some on_expr })

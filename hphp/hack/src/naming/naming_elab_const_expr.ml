@@ -109,22 +109,20 @@ let on_class_ (env, c, err) =
     Env.set_in_enum_class ~in_enum_class
     @@ Env.set_mode ~in_mode:c.Aast.c_mode env
   in
-  Naming_phase_pass.Cont.next (env, c, err)
+  Ok (env, c, err)
 
 let on_gconst (env, cst, err) =
   let env = Env.set_mode env ~in_mode:cst.Aast.cst_mode in
-  Naming_phase_pass.Cont.next (env, cst, err)
+  Ok (env, cst, err)
 
 let on_typedef (env, t, err) =
-  Naming_phase_pass.Cont.next (Env.set_mode env ~in_mode:t.Aast.t_mode, t, err)
+  Ok (Env.set_mode env ~in_mode:t.Aast.t_mode, t, err)
 
 let on_fun_def (env, fd, err) =
-  Naming_phase_pass.Cont.next
-    (Env.set_mode env ~in_mode:fd.Aast.fd_mode, fd, err)
+  Ok (Env.set_mode env ~in_mode:fd.Aast.fd_mode, fd, err)
 
 let on_module_def (env, md, err) =
-  Naming_phase_pass.Cont.next
-    (Env.set_mode env ~in_mode:md.Aast.md_mode, md, err)
+  Ok (Env.set_mode env ~in_mode:md.Aast.md_mode, md, err)
 
 let on_class_const_kind (env, kind, err_acc) =
   let in_mode = Env.in_mode env and in_enum_class = Env.in_enum_class env in
@@ -136,13 +134,13 @@ let on_class_const_kind (env, kind, err_acc) =
     | Aast.CCAbstract _ -> (kind, [])
   in
   let err = errs @ err_acc in
-  Naming_phase_pass.Cont.next (env, kind, err)
+  Ok (env, kind, err)
 
 let on_gconst_cst_value (env, cst_value, err_acc) =
   let in_mode = Env.in_mode env and in_enum_class = Env.in_enum_class env in
   let (cst_value, errs) = const_expr in_mode in_enum_class cst_value in
   let err = errs @ err_acc in
-  Naming_phase_pass.Cont.next (env, cst_value, err)
+  Ok (env, cst_value, err)
 
 let top_down_pass =
   Naming_phase_pass.(

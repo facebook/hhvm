@@ -24,8 +24,7 @@ module Env = struct
     current_class
 end
 
-let on_class_ (env, c, err) =
-  Naming_phase_pass.Cont.next (Env.in_class env c, c, err)
+let on_class_ (env, c, err) = Ok (Env.in_class env c, c, err)
 
 (* We permit class constants to be used as shape field names. Here we replace
     uses of `self` with the class to which they refer or `unknown` if the shape
@@ -66,15 +65,13 @@ let on_expr_ (env, expr_, err_acc) =
       (Aast.Shape fdl, err)
     | _ -> (expr_, err_acc)
   in
-  Naming_phase_pass.Cont.next (env, expr_, err_acc)
+  Ok (env, expr_, err_acc)
 
 let on_shape_field_info (env, (Aast.{ sfi_name; _ } as sfi), err_acc) =
   match canonical_shape_name (Env.current_class env) sfi_name with
-  | Ok sfi_name ->
-    Naming_phase_pass.Cont.next (env, Aast.{ sfi with sfi_name }, err_acc)
+  | Ok sfi_name -> Ok (env, Aast.{ sfi with sfi_name }, err_acc)
   | Error (sfi_name, err) ->
-    Naming_phase_pass.Cont.finish
-      (env, Aast.{ sfi with sfi_name }, err :: err_acc)
+    Error (env, Aast.{ sfi with sfi_name }, err :: err_acc)
 
 let top_down_pass =
   Naming_phase_pass.(top_down { identity with on_class_ = Some on_class_ })

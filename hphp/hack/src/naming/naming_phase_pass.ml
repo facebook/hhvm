@@ -6,75 +6,15 @@
  *
  *)
 open Hh_prelude
-
-module Cont = struct
-  type 'a t =
-    | Next of 'a
-    | Finish of 'a
-
-  let next x = Next x
-
-  let finish x = Finish x
-end
-
-module Transform = struct
-  type 'a t =
-    | Top_down of ('a -> 'a Cont.t)
-    | Bottom_up of ('a -> 'a Cont.t)
-
-  let top_down k = Top_down k
-
-  let bottom_up k = Bottom_up k
-
-  let partition ts =
-    List.fold_right ts ~init:([], []) ~f:(fun t (tds, bus) ->
-        match t with
-        | Top_down td -> (td :: tds, bus)
-        | Bottom_up bu -> (tds, bu :: bus))
-
-  (* Combine a sequence transforms.
-
-     We will apply `Top_down` transforms first, then rewrite subexpressions
-     before finally applying `Bottom_up` transforms
-
-     Combining transforms gives meaning to the continuation each
-     transformation returns:
-     - `Next` indicates we should apply the _next_ transform to the element.
-        If there are no more _top-down_ transforms, we rewrite subexpressions
-        then apply _bottom-up_ transforms. If there are no more _bottom-up_
-        transforms then we are done.
-     - `Finish` indicates that no more transformations need be applied to this
-        element or any part of it. This is useful if the transform produces
-        an element that is already in its final form like our `invalid_expr_`
-  *)
-  let combine ts ~traverse =
-    let rec aux (td, bu) elem = aux_td bu [] td elem
-    and aux_td bu applied unapplied elem =
-      match unapplied with
-      | next :: unapplied ->
-        let applied = next :: applied in
-        (match next elem with
-        | Cont.Next elem -> aux_td bu applied unapplied elem
-        | Cont.Finish elem -> elem)
-      | [] -> aux_bu (List.rev applied) [] bu @@ traverse elem
-    and aux_bu td applied unapplied elem =
-      match unapplied with
-      | next :: unapplied ->
-        let applied = next :: applied in
-        (match next elem with
-        | Cont.Next elem -> aux_bu td applied unapplied elem
-        | Cont.Finish elem -> elem)
-      | [] -> elem
-    in
-    aux (partition ts)
-end
-
+open Common
 open Aast
 
-(* Since we want entire passes to be top-down or bottom up, we provide
-   a type so that this needn't be specified for each field in the pass
-   type, below *)
-type 'a transform = 'a -> 'a Cont.t
+(* Each of our transforms can return either `Ok`, indicating that we
+   should continue to apply subsequent transforms, or `Error` indicating
+   that we should short-circuit the pass and stop. This is useful when
+   we introduce an error marker like `Herr` or `invalid_expr_` where
+   we know all child elements are already canonical and valid  *)
+type 'a transform = 'a -> ('a, 'a) Result.t
 
 (* A pass is the collection of transforms to be applied to each element
    of the AST.
@@ -276,6 +216,22 @@ let identity =
     on_as_expr = None;
   }
 
+let partition_passes ts ~select =
+  let cons_top_down t ((top_downs, bottom_ups) as default) =
+    Option.value_map (select t) ~default ~f:(fun top_down ->
+        (top_down :: top_downs, bottom_ups))
+  and cons_bottup_up t ((top_downs, bottom_ups) as default) =
+    Option.value_map (select t) ~default ~f:(fun bottom_up ->
+        (top_downs, bottom_up :: bottom_ups))
+  in
+  List.fold_right ts ~init:([], []) ~f:(fun t acc ->
+      match t with
+      | Top_down t -> cons_top_down t acc
+      | Bottom_up t -> cons_bottup_up t acc)
+
+let apply_passes ts env elem errs =
+  List.fold_result ts ~init:(env, elem, errs) ~f:( |> )
+
 (* Helper function to make visitor methods. Given a list, `ts`, of
   `('env,Naming_phase_error.t) t`s, and a function to `select` a record field
   from a `('env,Naming_phase_error.t) pass`, we filter and partition the
@@ -283,35 +239,24 @@ let identity =
   the element's children have been transformed) and one to be applied bottom up
   (i.e. after the element's children have been transformed)
 
-  We then combine the transforms using the `super` function to perform our
-  traversal. *)
+  We first apply the top-down transformations stopping early if we encounter
+  and `Error`. We then traverse the elemement, transforming its children.
+  Finally we apply the bottom-up transformations again stopping early if we
+  encounter an `Error` *)
 let mk_handler ts ~super ~select ~on_error =
-  let ts =
-    List.fold_right ts ~init:[] ~f:(fun t default ->
-        match t with
-        | Top_down t ->
-          Option.value_map ~default ~f:(fun t ->
-              Transform.top_down t :: default)
-          @@ select t
-        | Bottom_up t ->
-          Option.value_map ~default ~f:(fun t ->
-              Transform.bottom_up t :: default)
-          @@ select t)
-  in
-  match ts with
-  | [] -> super
-  | _ ->
-    fun env elem ->
-      let (_, elem, errs) =
-        (Transform.combine
-           ~traverse:(fun (env, elem, errs) ->
-             let elem = super env elem in
-             (env, elem, errs))
-           ts)
-          (env, elem, [])
-      in
-      List.iter ~f:on_error errs;
-      elem
+  let (top_downs, bottom_ups) = partition_passes ts ~select in
+  fun env elem ->
+    let (_, elem, errs) =
+      Result.(
+        fold
+          ~ok:Fn.id
+          ~error:Fn.id
+          ( apply_passes top_downs env elem [] >>= fun (env, elem, errs) ->
+            let elem = super env elem in
+            apply_passes bottom_ups env elem errs ))
+    in
+    List.iter errs ~f:on_error;
+    elem
 
 let mk_visitor ts ~on_error =
   object (_self)

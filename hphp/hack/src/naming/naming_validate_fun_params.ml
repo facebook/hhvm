@@ -29,11 +29,11 @@ let validate_fun_params errs params =
 
 let on_method_ (env, m, errs) =
   let err = validate_fun_params errs m.Aast.m_params in
-  Naming_phase_pass.Cont.next (env, m, err)
+  Ok (env, m, err)
 
 let on_fun_ (env, f, errs) =
   let errs = validate_fun_params errs f.Aast.f_params in
-  Naming_phase_pass.Cont.next (env, f, errs)
+  Ok (env, f, errs)
 
 let pass =
   Naming_phase_pass.(

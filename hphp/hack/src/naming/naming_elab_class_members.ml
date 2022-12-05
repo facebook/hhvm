@@ -150,19 +150,16 @@ let elab_xhp_attr
   (Aast.{ cv with cv_xhp_attr; cv_type; cv_expr; cv_user_attributes = [] }, errs)
 
 let on_typedef (env, t, err) =
-  Naming_phase_pass.Cont.next (Env.set_mode env ~in_mode:t.Aast.t_mode, t, err)
+  Ok (Env.set_mode env ~in_mode:t.Aast.t_mode, t, err)
 
 let on_gconst (env, cst, err) =
-  Naming_phase_pass.Cont.next
-    (Env.set_mode env ~in_mode:cst.Aast.cst_mode, cst, err)
+  Ok (Env.set_mode env ~in_mode:cst.Aast.cst_mode, cst, err)
 
 let on_fun_def (env, fd, err) =
-  Naming_phase_pass.Cont.next
-    (Env.set_mode env ~in_mode:fd.Aast.fd_mode, fd, err)
+  Ok (Env.set_mode env ~in_mode:fd.Aast.fd_mode, fd, err)
 
 let on_module_def (env, md, err) =
-  Naming_phase_pass.Cont.next
-    (Env.set_mode env ~in_mode:md.Aast.md_mode, md, err)
+  Ok (Env.set_mode env ~in_mode:md.Aast.md_mode, md, err)
 
 let on_class_
     ( env,
@@ -202,7 +199,7 @@ let on_class_
     (Aast.{ c with c_methods; c_vars; c_xhp_attrs = [] }, err)
   in
   let err = errs @ err_acc in
-  Naming_phase_pass.Cont.next (env, c, err)
+  Ok (env, c, err)
 
 let pass =
   Naming_phase_pass.(

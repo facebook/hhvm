@@ -20,19 +20,19 @@ end
 
 let on_targ (env, targ, err) =
   let env = Env.set_allow_retonly env ~allow_retonly:true in
-  Naming_phase_pass.Cont.next (env, targ, err)
+  Ok (env, targ, err)
 
 let on_hint_fun_hf_return_ty (env, t, err) =
   let env = Env.set_allow_retonly env ~allow_retonly:true in
-  Naming_phase_pass.Cont.next (env, t, err)
+  Ok (env, t, err)
 
 let on_fun_f_ret (env, f, err) =
   let env = Env.set_allow_retonly env ~allow_retonly:true in
-  Naming_phase_pass.Cont.next (env, f, err)
+  Ok (env, f, err)
 
 let on_method_m_ret (env, m, err) =
   let env = Env.set_allow_retonly env ~allow_retonly:true in
-  Naming_phase_pass.Cont.next (env, m, err)
+  Ok (env, m, err)
 
 let on_hint (env, hint, err_acc) =
   let allow_retonly = Env.allow_retonly env in
@@ -54,9 +54,8 @@ let on_hint (env, hint, err_acc) =
     | _ -> Ok (env, hint)
   in
   match res with
-  | Ok (env, hint) -> Naming_phase_pass.Cont.next (env, hint, err_acc)
-  | Error (hint, err) ->
-    Naming_phase_pass.Cont.finish (env, hint, err :: err_acc)
+  | Ok (env, hint) -> Ok (env, hint, err_acc)
+  | Error (hint, err) -> Error (env, hint, err :: err_acc)
 
 let pass =
   Naming_phase_pass.(

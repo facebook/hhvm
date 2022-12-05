@@ -40,7 +40,7 @@ let on_as_expr (env, as_expr, err_acc) =
       let (ve, err_acc) = elab_value err_acc ve in
       (Aast.Await_as_kv (pos, ke, ve), err_acc)
   in
-  Naming_phase_pass.Cont.next (env, as_expr, err_acc)
+  Ok (env, as_expr, err_acc)
 
 let pass =
   Naming_phase_pass.(bottom_up { identity with on_as_expr = Some on_as_expr })

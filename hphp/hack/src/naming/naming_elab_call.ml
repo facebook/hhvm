@@ -339,13 +339,10 @@ let on_expr_ (env, expr_, err_acc) =
     | _ -> (Ok expr_, err_acc)
   in
   match res with
-  | Ok expr_ -> Naming_phase_pass.Cont.next (env, expr_, err_acc)
-  | Error pos ->
-    Naming_phase_pass.Cont.finish
-      (env, Naming_phase_error.invalid_expr_ pos, err_acc)
+  | Ok expr_ -> Ok (env, expr_, err_acc)
+  | Error pos -> Error (env, Naming_phase_error.invalid_expr_ pos, err_acc)
 
-let on_class_ (env, c, err) =
-  Naming_phase_pass.Cont.next (Env.in_class env c, c, err)
+let on_class_ (env, c, err) = Ok (Env.in_class env c, c, err)
 
 let top_down_pass =
   Naming_phase_pass.(top_down { identity with on_class_ = Some on_class_ })

@@ -32,7 +32,7 @@ let on_hint_ (env, hint_, err_acc) =
         :: err_acc
       | _ -> err_acc
   in
-  Naming_phase_pass.Cont.next (env, hint_, err)
+  Ok (env, hint_, err)
 
 let on_class_ (env, (Aast.{ c_kind; c_enum; c_name; _ } as c), err) =
   let c =
@@ -62,7 +62,7 @@ let on_class_ (env, (Aast.{ c_kind; c_enum; c_name; _ } as c), err) =
       Aast.{ c with c_extends }
     | _ -> c
   in
-  Naming_phase_pass.Cont.next (env, c, err)
+  Ok (env, c, err)
 
 let pass =
   Naming_phase_pass.(

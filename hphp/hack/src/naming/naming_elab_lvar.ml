@@ -26,7 +26,7 @@ let on_expr_ (env, expr_, err) =
       Aast.Pipe (lid, e1, e2)
     | _ -> expr_
   in
-  Naming_phase_pass.Cont.next (env, expr_, err)
+  Ok (env, expr_, err)
 
 let pass =
   Naming_phase_pass.(top_down { identity with on_expr_ = Some on_expr_ })

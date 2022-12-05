@@ -46,7 +46,7 @@ let on_expr_ (env, expr_, err) =
     | Aast.(Is _ | As _) -> Env.set_in_is_as env ~in_is_as:true
     | _ -> env
   in
-  Naming_phase_pass.Cont.next (env, expr_, err)
+  Ok (env, expr_, err)
 
 let on_hint (env, hint, err) =
   let hint =
@@ -68,7 +68,7 @@ let on_hint (env, hint, err) =
     else
       hint
   in
-  Naming_phase_pass.Cont.next (env, hint, err)
+  Ok (env, hint, err)
 
 let on_fun_ (env, f, err) =
   let f =
@@ -86,7 +86,7 @@ let on_fun_ (env, f, err) =
     else
       f
   in
-  Naming_phase_pass.Cont.next (env, f, err)
+  Ok (env, f, err)
 
 let on_tparam (env, t, err) =
   let t =
@@ -100,7 +100,7 @@ let on_tparam (env, t, err) =
     else
       t
   in
-  Naming_phase_pass.Cont.next (env, t, err)
+  Ok (env, t, err)
 
 let on_class_top_down (env, c, err) =
   let in_enum_class =
@@ -109,7 +109,7 @@ let on_class_top_down (env, c, err) =
     | _ -> false
   in
   let env = Env.set_in_enum_class env ~in_enum_class in
-  Naming_phase_pass.Cont.next (env, c, err)
+  Ok (env, c, err)
 
 let on_class_ (env, c, err) =
   let c =
@@ -130,7 +130,7 @@ let on_class_ (env, c, err) =
     else
       c
   in
-  Naming_phase_pass.Cont.next (env, c, err)
+  Ok (env, c, err)
 
 let on_enum_ (env, e, err) =
   let e =
@@ -146,7 +146,7 @@ let on_enum_ (env, e, err) =
     else
       e
   in
-  Naming_phase_pass.Cont.next (env, e, err)
+  Ok (env, e, err)
 
 let top_down_pass =
   Naming_phase_pass.(

@@ -22,7 +22,7 @@ let on_module_def (env, (Aast.{ md_span; _ } as md), err_acc) =
       @@ Naming_error.Module_declaration_outside_allowed_files md_span)
       :: err_acc
   in
-  Naming_phase_pass.Cont.next (env, md, err)
+  Ok (env, md, err)
 
 let pass =
   Naming_phase_pass.(

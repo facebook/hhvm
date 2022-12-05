@@ -18,8 +18,7 @@ let on_expr (env, expr, err_acc) =
     | _ -> Ok expr
   in
   match res with
-  | Ok expr -> Naming_phase_pass.Cont.next (env, expr, err_acc)
-  | Error (expr, err) ->
-    Naming_phase_pass.Cont.finish (env, expr, err :: err_acc)
+  | Ok expr -> Ok (env, expr, err_acc)
+  | Error (expr, err) -> Error (env, expr, err :: err_acc)
 
 let pass = Naming_phase_pass.(top_down { identity with on_expr = Some on_expr })

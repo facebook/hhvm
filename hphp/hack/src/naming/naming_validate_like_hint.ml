@@ -29,7 +29,7 @@ let on_expr_ (env, expr_, err) =
     | Aast.(Is _ | As _ | Upcast _) -> Env.set_allow_like env ~allow_like:true
     | _ -> env
   in
-  Naming_phase_pass.Cont.next (env, expr_, err)
+  Ok (env, expr_, err)
 
 let on_hint (env, hint, err_acc) =
   let (err, env) =
@@ -44,7 +44,7 @@ let on_hint (env, hint, err_acc) =
       (err_acc, Env.set_allow_like env ~allow_like:false)
     | _ -> (err_acc, env)
   in
-  Naming_phase_pass.Cont.next (env, hint, err)
+  Ok (env, hint, err)
 
 let pass =
   Naming_phase_pass.(

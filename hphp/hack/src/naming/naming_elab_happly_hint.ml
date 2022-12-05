@@ -293,29 +293,24 @@ let canonicalize_happly in_mode tparams hint_pos tycon hints =
     let hint_ = Aast.Happly ((pos, tycon), hints) in
     Ok ((hint_pos, hint_), None)
 
-let on_typedef (env, t, err) =
-  Naming_phase_pass.Cont.next (Env.in_typedef env t, t, err)
+let on_typedef (env, t, err) = Ok (Env.in_typedef env t, t, err)
 
-let on_gconst (env, cst, err) =
-  Naming_phase_pass.Cont.next (Env.in_gconst env cst, cst, err)
+let on_gconst (env, cst, err) = Ok (Env.in_gconst env cst, cst, err)
 
-let on_fun_def (env, fd, err) =
-  Naming_phase_pass.Cont.next (Env.in_fun_def env fd, fd, err)
+let on_fun_def (env, fd, err) = Ok (Env.in_fun_def env fd, fd, err)
 
-let on_module_def (env, md, err) =
-  Naming_phase_pass.Cont.next (Env.in_module_def env md, md, err)
+let on_module_def (env, md, err) = Ok (Env.in_module_def env md, md, err)
 
-let on_class_ (env, c, err) =
-  Naming_phase_pass.Cont.next (Env.in_class env c, c, err)
+let on_class_ (env, c, err) = Ok (Env.in_class env c, c, err)
 
 let on_method_ (env, m, err) =
   let env = Env.extend_tparams env m.Aast.m_tparams in
-  Naming_phase_pass.Cont.next (env, m, err)
+  Ok (env, m, err)
 
 let on_tparam (env, tp, err) =
   (* TODO[mjt] do we want to maintain the HKT code? *)
   let env = Env.extend_tparams env tp.Aast.tp_parameters in
-  Naming_phase_pass.Cont.next (env, tp, err)
+  Ok (env, tp, err)
 
 let on_hint (env, hint, err_acc) =
   let res =
@@ -334,9 +329,8 @@ let on_hint (env, hint, err_acc) =
     let err =
       Option.value_map err_opt ~default:err_acc ~f:(fun err -> err :: err_acc)
     in
-    Naming_phase_pass.Cont.next (env, hint, err)
-  | Error (hint, err) ->
-    Naming_phase_pass.Cont.finish (env, hint, err :: err_acc)
+    Ok (env, hint, err)
+  | Error (hint, err) -> Error (env, hint, err :: err_acc)
 
 let pass =
   Naming_phase_pass.(

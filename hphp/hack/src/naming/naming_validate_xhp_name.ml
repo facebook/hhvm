@@ -19,7 +19,7 @@ let on_hint_ (env, hint_, err) =
       (Err.naming @@ Naming_error.Disallowed_xhp_type { pos; ty_name }) :: err
     | _ -> err
   in
-  Naming_phase_pass.Cont.next (env, hint_, err)
+  Ok (env, hint_, err)
 
 let pass =
   Naming_phase_pass.(top_down { identity with on_hint_ = Some on_hint_ })

@@ -27,7 +27,7 @@ let on_class_ (env, (Aast.{ c_kind; c_typeconsts; c_span; _ } as c), err_acc) =
     else
       err_acc
   in
-  Naming_phase_pass.Cont.next (env, c, err)
+  Ok (env, c, err)
 
 let pass =
   Naming_phase_pass.(top_down { identity with on_class_ = Some on_class_ })

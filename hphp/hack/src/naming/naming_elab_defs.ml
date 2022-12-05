@@ -33,7 +33,7 @@ let on_program (env, program, err) =
     | Aast.Namespace (_ns, aast) -> List.fold_left ~f:aux ~init:[] aast @ acc
   in
   let program = List.rev @@ List.fold_left ~f:aux ~init:[] program in
-  Naming_phase_pass.Cont.next (env, program, err)
+  Ok (env, program, err)
 
 let pass =
   Naming_phase_pass.(top_down { identity with on_program = Some on_program })

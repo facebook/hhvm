@@ -66,16 +66,13 @@ module Env = struct
     current_class
 end
 
-let on_class_ (env, c, err) =
-  Naming_phase_pass.Cont.next (Env.in_class env c, c, err)
+let on_class_ (env, c, err) = Ok (Env.in_class env c, c, err)
 
 let on_where_constraint_hint (env, cstr, err) =
-  Naming_phase_pass.Cont.next
-    (Env.set_in_where_clause env ~in_where_clause:true, cstr, err)
+  Ok (Env.set_in_where_clause env ~in_where_clause:true, cstr, err)
 
 let on_contexts (env, ctxts, err) =
-  Naming_phase_pass.Cont.next
-    (Env.set_in_context env ~in_context:true, ctxts, err)
+  Ok (Env.set_in_context env ~in_context:true, ctxts, err)
 
 let on_hint (env, hint, err_acc) =
   let res =
@@ -127,8 +124,8 @@ let on_hint (env, hint, err_acc) =
   match res with
   | Error (hint, err) ->
     let err = err :: err_acc in
-    Naming_phase_pass.Cont.finish (env, hint, err)
-  | Ok hint -> Naming_phase_pass.Cont.next (env, hint, err_acc)
+    Error (env, hint, err)
+  | Ok hint -> Ok (env, hint, err_acc)
 
 let pass =
   Naming_phase_pass.(

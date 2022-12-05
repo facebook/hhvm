@@ -16,12 +16,10 @@ let rec concat_blocks stmts =
     let rest = concat_blocks rest in
     next :: rest
 
-let on_block (env, stmts, err) =
-  Naming_phase_pass.Cont.next (env, concat_blocks stmts, err)
+let on_block (env, stmts, err) = Ok (env, concat_blocks stmts, err)
 
 let on_using_stmt (env, us, err) =
-  Naming_phase_pass.Cont.next
-    (env, Aast.{ us with us_is_block_scoped = false }, err)
+  Ok (env, Aast.{ us with us_is_block_scoped = false }, err)
 
 let pass =
   Naming_phase_pass.(

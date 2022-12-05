@@ -10,15 +10,7 @@ open Aast
 
 type ('env, 'err) t
 
-module Cont : sig
-  type 'a t
-
-  val next : 'a -> 'a t
-
-  val finish : 'a -> 'a t
-end
-
-type 'a transform = 'a -> 'a Cont.t
+type 'a transform = 'a -> ('a, 'a) Result.t
 
 type ('env, 'err) pass = {
   on_program: ('env * (unit, unit) Aast.program * 'err) transform option;

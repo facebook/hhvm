@@ -52,10 +52,10 @@ let on_expr_ (env, expr_, err) =
     | Aast.Upcast _ -> Env.set_allow_wildcard env ~allow_wildcard:false
     | _ -> env
   in
-  Naming_phase_pass.Cont.next (env, expr_, err)
+  Ok (env, expr_, err)
 
 let on_targ (env, targ, err) =
-  Naming_phase_pass.Cont.next
+  Ok
     ( Env.set_allow_wildcard ~allow_wildcard:true @@ Env.incr_tp_depth env,
       targ,
       err )
@@ -71,10 +71,9 @@ let on_hint_ (env, hint_, err) =
       Env.incr_tp_depth env
     | _ -> env
   in
-  Naming_phase_pass.Cont.next (env, hint_, err)
+  Ok (env, hint_, err)
 
-let on_shape_field_info (env, sfi, err) =
-  Naming_phase_pass.Cont.next (Env.incr_tp_depth env, sfi, err)
+let on_shape_field_info (env, sfi, err) = Ok (Env.incr_tp_depth env, sfi, err)
 
 let on_context (env, hint, err_acc) =
   match hint with
@@ -83,8 +82,8 @@ let on_context (env, hint, err_acc) =
     let err =
       Naming_phase_error.naming @@ Naming_error.Invalid_wildcard_context pos
     in
-    Naming_phase_pass.Cont.finish (env, (pos, Aast.Herr), err :: err_acc)
-  | _ -> Naming_phase_pass.Cont.next (env, hint, err_acc)
+    Error (env, (pos, Aast.Herr), err :: err_acc)
+  | _ -> Ok (env, hint, err_acc)
 
 let on_hint (env, hint, err_acc) =
   match hint with
@@ -97,15 +96,15 @@ let on_hint (env, hint, err_acc) =
           @@ Naming_error.Tparam_applied_to_type
                { pos; tparam_name = SN.Typehints.wildcard }
         in
-        Naming_phase_pass.Cont.next (env, (pos, Aast.Herr), err :: err_acc)
+        Ok (env, (pos, Aast.Herr), err :: err_acc)
       else
-        Naming_phase_pass.Cont.next (env, hint, err_acc)
+        Ok (env, hint, err_acc)
     else
       let err =
         Naming_phase_error.naming @@ Naming_error.Wildcard_hint_disallowed pos
       in
-      Naming_phase_pass.Cont.next (env, (pos, Aast.Herr), err :: err_acc)
-  | _ -> Naming_phase_pass.Cont.next (env, hint, err_acc)
+      Ok (env, (pos, Aast.Herr), err :: err_acc)
+  | _ -> Ok (env, hint, err_acc)
 
 let pass =
   Naming_phase_pass.(

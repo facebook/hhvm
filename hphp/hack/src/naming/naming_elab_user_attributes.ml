@@ -24,7 +24,7 @@ let on_user_attributes (env, us, err_acc) =
   let (us, err) =
     Tuple2.map_fst ~f:List.rev @@ List.fold_left us ~init:([], err_acc) ~f:dedup
   in
-  Naming_phase_pass.Cont.next (env, us, err)
+  Ok (env, us, err)
 
 let pass =
   Naming_phase_pass.(

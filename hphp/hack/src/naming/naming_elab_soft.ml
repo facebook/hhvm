@@ -17,6 +17,6 @@ let on_hint (env, hint, err) =
     | (pos, Aast.Hsoft (_, hint_)) -> (pos, hint_)
     | _ -> hint
   in
-  Naming_phase_pass.Cont.next (env, hint, err)
+  Ok (env, hint, err)
 
 let pass = Naming_phase_pass.(top_down { identity with on_hint = Some on_hint })

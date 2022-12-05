@@ -34,7 +34,7 @@ let on_class_ (env, (Aast.{ c_reqs; c_kind; _ } as c), err_acc) =
     List.filter_map ~f:Fn.id [err_req_impl; err_req_class; err_req_extends]
     @ err_acc
   in
-  Naming_phase_pass.Cont.next (env, c, err)
+  Ok (env, c, err)
 
 let pass =
   Naming_phase_pass.(top_down { identity with on_class_ = Some on_class_ })

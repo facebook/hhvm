@@ -27,7 +27,7 @@ let on_expr_ (env, expr_, err_acc) =
       (Naming_phase_error.naming @@ Naming_error.Object_cast pos) :: err_acc
     | _ -> err_acc
   in
-  Naming_phase_pass.Cont.next (env, expr_, err)
+  Ok (env, expr_, err)
 
 let pass =
   Naming_phase_pass.(bottom_up { identity with on_expr_ = Some on_expr_ })

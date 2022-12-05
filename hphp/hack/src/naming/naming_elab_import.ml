@@ -9,8 +9,7 @@
 let on_expr (env, expr, err_acc) =
   match expr with
   | (annot, pos, Aast.Import _) ->
-    Naming_phase_pass.Cont.finish
-      (env, (annot, pos, Naming_phase_error.invalid_expr_ pos), err_acc)
-  | _ -> Naming_phase_pass.Cont.next (env, expr, err_acc)
+    Error (env, (annot, pos, Naming_phase_error.invalid_expr_ pos), err_acc)
+  | _ -> Ok (env, expr, err_acc)
 
 let pass = Naming_phase_pass.(top_down { identity with on_expr = Some on_expr })

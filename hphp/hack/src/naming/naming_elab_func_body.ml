@@ -29,25 +29,22 @@ let on_func_body (env, func_body, err) =
     else
       func_body
   in
-  Naming_phase_pass.Cont.next (env, func_body, err)
+  Ok (env, func_body, err)
 
 let on_class_ (env, c, err) =
-  Naming_phase_pass.Cont.next (Env.set_mode env ~in_mode:c.Aast.c_mode, c, err)
+  Ok (Env.set_mode env ~in_mode:c.Aast.c_mode, c, err)
 
 let on_typedef (env, t, err) =
-  Naming_phase_pass.Cont.next (Env.set_mode env ~in_mode:t.Aast.t_mode, t, err)
+  Ok (Env.set_mode env ~in_mode:t.Aast.t_mode, t, err)
 
 let on_gconst (env, cst, err) =
-  Naming_phase_pass.Cont.next
-    (Env.set_mode env ~in_mode:cst.Aast.cst_mode, cst, err)
+  Ok (Env.set_mode env ~in_mode:cst.Aast.cst_mode, cst, err)
 
 let on_fun_def (env, fd, err) =
-  Naming_phase_pass.Cont.next
-    (Env.set_mode env ~in_mode:fd.Aast.fd_mode, fd, err)
+  Ok (Env.set_mode env ~in_mode:fd.Aast.fd_mode, fd, err)
 
 let on_module_def (env, md, err) =
-  Naming_phase_pass.Cont.next
-    (Env.set_mode env ~in_mode:md.Aast.md_mode, md, err)
+  Ok (Env.set_mode env ~in_mode:md.Aast.md_mode, md, err)
 
 let pass =
   Naming_phase_pass.(

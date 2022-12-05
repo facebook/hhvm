@@ -18,14 +18,12 @@ module Env = struct
     in_class
 end
 
-let on_class_ (env, c, err) =
-  Naming_phase_pass.Cont.next (Env.set_in_class env ~in_class:true, c, err)
+let on_class_ (env, c, err) = Ok (Env.set_in_class env ~in_class:true, c, err)
 
 (* The attributes applied to a class exist outside the current class so
    references to `self` are invalid *)
 let on_class_c_user_attributes (env, c_user_attributes, err_acc) =
-  Naming_phase_pass.Cont.next
-    (Env.set_in_class env ~in_class:false, c_user_attributes, err_acc)
+  Ok (Env.set_in_class env ~in_class:false, c_user_attributes, err_acc)
 
 (* The lowerer will give us CIexpr (Id  _ | Lvar _ ); here we:
       - convert CIexpr(_,_,Id _) to CIparent, CIself, CIstatic and CI.
@@ -77,7 +75,7 @@ let on_class_id (env, class_id, err_acc) =
     | (_, _, (Aast.(CIexpr (_, expr_pos, _)) as class_id_)) ->
       (((), expr_pos, class_id_), err_acc)
   in
-  Naming_phase_pass.Cont.next (env, class_id, err_acc)
+  Ok (env, class_id, err_acc)
 
 let pass =
   Naming_phase_pass.(

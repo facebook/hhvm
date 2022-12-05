@@ -33,6 +33,7 @@
 #include <limits.h>
 #include <folly/CPortability.h>
 #include <folly/CppAttributes.h>
+#include <folly/Function.h>
 #include <folly/Portability.h>
 #include <folly/Traits.h>
 #include <folly/synchronization/AtomicUtil.h>
@@ -1334,7 +1335,7 @@ class intern_boxed_field_ref {
 
   // TODO(dokwon): Consider removing `get_default_t` after resolving
   // dependency issue.
-  using get_default_t = std::function<const element_type&()>;
+  using get_default_t = folly::FunctionRef<const element_type&()>;
 
  public:
   using value_type = detail::copy_const_t<T, element_type>;
@@ -1574,7 +1575,7 @@ class terse_intern_boxed_field_ref {
 
   // TODO(dokwon): Consider removing `get_default_t` after resolving
   // dependency issue.
-  using get_default_t = std::function<const element_type&()>;
+  using get_default_t = folly::FunctionRef<const element_type&()>;
 
  public:
   using value_type = detail::copy_const_t<T, element_type>;

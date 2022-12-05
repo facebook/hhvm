@@ -21,7 +21,7 @@ module Env = struct
   let everything_sdt Naming_phase_env.{ everything_sdt; _ } = everything_sdt
 end
 
-let on_hint_ (env, hint_, err) =
+let on_hint_ (env, hint_, err_acc) =
   let err =
     if
       Env.is_hhi env
@@ -29,13 +29,13 @@ let on_hint_ (env, hint_, err) =
       || Env.supportdynamic_type_hint_enabled env
       || Env.everything_sdt env
     then
-      err
+      err_acc
     else
       match hint_ with
       | Aast.Happly ((pos, ty_name), _)
         when String.(equal ty_name SN.Classes.cSupportDyn) ->
-        Err.Free_monoid.plus err @@ Err.supportdyn pos
-      | _ -> err
+        Err.supportdyn pos :: err_acc
+      | _ -> err_acc
   in
   Naming_phase_pass.Cont.next (env, hint_, err)
 

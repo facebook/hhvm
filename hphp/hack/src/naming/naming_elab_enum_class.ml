@@ -26,10 +26,10 @@ let on_hint_ (env, hint_, err_acc) =
                equal ty_name SN.Classes.cHH_BuiltinEnum
                || equal ty_name SN.Classes.cHH_BuiltinEnumClass
                || equal ty_name SN.Classes.cHH_BuiltinAbstractEnumClass) ->
-        Err.Free_monoid.plus err_acc
-        @@ Err.naming
+        (Err.naming
         @@ Naming_error.Using_internal_class
-             { pos; class_name = Utils.strip_ns ty_name }
+             { pos; class_name = Utils.strip_ns ty_name })
+        :: err_acc
       | _ -> err_acc
   in
   Naming_phase_pass.Cont.next (env, hint_, err)

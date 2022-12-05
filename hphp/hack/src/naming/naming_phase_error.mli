@@ -8,45 +8,26 @@
 
 type t
 
-val empty : t
+type agg
 
-val suppress_like_type_errors : t -> t
+val naming : Naming_error.t -> t
 
-val emit : t -> unit
+val nast_check : Nast_check_error.t -> t
 
-module Free_monoid : sig
-  type 'a t
+val typing : Typing_error.Primary.t -> t
 
-  val zero : 'a t
+val like_type : Pos.t -> t
 
-  val plus : 'a t -> 'a t -> 'a t
+val unexpected_hint : Pos.t -> t
 
-  class virtual ['a] monoid :
-    object
-      method private plus : 'a t -> 'a t -> 'a t
+val malformed_access : Pos.t -> t
 
-      method private zero : 'a t
-    end
-end
-
-type err
-
-val naming : Naming_error.t -> err Free_monoid.t
-
-val nast_check : Nast_check_error.t -> err Free_monoid.t
-
-val typing : Typing_error.Primary.t -> err Free_monoid.t
-
-val like_type : Pos.t -> err Free_monoid.t
-
-val unexpected_hint : Pos.t -> err Free_monoid.t
-
-val malformed_access : Pos.t -> err Free_monoid.t
-
-val supportdyn : Pos.t -> err Free_monoid.t
-
-class monoid : [err] Free_monoid.monoid
-
-val from_monoid : ?init:t -> err Free_monoid.t -> t
+val supportdyn : Pos.t -> t
 
 val invalid_expr_ : Pos.t -> (unit, unit) Aast.expr_
+
+val add : agg -> t -> agg
+
+val emit : agg -> unit
+
+val empty : agg

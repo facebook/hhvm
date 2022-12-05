@@ -41,13 +41,7 @@ let on_expr_ (env, expr_, err_acc) =
       in
       let vc_kind = Nast.get_vc_kind cname in
 
-      let err =
-        List.fold_right
-          ~init:targ_err_opt
-          ~f:(fun err_opt acc ->
-            Option.merge ~f:Err.Free_monoid.plus acc err_opt)
-          fields_err_opts
-      in
+      let err = List.filter_map ~f:Fn.id @@ targ_err_opt :: fields_err_opts in
       Ok (Aast.ValCollection (vc_kind, targ_opt, exprs), err)
     | Aast.Collection ((pos, cname), c_targ_opt, afields)
       when Nast.is_kvc_kind cname ->
@@ -62,17 +56,11 @@ let on_expr_ (env, expr_, err_acc) =
         List.unzip @@ List.map ~f:(afield_key_value cname) afields
       in
       let kvc_kind = Nast.get_kvc_kind cname in
-      let err =
-        List.fold_right
-          ~init:targ_err_opt
-          ~f:(fun err_opt acc ->
-            Option.merge ~f:Err.Free_monoid.plus acc err_opt)
-          fields_err_opts
-      in
+      let err = List.filter_map ~f:Fn.id @@ targ_err_opt :: fields_err_opts in
       Ok (Aast.KeyValCollection (kvc_kind, targs_opt, fields), err)
     | Aast.Collection ((pos, cname), _, [])
       when String.equal SN.Collections.cPair cname ->
-      Error (pos, Err.naming @@ Naming_error.Too_few_arguments pos)
+      Error (pos, [Err.naming @@ Naming_error.Too_few_arguments pos])
     | Aast.Collection ((pos, cname), c_targ_opt, [fst; snd])
       when String.equal SN.Collections.cPair cname ->
       let (targs_opt, targ_err_opt) =
@@ -85,31 +73,21 @@ let on_expr_ (env, expr_, err_acc) =
       let (fst, fst_err_opt) = afield_value SN.Collections.cPair fst
       and (snd, snd_err_opt) = afield_value SN.Collections.cPair snd in
       let err =
-        List.fold_right
-          ~init:targ_err_opt
-          ~f:(fun err_opt acc ->
-            Option.merge ~f:Err.Free_monoid.plus acc err_opt)
-          [fst_err_opt; snd_err_opt]
+        List.filter_map ~f:Fn.id [targ_err_opt; fst_err_opt; snd_err_opt]
       in
       Ok (Aast.Pair (targs_opt, fst, snd), err)
     | Aast.Collection ((pos, cname), _, _)
       when String.equal SN.Collections.cPair cname ->
-      Error (pos, Err.naming @@ Naming_error.Too_many_arguments pos)
+      Error (pos, [Err.naming @@ Naming_error.Too_many_arguments pos])
     | Aast.Collection ((pos, cname), _, _) ->
-      Error (pos, Err.naming @@ Naming_error.Expected_collection { pos; cname })
-    | _ -> Ok (expr_, None)
+      Error
+        (pos, [Err.naming @@ Naming_error.Expected_collection { pos; cname }])
+    | _ -> Ok (expr_, [])
   in
   match res with
-  | Ok (expr_, err_opt) ->
-    Naming_phase_pass.Cont.next
-      ( env,
-        expr_,
-        Option.value_map
-          ~default:err_acc
-          ~f:(Err.Free_monoid.plus err_acc)
-          err_opt )
-  | Error (pos, err) ->
-    Naming_phase_pass.Cont.finish (env, Err.invalid_expr_ pos, err)
+  | Ok (expr_, errs) -> Naming_phase_pass.Cont.next (env, expr_, errs @ err_acc)
+  | Error (pos, errs) ->
+    Naming_phase_pass.Cont.finish (env, Err.invalid_expr_ pos, errs @ err_acc)
 
 let pass =
   Naming_phase_pass.(top_down { identity with on_expr_ = Some on_expr_ })

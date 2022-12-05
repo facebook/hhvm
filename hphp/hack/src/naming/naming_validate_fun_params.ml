@@ -9,11 +9,11 @@ open Hh_prelude
 module Err = Naming_phase_error
 module SN = Naming_special_names
 
-let validate_fun_params params =
+let validate_fun_params errs params =
   snd
   @@ List.fold_left
        params
-       ~init:(SSet.empty, [])
+       ~init:(SSet.empty, errs)
        ~f:(fun (seen, errs) Aast.{ param_name; param_pos; _ } ->
          if String.equal SN.SpecialIdents.placeholder param_name then
            (seen, errs)
@@ -27,19 +27,13 @@ let validate_fun_params params =
          else
            (SSet.add param_name seen, errs))
 
-let on_method_ (env, m, err) =
-  let err =
-    List.fold_right ~init:err ~f:Err.Free_monoid.plus
-    @@ validate_fun_params m.Aast.m_params
-  in
+let on_method_ (env, m, errs) =
+  let err = validate_fun_params errs m.Aast.m_params in
   Naming_phase_pass.Cont.next (env, m, err)
 
-let on_fun_ (env, f, err) =
-  let err =
-    List.fold_right ~init:err ~f:Err.Free_monoid.plus
-    @@ validate_fun_params f.Aast.f_params
-  in
-  Naming_phase_pass.Cont.next (env, f, err)
+let on_fun_ (env, f, errs) =
+  let errs = validate_fun_params errs f.Aast.f_params in
+  Naming_phase_pass.Cont.next (env, f, errs)
 
 let pass =
   Naming_phase_pass.(

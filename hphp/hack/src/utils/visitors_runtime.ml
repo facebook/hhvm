@@ -218,39 +218,3 @@ class virtual ['self] reduce =
 
     method private on_option = self#visit_option
   end
-
-class virtual ['self] mapreduce_base =
-  object (_ : 'self)
-    inherit ['acc] monoid
-
-    method virtual private on_string : 'env -> string -> string * 'acc
-
-    method virtual private on_int : 'env -> int -> int * 'acc
-
-    method virtual private on_bool : 'env -> bool -> bool * 'acc
-
-    method virtual private on_list
-        : 'env 'a 'b.
-          ('env -> 'a -> 'b * 'acc) -> 'env -> 'a list -> 'b list * 'acc
-
-    method virtual private on_option
-        : 'env 'a 'b.
-          ('env -> 'a -> 'b * 'acc) -> 'env -> 'a option -> 'b option * 'acc
-  end
-
-class virtual ['self] mapreduce =
-  object (self : 'self)
-    inherit ['self] mapreduce_base
-
-    inherit [_] VisitorsRuntime.mapreduce
-
-    method private on_string = self#visit_string
-
-    method private on_int = self#visit_int
-
-    method private on_bool = self#visit_bool
-
-    method private on_list = self#visit_list
-
-    method private on_option = self#visit_option
-  end

@@ -7,7 +7,30 @@
  *)
 open Hh_prelude
 
-type t = {
+type t =
+  | Naming of Naming_error.t
+  | Typing of Typing_error.Primary.t
+  | Nast_check of Nast_check_error.t
+  | Like_type of Pos.t
+  | Unexpected_hint of Pos.t
+  | Malformed_access of Pos.t
+  | Supportdyn of Pos.t
+
+let naming err = Naming err
+
+let typing err = Typing err
+
+let nast_check err = Nast_check err
+
+let like_type pos = Like_type pos
+
+let unexpected_hint pos = Unexpected_hint pos
+
+let malformed_access pos = Malformed_access pos
+
+let supportdyn pos = Supportdyn pos
+
+type agg = {
   naming: Naming_error.t list;
   (* TODO[mjt] either these errors shouldn't be raised in naming or they aren't
      really typing errors *)
@@ -34,7 +57,16 @@ let empty =
     supportdyns = [];
   }
 
-let suppress_like_type_errors t = { t with like_types = [] }
+let add t = function
+  | Naming err -> { t with naming = err :: t.naming }
+  | Typing err -> { t with typing = err :: t.typing }
+  | Nast_check err -> { t with nast_check = err :: t.nast_check }
+  | Like_type err -> { t with like_types = err :: t.like_types }
+  | Unexpected_hint err ->
+    { t with unexpected_hints = err :: t.unexpected_hints }
+  | Malformed_access err ->
+    { t with malformed_accesses = err :: t.malformed_accesses }
+  | Supportdyn err -> { t with supportdyns = err :: t.supportdyns }
 
 let emit
     {
@@ -67,84 +99,6 @@ let emit
   List.iter
     ~f:(fun p -> Errors.experimental_feature p "supportdyn type hint")
     supportdyns
-
-(* -- Monoid for use in visitors -------------------------------------------- *)
-
-module Free_monoid = struct
-  type 'a t =
-    | Zero
-    | One of 'a
-    | Plus of 'a t * 'a t
-
-  let zero = Zero
-
-  let plus e1 e2 =
-    match (e1, e2) with
-    | (Zero, _) -> e2
-    | (_, Zero) -> e1
-    | _ -> Plus (e1, e2)
-
-  let mk x = One x
-
-  let fold t ~init ~f =
-    let rec aux t ~acc ~k =
-      match t with
-      | Zero -> k acc
-      | One x -> k @@ f acc x
-      | Plus (x, y) -> aux y ~acc ~k:(fun acc -> aux x ~acc ~k)
-    in
-    aux t ~acc:init ~k:(fun x -> x)
-
-  class virtual ['a] monoid =
-    object (_ : 'self)
-      inherit ['a t] Visitors_runtime.monoid
-
-      method private zero = zero
-
-      method private plus = plus
-    end
-end
-
-type err =
-  | Naming of Naming_error.t
-  | Typing of Typing_error.Primary.t
-  | Nast_check of Nast_check_error.t
-  | Like_type of Pos.t
-  | Unexpected_hint of Pos.t
-  | Malformed_access of Pos.t
-  | Supportdyn of Pos.t
-
-let naming err = Free_monoid.mk @@ Naming err
-
-let nast_check err = Free_monoid.mk @@ Nast_check err
-
-let typing err = Free_monoid.mk @@ Typing err
-
-let like_type pos = Free_monoid.mk @@ Like_type pos
-
-let unexpected_hint pos = Free_monoid.mk @@ Unexpected_hint pos
-
-let malformed_access pos = Free_monoid.mk @@ Malformed_access pos
-
-let supportdyn pos = Free_monoid.mk @@ Supportdyn pos
-
-class monoid = [err] Free_monoid.monoid
-
-(* Convert the result of reduce / mapreduce visitor to our error representation *)
-let from_monoid ?(init = empty) err =
-  let f acc = function
-    | Naming err -> { acc with naming = err :: acc.naming }
-    | Typing err -> { acc with typing = err :: acc.typing }
-    | Nast_check err -> { acc with nast_check = err :: acc.nast_check }
-    | Like_type pos -> { acc with like_types = pos :: acc.like_types }
-    | Unexpected_hint pos ->
-      { acc with unexpected_hints = pos :: acc.unexpected_hints }
-    | Malformed_access pos ->
-      { acc with malformed_accesses = pos :: acc.malformed_accesses }
-    | Supportdyn pos -> { acc with supportdyns = pos :: acc.supportdyns }
-  in
-
-  Free_monoid.fold err ~init ~f
 
 (* Helper for constructing expression to be substituted for invalid expressions
    TODO[mjt] this probably belongs with the AAST defs

@@ -54,26 +54,3 @@ class virtual ['self] endo =
         : 'a 'b. ('env -> 'a -> 'b) -> 'env -> 'a LM.t -> 'b LM.t =
       (fun f env -> LM.map (f env))
   end
-
-class virtual ['self] mapreduce =
-  object (self : 'self)
-    inherit [_] Ast_defs.mapreduce
-
-    method private on_local_id_map
-        : 'a 'b. ('env -> 'a -> 'b * 'acc) -> 'env -> 'a LM.t -> 'b LM.t * 'acc
-        =
-      fun f env x ->
-        let (err, x) =
-          LM.map_env
-            (fun err _k d ->
-              let (x, e) = f env d in
-              (self#plus err e, x))
-            self#zero
-            x
-        in
-        (x, err)
-
-    method on_'ex _env x = (x, self#zero)
-
-    method on_'en _env x = (x, self#zero)
-  end

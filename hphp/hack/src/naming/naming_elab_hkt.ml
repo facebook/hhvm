@@ -16,10 +16,9 @@ let on_hint (env, hint, err_acc) =
   match hint with
   | (pos, Aast.Habstr (name, _ :: _)) when not @@ Env.hkt_enabled env ->
     let err =
-      Err.Free_monoid.plus
-        err_acc
-        (Err.naming
-        @@ Naming_error.Tparam_applied_to_type { pos; tparam_name = name })
+      (Err.naming
+      @@ Naming_error.Tparam_applied_to_type { pos; tparam_name = name })
+      :: err_acc
     in
     Naming_phase_pass.Cont.next (env, (pos, Aast.Habstr (name, [])), err)
   | _ -> Naming_phase_pass.Cont.next (env, hint, err_acc)
@@ -31,9 +30,8 @@ let on_tparam
   match tp_parameters with
   | _ :: _ when not @@ Env.hkt_enabled env ->
     let err =
-      Err.Free_monoid.plus err_acc
-      @@ Err.naming
-      @@ Naming_error.Tparam_with_tparam { pos; tparam_name }
+      (Err.naming @@ Naming_error.Tparam_with_tparam { pos; tparam_name })
+      :: err_acc
     in
     Naming_phase_pass.Cont.next
       (env, Aast.{ tparam with tp_parameters = [] }, err)

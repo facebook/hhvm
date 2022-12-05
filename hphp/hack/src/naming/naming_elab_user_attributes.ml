@@ -6,7 +6,6 @@
  *
  *)
 open Hh_prelude
-module Err = Naming_phase_error
 
 let on_user_attributes (env, us, err_acc) =
   let seen = Caml.Hashtbl.create 0 in
@@ -14,10 +13,10 @@ let on_user_attributes (env, us, err_acc) =
     match Caml.Hashtbl.find_opt seen attr_name with
     | Some prev_pos ->
       let err =
-        Err.naming
+        Naming_phase_error.naming
         @@ Naming_error.Duplicate_user_attribute { pos; prev_pos; attr_name }
       in
-      (attrs, Err.Free_monoid.plus err_acc err)
+      (attrs, err :: err_acc)
     | _ ->
       Caml.Hashtbl.add seen attr_name pos;
       (attr :: attrs, err_acc)

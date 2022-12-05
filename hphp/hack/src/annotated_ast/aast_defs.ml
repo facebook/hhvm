@@ -1256,17 +1256,6 @@ and where_constraint_hint = hint * Ast_defs.constraint_kind * hint
       },
     visitors
       {
-        variety = "mapreduce";
-        nude = true;
-        visit_prefix = "on_";
-        ancestors =
-          [
-            "Visitors_runtime.mapreduce";
-            "Aast_defs_visitors_ancestors.mapreduce";
-          ];
-      },
-    visitors
-      {
         variety = "endo";
         nude = true;
         visit_prefix = "on_";

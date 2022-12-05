@@ -41,46 +41,43 @@ let on_class_c_user_attributes (env, c_user_attributes, err_acc) =
 *)
 let on_class_id (env, class_id, err_acc) =
   let in_class = Env.in_class env in
-  let (class_id, err_opt) =
+  let (class_id, err_acc) =
     match class_id with
     (* TODO[mjt] if we don't expect these from lowering should we refine the
        NAST repr? *)
-    | (_, _, Aast.(CIparent | CIself | CIstatic | CI _)) -> (class_id, None)
+    | (_, _, Aast.(CIparent | CIself | CIstatic | CI _)) -> (class_id, err_acc)
     | (_, _, Aast.(CIexpr (_, expr_pos, Id (id_pos, cname)))) ->
       if String.equal cname SN.Classes.cParent then
         if not in_class then
           ( ((), expr_pos, Aast.CI (expr_pos, SN.Classes.cUnknown)),
-            Some (Err.typing @@ Typing_error.Primary.Parent_outside_class id_pos)
-          )
+            (Err.typing @@ Typing_error.Primary.Parent_outside_class id_pos)
+            :: err_acc )
         else
-          (((), expr_pos, Aast.CIparent), None)
+          (((), expr_pos, Aast.CIparent), err_acc)
       else if String.equal cname SN.Classes.cSelf then
         if not in_class then
           ( ((), expr_pos, Aast.CI (expr_pos, SN.Classes.cUnknown)),
-            Some (Err.typing @@ Typing_error.Primary.Self_outside_class id_pos)
-          )
+            (Err.typing @@ Typing_error.Primary.Self_outside_class id_pos)
+            :: err_acc )
         else
-          (((), expr_pos, Aast.CIself), None)
+          (((), expr_pos, Aast.CIself), err_acc)
       else if String.equal cname SN.Classes.cStatic then
         if not in_class then
           ( ((), expr_pos, Aast.CI (expr_pos, SN.Classes.cUnknown)),
-            Some (Err.typing @@ Typing_error.Primary.Static_outside_class id_pos)
-          )
+            (Err.typing @@ Typing_error.Primary.Static_outside_class id_pos)
+            :: err_acc )
         else
-          (((), expr_pos, Aast.CIstatic), None)
+          (((), expr_pos, Aast.CIstatic), err_acc)
       else
-        (((), expr_pos, Aast.CI (expr_pos, cname)), None)
+        (((), expr_pos, Aast.CI (expr_pos, cname)), err_acc)
     | (_, _, Aast.(CIexpr (_, expr_pos, Lvar (lid_pos, lid))))
       when String.equal (Local_id.to_string lid) SN.SpecialIdents.this ->
       (* TODO[mjt] why is `$this` valid outside a class? *)
-      (Aast.((), expr_pos, CIexpr ((), lid_pos, This)), None)
+      (Aast.((), expr_pos, CIexpr ((), lid_pos, This)), err_acc)
     | (_, _, (Aast.(CIexpr (_, expr_pos, _)) as class_id_)) ->
-      (((), expr_pos, class_id_), None)
+      (((), expr_pos, class_id_), err_acc)
   in
-  let err =
-    Option.value_map ~default:err_acc ~f:(Err.Free_monoid.plus err_acc) err_opt
-  in
-  Naming_phase_pass.Cont.next (env, class_id, err)
+  Naming_phase_pass.Cont.next (env, class_id, err_acc)
 
 let pass =
   Naming_phase_pass.(

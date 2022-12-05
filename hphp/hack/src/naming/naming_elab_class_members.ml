@@ -14,7 +14,6 @@
  *)
 open Hh_prelude
 module SN = Naming_special_names
-module Err = Naming_phase_error
 
 module Env = struct
   let in_mode
@@ -62,7 +61,8 @@ let is_xhp cv_name =
 
 let elab_cv_expr mode pos cv_expr =
   match cv_expr with
-  | None when FileInfo.is_hhi mode -> Some ((), pos, Err.invalid_expr_ pos)
+  | None when FileInfo.is_hhi mode ->
+    Some ((), pos, Naming_phase_error.invalid_expr_ pos)
   | cv_expr -> cv_expr
 
 let elab_class_prop mode (Aast.{ cv_expr; cv_id = (pos, cv_name); _ } as cv) =
@@ -121,7 +121,7 @@ let elab_xhp_attr
           let err =
             if is_required then
               Some
-                (Err.naming
+                (Naming_phase_error.naming
                 @@ Naming_error.Xhp_optional_required_attr
                      { pos; attr_name = snd @@ cv.Aast.cv_id })
             else
@@ -140,14 +140,14 @@ let elab_xhp_attr
              if like_type_hints_enabled then
                None
              else
-               Some (Err.like_type pos) ))
+               Some (Naming_phase_error.like_type pos) ))
   in
   let cv_type = ((), hint_opt)
   and cv_xhp_attr =
     Some Aast.{ xai_like; xai_tag = xhp_attr_tag_opt; xai_enum_values }
   and cv_expr = elab_cv_expr mode (fst cv.Aast.cv_id) cv.Aast.cv_expr in
-  let err = Option.merge ~f:Err.Free_monoid.plus req_attr_err like_err in
-  (Aast.{ cv with cv_xhp_attr; cv_type; cv_expr; cv_user_attributes = [] }, err)
+  let errs = List.filter_map ~f:Fn.id [req_attr_err; like_err] in
+  (Aast.{ cv with cv_xhp_attr; cv_type; cv_expr; cv_user_attributes = [] }, errs)
 
 let on_typedef (env, t, err) =
   Naming_phase_pass.Cont.next (Env.set_mode env ~in_mode:t.Aast.t_mode, t, err)
@@ -191,7 +191,7 @@ let on_class_
                   (Env.in_mode env))
              c_xhp_attrs
       in
-      (static_props @ props @ xhp_attrs, List.filter_map ~f:Fn.id xhp_attrs_err)
+      (static_props @ props @ xhp_attrs, List.concat xhp_attrs_err)
     in
     let c_methods =
       if Ast_defs.is_c_interface c.Aast.c_kind then
@@ -201,7 +201,7 @@ let on_class_
     in
     (Aast.{ c with c_methods; c_vars; c_xhp_attrs = [] }, err)
   in
-  let err = List.fold_right ~init:err_acc ~f:Err.Free_monoid.plus errs in
+  let err = errs @ err_acc in
   Naming_phase_pass.Cont.next (env, c, err)
 
 let pass =

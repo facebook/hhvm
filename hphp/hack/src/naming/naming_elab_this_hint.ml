@@ -7,7 +7,6 @@
  *)
 
 open Hh_prelude
-module Err = Naming_phase_error
 module SN = Naming_special_names
 
 module Env = struct
@@ -97,8 +96,10 @@ let on_expr_ (env, expr_, err_acc) =
 let on_hint (env, hint, err_acc) =
   match hint with
   | (pos, Aast.Hthis) when Env.forbid_this env ->
-    let err = Err.naming @@ Naming_error.This_type_forbidden pos in
-    Naming_phase_pass.Cont.next (env, (pos, Aast.Herr), err)
+    let err =
+      Naming_phase_error.naming @@ Naming_error.This_type_forbidden pos
+    in
+    Naming_phase_pass.Cont.next (env, (pos, Aast.Herr), err :: err_acc)
   | _ -> Naming_phase_pass.Cont.next (env, hint, err_acc)
 
 let on_shape_field_info (env, sfi, err_acc) =

@@ -35,69 +35,69 @@ module Env = struct
       }
 end
 
-let and_ err1 err2 = Option.merge ~f:Err.Free_monoid.plus err1 err2
-
-let rec const_expr_err in_mode (_, pos, expr_) =
+let rec const_expr_err in_mode acc (_, pos, expr_) =
   match expr_ with
-  | Aast.(Id _ | Null | True | False | Int _ | Float _ | String _) -> None
-  | Aast.(Class_const ((_, _, (CIparent | CIself | CI _)), _)) -> None
-  | Aast.(Class_const ((_, _, Aast.CIexpr (_, _, (This | Id _))), _)) -> None
-  | Aast.(Smethod_id _ | Fun_id _) -> None
-  | Aast.(FunctionPointer ((FP_id _ | FP_class_const _), _)) -> None
-  | Aast.Upcast (e, _) -> const_expr_err in_mode e
-  | Aast.(As (e, (_, Hlike _), _)) -> const_expr_err in_mode e
+  | Aast.(Id _ | Null | True | False | Int _ | Float _ | String _) -> acc
+  | Aast.(Class_const ((_, _, (CIparent | CIself | CI _)), _)) -> acc
+  | Aast.(Class_const ((_, _, Aast.CIexpr (_, _, (This | Id _))), _)) -> acc
+  | Aast.(Smethod_id _ | Fun_id _) -> acc
+  | Aast.(FunctionPointer ((FP_id _ | FP_class_const _), _)) -> acc
+  | Aast.Upcast (e, _) -> const_expr_err in_mode acc e
+  | Aast.(As (e, (_, Hlike _), _)) -> const_expr_err in_mode acc e
   | Aast.(As (e, (_, Happly ((p, cn), [_])), _)) ->
     if String.equal cn SN.FB.cIncorrectType then
-      const_expr_err in_mode e
+      const_expr_err in_mode acc e
     else
-      Some (Err.naming @@ Naming_error.Illegal_constant p)
+      (Err.naming @@ Naming_error.Illegal_constant p) :: acc
   | Aast.Unop
       ((Ast_defs.Uplus | Ast_defs.Uminus | Ast_defs.Utild | Ast_defs.Unot), e)
     ->
-    const_expr_err in_mode e
+    const_expr_err in_mode acc e
   | Aast.Binop (op, e1, e2) ->
     (* Only assignment is invalid *)
     begin
       match op with
-      | Ast_defs.Eq _ -> Some (Err.naming @@ Naming_error.Illegal_constant pos)
-      | _ -> and_ (const_expr_err in_mode e1) (const_expr_err in_mode e2)
+      | Ast_defs.Eq _ ->
+        (Err.naming @@ Naming_error.Illegal_constant pos) :: acc
+      | _ ->
+        let acc = const_expr_err in_mode acc e1 in
+        const_expr_err in_mode acc e2
     end
   | Aast.Eif (e1, e2_opt, e3) ->
-    and_
-      (const_expr_err in_mode e1)
-      (and_
-         (Option.bind ~f:(const_expr_err in_mode) e2_opt)
-         (const_expr_err in_mode e3))
+    let acc = const_expr_err in_mode acc e1 in
+    let acc = const_expr_err in_mode acc e3 in
+    Option.value_map ~default:acc ~f:(const_expr_err in_mode acc) e2_opt
   | Aast.Darray (_, kvs)
   | Aast.(KeyValCollection (Dict, _, kvs)) ->
-    List.fold_left kvs ~init:None ~f:(fun acc (ek, ev) ->
-        and_ acc @@ and_ (const_expr_err in_mode ek) (const_expr_err in_mode ev))
+    List.fold_left kvs ~init:acc ~f:(fun acc (ek, ev) ->
+        let acc = const_expr_err in_mode acc ek in
+        const_expr_err in_mode acc ev)
   | Aast.Varray (_, exprs)
   | Aast.(ValCollection ((Vec | Keyset), _, exprs))
   | Aast.Tuple exprs ->
-    List.fold_left exprs ~init:None ~f:(fun acc e ->
-        and_ acc @@ const_expr_err in_mode e)
+    List.fold_left exprs ~init:acc ~f:(fun acc e ->
+        const_expr_err in_mode acc e)
   | Aast.Shape flds ->
-    List.fold_left flds ~init:None ~f:(fun acc (_, e) ->
-        and_ acc @@ const_expr_err in_mode e)
+    List.fold_left flds ~init:acc ~f:(fun acc (_, e) ->
+        const_expr_err in_mode acc e)
   | Aast.Call ((_, _, Aast.Id (_, cn)), _, fn_params, _)
     when String.equal cn SN.StdlibFunctions.array_mark_legacy
          || String.equal cn SN.PseudoFunctions.unsafe_cast
          || String.equal cn SN.PseudoFunctions.unsafe_nonnull_cast ->
-    List.fold_left fn_params ~init:None ~f:(fun acc (_, e) ->
-        and_ acc @@ const_expr_err in_mode e)
+    List.fold_left fn_params ~init:acc ~f:(fun acc (_, e) ->
+        const_expr_err in_mode acc e)
   | Aast.Omitted when FileInfo.is_hhi in_mode ->
     (* Only allowed in HHI positions where we don't care about the value *)
-    None
-  | _ -> Some (Err.naming @@ Naming_error.Illegal_constant pos)
+    acc
+  | _ -> (Err.naming @@ Naming_error.Illegal_constant pos) :: acc
 
 let const_expr in_mode in_enum_class ((_, pos, _) as expr) =
   if in_enum_class then
-    (expr, None)
+    (expr, [])
   else
-    match const_expr_err in_mode expr with
-    | Some err -> (((), pos, Err.invalid_expr_ pos), Some err)
-    | None -> (expr, None)
+    match const_expr_err in_mode [] expr with
+    | [] -> (expr, [])
+    | errs -> (((), pos, Err.invalid_expr_ pos), errs)
 
 let on_class_ (env, c, err) =
   let in_enum_class =
@@ -128,24 +128,20 @@ let on_module_def (env, md, err) =
 
 let on_class_const_kind (env, kind, err_acc) =
   let in_mode = Env.in_mode env and in_enum_class = Env.in_enum_class env in
-  let (kind, err_opt) =
+  let (kind, errs) =
     match kind with
     | Aast.CCConcrete expr ->
-      let (expr, err) = const_expr in_mode in_enum_class expr in
-      (Aast.CCConcrete expr, err)
-    | Aast.CCAbstract _ -> (kind, None)
+      let (expr, errs) = const_expr in_mode in_enum_class expr in
+      (Aast.CCConcrete expr, errs)
+    | Aast.CCAbstract _ -> (kind, [])
   in
-  let err =
-    Option.value_map ~default:err_acc ~f:(Err.Free_monoid.plus err_acc) err_opt
-  in
+  let err = errs @ err_acc in
   Naming_phase_pass.Cont.next (env, kind, err)
 
 let on_gconst_cst_value (env, cst_value, err_acc) =
   let in_mode = Env.in_mode env and in_enum_class = Env.in_enum_class env in
-  let (cst_value, err_opt) = const_expr in_mode in_enum_class cst_value in
-  let err =
-    Option.value_map ~default:err_acc ~f:(Err.Free_monoid.plus err_acc) err_opt
-  in
+  let (cst_value, errs) = const_expr in_mode in_enum_class cst_value in
+  let err = errs @ err_acc in
   Naming_phase_pass.Cont.next (env, cst_value, err)
 
 let top_down_pass =

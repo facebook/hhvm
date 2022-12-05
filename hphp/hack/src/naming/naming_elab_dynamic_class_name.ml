@@ -25,16 +25,16 @@ let on_expr (env, (ex, pos, expr_), err_acc) =
       let err = Err.naming @@ Naming_error.Dynamic_new_in_strict_mode ci_pos in
       let class_id = ((), pos, Aast.CI (ci_pos, SN.Classes.cUnknown)) in
       let expr_ = Aast.New (class_id, targs, exprs, expr_opt, ann) in
-      Ok (expr_, Some err)
+      Ok (expr_, err :: err_acc)
     (* TODO[mjt] can we decompose this case further? This is considering
        both the class_id and the class_get_expr *)
     | Class_get ((_, _, ci), CGstring _, _prop_or_meth)
       when not @@ is_dynamic ci ->
-      Ok (expr_, None)
+      Ok (expr_, err_acc)
     | Class_get ((_, _, ci), CGexpr (_, cg_expr_pos, _), Ast_defs.Is_method)
       when not @@ is_dynamic ci ->
       let err = Err.naming @@ Naming_error.Dynamic_method_access cg_expr_pos in
-      Ok (expr_, Some err)
+      Ok (expr_, err :: err_acc)
     | Class_get
         ( (_, _, CIexpr (_, ci_pos, _)),
           (CGstring _ | CGexpr (_, _, (Lvar _ | This))),
@@ -42,7 +42,7 @@ let on_expr (env, (ex, pos, expr_), err_acc) =
       let err =
         Err.naming @@ Naming_error.Dynamic_class_name_in_strict_mode ci_pos
       in
-      Error (Some err)
+      Error (err :: err_acc)
     | Class_get
         ((_, _, CIexpr (_, ci_pos, _)), CGexpr (_, cg_pos, _), _prop_or_meth) ->
       let err1 =
@@ -53,38 +53,25 @@ let on_expr (env, (ex, pos, expr_), err_acc) =
       let err2 =
         Err.naming @@ Naming_error.Dynamic_class_name_in_strict_mode cg_pos
       in
-      Error (Some (Err.Free_monoid.plus err1 err2))
+      Error (err1 :: err2 :: err_acc)
     | Class_get (_, Aast.CGexpr (_, cg_pos, _), _prop_or_meth) ->
       let err =
         Err.naming @@ Naming_error.Dynamic_class_name_in_strict_mode cg_pos
       in
-      Error (Some err)
+      Error (err :: err_acc)
     | Aast.(FunctionPointer (FP_class_const ((_, _, ci), _), _))
       when is_dynamic ci ->
       (* TODO[mjt] report error in strict mode *)
-      Error None
+      Error err_acc
     | Aast.Class_const ((_, _, ci), _) when is_dynamic ci ->
       (* TODO[mjt] report error in strict mode *)
-      Error None
-    | _ -> Ok (expr_, None)
+      Error err_acc
+    | _ -> Ok (expr_, err_acc)
   in
   match res with
-  | Error err_opt ->
-    let err =
-      Option.value_map
-        err_opt
-        ~default:err_acc
-        ~f:(Err.Free_monoid.plus err_acc)
-    in
-    Naming_phase_pass.Cont.finish (env, (ex, pos, Err.invalid_expr_ pos), err)
-  | Ok (expr_, err_opt) ->
-    let err =
-      Option.value_map
-        err_opt
-        ~default:err_acc
-        ~f:(Err.Free_monoid.plus err_acc)
-    in
-    Naming_phase_pass.Cont.next (env, (ex, pos, expr_), err)
+  | Error errs ->
+    Naming_phase_pass.Cont.finish (env, (ex, pos, Err.invalid_expr_ pos), errs)
+  | Ok (expr_, errs) -> Naming_phase_pass.Cont.next (env, (ex, pos, expr_), errs)
 
 let pass =
   Naming_phase_pass.(bottom_up { identity with on_expr = Some on_expr })

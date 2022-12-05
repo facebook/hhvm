@@ -6,7 +6,6 @@
  *
  *)
 open Hh_prelude
-module Err = Naming_phase_error
 
 module Cont = struct
   type 'a t =
@@ -277,8 +276,6 @@ let identity =
     on_as_expr = None;
   }
 
-let drop_env (_, elem, err) = (elem, err)
-
 (* Helper function to make visitor methods. Given a list, `ts`, of
   `('env,Naming_phase_error.t) t`s, and a function to `select` a record field
   from a `('env,Naming_phase_error.t) pass`, we filter and partition the
@@ -288,7 +285,7 @@ let drop_env (_, elem, err) = (elem, err)
 
   We then combine the transforms using the `super` function to perform our
   traversal. *)
-let mk_handler super select ts =
+let mk_handler ts ~super ~select ~on_error =
   let ts =
     List.fold_right ts ~init:[] ~f:(fun t default ->
         match t with
@@ -305,263 +302,509 @@ let mk_handler super select ts =
   | [] -> super
   | _ ->
     fun env elem ->
-      drop_env
-      @@ (Transform.combine
-            ~traverse:(fun (env, elem, err) ->
-              let (elem, err') = super env elem in
-              (env, elem, Err.Free_monoid.plus err err'))
-            ts)
-           (env, elem, Err.Free_monoid.zero)
+      let (_, elem, errs) =
+        (Transform.combine
+           ~traverse:(fun (env, elem, errs) ->
+             let elem = super env elem in
+             (env, elem, errs))
+           ts)
+          (env, elem, [])
+      in
+      List.iter ~f:on_error errs;
+      elem
 
-let mk_visitor ts =
+let mk_visitor ts ~on_error =
   object (_self)
-    inherit [_] Naming_visitors.mapreduce as super
+    inherit [_] Naming_visitors.endo as super
 
-    method! on_program = mk_handler super#on_program (fun t -> t.on_program) ts
+    method! on_program =
+      mk_handler
+        ts
+        ~super:super#on_program
+        ~select:(fun t -> t.on_program)
+        ~on_error
 
-    method! on_class_ = mk_handler super#on_class_ (fun t -> t.on_class_) ts
+    method! on_class_ =
+      mk_handler
+        ts
+        ~super:super#on_class_
+        ~select:(fun t -> t.on_class_)
+        ~on_error
 
     method! on_class_c_tparams =
-      mk_handler super#on_class_c_tparams (fun t -> t.on_class_c_tparams) ts
+      mk_handler
+        ts
+        ~super:super#on_class_c_tparams
+        ~select:(fun t -> t.on_class_c_tparams)
+        ~on_error
 
     method! on_class_c_extends =
-      mk_handler super#on_class_c_extends (fun t -> t.on_class_c_extends) ts
+      mk_handler
+        ts
+        ~super:super#on_class_c_extends
+        ~select:(fun t -> t.on_class_c_extends)
+        ~on_error
 
     method! on_class_c_uses =
-      mk_handler super#on_class_c_uses (fun t -> t.on_class_c_uses) ts
+      mk_handler
+        ts
+        ~super:super#on_class_c_uses
+        ~select:(fun t -> t.on_class_c_uses)
+        ~on_error
 
     method! on_class_c_xhp_attrs =
-      mk_handler super#on_class_c_xhp_attrs (fun t -> t.on_class_c_xhp_attrs) ts
+      mk_handler
+        ts
+        ~super:super#on_class_c_xhp_attrs
+        ~select:(fun t -> t.on_class_c_xhp_attrs)
+        ~on_error
 
     method! on_class_c_xhp_attr_uses =
       mk_handler
-        super#on_class_c_xhp_attr_uses
-        (fun t -> t.on_class_c_xhp_attr_uses)
         ts
+        ~super:super#on_class_c_xhp_attr_uses
+        ~select:(fun t -> t.on_class_c_xhp_attr_uses)
+        ~on_error
 
     method! on_class_c_req =
-      mk_handler super#on_class_c_req (fun t -> t.on_class_c_req) ts
+      mk_handler
+        ts
+        ~super:super#on_class_c_req
+        ~select:(fun t -> t.on_class_c_req)
+        ~on_error
 
     method! on_class_c_reqs =
-      mk_handler super#on_class_c_reqs (fun t -> t.on_class_c_reqs) ts
+      mk_handler
+        ts
+        ~super:super#on_class_c_reqs
+        ~select:(fun t -> t.on_class_c_reqs)
+        ~on_error
 
     method! on_class_c_implements =
       mk_handler
-        super#on_class_c_implements
-        (fun t -> t.on_class_c_implements)
         ts
+        ~super:super#on_class_c_implements
+        ~select:(fun t -> t.on_class_c_implements)
+        ~on_error
 
     method! on_class_c_where_constraints =
       mk_handler
-        super#on_class_c_where_constraints
-        (fun t -> t.on_class_c_where_constraints)
         ts
+        ~super:super#on_class_c_where_constraints
+        ~select:(fun t -> t.on_class_c_where_constraints)
+        ~on_error
 
     method! on_class_c_consts =
-      mk_handler super#on_class_c_consts (fun t -> t.on_class_c_consts) ts
+      mk_handler
+        ts
+        ~super:super#on_class_c_consts
+        ~select:(fun t -> t.on_class_c_consts)
+        ~on_error
 
     method! on_class_c_typeconsts =
       mk_handler
-        super#on_class_c_typeconsts
-        (fun t -> t.on_class_c_typeconsts)
         ts
+        ~super:super#on_class_c_typeconsts
+        ~select:(fun t -> t.on_class_c_typeconsts)
+        ~on_error
 
     method! on_class_c_vars =
-      mk_handler super#on_class_c_vars (fun t -> t.on_class_c_vars) ts
+      mk_handler
+        ts
+        ~super:super#on_class_c_vars
+        ~select:(fun t -> t.on_class_c_vars)
+        ~on_error
 
     method! on_class_c_enum =
-      mk_handler super#on_class_c_enum (fun t -> t.on_class_c_enum) ts
+      mk_handler
+        ts
+        ~super:super#on_class_c_enum
+        ~select:(fun t -> t.on_class_c_enum)
+        ~on_error
 
     method! on_class_c_methods =
-      mk_handler super#on_class_c_methods (fun t -> t.on_class_c_methods) ts
+      mk_handler
+        ts
+        ~super:super#on_class_c_methods
+        ~select:(fun t -> t.on_class_c_methods)
+        ~on_error
 
     method! on_class_c_user_attributes =
       mk_handler
-        super#on_class_c_user_attributes
-        (fun t -> t.on_class_c_user_attributes)
         ts
+        ~super:super#on_class_c_user_attributes
+        ~select:(fun t -> t.on_class_c_user_attributes)
+        ~on_error
 
     method! on_class_c_file_attributes =
       mk_handler
-        super#on_class_c_file_attributes
-        (fun t -> t.on_class_c_file_attributes)
         ts
+        ~super:super#on_class_c_file_attributes
+        ~select:(fun t -> t.on_class_c_file_attributes)
+        ~on_error
 
     method! on_class_const_kind =
-      mk_handler super#on_class_const_kind (fun t -> t.on_class_const_kind) ts
+      mk_handler
+        ts
+        ~super:super#on_class_const_kind
+        ~select:(fun t -> t.on_class_const_kind)
+        ~on_error
 
     method! on_class_var =
-      mk_handler super#on_class_var (fun t -> t.on_class_var) ts
+      mk_handler
+        ts
+        ~super:super#on_class_var
+        ~select:(fun t -> t.on_class_var)
+        ~on_error
 
     method! on_class_var_cv_user_attributes =
       mk_handler
-        super#on_class_var_cv_user_attributes
-        (fun t -> t.on_class_var_cv_user_attributes)
         ts
+        ~super:super#on_class_var_cv_user_attributes
+        ~select:(fun t -> t.on_class_var_cv_user_attributes)
+        ~on_error
 
     method! on_class_var_cv_expr =
-      mk_handler super#on_class_var_cv_expr (fun t -> t.on_class_var_cv_expr) ts
+      mk_handler
+        ts
+        ~super:super#on_class_var_cv_expr
+        ~select:(fun t -> t.on_class_var_cv_expr)
+        ~on_error
 
     method! on_class_var_cv_type =
-      mk_handler super#on_class_var_cv_type (fun t -> t.on_class_var_cv_type) ts
+      mk_handler
+        ts
+        ~super:super#on_class_var_cv_type
+        ~select:(fun t -> t.on_class_var_cv_type)
+        ~on_error
 
-    method! on_typedef = mk_handler super#on_typedef (fun t -> t.on_typedef) ts
+    method! on_typedef =
+      mk_handler
+        ts
+        ~super:super#on_typedef
+        ~select:(fun t -> t.on_typedef)
+        ~on_error
 
-    method! on_gconst = mk_handler super#on_gconst (fun t -> t.on_gconst) ts
+    method! on_gconst =
+      mk_handler
+        ts
+        ~super:super#on_gconst
+        ~select:(fun t -> t.on_gconst)
+        ~on_error
 
     method! on_gconst_cst_type =
-      mk_handler super#on_gconst_cst_type (fun t -> t.on_gconst_cst_type) ts
+      mk_handler
+        ts
+        ~super:super#on_gconst_cst_type
+        ~select:(fun t -> t.on_gconst_cst_type)
+        ~on_error
 
     method! on_gconst_cst_value =
-      mk_handler super#on_gconst_cst_value (fun t -> t.on_gconst_cst_value) ts
+      mk_handler
+        ts
+        ~super:super#on_gconst_cst_value
+        ~select:(fun t -> t.on_gconst_cst_value)
+        ~on_error
 
-    method! on_fun_def = mk_handler super#on_fun_def (fun t -> t.on_fun_def) ts
+    method! on_fun_def =
+      mk_handler
+        ts
+        ~super:super#on_fun_def
+        ~select:(fun t -> t.on_fun_def)
+        ~on_error
 
     method! on_module_def =
-      mk_handler super#on_module_def (fun t -> t.on_module_def) ts
+      mk_handler
+        ts
+        ~super:super#on_module_def
+        ~select:(fun t -> t.on_module_def)
+        ~on_error
 
-    method! on_stmt = mk_handler super#on_stmt (fun t -> t.on_stmt) ts
+    method! on_stmt =
+      mk_handler ts ~super:super#on_stmt ~select:(fun t -> t.on_stmt) ~on_error
 
-    method! on_stmt_ = mk_handler super#on_stmt_ (fun t -> t.on_stmt_) ts
+    method! on_stmt_ =
+      mk_handler
+        ts
+        ~super:super#on_stmt_
+        ~select:(fun t -> t.on_stmt_)
+        ~on_error
 
-    method! on_block = mk_handler super#on_block (fun t -> t.on_block) ts
+    method! on_block =
+      mk_handler
+        ts
+        ~super:super#on_block
+        ~select:(fun t -> t.on_block)
+        ~on_error
 
     method! on_using_stmt =
-      mk_handler super#on_using_stmt (fun t -> t.on_using_stmt) ts
+      mk_handler
+        ts
+        ~super:super#on_using_stmt
+        ~select:(fun t -> t.on_using_stmt)
+        ~on_error
 
-    method! on_hint = mk_handler super#on_hint (fun t -> t.on_hint) ts
+    method! on_hint =
+      mk_handler ts ~super:super#on_hint ~select:(fun t -> t.on_hint) ~on_error
 
-    method! on_hint_ = mk_handler super#on_hint_ (fun t -> t.on_hint_) ts
+    method! on_hint_ =
+      mk_handler
+        ts
+        ~super:super#on_hint_
+        ~select:(fun t -> t.on_hint_)
+        ~on_error
 
     method! on_hint_fun =
-      mk_handler super#on_hint_fun (fun t -> t.on_hint_fun) ts
+      mk_handler
+        ts
+        ~super:super#on_hint_fun
+        ~select:(fun t -> t.on_hint_fun)
+        ~on_error
 
     method! on_hint_fun_hf_param_tys =
       mk_handler
-        super#on_hint_fun_hf_param_tys
-        (fun t -> t.on_hint_fun_hf_param_tys)
         ts
+        ~super:super#on_hint_fun_hf_param_tys
+        ~select:(fun t -> t.on_hint_fun_hf_param_tys)
+        ~on_error
 
     method! on_hint_fun_hf_variadic_ty =
       mk_handler
-        super#on_hint_fun_hf_variadic_ty
-        (fun t -> t.on_hint_fun_hf_variadic_ty)
         ts
+        ~super:super#on_hint_fun_hf_variadic_ty
+        ~select:(fun t -> t.on_hint_fun_hf_variadic_ty)
+        ~on_error
 
     method! on_hint_fun_hf_ctxs =
-      mk_handler super#on_hint_fun_hf_ctxs (fun t -> t.on_hint_fun_hf_ctxs) ts
+      mk_handler
+        ts
+        ~super:super#on_hint_fun_hf_ctxs
+        ~select:(fun t -> t.on_hint_fun_hf_ctxs)
+        ~on_error
 
     method! on_hint_fun_hf_return_ty =
       mk_handler
-        super#on_hint_fun_hf_return_ty
-        (fun t -> t.on_hint_fun_hf_return_ty)
         ts
+        ~super:super#on_hint_fun_hf_return_ty
+        ~select:(fun t -> t.on_hint_fun_hf_return_ty)
+        ~on_error
 
     method! on_nast_shape_info =
-      mk_handler super#on_nast_shape_info (fun t -> t.on_nast_shape_info) ts
+      mk_handler
+        ts
+        ~super:super#on_nast_shape_info
+        ~select:(fun t -> t.on_nast_shape_info)
+        ~on_error
 
     method! on_shape_field_info =
-      mk_handler super#on_shape_field_info (fun t -> t.on_shape_field_info) ts
+      mk_handler
+        ts
+        ~super:super#on_shape_field_info
+        ~select:(fun t -> t.on_shape_field_info)
+        ~on_error
 
-    method! on_expr = mk_handler super#on_expr (fun t -> t.on_expr) ts
+    method! on_expr =
+      mk_handler ts ~super:super#on_expr ~select:(fun t -> t.on_expr) ~on_error
 
-    method! on_expr_ = mk_handler super#on_expr_ (fun t -> t.on_expr_) ts
+    method! on_expr_ =
+      mk_handler
+        ts
+        ~super:super#on_expr_
+        ~select:(fun t -> t.on_expr_)
+        ~on_error
 
-    method! on_fun_ = mk_handler super#on_fun_ (fun t -> t.on_fun_) ts
+    method! on_fun_ =
+      mk_handler ts ~super:super#on_fun_ ~select:(fun t -> t.on_fun_) ~on_error
 
     method! on_fun_f_ret =
-      mk_handler super#on_fun_f_ret (fun t -> t.on_fun_f_ret) ts
+      mk_handler
+        ts
+        ~super:super#on_fun_f_ret
+        ~select:(fun t -> t.on_fun_f_ret)
+        ~on_error
 
     method! on_fun_f_tparams =
-      mk_handler super#on_fun_f_tparams (fun t -> t.on_fun_f_tparams) ts
+      mk_handler
+        ts
+        ~super:super#on_fun_f_tparams
+        ~select:(fun t -> t.on_fun_f_tparams)
+        ~on_error
 
     method! on_fun_f_where_constraints =
       mk_handler
-        super#on_fun_f_where_constraints
-        (fun t -> t.on_fun_f_where_constraints)
         ts
+        ~super:super#on_fun_f_where_constraints
+        ~select:(fun t -> t.on_fun_f_where_constraints)
+        ~on_error
 
     method! on_fun_f_params =
-      mk_handler super#on_fun_f_params (fun t -> t.on_fun_f_params) ts
+      mk_handler
+        ts
+        ~super:super#on_fun_f_params
+        ~select:(fun t -> t.on_fun_f_params)
+        ~on_error
 
     method! on_fun_f_ctxs =
-      mk_handler super#on_fun_f_ctxs (fun t -> t.on_fun_f_ctxs) ts
+      mk_handler
+        ts
+        ~super:super#on_fun_f_ctxs
+        ~select:(fun t -> t.on_fun_f_ctxs)
+        ~on_error
 
     method! on_fun_f_unsafe_ctxs =
-      mk_handler super#on_fun_f_unsafe_ctxs (fun t -> t.on_fun_f_unsafe_ctxs) ts
+      mk_handler
+        ts
+        ~super:super#on_fun_f_unsafe_ctxs
+        ~select:(fun t -> t.on_fun_f_unsafe_ctxs)
+        ~on_error
 
     method! on_fun_f_body =
-      mk_handler super#on_fun_f_body (fun t -> t.on_fun_f_body) ts
+      mk_handler
+        ts
+        ~super:super#on_fun_f_body
+        ~select:(fun t -> t.on_fun_f_body)
+        ~on_error
 
     method! on_fun_f_user_attributes =
       mk_handler
-        super#on_fun_f_user_attributes
-        (fun t -> t.on_fun_f_user_attributes)
         ts
+        ~super:super#on_fun_f_user_attributes
+        ~select:(fun t -> t.on_fun_f_user_attributes)
+        ~on_error
 
-    method! on_method_ = mk_handler super#on_method_ (fun t -> t.on_method_) ts
+    method! on_method_ =
+      mk_handler
+        ts
+        ~super:super#on_method_
+        ~select:(fun t -> t.on_method_)
+        ~on_error
 
     method! on_method_m_ret =
-      mk_handler super#on_method_m_ret (fun t -> t.on_method_m_ret) ts
+      mk_handler
+        ts
+        ~super:super#on_method_m_ret
+        ~select:(fun t -> t.on_method_m_ret)
+        ~on_error
 
     method! on_method_m_tparams =
-      mk_handler super#on_method_m_tparams (fun t -> t.on_method_m_tparams) ts
+      mk_handler
+        ts
+        ~super:super#on_method_m_tparams
+        ~select:(fun t -> t.on_method_m_tparams)
+        ~on_error
 
     method! on_method_m_where_constraints =
       mk_handler
-        super#on_method_m_where_constraints
-        (fun t -> t.on_method_m_where_constraints)
         ts
+        ~super:super#on_method_m_where_constraints
+        ~select:(fun t -> t.on_method_m_where_constraints)
+        ~on_error
 
     method! on_method_m_params =
-      mk_handler super#on_method_m_params (fun t -> t.on_method_m_params) ts
+      mk_handler
+        ts
+        ~super:super#on_method_m_params
+        ~select:(fun t -> t.on_method_m_params)
+        ~on_error
 
     method! on_method_m_ctxs =
-      mk_handler super#on_method_m_ctxs (fun t -> t.on_method_m_ctxs) ts
+      mk_handler
+        ts
+        ~super:super#on_method_m_ctxs
+        ~select:(fun t -> t.on_method_m_ctxs)
+        ~on_error
 
     method! on_method_m_unsafe_ctxs =
       mk_handler
-        super#on_method_m_unsafe_ctxs
-        (fun t -> t.on_method_m_unsafe_ctxs)
         ts
+        ~super:super#on_method_m_unsafe_ctxs
+        ~select:(fun t -> t.on_method_m_unsafe_ctxs)
+        ~on_error
 
     method! on_method_m_body =
-      mk_handler super#on_method_m_body (fun t -> t.on_method_m_body) ts
+      mk_handler
+        ts
+        ~super:super#on_method_m_body
+        ~select:(fun t -> t.on_method_m_body)
+        ~on_error
 
     method! on_method_m_user_attributes =
       mk_handler
-        super#on_method_m_user_attributes
-        (fun t -> t.on_method_m_user_attributes)
         ts
+        ~super:super#on_method_m_user_attributes
+        ~select:(fun t -> t.on_method_m_user_attributes)
+        ~on_error
 
     method! on_class_id =
-      mk_handler super#on_class_id (fun t -> t.on_class_id) ts
+      mk_handler
+        ts
+        ~super:super#on_class_id
+        ~select:(fun t -> t.on_class_id)
+        ~on_error
 
     method! on_class_id_ =
-      mk_handler super#on_class_id_ (fun t -> t.on_class_id_) ts
+      mk_handler
+        ts
+        ~super:super#on_class_id_
+        ~select:(fun t -> t.on_class_id_)
+        ~on_error
 
     method! on_func_body =
-      mk_handler super#on_func_body (fun t -> t.on_func_body) ts
+      mk_handler
+        ts
+        ~super:super#on_func_body
+        ~select:(fun t -> t.on_func_body)
+        ~on_error
 
-    method! on_enum_ = mk_handler super#on_enum_ (fun t -> t.on_enum_) ts
+    method! on_enum_ =
+      mk_handler
+        ts
+        ~super:super#on_enum_
+        ~select:(fun t -> t.on_enum_)
+        ~on_error
 
-    method! on_tparam = mk_handler super#on_tparam (fun t -> t.on_tparam) ts
+    method! on_tparam =
+      mk_handler
+        ts
+        ~super:super#on_tparam
+        ~select:(fun t -> t.on_tparam)
+        ~on_error
 
     method! on_user_attributes =
-      mk_handler super#on_user_attributes (fun t -> t.on_user_attributes) ts
+      mk_handler
+        ts
+        ~super:super#on_user_attributes
+        ~select:(fun t -> t.on_user_attributes)
+        ~on_error
 
     method! on_where_constraint_hint =
       mk_handler
-        super#on_where_constraint_hint
-        (fun t -> t.on_where_constraint_hint)
         ts
+        ~super:super#on_where_constraint_hint
+        ~select:(fun t -> t.on_where_constraint_hint)
+        ~on_error
 
     method! on_contexts =
-      mk_handler super#on_contexts (fun t -> t.on_contexts) ts
+      mk_handler
+        ts
+        ~super:super#on_contexts
+        ~select:(fun t -> t.on_contexts)
+        ~on_error
 
-    method! on_context = mk_handler super#on_context (fun t -> t.on_context) ts
+    method! on_context =
+      mk_handler
+        ts
+        ~super:super#on_context
+        ~select:(fun t -> t.on_context)
+        ~on_error
 
-    method! on_targ = mk_handler super#on_targ (fun t -> t.on_targ) ts
+    method! on_targ =
+      mk_handler ts ~super:super#on_targ ~select:(fun t -> t.on_targ) ~on_error
 
-    method! on_as_expr = mk_handler super#on_as_expr (fun t -> t.on_as_expr) ts
+    method! on_as_expr =
+      mk_handler
+        ts
+        ~super:super#on_as_expr
+        ~select:(fun t -> t.on_as_expr)
+        ~on_error
   end

@@ -12,7 +12,4 @@
   It is intended for use when the `--higher-kinded-types` typechecker option
   is _not_ set,
 *)
-val pass :
-  ( Naming_phase_env.t,
-    Naming_phase_error.err Naming_phase_error.Free_monoid.t )
-  Naming_phase_pass.t
+val pass : (Naming_phase_env.t, Naming_phase_error.t list) Naming_phase_pass.t

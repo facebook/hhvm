@@ -8,41 +8,39 @@
 open Hh_prelude
 module Err = Naming_phase_error
 
-let elab_value = function
+let elab_value err_acc = function
   | (annot, pos, Aast.Id _) ->
     let err = Err.naming @@ Naming_error.Expected_variable pos in
     let ident = Local_id.make_unscoped "__internal_placeholder" in
-    ((annot, pos, Aast.Lvar (pos, ident)), Some err)
-  | expr -> (expr, None)
+    ((annot, pos, Aast.Lvar (pos, ident)), err :: err_acc)
+  | expr -> (expr, err_acc)
 
-let elab_key = function
-  | (_, _, Aast.(Lvar _ | Lplaceholder _)) as expr -> (expr, None)
+let elab_key err_acc = function
+  | (_, _, Aast.(Lvar _ | Lplaceholder _)) as expr -> (expr, err_acc)
   | (annot, pos, _) ->
     let err = Err.naming @@ Naming_error.Expected_variable pos in
     let ident = Local_id.make_unscoped "__internal_placeholder" in
-    ((annot, pos, Aast.Lvar (pos, ident)), Some err)
+    ((annot, pos, Aast.Lvar (pos, ident)), err :: err_acc)
 
 let on_as_expr (env, as_expr, err_acc) =
-  let (as_expr, err_opt) =
+  let (as_expr, err_acc) =
     match as_expr with
     | Aast.As_v e ->
-      let (e, err) = elab_value e in
-      (Aast.As_v e, err)
+      let (e, err_acc) = elab_value err_acc e in
+      (Aast.As_v e, err_acc)
     | Aast.Await_as_v (pos, e) ->
-      let (e, err) = elab_value e in
-      (Aast.Await_as_v (pos, e), err)
+      let (e, err_acc) = elab_value err_acc e in
+      (Aast.Await_as_v (pos, e), err_acc)
     | Aast.As_kv (ke, ve) ->
-      let (ke, kerr) = elab_key ke and (ve, verr) = elab_value ve in
-      (Aast.As_kv (ke, ve), Option.merge ~f:Err.Free_monoid.plus kerr verr)
+      let (ke, err_acc) = elab_key err_acc ke in
+      let (ve, err_acc) = elab_value err_acc ve in
+      (Aast.As_kv (ke, ve), err_acc)
     | Aast.Await_as_kv (pos, ke, ve) ->
-      let (ke, kerr) = elab_key ke and (ve, verr) = elab_value ve in
-      ( Aast.Await_as_kv (pos, ke, ve),
-        Option.merge ~f:Err.Free_monoid.plus kerr verr )
+      let (ke, err_acc) = elab_key err_acc ke in
+      let (ve, err_acc) = elab_value err_acc ve in
+      (Aast.Await_as_kv (pos, ke, ve), err_acc)
   in
-  let err =
-    Option.value_map err_opt ~default:err_acc ~f:(Err.Free_monoid.plus err_acc)
-  in
-  Naming_phase_pass.Cont.next (env, as_expr, err)
+  Naming_phase_pass.Cont.next (env, as_expr, err_acc)
 
 let pass =
   Naming_phase_pass.(bottom_up { identity with on_as_expr = Some on_as_expr })

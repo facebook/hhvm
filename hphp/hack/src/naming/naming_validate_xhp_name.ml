@@ -16,9 +16,7 @@ let on_hint_ (env, hint_, err) =
       when String.(
              equal ty_name "Xhp" || equal ty_name ":Xhp" || equal ty_name "XHP")
       ->
-      Err.Free_monoid.plus err
-      @@ Err.naming
-      @@ Naming_error.Disallowed_xhp_type { pos; ty_name }
+      (Err.naming @@ Naming_error.Disallowed_xhp_type { pos; ty_name }) :: err
     | _ -> err
   in
   Naming_phase_pass.Cont.next (env, hint_, err)

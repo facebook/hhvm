@@ -6,7 +6,6 @@
  *
  *)
 open Hh_prelude
-module Err = Naming_phase_error
 module SN = Naming_special_names
 
 module Env = struct
@@ -40,13 +39,14 @@ let canonical_shape_name current_class sfld =
       Ok (Ast_defs.SFclass_const ((class_pos, class_name), cst))
     | None ->
       let err =
-        Err.typing @@ Typing_error.Primary.Self_outside_class class_pos
+        Naming_phase_error.typing
+        @@ Typing_error.Primary.Self_outside_class class_pos
       in
       Error (Ast_defs.SFclass_const ((class_pos, SN.Classes.cUnknown), cst), err))
   | _ -> Ok sfld
 
 let on_expr_ (env, expr_, err_acc) =
-  let (expr_, err) =
+  let (expr_, err_acc) =
     match expr_ with
     | Aast.Shape fdl ->
       let (fdl, err_opts) =
@@ -61,12 +61,12 @@ let on_expr_ (env, expr_, err_acc) =
       in
       let err =
         List.fold_right err_opts ~init:err_acc ~f:(fun err_opt acc ->
-            Option.value_map err_opt ~default:acc ~f:(Err.Free_monoid.plus acc))
+            Option.value_map err_opt ~default:acc ~f:(fun err -> err :: acc))
       in
       (Aast.Shape fdl, err)
     | _ -> (expr_, err_acc)
   in
-  Naming_phase_pass.Cont.next (env, expr_, err)
+  Naming_phase_pass.Cont.next (env, expr_, err_acc)
 
 let on_shape_field_info (env, (Aast.{ sfi_name; _ } as sfi), err_acc) =
   match canonical_shape_name (Env.current_class env) sfi_name with
@@ -74,7 +74,7 @@ let on_shape_field_info (env, (Aast.{ sfi_name; _ } as sfi), err_acc) =
     Naming_phase_pass.Cont.next (env, Aast.{ sfi with sfi_name }, err_acc)
   | Error (sfi_name, err) ->
     Naming_phase_pass.Cont.finish
-      (env, Aast.{ sfi with sfi_name }, Err.Free_monoid.plus err_acc err)
+      (env, Aast.{ sfi with sfi_name }, err :: err_acc)
 
 let top_down_pass =
   Naming_phase_pass.(top_down { identity with on_class_ = Some on_class_ })

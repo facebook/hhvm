@@ -6,7 +6,6 @@
  *
  *)
 open Hh_prelude
-module Err = Naming_phase_error
 module SN = Naming_special_names
 
 module Env = struct
@@ -81,9 +80,10 @@ let on_context (env, hint, err_acc) =
   match hint with
   | (pos, Aast.Happly ((_, tycon_name), _))
     when String.equal tycon_name SN.Typehints.wildcard ->
-    let err = Err.naming @@ Naming_error.Invalid_wildcard_context pos in
-    Naming_phase_pass.Cont.finish
-      (env, (pos, Aast.Herr), Err.Free_monoid.plus err_acc err)
+    let err =
+      Naming_phase_error.naming @@ Naming_error.Invalid_wildcard_context pos
+    in
+    Naming_phase_pass.Cont.finish (env, (pos, Aast.Herr), err :: err_acc)
   | _ -> Naming_phase_pass.Cont.next (env, hint, err_acc)
 
 let on_hint (env, hint, err_acc) =
@@ -93,18 +93,18 @@ let on_hint (env, hint, err_acc) =
     if Env.(allow_wildcard env && tp_depth env >= 1) (* prevents 3 as _ *) then
       if not (List.is_empty hints) then
         let err =
-          Err.naming
+          Naming_phase_error.naming
           @@ Naming_error.Tparam_applied_to_type
                { pos; tparam_name = SN.Typehints.wildcard }
         in
-        Naming_phase_pass.Cont.next
-          (env, (pos, Aast.Herr), Err.Free_monoid.plus err_acc err)
+        Naming_phase_pass.Cont.next (env, (pos, Aast.Herr), err :: err_acc)
       else
         Naming_phase_pass.Cont.next (env, hint, err_acc)
     else
-      let err = Err.naming @@ Naming_error.Wildcard_hint_disallowed pos in
-      Naming_phase_pass.Cont.next
-        (env, (pos, Aast.Herr), Err.Free_monoid.plus err_acc err)
+      let err =
+        Naming_phase_error.naming @@ Naming_error.Wildcard_hint_disallowed pos
+      in
+      Naming_phase_pass.Cont.next (env, (pos, Aast.Herr), err :: err_acc)
   | _ -> Naming_phase_pass.Cont.next (env, hint, err_acc)
 
 let pass =

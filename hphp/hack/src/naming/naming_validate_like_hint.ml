@@ -6,7 +6,6 @@
  *
  *)
 open Hh_prelude
-module Err = Naming_phase_error
 
 module Env = struct
   let like_type_hints_enabled Naming_phase_env.{ like_type_hints_enabled; _ } =
@@ -32,7 +31,7 @@ let on_expr_ (env, expr_, err) =
   in
   Naming_phase_pass.Cont.next (env, expr_, err)
 
-let on_hint (env, hint, err) =
+let on_hint (env, hint, err_acc) =
   let (err, env) =
     match hint with
     | (pos, Aast.Hlike _)
@@ -40,10 +39,10 @@ let on_hint (env, hint, err) =
              (Env.allow_like env
              || Env.like_type_hints_enabled env
              || Env.everything_sdt env) ->
-      (Err.Free_monoid.plus err @@ Err.like_type pos, env)
+      (Naming_phase_error.like_type pos :: err_acc, env)
     | (_, Aast.(Hfun _ | Happly _ | Haccess _ | Habstr _ | Hvec_or_dict _)) ->
-      (err, Env.set_allow_like env ~allow_like:false)
-    | _ -> (err, env)
+      (err_acc, Env.set_allow_like env ~allow_like:false)
+    | _ -> (err_acc, env)
   in
   Naming_phase_pass.Cont.next (env, hint, err)
 

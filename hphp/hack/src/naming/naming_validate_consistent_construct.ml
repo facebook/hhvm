@@ -6,7 +6,6 @@
  *
  *)
 open Hh_prelude
-module Err = Naming_phase_error
 module SN = Naming_special_names
 
 module Env = struct
@@ -34,10 +33,10 @@ let on_class_
       | (Some pos, None)
         when Ast_defs.is_c_trait c_kind || Env.consistent_ctor_level env > 1 ->
         if Option.is_none ctor_opt then
-          Err.Free_monoid.plus err_acc
-          @@ Err.naming
+          (Naming_phase_error.naming
           @@ Naming_error.Explicit_consistent_constructor
-               { classish_kind = c_kind; pos }
+               { classish_kind = c_kind; pos })
+          :: err_acc
         else
           err_acc
       | _ -> err_acc

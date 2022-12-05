@@ -15,7 +15,4 @@
    For internal testing, we provide a global "enable" flag to just
   enable them. This is off by default except in hh_single_type_check.
 *)
-val pass :
-  ( Naming_phase_env.t,
-    Naming_phase_error.err Naming_phase_error.Free_monoid.t )
-  Naming_phase_pass.t
+val pass : (Naming_phase_env.t, Naming_phase_error.t list) Naming_phase_pass.t

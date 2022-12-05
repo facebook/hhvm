@@ -22,6 +22,13 @@ module Env = Naming_phase_env
 (*****************************************************************************)
 (* Helpers *)
 (*****************************************************************************)
+let (on_error, reset_errors, get_errors) =
+  let naming_errs = ref Naming_phase_error.empty in
+  let reset_errors () = naming_errs := Naming_phase_error.empty
+  and get_errors () = !naming_errs
+  and on_error err = naming_errs := Naming_phase_error.add !naming_errs err in
+  (on_error, reset_errors, get_errors)
+
 let elaborate_namespaces =
   new Naming_elaborate_namespaces_endo.generic_elaborator
 
@@ -81,6 +88,7 @@ let mk_env filename tcopt =
 
 let elab_core =
   Naming_phase_pass.mk_visitor
+    ~on_error
     [
       (* Canonicalization passes -------------------------------------------- *)
       (* Remove top-level file attributes, noop and markup statements *)
@@ -177,10 +185,11 @@ let elab_core =
     ]
 
 let elab_elem elem ~filename ~tcopt ~elab_ns ~elab_capture ~elab_core =
-  let elem = elab_ns elem in
-  let elem = elab_capture elem in
-  let (elem, err_monoid) = elab_core (mk_env filename tcopt) elem in
-  Naming_phase_error.emit @@ Naming_phase_error.from_monoid err_monoid;
+  reset_errors ();
+  let env = mk_env filename tcopt in
+  let elem = elab_ns elem |> elab_capture |> elab_core env in
+  Naming_phase_error.emit @@ get_errors ();
+  reset_errors ();
   elem
 
 let program_filename defs =

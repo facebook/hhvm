@@ -187,13 +187,6 @@ and reify_kind =
       },
     visitors
       {
-        variety = "mapreduce";
-        nude = true;
-        visit_prefix = "on_";
-        ancestors = ["Visitors_runtime.mapreduce_base"];
-      },
-    visitors
-      {
         variety = "map";
         nude = true;
         visit_prefix = "on_";

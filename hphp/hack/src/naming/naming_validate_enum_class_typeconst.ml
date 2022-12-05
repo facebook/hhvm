@@ -6,7 +6,6 @@
  *
  *)
 open Hh_prelude
-module Err = Naming_phase_error
 
 module Env = struct
   let allow_typeconst_in_enum_class
@@ -21,10 +20,10 @@ let on_class_ (env, (Aast.{ c_kind; c_typeconsts; c_span; _ } as c), err_acc) =
       && (not (List.is_empty c_typeconsts))
       && Ast_defs.is_c_enum_class c_kind
     then
-      Err.Free_monoid.plus err_acc
-      @@ Err.naming
+      (Naming_phase_error.naming
       @@ Naming_error.Type_constant_in_enum_class_outside_allowed_locations
-           c_span
+           c_span)
+      :: err_acc
     else
       err_acc
   in

@@ -332,14 +332,11 @@ let on_hint (env, hint, err_acc) =
   match res with
   | Ok (hint, err_opt) ->
     let err =
-      Option.value_map
-        err_opt
-        ~default:err_acc
-        ~f:(Err.Free_monoid.plus err_acc)
+      Option.value_map err_opt ~default:err_acc ~f:(fun err -> err :: err_acc)
     in
     Naming_phase_pass.Cont.next (env, hint, err)
   | Error (hint, err) ->
-    Naming_phase_pass.Cont.finish (env, hint, Err.Free_monoid.plus err_acc err)
+    Naming_phase_pass.Cont.finish (env, hint, err :: err_acc)
 
 let pass =
   Naming_phase_pass.(

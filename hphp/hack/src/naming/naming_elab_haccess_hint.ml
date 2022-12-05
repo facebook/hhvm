@@ -126,7 +126,7 @@ let on_hint (env, hint, err_acc) =
   in
   match res with
   | Error (hint, err) ->
-    let err = Err.Free_monoid.plus err_acc err in
+    let err = err :: err_acc in
     Naming_phase_pass.Cont.finish (env, hint, err)
   | Ok hint -> Naming_phase_pass.Cont.next (env, hint, err_acc)
 

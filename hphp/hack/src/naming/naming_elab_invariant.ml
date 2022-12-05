@@ -63,14 +63,11 @@ let on_stmt (env, stmt, err_acc) =
   match res with
   | Ok (stmt, err_opt) ->
     let err =
-      Option.value_map
-        err_opt
-        ~default:err_acc
-        ~f:(Err.Free_monoid.plus err_acc)
+      Option.value_map err_opt ~default:err_acc ~f:(fun err -> err :: err_acc)
     in
     Naming_phase_pass.Cont.next (env, stmt, err)
   | Error (stmt, err) ->
-    let err = Err.Free_monoid.plus err_acc err in
+    let err = err :: err_acc in
     Naming_phase_pass.Cont.finish (env, stmt, err)
 
 let pass =

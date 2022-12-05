@@ -6,7 +6,6 @@
  *
  *)
 open Hh_prelude
-module Err = Naming_phase_error
 
 module Env = struct
   let allow_retonly
@@ -42,12 +41,12 @@ let on_hint (env, hint, err_acc) =
     | (pos, Aast.(Hprim Tvoid)) when not allow_retonly ->
       Error
         ( (pos, Aast.Herr),
-          Err.naming @@ Naming_error.Return_only_typehint { pos; kind = `void }
-        )
+          Naming_phase_error.naming
+          @@ Naming_error.Return_only_typehint { pos; kind = `void } )
     | (pos, Aast.(Hprim Tnoreturn)) when not allow_retonly ->
       Error
         ( (pos, Aast.Herr),
-          Err.naming
+          Naming_phase_error.naming
           @@ Naming_error.Return_only_typehint { pos; kind = `noreturn } )
     | (_, Aast.(Happly _ | Habstr _)) ->
       let env = Env.set_allow_retonly env ~allow_retonly:true in
@@ -57,7 +56,7 @@ let on_hint (env, hint, err_acc) =
   match res with
   | Ok (env, hint) -> Naming_phase_pass.Cont.next (env, hint, err_acc)
   | Error (hint, err) ->
-    Naming_phase_pass.Cont.finish (env, hint, Err.Free_monoid.plus err_acc err)
+    Naming_phase_pass.Cont.finish (env, hint, err :: err_acc)
 
 let pass =
   Naming_phase_pass.(

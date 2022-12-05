@@ -6,7 +6,6 @@
  *
  *)
 open Hh_prelude
-module Err = Naming_phase_error
 module SN = Naming_special_names
 
 let on_expr_ (env, expr_, err_acc) =
@@ -25,7 +24,7 @@ let on_expr_ (env, expr_, err_acc) =
       *)
       err_acc
     | Aast.(Cast ((pos, _), _)) ->
-      Err.Free_monoid.plus err_acc @@ Err.naming @@ Naming_error.Object_cast pos
+      (Naming_phase_error.naming @@ Naming_error.Object_cast pos) :: err_acc
     | _ -> err_acc
   in
   Naming_phase_pass.Cont.next (env, expr_, err)

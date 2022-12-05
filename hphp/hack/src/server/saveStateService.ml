@@ -249,8 +249,8 @@ let dump_naming_errors_decls
 
   if save_decls then dump_class_decls genv env ~base_filename:output_filename
 
-(** Dumps the errors in a JSON format. An empty JSON list will be dumped if
-there are no errors.*)
+(** Sorts and dumps the error relative paths in JSON format.
+ * An empty JSON list will be dumped if there are no errors.*)
 let dump_errors_json (output_filename : string) (errors : Errors.t) : unit =
   let errors_in_phases =
     List.map
@@ -261,11 +261,12 @@ let dump_errors_json (output_filename : string) (errors : Errors.t) : unit =
   let errors_json =
     Hh_json.(
       JSON_Array
-        (Relative_path.Set.fold
-           ~init:[]
-           ~f:(fun relative_path acc ->
-             JSON_String (Relative_path.suffix relative_path) :: acc)
-           errors))
+        (List.rev
+           (Relative_path.Set.fold
+              ~init:[]
+              ~f:(fun relative_path acc ->
+                JSON_String (Relative_path.suffix relative_path) :: acc)
+              errors)))
   in
   let chan = Stdlib.open_out (get_errors_filename_json output_filename) in
   Hh_json.json_to_output chan errors_json;

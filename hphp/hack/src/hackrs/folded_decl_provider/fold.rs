@@ -844,7 +844,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
 
         let deferred_init_members = self.get_deferred_init_members(&constructor.elt);
 
-        Ok(Arc::new(FoldedClass {
+        let fc = Arc::new(FoldedClass {
             name: self.child.name.id(),
             pos: self.child.name.pos().clone(),
             kind: self.child.kind,
@@ -879,6 +879,14 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             deferred_init_members,
             decl_errors: self.errors.into_boxed_slice(),
             docs_url: self.child.docs_url.clone(),
-        }))
+        });
+
+        // Add a DepType::Type edge to every transitive ancestor.
+        // Keep in sync with Decl_folded_class.class_decl
+        for &ancestor in fc.ancestors.keys() {
+            self.dependency_registrar
+                .add_dependency(fc.name.into(), ancestor.into())?;
+        }
+        Ok(fc)
     }
 }

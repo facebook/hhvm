@@ -237,12 +237,13 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         }
     }
 
-    fn register_extends_dependency(&self, ty: &Ty<R>, sc: &ShallowClass<R>) -> Result<()> {
-        let (_, p, _) = ty.unwrap_class_type();
-        let child = sc.name.id();
-        let parent = p.id();
+    // Add a DeclType::Extends and DeclType::Type edge to each direct parent.
+    // Keep in sync with Decl_env.add_extends_dependency
+    fn add_extends_dependency(&self, parent: TypeName, child: TypeName) -> Result<()> {
         self.dependency_registrar
             .add_dependency(DeclName::Type(child), DependencyName::Extends(parent))?;
+        self.dependency_registrar
+            .add_dependency(DeclName::Type(child), DependencyName::Type(parent))?;
         Ok(())
     }
 
@@ -269,12 +270,21 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         errors: &mut Vec<DeclError<R::Pos>>,
         sc: &ShallowClass<R>,
     ) -> Result<IndexMap<TypeName, Arc<FoldedClass<R>>>> {
+        use pos::Pos;
         Self::parents_to_fold(sc)
             .chain(DeclFolder::stringish_object_parent(sc).iter())
             .map(|ty| {
-                self.register_extends_dependency(ty, sc)?;
-                self.decl_class_type(stack, errors, ty)
-                    .map_err(|err| Self::parent_error(sc, ty, err))
+                let folded = self
+                    .decl_class_type(stack, errors, ty)
+                    .map_err(|err| Self::parent_error(sc, ty, err))?;
+                if let Some((parent, folded)) = &folded {
+                    // If this class is not an Hhi decl, add dependency edges on parents.
+                    // Keep in sync with Decl_env.get_class_and_add_dep.
+                    if !folded.pos.is_hhi() {
+                        self.add_extends_dependency(*parent, sc.name.id())?;
+                    }
+                }
+                Ok(folded)
             })
             .filter_map(Result::transpose)
             .collect()

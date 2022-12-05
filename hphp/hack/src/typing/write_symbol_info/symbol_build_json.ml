@@ -347,6 +347,7 @@ let build_xrefs_json (fact_map : XRefs.fact_map) =
     Fact_id.Map.fold
       (fun _id (target_json, pos_list) acc ->
         let sorted_pos = Caml.List.sort_uniq Pos.compare pos_list in
+        let first_pos = List.hd sorted_pos |> Option.value ~default:Pos.none in
         let (rev_byte_spans, _) =
           List.fold sorted_pos ~init:([], 0) ~f:(fun (spans, last_start) pos ->
               let start = fst (Pos.info_raw pos) in
@@ -359,11 +360,14 @@ let build_xrefs_json (fact_map : XRefs.fact_map) =
           JSON_Object
             [("target", target_json); ("ranges", JSON_Array byte_spans)]
         in
-        xref :: acc)
+        (first_pos, xref) :: acc)
       fact_map
       []
   in
-  JSON_Array xrefs
+  let sorted_xrefs =
+    List.sort ~compare:(fun (p, _) (p', _) -> Pos.compare p p') xrefs
+  in
+  JSON_Array (sorted_xrefs |> List.map ~f:snd)
 
 (* TODO refactor to avoid duplication *)
 let build_hint_xrefs_json sym_pos =

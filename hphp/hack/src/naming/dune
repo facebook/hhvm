@@ -133,6 +133,7 @@
   naming_elab_block
   naming_elab_call
   naming_elab_class_id
+  naming_elab_class_members
   naming_elab_collection
   naming_elab_const_expr
   naming_elab_dynamic_class_name

@@ -18,100 +18,6 @@ open Hh_prelude
 open Common
 open String_utils
 open Naming_phase_sigs
-module N = Aast
-module SN = Naming_special_names
-
-(*****************************************************************************)
-(* The types *)
-(*****************************************************************************)
-
-type genv = {
-  (* strict? decl?  *)
-  in_mode: FileInfo.mode;
-  (* various options that control the strictness of the typechecker *)
-  ctx: Provider_context.t;
-  (* Namespace environment, e.g., what namespace we're in and what use
-   * declarations are in play. *)
-  namespace: Namespace_env.env;
-}
-
-(* The primitives to manipulate the naming environment *)
-module Env : sig
-  val make_class_env : Provider_context.t -> Nast.class_ -> genv
-
-  val make_typedef_env : Provider_context.t -> Nast.typedef -> genv
-
-  val make_top_level_env : Provider_context.t -> genv
-
-  val make_fun_decl_genv : Provider_context.t -> Nast.fun_def -> genv
-
-  val make_const_env : Provider_context.t -> Nast.gconst -> genv
-
-  val make_module_env : Provider_context.t -> Nast.module_def -> genv
-end = struct
-  let make_class_genv ctx _ mode _ namespace _ =
-    { in_mode = mode; ctx; namespace }
-
-  let make_class_env ctx c =
-    let genv =
-      make_class_genv
-        ctx
-        c.Aast.c_tparams
-        c.Aast.c_mode
-        (c.Aast.c_name, c.Aast.c_kind)
-        c.Aast.c_namespace
-        c.Aast.c_final
-    in
-    genv
-
-  let make_typedef_genv ctx _ tdef_namespace =
-    { in_mode = FileInfo.Mstrict; ctx; namespace = tdef_namespace }
-
-  let make_typedef_env ctx tdef =
-    let genv =
-      make_typedef_genv ctx tdef.Aast.t_tparams tdef.Aast.t_namespace
-    in
-    genv
-
-  let make_fun_genv ctx _ f_mode f_namespace =
-    { in_mode = f_mode; ctx; namespace = f_namespace }
-
-  let make_fun_decl_genv ctx f =
-    make_fun_genv
-      ctx
-      f.Aast.fd_fun.Aast.f_tparams
-      f.Aast.fd_mode
-      f.Aast.fd_namespace
-
-  let make_const_genv ctx cst =
-    { in_mode = cst.Aast.cst_mode; ctx; namespace = cst.Aast.cst_namespace }
-
-  let make_top_level_genv ctx =
-    {
-      in_mode = FileInfo.Mstrict;
-      ctx;
-      namespace = Namespace_env.empty_with_default;
-    }
-
-  let make_top_level_env ctx =
-    let genv = make_top_level_genv ctx in
-    genv
-
-  let make_const_env ctx cst =
-    let genv = make_const_genv ctx cst in
-    genv
-
-  let make_module_genv ctx _module =
-    {
-      in_mode = FileInfo.Mstrict;
-      ctx;
-      namespace = Namespace_env.empty_with_default;
-    }
-
-  let make_module_env ctx module_ =
-    let genv = make_module_genv ctx module_ in
-    genv
-end
 
 (*****************************************************************************)
 (* Helpers *)
@@ -119,262 +25,31 @@ end
 let elaborate_namespaces =
   new Naming_elaborate_namespaces_endo.generic_elaborator
 
-let invalid_expr_ (p : Pos.t) : Nast.expr_ =
-  let throw : Nast.stmt =
-    ( p,
-      Aast.Throw
-        ( (),
-          p,
-          Aast.New
-            ( ((), p, Aast.CI (p, "\\Exception")),
-              [],
-              [((), p, Aast.String "invalid expression")],
-              None,
-              () ) ) )
-  in
-  Aast.Call
-    ( ( (),
-        p,
-        Aast.Lfun
-          ( {
-              Aast.f_span = p;
-              f_readonly_this = None;
-              f_annotation = ();
-              f_readonly_ret = None;
-              f_ret = ((), None);
-              f_name = (p, "invalid_expr");
-              f_tparams = [];
-              f_where_constraints = [];
-              f_params = [];
-              f_ctxs = None;
-              f_unsafe_ctxs = None;
-              f_body = { Aast.fb_ast = [throw] };
-              f_fun_kind = Ast_defs.FSync;
-              f_user_attributes = [];
-              f_external = false;
-              f_doc_comment = None;
-            },
-            [] ) ),
-      [],
-      [],
-      None )
-
-let ignored_expr_ p : Nast.expr_ = invalid_expr_ p
-
-(**************************************************************************)
-(* All the methods and static methods of an interface are "implicitly"
- * declared as abstract
- *)
-(**************************************************************************)
-
-let add_abstract m = { m with N.m_abstract = true }
-
-let add_abstractl methods = List.map methods ~f:add_abstract
-
-let interface c constructor methods smethods =
-  if not (Ast_defs.is_c_interface c.Aast.c_kind) then
-    (constructor, methods, smethods)
-  else
-    let constructor = Option.map constructor ~f:add_abstract in
-    let methods = add_abstractl methods in
-    let smethods = add_abstractl smethods in
-    (constructor, methods, smethods)
-
-let make_xhp_attr = function
-  | true -> Some { N.xai_like = None; N.xai_tag = None; N.xai_enum_values = [] }
-  | false -> None
-
-(**************************************************************************)
-(* Classes *)
-(**************************************************************************)
-
-let class_prop_expr_is_xhp env cv =
-  let expr = cv.Aast.cv_expr in
-  let expr =
-    if FileInfo.is_hhi env.in_mode && Option.is_none expr then
-      let pos = fst cv.Aast.cv_id in
-      Some ((), pos, ignored_expr_ (fst cv.Aast.cv_id))
-    else
-      expr
-  in
-  let is_xhp =
-    try String.(sub (snd cv.Aast.cv_id) ~pos:0 ~len:1 = ":") with
-    | Invalid_argument _ -> false
-  in
-  (expr, is_xhp)
-
-let class_prop_static env cv =
-  let (cv_expr, is_xhp) = class_prop_expr_is_xhp env cv in
-  let cv_xhp_attr = make_xhp_attr is_xhp in
-  Aast.{ cv with cv_xhp_attr; cv_expr }
-
-let class_prop_non_static env ?(const = None) cv =
-  (* if class is __Const, make all member fields __Const *)
-  let cv_user_attributes =
-    let attrs = cv.Aast.cv_user_attributes in
-    match const with
-    | Some c ->
-      if not (Naming_attributes.mem SN.UserAttributes.uaConst attrs) then
-        c :: attrs
-      else
-        attrs
-    | None -> attrs
-  in
-  let (cv_expr, is_xhp) = class_prop_expr_is_xhp env cv in
-  let cv_xhp_attr = make_xhp_attr is_xhp in
-  Aast.{ cv with cv_xhp_attr; cv_expr; cv_user_attributes }
-
-(* h cv is_required maybe_enum *)
-let xhp_attribute_decl env (h, cv, tag, maybe_enum) =
-  let (p, id) = cv.Aast.cv_id in
-  let default = cv.Aast.cv_expr in
-  let is_required = Option.is_some tag in
-  if is_required && Option.is_some default then
-    Errors.add_naming_error
-    @@ Naming_error.Xhp_required_with_default { pos = p; attr_name = id };
-  let hint_ =
-    match maybe_enum with
-    | Some (pos, items) ->
-      let is_int item =
-        match item with
-        | (_, _, Aast.Int _) -> true
-        | _ -> false
-      in
-      let contains_int = List.exists ~f:is_int items in
-      let is_string item =
-        match item with
-        | (_, _, Aast.String _)
-        | (_, _, Aast.String2 _) ->
-          true
-        | _ -> false
-      in
-      let contains_str = List.exists ~f:is_string items in
-      if contains_int && not contains_str then
-        Some (pos, Aast.(Hprim Tint))
-      else if (not contains_int) && contains_str then
-        Some (pos, Aast.(Hprim Tstring))
-      else
-        Some (pos, Aast.Hmixed)
-    | _ -> Aast.hint_of_type_hint h
-  in
-  let strip_like h =
-    match h with
-    | Aast.Hlike h -> snd h
-    | _ -> h
-  in
-  let hint_ =
-    match hint_ with
-    | Some (p, h) ->
-      begin
-        match strip_like h with
-        | Aast.Hoption _ ->
-          if is_required then
-            Errors.add_naming_error
-            @@ Naming_error.Xhp_optional_required_attr
-                 { pos = p; attr_name = id };
-          hint_
-        | Aast.Hmixed -> hint_
-        | _ ->
-          let has_default =
-            match default with
-            | None
-            | Some (_, _, Aast.Null) ->
-              false
-            | _ -> true
-          in
-          if is_required || has_default then
-            hint_
-          else
-            Some (p, Aast.Hoption (p, h))
-      end
-    | None -> None
-  in
-  let (like, enum_values) =
-    match cv.Aast.cv_xhp_attr with
-    | Some xai -> (xai.Aast.xai_like, xai.Aast.xai_enum_values)
-    | None -> (None, [])
-  in
-  let hint_ =
-    Option.map
-      ~f:(fun hint ->
-        match like with
-        | Some plike ->
-          if
-            not
-              (TypecheckerOptions.like_type_hints
-                 (Provider_context.get_tcopt env.ctx))
-          then
-            Errors.experimental_feature p "like-types";
-
-          (plike, Aast.Hlike hint)
-        | _ -> hint)
-      hint_
-  in
-  let cv_type = ((), hint_) in
-  let (cv_expr, _) = class_prop_expr_is_xhp env cv in
-  let cv_xhp_attr =
-    Some { N.xai_like = like; N.xai_tag = tag; N.xai_enum_values = enum_values }
-  in
-  Aast.{ cv with cv_xhp_attr; cv_type; cv_expr; cv_user_attributes = [] }
-
-let class_help _ env c =
-  let (sprops, props) = Aast.split_vars c.Aast.c_vars in
-  let sprops = List.map ~f:(class_prop_static env) sprops in
-  let const =
-    Naming_attributes.find SN.UserAttributes.uaConst c.Aast.c_user_attributes
-  in
-  let props = List.map ~f:(class_prop_non_static ~const env) props in
-  let xhp_attrs = List.map ~f:(xhp_attribute_decl env) c.Aast.c_xhp_attrs in
-  (* These would be out of order with the old attributes, but that shouldn't matter? *)
-  let c_vars = sprops @ props @ xhp_attrs in
-
-  let (constructor, smethods, methods) = Aast.split_methods c.Aast.c_methods in
-  let (constructor, methods, smethods) =
-    interface c constructor methods smethods
-  in
-  let c_methods =
-    match constructor with
-    | None -> smethods @ methods
-    | Some c -> c :: smethods @ methods
-  in
-  Aast.
-    {
-      c with
-      c_vars;
-      c_methods;
-      (* Naming and typechecking shouldn't use these fields *)
-      c_xhp_attrs = [];
-    }
+let invalid_expr_ = Naming_phase_error.invalid_expr_
 
 (**************************************************************************)
 (* Programs *)
 (**************************************************************************)
 
-let program_help ctx env ast =
-  let top_level_env = ref env in
+let program_help ast =
   let rec aux acc def =
     match def with
-    | Aast.Fun f -> N.Fun f :: acc
-    | Aast.Class c ->
-      let env = Env.make_class_env ctx c in
-      N.Class (class_help ctx env c) :: acc
-    | Aast.Stmt (_, Aast.Noop)
-    | Aast.Stmt (_, Aast.Markup _) ->
-      acc
-    | Aast.Stmt s -> Aast.Stmt s :: acc
-    | Aast.Typedef t -> N.Typedef t :: acc
-    | Aast.Constant cst -> N.Constant cst :: acc
-    | Aast.Namespace (_ns, aast) -> List.fold_left ~f:aux ~init:[] aast @ acc
-    | Aast.NamespaceUse _ -> acc
-    | Aast.SetNamespaceEnv nsenv ->
-      let genv = !top_level_env in
-      let genv = { genv with namespace = nsenv } in
-      top_level_env := genv;
-      acc
-    | Aast.Module md -> N.Module md :: acc
-    | Aast.SetModule sm -> N.SetModule sm :: acc
     (* These are elaborated away in Namespaces.elaborate_toplevel_defs *)
-    | Aast.FileAttributes _ -> acc
+    | Aast.FileAttributes _
+    | Aast.Stmt (_, Aast.Noop)
+    | Aast.Stmt (_, Aast.Markup _)
+    | Aast.NamespaceUse _
+    | Aast.SetNamespaceEnv _ ->
+      acc
+    | Aast.Stmt _
+    | Aast.Fun _
+    | Aast.Class _
+    | Aast.Typedef _
+    | Aast.Constant _
+    | Aast.Module _
+    | Aast.SetModule _ ->
+      def :: acc
+    | Aast.Namespace (_ns, aast) -> List.fold_left ~f:aux ~init:[] aast @ acc
   in
   let on_program aast =
     let nast = List.fold_left ~f:aux ~init:[] aast in
@@ -402,7 +77,8 @@ type 'elem pipeline = {
   elab_pipe: (Naming_elab_pipe.Env.t, 'elem) elaboration;
   elab_func_body: (Naming_elab_func_body.Env.t, 'elem) elaboration;
   elab_lambda_captures: (Naming_captures.Env.t, 'elem) elaboration;
-  elab_help: Provider_context.t -> genv -> 'elem -> 'elem;
+  elab_class_members: (Naming_elab_class_members.Env.t, 'elem) elabidation;
+  elab_help: 'elem -> 'elem;
   elab_soft: (Naming_elab_soft.Env.t, 'elem) elaboration;
   elab_everything_sdt: (Naming_elab_everything_sdt.Env.t, 'elem) elaboration;
   elab_hkt: (Naming_elab_hkt.Env.t, 'elem) elabidation;
@@ -426,7 +102,6 @@ type 'elem pipeline = {
 let elab_elem
     elem
     ~ctx
-    ~env
     ~filename
     {
       elab_ns;
@@ -444,6 +119,7 @@ let elab_elem
       elab_pipe;
       elab_func_body;
       elab_lambda_captures;
+      elab_class_members;
       elab_help;
       elab_soft;
       elab_everything_sdt;
@@ -466,14 +142,7 @@ let elab_elem
 
   (* Elaborate hints, collect errors and report them *)
   let (elem, err) = elab_hints elem in
-  (* We have to check if like-types are globally enabled and remove errors
-     before reporting if so *)
-  let err =
-    if TypecheckerOptions.like_type_hints tcopt then
-      Naming_phase_error.suppress_like_type_errors err
-    else
-      err
-  in
+
   (* Check for invalid use of internal classes - note that we must have this
      validation pass _before_ we elaborate enum classes *)
   let err =
@@ -540,8 +209,10 @@ let elab_elem
       err
   in
 
+  let (elem, err) = elab_class_members ~init:err elem in
+
   (* General expression / statement / xhp elaboration & validation *)
-  let elem = elab_help ctx env elem in
+  let elem = elab_help elem in
 
   (* Miscellaneous validation  *)
   (* TODO[mjt] move these to NAST checks*)
@@ -641,6 +312,14 @@ let elab_elem
       validate_module ~init:err elem
   in
 
+  (* We have to check if like-types are globally enabled and remove errors
+     before reporting if so *)
+  let err =
+    if TypecheckerOptions.like_type_hints tcopt then
+      Naming_phase_error.suppress_like_type_errors err
+    else
+      err
+  in
   Naming_phase_error.emit err;
   elem
 
@@ -659,12 +338,10 @@ let program_filename defs =
   aux defs
 
 let program ctx ast =
-  let env = Env.make_top_level_env ctx in
   let filename = program_filename ast in
   elab_elem
     ast
     ~ctx
-    ~env
     ~filename
     {
       elab_ns =
@@ -685,6 +362,7 @@ let program ctx ast =
       elab_pipe = Naming_elab_pipe.elab_program;
       elab_func_body = Naming_elab_func_body.elab_program;
       elab_lambda_captures = Naming_captures.elab_program;
+      elab_class_members = Naming_elab_class_members.elab_program;
       elab_help = program_help;
       elab_soft = Naming_elab_soft.elab_program;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_program;
@@ -705,17 +383,15 @@ let program ctx ast =
     }
 
 let fun_def ctx fd =
-  let env = Env.make_fun_decl_genv ctx fd in
   let filename = Pos.filename fd.Aast.fd_fun.Aast.f_span in
   elab_elem
     fd
     ~ctx
-    ~env
     ~filename
     {
       elab_ns =
         elaborate_namespaces#on_fun_def
-          (Naming_elaborate_namespaces_endo.make_env env.namespace);
+          (Naming_elaborate_namespaces_endo.make_env fd.Aast.fd_namespace);
       elab_hints = Naming_elab_hints.elab_fun_def;
       elab_collection = Naming_elab_collection.elab_fun_def;
       elab_call = Naming_elab_call.elab_fun_def;
@@ -730,7 +406,8 @@ let fun_def ctx fd =
       elab_pipe = Naming_elab_pipe.elab_fun_def;
       elab_func_body = Naming_elab_func_body.elab_fun_def;
       elab_lambda_captures = Naming_captures.elab_fun_def;
-      elab_help = (fun _ _ elem -> elem);
+      elab_class_members = Naming_elab_class_members.elab_fun_def;
+      elab_help = (fun elem -> elem);
       elab_soft = Naming_elab_soft.elab_fun_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_fun_def;
       elab_hkt = Naming_elab_hkt.elab_fun_def;
@@ -750,17 +427,15 @@ let fun_def ctx fd =
     }
 
 let class_ ctx c =
-  let env = Env.make_class_env ctx c in
   let filename = Pos.filename c.Aast.c_span in
   elab_elem
     c
     ~ctx
-    ~env
     ~filename
     {
       elab_ns =
         elaborate_namespaces#on_class_
-          (Naming_elaborate_namespaces_endo.make_env env.namespace);
+          (Naming_elaborate_namespaces_endo.make_env c.Aast.c_namespace);
       elab_hints = Naming_elab_hints.elab_class;
       elab_collection = Naming_elab_collection.elab_class;
       elab_call = Naming_elab_call.elab_class;
@@ -775,7 +450,8 @@ let class_ ctx c =
       elab_pipe = Naming_elab_pipe.elab_class;
       elab_func_body = Naming_elab_func_body.elab_class;
       elab_lambda_captures = Naming_captures.elab_class;
-      elab_help = class_help;
+      elab_class_members = Naming_elab_class_members.elab_class;
+      elab_help = (fun elem -> elem);
       elab_soft = Naming_elab_soft.elab_class;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_class;
       elab_hkt = Naming_elab_hkt.elab_class;
@@ -795,17 +471,16 @@ let class_ ctx c =
     }
 
 let module_ ctx module_ =
-  let env = Env.make_module_env ctx module_ in
   let filename = Pos.filename module_.Aast.md_span in
   elab_elem
     module_
     ~ctx
-    ~env
     ~filename
     {
       elab_ns =
         elaborate_namespaces#on_module_def
-          (Naming_elaborate_namespaces_endo.make_env env.namespace);
+          (Naming_elaborate_namespaces_endo.make_env
+             Namespace_env.empty_with_default);
       elab_hints = Naming_elab_hints.elab_module_def;
       elab_collection = Naming_elab_collection.elab_module_def;
       elab_call = Naming_elab_call.elab_module_def;
@@ -820,7 +495,8 @@ let module_ ctx module_ =
       elab_pipe = Naming_elab_pipe.elab_module_def;
       elab_func_body = Naming_elab_func_body.elab_module_def;
       elab_lambda_captures = Naming_captures.elab_module_def;
-      elab_help = (fun _ _ elem -> elem);
+      elab_class_members = Naming_elab_class_members.elab_module_def;
+      elab_help = (fun elem -> elem);
       elab_soft = Naming_elab_soft.elab_module_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_module_def;
       elab_hkt = Naming_elab_hkt.elab_module_def;
@@ -840,17 +516,15 @@ let module_ ctx module_ =
     }
 
 let global_const ctx cst =
-  let env = Env.make_const_env ctx cst in
   let filename = Pos.filename cst.Aast.cst_span in
   elab_elem
     cst
     ~ctx
-    ~env
     ~filename
     {
       elab_ns =
         elaborate_namespaces#on_gconst
-          (Naming_elaborate_namespaces_endo.make_env env.namespace);
+          (Naming_elaborate_namespaces_endo.make_env cst.Aast.cst_namespace);
       elab_hints = Naming_elab_hints.elab_gconst;
       elab_collection = Naming_elab_collection.elab_gconst;
       elab_call = Naming_elab_call.elab_gconst;
@@ -865,7 +539,8 @@ let global_const ctx cst =
       elab_pipe = Naming_elab_pipe.elab_gconst;
       elab_func_body = Naming_elab_func_body.elab_gconst;
       elab_lambda_captures = Naming_captures.elab_gconst;
-      elab_help = (fun _ _ elem -> elem);
+      elab_class_members = Naming_elab_class_members.elab_gconst;
+      elab_help = (fun elem -> elem);
       elab_soft = Naming_elab_soft.elab_gconst;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_gconst;
       elab_hkt = Naming_elab_hkt.elab_gconst;
@@ -885,17 +560,15 @@ let global_const ctx cst =
     }
 
 let typedef ctx tdef =
-  let env = Env.make_typedef_env ctx tdef in
   let filename = Pos.filename @@ tdef.Aast.t_span in
   elab_elem
     tdef
     ~ctx
-    ~env
     ~filename
     {
       elab_ns =
         elaborate_namespaces#on_typedef
-          (Naming_elaborate_namespaces_endo.make_env env.namespace);
+          (Naming_elaborate_namespaces_endo.make_env tdef.Aast.t_namespace);
       elab_hints = Naming_elab_hints.elab_typedef;
       elab_collection = Naming_elab_collection.elab_typedef;
       elab_call = Naming_elab_call.elab_typedef;
@@ -910,7 +583,8 @@ let typedef ctx tdef =
       elab_pipe = Naming_elab_pipe.elab_typedef;
       elab_func_body = Naming_elab_func_body.elab_typedef;
       elab_lambda_captures = Naming_captures.elab_typedef;
-      elab_help = (fun _ _ elem -> elem);
+      elab_class_members = Naming_elab_class_members.elab_typedef;
+      elab_help = (fun elem -> elem);
       elab_soft = Naming_elab_soft.elab_typedef;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_typedef;
       elab_hkt = Naming_elab_hkt.elab_typedef;

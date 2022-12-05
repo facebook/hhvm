@@ -46,12 +46,12 @@ impl NamingTable {
         let consts_shm = Arc::new(OcamlShmStore::new(
             "Naming_ConstPos",
             shm_store::Evictability::NonEvictable,
-            Default::default(),
+            shm_store::Compression::None,
         ));
         let modules_shm = Arc::new(OcamlShmStore::new(
             "Naming_ModulePos",
             shm_store::Evictability::NonEvictable,
-            Default::default(),
+            shm_store::Compression::None,
         ));
         Ok(Self {
             types: ReverseNamingTable::new(
@@ -490,7 +490,7 @@ mod reverse_naming_table {
             let positions_shm = Arc::new(OcamlShmStore::new(
                 pos_prefix,
                 shm_store::Evictability::NonEvictable,
-                Default::default(),
+                shm_store::Compression::None,
             ));
             Self {
                 positions: ChangesStore::new(Arc::new(DeltaStore::new(

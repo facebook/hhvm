@@ -401,10 +401,7 @@ and expr_ env p (e : Nast.expr_) =
     N.Binop (bop, expr env e1, expr env e2)
   | Aast.Binop (bop, e1, e2) -> N.Binop (bop, expr env e1, expr env e2)
   | Aast.Pipe (dollardollar, e1, e2) ->
-    N.Pipe
-      ( (fst dollardollar, Local_id.make_unscoped SN.SpecialIdents.dollardollar),
-        expr env e1,
-        expr env e2 )
+    N.Pipe (dollardollar, expr env e1, expr env e2)
   | Aast.Eif (e1, e2opt, e3) ->
     (* The order matters here, of course -- e1 can define vars that need to
      * be available in e2 and e3. *)
@@ -1046,6 +1043,7 @@ type 'elem pipeline = {
   elab_lvar: (Naming_elab_lvar.Env.t, 'elem) elaboration;
   elab_as_expr: (Naming_elab_as_expr.Env.t, 'elem) elabidation;
   elab_block: (Naming_elab_block.Env.t, 'elem) elaboration;
+  elab_pipe: (Naming_elab_pipe.Env.t, 'elem) elaboration;
   elab_help: Provider_context.t -> genv -> 'elem -> 'elem;
   elab_soft: (Naming_elab_soft.Env.t, 'elem) elaboration;
   elab_everything_sdt: (Naming_elab_everything_sdt.Env.t, 'elem) elaboration;
@@ -1081,6 +1079,7 @@ let elab_elem
       elab_lvar;
       elab_as_expr;
       elab_block;
+      elab_pipe;
       elab_help;
       elab_soft;
       elab_everything_sdt;
@@ -1156,6 +1155,8 @@ let elab_elem
   let err = validate_fun_params ~init:err elem in
 
   let elem = elab_block elem in
+
+  let elem = elab_pipe elem in
 
   (* General expression / statement / xhp elaboration & validation *)
   let elem = elab_help ctx env elem in
@@ -1273,6 +1274,7 @@ let program ctx ast =
       elab_lvar = Naming_elab_lvar.elab_program;
       elab_as_expr = Naming_elab_as_expr.elab_program;
       elab_block = Naming_elab_block.elab_program;
+      elab_pipe = Naming_elab_pipe.elab_program;
       elab_help = program_help;
       elab_soft = Naming_elab_soft.elab_program;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_program;
@@ -1311,6 +1313,7 @@ let fun_def ctx fd =
       elab_lvar = Naming_elab_lvar.elab_fun_def;
       elab_as_expr = Naming_elab_as_expr.elab_fun_def;
       elab_block = Naming_elab_block.elab_fun_def;
+      elab_pipe = Naming_elab_pipe.elab_fun_def;
       elab_help = fun_def_help;
       elab_soft = Naming_elab_soft.elab_fun_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_fun_def;
@@ -1349,6 +1352,7 @@ let class_ ctx c =
       elab_lvar = Naming_elab_lvar.elab_class;
       elab_as_expr = Naming_elab_as_expr.elab_class;
       elab_block = Naming_elab_block.elab_class;
+      elab_pipe = Naming_elab_pipe.elab_class;
       elab_help = class_help;
       elab_soft = Naming_elab_soft.elab_class;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_class;
@@ -1387,6 +1391,7 @@ let module_ ctx module_ =
       elab_lvar = Naming_elab_lvar.elab_module_def;
       elab_as_expr = Naming_elab_as_expr.elab_module_def;
       elab_block = Naming_elab_block.elab_module_def;
+      elab_pipe = Naming_elab_pipe.elab_module_def;
       elab_help = module_help;
       elab_soft = Naming_elab_soft.elab_module_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_module_def;
@@ -1425,6 +1430,7 @@ let global_const ctx cst =
       elab_lvar = Naming_elab_lvar.elab_gconst;
       elab_as_expr = Naming_elab_as_expr.elab_gconst;
       elab_block = Naming_elab_block.elab_gconst;
+      elab_pipe = Naming_elab_pipe.elab_gconst;
       elab_help = global_const_help;
       elab_soft = Naming_elab_soft.elab_gconst;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_gconst;
@@ -1463,6 +1469,7 @@ let typedef ctx tdef =
       elab_lvar = Naming_elab_lvar.elab_typedef;
       elab_as_expr = Naming_elab_as_expr.elab_typedef;
       elab_block = Naming_elab_block.elab_typedef;
+      elab_pipe = Naming_elab_pipe.elab_typedef;
       elab_help = typedef_help;
       elab_soft = Naming_elab_soft.elab_typedef;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_typedef;

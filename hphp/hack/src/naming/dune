@@ -143,6 +143,7 @@
   naming_elab_import
   naming_elab_invariant
   naming_elab_lvar
+  naming_elab_pipe
   naming_elab_soft
   naming_elab_tuple
   naming_elab_user_attributes

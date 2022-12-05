@@ -1437,46 +1437,6 @@ let xhp_attribute_decl env (h, cv, tag, maybe_enum) =
   in
   Aast.{ cv with cv_xhp_attr; cv_type; cv_expr; cv_user_attributes = [] }
 
-let typeconsts ctx env c =
-  let open Aast in
-  (* Normal move, just run the algorithm on the declared type constants *)
-  let default () = List.map ~f:(typeconst env) c.c_typeconsts in
-  if
-    Ast_defs.is_c_enum_class c.Aast.c_kind && not (List.is_empty c.c_typeconsts)
-  then
-    (* However, we're still in the middle of developping type constants
-     * for enum classes, so we gate them carefully for now:
-     * They must use the feature flag `type_constants_in_enum_class` AND
-     * be in a selected list of directories.
-     * For internal testing, we provide a global "enable" flag to just
-     * enable them. This is off by default except in hh_single_type_check.
-     * *)
-    let tcopts = Provider_context.get_tcopt ctx in
-    let allowed_locations =
-      TypecheckerOptions.allowed_locations_for_type_constant_in_enum_class
-        tcopts
-    in
-    let allow_all_locations =
-      TypecheckerOptions.allow_all_locations_for_type_constant_in_enum_class
-        tcopts
-    in
-    let class_file = Relative_path.suffix @@ Pos.filename c.c_span in
-    let class_dir = Filename.dirname class_file in
-    if
-      (not allow_all_locations)
-      && not
-           (List.exists allowed_locations ~f:(fun allowed_dir ->
-                String.equal allowed_dir class_dir))
-    then (
-      Errors.add_naming_error
-      @@ Naming_error.Type_constant_in_enum_class_outside_allowed_locations
-           c.c_span;
-      []
-    ) else
-      default ()
-  else
-    default ()
-
 let class_help ctx env c =
   let c = Naming_captures.populate_class_ c in
   let (constructor, smethods, methods) = Aast.split_methods c.Aast.c_methods in
@@ -1563,7 +1523,7 @@ let class_help ctx env c =
    *)
   let c_tparams = type_paraml env c.Aast.c_tparams in
   let consts = List.map ~f:(class_const env ~in_enum_class) c.Aast.c_consts in
-  let typeconsts = typeconsts ctx env c in
+  let typeconsts = List.map ~f:(typeconst env) c.Aast.c_typeconsts in
   let implements = c.Aast.c_implements in
   let constructor = Option.map constructor ~f:(method_ env) in
   let (constructor, methods, smethods) =
@@ -1738,6 +1698,11 @@ type 'elem pipeline = {
     ?env:Naming_validate_builtin_enum.Env.t ->
     'elem ->
     Naming_phase_error.t;
+  validate_enum_class_typeconst:
+    ?init:Naming_phase_error.t ->
+    ?env:Naming_validate_enum_class_typeconst.Env.t ->
+    'elem ->
+    Naming_phase_error.t;
   validate_supportdyn:
     ?init:Naming_phase_error.t ->
     ?env:Naming_validate_supportdyn.Env.t ->
@@ -1762,6 +1727,7 @@ let elab_elem
       elab_class_id;
       validate_xhp;
       validate_builtin_enum;
+      validate_enum_class_typeconst;
       validate_supportdyn;
     } =
   let tcopt = Provider_context.get_tcopt ctx in
@@ -1830,7 +1796,7 @@ let elab_elem
     if
       (not
          (string_ends_with (Relative_path.suffix filename) ".hhi"
-         || TypecheckerOptions.is_systemlib (Provider_context.get_tcopt ctx)))
+         || TypecheckerOptions.is_systemlib tcopt))
       && not
            (TypecheckerOptions.experimental_feature_enabled
               tcopt
@@ -1847,6 +1813,29 @@ let elab_elem
       elab_everything_sdt elem
     else
       elem
+  in
+
+  (* enum class type constants *)
+  (* we're still in the middle of developing type constants for enum classes
+     so we gate them carefully for now:
+     They must use the feature flag `type_constants_in_enum_class` AND
+     be in a selected list of directories.
+
+     For internal testing, we provide a global "enable" flag to just
+     enable them. This is off by default except in hh_single_type_check.
+  *)
+  let class_dir = Filename.dirname @@ Relative_path.suffix filename in
+  let err =
+    if
+      TypecheckerOptions.allow_all_locations_for_type_constant_in_enum_class
+        tcopt
+      || List.exists ~f:(String.equal class_dir)
+         @@ TypecheckerOptions.allowed_locations_for_type_constant_in_enum_class
+              tcopt
+    then
+      err
+    else
+      validate_enum_class_typeconst ~init:err elem
   in
 
   Naming_phase_error.emit err;
@@ -1888,6 +1877,8 @@ let program ctx ast =
       elab_class_id = Naming_elab_class_id.elab_program;
       validate_xhp = Naming_validate_xhp_name.validate_program;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_program;
+      validate_enum_class_typeconst =
+        Naming_validate_enum_class_typeconst.validate_program;
       validate_supportdyn = Naming_validate_supportdyn.validate_program;
     }
 
@@ -1912,6 +1903,8 @@ let fun_def ctx fd =
       elab_class_id = Naming_elab_class_id.elab_fun_def;
       validate_xhp = Naming_validate_xhp_name.validate_fun_def;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_fun_def;
+      validate_enum_class_typeconst =
+        Naming_validate_enum_class_typeconst.validate_fun_def;
       validate_supportdyn = Naming_validate_supportdyn.validate_fun_def;
     }
 
@@ -1936,6 +1929,8 @@ let class_ ctx c =
       elab_class_id = Naming_elab_class_id.elab_class;
       validate_xhp = Naming_validate_xhp_name.validate_class;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_class;
+      validate_enum_class_typeconst =
+        Naming_validate_enum_class_typeconst.validate_class;
       validate_supportdyn = Naming_validate_supportdyn.validate_class;
     }
 
@@ -1960,6 +1955,8 @@ let module_ ctx module_ =
       elab_class_id = Naming_elab_class_id.elab_module_def;
       validate_xhp = Naming_validate_xhp_name.validate_module_def;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_module_def;
+      validate_enum_class_typeconst =
+        Naming_validate_enum_class_typeconst.validate_module_def;
       validate_supportdyn = Naming_validate_supportdyn.validate_module_def;
     }
 
@@ -1984,6 +1981,8 @@ let global_const ctx cst =
       elab_class_id = Naming_elab_class_id.elab_gconst;
       validate_xhp = Naming_validate_xhp_name.validate_gconst;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_gconst;
+      validate_enum_class_typeconst =
+        Naming_validate_enum_class_typeconst.validate_gconst;
       validate_supportdyn = Naming_validate_supportdyn.validate_gconst;
     }
 
@@ -2008,5 +2007,7 @@ let typedef ctx tdef =
       elab_class_id = Naming_elab_class_id.elab_typedef;
       validate_xhp = Naming_validate_xhp_name.validate_typedef;
       validate_builtin_enum = Naming_validate_builtin_enum.validate_typedef;
+      validate_enum_class_typeconst =
+        Naming_validate_enum_class_typeconst.validate_typedef;
       validate_supportdyn = Naming_validate_supportdyn.validate_typedef;
     }

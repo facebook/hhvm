@@ -5,7 +5,16 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
 (* We permit class constants to be used as shape field names. Here we replace
    uses of `self` with the class to which they refer or `unknown` if the shape
    is not defined within the context of a class *)
-include Naming_phase_sigs.Elabidation
+val top_down_pass :
+  ( Naming_phase_env.t,
+    Naming_phase_error.err Naming_phase_error.Free_monoid.t )
+  Naming_phase_pass.t
+
+val bottom_up_pass :
+  ( Naming_phase_env.t,
+    Naming_phase_error.err Naming_phase_error.Free_monoid.t )
+  Naming_phase_pass.t

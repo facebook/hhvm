@@ -5,6 +5,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
 (* invariant is subject to a source-code transform in the HHVM
  * runtime: the arguments to invariant are lazily evaluated only in
  * the case in which the invariant condition does not hold. So:
@@ -17,4 +18,7 @@
  *     invariant_violation(<format>, <format_args...>);
  *   }
  *)
-include Naming_phase_sigs.Elabidation
+val pass :
+  ( Naming_phase_env.t,
+    Naming_phase_error.err Naming_phase_error.Free_monoid.t )
+  Naming_phase_pass.t

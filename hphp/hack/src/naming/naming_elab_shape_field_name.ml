@@ -9,26 +9,24 @@ open Hh_prelude
 module Err = Naming_phase_error
 module SN = Naming_special_names
 
-module Env : sig
-  type t
+module Env = struct
+  let in_class t Aast.{ c_name; c_kind; c_final; _ } =
+    Naming_phase_env.
+      {
+        t with
+        elab_shape_field_name =
+          Elab_shape_field_name.
+            { current_class = Some (c_name, c_kind, c_final) };
+      }
 
-  val empty : t
-
-  val in_class : t -> ('ex, 'en) Aast.class_ -> t
-
-  val current_class : t -> (Ast_defs.id * Ast_defs.classish_kind * bool) option
-end = struct
-  type t = {
-    current_class: (Ast_defs.id * Ast_defs.classish_kind * bool) option;
-  }
-
-  let empty = { current_class = None }
-
-  let in_class _ Aast.{ c_name; c_kind; c_final; _ } =
-    { current_class = Some (c_name, c_kind, c_final) }
-
-  let current_class { current_class } = current_class
+  let current_class
+      Naming_phase_env.
+        { elab_shape_field_name = Elab_shape_field_name.{ current_class }; _ } =
+    current_class
 end
+
+let on_class_ (env, c, err) =
+  Naming_phase_pass.Cont.next (Env.in_class env c, c, err)
 
 (* We permit class constants to be used as shape field names. Here we replace
     uses of `self` with the class to which they refer or `unknown` if the shape
@@ -46,9 +44,6 @@ let canonical_shape_name current_class sfld =
       in
       Error (Ast_defs.SFclass_const ((class_pos, SN.Classes.cUnknown), cst), err))
   | _ -> Ok sfld
-
-let on_class_ (env, c, err) =
-  Naming_phase_pass.Cont.next (Env.in_class env c, c, err)
 
 let on_expr_ (env, expr_, err_acc) =
   let (expr_, err) =
@@ -81,29 +76,14 @@ let on_shape_field_info (env, (Aast.{ sfi_name; _ } as sfi), err_acc) =
     Naming_phase_pass.Cont.finish
       (env, Aast.{ sfi with sfi_name }, Err.Free_monoid.plus err_acc err)
 
-let pass =
+let top_down_pass =
+  Naming_phase_pass.(top_down { identity with on_class_ = Some on_class_ })
+
+let bottom_up_pass =
   Naming_phase_pass.(
-    top_down
+    bottom_up
       {
         identity with
-        on_class_ = Some on_class_;
         on_expr_ = Some on_expr_;
         on_shape_field_info = Some on_shape_field_info;
       })
-
-let visitor = Naming_phase_pass.mk_visitor [pass]
-
-let elab f ?init ?(env = Env.empty) elem =
-  Tuple2.map_snd ~f:(Err.from_monoid ?init) @@ f env elem
-
-let elab_fun_def ?init ?env elem = elab visitor#on_fun_def ?init ?env elem
-
-let elab_typedef ?init ?env elem = elab visitor#on_typedef ?init ?env elem
-
-let elab_module_def ?init ?env elem = elab visitor#on_module_def ?init ?env elem
-
-let elab_gconst ?init ?env elem = elab visitor#on_gconst ?init ?env elem
-
-let elab_class ?init ?env elem = elab visitor#on_class_ ?init ?env elem
-
-let elab_program ?init ?env elem = elab visitor#on_program ?init ?env elem

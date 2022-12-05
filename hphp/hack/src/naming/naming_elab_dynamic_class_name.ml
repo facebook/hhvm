@@ -9,19 +9,10 @@ open Hh_prelude
 module Err = Naming_phase_error
 module SN = Naming_special_names
 
-module Env : sig
-  type t
-
-  val empty : t
-end = struct
-  type t = unit
-
-  let empty = ()
-end
-
 let is_dynamic = function
-  | Aast.(CIparent | CIself | CIstatic | CI _ | CIexpr (_, _, (Lvar _ | This)))
-    ->
+  | Aast.(
+      ( CIparent | CIself | CIstatic | CI _
+      | CIexpr (_, _, (Lvar _ | This | Dollardollar _)) )) ->
     false
   | _ -> true
 
@@ -77,8 +68,6 @@ let on_expr (env, (ex, pos, expr_), err_acc) =
       Error None
     | _ -> Ok (expr_, None)
   in
-  (* Where we are replacing the entire expression, there is no need
-     to proceed with the recursion *)
   match res with
   | Error err_opt ->
     let err =
@@ -97,21 +86,5 @@ let on_expr (env, (ex, pos, expr_), err_acc) =
     in
     Naming_phase_pass.Cont.next (env, (ex, pos, expr_), err)
 
-let pass = Naming_phase_pass.(top_down { identity with on_expr = Some on_expr })
-
-let visitor = Naming_phase_pass.mk_visitor [pass]
-
-let elab f ?init ?(env = Env.empty) elem =
-  Tuple2.map_snd ~f:(Err.from_monoid ?init) @@ f env elem
-
-let elab_fun_def ?init ?env elem = elab visitor#on_fun_def ?init ?env elem
-
-let elab_typedef ?init ?env elem = elab visitor#on_typedef ?init ?env elem
-
-let elab_module_def ?init ?env elem = elab visitor#on_module_def ?init ?env elem
-
-let elab_gconst ?init ?env elem = elab visitor#on_gconst ?init ?env elem
-
-let elab_class ?init ?env elem = elab visitor#on_class_ ?init ?env elem
-
-let elab_program ?init ?env elem = elab visitor#on_program ?init ?env elem
+let pass =
+  Naming_phase_pass.(bottom_up { identity with on_expr = Some on_expr })

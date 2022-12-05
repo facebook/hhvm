@@ -8,4 +8,7 @@
 (* This validation pass will raise errors when it encounters use of certain
    miscased or errneous XHP related class names.
 *)
-include Naming_phase_sigs.Validation
+val pass :
+  ( Naming_phase_env.t,
+    Naming_phase_error.err Naming_phase_error.Free_monoid.t )
+  Naming_phase_pass.t

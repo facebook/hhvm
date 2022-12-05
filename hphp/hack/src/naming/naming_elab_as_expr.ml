@@ -8,16 +8,6 @@
 open Hh_prelude
 module Err = Naming_phase_error
 
-module Env : sig
-  type t
-
-  val empty : t
-end = struct
-  type t = unit
-
-  let empty = ()
-end
-
 let elab_value = function
   | (annot, pos, Aast.Id _) ->
     let err = Err.naming @@ Naming_error.Expected_variable pos in
@@ -33,7 +23,6 @@ let elab_key = function
     ((annot, pos, Aast.Lvar (pos, ident)), Some err)
 
 let on_as_expr (env, as_expr, err_acc) =
-  let open Naming_phase_pass.Cont in
   let (as_expr, err_opt) =
     match as_expr with
     | Aast.As_v e ->
@@ -53,24 +42,7 @@ let on_as_expr (env, as_expr, err_acc) =
   let err =
     Option.value_map err_opt ~default:err_acc ~f:(Err.Free_monoid.plus err_acc)
   in
-  next (env, as_expr, err)
+  Naming_phase_pass.Cont.next (env, as_expr, err)
 
 let pass =
-  Naming_phase_pass.(top_down { identity with on_as_expr = Some on_as_expr })
-
-let visitor = Naming_phase_pass.mk_visitor [pass]
-
-let elab f ?init ?(env = Env.empty) elem =
-  Tuple2.map_snd ~f:(Err.from_monoid ?init) @@ f env elem
-
-let elab_fun_def ?init ?env elem = elab visitor#on_fun_def ?init ?env elem
-
-let elab_typedef ?init ?env elem = elab visitor#on_typedef ?init ?env elem
-
-let elab_module_def ?init ?env elem = elab visitor#on_module_def ?init ?env elem
-
-let elab_gconst ?init ?env elem = elab visitor#on_gconst ?init ?env elem
-
-let elab_class ?init ?env elem = elab visitor#on_class_ ?init ?env elem
-
-let elab_program ?init ?env elem = elab visitor#on_program ?init ?env elem
+  Naming_phase_pass.(bottom_up { identity with on_as_expr = Some on_as_expr })

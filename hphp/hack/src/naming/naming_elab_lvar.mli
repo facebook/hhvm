@@ -5,6 +5,10 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
 (* Elaborates `$$`, `$this` and `$_` to `Dollardollar`, `This` and
    `Lplaceholder` *)
-include Naming_phase_sigs.Elaboration
+val pass :
+  ( Naming_phase_env.t,
+    Naming_phase_error.err Naming_phase_error.Free_monoid.t )
+  Naming_phase_pass.t

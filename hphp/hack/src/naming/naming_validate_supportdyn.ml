@@ -9,46 +9,35 @@ open Hh_prelude
 module Err = Naming_phase_error
 module SN = Naming_special_names
 
-module Env : sig
-  type t
+module Env = struct
+  let is_hhi Naming_phase_env.{ is_hhi; _ } = is_hhi
 
-  val empty : t
-end = struct
-  type t = unit
+  let is_systemlib Naming_phase_env.{ is_systemlib; _ } = is_systemlib
 
-  let empty = ()
+  let supportdynamic_type_hint_enabled
+      Naming_phase_env.{ supportdynamic_type_hint_enabled; _ } =
+    supportdynamic_type_hint_enabled
+
+  let everything_sdt Naming_phase_env.{ everything_sdt; _ } = everything_sdt
 end
 
 let on_hint_ (env, hint_, err) =
   let err =
-    match hint_ with
-    | Aast.Happly ((pos, ty_name), _)
-      when String.(equal ty_name SN.Classes.cSupportDyn) ->
-      Err.Free_monoid.plus err @@ Err.supportdyn pos
-    | _ -> err
+    if
+      Env.is_hhi env
+      || Env.is_systemlib env
+      || Env.supportdynamic_type_hint_enabled env
+      || Env.everything_sdt env
+    then
+      err
+    else
+      match hint_ with
+      | Aast.Happly ((pos, ty_name), _)
+        when String.(equal ty_name SN.Classes.cSupportDyn) ->
+        Err.Free_monoid.plus err @@ Err.supportdyn pos
+      | _ -> err
   in
   Naming_phase_pass.Cont.next (env, hint_, err)
 
 let pass =
   Naming_phase_pass.(top_down { identity with on_hint_ = Some on_hint_ })
-
-let visitor = Naming_phase_pass.mk_visitor [pass]
-
-let validate f ?init ?(env = Env.empty) elem =
-  Err.from_monoid ?init @@ snd @@ f env elem
-
-let validate_program ?init ?env elem =
-  validate visitor#on_program ?init ?env elem
-
-let validate_module_def ?init ?env elem =
-  validate visitor#on_module_def ?init ?env elem
-
-let validate_class ?init ?env elem = validate visitor#on_class_ ?init ?env elem
-
-let validate_typedef ?init ?env elem =
-  validate visitor#on_typedef ?init ?env elem
-
-let validate_fun_def ?init ?env elem =
-  validate visitor#on_fun_def ?init ?env elem
-
-let validate_gconst ?init ?env elem = validate visitor#on_gconst ?init ?env elem

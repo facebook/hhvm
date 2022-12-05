@@ -9,16 +9,6 @@ open Hh_prelude
 module Err = Naming_phase_error
 module SN = Naming_special_names
 
-module Env : sig
-  type t
-
-  val empty : t
-end = struct
-  type t = unit
-
-  let empty = ()
-end
-
 let on_expr_ (env, expr_, err_acc) =
   let err =
     match expr_ with
@@ -41,25 +31,4 @@ let on_expr_ (env, expr_, err_acc) =
   Naming_phase_pass.Cont.next (env, expr_, err)
 
 let pass =
-  Naming_phase_pass.(top_down { identity with on_expr_ = Some on_expr_ })
-
-let visitor = Naming_phase_pass.mk_visitor [pass]
-
-let validate f ?init ?(env = Env.empty) elem =
-  Err.from_monoid ?init @@ snd @@ f env elem
-
-let validate_program ?init ?env elem =
-  validate visitor#on_program ?init ?env elem
-
-let validate_module_def ?init ?env elem =
-  validate visitor#on_module_def ?init ?env elem
-
-let validate_class ?init ?env elem = validate visitor#on_class_ ?init ?env elem
-
-let validate_typedef ?init ?env elem =
-  validate visitor#on_typedef ?init ?env elem
-
-let validate_fun_def ?init ?env elem =
-  validate visitor#on_fun_def ?init ?env elem
-
-let validate_gconst ?init ?env elem = validate visitor#on_gconst ?init ?env elem
+  Naming_phase_pass.(bottom_up { identity with on_expr_ = Some on_expr_ })

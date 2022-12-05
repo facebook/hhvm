@@ -5,6 +5,10 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
 (* Removes all statements from the `func_body` of `method_`s and `fun_`s. This
    pass is intended for use with .hhi files *)
-include Naming_phase_sigs.Elaboration
+val pass :
+  ( Naming_phase_env.t,
+    Naming_phase_error.err Naming_phase_error.Free_monoid.t )
+  Naming_phase_pass.t

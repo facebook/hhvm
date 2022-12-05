@@ -12,13 +12,10 @@ module Cont = struct
   type 'a t =
     | Next of 'a
     | Finish of 'a
-    | Restart of 'a
 
   let next x = Next x
 
   let finish x = Finish x
-
-  let restart x = Restart x
 end
 
 module Transform = struct
@@ -31,15 +28,10 @@ module Transform = struct
   let bottom_up k = Bottom_up k
 
   let partition ts =
-    let rec aux ts ~k =
-      match ts with
-      | [] -> k ([], [])
-      | Top_down t :: rest ->
-        aux rest ~k:(fun (tds, bus) -> k @@ (t :: tds, bus))
-      | Bottom_up t :: rest ->
-        aux rest ~k:(fun (tds, bus) -> k @@ (tds, t :: bus))
-    in
-    aux ts ~k:Fn.id
+    List.fold_right ts ~init:([], []) ~f:(fun t (tds, bus) ->
+        match t with
+        | Top_down td -> (td :: tds, bus)
+        | Bottom_up bu -> (tds, bu :: bus))
 
   (* Combine a sequence transforms.
 
@@ -48,14 +40,10 @@ module Transform = struct
 
      Combining transforms gives meaning to the continuation each
      transformation returns:
-     - `Next` indicates we should apply the _next_ transform in the stratum to
-        the element. If there are no more transforms in the current stratum, we
-        move on to the next
-     - `Restart` indicates that the element was changed and that transforms in
-        the _current_ stratum may now apply. This means that transforms within
-        a stratum can be in any order. Note that we only need reapply in the
-        current statum since all transforms in previous stata should not be a
-        applicable (see discussion of stratification invariants, above)
+     - `Next` indicates we should apply the _next_ transform to the element.
+        If there are no more _top-down_ transforms, we rewrite subexpressions
+        then apply _bottom-up_ transforms. If there are no more _bottom-up_
+        transforms then we are done.
      - `Finish` indicates that no more transformations need be applied to this
         element or any part of it. This is useful if the transform produces
         an element that is already in its final form like our `invalid_expr_`
@@ -64,26 +52,20 @@ module Transform = struct
     let rec aux (td, bu) elem = aux_td bu [] td elem
     and aux_td bu applied unapplied elem =
       match unapplied with
-      | [] -> aux_bu (List.rev applied) [] bu @@ traverse elem
       | next :: unapplied ->
         let applied = next :: applied in
         (match next elem with
         | Cont.Next elem -> aux_td bu applied unapplied elem
-        | Cont.Restart elem ->
-          let td = List.rev applied @ unapplied in
-          aux (td, bu) elem
         | Cont.Finish elem -> elem)
+      | [] -> aux_bu (List.rev applied) [] bu @@ traverse elem
     and aux_bu td applied unapplied elem =
       match unapplied with
-      | [] -> elem
       | next :: unapplied ->
         let applied = next :: applied in
         (match next elem with
         | Cont.Next elem -> aux_bu td applied unapplied elem
-        | Cont.Restart elem ->
-          let bu = List.rev applied @ unapplied in
-          aux (td, bu) elem
         | Cont.Finish elem -> elem)
+      | [] -> elem
     in
     aux (partition ts)
 end
@@ -297,18 +279,39 @@ let identity =
 
 let drop_env (_, elem, err) = (elem, err)
 
+(* Helper function to make visitor methods. Given a list, `ts`, of
+  `('env,Naming_phase_error.t) t`s, and a function to `select` a record field
+  from a `('env,Naming_phase_error.t) pass`, we filter and partition the
+  selected `transform`s into two lists one to be applied 'top-down' (i.e. before
+  the element's children have been transformed) and one to be applied bottom up
+  (i.e. after the element's children have been transformed)
+
+  We then combine the transforms using the `super` function to perform our
+  traversal. *)
 let mk_handler super select ts =
-  let f env elem =
-    drop_env
-    @@ (Transform.combine ~traverse:(fun (env, elem, err) ->
-            let (elem, err') = super env elem in
-            (env, elem, Err.Free_monoid.plus err err'))
-       @@ List.filter_map ts ~f:(function
-              | Top_down t -> Option.map ~f:Transform.top_down @@ select t
-              | Bottom_up t -> Option.map ~f:Transform.bottom_up @@ select t))
-         (env, elem, Err.Free_monoid.zero)
+  let ts =
+    List.fold_right ts ~init:[] ~f:(fun t default ->
+        match t with
+        | Top_down t ->
+          Option.value_map ~default ~f:(fun t ->
+              Transform.top_down t :: default)
+          @@ select t
+        | Bottom_up t ->
+          Option.value_map ~default ~f:(fun t ->
+              Transform.bottom_up t :: default)
+          @@ select t)
   in
-  f
+  match ts with
+  | [] -> super
+  | _ ->
+    fun env elem ->
+      drop_env
+      @@ (Transform.combine
+            ~traverse:(fun (env, elem, err) ->
+              let (elem, err') = super env elem in
+              (env, elem, Err.Free_monoid.plus err err'))
+            ts)
+           (env, elem, Err.Free_monoid.zero)
 
 let mk_visitor ts =
   object (_self)
@@ -384,6 +387,9 @@ let mk_visitor ts =
         (fun t -> t.on_class_c_file_attributes)
         ts
 
+    method! on_class_const_kind =
+      mk_handler super#on_class_const_kind (fun t -> t.on_class_const_kind) ts
+
     method! on_class_var =
       mk_handler super#on_class_var (fun t -> t.on_class_var) ts
 
@@ -398,9 +404,6 @@ let mk_visitor ts =
 
     method! on_class_var_cv_type =
       mk_handler super#on_class_var_cv_type (fun t -> t.on_class_var_cv_type) ts
-
-    method! on_class_const_kind =
-      mk_handler super#on_class_const_kind (fun t -> t.on_class_const_kind) ts
 
     method! on_typedef = mk_handler super#on_typedef (fun t -> t.on_typedef) ts
 

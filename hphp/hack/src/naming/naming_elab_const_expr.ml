@@ -9,33 +9,30 @@ open Hh_prelude
 module Err = Naming_phase_error
 module SN = Naming_special_names
 
-module Env : sig
-  type t
+module Env = struct
+  let in_mode
+      Naming_phase_env.{ elab_const_expr = Elab_const_expr.{ in_mode; _ }; _ } =
+    in_mode
 
-  val empty : t
+  let in_enum_class
+      Naming_phase_env.
+        { elab_const_expr = Elab_const_expr.{ in_enum_class; _ }; _ } =
+    in_enum_class
 
-  val in_mode : t -> FileInfo.mode
+  let set_mode t ~in_mode =
+    Naming_phase_env.
+      {
+        t with
+        elab_const_expr = Elab_const_expr.{ t.elab_const_expr with in_mode };
+      }
 
-  val set_mode : t -> in_mode:FileInfo.mode -> t
-
-  val in_enum_class : t -> bool
-
-  val set_in_enum_class : t -> in_enum_class:bool -> t
-end = struct
-  type t = {
-    in_enum_class: bool;
-    in_mode: FileInfo.mode;
-  }
-
-  let empty = { in_enum_class = false; in_mode = FileInfo.Mstrict }
-
-  let in_mode { in_mode; _ } = in_mode
-
-  let in_enum_class { in_enum_class; _ } = in_enum_class
-
-  let set_mode env ~in_mode = { env with in_mode }
-
-  let set_in_enum_class env ~in_enum_class = { env with in_enum_class }
+  let set_in_enum_class t ~in_enum_class =
+    Naming_phase_env.
+      {
+        t with
+        elab_const_expr =
+          Elab_const_expr.{ t.elab_const_expr with in_enum_class };
+      }
 end
 
 let and_ err1 err2 = Option.merge ~f:Err.Free_monoid.plus err1 err2
@@ -114,6 +111,21 @@ let on_class_ (env, c, err) =
   in
   Naming_phase_pass.Cont.next (env, c, err)
 
+let on_gconst (env, cst, err) =
+  let env = Env.set_mode env ~in_mode:cst.Aast.cst_mode in
+  Naming_phase_pass.Cont.next (env, cst, err)
+
+let on_typedef (env, t, err) =
+  Naming_phase_pass.Cont.next (Env.set_mode env ~in_mode:t.Aast.t_mode, t, err)
+
+let on_fun_def (env, fd, err) =
+  Naming_phase_pass.Cont.next
+    (Env.set_mode env ~in_mode:fd.Aast.fd_mode, fd, err)
+
+let on_module_def (env, md, err) =
+  Naming_phase_pass.Cont.next
+    (Env.set_mode env ~in_mode:md.Aast.md_mode, md, err)
+
 let on_class_const_kind (env, kind, err_acc) =
   let in_mode = Env.in_mode env and in_enum_class = Env.in_enum_class env in
   let (kind, err_opt) =
@@ -128,10 +140,6 @@ let on_class_const_kind (env, kind, err_acc) =
   in
   Naming_phase_pass.Cont.next (env, kind, err)
 
-let on_gconst (env, cst, err) =
-  let env = Env.set_mode env ~in_mode:cst.Aast.cst_mode in
-  Naming_phase_pass.Cont.next (env, cst, err)
-
 let on_gconst_cst_value (env, cst_value, err_acc) =
   let in_mode = Env.in_mode env and in_enum_class = Env.in_enum_class env in
   let (cst_value, err_opt) = const_expr in_mode in_enum_class cst_value in
@@ -140,44 +148,23 @@ let on_gconst_cst_value (env, cst_value, err_acc) =
   in
   Naming_phase_pass.Cont.next (env, cst_value, err)
 
-let on_typedef (env, t, err) =
-  Naming_phase_pass.Cont.next (Env.set_mode env ~in_mode:t.Aast.t_mode, t, err)
-
-let on_fun_def (env, fd, err) =
-  Naming_phase_pass.Cont.next
-    (Env.set_mode env ~in_mode:fd.Aast.fd_mode, fd, err)
-
-let on_module_def (env, md, err) =
-  Naming_phase_pass.Cont.next
-    (Env.set_mode env ~in_mode:md.Aast.md_mode, md, err)
-
-let pass =
+let top_down_pass =
   Naming_phase_pass.(
     top_down
       {
         identity with
         on_class_ = Some on_class_;
-        on_class_const_kind = Some on_class_const_kind;
         on_gconst = Some on_gconst;
-        on_gconst_cst_value = Some on_gconst_cst_value;
         on_typedef = Some on_typedef;
         on_fun_def = Some on_fun_def;
         on_module_def = Some on_module_def;
       })
 
-let visitor = Naming_phase_pass.mk_visitor [pass]
-
-let elab f ?init ?(env = Env.empty) elem =
-  Tuple2.map_snd ~f:(Err.from_monoid ?init) @@ f env elem
-
-let elab_fun_def ?init ?env elem = elab visitor#on_fun_def ?init ?env elem
-
-let elab_typedef ?init ?env elem = elab visitor#on_typedef ?init ?env elem
-
-let elab_module_def ?init ?env elem = elab visitor#on_module_def ?init ?env elem
-
-let elab_gconst ?init ?env elem = elab visitor#on_gconst ?init ?env elem
-
-let elab_class ?init ?env elem = elab visitor#on_class_ ?init ?env elem
-
-let elab_program ?init ?env elem = elab visitor#on_program ?init ?env elem
+let bottom_up_pass =
+  Naming_phase_pass.(
+    bottom_up
+      {
+        identity with
+        on_class_const_kind = Some on_class_const_kind;
+        on_gconst_cst_value = Some on_gconst_cst_value;
+      })

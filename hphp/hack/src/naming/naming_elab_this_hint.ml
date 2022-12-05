@@ -10,34 +10,28 @@ open Hh_prelude
 module Err = Naming_phase_error
 module SN = Naming_special_names
 
-module Env : sig
-  type t
+module Env = struct
+  let forbid_this
+      Naming_phase_env.{ elab_this_hint = Elab_this_hint.{ forbid_this; _ }; _ }
+      =
+    forbid_this
 
-  val empty : t
+  let lsb Naming_phase_env.{ elab_this_hint = Elab_this_hint.{ lsb; _ }; _ } =
+    lsb
 
-  val forbid_this : t -> bool
+  let set_forbid_this t ~forbid_this =
+    let elab_this_hint = t.Naming_phase_env.elab_this_hint in
+    let elab_this_hint =
+      Naming_phase_env.Elab_this_hint.{ elab_this_hint with forbid_this }
+    in
+    Naming_phase_env.{ t with elab_this_hint }
 
-  val lsb : t -> bool option
-
-  val set_forbid_this : t -> forbid_this:bool -> t
-
-  val set_lsb : t -> lsb:bool option -> t
-end = struct
-  type t = {
-    (* `this` is forbidden as a hint in this context *)
-    forbid_this: bool;
-    lsb: bool option;
-  }
-
-  let empty = { forbid_this = false; lsb = None }
-
-  let forbid_this { forbid_this; _ } = forbid_this
-
-  let lsb { lsb; _ } = lsb
-
-  let set_forbid_this t ~forbid_this = { t with forbid_this }
-
-  let set_lsb t ~lsb = { t with lsb }
+  let set_lsb t ~lsb =
+    let elab_this_hint = t.Naming_phase_env.elab_this_hint in
+    let elab_this_hint =
+      Naming_phase_env.Elab_this_hint.{ elab_this_hint with lsb }
+    in
+    Naming_phase_env.{ t with elab_this_hint }
 end
 
 let on_class_c_tparams (env, c_tparams, err_acc) =
@@ -95,7 +89,7 @@ let on_expr_ (env, expr_, err_acc) =
   let env =
     match expr_ with
     | Aast.(Cast _ | Is _ | As _ | Upcast _) ->
-      Env.(set_forbid_this empty ~forbid_this:false)
+      Env.set_forbid_this ~forbid_this:false @@ Env.set_lsb ~lsb:None env
     | _ -> env
   in
   Naming_phase_pass.Cont.next (env, expr_, err_acc)
@@ -104,7 +98,7 @@ let on_hint (env, hint, err_acc) =
   match hint with
   | (pos, Aast.Hthis) when Env.forbid_this env ->
     let err = Err.naming @@ Naming_error.This_type_forbidden pos in
-    Naming_phase_pass.Cont.finish (env, (pos, Aast.Herr), err)
+    Naming_phase_pass.Cont.next (env, (pos, Aast.Herr), err)
   | _ -> Naming_phase_pass.Cont.next (env, hint, err_acc)
 
 let on_shape_field_info (env, sfi, err_acc) =
@@ -146,20 +140,3 @@ let pass =
         on_hint_fun_hf_return_ty = Some on_hint_fun_hf_return_ty;
         on_targ = Some on_targ;
       })
-
-let visitor = Naming_phase_pass.mk_visitor [pass]
-
-let elab f ?init ?(env = Env.empty) elem =
-  Tuple2.map_snd ~f:(Err.from_monoid ?init) @@ f env elem
-
-let elab_fun_def ?init ?env elem = elab visitor#on_fun_def ?init ?env elem
-
-let elab_typedef ?init ?env elem = elab visitor#on_typedef ?init ?env elem
-
-let elab_module_def ?init ?env elem = elab visitor#on_module_def ?init ?env elem
-
-let elab_gconst ?init ?env elem = elab visitor#on_gconst ?init ?env elem
-
-let elab_class ?init ?env elem = elab visitor#on_class_ ?init ?env elem
-
-let elab_program ?init ?env elem = elab visitor#on_program ?init ?env elem

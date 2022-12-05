@@ -147,7 +147,6 @@
   naming_elab_import
   naming_elab_invariant
   naming_elab_lvar
-  naming_elab_pipe
   naming_elab_retonly_hint
   naming_elab_shape_field_name
   naming_elab_soft
@@ -155,10 +154,9 @@
   naming_elab_tuple
   naming_elab_user_attributes
   naming_elab_wildcard_hint
+  naming_phase_env
   naming_phase_error
   naming_phase_pass
-  naming_phase_sigs
-  naming_validate_builtin_enum
   naming_validate_cast_expr
   naming_validate_class_req
   naming_validate_consistent_construct

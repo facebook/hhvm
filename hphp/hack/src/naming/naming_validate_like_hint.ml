@@ -8,22 +8,20 @@
 open Hh_prelude
 module Err = Naming_phase_error
 
-module Env : sig
-  type t
+module Env = struct
+  let like_type_hints_enabled Naming_phase_env.{ like_type_hints_enabled; _ } =
+    like_type_hints_enabled
 
-  val empty : t
+  let everything_sdt Naming_phase_env.{ everything_sdt; _ } = everything_sdt
 
-  val allow_like : t -> bool
+  let allow_like
+      Naming_phase_env.
+        { validate_like_hint = Validate_like_hint.{ allow_like }; _ } =
+    allow_like
 
-  val set_allow_like : t -> allow_like:bool -> t
-end = struct
-  type t = { allow_like: bool }
-
-  let empty = { allow_like = false }
-
-  let set_allow_like _ ~allow_like = { allow_like }
-
-  let allow_like { allow_like } = allow_like
+  let set_allow_like t ~allow_like =
+    Naming_phase_env.
+      { t with validate_like_hint = Validate_like_hint.{ allow_like } }
 end
 
 let on_expr_ (env, expr_, err) =
@@ -34,51 +32,21 @@ let on_expr_ (env, expr_, err) =
   in
   Naming_phase_pass.Cont.next (env, expr_, err)
 
-let on_hint_ (env, hint_, err) =
-  let env =
-    match hint_ with
-    | Aast.(Hfun _ | Happly _ | Haccess _ | Habstr _ | Hvec_or_dict _) ->
-      Env.set_allow_like env ~allow_like:false
-    | _ -> env
-  in
-  Naming_phase_pass.Cont.next (env, hint_, err)
-
 let on_hint (env, hint, err) =
-  let err =
+  let (err, env) =
     match hint with
-    | (pos, Aast.Hlike _) when not @@ Env.allow_like env ->
-      Err.Free_monoid.plus err @@ Err.like_type pos
-    | _ -> err
+    | (pos, Aast.Hlike _)
+      when not
+             (Env.allow_like env
+             || Env.like_type_hints_enabled env
+             || Env.everything_sdt env) ->
+      (Err.Free_monoid.plus err @@ Err.like_type pos, env)
+    | (_, Aast.(Hfun _ | Happly _ | Haccess _ | Habstr _ | Hvec_or_dict _)) ->
+      (err, Env.set_allow_like env ~allow_like:false)
+    | _ -> (err, env)
   in
   Naming_phase_pass.Cont.next (env, hint, err)
 
 let pass =
   Naming_phase_pass.(
-    top_down
-      {
-        identity with
-        on_expr_ = Some on_expr_;
-        on_hint_ = Some on_hint_;
-        on_hint = Some on_hint;
-      })
-
-let visitor = Naming_phase_pass.mk_visitor [pass]
-
-let validate f ?init ?(env = Env.empty) elem =
-  Err.from_monoid ?init @@ snd @@ f env elem
-
-let validate_program ?init ?env elem =
-  validate visitor#on_program ?init ?env elem
-
-let validate_module_def ?init ?env elem =
-  validate visitor#on_module_def ?init ?env elem
-
-let validate_class ?init ?env elem = validate visitor#on_class_ ?init ?env elem
-
-let validate_typedef ?init ?env elem =
-  validate visitor#on_typedef ?init ?env elem
-
-let validate_fun_def ?init ?env elem =
-  validate visitor#on_fun_def ?init ?env elem
-
-let validate_gconst ?init ?env elem = validate visitor#on_gconst ?init ?env elem
+    top_down { identity with on_expr_ = Some on_expr_; on_hint = Some on_hint })

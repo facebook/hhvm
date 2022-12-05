@@ -8,16 +8,6 @@
 open Hh_prelude
 module Err = Naming_phase_error
 
-module Env : sig
-  type t
-
-  val empty : t
-end = struct
-  type t = unit
-
-  let empty = ()
-end
-
 let on_class_ (env, (Aast.{ c_reqs; c_kind; _ } as c), err_acc) =
   let (c_req_extends, c_req_implements, c_req_class) = Aast.split_reqs c_reqs in
   let is_trait = Ast_defs.is_c_trait c_kind
@@ -46,24 +36,3 @@ let on_class_ (env, (Aast.{ c_reqs; c_kind; _ } as c), err_acc) =
 
 let pass =
   Naming_phase_pass.(top_down { identity with on_class_ = Some on_class_ })
-
-let visitor = Naming_phase_pass.mk_visitor [pass]
-
-let validate f ?init ?(env = Env.empty) elem =
-  Err.from_monoid ?init @@ snd @@ f env elem
-
-let validate_program ?init ?env elem =
-  validate visitor#on_program ?init ?env elem
-
-let validate_module_def ?init ?env elem =
-  validate visitor#on_module_def ?init ?env elem
-
-let validate_class ?init ?env elem = validate visitor#on_class_ ?init ?env elem
-
-let validate_typedef ?init ?env elem =
-  validate visitor#on_typedef ?init ?env elem
-
-let validate_fun_def ?init ?env elem =
-  validate visitor#on_fun_def ?init ?env elem
-
-let validate_gconst ?init ?env elem = validate visitor#on_gconst ?init ?env elem

@@ -7,16 +7,32 @@
  *)
 open Hh_prelude
 module SN = Naming_special_names
+module Err = Naming_phase_error
 
-module Env : sig
-  type t
+module Env = struct
+  let is_systemlib Naming_phase_env.{ is_systemlib; _ } = is_systemlib
 
-  val empty : t
-end = struct
-  type t = unit
-
-  let empty = ()
+  let is_hhi Naming_phase_env.{ is_hhi; _ } = is_hhi
 end
+
+let on_hint_ (env, hint_, err_acc) =
+  let err =
+    if Env.is_systemlib env || Env.is_hhi env then
+      err_acc
+    else
+      match hint_ with
+      | Aast.Happly ((pos, ty_name), _)
+        when String.(
+               equal ty_name SN.Classes.cHH_BuiltinEnum
+               || equal ty_name SN.Classes.cHH_BuiltinEnumClass
+               || equal ty_name SN.Classes.cHH_BuiltinAbstractEnumClass) ->
+        Err.Free_monoid.plus err_acc
+        @@ Err.naming
+        @@ Naming_error.Using_internal_class
+             { pos; class_name = Utils.strip_ns ty_name }
+      | _ -> err_acc
+  in
+  Naming_phase_pass.Cont.next (env, hint_, err)
 
 let on_class_ (env, (Aast.{ c_kind; c_enum; c_name; _ } as c), err) =
   let c =
@@ -49,20 +65,6 @@ let on_class_ (env, (Aast.{ c_kind; c_enum; c_name; _ } as c), err) =
   Naming_phase_pass.Cont.next (env, c, err)
 
 let pass =
-  Naming_phase_pass.(top_down { identity with on_class_ = Some on_class_ })
-
-let visitor = Naming_phase_pass.mk_visitor [pass]
-
-let elab f ?(env = Env.empty) elem = fst @@ f env elem
-
-let elab_fun_def ?env elem = elab visitor#on_fun_def ?env elem
-
-let elab_typedef ?env elem = elab visitor#on_typedef ?env elem
-
-let elab_module_def ?env elem = elab visitor#on_module_def ?env elem
-
-let elab_gconst ?env elem = elab visitor#on_gconst ?env elem
-
-let elab_class ?env elem = elab visitor#on_class_ ?env elem
-
-let elab_program ?env elem = elab visitor#on_program ?env elem
+  Naming_phase_pass.(
+    bottom_up
+      { identity with on_hint_ = Some on_hint_; on_class_ = Some on_class_ })

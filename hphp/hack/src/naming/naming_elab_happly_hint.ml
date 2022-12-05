@@ -10,37 +10,16 @@ open Common
 module Err = Naming_phase_error
 module SN = Naming_special_names
 
-module Env : sig
-  type t
+module Env = struct
+  let tparams
+      Naming_phase_env.{ elab_happly_hint = Elab_happly_hint.{ tparams; _ }; _ }
+      =
+    tparams
 
-  val empty : t
-
-  val tparams : t -> SSet.t
-
-  val in_mode : t -> FileInfo.mode
-
-  val extend_tparams : t -> ('ex, 'en) Aast.tparam list -> t
-
-  val in_class : t -> ('ex, 'en) Aast.class_ -> t
-
-  val in_fun_def : t -> ('ex, 'en) Aast.fun_def -> t
-
-  val in_typedef : t -> ('ex, 'en) Aast.typedef -> t
-
-  val in_gconst : t -> ('ex, 'en) Aast.gconst -> t
-
-  val in_module_def : t -> ('ex, 'en) Aast.module_def -> t
-end = struct
-  type t = {
-    tparams: SSet.t;
-    in_mode: FileInfo.mode;
-  }
-
-  let empty = { tparams = SSet.empty; in_mode = FileInfo.Mstrict }
-
-  let tparams { tparams; _ } = tparams
-
-  let in_mode { in_mode; _ } = in_mode
+  let in_mode
+      Naming_phase_env.{ elab_happly_hint = Elab_happly_hint.{ in_mode; _ }; _ }
+      =
+    in_mode
 
   let add_tparams ps init =
     List.fold
@@ -48,27 +27,53 @@ end = struct
       ~f:(fun acc Aast.{ tp_name = (_, nm); _ } -> SSet.add nm acc)
       ~init
 
-  let extend_tparams env ps =
-    let tparams = add_tparams ps env.tparams in
-    { env with tparams }
+  let extend_tparams t ps =
+    let elab_happly_hint = t.Naming_phase_env.elab_happly_hint in
+    let tparams =
+      add_tparams ps elab_happly_hint.Naming_phase_env.Elab_happly_hint.tparams
+    in
+    let elab_happly_hint =
+      Naming_phase_env.Elab_happly_hint.{ elab_happly_hint with tparams }
+    in
+    Naming_phase_env.{ t with elab_happly_hint }
 
-  let in_class _ Aast.{ c_mode; c_tparams; _ } =
-    { in_mode = c_mode; tparams = add_tparams c_tparams SSet.empty }
+  let in_class t Aast.{ c_mode; c_tparams; _ } =
+    let elab_happly_hint =
+      Naming_phase_env.Elab_happly_hint.
+        { in_mode = c_mode; tparams = add_tparams c_tparams SSet.empty }
+    in
+    Naming_phase_env.{ t with elab_happly_hint }
 
-  let in_fun_def _ Aast.{ fd_fun; fd_mode; _ } =
-    {
-      in_mode = fd_mode;
-      tparams = add_tparams fd_fun.Aast.f_tparams SSet.empty;
-    }
+  let in_fun_def t Aast.{ fd_fun; fd_mode; _ } =
+    let elab_happly_hint =
+      Naming_phase_env.Elab_happly_hint.
+        {
+          in_mode = fd_mode;
+          tparams = add_tparams fd_fun.Aast.f_tparams SSet.empty;
+        }
+    in
+    Naming_phase_env.{ t with elab_happly_hint }
 
-  let in_typedef _ Aast.{ t_tparams; t_mode; _ } =
-    { in_mode = t_mode; tparams = add_tparams t_tparams SSet.empty }
+  let in_typedef t Aast.{ t_tparams; t_mode; _ } =
+    let elab_happly_hint =
+      Naming_phase_env.Elab_happly_hint.
+        { in_mode = t_mode; tparams = add_tparams t_tparams SSet.empty }
+    in
+    Naming_phase_env.{ t with elab_happly_hint }
 
-  let in_gconst _ Aast.{ cst_mode; _ } =
-    { in_mode = cst_mode; tparams = SSet.empty }
+  let in_gconst t Aast.{ cst_mode; _ } =
+    let elab_happly_hint =
+      Naming_phase_env.Elab_happly_hint.
+        { in_mode = cst_mode; tparams = SSet.empty }
+    in
+    Naming_phase_env.{ t with elab_happly_hint }
 
-  let in_module_def _ Aast.{ md_mode; _ } =
-    { in_mode = md_mode; tparams = SSet.empty }
+  let in_module_def t Aast.{ md_mode; _ } =
+    let elab_happly_hint =
+      Naming_phase_env.Elab_happly_hint.
+        { in_mode = md_mode; tparams = SSet.empty }
+    in
+    Naming_phase_env.{ t with elab_happly_hint }
 end
 
 type canon_result =
@@ -350,20 +355,3 @@ let pass =
         on_tparam = Some on_tparam;
         on_hint = Some on_hint;
       })
-
-let visitor = Naming_phase_pass.mk_visitor [pass]
-
-let elab f ?init ?(env = Env.empty) elem =
-  Tuple2.map_snd ~f:(Err.from_monoid ?init) @@ f env elem
-
-let elab_fun_def ?init ?env elem = elab visitor#on_fun_def ?init ?env elem
-
-let elab_typedef ?init ?env elem = elab visitor#on_typedef ?init ?env elem
-
-let elab_module_def ?init ?env elem = elab visitor#on_module_def ?init ?env elem
-
-let elab_gconst ?init ?env elem = elab visitor#on_gconst ?init ?env elem
-
-let elab_class ?init ?env elem = elab visitor#on_class_ ?init ?env elem
-
-let elab_program ?init ?env elem = elab visitor#on_program ?init ?env elem

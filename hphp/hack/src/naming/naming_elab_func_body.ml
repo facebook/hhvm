@@ -13,22 +13,13 @@
  *
  *)
 
-module Env : sig
-  type t
+module Env = struct
+  let in_mode
+      Naming_phase_env.{ elab_func_body = Elab_func_body.{ in_mode }; _ } =
+    in_mode
 
-  val empty : t
-
-  val in_mode : t -> FileInfo.mode
-
-  val set_mode : t -> in_mode:FileInfo.mode -> t
-end = struct
-  type t = { in_mode: FileInfo.mode }
-
-  let empty = { in_mode = FileInfo.Mstrict }
-
-  let in_mode { in_mode } = in_mode
-
-  let set_mode _ ~in_mode = { in_mode }
+  let set_mode t ~in_mode =
+    Naming_phase_env.{ t with elab_func_body = Elab_func_body.{ in_mode } }
 end
 
 let on_func_body (env, func_body, err) =
@@ -70,19 +61,3 @@ let pass =
         on_fun_def = Some on_fun_def;
         on_module_def = Some on_module_def;
       })
-
-let visitor = Naming_phase_pass.mk_visitor [pass]
-
-let elab f ?(env = Env.empty) elem = fst @@ f env elem
-
-let elab_fun_def ?env elem = elab visitor#on_fun_def ?env elem
-
-let elab_typedef ?env elem = elab visitor#on_typedef ?env elem
-
-let elab_module_def ?env elem = elab visitor#on_module_def ?env elem
-
-let elab_gconst ?env elem = elab visitor#on_gconst ?env elem
-
-let elab_class ?env elem = elab visitor#on_class_ ?env elem
-
-let elab_program ?env elem = elab visitor#on_program ?env elem

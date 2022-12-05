@@ -9,41 +9,43 @@ open Hh_prelude
 module Err = Naming_phase_error
 module SN = Naming_special_names
 
-module Env : sig
-  type t
+module Env = struct
+  let incr_tp_depth t =
+    let elab_wildcard_hint = t.Naming_phase_env.elab_wildcard_hint in
+    let elab_wildcard_hint =
+      Naming_phase_env.Elab_wildcard_hint.
+        { elab_wildcard_hint with tp_depth = elab_wildcard_hint.tp_depth + 1 }
+    in
+    Naming_phase_env.{ t with elab_wildcard_hint }
 
-  val empty : t
+  let reset_tp_depth t =
+    let elab_wildcard_hint = t.Naming_phase_env.elab_wildcard_hint in
+    let elab_wildcard_hint =
+      Naming_phase_env.Elab_wildcard_hint.
+        { elab_wildcard_hint with tp_depth = 0 }
+    in
+    Naming_phase_env.{ t with elab_wildcard_hint }
 
-  val allow_wildcard : t -> bool
+  let allow_wildcard
+      Naming_phase_env.
+        { elab_wildcard_hint = Elab_wildcard_hint.{ allow_wildcard; _ }; _ } =
+    allow_wildcard
 
-  val tp_depth : t -> int
+  let set_allow_wildcard t ~allow_wildcard =
+    let elab_wildcard_hint = t.Naming_phase_env.elab_wildcard_hint in
+    let elab_wildcard_hint =
+      Naming_phase_env.Elab_wildcard_hint.
+        { elab_wildcard_hint with allow_wildcard }
+    in
+    Naming_phase_env.{ t with elab_wildcard_hint }
 
-  val incr_tp_depth : t -> t
-
-  val reset_tp_depth : t -> t
-
-  val set_allow_wildcard : t -> allow_wildcard:bool -> t
-end = struct
-  type t = {
-    allow_wildcard: bool;
-    tp_depth: int;
-  }
-
-  let empty = { allow_wildcard = false; tp_depth = 0 }
-
-  let incr_tp_depth t = { t with tp_depth = t.tp_depth + 1 }
-
-  let reset_tp_depth t = { t with tp_depth = 0 }
-
-  let allow_wildcard { allow_wildcard; _ } = allow_wildcard
-
-  let set_allow_wildcard t ~allow_wildcard = { t with allow_wildcard }
-
-  let tp_depth { tp_depth; _ } = tp_depth
+  let tp_depth
+      Naming_phase_env.
+        { elab_wildcard_hint = Elab_wildcard_hint.{ tp_depth; _ }; _ } =
+    tp_depth
 end
 
 let on_expr_ (env, expr_, err) =
-  let open Naming_phase_pass.Cont in
   let env =
     match expr_ with
     | Aast.Cast _ -> Env.incr_tp_depth env
@@ -51,17 +53,15 @@ let on_expr_ (env, expr_, err) =
     | Aast.Upcast _ -> Env.set_allow_wildcard env ~allow_wildcard:false
     | _ -> env
   in
-  next (env, expr_, err)
+  Naming_phase_pass.Cont.next (env, expr_, err)
 
 let on_targ (env, targ, err) =
-  let open Naming_phase_pass.Cont in
-  next
+  Naming_phase_pass.Cont.next
     ( Env.set_allow_wildcard ~allow_wildcard:true @@ Env.incr_tp_depth env,
       targ,
       err )
 
 let on_hint_ (env, hint_, err) =
-  let open Naming_phase_pass.Cont in
   let env =
     match hint_ with
     | Aast.(
@@ -72,23 +72,21 @@ let on_hint_ (env, hint_, err) =
       Env.incr_tp_depth env
     | _ -> env
   in
-  next (env, hint_, err)
+  Naming_phase_pass.Cont.next (env, hint_, err)
 
 let on_shape_field_info (env, sfi, err) =
-  let open Naming_phase_pass.Cont in
-  next (Env.incr_tp_depth env, sfi, err)
+  Naming_phase_pass.Cont.next (Env.incr_tp_depth env, sfi, err)
 
 let on_context (env, hint, err_acc) =
-  let open Naming_phase_pass.Cont in
   match hint with
   | (pos, Aast.Happly ((_, tycon_name), _))
     when String.equal tycon_name SN.Typehints.wildcard ->
     let err = Err.naming @@ Naming_error.Invalid_wildcard_context pos in
-    finish (env, (pos, Aast.Herr), Err.Free_monoid.plus err_acc err)
-  | _ -> next (env, hint, err_acc)
+    Naming_phase_pass.Cont.finish
+      (env, (pos, Aast.Herr), Err.Free_monoid.plus err_acc err)
+  | _ -> Naming_phase_pass.Cont.next (env, hint, err_acc)
 
 let on_hint (env, hint, err_acc) =
-  let open Naming_phase_pass.Cont in
   match hint with
   | (pos, Aast.Happly ((_, tycon_name), hints))
     when String.equal tycon_name SN.Typehints.wildcard ->
@@ -99,13 +97,15 @@ let on_hint (env, hint, err_acc) =
           @@ Naming_error.Tparam_applied_to_type
                { pos; tparam_name = SN.Typehints.wildcard }
         in
-        finish (env, (pos, Aast.Herr), Err.Free_monoid.plus err_acc err)
+        Naming_phase_pass.Cont.next
+          (env, (pos, Aast.Herr), Err.Free_monoid.plus err_acc err)
       else
-        next (env, hint, err_acc)
+        Naming_phase_pass.Cont.next (env, hint, err_acc)
     else
       let err = Err.naming @@ Naming_error.Wildcard_hint_disallowed pos in
-      finish (env, (pos, Aast.Herr), Err.Free_monoid.plus err_acc err)
-  | _ -> next (env, hint, err_acc)
+      Naming_phase_pass.Cont.next
+        (env, (pos, Aast.Herr), Err.Free_monoid.plus err_acc err)
+  | _ -> Naming_phase_pass.Cont.next (env, hint, err_acc)
 
 let pass =
   Naming_phase_pass.(
@@ -119,20 +119,3 @@ let pass =
         on_context = Some on_context;
         on_hint = Some on_hint;
       })
-
-let visitor = Naming_phase_pass.mk_visitor [pass]
-
-let elab f ?init ?(env = Env.empty) elem =
-  Tuple2.map_snd ~f:(Err.from_monoid ?init) @@ f env elem
-
-let elab_fun_def ?init ?env elem = elab visitor#on_fun_def ?init ?env elem
-
-let elab_typedef ?init ?env elem = elab visitor#on_typedef ?init ?env elem
-
-let elab_module_def ?init ?env elem = elab visitor#on_module_def ?init ?env elem
-
-let elab_gconst ?init ?env elem = elab visitor#on_gconst ?init ?env elem
-
-let elab_class ?init ?env elem = elab visitor#on_class_ ?init ?env elem
-
-let elab_program ?init ?env elem = elab visitor#on_program ?init ?env elem

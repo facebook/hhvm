@@ -6,4 +6,12 @@
  *
  *)
 
-include Naming_phase_sigs.Elabidation
+val top_down_pass :
+  ( Naming_phase_env.t,
+    Naming_phase_error.err Naming_phase_error.Free_monoid.t )
+  Naming_phase_pass.t
+
+val bottom_up_pass :
+  ( Naming_phase_env.t,
+    Naming_phase_error.err Naming_phase_error.Free_monoid.t )
+  Naming_phase_pass.t

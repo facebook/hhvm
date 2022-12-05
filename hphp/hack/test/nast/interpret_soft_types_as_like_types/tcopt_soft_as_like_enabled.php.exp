@@ -1,3 +1,6 @@
+Errors:
+  [4:48-51] Cannot use experimental feature: like-types
+  [4:57-61] Cannot use experimental feature: like-types
 [(Stmt
     ([2:1-6:2],
      (Expr

@@ -16,22 +16,18 @@ open Hh_prelude
 module SN = Naming_special_names
 module Err = Naming_phase_error
 
-module Env : sig
-  type t
+module Env = struct
+  let in_mode
+      Naming_phase_env.
+        { elab_class_members = Elab_class_members.{ in_mode }; _ } =
+    in_mode
 
-  val empty : t
+  let set_mode t ~in_mode =
+    Naming_phase_env.
+      { t with elab_class_members = Elab_class_members.{ in_mode } }
 
-  val in_mode : t -> FileInfo.mode
-
-  val set_mode : t -> in_mode:FileInfo.mode -> t
-end = struct
-  type t = { in_mode: FileInfo.mode }
-
-  let empty = { in_mode = FileInfo.Mstrict }
-
-  let in_mode { in_mode } = in_mode
-
-  let set_mode _ ~in_mode = { in_mode }
+  let like_type_hints_enabled Naming_phase_env.{ like_type_hints_enabled; _ } =
+    like_type_hints_enabled
 end
 
 let exists_both p1 p2 xs =
@@ -93,7 +89,8 @@ let elab_non_static_class_prop
   in
   Aast.{ cv with cv_user_attributes }
 
-let elab_xhp_attr mode (type_hint, cv, xhp_attr_tag_opt, enum_opt) =
+let elab_xhp_attr
+    like_type_hints_enabled mode (type_hint, cv, xhp_attr_tag_opt, enum_opt) =
   let is_required = Option.is_some xhp_attr_tag_opt
   and has_default =
     Option.value_map
@@ -139,7 +136,11 @@ let elab_xhp_attr mode (type_hint, cv, xhp_attr_tag_opt, enum_opt) =
   let (hint_opt, like_err) =
     Option.value ~default:(hint_opt, None)
     @@ Option.map2 hint_opt xai_like ~f:(fun hint pos ->
-           (Some (pos, Aast.Hlike hint), Some (Err.like_type pos)))
+           ( Some (pos, Aast.Hlike hint),
+             if like_type_hints_enabled then
+               None
+             else
+               Some (Err.like_type pos) ))
   in
   let cv_type = ((), hint_opt)
   and cv_xhp_attr =
@@ -182,7 +183,13 @@ let on_class_
           ~f:(elab_non_static_class_prop const_attr_opt @@ Env.in_mode env)
           props
       and (xhp_attrs, xhp_attrs_err) =
-        List.unzip @@ List.map ~f:(elab_xhp_attr @@ Env.in_mode env) c_xhp_attrs
+        List.unzip
+        @@ List.map
+             ~f:
+               (elab_xhp_attr
+                  (Env.like_type_hints_enabled env)
+                  (Env.in_mode env))
+             c_xhp_attrs
       in
       (static_props @ props @ xhp_attrs, List.filter_map ~f:Fn.id xhp_attrs_err)
     in
@@ -199,7 +206,7 @@ let on_class_
 
 let pass =
   Naming_phase_pass.(
-    top_down
+    bottom_up
       {
         identity with
         on_typedef = Some on_typedef;
@@ -208,20 +215,3 @@ let pass =
         on_module_def = Some on_module_def;
         on_class_ = Some on_class_;
       })
-
-let visitor = Naming_phase_pass.mk_visitor [pass]
-
-let elab f ?init ?(env = Env.empty) elem =
-  Tuple2.map_snd ~f:(Err.from_monoid ?init) @@ f env elem
-
-let elab_fun_def ?init ?env elem = elab visitor#on_fun_def ?init ?env elem
-
-let elab_typedef ?init ?env elem = elab visitor#on_typedef ?init ?env elem
-
-let elab_module_def ?init ?env elem = elab visitor#on_module_def ?init ?env elem
-
-let elab_gconst ?init ?env elem = elab visitor#on_gconst ?init ?env elem
-
-let elab_class ?init ?env elem = elab visitor#on_class_ ?init ?env elem
-
-let elab_program ?init ?env elem = elab visitor#on_program ?init ?env elem

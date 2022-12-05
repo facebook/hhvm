@@ -9,22 +9,13 @@ open Hh_prelude
 module Err = Naming_phase_error
 module SN = Naming_special_names
 
-module Env : sig
-  type t
+module Env = struct
+  let set_in_class t ~in_class =
+    Naming_phase_env.{ t with elab_class_id = Elab_class_id.{ in_class } }
 
-  val empty : t
-
-  val set_in_class : t -> in_class:bool -> t
-
-  val in_class : t -> bool
-end = struct
-  type t = { in_class: bool }
-
-  let empty = { in_class = false }
-
-  let set_in_class _ ~in_class = { in_class }
-
-  let in_class { in_class } = in_class
+  let in_class
+      Naming_phase_env.{ elab_class_id = Elab_class_id.{ in_class }; _ } =
+    in_class
 end
 
 let on_class_ (env, c, err) =
@@ -100,20 +91,3 @@ let pass =
         on_class_c_user_attributes = Some on_class_c_user_attributes;
         on_class_id = Some on_class_id;
       })
-
-let visitor = Naming_phase_pass.mk_visitor [pass]
-
-let elab f ?init ?(env = Env.empty) elem =
-  Tuple2.map_snd ~f:(Err.from_monoid ?init) @@ f env elem
-
-let elab_fun_def ?init ?env elem = elab visitor#on_fun_def ?init ?env elem
-
-let elab_typedef ?init ?env elem = elab visitor#on_typedef ?init ?env elem
-
-let elab_module_def ?init ?env elem = elab visitor#on_module_def ?init ?env elem
-
-let elab_gconst ?init ?env elem = elab visitor#on_gconst ?init ?env elem
-
-let elab_class ?init ?env elem = elab visitor#on_class_ ?init ?env elem
-
-let elab_program ?init ?env elem = elab visitor#on_program ?init ?env elem

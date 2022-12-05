@@ -275,61 +275,6 @@ let rec stmt env (pos, st) =
     | Aast.Switch (e, cl, dfl) -> switch_stmt env e cl dfl
     | Aast.Foreach (e, ae, b) -> foreach_stmt env e ae b
     | Aast.Try (b, cl, fb) -> try_stmt env b cl fb
-    | Aast.Expr
-        (_, cp, Aast.Call ((_, p, Aast.Id (fp, fn)), hl, el, unpacked_element))
-      when String.equal fn SN.AutoimportedFunctions.invariant ->
-      (* invariant is subject to a source-code transform in the HHVM
-       * runtime: the arguments to invariant are lazily evaluated only in
-       * the case in which the invariant condition does not hold. So:
-       *
-       *   invariant_violation(<condition>, <format>, <format_args...>)
-       *
-       * ... is rewritten as:
-       *
-       *   if (!<condition>) {
-       *     invariant_violation(<format>, <format_args...>);
-       *   }
-       *)
-      begin
-        match el with
-        | []
-        | [_] ->
-          Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
-          N.Expr (invalid_expr p)
-        | (pk, (_, cond_p, cond)) :: el ->
-          begin
-            match pk with
-            | Ast_defs.Pnormal -> ()
-            | Ast_defs.Pinout pk_p ->
-              Errors.add_nast_check_error
-              @@ Nast_check_error.Inout_in_transformed_pseudofunction
-                   { pos = Pos.merge pk_p p; fn_name = "invariant" }
-          end;
-          let violation =
-            ( (),
-              cp,
-              Aast.Call
-                ( ( (),
-                    p,
-                    Aast.Id (fp, SN.AutoimportedFunctions.invariant_violation)
-                  ),
-                  hl,
-                  el,
-                  unpacked_element ) )
-          in
-          (match cond with
-          | Aast.False ->
-            (* a false <condition> means unconditional invariant_violation *)
-            N.Expr (expr env violation)
-          | _ ->
-            let (b1, b2) =
-              ([(cp, Aast.Expr violation)], [(Pos.none, Aast.Noop)])
-            in
-            let cond =
-              ((), cond_p, Aast.Unop (Ast_defs.Unot, ((), cond_p, cond)))
-            in
-            if_stmt env cond b1 b2)
-      end
     | Aast.Expr e -> N.Expr (expr env e)
   in
   (pos, stmt)
@@ -1279,6 +1224,7 @@ type 'elem pipeline = {
   elab_collection: (Naming_elab_collection.Env.t, 'elem) elabidation;
   elab_call: (Naming_elab_call.Env.t, 'elem) elabidation;
   elab_tuple: (Naming_elab_tuple.Env.t, 'elem) elabidation;
+  elab_invariant: (Naming_elab_invariant.Env.t, 'elem) elabidation;
   elab_help: Provider_context.t -> genv -> 'elem -> 'elem;
   elab_soft: (Naming_elab_soft.Env.t, 'elem) elaboration;
   elab_everything_sdt: (Naming_elab_everything_sdt.Env.t, 'elem) elaboration;
@@ -1306,6 +1252,7 @@ let elab_elem
       elab_collection;
       elab_call;
       elab_tuple;
+      elab_invariant;
       elab_help;
       elab_soft;
       elab_everything_sdt;
@@ -1364,6 +1311,8 @@ let elab_elem
   let (elem, err) = elab_call ~init:err elem in
 
   let (elem, err) = elab_tuple ~init:err elem in
+
+  let (elem, err) = elab_invariant ~init:err elem in
 
   (* General expression / statement / xhp elaboration & validation *)
   let elem = elab_help ctx env elem in
@@ -1474,6 +1423,7 @@ let program ctx ast =
       elab_collection = Naming_elab_collection.elab_program;
       elab_call = Naming_elab_call.elab_program;
       elab_tuple = Naming_elab_tuple.elab_program;
+      elab_invariant = Naming_elab_invariant.elab_program;
       elab_help = program_help;
       elab_soft = Naming_elab_soft.elab_program;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_program;
@@ -1504,6 +1454,7 @@ let fun_def ctx fd =
       elab_collection = Naming_elab_collection.elab_fun_def;
       elab_call = Naming_elab_call.elab_fun_def;
       elab_tuple = Naming_elab_tuple.elab_fun_def;
+      elab_invariant = Naming_elab_invariant.elab_fun_def;
       elab_help = fun_def_help;
       elab_soft = Naming_elab_soft.elab_fun_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_fun_def;
@@ -1534,6 +1485,7 @@ let class_ ctx c =
       elab_collection = Naming_elab_collection.elab_class;
       elab_call = Naming_elab_call.elab_class;
       elab_tuple = Naming_elab_tuple.elab_class;
+      elab_invariant = Naming_elab_invariant.elab_class;
       elab_help = class_help;
       elab_soft = Naming_elab_soft.elab_class;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_class;
@@ -1564,6 +1516,7 @@ let module_ ctx module_ =
       elab_collection = Naming_elab_collection.elab_module_def;
       elab_call = Naming_elab_call.elab_module_def;
       elab_tuple = Naming_elab_tuple.elab_module_def;
+      elab_invariant = Naming_elab_invariant.elab_module_def;
       elab_help = module_help;
       elab_soft = Naming_elab_soft.elab_module_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_module_def;
@@ -1594,6 +1547,7 @@ let global_const ctx cst =
       elab_collection = Naming_elab_collection.elab_gconst;
       elab_call = Naming_elab_call.elab_gconst;
       elab_tuple = Naming_elab_tuple.elab_gconst;
+      elab_invariant = Naming_elab_invariant.elab_gconst;
       elab_help = global_const_help;
       elab_soft = Naming_elab_soft.elab_gconst;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_gconst;
@@ -1624,6 +1578,7 @@ let typedef ctx tdef =
       elab_collection = Naming_elab_collection.elab_typedef;
       elab_call = Naming_elab_call.elab_typedef;
       elab_tuple = Naming_elab_tuple.elab_typedef;
+      elab_invariant = Naming_elab_invariant.elab_typedef;
       elab_help = typedef_help;
       elab_soft = Naming_elab_soft.elab_typedef;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_typedef;

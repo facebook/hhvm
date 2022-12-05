@@ -185,39 +185,10 @@ let make_xhp_attr = function
   | false -> None
 
 (**************************************************************************)
-(* Functions *)
-(**************************************************************************)
-let fun_ genv f =
-  (* TODO[mjt] pull out into elaboration pass *)
-  let f_body =
-    match genv.in_mode with
-    | FileInfo.Mhhi -> { N.fb_ast = [] }
-    | FileInfo.Mstrict ->
-      let fb_ast = f.Aast.f_body.Aast.fb_ast in
-      { N.fb_ast }
-  in
-  Aast.{ f with f_annotation = (); f_body }
-
-(**************************************************************************)
-(* Methods *)
-(**************************************************************************)
-
-let method_ genv m =
-  (* TODO[mjt] pull out into elaboration pass *)
-  let m_body =
-    match genv.in_mode with
-    | FileInfo.Mhhi -> { N.fb_ast = [] }
-    | FileInfo.Mstrict ->
-      let fub_ast = m.N.m_body.N.fb_ast in
-      { N.fb_ast = fub_ast }
-  in
-  Aast.{ m with m_annotation = (); m_body }
-
-(**************************************************************************)
 (* Top level function definitions *)
 (**************************************************************************)
 
-let fun_def_help ctx genv fd =
+let fun_def_help ctx _ fd =
   (* TODO[mjt] pull out into a tcopt elaboration pass *)
   let fd =
     if
@@ -229,9 +200,7 @@ let fun_def_help ctx genv fd =
       fd
   in
   (* TODO[mjt] pull out into an elaboration pass *)
-  let fd = Naming_captures.populate_fun_def fd in
-  let fd_fun = fun_ genv fd.Aast.fd_fun in
-  Aast.{ fd with fd_fun }
+  Naming_captures.populate_fun_def fd
 
 (**************************************************************************)
 (* Classes *)
@@ -369,7 +338,6 @@ let xhp_attribute_decl env (h, cv, tag, maybe_enum) =
 let class_help ctx env c =
   let c = Naming_captures.populate_class_ c in
   let (constructor, smethods, methods) = Aast.split_methods c.Aast.c_methods in
-  let smethods = List.map ~f:(method_ env) smethods in
   let (sprops, props) = Aast.split_vars c.Aast.c_vars in
   let sprops = List.map ~f:(class_prop_static env) sprops in
   let attrs = c.Aast.c_user_attributes in
@@ -378,7 +346,6 @@ let class_help ctx env c =
   let xhp_attrs = List.map ~f:(xhp_attribute_decl env) c.Aast.c_xhp_attrs in
   (* These would be out of order with the old attributes, but that shouldn't matter? *)
   let props = props @ xhp_attrs in
-  let methods = List.map ~f:(method_ env) methods in
   let uses = c.Aast.c_uses in
   let xhp_attr_uses = c.Aast.c_xhp_attr_uses in
   let (c_req_extends, c_req_implements, c_req_class) =
@@ -438,7 +405,6 @@ let class_help ctx env c =
    * so lets forbid it for now.
    *)
   let implements = c.Aast.c_implements in
-  let constructor = Option.map constructor ~f:(method_ env) in
   let (constructor, methods, smethods) =
     interface c constructor methods smethods
   in
@@ -554,6 +520,7 @@ type 'elem pipeline = {
   elab_as_expr: (Naming_elab_as_expr.Env.t, 'elem) elabidation;
   elab_block: (Naming_elab_block.Env.t, 'elem) elaboration;
   elab_pipe: (Naming_elab_pipe.Env.t, 'elem) elaboration;
+  elab_func_body: (Naming_elab_func_body.Env.t, 'elem) elaboration;
   elab_help: Provider_context.t -> genv -> 'elem -> 'elem;
   elab_soft: (Naming_elab_soft.Env.t, 'elem) elaboration;
   elab_everything_sdt: (Naming_elab_everything_sdt.Env.t, 'elem) elaboration;
@@ -590,6 +557,7 @@ let elab_elem
       elab_as_expr;
       elab_block;
       elab_pipe;
+      elab_func_body;
       elab_help;
       elab_soft;
       elab_everything_sdt;
@@ -667,6 +635,8 @@ let elab_elem
   let elem = elab_block elem in
 
   let elem = elab_pipe elem in
+
+  let elem = elab_func_body elem in
 
   (* General expression / statement / xhp elaboration & validation *)
   let elem = elab_help ctx env elem in
@@ -785,6 +755,7 @@ let program ctx ast =
       elab_as_expr = Naming_elab_as_expr.elab_program;
       elab_block = Naming_elab_block.elab_program;
       elab_pipe = Naming_elab_pipe.elab_program;
+      elab_func_body = Naming_elab_func_body.elab_program;
       elab_help = program_help;
       elab_soft = Naming_elab_soft.elab_program;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_program;
@@ -824,6 +795,7 @@ let fun_def ctx fd =
       elab_as_expr = Naming_elab_as_expr.elab_fun_def;
       elab_block = Naming_elab_block.elab_fun_def;
       elab_pipe = Naming_elab_pipe.elab_fun_def;
+      elab_func_body = Naming_elab_func_body.elab_fun_def;
       elab_help = fun_def_help;
       elab_soft = Naming_elab_soft.elab_fun_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_fun_def;
@@ -863,6 +835,7 @@ let class_ ctx c =
       elab_as_expr = Naming_elab_as_expr.elab_class;
       elab_block = Naming_elab_block.elab_class;
       elab_pipe = Naming_elab_pipe.elab_class;
+      elab_func_body = Naming_elab_func_body.elab_class;
       elab_help = class_help;
       elab_soft = Naming_elab_soft.elab_class;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_class;
@@ -902,6 +875,7 @@ let module_ ctx module_ =
       elab_as_expr = Naming_elab_as_expr.elab_module_def;
       elab_block = Naming_elab_block.elab_module_def;
       elab_pipe = Naming_elab_pipe.elab_module_def;
+      elab_func_body = Naming_elab_func_body.elab_module_def;
       elab_help = module_help;
       elab_soft = Naming_elab_soft.elab_module_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_module_def;
@@ -941,6 +915,7 @@ let global_const ctx cst =
       elab_as_expr = Naming_elab_as_expr.elab_gconst;
       elab_block = Naming_elab_block.elab_gconst;
       elab_pipe = Naming_elab_pipe.elab_gconst;
+      elab_func_body = Naming_elab_func_body.elab_gconst;
       elab_help = (fun _ _ elem -> elem);
       elab_soft = Naming_elab_soft.elab_gconst;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_gconst;
@@ -980,6 +955,7 @@ let typedef ctx tdef =
       elab_as_expr = Naming_elab_as_expr.elab_typedef;
       elab_block = Naming_elab_block.elab_typedef;
       elab_pipe = Naming_elab_pipe.elab_typedef;
+      elab_func_body = Naming_elab_func_body.elab_typedef;
       elab_help = (fun _ _ elem -> elem);
       elab_soft = Naming_elab_soft.elab_typedef;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_typedef;

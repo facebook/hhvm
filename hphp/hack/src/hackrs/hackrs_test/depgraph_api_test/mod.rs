@@ -53,9 +53,17 @@ class B extends A implements I {
     // Doing the comparisons on binary search trees avoids issues with hash
     // map/set orderings.
     let expected = btreemap! {
-        DependencyName::Extends(A) => btreeset!{DeclName::Type(T).hash1(), DeclName::Type(B).hash1()},
-        DependencyName::Extends(T) => btreeset!{DeclName::Type(B).hash1()},
-        DependencyName::Extends(I) => btreeset!{DeclName::Type(B).hash1(), DeclName::Type(T).hash1()},
+        DependencyName::Extends(A) => btreeset!{
+            DeclName::Type(T).to_dep(),
+            DeclName::Type(B).to_dep()
+        },
+        DependencyName::Extends(T) => btreeset!{
+            DeclName::Type(B).to_dep()
+        },
+        DependencyName::Extends(I) => btreeset!{
+            DeclName::Type(B).to_dep(),
+            DeclName::Type(T).to_dep()
+        },
     };
     for name in expected.keys() {
         let act = depgraph.get_dependents(*name).collect::<BTreeSet<_>>();
@@ -84,7 +92,7 @@ fn constructor_relation(fb: FacebookInit) -> Result<()> {
 
     // Doing the comparisons on binary search trees avoids issues with hash
     // map/set orderings.
-    let exp = btreeset! {DeclName::Type(B).hash1()};
+    let exp = btreeset! {DeclName::Type(B).to_dep()};
     let act = depgraph
         .get_dependents(DependencyName::Constructor(A))
         .collect::<BTreeSet<_>>();

@@ -1903,12 +1903,12 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "bincode",
- "dashmap",
  "datastore",
  "decl_parser",
  "dep",
  "depgraph_api",
  "folded_decl_provider",
+ "hash",
  "indicatif",
  "intern",
  "lz4",

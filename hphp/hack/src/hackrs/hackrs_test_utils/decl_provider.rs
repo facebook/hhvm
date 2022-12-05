@@ -48,6 +48,6 @@ pub fn make_folded_decl_provider<R: Reason>(
             StoreOpts::Unserialized => Arc::new(NonEvictingStore::new()),
         },
         shallow_decl_provider,
-        Arc::new(DependencyGraph::new()),
+        Arc::new(DependencyGraph::default()),
     )
 }

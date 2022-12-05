@@ -3,19 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::HashSet;
-
-use dashmap::mapref::entry::Entry;
-use dashmap::DashMap;
 use depgraph_api::DeclName;
 use depgraph_api::DepGraphReader;
 use depgraph_api::DepGraphWriter;
 use depgraph_api::DependencyName;
 use depgraph_api::Result;
+use hash::DashMap;
+use hash::HashSet;
 
-pub type DeclNameSet = HashSet<DeclName>;
-
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct DependencyGraph {
     // We store the dependency edges in "reverse dependency" fashion (rdeps)
     // e.g.
@@ -25,15 +21,7 @@ pub struct DependencyGraph {
     // ```
     // would result in
     //   Extends(A) : {Type(B)}
-    pub rdeps: DashMap<DependencyName, DeclNameSet>,
-}
-
-impl DependencyGraph {
-    pub fn new() -> Self {
-        Self {
-            rdeps: DashMap::new(),
-        }
-    }
+    pub rdeps: DashMap<DependencyName, HashSet<DeclName>>,
 }
 
 impl DepGraphReader for DependencyGraph {
@@ -41,25 +29,18 @@ impl DepGraphReader for DependencyGraph {
         &self,
         dependency: DependencyName,
     ) -> Box<dyn Iterator<Item = dep::Dep> + '_> {
-        match self.rdeps.get(&dependency) {
-            Some(e) => Box::new(e.value().clone().into_iter().map(|n| n.hash1())),
-            None => Box::new(std::iter::empty()),
-        }
+        Box::new(
+            self.rdeps
+                .get(&dependency)
+                .into_iter()
+                .flat_map(|e| Vec::from_iter(e.value().iter().map(|n| n.to_dep()))),
+        )
     }
 }
 
 impl DepGraphWriter for DependencyGraph {
     fn add_dependency(&self, dependent: DeclName, dependency: DependencyName) -> Result<()> {
-        match self.rdeps.entry(dependency) {
-            Entry::Vacant(e) => {
-                let mut dependents: DeclNameSet = DeclNameSet::new();
-                dependents.insert(dependent);
-                e.insert(dependents);
-            }
-            Entry::Occupied(mut e) => {
-                e.get_mut().insert(dependent);
-            }
-        }
+        self.rdeps.entry(dependency).or_default().insert(dependent);
         Ok(())
     }
 }

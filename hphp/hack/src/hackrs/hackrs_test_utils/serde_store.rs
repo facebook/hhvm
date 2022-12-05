@@ -7,7 +7,7 @@ use std::fmt::Debug;
 use std::hash::Hash;
 
 use anyhow::Result;
-use dashmap::DashMap;
+use hash::DashMap;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 

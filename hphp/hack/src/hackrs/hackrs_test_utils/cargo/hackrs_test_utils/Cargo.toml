@@ -10,12 +10,12 @@ path = "../../mod.rs"
 [dependencies]
 anyhow = "1.0.65"
 bincode = "1.3.3"
-dashmap = { version = "5", features = ["rayon", "serde"] }
 datastore = { path = "../../../datastore" }
 decl_parser = { path = "../../../decl_parser/cargo/decl_parser" }
 dep = { path = "../../../../depgraph/cargo/dep" }
 depgraph_api = { path = "../../../depgraph_api/cargo/depgraph_api" }
 folded_decl_provider = { path = "../../../folded_decl_provider/cargo/folded_decl_provider" }
+hash = { path = "../../../../utils/hash" }
 indicatif = { version = "0.17.1", features = ["improved_unicode", "rayon", "tokio"] }
 intern = { path = "../../../../utils/intern" }
 lz4 = "1.23.1"

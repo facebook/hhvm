@@ -31,7 +31,7 @@ pub enum DeclName {
 }
 
 impl DeclName {
-    pub fn hash1(&self) -> Dep {
+    pub fn to_dep(&self) -> Dep {
         Dep::new(match self {
             DeclName::Fun(n) => typing_deps_hash::hash1(DepType::Fun, n.as_str().as_bytes()),
             DeclName::Const(n) => typing_deps_hash::hash1(DepType::GConst, n.as_str().as_bytes()),
@@ -123,6 +123,7 @@ impl From<TypeName> for DependencyName {
         Self::Type(name)
     }
 }
+
 /// Organize and administer dependency records.
 pub trait DepGraphWriter: Debug + Send + Sync {
     /// Record a dependency.
@@ -139,14 +140,8 @@ pub trait DepGraphReader: Debug + Send + Sync {
 
 /// A no-op implementation of the `DepGraphReader` & `DepGraphWriter` traits.
 /// All registered edges are thrown away.
-#[derive(Debug, Clone)]
-pub struct NoDepGraph(());
-
-impl NoDepGraph {
-    pub fn new() -> Self {
-        Self(())
-    }
-}
+#[derive(Debug, Clone, Default)]
+pub struct NoDepGraph;
 
 impl DepGraphWriter for NoDepGraph {
     fn add_dependency(&self, _dependent: DeclName, _dependency: DependencyName) -> Result<()> {

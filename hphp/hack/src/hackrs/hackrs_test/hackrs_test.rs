@@ -50,7 +50,7 @@ impl TestContext {
             dummy: PathBuf::new(),
             tmp: tmpdir.path().to_path_buf(),
         });
-        let dependency_graph = Arc::new(DependencyGraph::new());
+        let dependency_graph = Arc::new(DependencyGraph::default());
         let decl_parser =
             DeclParser::new(Arc::new(file_provider::DiskProvider::new(path_ctx, None)));
         let shallow_decl_provider = Arc::new(LazyShallowDeclProvider::new(

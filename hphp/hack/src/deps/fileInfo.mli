@@ -96,6 +96,7 @@ type names = {
   n_consts: SSet.t;
   n_modules: SSet.t;
 }
+[@@deriving show]
 
 (*****************************************************************************)
 (* The record used in our saved state. *)

@@ -132,6 +132,7 @@ type names = {
   n_consts: SSet.t;
   n_modules: SSet.t;
 }
+[@@deriving show]
 
 (** The simplified record stored in saved-state.*)
 type saved_names = {

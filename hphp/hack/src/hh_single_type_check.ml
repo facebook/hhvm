@@ -1733,66 +1733,6 @@ let dump_debug_glean_deps
     Printf.printf "%s\n" (Hh_json.json_to_string ~pretty:true json_obj)
   | None -> Printf.printf "No dependencies\n"
 
-let dump_dep_hashes (nast : Nast.program) : unit =
-  let process_variant x =
-    let open Typing_deps in
-    let dep = Dep.make x in
-    Printf.printf "%s %s\n" (Dep.to_hex_string dep) (Dep.variant_to_string x)
-  in
-  let handler =
-    let open Typing_deps.Dep in
-    let open Aast in
-    object
-      inherit [_] Aast.iter as super
-
-      method! on_fun_ env x =
-        process_variant @@ Fun (snd x.f_name);
-        super#on_fun_ env x
-
-      method! on_method_ cls x =
-        process_variant
-        @@
-        if x.m_static then
-          SMethod (Option.value_exn cls, snd x.m_name)
-        else
-          Method (Option.value_exn cls, snd x.m_name);
-        super#on_method_ cls x
-
-      method! on_class_ _cls x =
-        process_variant @@ Type (snd x.c_name);
-        process_variant @@ Constructor (snd x.c_name);
-        process_variant @@ Extends (snd x.c_name);
-        process_variant @@ AllMembers (snd x.c_name);
-        super#on_class_ (Some (snd x.c_name)) x
-
-      method! on_class_const cls x =
-        process_variant @@ Const (Option.value_exn cls, snd x.cc_id);
-        super#on_class_const cls x
-
-      method! on_class_typeconst_def cls x =
-        process_variant @@ Const (Option.value_exn cls, snd x.c_tconst_name);
-        super#on_class_typeconst_def cls x
-
-      method! on_class_var cls x =
-        process_variant
-        @@
-        if x.cv_is_static then
-          SProp (Option.value_exn cls, snd x.cv_id)
-        else
-          Prop (Option.value_exn cls, snd x.cv_id);
-        super#on_class_var cls x
-
-      method! on_typedef _cls x =
-        process_variant @@ Type (snd x.t_name);
-        super#on_typedef (Some (snd x.t_name)) x
-
-      method! on_gconst cls x =
-        process_variant @@ GConst (snd x.cst_name);
-        super#on_gconst cls x
-    end
-  in
-  handler#on_program None nast
-
 let handle_constraint_mode
     ~do_
     name
@@ -2073,7 +2013,8 @@ let handle_mode
   | Dump_dep_hashes ->
     iter_over_files (fun _ ->
         let nasts = create_nasts ctx files_info in
-        Relative_path.Map.iter nasts ~f:(fun _ nast -> dump_dep_hashes nast))
+        Relative_path.Map.iter nasts ~f:(fun _ nast ->
+            Dep_hash_to_symbol.dump nast))
   | Dump_glean_deps ->
     Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
         ignore @@ Typing_check_utils.check_defs ctx fn fileinfo);
@@ -2868,7 +2809,7 @@ let decl_and_run_mode
         HashSet.add set root;
         Hashtbl.set dbg_deps ~key:obj ~data:set
     in
-    Typing_deps.add_dependency_callback "get_debug_trace" get_debug_trace
+    Typing_deps.add_dependency_callback ~name:"get_debug_trace" get_debug_trace
   | _ -> ());
   let dbg_glean_deps = HashSet.create () in
   (match mode with
@@ -2879,7 +2820,7 @@ let decl_and_run_mode
     let get_debug_trace dep_right dep_left =
       HashSet.add dbg_glean_deps (dep_left, dep_right)
     in
-    Typing_deps.add_dependency_callback "get_debug_trace" get_debug_trace
+    Typing_deps.add_dependency_callback ~name:"get_debug_trace" get_debug_trace
   | _ -> ());
   let ctx =
     if rust_provider_backend then (

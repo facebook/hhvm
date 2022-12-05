@@ -22,6 +22,7 @@
   count_imprecise_types
   decl_parser_options
   default_injector_config
+  dep_hash_to_symbol
   direct_decl_parser
   direct_decl_utils
   gen_deps
@@ -196,6 +197,24 @@
    (:include dune_config/ld-opts.sexp)))
  (libraries core_kernel str parser_schema collections utils_core))
 
+ (executable
+  (name hh_single_fanout)
+  (modules hh_single_fanout)
+  (modes exe byte_complete)
+  (link_flags
+   (:standard
+    (:include dune_config/ld-opts.sexp)))
+ (libraries
+    decl_redecl_service
+    default_injector_config
+    dep_hash_to_symbol
+    direct_decl_service
+    naming_table
+    typing_check_job
+    typing_deps)
+  (preprocess
+    (pps ppx_deriving.std)))
+
 (alias
  (name exe)
  (deps
@@ -208,6 +227,7 @@
   hh_single_type_check.exe
   hh_single_complete.exe
   hh_single_ai.exe
+  hh_single_fanout.exe
   ai/zoncolan.exe))
 
 (alias
@@ -232,4 +252,5 @@
   hh_server.bc.exe
   hh_single_type_check.bc.exe
   hh_single_complete.bc.exe
+  hh_single_fanout.bc.exe
   hh_single_ai.bc.exe))

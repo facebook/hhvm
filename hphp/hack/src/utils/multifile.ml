@@ -14,6 +14,10 @@ open Hh_prelude
   Indeed, there are some features that require mutliple files to be tested.
   For example, newtype has a different meaning depending on the file. *)
 
+type path = string
+
+type content = string
+
 let delim_regexp = "////.*\n"
 
 let delim = Str.regexp delim_regexp
@@ -112,3 +116,27 @@ let print_files_as_multifile files =
     |> List.rev
     |> String.concat ~sep:"\n"
     |> Out_channel.output_string stdout
+
+(** This module handles multifiles with internal file names like
+  'base-xxx.php' and 'changed-xxx.php' *)
+module States : sig
+  val base_files : path -> content Relative_path.Map.t
+
+  val changed_files : path -> content Relative_path.Map.t
+end = struct
+  let files path ~prefix =
+    let content = Sys_utils.cat path in
+    let files = split_multifile_content content in
+    List.filter_map files ~f:(fun (sub_fn, content) ->
+        match String.chop_prefix sub_fn ~prefix:(prefix ^ "-") with
+        | None -> None
+        | Some sub_fn ->
+          Some
+            ( Relative_path.create Relative_path.Dummy (path ^ "--" ^ sub_fn),
+              content ))
+    |> Relative_path.Map.of_list
+
+  let base_files = files ~prefix:"base"
+
+  let changed_files = files ~prefix:"changed"
+end

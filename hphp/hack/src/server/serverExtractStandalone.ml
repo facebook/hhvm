@@ -919,7 +919,7 @@ end = struct
         (obj : Typing_deps.Dep.dependency Typing_deps.Dep.variant) : unit =
       if Dep.is_relevant target root then do_add_dep ctx env obj
     in
-    Typing_deps.add_dependency_callback "add_dependency" add_dependency;
+    Typing_deps.add_dependency_callback ~name:"add_dependency" add_dependency;
     (* Collect dependencies through side effects of typechecking and remove
      * the target function/method from the set of dependencies to avoid
      * declaring it twice.

@@ -136,6 +136,8 @@ module Dep : sig
   val of_hex_string : string -> t
 
   val variant_to_string : 'a variant -> string
+
+  val pp_variant : Format.formatter -> 'a variant -> unit
 end
 
 module DepHashKey : sig
@@ -147,7 +149,7 @@ module DepHashKey : sig
 end
 
 module DepSet : sig
-  type t
+  type t [@@deriving show]
 
   type elt = Dep.t
 
@@ -176,8 +178,14 @@ module DepSet : sig
   val is_empty : t -> bool
 
   val of_list : elt list -> t
+end
 
-  val pp : Format.formatter -> t -> unit
+module DepMap : sig
+  include WrappedMap_sig.S with type key = Dep.t
+
+  val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
+
+  val show : (Format.formatter -> 'a -> unit) -> 'a t -> string
 end
 
 module VisitedSet : sig
@@ -197,7 +205,7 @@ val worker_id : int option ref
 val trace : bool ref
 
 val add_dependency_callback :
-  string ->
+  name:string ->
   (Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> unit) ->
   unit
 
@@ -267,3 +275,6 @@ val add_all_deps : Mode.t -> DepSet.t -> DepSet.t
 module Telemetry : sig
   val depgraph_delta_num_edges : Mode.t -> int option
 end
+
+val dump_current_edge_buffer_in_memory_mode :
+  ?deps_to_symbol_map:'a Dep.variant DepMap.t -> unit -> unit

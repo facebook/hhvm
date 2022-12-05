@@ -62,7 +62,7 @@ let calculate_dep_edges
   List.map paths ~f:(fun path ->
       let dep_edges = HashSet.create () in
       Typing_deps.add_dependency_callback
-        "hh_fanout debug collect deps"
+        ~name:"hh_fanout debug collect deps"
         (fun dependent dependency ->
           HashSet.add dep_edges { dependent; dependency });
 

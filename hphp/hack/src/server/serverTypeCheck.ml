@@ -276,7 +276,10 @@ let parsing genv env to_check cgroup_steps =
         ~ide_files
         ~get_next
         ~trace:true
-        ~cache_decls:false,
+        ~cache_decls:
+          (* Not caching here, otherwise oldification done in redo_type_decl will
+             oldify the new version (and override the real old versions. *)
+          false,
       Errors.empty,
       Relative_path.Set.empty )
   in

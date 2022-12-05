@@ -117,6 +117,7 @@ pub enum Pos {
     Serialize,
     ToOcamlRep,
 )]
+#[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "n_")]
 #[repr(C)]
 pub struct Names {

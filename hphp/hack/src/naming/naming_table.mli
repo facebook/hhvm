@@ -18,7 +18,7 @@ type t [@@deriving show]
 
 type changes_since_baseline
 
-type defs_per_file = FileInfo.names Relative_path.Map.t
+type defs_per_file = FileInfo.names Relative_path.Map.t [@@deriving show]
 
 type saved_state_info = FileInfo.saved Relative_path.Map.t
 

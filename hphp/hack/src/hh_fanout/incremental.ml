@@ -103,7 +103,7 @@ let typecheck_and_get_deps_and_errors_job
       | Some _ ->
         let deps = HashSet.create () in
         Typing_deps.add_dependency_callback
-          "typecheck_and_get_deps_and_errors_job"
+          ~name:"typecheck_and_get_deps_and_errors_job"
           (fun dependent dependency ->
             let dependent = Typing_deps.Dep.make dependent in
             let dependency = Typing_deps.Dep.make dependency in

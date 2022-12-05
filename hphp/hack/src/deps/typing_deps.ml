@@ -259,6 +259,8 @@ module Dep = struct
 
   let to_hex_string = Printf.sprintf "0x%016x"
 
+  let pp fmt dep = Format.fprintf fmt "%s" (to_hex_string dep)
+
   let of_hex_string = int_of_string
 
   let variant_to_string : type a. a variant -> string =
@@ -280,6 +282,17 @@ module Dep = struct
       | Module _ -> "Module"
     in
     prefix ^ " " ^ extract_name dep
+
+  let pp_variant fmt variant =
+    Format.fprintf fmt "%s" (variant_to_string variant)
+end
+
+module DepMap = struct
+  include WrappedMap.Make (Dep)
+
+  let pp pp_data = make_pp Dep.pp pp_data
+
+  let show pp_data x = Format.asprintf "%a" (pp pp_data) x
 end
 
 (***********************************************)
@@ -292,8 +305,8 @@ let trace = ref true
 (** List of callbacks, called when discovering dependency edges *)
 let dependency_callbacks = Caml.Hashtbl.create 0
 
-let add_dependency_callback cb_name cb =
-  Caml.Hashtbl.replace dependency_callbacks cb_name cb
+let add_dependency_callback ~name cb =
+  Caml.Hashtbl.replace dependency_callbacks name cb
 
 (** Set of dependencies used for the custom system
 
@@ -340,6 +353,8 @@ module DepSet = struct
         let str = Printf.sprintf "%x; " x in
         pp_print_string fmt str);
     pp_print_string fmt "}"
+
+  let show s = Format.asprintf "%a" pp s
 end
 
 module DepHashKey = struct
@@ -477,6 +492,23 @@ module CustomGraph = struct
           filter_discovered_deps_batch mode
       end
     )
+
+  let dump_current_edge_buffer ?deps_to_symbol_map () =
+    let hash_to_string dep =
+      match deps_to_symbol_map with
+      | None -> Dep.to_hex_string dep
+      | Some map ->
+        (match DepMap.find_opt dep map with
+        | None -> Dep.to_hex_string dep
+        | Some symbol -> Dep.variant_to_string symbol)
+    in
+    Hashtbl.iter
+      (fun { idependent; idependency } () ->
+        Printf.printf
+          "%s -> %s\n"
+          (hash_to_string idependency)
+          (hash_to_string idependent))
+      discovered_deps_batch
 end
 
 module SaveHumanReadableDepMap : sig
@@ -858,3 +890,6 @@ let add_extend_deps mode acc = CustomGraph.add_extend_deps mode acc
 let add_typing_deps mode acc = CustomGraph.add_typing_deps mode acc
 
 let add_all_deps mode acc = CustomGraph.add_all_deps mode acc
+
+let dump_current_edge_buffer_in_memory_mode =
+  CustomGraph.dump_current_edge_buffer

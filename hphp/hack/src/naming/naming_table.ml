@@ -159,7 +159,7 @@ type t =
   | Backed of Naming_sqlite.local_changes * Naming_sqlite.db_path
 [@@deriving show]
 
-type defs_per_file = FileInfo.names Relative_path.Map.t
+type defs_per_file = FileInfo.names Relative_path.Map.t [@@deriving show]
 
 type saved_state_info = FileInfo.saved Relative_path.Map.t
 

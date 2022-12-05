@@ -75,12 +75,11 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
     match get_node ty with
     | Toption ty -> transform_shapemap ~nullable:true env pos ty shape
     | _ ->
+      let base_type = TUtils.get_base_type env ty in
       (* If the abstract type is unbounded we do not specialize at all *)
       let is_unbound =
-        match ty |> TUtils.get_base_type env |> get_node with
-        (* An enum is considered a valid bound *)
-        | Tnewtype (s, _, _) when Env.is_enum env s -> false
-        | Tgeneric _ -> true
+        match get_node base_type with
+        | Tgeneric (n, _) -> not (DependentKind.is_generic_dep_ty n)
         | _ -> false
       in
       if is_unbound then

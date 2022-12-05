@@ -484,7 +484,10 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Shape fdl ->
     let shp = List.map fdl ~f:(fun (pname, value) -> (pname, expr env value)) in
     N.Shape shp
-  | Aast.Import _ -> ignored_expr_ p
+  (* This has been elaborated away - we will remove this entire function in a
+     subsequent diff so no special handling of the invariant is applied for now
+  *)
+  | Aast.Import (imp, ex) -> N.Import (imp, ex)
   | Aast.Omitted -> N.Omitted
   | Aast.EnumClassLabel (opt_sid, x) -> N.EnumClassLabel (opt_sid, x)
   | Aast.ReadonlyExpr e -> N.ReadonlyExpr (expr env e)
@@ -1098,6 +1101,7 @@ type 'elem pipeline = {
   elab_invariant: (Naming_elab_invariant.Env.t, 'elem) elabidation;
   elab_const_expr: (Naming_elab_const_expr.Env.t, 'elem) elabidation;
   elab_user_attrs: (Naming_elab_user_attributes.Env.t, 'elem) elabidation;
+  elab_import: (Naming_elab_import.Env.t, 'elem) elaboration;
   elab_help: Provider_context.t -> genv -> 'elem -> 'elem;
   elab_soft: (Naming_elab_soft.Env.t, 'elem) elaboration;
   elab_everything_sdt: (Naming_elab_everything_sdt.Env.t, 'elem) elaboration;
@@ -1128,6 +1132,7 @@ let elab_elem
       elab_invariant;
       elab_const_expr;
       elab_user_attrs;
+      elab_import;
       elab_help;
       elab_soft;
       elab_everything_sdt;
@@ -1192,6 +1197,8 @@ let elab_elem
   let (elem, err) = elab_const_expr ~init:err elem in
 
   let (elem, err) = elab_user_attrs ~init:err elem in
+
+  let elem = elab_import elem in
 
   (* General expression / statement / xhp elaboration & validation *)
   let elem = elab_help ctx env elem in
@@ -1305,6 +1312,7 @@ let program ctx ast =
       elab_invariant = Naming_elab_invariant.elab_program;
       elab_const_expr = Naming_elab_const_expr.elab_program;
       elab_user_attrs = Naming_elab_user_attributes.elab_program;
+      elab_import = Naming_elab_import.elab_program;
       elab_help = program_help;
       elab_soft = Naming_elab_soft.elab_program;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_program;
@@ -1338,6 +1346,7 @@ let fun_def ctx fd =
       elab_invariant = Naming_elab_invariant.elab_fun_def;
       elab_const_expr = Naming_elab_const_expr.elab_fun_def;
       elab_user_attrs = Naming_elab_user_attributes.elab_fun_def;
+      elab_import = Naming_elab_import.elab_fun_def;
       elab_help = fun_def_help;
       elab_soft = Naming_elab_soft.elab_fun_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_fun_def;
@@ -1371,6 +1380,7 @@ let class_ ctx c =
       elab_invariant = Naming_elab_invariant.elab_class;
       elab_const_expr = Naming_elab_const_expr.elab_class;
       elab_user_attrs = Naming_elab_user_attributes.elab_class;
+      elab_import = Naming_elab_import.elab_class;
       elab_help = class_help;
       elab_soft = Naming_elab_soft.elab_class;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_class;
@@ -1404,6 +1414,7 @@ let module_ ctx module_ =
       elab_invariant = Naming_elab_invariant.elab_module_def;
       elab_const_expr = Naming_elab_const_expr.elab_module_def;
       elab_user_attrs = Naming_elab_user_attributes.elab_module_def;
+      elab_import = Naming_elab_import.elab_module_def;
       elab_help = module_help;
       elab_soft = Naming_elab_soft.elab_module_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_module_def;
@@ -1437,6 +1448,7 @@ let global_const ctx cst =
       elab_invariant = Naming_elab_invariant.elab_gconst;
       elab_const_expr = Naming_elab_const_expr.elab_gconst;
       elab_user_attrs = Naming_elab_user_attributes.elab_gconst;
+      elab_import = Naming_elab_import.elab_gconst;
       elab_help = global_const_help;
       elab_soft = Naming_elab_soft.elab_gconst;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_gconst;
@@ -1470,6 +1482,7 @@ let typedef ctx tdef =
       elab_invariant = Naming_elab_invariant.elab_typedef;
       elab_const_expr = Naming_elab_const_expr.elab_typedef;
       elab_user_attrs = Naming_elab_user_attributes.elab_typedef;
+      elab_import = Naming_elab_import.elab_typedef;
       elab_help = typedef_help;
       elab_soft = Naming_elab_soft.elab_typedef;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_typedef;

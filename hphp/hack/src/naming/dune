@@ -138,6 +138,7 @@
   naming_elab_everything_sdt
   naming_elab_hints
   naming_elab_hkt
+  naming_elab_import
   naming_elab_invariant
   naming_elab_soft
   naming_elab_tuple

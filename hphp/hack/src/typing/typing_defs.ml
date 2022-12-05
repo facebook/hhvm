@@ -270,9 +270,7 @@ end = struct
             to the LHS id, we are able to report a cycle. *)
     expansions: (Pos_or_decl.t * string) list;
         (** A list of the type defs and type access we have expanded thus far. Used
-            to prevent entering into a cycle when expanding these types.
-            If the boolean is set, then emit an error because we were checking the
-            definition of a type (by type, or newtype, or a type constant) *)
+            to prevent entering into a cycle when expanding these types. *)
   }
 
   let empty_w_cycle_report ~report_cycle = { report_cycle; expansions = [] }

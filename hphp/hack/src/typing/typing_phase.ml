@@ -346,21 +346,33 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     in
     (env, mk (r, Tshape (shape_kind, tym)))
   | Tnewtype (name, tyl, ty) ->
-    if Env.is_enum env name then
-      failwith "should not happen"
-    else
-      let td =
-        Utils.unsafe_opt
-        @@ Decl_provider.get_typedef (Typing_env.get_ctx env) name
+    let td =
+      Utils.unsafe_opt
+      @@ Decl_provider.get_typedef (Typing_env.get_ctx env) name
+    in
+    let should_expand =
+      Typing_env.is_typedef_visible
+        env
+        ~expand_visible_newtype:ety_env.expand_visible_newtype
+        ~name
+        td
+    in
+    if should_expand then
+      let decl_pos = Reason.to_pos r in
+      let (ety_env, has_cycle) =
+        Typing_defs.add_type_expansion_check_cycles ety_env (decl_pos, name)
       in
-      let should_expand =
-        Typing_env.is_typedef_visible
-          env
-          ~expand_visible_newtype:ety_env.expand_visible_newtype
-          ~name
-          td
-      in
-      if should_expand then
+      match has_cycle with
+      | Some initial_taccess_pos_opt ->
+        let ty_err_opt =
+          Option.map initial_taccess_pos_opt ~f:(fun initial_taccess_pos ->
+              Typing_error.(
+                primary
+                @@ Primary.Cyclic_typedef
+                     { pos = initial_taccess_pos; decl_pos }))
+        in
+        ((env, ty_err_opt), MakeType.err r)
+      | None ->
         Decl_typedef_expand.expand_typedef
           ~force_expand:true
           (Typing_env.get_ctx env)
@@ -368,17 +380,17 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
           name
           tyl
         |> localize ~ety_env env
-      else
-        let ((env, e1), ty) = localize ~ety_env env ty in
-        let ((env, e2), tyl) =
-          List.map_env_ty_err_opt
-            env
-            tyl
-            ~f:(localize ~ety_env)
-            ~combine_ty_errs:Typing_error.multiple_opt
-        in
-        let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
-        ((env, ty_err_opt), mk (r, Tnewtype (name, tyl, ty)))
+    else
+      let ((env, e1), ty) = localize ~ety_env env ty in
+      let ((env, e2), tyl) =
+        List.map_env_ty_err_opt
+          env
+          tyl
+          ~f:(localize ~ety_env)
+          ~combine_ty_errs:Typing_error.multiple_opt
+      in
+      let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
+      ((env, ty_err_opt), mk (r, Tnewtype (name, tyl, ty)))
 
 (* Localize type arguments for something whose kinds is [kind] *)
 and localize_targs_by_kind

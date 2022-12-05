@@ -380,7 +380,7 @@ fn enum_from_ocamlrep(variants: EnumVariants<'_>, from_in: bool) -> TokenStream 
         },
         // Both nullary and block variants.
         (false, false) => quote! {
-            if value.is_immediate() {
+            if value.is_int() {
                 match value.as_int().unwrap() { #nullary_arms }
             } else {
                 let block = value.as_block().unwrap();

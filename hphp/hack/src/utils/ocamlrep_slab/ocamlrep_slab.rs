@@ -41,11 +41,11 @@ const WORD_SIZE: usize = mem::size_of::<OpaqueValue<'_>>();
 struct OpaqueValue<'a>(usize, std::marker::PhantomData<&'a ()>);
 
 impl<'a> OpaqueValue<'a> {
-    fn is_immediate(self) -> bool {
+    fn is_int(self) -> bool {
         self.0 & 1 == 1
     }
     fn as_int(self) -> Option<isize> {
-        if self.is_immediate() {
+        if self.is_int() {
             Some((self.0 as isize) >> 1)
         } else {
             None
@@ -61,7 +61,7 @@ impl<'a> OpaqueValue<'a> {
         self.0
     }
     unsafe fn add_ptr_offset(&mut self, diff: isize) {
-        if !self.is_immediate() {
+        if !self.is_int() {
             self.0 = (self.0 as isize + diff) as usize;
         }
     }
@@ -289,7 +289,7 @@ impl<'a> SlabTrait for Slab<'a> {
             } else {
                 // Skip header, then validate pointer fields
                 i += 1;
-                for value in self[i..(i + size)].iter().filter(|v| !v.is_immediate()) {
+                for value in self[i..(i + size)].iter().filter(|v| !v.is_int()) {
                     let ptr = value.to_bits();
                     if ptr < base || ptr % WORD_SIZE != 0 {
                         return Err(InvalidPointer(ptr));

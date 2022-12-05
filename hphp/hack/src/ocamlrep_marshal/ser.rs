@@ -46,7 +46,7 @@ impl From<ExternFlag> for ExternFlags {
 impl FromOcamlRep for ExternFlags {
     fn from_ocamlrep(mut list: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
         let mut res = ExternFlags::empty();
-        while !list.is_immediate() {
+        while !list.is_int() {
             let block = ocamlrep::from::expect_tuple(list, 2)?;
             let flag: ExternFlag = ocamlrep::from::field(block, 0)?;
             res |= flag.into();
@@ -472,7 +472,7 @@ impl<'a, W: Write> State<'a, W> {
         self.init_position_table();
 
         loop {
-            if v.is_immediate() {
+            if v.is_int() {
                 self.extern_int(v.as_int().unwrap())?;
             } else {
                 let b = v.as_block().unwrap();

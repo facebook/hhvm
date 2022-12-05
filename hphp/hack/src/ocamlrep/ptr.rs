@@ -39,10 +39,10 @@ impl UnsafeOcamlPtr {
     }
 
     #[inline(always)]
-    pub const fn is_immediate(self) -> bool {
-        // SAFETY: `Value::is_immediate` only checks the low bit, so it's safe
+    pub const fn is_int(self) -> bool {
+        // SAFETY: `Value::is_int` only checks the low bit, so it's safe
         // to interpret `self.0` as a value (we don't attempt to dereference it)
-        unsafe { self.as_value().is_immediate() }
+        unsafe { self.as_value().is_int() }
     }
 
     #[inline(always)]
@@ -75,7 +75,7 @@ impl ToOcamlRep for UnsafeOcamlPtr {
 
 impl FromOcamlRep for UnsafeOcamlPtr {
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
-        if value.is_immediate() {
+        if value.is_int() {
             return Err(FromError::ExpectedBlock(value.as_int().unwrap()));
         }
         Ok(unsafe { Self::new(value.to_bits()) })
@@ -129,7 +129,7 @@ impl<T> ToOcamlRep for NakedPtr<T> {
 
 impl<T> FromOcamlRep for NakedPtr<T> {
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
-        if value.is_immediate() {
+        if value.is_int() {
             return Err(FromError::ExpectedBlock(value.as_int().unwrap()));
         }
         Ok(Self::new(value.to_bits() as *const T))

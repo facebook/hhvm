@@ -25,7 +25,7 @@ fn expected_int_but_got_block() {
     let value = arena.block_with_size_and_tag(1, 0).build();
     let err = isize::from_ocamlrep(value).err().unwrap();
     match err {
-        ExpectedImmediate(..) => {}
+        ExpectedInt(..) => {}
         _ => panic!("unexpected error: {}", err.to_string()),
     }
 }
@@ -131,7 +131,7 @@ fn expected_unit_struct_but_got_block() {
     let value = arena.block_with_size_and_tag(1, 0).build();
     let err = UnitStruct::from_ocamlrep(value).err().unwrap();
     match err {
-        ExpectedImmediate(..) => {}
+        ExpectedInt(..) => {}
         _ => panic!("unexpected error: {}", err.to_string()),
     }
 }

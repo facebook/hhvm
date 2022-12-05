@@ -32,21 +32,21 @@ pub const fn ocaml_int_to_isize(value: usize) -> isize {
 /// A value, as represented by OCaml. Valid, immutable, and immovable for
 /// lifetime `'a`.
 ///
-/// Either an immediate value (i.e., an integer or a zero-argument variant) or a
-/// pointer to a [`Block`](struct.Block.html) containing fields or binary data.
+/// Either a tagged integer value or a pointer to a [`Block`](struct.Block.html)
+/// containing fields or binary data.
 #[repr(transparent)]
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct Value<'a>(pub(crate) usize, PhantomData<&'a ()>);
 
 impl<'a> Value<'a> {
     #[inline(always)]
-    pub const fn is_immediate(self) -> bool {
+    pub const fn is_int(self) -> bool {
         is_ocaml_int(self.0)
     }
 
     #[inline(always)]
     pub const fn is_block(self) -> bool {
-        !self.is_immediate()
+        !self.is_int()
     }
 
     #[inline(always)]
@@ -56,7 +56,7 @@ impl<'a> Value<'a> {
 
     #[inline(always)]
     pub fn as_int(self) -> Option<isize> {
-        if self.is_immediate() {
+        if self.is_int() {
             Some(ocaml_int_to_isize(self.0))
         } else {
             None
@@ -65,7 +65,7 @@ impl<'a> Value<'a> {
 
     #[inline(always)]
     pub fn as_block(self) -> Option<Block<'a>> {
-        if self.is_immediate() {
+        if self.is_int() {
             return None;
         }
         let block = unsafe {

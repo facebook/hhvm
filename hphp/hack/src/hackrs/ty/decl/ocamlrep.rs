@@ -359,7 +359,7 @@ impl<R: Reason> ToOcamlRep for Ty_<R> {
 // on `shape_field_name_to_ocamlrep`) and don't represent TanySentinel.
 impl<R: Reason> FromOcamlRep for Ty_<R> {
     fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
-        if value.is_immediate() {
+        if value.is_int() {
             match value.as_int().unwrap() {
                 0 => Ok(Ty_::Tthis),
                 1 => Ok(Ty_::Tmixed),

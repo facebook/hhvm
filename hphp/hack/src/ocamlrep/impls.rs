@@ -343,7 +343,7 @@ impl<T: ToOcamlRep> ToOcamlRep for Option<T> {
 
 impl<T: FromOcamlRep> FromOcamlRep for Option<T> {
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
-        if value.is_immediate() {
+        if value.is_int() {
             let _ = from::expect_nullary_variant(value, 0)?;
             Ok(None)
         } else {
@@ -355,7 +355,7 @@ impl<T: FromOcamlRep> FromOcamlRep for Option<T> {
 
 impl<'a, T: FromOcamlRepIn<'a>> FromOcamlRepIn<'a> for Option<T> {
     fn from_ocamlrep_in(value: Value<'_>, alloc: &'a Bump) -> Result<Self, FromError> {
-        if value.is_immediate() {
+        if value.is_int() {
             let _ = from::expect_nullary_variant(value, 0)?;
             Ok(None)
         } else {
@@ -431,7 +431,7 @@ impl<'a, T: FromOcamlRepIn<'a>> FromOcamlRepIn<'a> for &'a [T] {
     fn from_ocamlrep_in(value: Value<'_>, alloc: &'a Bump) -> Result<Self, FromError> {
         let mut len = 0usize;
         let mut hd = value;
-        while !hd.is_immediate() {
+        while !hd.is_int() {
             let block = from::expect_tuple(hd, 2)?;
             len += 1;
             hd = block[1];
@@ -443,7 +443,7 @@ impl<'a, T: FromOcamlRepIn<'a>> FromOcamlRepIn<'a> for &'a [T] {
 
         let mut vec = bumpalo::collections::Vec::with_capacity_in(len, alloc);
         let mut hd = value;
-        while !hd.is_immediate() {
+        while !hd.is_int() {
             let block = from::expect_tuple(hd, 2).unwrap();
             vec.push(from::field_in(block, 0, alloc)?);
             hd = block[1];
@@ -475,7 +475,7 @@ impl<T: FromOcamlRep> FromOcamlRep for Vec<T> {
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
         let mut vec = vec![];
         let mut hd = value;
-        while !hd.is_immediate() {
+        while !hd.is_int() {
             let block = from::expect_tuple(hd, 2)?;
             vec.push(from::field(block, 0)?);
             hd = block[1];
@@ -551,7 +551,7 @@ fn btree_map_from_ocamlrep<K: FromOcamlRep + Ord, V: FromOcamlRep>(
     map: &mut BTreeMap<K, V>,
     value: Value<'_>,
 ) -> Result<(), FromError> {
-    if value.is_immediate() {
+    if value.is_int() {
         let _ = from::expect_nullary_variant(value, 0)?;
         return Ok(());
     }
@@ -568,7 +568,7 @@ fn vec_from_ocaml_map_impl<K: FromOcamlRep, V: FromOcamlRep>(
     vec: &mut Vec<(K, V)>,
     value: Value<'_>,
 ) -> Result<(), FromError> {
-    if value.is_immediate() {
+    if value.is_int() {
         let _ = from::expect_nullary_variant(value, 0)?;
         return Ok(());
     }
@@ -598,7 +598,7 @@ where
     K: FromOcamlRepIn<'a> + Ord,
     V: FromOcamlRepIn<'a>,
 {
-    if value.is_immediate() {
+    if value.is_int() {
         let _ = from::expect_nullary_variant(value, 0)?;
         return Ok(());
     }
@@ -664,7 +664,7 @@ fn btree_set_from_ocamlrep<T: FromOcamlRep + Ord>(
     set: &mut BTreeSet<T>,
     value: Value<'_>,
 ) -> Result<(), FromError> {
-    if value.is_immediate() {
+    if value.is_int() {
         let _ = from::expect_nullary_variant(value, 0)?;
         return Ok(());
     }
@@ -679,7 +679,7 @@ fn vec_from_ocaml_set_impl<T: FromOcamlRep>(
     value: Value<'_>,
     vec: &mut Vec<T>,
 ) -> Result<(), FromError> {
-    if value.is_immediate() {
+    if value.is_int() {
         let _ = from::expect_nullary_variant(value, 0)?;
         return Ok(());
     }
@@ -701,7 +701,7 @@ pub fn vec_from_ocaml_set_in<'a, T: FromOcamlRepIn<'a> + Ord>(
     vec: &mut bumpalo::collections::Vec<'a, T>,
     alloc: &'a Bump,
 ) -> Result<(), FromError> {
-    if value.is_immediate() {
+    if value.is_int() {
         let _ = from::expect_nullary_variant(value, 0)?;
         return Ok(());
     }

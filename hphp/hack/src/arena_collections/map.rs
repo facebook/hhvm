@@ -111,7 +111,7 @@ where
         value: ocamlrep::Value<'_>,
         alloc: &'a bumpalo::Bump,
     ) -> Result<Self, ocamlrep::FromError> {
-        if value.is_immediate() {
+        if value.is_int() {
             let _ = ocamlrep::from::expect_nullary_variant(value, 0)?;
             Ok(Map(None))
         } else {

@@ -21,7 +21,7 @@ pub enum FromError {
     ExpectedBlockTag { expected: u8, actual: u8 },
     ExpectedBool(isize),
     ExpectedChar(isize),
-    ExpectedImmediate(usize),
+    ExpectedInt(usize),
     ExpectedUnit(isize),
     ExpectedZeroTag(u8),
     IntOutOfRange(TryFromIntError),
@@ -51,7 +51,7 @@ impl fmt::Display for FromError {
                 write!(f, "Expected tag value <= {}, but got {}", max, actual)
             }
             ErrorInField(idx, _) => write!(f, "Failed to convert field {}", idx),
-            ExpectedBlock(x) => write!(f, "Expected block, but got immediate value {}", x),
+            ExpectedBlock(x) => write!(f, "Expected block, but got integer value {}", x),
             ExpectedBlockTag { expected, actual } => write!(
                 f,
                 "Expected block with tag {}, but got {}",
@@ -59,8 +59,8 @@ impl fmt::Display for FromError {
             ),
             ExpectedBool(x) => write!(f, "Expected bool, but got {}", x),
             ExpectedChar(x) => write!(f, "Expected char, but got {}", x),
-            ExpectedImmediate(x) => {
-                write!(f, "Expected immediate value, but got block pointer {:p}", x)
+            ExpectedInt(x) => {
+                write!(f, "Expected integer value, but got block pointer {:p}", x)
             }
             ExpectedUnit(x) => write!(f, "Expected (), but got {}", x),
             ExpectedZeroTag(x) => write!(
@@ -100,7 +100,7 @@ impl Error for FromError {
             | ExpectedBlockTag { .. }
             | ExpectedBool(..)
             | ExpectedChar(..)
-            | ExpectedImmediate(..)
+            | ExpectedInt(..)
             | ExpectedUnit(..)
             | ExpectedZeroTag(..)
             | NullaryVariantTagOutOfRange { .. }

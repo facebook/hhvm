@@ -45,6 +45,8 @@ let add_local_ref vars (pos, lid) : vars =
   else
     { vars with free = Local_id.Map.add lid pos vars.free }
 
+let vars = ref empty
+
 (* Walk this AAST, track free variables, and add them to capture lists in
    lambdas.
 
@@ -57,9 +59,7 @@ let add_local_ref vars (pos, lid) : vars =
    }
 
    In this example, only $c is free. *)
-let populate_visitor () =
-  let vars = ref empty in
-
+let visitor =
   object
     inherit [_] Aast.endo as super
 
@@ -179,29 +179,24 @@ let populate_visitor () =
    ($x) ==> $x + $y; // $y is captured here
 *)
 
-let populate_fun_def (fd : Nast.fun_def) : Nast.fun_def =
-  (populate_visitor ())#on_fun_def () fd
+let elab f elem =
+  vars := empty;
+  let elem = f () elem in
+  vars := empty;
+  elem
 
-let populate_class_ (c : Nast.class_) : Nast.class_ =
-  (populate_visitor ())#on_class_ () c
+let elab_fun_def elem = elab visitor#on_fun_def elem
 
-module Env = struct
-  type t = unit
+let elab_typedef elem = elab visitor#on_typedef elem
 
-  let empty = ()
-end
+let elab_module_def elem = elab visitor#on_module_def elem
 
-let elab f ?(env = Env.empty) elem = f env elem
+let elab_gconst elem = elab visitor#on_gconst elem
 
-let elab_fun_def ?env elem = elab (populate_visitor ())#on_fun_def ?env elem
+let elab_class elem = elab visitor#on_class_ elem
 
-let elab_typedef ?env elem = elab (populate_visitor ())#on_typedef ?env elem
+let elab_program elem = elab visitor#on_program elem
 
-let elab_module_def ?env elem =
-  elab (populate_visitor ())#on_module_def ?env elem
+let populate_fun_def (fd : Nast.fun_def) : Nast.fun_def = elab_fun_def fd
 
-let elab_gconst ?env elem = elab (populate_visitor ())#on_gconst ?env elem
-
-let elab_class ?env elem = elab (populate_visitor ())#on_class_ ?env elem
-
-let elab_program ?env elem = elab (populate_visitor ())#on_program ?env elem
+let populate_class_ (c : Nast.class_) : Nast.class_ = elab_class c

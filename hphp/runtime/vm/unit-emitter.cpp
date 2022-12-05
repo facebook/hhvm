@@ -122,12 +122,14 @@ const ArrayData* UnitEmitter::lookupArray(Id id) const {
     return wrapper.ptr();
   }
 
-  assertx(!BlobEncoderHelper<const StringData*>::tl_unitEmitter);
+  auto const oldStrEmitter =
+    BlobEncoderHelper<const StringData*>::tl_unitEmitter;
+
   BlobEncoderHelper<const StringData*>::tl_unitEmitter =
     const_cast<UnitEmitter*>(this);
   SCOPE_EXIT {
     assertx(BlobEncoderHelper<const StringData*>::tl_unitEmitter == this);
-    BlobEncoderHelper<const StringData*>::tl_unitEmitter = nullptr;
+    BlobEncoderHelper<const StringData*>::tl_unitEmitter = oldStrEmitter;
   };
 
   auto const array =
@@ -693,12 +695,16 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
 
   if (isASystemLib()) lazy = false;
 
-  // Have SerDe use this unit's string table for encoding or decoding.
+  // Have SerDe use this unit's string/array table for encoding or decoding.
   assertx(!BlobEncoderHelper<const StringData*>::tl_unitEmitter);
+  assertx(!BlobEncoderHelper<const ArrayData*>::tl_unitEmitter);
   BlobEncoderHelper<const StringData*>::tl_unitEmitter = this;
+  BlobEncoderHelper<const ArrayData*>::tl_unitEmitter = this;
   SCOPE_EXIT {
     assertx(BlobEncoderHelper<const StringData*>::tl_unitEmitter == this);
+    assertx(BlobEncoderHelper<const ArrayData*>::tl_unitEmitter == this);
     BlobEncoderHelper<const StringData*>::tl_unitEmitter = nullptr;
+    BlobEncoderHelper<const ArrayData*>::tl_unitEmitter = nullptr;
   };
 
   auto const seq = [&] (auto const& c, auto const& r, auto const& w) {
@@ -783,48 +789,6 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
       } else {
         assertx(m_entryPointIdCalculated);
       }
-
-      // Arrays
-      seq(
-        m_arrays,
-        [&] (auto& sd, size_t i) {
-          if (lazy && RO::RepoLitstrLazyLoad) {
-            assertx(m_arrays.size() == i);
-            m_arrays.emplace_back(ArrayOrToken::FromToken(sd.advanced()));
-            sd.skipStdString();
-          } else {
-            std::string key;
-            sd(key);
-
-            auto v = [&]{
-                VariableUnserializer vu{
-                  key.data(),
-                  key.size(),
-                  VariableUnserializer::Type::Internal
-                };
-                vu.setUnitFilename(m_filepath);
-                return vu.unserialize();
-              }();
-            assertx(v.isArray());
-            auto ad = v.detach().m_data.parr;
-            ArrayData::GetScalarArray(&ad);
-            auto const id DEBUG_ONLY = mergeArray(ad);
-            assertx(id == i);
-          }
-        },
-        [&] (auto& sd, auto const& wrapper) {
-          auto const str = [&]{
-            VariableSerializer vs{VariableSerializer::Type::Internal};
-            vs.setUnitFilename(m_filepath);
-            return
-              vs.serializeValue(
-                VarNR(const_cast<ArrayData*>(wrapper->ptr())),
-                false
-              ).toCppString();
-          }();
-          sd(str);
-        }
-      );
 
       // RAT arrays
       seq(
@@ -926,12 +890,16 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
       );
     },
     [&] {
-      // Don't access the string table here since we're populating it.
+      // Don't access the string/array table here since we're populating it.
       assertx(BlobEncoderHelper<const StringData*>::tl_unitEmitter == this);
+      assertx(BlobEncoderHelper<const ArrayData*>::tl_unitEmitter == this);
       BlobEncoderHelper<const StringData*>::tl_unitEmitter = nullptr;
+      BlobEncoderHelper<const ArrayData*>::tl_unitEmitter = nullptr;
       SCOPE_EXIT {
         assertx(!BlobEncoderHelper<const StringData*>::tl_unitEmitter);
+        assertx(!BlobEncoderHelper<const ArrayData*>::tl_unitEmitter);
         BlobEncoderHelper<const StringData*>::tl_unitEmitter = this;
+        BlobEncoderHelper<const ArrayData*>::tl_unitEmitter = this;
       };
 
       // Literal strings
@@ -967,6 +935,48 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
           }
         },
         [&] (auto& sd, auto const& wrapper) { sd(wrapper->ptr()); }
+      );
+
+      // Arrays
+      seq(
+        m_arrays,
+        [&] (auto& sd, size_t i) {
+          if (lazy && RO::RepoLitstrLazyLoad) {
+            assertx(m_arrays.size() == i);
+            m_arrays.emplace_back(ArrayOrToken::FromToken(sd.advanced()));
+            sd.skipStdString();
+          } else {
+            std::string key;
+            sd(key);
+
+            auto v = [&]{
+              VariableUnserializer vu{
+                key.data(),
+                key.size(),
+                VariableUnserializer::Type::Internal
+              };
+              vu.setUnitFilename(m_filepath);
+              return vu.unserialize();
+            }();
+            assertx(v.isArray());
+            auto ad = v.detach().m_data.parr;
+            ArrayData::GetScalarArray(&ad);
+            auto const id DEBUG_ONLY = mergeArray(ad);
+            assertx(id == i);
+          }
+        },
+        [&] (auto& sd, auto const& wrapper) {
+          auto const str = [&]{
+            VariableSerializer vs{VariableSerializer::Type::Internal};
+            vs.setUnitFilename(m_filepath);
+            return
+              vs.serializeValue(
+                VarNR(const_cast<ArrayData*>(wrapper->ptr())),
+                false
+              ).toCppString();
+          }();
+          sd(str);
+        }
       );
     }
   );

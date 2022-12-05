@@ -41,6 +41,7 @@ struct Array;
 struct MakeUncountedEnv;
 struct String;
 struct StringData;
+struct UnitEmitter;
 struct Variant;
 
 namespace bespoke {
@@ -816,6 +817,9 @@ template<>
 struct BlobEncoderHelper<const ArrayData*> {
   static void serde(BlobEncoder&, const ArrayData*);
   static void serde(BlobDecoder&, const ArrayData*&);
+
+  // If set, will utilize the UnitEmitter's array table.
+  static __thread UnitEmitter* tl_unitEmitter;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -36,6 +36,7 @@
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/interp-helpers.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 
 #include "hphp/util/exception.h"
 
@@ -986,9 +987,22 @@ ArrayData* ArrayData::toKeyset(bool copy) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Serialization
+
+__thread UnitEmitter* BlobEncoderHelper<const ArrayData*>::tl_unitEmitter{nullptr};
 
 void BlobEncoderHelper<const ArrayData*>::serde(BlobEncoder& encoder,
                                                 const ArrayData* ad) {
+  if (auto const ue = tl_unitEmitter) {
+    if (!ad) {
+      encoder(Id{0});
+      return;
+    }
+    Id id = ue->mergeArray(ad);
+    assertx(id != std::numeric_limits<Id>::max());
+    encoder(id+1);
+    return;
+  }
   if (!ad) {
     encoder(make_tv<KindOfUninit>());
     return;
@@ -999,6 +1013,17 @@ void BlobEncoderHelper<const ArrayData*>::serde(BlobEncoder& encoder,
 
 void BlobEncoderHelper<const ArrayData*>::serde(BlobDecoder& decoder,
                                                 const ArrayData*& ad) {
+  if (auto const ue = tl_unitEmitter) {
+    Id id;
+    decoder(id);
+    if (!id) {
+      ad = nullptr;
+      return;
+    }
+    ad = ue->lookupArray(id-1);
+    return;
+  }
+
   TypedValue tv;
   decoder(tv);
   if (tv.m_type == KindOfUninit) {

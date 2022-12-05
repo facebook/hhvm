@@ -327,37 +327,11 @@ and foreach_stmt env e ae b =
   N.Foreach (e, ae, b)
 
 and as_expr env ae =
-  let handle_v ev =
-    match ev with
-    | (_, p, Aast.Id _) ->
-      Errors.add_naming_error @@ Naming_error.Expected_variable p;
-      let ident = Local_id.make_unscoped "__internal_placeholder" in
-      ((), p, N.Lvar (p, ident))
-    | ev -> expr env ev
-  in
-  let handle_k ek =
-    match ek with
-    | Aast.(_, _, (Lvar _ | Lplaceholder _)) -> ek
-    | (_, p, _) ->
-      Errors.add_naming_error @@ Naming_error.Expected_variable p;
-      let ident = Local_id.make_unscoped "__internal_placeholder" in
-      ((), p, N.Lvar (p, ident))
-  in
   match ae with
-  | Aast.As_v ev ->
-    let ev = handle_v ev in
-    N.As_v ev
-  | Aast.As_kv (k, ev) ->
-    let k = handle_k k in
-    let ev = handle_v ev in
-    N.As_kv (k, ev)
-  | N.Await_as_v (p, ev) ->
-    let ev = handle_v ev in
-    N.Await_as_v (p, ev)
-  | N.Await_as_kv (p, k, ev) ->
-    let k = handle_k k in
-    let ev = handle_v ev in
-    N.Await_as_kv (p, k, ev)
+  | Aast.As_v ev -> N.As_v (expr env ev)
+  | Aast.As_kv (k, ev) -> N.As_kv (expr env k, expr env ev)
+  | N.Await_as_v (p, ev) -> N.Await_as_v (p, expr env ev)
+  | N.Await_as_kv (p, k, ev) -> N.Await_as_kv (p, expr env k, expr env ev)
 
 and try_stmt env b cl fb =
   let fb = branch env fb in
@@ -1094,6 +1068,7 @@ type 'elem pipeline = {
   elab_user_attrs: (Naming_elab_user_attributes.Env.t, 'elem) elabidation;
   elab_import: (Naming_elab_import.Env.t, 'elem) elaboration;
   elab_lvar: (Naming_elab_lvar.Env.t, 'elem) elaboration;
+  elab_as_expr: (Naming_elab_as_expr.Env.t, 'elem) elabidation;
   elab_help: Provider_context.t -> genv -> 'elem -> 'elem;
   elab_soft: (Naming_elab_soft.Env.t, 'elem) elaboration;
   elab_everything_sdt: (Naming_elab_everything_sdt.Env.t, 'elem) elaboration;
@@ -1126,6 +1101,7 @@ let elab_elem
       elab_user_attrs;
       elab_import;
       elab_lvar;
+      elab_as_expr;
       elab_help;
       elab_soft;
       elab_everything_sdt;
@@ -1194,6 +1170,8 @@ let elab_elem
   let elem = elab_import elem in
 
   let elem = elab_lvar elem in
+
+  let (elem, err) = elab_as_expr ~init:err elem in
 
   (* General expression / statement / xhp elaboration & validation *)
   let elem = elab_help ctx env elem in
@@ -1309,6 +1287,7 @@ let program ctx ast =
       elab_user_attrs = Naming_elab_user_attributes.elab_program;
       elab_import = Naming_elab_import.elab_program;
       elab_lvar = Naming_elab_lvar.elab_program;
+      elab_as_expr = Naming_elab_as_expr.elab_program;
       elab_help = program_help;
       elab_soft = Naming_elab_soft.elab_program;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_program;
@@ -1344,6 +1323,7 @@ let fun_def ctx fd =
       elab_user_attrs = Naming_elab_user_attributes.elab_fun_def;
       elab_import = Naming_elab_import.elab_fun_def;
       elab_lvar = Naming_elab_lvar.elab_fun_def;
+      elab_as_expr = Naming_elab_as_expr.elab_fun_def;
       elab_help = fun_def_help;
       elab_soft = Naming_elab_soft.elab_fun_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_fun_def;
@@ -1379,6 +1359,7 @@ let class_ ctx c =
       elab_user_attrs = Naming_elab_user_attributes.elab_class;
       elab_import = Naming_elab_import.elab_class;
       elab_lvar = Naming_elab_lvar.elab_class;
+      elab_as_expr = Naming_elab_as_expr.elab_class;
       elab_help = class_help;
       elab_soft = Naming_elab_soft.elab_class;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_class;
@@ -1414,6 +1395,7 @@ let module_ ctx module_ =
       elab_user_attrs = Naming_elab_user_attributes.elab_module_def;
       elab_import = Naming_elab_import.elab_module_def;
       elab_lvar = Naming_elab_lvar.elab_module_def;
+      elab_as_expr = Naming_elab_as_expr.elab_module_def;
       elab_help = module_help;
       elab_soft = Naming_elab_soft.elab_module_def;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_module_def;
@@ -1449,6 +1431,7 @@ let global_const ctx cst =
       elab_user_attrs = Naming_elab_user_attributes.elab_gconst;
       elab_import = Naming_elab_import.elab_gconst;
       elab_lvar = Naming_elab_lvar.elab_gconst;
+      elab_as_expr = Naming_elab_as_expr.elab_gconst;
       elab_help = global_const_help;
       elab_soft = Naming_elab_soft.elab_gconst;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_gconst;
@@ -1484,6 +1467,7 @@ let typedef ctx tdef =
       elab_user_attrs = Naming_elab_user_attributes.elab_typedef;
       elab_import = Naming_elab_import.elab_typedef;
       elab_lvar = Naming_elab_lvar.elab_typedef;
+      elab_as_expr = Naming_elab_as_expr.elab_typedef;
       elab_help = typedef_help;
       elab_soft = Naming_elab_soft.elab_typedef;
       elab_everything_sdt = Naming_elab_everything_sdt.elab_typedef;

@@ -1840,21 +1840,12 @@ let handle_constraint_mode
   in
   iter_over_files process_multifile
 
-let print_files files =
-  let print_filename = not @@ Int.equal (Relative_path.Map.cardinal files) 1 in
-  Relative_path.Map.iter
-    ~f:(fun fn new_contents ->
-      if print_filename then
-        Printf.printf "//// %s\n" (Relative_path.to_absolute fn);
-      Out_channel.output_string stdout new_contents)
-    files
-
 let apply_patches files_contents patches =
   if List.length patches <= 0 then
     print_endline "No patches"
   else
     ServerRefactorTypes.apply_patches_to_file_contents files_contents patches
-    |> print_files
+    |> Multifile.print_files_as_multifile
 
 let handle_mode
     mode
@@ -2271,7 +2262,7 @@ let handle_mode
           patches
       in
       if List.is_empty patches then
-        print_files files_contents
+        Multifile.print_files_as_multifile files_contents
       else
         go files_info files_contents
     in

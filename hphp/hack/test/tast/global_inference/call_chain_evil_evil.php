@@ -15,6 +15,7 @@ class B extends A {
     return A::f($x);
   }
 }
+
 //// file3.php
 <?hh
 

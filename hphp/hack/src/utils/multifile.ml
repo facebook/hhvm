@@ -9,20 +9,30 @@
 
 open Hh_prelude
 
-(* This allows one to fake having multiple files in one file. This
- * is used only in unit test files.
- * Indeed, there are some features that require mutliple files to be tested.
- * For example, newtype has a different meaning depending on the file.
- *)
-let rec make_files = function
-  | [] -> []
-  | Str.Delim header :: Str.Text content :: rl ->
-    let pattern = Str.regexp "////" in
-    let header = Str.global_replace pattern "" header in
-    let pattern = Str.regexp "[ |\n]*" in
-    let filename = Str.global_replace pattern "" header in
-    (filename, content) :: make_files rl
-  | _ -> assert false
+(** This allows one to fake having multiple files in one file. This
+  is used only in unit test files.
+  Indeed, there are some features that require mutliple files to be tested.
+  For example, newtype has a different meaning depending on the file. *)
+
+let delim_regexp = "////.*\n"
+
+let delim = Str.regexp delim_regexp
+
+let split_multifile_content content =
+  let rec make_files = function
+    | [] -> []
+    | Str.Delim header :: Str.Text content :: rl ->
+      let pattern = Str.regexp "\n////" in
+      let header = Str.global_replace pattern "" header in
+      let pattern = Str.regexp "[ |\n]*" in
+      let filename = Str.global_replace pattern "" header in
+      (filename, content) :: make_files rl
+    | _ -> assert false
+  in
+  let contents =
+    Str.full_split (Str.regexp ("\n" ^ delim_regexp)) ("\n" ^ content)
+  in
+  make_files contents
 
 (* We have some hacky "syntax extensions" to have one file contain multiple
  * files, which can be located at arbitrary paths. This is useful e.g. for
@@ -46,10 +56,8 @@ let file_to_file_list file =
   in
   let abs_fn = Relative_path.to_absolute file in
   let content = Sys_utils.cat abs_fn in
-  let delim = Str.regexp "////.*\n" in
   if Str.string_match delim content 0 then
-    let contentl = Str.full_split delim content in
-    let files = make_files contentl in
+    let files = split_multifile_content content in
     List.map files ~f:(fun (sub_fn, c) ->
         (Relative_path.create Relative_path.Dummy (abs_fn ^ "--" ^ sub_fn), c))
   else if String.is_prefix content ~prefix:"// @directory " then (
@@ -75,10 +83,10 @@ let file_to_file_list file =
 
 let file_to_files file = file_to_file_list file |> Relative_path.Map.of_list
 
-(* Given a path of the form `sample/file/name.php--another/file/name.php`,
-   it will read in the portion of `sample/file/name.php` corresponding
-   to `another/file/name.php`. *)
-let read_file_from_multifile path =
+(** Given a path of the form `sample/file/name.php--another/file/name.php`,
+  read in the portion of multifile `sample/file/name.php` corresponding
+  to `another/file/name.php`. *)
+let read_file_from_multifile path : string list =
   let splitter = ".php--" in
   let ix = String_utils.substring_index splitter path in
   if ix >= 0 then
@@ -93,3 +101,14 @@ let read_file_from_multifile path =
     | Some content -> Str.split (Str.regexp "\n") content
   else
     []
+
+let print_files_as_multifile files =
+  if Int.equal (Relative_path.Map.cardinal files) 1 then
+    Out_channel.output_string stdout (Relative_path.Map.choose files |> snd)
+  else
+    Relative_path.Map.fold files ~init:[] ~f:(fun fn content acc ->
+        content
+        :: Printf.sprintf "//// %s" (Relative_path.to_absolute fn) :: acc)
+    |> List.rev
+    |> String.concat ~sep:"\n"
+    |> Out_channel.output_string stdout

@@ -281,11 +281,14 @@ let process_xrefs ctx symbols prog : XRefs.t * Fact_acc.t =
 
 let process_xrefs_and_calls ctx prog File_info.{ path; tast; symbols; _ } =
   Fact_acc.set_ownership_unit prog (Some path);
-  let (XRefs.{ fact_map; pos_map; _ }, prog) = process_xrefs ctx symbols prog in
+  let ((XRefs.{ fact_map; pos_map; _ } as xrefs), prog) =
+    process_xrefs ctx symbols prog
+  in
   let prog =
     if Fact_id.Map.is_empty fact_map then
       prog
     else
       Add_fact.file_xrefs ~path fact_map prog |> snd
   in
-  process_calls ctx path tast pos_map prog
+  let prog = process_calls ctx path tast pos_map prog in
+  (prog, xrefs)

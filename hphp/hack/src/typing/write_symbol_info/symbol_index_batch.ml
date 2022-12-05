@@ -44,8 +44,10 @@ let build_json ctx files_info ~ownership =
   let index_file progress file_info =
     Fact_acc.set_ownership_unit progress (Some file_info.File_info.path);
     let progress = process_source_text ctx progress file_info in
-    let progress = Symbol_index_decls.process_decls ctx progress file_info in
-    Symbol_index_xrefs.process_xrefs_and_calls ctx progress file_info
+    let (progress, _xrefs) =
+      Symbol_index_xrefs.process_xrefs_and_calls ctx progress file_info
+    in
+    Symbol_index_decls.process_decls ctx progress file_info
   in
   let progress = Fact_acc.init ~ownership in
   List.fold files_info ~init:progress ~f:index_file |> Fact_acc.to_json

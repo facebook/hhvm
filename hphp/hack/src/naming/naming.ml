@@ -489,9 +489,6 @@ and expr_ env p (e : Nast.expr_) =
        is being used for instance property access; see the case below for
        handling nullsafe instance method calls to see how this works *)
     N.Obj_get (expr env e1, expr_obj_get_name env e2, nullsafe, prop_or_method)
-  | Aast.Array_get ((_, p, Aast.Lvar x), None) ->
-    let id = ((), p, N.Lvar x) in
-    N.Array_get (id, None)
   | Aast.Array_get (e1, e2) -> N.Array_get (expr env e1, oexpr env e2)
   | Aast.(Class_get (class_id, cg_expr, prop_or_method)) ->
     N.Class_get (class_id, cg_expr, prop_or_method)
@@ -522,9 +519,6 @@ and expr_ env p (e : Nast.expr_) =
         }
   | Aast.ET_Splice e -> N.ET_Splice (expr env e)
   | Aast.Unop (uop, e) -> N.Unop (uop, expr env e)
-  | Aast.Binop ((Ast_defs.Eq None as op), lv, e2) ->
-    let e2 = expr env e2 in
-    N.Binop (op, expr env lv, e2)
   | Aast.Binop ((Ast_defs.Eq _ as bop), e1, e2) ->
     N.Binop (bop, expr env e1, expr env e2)
   | Aast.Binop (bop, e1, e2) -> N.Binop (bop, expr env e1, expr env e2)

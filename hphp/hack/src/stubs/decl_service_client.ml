@@ -20,6 +20,8 @@ let rpc_get_type_kind _ _ = failwith "not implemented"
 
 module Positioned = struct
   let rpc_get_typedef_path _ _ = failwith "not implemented"
+
+  let rpc_get_full_pos _ _ _ _ = failwith "not implemented"
 end
 
 module Slow = struct

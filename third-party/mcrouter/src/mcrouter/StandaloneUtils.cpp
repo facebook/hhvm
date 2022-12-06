@@ -184,6 +184,16 @@ void validateConfigAndExit(const McrouterOptions& libmcrouterOptions) {
   _exit(0);
 }
 
+template <
+    class RouterInfo,
+    template <class>
+    class RequestHandler,
+    template <class>
+    class ThriftRequestHandler>
+void validateConfigAndExitThrift(const McrouterOptions& libmcrouterOptions) {
+  validateConfigAndExit<RouterInfo, RequestHandler>(libmcrouterOptions);
+}
+
 template <class RouterInfo, template <class> class RequestHandler>
 void run(
     const McrouterOptions& libmcrouterOptions,
@@ -197,14 +207,19 @@ void run(
   }
 }
 
-template <class RouterInfo, template <class> class RequestHandler>
+template <
+    class RouterInfo,
+    template <class>
+    class RequestHandler,
+    template <class>
+    class ThriftRequestHandler>
 void runDual(
     const McrouterOptions& libmcrouterOptions,
     const McrouterStandaloneOptions& standaloneOptions,
     StandalonePreRunCb preRunCb) {
   LOG(INFO) << "Starting dual mode" << RouterInfo::name << " router";
 
-  if (!runServerDual<RouterInfo, RequestHandler>(
+  if (!runServerDual<RouterInfo, RequestHandler, ThriftRequestHandler>(
           libmcrouterOptions, standaloneOptions, std::move(preRunCb))) {
     exit(kExitStatusTransientError);
   }
@@ -514,7 +529,7 @@ void runStandaloneMcrouter(
       if (standaloneOptions.use_thrift) {
         CALL_BY_ROUTER_NAME_THRIFT(
             standaloneOptions.carbon_router_name,
-            validateConfigAndExit,
+            validateConfigAndExitThrift,
             libmcrouterOptions);
       } else {
         CALL_BY_ROUTER_NAME(

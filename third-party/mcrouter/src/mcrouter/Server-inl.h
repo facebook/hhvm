@@ -280,7 +280,12 @@ void setupRouter(
   }
 }
 
-template <class RouterInfo, template <class> class RequestHandler>
+template <
+    class RouterInfo,
+    template <class>
+    class RequestHandler,
+    template <class>
+    class ThriftRequestHandler>
 bool runServerDual(
     const McrouterOptions& mcrouterOpts,
     const McrouterStandaloneOptions& standaloneOpts,
@@ -371,8 +376,8 @@ bool runServerDual(
 
     // Create thrift handler
     thriftServer->setInterface(
-        std::make_shared<ServerOnRequestThrift<RouterInfo>>(
-            serverOnRequestMap));
+        std::make_shared<ThriftRequestHandler<ServerOnRequest<RouterInfo>>>(
+            std::move(serverOnRequestMap)));
 
     // Add Identity Hook
     thriftServer->setClientIdentityHook(McSSLUtil::getClientIdentityHook());

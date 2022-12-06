@@ -10,8 +10,6 @@
 #include <folly/io/async/EventBase.h>
 #include <cassert>
 
-#include <mcrouter/lib/network/gen/Memcache.h>
-#include <mcrouter/lib/network/gen/gen-cpp2/Memcache.h>
 #include "mcrouter/CarbonRouterClient.h"
 #include "mcrouter/RequestAclChecker.h"
 #include "mcrouter/config.h"
@@ -91,10 +89,15 @@ class ServerOnRequest {
   }
 
   template <class Request>
-  void onRequestThrift(McThriftCallback<ReplyT<Request>>&& ctx, Request&& req) {
+  void onRequestThrift(
+      std::unique_ptr<apache::thrift::HandlerCallback<
+          typename Request::reply_type>>&& callback,
+      Request&& req) {
     if (HasKeyTrait<Request>::value) {
       req.key_ref()->update();
     }
+    McThriftCallback<ReplyT<Request>> ctx =
+        McThriftCallback<typename Request::reply_type>(std::move(callback));
     send(
         std::move(ctx),
         std::move(req),
@@ -191,213 +194,6 @@ class ServerOnRequest {
   const bool remoteThread_{false};
   const RequestAclChecker<RouterInfo> aclChecker_;
 };
-
-template <class RouterInfo>
-class ServerOnRequestThrift : public thrift::MemcacheSvIf {
- public:
-  ServerOnRequestThrift(
-      std::unordered_map<
-          folly::EventBase*,
-          std::shared_ptr<ServerOnRequest<RouterInfo>>> serverOnRequestMap)
-      : serverOnRequestMap_(std::move(serverOnRequestMap)) {}
-
-  // thrift
-  void async_eb_mcVersion(
-      std::unique_ptr<apache::thrift::HandlerCallback<McVersionReply>> callback,
-      const McVersionRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-  void async_eb_mcGet(
-      std::unique_ptr<apache::thrift::HandlerCallback<McGetReply>> callback,
-      const McGetRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  void async_eb_mcSet(
-      std::unique_ptr<apache::thrift::HandlerCallback<McSetReply>> callback,
-      const McSetRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  void async_eb_mcDelete(
-      std::unique_ptr<apache::thrift::HandlerCallback<McDeleteReply>> callback,
-      const McDeleteRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  void async_eb_mcLeaseGet(
-      std::unique_ptr<apache::thrift::HandlerCallback<McLeaseGetReply>>
-          callback,
-      const McLeaseGetRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  void async_eb_mcLeaseSet(
-      std::unique_ptr<apache::thrift::HandlerCallback<McLeaseSetReply>>
-          callback,
-      const McLeaseSetRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  void async_eb_mcAdd(
-      std::unique_ptr<apache::thrift::HandlerCallback<McAddReply>> callback,
-      const McAddRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  void async_eb_mcReplace(
-      std::unique_ptr<apache::thrift::HandlerCallback<McReplaceReply>> callback,
-      const McReplaceRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  void async_eb_mcGets(
-      std::unique_ptr<apache::thrift::HandlerCallback<McGetsReply>> callback,
-      const McGetsRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  void async_eb_mcCas(
-      std::unique_ptr<apache::thrift::HandlerCallback<McCasReply>> callback,
-      const McCasRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  void async_eb_mcIncr(
-      std::unique_ptr<apache::thrift::HandlerCallback<McIncrReply>> callback,
-      const McIncrRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  void async_eb_mcDecr(
-      std::unique_ptr<apache::thrift::HandlerCallback<McDecrReply>> callback,
-      const McDecrRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  void async_eb_mcMetaget(
-      std::unique_ptr<apache::thrift::HandlerCallback<McMetagetReply>> callback,
-      const McMetagetRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  void async_eb_mcAppend(
-      std::unique_ptr<apache::thrift::HandlerCallback<McAppendReply>> callback,
-      const McAppendRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  void async_eb_mcPrepend(
-      std::unique_ptr<apache::thrift::HandlerCallback<McPrependReply>> callback,
-      const McPrependRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  void async_eb_mcTouch(
-      std::unique_ptr<apache::thrift::HandlerCallback<McTouchReply>> callback,
-      const McTouchRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  void async_eb_mcFlushRe(
-      std::unique_ptr<apache::thrift::HandlerCallback<McFlushReReply>> callback,
-      const McFlushReRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  void async_eb_mcFlushAll(
-      std::unique_ptr<apache::thrift::HandlerCallback<McFlushAllReply>>
-          callback,
-      const McFlushAllRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  void async_eb_mcGat(
-      std::unique_ptr<apache::thrift::HandlerCallback<McGatReply>> callback,
-      const McGatRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  void async_eb_mcGats(
-      std::unique_ptr<apache::thrift::HandlerCallback<McGatsReply>> callback,
-      const McGatsRequest& request) override final {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  void async_eb_mcExec(
-      std::unique_ptr<apache::thrift::HandlerCallback<McExecReply>> callback,
-      const McExecRequest& request) {
-    onRequestThriftHelper<std::remove_reference_t<decltype(request)>>(
-        request, std::move(callback));
-  }
-
-  // Return this factory instead of MemcacheAsyncProcessor from getProcessor(),
-  // so that we don't use the default statically registered handlers
-  class MemcacheAsyncProcessorCustomHandlers
-      : public thrift::MemcacheAsyncProcessor {
-   public:
-    explicit MemcacheAsyncProcessorCustomHandlers(thrift::MemcacheSvIf* svif)
-        : MemcacheAsyncProcessor(svif) {
-      clearEventHandlers();
-    }
-  };
-  std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor()
-      override final {
-    return std::make_unique<MemcacheAsyncProcessorCustomHandlers>(this);
-  }
-
- private:
-  std::unordered_map<
-      folly::EventBase*,
-      std::shared_ptr<ServerOnRequest<RouterInfo>>>
-      serverOnRequestMap_;
-  static thread_local ServerOnRequest<RouterInfo>* serverOnRequest_;
-
-  template <class Request>
-  void onRequestThriftHelper(
-      const Request& request,
-      std::unique_ptr<apache::thrift::HandlerCallback<ReplyT<Request>>>
-          callback) {
-    getServerOnRequest(callback->getEventBase())
-        ->onRequestThrift(
-            McThriftCallback<ReplyT<Request>>(std::move(callback)),
-            std::move(const_cast<std::remove_const_t<Request>&>(request)));
-  }
-
-  // Returns the ServerOnRequest* associated with this evb
-  ServerOnRequest<RouterInfo>* getServerOnRequest(folly::EventBase* evb) {
-    if (serverOnRequest_ == nullptr) {
-      auto it = serverOnRequestMap_.find(evb);
-      CHECK(it != serverOnRequestMap_.end());
-      serverOnRequest_ = it->second.get();
-    }
-    return serverOnRequest_;
-  }
-};
-
-template <class RouterInfo>
-thread_local ServerOnRequest<RouterInfo>*
-    ServerOnRequestThrift<RouterInfo>::serverOnRequest_{nullptr};
 
 } // namespace mcrouter
 } // namespace memcache

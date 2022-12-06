@@ -333,12 +333,12 @@ impl ToplevelSymbolHash {
     }
 
     #[inline(always)]
-    pub fn to_bytes(self) -> [u8; 8] {
+    pub fn to_be_bytes(self) -> [u8; 8] {
         self.0.to_be_bytes()
     }
 
     #[inline(always)]
-    pub fn from_bytes(bs: [u8; 8]) -> Self {
+    pub fn from_be_bytes(bs: [u8; 8]) -> Self {
         Self(u64::from_be_bytes(bs))
     }
 
@@ -383,42 +383,24 @@ impl ToplevelCanonSymbolHash {
 }
 
 /// The hash of a toplevel symbol name, or the hash of a class member name, or
-/// an Extends or AllMembers hash for a class name.
-/// See `Typing_deps.Dep.(dependency variant)`.
-#[derive(
-    Copy,
-    Clone,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    serde::Deserialize,
-    serde::Serialize
-)]
+/// an Extends, Constructor, or AllMembers hash for a class name.
+/// See `Typing_deps.Dep.(dependency variant)`. and Dep.make in typing_deps.ml
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(serde::Deserialize, serde::Serialize)]
 #[derive(derive_more::UpperHex, derive_more::LowerHex)]
 pub struct DependencyHash(pub u64);
 
 impl DependencyHash {
     pub fn of_member(
         dep_type: typing_deps_hash::DepType,
-        class_symbol: ToplevelSymbolHash,
+        type_hash: ToplevelSymbolHash,
         member_name: &str,
-    ) -> DependencyHash {
-        let type_hash =
-            typing_deps_hash::hash1(typing_deps_hash::DepType::Type, &class_symbol.to_bytes());
+    ) -> Self {
         Self(typing_deps_hash::hash2(
             dep_type,
-            type_hash,
+            type_hash.0,
             member_name.as_bytes(),
         ))
-    }
-
-    pub fn of_class(
-        dep_type: typing_deps_hash::DepType,
-        class_symbol: ToplevelSymbolHash,
-    ) -> DependencyHash {
-        Self(typing_deps_hash::hash1(dep_type, &class_symbol.to_bytes()))
     }
 }
 
@@ -451,12 +433,12 @@ impl From<DependencyHash> for ToplevelSymbolHash {
 
 impl DependencyHash {
     #[inline(always)]
-    pub fn to_bytes(self) -> [u8; 8] {
+    pub fn to_be_bytes(self) -> [u8; 8] {
         self.0.to_be_bytes()
     }
 
     #[inline(always)]
-    pub fn from_bytes(bs: [u8; 8]) -> Self {
+    pub fn from_be_bytes(bs: [u8; 8]) -> Self {
         Self(u64::from_be_bytes(bs))
     }
 }

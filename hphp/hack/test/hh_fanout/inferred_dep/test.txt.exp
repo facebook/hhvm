@@ -11,7 +11,7 @@ Fanout calculation on line 43
                                                   'variant': 'Type Bar'},
                                    'dependent': {'hash': '3296325908251159198',
                                                  'variant': 'Fun uses_foo'}},
-                                  {'dependency': {'hash': '4446127974083881620',
+                                  {'dependency': {'hash': '-3721847368725977196',
                                                   'variant': 'Method '
                                                              'Foo::getSomething'},
                                    'dependent': {'hash': '3296325908251159198',
@@ -25,7 +25,7 @@ Fanout calculation on line 43
                                                   'variant': 'Type Foo'},
                                    'dependent': {'hash': '3296325908251159198',
                                                  'variant': 'Fun uses_foo'}},
-                                  {'dependency': {'hash': '-2679637873881058158',
+                                  {'dependency': {'hash': '947846550776342478',
                                                   'variant': 'Constructor Foo'},
                                    'dependent': {'hash': '3296325908251159198',
                                                  'variant': 'Fun uses_foo'}}]},

@@ -147,7 +147,7 @@ module Dep = struct
   let make_member_dep_from_type_dep : t -> Member.t -> t =
    fun type_hash -> function
     | Member.Const name -> hash2 (dep_kind_to_enum KConst) type_hash name
-    | Member.Constructor -> type_hash
+    | Member.Constructor -> hash2 (dep_kind_to_enum KConstructor) type_hash ""
     | Member.Prop name -> hash2 (dep_kind_to_enum KProp) type_hash name
     | Member.SProp name -> hash2 (dep_kind_to_enum KSProp) type_hash name
     | Member.Method name -> hash2 (dep_kind_to_enum KMethod) type_hash name
@@ -164,7 +164,8 @@ module Dep = struct
     | GConstName name1 -> hash1 (dep_kind_to_enum KGConstName) name1
     | Module mname -> hash1 (dep_kind_to_enum KModule) mname
     (* Deps on members *)
-    | Constructor name1 -> hash1 (dep_kind_to_enum KConstructor) name1
+    | Constructor name1 ->
+      make_member_dep_from_type_dep (make (Type name1)) Member.Constructor
     | Const (name1, name2) ->
       make_member_dep_from_type_dep (make (Type name1)) (Member.Const name2)
     | Prop (name1, name2) ->

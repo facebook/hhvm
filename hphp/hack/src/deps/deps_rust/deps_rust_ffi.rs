@@ -79,11 +79,12 @@ unsafe extern "C" fn hash1_ocaml(dep_type_tag: usize, name1: usize) -> usize {
 ///
 /// # Safety
 ///
-/// Both `name1` and `name2` must point to valid OCaml strings. They must not be
-/// concurrently modified while this function holds a reference to them.
+/// `type_hash` must be a valid OCaml int.
+/// `member_name` must point to a valid OCaml string. It must not be concurrently
+/// modified while this function holds a reference to it.
 ///
 /// This function is only called from OCaml, and it is passed values allocated
-/// entirely by OCaml code, so the argument will be valid strings. The OCaml
+/// entirely by OCaml code, so the argument will be a valid string. The OCaml
 /// runtime is interrupted by the FFI call to this function, none of the
 /// transitively called functions from here call into the OCaml runtime, and we
 /// do not spawn threads in our OCaml code, so the pointed-to value will not be
@@ -103,9 +104,14 @@ unsafe extern "C" fn hash2_ocaml(
             .as_int()
             .expect("dep_type_tag could not be converted to int");
         let dep_type = tag_to_dep_type(dep_type_tag as u8);
+
+        // Ocaml ints are i63, signed extended to i64. clear the MSB while
+        // converting to u64, to match FromOcamlRep for Dep.
         let type_hash = type_hash
             .as_int()
-            .expect("type_hash could not be converted to int") as u64;
+            .expect("type_hash could not be converted to int");
+        let type_hash = type_hash as u64 & !(1 << 63);
+
         let member_name = member_name
             .as_byte_string()
             .expect("member_name could not be converted to byte string");

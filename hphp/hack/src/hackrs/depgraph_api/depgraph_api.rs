@@ -6,6 +6,7 @@
 use std::fmt::Debug;
 
 use dep::Dep;
+use pos::ClassConstName;
 use pos::ConstName;
 use pos::FunName;
 use pos::MethodName;
@@ -75,7 +76,7 @@ pub enum DependencyName {
     /// implements`, etc.)
     Extends(TypeName),
     /// Represents something depending on a class constant.
-    Const(ConstName),
+    Const(TypeName, ClassConstName),
     /// Represents something depending on a class constructor.
     Constructor(TypeName),
     /// Represents something depending on a class's instance property.
@@ -108,7 +109,7 @@ impl From<FunName> for DependencyName {
 
 impl From<ConstName> for DependencyName {
     fn from(name: ConstName) -> Self {
-        Self::Const(name)
+        Self::GConst(name)
     }
 }
 

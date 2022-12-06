@@ -699,7 +699,7 @@ impl Names {
     pub fn fwd_update(
         &self,
         path: &RelativePath,
-        parsed_file: Option<&oxidized_by_ref::direct_decl_parser::ParsedFile<'_>>,
+        file_summary: Option<&crate::FileSummary>,
     ) -> anyhow::Result<crate::FileInfoId> {
         let file_info_id_opt = self
             .conn
@@ -726,15 +726,7 @@ impl Names {
             }
         };
 
-        // This helper takes a list of (name,decl) pairs and turns into string "name1|name2|..."
-        fn join<'a, Decl, I: Iterator<Item = (&'a str, Decl)>>(i: I, sep: &'static str) -> String {
-            i.map(|(name, _decl)| name).collect::<Vec<&str>>().join(sep)
-        }
-
-        let decls_or_empty = parsed_file
-            .map_or_else(oxidized_by_ref::direct_decl_parser::Decls::empty, |pf| {
-                pf.decls
-            });
+        let _a = file_summary.and_then(|fs| Self::join_with_pipe(fs.classes()));
         self.conn
             .prepare_cached(
                 "
@@ -744,13 +736,13 @@ impl Names {
                 ",
             )?
             .execute(params![
-                crate::datatypes::convert::mode_to_i64(parsed_file.and_then(|pf| pf.mode)),
-                crate::hash_decls(&decls_or_empty),
-                join(decls_or_empty.classes(), "|"),
-                join(decls_or_empty.consts(), "|"),
-                join(decls_or_empty.funs(), "|"),
-                join(decls_or_empty.typedefs(), "|"),
-                join(decls_or_empty.modules(), "|"),
+                crate::datatypes::convert::mode_to_i64(file_summary.and_then(|fs| fs.mode)),
+                file_summary.map(|fs| fs.file_decls_hash),
+                file_summary.and_then(|fs| Self::join_with_pipe(fs.classes())),
+                file_summary.and_then(|fs| Self::join_with_pipe(fs.consts())),
+                file_summary.and_then(|fs| Self::join_with_pipe(fs.funs())),
+                file_summary.and_then(|fs| Self::join_with_pipe(fs.typedefs())),
+                file_summary.and_then(|fs| Self::join_with_pipe(fs.modules())),
                 file_info_id,
             ])?;
 

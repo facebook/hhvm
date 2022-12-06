@@ -11,7 +11,6 @@ path = "names.rs"
 anyhow = "1.0.65"
 crossbeam = "0.8"
 hh24_types = { path = "../../utils/hh24_types" }
-hh_hash = { path = "../../utils/hh_hash" }
 oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 rand = { version = "0.8", features = ["small_rng"] }

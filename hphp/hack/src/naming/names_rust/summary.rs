@@ -84,22 +84,8 @@ pub struct DeclSummary {
 }
 
 impl DeclSummary {
-    pub fn new(symbol: &str, decl: &Decl<'_>) -> Self {
-        Self {
-            name_type: decl.kind(),
-            symbol: symbol.to_owned(),
-            hash: crate::hash_decl(decl),
-        }
-    }
-
     pub fn symbol_hash(&self) -> ToplevelSymbolHash {
         ToplevelSymbolHash::new(self.name_type, &self.symbol)
-    }
-}
-
-impl From<&(&str, Decl<'_>)> for DeclSummary {
-    fn from((symbol, decl): &(&str, Decl<'_>)) -> Self {
-        Self::new(*symbol, decl)
     }
 }
 
@@ -129,13 +115,14 @@ impl SymbolRow {
         file_info_id: crate::FileInfoId,
         name: &str,
         decl: &Decl<'_>,
+        decl_hash: DeclHash,
     ) -> Self {
         let kind = decl.kind();
         Self {
             hash: ToplevelSymbolHash::new(kind, name),
             canon_hash: ToplevelCanonSymbolHash::new(kind, name.to_owned()),
             kind,
-            decl_hash: crate::hash_decl(decl),
+            decl_hash,
             file_info_id,
             path,
         }

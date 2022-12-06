@@ -1,6 +1,6 @@
 type t = unit
 
-let connect ~decl_state_dir:_ ~opts:_ = failwith "not implemented"
+let connect ~decl_state_dir:_ = failwith "not implemented"
 
 let rpc_get_fun _ _ = failwith "not implemented"
 
@@ -27,5 +27,3 @@ let rpc_get_module_path _ _ = failwith "not implemented"
 let rpc_get_fun_canon_name _ _ = failwith "not implemented"
 
 let rpc_get_type_canon_name _ _ = failwith "not implemented"
-
-let parse_and_cache_decls_in _ _ _ = failwith "not implemented"

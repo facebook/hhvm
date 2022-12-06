@@ -30,9 +30,6 @@ type gconst_decl = Typing_defs.const_decl
 
 type module_decl = Typing_defs.module_def_type
 
-val prepare_for_typecheck :
-  Provider_context.t -> Relative_path.t -> string -> unit
-
 val get_fun :
   ?tracing_info:Decl_counters.tracing_info ->
   Provider_context.t ->

@@ -364,25 +364,6 @@ let get_gconst
   | Provider_backend.Rust_provider_backend backend ->
     Rust_provider_backend.Decl.get_gconst backend gconst_name
 
-let prepare_for_typecheck
-    (ctx : Provider_context.t) (path : Relative_path.t) (content : string) :
-    unit =
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Analysis
-  | Provider_backend.Rust_provider_backend _
-  | Provider_backend.Pessimised_shared_memory _
-  | Provider_backend.Shared_memory
-  | Provider_backend.Local_memory _ ->
-    ()
-  (* When using the decl service, before typechecking the file, populate our
-     decl caches with the symbols declared within that file. If we leave this to
-     the decl service, then in longer files, the decls declared later in the
-     file may be evicted by the time we attempt to typecheck them, forcing the
-     decl service to re-parse the file. This can lead to many re-parses in
-     extreme cases. *)
-  | Provider_backend.Decl_service { decl; _ } ->
-    Decl_service_client.parse_and_cache_decls_in decl path content
-
 let get_module
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)

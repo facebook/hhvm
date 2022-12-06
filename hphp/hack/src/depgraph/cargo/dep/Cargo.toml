@@ -10,3 +10,4 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 ocamlrep = { path = "../../../ocamlrep" }
+serde = { version = "1.0.136", features = ["derive", "rc"] }

@@ -8,7 +8,9 @@ edition = "2021"
 path = "../../depgraph_api.rs"
 
 [dependencies]
+core_utils_rust = { path = "../../../../utils/core" }
 dep = { path = "../../../../depgraph/cargo/dep" }
+hh24_types = { path = "../../../../utils/hh24_types" }
 pos = { path = "../../../pos/cargo/pos" }
 thiserror = "1.0.36"
 typing_deps_hash = { path = "../../../../deps/cargo/typing_deps_hash" }

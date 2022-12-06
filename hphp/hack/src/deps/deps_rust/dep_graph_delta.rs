@@ -10,9 +10,11 @@ use std::io::Write;
 use dep::Dep;
 use hash::HashMap;
 use hash::HashSet;
+use serde::Deserialize;
+use serde::Serialize;
 
 /// Structure to keep track of the dependency graph delta.
-#[derive(Default, Debug, Clone, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DepGraphDelta {
     /// Maps each dependency to a set of dependents
     rdeps: HashMap<Dep, HashSet<Dep>>,
@@ -29,6 +31,20 @@ impl DepGraphDelta {
             .insert(dependent)
         {
             self.num_edges += 1;
+        }
+    }
+
+    pub fn extend(&mut self, other: Self) {
+        use std::collections::hash_map::Entry::*;
+        for (dependency, dependents) in other.rdeps {
+            match self.rdeps.entry(dependency) {
+                Occupied(e) => {
+                    e.into_mut().extend(dependents);
+                }
+                Vacant(e) => {
+                    e.insert(dependents);
+                }
+            }
         }
     }
 
@@ -59,7 +75,10 @@ impl DepGraphDelta {
     /// between dependency and dependent hashes, we make use of the fact that
     /// hashes are 63-bit (due to the OCaml limitation). We set the MSB for
     /// dependent hashes.
-    pub fn write_to<W: Write>(&self, w: &mut W) -> io::Result<usize> {
+    ///
+    /// The output is deterministic if the insertion order is deterministic,
+    /// but is arbitrary since we're iterating HashMap & HashSet.
+    pub fn write_to<W: Write>(&self, mut w: W) -> io::Result<usize> {
         let mut edges_added = 0;
         for (&dependency, dependents) in self.rdeps.iter() {
             if dependents.is_empty() {
@@ -83,6 +102,31 @@ impl DepGraphDelta {
         Ok(edges_added)
     }
 
+    /// Write all edges in the delta to the writer in a custom format.
+    ///
+    /// The format is as follows. Each dependency hash can be followed by
+    /// an arbitrary number of accompanying dependent hashes. To distinguish
+    /// between dependency and dependent hashes, we make use of the fact that
+    /// hashes are 63-bit (due to the OCaml limitation). We set the MSB for
+    /// dependent hashes.
+    ///
+    /// The output is deterministic sorted order.
+    pub fn write_sorted<W: Write>(&self, mut w: W) -> io::Result<()> {
+        let mut dependencies: Vec<_> = self.rdeps.iter().collect();
+        dependencies.sort_unstable_by_key(|(dep, _)| *dep);
+        for (&dependency, dependents) in dependencies {
+            let dependency: u64 = dependency.into();
+            let mut dependents: Vec<Dep> = dependents.iter().copied().collect();
+            dependents.sort_unstable();
+            w.write_all(&dependency.to_be_bytes())?;
+            for dependent in dependents {
+                let dependent: u64 = dependent.into();
+                w.write_all(&(dependent | (1 << 63)).to_be_bytes())?;
+            }
+        }
+        Ok(())
+    }
+
     /// Load all edges into the delta.
     ///
     /// The predicate determines whether or not to add a loaded edge to the delta.
@@ -94,7 +138,7 @@ impl DepGraphDelta {
     /// See write_to() for details about the file format.
     pub fn read_from<R: Read>(
         &mut self,
-        r: &mut R,
+        mut r: R,
         f: impl Fn(Dep, Dep) -> bool,
     ) -> io::Result<usize> {
         let mut edges_read = 0;

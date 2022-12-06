@@ -6,6 +6,7 @@
 use std::fmt::Debug;
 
 use dep::Dep;
+use hh24_types::DependencyHash;
 use pos::ClassConstName;
 use pos::ConstName;
 use pos::FunName;
@@ -122,6 +123,81 @@ impl From<ModuleName> for DependencyName {
 impl From<TypeName> for DependencyName {
     fn from(name: TypeName) -> Self {
         Self::Type(name)
+    }
+}
+
+impl From<DeclName> for DependencyName {
+    fn from(name: DeclName) -> Self {
+        match name {
+            DeclName::Fun(name) => DependencyName::Fun(name),
+            DeclName::Const(name) => DependencyName::GConst(name),
+            DeclName::Type(name) => DependencyName::Type(name),
+            DeclName::Module(name) => DependencyName::Module(name),
+        }
+    }
+}
+
+impl From<DependencyName> for DependencyHash {
+    // Keep in sync with Dep.make in typing_deps.ml
+    fn from(name: DependencyName) -> Self {
+        match name {
+            DependencyName::Extends(t) => Self::of_symbol(DepType::Extends, &t),
+            DependencyName::Const(t, c) => Self::of_member(DepType::Const, t.into(), &c),
+            DependencyName::Constructor(t) => Self::of_member(DepType::Constructor, t.into(), ""),
+            DependencyName::Prop(t, p) => Self::of_member(DepType::Prop, t.into(), &p),
+            DependencyName::StaticProp(t, p) => Self::of_member(DepType::SProp, t.into(), &p),
+            DependencyName::Method(t, m) => Self::of_member(DepType::Method, t.into(), &m),
+            DependencyName::StaticMethod(t, m) => Self::of_member(DepType::SMethod, t.into(), &m),
+            DependencyName::AllMembers(t) => Self::of_member(DepType::AllMembers, t.into(), ""),
+            DependencyName::GConst(c) => Self::of_symbol(DepType::GConst, &c),
+            DependencyName::Fun(f) => Self::of_symbol(DepType::Fun, &f),
+            DependencyName::Type(t) => Self::of_symbol(DepType::Type, &t),
+            DependencyName::Module(m) => Self::of_symbol(DepType::Module, &m),
+        }
+    }
+}
+
+impl DependencyName {
+    pub fn to_dep(&self) -> Dep {
+        Dep::new(hh24_types::DependencyHash::from(*self).0)
+    }
+
+    // Keep in sync with Dep.extract_name in typing_deps.ml
+    pub fn extract_name(&self) -> String {
+        use core_utils_rust::strip_ns;
+        match self {
+            DependencyName::Type(t)
+            | DependencyName::Extends(t)
+            | DependencyName::Constructor(t)
+            | DependencyName::AllMembers(t) => strip_ns(t).into(),
+            DependencyName::Const(t, c) => format!("{}::{}", strip_ns(t), c),
+            DependencyName::Prop(t, p) | DependencyName::StaticProp(t, p) => {
+                format!("{}::{}", strip_ns(t), p)
+            }
+            DependencyName::Method(t, m) | DependencyName::StaticMethod(t, m) => {
+                format!("{}::{}", strip_ns(t), m)
+            }
+            DependencyName::GConst(c) => strip_ns(c).into(),
+            DependencyName::Fun(f) => strip_ns(f).into(),
+            DependencyName::Module(m) => m.as_str().into(),
+        }
+    }
+
+    pub fn dep_type(&self) -> DepType {
+        match self {
+            DependencyName::Extends(_) => DepType::Extends,
+            DependencyName::Const(_, _) => DepType::Const,
+            DependencyName::Constructor(_) => DepType::Constructor,
+            DependencyName::Prop(_, _) => DepType::Prop,
+            DependencyName::StaticProp(_, _) => DepType::SProp,
+            DependencyName::Method(_, _) => DepType::Method,
+            DependencyName::StaticMethod(_, _) => DepType::SMethod,
+            DependencyName::AllMembers(_) => DepType::AllMembers,
+            DependencyName::GConst(_) => DepType::GConst,
+            DependencyName::Fun(_) => DepType::Fun,
+            DependencyName::Type(_) => DepType::Type,
+            DependencyName::Module(_) => DepType::Module,
+        }
     }
 }
 

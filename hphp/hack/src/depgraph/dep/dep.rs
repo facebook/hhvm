@@ -12,8 +12,11 @@ use ocamlrep::FromError;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use ocamlrep::Value;
+use serde::Deserialize;
+use serde::Serialize;
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize)]
 pub struct Dep(u64);
 
 impl Dep {

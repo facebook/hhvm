@@ -402,6 +402,10 @@ impl DependencyHash {
             member_name.as_bytes(),
         ))
     }
+
+    pub fn of_symbol(dep_type: typing_deps_hash::DepType, type_name: &str) -> Self {
+        Self(typing_deps_hash::hash1(dep_type, type_name.as_bytes()))
+    }
 }
 
 impl std::fmt::Debug for DependencyHash {
@@ -443,18 +447,8 @@ impl DependencyHash {
     }
 }
 
-#[derive(
-    Copy,
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Hash,
-    PartialOrd,
-    Ord,
-    serde::Deserialize,
-    serde::Serialize
-)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(serde::Deserialize, serde::Serialize)]
 pub struct DepGraphEdge {
     pub dependency: DependencyHash,
     pub dependent: ToplevelSymbolHash,

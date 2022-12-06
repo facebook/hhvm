@@ -1112,6 +1112,7 @@ name = "dep"
 version = "0.0.0"
 dependencies = [
  "ocamlrep",
+ "serde",
 ]
 
 [[package]]
@@ -1120,13 +1121,16 @@ version = "0.0.0"
 dependencies = [
  "dep",
  "hash",
+ "serde",
 ]
 
 [[package]]
 name = "depgraph_api"
 version = "0.0.0"
 dependencies = [
+ "core_utils_rust",
  "dep",
+ "hh24_types",
  "pos",
  "thiserror",
  "typing_deps_hash",

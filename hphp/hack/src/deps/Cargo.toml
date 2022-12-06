@@ -10,3 +10,4 @@ path = "deps_rust/dep_graph_delta.rs"
 [dependencies]
 dep = { path = "../depgraph/cargo/dep" }
 hash = { path = "../utils/hash" }
+serde = { version = "1.0.136", features = ["derive", "rc"] }

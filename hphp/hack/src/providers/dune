@@ -13,6 +13,7 @@
   pos
   relative_path
   shallow_decl_defs
+  typechecker_options
   typing_class_types
   typing_defs)
  (preprocess

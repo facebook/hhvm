@@ -241,7 +241,8 @@ val set_local_memory_backend :
   max_num_linearizations:int ->
   unit
 
-val set_decl_service_backend : Decl_service_client.t -> unit
+val set_decl_service_backend :
+  Decl_service_client.t -> TypecheckerOptions.t -> unit
 
 val get : unit -> t
 

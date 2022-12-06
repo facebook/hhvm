@@ -12,6 +12,10 @@ let rpc_get_gconst _ _ = failwith "not implemented"
 
 let rpc_get_module _ _ = failwith "not implemented"
 
+let rpc_get_folded_class _ _ = failwith "not implemented"
+
+let rpc_store_folded_class _ _ _ = failwith "not implemented"
+
 let rpc_get_gconst_path _ _ = failwith "not implemented"
 
 let rpc_get_fun_path _ _ = failwith "not implemented"

@@ -8,6 +8,10 @@
  *
  */
 
+final class ThriftApplicationException extends Exception {
+  public function __construct(?string $message = null)[];
+}
+
 const int THRIFT_MARK_LEGACY_ARRAYS;
 
 <<__PHPStdLib>>

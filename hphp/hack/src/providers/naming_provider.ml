@@ -134,11 +134,14 @@ let get_const_pos (ctx : Provider_context.t) (name : string) :
             |> Option.map ~f:(fun path -> (FileInfo.Const, path)))
         >>| attach_name_type_to_tuple
       | Provider_backend.Decl_service { decl; _ } ->
-        Decl_service_client.rpc_get_gconst_path decl name)
+        Decl_service_client.Slow.rpc_get_gconst_path decl name)
   >>| remove_name_type
 
 let const_exists (ctx : Provider_context.t) (name : string) : bool =
-  get_const_pos ctx name |> Option.is_some
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Decl_service { decl; _ } ->
+    Decl_service_client.rpc_get_gconst decl name |> Option.is_some
+  | _ -> get_const_pos ctx name |> Option.is_some
 
 let get_const_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
@@ -212,11 +215,14 @@ let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
             |> Option.map ~f:(fun path -> (FileInfo.Fun, path)))
         >>| attach_name_type_to_tuple
       | Provider_backend.Decl_service { decl; _ } ->
-        Decl_service_client.rpc_get_fun_path decl name)
+        Decl_service_client.Slow.rpc_get_fun_path decl name)
   >>| remove_name_type
 
 let fun_exists (ctx : Provider_context.t) (name : string) : bool =
-  get_fun_pos ctx name |> Option.is_some
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Decl_service { decl; _ } ->
+    Decl_service_client.rpc_get_fun decl name |> Option.is_some
+  | _ -> get_fun_pos ctx name |> Option.is_some
 
 let get_fun_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
@@ -273,7 +279,7 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
       else
         compute_symbol_canon_name path
     | Provider_backend.Decl_service { decl; _ } ->
-      Decl_service_client.rpc_get_fun_canon_name decl name)
+      Decl_service_client.Slow.rpc_get_fun_canon_name decl name)
 
 let add_fun (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos)
     : unit =
@@ -423,7 +429,7 @@ let get_type_pos_and_kind (ctx : Provider_context.t) (name : string) :
                    (kind_to_name_type kind, path)))
         >>| fun (name_type, path) -> (FileInfo.File (name_type, path), name_type)
       | Provider_backend.Decl_service { decl; _ } ->
-        Decl_service_client.rpc_get_type_path decl name)
+        Decl_service_client.Slow.rpc_get_type_path decl name)
   >>| fun (pos, name_type) -> (pos, name_type_to_kind name_type)
 
 let get_type_pos (ctx : Provider_context.t) (name : string) :
@@ -446,9 +452,13 @@ let get_type_path_and_kind (ctx : Provider_context.t) (name : string) :
 
 let get_type_kind (ctx : Provider_context.t) (name : string) :
     Naming_types.kind_of_type option =
-  match get_type_pos_and_kind ctx name with
-  | Some (_pos, kind) -> Some kind
-  | None -> None
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Decl_service { decl; _ } ->
+    Decl_service_client.rpc_get_type_kind decl name
+  | _ ->
+    (match get_type_pos_and_kind ctx name with
+    | Some (_pos, kind) -> Some kind
+    | None -> None)
 
 let get_type_canon_name (ctx : Provider_context.t) (name : string) :
     string option =
@@ -507,7 +517,7 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
       else
         compute_symbol_canon_name path (name_type_to_kind name_type)
     | Provider_backend.Decl_service { decl; _ } ->
-      Decl_service_client.rpc_get_type_canon_name decl name)
+      Decl_service_client.Slow.rpc_get_type_canon_name decl name)
 
 let get_class_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
@@ -523,11 +533,17 @@ let add_class
 
 let get_typedef_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
-  match get_type_path_and_kind ctx name with
-  | Some (fn, Naming_types.TTypedef) -> Some fn
-  | Some (_, Naming_types.TClass)
-  | None ->
-    None
+  (* This function is used even for code that typechecks clean, in order to judge
+     whether an opaque typedef is visible (which it is only in the file being typechecked *)
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Decl_service { decl; _ } ->
+    Decl_service_client.Positioned.rpc_get_typedef_path decl name
+  | _ ->
+    (match get_type_path_and_kind ctx name with
+    | Some (fn, Naming_types.TTypedef) -> Some fn
+    | Some (_, Naming_types.TClass)
+    | None ->
+      None)
 
 let add_typedef
     (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos) : unit =
@@ -563,7 +579,7 @@ let get_module_pos (ctx : Provider_context.t) (name : string) :
             |> Option.map ~f:(fun path -> (FileInfo.Module, path)))
         >>| attach_name_type_to_tuple
       | Provider_backend.Decl_service { decl; _ } ->
-        Decl_service_client.rpc_get_module_path decl name)
+        Decl_service_client.Slow.rpc_get_module_path decl name)
   >>| remove_name_type
 
 let get_module_path (ctx : Provider_context.t) (name : string) :
@@ -571,7 +587,10 @@ let get_module_path (ctx : Provider_context.t) (name : string) :
   get_module_pos ctx name |> Option.map ~f:FileInfo.get_pos_filename
 
 let module_exists (ctx : Provider_context.t) (name : string) : bool =
-  get_module_pos ctx name |> Option.is_some
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Decl_service { decl; _ } ->
+    Decl_service_client.rpc_get_module decl name |> Option.is_some
+  | _ -> get_module_pos ctx name |> Option.is_some
 
 let add_module backend name pos =
   match backend with

@@ -55,12 +55,6 @@ std::ostream& operator<<(std::ostream& os, const diagnostic& e) {
   if (!e.name().empty()) {
     os << " [" << e.name() << "]";
   }
-  for (const auto& tag : e.tags()) {
-    // Output info for known tags.
-    if (tag.rfind("spec/", 0) == 0) { // i.e. tag.starts_with(...)
-      os << std::endl << "  See also: sdoc thrift/docs/" << tag;
-    }
-  }
   return os;
 }
 

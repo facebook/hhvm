@@ -19,7 +19,6 @@
 #include <array>
 #include <functional>
 #include <iosfwd>
-#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -52,34 +51,24 @@ class diagnostic {
    * @param file       - file path location of diagnostic
    * @param line       - line location of diagnostic in the file, if known
    * @param name       - name given to this diagnostic, if any
-   * @param tags       - the assciated 'tags', for example
-   * {"spec/definition/data#enum"}
    */
   diagnostic(
       diagnostic_level level,
       std::string message,
       std::string file,
       int line = 0,
-      std::string name = "",
-      std::set<std::string> tags = {})
+      std::string name = "")
       : level_(level),
         message_(std::move(message)),
         file_(std::move(file)),
         line_(line),
-        name_(std::move(name)),
-        tags_(std::move(tags)) {}
+        name_(std::move(name)) {}
 
   diagnostic_level level() const { return level_; }
   const std::string& message() const { return message_; }
   const std::string& file() const { return file_; }
   int lineno() const { return line_; }
   const std::string& name() const { return name_; }
-  const std::set<std::string>& tags() const { return tags_; }
-  // Tags the diagnostic with the given string.
-  template <typename T>
-  bool tag(T&& name) {
-    return tags_.emplace(std::forward<T>(name)).second;
-  }
   std::string str() const;
 
  private:
@@ -88,7 +77,6 @@ class diagnostic {
   std::string file_;
   int line_;
   std::string name_;
-  std::set<std::string> tags_;
 
   friend bool operator==(const diagnostic& lhs, const diagnostic& rhs) {
     return lhs.level_ == rhs.level_ && lhs.line_ == rhs.line_ &&

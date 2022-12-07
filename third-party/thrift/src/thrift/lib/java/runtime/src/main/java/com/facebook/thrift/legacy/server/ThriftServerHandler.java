@@ -190,7 +190,9 @@ public class ThriftServerHandler extends ChannelDuplexHandler {
                 TimeUnit.MILLISECONDS,
                 Mono.defer(
                     () -> {
-                      String message = String.format("method %s timed out", metadata.getName());
+                      String message =
+                          String.format(
+                              "method %s timed out after %s", metadata.getName(), requestTimeout);
                       log.warn(message);
                       ThriftFrame exceptionFrame =
                           encodeApplicationException(
@@ -249,7 +251,9 @@ public class ThriftServerHandler extends ChannelDuplexHandler {
                 TimeUnit.MILLISECONDS,
                 Mono.defer(
                     () -> {
-                      String message = String.format("method %s timed out", metadata.getName());
+                      String message =
+                          String.format(
+                              "method %s timed out after %s", metadata.getName(), requestTimeout);
                       log.warn(message);
 
                       ThriftFrame exceptionFrame =

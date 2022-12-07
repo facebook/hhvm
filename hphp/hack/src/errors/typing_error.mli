@@ -1277,18 +1277,6 @@ module Primary : sig
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;
       }
-    | Static_redeclared_as_dynamic of {
-        pos: Pos.t;
-        static_pos: Pos_or_decl.t;
-        member_name: string;
-        elt: [ `meth | `prop ];
-      }
-    | Dynamic_redeclared_as_static of {
-        pos: Pos.t;
-        dyn_pos: Pos_or_decl.t;
-        member_name: string;
-        elt: [ `meth | `prop ];
-      }
     | Unknown_object_member of {
         pos: Pos.t;
         member_name: string;
@@ -1385,6 +1373,13 @@ module Primary : sig
         ctxt: [ `read | `write ];
         member_name: string;
         kind: [ `class_typeconst | `method_ | `property ];
+      }
+    | Static_instance_intersection of {
+        class_pos: Pos.t;
+        instance_pos: Pos_or_decl.t Lazy.t;
+        static_pos: Pos_or_decl.t Lazy.t;
+        member_name: string;
+        kind: [ `meth | `prop ];
       }
 
   val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t option

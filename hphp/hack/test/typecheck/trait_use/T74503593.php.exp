@@ -1,0 +1,6 @@
+File "T74503593.php", line 12, characters 7-13:
+This class overrides some members with a different staticness (Typing[4091])
+  File "T74503593.php", line 9, characters 19-21:
+  The method `foo` is declared as non-static here
+  File "T74503593.php", line 5, characters 26-28:
+  But it conflicts with an inherited static declaration here

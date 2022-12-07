@@ -717,51 +717,6 @@ let class_type_param env ct =
   let (env, tparam_list) = List.map_env env ct ~f:Typing.type_param in
   (env, tparam_list)
 
-(** Checks that a dynamic element is also dynamic in the parents. *)
-let check_dynamic_class_element get_static_elt element_name dyn_pos ~elt_type =
-  (* The non-static properties that we get passed do not start with '$', but the
-     static properties we want to look up do, so add it. *)
-  let id =
-    match elt_type with
-    | `meth -> element_name
-    | `prop -> "$" ^ element_name
-  in
-  match get_static_elt id with
-  | None -> ()
-  | Some static_element ->
-    let (lazy ty) = static_element.ce_type in
-    Errors.add_typing_error
-      Typing_error.(
-        primary
-        @@ Primary.Static_redeclared_as_dynamic
-             {
-               pos = dyn_pos;
-               static_pos = get_pos ty;
-               member_name = element_name;
-               elt = elt_type;
-             })
-
-(** Checks that a static element is also static in the parents. *)
-let check_static_class_element get_dyn_elt element_name static_pos ~elt_type =
-  (* The static properties that we get passed in start with '$', but the
-     non-static properties we're matching against don't, so we need to detect
-     that and remove it if present. *)
-  let element_name = String_utils.lstrip element_name "$" in
-  match get_dyn_elt element_name with
-  | None -> ()
-  | Some dyn_element ->
-    let (lazy ty) = dyn_element.ce_type in
-    Errors.add_typing_error
-      Typing_error.(
-        primary
-        @@ Primary.Dynamic_redeclared_as_static
-             {
-               pos = static_pos;
-               dyn_pos = get_pos ty;
-               member_name = element_name;
-               elt = elt_type;
-             })
-
 (** Check whether the type of a static property (class variable) contains
     any generic type parameters. Outside of traits, this is illegal as static
      * properties are shared across all generic instantiations. *)
@@ -1619,20 +1574,6 @@ let class_wellformedness_checks env c tc (parents : class_parents) =
   check_no_generic_static_property env tc;
   (env, user_attributes, file_attrs)
 
-(** Checks that static (resp. dynamic) members are also static (resp. dynamic) in the parents.*)
-let check_static_keyword_override c tc =
-  let (static_vars, vars) = split_vars c.c_vars in
-  let (_constructor, static_methods, methods) = split_methods c.c_methods in
-  List.iter static_vars ~f:(fun { cv_id = (p, id); _ } ->
-      check_static_class_element (Cls.get_prop tc) ~elt_type:`prop id p);
-  List.iter vars ~f:(fun { cv_id = (p, id); _ } ->
-      check_dynamic_class_element (Cls.get_sprop tc) ~elt_type:`prop id p);
-  List.iter static_methods ~f:(fun { m_name = (p, id); _ } ->
-      check_static_class_element (Cls.get_method tc) ~elt_type:`meth id p);
-  List.iter methods ~f:(fun { m_name = (p, id); _ } ->
-      check_dynamic_class_element (Cls.get_smethod tc) ~elt_type:`meth id p);
-  ()
-
 (** Perform all hierarchy checks,
   i.e. checking that making this class a child of its parents is legal:
   - requirements from `require` statements
@@ -1644,7 +1585,6 @@ let check_static_keyword_override c tc =
   - individual member checks:
     - subtyping parent members
     - __Override attribute check
-    - `static` keyword with respect to parents
     - enum inclusions
     - abstract members in concrete class
     - non-const members in const class *)
@@ -1679,7 +1619,6 @@ let class_hierarchy_checks env c tc (parents : class_parents) =
     in
     if Cls.const tc then
       List.iter c.c_uses ~f:(check_non_const_trait_members pc env);
-    check_static_keyword_override c tc;
     let impl = extends @ implements @ uses in
     let impl =
       if

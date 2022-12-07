@@ -1354,6 +1354,81 @@ let check_class_against_parent_class_elt
       member_kind;
     env
 
+(**
+ * [check_static_member_intersection class_ class_pos parent_members] looks for
+ * intersections in the static and instance members of [class_] (at [class_pos])
+ * via a precomputed list of class members in [parent_members]. We emit an
+ * error if there exists a class member that is defined as both static, and
+ * instance, as it will unconditionally fatal in HHVM. For example,
+ * the following code will fatal:
+ *
+ *   abstract class Foo { public int $bar; }
+ *   trait Baz { public static int $bar; }
+ *   final class Quxx extends Foo { use Baz; }
+ *)
+let check_static_member_intersection
+    (class_ : Cls.t)
+    (class_pos : Pos.t)
+    (parent_members : ParentClassEltSet.t MemberNameMap.t MemberKindMap.t) =
+  let check_single_member
+      (member_kind : MemberKind.t)
+      (name : MemberNameMap.key)
+      (parent_members : ParentClassEltSet.t)
+      (acc :
+        (MemberNameMap.key * Typing_defs.class_elt * Typing_defs.class_elt) list)
+      =
+    let name =
+      match member_kind with
+      | MemberKind.Property -> String.chop_prefix_if_exists ~prefix:"$" name
+      | MemberKind.Static_property -> "$" ^ name
+      | MemberKind.Static_method
+      | MemberKind.Method
+      | MemberKind.Constructor _ ->
+        name
+    in
+    match get_member member_kind class_ name with
+    | None -> acc
+    | Some class_elt ->
+      ( name,
+        (ParentClassEltSet.choose parent_members).ParentClassElt.class_elt,
+        class_elt )
+      :: acc
+  in
+  let gather_violations parent_member_kind child_member_kind =
+    MemberKindMap.find_opt parent_member_kind parent_members
+    |> Option.value ~default:MemberNameMap.empty
+    |> fun map ->
+    MemberNameMap.fold (check_single_member child_member_kind) map []
+  in
+  let on_error ~member_name ~static_elem ~instance_elem ~kind =
+    Errors.add_typing_error
+    @@ Typing_error.(
+         primary
+         @@ Primary.Static_instance_intersection
+              {
+                class_pos;
+                instance_pos = instance_elem.ce_pos;
+                static_pos = static_elem.ce_pos;
+                member_name;
+                kind;
+              })
+  in
+  let find_intersections static_member_kind instance_member_kind kind =
+    let violations =
+      gather_violations static_member_kind instance_member_kind
+    in
+    List.iter violations ~f:(fun (member_name, static_elem, instance_elem) ->
+        on_error ~member_name ~static_elem ~instance_elem ~kind);
+    let violations =
+      gather_violations instance_member_kind static_member_kind
+    in
+    List.iter violations ~f:(fun (member_name, instance_elem, static_elem) ->
+        on_error ~member_name ~static_elem ~instance_elem ~kind)
+  in
+  find_intersections MemberKind.Static_method MemberKind.Method `meth;
+  find_intersections MemberKind.Static_property MemberKind.Property `prop;
+  ()
+
 let check_members_from_all_parents
     env
     ((class_pos : Pos.t), class_)
@@ -1372,7 +1447,9 @@ let check_members_from_all_parents
     in
     MemberNameMap.fold check member_map env
   in
-  MemberKindMap.fold check parent_members env
+  let env = MemberKindMap.fold check parent_members env in
+  check_static_member_intersection class_ class_pos parent_members;
+  env
 
 let make_all_members ~parent_class =
   let wrap_constructor (ctor, kind) =

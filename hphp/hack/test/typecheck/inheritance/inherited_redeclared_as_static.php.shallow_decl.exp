@@ -1,8 +1,8 @@
 File "inherited_redeclared_as_static.php", line 11, characters 7-9:
 This class overrides some members with a different staticness (Typing[4091])
-  File "inherited_redeclared_as_static.php", line 4, characters 13-18:
+  File "inherited_redeclared_as_static.php", line 4, characters 20-39:
   The property `$non_static_property` is declared as non-static here
-  File "inherited_redeclared_as_static.php", line 12, characters 17-22:
+  File "inherited_redeclared_as_static.php", line 12, characters 24-43:
   But it conflicts with an inherited static declaration here
 File "inherited_redeclared_as_static.php", line 11, characters 7-9:
 This class overrides some members with a different staticness (Typing[4091])
@@ -12,9 +12,9 @@ This class overrides some members with a different staticness (Typing[4091])
   But it conflicts with an inherited static declaration here
 File "inherited_redeclared_as_static.php", line 11, characters 7-9:
 This class overrides some members with a different staticness (Typing[4091])
-  File "inherited_redeclared_as_static.php", line 13, characters 10-15:
+  File "inherited_redeclared_as_static.php", line 13, characters 17-32:
   The property `static_property` is declared as non-static here
-  File "inherited_redeclared_as_static.php", line 5, characters 20-25:
+  File "inherited_redeclared_as_static.php", line 5, characters 27-42:
   But it conflicts with an inherited static declaration here
 File "inherited_redeclared_as_static.php", line 11, characters 7-9:
 This class overrides some members with a different staticness (Typing[4091])

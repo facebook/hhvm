@@ -2528,18 +2528,6 @@ module Primary = struct
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;
       }
-    | Static_redeclared_as_dynamic of {
-        pos: Pos.t;
-        static_pos: Pos_or_decl.t;
-        member_name: string;
-        elt: [ `meth | `prop ];
-      }
-    | Dynamic_redeclared_as_static of {
-        pos: Pos.t;
-        dyn_pos: Pos_or_decl.t;
-        member_name: string;
-        elt: [ `meth | `prop ];
-      }
     | Unknown_object_member of {
         pos: Pos.t;
         member_name: string;
@@ -2636,6 +2624,13 @@ module Primary = struct
         ctxt: [ `read | `write ];
         member_name: string;
         kind: [ `class_typeconst | `method_ | `property ];
+      }
+    | Static_instance_intersection of {
+        class_pos: Pos.t;
+        instance_pos: Pos_or_decl.t Lazy.t;
+        static_pos: Pos_or_decl.t Lazy.t;
+        member_name: string;
+        kind: [ `meth | `prop ];
       }
 
   (* User error helpers *)
@@ -3191,6 +3186,30 @@ module Primary = struct
         decl_pos
     in
     (code, claim, reasons, [])
+
+  let static_instance_intersection
+      class_pos instance_pos static_pos member_name kind =
+    let claim =
+      lazy
+        ( class_pos,
+          "This class overrides some members with a different staticness" )
+    in
+    ( Error_code.StaticDynamic,
+      claim,
+      lazy
+        [
+          ( Lazy.force instance_pos,
+            "The "
+            ^ (match kind with
+              | `meth -> "method"
+              | `prop -> "property")
+            ^ " "
+            ^ Markdown_lite.md_codify member_name
+            ^ " is declared as non-static here" );
+          ( Lazy.force static_pos,
+            "But it conflicts with an inherited static declaration here" );
+        ],
+      [] )
 
   let nullsafe_property_write_context pos =
     let claim =
@@ -5340,54 +5359,6 @@ module Primary = struct
     | `meth -> "method"
     | `prop -> "property"
 
-  let static_redeclared_as_dynamic
-      dyn_position static_position member_name elt_type =
-    let claim =
-      lazy
-        (let dollar =
-           match elt_type with
-           | `prop -> "$"
-           | _ -> ""
-         in
-         let elt_type = elt_type_to_string elt_type in
-         let msg_dynamic =
-           "The "
-           ^ elt_type
-           ^ " "
-           ^ Markdown_lite.md_codify (dollar ^ member_name)
-           ^ " is declared here as non-static"
-         in
-         (dyn_position, msg_dynamic))
-    in
-    let msg_static =
-      "But it conflicts with an inherited static declaration here"
-    in
-    (Error_code.StaticDynamic, claim, lazy [(static_position, msg_static)], [])
-
-  let dynamic_redeclared_as_static
-      static_position dyn_position member_name elt_type =
-    let claim =
-      lazy
-        (let dollar =
-           match elt_type with
-           | `prop -> "$"
-           | _ -> ""
-         in
-         let elt_type = elt_type_to_string elt_type in
-         let msg_static =
-           "The "
-           ^ elt_type
-           ^ " "
-           ^ Markdown_lite.md_codify (dollar ^ member_name)
-           ^ " is declared here as static"
-         in
-         (static_position, msg_static))
-    in
-    let msg_dynamic =
-      "But it conflicts with an inherited non-static declaration here"
-    in
-    (Error_code.StaticDynamic, claim, lazy [(dyn_position, msg_dynamic)], [])
-
   let unknown_object_member pos s elt r =
     let claim =
       lazy
@@ -5713,6 +5684,14 @@ module Primary = struct
       typing_too_few_args pos decl_pos actual expected
     | Non_object_member { pos; ctxt; ty_name; member_name; kind; decl_pos } ->
       non_object_member pos ctxt ty_name member_name kind decl_pos
+    | Static_instance_intersection
+        { class_pos; instance_pos; static_pos; member_name; kind } ->
+      static_instance_intersection
+        class_pos
+        instance_pos
+        static_pos
+        member_name
+        kind
     | Nullsafe_property_write_context pos -> nullsafe_property_write_context pos
     | Uninstantiable_class { pos; class_name; reason_ty_opt; decl_pos } ->
       uninstantiable_class pos class_name reason_ty_opt decl_pos
@@ -6125,10 +6104,6 @@ module Primary = struct
     | Reified_generics_not_allowed pos -> reified_generics_not_allowed pos
     | New_without_newable { pos; name } -> new_without_newable pos name
     | Discarded_awaitable { pos; decl_pos } -> discarded_awaitable pos decl_pos
-    | Static_redeclared_as_dynamic { pos; static_pos; member_name; elt } ->
-      static_redeclared_as_dynamic pos static_pos member_name elt
-    | Dynamic_redeclared_as_static { pos; dyn_pos; member_name; elt } ->
-      dynamic_redeclared_as_static pos dyn_pos member_name elt
     | Unknown_object_member { pos; member_name; elt; reason } ->
       unknown_object_member pos member_name elt reason
     | Non_class_member { pos; member_name; elt; ty_name; decl_pos } ->

@@ -116,18 +116,29 @@ impl LowerInstrs<'_> {
         Some(builtin)
     }
 
-    fn handle_with_builtin(&self, builder: &mut FuncBuilder<'_>, instr: &Instr) -> Option<Instr> {
-        let builtin = match instr {
-            Instr::Hhbc(hhbc) => {
-                if let Some(hhbc) = self.handle_hhbc_with_builtin(hhbc) {
-                    hack::Builtin::Hhbc(hhbc)
-                } else {
-                    return None;
-                }
-            }
+    fn handle_terminator_with_builtin(&self, term: &Terminator) -> Option<hack::Hhbc> {
+        let builtin = match term {
+            Terminator::Exit(..) => hack::Hhbc::Exit,
+            Terminator::Throw(..) => hack::Hhbc::Throw,
+            Terminator::ThrowAsTypeStructException(..) => hack::Hhbc::ThrowAsTypeStructException,
             _ => return None,
         };
-        Some(builder.hack_builtin(builtin, instr.operands(), instr.loc_id()))
+        Some(builtin)
+    }
+
+    fn handle_with_builtin(&self, builder: &mut FuncBuilder<'_>, instr: &Instr) -> Option<Instr> {
+        match instr {
+            Instr::Hhbc(hhbc) => {
+                let hhbc = self.handle_hhbc_with_builtin(hhbc)?;
+                Some(builder.hhbc_builtin(hhbc, instr.operands(), instr.loc_id()))
+            }
+            Instr::Terminator(term) => {
+                let hhbc = self.handle_terminator_with_builtin(term)?;
+                builder.emit_hhbc_builtin(hhbc, instr.operands(), instr.loc_id());
+                Some(Instr::unreachable())
+            }
+            _ => None,
+        }
     }
 
     fn verify_out_type(
@@ -335,16 +346,6 @@ impl TransformInstr for LowerInstrs<'_> {
             }
             Instr::Hhbc(Hhbc::VerifyRetTypeTS([obj, ts], loc)) => {
                 self.verify_ret_type_ts(builder, obj, ts, loc)
-            }
-            Instr::Terminator(Terminator::Exit(ops, loc)) => {
-                let builtin = hack::Hhbc::Exit;
-                builder.emit_hhbc_builtin(builtin, &[ops], loc);
-                Instr::unreachable()
-            }
-            Instr::Terminator(Terminator::Throw(value, loc)) => {
-                let builtin = hack::Hhbc::Throw;
-                builder.emit_hhbc_builtin(builtin, &[value], loc);
-                Instr::unreachable()
             }
             Instr::Terminator(Terminator::RetM(ops, loc)) => {
                 // ret a, b;

@@ -130,6 +130,8 @@ pub(crate) enum Hhbc {
     Sub,
     #[decl(fn hhbc_throw(*HackMixed) -> noreturn)]
     Throw,
+    #[decl(fn hhbc_throw_as_type_struct_exception(*HackMixed, *HackMixed) -> *HackMixed)]
+    ThrowAsTypeStructException,
     #[decl(fn hhbc_verify_param_type_ts(obj: *HackMixed, ts: *HackMixed) -> void)]
     VerifyParamTypeTS,
 }

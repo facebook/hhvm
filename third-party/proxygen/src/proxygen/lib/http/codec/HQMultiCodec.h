@@ -199,6 +199,10 @@ class HQMultiCodec : public HQControlCodec {
     return getCodec(stream).generateEOM(writeBuf, stream);
   }
 
+  void setHeaderCodecStats(HeaderCodec::Stats* hcStats) override {
+    qpackCodec_.setStats(hcStats);
+  }
+
   CompressionInfo getCompressionInfo() const override {
     return qpackCodec_.getCompressionInfo();
   }

@@ -54,7 +54,7 @@ enum TestUnionEnum: int {
 class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<TestUnionEnum> {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'int_value',
       'union' => true,
@@ -484,7 +484,7 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
 class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'a',
       'type' => \TType::LST,
@@ -728,7 +728,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
 class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo_struct',
       'type' => \TType::STRUCT,
@@ -1029,7 +1029,7 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 class Baz extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'message',
       'type' => \TType::STRING,
@@ -1204,7 +1204,7 @@ class Baz extends \TException implements \IThriftSyncStruct, \IThriftExceptionMe
 class OptBaz extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'message',
       'type' => \TType::STRING,

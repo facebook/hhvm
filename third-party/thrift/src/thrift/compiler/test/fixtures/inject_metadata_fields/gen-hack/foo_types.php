@@ -13,7 +13,7 @@
 class Fields implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     100 => shape(
       'var' => 'injected_field',
       'type' => \TType::STRING,

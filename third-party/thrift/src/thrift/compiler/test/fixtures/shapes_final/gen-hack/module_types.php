@@ -50,7 +50,7 @@ enum UnionEnum: int {
 class Union implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\test\fixtures\UnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'intValue',
       'union' => true,
@@ -244,7 +244,7 @@ class Union implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion
 class A implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'a',
       'type' => \TType::STRING,
@@ -343,7 +343,7 @@ class A implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
 class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'just_an_A',
       'type' => \TType::STRUCT,

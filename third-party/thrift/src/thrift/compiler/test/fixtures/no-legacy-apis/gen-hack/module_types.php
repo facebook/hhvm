@@ -48,7 +48,7 @@ class MyEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
 class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'myIntField',
       'type' => \TType::I64,
@@ -197,7 +197,7 @@ enum MyUnionEnum: int {
 class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\fixtures\no-legacy-apis\MyUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'myEnum',
       'union' => true,

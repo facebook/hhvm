@@ -46,7 +46,7 @@ class TestEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
 class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'a',
       'type' => \TType::LST,
@@ -283,7 +283,7 @@ enum TestUnionEnum: int {
 class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<TestUnionEnum> {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'string_field',
       'union' => true,
@@ -581,7 +581,7 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
 class Baz extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'message',
       'type' => \TType::STRING,
@@ -765,7 +765,7 @@ class Baz extends \TException implements \IThriftSyncStruct, \IThriftExceptionMe
 class OptBaz extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'message',
       'type' => \TType::STRING,

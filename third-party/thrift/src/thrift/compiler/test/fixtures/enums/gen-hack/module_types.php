@@ -292,7 +292,7 @@ class MyBitmaskEnum2_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
 class SomeStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'reasonable',
       'type' => \TType::I32,
@@ -536,7 +536,7 @@ class SomeStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
 class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'me2_3',
       'type' => \TType::I32,

@@ -308,7 +308,7 @@ class TestServiceProcessor extends TestServiceSyncProcessor {}
 class TestService_init_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'int1',
       'type' => \TType::I64,
@@ -413,7 +413,7 @@ class TestService_init_result extends \ThriftSyncStructWithResult implements \IT
 
   const type TResult = int;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::I64,

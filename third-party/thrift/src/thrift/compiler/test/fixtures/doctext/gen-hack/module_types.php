@@ -49,7 +49,7 @@ class B_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
 class A implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'useless_field',
       'type' => \TType::I32,
@@ -144,7 +144,7 @@ enum UEnum: int {
 class U implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<UEnum> {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'i',
       'union' => true,
@@ -327,7 +327,7 @@ class U implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<UEn
 class Bang extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'message',
       'type' => \TType::STRING,

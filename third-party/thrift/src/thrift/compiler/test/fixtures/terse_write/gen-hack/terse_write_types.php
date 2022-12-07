@@ -48,7 +48,7 @@ class MyEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
 class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -147,7 +147,7 @@ enum MyUnionEnum: int {
 class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\thrift\test\terse_write\MyUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'bool_field',
       'union' => true,
@@ -1173,7 +1173,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
 class MyStructWithCustomDefault implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'field1',
       'type' => \TType::I64,
@@ -1286,7 +1286,7 @@ class MyStructWithCustomDefault implements \IThriftSyncStruct, \IThriftStructMet
 class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'bool_field',
       'is_terse' => true,
@@ -1975,7 +1975,7 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetada
 class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'terse_bool_field',
       'is_terse' => true,
@@ -3365,7 +3365,7 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftStructMetadat
 class TerseStructWithCustomDefault implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'bool_field',
       'is_terse' => true,
@@ -4020,7 +4020,7 @@ class TerseStructWithCustomDefault implements \IThriftSyncStruct, \IThriftStruct
 class AdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'field1',
       'is_terse' => true,
@@ -4295,7 +4295,7 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
 class WrappedFields implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'field1',
       'is_wrapped' => true,
@@ -4440,7 +4440,7 @@ class WrappedFields implements \IThriftAsyncStruct, \IThriftStructMetadata, \ITh
 class TerseException extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'msg',
       'is_terse' => true,

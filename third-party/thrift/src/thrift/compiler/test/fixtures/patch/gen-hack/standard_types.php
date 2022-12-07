@@ -133,7 +133,7 @@ class apache_thrift_type_standard_StandardProtocol_TEnumStaticMetadata implement
 class apache_thrift_type_standard_DurationStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'seconds',
       'type' => \TType::I64,
@@ -290,7 +290,7 @@ class apache_thrift_type_standard_DurationStruct implements \IThriftSyncStruct, 
 class apache_thrift_type_standard_TimeStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'seconds',
       'type' => \TType::I64,
@@ -450,7 +450,7 @@ class apache_thrift_type_standard_TimeStruct implements \IThriftSyncStruct, \ITh
 class apache_thrift_type_standard_FractionStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'numerator',
       'type' => \TType::I64,
@@ -603,7 +603,7 @@ class apache_thrift_type_standard_FractionStruct implements \IThriftSyncStruct, 
 class apache_thrift_type_standard_UriStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'scheme',
       'type' => \TType::STRING,
@@ -994,7 +994,7 @@ enum apache_thrift_type_standard_JsonValueEnum: int {
 class apache_thrift_type_standard_JsonValue implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<apache_thrift_type_standard_JsonValueEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'boolValue',
       'union' => true,
@@ -1620,7 +1620,7 @@ enum apache_thrift_type_standard_TypeUriEnum: int {
 class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<apache_thrift_type_standard_TypeUriEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'uri',
       'union' => true,
@@ -1900,7 +1900,7 @@ enum apache_thrift_type_standard_TypeNameEnum: int {
 class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<apache_thrift_type_standard_TypeNameEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'boolType',
       'union' => true,

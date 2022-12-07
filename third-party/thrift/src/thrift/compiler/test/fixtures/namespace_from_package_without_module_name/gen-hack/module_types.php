@@ -16,7 +16,7 @@ namespace namespace_from_package_without_module_name;
 class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'MyInt',
       'type' => \TType::I64,

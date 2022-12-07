@@ -46,7 +46,7 @@ class MyEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
 class MyStructNestedAnnotation implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'name',
       'type' => \TType::STRING,
@@ -162,7 +162,7 @@ enum MyUnionEnum: int {
 class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<MyUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -263,7 +263,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
 class MyException extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -338,7 +338,7 @@ class MyException extends \TException implements \IThriftSyncStruct, \IThriftExc
 class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     2 => shape(
       'var' => 'major',
       'type' => \TType::I64,
@@ -792,7 +792,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
 class SecretStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'id',
       'type' => \TType::I64,

@@ -192,7 +192,7 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
 class MyService_first_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -249,7 +249,7 @@ class MyService_first_result extends \ThriftSyncStructWithResult implements \ITh
 
   const type TResult = string;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRING,
@@ -350,7 +350,7 @@ class MyService_first_result extends \ThriftSyncStructWithResult implements \ITh
 class MyService_second_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'count',
       'type' => \TType::I64,
@@ -439,7 +439,7 @@ class MyService_second_result extends \ThriftSyncStructWithResult implements \IT
 
   const type TResult = bool;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::BOOL,

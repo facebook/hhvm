@@ -16,7 +16,7 @@ namespace thrift\annotation;
 class InjectMetadataFields implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'type',
       'type' => \TType::STRING,

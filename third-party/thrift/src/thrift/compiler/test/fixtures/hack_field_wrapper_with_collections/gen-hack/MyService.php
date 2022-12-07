@@ -208,7 +208,7 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
 class MyService_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'arg1',
       'type' => \TType::STRING,
@@ -363,7 +363,7 @@ class MyService_func_result extends \ThriftSyncStructWithResult implements \IThr
 
   const type TResult = MyStruct;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
@@ -460,7 +460,7 @@ class MyService_func_result extends \ThriftSyncStructWithResult implements \IThr
 class MyService_func1_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'arg1',
       'type' => \TType::STRING,
@@ -615,7 +615,7 @@ class MyService_func1_result extends \ThriftSyncStructWithResult implements \ITh
 
   const type TResult = MyStruct;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,

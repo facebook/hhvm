@@ -18,7 +18,7 @@ namespace thrift\annotation;
 class Beta implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -110,7 +110,7 @@ class Beta implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
 class Experimental implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -206,7 +206,7 @@ class Experimental implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
 class Testing implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -297,7 +297,7 @@ class Testing implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
 class Deprecated implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'message',
       'type' => \TType::STRING,
@@ -437,7 +437,7 @@ class Deprecated implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
 class ReserveIds implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'ids',
       'type' => \TType::LST,
@@ -659,7 +659,7 @@ class ReserveIds implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
 class Legacy implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'message',
       'type' => \TType::STRING,
@@ -783,7 +783,7 @@ class Legacy implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
 class RequiresBackwardCompatibility implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'field_name',
       'type' => \TType::BOOL,
@@ -906,7 +906,7 @@ class RequiresBackwardCompatibility implements \IThriftSyncStruct, \IThriftStruc
 class NoTesting implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -997,7 +997,7 @@ class NoTesting implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
 class NoExperimental implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1088,7 +1088,7 @@ class NoExperimental implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
 class NoBeta implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1180,7 +1180,7 @@ class NoBeta implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
 class Released implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1275,7 +1275,7 @@ class Released implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
 class NoLegacy implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1374,7 +1374,7 @@ class NoLegacy implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
 class NoDeprecated implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1479,7 +1479,7 @@ class NoDeprecated implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
 class TerseWrite implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1582,7 +1582,7 @@ class TerseWrite implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
 class Box implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1671,7 +1671,7 @@ class Box implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
 class Mixin implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1767,7 +1767,7 @@ class Mixin implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapi
 class Bit implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1865,7 +1865,7 @@ class Bit implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
 class SerializeInFieldIdOrder implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1956,7 +1956,7 @@ class SerializeInFieldIdOrder implements \IThriftSyncStruct, \IThriftStructMetad
 class BitmaskEnum implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -2051,7 +2051,7 @@ class BitmaskEnum implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
 class GenDefaultEnumValue implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'name',
       'type' => \TType::STRING,
@@ -2207,7 +2207,7 @@ class GenDefaultEnumValue implements \IThriftSyncStruct, \IThriftStructMetadata,
 class GenEnumSet implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'name',
       'type' => \TType::STRING,
@@ -2336,7 +2336,7 @@ class GenEnumSet implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
 class v1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -2427,7 +2427,7 @@ class v1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishS
 class v1beta implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -2538,7 +2538,7 @@ class v1beta implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
 class v1alpha implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -2638,7 +2638,7 @@ class v1alpha implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
 class v1test implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -2738,7 +2738,7 @@ class v1test implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShap
 class ExceptionMessage implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'field',
       'type' => \TType::STRING,
@@ -2863,7 +2863,7 @@ class ExceptionMessage implements \IThriftSyncStruct, \IThriftStructMetadata, \I
 class GenerateRuntimeSchema implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'name',
       'type' => \TType::STRING,
@@ -3003,7 +3003,7 @@ class GenerateRuntimeSchema implements \IThriftSyncStruct, \IThriftStructMetadat
 class InternBox implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];

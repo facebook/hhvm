@@ -192,7 +192,7 @@ class SomeServiceClient extends \ThriftClientBase implements SomeServiceClientIf
 class SomeService_bounce_map_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'm',
       'type' => \TType::MAP,
@@ -321,7 +321,7 @@ class SomeService_bounce_map_result extends \ThriftSyncStructWithResult implemen
 
   const type TResult = Map<int, string>;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::MAP,
@@ -448,7 +448,7 @@ class SomeService_bounce_map_result extends \ThriftSyncStructWithResult implemen
 class SomeService_binary_keyed_map_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'r',
       'type' => \TType::LST,
@@ -559,7 +559,7 @@ class SomeService_binary_keyed_map_result extends \ThriftSyncStructWithResult im
 
   const type TResult = Map<string, int>;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::MAP,

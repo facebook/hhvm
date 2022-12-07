@@ -192,7 +192,7 @@ class AdapterServiceClient extends \ThriftClientBase implements AdapterServiceCl
 class AdapterService_count_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -269,7 +269,7 @@ class AdapterService_count_result extends \ThriftSyncStructWithResult implements
 
   const type TResult = \thrift\test\CountingStruct;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
@@ -366,7 +366,7 @@ class AdapterService_count_result extends \ThriftSyncStructWithResult implements
 class AdapterService_adaptedTypes_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'arg',
       'type' => \TType::STRUCT,
@@ -490,7 +490,7 @@ class AdapterService_adaptedTypes_result extends \ThriftSyncStructWithResult imp
 
   const type TResult = \thrift\test\HeapAllocated;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,

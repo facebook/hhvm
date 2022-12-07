@@ -308,7 +308,7 @@ class FB303ServiceProcessor extends FB303ServiceSyncProcessor {}
 class FB303Service_renamed_rpc implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'int_parameter',
       'type' => \TType::I32,
@@ -429,7 +429,7 @@ class FB303Service_renamed_rpc_result extends \ThriftSyncStructWithResult implem
 
   const type TResult = \fixtures\basic\MyRenamedStruct;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,

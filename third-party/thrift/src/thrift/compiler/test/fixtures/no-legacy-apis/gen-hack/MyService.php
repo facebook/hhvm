@@ -308,7 +308,7 @@ class MyServiceProcessor extends MyServiceSyncProcessor {}
 class MyService_query_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'u',
       'type' => \TType::STRUCT,
@@ -422,7 +422,7 @@ class MyService_query_result extends \ThriftSyncStructWithResult implements \ITh
 
   const type TResult = \fixtures\no-legacy-apis\MyStruct;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,

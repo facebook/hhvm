@@ -13,7 +13,7 @@
 class Fields implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     100 => shape(
       'var' => 'injected_field',
       'type' => \TType::STRING,
@@ -98,7 +98,7 @@ class Fields implements \IThriftSyncStruct, \IThriftStructMetadata {
 class FieldsInjectedToEmptyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     -1100 => shape(
       'var' => 'injected_field',
       'type' => \TType::STRING,
@@ -189,7 +189,7 @@ class FieldsInjectedToEmptyStruct implements \IThriftSyncStruct, \IThriftStructM
 class FieldsInjectedToStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'string_field',
       'type' => \TType::STRING,
@@ -304,7 +304,7 @@ class FieldsInjectedToStruct implements \IThriftSyncStruct, \IThriftStructMetada
 class FieldsInjectedWithIncludedStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'string_field',
       'type' => \TType::STRING,

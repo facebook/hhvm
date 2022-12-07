@@ -464,7 +464,7 @@ class DbMixedStackArgumentsProcessor extends DbMixedStackArgumentsSyncProcessor 
 class DbMixedStackArguments_getDataByKey0_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'key',
       'type' => \TType::STRING,
@@ -570,7 +570,7 @@ class DbMixedStackArguments_getDataByKey0_result extends \ThriftSyncStructWithRe
 
   const type TResult = string;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRING,
@@ -660,7 +660,7 @@ class DbMixedStackArguments_getDataByKey0_result extends \ThriftSyncStructWithRe
 class DbMixedStackArguments_getDataByKey1_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'key',
       'type' => \TType::STRING,
@@ -766,7 +766,7 @@ class DbMixedStackArguments_getDataByKey1_result extends \ThriftSyncStructWithRe
 
   const type TResult = string;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRING,

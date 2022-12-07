@@ -23,7 +23,7 @@ enum ComplexUnionEnum: int {
 class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<ComplexUnionEnum> {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'intValue',
       'union' => true,
@@ -522,7 +522,7 @@ enum ListUnionEnum: int {
 class ListUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<ListUnionEnum> {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     2 => shape(
       'var' => 'intListValue',
       'union' => true,
@@ -763,7 +763,7 @@ enum DataUnionEnum: int {
 class DataUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<DataUnionEnum> {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'binaryData',
       'union' => true,
@@ -959,7 +959,7 @@ class DataUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
 class Val implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'strVal',
       'type' => \TType::STRING,
@@ -1159,7 +1159,7 @@ enum ValUnionEnum: int {
 class ValUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<ValUnionEnum> {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'v1',
       'union' => true,
@@ -1376,7 +1376,7 @@ enum VirtualComplexUnionEnum: int {
 class VirtualComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<VirtualComplexUnionEnum> {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'thingOne',
       'union' => true,
@@ -1571,7 +1571,7 @@ class VirtualComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata,
 class NonCopyableStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'num',
       'type' => \TType::I64,
@@ -1673,7 +1673,7 @@ enum NonCopyableUnionEnum: int {
 class NonCopyableUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<NonCopyableUnionEnum> {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 's',
       'union' => true,

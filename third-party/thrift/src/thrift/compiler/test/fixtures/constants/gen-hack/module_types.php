@@ -112,7 +112,7 @@ type MyMapIdentifier = Map<string, string>;
 class Internship implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'weeks',
       'type' => \TType::I32,
@@ -301,7 +301,7 @@ class Internship implements \IThriftSyncStruct, \IThriftStructMetadata {
 class Range implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'min',
       'type' => \TType::I32,
@@ -410,7 +410,7 @@ class Range implements \IThriftSyncStruct, \IThriftStructMetadata {
 class struct1 implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'a',
       'type' => \TType::I32,
@@ -519,7 +519,7 @@ class struct1 implements \IThriftSyncStruct, \IThriftStructMetadata {
 class struct2 implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'a',
       'type' => \TType::I32,
@@ -694,7 +694,7 @@ class struct2 implements \IThriftSyncStruct, \IThriftStructMetadata {
 class struct3 implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'a',
       'type' => \TType::STRING,
@@ -832,7 +832,7 @@ class struct3 implements \IThriftSyncStruct, \IThriftStructMetadata {
 class struct4 implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'a',
       'type' => \TType::I32,
@@ -973,7 +973,7 @@ enum union1Enum: int {
 class union1 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<union1Enum> {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'i',
       'union' => true,
@@ -1158,7 +1158,7 @@ enum union2Enum: int {
 class union2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<union2Enum> {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'i',
       'union' => true,

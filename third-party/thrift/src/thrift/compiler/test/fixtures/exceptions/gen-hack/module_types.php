@@ -13,7 +13,7 @@
 class Fiery extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'message',
       'type' => \TType::STRING,
@@ -98,7 +98,7 @@ class Fiery extends \TException implements \IThriftSyncStruct, \IThriftException
 class Serious extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'sonnet',
       'type' => \TType::STRING,
@@ -189,7 +189,7 @@ class Serious extends \TException implements \IThriftSyncStruct, \IThriftExcepti
 class ComplexFieldNames extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'error_message',
       'type' => \TType::STRING,
@@ -303,7 +303,7 @@ class ComplexFieldNames extends \TException implements \IThriftSyncStruct, \IThr
 class CustomFieldNames extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'error_message',
       'type' => \TType::STRING,
@@ -417,7 +417,7 @@ class CustomFieldNames extends \TException implements \IThriftSyncStruct, \IThri
 class ExceptionWithPrimitiveField extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'message',
       'type' => \TType::STRING,
@@ -526,7 +526,7 @@ class ExceptionWithPrimitiveField extends \TException implements \IThriftSyncStr
 class ExceptionWithStructuredAnnotation extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'message_field',
       'type' => \TType::STRING,
@@ -646,7 +646,7 @@ class ExceptionWithStructuredAnnotation extends \TException implements \IThriftS
 class Banal extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];

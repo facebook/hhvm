@@ -50,7 +50,7 @@ class MyThriftEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
 class MyThriftStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::STRING,
@@ -184,7 +184,7 @@ class MyThriftStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 class MySecondThriftStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::I32,
@@ -328,7 +328,7 @@ class MySecondThriftStruct implements \IThriftSyncStruct, \IThriftStructMetadata
 class MyThirdThriftStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::I32,
@@ -442,7 +442,7 @@ enum UnionTestingEnum: int {
 class UnionTesting implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\test\fixtures\jsenum\UnionTestingEnum> {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'union' => true,
@@ -626,7 +626,7 @@ enum UnionTestingStructuredEnum: int {
 class UnionTestingStructured implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\test\fixtures\jsenum\UnionTestingStructuredEnum> {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'union' => true,

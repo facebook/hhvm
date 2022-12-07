@@ -42,7 +42,7 @@ class Enum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
 class A implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'a',
       'type' => \TType::STRING,
@@ -150,7 +150,7 @@ class A implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
 class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'just_an_A',
       'type' => \TType::STRUCT,

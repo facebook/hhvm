@@ -84,7 +84,7 @@ type i64WithWrapper = \MyTypeIntWrapper<\thrift_adapted_types\i64WithWrapper>;
 class structured_annotation_with_default implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'count',
       'type' => \TType::I32,
@@ -210,7 +210,7 @@ class structured_annotation_with_default implements \IThriftSyncStruct, \IThrift
 class structured_annotation_recursive implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'name',
       'type' => \TType::STRING,
@@ -620,7 +620,7 @@ class structured_annotation_recursive implements \IThriftAsyncStruct, \IThriftSt
 class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'annotated_recursive',
       'type' => \TType::STRING,

@@ -16,7 +16,7 @@ namespace thrift\annotation\java;
 class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'adapterClassName',
       'type' => \TType::STRING,
@@ -172,7 +172,7 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
 class Wrapper implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'wrapperClassName',
       'type' => \TType::STRING,

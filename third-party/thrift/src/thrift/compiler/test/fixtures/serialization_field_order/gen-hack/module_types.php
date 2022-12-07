@@ -13,7 +13,7 @@
 class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'field2',
       'type' => \TType::I32,
@@ -204,7 +204,7 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
 class Foo2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     3 => shape(
       'var' => 'field1',
       'type' => \TType::I32,

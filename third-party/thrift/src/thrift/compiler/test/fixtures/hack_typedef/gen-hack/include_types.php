@@ -16,7 +16,7 @@ type MyI32 = int;
 class Foo implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'i_field',
       'type' => \TType::I32,

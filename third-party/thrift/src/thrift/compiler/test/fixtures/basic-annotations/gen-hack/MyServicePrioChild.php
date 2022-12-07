@@ -296,7 +296,7 @@ class MyServicePrioChildProcessor extends MyServicePrioChildSyncProcessor {}
 class MyServicePrioChild_pang_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -372,7 +372,7 @@ class MyServicePrioChild_pang_args implements \IThriftSyncStruct, \IThriftStruct
 class MyServicePrioChild_pang_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];

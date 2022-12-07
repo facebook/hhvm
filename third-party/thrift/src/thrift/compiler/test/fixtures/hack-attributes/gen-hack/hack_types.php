@@ -16,7 +16,7 @@ namespace thrift\annotation\hack;
 class FieldWrapper implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'name',
       'type' => \TType::STRING,
@@ -107,7 +107,7 @@ class FieldWrapper implements \IThriftSyncStruct, \IThriftStructMetadata {
 class Wrapper implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'name',
       'type' => \TType::STRING,
@@ -254,7 +254,7 @@ class Wrapper implements \IThriftSyncStruct, \IThriftStructMetadata {
 class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'name',
       'type' => \TType::STRING,
@@ -349,7 +349,7 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata {
 class SkipCodegen implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'reason',
       'type' => \TType::STRING,
@@ -444,7 +444,7 @@ class SkipCodegen implements \IThriftSyncStruct, \IThriftStructMetadata {
 class Name implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'name',
       'type' => \TType::STRING,
@@ -554,7 +554,7 @@ class Name implements \IThriftSyncStruct, \IThriftStructMetadata {
 class UnionEnumAttributes implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'attributes',
       'type' => \TType::LST,
@@ -658,7 +658,7 @@ class UnionEnumAttributes implements \IThriftSyncStruct, \IThriftStructMetadata 
 class StructTrait implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'name',
       'type' => \TType::STRING,
@@ -757,7 +757,7 @@ class StructTrait implements \IThriftSyncStruct, \IThriftStructMetadata {
 class Attributes implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'attributes',
       'type' => \TType::LST,
@@ -856,7 +856,7 @@ class Attributes implements \IThriftSyncStruct, \IThriftStructMetadata {
 class StructAsTrait implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];

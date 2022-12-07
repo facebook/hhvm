@@ -46,7 +46,7 @@ class MyEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
 class MyData implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'data1',
       'is_terse' => true,
@@ -203,7 +203,7 @@ enum InnerUnionEnum: int {
 class InnerUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\fixtures\patch\InnerUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'innerOption',
       'union' => true,
@@ -367,7 +367,7 @@ enum MyUnionEnum: int {
 class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\fixtures\patch\MyUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'option1',
       'union' => true,
@@ -652,7 +652,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
 class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     -1 => shape(
       'var' => 'boolVal',
       'is_terse' => true,
@@ -2069,7 +2069,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
 class LateDefStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -2150,7 +2150,7 @@ class LateDefStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
 class Recursive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     -1 => shape(
       'var' => 'nodes',
       'is_terse' => true,
@@ -2325,7 +2325,7 @@ class Recursive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
 class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     -1 => shape(
       'var' => 'loop',
       'is_terse' => true,
@@ -2466,7 +2466,7 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
 class Loop implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     -1 => shape(
       'var' => 'bar',
       'is_terse' => true,
@@ -2603,7 +2603,7 @@ class Loop implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
 class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'data1',
       'is_terse' => true,
@@ -2788,7 +2788,7 @@ class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'assign',
       'type' => \TType::STRUCT,
@@ -3074,7 +3074,7 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'innerOption',
       'is_terse' => true,
@@ -3206,7 +3206,7 @@ class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata
 class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'assign',
       'type' => \TType::STRUCT,
@@ -3492,7 +3492,7 @@ class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'option1',
       'is_terse' => true,
@@ -3731,7 +3731,7 @@ class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'assign',
       'type' => \TType::STRUCT,
@@ -4017,7 +4017,7 @@ class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 class MyStructField10Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'assign',
       'type' => \TType::I32,
@@ -4165,7 +4165,7 @@ class MyStructField10Patch implements \IThriftSyncStruct, \IThriftStructMetadata
 class MyStructField25Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'assign',
       'type' => \TType::I32,
@@ -4313,7 +4313,7 @@ class MyStructField25Patch implements \IThriftSyncStruct, \IThriftStructMetadata
 class MyStructField28Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'assign',
       'type' => \TType::LST,
@@ -4709,7 +4709,7 @@ class MyStructField28Patch implements \IThriftSyncStruct, \IThriftStructMetadata
 class MyStructField29Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'assign',
       'type' => \TType::SET,
@@ -4970,7 +4970,7 @@ class MyStructField29Patch implements \IThriftSyncStruct, \IThriftStructMetadata
 class MyStructField30Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'assign',
       'type' => \TType::MAP,
@@ -5439,7 +5439,7 @@ class MyStructField30Patch implements \IThriftSyncStruct, \IThriftStructMetadata
 class MyStructField31Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'assign',
       'type' => \TType::LST,
@@ -5951,7 +5951,7 @@ class MyStructField31Patch implements \IThriftSyncStruct, \IThriftStructMetadata
 class MyStructField31Patch1 implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'assign',
       'type' => \TType::MAP,
@@ -6435,7 +6435,7 @@ class MyStructField31Patch1 implements \IThriftSyncStruct, \IThriftStructMetadat
 class MyStructField32Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'assign',
       'type' => \TType::MAP,
@@ -7006,7 +7006,7 @@ class MyStructField32Patch implements \IThriftSyncStruct, \IThriftStructMetadata
 class MyStructField32Patch1 implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'assign',
       'type' => \TType::MAP,
@@ -7490,7 +7490,7 @@ class MyStructField32Patch1 implements \IThriftSyncStruct, \IThriftStructMetadat
 class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     -32 => shape(
       'var' => 'mapMap',
       'is_terse' => true,
@@ -9295,7 +9295,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'assign',
       'type' => \TType::STRUCT,
@@ -9599,7 +9599,7 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 class LateDefStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -9676,7 +9676,7 @@ class LateDefStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetad
 class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'assign',
       'type' => \TType::STRUCT,
@@ -9962,7 +9962,7 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 class RecursiveField1Patch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'assign',
       'type' => \TType::MAP,
@@ -10151,7 +10151,7 @@ class RecursiveField1Patch implements \IThriftSyncStruct, \IThriftStructMetadata
 class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     -1 => shape(
       'var' => 'nodes',
       'is_terse' => true,
@@ -10284,7 +10284,7 @@ class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata 
 class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'assign',
       'type' => \TType::STRUCT,
@@ -10570,7 +10570,7 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 class BarFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     -1 => shape(
       'var' => 'loop',
       'is_terse' => true,
@@ -10712,7 +10712,7 @@ class BarFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'assign',
       'type' => \TType::STRUCT,
@@ -10998,7 +10998,7 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 class LoopFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     -1 => shape(
       'var' => 'bar',
       'is_terse' => true,
@@ -11131,7 +11131,7 @@ class LoopFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
 class LoopPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'assign',
       'type' => \TType::STRUCT,

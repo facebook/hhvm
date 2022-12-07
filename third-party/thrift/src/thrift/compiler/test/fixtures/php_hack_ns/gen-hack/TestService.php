@@ -130,7 +130,7 @@ class TestServiceClient extends \FooHackServiceClient implements TestServiceClie
 class TestService_ping_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'str_arg',
       'type' => \TType::STRING,
@@ -209,7 +209,7 @@ class TestService_ping_result extends \ThriftSyncStructWithResult implements \IT
 
   const type TResult = int;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::I32,

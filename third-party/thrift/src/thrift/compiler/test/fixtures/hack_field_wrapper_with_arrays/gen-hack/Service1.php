@@ -635,7 +635,7 @@ class Service1Processor extends Service1SyncProcessor {}
 class Service1_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'arg1',
       'type' => \TType::STRING,
@@ -793,7 +793,7 @@ class Service1_func_result extends \ThriftSyncStructWithResult implements \IThri
 
   const type TResult = MyStruct;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
@@ -896,7 +896,7 @@ class Service1_func_result extends \ThriftSyncStructWithResult implements \IThri
 class Service1_func1_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'arg1',
       'type' => \TType::STRING,
@@ -1054,7 +1054,7 @@ class Service1_func1_result extends \ThriftSyncStructWithResult implements \IThr
 
   const type TResult = MyStruct;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
@@ -1157,7 +1157,7 @@ class Service1_func1_result extends \ThriftSyncStructWithResult implements \IThr
 class Service1_func2_args implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'arg1',
       'is_type_wrapped' => true,
@@ -1374,7 +1374,7 @@ class Service1_func2_result extends \ThriftAsyncStructWithResult implements \ITh
 
   const type TResult = i64WithWrapper;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'is_type_wrapped' => true,

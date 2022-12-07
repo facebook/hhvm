@@ -13,7 +13,7 @@
 class AnnotationStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -110,7 +110,7 @@ class AnnotationStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \I
 class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'nested_struct',
       'type' => \TType::STRUCT,
@@ -254,7 +254,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
 class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'wrapped_field',
       'is_wrapped' => true,
@@ -490,7 +490,7 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
 class MyComplexStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'map_of_string_to_MyStruct',
       'type' => \TType::MAP,

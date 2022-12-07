@@ -93,7 +93,7 @@ class RenamedEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
 class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'MyIntField',
       'type' => \TType::I64,
@@ -408,7 +408,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
 class MyDataItem implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -496,7 +496,7 @@ enum MyUnionEnum: int {
 class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\fixtures\basic\MyUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'myEnum',
       'union' => true,
@@ -789,7 +789,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
 class MyRenamedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'reserved_field',
       'type' => \TType::I32,
@@ -928,7 +928,7 @@ enum MyRenamedUnionEnum: int {
 class MyRenamedUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\fixtures\basic\MyRenamedUnionEnum>, \IThriftShapishSyncStruct {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'reserved_field',
       'union' => true,

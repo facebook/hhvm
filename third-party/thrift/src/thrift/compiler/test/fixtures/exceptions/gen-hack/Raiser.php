@@ -334,7 +334,7 @@ class RaiserClient extends \ThriftClientBase implements RaiserClientIf {
 class Raiser_doBland_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -389,7 +389,7 @@ class Raiser_doBland_args implements \IThriftSyncStruct, \IThriftStructMetadata 
 class Raiser_doBland_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -444,7 +444,7 @@ class Raiser_doBland_result extends \ThriftSyncStructWithoutResult implements \I
 class Raiser_doRaise_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -499,7 +499,7 @@ class Raiser_doRaise_args implements \IThriftSyncStruct, \IThriftStructMetadata 
 class Raiser_doRaise_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'b',
       'type' => \TType::STRUCT,
@@ -652,7 +652,7 @@ class Raiser_doRaise_result extends \ThriftSyncStructWithoutResult implements \I
 class Raiser_get200_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -709,7 +709,7 @@ class Raiser_get200_result extends \ThriftSyncStructWithResult implements \IThri
 
   const type TResult = string;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRING,
@@ -786,7 +786,7 @@ class Raiser_get200_result extends \ThriftSyncStructWithResult implements \IThri
 class Raiser_get500_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -843,7 +843,7 @@ class Raiser_get500_result extends \ThriftSyncStructWithResult implements \IThri
 
   const type TResult = string;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRING,

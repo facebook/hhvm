@@ -397,7 +397,7 @@ class SinkServiceClient extends \ThriftClientBase implements SinkServiceClientIf
 class SinkService_method_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -452,7 +452,7 @@ class SinkService_method_args implements \IThriftSyncStruct, \IThriftStructMetad
 class SinkService_method_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -509,7 +509,7 @@ class SinkService_method_SinkPayload extends \ThriftSyncStructWithResult impleme
 
   const type TResult = SinkPayload;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
@@ -593,7 +593,7 @@ class SinkService_method_FinalResponse extends \ThriftSyncStructWithResult imple
 
   const type TResult = FinalResponse;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
@@ -675,7 +675,7 @@ class SinkService_method_FinalResponse extends \ThriftSyncStructWithResult imple
 class SinkService_methodAndReponse_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -732,7 +732,7 @@ class SinkService_methodAndReponse_FirstResponse extends \ThriftSyncStructWithRe
 
   const type TResult = InitialResponse;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
@@ -816,7 +816,7 @@ class SinkService_methodAndReponse_SinkPayload extends \ThriftSyncStructWithResu
 
   const type TResult = SinkPayload;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
@@ -900,7 +900,7 @@ class SinkService_methodAndReponse_FinalResponse extends \ThriftSyncStructWithRe
 
   const type TResult = FinalResponse;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
@@ -982,7 +982,7 @@ class SinkService_methodAndReponse_FinalResponse extends \ThriftSyncStructWithRe
 class SinkService_methodThrow_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1037,7 +1037,7 @@ class SinkService_methodThrow_args implements \IThriftSyncStruct, \IThriftStruct
 class SinkService_methodThrow_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'ex',
       'type' => \TType::STRUCT,
@@ -1127,7 +1127,7 @@ class SinkService_methodThrow_SinkPayload extends \ThriftSyncStructWithResult im
 
   const type TResult = SinkPayload;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
@@ -1211,7 +1211,7 @@ class SinkService_methodThrow_FinalResponse extends \ThriftSyncStructWithResult 
 
   const type TResult = FinalResponse;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
@@ -1293,7 +1293,7 @@ class SinkService_methodThrow_FinalResponse extends \ThriftSyncStructWithResult 
 class SinkService_methodSinkThrow_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1348,7 +1348,7 @@ class SinkService_methodSinkThrow_args implements \IThriftSyncStruct, \IThriftSt
 class SinkService_methodSinkThrow_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1405,7 +1405,7 @@ class SinkService_methodSinkThrow_SinkPayload extends \ThriftSyncStructWithResul
 
   const type TResult = SinkPayload;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
@@ -1520,7 +1520,7 @@ class SinkService_methodSinkThrow_FinalResponse extends \ThriftSyncStructWithRes
 
   const type TResult = FinalResponse;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
@@ -1602,7 +1602,7 @@ class SinkService_methodSinkThrow_FinalResponse extends \ThriftSyncStructWithRes
 class SinkService_methodFinalThrow_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1657,7 +1657,7 @@ class SinkService_methodFinalThrow_args implements \IThriftSyncStruct, \IThriftS
 class SinkService_methodFinalThrow_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1714,7 +1714,7 @@ class SinkService_methodFinalThrow_SinkPayload extends \ThriftSyncStructWithResu
 
   const type TResult = SinkPayload;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
@@ -1798,7 +1798,7 @@ class SinkService_methodFinalThrow_FinalResponse extends \ThriftSyncStructWithRe
 
   const type TResult = FinalResponse;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
@@ -1911,7 +1911,7 @@ class SinkService_methodFinalThrow_FinalResponse extends \ThriftSyncStructWithRe
 class SinkService_methodBothThrow_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1966,7 +1966,7 @@ class SinkService_methodBothThrow_args implements \IThriftSyncStruct, \IThriftSt
 class SinkService_methodBothThrow_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -2023,7 +2023,7 @@ class SinkService_methodBothThrow_SinkPayload extends \ThriftSyncStructWithResul
 
   const type TResult = SinkPayload;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
@@ -2138,7 +2138,7 @@ class SinkService_methodBothThrow_FinalResponse extends \ThriftSyncStructWithRes
 
   const type TResult = FinalResponse;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
@@ -2251,7 +2251,7 @@ class SinkService_methodBothThrow_FinalResponse extends \ThriftSyncStructWithRes
 class SinkService_methodFast_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -2306,7 +2306,7 @@ class SinkService_methodFast_args implements \IThriftSyncStruct, \IThriftStructM
 class SinkService_methodFast_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -2363,7 +2363,7 @@ class SinkService_methodFast_SinkPayload extends \ThriftSyncStructWithResult imp
 
   const type TResult = SinkPayload;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,
@@ -2447,7 +2447,7 @@ class SinkService_methodFast_FinalResponse extends \ThriftSyncStructWithResult i
 
   const type TResult = FinalResponse;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRUCT,

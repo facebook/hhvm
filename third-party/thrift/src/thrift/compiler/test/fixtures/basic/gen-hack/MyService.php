@@ -1365,7 +1365,7 @@ class MyServiceProcessor extends MyServiceSyncProcessor {}
 class MyService_ping_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1441,7 +1441,7 @@ class MyService_ping_args implements \IThriftSyncStruct, \IThriftStructMetadata,
 class MyService_ping_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1505,7 +1505,7 @@ class MyService_ping_result extends \ThriftSyncStructWithoutResult implements \I
 class MyService_getRandomData_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1583,7 +1583,7 @@ class MyService_getRandomData_result extends \ThriftSyncStructWithResult impleme
 
   const type TResult = string;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRING,
@@ -1672,7 +1672,7 @@ class MyService_getRandomData_result extends \ThriftSyncStructWithResult impleme
 class MyService_sink_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'sink',
       'type' => \TType::I64,
@@ -1776,7 +1776,7 @@ class MyService_sink_args implements \IThriftSyncStruct, \IThriftStructMetadata,
 class MyService_sink_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1840,7 +1840,7 @@ class MyService_sink_result extends \ThriftSyncStructWithoutResult implements \I
 class MyService_putDataById_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'id',
       'type' => \TType::I64,
@@ -1970,7 +1970,7 @@ class MyService_putDataById_args implements \IThriftSyncStruct, \IThriftStructMe
 class MyService_putDataById_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -2034,7 +2034,7 @@ class MyService_putDataById_result extends \ThriftSyncStructWithoutResult implem
 class MyService_hasDataById_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'id',
       'type' => \TType::I64,
@@ -2140,7 +2140,7 @@ class MyService_hasDataById_result extends \ThriftSyncStructWithResult implement
 
   const type TResult = bool;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::BOOL,
@@ -2229,7 +2229,7 @@ class MyService_hasDataById_result extends \ThriftSyncStructWithResult implement
 class MyService_getDataById_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'id',
       'type' => \TType::I64,
@@ -2335,7 +2335,7 @@ class MyService_getDataById_result extends \ThriftSyncStructWithResult implement
 
   const type TResult = string;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRING,
@@ -2424,7 +2424,7 @@ class MyService_getDataById_result extends \ThriftSyncStructWithResult implement
 class MyService_deleteDataById_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'id',
       'type' => \TType::I64,
@@ -2528,7 +2528,7 @@ class MyService_deleteDataById_args implements \IThriftSyncStruct, \IThriftStruc
 class MyService_deleteDataById_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -2592,7 +2592,7 @@ class MyService_deleteDataById_result extends \ThriftSyncStructWithoutResult imp
 class MyService_lobDataById_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'id',
       'type' => \TType::I64,

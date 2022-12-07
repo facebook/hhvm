@@ -956,7 +956,7 @@ class NestedContainersProcessor extends NestedContainersSyncProcessor {}
 class NestedContainers_mapList_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::MAP,
@@ -1088,7 +1088,7 @@ class NestedContainers_mapList_args implements \IThriftSyncStruct, \IThriftStruc
 class NestedContainers_mapList_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1143,7 +1143,7 @@ class NestedContainers_mapList_result extends \ThriftSyncStructWithoutResult imp
 class NestedContainers_mapSet_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::MAP,
@@ -1275,7 +1275,7 @@ class NestedContainers_mapSet_args implements \IThriftSyncStruct, \IThriftStruct
 class NestedContainers_mapSet_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1330,7 +1330,7 @@ class NestedContainers_mapSet_result extends \ThriftSyncStructWithoutResult impl
 class NestedContainers_listMap_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::LST,
@@ -1462,7 +1462,7 @@ class NestedContainers_listMap_args implements \IThriftSyncStruct, \IThriftStruc
 class NestedContainers_listMap_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1517,7 +1517,7 @@ class NestedContainers_listMap_result extends \ThriftSyncStructWithoutResult imp
 class NestedContainers_listSet_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::LST,
@@ -1640,7 +1640,7 @@ class NestedContainers_listSet_args implements \IThriftSyncStruct, \IThriftStruc
 class NestedContainers_listSet_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1695,7 +1695,7 @@ class NestedContainers_listSet_result extends \ThriftSyncStructWithoutResult imp
 class NestedContainers_turtles_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::LST,
@@ -1890,7 +1890,7 @@ class NestedContainers_turtles_args implements \IThriftSyncStruct, \IThriftStruc
 class NestedContainers_turtles_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];

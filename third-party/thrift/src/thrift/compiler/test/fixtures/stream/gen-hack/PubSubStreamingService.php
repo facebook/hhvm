@@ -561,7 +561,7 @@ class PubSubStreamingServiceClient extends \ThriftClientBase implements PubSubSt
 class PubSubStreamingService_returnstream_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'i32_from',
       'type' => \TType::I32,
@@ -660,7 +660,7 @@ class PubSubStreamingService_returnstream_StreamResponse extends \ThriftSyncStru
 
   const type TResult = int;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::I32,
@@ -737,7 +737,7 @@ class PubSubStreamingService_returnstream_StreamResponse extends \ThriftSyncStru
 class PubSubStreamingService_returnstream_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -792,7 +792,7 @@ class PubSubStreamingService_returnstream_FirstResponse extends \ThriftSyncStruc
 class PubSubStreamingService_streamthrows_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::I32,
@@ -871,7 +871,7 @@ class PubSubStreamingService_streamthrows_StreamResponse extends \ThriftSyncStru
 
   const type TResult = int;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::I32,
@@ -979,7 +979,7 @@ class PubSubStreamingService_streamthrows_StreamResponse extends \ThriftSyncStru
 class PubSubStreamingService_streamthrows_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -1034,7 +1034,7 @@ class PubSubStreamingService_streamthrows_FirstResponse extends \ThriftSyncStruc
 class PubSubStreamingService_servicethrows_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::I32,
@@ -1113,7 +1113,7 @@ class PubSubStreamingService_servicethrows_StreamResponse extends \ThriftSyncStr
 
   const type TResult = int;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::I32,
@@ -1190,7 +1190,7 @@ class PubSubStreamingService_servicethrows_StreamResponse extends \ThriftSyncStr
 class PubSubStreamingService_servicethrows_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'e',
       'type' => \TType::STRUCT,
@@ -1278,7 +1278,7 @@ class PubSubStreamingService_servicethrows_FirstResponse extends \ThriftSyncStru
 class PubSubStreamingService_servicethrows2_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::I32,
@@ -1357,7 +1357,7 @@ class PubSubStreamingService_servicethrows2_StreamResponse extends \ThriftSyncSt
 
   const type TResult = int;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::I32,
@@ -1434,7 +1434,7 @@ class PubSubStreamingService_servicethrows2_StreamResponse extends \ThriftSyncSt
 class PubSubStreamingService_servicethrows2_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'e1',
       'type' => \TType::STRUCT,
@@ -1550,7 +1550,7 @@ class PubSubStreamingService_servicethrows2_FirstResponse extends \ThriftSyncStr
 class PubSubStreamingService_boththrows_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::I32,
@@ -1629,7 +1629,7 @@ class PubSubStreamingService_boththrows_StreamResponse extends \ThriftSyncStruct
 
   const type TResult = int;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::I32,
@@ -1737,7 +1737,7 @@ class PubSubStreamingService_boththrows_StreamResponse extends \ThriftSyncStruct
 class PubSubStreamingService_boththrows_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'e',
       'type' => \TType::STRUCT,
@@ -1825,7 +1825,7 @@ class PubSubStreamingService_boththrows_FirstResponse extends \ThriftSyncStructW
 class PubSubStreamingService_responseandstreamstreamthrows_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::I32,
@@ -1904,7 +1904,7 @@ class PubSubStreamingService_responseandstreamstreamthrows_StreamResponse extend
 
   const type TResult = int;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::I32,
@@ -2014,7 +2014,7 @@ class PubSubStreamingService_responseandstreamstreamthrows_FirstResponse extends
 
   const type TResult = int;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::I32,
@@ -2091,7 +2091,7 @@ class PubSubStreamingService_responseandstreamstreamthrows_FirstResponse extends
 class PubSubStreamingService_responseandstreamservicethrows_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::I32,
@@ -2170,7 +2170,7 @@ class PubSubStreamingService_responseandstreamservicethrows_StreamResponse exten
 
   const type TResult = int;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::I32,
@@ -2249,7 +2249,7 @@ class PubSubStreamingService_responseandstreamservicethrows_FirstResponse extend
 
   const type TResult = int;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::I32,
@@ -2357,7 +2357,7 @@ class PubSubStreamingService_responseandstreamservicethrows_FirstResponse extend
 class PubSubStreamingService_responseandstreamboththrows_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::I32,
@@ -2436,7 +2436,7 @@ class PubSubStreamingService_responseandstreamboththrows_StreamResponse extends 
 
   const type TResult = int;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::I32,
@@ -2546,7 +2546,7 @@ class PubSubStreamingService_responseandstreamboththrows_FirstResponse extends \
 
   const type TResult = int;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::I32,
@@ -2654,7 +2654,7 @@ class PubSubStreamingService_responseandstreamboththrows_FirstResponse extends \
 class PubSubStreamingService_returnstreamFast_args implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'i32_from',
       'type' => \TType::I32,
@@ -2753,7 +2753,7 @@ class PubSubStreamingService_returnstreamFast_StreamResponse extends \ThriftSync
 
   const type TResult = int;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::I32,
@@ -2830,7 +2830,7 @@ class PubSubStreamingService_returnstreamFast_StreamResponse extends \ThriftSync
 class PubSubStreamingService_returnstreamFast_FirstResponse extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];

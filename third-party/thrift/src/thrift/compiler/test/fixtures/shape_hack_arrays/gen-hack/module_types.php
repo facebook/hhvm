@@ -13,7 +13,7 @@
 class A implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'a',
       'type' => \TType::STRING,
@@ -162,7 +162,7 @@ class A implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
 class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'map_of_string_to_string',
       'type' => \TType::MAP,
@@ -873,7 +873,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
 class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'map_of_string_to_string',
       'type' => \TType::MAP,

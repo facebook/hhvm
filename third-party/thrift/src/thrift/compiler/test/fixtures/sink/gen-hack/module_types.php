@@ -13,7 +13,7 @@
 class InitialResponse implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'content',
       'type' => \TType::STRING,
@@ -98,7 +98,7 @@ class InitialResponse implements \IThriftSyncStruct, \IThriftStructMetadata {
 class FinalResponse implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'content',
       'type' => \TType::STRING,
@@ -183,7 +183,7 @@ class FinalResponse implements \IThriftSyncStruct, \IThriftStructMetadata {
 class SinkPayload implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'content',
       'type' => \TType::STRING,
@@ -268,7 +268,7 @@ class SinkPayload implements \IThriftSyncStruct, \IThriftStructMetadata {
 class CompatibleWithKeywordSink implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'sink',
       'type' => \TType::STRING,
@@ -353,7 +353,7 @@ class CompatibleWithKeywordSink implements \IThriftSyncStruct, \IThriftStructMet
 class InitialException extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'reason',
       'type' => \TType::STRING,
@@ -438,7 +438,7 @@ class InitialException extends \TException implements \IThriftSyncStruct, \IThri
 class SinkException1 extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'reason',
       'type' => \TType::STRING,
@@ -523,7 +523,7 @@ class SinkException1 extends \TException implements \IThriftSyncStruct, \IThrift
 class SinkException2 extends \TException implements \IThriftSyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'reason',
       'type' => \TType::I64,

@@ -13,7 +13,7 @@
 class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'int_field',
       'type' => \TType::I64,
@@ -140,7 +140,7 @@ enum MyUnionEnum: int {
 class MyUnion implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftUnion<MyUnionEnum>, \IThriftShapishAsyncStruct {
   use \ThriftUnionSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'union_annotated_field',
       'union' => true,
@@ -404,7 +404,7 @@ class MyUnion implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftUn
 class MyException extends \TException implements \IThriftAsyncStruct, \IThriftExceptionMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'code',
       'type' => \TType::I64,

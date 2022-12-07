@@ -220,7 +220,7 @@ class BarClient extends \ThriftClientBase implements BarClientIf {
 class Bar_baz_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'a',
       'type' => \TType::SET,
@@ -471,7 +471,7 @@ class Bar_baz_result extends \ThriftSyncStructWithResult implements \IThriftStru
 
   const type TResult = string;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     0 => shape(
       'var' => 'success',
       'type' => \TType::STRING,

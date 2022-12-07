@@ -22,49 +22,9 @@
  */
 <<__ConsistentConstruct>>
 interface IThriftStruct extends \HH\IMemoizeParam {
-  const type TFieldSpec = shape(
-    'var' => string,
-    'type' => TType,
-    ?'union' => bool,
-    ?'etype' => TType,
-    ?'elem' => this::TElemSpec,
-    ?'ktype' => TType,
-    ?'vtype' => TType,
-    ?'key' => this::TElemSpec,
-    ?'val' => this::TElemSpec,
-    ?'format' => string,
-    ?'class' => string,
-    ?'enum' => string,
-    ?'type_annotations' => varray<IThriftStruct>,
-    ?'field_annotations' => varray<IThriftStruct>,
-  );
-  const type TElemSpec = shape(
-    'type' => TType,
-    ?'etype' => TType,
-    ?'elem' => mixed, // this::TElemSpec once hack supports recursive types
-    ?'ktype' => TType,
-    ?'vtype' => TType,
-    ?'key' => mixed, // this::TElemSpec once hack supports recursive types
-    ?'val' => mixed, // this::TElemSpec once hack supports recursive types
-    ?'format' => string,
-    ?'class' => string,
-    ?'enum' => string,
-  );
-  const type TGenericSpec = shape(
-    'type' => TType,
-    ?'var' => string,
-    ?'union' => bool,
-    ?'etype' => TType,
-    ?'elem' => mixed, // this::TElemSpec once hack supports recursive types
-    ?'ktype' => TType,
-    ?'vtype' => TType,
-    ?'key' => mixed, // this::TElemSpec once hack supports recursive types
-    ?'val' => mixed, // this::TElemSpec once hack supports recursive types
-    ?'format' => string,
-    ?'class' => classname<IThriftStruct>,
-    ?'enum' => string, // classname<HH\BuiltinEnum<int>>
-    ...
-  );
+  const type TFieldSpec = \ThriftStructTypes::TFieldSpec;
+  const type TElemSpec = \ThriftStructTypes::TElemSpec;
+  const type TGenericSpec = \ThriftStructTypes::TGenericSpec;
 
   abstract const dict<int, this::TFieldSpec> SPEC;
   abstract const dict<string, int> FIELDMAP;

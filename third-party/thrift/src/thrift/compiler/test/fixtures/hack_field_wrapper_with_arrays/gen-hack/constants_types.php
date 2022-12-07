@@ -55,7 +55,7 @@ type MyCompany = Company;
 class Internship implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftShapishAsyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'weeks',
       'type' => \TType::I32,
@@ -427,7 +427,7 @@ class Internship implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThrif
 class SWE implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'employer',
       'type' => \TType::I32,

@@ -15,7 +15,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   use MyStructTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::STRING,
@@ -102,7 +102,7 @@ class MySecondStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   use MySecondStructTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::STRING,
@@ -189,7 +189,7 @@ class MyThirdStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   use CustomTraitName;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::STRING,
@@ -276,7 +276,7 @@ class MyFourthStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   use MyFourthStructTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::STRING,
@@ -368,7 +368,7 @@ class MyFifthStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   use CustomTraitName;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::STRING,
@@ -455,7 +455,7 @@ class MyFifthStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 trait MySixthStructTrait implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::STRING,
@@ -538,7 +538,7 @@ trait MySixthStructTrait implements \IThriftSyncStruct, \IThriftStructMetadata {
 trait MySeventhStructTrait implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'foo',
       'type' => \TType::STRING,

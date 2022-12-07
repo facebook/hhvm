@@ -44,7 +44,7 @@ class Status_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
 class FBStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
       'var' => 'str_value',
       'type' => \TType::STRING,

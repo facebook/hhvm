@@ -2961,7 +2961,7 @@ void t_hack_generator::generate_php_type_spec(
  */
 void t_hack_generator::generate_php_struct_spec(
     std::ofstream& out, const t_struct* tstruct) {
-  indent(out) << "const dict<int, this::TFieldSpec> SPEC = dict[\n";
+  indent(out) << "const \\ThriftStructTypes::TSpec SPEC = dict[\n";
   indent_up();
   const auto fields =
       tstruct->find_structured_annotation_or_null(kSerializeInFieldIdOrderUri)

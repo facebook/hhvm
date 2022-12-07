@@ -446,7 +446,7 @@ class MyServicePrioParentProcessor extends MyServicePrioParentSyncProcessor {}
 class MyServicePrioParent_ping_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -522,7 +522,7 @@ class MyServicePrioParent_ping_args implements \IThriftSyncStruct, \IThriftStruc
 class MyServicePrioParent_ping_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -586,7 +586,7 @@ class MyServicePrioParent_ping_result extends \ThriftSyncStructWithoutResult imp
 class MyServicePrioParent_pong_args implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];
@@ -662,7 +662,7 @@ class MyServicePrioParent_pong_args implements \IThriftSyncStruct, \IThriftStruc
 class MyServicePrioParent_pong_result extends \ThriftSyncStructWithoutResult implements \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  const dict<int, this::TFieldSpec> SPEC = dict[
+  const \ThriftStructTypes::TSpec SPEC = dict[
   ];
   const dict<string, int> FIELDMAP = dict[
   ];

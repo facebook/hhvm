@@ -129,6 +129,47 @@ module Dep = struct
 
   let to_int hash = hash
 
+  let ordinal_variant (type a) : a variant -> int = function
+    | GConst _ -> 0
+    | Fun _ -> 1
+    | Type _ -> 2
+    | Extends _ -> 3
+    | Const _ -> 4
+    | Constructor _ -> 5
+    | Prop _ -> 6
+    | SProp _ -> 7
+    | Method _ -> 8
+    | SMethod _ -> 9
+    | AllMembers _ -> 10
+    | GConstName _ -> 11
+    | Module _ -> 12
+
+  let compare_variant (type a) (v1 : a variant) (v2 : a variant) : int =
+    match (v1, v2) with
+    | (GConst x1, GConst x2)
+    | (Fun x1, Fun x2)
+    | (Type x1, Type x2)
+    | (Extends x1, Extends x2)
+    | (Constructor x1, Constructor x2)
+    | (AllMembers x1, AllMembers x2)
+    | (GConstName x1, GConstName x2) ->
+      String.compare x1 x2
+    | (Prop (c1, m1), Prop (c2, m2))
+    | (SProp (c1, m1), SProp (c2, m2))
+    | (Method (c1, m1), Method (c2, m2))
+    | (SMethod (c1, m1), SMethod (c2, m2))
+    | (Const (c1, m1), Const (c2, m2)) ->
+      let res = String.compare c1 c2 in
+      if Int.( <> ) res 0 then
+        res
+      else
+        String.compare m1 m2
+    | ( _,
+        ( GConst _ | Fun _ | Type _ | Extends _ | Const _ | Constructor _
+        | Prop _ | SProp _ | Method _ | SMethod _ | AllMembers _ | GConstName _
+        | Module _ ) ) ->
+      ordinal_variant v1 - ordinal_variant v2
+
   let dep_kind_of_variant : type a. a variant -> dep_kind = function
     | GConst _ -> KGConst
     | GConstName _ -> KGConstName

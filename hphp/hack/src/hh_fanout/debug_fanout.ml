@@ -13,15 +13,32 @@ type dependent = Typing_deps.Dep.dependent Typing_deps.Dep.variant
 
 type dependency = Typing_deps.Dep.dependency Typing_deps.Dep.variant
 
-type dep_edge = {
-  dependent: dependent;
-  dependency: dependency;
-}
+let compare_dependency = Typing_deps.Dep.compare_variant
+
+let compare_dependent = Typing_deps.Dep.compare_variant
+
+module DepEdge = struct
+  type t = {
+    dependent: dependent;
+    dependency: dependency;
+  }
+  [@@deriving ord]
+
+  let t_of_sexp _ =
+    {
+      dependency = Typing_deps.Dep.Fun "_";
+      dependent = Typing_deps.Dep.Fun "_";
+    }
+
+  let sexp_of_t _ = Sexp.Atom ""
+end
+
+module DepEdgeSet = Set.Make (DepEdge)
 
 type result = {
   dependencies: dependency list;
   fanout_dependents: Typing_deps.DepSet.t;
-  relevant_dep_edges: dep_edge list;
+  relevant_dep_edges: DepEdgeSet.t;
 }
 
 let result_to_json (result : result) : Hh_json.json =
@@ -34,7 +51,7 @@ let result_to_json (result : result) : Hh_json.json =
             (Typing_deps.(Dep.make dep) |> Typing_deps.Dep.to_debug_string) );
       ]
   in
-  let dep_edge_to_json { dependent; dependency } =
+  let dep_edge_to_json { DepEdge.dependent; dependency } =
     Hh_json.JSON_Object
       [
         ("dependent", dep_to_json dependent);
@@ -53,18 +70,20 @@ let result_to_json (result : result) : Hh_json.json =
           |> List.sort ~compare:String.compare
           |> List.map ~f:(fun dep -> Hh_json.JSON_String dep)) );
       ( "relevant_dep_edges",
-        Hh_json.JSON_Array (List.map relevant_dep_edges ~f:dep_edge_to_json) );
+        Hh_json.JSON_Array
+          (DepEdgeSet.elements relevant_dep_edges
+          |> List.map ~f:dep_edge_to_json) );
     ]
 
 let calculate_dep_edges
     ~(ctx : Provider_context.t) _acc (paths : Relative_path.t list) :
-    dep_edge HashSet.t list =
+    DepEdge.t HashSet.t list =
   List.map paths ~f:(fun path ->
       let dep_edges = HashSet.create () in
       Typing_deps.add_dependency_callback
         ~name:"hh_fanout debug collect deps"
         (fun dependent dependency ->
-          HashSet.add dep_edges { dependent; dependency });
+          HashSet.add dep_edges { DepEdge.dependent; dependency });
 
       let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
       (match Provider_context.read_file_contents entry with
@@ -127,9 +146,11 @@ let go
            (Relative_path.Set.elements fanout_files)
            ~num_workers:(List.length workers))
   in
-  HashSet.filter relevant_dep_edges ~f:(fun { dependent; _ } ->
+  HashSet.filter relevant_dep_edges ~f:(fun { DepEdge.dependent; _ } ->
       let open Typing_deps in
       DepSet.mem fanout_dependents (Dep.make dependent));
-  let relevant_dep_edges = HashSet.to_list relevant_dep_edges in
+  let relevant_dep_edges =
+    HashSet.to_list relevant_dep_edges |> DepEdgeSet.of_list
+  in
 
   { dependencies; fanout_dependents; relevant_dep_edges }

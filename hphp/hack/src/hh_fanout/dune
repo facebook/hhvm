@@ -24,7 +24,7 @@
   temp_file
   utils_core)
  (preprocess
-  (pps lwt_ppx ppx_let)))
+  (pps lwt_ppx ppx_let ppx_deriving.std)))
 
 (data_only_dirs
  cargo

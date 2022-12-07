@@ -108,6 +108,8 @@ module Dep : sig
 
   val make_member_dep_from_type_dep : t -> Member.t -> t
 
+  val compare_variant : 'a variant -> 'a variant -> int
+
   (** A 64bit representation of the 63bit hash. *)
   val to_int64 : t -> int64
 

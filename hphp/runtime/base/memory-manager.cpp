@@ -1127,7 +1127,7 @@ void MemoryManager::setGCEnabled(bool isGCEnabled) {
 }
 
 void MemoryManager::debugFreeFill(void* ptr, size_t bytes) {
-  if (bytes >= sizeof(HeapObject) + 16u) {
+  if (bytes >= sizeof(FreeNode) + 16u) {
     auto node = static_cast<FreeNode*>(ptr);
     auto p = reinterpret_cast<uint64_t*>(node + 1);
     // try to remember the class of the object when applicable.

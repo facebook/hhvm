@@ -107,28 +107,19 @@ class HTTPMessageFilter
 
   virtual void resume(uint64_t offset) noexcept;
 
-  // This is called by the handler when it wants to detach from the transaction.
-  // After this call, the handler and the transaction can be destroyed without
-  // notifying each other. We pass the call through the filter chain to
-  // avoid holding a stale pointer to the transaction.
-  void detachHandlerFromTransaction() noexcept {
-    if (prev_.which() == 0) {
-      auto prev = boost::get<HTTPMessageFilter*>(prev_);
-      if (prev) {
-        // prev points to another filter, popagate the call.
-        prev->detachHandlerFromTransaction();
-      }
-    } else {
-      auto prev = boost::get<HTTPSink*>(prev_);
-      if (prev) {
-        // prev points to the transaction, detach the handler from the
-        // transaction.
-        prev->detachHandler();
-        // Set the pointer to nullptr. It is not safe to use the pointer since
-        // after this the transaction can be destroyed without notifying the
-        // filter.
-        prev_ = static_cast<HTTPSink*>(nullptr);
-      }
+  // Doesn't need to propagate down a chain, call on head filter
+  void detachHandlerFromSink(std::unique_ptr<HTTPSink> sink) noexcept {
+    CHECK_EQ(prev_.which(), 1);
+    auto prev = boost::get<HTTPSink*>(prev_);
+    if (prev) {
+      // prev points to the transaction, detach the handler from the
+      // transaction.
+      CHECK_EQ(prev, sink.get());
+      prev->detachAndAbortIfIncomplete(std::move(sink));
+      // Set the pointer to nullptr. It is not safe to use the pointer since
+      // after this the transaction can be destroyed without notifying the
+      // filter.
+      prev_ = static_cast<HTTPSink*>(nullptr);
     }
   }
 

@@ -127,25 +127,23 @@ TEST(HTTPMessageFilter, TestFilterPauseResumeAfterTxnDetached) {
 }
 
 TEST(HTTPMessageFilter, TestFilterDetachHandlerFromTransaction) {
-  //              prev               prev
-  // testFilter2 -----> testFilter1 -----> mockTxn
+  //                prev
+  // testFilter1 -----> mockTxn
 
   TestFilter testFilter1;
-  TestFilter testFilter2;
 
   HTTP2PriorityQueue q;
   MockHTTPTransaction mockTxn(TransportDirection::UPSTREAM, 1, 0, q);
 
   auto sink = std::make_unique<HTTPTransactionSink>(&mockTxn);
-  testFilter2.setPrevFilter(&testFilter1);
   testFilter1.setPrevSink(sink.get());
 
   EXPECT_CALL(mockTxn, setHandler(nullptr));
-  testFilter2.detachHandlerFromTransaction();
+  testFilter1.detachHandlerFromSink(std::move(sink));
 }
 
 TEST(HTTPMessageFilter, TestFilterDetachHandlerNoTransaction) {
   TestFilter testFilter1;
   // detach when filter does not hold a pointer to transaction
-  EXPECT_NO_THROW(testFilter1.detachHandlerFromTransaction());
+  EXPECT_NO_THROW(testFilter1.detachHandlerFromSink(nullptr));
 }

@@ -35,7 +35,9 @@ class NullHTTPSink : public HTTPSink {
   [[nodiscard]] HTTPTransaction* FOLLY_NULLABLE getHTTPTxn() const override {
     return nullptr;
   }
-  void detachHandler() override {
+  void detachAndAbortIfIncomplete(std::unique_ptr<HTTPSink>) override {
+    LOG(ERROR) << "detachAndAbortIfIncomplete event is not expected for "
+                  "NullHTTPSink";
   }
   // Sending data
   void sendHeaders(const HTTPMessage& /*headers*/) override {
@@ -76,10 +78,6 @@ class NullHTTPSink : public HTTPSink {
   [[nodiscard]] bool canSendHeaders() const override {
     XLOG(ERR) << "canSendHeaders event is not expected for NullHTTPSink";
     return false;
-  }
-  void sendAbortIfIncomplete() override {
-    LOG(ERROR) << "sendAbortIfIncomplete event is not expected for "
-                  "NullHTTPSink";
   }
   const wangle::TransportInfo& getSetupTransportInfo() const noexcept override {
     static wangle::TransportInfo dummy;

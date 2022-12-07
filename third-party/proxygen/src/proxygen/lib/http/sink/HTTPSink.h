@@ -33,7 +33,7 @@ class HTTPSink {
   virtual ~HTTPSink() = default;
 
   [[nodiscard]] virtual HTTPTransaction* FOLLY_NULLABLE getHTTPTxn() const = 0;
-  virtual void detachHandler() = 0;
+  virtual void detachAndAbortIfIncomplete(std::unique_ptr<HTTPSink> self) = 0;
   // Sending data
   virtual void sendHeaders(const HTTPMessage& headers) = 0;
   virtual bool sendHeadersWithDelegate(
@@ -47,7 +47,6 @@ class HTTPSink {
   virtual void sendTrailers(const HTTPHeaders& trailers) = 0;
   virtual void sendEOM() = 0;
   virtual void sendAbort() = 0;
-  virtual void sendAbortIfIncomplete() = 0;
 
   // Check state
   [[nodiscard]] virtual bool canSendHeaders() const = 0;

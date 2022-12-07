@@ -29,8 +29,17 @@ class HTTPTransactionSink : public HTTPSink {
   [[nodiscard]] HTTPTransaction* FOLLY_NULLABLE getHTTPTxn() const override {
     return httpTransaction_;
   }
-  void detachHandler() override {
+
+  void detachAndAbortIfIncomplete(std::unique_ptr<HTTPSink> self) override {
+    CHECK_EQ(self.get(), this);
+    httpTransaction_->setTransportCallback(nullptr);
     httpTransaction_->setHandler(nullptr);
+    if (!(httpTransaction_->isEgressComplete() ||
+          httpTransaction_->isEgressEOMQueued()) ||
+        !httpTransaction_->isIngressComplete()) {
+      sendAbort();
+    }
+    self.reset();
   }
 
   // Sending data
@@ -70,15 +79,6 @@ class HTTPTransactionSink : public HTTPSink {
   }
   [[nodiscard]] bool canSendHeaders() const override {
     return httpTransaction_->canSendHeaders();
-  }
-  void sendAbortIfIncomplete() override {
-    // TODO: this reveals warts in the txn api. If egress and ingress are
-    // complete, we really should have gotten detachTransaction() already.
-    if (!(httpTransaction_->isEgressComplete() ||
-          httpTransaction_->isEgressEOMQueued()) ||
-        !httpTransaction_->isIngressComplete()) {
-      sendAbort();
-    }
   }
   const wangle::TransportInfo& getSetupTransportInfo() const noexcept override {
     return httpTransaction_->getSetupTransportInfo();

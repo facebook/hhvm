@@ -1,11 +1,11 @@
 // RUN: %hackc compile-infer %s | FileCheck %s
-// CHECK: .source_language = "hack"
 
 class D {
   public int $foo = 42;
   /* HH_FIXME[4055] No initial value */
   public static D $bar;
 
+  // TEST-CHECK-BAL: define D.mop_baseh_querym_pt
   // CHECK: define D.mop_baseh_querym_pt($this: *D) : *HackMixed {
   // CHECK: local base: *HackMixed
   // CHECK: #b0:
@@ -23,6 +23,7 @@ class D {
     return $this->foo;
   }
 
+  // TEST-CHECK-BAL: define D.mop_basesc_querym_pt
   // CHECK: define D.mop_basesc_querym_pt($this: *D) : *HackMixed {
   // CHECK: local base: *HackMixed
   // CHECK: #b0:
@@ -43,6 +44,7 @@ class D {
   }
 }
 
+// TEST-CHECK-BAL: define $root.mop_basec_querym_pc
 // CHECK: define $root.mop_basec_querym_pc($this: *void) : *HackMixed {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
@@ -60,6 +62,7 @@ function mop_basec_querym_pc(): int {
   return ret_c()->foo;
 }
 
+// TEST-CHECK-BAL: define $root.mop_basegc_querym_ec
 // CHECK: define $root.mop_basegc_querym_ec($this: *void) : *HackMixed {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
@@ -77,6 +80,7 @@ function mop_basegc_querym_ec(): int {
   return $_SERVER[ret_int()];
 }
 
+// TEST-CHECK-BAL: define $root.mop_basel_querym_ei
 // CHECK: define $root.mop_basel_querym_ei($this: *void, $a: *HackMixed) : *HackMixed {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
@@ -95,6 +99,7 @@ function mop_basel_querym_ei(vec<int> $a): int {
   return $a[5];
 }
 
+// TEST-CHECK-BAL: define $root.mop_basel_querym_pc
 // CHECK: define $root.mop_basel_querym_pc($this: *void, $a: *HackMixed) : *HackMixed {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
@@ -110,6 +115,7 @@ function mop_basel_querym_pc(C $a): int {
   return $a->{ret_str()};
 }
 
+// TEST-CHECK-BAL: define $root.mop_basel_querym_pl
 // CHECK: define $root.mop_basel_querym_pl($this: *void, $a: *HackMixed) : *HackMixed {
 // CHECK: local $b: *void, base: *HackMixed
 // CHECK: #b0:
@@ -129,6 +135,7 @@ function mop_basel_querym_pl(C $a): int {
   return $a->{$b};
 }
 
+// TEST-CHECK-BAL: define $root.mop_basel_querym_el
 // CHECK: define $root.mop_basel_querym_el($this: *void, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
@@ -147,6 +154,7 @@ function mop_basel_querym_el(vec<int> $a, int $b): int {
   return $a[$b];
 }
 
+// TEST-CHECK-BAL: define $root.mop_basel_querym_et
 // CHECK: define $root.mop_basel_querym_et($this: *void, $a: *HackMixed) : *HackMixed {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
@@ -165,6 +173,7 @@ function mop_basel_querym_et(dict<string, int> $a): int {
   return $a["hello"];
 }
 
+// TEST-CHECK-BAL: define $root.mop_basel_querym_pt
 // CHECK: define $root.mop_basel_querym_pt($this: *void, $a: *HackMixed) : *HackMixed {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
@@ -180,6 +189,7 @@ function mop_basel_querym_pt(C $a): int {
   return $a->foo;
 }
 
+// TEST-CHECK-BAL: define $root.mop_basel_querym_qt
 // CHECK: define $root.mop_basel_querym_qt($this: *void, $a: *HackMixed) : *HackMixed {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
@@ -196,6 +206,7 @@ function mop_basel_querym_qt(?C $a): ?int {
   return $a?->foo;
 }
 
+// TEST-CHECK-BAL: define $root.mop_basel_setm_w
 // CHECK: define $root.mop_basel_setm_w($this: *void, $a: *HackMixed) : *HackMixed {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
@@ -212,6 +223,7 @@ function mop_basel_setm_w(vec<int> $a): void {
   $a[] = 5;
 }
 
+// TEST-CHECK-BAL: define $root.mop_basel_incdec_ei
 // CHECK: define $root.mop_basel_incdec_ei($this: *void, $a: *HackMixed) : *HackMixed {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:

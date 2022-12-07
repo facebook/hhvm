@@ -1,6 +1,7 @@
 ---
 description: Implementing ThriftServer in C++
 ---
+
 # Cpp2 ThriftServer
 
 This is a re-implementation of both the generated cpp code, and a

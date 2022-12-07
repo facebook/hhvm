@@ -49,7 +49,20 @@ module.exports = {
         id: "fb/howtos/index",
       },
       items: [
-        'fb/howtos/calling-python-from-hack',
+        'fb/howtos/using-a-client',
+        {
+          type: 'category',
+          label: 'Implementing a Server',
+          link: {
+            type: 'doc',
+            id: "fb/howtos/implementing-a-server/index",
+          },
+          items: [
+            'fb/howtos/implementing-a-server/cpp',
+            'fb/howtos/implementing-a-server/java'
+          ]
+        },
+        'fb/howtos/calling-python-from-hack'
       ]
     }]),
     {
@@ -61,7 +74,22 @@ module.exports = {
       },
       items: [
         "spec/about",
-        "spec/idl",
+        {
+          type: 'category',
+          label: 'Interface Definition Language',
+          link: {
+            type: 'doc',
+            id: 'spec/idl/index',
+          },
+          items: [
+            "spec/idl/idl-reference",
+            "spec/idl/optional-required-fields",
+            "spec/idl/structured-annotations",
+            "spec/idl/standard-thrift-annotation-library",
+            "spec/idl/mixins",
+            "spec/idl/schema-evolution"
+          ]
+        },
         {
           type: 'category',
           label: 'Definitions',
@@ -118,6 +146,7 @@ module.exports = {
         // affecting their URLs.
 
         // Released features:
+        'fb/features/serialization',
         {
           type: 'category',
           label: 'Streaming',
@@ -170,8 +199,6 @@ module.exports = {
             id: "languages/cpp/index",
           },
           items: [
-            'languages/cpp/channel',
-            'languages/cpp/cpp2',
             ...fbInternalOnly([
             'fb/languages/cpp/generated-code',
             'fb/languages/cpp/field-access',
@@ -188,9 +215,12 @@ module.exports = {
                 'fb/languages/cpp/code-frameworks/migration'
               ]
             },
+            'languages/cpp/channel',
+            'languages/cpp/cpp2',
             'fb/languages/cpp/serialization',
             'fb/languages/cpp/visitation',
             'fb/languages/cpp/hash',
+            'fb/languages/cpp/lazy',
             'fb/languages/cpp/protocol-object',
             {
               type: 'category',
@@ -253,7 +283,8 @@ module.exports = {
                 'fb/languages/hack/servers/sr-setup',
               ]
             },
-            'fb/languages/hack/example-of-thrift-clients-in-www'
+            'fb/languages/hack/example-of-thrift-clients-in-www',
+            'fb/languages/hack/testing-serialization-changes'
           ]
         },
         {
@@ -302,6 +333,7 @@ module.exports = {
       },
       items: [
         'fb/server/components',
+        'fb/server/transport',
         'fb/server/threading-models',
         'fb/server/thrift-server-features',
         'fb/server/async-handling',
@@ -371,18 +403,15 @@ module.exports = {
         },
         'fb/best-practices/migrating-javadeprecated-to-java-swift'
       ]
-    }
-    ]),
+    },
     {
       type: 'category',
       label: 'Troubleshooting',
       link: {
         type: 'doc',
-        id: "troubleshooting/index",
+        id: "fb/troubleshooting/index",
       },
       items: [
-        'troubleshooting/errors',
-        ...fbInternalOnly([
         'fb/troubleshooting/faq',
         {
           type: 'category',
@@ -409,9 +438,9 @@ module.exports = {
           ]
         },
         'fb/troubleshooting/fb303-counters'
-        ])
       ]
-    },
+    }
+    ]),
     {
       type: 'category',
       label: 'Releases',

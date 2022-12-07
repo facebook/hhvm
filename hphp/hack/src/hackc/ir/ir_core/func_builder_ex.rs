@@ -5,8 +5,8 @@
 
 use std::sync::Arc;
 
-use crate::instr;
 use crate::instr::Hhbc;
+use crate::instr::Predicate;
 use crate::type_struct::TypeStruct;
 use crate::BaseType;
 use crate::Constant;
@@ -29,19 +29,21 @@ pub trait FuncBuilderEx {
     ///         jmp false_br
     ///     false_br:
     ///
+    fn emit_if_then(&mut self, pred: ValueId, loc: LocId, f: impl FnOnce(&mut Self));
+
+    /// Build a conditional:
+    ///     pred ? b() : c()
+    ///
     /// Note that although the callback only returns a single Instr it can emit
     /// as many instrs as it wants simply returning the final one. In addition
     /// it can return a tombstone to indicate that it already emitted everything
     /// it needed.
-    fn if_then(&mut self, pred: ValueId, loc: LocId, f: impl FnOnce(&mut Self) -> Instr) -> Instr;
-
-    /// Emit an if/then block.  This behaves like `if_then()` but instead of
-    /// returning the final Instr it emits it.
-    fn emit_if_then(
+    fn emit_if_then_else(
         &mut self,
         pred: ValueId,
         loc: LocId,
-        f: impl FnOnce(&mut Self) -> Instr,
+        f_true: impl FnOnce(&mut Self) -> ValueId,
+        f_false: impl FnOnce(&mut Self) -> ValueId,
     ) -> ValueId;
 
     /// Build an `is` check.
@@ -57,8 +59,7 @@ pub trait FuncBuilderEx {
 }
 
 impl<'a> FuncBuilderEx for FuncBuilder<'a> {
-    fn if_then(&mut self, pred: ValueId, loc: LocId, f: impl FnOnce(&mut Self) -> Instr) -> Instr {
-        use instr::Predicate;
+    fn emit_if_then(&mut self, pred: ValueId, loc: LocId, f: impl FnOnce(&mut Self)) {
         let join_bid = self.alloc_bid();
         let true_bid = self.alloc_bid();
         self.emit(Instr::jmp_op(
@@ -69,23 +70,53 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
             loc,
         ));
         self.start_block(true_bid);
-        let instr = f(self);
-        self.emit(instr);
+        f(self);
         if !self.func.is_terminated(self.cur_bid()) {
             self.emit(Instr::jmp(join_bid, loc));
         }
         self.start_block(join_bid);
-        Instr::tombstone()
     }
 
-    fn emit_if_then(
+    fn emit_if_then_else(
         &mut self,
         pred: ValueId,
         loc: LocId,
-        f: impl FnOnce(&mut Self) -> Instr,
+        f_true: impl FnOnce(&mut Self) -> ValueId,
+        f_false: impl FnOnce(&mut Self) -> ValueId,
     ) -> ValueId {
-        let instr = self.if_then(pred, loc, f);
-        self.emit(instr)
+        // b_true:
+        //   arg = f_true()
+        //   jmp b_join(arg)
+        // b_false:
+        //   arg = f_false()
+        //   jmp b_join(arg)
+        // b_join(arg):
+
+        let join_bid = self.alloc_bid();
+        let true_bid = self.alloc_bid();
+        let false_bid = self.alloc_bid();
+        self.emit(Instr::jmp_op(
+            pred,
+            Predicate::NonZero,
+            true_bid,
+            false_bid,
+            loc,
+        ));
+
+        self.start_block(true_bid);
+        let arg = f_true(self);
+        if !self.func.is_terminated(self.cur_bid()) {
+            self.emit(Instr::jmp_args(join_bid, &[arg], loc));
+        }
+
+        self.start_block(false_bid);
+        let arg = f_false(self);
+        if !self.func.is_terminated(self.cur_bid()) {
+            self.emit(Instr::jmp_args(join_bid, &[arg], loc));
+        }
+
+        self.start_block(join_bid);
+        self.alloc_param()
     }
 
     fn is(&mut self, vid: ValueId, ety: &EnforceableType, loc: LocId) -> Instr {

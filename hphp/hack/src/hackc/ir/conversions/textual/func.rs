@@ -280,6 +280,7 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             state.set_iid(iid, vid);
         }
         Instr::Hhbc(Hhbc::CGetL(lid, _)) => write_load_var(state, iid, lid)?,
+        Instr::Hhbc(Hhbc::ConsumeL(..)) => { /* no-op */ }
         Instr::Hhbc(Hhbc::IncDecL(lid, op, _)) => write_inc_dec_l(state, iid, lid, op)?,
         Instr::Hhbc(Hhbc::ResolveClass(cid, _)) => {
             let vid = state.load_static_class(cid)?;
@@ -672,12 +673,9 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
         CallDetail::FCallObjMethod { .. } => state.write_todo("FCallObjMethod")?,
         CallDetail::FCallObjMethodD { flavor, method } => {
             // $x->y()
-            if flavor == ir::ObjMethodOp::NullSafe {
-                // Handle this in lowering.
-                textual_todo! {
-                    state.fb.comment("TODO: NullSafe")?;
-                }
-            }
+
+            // This should have been handled in lowering.
+            assert!(flavor != ir::ObjMethodOp::NullSafe);
 
             // TODO: need to try to figure out the type.
             let ty = ClassName::new(Str::new(b"HackMixed"));

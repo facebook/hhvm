@@ -27,6 +27,7 @@ use ir::LocalId;
 use ir::MethodId;
 use ir::ObjMethodOp;
 use ir::SpecialClsRef;
+use ir::TypeStructResolveOp;
 use ir::UnitBytesId;
 use ir::ValueId;
 
@@ -216,6 +217,20 @@ impl TransformInstr for LowerInstrs<'_> {
                 call.detail = CallDetail::FCallObjMethodD { flavor, method };
                 Instr::Call(Box::new(call))
             }
+            Instr::Call(
+                box call @ Call {
+                    detail:
+                        CallDetail::FCallObjMethod {
+                            flavor: ObjMethodOp::NullSafe,
+                            ..
+                        }
+                        | CallDetail::FCallObjMethodD {
+                            flavor: ObjMethodOp::NullSafe,
+                            ..
+                        },
+                    ..
+                },
+            ) => rewrite_nullsafe_call(builder, call),
             Instr::Hhbc(Hhbc::BareThis(_op, loc)) => {
                 let this = builder.strings.intern_str("$this");
                 let lid = LocalId::Named(this);
@@ -230,6 +245,16 @@ impl TransformInstr for LowerInstrs<'_> {
             Instr::Hhbc(Hhbc::InstanceOfD(vid, cid, loc)) => {
                 let cid = builder.emit_constant(Constant::String(cid.id));
                 builder.hack_builtin(Builtin::IsType, &[vid, cid], loc)
+            }
+            Instr::Hhbc(Hhbc::IsTypeStructC([obj, ts], op, loc)) => {
+                let builtin = hack::Hhbc::IsTypeStructC;
+                let op = match op {
+                    TypeStructResolveOp::DontResolve => 0,
+                    TypeStructResolveOp::Resolve => 1,
+                    _ => unreachable!(),
+                };
+                let op = builder.emit_constant(Constant::Int(op));
+                builder.hhbc_builtin(builtin, &[obj, ts, op], loc)
             }
             Instr::Hhbc(Hhbc::LateBoundCls(loc)) => {
                 match self.method_info.as_ref().unwrap().is_static {
@@ -325,4 +350,36 @@ impl TransformInstr for LowerInstrs<'_> {
         self.changed = true;
         instr
     }
+}
+
+fn rewrite_nullsafe_call(builder: &mut FuncBuilder<'_>, mut call: Call) -> Instr {
+    // rewrite a call like `$a?->b()` into `$a ? $a->b() : null`
+    call.detail = match call.detail {
+        CallDetail::FCallObjMethod { .. } => CallDetail::FCallObjMethod {
+            flavor: ObjMethodOp::NullThrows,
+        },
+        CallDetail::FCallObjMethodD { method, .. } => CallDetail::FCallObjMethodD {
+            flavor: ObjMethodOp::NullThrows,
+            method,
+        },
+        _ => unreachable!(),
+    };
+
+    let loc = call.loc;
+    let obj = call.obj();
+    let pred = builder.emit_hack_builtin(hack::Builtin::Hhbc(hack::Hhbc::IsTypeNull), &[obj], loc);
+    let res = builder.emit_if_then_else(
+        pred,
+        loc,
+        |builder| {
+            // is null
+            builder.emit_constant(Constant::Null)
+        },
+        |builder| {
+            // is not null
+            builder.emit(Instr::Call(Box::new(call)))
+        },
+    );
+
+    Instr::copy(res)
 }

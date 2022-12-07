@@ -91,4 +91,23 @@ function fcall_method(C $a): void {
   $a->b(1, 2, 3);
 }
 
+// CHECK: define $root.fcall_nullsafe($this: *void, $c: *HackMixed) : *HackMixed {
+// CHECK: #b0:
+// CHECK:   n0: *HackMixed = load &$c
+// CHECK:   n1 = $builtins.hhbc_is_type_null(n0)
+// CHECK:   jmp b1, b2
+// CHECK: #b1:
+// CHECK:   prune $builtins.hack_is_true(n1)
+// CHECK:   jmp b3($builtins.hack_null())
+// CHECK: #b2:
+// CHECK:   prune ! $builtins.hack_is_true(n1)
+// CHECK:   n2 = n0.HackMixed.g()
+// CHECK:   jmp b3(n2)
+// CHECK: #b3(n3: *HackMixed):
+// CHECK:   n4 = $root.f(null, n3)
+// CHECK: }
+function fcall_nullsafe(?C $c): void {
+  f($c?->g());
+}
+
 // CHECK: declare C$static.f(...): *HackMixed

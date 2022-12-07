@@ -90,6 +90,8 @@ pub(crate) enum Hhbc {
     IsTypeScalar,
     #[decl(fn hhbc_is_type_str(*HackMixed) -> *HackMixed)]
     IsTypeStr,
+    #[decl(fn hhbc_is_type_struct_c(*HackMixed, *HackMixed, *HackMixed) -> *HackMixed)]
+    IsTypeStructC,
     #[decl(fn hhbc_is_type_vec(*HackMixed) -> *HackMixed)]
     IsTypeVec,
     #[decl(fn hhbc_lock_obj(*HackMixed) -> void)]

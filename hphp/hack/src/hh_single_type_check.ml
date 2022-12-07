@@ -50,6 +50,7 @@ type mode =
   | Lint_json
   | Dump_deps
   | Dump_dep_hashes
+  | Get_some_file_deps of int
   | Identify_symbol of int * int
   | Find_local of int * int
   | Get_member of string
@@ -444,6 +445,10 @@ let parse_options () =
       ( "--dump-inheritance",
         Arg.Unit (set_mode Dump_inheritance),
         " Print inheritance" );
+      ( "--get-some-file-deps",
+        Arg.Int (fun depth -> set_mode (Get_some_file_deps depth) ()),
+        " Print a list of files this file depends on. The provided integer is the depth of the traversal. Requires --root, --naming-table and --depth"
+      );
       ( "--identify-symbol",
         Arg.Tuple
           [
@@ -894,6 +899,13 @@ let parse_options () =
     | _ -> false
   in
 
+  (match !mode with
+  | Get_some_file_deps _ ->
+    if Option.is_none !naming_table then
+      raise (Arg.Bad "--get-some-file-deps requires --naming-table");
+    if Option.is_none !root then
+      raise (Arg.Bad "--get-some-file-deps requires --root")
+  | _ -> ());
   (* --root implies certain things... *)
   let root =
     match !root with
@@ -1780,6 +1792,72 @@ let handle_constraint_mode
   in
   iter_over_files process_multifile
 
+let scrape_class_names (ast : Nast.program) : SSet.t =
+  let names = ref SSet.empty in
+  let visitor =
+    object
+      (* It would look less clumsy to use Aast.reduce, but would use set union which has higher complexity. *)
+      inherit [_] Aast.iter
+
+      method! on_class_name _ (_p, id) = names := SSet.add id !names
+    end
+  in
+  visitor#on_program () ast;
+  !names
+
+(** Scrape names in file and return the files where those names are defined. *)
+let get_some_file_dependencies ctx (file : Relative_path.t) :
+    Relative_path.Set.t =
+  let open Hh_prelude in
+  let nast = Ast_provider.get_ast ctx ~full:true file in
+  let names =
+    Errors.ignore_ (fun () -> Naming.program ctx nast) |> scrape_class_names
+    (* TODO: scape other defs too *)
+  in
+  SSet.fold
+    (fun class_name files ->
+      match Naming_provider.get_class_path ctx class_name with
+      | None -> files
+      | Some file -> Relative_path.Set.add files file)
+    names
+    Relative_path.Set.empty
+
+(** Recursively scrape names in files and return the
+  files where those names are defined. *)
+let traverse_file_dependencies ctx (files : Relative_path.t list) ~(depth : int)
+    : Relative_path.Set.t =
+  let rec traverse
+      (files : Relative_path.Set.t)
+      depth
+      (visited : Relative_path.Set.t)
+      (results : Relative_path.Set.t) =
+    if Int.( <= ) depth 0 then
+      Relative_path.Set.union files results
+    else
+      let (next_files, visited, results) =
+        Relative_path.Set.fold
+          files
+          ~init:(Relative_path.Set.empty, visited, results)
+          ~f:(fun file (next_files, visited, results) ->
+            if Relative_path.Set.mem visited file then
+              (next_files, visited, results)
+            else
+              let visited = Relative_path.Set.add visited file in
+              let dependencies = get_some_file_dependencies ctx file in
+              let next_files =
+                Relative_path.Set.union dependencies next_files
+              in
+              let results = Relative_path.Set.add results file in
+              (next_files, visited, results))
+      in
+      traverse next_files (depth - 1) visited results
+  in
+  traverse
+    (Relative_path.Set.of_list files)
+    depth
+    Relative_path.Set.empty
+    Relative_path.Set.empty
+
 let apply_patches files_contents patches =
   if List.length patches <= 0 then
     print_endline "No patches"
@@ -2019,6 +2097,10 @@ let handle_mode
     Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
         ignore @@ Typing_check_utils.check_defs ctx fn fileinfo);
     dump_debug_glean_deps dbg_glean_deps
+  | Get_some_file_deps depth ->
+    let file_deps = traverse_file_dependencies ctx filenames ~depth in
+    Relative_path.Set.iter file_deps ~f:(fun file ->
+        Printf.printf "%s\n" (Relative_path.to_absolute file))
   | Dump_inheritance ->
     let open ServerCommandTypes.Method_jumps in
     let naming_table = Naming_table.create files_info in

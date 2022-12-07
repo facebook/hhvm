@@ -975,6 +975,9 @@ ParseURL HTTPMessage::setURLImplInternal(bool unparse, bool strict) {
     DVLOG(9) << "set path: " << u.path() << " query:" << u.query();
     req.path_ = u.path();
     req.query_ = u.query();
+    if (req.path_.empty()) {
+      req.path_.reset("/", 1);
+    }
   } else {
     DVLOG(4) << "Error in parsing URL: " << req.url_;
     req.path_.clear();

@@ -1464,6 +1464,18 @@ TEST(HTTP1xCodecTest, TrailerCtls) {
           }));
   codec.onIngress(*buffer);
 }
+
+TEST(HTTP1xCodecTest, AbsoluteURLNoPath) {
+  HTTP1xCodec codec(TransportDirection::DOWNSTREAM, true);
+  HTTP1xCodecCallback callbacks;
+  codec.setCallback(&callbacks);
+  auto buffer = folly::IOBuf::copyBuffer(
+      string("GET http://www.foo.com HTTP/1.0\r\n\r\n"));
+  codec.onIngress(*buffer);
+  EXPECT_EQ(callbacks.headersComplete, 1);
+  EXPECT_EQ(callbacks.msg_->getPathAsStringPiece(), string("/"));
+}
+
 class ConnectionHeaderTest
     : public TestWithParam<std::pair<std::list<string>, string>> {
  public:

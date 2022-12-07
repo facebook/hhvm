@@ -140,6 +140,25 @@ TEST(HTTPMessage, SetInvalidURL) {
   EXPECT_EQ(msg.getPathAsStringPiece(), "");
 }
 
+TEST(HTTPMessage, SetURLEmpty) {
+  HTTPMessage msg;
+
+  auto res = msg.setURL("");
+  EXPECT_FALSE(res.valid());
+  EXPECT_EQ(msg.getPathAsStringPiece(), "");
+}
+
+TEST(HTTPMessage, SetAbsoluteURLNoPath) {
+  HTTPMessage msg;
+
+  auto res = msg.setURL("http://www.foo.com");
+  EXPECT_TRUE(res.valid());
+  EXPECT_EQ(msg.getPathAsStringPiece(), "/");
+  EXPECT_EQ(msg.getPath(), msg.getPathAsStringPiece());
+  // getPathAsStringPiece points to constant string and getPath points to copy
+  EXPECT_NE(msg.getPath().data(), msg.getPathAsStringPiece().begin());
+}
+
 TEST(HTTPMessage, TestHeaderPreservation) {
   HTTPMessage msg;
   HTTPHeaders& hdrs = msg.getHeaders();
@@ -432,7 +451,7 @@ void testPathAndQuery(const string& url,
 TEST(GetPathAndQuery, ParseURL) {
   testPathAndQuery("http://localhost:80/foo?bar#qqq", "/foo", "bar");
   testPathAndQuery("localhost:80/foo?bar#qqq", "/foo", "bar");
-  testPathAndQuery("localhost", "", "");
+  testPathAndQuery("localhost", "/", "");
   testPathAndQuery("/f/o/o?bar#qqq", "/f/o/o", "bar");
   testPathAndQuery("#?hello", "", "");
 }

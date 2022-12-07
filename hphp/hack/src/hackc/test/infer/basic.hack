@@ -9,7 +9,7 @@
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("Hello, World!\n")
 // CHECK:   n1 = $builtins.hhbc_print(n0)
-// CHECK:   ret $builtins.hack_null()
+// CHECK:   ret null
 // CHECK: }
 function main(): void {
   echo "Hello, World!\n";
@@ -21,7 +21,7 @@ function main(): void {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("This string has \042 a quote")
 // CHECK:   n1 = $builtins.hhbc_print(n0)
-// CHECK:   ret $builtins.hack_null()
+// CHECK:   ret null
 // CHECK: }
 function escaped_string(): void {
   echo 'This string has " a quote';
@@ -46,7 +46,7 @@ function escaped_string(): void {
 // CHECK:   n6 = $builtins.hhbc_print(n0)
 // CHECK:   jmp b3
 // CHECK: #b3:
-// CHECK:   ret $builtins.hack_null()
+// CHECK:   ret null
 // CHECK: }
 function cmp(mixed $a, mixed $b): void {
   if ($a == $b) {
@@ -75,7 +75,7 @@ function cmp(mixed $a, mixed $b): void {
 // CHECK:   n6 = $builtins.hhbc_print(n0)
 // CHECK:   jmp b3
 // CHECK: #b3:
-// CHECK:   ret $builtins.hack_null()
+// CHECK:   ret null
 // CHECK: }
 function cmp2(int $a, int $b): void {
   if ($a == $b) {
@@ -104,7 +104,7 @@ function ret_str(): string {
 // CHECK: #b0:
 // CHECK:   n0 = $root.f_bool(null, $builtins.hack_bool(false))
 // CHECK:   n1 = $root.f_bool(null, $builtins.hack_bool(true))
-// CHECK:   ret $builtins.hack_null()
+// CHECK:   ret null
 // CHECK: }
 function bool_call(): void {
   f_bool(false);
@@ -121,7 +121,7 @@ function bool_call(): void {
 // CHECK:   store &$a <- n0: *HackMixed
 // CHECK:   store &$b <- n2: *HackMixed
 // CHECK:   store &$c <- n1: *HackMixed
-// CHECK:   ret $builtins.hack_null()
+// CHECK:   ret null
 // CHECK: }
 function test_const(): void {
   $a = vec["x", 2.0, 3, true];
@@ -135,7 +135,7 @@ function test_const(): void {
 // CHECK: #b0:
 // CHECK:   n0 = $root.f_float(null, $builtins.hack_float(3.14))
 // CHECK:   n1 = $root.f_float(null, $builtins.hack_float(3.0))
-// CHECK:   ret $builtins.hack_null()
+// CHECK:   ret null
 // CHECK: }
 function float_arg(): void {
   f_float(3.14);

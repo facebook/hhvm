@@ -18,7 +18,7 @@ use crate::util;
 
 pub(crate) fn typed_value_expr(tv: &TypedValue, strings: &StringInterner) -> Expr {
     match *tv {
-        TypedValue::Uninit => hack::expr_builtin(Builtin::Null, ()),
+        TypedValue::Uninit => textual::Expr::null(),
         TypedValue::Int(n) => hack::expr_builtin(Builtin::Int, [Expr::Const(Const::Int(n))]),
         TypedValue::Bool(false) => hack::expr_builtin(Builtin::Bool, [Expr::Const(Const::False)]),
         TypedValue::Bool(true) => hack::expr_builtin(Builtin::Bool, [Expr::Const(Const::True)]),
@@ -29,7 +29,7 @@ pub(crate) fn typed_value_expr(tv: &TypedValue, strings: &StringInterner) -> Exp
             let s = util::escaped_string(&strings.lookup_bytes(s));
             hack::expr_builtin(Builtin::String, [Expr::Const(Const::String(s))])
         }
-        TypedValue::Null => hack::expr_builtin(Builtin::Null, ()),
+        TypedValue::Null => textual::Expr::null(),
         TypedValue::Vec(ref v) => {
             let args: Vec<Expr> = v
                 .iter()

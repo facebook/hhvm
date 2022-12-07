@@ -26,7 +26,7 @@
 // CHECK:   jmp b5
 // CHECK: #b5:
 // CHECK:   n7 = $root.a(null, $builtins.hack_int(3))
-// CHECK:   ret $builtins.hack_null()
+// CHECK:   ret null
 // CHECK: }
 function main(): void {
   a(0);

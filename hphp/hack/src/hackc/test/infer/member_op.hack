@@ -217,7 +217,7 @@ function mop_basel_querym_qt(?C $a): ?int {
 // CHECK:   n4 = $builtins.hack_dim_array_append(n3)
 // CHECK:   n5 = $builtins.hack_int(5)
 // CHECK:   store n4 <- n5: *HackMixed
-// CHECK:   ret $builtins.hack_null()
+// CHECK:   ret null
 // CHECK: }
 function mop_basel_setm_w(vec<int> $a): void {
   $a[] = 5;

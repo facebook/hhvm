@@ -809,19 +809,19 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
                     Constant::Bool(false) => hack::expr_builtin(Builtin::Bool, [false]),
                     Constant::Bool(true) => hack::expr_builtin(Builtin::Bool, [true]),
                     Constant::Int(i) => hack::expr_builtin(Builtin::Int, [*i]),
-                    Constant::Null => hack::expr_builtin(Builtin::Null, ()),
+                    Constant::Null => textual::Expr::null(),
                     Constant::String(s) => {
                         let s = self.strings.lookup_bstr(*s);
                         let s = util::escaped_string(&s);
                         hack::expr_builtin(Builtin::String, [s])
                     }
-                    Constant::Array(..) => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
-                    Constant::Dir => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
+                    Constant::Array(..) => textual_todo! { textual::Expr::null() },
+                    Constant::Dir => textual_todo! { textual::Expr::null() },
                     Constant::Float(f) => hack::expr_builtin(Builtin::Float, [f.to_f64()]),
-                    Constant::File => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
-                    Constant::FuncCred => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
-                    Constant::Method => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
-                    Constant::Named(..) => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
+                    Constant::File => textual_todo! { textual::Expr::null() },
+                    Constant::FuncCred => textual_todo! { textual::Expr::null() },
+                    Constant::Method => textual_todo! { textual::Expr::null() },
+                    Constant::Named(..) => textual_todo! { textual::Expr::null() },
                     Constant::NewCol(CollectionType::ImmMap) => {
                         hack::expr_builtin(Builtin::Hhbc(hack::Hhbc::NewColImmMap), ())
                     }
@@ -844,7 +844,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
                         hack::expr_builtin(Builtin::Hhbc(hack::Hhbc::NewColVector), ())
                     }
                     Constant::NewCol(_) => unreachable!(),
-                    Constant::Uninit => textual_todo! { hack::expr_builtin(Builtin::Null, ()) },
+                    Constant::Uninit => textual_todo! { textual::Expr::null() },
                 }
             }
             ir::FullInstrId::None => unreachable!(),

@@ -67,7 +67,7 @@ function unops(int $a): void {
 // CHECK:   n3 = $root.b(null)
 // CHECK:   n4 = $builtins.hack_new_dict(n0, n2, n1, n3)
 // CHECK:   n5 = $root.f(null, n4)
-// CHECK:   ret $builtins.hack_null()
+// CHECK:   ret null
 // CHECK: }
 function check_shape(): void {
   f(shape('a' => a(), 'b' => b()));

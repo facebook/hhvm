@@ -4,7 +4,7 @@
 // CHECK: define $root.no_locals($this: *void, $a: *HackMixed) : *HackMixed {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
-// CHECK:   ret $builtins.hack_null()
+// CHECK:   ret null
 // CHECK: }
 function no_locals(int $a) : void {
 }
@@ -15,7 +15,7 @@ function no_locals(int $a) : void {
 // CHECK: #b0:
 // CHECK:   store &$a <- $builtins.hack_int(1): *HackMixed
 // CHECK:   store &$b <- $builtins.hack_int(2): *HackMixed
-// CHECK:   ret $builtins.hack_null()
+// CHECK:   ret null
 // CHECK: }
 function only_locals() : void {
   $a = 1;
@@ -28,7 +28,7 @@ function only_locals() : void {
 // CHECK: #b0:
 // CHECK:   store &$b <- $builtins.hack_int(1): *HackMixed
 // CHECK:   store &$c <- $builtins.hack_int(2): *HackMixed
-// CHECK:   ret $builtins.hack_null()
+// CHECK:   ret null
 // CHECK: }
 function params_and_locals(int $a) : void {
   $b = 1;

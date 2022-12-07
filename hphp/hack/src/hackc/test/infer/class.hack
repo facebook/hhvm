@@ -140,7 +140,7 @@ class C {
   // CHECK:   n30 = n27.HackMixed.__construct($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
   // CHECK:   n31 = $builtins.hhbc_lock_obj(n27)
   // CHECK:   store &$a <- n27: *HackMixed
-  // CHECK:   ret $builtins.hack_null()
+  // CHECK:   ret null
   // CHECK: }
   public function cons_static(): void {
     $a = new static(1, 2, 3);
@@ -202,7 +202,7 @@ class C {
   // CHECK:   n17 = n14.HackMixed.__construct($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
   // CHECK:   n18 = $builtins.hhbc_lock_obj(n14)
   // CHECK:   store &$a <- n14: *HackMixed
-  // CHECK:   ret $builtins.hack_null()
+  // CHECK:   ret null
   // CHECK: }
   public function cons_self(): void {
     $a = new self(1, 2, 3);
@@ -264,7 +264,7 @@ class C {
   // CHECK:   n17 = n14.HackMixed.__construct($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
   // CHECK:   n18 = $builtins.hhbc_lock_obj(n14)
   // CHECK:   store &$a <- n14: *HackMixed
-  // CHECK:   ret $builtins.hack_null()
+  // CHECK:   ret null
   // CHECK: }
   public function cons_inst(): void {
     $a = new C(1, 2, 3);
@@ -289,7 +289,7 @@ class C {
   // CHECK:   n6 = $builtins.hhbc_print(n0)
   // CHECK:   jmp b3
   // CHECK: #b3:
-  // CHECK:   ret $builtins.hack_null()
+  // CHECK:   ret null
   // CHECK: }
 
   // TEST-CHECK-BAL: define C.static_signature
@@ -317,7 +317,7 @@ class C {
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &C$static::MY_CONSTANT
   // CHECK:   store &$x <- n0: *HackMixed
-  // CHECK:   ret $builtins.hack_null()
+  // CHECK:   ret null
   // CHECK: }
   public function test_const(): void {
     $x = C::MY_CONSTANT;

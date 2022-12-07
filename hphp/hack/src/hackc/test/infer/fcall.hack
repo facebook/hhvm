@@ -7,7 +7,7 @@ class D extends B {
   // CHECK: #b0:
   // CHECK:   n0: *D = load &$this
   // CHECK:   n1 = D.bar(n0)
-  // CHECK:   ret $builtins.hack_null()
+  // CHECK:   ret null
   // CHECK: }
   public function inst_fcall_self(): void {
     self::bar();
@@ -19,7 +19,7 @@ class D extends B {
   // CHECK: #b0:
   // CHECK:   n0: *D$static = load &$this
   // CHECK:   n1 = D$static.bar(n0)
-  // CHECK:   ret $builtins.hack_null()
+  // CHECK:   ret null
   // CHECK: }
   public static function static_fcall_self(): void {
     self::bar();
@@ -31,7 +31,7 @@ class D extends B {
   // CHECK: #b0:
   // CHECK:   n0: *D = load &$this
   // CHECK:   n1 = n0.D.bar()
-  // CHECK:   ret $builtins.hack_null()
+  // CHECK:   ret null
   // CHECK: }
   public function inst_fcall_static(): void {
     static::bar();
@@ -43,7 +43,7 @@ class D extends B {
   // CHECK: #b0:
   // CHECK:   n0: *D$static = load &$this
   // CHECK:   n1 = n0.D$static.bar()
-  // CHECK:   ret $builtins.hack_null()
+  // CHECK:   ret null
   // CHECK: }
   public static function static_fcall_static(): void {
     static::bar();
@@ -55,7 +55,7 @@ class D extends B {
   // CHECK: #b0:
   // CHECK:   n0: *D = load &$this
   // CHECK:   n1 = B.bar(n0)
-  // CHECK:   ret $builtins.hack_null()
+  // CHECK:   ret null
   // CHECK: }
   public function inst_fcall_parent(): void {
     parent::bar();
@@ -67,7 +67,7 @@ class D extends B {
   // CHECK: #b0:
   // CHECK:   n0: *D$static = load &$this
   // CHECK:   n1 = B$static.bar(n0)
-  // CHECK:   ret $builtins.hack_null()
+  // CHECK:   ret null
   // CHECK: }
   public static function static_fcall_parent(): void {
     parent::bar();
@@ -81,7 +81,7 @@ class D extends B {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $root.f(null, $builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
-// CHECK:   ret $builtins.hack_null()
+// CHECK:   ret null
 // CHECK: }
 function fcall_func(): void {
   f(1, 2, 3);
@@ -94,7 +94,7 @@ function fcall_func(): void {
 // CHECK:   n0: *C$static = load &C$static::static_singleton
 // CHECK:   n1 = $builtins.lazy_initialize(n0)
 // CHECK:   n2 = C$static.f(n0, $builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
-// CHECK:   ret $builtins.hack_null()
+// CHECK:   ret null
 // CHECK: }
 function fcall_static(): void {
   C::f(1, 2, 3);
@@ -106,7 +106,7 @@ function fcall_static(): void {
 // CHECK: #b0:
 // CHECK:   n0: *HackMixed = load &$a
 // CHECK:   n1 = n0.HackMixed.b($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
-// CHECK:   ret $builtins.hack_null()
+// CHECK:   ret null
 // CHECK: }
 function fcall_method(C $a): void {
   $a->b(1, 2, 3);
@@ -121,14 +121,14 @@ function fcall_method(C $a): void {
 // CHECK:   jmp b1, b2
 // CHECK: #b1:
 // CHECK:   prune $builtins.hack_is_true(n1)
-// CHECK:   jmp b3($builtins.hack_null())
+// CHECK:   jmp b3(null)
 // CHECK: #b2:
 // CHECK:   prune ! $builtins.hack_is_true(n1)
 // CHECK:   n2 = n0.HackMixed.g()
 // CHECK:   jmp b3(n2)
 // CHECK: #b3(n3: *HackMixed):
 // CHECK:   n4 = $root.f(null, n3)
-// CHECK:   ret $builtins.hack_null()
+// CHECK:   ret null
 // CHECK: }
 function fcall_nullsafe(?C $c): void {
   f($c?->g());

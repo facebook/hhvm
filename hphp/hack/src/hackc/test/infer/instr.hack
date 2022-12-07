@@ -39,3 +39,17 @@ function unops(int $a): void {
   // CHECK:  n{{[0-9]+}} = $builtins.hhbc_not(n{{[0-9]+}})
   $c = ! $a;
 }
+
+// CHECK: define $root.check_shape($this: *void) : *HackMixed {
+// ...
+// CHECK:   n0 = $builtins.hack_string("a")
+// CHECK:   n1 = $builtins.hack_string("b")
+// CHECK:   n2 = $root.a(null)
+// CHECK:   n3 = $root.b(null)
+// CHECK:   n4 = $builtins.hack_new_dict(n0, n2, n1, n3)
+// CHECK:   n5 = $root.f(null, n4)
+// ...
+// CHECK: }
+function check_shape(): void {
+  f(shape('a' => a(), 'b' => b()));
+}

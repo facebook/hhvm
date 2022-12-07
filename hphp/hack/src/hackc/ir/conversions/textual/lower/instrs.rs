@@ -30,6 +30,7 @@ use ir::SpecialClsRef;
 use ir::TypeStructResolveOp;
 use ir::UnitBytesId;
 use ir::ValueId;
+use itertools::Itertools;
 
 use super::func_builder::FuncBuilderEx as _;
 use crate::class::IsStatic;
@@ -271,6 +272,16 @@ impl TransformInstr for LowerInstrs<'_> {
             Instr::Hhbc(Hhbc::LockObj(obj, loc)) => {
                 builder.emit_hhbc_builtin(hack::Hhbc::LockObj, &[obj], loc);
                 Instr::copy(obj)
+            }
+            Instr::Hhbc(Hhbc::NewStructDict(names, values, loc)) => {
+                let args = names
+                    .iter()
+                    .zip(values.iter().copied())
+                    .flat_map(|(name, value)| {
+                        [builder.emit_constant(Constant::String(*name)), value]
+                    })
+                    .collect_vec();
+                builder.hack_builtin(Builtin::NewDict, &args, loc)
             }
             Instr::Hhbc(Hhbc::NewObj(cls, loc)) => {
                 let method = MethodId::from_str("__factory", &builder.strings);

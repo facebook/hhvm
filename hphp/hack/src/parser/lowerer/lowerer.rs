@@ -417,25 +417,16 @@ fn p_pos<'a>(node: S<'a>, env: &Env<'_>) -> Pos {
 }
 
 fn raise_parsing_error<'a>(node: S<'a>, env: &mut Env<'a>, msg: &str) {
-    raise_parsing_error_(Either::Left(node), env, msg)
+    let pos = p_pos(node, env);
+    raise_parsing_error_(pos, env, msg)
 }
 
-fn raise_parsing_error_pos<'a>(pos: &Pos, env: &mut Env<'a>, msg: &str) {
-    raise_parsing_error_(Either::Right(pos), env, msg)
+fn raise_parsing_error_pos(pos: &Pos, env: &mut Env<'_>, msg: &str) {
+    raise_parsing_error_(pos.clone(), env, msg)
 }
 
-fn raise_parsing_error_<'a>(node_or_pos: Either<S<'a>, &Pos>, env: &mut Env<'a>, msg: &str) {
-    if env.should_surface_error() {
-        let pos = node_or_pos.either(|node| p_pos(node, env), |pos| pos.clone());
-        env.parsing_errors().push((pos, String::from(msg)))
-    } else if env.codegen() {
-        let pos = node_or_pos.either(
-            |node| {
-                node.position_exclusive(env.indexed_source_text)
-                    .map_or_else(|| env.mk_none_pos(), Into::into)
-            },
-            |pos| pos.clone(),
-        );
+fn raise_parsing_error_(pos: Pos, env: &mut Env<'_>, msg: &str) {
+    if env.should_surface_error() || env.codegen() {
         env.parsing_errors().push((pos, String::from(msg)))
     }
 }

@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-include "thrift/annotation/cpp.thrift"
-include "thrift/annotation/java.thrift"
 include "thrift/annotation/thrift.thrift"
+include "thrift/annotation/java.thrift"
 
 cpp_include "<folly/io/IOBuf.h>"
 cpp_include "<folly/FBString.h>"
-cpp_include "thrift/lib/cpp2/type/detail/Json.h"
 
 /** The **standard** types all Thrift implementations support. */
 @thrift.v1alpha
@@ -246,10 +244,6 @@ struct UriStruct {
 @thrift.Experimental // TODO(afuller): Adapt!
 typedef string JsonString
 
-/** A decoded JSON definition, as defined by https://www.json.org. */
-@thrift.Experimental // TODO(afuller): Adapt!
-typedef JsonValue Json
-
 /** The types availible in JSON, as defined by https://www.json.org. */
 enum JsonType {
   Null = 0,
@@ -259,67 +253,6 @@ enum JsonType {
   Array = 5,
   Object = 6,
 }
-
-/**
- * A decoded JSON Value.
- *
- * Considered 'normal' if all contained `floatValue` are not representable
- * losslessly in `intValue`.
- *
- * Note: This type is wire compatibile with `dynamic.Dynamic`, for all valid
- * JSON values.
- *
- * @see JsonString For the encoded version.
- */
-@cpp.Adapter{
-  name = "::apache::thrift::type::detail::JsonAdapter<::apache::thrift::type::JsonType>",
-  adaptedType = "::apache::thrift::type::detail::Json<::apache::thrift::type::JsonType, ::apache::thrift::type::detail::JsonValue>",
-}
-@cpp.UseOpEncode
-@thrift.Experimental // TODO(afuller): Adapt!
-union JsonValue {
-  /** JSON "true" and "false" values represented as a boolean value. */
-  1: bool boolValue;
-
-  /**
-   * A JSON number represented as an integer value.
-   *
-   * @see #floatValue
-   */
-  2: i64 intValue;
-
-  /**
-   * A floating point approximation of a JSON number.
-   *
-   * JSON does not specify a limit on the range or percision of numbers, so
-   * a 64-bit flating point value is use to approximate any numbers that cannot
-   * be represented losslessly in `intValue`.
-   *
-   * Any `floatValue` that can be represented losslessly in `intValue`, *should*
-   * be stored there.
-   *
-   * @see #intValue
-   */
-  3: double floatValue;
-
-  /** A JSON string value. */
-  4: string stringValue;
-
-  /** A JSON array value. */
-  @thrift.Box
-  5: JsonArray arrayValue;
-
-  /** A JSON object value. */
-  @thrift.Box
-  6: JsonObject objectValue;
-} (cpp.frozen2_exclude, py3.hidden)
-
-/** A decoded JSON object. */
-@thrift.Experimental // TODO(afuller): Adapt!
-typedef map<string, JsonValue> JsonObject (py3.hidden)
-
-/** A decoded JSON array. */
-typedef list<JsonValue> JsonArray (py3.hidden)
 
 /** The uri of an IDL defined type. */
 union TypeUri {

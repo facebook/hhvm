@@ -16,10 +16,9 @@ import sys
 if sys.version_info[0] >= 3:
   long = int
 
-import thrift.annotation.cpp.ttypes
-import thrift.annotation.java.ttypes
 import thrift.annotation.thrift.ttypes
+import thrift.annotation.java.ttypes
 
 
-from .ttypes import UTF8STRINGS, Void, JsonType, StandardProtocol, DurationStruct, TimeStruct, FractionStruct, UriStruct, JsonValue, TypeUri, TypeName, ByteString, ByteBuffer, Fraction, SimpleFraction, Uuid, UuidString, Path, PathSegments, Domain, DomainLabels, QueryString, QueryArgs, Uri, JsonString, Json, JsonObject, JsonArray
+from .ttypes import UTF8STRINGS, Void, JsonType, StandardProtocol, DurationStruct, TimeStruct, FractionStruct, UriStruct, TypeUri, TypeName, ByteString, ByteBuffer, Fraction, SimpleFraction, Uuid, UuidString, Path, PathSegments, Domain, DomainLabels, QueryString, QueryArgs, Uri, JsonString
 

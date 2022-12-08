@@ -1247,7 +1247,7 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
   doPass("VOPT_DCE",    removeDeadCode);
   doPass("VOPT_PHI",    optimizePhis);
   doPass("VOPT_BRANCH", fuseBranches);
-  doPass("VOPT_JMP",    [] (Vunit& u) { optimizeJmps(u, false); });
+  doPass("VOPT_JMP",    [] (Vunit& u) { optimizeJmps(u, false, true); });
 
   assertx(checkWidths(unit));
 
@@ -1273,7 +1273,7 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
   doPass("VOPT_BRANCH", fuseBranches);
 
   if (unit.needsRegAlloc()) {
-    doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u, false); });
+    doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u, false, false); });
     doPass("VOPT_DCE", removeDeadCode);
 
     if (regalloc) {
@@ -1300,7 +1300,7 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
 
   // We can add side-exiting instructions now
   doPass("VOPT_EXIT", optimizeExits);
-  doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u, true); });
+  doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u, true, false); });
 }
 
 void emitX64(Vunit& unit, Vtext& text, CGMeta& fixups,

@@ -193,7 +193,8 @@ bool isOnly(Vunit& unit, Vlabel b, Vinstr::Opcode op) {
  */
 bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
                      jit::vector<Vinstr>& code,
-                     jit::vector<int>& npreds) {
+                     jit::vector<int>& npreds,
+                     bool trustWidths) {
   auto const next = jcc_i.targets[0];
   auto const taken = jcc_i.targets[1];
   if (!isOnly(unit, next, Vinstr::phijmp)) return false;
@@ -236,16 +237,30 @@ bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
             analysis.getAppropriate(r2) &
             analysis.getAppropriate(r3)) {
       case Width::Byte:
-        moves.emplace_back(cmovb{cc, sf, r1, r2, d}, irctx);
-        break;
+        // After the lowering pass we can no longer trust the distinction
+        // between different word sizes as the lower pass may elide noop
+        // instructions which denote these differences. It should always still
+        // be safe to emit a cmovq in these cases. Information about flags and
+        // floating point registers should still be accurate.
+        if (trustWidths) {
+          moves.emplace_back(cmovb{cc, sf, r1, r2, d}, irctx);
+          break;
+        }
+        // fallthrough
       case Width::Word:
       case Width::WordN:
-        moves.emplace_back(cmovw{cc, sf, r1, r2, d}, irctx);
-        break;
+        if (trustWidths) {
+          moves.emplace_back(cmovw{cc, sf, r1, r2, d}, irctx);
+          break;
+        }
+        // fallthrough
       case Width::Long:
       case Width::LongN:
-        moves.emplace_back(cmovl{cc, sf, r1, r2, d}, irctx);
-        break;
+        if (trustWidths) {
+          moves.emplace_back(cmovl{cc, sf, r1, r2, d}, irctx);
+          break;
+        }
+        // fallthrough
       case Width::Quad:
       case Width::QuadN:
         moves.emplace_back(cmovq{cc, sf, r1, r2, d}, irctx);
@@ -285,7 +300,7 @@ bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
 
 }
 
-void optimizeJmps(Vunit& unit, bool makeSideExits) {
+void optimizeJmps(Vunit& unit, bool makeSideExits, bool trustWidths) {
   Timer timer(Timer::vasm_jumps);
 
   bool changed = false;
@@ -379,7 +394,7 @@ void optimizeJmps(Vunit& unit, bool makeSideExits) {
             }
           }
 
-          changed |= diamondIntoCmov(unit, jcc_i, code, npreds);
+          changed |= diamondIntoCmov(unit, jcc_i, code, npreds, trustWidths);
         }
       }
 

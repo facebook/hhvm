@@ -1942,7 +1942,7 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
   removeTrivialNops(unit);
   optimizePhis(unit);
   fuseBranches(unit);
-  optimizeJmps(unit, false);
+  optimizeJmps(unit, false, true);
 
   assertx(checkWidths(unit));
 
@@ -1978,7 +1978,7 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
   }
 
   optimizeExits(unit);
-  optimizeJmps(unit, true);
+  optimizeJmps(unit, true, false);
 }
 
 void emitARM(Vunit& unit, Vtext& text, CGMeta& fixups,

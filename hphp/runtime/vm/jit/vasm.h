@@ -132,7 +132,7 @@ void annotateSFUses(Vunit&);
 void fuseBranches(Vunit&);
 void optimizeCopies(Vunit&, const Abi&);
 void optimizeExits(Vunit&);
-void optimizeJmps(Vunit&, bool makeSideExits);
+void optimizeJmps(Vunit&, bool makeSideExits, bool trustWidths);
 void optimizePhis(Vunit&);
 void removeDeadCode(Vunit&);
 void removeTrivialNops(Vunit&);

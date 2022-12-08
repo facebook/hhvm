@@ -47,6 +47,7 @@
 #include "hphp/runtime/ext/facts/thread-factory.h"
 #include "hphp/util/hash-set.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/optional.h"
 #include "hphp/util/sha1.h"
 
 namespace fs = std::filesystem;
@@ -496,11 +497,13 @@ struct FactsStoreImpl final
       fs::path root,
       AutoloadDB::Handle dbHandle,
       std::shared_ptr<Watcher> watcher,
+      Optional<std::filesystem::path> suppressionFilePath,
       hphp_hash_set<std::string> indexedMethodAttributes)
       : m_updateExec{1, make_thread_factory("Autoload update")},
         m_root{std::move(root)},
         m_map{m_root, std::move(dbHandle), std::move(indexedMethodAttributes)},
-        m_watcher{std::move(watcher)} {}
+        m_watcher{std::move(watcher)},
+        m_suppressionFilePath{std::move(suppressionFilePath)} {}
 
   FactsStoreImpl(fs::path root, AutoloadDB::Handle dbHandle)
       : m_updateExec{1, make_thread_factory("Autoload update")},
@@ -928,6 +931,20 @@ struct FactsStoreImpl final
     if (!m_watcher) {
       return {};
     }
+    // Check if a suppression sentinel file exists
+    if (m_suppressionFilePath) {
+      auto suppressionFilePath = *m_suppressionFilePath;
+      if (suppressionFilePath.is_relative()) {
+        suppressionFilePath = m_root / std::move(suppressionFilePath);
+      }
+      if (std::filesystem::exists(suppressionFilePath)) {
+        XLOGF(
+            INFO,
+            "Suppression file found at {}, not updating native Facts.",
+            suppressionFilePath.native());
+        return {};
+      }
+    }
     auto updateFuture = m_updateFuture.wlock();
     *updateFuture = folly::splitFuture(
         updateFuture->getFuture()
@@ -1219,6 +1236,7 @@ struct FactsStoreImpl final
   fs::path m_root;
   SymbolMap m_map;
   std::shared_ptr<Watcher> m_watcher;
+  Optional<std::filesystem::path> m_suppressionFilePath;
 
   template <SymKind k, typename TLambda>
   Array getFileSymbols(const String& path, TLambda lambda) {
@@ -1378,6 +1396,7 @@ std::shared_ptr<FactsStore> make_watcher_facts(
     AutoloadDB::Handle dbHandle,
     std::shared_ptr<Watcher> watcher,
     bool shouldSubscribe,
+    Optional<std::filesystem::path> suppressionFilePath,
     std::vector<std::string> indexedMethodAttrsVec) {
   hphp_hash_set<std::string> indexedMethodAttrs;
   indexedMethodAttrs.reserve(indexedMethodAttrsVec.size());
@@ -1388,6 +1407,7 @@ std::shared_ptr<FactsStore> make_watcher_facts(
       std::move(root),
       std::move(dbHandle),
       std::move(watcher),
+      std::move(suppressionFilePath),
       std::move(indexedMethodAttrs));
   if (shouldSubscribe) {
     map->subscribe();

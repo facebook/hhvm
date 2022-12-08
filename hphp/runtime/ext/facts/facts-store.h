@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/watcher.h"
+#include "hphp/util/optional.h"
 
 namespace HPHP {
 namespace Facts {
@@ -37,6 +38,7 @@ std::shared_ptr<FactsStore> make_watcher_facts(
     AutoloadDB::Handle dbHandle,
     std::shared_ptr<Watcher> watcher,
     bool shouldSubscribe,
+    Optional<std::filesystem::path> suppressionFilePath,
     std::vector<std::string> indexedMethodAttributes);
 
 /**

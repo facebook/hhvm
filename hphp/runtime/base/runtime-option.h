@@ -530,6 +530,7 @@ struct RuntimeOption {
   static bool AutoloadEnableExternFactExtractor;
   static std::string AutoloadDBPath;
   static bool AutoloadDBCanCreate;
+  static std::string AutoloadUpdateSuppressionPath;
   static std::string AutoloadDBPerms;
   static std::string AutoloadDBGroup;
   static std::string AutoloadLogging;

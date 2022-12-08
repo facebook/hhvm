@@ -846,6 +846,7 @@ bool RuntimeOption::AutoloadEnabled;
 bool RuntimeOption::AutoloadEnableExternFactExtractor;
 std::string RuntimeOption::AutoloadDBPath;
 bool RuntimeOption::AutoloadDBCanCreate;
+std::string RuntimeOption::AutoloadUpdateSuppressionPath;
 std::string RuntimeOption::AutoloadDBPerms{"0644"};
 std::string RuntimeOption::AutoloadDBGroup;
 std::string RuntimeOption::AutoloadLogging;
@@ -2432,6 +2433,13 @@ void RuntimeOption::Load(
     Config::Bind(AutoloadEnabled, ini, config, "Autoload.Enabled", false);
     Config::Bind(AutoloadDBPath, ini, config, "Autoload.DB.Path");
     Config::Bind(AutoloadEnableExternFactExtractor, ini, config, "Autoload.EnableExternFactExtractor", true);
+
+    /**
+     * If this option is nonempty, Facts will check if a file exists at the
+     * given path. If such a file does exist, Facts will not update.
+     */
+    Config::Bind(AutoloadUpdateSuppressionPath, ini, config,
+      "Autoload.UpdateSuppressionPath", "");
 
     /**
      * If true, and if a Facts DB doesn't already exist, native Facts will

@@ -627,6 +627,11 @@ FactsStore* WatchmanAutoloadMapFactory::getForOptions(
 
   assertx(mapKey->m_queryExpr.isObject());
 
+  Optional<std::filesystem::path> updateSuppressionPath;
+  if (!RuntimeOption::AutoloadUpdateSuppressionPath.empty()) {
+    updateSuppressionPath = {
+        std::filesystem::path{RuntimeOption::AutoloadUpdateSuppressionPath}};
+  }
   return m_maps
       .insert(
           {*mapKey,
@@ -638,6 +643,7 @@ FactsStore* WatchmanAutoloadMapFactory::getForOptions(
                    get_watchman_client(mapKey->m_root),
                    s_ext.getWatchmanWatcherOpts()),
                RuntimeOption::ServerExecutionMode(),
+               std::move(updateSuppressionPath),
                mapKey->m_indexedMethodAttrs)})
       .first->second.get();
 }

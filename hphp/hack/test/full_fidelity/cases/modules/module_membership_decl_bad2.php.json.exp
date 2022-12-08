@@ -192,33 +192,25 @@
             "trailing":[{"kind":"whitespace","text":" ","offset":58,"width":1}],
             "line_number":5
           }
-        },
-        "module_membership_declaration_name":{
-          "kind":"module_name",
-          "module_name_parts":{
-            "kind":"list",
-            "elements":[
-              {
-                "kind":"list_item",
-                "list_item":{
-                  "kind":"token",
-                  "token":{
-                    "kind":"name",
-                    "text":"foo",
-                    "offset":59,
-                    "leading_width":1,
-                    "width":3,
-                    "trailing_width":0,
-                    "leading":[{"kind":"extra_token_error","text":":","offset":59,"width":1}],
-                    "trailing":[],
-                    "line_number":5
-                  }
-                }
-              }
-            ]
+        }
+      },
+      {
+        "kind":"expression_statement",
+        "expression_statement_expression":{
+          "kind":"token",
+          "token":{
+            "kind":"XHP_class_name",
+            "text":":foo",
+            "offset":59,
+            "leading_width":0,
+            "width":4,
+            "trailing_width":0,
+            "leading":[],
+            "trailing":[],
+            "line_number":5
           }
         },
-        "module_membership_declaration_semicolon":{
+        "expression_statement_semicolon":{
           "kind":"token",
           "token":{
             "kind":";",

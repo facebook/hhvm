@@ -620,7 +620,7 @@ where
         let mut parts = vec![];
 
         loop {
-            let name = self.require_token(TokenKind::Name, Errors::error1004);
+            let name = self.require_name_allow_non_reserved();
 
             if name.is_missing() {
                 break;

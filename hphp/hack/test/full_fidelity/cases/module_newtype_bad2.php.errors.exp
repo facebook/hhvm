@@ -1,4 +1,2 @@
-(4,8)-(4,12) Encountered unexpected token `type`.
-(4,17)-(4,17) A semicolon `;` is expected here.
-(4,19)-(4,19) An expression is expected here.
-(4,19)-(4,22) Encountered unexpected token `int`.
+(4,13)-(4,13) A semicolon `;` is expected here.
+(4,13)-(4,16) You cannot use this syntax on the left-hand side of an assignment.

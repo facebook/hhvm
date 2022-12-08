@@ -470,28 +470,14 @@ fn raise_missing_syntax(expecting: &str, node: S<'_>, env: &mut Env<'_>) {
     lowering_error(env, &pos, &text, expecting);
 }
 
-fn missing_syntax_<N>(
-    fallback: Option<N>,
-    expecting: &str,
-    node: S<'_>,
-    env: &mut Env<'_>,
-) -> Result<N> {
-    let pos = p_pos(node, env);
+fn missing_syntax<'a, N>(expecting: &str, node: S<'a>, env: &mut Env<'a>) -> Result<N> {
     let text = text(node, env);
-    if let Some(x) = fallback {
-        lowering_error(env, &pos, &text, expecting);
-        return Ok(x);
-    }
     Err(Error::MissingSyntax {
         expecting: String::from(expecting),
         pos: p_pos(node, env),
         node_name: text,
         kind: node.kind(),
     })
-}
-
-fn missing_syntax<'a, N>(expecting: &str, node: S<'a>, env: &mut Env<'a>) -> Result<N> {
-    missing_syntax_(None, expecting, node, env)
 }
 
 fn map_optional<'a, F, R>(node: S<'a>, env: &mut Env<'a>, p: F) -> Result<Option<R>>
@@ -1614,7 +1600,10 @@ fn p_expr_impl<'a>(
         AwaitableCreationExpression(c) => p_awaitable_creation_expr(node, c, env, pos),
         XHPExpression(c) if c.open.is_xhp_open() => p_xhp_expr(c, env),
         EnumClassLabelExpression(c) => p_enum_class_label_expr(c, env),
-        _ => missing_syntax_(Some(Expr_::Null), "expression", node, env),
+        _ => {
+            raise_missing_syntax("expression", node, env);
+            Ok(Expr_::Null)
+        }
     }
 }
 
@@ -2850,12 +2839,10 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
         ContinueStatement(_) => Ok(new(pos, S_::Continue)),
         ConcurrentStatement(c) => p_concurrent_stmt(env, pos, c, node),
         MarkupSection(_) => p_markup(node, env),
-        _ => missing_syntax_(
-            Some(new(env.mk_none_pos(), S_::Noop)),
-            "statement",
-            node,
-            env,
-        ),
+        _ => {
+            raise_missing_syntax("statement", node, env);
+            Ok(new(env.mk_none_pos(), S_::Noop))
+        }
     }
 }
 

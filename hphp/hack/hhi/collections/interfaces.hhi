@@ -1412,8 +1412,6 @@ namespace {
      *
      * @guide /hack/collections/examples
      */
-  /* HH_FIXME[4110] explicitly not compatible with parent */
-  /* HH_FIXME[4341] explicitly not compatible with parent */
   public function map<Tu as arraykey>((function(Tv)[_]: Tu) $fn)[ctx $fn]: ConstSet<Tu>;
     /**
      * Returns a `ConstSet` containing the values after an operation has been
@@ -1432,8 +1430,6 @@ namespace {
      * @return - a `ConstSet` containing the values after a user-specified
      *           operation on the current `ConstSet`'s values is applied.
      */
-  /* HH_FIXME[4110] explicitly not compatible with parent */
-  /* HH_FIXME[4341] explicitly not compatible with parent */
   public function mapWithKey<Tu as arraykey>((function(arraykey, Tv)[_]: Tu) $fn)[ctx $fn]: ConstSet<Tu>;
     /**
      * Returns a `ConstSet` containing the values of the current `ConstSet` that

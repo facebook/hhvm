@@ -342,23 +342,6 @@ namespace HH {
      */
     public function values(): Iterable<Tv>;
     /**
-     * Returns an `Iterable` containing the values after an operation has been
-     * applied to each value in the current `Iterable`.
-     *
-     * Every value in the current `Iterable` is affected by a call to `map()`,
-     * unlike `filter()` where only values that meet a certain criteria are
-     * affected.
-     *
-     * @param $fn - The callback containing the operation to apply to the
-     *              `Iterable` values.
-     *
-     * @return - an `Iterable` containing the values after a user-specified
-     *           operation is applied.
-     *
-     * @guide /hack/collections/examples
-     */
-    public function map<Tu>((function(Tv)[_]: Tu) $fn)[ctx $fn]: Iterable<Tu>;
-    /**
      * Returns an `Iterable` containing the values of the current `Iterable` that
      * meet a supplied condition.
      *
@@ -575,43 +558,6 @@ namespace HH {
      * @return An `Iterable` with the keys of the current `KeyedIterable`.
      */
     public function keys(): Iterable<Tk>;
-    /**
-     * Returns a `KeyedIterable` containing the values after an operation has been
-     * applied to each value in the current `KeyedIterable`.
-     *
-     * Every value in the current `KeyedIterable` is affected by a call to
-     * `map()`, unlike `filter()` where only values that meet a certain criteria
-     * are affected.
-     *
-     * @param $fn - The callback containing the operation to apply to the
-     *              `KeyedIterable` values.
-     *
-     * @return - a `KeyedIterable` containing the values after a user-specified
-     *           operation is applied.
-     *
-     * @guide /hack/collections/examples
-     */
-    public function map<Tu>(
-      (function(Tv)[_]: Tu) $fn,
-    )[ctx $fn]: KeyedIterable<Tk, Tu>;
-    /**
-     * Returns a `KeyedIterable` containing the values after an operation has
-     * been applied to each key and value in the current `KeyedIterable`.
-     *
-     * Every key and value in the current `KeyedIterable` is affected by a call to
-     * `mapWithKey()`, unlike `filterWithKey()` where only values that meet a
-     * certain criteria are affected.
-     *
-     * @param $fn - The callback containing the operation to apply to the
-     *              `KeyedIterable` keys and values.
-     *
-     * @return - a `KeyedIterable` containing the values after a user-specified
-     *           operation on the current `KeyedIterable`'s keys and values is
-     *           applied.
-     */
-    public function mapWithKey<Tu>(
-      (function(Tk, Tv)[_]: Tu) $fn,
-    )[ctx $fn]: KeyedIterable<Tk, Tu>;
     /**
      * Returns a `KeyedIterable` containing the values of the current
      * `KeyedIterable` that meet a supplied condition.

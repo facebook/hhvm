@@ -425,6 +425,53 @@ where
         v
     }
 
+    /// Insert an arbitrary value into the store. CARE: The impl of `ToOcamlRep`
+    /// for `val` must produce the same OCaml type as the impl of `ToOcamlRep`
+    /// for `V`, else attempts to deserialize it will fail with
+    /// `ocamlrep::FromError`.
+    pub fn insert_ocamlrep(&self, key: K, val: &impl ToOcamlRep) -> Result<()> {
+        let arena = ocamlrep::Arena::new();
+        let ocaml_val = arena.add_root(&val);
+        let mut bytes = std::io::Cursor::new(Vec::with_capacity(4096));
+        ocamlrep_marshal::output_value(
+            &mut bytes,
+            ocaml_val,
+            ocamlrep_marshal::ExternFlags::empty(),
+        )?;
+        let bytes = bytes.into_inner();
+        let uncompressed_size = bytes.len();
+        let bytes = match self.compression {
+            Compression::None => bytes,
+            Compression::Lz4 { .. } => lz4_compress(&bytes)?,
+            Compression::Zstd { compression_level } => zstd_compress(&bytes, compression_level)?,
+        };
+        let compressed_size = bytes.len();
+        let did_insert = shmffi::with(|segment| {
+            segment.table.insert(
+                self.hash_key(&key),
+                Some(Layout::from_size_align(bytes.len(), 1).unwrap()),
+                self.evictable,
+                |buffer| {
+                    buffer.copy_from_slice(&bytes);
+                    let header = ocaml_blob::HeapValueHeaderFields {
+                        buffer_size: bytes.len(),
+                        uncompressed_size,
+                        is_serialized: true,
+                        is_evictable: self.evictable,
+                    };
+                    ocaml_blob::HeapValue {
+                        header: header.into(),
+                        data: std::ptr::NonNull::from(buffer).cast(),
+                    }
+                },
+            )
+        });
+        if did_insert {
+            self.log_serialize(compressed_size, uncompressed_size);
+        }
+        Ok(())
+    }
+
     fn decompress<'a>(&self, bytes: &'a [u8], uncompressed_size: usize) -> Result<Cow<'a, [u8]>> {
         self.log_deserialize(bytes.len());
         Ok(match self.compression {
@@ -540,46 +587,8 @@ where
     }
 
     fn insert(&self, key: K, val: V) -> Result<()> {
-        let arena = ocamlrep::Arena::new();
-        let ocaml_val = arena.add_root(&val);
-        let mut bytes = std::io::Cursor::new(Vec::with_capacity(4096));
-        ocamlrep_marshal::output_value(
-            &mut bytes,
-            ocaml_val,
-            ocamlrep_marshal::ExternFlags::empty(),
-        )?;
-        let bytes = bytes.into_inner();
-        let uncompressed_size = bytes.len();
-        let bytes = match self.compression {
-            Compression::None => bytes,
-            Compression::Lz4 { .. } => lz4_compress(&bytes)?,
-            Compression::Zstd { compression_level } => zstd_compress(&bytes, compression_level)?,
-        };
-        let compressed_size = bytes.len();
+        self.insert_ocamlrep(key, &val)?;
         self.cache.lock().put(key, val);
-        let did_insert = shmffi::with(|segment| {
-            segment.table.insert(
-                self.hash_key(&key),
-                Some(Layout::from_size_align(bytes.len(), 1).unwrap()),
-                self.evictable,
-                |buffer| {
-                    buffer.copy_from_slice(&bytes);
-                    let header = ocaml_blob::HeapValueHeaderFields {
-                        buffer_size: bytes.len(),
-                        uncompressed_size,
-                        is_serialized: true,
-                        is_evictable: self.evictable,
-                    };
-                    ocaml_blob::HeapValue {
-                        header: header.into(),
-                        data: std::ptr::NonNull::from(buffer).cast(),
-                    }
-                },
-            )
-        });
-        if did_insert {
-            self.log_serialize(compressed_size, uncompressed_size);
-        }
         Ok(())
     }
 

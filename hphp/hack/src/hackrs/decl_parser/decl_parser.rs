@@ -19,7 +19,9 @@ use ty::reason::Reason;
 #[derive(Debug, Clone)]
 pub struct DeclParser<R: Reason> {
     file_provider: Arc<dyn FileProvider>,
+    // TODO: this should not be pub
     pub opts: ParserOptions,
+    decl_parser_opts: DeclParserOptions,
     // We could make our parse methods generic over `R` instead, but it's
     // usually more convenient for callers (especially tests) to pin the decl
     // parser to a single Reason type.
@@ -28,9 +30,11 @@ pub struct DeclParser<R: Reason> {
 
 impl<R: Reason> DeclParser<R> {
     pub fn new(file_provider: Arc<dyn FileProvider>) -> Self {
+        let opts = Default::default();
         Self {
             file_provider,
-            opts: Default::default(),
+            decl_parser_opts: DeclParserOptions::from_parser_options(&opts),
+            opts,
             _phantom: PhantomData,
         }
     }
@@ -38,6 +42,7 @@ impl<R: Reason> DeclParser<R> {
     pub fn with_options(file_provider: Arc<dyn FileProvider>, opts: ParserOptions) -> Self {
         Self {
             file_provider,
+            decl_parser_opts: DeclParserOptions::from_parser_options(&opts),
             opts,
             _phantom: PhantomData,
         }
@@ -77,9 +82,9 @@ impl<R: Reason> DeclParser<R> {
     ) -> ParsedFileWithHashes<'a> {
         let prefix = path.prefix();
         let deregister_php_stdlib_if_hhi = self.opts.po_deregister_php_stdlib;
-        let opts = DeclParserOptions::from_parser_options(&self.opts);
+        let opts = &self.decl_parser_opts;
         let parsed_file =
-            direct_decl_parser::parse_decls_for_typechecking(&opts, path.into(), text, arena);
+            direct_decl_parser::parse_decls_for_typechecking(opts, path.into(), text, arena);
         ParsedFileWithHashes::new(parsed_file, deregister_php_stdlib_if_hhi, prefix, arena)
     }
 }

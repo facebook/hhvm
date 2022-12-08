@@ -139,6 +139,21 @@ ocaml_ffi! {
 
 // Decl_provider ////////////////////////////////////////////////////////////
 
+ocaml_ffi! {
+    fn hh_rust_provider_backend_parallel_decl_parse(
+        backend: Backend,
+        cache_decls: bool,
+        ctx_entry_contents: BTreeMap<pos::RelativePath, bstr::BString>,
+        files: Vec<pos::RelativePath>,
+    ) -> BTreeMap<pos::RelativePath, hackrs_provider_backend::FileInfo> {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.parallel_decl_parse(files, ctx_entry_contents, cache_decls).unwrap()
+        } else {
+            unimplemented!("parallel_decl_parse: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+}
+
 ocaml_ffi_with_arena! {
     fn hh_rust_provider_backend_direct_decl_parse_and_cache<'a>(
         arena: &'a Bump,

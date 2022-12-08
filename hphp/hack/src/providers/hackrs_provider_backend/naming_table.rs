@@ -279,7 +279,7 @@ impl std::fmt::Debug for NamingTable {
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[derive(ocamlrep::ToOcamlRep, ocamlrep::FromOcamlRep)]
-enum Pos {
+pub enum Pos {
     Full(pos::BPos),
     File(NameType, RelativePath),
 }

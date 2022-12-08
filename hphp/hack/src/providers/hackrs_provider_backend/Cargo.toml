@@ -19,13 +19,16 @@ file_info = { path = "../../deps/rust/file_info" }
 file_provider = { path = "../../hackrs/file_provider/cargo/file_provider" }
 folded_decl_provider = { path = "../../hackrs/folded_decl_provider/cargo/folded_decl_provider" }
 hh24_types = { path = "../../utils/hh24_types" }
+itertools = "0.10.3"
 names = { path = "../../naming/names_rust" }
 naming_provider = { path = "../../hackrs/naming_provider/cargo/naming_provider" }
 ocamlrep = { path = "../../ocamlrep" }
+ocamlrep_caml_builtins = { path = "../../utils/ocamlrep_caml_builtins" }
 oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 parking_lot = { version = "0.11.2", features = ["send_guard"] }
 pos = { path = "../../hackrs/pos/cargo/pos" }
+rayon = "1.2"
 rust_provider_backend_api = { path = ".." }
 serde = { version = "1.0.136", features = ["derive", "rc"] }
 shallow_decl_provider = { path = "../../hackrs/shallow_decl_provider/cargo/shallow_decl_provider" }

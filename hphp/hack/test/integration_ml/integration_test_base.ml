@@ -654,8 +654,6 @@ let load_state
     ?(local_changes = [])
     ?(load_hhi_files = false)
     ?(use_precheked_files = ServerLocalConfig.(default.prechecked_files))
-    ?(load_decls_from_saved_state =
-      ServerLocalConfig.(default.load_decls_from_saved_state))
     ?(enable_naming_table_fallback = false)
     ?custom_config
     ~disk_state
@@ -673,7 +671,6 @@ let load_state
           lazy_init = true;
           prechecked_files = use_precheked_files;
           predeclare_ide = true;
-          load_decls_from_saved_state;
           naming_sqlite_path =
             (if enable_naming_table_fallback then
               Some (saved_state_dir ^ "/" ^ saved_naming_filename)

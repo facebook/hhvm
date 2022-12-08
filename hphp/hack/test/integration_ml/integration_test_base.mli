@@ -50,7 +50,6 @@ val load_state :
   ?local_changes:string list ->
   ?load_hhi_files:bool ->
   ?use_precheked_files:bool ->
-  ?load_decls_from_saved_state:bool ->
   ?enable_naming_table_fallback:bool ->
   ?custom_config:ServerConfig.t ->
   disk_state:disk_changes_type ->

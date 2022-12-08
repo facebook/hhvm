@@ -402,10 +402,6 @@ let save_decls_end _ _ = ()
 
 let save_decls_failure _ = ()
 
-let load_decls_end _ = ()
-
-let load_decls_failure _ = ()
-
 let saved_state_load_ok _ ~start_time:_ = ()
 
 let saved_state_load_failure _ ~start_time:_ = ()

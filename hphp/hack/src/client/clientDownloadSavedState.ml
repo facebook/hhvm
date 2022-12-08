@@ -330,8 +330,6 @@ let main (env : env) (local_config : ServerLocalConfig.t) : Exit_status.t Lwt.t
                 Naming_and_dep_table_info.naming_table_path;
                 Naming_and_dep_table_info.naming_sqlite_table_path;
                 dep_table_path;
-                legacy_hot_decls_path;
-                shallow_hot_decls_path;
                 errors_path;
               };
             additional_info;
@@ -362,10 +360,6 @@ let main (env : env) (local_config : ServerLocalConfig.t) : Exit_status.t Lwt.t
               naming_sqlite_table_path |> Path.to_string |> Hh_json.string_ );
             ( "dep_table_path",
               dep_table_path |> Path.to_string |> Hh_json.string_ );
-            ( "legacy_hot_decls_path",
-              legacy_hot_decls_path |> Path.to_string |> Hh_json.string_ );
-            ( "shallow_hot_decls_path",
-              shallow_hot_decls_path |> Path.to_string |> Hh_json.string_ );
             ("errors_path", errors_path |> Path.to_string |> Hh_json.string_);
             ( "replay_token",
               Option.value_map

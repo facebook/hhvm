@@ -267,8 +267,6 @@ let make_remote_server_api
         Saved_state_loader.Naming_and_dep_table_info.naming_table_path = _;
         dep_table_path;
         naming_sqlite_table_path;
-        legacy_hot_decls_path = _;
-        shallow_hot_decls_path = _;
         errors_path = _;
       } =
         saved_state_main_artifacts

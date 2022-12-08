@@ -146,8 +146,6 @@ let merge_saved_state_futures
           deptable_naming_table_blob_path;
         dep_table_path;
         naming_sqlite_table_path;
-        legacy_hot_decls_path;
-        shallow_hot_decls_path;
         errors_path;
       } =
         main_artifacts
@@ -165,15 +163,6 @@ let merge_saved_state_futures
         ~base_file_name:(Path.to_string deptable_naming_table_blob_path)
         ~deptable
         ~ignore_hh_version;
-      let load_decls =
-        genv.local_config.SLC.load_decls_from_saved_state
-        || genv.local_config.SLC.force_load_hot_shallow_decls
-      in
-
-      let shallow_decls =
-        genv.local_config.SLC.shallow_class_decl
-        || genv.local_config.SLC.force_shallow_decl_fanout
-      in
       let naming_table_fallback_path =
         if
           genv.local_config.SLC.use_hack_64_naming_table
@@ -198,10 +187,6 @@ let merge_saved_state_futures
           ctx
           ~naming_table_path:(Path.to_string deptable_naming_table_blob_path)
           ~naming_table_fallback_path
-          ~load_decls
-          ~shallow_decls
-          ~legacy_hot_decls_path:(Path.to_string legacy_hot_decls_path)
-          ~shallow_hot_decls_path:(Path.to_string shallow_hot_decls_path)
           ~errors_path:(Path.to_string errors_path)
       in
       let t = Unix.time () in
@@ -457,11 +442,6 @@ let use_precomputed_state_exn
   let changes = Relative_path.set_of_list changes in
   let naming_changes = Relative_path.set_of_list naming_changes in
   let prechecked_changes = Relative_path.set_of_list prechecked_changes in
-  let load_decls =
-    genv.local_config.SLC.load_decls_from_saved_state
-    || genv.local_config.SLC.force_load_hot_shallow_decls
-  in
-  let shallow_decls = genv.local_config.SLC.shallow_class_decl in
   let naming_sqlite_table_path =
     ServerArgs.naming_sqlite_path_for_target_info info
   in
@@ -475,12 +455,6 @@ let use_precomputed_state_exn
     ) else
       ServerCheckUtils.get_naming_table_fallback_path genv None
   in
-  let legacy_hot_decls_path =
-    ServerArgs.legacy_hot_decls_path_for_target_info info
-  in
-  let shallow_hot_decls_path =
-    ServerArgs.shallow_hot_decls_path_for_target_info info
-  in
   let errors_path = ServerArgs.errors_path_for_target_info info in
   let (old_naming_table, old_errors) =
     CgroupProfiler.step_start_end cgroup_steps "load saved state"
@@ -489,10 +463,6 @@ let use_precomputed_state_exn
       ctx
       ~naming_table_path
       ~naming_table_fallback_path
-      ~load_decls
-      ~shallow_decls
-      ~legacy_hot_decls_path
-      ~shallow_hot_decls_path
       ~errors_path
   in
   let log_saved_state_age_and_distance =

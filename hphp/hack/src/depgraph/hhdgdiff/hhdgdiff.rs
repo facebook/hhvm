@@ -80,11 +80,13 @@ fn compare(dg1: &DepGraph<'_>, dg2: &DepGraph<'_>, prefix: &str, nodes: &Nodes) 
 
 fn main() -> Result<()> {
     let opts = Opts::parse();
-    let opener = DepGraphOpener::from_path(&opts.dg1)?;
+    let opener =
+        DepGraphOpener::from_path(&opts.dg1).with_context(|| opts.dg1.display().to_string())?;
     let dg1 = (opener.open())
         .map_err(|s| anyhow::anyhow!("could not open: {s}"))
         .with_context(|| opts.dg1.display().to_string())?;
-    let opener = DepGraphOpener::from_path(&opts.dg2)?;
+    let opener =
+        DepGraphOpener::from_path(&opts.dg2).with_context(|| opts.dg2.display().to_string())?;
     let dg2 = (opener.open())
         .map_err(|s| anyhow::anyhow!("could not open: {s}"))
         .with_context(|| opts.dg2.display().to_string())?;

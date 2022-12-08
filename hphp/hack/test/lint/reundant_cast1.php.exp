@@ -1,0 +1,16 @@
+File "reundant_cast1.php", line 4, characters 3-10:
+This use of `(int)` is redundant since the type of the expression is a subtype of the type being cast to. Please remove this cast. (Lint[5648])
+File "reundant_cast1.php", line 5, characters 3-10:
+This use of `(int)` is redundant since the type of the expression is a subtype of the type being cast to. Please remove this cast. (Lint[5648])
+File "reundant_cast1.php", line 6, characters 3-10:
+This use of `(int)` is redundant since the type of the expression is a subtype of the type being cast to. Please remove this cast. (Lint[5648])
+File "reundant_cast1.php", line 10, characters 3-13:
+This use of `(string)` is redundant since the type of the expression is a subtype of the type being cast to. Please remove this cast. (Lint[5648])
+File "reundant_cast1.php", line 11, characters 3-18:
+This use of `(string)` is redundant since the type of the expression is a subtype of the type being cast to. Please remove this cast. (Lint[5648])
+File "reundant_cast1.php", line 12, characters 3-18:
+This use of `(string)` is redundant since the type of the expression is a subtype of the type being cast to. Please remove this cast. (Lint[5648])
+File "reundant_cast1.php", line 16, characters 3-12:
+This use of `(float)` is redundant since the type of the expression is a subtype of the type being cast to. Please remove this cast. (Lint[5648])
+File "reundant_cast1.php", line 17, characters 3-19:
+This use of `(float)` is redundant since the type of the expression is a subtype of the type being cast to. Please remove this cast. (Lint[5648])

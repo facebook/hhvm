@@ -106,4 +106,6 @@ module Codes = struct
   let branch_return_same_value = 5646
 
   let redundant_unsafe_cast = 5647
+
+  let redundant_cast = 5648
 end

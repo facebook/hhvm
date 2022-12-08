@@ -162,18 +162,6 @@ void Cpp2Worker::handleHeader(
 
 std::shared_ptr<folly::AsyncTransport> Cpp2Worker::createThriftTransport(
     folly::AsyncTransport::UniquePtr sock) {
-  auto fizzServer = dynamic_cast<fizz::server::AsyncFizzServer*>(sock.get());
-  if (fizzServer) {
-    auto asyncSock = sock->getUnderlyingTransport<folly::AsyncSocket>();
-    if (asyncSock) {
-      markSocketAccepted(asyncSock);
-    }
-    // give up ownership
-    sock.release();
-    return std::shared_ptr<fizz::server::AsyncFizzServer>(
-        fizzServer, fizz::server::AsyncFizzServer::Destructor());
-  }
-
   folly::AsyncSocket* tsock =
       sock->getUnderlyingTransport<folly::AsyncSocket>();
   if (tsock) {

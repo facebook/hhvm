@@ -3219,6 +3219,41 @@ TEST(ThriftServer, RocketOverSSLNoALPNWithTLS13) {
   EXPECT_EQ(response, "test64");
 }
 
+TEST(ThriftServer, HeaderToRocketUpgradeWithDuplexOverTLS13) {
+  THRIFT_FLAG_SET_MOCK(server_rocket_upgrade_enabled, true);
+
+  auto server = std::static_pointer_cast<ThriftServer>(
+      TestThriftServerFactory<TestInterface>().duplex(true).create());
+  server->setSSLPolicy(SSLPolicy::REQUIRED);
+
+  auto sslConfig = std::make_shared<wangle::SSLContextConfig>();
+  sslConfig->setCertificate(folly::kTestCert, folly::kTestKey, "");
+  sslConfig->clientCAFiles = std::vector<std::string>{folly::kTestCA};
+  sslConfig->sessionContext = "ThriftServerTest";
+  sslConfig->setNextProtocols(**ThriftServer::defaultNextProtocols());
+
+  server->setSSLConfig(std::move(sslConfig));
+
+  ScopedServerThread sst(std::move(server));
+
+  folly::EventBase base;
+  auto port = sst.getAddress()->getPort();
+  folly::SocketAddress loopback("::1", port);
+
+  // TLS 1.3 enabled by default
+  auto ctx = makeClientSslContext();
+  folly::AsyncSSLSocket::UniquePtr sslSock(
+      new folly::AsyncSSLSocket(ctx, &base));
+  sslSock->connect(nullptr /* connect callback */, loopback);
+
+  TestServiceAsyncClient client(
+      HeaderClientChannel::newChannel(std::move(sslSock)));
+
+  std::string response;
+  client.sync_sendResponse(response, 64);
+  EXPECT_EQ(response, "test64");
+}
+
 TEST(ThriftServer, PooledRocketSyncChannel) {
   auto server = std::static_pointer_cast<ThriftServer>(
       TestThriftServerFactory<TestInterface>().create());

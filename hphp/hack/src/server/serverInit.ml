@@ -54,12 +54,7 @@ let save_state
   if not do_save_state then
     None
   else
-    let save_decls =
-      genv.local_config.ServerLocalConfig.store_decls_in_saved_state
-    in
-    let result =
-      SaveStateService.save_state ~save_decls genv env output_filename
-    in
+    let result = SaveStateService.save_state genv env output_filename in
     Some result
 
 let post_init genv (env, t) =

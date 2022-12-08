@@ -351,10 +351,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (env, SaveStateService.go_naming env.naming_table filename)
   | SAVE_STATE (filename, gen_saved_ignore_type_errors) ->
     if Errors.is_empty env.errorl || gen_saved_ignore_type_errors then
-      let save_decls =
-        genv.local_config.ServerLocalConfig.store_decls_in_saved_state
-      in
-      (env, SaveStateService.go ~save_decls genv env filename)
+      (env, SaveStateService.go genv env filename)
     else
       (env, Error "There are typecheck errors; cannot generate saved state.")
   | SEARCH (query, type_) ->

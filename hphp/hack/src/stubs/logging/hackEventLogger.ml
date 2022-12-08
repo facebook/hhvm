@@ -398,10 +398,6 @@ let state_loader_dirty_files _ = ()
 
 let changed_while_parsing_end _ = ()
 
-let save_decls_end _ _ = ()
-
-let save_decls_failure _ = ()
-
 let saved_state_load_ok _ ~start_time:_ = ()
 
 let saved_state_load_failure _ ~start_time:_ = ()

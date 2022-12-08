@@ -112,50 +112,10 @@ let get_hot_classes (filename : string) : SSet.t =
     |> List.map ~f:Hh_json.get_string_exn
     |> SSet.of_list
 
-let dump_class_decls genv env ~base_filename =
-  let ctx = Provider_utils.ctx_from_server_env env in
-  let start_t = Unix.gettimeofday () in
-  let hot_classes_filename = get_hot_classes_filename () in
-  Hh_logger.log
-    "Begin saving class declarations to %s based on %s"
-    base_filename
-    hot_classes_filename;
-  try
-    let classes = get_hot_classes hot_classes_filename in
-    let t1 = Unix.gettimeofday () in
-    let legacy_decls = Decl_export.collect_legacy_decls ctx classes in
-    let t2 = Unix.gettimeofday () in
-    let shallow_decls =
-      Decl_export.collect_shallow_decls ctx genv.ServerEnv.workers classes
-    in
-    let t3 = Unix.gettimeofday () in
-    save_contents (get_legacy_decls_filename base_filename) legacy_decls;
-    save_contents (get_shallow_decls_filename base_filename) shallow_decls;
-    let t4 = Unix.gettimeofday () in
-    let telemetry =
-      Telemetry.create ()
-      |> Telemetry.int_ ~key:"count" ~value:(SSet.cardinal classes)
-      |> Telemetry.float_ ~key:"load_classnames" ~value:(t1 -. start_t)
-      |> Telemetry.float_ ~key:"collect_legacy" ~value:(t2 -. t1)
-      |> Telemetry.float_ ~key:"collect_shallow" ~value:(t3 -. t2)
-      |> Telemetry.float_ ~key:"save" ~value:(t4 -. t3)
-    in
-    HackEventLogger.save_decls_end start_t telemetry;
-    Hh_logger.log "Saved class declarations: %s" (Telemetry.to_string telemetry)
-  with
-  | e ->
-    let e = Exception.wrap e in
-    HackEventLogger.save_decls_failure e;
-    Hh_logger.error
-      "Failed to save class declarations:\n%s"
-      (Exception.to_string e)
-
 (** Dumps the naming-table (a saveable form of FileInfo), and errors if any,
 and hot class decls. *)
 let dump_naming_errors_decls
-    ~(save_decls : bool)
     (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
     (output_filename : string)
     (naming_table : Naming_table.t)
     (errors : Errors.t) : unit =
@@ -201,8 +161,7 @@ let dump_naming_errors_decls
         [Errors.Parsing; Errors.Decl; Errors.Naming; Errors.Typing]
     in
     save_contents (get_errors_filename output_filename) errors_in_phases);
-
-  if save_decls then dump_class_decls genv env ~base_filename:output_filename
+  ()
 
 (** Sorts and dumps the error relative paths in JSON format.
  * An empty JSON list will be dumped if there are no errors.*)
@@ -270,10 +229,8 @@ let dump_dep_graph_64bit ~mode ~db_name ~incremental_info_file =
 (** Saves the saved state to the given path. Returns number of dependency
 * edges dumped into the database. *)
 let save_state
-    ~(save_decls : bool)
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
-    (output_filename : string) : save_state_result =
+    (genv : ServerEnv.genv) (env : ServerEnv.env) (output_filename : string) :
+    save_state_result =
   let () = Sys_utils.mkdir_p (Filename.dirname output_filename) in
   let db_name =
     match env.ServerEnv.deps_mode with
@@ -300,13 +257,7 @@ let save_state
     let naming_table = env.ServerEnv.naming_table in
     let errors = env.ServerEnv.errorl in
     let t = Unix.gettimeofday () in
-    dump_naming_errors_decls
-      ~save_decls
-      genv
-      env
-      output_filename
-      naming_table
-      errors;
+    dump_naming_errors_decls genv output_filename naming_table errors;
     Hh_logger.log_duration "Saving saved-state naming/errors/decls took" t
   in
   match env.ServerEnv.deps_mode with
@@ -353,11 +304,7 @@ let go_naming (naming_table : Naming_table.t) (output_filename : string) :
 
 (* If successful, returns the # of edges from the dependency table that were written. *)
 (* TODO: write some other stats, e.g., the number of names, the number of errors, etc. *)
-let go
-    ~(save_decls : bool)
-    (genv : ServerEnv.genv)
-    (env : ServerEnv.env)
-    (output_filename : string) : (save_state_result, string) result =
-  Utils.try_with_stack (fun () ->
-      save_state ~save_decls genv env output_filename)
+let go (genv : ServerEnv.genv) (env : ServerEnv.env) (output_filename : string)
+    : (save_state_result, string) result =
+  Utils.try_with_stack (fun () -> save_state genv env output_filename)
   |> Result.map_error ~f:(fun e -> Exception.get_ctor_string e)

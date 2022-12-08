@@ -924,6 +924,8 @@ static bool HHVM_METHOD(ReflectionFunctionAbstract, returnsReadonly) {
 }
 
 const StaticString
+  s_Memoize("__Memoize"),
+  s_MemoizeLSB("__MemoizeLSB"),
   s_systemlib_create_opaque_value("__SystemLib\\create_opaque_value"),
   s_KeyedByIC("KeyedByIC"),
   s_MakeICInaccessible("MakeICInaccessible"),
@@ -935,10 +937,12 @@ static Array get_function_user_attributes(const Func* func) {
 
   DictInit ai(userAttrs.size());
   for (auto it = userAttrs.begin(); it != userAttrs.end(); ++it) {
-    if (!func->isMemoizeWrapper() ||
-        func->memoizeICType() == Func::MemoizeICType::NoIC) {
-      ai.set(StrNR(it->first).asString(), it->second);
-    } else {
+    auto const attrName = StrNR(it->first).asString();
+    // __Memoize and LSB attributes may contain EnumClassLabels
+    if (func->isMemoizeWrapper() &&
+        func->memoizeICType() != Func::MemoizeICType::NoIC &&
+        (attrName.get()->isame(s_Memoize.get()) ||
+         attrName.get()->isame(s_MemoizeLSB.get()))) {
       assertx(tvIsVec(it->second));
       auto const ad = it->second.m_data.parr;
       VecInit args(ad->size());
@@ -963,7 +967,9 @@ static Array get_function_user_attributes(const Func* func) {
           }
         }
       });
-      ai.set(StrNR(it->first).asString(), args.toArray());
+      ai.set(attrName, args.toArray());
+    } else {
+      ai.set(attrName, it->second);
     }
   }
   return ai.toArray();

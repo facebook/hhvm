@@ -906,6 +906,10 @@ let parse_options () =
     if Option.is_none !root then
       raise (Arg.Bad "--get-some-file-deps requires --root")
   | _ -> ());
+
+  if Option.is_some !naming_table && Option.is_none !root then
+    failwith "--naming-table needs --root";
+
   (* --root implies certain things... *)
   let root =
     match !root with

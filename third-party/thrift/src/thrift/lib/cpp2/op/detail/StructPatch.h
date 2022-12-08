@@ -419,17 +419,21 @@ class UnionPatch : public BaseEnsurePatch<Patch, UnionPatch<Patch>> {
 
     // Merge patchPrior, ensure, and patchAfter.
     // next.assign and next.clear known to be empty.
-    if (hasValue(data_.ensure())) {
-      // All values will be set before next, so ignore next.ensure and
-      // merge next.patchPrior and next.patch into this.patch.
+
+    if (hasValue(data_.ensure()) &&
+        (!hasValue(next.toThrift().ensure()) ||
+         (data_.ensure()->getType() == next.toThrift().ensure()->getType()))) {
+      // next.ensure has the same set member (or is unset),
+      // so it is safe to merge next.patchPrior and next.patch into this.patch
       auto temp = *std::forward<U>(next).toThrift().patch();
       data_.patch()->merge(*std::forward<U>(next).toThrift().patchPrior());
       data_.patch()->merge(std::move(temp));
-    } else { // Both this.ensure and next.clear are known to be empty.
+    } else {
+      auto temp = *std::forward<U>(next).toThrift().patchPrior();
       // Merge anything in patch into patchPrior.
       data_.patchPrior()->merge(std::move(*data_.patch()));
       // Merge in next.patchPrior into patchPrior.
-      data_.patchPrior()->merge(*std::forward<U>(next).toThrift().patchPrior());
+      data_.patchPrior()->merge(temp);
       // Consume next.ensure, if any.
       if (hasValue(next.toThrift().ensure())) {
         data_.ensure() = *std::forward<U>(next).toThrift().ensure();

@@ -739,5 +739,23 @@ TEST(UnionPatchTest, PatchInner) {
   test::expectPatch(patch, a, b);
 }
 
+TEST(UnionPatchTest, PatchMergeEnsure) {
+  MyUnionPatch patch1;
+  patch1.patch<ident::option1>() += "Na";
+
+  MyUnionPatch patch2;
+  patch2.patch<ident::option2>() += 4;
+
+  auto patch = patch1;
+  patch.merge(patch2);
+
+  MyUnion actual;
+  MyUnion expected1;
+  expected1.option2_ref() = 4;
+  MyUnion expected2;
+  expected2.option2_ref() = 8;
+  test::expectPatch(patch, actual, expected1, expected2);
+}
+
 } // namespace
 } // namespace apache::thrift

@@ -356,7 +356,7 @@ template <class Old, class New>
       NoZeroEnumStruct{},
       0,
       "Test when removing `0` from Enum Struct. "
-      "The old value `0` should be unchanged since we should generate implicit `0`."));
+      "The old value should be retained."));
 
   // Remove field
   ret.push_back(changeEnumValueTestCase(
@@ -364,9 +364,9 @@ template <class Old, class New>
       StandardEnumStruct{},
       2,
       LessFieldEnumStruct{},
-      -1,
+      2,
       "Test when removing non-zero enum value. "
-      "The old value should be treated as `-1`."));
+      "The old value should be retained."));
 
   // Rename field
   ret.push_back(changeEnumValueTestCase(
@@ -376,7 +376,7 @@ template <class Old, class New>
       DifferentNameEnumStruct{},
       2,
       "Test when renaming enum value. "
-      "The old value should be unchanged."));
+      "The old value should be retained."));
 
   // Change value
   ret.push_back(changeEnumValueTestCase(
@@ -384,9 +384,9 @@ template <class Old, class New>
       StandardEnumStruct{},
       2,
       DifferentValueEnumStruct{},
-      -1,
+      2,
       "Test when changing enum value. "
-      "The old value should be treated as `-1` since becomes unrecognized."));
+      "The old value should be retained."));
 
   return ret;
 }

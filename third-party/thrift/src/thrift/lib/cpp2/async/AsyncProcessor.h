@@ -57,10 +57,6 @@
 #include <thrift/lib/cpp2/util/Checksum.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
-#if defined(ENABLE_ANY)
-#include <thrift/lib/thrift/gen-cpp2/schema_types.h>
-using SchemaV1 = facebook::thrift::type::Schema;
-#endif
 
 namespace folly {
 namespace coro {
@@ -116,21 +112,6 @@ class ServiceInfoHolder {
  */
 class AsyncProcessorFactory {
  public:
-#if defined(ENABLE_ANY)
-  /**
-   * Reflects on the current service's methods, associated structs etc. at
-   * runtime. This is useful to, for example, a tool that can send requests to a
-   * service without knowing its schemata ahead of time.
-   *
-   * This is analogous to GraphQL introspection
-   * (https://graphql.org/learn/introspection/) and can be used to build a tool
-   * like GraphiQL.
-   */
-  virtual folly::Optional<std::vector<SchemaV1>> getServiceMetadataV1() {
-    return {};
-  }
-#endif
-
   /**
    * Creates a per-connection processor that will handle requests for this
    * service. The returned AsyncProcessor has an implicit contract with the

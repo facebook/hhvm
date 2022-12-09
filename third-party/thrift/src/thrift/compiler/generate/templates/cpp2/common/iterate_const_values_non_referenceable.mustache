@@ -74,6 +74,6 @@ Struct:
         %><%#value:const_struct%><%#constant:type%><%#constant:value%><%#constant:field%><%!
         %>::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::<%constant:cpp_name%><%!
           %><%#field:cpp_first_adapter%>, <%field:cpp_first_adapter%>, ::apache::thrift::FieldId{<%field:key%>}<%/field:cpp_first_adapter%>>(<%!
-            %><% > common/cxx_value_prefix%><% > common/iterate_const_values%><% > common/cxx_value_suffix%>)<%^last?%>, <%/last?%><%!
+            %><% > common/iterate_const_values%>)<%^last?%>, <%/last?%><%!
         %><%/constant:field%><%/constant:value%><%/constant:type%><%/value:const_struct%>)<%!
 %><%/type:struct?%>

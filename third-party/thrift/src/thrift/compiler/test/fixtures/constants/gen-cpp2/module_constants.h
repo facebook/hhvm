@@ -59,7 +59,7 @@ multi line string.
     return longDoubleValue_;
   }
 
-  static constexpr ::cpp2::MyCompany const my_company_ = static_cast<::cpp2::MyCompany>( ::cpp2::MyCompany::FACEBOOK);
+  static constexpr ::cpp2::MyCompany const my_company_ =  ::cpp2::MyCompany::FACEBOOK;
   static constexpr ::cpp2::MyCompany my_company() {
     return my_company_;
   }
@@ -151,12 +151,12 @@ multi line string.
 
   static ::std::vector<::std::string> const& escaped_strings();
 
-  static constexpr bool const false_c_ = static_cast<bool>(false);
+  static constexpr bool const false_c_ = false;
   static constexpr bool false_c() {
     return false_c_;
   }
 
-  static constexpr bool const true_c_ = static_cast<bool>(true);
+  static constexpr bool const true_c_ = true;
   static constexpr bool true_c() {
     return true_c_;
   }

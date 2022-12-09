@@ -14,7 +14,7 @@ namespace py3 { namespace simple {
 
 struct module_constants {
 
-  static constexpr bool const A_BOOL_ = static_cast<bool>(true);
+  static constexpr bool const A_BOOL_ = true;
   static constexpr bool A_BOOL() {
     return A_BOOL_;
   }

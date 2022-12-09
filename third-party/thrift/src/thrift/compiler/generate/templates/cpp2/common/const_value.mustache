@@ -20,15 +20,16 @@ Base Constant Values
 
 %><%#value:bool?%><%value:bool_value%><%/value:bool?%><%!
 
-%><%#value:integer?%><%value:integer_value%><%/value:integer?%><%!
+%><%#value:integer?%>static_cast<<%type:cpp_standard_type%>>(<%value:integer_value%>)<%/value:integer?%><%!
 
-%><%#value:double?%><%value:double_value%><%/value:double?%><%!
+%><%#value:double?%>static_cast<<%type:cpp_standard_type%>>(<%value:double_value%>)<%/value:double?%><%!
 
 %><%#value:string?%><%!
   %><%^value:string_multi_line?%>"<%value:string_value%>"<%/value:string_multi_line?%><%!
   %><%#value:string_multi_line?%>R"__FBTHRIFT_STRL(<%value:string_value%>)__FBTHRIFT_STRL"<%/value:string_multi_line?%><%!
 %><%/value:string?%><%!
 
-%><%#value:enum?%><%#value:enum_value?%><% > common/type_namespace_cpp2%><%type:cpp_name%>::<%value:enum_value_cpp_name%><%/value:enum_value?%><%/value:enum?%><%!
-
-%><%#value:enum?%><%^value:enum_value?%>static_cast<<% > common/type_namespace_cpp2%><%type:cpp_name%>>(<%value:integer_value%>)<%/value:enum_value?%><%/value:enum?%>
+%><%#value:enum?%><%!
+  %><%#value:enum_value?%><% > common/type_namespace_cpp2%><%type:cpp_name%>::<%value:enum_value_cpp_name%><%/value:enum_value?%><%!
+  %><%^value:enum_value?%>static_cast<<% > common/type_namespace_cpp2%><%type:cpp_name%>>(<%value:integer_value%>)<%/value:enum_value?%><%!
+%><%/value:enum?%>

@@ -236,7 +236,7 @@ Foo& Foo::operator=(const Foo& other) {
 Foo::Foo() :
       __fbthrift_field_intField(),
       __fbthrift_field_optionalIntField(),
-      __fbthrift_field_intFieldWithDefault(::apache::thrift::adapt_detail::fromThriftField<::my::Adapter1, 3>(static_cast<::std::int32_t>(13), *this)),
+      __fbthrift_field_intFieldWithDefault(::apache::thrift::adapt_detail::fromThriftField<::my::Adapter1, 3>(::std::int32_t(static_cast<::std::int32_t>(13)), *this)),
       __fbthrift_field_longField(),
       __fbthrift_field_adaptedLongField(),
       __fbthrift_field_doubleAdaptedField() {
@@ -1008,7 +1008,7 @@ StructWithFieldAdapter& StructWithFieldAdapter::operator=(const StructWithFieldA
 StructWithFieldAdapter::StructWithFieldAdapter() :
       __fbthrift_field_field(),
       __fbthrift_field_shared_field(std::make_shared<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>()),
-      __fbthrift_field_boxed_field(::apache::thrift::adapt_detail::fromThriftField<::my::Adapter1, 5>(::std::int32_t(), *this)) {
+      __fbthrift_field_boxed_field(::apache::thrift::adapt_detail::fromThriftField<::my::Adapter1, 5>(::std::int32_t(::std::int32_t()), *this)) {
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_field, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(*__fbthrift_field_shared_field, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 5>(*__fbthrift_field_boxed_field, *this);
@@ -1987,17 +1987,17 @@ AdaptTemplatedTestStruct::AdaptTemplatedTestStruct() :
       __fbthrift_field_adaptedInteger(),
       __fbthrift_field_adaptedLong(),
       __fbthrift_field_adaptedDouble(),
-      __fbthrift_field_adaptedBoolDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 11>(static_cast<bool>(true), *this)),
-      __fbthrift_field_adaptedByteDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 12>(static_cast<::std::int8_t>(1), *this)),
-      __fbthrift_field_adaptedShortDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 13>(static_cast<::std::int16_t>(2), *this)),
-      __fbthrift_field_adaptedIntegerDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 14>(static_cast<::std::int32_t>(3), *this)),
-      __fbthrift_field_adaptedLongDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 15>(static_cast<::std::int64_t>(4), *this)),
-      __fbthrift_field_adaptedDoubleDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 16>(static_cast<double>(5), *this)),
-      __fbthrift_field_adaptedStringDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 17>(apache::thrift::StringTraits<std::string>::fromStringLiteral("6"), *this)),
-      __fbthrift_field_adaptedEnum(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::StaticCastAdapter<::apache::thrift::test::basic::AdaptedEnum, ::apache::thrift::test::basic::ThriftAdaptedEnum>, 18>(static_cast<::facebook::thrift::test::ThriftAdaptedEnum>( ::facebook::thrift::test::AdaptedEnum::One), *this)),
-      __fbthrift_field_adaptedListDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 19>(static_cast<::std::vector<::std::int64_t>>(std::initializer_list<::std::int64_t>{1}), *this)),
-      __fbthrift_field_adaptedSetDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 20>(static_cast<::std::set<::std::int64_t>>(std::initializer_list<::std::int64_t>{1}), *this)),
-      __fbthrift_field_adaptedMapDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 21>(static_cast<::std::map<::std::int64_t, ::std::int64_t>>(std::initializer_list<std::pair<const ::std::int64_t, ::std::int64_t>>{{1, 1}}), *this)),
+      __fbthrift_field_adaptedBoolDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 11>(bool(true), *this)),
+      __fbthrift_field_adaptedByteDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 12>(::std::int8_t(static_cast<::std::int8_t>(1)), *this)),
+      __fbthrift_field_adaptedShortDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 13>(::std::int16_t(static_cast<::std::int16_t>(2)), *this)),
+      __fbthrift_field_adaptedIntegerDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 14>(::std::int32_t(static_cast<::std::int32_t>(3)), *this)),
+      __fbthrift_field_adaptedLongDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 15>(::std::int64_t(static_cast<::std::int64_t>(4)), *this)),
+      __fbthrift_field_adaptedDoubleDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 16>(double(static_cast<double>(5)), *this)),
+      __fbthrift_field_adaptedStringDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 17>(::std::string(apache::thrift::StringTraits<std::string>::fromStringLiteral("6")), *this)),
+      __fbthrift_field_adaptedEnum(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::StaticCastAdapter<::apache::thrift::test::basic::AdaptedEnum, ::apache::thrift::test::basic::ThriftAdaptedEnum>, 18>(::facebook::thrift::test::ThriftAdaptedEnum( ::facebook::thrift::test::AdaptedEnum::One), *this)),
+      __fbthrift_field_adaptedListDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 19>(::std::vector<::std::int64_t>(std::initializer_list<::std::int64_t>{static_cast<::std::int64_t>(1)}), *this)),
+      __fbthrift_field_adaptedSetDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 20>(::std::set<::std::int64_t>(std::initializer_list<::std::int64_t>{static_cast<::std::int64_t>(1)}), *this)),
+      __fbthrift_field_adaptedMapDefault(::apache::thrift::adapt_detail::fromThriftField<::apache::thrift::test::TemplatedTestAdapter, 21>(::std::map<::std::int64_t, ::std::int64_t>(std::initializer_list<std::pair<const ::std::int64_t, ::std::int64_t>>{{static_cast<::std::int64_t>(1), static_cast<::std::int64_t>(1)}}), *this)),
       __fbthrift_field_doubleTypedefBool() {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::TemplatedTestAdapter, 1>(__fbthrift_field_adaptedBool, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::test::TemplatedTestAdapter, 2>(__fbthrift_field_adaptedByte, *this);

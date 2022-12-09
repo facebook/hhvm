@@ -182,7 +182,7 @@ const folly::StringPiece Vehicle::__fbthrift_get_field_name(::apache::thrift::Fi
 Vehicle::Vehicle(const Vehicle&) = default;
 Vehicle& Vehicle::operator=(const Vehicle&) = default;
 Vehicle::Vehicle() :
-      __fbthrift_field_hasAC(static_cast<bool>(false)) {
+      __fbthrift_field_hasAC(false) {
 }
 
 

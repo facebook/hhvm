@@ -3073,7 +3073,7 @@ class MyAnnotation final  {
  public:
 
   MyAnnotation() :
-      __fbthrift_field_color(static_cast<::facebook::thrift::test::Color>( ::facebook::thrift::test::Color::RED)) {
+      __fbthrift_field_color( ::facebook::thrift::test::Color::RED) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]

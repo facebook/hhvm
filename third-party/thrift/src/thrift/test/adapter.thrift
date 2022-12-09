@@ -280,3 +280,8 @@ const AdaptedBool type_adapted = true;
 const MoveOnly nested_adapted = {"ptr": {}};
 
 const list<AdaptedByte> container_of_adapted = [1, 2, 3];
+
+@cpp.UseOpEncode
+struct ContainerOfAdaptedWithDefault {
+  1: list<AdaptedByte> container_of_adapted = [1, 2, 3];
+}

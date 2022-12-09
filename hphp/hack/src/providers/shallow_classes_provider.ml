@@ -114,6 +114,26 @@ let get_batch (ctx : Provider_context.t) (names : SSet.t) :
   | Provider_backend.Decl_service _ ->
     failwith "get_batch not implemented for Decl_service"
 
+let fetch_missing_old_classes_remotely ctx old_classes =
+  if fetch_remote_old_decls ctx then
+    let missing_old_classes =
+      SMap.fold
+        (fun cid decl_opt missing_classes ->
+          if Option.is_none decl_opt then
+            cid :: missing_classes
+          else
+            missing_classes)
+        old_classes
+        []
+    in
+    let remote_old_classes =
+      Remote_old_decl_client.fetch_old_decls ~ctx missing_old_classes
+    in
+    SMap.union old_classes remote_old_classes ~combine:(fun _ decl _ ->
+        Some decl)
+  else
+    old_classes
+
 let get_old_batch (ctx : Provider_context.t) (names : SSet.t) :
     shallow_class option SMap.t =
   match Provider_context.get_backend ctx with
@@ -127,56 +147,10 @@ let get_old_batch (ctx : Provider_context.t) (names : SSet.t) :
         be
         FileInfo.{ empty_names with n_classes = names }
     in
-    if fetch_remote_old_decls ctx then
-      let missing_old_classes =
-        SMap.fold
-          (fun cid decl_opt missing_classes ->
-            if Option.is_some decl_opt then
-              missing_classes
-            else
-              cid :: missing_classes)
-          old_classes
-          []
-      in
-      let remote_old_classes =
-        Remote_old_decl_client.fetch_old_decls ~ctx missing_old_classes
-      in
-      SMap.fold
-        (fun a b acc ->
-          if Option.is_some b || not (SMap.mem a remote_old_classes) then
-            SMap.add a b acc
-          else
-            SMap.add a (SMap.find a remote_old_classes) acc)
-        old_classes
-        SMap.empty
-    else
-      old_classes
+    fetch_missing_old_classes_remotely ctx old_classes
   | Provider_backend.Shared_memory ->
     let old_classes = Shallow_classes_heap.Classes.get_old_batch names in
-    if fetch_remote_old_decls ctx then
-      let missing_old_classes =
-        SMap.fold
-          (fun cid decl_opt missing_classes ->
-            if Option.is_some decl_opt then
-              missing_classes
-            else
-              cid :: missing_classes)
-          old_classes
-          []
-      in
-      let remote_old_classes =
-        Remote_old_decl_client.fetch_old_decls ~ctx missing_old_classes
-      in
-      SMap.fold
-        (fun a b acc ->
-          if Option.is_some b || not (SMap.mem a remote_old_classes) then
-            SMap.add a b acc
-          else
-            SMap.add a (SMap.find a remote_old_classes) acc)
-        old_classes
-        SMap.empty
-    else
-      old_classes
+    fetch_missing_old_classes_remotely ctx old_classes
   | Provider_backend.Local_memory _ ->
     failwith "get_old_batch not implemented for Local_memory"
   | Provider_backend.Decl_service _ ->

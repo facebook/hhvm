@@ -269,4 +269,13 @@ TEST(SchematizerTest, Enum) {
   EXPECT_EQ(value1.at("name")->get_string(), ev_1_name);
   EXPECT_EQ(value1.at("value")->get_integer(), ev_1_value);
 }
+
+TEST(SchematizerTest, WrapWithProtocolValue) {
+  t_const_value str("foo");
+  auto value = wrap_with_protocol_value(str, {});
+  auto map = value->get_map();
+  EXPECT_EQ(map.at(0).first->get_string(), "stringValue");
+  EXPECT_EQ(map.at(0).second->get_string(), "foo");
+}
+
 } // namespace apache::thrift::compiler

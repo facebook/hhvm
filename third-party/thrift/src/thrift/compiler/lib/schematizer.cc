@@ -29,7 +29,7 @@ namespace thrift {
 namespace compiler {
 namespace {
 template <typename... Args>
-std::unique_ptr<t_const_value> val(Args... args) {
+std::unique_ptr<t_const_value> val(Args&&... args) {
   return std::make_unique<t_const_value>(std::forward<Args>(args)...);
 }
 template <typename Enm, typename = std::enable_if_t<std::is_enum<Enm>::value>>
@@ -38,12 +38,60 @@ std::unique_ptr<t_const_value> val(Enm val) {
       static_cast<std::underlying_type_t<Enm>>(val));
 }
 
-void add_definition(t_const_value& schema, const t_named& node) {
+void add_definition(
+    t_const_value& schema,
+    const t_named& node,
+    const t_program* program,
+    schematizer::InternFunc& intern_value) {
   auto definition = val();
   definition->set_map();
   definition->add_map(val("name"), val(node.name()));
   if (!node.uri().empty()) {
     definition->add_map(val("uri"), val(node.uri()));
+  }
+  const auto& structured = node.structured_annotations();
+  if (!structured.empty()) {
+    auto annots = val();
+    annots->set_list();
+
+    for (const auto* item : structured) {
+      auto annot = val();
+      static const std::string kStructuredAnnotationSchemaUri =
+          "facebook.com/thrift/type/StructuredAnnotation";
+      // May be null when run from thrift2ast, which doesn't read this value.
+      auto structured_annotation_ttype =
+          t_type_ref::from_ptr(dynamic_cast<const t_type*>(
+              program->scope()->find_def(kStructuredAnnotationSchemaUri)));
+      annot->set_ttype(structured_annotation_ttype);
+      annot->set_map();
+      annot->add_map(val("name"), val(item->type()->name()));
+      if (!item->type()->uri().empty()) {
+        annot->add_map(val("uri"), val(item->type()->uri()));
+      }
+      if (!item->value()->is_empty()) {
+        static const std::string kProtocolValueUri =
+            "facebook.com/thrift/protocol/Value";
+        // May be null when run from thrift2ast, which doesn't read this value.
+        auto protocol_value_ttype =
+            t_type_ref::from_ptr(dynamic_cast<const t_type*>(
+                program->scope()->find_def(kProtocolValueUri)));
+        auto fields = val();
+        fields->set_map();
+        for (const auto& pair : item->value()->get_map()) {
+          fields->add_map(
+              pair.first->clone(),
+              wrap_with_protocol_value(*pair.second, protocol_value_ttype));
+        }
+        annot->add_map(val("fields"), std::move(fields));
+      };
+      auto id = intern_value(
+          std::move(annot),
+          structured_annotation_ttype,
+          const_cast<t_program*>(program));
+      annots->add_list(val(id));
+    }
+
+    definition->add_map(val("annotations"), std::move(annots));
   }
   // TODO: annotations
   schema.add_map(val("attrs"), std::move(definition));
@@ -244,7 +292,7 @@ void add_fields(
   for (const auto& field : fields) {
     auto field_schema = val();
     field_schema->set_map();
-    add_definition(*field_schema, field);
+    add_definition(*field_schema, field, program, intern_value);
     field_schema->add_map(val("id"), val(field.id()));
 
     add_qualifier(field_qualifier_enum, *field_schema, [&] {
@@ -280,7 +328,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(
     const t_structured& node) {
   auto schema = val();
   schema->set_map();
-  add_definition(*schema, node);
+  add_definition(*schema, node, node.program(), intern_value_);
   add_fields(
       this,
       node.program(),
@@ -309,7 +357,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
 
   auto svc_schema = val();
   svc_schema->set_map();
-  add_definition(*svc_schema, node);
+  add_definition(*svc_schema, node, node.program(), intern_value_);
 
   auto functions_schema = val();
   functions_schema->set_list();
@@ -320,7 +368,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
   for (const auto& func : node.functions()) {
     auto func_schema = val();
     func_schema->set_map();
-    add_definition(*func_schema, func);
+    add_definition(*func_schema, func, node.program(), intern_value_);
 
     add_qualifier(func_qualifier_enum, *func_schema, [&] {
       switch (func.qualifier()) {
@@ -391,16 +439,17 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
 }
 
 std::unique_ptr<t_const_value> schematizer::gen_schema(const t_const& node) {
+  const auto* program = node.program();
+  assert(program);
+
   auto schema = val();
   schema->set_map();
-  add_definition(*schema, node);
+  add_definition(*schema, node, program, intern_value_);
 
   schema->add_map(val("type"), gen_type(*node.type()));
 
-  const auto* program = node.program();
-  assert(program);
-  auto id = const_cast<t_program*>(program)->intern_value(
-      node.value()->clone(), node.type());
+  auto id = intern_value_(
+      node.value()->clone(), node.type(), const_cast<t_program*>(program));
   schema->add_map(val("value"), val(id));
 
   return schema;
@@ -409,7 +458,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_const& node) {
 std::unique_ptr<t_const_value> schematizer::gen_schema(const t_enum& node) {
   auto schema = val();
   schema->set_map();
-  add_definition(*schema, node);
+  add_definition(*schema, node, node.program(), intern_value_);
 
   auto values = val();
   values->set_list();
@@ -417,7 +466,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_enum& node) {
   for (const auto& value : node.values()) {
     auto value_schema = val();
     value_schema->set_map();
-    add_definition(*value_schema, value);
+    add_definition(*value_schema, value, node.program(), intern_value_);
     value_schema->add_map(val("value"), val(value.get_value()));
     values->add_list(std::move(value_schema));
   }
@@ -430,7 +479,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_enum& node) {
 std::unique_ptr<t_const_value> schematizer::gen_schema(const t_program& node) {
   auto schema = val();
   schema->set_map();
-  add_definition(*schema, node);
+  add_definition(*schema, node, &node, intern_value_);
 
   // The remaining fields are intern IDs and have to be stiched in by the
   // caller.
@@ -441,7 +490,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_program& node) {
 std::unique_ptr<t_const_value> schematizer::gen_schema(const t_typedef& node) {
   auto schema = val();
   schema->set_map();
-  add_definition(*schema, node);
+  add_definition(*schema, node, node.program(), intern_value_);
 
   schema->add_map(val("type"), gen_type(*node.type()));
 
@@ -457,6 +506,48 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_typedef& node) {
 t_program::value_id schematizer::default_intern_value(
     std::unique_ptr<t_const_value> val, t_type_ref type, t_program* program) {
   return program->intern_value(std::move(val), std::move(type));
+}
+
+std::unique_ptr<t_const_value> wrap_with_protocol_value(
+    const t_const_value& value, t_type_ref ttype) {
+  auto ret = val();
+  ret->set_map();
+  ret->set_ttype(ttype);
+  switch (value.get_type()) {
+    case t_const_value::CV_BOOL:
+      ret->add_map(val("boolValue"), val(value.get_bool()));
+      break;
+    case t_const_value::CV_INTEGER:
+      ret->add_map(val("i64Value"), val(value.get_integer()));
+      break;
+    case t_const_value::CV_DOUBLE:
+      ret->add_map(val("doubleValue"), val(value.get_double()));
+      break;
+    case t_const_value::CV_STRING:
+      ret->add_map(val("stringValue"), val(value.get_string()));
+      break;
+    case t_const_value::CV_MAP: {
+      auto map = val();
+      map->set_map();
+      for (const auto& map_elem : value.get_map()) {
+        map->add_map(
+            wrap_with_protocol_value(*map_elem.first, ttype),
+            wrap_with_protocol_value(*map_elem.second, ttype));
+      }
+      ret->add_map(val("mapValue"), std::move(map));
+      break;
+    }
+    case t_const_value::CV_LIST: {
+      auto list = val();
+      list->set_list();
+      for (const auto& list_elem : value.get_list()) {
+        list->add_list(wrap_with_protocol_value(*list_elem, ttype));
+      }
+      ret->add_map(val("listValue"), std::move(list));
+      break;
+    }
+  }
+  return ret;
 }
 
 } // namespace compiler

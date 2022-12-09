@@ -54,6 +54,13 @@ class schematizer {
   static t_program::value_id default_intern_value(
       std::unique_ptr<t_const_value> val, t_type_ref type, t_program* program);
 };
+
+// Turns a t_const_value holding some value V into a t_const_value holding a
+// protocol.Value representing V.
+// Currently only uses bool/i64/double/string/list/map.
+// TODO: allow increasing type fidelity.
+std::unique_ptr<t_const_value> wrap_with_protocol_value(
+    const t_const_value& value, t_type_ref ttype);
 } // namespace compiler
 } // namespace thrift
 } // namespace apache

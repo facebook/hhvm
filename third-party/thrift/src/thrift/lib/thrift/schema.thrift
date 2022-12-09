@@ -21,6 +21,7 @@ include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/any.thrift"
 include "thrift/lib/thrift/id.thrift"
 include "thrift/lib/thrift/standard.thrift"
+include "thrift/lib/thrift/protocol.thrift"
 include "thrift/lib/thrift/type.thrift"
 
 /**
@@ -41,9 +42,21 @@ include "thrift/lib/thrift/type.thrift"
 @thrift.v1alpha
 package "facebook.com/thrift/type"
 
-/** An unordered set of value ids, that can contain *at most one* value of any type. */
+/**
+ * An unordered set of value ids, that can contain *at most one* value of any type.
+ * Values correspond to the struct StructuredAnnotation.
+ */
 @thrift.Experimental // TODO(afuller): Adapt!
 typedef set<id.ValueId> AnnotationIds
+
+/**
+ * An instance of an annotation, applied to some definition.
+ */
+struct StructuredAnnotation {
+  1: string name;
+  2: string uri;
+  3: map<string, protocol.Value> fields;
+}
 
 /**
  * An list of definition ids, in the order they were declared in the IDL/AST.

@@ -684,6 +684,7 @@ let get_files_to_undecl_and_recheck
     Decl_redecl_service.redo_type_decl
       ~bucket_size
       ctx
+      ~during_init:true
       genv.workers
       get_old_and_new_classes
       ~previously_oldified_defs:dirty_names

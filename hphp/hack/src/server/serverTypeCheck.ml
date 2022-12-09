@@ -867,6 +867,7 @@ functor
         Decl_redecl_service.redo_type_decl
           ~bucket_size
           ctx
+          ~during_init:false
           genv.workers
           get_classes
           ~previously_oldified_defs:oldified_defs
@@ -943,6 +944,7 @@ functor
         Decl_redecl_service.redo_type_decl
           ~bucket_size
           ctx
+          ~during_init:false
           genv.workers
           get_classes
           ~previously_oldified_defs:oldified_defs

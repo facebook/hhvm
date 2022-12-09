@@ -35,6 +35,7 @@ re-typechecked as a result of comparing the current versions of the symbols
 to their old versions. *)
 val redo_type_decl :
   Provider_context.t ->
+  during_init:bool ->
   MultiWorker.worker list option ->
   bucket_size:int ->
   get_classes_in_file ->

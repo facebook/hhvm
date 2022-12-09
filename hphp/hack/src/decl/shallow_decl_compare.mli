@@ -10,6 +10,7 @@
 (** Compare classes in files and deduce fanout. *)
 val compute_class_fanout :
   Provider_context.t ->
+  during_init:bool ->
   defs:FileInfo.names Relative_path.Map.t ->
   Relative_path.t list ->
   AffectedDeps.t

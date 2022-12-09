@@ -598,6 +598,7 @@ re-typechecked as a result of comparing the current versions of the symbols
 to their old versions. *)
 let redo_type_decl
     (ctx : Provider_context.t)
+    ~during_init
     (workers : MultiWorker.worker list option)
     ~(bucket_size : int)
     (get_classes : Relative_path.t -> SSet.t)
@@ -636,7 +637,7 @@ let redo_type_decl
   let (changed, to_recheck) =
     if shallow_decl_enabled ctx then (
       let AffectedDeps.{ changed = changed'; mro_invalidated; needs_recheck } =
-        Shallow_decl_compare.compute_class_fanout ctx ~defs fnl
+        Shallow_decl_compare.compute_class_fanout ctx ~during_init ~defs fnl
       in
       let changed = DepSet.union changed changed' in
       let to_recheck = DepSet.union to_recheck needs_recheck in
@@ -651,7 +652,7 @@ let redo_type_decl
     ) else if force_shallow_decl_fanout_enabled ctx then (
       let AffectedDeps.
             { changed = changed'; mro_invalidated = _; needs_recheck } =
-        Shallow_decl_compare.compute_class_fanout ctx ~defs fnl
+        Shallow_decl_compare.compute_class_fanout ctx ~during_init ~defs fnl
       in
 
       invalidate_folded_classes_for_shallow_fanout

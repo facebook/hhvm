@@ -23,7 +23,11 @@ val get_member_filter : Provider_context.t -> string -> BloomFilter.t option
 
 val get_batch : Provider_context.t -> SSet.t -> shallow_class option SMap.t
 
-val get_old_batch : Provider_context.t -> SSet.t -> shallow_class option SMap.t
+val get_old_batch :
+  Provider_context.t ->
+  during_init:bool ->
+  SSet.t ->
+  shallow_class option SMap.t
 
 val oldify_batch : Provider_context.t -> SSet.t -> unit
 

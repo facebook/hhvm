@@ -25,8 +25,20 @@ let direct_decl_parse_and_cache ctx filename name =
   | None -> err_not_found filename name
   | Some parsed_file -> parsed_file.Direct_decl_utils.pfh_decls
 
-let fetch_remote_old_decls (ctx : Provider_context.t) =
+let fetch_remote_old_decl_flag (ctx : Provider_context.t) =
   TypecheckerOptions.fetch_remote_old_decls (Provider_context.get_tcopt ctx)
+
+let only_fetch_remote_old_decl_during_init (ctx : Provider_context.t) =
+  TypecheckerOptions.only_fetch_remote_old_decl_during_init
+    (Provider_context.get_tcopt ctx)
+
+let fetch_remote_old_decls ctx ~during_init =
+  fetch_remote_old_decl_flag ctx
+  &&
+  if only_fetch_remote_old_decl_during_init ctx then
+    during_init
+  else
+    true
 
 let get (ctx : Provider_context.t) (name : string) : shallow_class option =
   let find_in_direct_decl_parse ~fill_caches path =
@@ -114,8 +126,8 @@ let get_batch (ctx : Provider_context.t) (names : SSet.t) :
   | Provider_backend.Decl_service _ ->
     failwith "get_batch not implemented for Decl_service"
 
-let fetch_missing_old_classes_remotely ctx old_classes =
-  if fetch_remote_old_decls ctx then
+let fetch_missing_old_classes_remotely ctx ~during_init old_classes =
+  if fetch_remote_old_decls ctx ~during_init then
     let missing_old_classes =
       SMap.fold
         (fun cid decl_opt missing_classes ->
@@ -134,7 +146,7 @@ let fetch_missing_old_classes_remotely ctx old_classes =
   else
     old_classes
 
-let get_old_batch (ctx : Provider_context.t) (names : SSet.t) :
+let get_old_batch (ctx : Provider_context.t) ~during_init (names : SSet.t) :
     shallow_class option SMap.t =
   match Provider_context.get_backend ctx with
   | Provider_backend.Pessimised_shared_memory _
@@ -147,10 +159,10 @@ let get_old_batch (ctx : Provider_context.t) (names : SSet.t) :
         be
         FileInfo.{ empty_names with n_classes = names }
     in
-    fetch_missing_old_classes_remotely ctx old_classes
+    fetch_missing_old_classes_remotely ctx ~during_init old_classes
   | Provider_backend.Shared_memory ->
     let old_classes = Shallow_classes_heap.Classes.get_old_batch names in
-    fetch_missing_old_classes_remotely ctx old_classes
+    fetch_missing_old_classes_remotely ctx ~during_init old_classes
   | Provider_backend.Local_memory _ ->
     failwith "get_old_batch not implemented for Local_memory"
   | Provider_backend.Decl_service _ ->

@@ -62,6 +62,7 @@ type t = {
   tco_force_shallow_decl_fanout: bool;
   tco_remote_old_decls_no_limit: bool;
   tco_fetch_remote_old_decls: bool;
+  tco_only_fetch_remote_old_decl_during_init: bool;
   tco_force_load_hot_shallow_decls: bool;
   tco_populate_member_heaps: bool;
   tco_skip_hierarchy_checks: bool;
@@ -204,6 +205,7 @@ let default =
     tco_force_shallow_decl_fanout = false;
     tco_remote_old_decls_no_limit = false;
     tco_fetch_remote_old_decls = false;
+    tco_only_fetch_remote_old_decl_during_init = false;
     tco_force_load_hot_shallow_decls = false;
     tco_populate_member_heaps = true;
     tco_skip_hierarchy_checks = false;
@@ -345,6 +347,8 @@ let make
     ?(tco_force_shallow_decl_fanout = default.tco_force_shallow_decl_fanout)
     ?(tco_remote_old_decls_no_limit = default.tco_remote_old_decls_no_limit)
     ?(tco_fetch_remote_old_decls = default.tco_fetch_remote_old_decls)
+    ?(tco_only_fetch_remote_old_decl_during_init =
+      default.tco_only_fetch_remote_old_decl_during_init)
     ?(tco_force_load_hot_shallow_decls =
       default.tco_force_load_hot_shallow_decls)
     ?(tco_populate_member_heaps = default.tco_populate_member_heaps)
@@ -516,6 +520,7 @@ let make
     tco_force_shallow_decl_fanout;
     tco_remote_old_decls_no_limit;
     tco_fetch_remote_old_decls;
+    tco_only_fetch_remote_old_decl_during_init;
     tco_force_load_hot_shallow_decls;
     tco_populate_member_heaps;
     tco_skip_hierarchy_checks;

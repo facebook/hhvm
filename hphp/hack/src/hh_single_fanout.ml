@@ -113,6 +113,7 @@ let compute_fanout ctx options (old_and_new_defs : Naming_table.defs_per_file) :
   } =
     Decl_redecl_service.redo_type_decl
       ctx
+      ~during_init:false
       None
       ~bucket_size:500
       (fun _ -> SSet.empty)

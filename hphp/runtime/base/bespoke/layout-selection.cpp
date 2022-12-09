@@ -786,6 +786,8 @@ std::vector<Decision<ArrayLayout>> makeSinkDecisions(
     RO::EvalBespokeArraySinkIteratorSpecializationThreshold / 100 :
     RO::EvalBespokeArraySinkSpecializationThreshold / 100;
 
+  auto const layoutThreshold = RO::EvalBespokeArraySinkMultiLayoutThreshold;
+
   auto const p_sampled = 1.0 * sampled / (sampled + unsampled);
 
   if (!total) {
@@ -799,13 +801,43 @@ std::vector<Decision<ArrayLayout>> makeSinkDecisions(
   auto const p_is_struct = p_sampled * is_struct / total;
   auto const p_is_type_structures = p_sampled * type_structures / total;
 
+  const auto sortedStructs = [&](){
+    std::vector<std::pair<const bespoke::Layout*, double>> structVec;
+    structVec.reserve(structs.size());
+
+    for (auto const& pair : structs) {
+      auto const p_this = p_sampled * pair.second / total;
+      structVec.push_back(std::make_pair(pair.first, p_this));
+    }
+
+    std::sort(
+      structVec.begin(),
+      structVec.end(),
+      [](auto const& p1, auto const& p2) {
+        return p1.second > p2.second;
+      }
+    );
+
+    return structVec;
+  }();
+
   // Handle vanilla layouts
   if (p_vanilla >= p_cutoff) {
 
     // When vanilla + top struct cover all sources, return both
     if (p_is_struct > 0 &&
-        p_vanilla + p_is_struct == 1.0 &&
+        p_vanilla + p_is_struct >= layoutThreshold &&
         !isIteratorOp(profile.key.second.op())) {
+
+      // if single struct, return it
+      if (sortedStructs.size() == 1) {
+        auto const [layout, prob] = sortedStructs[0];
+        return {
+          {ArrayLayout::Vanilla(), p_vanilla},
+          {ArrayLayout(layout), prob}
+        };
+      }
+
       return {
         {ArrayLayout::Vanilla(), p_vanilla},
         {ArrayLayout(TopStructLayout::Index()), p_is_struct}
@@ -864,26 +896,6 @@ std::vector<Decision<ArrayLayout>> makeSinkDecisions(
     return {{ArrayLayout(TypeStructure::GetLayoutIndex()), p_is_type_structures}};
   }
 
-  // Handle struct layouts
-  if (p_is_struct >= p_cutoff) {
-    for (auto const& pair : structs) {
-      auto const p_this = p_sampled * pair.second / total;
-      if (p_this >= p_cutoff) return {{ArrayLayout(pair.first), p_this}};
-    }
-
-    // When top struct + vanilla cover all sources, return both
-    if (p_vanilla > 0 &&
-        p_is_struct + p_vanilla == 1.0 &&
-        !isIteratorOp(profile.key.second.op())) {
-      return {
-        {ArrayLayout(TopStructLayout::Index()), p_is_struct},
-        {ArrayLayout::Vanilla(), p_vanilla}
-      };
-    }
-
-    return {{ArrayLayout(TopStructLayout::Index()), p_is_struct}};
-  }
-
   auto const selectMultipleLayouts = [&](double p1, double p2){
     // Do not select multiple layouts for iterator ops
     if (isIteratorOp(profile.key.second.op())) return false;
@@ -900,17 +912,49 @@ std::vector<Decision<ArrayLayout>> makeSinkDecisions(
     return true;
   };
 
-  // Handle combined vanilla + struct layouts
-  if (selectMultipleLayouts(p_vanilla, p_is_struct)) {
-    return p_vanilla > p_is_struct ?
-      std::vector<DAL>({
-        {ArrayLayout::Vanilla(), p_vanilla},
-        {ArrayLayout(TopStructLayout::Index()), p_is_struct}
-      }) :
-      std::vector<DAL>({
+  // Handle struct layouts
+  if (p_is_struct >= p_cutoff) {
+    auto const& [layout_first, p_first] = sortedStructs[0];
+
+    if (sortedStructs.size() > 1 &&
+        !isIteratorOp(profile.key.second.op())) {
+      auto const& [layout_second, p_second] = sortedStructs[1];
+
+      if (p_first + p_second >= p_cutoff &&
+          selectMultipleLayouts(p_first, p_second)) {
+        return {
+          {ArrayLayout(layout_first), p_first},
+          {ArrayLayout(layout_second), p_second},
+        };
+      }
+    }
+
+    if (p_first >= p_cutoff) {
+      return {{ArrayLayout(layout_first), p_first}};
+    }
+
+    // When top struct + vanilla cover all sources, return both
+    if (p_vanilla > 0 &&
+        p_is_struct + p_vanilla >= layoutThreshold &&
+        !isIteratorOp(profile.key.second.op())) {
+      return {
         {ArrayLayout(TopStructLayout::Index()), p_is_struct},
         {ArrayLayout::Vanilla(), p_vanilla}
-      });
+      };
+    }
+
+    return {{ArrayLayout(TopStructLayout::Index()), p_is_struct}};
+  }
+
+  // Handle combined vanilla + struct layouts
+  if (selectMultipleLayouts(p_vanilla, p_is_struct)) {
+    auto const structLayout = sortedStructs.size() == 1 ?
+      DAL({ArrayLayout(sortedStructs[0].first), sortedStructs[0].second}) :
+      DAL({ArrayLayout(TopStructLayout::Index()), p_is_struct});
+
+    return p_vanilla > p_is_struct ?
+      std::vector<DAL>({{ArrayLayout::Vanilla(), p_vanilla}, structLayout}) :
+      std::vector<DAL>({structLayout, {ArrayLayout::Vanilla(), p_vanilla}});
     }
 
   return {{ArrayLayout::Top(), 1.0}};

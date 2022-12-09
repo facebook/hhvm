@@ -325,7 +325,9 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
               if (cb && stream.readState == NEW) {
                 stream.readState = OPEN;
               } else if (cb && stream.readState == OPEN) {
-                eventBase_->runInLoop(this, true);
+                if (!stream.readBuf.empty()) {
+                  eventBase_->runInLoop(this, true);
+                }
               } else if (stream.readState == ERROR) {
                 return folly::makeUnexpected(
                     quic::LocalErrorCode::INTERNAL_ERROR);
@@ -1497,7 +1499,6 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
             stream.readBuf.append(std::move(event.buf));
             stream.readEOF |= ((event.eof) ? 1 : 0);
             if (stream.readState == NEW) {
-              stream.readState = OPEN;
               if (sock_->connCb_) {
                 if (sock_->isUnidirectionalStream(event.streamId)) {
                   if (isPeerStream(event.streamId)) {
@@ -1509,6 +1510,9 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                 } else {
                   sock_->connCb_->onNewBidirectionalStream(event.streamId);
                 }
+              }
+              if (stream.readState == NEW) {
+                stream.readState = OPEN;
               }
             }
             if (event.error && event.stopSending) {
@@ -1686,42 +1690,40 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
   void runLoopCallback() noexcept override {
     bool reschedule = false;
     for (auto& it : streams_) {
-      auto streamID = it.first;
-      auto& streamState = it.second;
-      auto hasCB = streamState.readCB || streamState.peekCB;
-      auto hasDataOrEOF = !streamState.readBuf.empty() || streamState.readEOF;
-      if (streamID != kConnectionStreamId && hasCB &&
-          streamState.readState == OPEN && hasDataOrEOF) {
-        if (streamState.peekCB) {
+      if (it.first != kConnectionStreamId &&
+          (it.second.readCB || it.second.peekCB) &&
+          it.second.readState == OPEN &&
+          (!it.second.readBuf.empty() || it.second.readEOF)) {
+        if (it.second.peekCB) {
           std::deque<StreamBuffer> fakeReadBuffer;
           std::unique_ptr<folly::IOBuf> copyBuf;
           std::size_t copyBufLen = 0;
-          if (streamState.readBuf.chainLength() > 0) {
-            copyBuf = streamState.readBuf.front()->clone();
+          if (it.second.readBuf.chainLength() > 0) {
+            copyBuf = it.second.readBuf.front()->clone();
             copyBufLen = copyBuf->computeChainDataLength();
           }
           VLOG(6) << "peek onDataAvailable id=" << it.first
                   << " len=" << copyBufLen
-                  << " offset=" << streamState.readOffset;
-          ERROR_IF(streamState.readBufOffset < copyBufLen,
+                  << " offset=" << it.second.readOffset;
+          ERROR_IF(it.second.readBufOffset < copyBufLen,
                    fmt::format("readOffset({}) is lower than current read "
                                "buffer offset({}) for streamId={}",
-                               streamState.readBufOffset,
+                               it.second.readBufOffset,
                                copyBufLen,
                                it.first),
                    continue);
           fakeReadBuffer.emplace_back(std::move(copyBuf),
-                                      streamState.fakePeekOffset
-                                          ? streamState.fakePeekOffset
-                                          : streamState.readOffset,
-                                      streamState.readEOF);
-          streamState.peekCB->onDataAvailable(
+                                      it.second.fakePeekOffset
+                                          ? it.second.fakePeekOffset
+                                          : it.second.readOffset,
+                                      it.second.readEOF);
+          it.second.peekCB->onDataAvailable(
               it.first,
               folly::Range<PeekIterator>(fakeReadBuffer.cbegin(),
                                          fakeReadBuffer.size()));
         }
-        if (streamState.readCB) {
-          streamState.readCB->readAvailable(it.first);
+        if (it.second.readCB) {
+          it.second.readCB->readAvailable(it.first);
           reschedule = true;
         }
       }

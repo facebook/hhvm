@@ -22,28 +22,34 @@ namespace py.asyncio thrift_asyncio.test.Enum
 namespace java.swift org.apache.thrift.test
 namespace go thrift.test.testset.Enum
 
+include "thrift/annotation/compat.thrift"
+
 enum Standard {
   value_0 = 0,
   value_1 = 1,
   value_2 = 2,
 }
 
+@compat.Enums
 enum NoZero {
   value_1 = 1,
   value_2 = 2,
 }
 
+@compat.Enums
 enum MissingField {
   value_0 = 0,
   value_1 = 1,
 }
 
+@compat.Enums
 enum NameMismatch {
   value_0 = 0,
   value_1 = 1,
   value_3 = 2,
 }
 
+@compat.Enums
 enum ValueMismatch {
   value_0 = 0,
   value_1 = 1,

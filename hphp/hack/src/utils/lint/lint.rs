@@ -23,7 +23,9 @@ pub enum Severity {
     Advice,
 }
 
-// port from lints_core.t
+// port from Lints_core.t
+// IMPORTANT: be sure to keep this type definition in sync with
+// Lints_core.t in src/lints/lints_core.ml
 #[derive(Clone, Debug, FromOcamlRep, ToOcamlRep)]
 pub struct LintError {
     code: usize,
@@ -35,7 +37,7 @@ pub struct LintError {
     /// lines they are raised on overlap with lines changed in a diff. This
     /// flag bypasses that behavior
     bypass_changed_lines: bool,
-    autofix: (String, String),
+    autofix: Option<(String, Pos)>,
 }
 
 impl LintError {
@@ -48,7 +50,7 @@ impl LintError {
             pos: p,
             message,
             bypass_changed_lines: false,
-            autofix: ("".into(), "".into()),
+            autofix: None,
         }
     }
 }

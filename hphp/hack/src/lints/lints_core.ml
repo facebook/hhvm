@@ -22,6 +22,9 @@ let string_of_severity = function
   | Lint_warning -> "warning"
   | Lint_advice -> "advice"
 
+(* IMPORTANT: be sure to keep this type definition in sync with
+ * LintError in src/utils/lint/lint.rs
+ *)
 type 'pos t = {
   code: int;
   severity: severity;

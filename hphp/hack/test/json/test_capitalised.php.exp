@@ -1,0 +1,33 @@
+{
+  "errors":[
+    {
+      "descr":"test_capitalised.php only declares `f`, it should be named f.php instead.",
+      "severity":"warning",
+      "path":"test_capitalised.php",
+      "line":3,
+      "start":10,
+      "end":10,
+      "code":5564,
+      "bypass_changed_lines":false,
+      "original":"",
+      "replacement":"",
+      "start_offset":null,
+      "width":null
+    },
+    {
+      "descr":"Please use `true` instead of `True`",
+      "severity":"warning",
+      "path":"test_capitalised.php",
+      "line":3,
+      "start":22,
+      "end":25,
+      "code":5001,
+      "bypass_changed_lines":false,
+      "original":"",
+      "replacement":"",
+      "start_offset":null,
+      "width":null
+    }
+  ],
+  "version":" Wed Dec 31 16:00:00 1969"
+}

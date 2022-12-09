@@ -15,7 +15,7 @@ namespace proxygen {
 
 // Will never be valid HTTP/2 which only has 16 bits
 #define SPDY_SETTINGS_MASK (1 << 16)
-#define HQ_SETTINGS_MASK (((uint64_t)1) << 32)
+#define HQ_SETTINGS_MASK (1ull << 32)
 
 enum class SettingsId : uint64_t {
   // From HTTP/2

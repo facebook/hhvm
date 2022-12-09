@@ -376,7 +376,7 @@ module Full = struct
       in
       (fuel, text ("type " ^ name ^ " ") ^^ tr_doc)
     in
-    delimited_list ~fuel semi_sep "{" tref (SMap.bindings trs) "}"
+    delimited_list ~fuel semi_sep "{ " tref (SMap.bindings trs) " }"
 
   let refinements ~fuel k e =
     match e with

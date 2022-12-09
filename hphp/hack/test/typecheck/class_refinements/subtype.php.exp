@@ -9,7 +9,7 @@ A `where` type constraint is violated here (Typing[4323])
   File "subtype.php", line 25, characters 50-51:
     via this generic `Tb`
   File "subtype.php", line 36, characters 14-36:
-  But got `Box with {type T = int}`
+  But got `Box with { type T = int }`
   File "subtype.php", line 25, characters 44-45:
     via this generic `Ta`
   File "subtype.php", line 36, characters 58-63:
@@ -57,7 +57,7 @@ A `where` type constraint is violated here (Typing[4323])
   File "subtype.php", line 25, characters 50-51:
     via this generic `Tb`
   File "subtype.php", line 39, characters 14-27:
-  But got `Box with {type T as C2 super C4}`
+  But got `Box with { type T as C2 super C4 }`
   File "subtype.php", line 25, characters 44-45:
     via this generic `Ta`
   File "subtype.php", line 23, characters 48-50:

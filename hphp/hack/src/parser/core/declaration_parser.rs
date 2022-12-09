@@ -265,22 +265,27 @@ where
 
     fn parse_enum_declaration(&mut self, attrs: S::Output, modifiers: S::Output) -> S::Output {
         // enum-declaration:
-        //   attribute-specification-opt modifiers enum  name  enum-base  type-constraint-opt /
-        //     {  enum-use-clause-list-opt; enumerator-list-opt  }
-        // enum-base:
-        //   :  int
-        //   :  string
-        //
-        // TODO: SPEC ERROR: The spec states that the only legal enum types
-        // are "int" and "string", but Hack allows any type, and apparently
-        // some of those are meaningful and desired.  Figure out what types
-        // are actually legal and illegal as enum base types; put them in the
-        // spec, and add an error pass that says when they are wrong.
+        //   'enum' name ':' type type-constraint-opt '{' enum-use-clause-list-opt; enumerator-list-opt '}'
         let enum_ = self.assert_token(TokenKind::Enum);
         let name = self.require_name();
-        let colon = self.require_colon();
-        let base =
-            self.parse_type_specifier(false /* allow_var */, true /* allow_attr */);
+
+        let token_kind = self.peek_token_kind();
+        let (colon, base) = if token_kind == TokenKind::LeftBrace {
+            // enum Foo {}
+            // The user has forgotten the base type. Mark it as missing and keep parsing.
+            let pos = self.pos();
+            let missing1 = self.sc_mut().make_missing(pos);
+            let missing2 = self.sc_mut().make_missing(pos);
+            (missing1, missing2)
+        } else {
+            // enum Foo: Bar {}
+            // The syntax is correct.
+            let colon = self.require_colon();
+            let base =
+                self.parse_type_specifier(false /* allow_var */, true /* allow_attr */);
+            (colon, base)
+        };
+
         let enum_type = self.parse_type_constraint_opt(false);
         let left_brace = self.require_left_brace();
         let use_clauses = self.parse_enum_use_list_opt();

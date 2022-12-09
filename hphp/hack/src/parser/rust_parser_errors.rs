@@ -704,13 +704,15 @@ fn make_error_from_node_with_quickfix(
     node: S<'_>,
     error: errors::Error,
     quickfix_title: &str,
+    quickfix_start: usize,
+    quickfix_end: usize,
     new_text: &str,
 ) -> SyntaxError {
     let s = start_offset(node);
     let e = end_offset(node);
     let quickfixes = vec![SyntaxQuickfix {
         title: quickfix_title.into(),
-        edits: vec![(s, e, new_text.into())],
+        edits: vec![(quickfix_start, quickfix_end, new_text.into())],
     }];
     SyntaxError::make_with_child_and_type(None, s, e, ErrorType::ParseError, error, quickfixes)
 }
@@ -2153,10 +2155,15 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 let async_annotation = extract_keyword(|x| x.is_async(), node).unwrap_or(node);
 
                 if self.is_interface_and_async_method(node) {
+                    let quickfix_start = start_offset(async_annotation);
+                    let quickfix_end = end_offset(async_annotation);
+
                     self.errors.push(make_error_from_node_with_quickfix(
                         async_annotation,
                         errors::error2046("a method in an interface"),
                         "Remove `async`",
+                        quickfix_start,
+                        quickfix_end,
                         "",
                     ))
                 }
@@ -4901,7 +4908,22 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             if !x.name.is_missing() {
                 let name = self.text(&x.name);
                 let location = make_location_of_node(&x.name);
-                self.check_type_name(&x.name, name, location)
+                self.check_type_name(&x.name, name, location);
+
+                if x.base.is_missing() {
+                    // Create a zero width region to insert the new text.
+                    let quickfix_start = end_offset(&x.name);
+                    let quickfix_end = end_offset(&x.name);
+
+                    self.errors.push(make_error_from_node_with_quickfix(
+                        &x.name,
+                        errors::enum_missing_base_type,
+                        "Add `arraykey` base type",
+                        quickfix_start,
+                        quickfix_end,
+                        ": arraykey",
+                    ))
+                }
             }
         }
     }

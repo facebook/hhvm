@@ -1104,6 +1104,9 @@ pub const enum_class_abstract_constant_with_value: Error =
 
 pub const enum_with_modifiers: Error = Cow::Borrowed("Enums can't have any modifiers");
 
+pub const enum_missing_base_type: Error =
+    Cow::Borrowed("Enums must have a base type, such as `arraykey` or `int`.");
+
 pub const readonly_static_method: Error =
     Cow::Borrowed("Static methods do not need to be marked readonly");
 pub const variadic_readonly_param: Error =

@@ -602,8 +602,7 @@ let redo_type_decl
     ~(bucket_size : int)
     (get_classes : Relative_path.t -> SSet.t)
     ~(previously_oldified_defs : FileInfo.names)
-    ~(defs : FileInfo.names Relative_path.Map.t)
-    ~(telemetry_label : string) : redo_type_decl_result =
+    ~(defs : FileInfo.names Relative_path.Map.t) : redo_type_decl_result =
   let all_defs =
     Relative_path.Map.fold defs ~init:FileInfo.empty_names ~f:(fun _ ->
         FileInfo.merge_names)
@@ -637,12 +636,7 @@ let redo_type_decl
   let (changed, to_recheck) =
     if shallow_decl_enabled ctx then (
       let AffectedDeps.{ changed = changed'; mro_invalidated; needs_recheck } =
-        Shallow_decl_compare.compute_class_fanout
-          ctx
-          ~defs
-          ~fetch_old_decls:
-            (Remote_old_decl_client.fetch_old_decls ~ctx ~telemetry_label)
-          fnl
+        Shallow_decl_compare.compute_class_fanout ctx ~defs fnl
       in
       let changed = DepSet.union changed changed' in
       let to_recheck = DepSet.union to_recheck needs_recheck in
@@ -657,12 +651,7 @@ let redo_type_decl
     ) else if force_shallow_decl_fanout_enabled ctx then (
       let AffectedDeps.
             { changed = changed'; mro_invalidated = _; needs_recheck } =
-        Shallow_decl_compare.compute_class_fanout
-          ctx
-          ~defs
-          ~fetch_old_decls:
-            (Remote_old_decl_client.fetch_old_decls ~ctx ~telemetry_label)
-          fnl
+        Shallow_decl_compare.compute_class_fanout ctx ~defs fnl
       in
 
       invalidate_folded_classes_for_shallow_fanout

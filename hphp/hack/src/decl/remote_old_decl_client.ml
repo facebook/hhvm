@@ -108,10 +108,8 @@ let fetch_old_decl_hashes_and_blobs ~hhconfig_version ~no_limit ~decl_hashes =
     in
     decl_hashes_and_blobs
 
-let fetch_old_decls
-    ~(telemetry_label : string)
-    ~(ctx : Provider_context.t)
-    (names : string list) : Shallow_decl_defs.shallow_class option SMap.t =
+let fetch_old_decls ~(ctx : Provider_context.t) (names : string list) :
+    Shallow_decl_defs.shallow_class option SMap.t =
   let db_path_opt = Utils.db_path_of_ctx ~ctx in
   match db_path_opt with
   | None -> SMap.empty
@@ -166,8 +164,7 @@ let fetch_old_decls
                 acc)
             decl_blobs
         in
-        let telemetry = Telemetry.create () in
-        let fetch_results =
+        let telemetry =
           Telemetry.create ()
           |> Telemetry.int_ ~key:"to_fetch" ~value:(List.length names)
           |> Telemetry.int_ ~key:"fetched" ~value:(SMap.cardinal decls)
@@ -177,8 +174,5 @@ let fetch_old_decls
           (SMap.cardinal decls)
           (List.length names);
 
-        let telemetry =
-          Telemetry.object_ telemetry ~key:telemetry_label ~value:fetch_results
-        in
         HackEventLogger.remote_old_decl_end telemetry start_t;
         decls))

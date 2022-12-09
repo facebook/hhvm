@@ -688,7 +688,6 @@ let get_files_to_undecl_and_recheck
       get_old_and_new_classes
       ~previously_oldified_defs:dirty_names
       ~defs:defs_per_file_to_redeclare
-      ~telemetry_label:"post_ss_redecl"
   in
   Decl_redecl_service.remove_old_defs ctx ~bucket_size genv.workers dirty_names;
   let to_recheck_deps = Typing_deps.add_all_deps env.deps_mode to_redecl in

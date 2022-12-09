@@ -40,7 +40,6 @@ val redo_type_decl :
   get_classes_in_file ->
   previously_oldified_defs:FileInfo.names ->
   defs:Naming_table.defs_per_file ->
-  telemetry_label:string ->
   redo_type_decl_result
 
 (** Mark all provided [defs] as old, as long as they were not previously

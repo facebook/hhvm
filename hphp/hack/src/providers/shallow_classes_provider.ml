@@ -114,11 +114,7 @@ let get_batch (ctx : Provider_context.t) (names : SSet.t) :
   | Provider_backend.Decl_service _ ->
     failwith "get_batch not implemented for Decl_service"
 
-let get_old_batch
-    (ctx : Provider_context.t)
-    (names : SSet.t)
-    ~(fetch_old_decls :
-       string list -> Shallow_decl_defs.shallow_class option SMap.t) :
+let get_old_batch (ctx : Provider_context.t) (names : SSet.t) :
     shallow_class option SMap.t =
   match Provider_context.get_backend ctx with
   | Provider_backend.Pessimised_shared_memory _
@@ -142,7 +138,9 @@ let get_old_batch
           old_classes
           []
       in
-      let remote_old_classes = fetch_old_decls missing_old_classes in
+      let remote_old_classes =
+        Remote_old_decl_client.fetch_old_decls ~ctx missing_old_classes
+      in
       SMap.fold
         (fun a b acc ->
           if Option.is_some b || not (SMap.mem a remote_old_classes) then
@@ -166,7 +164,9 @@ let get_old_batch
           old_classes
           []
       in
-      let remote_old_classes = fetch_old_decls missing_old_classes in
+      let remote_old_classes =
+        Remote_old_decl_client.fetch_old_decls ~ctx missing_old_classes
+      in
       SMap.fold
         (fun a b acc ->
           if Option.is_some b || not (SMap.mem a remote_old_classes) then

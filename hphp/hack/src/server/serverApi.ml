@@ -626,10 +626,7 @@ let make_remote_server_api
           "Fecthing %d decls from the remote decl store"
           (List.length classnames);
         let remotely_fetched_decls =
-          Remote_old_decl_client.fetch_old_decls
-            ~telemetry_label:"hulk type check"
-            ~ctx
-            classnames
+          Remote_old_decl_client.fetch_old_decls ~ctx classnames
         in
         Hh_logger.log
           "Fetched %d decls from the remote decl store"

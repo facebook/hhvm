@@ -118,7 +118,6 @@ let compute_fanout ctx options (old_and_new_defs : Naming_table.defs_per_file) :
       (fun _ -> SSet.empty)
       ~previously_oldified_defs:FileInfo.empty_names
       ~defs:old_and_new_defs
-      ~telemetry_label:"tests"
   in
   if options.debug then (
     Printf.printf "Hashes of changed:%s\n" (Typing_deps.DepSet.show changed);

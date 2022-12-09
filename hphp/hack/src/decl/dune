@@ -348,12 +348,16 @@
  (name remote_old_decl_client)
  (modules remote_old_decl_client)
  (libraries
-  decl_export
+  db_path_provider
   file_info
+  future
   naming_sqlite
+  process
+  process_types
   provider_context
   shallow_decl_defs
   sys_utils
+  temp_file
   typing_defs
   remote_old_decls_ffi
   utils_config_file

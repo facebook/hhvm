@@ -871,7 +871,6 @@ functor
           get_classes
           ~previously_oldified_defs:oldified_defs
           ~defs:defs_per_file
-          ~telemetry_label:"type_check_redecl_phase1"
       in
       (* Things that were redeclared are no longer in old heap, so we substract
        * defs_to_redecl from oldified_defs *)
@@ -948,7 +947,6 @@ functor
           get_classes
           ~previously_oldified_defs:oldified_defs
           ~defs:defs_per_file_redecl_phase2_now
-          ~telemetry_label:"type_check_redecl_phase2"
       in
       let (env, errors, time_errors_pushed) =
         push_and_accumulate_errors

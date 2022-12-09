@@ -373,8 +373,8 @@ t_struct& patch_generator::add_field_patch(
   }
   StructGen gen{annot, gen_suffix_struct(annot, orig, "FieldPatch"), program_};
   for (const auto& entry : types) {
-    gen.intern_box(gen.terse(gen.field(
-        entry.first, entry.second, orig.get_field_by_id(entry.first)->name())));
+    gen.terse(gen.field(
+        entry.first, entry.second, orig.get_field_by_id(entry.first)->name()));
   }
   gen.set_adapter("FieldPatchAdapter");
   return gen;

@@ -5813,8 +5813,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let type_members = arena_collections::map::Map::from(
             self.arena,
             members.iter().filter_map(|node| match node {
-                Node::ClassTypeRefinement(&(id, ctr)) => Some((id, ctr)),
-                _ => None,
+                Node::ListItem(&(node, _)) | &node => match node {
+                    Node::ClassTypeRefinement(&(id, ctr)) => Some((id, ctr)),
+                    _ => None,
+                },
             }),
         );
         let class_ref = ClassRefinement {

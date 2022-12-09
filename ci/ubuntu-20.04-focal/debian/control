@@ -1,0 +1,89 @@
+Source: hhvm-nightly
+Maintainer: HHVM Open Source <hhvm-oss@fb.com>
+Section: web
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends:
+  aspcud,
+  autoconf,
+  automake,
+  binutils-dev,
+  bison,
+  build-essential,
+  cmake,
+  curl,
+  debhelper (>= 9),
+  flex,
+  g++,
+  gawk,
+  git,
+  gperf,
+  libboost-all-dev,
+  libbz2-dev,
+  libc-client-dev,
+  libc-client2007e-dev,
+  libcap-dev,
+  libcurl4-openssl-dev,
+  libdwarf-dev,
+  libedit-dev,
+  libelf-dev,
+  libevent-dev,
+  libexpat-dev,
+  libgd-dev,
+  libgmp3-dev,
+  libgoogle-glog-dev,
+  libgoogle-perftools-dev,
+  libiberty-dev,
+  libiconv-hook-dev,
+  libicu-dev,
+  libinotifytools0-dev,
+  libjemalloc-dev,
+  libkrb5-dev,
+  libldap2-dev,
+  libmagickwand-dev,
+  libmcrypt-dev,
+  libmemcached-dev,
+  libncurses-dev,
+  libnotify-dev,
+  libnuma-dev,
+  libonig-dev,
+  libpcre3-dev,
+  libpq-dev,
+  libre2-dev,
+  libsodium-dev,
+  libsqlite3-dev,
+  libssl-dev,
+  libtbb-dev,
+  libtool,
+  libxml2-dev,
+  libxslt1-dev,
+  libyaml-dev,
+  python3,
+  re2c,
+  rsync,
+  tzdata,
+  unzip,
+  wget,
+  zlib1g-dev
+
+Package: hhvm-nightly
+Architecture: any
+Conflicts: hhvm
+Depends: tzdata, lsof, ${shlibs:Depends}, ${misc:Depends}
+Description: HHVM virtual machine, runtime, and JIT for the Hack language
+
+Package: hhvm-nightly-dbg
+Architecture: any
+Depends: hhvm-nightly (= ${binary:Version}), ${misc:Depends}
+Recommends: perf, gdb
+Section: debug
+Priority: extra
+Description: Debugging symbols for HHVM.
+
+Package: hhvm-nightly-dev
+Architecture: any
+Depends: hhvm-nightly (= ${binary:Version}), ${misc:Depends}
+Recommends: cmake
+Section: libdevel
+Priority: extra
+Description: Header and build system files for HHVM extension.

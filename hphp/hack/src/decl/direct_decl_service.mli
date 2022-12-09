@@ -11,6 +11,7 @@ val go :
   Provider_context.t ->
   trace:bool ->
   cache_decls:bool ->
+  ?worker_call:MultiWorker.call_wrapper ->
   MultiWorker.worker list option ->
   (* IDE files are processed sequentially (in the master process), to match the
      behavior of the legacy Parsing_service. *)

@@ -62,6 +62,7 @@ let parsing
     else
       ( Direct_decl_service.go
           ctx
+          ~worker_call
           genv.workers
           ~ide_files:Relative_path.Set.empty
           ~get_next

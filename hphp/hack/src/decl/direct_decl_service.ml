@@ -41,6 +41,7 @@ let go
     (ctx : Provider_context.t)
     ~(trace : bool)
     ~(cache_decls : bool)
+    ?(worker_call : MultiWorker.call_wrapper = MultiWorker.wrapper)
     (workers : MultiWorker.worker list option)
     ~(ide_files : Relative_path.Set.t)
     ~(get_next : Relative_path.t list MultiWorker.Hh_bucket.next) :
@@ -70,7 +71,7 @@ let go
         ~cache_decls
         ~ctx_entry_contents
     | _ ->
-      MultiWorker.call
+      worker_call.MultiWorker.f
         workers
         ~job:(fun init -> List.fold ~init ~f:(parse ctx ~trace ~cache_decls))
         ~neutral:Relative_path.Map.empty

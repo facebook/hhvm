@@ -6,19 +6,18 @@
 use std::path::Path;
 use std::path::PathBuf;
 
-use structopt::StructOpt;
+use clap::Parser;
 
-#[derive(Debug, StructOpt)]
-#[structopt(no_version)] // don't consult CARGO_PKG_VERSION (buck doesn't set it)
+#[derive(Debug, Parser)]
 struct Options {
     /// The directory containing HHI files.
-    #[structopt(long, parse(from_os_str))]
+    #[clap(long, parse(from_os_str))]
     hhi_dir: PathBuf,
 
     /// The directory containing this stamp is the directory to search for HHIs
     /// generated from the HSL. These will be placed in the final hhi directory
     /// under a subdirectory named "hsl_generated".
-    #[structopt(long, parse(from_os_str))]
+    #[clap(long, parse(from_os_str))]
     hsl_stamp: PathBuf,
 }
 

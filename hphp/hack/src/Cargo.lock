@@ -2190,9 +2190,9 @@ dependencies = [
 name = "hhi"
 version = "0.0.0"
 dependencies = [
+ "clap 3.2.17",
  "gen_hhi_contents_lib",
  "generate_hhi_lib",
- "structopt",
  "walkdir",
 ]
 

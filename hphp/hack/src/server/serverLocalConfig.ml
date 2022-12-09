@@ -1607,4 +1607,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       use_type_alias_heap = options.use_type_alias_heap;
       override_load_state_natively = options.override_load_state_natively;
       use_server_revision_tracker_v2 = options.use_server_revision_tracker_v2;
+      rust_provider_backend = options.rust_provider_backend;
     }

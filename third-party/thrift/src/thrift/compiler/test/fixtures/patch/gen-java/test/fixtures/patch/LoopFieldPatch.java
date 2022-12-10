@@ -25,21 +25,21 @@ public final class LoopFieldPatch implements com.facebook.thrift.payload.ThriftS
 
     @ThriftConstructor
     public LoopFieldPatch(
-        @com.facebook.swift.codec.ThriftField(value=-1, name="bar", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.BarPatch bar
+        @com.facebook.swift.codec.ThriftField(value=-1, name="bar", isLegacyId=true, requiredness=Requiredness.NONE) final test.fixtures.patch.BarPatch bar
     ) {
         this.bar = bar;
     }
     
     @ThriftConstructor
     protected LoopFieldPatch() {
-      this.bar = test.fixtures.patch.BarPatch.defaultInstance();
+      this.bar = null;
     }
     
     public static class Builder {
     
-        private test.fixtures.patch.BarPatch bar = test.fixtures.patch.BarPatch.defaultInstance();
+        private test.fixtures.patch.BarPatch bar = null;
     
-        @com.facebook.swift.codec.ThriftField(value=-1, name="bar", isLegacyId=true, requiredness=Requiredness.TERSE)
+        @com.facebook.swift.codec.ThriftField(value=-1, name="bar", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setBar(test.fixtures.patch.BarPatch bar) {
             this.bar = bar;
             return this;
@@ -78,7 +78,7 @@ public final class LoopFieldPatch implements com.facebook.thrift.payload.ThriftS
     }
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-1, name="bar", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-1, name="bar", isLegacyId=true, requiredness=Requiredness.NONE)
     public test.fixtures.patch.BarPatch getBar() { return bar; }
     
     @java.lang.Override
@@ -144,19 +144,11 @@ public final class LoopFieldPatch implements com.facebook.thrift.payload.ThriftS
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      int structStart = 0;
-      int pos = 0;
-      com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
-      java.util.Objects.requireNonNull(bar, "bar must not be null");
-      structStart = p.mark();
+      if (bar != null) {
         oprot.writeFieldBegin(BAR_FIELD_DESC);
-        pos = p.mark();
         this.bar.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
+        oprot.writeFieldEnd();
+      }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }

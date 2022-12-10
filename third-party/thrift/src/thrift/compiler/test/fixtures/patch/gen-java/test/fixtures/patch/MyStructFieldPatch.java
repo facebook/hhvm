@@ -25,38 +25,38 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
 
     @ThriftConstructor
     public MyStructFieldPatch(
-        @com.facebook.swift.codec.ThriftField(value=-32, name="mapMap", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.MyStructField32Patch mapMap,
-        @com.facebook.swift.codec.ThriftField(value=-31, name="listMap", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.MyStructField31Patch listMap,
-        @com.facebook.swift.codec.ThriftField(value=-30, name="optMapVal", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.MyStructField30Patch optMapVal,
-        @com.facebook.swift.codec.ThriftField(value=-29, name="optSetVal", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.MyStructField29Patch optSetVal,
-        @com.facebook.swift.codec.ThriftField(value=-28, name="optListVal", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.MyStructField28Patch optListVal,
-        @com.facebook.swift.codec.ThriftField(value=-27, name="optLateStructVal", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.LateDefStructPatch optLateStructVal,
-        @com.facebook.swift.codec.ThriftField(value=-26, name="optStructVal", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.MyDataPatch optStructVal,
-        @com.facebook.swift.codec.ThriftField(value=-25, name="optEnumVal", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.MyStructField25Patch optEnumVal,
-        @com.facebook.swift.codec.ThriftField(value=-24, name="optBinaryVal", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.BinaryPatch optBinaryVal,
-        @com.facebook.swift.codec.ThriftField(value=-23, name="optStringVal", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.StringPatch optStringVal,
-        @com.facebook.swift.codec.ThriftField(value=-22, name="optDoubleVal", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.DoublePatch optDoubleVal,
-        @com.facebook.swift.codec.ThriftField(value=-21, name="optFloatVal", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.FloatPatch optFloatVal,
-        @com.facebook.swift.codec.ThriftField(value=-20, name="optI64Val", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.I64Patch optI64Val,
-        @com.facebook.swift.codec.ThriftField(value=-19, name="optI32Val", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.I32Patch optI32Val,
-        @com.facebook.swift.codec.ThriftField(value=-18, name="optI16Val", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.I16Patch optI16Val,
-        @com.facebook.swift.codec.ThriftField(value=-17, name="optByteVal", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.BytePatch optByteVal,
-        @com.facebook.swift.codec.ThriftField(value=-16, name="optBoolVal", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.BoolPatch optBoolVal,
-        @com.facebook.swift.codec.ThriftField(value=-15, name="timeVal", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.TimePatch timeVal,
-        @com.facebook.swift.codec.ThriftField(value=-14, name="durationVal", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.DurationPatch durationVal,
-        @com.facebook.swift.codec.ThriftField(value=-13, name="lateStructVal", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.LateDefStructPatch lateStructVal,
-        @com.facebook.swift.codec.ThriftField(value=-12, name="unionVal", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.MyUnionPatch unionVal,
-        @com.facebook.swift.codec.ThriftField(value=-11, name="structVal", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.MyDataPatch structVal,
-        @com.facebook.swift.codec.ThriftField(value=-10, name="enumVal", isLegacyId=true, requiredness=Requiredness.TERSE) final test.fixtures.patch.MyStructField10Patch enumVal,
-        @com.facebook.swift.codec.ThriftField(value=-9, name="binaryVal", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.BinaryPatch binaryVal,
-        @com.facebook.swift.codec.ThriftField(value=-8, name="stringVal", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.StringPatch stringVal,
-        @com.facebook.swift.codec.ThriftField(value=-7, name="doubleVal", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.DoublePatch doubleVal,
-        @com.facebook.swift.codec.ThriftField(value=-6, name="floatVal", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.FloatPatch floatVal,
-        @com.facebook.swift.codec.ThriftField(value=-5, name="i64Val", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.I64Patch i64Val,
-        @com.facebook.swift.codec.ThriftField(value=-4, name="i32Val", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.I32Patch i32Val,
-        @com.facebook.swift.codec.ThriftField(value=-3, name="i16Val", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.I16Patch i16Val,
-        @com.facebook.swift.codec.ThriftField(value=-2, name="byteVal", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.BytePatch byteVal,
-        @com.facebook.swift.codec.ThriftField(value=-1, name="boolVal", isLegacyId=true, requiredness=Requiredness.TERSE) final com.facebook.thrift.op.BoolPatch boolVal
+        @com.facebook.swift.codec.ThriftField(value=-32, name="mapMap", isLegacyId=true, requiredness=Requiredness.NONE) final test.fixtures.patch.MyStructField32Patch mapMap,
+        @com.facebook.swift.codec.ThriftField(value=-31, name="listMap", isLegacyId=true, requiredness=Requiredness.NONE) final test.fixtures.patch.MyStructField31Patch listMap,
+        @com.facebook.swift.codec.ThriftField(value=-30, name="optMapVal", isLegacyId=true, requiredness=Requiredness.NONE) final test.fixtures.patch.MyStructField30Patch optMapVal,
+        @com.facebook.swift.codec.ThriftField(value=-29, name="optSetVal", isLegacyId=true, requiredness=Requiredness.NONE) final test.fixtures.patch.MyStructField29Patch optSetVal,
+        @com.facebook.swift.codec.ThriftField(value=-28, name="optListVal", isLegacyId=true, requiredness=Requiredness.NONE) final test.fixtures.patch.MyStructField28Patch optListVal,
+        @com.facebook.swift.codec.ThriftField(value=-27, name="optLateStructVal", isLegacyId=true, requiredness=Requiredness.NONE) final test.fixtures.patch.LateDefStructPatch optLateStructVal,
+        @com.facebook.swift.codec.ThriftField(value=-26, name="optStructVal", isLegacyId=true, requiredness=Requiredness.NONE) final test.fixtures.patch.MyDataPatch optStructVal,
+        @com.facebook.swift.codec.ThriftField(value=-25, name="optEnumVal", isLegacyId=true, requiredness=Requiredness.NONE) final test.fixtures.patch.MyStructField25Patch optEnumVal,
+        @com.facebook.swift.codec.ThriftField(value=-24, name="optBinaryVal", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.BinaryPatch optBinaryVal,
+        @com.facebook.swift.codec.ThriftField(value=-23, name="optStringVal", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.StringPatch optStringVal,
+        @com.facebook.swift.codec.ThriftField(value=-22, name="optDoubleVal", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.DoublePatch optDoubleVal,
+        @com.facebook.swift.codec.ThriftField(value=-21, name="optFloatVal", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.FloatPatch optFloatVal,
+        @com.facebook.swift.codec.ThriftField(value=-20, name="optI64Val", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.I64Patch optI64Val,
+        @com.facebook.swift.codec.ThriftField(value=-19, name="optI32Val", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.I32Patch optI32Val,
+        @com.facebook.swift.codec.ThriftField(value=-18, name="optI16Val", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.I16Patch optI16Val,
+        @com.facebook.swift.codec.ThriftField(value=-17, name="optByteVal", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.BytePatch optByteVal,
+        @com.facebook.swift.codec.ThriftField(value=-16, name="optBoolVal", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.BoolPatch optBoolVal,
+        @com.facebook.swift.codec.ThriftField(value=-15, name="timeVal", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.TimePatch timeVal,
+        @com.facebook.swift.codec.ThriftField(value=-14, name="durationVal", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.DurationPatch durationVal,
+        @com.facebook.swift.codec.ThriftField(value=-13, name="lateStructVal", isLegacyId=true, requiredness=Requiredness.NONE) final test.fixtures.patch.LateDefStructPatch lateStructVal,
+        @com.facebook.swift.codec.ThriftField(value=-12, name="unionVal", isLegacyId=true, requiredness=Requiredness.NONE) final test.fixtures.patch.MyUnionPatch unionVal,
+        @com.facebook.swift.codec.ThriftField(value=-11, name="structVal", isLegacyId=true, requiredness=Requiredness.NONE) final test.fixtures.patch.MyDataPatch structVal,
+        @com.facebook.swift.codec.ThriftField(value=-10, name="enumVal", isLegacyId=true, requiredness=Requiredness.NONE) final test.fixtures.patch.MyStructField10Patch enumVal,
+        @com.facebook.swift.codec.ThriftField(value=-9, name="binaryVal", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.BinaryPatch binaryVal,
+        @com.facebook.swift.codec.ThriftField(value=-8, name="stringVal", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.StringPatch stringVal,
+        @com.facebook.swift.codec.ThriftField(value=-7, name="doubleVal", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.DoublePatch doubleVal,
+        @com.facebook.swift.codec.ThriftField(value=-6, name="floatVal", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.FloatPatch floatVal,
+        @com.facebook.swift.codec.ThriftField(value=-5, name="i64Val", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.I64Patch i64Val,
+        @com.facebook.swift.codec.ThriftField(value=-4, name="i32Val", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.I32Patch i32Val,
+        @com.facebook.swift.codec.ThriftField(value=-3, name="i16Val", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.I16Patch i16Val,
+        @com.facebook.swift.codec.ThriftField(value=-2, name="byteVal", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.BytePatch byteVal,
+        @com.facebook.swift.codec.ThriftField(value=-1, name="boolVal", isLegacyId=true, requiredness=Requiredness.NONE) final com.facebook.thrift.op.BoolPatch boolVal
     ) {
         this.mapMap = mapMap;
         this.listMap = listMap;
@@ -94,76 +94,76 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
     @ThriftConstructor
     protected MyStructFieldPatch() {
-      this.mapMap = test.fixtures.patch.MyStructField32Patch.defaultInstance();
-      this.listMap = test.fixtures.patch.MyStructField31Patch.defaultInstance();
-      this.optMapVal = test.fixtures.patch.MyStructField30Patch.defaultInstance();
-      this.optSetVal = test.fixtures.patch.MyStructField29Patch.defaultInstance();
-      this.optListVal = test.fixtures.patch.MyStructField28Patch.defaultInstance();
-      this.optLateStructVal = test.fixtures.patch.LateDefStructPatch.defaultInstance();
-      this.optStructVal = test.fixtures.patch.MyDataPatch.defaultInstance();
-      this.optEnumVal = test.fixtures.patch.MyStructField25Patch.defaultInstance();
-      this.optBinaryVal = com.facebook.thrift.op.BinaryPatch.defaultInstance();
-      this.optStringVal = com.facebook.thrift.op.StringPatch.defaultInstance();
-      this.optDoubleVal = com.facebook.thrift.op.DoublePatch.defaultInstance();
-      this.optFloatVal = com.facebook.thrift.op.FloatPatch.defaultInstance();
-      this.optI64Val = com.facebook.thrift.op.I64Patch.defaultInstance();
-      this.optI32Val = com.facebook.thrift.op.I32Patch.defaultInstance();
-      this.optI16Val = com.facebook.thrift.op.I16Patch.defaultInstance();
-      this.optByteVal = com.facebook.thrift.op.BytePatch.defaultInstance();
-      this.optBoolVal = com.facebook.thrift.op.BoolPatch.defaultInstance();
-      this.timeVal = com.facebook.thrift.op.TimePatch.defaultInstance();
-      this.durationVal = com.facebook.thrift.op.DurationPatch.defaultInstance();
-      this.lateStructVal = test.fixtures.patch.LateDefStructPatch.defaultInstance();
-      this.unionVal = test.fixtures.patch.MyUnionPatch.defaultInstance();
-      this.structVal = test.fixtures.patch.MyDataPatch.defaultInstance();
-      this.enumVal = test.fixtures.patch.MyStructField10Patch.defaultInstance();
-      this.binaryVal = com.facebook.thrift.op.BinaryPatch.defaultInstance();
-      this.stringVal = com.facebook.thrift.op.StringPatch.defaultInstance();
-      this.doubleVal = com.facebook.thrift.op.DoublePatch.defaultInstance();
-      this.floatVal = com.facebook.thrift.op.FloatPatch.defaultInstance();
-      this.i64Val = com.facebook.thrift.op.I64Patch.defaultInstance();
-      this.i32Val = com.facebook.thrift.op.I32Patch.defaultInstance();
-      this.i16Val = com.facebook.thrift.op.I16Patch.defaultInstance();
-      this.byteVal = com.facebook.thrift.op.BytePatch.defaultInstance();
-      this.boolVal = com.facebook.thrift.op.BoolPatch.defaultInstance();
+      this.mapMap = null;
+      this.listMap = null;
+      this.optMapVal = null;
+      this.optSetVal = null;
+      this.optListVal = null;
+      this.optLateStructVal = null;
+      this.optStructVal = null;
+      this.optEnumVal = null;
+      this.optBinaryVal = null;
+      this.optStringVal = null;
+      this.optDoubleVal = null;
+      this.optFloatVal = null;
+      this.optI64Val = null;
+      this.optI32Val = null;
+      this.optI16Val = null;
+      this.optByteVal = null;
+      this.optBoolVal = null;
+      this.timeVal = null;
+      this.durationVal = null;
+      this.lateStructVal = null;
+      this.unionVal = null;
+      this.structVal = null;
+      this.enumVal = null;
+      this.binaryVal = null;
+      this.stringVal = null;
+      this.doubleVal = null;
+      this.floatVal = null;
+      this.i64Val = null;
+      this.i32Val = null;
+      this.i16Val = null;
+      this.byteVal = null;
+      this.boolVal = null;
     }
     
     public static class Builder {
     
-        private test.fixtures.patch.MyStructField32Patch mapMap = test.fixtures.patch.MyStructField32Patch.defaultInstance();
-        private test.fixtures.patch.MyStructField31Patch listMap = test.fixtures.patch.MyStructField31Patch.defaultInstance();
-        private test.fixtures.patch.MyStructField30Patch optMapVal = test.fixtures.patch.MyStructField30Patch.defaultInstance();
-        private test.fixtures.patch.MyStructField29Patch optSetVal = test.fixtures.patch.MyStructField29Patch.defaultInstance();
-        private test.fixtures.patch.MyStructField28Patch optListVal = test.fixtures.patch.MyStructField28Patch.defaultInstance();
-        private test.fixtures.patch.LateDefStructPatch optLateStructVal = test.fixtures.patch.LateDefStructPatch.defaultInstance();
-        private test.fixtures.patch.MyDataPatch optStructVal = test.fixtures.patch.MyDataPatch.defaultInstance();
-        private test.fixtures.patch.MyStructField25Patch optEnumVal = test.fixtures.patch.MyStructField25Patch.defaultInstance();
-        private com.facebook.thrift.op.BinaryPatch optBinaryVal = com.facebook.thrift.op.BinaryPatch.defaultInstance();
-        private com.facebook.thrift.op.StringPatch optStringVal = com.facebook.thrift.op.StringPatch.defaultInstance();
-        private com.facebook.thrift.op.DoublePatch optDoubleVal = com.facebook.thrift.op.DoublePatch.defaultInstance();
-        private com.facebook.thrift.op.FloatPatch optFloatVal = com.facebook.thrift.op.FloatPatch.defaultInstance();
-        private com.facebook.thrift.op.I64Patch optI64Val = com.facebook.thrift.op.I64Patch.defaultInstance();
-        private com.facebook.thrift.op.I32Patch optI32Val = com.facebook.thrift.op.I32Patch.defaultInstance();
-        private com.facebook.thrift.op.I16Patch optI16Val = com.facebook.thrift.op.I16Patch.defaultInstance();
-        private com.facebook.thrift.op.BytePatch optByteVal = com.facebook.thrift.op.BytePatch.defaultInstance();
-        private com.facebook.thrift.op.BoolPatch optBoolVal = com.facebook.thrift.op.BoolPatch.defaultInstance();
-        private com.facebook.thrift.op.TimePatch timeVal = com.facebook.thrift.op.TimePatch.defaultInstance();
-        private com.facebook.thrift.op.DurationPatch durationVal = com.facebook.thrift.op.DurationPatch.defaultInstance();
-        private test.fixtures.patch.LateDefStructPatch lateStructVal = test.fixtures.patch.LateDefStructPatch.defaultInstance();
-        private test.fixtures.patch.MyUnionPatch unionVal = test.fixtures.patch.MyUnionPatch.defaultInstance();
-        private test.fixtures.patch.MyDataPatch structVal = test.fixtures.patch.MyDataPatch.defaultInstance();
-        private test.fixtures.patch.MyStructField10Patch enumVal = test.fixtures.patch.MyStructField10Patch.defaultInstance();
-        private com.facebook.thrift.op.BinaryPatch binaryVal = com.facebook.thrift.op.BinaryPatch.defaultInstance();
-        private com.facebook.thrift.op.StringPatch stringVal = com.facebook.thrift.op.StringPatch.defaultInstance();
-        private com.facebook.thrift.op.DoublePatch doubleVal = com.facebook.thrift.op.DoublePatch.defaultInstance();
-        private com.facebook.thrift.op.FloatPatch floatVal = com.facebook.thrift.op.FloatPatch.defaultInstance();
-        private com.facebook.thrift.op.I64Patch i64Val = com.facebook.thrift.op.I64Patch.defaultInstance();
-        private com.facebook.thrift.op.I32Patch i32Val = com.facebook.thrift.op.I32Patch.defaultInstance();
-        private com.facebook.thrift.op.I16Patch i16Val = com.facebook.thrift.op.I16Patch.defaultInstance();
-        private com.facebook.thrift.op.BytePatch byteVal = com.facebook.thrift.op.BytePatch.defaultInstance();
-        private com.facebook.thrift.op.BoolPatch boolVal = com.facebook.thrift.op.BoolPatch.defaultInstance();
+        private test.fixtures.patch.MyStructField32Patch mapMap = null;
+        private test.fixtures.patch.MyStructField31Patch listMap = null;
+        private test.fixtures.patch.MyStructField30Patch optMapVal = null;
+        private test.fixtures.patch.MyStructField29Patch optSetVal = null;
+        private test.fixtures.patch.MyStructField28Patch optListVal = null;
+        private test.fixtures.patch.LateDefStructPatch optLateStructVal = null;
+        private test.fixtures.patch.MyDataPatch optStructVal = null;
+        private test.fixtures.patch.MyStructField25Patch optEnumVal = null;
+        private com.facebook.thrift.op.BinaryPatch optBinaryVal = null;
+        private com.facebook.thrift.op.StringPatch optStringVal = null;
+        private com.facebook.thrift.op.DoublePatch optDoubleVal = null;
+        private com.facebook.thrift.op.FloatPatch optFloatVal = null;
+        private com.facebook.thrift.op.I64Patch optI64Val = null;
+        private com.facebook.thrift.op.I32Patch optI32Val = null;
+        private com.facebook.thrift.op.I16Patch optI16Val = null;
+        private com.facebook.thrift.op.BytePatch optByteVal = null;
+        private com.facebook.thrift.op.BoolPatch optBoolVal = null;
+        private com.facebook.thrift.op.TimePatch timeVal = null;
+        private com.facebook.thrift.op.DurationPatch durationVal = null;
+        private test.fixtures.patch.LateDefStructPatch lateStructVal = null;
+        private test.fixtures.patch.MyUnionPatch unionVal = null;
+        private test.fixtures.patch.MyDataPatch structVal = null;
+        private test.fixtures.patch.MyStructField10Patch enumVal = null;
+        private com.facebook.thrift.op.BinaryPatch binaryVal = null;
+        private com.facebook.thrift.op.StringPatch stringVal = null;
+        private com.facebook.thrift.op.DoublePatch doubleVal = null;
+        private com.facebook.thrift.op.FloatPatch floatVal = null;
+        private com.facebook.thrift.op.I64Patch i64Val = null;
+        private com.facebook.thrift.op.I32Patch i32Val = null;
+        private com.facebook.thrift.op.I16Patch i16Val = null;
+        private com.facebook.thrift.op.BytePatch byteVal = null;
+        private com.facebook.thrift.op.BoolPatch boolVal = null;
     
-        @com.facebook.swift.codec.ThriftField(value=-32, name="mapMap", isLegacyId=true, requiredness=Requiredness.TERSE)
+        @com.facebook.swift.codec.ThriftField(value=-32, name="mapMap", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setMapMap(test.fixtures.patch.MyStructField32Patch mapMap) {
             this.mapMap = mapMap;
             return this;
@@ -171,7 +171,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public test.fixtures.patch.MyStructField32Patch getMapMap() { return mapMap; }
     
-            @com.facebook.swift.codec.ThriftField(value=-31, name="listMap", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-31, name="listMap", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setListMap(test.fixtures.patch.MyStructField31Patch listMap) {
             this.listMap = listMap;
             return this;
@@ -179,7 +179,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public test.fixtures.patch.MyStructField31Patch getListMap() { return listMap; }
     
-            @com.facebook.swift.codec.ThriftField(value=-30, name="optMapVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-30, name="optMapVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setOptMapVal(test.fixtures.patch.MyStructField30Patch optMapVal) {
             this.optMapVal = optMapVal;
             return this;
@@ -187,7 +187,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public test.fixtures.patch.MyStructField30Patch getOptMapVal() { return optMapVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-29, name="optSetVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-29, name="optSetVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setOptSetVal(test.fixtures.patch.MyStructField29Patch optSetVal) {
             this.optSetVal = optSetVal;
             return this;
@@ -195,7 +195,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public test.fixtures.patch.MyStructField29Patch getOptSetVal() { return optSetVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-28, name="optListVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-28, name="optListVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setOptListVal(test.fixtures.patch.MyStructField28Patch optListVal) {
             this.optListVal = optListVal;
             return this;
@@ -203,7 +203,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public test.fixtures.patch.MyStructField28Patch getOptListVal() { return optListVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-27, name="optLateStructVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-27, name="optLateStructVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setOptLateStructVal(test.fixtures.patch.LateDefStructPatch optLateStructVal) {
             this.optLateStructVal = optLateStructVal;
             return this;
@@ -211,7 +211,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public test.fixtures.patch.LateDefStructPatch getOptLateStructVal() { return optLateStructVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-26, name="optStructVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-26, name="optStructVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setOptStructVal(test.fixtures.patch.MyDataPatch optStructVal) {
             this.optStructVal = optStructVal;
             return this;
@@ -219,7 +219,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public test.fixtures.patch.MyDataPatch getOptStructVal() { return optStructVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-25, name="optEnumVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-25, name="optEnumVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setOptEnumVal(test.fixtures.patch.MyStructField25Patch optEnumVal) {
             this.optEnumVal = optEnumVal;
             return this;
@@ -227,7 +227,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public test.fixtures.patch.MyStructField25Patch getOptEnumVal() { return optEnumVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-24, name="optBinaryVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-24, name="optBinaryVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setOptBinaryVal(com.facebook.thrift.op.BinaryPatch optBinaryVal) {
             this.optBinaryVal = optBinaryVal;
             return this;
@@ -235,7 +235,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.BinaryPatch getOptBinaryVal() { return optBinaryVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-23, name="optStringVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-23, name="optStringVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setOptStringVal(com.facebook.thrift.op.StringPatch optStringVal) {
             this.optStringVal = optStringVal;
             return this;
@@ -243,7 +243,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.StringPatch getOptStringVal() { return optStringVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-22, name="optDoubleVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-22, name="optDoubleVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setOptDoubleVal(com.facebook.thrift.op.DoublePatch optDoubleVal) {
             this.optDoubleVal = optDoubleVal;
             return this;
@@ -251,7 +251,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.DoublePatch getOptDoubleVal() { return optDoubleVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-21, name="optFloatVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-21, name="optFloatVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setOptFloatVal(com.facebook.thrift.op.FloatPatch optFloatVal) {
             this.optFloatVal = optFloatVal;
             return this;
@@ -259,7 +259,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.FloatPatch getOptFloatVal() { return optFloatVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-20, name="optI64Val", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-20, name="optI64Val", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setOptI64Val(com.facebook.thrift.op.I64Patch optI64Val) {
             this.optI64Val = optI64Val;
             return this;
@@ -267,7 +267,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.I64Patch getOptI64Val() { return optI64Val; }
     
-            @com.facebook.swift.codec.ThriftField(value=-19, name="optI32Val", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-19, name="optI32Val", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setOptI32Val(com.facebook.thrift.op.I32Patch optI32Val) {
             this.optI32Val = optI32Val;
             return this;
@@ -275,7 +275,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.I32Patch getOptI32Val() { return optI32Val; }
     
-            @com.facebook.swift.codec.ThriftField(value=-18, name="optI16Val", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-18, name="optI16Val", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setOptI16Val(com.facebook.thrift.op.I16Patch optI16Val) {
             this.optI16Val = optI16Val;
             return this;
@@ -283,7 +283,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.I16Patch getOptI16Val() { return optI16Val; }
     
-            @com.facebook.swift.codec.ThriftField(value=-17, name="optByteVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-17, name="optByteVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setOptByteVal(com.facebook.thrift.op.BytePatch optByteVal) {
             this.optByteVal = optByteVal;
             return this;
@@ -291,7 +291,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.BytePatch getOptByteVal() { return optByteVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-16, name="optBoolVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-16, name="optBoolVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setOptBoolVal(com.facebook.thrift.op.BoolPatch optBoolVal) {
             this.optBoolVal = optBoolVal;
             return this;
@@ -299,7 +299,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.BoolPatch getOptBoolVal() { return optBoolVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-15, name="timeVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-15, name="timeVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setTimeVal(com.facebook.thrift.op.TimePatch timeVal) {
             this.timeVal = timeVal;
             return this;
@@ -307,7 +307,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.TimePatch getTimeVal() { return timeVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-14, name="durationVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-14, name="durationVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setDurationVal(com.facebook.thrift.op.DurationPatch durationVal) {
             this.durationVal = durationVal;
             return this;
@@ -315,7 +315,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.DurationPatch getDurationVal() { return durationVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-13, name="lateStructVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-13, name="lateStructVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setLateStructVal(test.fixtures.patch.LateDefStructPatch lateStructVal) {
             this.lateStructVal = lateStructVal;
             return this;
@@ -323,7 +323,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public test.fixtures.patch.LateDefStructPatch getLateStructVal() { return lateStructVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-12, name="unionVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-12, name="unionVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setUnionVal(test.fixtures.patch.MyUnionPatch unionVal) {
             this.unionVal = unionVal;
             return this;
@@ -331,7 +331,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public test.fixtures.patch.MyUnionPatch getUnionVal() { return unionVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-11, name="structVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-11, name="structVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setStructVal(test.fixtures.patch.MyDataPatch structVal) {
             this.structVal = structVal;
             return this;
@@ -339,7 +339,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public test.fixtures.patch.MyDataPatch getStructVal() { return structVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-10, name="enumVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-10, name="enumVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setEnumVal(test.fixtures.patch.MyStructField10Patch enumVal) {
             this.enumVal = enumVal;
             return this;
@@ -347,7 +347,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public test.fixtures.patch.MyStructField10Patch getEnumVal() { return enumVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-9, name="binaryVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-9, name="binaryVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setBinaryVal(com.facebook.thrift.op.BinaryPatch binaryVal) {
             this.binaryVal = binaryVal;
             return this;
@@ -355,7 +355,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.BinaryPatch getBinaryVal() { return binaryVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-8, name="stringVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-8, name="stringVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setStringVal(com.facebook.thrift.op.StringPatch stringVal) {
             this.stringVal = stringVal;
             return this;
@@ -363,7 +363,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.StringPatch getStringVal() { return stringVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-7, name="doubleVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-7, name="doubleVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setDoubleVal(com.facebook.thrift.op.DoublePatch doubleVal) {
             this.doubleVal = doubleVal;
             return this;
@@ -371,7 +371,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.DoublePatch getDoubleVal() { return doubleVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-6, name="floatVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-6, name="floatVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setFloatVal(com.facebook.thrift.op.FloatPatch floatVal) {
             this.floatVal = floatVal;
             return this;
@@ -379,7 +379,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.FloatPatch getFloatVal() { return floatVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-5, name="i64Val", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-5, name="i64Val", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setI64Val(com.facebook.thrift.op.I64Patch i64Val) {
             this.i64Val = i64Val;
             return this;
@@ -387,7 +387,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.I64Patch getI64Val() { return i64Val; }
     
-            @com.facebook.swift.codec.ThriftField(value=-4, name="i32Val", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-4, name="i32Val", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setI32Val(com.facebook.thrift.op.I32Patch i32Val) {
             this.i32Val = i32Val;
             return this;
@@ -395,7 +395,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.I32Patch getI32Val() { return i32Val; }
     
-            @com.facebook.swift.codec.ThriftField(value=-3, name="i16Val", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-3, name="i16Val", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setI16Val(com.facebook.thrift.op.I16Patch i16Val) {
             this.i16Val = i16Val;
             return this;
@@ -403,7 +403,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.I16Patch getI16Val() { return i16Val; }
     
-            @com.facebook.swift.codec.ThriftField(value=-2, name="byteVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-2, name="byteVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setByteVal(com.facebook.thrift.op.BytePatch byteVal) {
             this.byteVal = byteVal;
             return this;
@@ -411,7 +411,7 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         public com.facebook.thrift.op.BytePatch getByteVal() { return byteVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-1, name="boolVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+            @com.facebook.swift.codec.ThriftField(value=-1, name="boolVal", isLegacyId=true, requiredness=Requiredness.NONE)
         public Builder setBoolVal(com.facebook.thrift.op.BoolPatch boolVal) {
             this.boolVal = boolVal;
             return this;
@@ -698,162 +698,162 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     }
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-32, name="mapMap", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-32, name="mapMap", isLegacyId=true, requiredness=Requiredness.NONE)
     public test.fixtures.patch.MyStructField32Patch getMapMap() { return mapMap; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-31, name="listMap", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-31, name="listMap", isLegacyId=true, requiredness=Requiredness.NONE)
     public test.fixtures.patch.MyStructField31Patch getListMap() { return listMap; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-30, name="optMapVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-30, name="optMapVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public test.fixtures.patch.MyStructField30Patch getOptMapVal() { return optMapVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-29, name="optSetVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-29, name="optSetVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public test.fixtures.patch.MyStructField29Patch getOptSetVal() { return optSetVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-28, name="optListVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-28, name="optListVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public test.fixtures.patch.MyStructField28Patch getOptListVal() { return optListVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-27, name="optLateStructVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-27, name="optLateStructVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public test.fixtures.patch.LateDefStructPatch getOptLateStructVal() { return optLateStructVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-26, name="optStructVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-26, name="optStructVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public test.fixtures.patch.MyDataPatch getOptStructVal() { return optStructVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-25, name="optEnumVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-25, name="optEnumVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public test.fixtures.patch.MyStructField25Patch getOptEnumVal() { return optEnumVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-24, name="optBinaryVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-24, name="optBinaryVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.BinaryPatch getOptBinaryVal() { return optBinaryVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-23, name="optStringVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-23, name="optStringVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.StringPatch getOptStringVal() { return optStringVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-22, name="optDoubleVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-22, name="optDoubleVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.DoublePatch getOptDoubleVal() { return optDoubleVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-21, name="optFloatVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-21, name="optFloatVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.FloatPatch getOptFloatVal() { return optFloatVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-20, name="optI64Val", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-20, name="optI64Val", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.I64Patch getOptI64Val() { return optI64Val; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-19, name="optI32Val", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-19, name="optI32Val", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.I32Patch getOptI32Val() { return optI32Val; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-18, name="optI16Val", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-18, name="optI16Val", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.I16Patch getOptI16Val() { return optI16Val; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-17, name="optByteVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-17, name="optByteVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.BytePatch getOptByteVal() { return optByteVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-16, name="optBoolVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-16, name="optBoolVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.BoolPatch getOptBoolVal() { return optBoolVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-15, name="timeVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-15, name="timeVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.TimePatch getTimeVal() { return timeVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-14, name="durationVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-14, name="durationVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.DurationPatch getDurationVal() { return durationVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-13, name="lateStructVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-13, name="lateStructVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public test.fixtures.patch.LateDefStructPatch getLateStructVal() { return lateStructVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-12, name="unionVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-12, name="unionVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public test.fixtures.patch.MyUnionPatch getUnionVal() { return unionVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-11, name="structVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-11, name="structVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public test.fixtures.patch.MyDataPatch getStructVal() { return structVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-10, name="enumVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-10, name="enumVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public test.fixtures.patch.MyStructField10Patch getEnumVal() { return enumVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-9, name="binaryVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-9, name="binaryVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.BinaryPatch getBinaryVal() { return binaryVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-8, name="stringVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-8, name="stringVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.StringPatch getStringVal() { return stringVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-7, name="doubleVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-7, name="doubleVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.DoublePatch getDoubleVal() { return doubleVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-6, name="floatVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-6, name="floatVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.FloatPatch getFloatVal() { return floatVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-5, name="i64Val", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-5, name="i64Val", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.I64Patch getI64Val() { return i64Val; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-4, name="i32Val", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-4, name="i32Val", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.I32Patch getI32Val() { return i32Val; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-3, name="i16Val", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-3, name="i16Val", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.I16Patch getI16Val() { return i16Val; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-2, name="byteVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-2, name="byteVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.BytePatch getByteVal() { return byteVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=-1, name="boolVal", isLegacyId=true, requiredness=Requiredness.TERSE)
+    @com.facebook.swift.codec.ThriftField(value=-1, name="boolVal", isLegacyId=true, requiredness=Requiredness.NONE)
     public com.facebook.thrift.op.BoolPatch getBoolVal() { return boolVal; }
     
     @java.lang.Override
@@ -1260,329 +1260,166 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      int structStart = 0;
-      int pos = 0;
-      com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
-      java.util.Objects.requireNonNull(mapMap, "mapMap must not be null");
-      structStart = p.mark();
+      if (mapMap != null) {
         oprot.writeFieldBegin(MAP_MAP_FIELD_DESC);
-        pos = p.mark();
         this.mapMap.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(listMap, "listMap must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (listMap != null) {
         oprot.writeFieldBegin(LIST_MAP_FIELD_DESC);
-        pos = p.mark();
         this.listMap.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(optMapVal, "optMapVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (optMapVal != null) {
         oprot.writeFieldBegin(OPT_MAP_VAL_FIELD_DESC);
-        pos = p.mark();
         this.optMapVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(optSetVal, "optSetVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (optSetVal != null) {
         oprot.writeFieldBegin(OPT_SET_VAL_FIELD_DESC);
-        pos = p.mark();
         this.optSetVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(optListVal, "optListVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (optListVal != null) {
         oprot.writeFieldBegin(OPT_LIST_VAL_FIELD_DESC);
-        pos = p.mark();
         this.optListVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(optLateStructVal, "optLateStructVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (optLateStructVal != null) {
         oprot.writeFieldBegin(OPT_LATE_STRUCT_VAL_FIELD_DESC);
-        pos = p.mark();
         this.optLateStructVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(optStructVal, "optStructVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (optStructVal != null) {
         oprot.writeFieldBegin(OPT_STRUCT_VAL_FIELD_DESC);
-        pos = p.mark();
         this.optStructVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(optEnumVal, "optEnumVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (optEnumVal != null) {
         oprot.writeFieldBegin(OPT_ENUM_VAL_FIELD_DESC);
-        pos = p.mark();
         this.optEnumVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(optBinaryVal, "optBinaryVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (optBinaryVal != null) {
         oprot.writeFieldBegin(OPT_BINARY_VAL_FIELD_DESC);
-        pos = p.mark();
         this.optBinaryVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(optStringVal, "optStringVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (optStringVal != null) {
         oprot.writeFieldBegin(OPT_STRING_VAL_FIELD_DESC);
-        pos = p.mark();
         this.optStringVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(optDoubleVal, "optDoubleVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (optDoubleVal != null) {
         oprot.writeFieldBegin(OPT_DOUBLE_VAL_FIELD_DESC);
-        pos = p.mark();
         this.optDoubleVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(optFloatVal, "optFloatVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (optFloatVal != null) {
         oprot.writeFieldBegin(OPT_FLOAT_VAL_FIELD_DESC);
-        pos = p.mark();
         this.optFloatVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(optI64Val, "optI64Val must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (optI64Val != null) {
         oprot.writeFieldBegin(OPT_I64_VAL_FIELD_DESC);
-        pos = p.mark();
         this.optI64Val.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(optI32Val, "optI32Val must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (optI32Val != null) {
         oprot.writeFieldBegin(OPT_I32_VAL_FIELD_DESC);
-        pos = p.mark();
         this.optI32Val.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(optI16Val, "optI16Val must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (optI16Val != null) {
         oprot.writeFieldBegin(OPT_I16_VAL_FIELD_DESC);
-        pos = p.mark();
         this.optI16Val.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(optByteVal, "optByteVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (optByteVal != null) {
         oprot.writeFieldBegin(OPT_BYTE_VAL_FIELD_DESC);
-        pos = p.mark();
         this.optByteVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(optBoolVal, "optBoolVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (optBoolVal != null) {
         oprot.writeFieldBegin(OPT_BOOL_VAL_FIELD_DESC);
-        pos = p.mark();
         this.optBoolVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(timeVal, "timeVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (timeVal != null) {
         oprot.writeFieldBegin(TIME_VAL_FIELD_DESC);
-        pos = p.mark();
         this.timeVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(durationVal, "durationVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (durationVal != null) {
         oprot.writeFieldBegin(DURATION_VAL_FIELD_DESC);
-        pos = p.mark();
         this.durationVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(lateStructVal, "lateStructVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (lateStructVal != null) {
         oprot.writeFieldBegin(LATE_STRUCT_VAL_FIELD_DESC);
-        pos = p.mark();
         this.lateStructVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(unionVal, "unionVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (unionVal != null) {
         oprot.writeFieldBegin(UNION_VAL_FIELD_DESC);
-        pos = p.mark();
         this.unionVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(structVal, "structVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (structVal != null) {
         oprot.writeFieldBegin(STRUCT_VAL_FIELD_DESC);
-        pos = p.mark();
         this.structVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(enumVal, "enumVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (enumVal != null) {
         oprot.writeFieldBegin(ENUM_VAL_FIELD_DESC);
-        pos = p.mark();
         this.enumVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(binaryVal, "binaryVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (binaryVal != null) {
         oprot.writeFieldBegin(BINARY_VAL_FIELD_DESC);
-        pos = p.mark();
         this.binaryVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(stringVal, "stringVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (stringVal != null) {
         oprot.writeFieldBegin(STRING_VAL_FIELD_DESC);
-        pos = p.mark();
         this.stringVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(doubleVal, "doubleVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (doubleVal != null) {
         oprot.writeFieldBegin(DOUBLE_VAL_FIELD_DESC);
-        pos = p.mark();
         this.doubleVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(floatVal, "floatVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (floatVal != null) {
         oprot.writeFieldBegin(FLOAT_VAL_FIELD_DESC);
-        pos = p.mark();
         this.floatVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(i64Val, "i64Val must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (i64Val != null) {
         oprot.writeFieldBegin(I64_VAL_FIELD_DESC);
-        pos = p.mark();
         this.i64Val.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(i32Val, "i32Val must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (i32Val != null) {
         oprot.writeFieldBegin(I32_VAL_FIELD_DESC);
-        pos = p.mark();
         this.i32Val.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(i16Val, "i16Val must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (i16Val != null) {
         oprot.writeFieldBegin(I16_VAL_FIELD_DESC);
-        pos = p.mark();
         this.i16Val.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(byteVal, "byteVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (byteVal != null) {
         oprot.writeFieldBegin(BYTE_VAL_FIELD_DESC);
-        pos = p.mark();
         this.byteVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
-      java.util.Objects.requireNonNull(boolVal, "boolVal must not be null");
-      structStart = p.mark();
+        oprot.writeFieldEnd();
+      }
+      if (boolVal != null) {
         oprot.writeFieldBegin(BOOL_VAL_FIELD_DESC);
-        pos = p.mark();
         this.boolVal.write0(oprot);
-        if (p.mark() - pos > p.getEmptyStructSize()) {
-          p.writeFieldEnd();    
-        } else {
-          p.rollback(structStart);
-        }    
+        oprot.writeFieldEnd();
+      }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }

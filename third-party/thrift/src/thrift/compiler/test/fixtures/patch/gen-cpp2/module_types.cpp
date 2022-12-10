@@ -1333,7 +1333,8 @@ const folly::StringPiece MyDataFieldPatchStruct::__fbthrift_get_field_name(::apa
 
 MyDataFieldPatchStruct::MyDataFieldPatchStruct(const MyDataFieldPatchStruct& srcObj) :
     __fbthrift_field_data1(srcObj.__fbthrift_field_data1),
-    __fbthrift_field_data2(srcObj.__fbthrift_field_data2) {
+    __fbthrift_field_data2(srcObj.__fbthrift_field_data2),
+    __isset(srcObj.__isset) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter, 1>(__fbthrift_field_data1, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, 2>(__fbthrift_field_data2, *this);
 }
@@ -1346,7 +1347,8 @@ MyDataFieldPatchStruct& MyDataFieldPatchStruct::operator=(const MyDataFieldPatch
 
 MyDataFieldPatchStruct::MyDataFieldPatchStruct(FOLLY_MAYBE_UNUSED MyDataFieldPatchStruct&& other) noexcept :
     __fbthrift_field_data1(std::move(other.__fbthrift_field_data1)),
-    __fbthrift_field_data2(std::move(other.__fbthrift_field_data2)) {
+    __fbthrift_field_data2(std::move(other.__fbthrift_field_data2)),
+    __isset(other.__isset) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter, 1>(__fbthrift_field_data1, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, 2>(__fbthrift_field_data2, *this);
 }
@@ -1354,6 +1356,7 @@ MyDataFieldPatchStruct::MyDataFieldPatchStruct(FOLLY_MAYBE_UNUSED MyDataFieldPat
 MyDataFieldPatchStruct& MyDataFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyDataFieldPatchStruct&& other) noexcept {
     this->__fbthrift_field_data1 = std::move(other.__fbthrift_field_data1);
     this->__fbthrift_field_data2 = std::move(other.__fbthrift_field_data2);
+    __isset = other.__isset;
     return *this;
 }
 
@@ -1363,6 +1366,8 @@ MyDataFieldPatchStruct::MyDataFieldPatchStruct(apache::thrift::FragileConstructo
     __fbthrift_field_data2(std::move(data2__arg)) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter, 1>(__fbthrift_field_data1, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, 2>(__fbthrift_field_data2, *this);
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
 }
 
 
@@ -1370,16 +1375,14 @@ void MyDataFieldPatchStruct::__fbthrift_clear() {
   // clear all fields
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::StringPatchAdapter, 1>(__fbthrift_field_data1, *this);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::NumberPatchAdapter, 2>(__fbthrift_field_data2, *this);
+  __isset = {};
 }
 
 void MyDataFieldPatchStruct::__fbthrift_clear_terse_fields() {
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::StringPatchAdapter, 1>(__fbthrift_field_data1, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::NumberPatchAdapter, 2>(__fbthrift_field_data2, *this);
 }
 
 bool MyDataFieldPatchStruct::__fbthrift_is_empty() const {
-  return ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<1>, MyDataFieldPatchStruct>>(this->__fbthrift_field_data1) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<2>, MyDataFieldPatchStruct>>(this->__fbthrift_field_data2);
+  return false;
 }
 
 bool MyDataFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyDataFieldPatchStruct& rhs) const {
@@ -1402,6 +1405,7 @@ void swap(FOLLY_MAYBE_UNUSED MyDataFieldPatchStruct& a, FOLLY_MAYBE_UNUSED MyDat
   using ::std::swap;
   swap(a.__fbthrift_field_data1, b.__fbthrift_field_data1);
   swap(a.__fbthrift_field_data2, b.__fbthrift_field_data2);
+  swap(a.__isset, b.__isset);
 }
 
 template void MyDataFieldPatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1652,7 +1656,8 @@ const folly::StringPiece InnerUnionFieldPatchStruct::__fbthrift_get_field_name(:
 }
 
 InnerUnionFieldPatchStruct::InnerUnionFieldPatchStruct(const InnerUnionFieldPatchStruct& srcObj) :
-    __fbthrift_field_innerOption(srcObj.__fbthrift_field_innerOption) {
+    __fbthrift_field_innerOption(srcObj.__fbthrift_field_innerOption),
+    __isset(srcObj.__isset) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::BinaryPatchAdapter, 1>(__fbthrift_field_innerOption, *this);
 }
 
@@ -1663,12 +1668,14 @@ InnerUnionFieldPatchStruct& InnerUnionFieldPatchStruct::operator=(const InnerUni
 }
 
 InnerUnionFieldPatchStruct::InnerUnionFieldPatchStruct(FOLLY_MAYBE_UNUSED InnerUnionFieldPatchStruct&& other) noexcept :
-    __fbthrift_field_innerOption(std::move(other.__fbthrift_field_innerOption)) {
+    __fbthrift_field_innerOption(std::move(other.__fbthrift_field_innerOption)),
+    __isset(other.__isset) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::BinaryPatchAdapter, 1>(__fbthrift_field_innerOption, *this);
 }
 
 InnerUnionFieldPatchStruct& InnerUnionFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED InnerUnionFieldPatchStruct&& other) noexcept {
     this->__fbthrift_field_innerOption = std::move(other.__fbthrift_field_innerOption);
+    __isset = other.__isset;
     return *this;
 }
 
@@ -1676,20 +1683,21 @@ InnerUnionFieldPatchStruct& InnerUnionFieldPatchStruct::operator=(FOLLY_MAYBE_UN
 InnerUnionFieldPatchStruct::InnerUnionFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::op::BinaryPatch innerOption__arg) :
     __fbthrift_field_innerOption(std::move(innerOption__arg)) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::BinaryPatchAdapter, 1>(__fbthrift_field_innerOption, *this);
+  __isset.set(folly::index_constant<0>(), true);
 }
 
 
 void InnerUnionFieldPatchStruct::__fbthrift_clear() {
   // clear all fields
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::BinaryPatchAdapter, 1>(__fbthrift_field_innerOption, *this);
+  __isset = {};
 }
 
 void InnerUnionFieldPatchStruct::__fbthrift_clear_terse_fields() {
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::BinaryPatchAdapter, 1>(__fbthrift_field_innerOption, *this);
 }
 
 bool InnerUnionFieldPatchStruct::__fbthrift_is_empty() const {
-  return ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<1>, InnerUnionFieldPatchStruct>>(this->__fbthrift_field_innerOption);
+  return false;
 }
 
 bool InnerUnionFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const InnerUnionFieldPatchStruct& rhs) const {
@@ -1708,6 +1716,7 @@ bool InnerUnionFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const InnerUnionFi
 void swap(FOLLY_MAYBE_UNUSED InnerUnionFieldPatchStruct& a, FOLLY_MAYBE_UNUSED InnerUnionFieldPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_innerOption, b.__fbthrift_field_innerOption);
+  swap(a.__isset, b.__isset);
 }
 
 template void InnerUnionFieldPatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1954,7 +1963,8 @@ const folly::StringPiece MyUnionFieldPatchStruct::__fbthrift_get_field_name(::ap
 MyUnionFieldPatchStruct::MyUnionFieldPatchStruct(const MyUnionFieldPatchStruct& srcObj) :
     __fbthrift_field_option1(srcObj.__fbthrift_field_option1),
     __fbthrift_field_option2(srcObj.__fbthrift_field_option2),
-    __fbthrift_field_option3(srcObj.__fbthrift_field_option3) {
+    __fbthrift_field_option3(srcObj.__fbthrift_field_option3),
+    __isset(srcObj.__isset) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter, 1>(__fbthrift_field_option1, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, 2>(__fbthrift_field_option2, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::UnionPatchAdapter, 3>(__fbthrift_field_option3, *this);
@@ -1969,7 +1979,8 @@ MyUnionFieldPatchStruct& MyUnionFieldPatchStruct::operator=(const MyUnionFieldPa
 MyUnionFieldPatchStruct::MyUnionFieldPatchStruct(FOLLY_MAYBE_UNUSED MyUnionFieldPatchStruct&& other) noexcept :
     __fbthrift_field_option1(std::move(other.__fbthrift_field_option1)),
     __fbthrift_field_option2(std::move(other.__fbthrift_field_option2)),
-    __fbthrift_field_option3(std::move(other.__fbthrift_field_option3)) {
+    __fbthrift_field_option3(std::move(other.__fbthrift_field_option3)),
+    __isset(other.__isset) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter, 1>(__fbthrift_field_option1, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, 2>(__fbthrift_field_option2, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::UnionPatchAdapter, 3>(__fbthrift_field_option3, *this);
@@ -1979,6 +1990,7 @@ MyUnionFieldPatchStruct& MyUnionFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED M
     this->__fbthrift_field_option1 = std::move(other.__fbthrift_field_option1);
     this->__fbthrift_field_option2 = std::move(other.__fbthrift_field_option2);
     this->__fbthrift_field_option3 = std::move(other.__fbthrift_field_option3);
+    __isset = other.__isset;
     return *this;
 }
 
@@ -1990,6 +2002,9 @@ MyUnionFieldPatchStruct::MyUnionFieldPatchStruct(apache::thrift::FragileConstruc
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter, 1>(__fbthrift_field_option1, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, 2>(__fbthrift_field_option2, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::UnionPatchAdapter, 3>(__fbthrift_field_option3, *this);
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
 }
 
 
@@ -1998,18 +2013,14 @@ void MyUnionFieldPatchStruct::__fbthrift_clear() {
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::StringPatchAdapter, 1>(__fbthrift_field_option1, *this);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::NumberPatchAdapter, 2>(__fbthrift_field_option2, *this);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::UnionPatchAdapter, 3>(__fbthrift_field_option3, *this);
+  __isset = {};
 }
 
 void MyUnionFieldPatchStruct::__fbthrift_clear_terse_fields() {
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::StringPatchAdapter, 1>(__fbthrift_field_option1, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::NumberPatchAdapter, 2>(__fbthrift_field_option2, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::UnionPatchAdapter, 3>(__fbthrift_field_option3, *this);
 }
 
 bool MyUnionFieldPatchStruct::__fbthrift_is_empty() const {
-  return ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<1>, MyUnionFieldPatchStruct>>(this->__fbthrift_field_option1) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<2>, MyUnionFieldPatchStruct>>(this->__fbthrift_field_option2) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<3>, MyUnionFieldPatchStruct>>(this->__fbthrift_field_option3);
+  return false;
 }
 
 bool MyUnionFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyUnionFieldPatchStruct& rhs) const {
@@ -2036,6 +2047,7 @@ void swap(FOLLY_MAYBE_UNUSED MyUnionFieldPatchStruct& a, FOLLY_MAYBE_UNUSED MyUn
   swap(a.__fbthrift_field_option1, b.__fbthrift_field_option1);
   swap(a.__fbthrift_field_option2, b.__fbthrift_field_option2);
   swap(a.__fbthrift_field_option3, b.__fbthrift_field_option3);
+  swap(a.__isset, b.__isset);
 }
 
 template void MyUnionFieldPatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3906,7 +3918,8 @@ MyStructFieldPatchStruct::MyStructFieldPatchStruct(const MyStructFieldPatchStruc
     __fbthrift_field_i32Val(srcObj.__fbthrift_field_i32Val),
     __fbthrift_field_i16Val(srcObj.__fbthrift_field_i16Val),
     __fbthrift_field_byteVal(srcObj.__fbthrift_field_byteVal),
-    __fbthrift_field_boolVal(srcObj.__fbthrift_field_boolVal) {
+    __fbthrift_field_boolVal(srcObj.__fbthrift_field_boolVal),
+    __isset(srcObj.__isset) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::MapPatchAdapter, -32>(__fbthrift_field_mapMap, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter, -31>(__fbthrift_field_listMap, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::MapPatchAdapter, -30>(__fbthrift_field_optMapVal, *this);
@@ -3979,7 +3992,8 @@ MyStructFieldPatchStruct::MyStructFieldPatchStruct(FOLLY_MAYBE_UNUSED MyStructFi
     __fbthrift_field_i32Val(std::move(other.__fbthrift_field_i32Val)),
     __fbthrift_field_i16Val(std::move(other.__fbthrift_field_i16Val)),
     __fbthrift_field_byteVal(std::move(other.__fbthrift_field_byteVal)),
-    __fbthrift_field_boolVal(std::move(other.__fbthrift_field_boolVal)) {
+    __fbthrift_field_boolVal(std::move(other.__fbthrift_field_boolVal)),
+    __isset(other.__isset) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::MapPatchAdapter, -32>(__fbthrift_field_mapMap, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter, -31>(__fbthrift_field_listMap, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::MapPatchAdapter, -30>(__fbthrift_field_optMapVal, *this);
@@ -4047,6 +4061,7 @@ MyStructFieldPatchStruct& MyStructFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED
     this->__fbthrift_field_i16Val = std::move(other.__fbthrift_field_i16Val);
     this->__fbthrift_field_byteVal = std::move(other.__fbthrift_field_byteVal);
     this->__fbthrift_field_boolVal = std::move(other.__fbthrift_field_boolVal);
+    __isset = other.__isset;
     return *this;
 }
 
@@ -4116,6 +4131,38 @@ MyStructFieldPatchStruct::MyStructFieldPatchStruct(apache::thrift::FragileConstr
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, -3>(__fbthrift_field_i16Val, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, -2>(__fbthrift_field_byteVal, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::BoolPatchAdapter, -1>(__fbthrift_field_boolVal, *this);
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+  __isset.set(folly::index_constant<4>(), true);
+  __isset.set(folly::index_constant<5>(), true);
+  __isset.set(folly::index_constant<6>(), true);
+  __isset.set(folly::index_constant<7>(), true);
+  __isset.set(folly::index_constant<8>(), true);
+  __isset.set(folly::index_constant<9>(), true);
+  __isset.set(folly::index_constant<10>(), true);
+  __isset.set(folly::index_constant<11>(), true);
+  __isset.set(folly::index_constant<12>(), true);
+  __isset.set(folly::index_constant<13>(), true);
+  __isset.set(folly::index_constant<14>(), true);
+  __isset.set(folly::index_constant<15>(), true);
+  __isset.set(folly::index_constant<16>(), true);
+  __isset.set(folly::index_constant<17>(), true);
+  __isset.set(folly::index_constant<18>(), true);
+  __isset.set(folly::index_constant<19>(), true);
+  __isset.set(folly::index_constant<20>(), true);
+  __isset.set(folly::index_constant<21>(), true);
+  __isset.set(folly::index_constant<22>(), true);
+  __isset.set(folly::index_constant<23>(), true);
+  __isset.set(folly::index_constant<24>(), true);
+  __isset.set(folly::index_constant<25>(), true);
+  __isset.set(folly::index_constant<26>(), true);
+  __isset.set(folly::index_constant<27>(), true);
+  __isset.set(folly::index_constant<28>(), true);
+  __isset.set(folly::index_constant<29>(), true);
+  __isset.set(folly::index_constant<30>(), true);
+  __isset.set(folly::index_constant<31>(), true);
 }
 
 
@@ -4153,76 +4200,14 @@ void MyStructFieldPatchStruct::__fbthrift_clear() {
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::NumberPatchAdapter, -3>(__fbthrift_field_i16Val, *this);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::NumberPatchAdapter, -2>(__fbthrift_field_byteVal, *this);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::BoolPatchAdapter, -1>(__fbthrift_field_boolVal, *this);
+  __isset = {};
 }
 
 void MyStructFieldPatchStruct::__fbthrift_clear_terse_fields() {
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::MapPatchAdapter, -32>(__fbthrift_field_mapMap, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::ListPatchAdapter, -31>(__fbthrift_field_listMap, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::MapPatchAdapter, -30>(__fbthrift_field_optMapVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::SetPatchAdapter, -29>(__fbthrift_field_optSetVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::ListPatchAdapter, -28>(__fbthrift_field_optListVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::StructPatchAdapter, -27>(__fbthrift_field_optLateStructVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::StructPatchAdapter, -26>(__fbthrift_field_optStructVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::AssignPatchAdapter, -25>(__fbthrift_field_optEnumVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::BinaryPatchAdapter, -24>(__fbthrift_field_optBinaryVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::StringPatchAdapter, -23>(__fbthrift_field_optStringVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::NumberPatchAdapter, -22>(__fbthrift_field_optDoubleVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::NumberPatchAdapter, -21>(__fbthrift_field_optFloatVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::NumberPatchAdapter, -20>(__fbthrift_field_optI64Val, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::NumberPatchAdapter, -19>(__fbthrift_field_optI32Val, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::NumberPatchAdapter, -18>(__fbthrift_field_optI16Val, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::NumberPatchAdapter, -17>(__fbthrift_field_optByteVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::BoolPatchAdapter, -16>(__fbthrift_field_optBoolVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::AssignPatchAdapter, -15>(__fbthrift_field_timeVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::AssignPatchAdapter, -14>(__fbthrift_field_durationVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::StructPatchAdapter, -13>(__fbthrift_field_lateStructVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::UnionPatchAdapter, -12>(__fbthrift_field_unionVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::StructPatchAdapter, -11>(__fbthrift_field_structVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::AssignPatchAdapter, -10>(__fbthrift_field_enumVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::BinaryPatchAdapter, -9>(__fbthrift_field_binaryVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::StringPatchAdapter, -8>(__fbthrift_field_stringVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::NumberPatchAdapter, -7>(__fbthrift_field_doubleVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::NumberPatchAdapter, -6>(__fbthrift_field_floatVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::NumberPatchAdapter, -5>(__fbthrift_field_i64Val, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::NumberPatchAdapter, -4>(__fbthrift_field_i32Val, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::NumberPatchAdapter, -3>(__fbthrift_field_i16Val, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::NumberPatchAdapter, -2>(__fbthrift_field_byteVal, *this);
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::BoolPatchAdapter, -1>(__fbthrift_field_boolVal, *this);
 }
 
 bool MyStructFieldPatchStruct::__fbthrift_is_empty() const {
-  return ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-32>, MyStructFieldPatchStruct>>(this->__fbthrift_field_mapMap) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-31>, MyStructFieldPatchStruct>>(this->__fbthrift_field_listMap) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-30>, MyStructFieldPatchStruct>>(this->__fbthrift_field_optMapVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-29>, MyStructFieldPatchStruct>>(this->__fbthrift_field_optSetVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-28>, MyStructFieldPatchStruct>>(this->__fbthrift_field_optListVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-27>, MyStructFieldPatchStruct>>(this->__fbthrift_field_optLateStructVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-26>, MyStructFieldPatchStruct>>(this->__fbthrift_field_optStructVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-25>, MyStructFieldPatchStruct>>(this->__fbthrift_field_optEnumVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-24>, MyStructFieldPatchStruct>>(this->__fbthrift_field_optBinaryVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-23>, MyStructFieldPatchStruct>>(this->__fbthrift_field_optStringVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-22>, MyStructFieldPatchStruct>>(this->__fbthrift_field_optDoubleVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-21>, MyStructFieldPatchStruct>>(this->__fbthrift_field_optFloatVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-20>, MyStructFieldPatchStruct>>(this->__fbthrift_field_optI64Val) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-19>, MyStructFieldPatchStruct>>(this->__fbthrift_field_optI32Val) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-18>, MyStructFieldPatchStruct>>(this->__fbthrift_field_optI16Val) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-17>, MyStructFieldPatchStruct>>(this->__fbthrift_field_optByteVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-16>, MyStructFieldPatchStruct>>(this->__fbthrift_field_optBoolVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-15>, MyStructFieldPatchStruct>>(this->__fbthrift_field_timeVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-14>, MyStructFieldPatchStruct>>(this->__fbthrift_field_durationVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-13>, MyStructFieldPatchStruct>>(this->__fbthrift_field_lateStructVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-12>, MyStructFieldPatchStruct>>(this->__fbthrift_field_unionVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-11>, MyStructFieldPatchStruct>>(this->__fbthrift_field_structVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-10>, MyStructFieldPatchStruct>>(this->__fbthrift_field_enumVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-9>, MyStructFieldPatchStruct>>(this->__fbthrift_field_binaryVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-8>, MyStructFieldPatchStruct>>(this->__fbthrift_field_stringVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-7>, MyStructFieldPatchStruct>>(this->__fbthrift_field_doubleVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-6>, MyStructFieldPatchStruct>>(this->__fbthrift_field_floatVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-5>, MyStructFieldPatchStruct>>(this->__fbthrift_field_i64Val) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-4>, MyStructFieldPatchStruct>>(this->__fbthrift_field_i32Val) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-3>, MyStructFieldPatchStruct>>(this->__fbthrift_field_i16Val) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-2>, MyStructFieldPatchStruct>>(this->__fbthrift_field_byteVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-1>, MyStructFieldPatchStruct>>(this->__fbthrift_field_boolVal);
+  return false;
 }
 
 bool MyStructFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructFieldPatchStruct& rhs) const {
@@ -4365,6 +4350,7 @@ void swap(FOLLY_MAYBE_UNUSED MyStructFieldPatchStruct& a, FOLLY_MAYBE_UNUSED MyS
   swap(a.__fbthrift_field_i16Val, b.__fbthrift_field_i16Val);
   swap(a.__fbthrift_field_byteVal, b.__fbthrift_field_byteVal);
   swap(a.__fbthrift_field_boolVal, b.__fbthrift_field_boolVal);
+  swap(a.__isset, b.__isset);
 }
 
 template void MyStructFieldPatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -5168,7 +5154,8 @@ const folly::StringPiece RecursiveFieldPatchStruct::__fbthrift_get_field_name(::
 }
 
 RecursiveFieldPatchStruct::RecursiveFieldPatchStruct(const RecursiveFieldPatchStruct& srcObj) :
-    __fbthrift_field_nodes(srcObj.__fbthrift_field_nodes) {
+    __fbthrift_field_nodes(srcObj.__fbthrift_field_nodes),
+    __isset(srcObj.__isset) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::AssignPatchAdapter, -1>(__fbthrift_field_nodes, *this);
 }
 
@@ -5179,12 +5166,14 @@ RecursiveFieldPatchStruct& RecursiveFieldPatchStruct::operator=(const RecursiveF
 }
 
 RecursiveFieldPatchStruct::RecursiveFieldPatchStruct(FOLLY_MAYBE_UNUSED RecursiveFieldPatchStruct&& other) noexcept :
-    __fbthrift_field_nodes(std::move(other.__fbthrift_field_nodes)) {
+    __fbthrift_field_nodes(std::move(other.__fbthrift_field_nodes)),
+    __isset(other.__isset) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::AssignPatchAdapter, -1>(__fbthrift_field_nodes, *this);
 }
 
 RecursiveFieldPatchStruct& RecursiveFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED RecursiveFieldPatchStruct&& other) noexcept {
     this->__fbthrift_field_nodes = std::move(other.__fbthrift_field_nodes);
+    __isset = other.__isset;
     return *this;
 }
 
@@ -5192,20 +5181,21 @@ RecursiveFieldPatchStruct& RecursiveFieldPatchStruct::operator=(FOLLY_MAYBE_UNUS
 RecursiveFieldPatchStruct::RecursiveFieldPatchStruct(apache::thrift::FragileConstructor, ::test::fixtures::patch::RecursiveField1Patch nodes__arg) :
     __fbthrift_field_nodes(std::move(nodes__arg)) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::AssignPatchAdapter, -1>(__fbthrift_field_nodes, *this);
+  __isset.set(folly::index_constant<0>(), true);
 }
 
 
 void RecursiveFieldPatchStruct::__fbthrift_clear() {
   // clear all fields
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::AssignPatchAdapter, -1>(__fbthrift_field_nodes, *this);
+  __isset = {};
 }
 
 void RecursiveFieldPatchStruct::__fbthrift_clear_terse_fields() {
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::AssignPatchAdapter, -1>(__fbthrift_field_nodes, *this);
 }
 
 bool RecursiveFieldPatchStruct::__fbthrift_is_empty() const {
-  return ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-1>, RecursiveFieldPatchStruct>>(this->__fbthrift_field_nodes);
+  return false;
 }
 
 bool RecursiveFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const RecursiveFieldPatchStruct& rhs) const {
@@ -5224,6 +5214,7 @@ bool RecursiveFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const RecursiveFiel
 void swap(FOLLY_MAYBE_UNUSED RecursiveFieldPatchStruct& a, FOLLY_MAYBE_UNUSED RecursiveFieldPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_nodes, b.__fbthrift_field_nodes);
+  swap(a.__isset, b.__isset);
 }
 
 template void RecursiveFieldPatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -5468,7 +5459,8 @@ const folly::StringPiece BarFieldPatchStruct::__fbthrift_get_field_name(::apache
 }
 
 BarFieldPatchStruct::BarFieldPatchStruct(const BarFieldPatchStruct& srcObj) :
-    __fbthrift_field_loop(srcObj.__fbthrift_field_loop) {
+    __fbthrift_field_loop(srcObj.__fbthrift_field_loop),
+    __isset(srcObj.__isset) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::AssignPatchAdapter, -1>(__fbthrift_field_loop, *this);
 }
 
@@ -5479,12 +5471,14 @@ BarFieldPatchStruct& BarFieldPatchStruct::operator=(const BarFieldPatchStruct& o
 }
 
 BarFieldPatchStruct::BarFieldPatchStruct(FOLLY_MAYBE_UNUSED BarFieldPatchStruct&& other) noexcept :
-    __fbthrift_field_loop(std::move(other.__fbthrift_field_loop)) {
+    __fbthrift_field_loop(std::move(other.__fbthrift_field_loop)),
+    __isset(other.__isset) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::AssignPatchAdapter, -1>(__fbthrift_field_loop, *this);
 }
 
 BarFieldPatchStruct& BarFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED BarFieldPatchStruct&& other) noexcept {
     this->__fbthrift_field_loop = std::move(other.__fbthrift_field_loop);
+    __isset = other.__isset;
     return *this;
 }
 
@@ -5492,20 +5486,21 @@ BarFieldPatchStruct& BarFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED BarFieldP
 BarFieldPatchStruct::BarFieldPatchStruct(apache::thrift::FragileConstructor, ::test::fixtures::patch::LoopPatch loop__arg) :
     __fbthrift_field_loop(std::move(loop__arg)) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::AssignPatchAdapter, -1>(__fbthrift_field_loop, *this);
+  __isset.set(folly::index_constant<0>(), true);
 }
 
 
 void BarFieldPatchStruct::__fbthrift_clear() {
   // clear all fields
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::AssignPatchAdapter, -1>(__fbthrift_field_loop, *this);
+  __isset = {};
 }
 
 void BarFieldPatchStruct::__fbthrift_clear_terse_fields() {
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::AssignPatchAdapter, -1>(__fbthrift_field_loop, *this);
 }
 
 bool BarFieldPatchStruct::__fbthrift_is_empty() const {
-  return ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-1>, BarFieldPatchStruct>>(this->__fbthrift_field_loop);
+  return false;
 }
 
 bool BarFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const BarFieldPatchStruct& rhs) const {
@@ -5524,6 +5519,7 @@ bool BarFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const BarFieldPatchStruct
 void swap(FOLLY_MAYBE_UNUSED BarFieldPatchStruct& a, FOLLY_MAYBE_UNUSED BarFieldPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_loop, b.__fbthrift_field_loop);
+  swap(a.__isset, b.__isset);
 }
 
 template void BarFieldPatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -5768,7 +5764,8 @@ const folly::StringPiece LoopFieldPatchStruct::__fbthrift_get_field_name(::apach
 }
 
 LoopFieldPatchStruct::LoopFieldPatchStruct(const LoopFieldPatchStruct& srcObj) :
-    __fbthrift_field_bar(srcObj.__fbthrift_field_bar) {
+    __fbthrift_field_bar(srcObj.__fbthrift_field_bar),
+    __isset(srcObj.__isset) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StructPatchAdapter, -1>(__fbthrift_field_bar, *this);
 }
 
@@ -5779,12 +5776,14 @@ LoopFieldPatchStruct& LoopFieldPatchStruct::operator=(const LoopFieldPatchStruct
 }
 
 LoopFieldPatchStruct::LoopFieldPatchStruct(FOLLY_MAYBE_UNUSED LoopFieldPatchStruct&& other) noexcept :
-    __fbthrift_field_bar(std::move(other.__fbthrift_field_bar)) {
+    __fbthrift_field_bar(std::move(other.__fbthrift_field_bar)),
+    __isset(other.__isset) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StructPatchAdapter, -1>(__fbthrift_field_bar, *this);
 }
 
 LoopFieldPatchStruct& LoopFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED LoopFieldPatchStruct&& other) noexcept {
     this->__fbthrift_field_bar = std::move(other.__fbthrift_field_bar);
+    __isset = other.__isset;
     return *this;
 }
 
@@ -5792,20 +5791,21 @@ LoopFieldPatchStruct& LoopFieldPatchStruct::operator=(FOLLY_MAYBE_UNUSED LoopFie
 LoopFieldPatchStruct::LoopFieldPatchStruct(apache::thrift::FragileConstructor, ::test::fixtures::patch::BarPatch bar__arg) :
     __fbthrift_field_bar(std::move(bar__arg)) {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StructPatchAdapter, -1>(__fbthrift_field_bar, *this);
+  __isset.set(folly::index_constant<0>(), true);
 }
 
 
 void LoopFieldPatchStruct::__fbthrift_clear() {
   // clear all fields
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::StructPatchAdapter, -1>(__fbthrift_field_bar, *this);
+  __isset = {};
 }
 
 void LoopFieldPatchStruct::__fbthrift_clear_terse_fields() {
-  ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::StructPatchAdapter, -1>(__fbthrift_field_bar, *this);
 }
 
 bool LoopFieldPatchStruct::__fbthrift_is_empty() const {
-  return ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<-1>, LoopFieldPatchStruct>>(this->__fbthrift_field_bar);
+  return false;
 }
 
 bool LoopFieldPatchStruct::operator==(FOLLY_MAYBE_UNUSED const LoopFieldPatchStruct& rhs) const {
@@ -5824,6 +5824,7 @@ bool LoopFieldPatchStruct::operator<(FOLLY_MAYBE_UNUSED const LoopFieldPatchStru
 void swap(FOLLY_MAYBE_UNUSED LoopFieldPatchStruct& a, FOLLY_MAYBE_UNUSED LoopFieldPatchStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_bar, b.__fbthrift_field_bar);
+  swap(a.__isset, b.__isset);
 }
 
 template void LoopFieldPatchStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);

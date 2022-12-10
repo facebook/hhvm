@@ -483,6 +483,7 @@
             "name" : "data1",
             "key" : 1,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "StringPatch",
@@ -493,6 +494,7 @@
             "name" : "data2",
             "key" : 2,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "I32Patch",
@@ -591,6 +593,7 @@
             "name" : "innerOption",
             "key" : 1,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "BinaryPatch",
@@ -689,6 +692,7 @@
             "name" : "option1",
             "key" : 1,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "StringPatch",
@@ -699,6 +703,7 @@
             "name" : "option2",
             "key" : 2,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "I32Patch",
@@ -709,6 +714,7 @@
             "name" : "option3",
             "key" : 3,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "InnerUnionPatch"
@@ -1556,6 +1562,7 @@
             "name" : "mapMap",
             "key" : -32,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyStructField32Patch"
@@ -1565,6 +1572,7 @@
             "name" : "listMap",
             "key" : -31,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyStructField31Patch"
@@ -1574,6 +1582,7 @@
             "name" : "optMapVal",
             "key" : -30,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyStructField30Patch"
@@ -1583,6 +1592,7 @@
             "name" : "optSetVal",
             "key" : -29,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyStructField29Patch"
@@ -1592,6 +1602,7 @@
             "name" : "optListVal",
             "key" : -28,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyStructField28Patch"
@@ -1601,6 +1612,7 @@
             "name" : "optLateStructVal",
             "key" : -27,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "LateDefStructPatch"
@@ -1610,6 +1622,7 @@
             "name" : "optStructVal",
             "key" : -26,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyDataPatch"
@@ -1619,6 +1632,7 @@
             "name" : "optEnumVal",
             "key" : -25,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyStructField25Patch"
@@ -1628,6 +1642,7 @@
             "name" : "optBinaryVal",
             "key" : -24,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "BinaryPatch",
@@ -1638,6 +1653,7 @@
             "name" : "optStringVal",
             "key" : -23,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "StringPatch",
@@ -1648,6 +1664,7 @@
             "name" : "optDoubleVal",
             "key" : -22,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "DoublePatch",
@@ -1658,6 +1675,7 @@
             "name" : "optFloatVal",
             "key" : -21,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "FloatPatch",
@@ -1668,6 +1686,7 @@
             "name" : "optI64Val",
             "key" : -20,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "I64Patch",
@@ -1678,6 +1697,7 @@
             "name" : "optI32Val",
             "key" : -19,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "I32Patch",
@@ -1688,6 +1708,7 @@
             "name" : "optI16Val",
             "key" : -18,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "I16Patch",
@@ -1698,6 +1719,7 @@
             "name" : "optByteVal",
             "key" : -17,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "BytePatch",
@@ -1708,6 +1730,7 @@
             "name" : "optBoolVal",
             "key" : -16,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "BoolPatch",
@@ -1718,6 +1741,7 @@
             "name" : "timeVal",
             "key" : -15,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "TimePatch",
@@ -1728,6 +1752,7 @@
             "name" : "durationVal",
             "key" : -14,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "DurationPatch",
@@ -1738,6 +1763,7 @@
             "name" : "lateStructVal",
             "key" : -13,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "LateDefStructPatch"
@@ -1747,6 +1773,7 @@
             "name" : "unionVal",
             "key" : -12,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyUnionPatch"
@@ -1756,6 +1783,7 @@
             "name" : "structVal",
             "key" : -11,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyDataPatch"
@@ -1765,6 +1793,7 @@
             "name" : "enumVal",
             "key" : -10,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "MyStructField10Patch"
@@ -1774,6 +1803,7 @@
             "name" : "binaryVal",
             "key" : -9,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "BinaryPatch",
@@ -1784,6 +1814,7 @@
             "name" : "stringVal",
             "key" : -8,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "StringPatch",
@@ -1794,6 +1825,7 @@
             "name" : "doubleVal",
             "key" : -7,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "DoublePatch",
@@ -1804,6 +1836,7 @@
             "name" : "floatVal",
             "key" : -6,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "FloatPatch",
@@ -1814,6 +1847,7 @@
             "name" : "i64Val",
             "key" : -5,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "I64Patch",
@@ -1824,6 +1858,7 @@
             "name" : "i32Val",
             "key" : -4,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "I32Patch",
@@ -1834,6 +1869,7 @@
             "name" : "i16Val",
             "key" : -3,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "I16Patch",
@@ -1844,6 +1880,7 @@
             "name" : "byteVal",
             "key" : -2,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "BytePatch",
@@ -1854,6 +1891,7 @@
             "name" : "boolVal",
             "key" : -1,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "BoolPatch",
@@ -2079,6 +2117,7 @@
             "name" : "nodes",
             "key" : -1,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "RecursiveField1Patch"
@@ -2176,6 +2215,7 @@
             "name" : "loop",
             "key" : -1,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "LoopPatch"
@@ -2273,6 +2313,7 @@
             "name" : "bar",
             "key" : -1,
             "lineno" : 22,
+            "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
   "name" : "BarPatch"

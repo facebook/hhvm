@@ -11,12 +11,12 @@ namespace py facebook.eden.eden_config
 namespace py3 eden.fs.config
 
 /**
- * ConfigSource identifies the point of origin of a config setting.
- * It is ordered from low to high precedence. Higher precedence
- * configuration values over-ride lower precedence values. A config
- * setting of CommandLine takes precedence over all other settings.
+ * Identifies the point of origin of a config setting. It is ordered from
+ * low to high precedence. Higher precedence configuration values over-ride
+ * lower precedence values. A config setting of CommandLine takes precedence
+ * over all other settings.
  */
-enum ConfigSource {
+enum ConfigSourceType {
   Default = 0,
   SystemConfig = 1,
   UserConfig = 2,
@@ -41,7 +41,7 @@ struct ConfigValue {
   // contains the original value from before variable interpolation.  We don't
   // currently store this data after performing parsing, however.
   1: string parsedValue;
-  2: ConfigSource source;
+  2: ConfigSourceType sourceType;
   // For configuration files, this is the path on the filesystem. For other
   // sources, it's an empty string, though one could imagine a URL or
   // otherwise.

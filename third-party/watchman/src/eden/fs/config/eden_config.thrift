@@ -42,6 +42,10 @@ struct ConfigValue {
   // currently store this data after performing parsing, however.
   1: string parsedValue;
   2: ConfigSource source;
+  // For configuration files, this is the path on the filesystem. For other
+  // sources, it's an empty string, though one could imagine a URL or
+  // otherwise.
+  3: binary sourcePath;
 }
 
 struct EdenConfigData {

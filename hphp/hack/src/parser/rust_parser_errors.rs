@@ -123,7 +123,7 @@ impl UnstableFeatures {
             UnstableFeatures::TypeConstMultipleBounds => Preview,
             UnstableFeatures::TypeConstSuperBound => Unstable,
             UnstableFeatures::ClassConstDefault => Migration,
-            UnstableFeatures::TypeRefinements => Preview,
+            UnstableFeatures::TypeRefinements => OngoingRelease,
             UnstableFeatures::MethodTraitDiamond => OngoingRelease,
             UnstableFeatures::UpcastExpression => Unstable,
             UnstableFeatures::RequireClass => Preview,

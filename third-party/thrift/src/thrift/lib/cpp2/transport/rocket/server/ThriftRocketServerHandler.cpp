@@ -570,6 +570,9 @@ void ThriftRocketServerHandler::handleRequestCommon(
       if (samplingStatus.isEnabledByServer()) {
         if (threadManager_) {
           observer->queuedRequests(threadManager_->pendingUpstreamTaskCount());
+        } else if (!serverConfigs_->resourcePoolSet().empty()) {
+          observer->queuedRequests(
+              serverConfigs_->resourcePoolSet().numQueued());
         }
         observer->activeRequests(serverConfigs_->getActiveRequests());
       }

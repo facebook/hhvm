@@ -598,6 +598,8 @@ void Cpp2Connection::requestReceived(
     if (samplingStatus.isEnabledByServer() && observer) {
       if (threadManager_) {
         observer->queuedRequests(threadManager_->pendingUpstreamTaskCount());
+      } else if (!server->resourcePoolSet().empty()) {
+        observer->queuedRequests(server->resourcePoolSet().numQueued());
       }
       observer->activeRequests(server->getActiveRequests());
     }

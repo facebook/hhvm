@@ -172,7 +172,10 @@ struct NamedEntity {
    * If `str' needs to be namespace-normalized, we pass the normalized result
    * out through `normalizedStr' if it is provided.
    */
-  static NamedEntity* get(const StringData* str,
+  static NamedEntity* getType(const StringData* str,
+                          bool allowCreate = true,
+                          String* normalizedStr = nullptr) FLATTEN;
+  static NamedEntity* getFunc(const StringData* str,
                           bool allowCreate = true,
                           String* normalizedStr = nullptr) FLATTEN;
 
@@ -198,7 +201,8 @@ struct NamedEntity {
   const char* checkSameName();
 
 private:
-  static Map* table();
+  static Map* types();
+  static Map* funcs();
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.

@@ -112,8 +112,8 @@ Class* StringData::getCachedClass() const {
   return getSymbolPrefix(this)->cls;
 }
 
-NamedEntity* StringData::getNamedEntity() const {
-  return getSymbolPrefix(this)->ne;
+NamedEntity* StringData::getNamedType() const {
+  return getSymbolPrefix(this)->nty;
 }
 
 void StringData::setCachedClass(Class* cls) {
@@ -122,10 +122,10 @@ void StringData::setCachedClass(Class* cls) {
   prefix->cls = cls;
 }
 
-void StringData::setNamedEntity(NamedEntity* ne) {
+void StringData::setNamedType(NamedEntity* nty) {
   auto const prefix = getSymbolPrefix(this);
-  assertx(IMPLIES(prefix->ne, prefix->ne == ne));
-  prefix->ne = ne;
+  assertx(IMPLIES(prefix->nty, prefix->nty == nty));
+  prefix->nty = nty;
 }
 
 ptrdiff_t StringData::isSymbolOffset() {
@@ -188,8 +188,8 @@ StringData* StringData::MakeSharedAt(folly::StringPiece sl, MemBlock range) {
   if (symbol) {
     auto constexpr aux = kIsSymbolMask << 8 | kInvalidColor;
     sd->initHeader_16(HeaderKind::String, count, aux);
+    getSymbolPrefix(sd)->nty = nullptr;
     getSymbolPrefix(sd)->cls = nullptr;
-    getSymbolPrefix(sd)->ne = nullptr;
   } else {
     sd->initHeader_16(HeaderKind::String, count, kInvalidColor);
   }

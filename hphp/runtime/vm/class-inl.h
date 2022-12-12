@@ -755,7 +755,7 @@ inline Class* Class::lookup(const StringData* name) {
   if (name->isSymbol()) {
     if (auto const result = name->getCachedClass()) return result;
   }
-  auto const result = lookup(NamedEntity::get(name));
+  auto const result = lookup(NamedEntity::getType(name));
   if (name->isSymbol() && result && classHasPersistentRDS(result)) {
     const_cast<StringData*>(name)->setCachedClass(result);
   }
@@ -776,7 +776,7 @@ inline const Class* Class::lookupUniqueInContext(const NamedEntity* ne,
 inline const Class* Class::lookupUniqueInContext(const StringData* name,
                                                  const Class* ctx,
                                                  const Unit* unit) {
-  return lookupUniqueInContext(NamedEntity::get(name), ctx, unit);
+  return lookupUniqueInContext(NamedEntity::getType(name), ctx, unit);
 }
 
 inline Class* Class::load(const StringData* name) {
@@ -787,7 +787,7 @@ inline Class* Class::load(const StringData* name) {
 
   auto const result = [&]() -> Class* {
     String normStr;
-    auto ne = NamedEntity::get(name, true, &normStr);
+    auto ne = NamedEntity::getType(name, true, &normStr);
 
     // Try to fetch from cache
     Class* class_ = ne->getCachedClass();
@@ -812,7 +812,7 @@ inline Class* Class::get(const StringData* name, bool tryAutoload) {
   }
   auto const orig = name;
   String normStr;
-  auto ne = NamedEntity::get(name, true, &normStr);
+  auto ne = NamedEntity::getType(name, true, &normStr);
   if (normStr) {
     name = normStr.get();
   }

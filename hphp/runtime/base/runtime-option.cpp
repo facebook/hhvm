@@ -638,7 +638,8 @@ bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::DumpPreciseProfData = true;
 uint32_t RuntimeOption::EvalInitialStaticStringTableSize =
   kDefaultInitialStaticStringTableSize;
-uint32_t RuntimeOption::EvalInitialNamedEntityTableSize = 30000;
+uint32_t RuntimeOption::EvalInitialTypeTableSize = 30000;
+uint32_t RuntimeOption::EvalInitialFuncTableSize = 3000;
 JitSerdesMode RuntimeOption::EvalJitSerdesMode{};
 int RuntimeOption::ProfDataTTLHours = 24;
 std::string RuntimeOption::ProfDataTag;
@@ -1933,9 +1934,17 @@ void RuntimeOption::Load(
                  true);
     Config::Bind(CheckFlushOnUserClose, ini, config,
                  "Eval.CheckFlushOnUserClose", true);
-    Config::Bind(EvalInitialNamedEntityTableSize, ini, config,
+    Config::Bind(EvalInitialTypeTableSize, ini, config,
                  "Eval.InitialNamedEntityTableSize",
-                 EvalInitialNamedEntityTableSize);
+                 EvalInitialTypeTableSize);
+    Config::Bind(EvalInitialFuncTableSize, ini, config,
+                 "Eval.InitialFuncTableSize",
+                 EvalInitialTypeTableSize);
+    if (EvalInitialTypeTableSize / 200 > EvalInitialTypeTableSize) {
+      // Assume InitialFuncTableSize was not provided; compute initial func
+      // table size from a conservative type/func ratio.
+      EvalInitialFuncTableSize = EvalInitialTypeTableSize / 200;
+    }
     Config::Bind(EvalInitialStaticStringTableSize, ini, config,
                  "Eval.InitialStaticStringTableSize",
                  EvalInitialStaticStringTableSize);

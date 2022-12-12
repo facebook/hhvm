@@ -401,15 +401,15 @@ struct StringData final : MaybeCountable,
   void setColor(uint16_t color);
 
   /*
-   * Get or set the cached class or named entity. Get will return nullptr
+   * Get or set the cached class or named type. Get will return nullptr
    * if the corresponding cached value hasn't been set yet.
    *
    * Pre: isSymbol()
    */
   Class* getCachedClass() const;
-  NamedEntity* getNamedEntity() const;
+  NamedEntity* getNamedType() const;
   void setCachedClass(Class* cls);
-  void setNamedEntity(NamedEntity* ne);
+  void setNamedType(NamedEntity* ne);
 
   /*
    * Helpers used to JIT access to the symbol cache.
@@ -530,7 +530,7 @@ private:
  * Some static StringData has a SymbolPrefix allocated right in front.
  */
 struct SymbolPrefix {
-  AtomicLowPtr<NamedEntity> ne;
+  AtomicLowPtr<NamedEntity> nty;
   AtomicLowPtr<Class> cls;
 };
 

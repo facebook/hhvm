@@ -365,8 +365,10 @@ public:
    */
   StringData* lookupLitstrId(Id id) const;
 
-  const NamedEntity* lookupNamedEntityId(Id id) const;
-  NamedEntityPair lookupNamedEntityPairId(Id id) const;
+  const NamedEntity* lookupNamedTypeId(Id id) const;
+  const NamedEntity* lookupNamedFuncId(Id id) const;
+  NamedEntityPair lookupNamedTypePairId(Id id) const;
+  NamedEntityPair lookupNamedFuncPairId(Id id) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Arrays.                                                            [const]

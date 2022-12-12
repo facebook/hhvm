@@ -19,7 +19,7 @@
    decl
    ""
    --error-format
-   raw)))
+   plain)))
 
 (alias
  (name runtest)

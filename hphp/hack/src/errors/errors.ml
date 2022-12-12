@@ -37,9 +37,10 @@ let phases_up_to_excl : phase -> phase list =
   |> List.map ~f:(fun enum -> Option.value_exn (phase_of_enum enum))
 
 type format =
-  | Context
-  | Raw
-  | Highlighted
+  | Context  (** Underlined references and color *)
+  | Raw  (** Compact format with color but no references *)
+  | Highlighted  (** Numbered and colored references *)
+  | Plain  (** Verbose positions and no color *)
 
 let claim_as_reason : Pos.t Message.t -> Pos_or_decl.t Message.t =
  (fun (p, m) -> (Pos_or_decl.of_raw_pos p, m))
@@ -494,7 +495,9 @@ let format_summary format errors dropped_count max_errors : string option =
       | _ -> ".\n"
     in
     Some (formatted_total ^ truncated)
-  | Raw -> None
+  | Raw
+  | Plain ->
+    None
 
 let report_pos_from_reason = ref false
 

@@ -149,7 +149,8 @@ let print_error format ?(oc = stderr) l =
   let formatter =
     match format with
     | Errors.Context -> (fun e -> Contextual_error_formatter.to_string e)
-    | Errors.Raw -> (fun e -> Errors.to_string e)
+    | Errors.Raw -> (fun e -> Raw_error_formatter.to_string e)
+    | Errors.Plain -> (fun e -> Errors.to_string e)
     | Errors.Highlighted -> Highlighted_error_formatter.to_string
   in
   let absolute_errors = User_error.to_absolute l in
@@ -425,8 +426,10 @@ let parse_options () =
             | "raw" -> error_format := Errors.Raw
             | "context" -> error_format := Errors.Context
             | "highlighted" -> error_format := Errors.Highlighted
+            | "plain" -> error_format := Errors.Plain
             | _ -> print_string "Warning: unrecognized error format.\n"),
-        "<raw|context|highlighted> Error formatting style" );
+        "<raw|context|highlighted|plain> Error formatting style; (default: highlighted)"
+      );
       ("--lint", Arg.Unit (set_mode Lint), " Produce lint errors");
       ("--lint-json", Arg.Unit (set_mode Lint_json), " Produce json lint output");
       ( "--no-builtins",
@@ -1244,7 +1247,7 @@ let solve_global_inference_env
   Typing_global_inference.StateSolvedGraph.from_constraint_graph gienv
 
 let global_inference_merge_and_solve
-    ~verbosity ?(error_format = Errors.Raw) ?max_errors ctx gienvs =
+    ~verbosity ?(error_format = Errors.Plain) ?max_errors ctx gienvs =
   print_global_inference_envs ctx ~verbosity gienvs;
   let gienv = merge_global_inference_envs_opt ctx gienvs in
   print_merged_global_inference_env ~verbosity gienv error_format max_errors;

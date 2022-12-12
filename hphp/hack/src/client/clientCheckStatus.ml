@@ -12,6 +12,8 @@ open ServerCommandTypes
 
 let print_error_raw e = Printf.printf "%s" (Raw_error_formatter.to_string e)
 
+let print_error_plain e = Printf.printf "%s" (Errors.to_string e)
+
 let print_error_contextual e =
   Printf.printf "%s" (Contextual_error_formatter.to_string e)
 
@@ -67,6 +69,7 @@ let go status output_json from error_format max_errors =
     let f =
       match error_format with
       | Errors.Raw -> print_error_raw
+      | Errors.Plain -> print_error_plain
       | Errors.Context -> print_error_contextual
       | Errors.Highlighted -> print_error_highlighted
     in

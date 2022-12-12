@@ -15,7 +15,7 @@
           --program %{exe:../../src/hh_single_type_check.exe}
           --batch
       --flags
-      --error-format raw)))
+      --error-format plain)))
 
 (rule
     (alias typecheck_shallow_decl)
@@ -39,7 +39,7 @@
       --flags
       --shallow-class-decl
       --out-extension .shallow_decl.out
-      --error-format raw)))
+      --error-format plain)))
 
 (rule
     (alias decl_compare)
@@ -75,7 +75,7 @@
       --verbose
       --flags
       --shallow-class-decl
-      --error-format raw)))
+      --error-format plain)))
 
 
 (alias

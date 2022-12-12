@@ -33,6 +33,7 @@ type format =
   | Context
   | Raw
   | Highlighted
+  | Plain
 
 (** Type representing the errors for a single file. *)
 type per_file_errors

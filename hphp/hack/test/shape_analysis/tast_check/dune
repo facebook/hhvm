@@ -20,7 +20,7 @@
    --union-intersection-type-hints
    --shape-analysis simplify:local
    --error-format
-   raw)))
+   plain)))
 
 (alias
  (name runtest)

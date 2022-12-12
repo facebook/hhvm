@@ -96,15 +96,15 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> PartialOrd for UserError<PP, P> {
 
 impl UserError<Pos, PosOrDecl> {
     /// Return a struct with a `std::fmt::Display` implementation that displays
-    /// the error in the "raw" format expected by our typecheck test cases.
-    pub fn display_raw(&self) -> DisplayRaw<'_> {
-        DisplayRaw(self)
+    /// the error in the Errors.Plain format produced by OCaml Errors.to_string.
+    pub fn display_plain(&self) -> DisplayPlain<'_> {
+        DisplayPlain(self)
     }
 }
 
-pub struct DisplayRaw<'a>(&'a UserError<Pos, PosOrDecl>);
+pub struct DisplayPlain<'a>(&'a UserError<Pos, PosOrDecl>);
 
-impl<'a> std::fmt::Display for DisplayRaw<'a> {
+impl<'a> std::fmt::Display for DisplayPlain<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let UserError {
             code,

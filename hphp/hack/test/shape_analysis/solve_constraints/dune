@@ -22,7 +22,7 @@
    --shape-analysis
    solve:global
    --error-format
-   raw)))
+   plain)))
 
 (alias
  (name runtest)

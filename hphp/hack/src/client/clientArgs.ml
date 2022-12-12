@@ -302,10 +302,12 @@ let parse_check_args cmd =
           (fun s ->
             match s with
             | "raw" -> error_format := Errors.Raw
+            | "plain" -> error_format := Errors.Plain
             | "context" -> error_format := Errors.Context
             | "highlighted" -> error_format := Errors.Highlighted
             | _ -> print_string "Warning: unrecognized error format.\n"),
-        "<raw|context|highlighted> Error formatting style" );
+        "<raw|context|highlighted|plain> Error formatting style; (default: highlighted)"
+      );
       ( "--extract-standalone",
         Arg.String (fun name -> set_mode (MODE_EXTRACT_STANDALONE name)),
         " extract a given function / method together with its dependencies as a standalone file. Usage: --extract-standalone Classname::methodName or function_name"

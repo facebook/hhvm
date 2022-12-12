@@ -33,7 +33,9 @@ let output_text oc el format =
     let f =
       match format with
       | Errors.Context -> Lint.to_contextual_string
-      | Errors.Raw -> Lint.to_string
+      | Errors.Raw
+      | Errors.Plain ->
+        Lint.to_string
       | Errors.Highlighted -> Lint.to_highlighted_string
     in
     let sl = List.map el ~f in

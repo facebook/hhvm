@@ -56,7 +56,7 @@
    --out-extension
    .legacy_decl.out
    --error-format
-   raw)))
+   plain)))
 
 (rule
  (alias requireclass_typing_shallow_decl_good)
@@ -98,7 +98,7 @@
    --flags
    --shallow-class-decl
    --error-format
-   raw)))
+   plain)))
 
 (alias
  (name runtest)

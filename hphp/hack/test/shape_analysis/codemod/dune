@@ -22,7 +22,7 @@
    --shape-analysis
    codemod:global
    --error-format
-   raw)))
+   plain)))
 
 (alias
  (name runtest)

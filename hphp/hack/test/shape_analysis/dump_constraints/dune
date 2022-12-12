@@ -21,7 +21,7 @@
    --shape-analysis
    dump:global
    --error-format
-   raw)))
+   plain)))
 
 (alias
  (name runtest)

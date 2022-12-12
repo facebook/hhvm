@@ -28,7 +28,7 @@
    --out-extension
    .legacy_decl.out
    --error-format
-   raw)))
+   plain)))
 
 (rule
  (alias sound_dynamic_typing_completeness_bugs_shallow_decl_bad)
@@ -51,7 +51,7 @@
    --enable-sound-dynamic-type
    --shallow-class-decl
    --error-format
-   raw)))
+   plain)))
 
 (alias
  (name runtest)

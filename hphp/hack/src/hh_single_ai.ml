@@ -69,7 +69,8 @@ let print_error format ?(oc = stderr) l =
   let formatter =
     match format with
     | Errors.Context -> (fun e -> Contextual_error_formatter.to_string e)
-    | Errors.Raw -> (fun e -> Errors.to_string e)
+    | Errors.Raw -> (fun e -> Raw_error_formatter.to_string e)
+    | Errors.Plain -> (fun e -> Errors.to_string e)
     | Errors.Highlighted -> Highlighted_error_formatter.to_string
   in
   let absolute_errors =
@@ -117,10 +118,12 @@ let parse_options () =
           (fun s ->
             match s with
             | "raw" -> error_format := Errors.Raw
+            | "plain" -> error_format := Errors.Plain
             | "context" -> error_format := Errors.Context
             | "highlighted" -> error_format := Errors.Highlighted
             | _ -> print_string "Warning: unrecognized error format.\n"),
-        "<raw|context|highlighted> Error formatting style" );
+        "<raw|context|highlighted|plain> Error formatting style; (default: highlighted)"
+      );
       ( "--check-xhp-attribute",
         Arg.Set check_xhp_attribute,
         " Typechecks xhp required attributes" );

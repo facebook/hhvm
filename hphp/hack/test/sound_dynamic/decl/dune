@@ -39,7 +39,7 @@
    --flags
    --shallow-class-decl
    --error-format
-   raw
+   plain
    --enable-higher-kinded-types
    --enable-supportdyn-hint)))
 

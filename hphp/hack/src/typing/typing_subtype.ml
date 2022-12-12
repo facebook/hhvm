@@ -1597,7 +1597,15 @@ and simplify_subtype_i
               ty_sub'
               ty_super
               env
-          (* We do not want to decompose Toption for these cases *)
+          (* If the type on the left is disjoint from null, then the Toption on the right is not
+             doing anything helpful. *)
+          | ((_, (Tintersection _ | Tunion _)), _)
+            when Typing_utils.is_type_disjoint
+                   env
+                   lty_sub
+                   (Typing_make_type.null Reason.Rnone) ->
+            simplify_subtype ~subtype_env ~this_ty ~super_like lty_sub ety env
+            (* We do not want to decompose Toption for these cases *)
           | ((_, (Tvar _ | Tunion _ | Tintersection _)), _) ->
             default_subtype env
           | ((_, Tgeneric _), _) when subtype_env.require_completeness ->

@@ -2061,8 +2061,8 @@ void ConfigPreprocessor::parseMacroDef(
         params.push_back(paramObj);
       }
     }
-    auto f = [res = res, this](Context&& ctx) mutable {
-      return expandMacros(std::move(res), std::move(ctx));
+    auto f = [res, this](Context&& ctx) {
+      return expandMacros(res, std::move(ctx));
     };
     addMacro(key, params, std::move(f));
   } else if (objType == "constDef") {

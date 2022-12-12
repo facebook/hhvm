@@ -293,11 +293,8 @@ function(build_cxx_bridge NAME)
       "${NAME}_rust_part"
       ${CXX_BRIDGE_LINK_LIBS}
   )
-  # `-iquote` is like `-I` (or target_include_directories()`), except:
-  # - it takes precedence over `-I`
-  # - it only applies to `#include "foo"`, not `#include <foo>`
-  target_compile_options("${NAME}" INTERFACE "-iquote" "${RUST_FFI_BUILD_ROOT}")
-  target_compile_options("${NAME}" PRIVATE "-iquote" "${GENERATED_CXXBRIDGE}")
+  target_include_directories("${NAME}" INTERFACE "${RUST_FFI_BUILD_ROOT}")
+  target_include_directories("${NAME}" PRIVATE "${GENERATED_CXXBRIDGE}")
 endfunction()
 
 build_cxx_bridge(

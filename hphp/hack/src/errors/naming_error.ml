@@ -164,7 +164,6 @@ type t =
       class_name: string;
     }
   | Too_few_type_arguments of Pos.t
-  | Method_needs_visibility of Pos.t
   | Dynamic_class_name_in_strict_mode of Pos.t
   | Xhp_optional_required_attr of {
       pos: Pos.t;
@@ -324,12 +323,6 @@ let too_few_type_arguments p =
   User_error.make
     Error_code.(to_enum TooFewTypeArguments)
     (p, "Too few type arguments for this type")
-    []
-
-let method_needs_visibility pos =
-  User_error.make
-    Error_code.(to_enum MethodNeedsVisibility)
-    (pos, "Methods need to be marked `public`, `private`, or `protected`.")
     []
 
 let dynamic_class_name_in_strict_mode pos =
@@ -1193,7 +1186,6 @@ let to_user_error = function
   | Using_internal_class { pos; class_name } ->
     using_internal_class pos class_name
   | Too_few_type_arguments pos -> too_few_type_arguments pos
-  | Method_needs_visibility pos -> method_needs_visibility pos
   | Dynamic_class_name_in_strict_mode pos ->
     dynamic_class_name_in_strict_mode pos
   | Xhp_optional_required_attr { pos; attr_name } ->

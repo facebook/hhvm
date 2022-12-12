@@ -160,7 +160,6 @@ type t =
       class_name: string;
     }
   | Too_few_type_arguments of Pos.t
-  | Method_needs_visibility of Pos.t
   | Dynamic_class_name_in_strict_mode of Pos.t
   | Xhp_optional_required_attr of {
       pos: Pos.t;

@@ -158,7 +158,7 @@ impl Naming {
             Self::MethodNeedsVisibility as isize,
             Message(
                 p,
-                "Methods need to be marked public, private, or protected.".into(),
+                "Methods need to be marked `public`, `private`, or `protected`.".into(),
             ),
             vec![],
             vec![],

@@ -40,6 +40,8 @@ end
 
 let wrap_supportdyn p h = Aast.Happly ((p, SN.Classes.cSupportDyn), [(p, h)])
 
+let wrap_like ((pos, _) as hint) = (pos, Aast.Hlike hint)
+
 let on_expr_ (env, expr_, err) =
   let env =
     match expr_ with
@@ -60,8 +62,7 @@ let on_hint (env, hint, err) =
         ->
         (pos, wrap_supportdyn pos hint_)
       | (pos, Aast.Hfun hint_fun) ->
-        let ((hf_return_pos, _) as hf_return_ty) = hint_fun.Aast.hf_return_ty in
-        let hf_return_ty = (hf_return_pos, Aast.Hlike hf_return_ty) in
+        let hf_return_ty = wrap_like hint_fun.Aast.hf_return_ty in
         let hint_ = Aast.(Hfun { hint_fun with hf_return_ty }) in
         (pos, wrap_supportdyn pos hint_)
       | _ -> hint
@@ -132,16 +133,32 @@ let on_class_ (env, c, err) =
   in
   Ok (env, c, err)
 
+let on_class_c_consts (env, c_consts, err) =
+  let c_consts =
+    if Env.everything_sdt env && Env.in_enum_class env then
+      let elab_hint = function
+        | ( pos,
+            Aast.(
+              Happly ((p_member_of, c_member_of), [((p1, Happly _) as h1); h2]))
+          )
+          when String.equal c_member_of SN.Classes.cMemberOf ->
+          (pos, Aast.(Happly ((p_member_of, c_member_of), [h1; (p1, Hlike h2)])))
+        | hint -> hint
+      in
+      List.map
+        ~f:(fun c_const ->
+          Aast.
+            { c_const with cc_type = Option.map ~f:elab_hint c_const.cc_type })
+        c_consts
+    else
+      c_consts
+  in
+  Ok (env, c_consts, err)
+
 let on_enum_ (env, e, err) =
   let e =
-    if Env.everything_sdt env then
-      let e_base =
-        if Env.in_enum_class env then
-          let ((pos, _) as e_base) = e.Aast.e_base in
-          (pos, Aast.Hlike e_base)
-        else
-          e.Aast.e_base
-      in
+    if Env.everything_sdt env && Env.in_enum_class env then
+      let e_base = wrap_like e.Aast.e_base in
       Aast.{ e with e_base }
     else
       e
@@ -168,5 +185,6 @@ let bottom_up_pass =
           on_fun_ = Some on_fun_;
           on_tparam = Some on_tparam;
           on_class_ = Some on_class_;
+          on_class_c_consts = Some on_class_c_consts;
           on_enum_ = Some on_enum_;
         })

@@ -5818,11 +5818,6 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 let enum_class = ast::Hint_::mk_happly(enum_name, vec![]);
                 let enum_class = ast::Hint::new(p.clone(), enum_class);
                 let elt_id = ast::Id(p.clone(), special_classes::MEMBER_OF.to_string());
-                let ty = if env.parser_options.tco_everything_sdt {
-                    ast::Hint::new(p.clone(), ast::Hint_::mk_hlike(ty))
-                } else {
-                    ty
-                };
                 let full_type = ast::Hint_::mk_happly(elt_id, vec![enum_class, ty]);
                 ast::Hint::new(p, full_type)
             };

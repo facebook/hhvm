@@ -11,7 +11,10 @@ use ir::instr::CmpOp;
 use ir::instr::HasLoc;
 use ir::instr::HasOperands;
 use ir::instr::Hhbc;
+use ir::instr::IteratorArgs;
+use ir::instr::Predicate;
 use ir::instr::Terminator;
+use ir::instr::Textual;
 use ir::BareThisOp;
 use ir::Call;
 use ir::Constant;
@@ -139,6 +142,75 @@ impl LowerInstrs<'_> {
             }
             _ => None,
         }
+    }
+
+    fn iter_init(
+        &self,
+        builder: &mut FuncBuilder<'_>,
+        args: IteratorArgs,
+        container: ValueId,
+    ) -> Instr {
+        // iterator ^0 init from %0 jmp to b2 else b1 with $index
+        // ->
+        // %n = hack::iter_init(&iter0, /* key */ null, &$index, %0)
+        // if %n jmp b1 else b2
+
+        let loc = args.loc;
+        let iter_lid = iter_var_name(args.iter_id, &builder.strings);
+
+        let iter_var = builder.emit(Textual::deref(iter_lid));
+
+        let value_var = builder.emit(Textual::deref(args.value_lid()));
+
+        let key_var = if let Some(key_lid) = args.key_lid() {
+            builder.emit(Textual::deref(key_lid))
+        } else {
+            builder.emit_constant(Constant::Null)
+        };
+
+        let pred = builder.emit_hhbc_builtin(
+            hack::Hhbc::IterInit,
+            &[iter_var, key_var, value_var, container],
+            loc,
+        );
+
+        Instr::jmp_op(
+            pred,
+            Predicate::NonZero,
+            args.next_bid(),
+            args.done_bid(),
+            loc,
+        )
+    }
+
+    fn iter_next(&self, builder: &mut FuncBuilder<'_>, args: IteratorArgs) -> Instr {
+        // iterator ^0 next jmp to b2 else b1 with $index
+        // ->
+        // %n = hack::iter_next(&iter0, /* key */ null, &$index)
+        // if %n jmp b1 else b2
+
+        let loc = args.loc;
+        let iter_lid = iter_var_name(args.iter_id, &builder.strings);
+
+        let value_var = builder.emit(Textual::deref(args.value_lid()));
+
+        let key_var = if let Some(key_lid) = args.key_lid() {
+            builder.emit(Textual::deref(key_lid))
+        } else {
+            builder.emit_constant(Constant::Null)
+        };
+
+        let iter_var = builder.emit(Instr::Hhbc(Hhbc::CGetL(iter_lid, loc)));
+        let pred =
+            builder.emit_hhbc_builtin(hack::Hhbc::IterNext, &[iter_var, key_var, value_var], loc);
+
+        Instr::jmp_op(
+            pred,
+            Predicate::NonZero,
+            args.next_bid(),
+            args.done_bid(),
+            loc,
+        )
     }
 
     fn verify_out_type(
@@ -347,6 +419,15 @@ impl TransformInstr for LowerInstrs<'_> {
             Instr::Hhbc(Hhbc::VerifyRetTypeTS([obj, ts], loc)) => {
                 self.verify_ret_type_ts(builder, obj, ts, loc)
             }
+            Instr::Hhbc(Hhbc::IterFree(id, loc)) => {
+                let lid = iter_var_name(id, &builder.strings);
+                let value = builder.emit(Instr::Hhbc(Hhbc::CGetL(lid, loc)));
+                builder.hhbc_builtin(hack::Hhbc::IterFree, &[value], loc)
+            }
+            Instr::Terminator(Terminator::IterInit(args, value)) => {
+                self.iter_init(builder, args, value)
+            }
+            Instr::Terminator(Terminator::IterNext(args)) => self.iter_next(builder, args),
             Instr::Terminator(Terminator::RetM(ops, loc)) => {
                 // ret a, b;
                 // =>
@@ -394,4 +475,9 @@ fn rewrite_nullsafe_call(builder: &mut FuncBuilder<'_>, mut call: Call) -> Instr
     );
 
     Instr::copy(res)
+}
+
+fn iter_var_name(id: ir::IterId, strings: &ir::StringInterner) -> LocalId {
+    let name = strings.intern_str(&format!("iter{}", id.idx));
+    LocalId::Named(name)
 }

@@ -1352,6 +1352,9 @@ pub(crate) fn print_textual(
                 FmtVid(func, *vid, verbose, strings)
             )?;
         }
+        Textual::Deref(lid) => {
+            write!(w, "textual::deref {}", FmtLid(*lid, ctx.strings),)?;
+        }
         Textual::HackBuiltin {
             values,
             target,

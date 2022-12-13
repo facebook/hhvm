@@ -486,6 +486,26 @@ where
     }
 }
 
+impl<T> VarArgs for [T; 3]
+where
+    T: Into<Expr>,
+{
+    fn into_exprs(self) -> Vec<Expr> {
+        let [a, b, c] = self;
+        vec![a.into(), b.into(), c.into()]
+    }
+}
+
+impl<T> VarArgs for [T; 4]
+where
+    T: Into<Expr>,
+{
+    fn into_exprs(self) -> Vec<Expr> {
+        let [a, b, c, d] = self;
+        vec![a.into(), b.into(), c.into(), d.into()]
+    }
+}
+
 impl<T> VarArgs for Vec<T>
 where
     T: Into<Expr>,

@@ -7,7 +7,6 @@ use std::collections::HashSet;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use anyhow::anyhow;
 use anyhow::Error;
 use ascii::AsciiString;
 use ffi::Str;
@@ -318,6 +317,10 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             // I think "prune" means "stop if this expression IS NOT true"...
             let pred = hack::expr_builtin(hack::Builtin::IsTrue, [state.lookup_vid(vid)]);
             state.fb.prune(pred)?;
+        }
+        Instr::Special(Special::Textual(Textual::Deref(..))) => {
+            // Do nothing - the expectation is that this will be emitted as a
+            // Expr inlined in the target instruction (from lookup_iid()).
         }
         Instr::Special(Special::Textual(Textual::HackBuiltin {
             ref target,
@@ -787,11 +790,20 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
     }
 
     pub(crate) fn lookup_iid(&self, iid: InstrId) -> textual::Expr {
-        self.iid_mapping
-            .get(&iid)
-            .cloned()
-            .ok_or_else(|| anyhow!("looking for {iid:?}"))
-            .unwrap()
+        if let Some(expr) = self.iid_mapping.get(&iid) {
+            return expr.clone();
+        }
+
+        // The iid wasn't found.  Maybe it's a "special" reference (like a
+        // Deref()) - pessimistically look for that.
+        match self.func.instr(iid) {
+            Instr::Special(Special::Textual(Textual::Deref(lid))) => {
+                return textual::Expr::deref(*lid);
+            }
+            _ => {}
+        }
+
+        panic!("failed to look up iid {iid}");
     }
 
     /// Look up a ValueId in the FuncState and return an Expr representing

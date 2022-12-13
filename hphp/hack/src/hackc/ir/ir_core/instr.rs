@@ -1108,6 +1108,10 @@ pub enum Textual {
     /// If the expression is true then halt execution along this path.
     /// (this is what Textual calls 'prune not')
     AssertFalse(ValueId, LocId),
+    /// Special Deref marker for a variable.
+    #[has_operands(none)]
+    #[has_loc(none)]
+    Deref(LocalId),
     /// Special call to a Hack builtin function (like `hack_string`) skipping
     /// the normal Hack function ABI.
     HackBuiltin {
@@ -1119,6 +1123,12 @@ pub enum Textual {
     #[has_operands(none)]
     #[has_loc(none)]
     String(UnitBytesId),
+}
+
+impl Textual {
+    pub fn deref(lid: LocalId) -> Instr {
+        Instr::Special(Special::Textual(Textual::Deref(lid)))
+    }
 }
 
 #[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]

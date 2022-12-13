@@ -104,7 +104,10 @@ let can_access_public
     ~(env : Typing_env_types.env)
     ~(current : string option)
     ~(target : string option) =
-  if Option.equal String.equal current target then
+  (* Temporarily disable experimental module reference feature because it is too expensive *)
+  if true then
+    `Yes
+  else if Option.equal String.equal current target then
     `Yes
   else
     match satisfies_import_rules env current target with

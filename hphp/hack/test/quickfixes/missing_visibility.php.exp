@@ -1,0 +1,7 @@
+Add `private` modifier
+
+<?hh
+
+class C {
+  private static async function foo(): Awaitable<void> {}
+}

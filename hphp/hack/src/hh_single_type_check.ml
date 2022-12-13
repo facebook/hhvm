@@ -2714,10 +2714,13 @@ let handle_mode
       compute_tasts ~drop_fixmed:false ctx files_info files_contents
     in
     let src = Relative_path.Map.find files_contents path in
+
     let quickfixes =
       Errors.get_error_list ~drop_fixmed:false errors
-      |> List.map ~f:User_error.quickfixes
-      |> List.concat
+      |> List.map ~f:(fun e ->
+             (* If an error has multiple possible quickfixes, take the first. *)
+             List.hd (User_error.quickfixes e))
+      |> List.filter_opt
     in
 
     let cst = Ast_provider.compute_cst ~ctx ~entry in

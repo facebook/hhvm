@@ -5,10 +5,14 @@
 
 use std::cmp::Ordering;
 
+use ocamlrep::rc::RcOc;
+
 use crate::errors::*;
 use crate::message::Message;
 use crate::pos::Pos;
 use crate::pos_or_decl::PosOrDecl;
+use crate::quickfix::Edit;
+use crate::quickfix::QfPos;
 use crate::quickfix::Quickfix;
 use crate::user_error::UserError;
 
@@ -153,15 +157,34 @@ impl Naming {
         )
     }
 
-    pub fn method_needs_visibility(p: Pos) -> Error {
+    pub fn method_needs_visibility(first_token_p: Pos, name_p: Pos) -> Error {
+        // Create a zero width position at the start of the first token.
+        let file = RcOc::clone(first_token_p.filename_rc_ref());
+        let mut p_span = first_token_p.to_raw_span();
+        p_span.end = p_span.start;
+        let fix_pos = Pos::from_raw_span(file, p_span);
+
         UserError::new(
             Self::MethodNeedsVisibility as isize,
             Message(
-                p,
+                name_p,
                 "Methods need to be marked `public`, `private`, or `protected`.".into(),
             ),
             vec![],
-            vec![],
+            vec![
+                Quickfix {
+                    title: "Add `private` modifier".into(),
+                    edits: vec![Edit("private ".into(), QfPos::Qpos(fix_pos.clone()))],
+                },
+                Quickfix {
+                    title: "Add `protected` modifier".into(),
+                    edits: vec![Edit("protected ".into(), QfPos::Qpos(fix_pos.clone()))],
+                },
+                Quickfix {
+                    title: "Add `public` modifier".into(),
+                    edits: vec![Edit("public ".into(), QfPos::Qpos(fix_pos))],
+                },
+            ],
         )
     }
 

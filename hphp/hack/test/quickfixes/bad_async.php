@@ -1,5 +1,5 @@
 <?hh
 
 interface MyIface {
-  async function foo(): Awaitable<void>;
+  public async function foo(): Awaitable<void>;
 }

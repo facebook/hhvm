@@ -124,7 +124,7 @@ impl Pos {
         self.filename_rc_ref()
     }
 
-    fn filename_rc_ref(&self) -> &RcOc<RelativePath> {
+    pub fn filename_rc_ref(&self) -> &RcOc<RelativePath> {
         match &self.0 {
             PosImpl::Small { file, .. }
             | PosImpl::Large { file, .. }

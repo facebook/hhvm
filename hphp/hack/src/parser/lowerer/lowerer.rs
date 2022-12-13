@@ -4571,7 +4571,15 @@ fn merge_constraints(
 fn p_method_vis<'a>(node: S<'a>, name_pos: &Pos, env: &mut Env<'a>) -> ast::Visibility {
     match p_visibility_last_win(node, env) {
         None => {
-            raise_hh_error(env, Naming::method_needs_visibility(name_pos.clone()));
+            let first_token_pos = match node.syntax_node_to_list_skip_separator().next() {
+                Some(token_node) => p_pos(token_node, env),
+                None => name_pos.clone(),
+            };
+
+            raise_hh_error(
+                env,
+                Naming::method_needs_visibility(first_token_pos, name_pos.clone()),
+            );
             ast::Visibility::Public
         }
         Some(v) => v,

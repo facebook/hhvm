@@ -392,6 +392,20 @@ MultiplexAsyncProcessorFactory::flattenProcessorFactories(
   return result;
 }
 
+#if defined(THRIFT_SCHEMA_AVAILABLE)
+folly::Optional<std::vector<SchemaV1>>
+MultiplexAsyncProcessorFactory::getServiceMetadataV1() {
+  std::vector<SchemaV1> allSchemas;
+  for (auto& processorFactory : processorFactories_) {
+    auto schemas = processorFactory->getServiceMetadataV1();
+    if (schemas.hasValue()) {
+      allSchemas.insert(allSchemas.end(), schemas->begin(), schemas->end());
+    }
+  }
+  return allSchemas;
+}
+#endif
+
 std::unique_ptr<AsyncProcessor> MultiplexAsyncProcessorFactory::getProcessor() {
   return getProcessorWithUnderlyingModifications({} /* modifier */);
 }

@@ -36,13 +36,13 @@ namespace apache::thrift::conformance {
  **/
 class Protocol {
  public:
-  Protocol() noexcept = default;
+  Protocol() = default;
   Protocol(const Protocol&) = default;
   Protocol(Protocol&&) noexcept = default;
 
-  explicit Protocol(StandardProtocol standard) noexcept : standard_(standard) {}
+  explicit Protocol(StandardProtocol standard) : standard_(standard) {}
   explicit Protocol(std::string custom) noexcept : custom_(std::move(custom)) {}
-  explicit Protocol(ProtocolStruct protocol) noexcept;
+  explicit Protocol(ProtocolStruct protocol);
 
   // Returns a protocol for the given name.
   //

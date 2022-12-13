@@ -1,7 +1,7 @@
 // RUN: %hackc compile-infer %s | FileCheck %s
 
 // TEST-CHECK-BAL: "type A "
-// CHECK: type A = {
+// CHECK: type A extends HH::BuiltinEnum = .kind="class" {
 // CHECK: }
 
 // TEST-CHECK-BAL: define A$static.$init_static

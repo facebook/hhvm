@@ -125,17 +125,52 @@ impl<'a> TextualFile<'a> {
         Ok(result)
     }
 
+    fn write_metadata<'s>(
+        &mut self,
+        metadata: impl Iterator<Item = (&'s str, &'s Expr)>,
+    ) -> Result {
+        for (k, v) in metadata {
+            // Special case - for a false value just emit nothing.
+            if matches!(v, Expr::Const(Const::False)) {
+                continue;
+            }
+
+            self.w.write_all(b".")?;
+            self.w.write_all(k.as_bytes())?;
+            // Special case - for a true value just emit the key.
+            if !matches!(v, Expr::Const(Const::True)) {
+                self.w.write_all(b"=")?;
+                self.write_expr(v)?;
+            }
+            self.w.write_all(b" ")?;
+        }
+        Ok(())
+    }
+
     pub(crate) fn define_type<'s>(
         &mut self,
         name: &str,
         src_loc: &SrcLoc,
+        extends: impl Iterator<Item = &'s str>,
         fields: impl Iterator<Item = Field<'s>>,
+        metadata: impl Iterator<Item = (&'s str, &'s Expr)>,
     ) -> Result {
         self.write_full_loc(src_loc)?;
 
-        write!(self.w, "type {name} = {{")?;
+        write!(self.w, "type {name}")?;
+
+        let mut sep = " extends";
+        for base in extends {
+            write!(self.w, "{sep} {base}")?;
+            sep = ",";
+        }
+
+        write!(self.w, " = ")?;
+        self.write_metadata(metadata)?;
+        write!(self.w, "{{")?;
 
         let mut sep = "\n";
+
         for f in fields {
             write!(
                 self.w,
@@ -197,6 +232,42 @@ impl<'a> TextualFile<'a> {
         }
 
         Ok(builtins)
+    }
+
+    fn write_expr(&mut self, expr: &Expr) -> Result {
+        match *expr {
+            Expr::Call(ref target, ref params) => {
+                if !self.called_functions.contains(target) {
+                    self.called_functions.insert(target.to_owned());
+                }
+                write!(self.w, "{}(", target)?;
+                let mut sep = "";
+                for param in params.iter() {
+                    self.w.write_all(sep.as_bytes())?;
+                    self.write_expr(param)?;
+                    sep = ", ";
+                }
+                write!(self.w, ")")?;
+            }
+            Expr::Const(ref c) => write!(self.w, "{}", FmtConst(c))?,
+            Expr::Deref(ref var) => {
+                self.w.write_all(b"&")?;
+                self.write_expr(var)?;
+            }
+            Expr::Field(ref base, ref name) => {
+                self.write_expr(base)?;
+                write!(self.w, ".{name}")?;
+            }
+            Expr::Index(ref base, ref offset) => {
+                self.write_expr(base)?;
+                self.w.write_all(b"[")?;
+                self.write_expr(offset)?;
+                self.w.write_all(b"]")?;
+            }
+            Expr::Sid(sid) => write!(self.w, "{}", FmtSid(sid))?,
+            Expr::Var(ref var) => write!(self.w, "{}", FmtVar(&self.strings, var))?,
+        }
+        Ok(())
     }
 
     fn write_full_loc(&mut self, src_loc: &SrcLoc) -> Result {
@@ -633,7 +704,7 @@ impl FuncBuilder<'_, '_> {
                 let mut sep2 = "";
                 for param in params.iter() {
                     self.txf.w.write_all(sep2.as_bytes())?;
-                    self.write_expr(param)?;
+                    self.txf.write_expr(param)?;
                     sep2 = ", ";
                 }
                 write!(self.txf.w, ")")?;
@@ -647,42 +718,6 @@ impl FuncBuilder<'_, '_> {
 
     pub(crate) fn write_exception_handler(&mut self, target: BlockId) -> Result {
         writeln!(self.txf.w, "{INDENT}.handlers {}", FmtBid(target))?;
-        Ok(())
-    }
-
-    fn write_expr(&mut self, expr: &Expr) -> Result {
-        match *expr {
-            Expr::Call(ref target, ref params) => {
-                if !self.txf.called_functions.contains(target) {
-                    self.txf.called_functions.insert(target.to_owned());
-                }
-                write!(self.txf.w, "{}(", target)?;
-                let mut sep = "";
-                for param in params.iter() {
-                    self.txf.w.write_all(sep.as_bytes())?;
-                    self.write_expr(param)?;
-                    sep = ", ";
-                }
-                write!(self.txf.w, ")")?;
-            }
-            Expr::Const(ref c) => write!(self.txf.w, "{}", FmtConst(c))?,
-            Expr::Deref(ref var) => {
-                self.txf.w.write_all(b"&")?;
-                self.write_expr(var)?;
-            }
-            Expr::Field(ref base, ref name) => {
-                self.write_expr(base)?;
-                write!(self.txf.w, ".{name}")?;
-            }
-            Expr::Index(ref base, ref offset) => {
-                self.write_expr(base)?;
-                self.txf.w.write_all(b"[")?;
-                self.write_expr(offset)?;
-                self.txf.w.write_all(b"]")?;
-            }
-            Expr::Sid(sid) => write!(self.txf.w, "{}", FmtSid(sid))?,
-            Expr::Var(ref var) => write!(self.txf.w, "{}", FmtVar(&self.txf.strings, var))?,
-        }
         Ok(())
     }
 
@@ -734,11 +769,11 @@ impl FuncBuilder<'_, '_> {
         }
         let dst = self.alloc_sid();
         write!(self.txf.w, "{INDENT}{dst} = {target}(", dst = FmtSid(dst),)?;
-        self.write_expr(&this)?;
+        self.txf.write_expr(&this)?;
         let params = params.into_exprs();
         for param in params {
             self.txf.w.write_all(b", ")?;
-            self.write_expr(&param)?;
+            self.txf.write_expr(&param)?;
         }
         writeln!(self.txf.w, ")")?;
         Ok(dst)
@@ -756,13 +791,13 @@ impl FuncBuilder<'_, '_> {
         }
         let dst = self.alloc_sid();
         write!(self.txf.w, "{INDENT}{dst} = ", dst = FmtSid(dst),)?;
-        self.write_expr(&this)?;
+        self.txf.write_expr(&this)?;
         write!(self.txf.w, ".{target}(")?;
         let params = params.into_exprs();
         let mut sep = "";
         for param in params {
             self.txf.w.write_all(sep.as_bytes())?;
-            self.write_expr(&param)?;
+            self.txf.write_expr(&param)?;
             sep = ", ";
         }
         writeln!(self.txf.w, ")")?;
@@ -779,7 +814,7 @@ impl FuncBuilder<'_, '_> {
         let params = params.into_exprs();
         for param in params {
             self.txf.w.write_all(sep.as_bytes())?;
-            self.write_expr(&param)?;
+            self.txf.write_expr(&param)?;
             sep = ", ";
         }
         writeln!(self.txf.w, ")")?;
@@ -795,7 +830,7 @@ impl FuncBuilder<'_, '_> {
         let src = src.into();
         let dst = self.alloc_sid();
         write!(self.txf.w, "{INDENT}{dst} = ", dst = FmtSid(dst),)?;
-        self.write_expr(&src)?;
+        self.txf.write_expr(&src)?;
         writeln!(self.txf.w)?;
         Ok(dst)
     }
@@ -809,7 +844,7 @@ impl FuncBuilder<'_, '_> {
             dst = FmtSid(dst),
             ty = FmtTy(ty),
         )?;
-        self.write_expr(&src)?;
+        self.txf.write_expr(&src)?;
         writeln!(self.txf.w)?;
         Ok(dst)
     }
@@ -818,7 +853,7 @@ impl FuncBuilder<'_, '_> {
     pub(crate) fn prune(&mut self, expr: impl Into<Expr>) -> Result {
         let expr = expr.into();
         write!(self.txf.w, "{INDENT}prune ")?;
-        self.write_expr(&expr)?;
+        self.txf.write_expr(&expr)?;
         writeln!(self.txf.w)?;
         Ok(())
     }
@@ -827,7 +862,7 @@ impl FuncBuilder<'_, '_> {
     pub(crate) fn prune_not(&mut self, expr: impl Into<Expr>) -> Result {
         let expr = expr.into();
         write!(self.txf.w, "{INDENT}prune ! ")?;
-        self.write_expr(&expr)?;
+        self.txf.write_expr(&expr)?;
         writeln!(self.txf.w)?;
         Ok(())
     }
@@ -835,7 +870,7 @@ impl FuncBuilder<'_, '_> {
     pub(crate) fn ret(&mut self, expr: impl Into<Expr>) -> Result {
         let expr = expr.into();
         write!(self.txf.w, "{INDENT}ret ",)?;
-        self.write_expr(&expr)?;
+        self.txf.write_expr(&expr)?;
         writeln!(self.txf.w)?;
         Ok(())
     }
@@ -849,9 +884,9 @@ impl FuncBuilder<'_, '_> {
         let dst = dst.into();
         let src = src.into();
         write!(self.txf.w, "{INDENT}store ")?;
-        self.write_expr(&dst)?;
+        self.txf.write_expr(&dst)?;
         self.txf.w.write_all(b" <- ")?;
-        self.write_expr(&src)?;
+        self.txf.write_expr(&src)?;
         writeln!(self.txf.w, ": {ty}", ty = FmtTy(src_ty))?;
         Ok(())
     }

@@ -1,13 +1,13 @@
 // RUN: %hackc compile-infer %s | FileCheck %s
 
 // TEST-CHECK-BAL: type C$static
-// CHECK: type C$static = {
+// CHECK: type C$static = .kind="class" .static {
 // CHECK:   prop3: .public *HackFloat;
 // CHECK:   prop4: .public *HackMixed
 // CHECK: }
 
 // TEST-CHECK-BAL: "type C "
-// CHECK: type C = {
+// CHECK: type C = .kind="class" {
 // CHECK:   prop1: .public *HackInt;
 // CHECK:   prop2: .public *HackString;
 // CHECK:   type_: .public *HackInt

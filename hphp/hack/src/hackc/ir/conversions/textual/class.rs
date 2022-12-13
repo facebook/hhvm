@@ -14,6 +14,7 @@
 use std::sync::Arc;
 
 use anyhow::Error;
+use hash::IndexMap;
 use log::trace;
 
 use super::func;
@@ -149,12 +150,49 @@ fn write_type(
     class: &ir::Class<'_>,
     is_static: IsStatic,
 ) -> Result {
+    let mut metadata: IndexMap<&str, textual::Expr> = IndexMap::default();
+
+    let kind = if class.flags.is_interface() {
+        "interface"
+    } else if class.flags.is_trait() {
+        "trait"
+    } else {
+        "class"
+    };
+    metadata.insert("kind", kind.into());
+    metadata.insert("static", is_static.as_bool().into());
+
+    // Traits say they're final - because they're not "real" classes. But that
+    // will be strange for us since we treat them as bases.
+    if !class.flags.is_trait() && !class.flags.is_interface() {
+        metadata.insert("final", class.flags.is_final().into());
+    }
+
     let mut fields: Vec<(String, textual::Ty, textual::Visibility)> = Vec::new();
     for prop in &class.properties {
         if prop.flags.is_static() == is_static.as_bool() {
             write_property(txf, &mut fields, state, prop)?;
         }
     }
+
+    let mut extends: Vec<String> = Vec::new();
+    if let Some(base) = class.base {
+        extends.push(base.mangle_class(is_static, &state.strings));
+    }
+
+    extends.extend(
+        class
+            .implements
+            .iter()
+            .map(|id| id.mangle_class(is_static, &state.strings)),
+    );
+
+    extends.extend(
+        class
+            .uses
+            .iter()
+            .map(|id| id.mangle_class(is_static, &state.strings)),
+    );
 
     let fields = fields.iter().map(|(name, ty, visibility)| textual::Field {
         name: name.as_str(),
@@ -163,7 +201,13 @@ fn write_type(
     });
 
     let cname = class.name.mangle_class(is_static, &state.strings);
-    txf.define_type(&cname, &class.src_loc, fields)?;
+    txf.define_type(
+        &cname,
+        &class.src_loc,
+        extends.iter().map(String::as_str),
+        fields,
+        metadata.iter().map(|(k, v)| (*k, v)),
+    )?;
 
     Ok(())
 }

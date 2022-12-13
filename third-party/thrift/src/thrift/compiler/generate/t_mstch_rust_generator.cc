@@ -358,6 +358,7 @@ class rust_mstch_program : public mstch_program {
             {"program:docs", &rust_mstch_program::rust_docs},
             {"program:include_srcs", &rust_mstch_program::rust_include_srcs},
         });
+    register_has_option("program:default_enum_zero?", "default_enum_zero");
   }
   mstch::node rust_has_types() {
     return !program_->structs().empty() || !program_->enums().empty() ||

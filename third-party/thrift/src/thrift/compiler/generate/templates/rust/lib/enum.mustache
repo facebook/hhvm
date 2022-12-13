@@ -62,7 +62,12 @@ impl ::fbthrift::ThriftEnum for {{enum:rust_name}} {
 
 impl ::std::default::Default for {{enum:rust_name}} {
     fn default() -> Self {
+        {{#program:default_enum_zero?}}
+        Self(0)
+        {{/program:default_enum_zero?}}
+        {{^program:default_enum_zero?}}
         Self(::fbthrift::__UNKNOWN_ID)
+        {{/program:default_enum_zero?}}
     }
 }
 

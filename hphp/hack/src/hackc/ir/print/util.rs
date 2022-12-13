@@ -116,21 +116,17 @@ pub struct FmtEscapedString<'a>(pub &'a [u8]);
 
 impl Display for FmtEscapedString<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let mut s = String::with_capacity(self.0.len() * 3 / 2 + 2);
+        let mut s = String::with_capacity(self.0.len() * 2 + 2);
         s.push('"');
         for &c in self.0 {
             match c {
-                b'\\' => s.push('\\'),
+                b'\\' => s.push_str("\\\\"),
                 b'\n' => s.push_str("\\n"),
                 b'\r' => s.push_str("\\r"),
                 b'\t' => s.push_str("\\t"),
-                c => {
-                    if c.is_ascii_graphic() || c == b' ' {
-                        s.push(c as char)
-                    } else {
-                        s.push_str(&format!("\\{:03o}", c))
-                    }
-                }
+                b'\"' => s.push_str("\\\""),
+                c if c.is_ascii_graphic() || c == b' ' => s.push(c as char),
+                c => s.push_str(&format!("\\x{:02x}", c)),
             }
         }
         s.push('"');

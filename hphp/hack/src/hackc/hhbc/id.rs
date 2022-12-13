@@ -47,6 +47,10 @@ macro_rules! impl_id {
                 self.0.as_bstr().as_bytes()
             }
 
+            pub fn from_bytes(alloc: &'arena bumpalo::Bump, s: &[u8]) -> $type<'arena> {
+                $type(Str::new_slice(alloc, s))
+            }
+
             pub fn from_raw_string(alloc: &'arena bumpalo::Bump, s: &str) -> $type<'arena> {
                 $type(Str::new_str(alloc, s))
             }

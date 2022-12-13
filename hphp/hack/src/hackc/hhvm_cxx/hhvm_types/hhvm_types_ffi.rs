@@ -4,8 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::ops::BitAnd;
+use std::ops::BitAndAssign;
 use std::ops::BitOr;
-use std::ops::Not;
+use std::ops::SubAssign;
 
 #[allow(unreachable_patterns)]
 #[cxx::bridge(namespace = "HPHP")]
@@ -198,11 +199,16 @@ impl BitAnd for TypeConstraintFlags {
     }
 }
 
-impl Not for TypeConstraintFlags {
-    type Output = Self;
+impl BitAndAssign for TypeConstraintFlags {
+    fn bitand_assign(&mut self, rhs: Self) {
+        self.repr &= rhs.repr;
+    }
+}
 
-    fn not(self) -> Self::Output {
-        Self { repr: !self.repr }
+impl SubAssign for TypeConstraintFlags {
+    fn sub_assign(&mut self, other: Self) {
+        // For flags subtract just drops the bits.
+        self.repr &= !other.repr;
     }
 }
 
@@ -260,6 +266,12 @@ impl Attr {
     pub fn add(&mut self, attr: Attr) {
         self.repr = *self | attr
     }
+    pub fn remove(&mut self, attr: Attr) {
+        self.repr &= !attr.repr;
+    }
+    pub fn contains(&self, attr: Attr) -> bool {
+        (self.repr & attr.repr) == attr.repr
+    }
 
     pub fn set(&mut self, attr: Attr, b: bool) {
         if b {
@@ -272,76 +284,83 @@ impl Attr {
     }
 
     pub fn is_internal(&self) -> bool {
-        (*self & Self::AttrInternal) != 0
+        (*self & Self::AttrInternal) != Self::AttrNone
     }
     pub fn is_public(&self) -> bool {
-        (*self & Self::AttrPublic) != 0
+        (*self & Self::AttrPublic) != Self::AttrNone
     }
     pub fn is_private(&self) -> bool {
-        (*self & Self::AttrPrivate) != 0
+        (*self & Self::AttrPrivate) != Self::AttrNone
     }
     pub fn is_protected(&self) -> bool {
-        (*self & Self::AttrProtected) != 0
+        (*self & Self::AttrProtected) != Self::AttrNone
     }
     pub fn is_final(&self) -> bool {
-        (*self & Self::AttrFinal) != 0
+        (*self & Self::AttrFinal) != Self::AttrNone
     }
     pub fn is_sealed(&self) -> bool {
-        (*self & Self::AttrSealed) != 0
+        (*self & Self::AttrSealed) != Self::AttrNone
     }
     pub fn is_abstract(&self) -> bool {
-        (*self & Self::AttrAbstract) != 0
+        (*self & Self::AttrAbstract) != Self::AttrNone
     }
     pub fn is_interface(&self) -> bool {
-        (*self & Self::AttrInterface) != 0
+        (*self & Self::AttrInterface) != Self::AttrNone
     }
     pub fn is_trait(&self) -> bool {
-        (*self & Self::AttrTrait) != 0
+        (*self & Self::AttrTrait) != Self::AttrNone
     }
     pub fn is_const(&self) -> bool {
-        (*self & Self::AttrIsConst) != 0
+        (*self & Self::AttrIsConst) != Self::AttrNone
     }
     pub fn no_dynamic_props(&self) -> bool {
-        (*self & Self::AttrForbidDynamicProps) != 0
+        (*self & Self::AttrForbidDynamicProps) != Self::AttrNone
     }
     pub fn needs_no_reifiedinit(&self) -> bool {
-        (*self & Self::AttrNoReifiedInit) != 0
+        (*self & Self::AttrNoReifiedInit) != Self::AttrNone
     }
     pub fn is_late_init(&self) -> bool {
-        (*self & Self::AttrLateInit) != 0
+        (*self & Self::AttrLateInit) != Self::AttrNone
     }
     pub fn is_no_bad_redeclare(&self) -> bool {
-        (*self & Self::AttrNoBadRedeclare) != 0
+        (*self & Self::AttrNoBadRedeclare) != Self::AttrNone
     }
     pub fn initial_satisfies_tc(&self) -> bool {
-        (*self & Self::AttrInitialSatisfiesTC) != 0
+        (*self & Self::AttrInitialSatisfiesTC) != Self::AttrNone
     }
     pub fn no_implicit_null(&self) -> bool {
-        (*self & Self::AttrNoImplicitNullable) != 0
+        (*self & Self::AttrNoImplicitNullable) != Self::AttrNone
     }
     pub fn has_system_initial(&self) -> bool {
-        (*self & Self::AttrSystemInitialValue) != 0
+        (*self & Self::AttrSystemInitialValue) != Self::AttrNone
     }
     pub fn is_deep_init(&self) -> bool {
-        (*self & Self::AttrDeepInit) != 0
+        (*self & Self::AttrDeepInit) != Self::AttrNone
     }
     pub fn is_lsb(&self) -> bool {
-        (*self & Self::AttrLSB) != 0
+        (*self & Self::AttrLSB) != Self::AttrNone
     }
     pub fn is_static(&self) -> bool {
-        (*self & Self::AttrStatic) != 0
+        (*self & Self::AttrStatic) != Self::AttrNone
     }
     pub fn is_readonly(&self) -> bool {
-        (*self & Self::AttrIsReadonly) != 0
+        (*self & Self::AttrIsReadonly) != Self::AttrNone
     }
     pub fn is_no_injection(&self) -> bool {
-        (*self & Self::AttrNoInjection) != 0
+        (*self & Self::AttrNoInjection) != Self::AttrNone
     }
     pub fn is_interceptable(&self) -> bool {
-        (*self & Self::AttrInterceptable) != 0
+        (*self & Self::AttrInterceptable) != Self::AttrNone
     }
     pub fn is_empty(&self) -> bool {
         *self == Self::AttrNone
+    }
+}
+
+impl SubAssign for Attr {
+    fn sub_assign(&mut self, other: Self) {
+        // For flags subtract just drops the bits.
+        self.repr &= !other.repr;
     }
 }
 
@@ -362,10 +381,12 @@ impl BitOr<Attr> for u32 {
 }
 
 impl BitAnd for Attr {
-    type Output = u32;
+    type Output = Self;
 
-    fn bitand(self, other: Self) -> u32 {
-        self.repr & other.repr
+    fn bitand(self, other: Self) -> Self {
+        Self {
+            repr: self.repr & other.repr,
+        }
     }
 }
 
@@ -374,5 +395,11 @@ impl BitAnd<u32> for Attr {
 
     fn bitand(self, other: u32) -> u32 {
         self.repr & other
+    }
+}
+
+impl BitAndAssign for Attr {
+    fn bitand_assign(&mut self, rhs: Self) {
+        self.repr &= rhs.repr;
     }
 }

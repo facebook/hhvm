@@ -29,7 +29,7 @@ pub struct Method<'arena> {
 }
 
 bitflags! {
-    #[derive(Serialize)]
+    #[derive(Default, Serialize)]
     #[repr(C)]
     pub struct MethodFlags: u16 {
         const IS_ASYNC = 1 << 0;

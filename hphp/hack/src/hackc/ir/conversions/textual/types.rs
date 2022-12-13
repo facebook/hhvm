@@ -16,12 +16,12 @@ pub(crate) fn convert_ty(ty: &ir::EnforceableType, strings: &StringInterner) -> 
     let mut modifiers = ty.modifiers;
 
     // ExtendedHint does nothing interesting.
-    modifiers = modifiers & !TypeConstraintFlags::ExtendedHint;
+    modifiers -= TypeConstraintFlags::ExtendedHint;
     // DisplayNullable does nothing interesting.
-    modifiers = modifiers & !TypeConstraintFlags::DisplayNullable;
+    modifiers -= TypeConstraintFlags::DisplayNullable;
 
     // All textual boxed types are nullable.
-    modifiers = modifiers & !TypeConstraintFlags::Nullable;
+    modifiers -= TypeConstraintFlags::Nullable;
 
     if modifiers != TypeConstraintFlags::NoFlags {
         log::trace!("MODIFIERS: {modifiers:?}");

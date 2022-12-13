@@ -742,32 +742,41 @@ module HhFanout : sig
     Dep.dependent Dep.variant ->
     Dep.dependency Dep.variant ->
     unit
+
+  val flush_edges : Hh_fanout_rust_ffi_externs.hh_fanout_rust_ffi -> unit
 end = struct
-  let current_buffer : Hh_fanout_rust_ffi_externs.edges_buffer option ref =
-    ref None
+  let discovered_deps_batch : (CustomGraph.dep_edge, unit) Hashtbl.t =
+    Hashtbl.create 1000
 
-  let get_buffer_or_start hh_fanout : Hh_fanout_rust_ffi_externs.edges_buffer =
-    match !current_buffer with
-    | None ->
-      let buffer = Hh_fanout_rust_ffi_externs.start_edges hh_fanout in
-      let () = current_buffer := Some buffer in
-      buffer
-    | Some buffer -> buffer
-
-  let add_idep hh_fanout dependent dependency =
-    let buffer = get_buffer_or_start hh_fanout in
-    let dependent_int64 = dependent |> Dep.make |> Dep.to_int64 in
-    let add_edge_result =
-      Hh_fanout_rust_ffi_externs.add_edge
-        hh_fanout
-        ~dependent:dependent_int64
-        ~dependency:(dependency |> Dep.make |> Dep.to_int64)
-        buffer (* TODO(toyang): use an actual checksum *)
-        ~expected_checksum:(Int64.of_int 42)
+  let flush_edges hh_fanout_ffi =
+    let edges =
+      Hashtbl.fold
+        begin
+          fun CustomGraph.{ idependent; idependency } () acc ->
+          (idependency, idependent) :: acc
+        end
+        discovered_deps_batch
+        []
     in
-    match add_edge_result with
-    | Ok edges_buffer -> current_buffer := Some edges_buffer
-    | Error _hh_fanout_error -> failwith "TODO handle errors from hh_fanout"
+    Hh_fanout_rust_ffi_externs.commit_edges hh_fanout_ffi edges;
+    Hashtbl.clear discovered_deps_batch
+
+  let add_idep hh_fanout_ffi dependent dependency =
+    let idependent = Dep.make dependent in
+    let idependency = Dep.make dependency in
+    if idependent = idependency then
+      ()
+    else (
+      Caml.Hashtbl.iter (fun _ f -> f dependent dependency) dependency_callbacks;
+      if !trace then begin
+        Hashtbl.replace
+          discovered_deps_batch
+          CustomGraph.{ idependent; idependency }
+          ();
+        if Hashtbl.length discovered_deps_batch >= 1000 then
+          flush_edges hh_fanout_ffi
+      end
+    )
 end
 
 (** Registers Rust custom types with the OCaml runtime, supporting deserialization *)
@@ -890,7 +899,13 @@ let flush_ideps_batch mode : dep_edges =
     SaveCustomGraph.filter_discovered_deps_batch ~flush:true mode;
     SaveHumanReadableDepMap.export_to_disk ~flush:true mode;
     None
-  | HhFanoutRustMode _ -> failwith "TODO"
+  (* This function is used by  *)
+  | HhFanoutRustMode _ -> failwith "HhFanoutRustMode not supported"
+
+let hh_fanout_flush_ideps mode : unit =
+  match mode with
+  | HhFanoutRustMode { hh_fanout } -> HhFanout.flush_edges hh_fanout
+  | _ -> failwith "should only be called in HhFanoutRustMode"
 
 let merge_dep_edges (x : dep_edges) (y : dep_edges) : dep_edges =
   match (x, y) with
@@ -907,20 +922,23 @@ let save_discovered_edges mode ~dest ~reset_state_after_saving =
   | InMemoryMode _ -> CustomGraph.save_delta dest reset_state_after_saving
   | SaveToDiskMode _ ->
     failwith "save_discovered_edges not supported for SaveToDiskMode"
-  | HhFanoutRustMode _ -> failwith "TODO"
+  | HhFanoutRustMode _ ->
+    failwith "save_discovered_edges not supported for HhFanoutRustMode"
 
 let load_discovered_edges mode source =
   match mode with
   | InMemoryMode _ -> CustomGraph.load_delta mode source
   | SaveToDiskMode _ -> SaveCustomGraph.save_delta mode ~source
-  | HhFanoutRustMode _ -> failwith "TODO"
+  | HhFanoutRustMode _ ->
+    failwith "load_discovered_edges not supported for HhFanoutRustMode"
 
 let get_ideps_from_hash mode hash =
   match mode with
   | InMemoryMode _
   | SaveToDiskMode _ ->
     CustomGraph.get_ideps_from_hash mode hash
-  | HhFanoutRustMode _ -> failwith "TODO"
+  | HhFanoutRustMode _ ->
+    failwith "get_ideps_from_hash not supported for HhFanoutRustMode"
 
 let get_ideps mode dependency = get_ideps_from_hash mode (Dep.make dependency)
 

@@ -3,11 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#![cfg_attr(not(fbcode_build), allow(unused_variables))]
+#[cfg(fbcode_build)]
+use std::path::Path;
+use std::path::PathBuf;
 
-use ocamlrep_caml_builtins::Int64;
 use ocamlrep_custom::Custom;
-use rpds::HashTrieSet;
 
 #[cfg(fbcode_build)]
 pub struct HhFanoutRustFfi(hh_fanout_lib::HhFanoutImpl);
@@ -18,50 +18,48 @@ impl ocamlrep_custom::CamlSerialize for HhFanoutRustFfi {
     ocamlrep_custom::caml_serialize_default_impls!();
 }
 
-#[derive(ocamlrep::ToOcamlRep, ocamlrep::FromOcamlRep)]
-#[repr(C)]
-enum EdgesError {
-    EeDecl(String),
-}
-
-type EdgesResult<T> = Result<T, EdgesError>;
-
-/// Rust set of edges.
-#[derive(Debug)]
-pub struct EdgesBuffer(HashTrieSet<hh24_types::DepGraphEdge>);
-
-impl std::ops::Deref for EdgesBuffer {
-    type Target = HashTrieSet<hh24_types::DepGraphEdge>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl From<HashTrieSet<hh24_types::DepGraphEdge>> for EdgesBuffer {
-    fn from(set: HashTrieSet<hh24_types::DepGraphEdge>) -> Self {
-        Self(set)
-    }
-}
-
-impl ocamlrep_custom::CamlSerialize for EdgesBuffer {
-    ocamlrep_custom::caml_serialize_default_impls!();
-}
-
+#[cfg(fbcode_build)]
 ocamlrep_ocamlpool::ocaml_ffi! {
- fn hh_fanout_start_edges(hh_fanout: Custom<HhFanoutRustFfi>) -> Custom<EdgesBuffer> {
-     // TODO(toyang): do things with hh_fanout.0
-     let _ = hh_fanout;
-     todo!()
- }
+    fn hh_fanout_ffi_make(fanout_state_dir: PathBuf, decl_state_dir: PathBuf) -> Custom<HhFanoutRustFfi> {
+        // TODO(toyang): we should replace this log with a real scuba logger and
+        // a file log in the state dir or in a configured location. See
+        // hh_decl_ffi.rs for another location we need to pass a better log
+        // object.
+        let log = hh_slog::Log {
+            file: hh_slog::init_file_sync(Path::new("/tmp/hh_fanout_log")),
+            scuba: hh_slog::init_file_sync(Path::new("/tmp/hh_fanout_log_scuba")),
+        };
+        let hh_decl = Box::new(hh_decl_shmem::DeclShmem::new(log.clone(), decl_state_dir));
+        let hh_fanout = hh_fanout_lib::HhFanoutImpl::new(log, fanout_state_dir, hh_decl);
+        Custom::from(HhFanoutRustFfi(hh_fanout))
+    }
 
- fn hh_fanout_add_edge(hh_fanout: Custom<HhFanoutRustFfi>, dependent: Int64, dependency: Int64, buffer: Custom<EdgesBuffer>, expected_checksum: Int64) -> EdgesResult<Custom<EdgesBuffer>> {
-     let _ = (hh_fanout, dependent, dependency, buffer, expected_checksum);
-     todo!()
- }
+    // Each edge is a tuple of (dependency, dependent).
+    fn hh_fanout_ffi_add_idep_batch(hh_fanout: Custom<HhFanoutRustFfi>, edges: Vec<(u64, u64)>) {
+        use hh_fanout_lib::HhFanout;
+        if let Err(err) = hh_fanout.0.commit_edges(
+            edges.into_iter().map(
+                |(dependency, dependent)|
+                hh24_types::DepGraphEdge {
+                    dependency: hh24_types::DependencyHash(dependency),
+                    dependent: hh24_types::ToplevelSymbolHash::from_u64(dependent),
+                }
+            ).collect()
+        ) {
+            eprintln!("Error: {err}");
+            todo!("deal with hh errors like checksum mismatch");
+        };
+    }
+}
 
- fn hh_fanout_finish_edges(hh_fanout: Custom<HhFanoutRustFfi>, buffer: Custom<EdgesBuffer>) -> EdgesResult<()> {
-     let _ =(hh_fanout, buffer);
-     todo!()
- }
+#[cfg(not(fbcode_build))]
+// This FFI only works for fbcode builds at the moment, due to trickiness with
+// dune working with cargo and not playing well with some dependencies.
+ocamlrep_ocamlpool::ocaml_ffi! {
+    fn hh_fanout_ffi_make(_fanout_state_dir: PathBuf, _decl_state_dir: PathBuf) -> Custom<HhFanoutRustFfi> {
+        unimplemented!()
+    }
+    fn hh_fanout_ffi_add_idep_batch(_hh_fanout: Custom<HhFanoutRustFfi>, _edges: Vec<(u64, u64)>) {
+        unimplemented!()
+    }
 }

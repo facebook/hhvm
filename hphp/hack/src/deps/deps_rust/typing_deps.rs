@@ -175,7 +175,9 @@ impl UnsafeDepGraph {
                     Ok(Some(depgraph))
                 }
                 TypingDepsMode::HhFanoutRustMode { hh_fanout: _ } => {
-                    todo!()
+                    // HhFanoutRustMode doesn't load the dep graph this way.
+                    // This path shouldn't be reached.
+                    unimplemented!()
                 }
             }
         })?;

@@ -36,6 +36,11 @@ pub fn init_file(filename: &std::path::Path) -> (slog::Logger, slog_async::Async
     (log, guard)
 }
 
+pub fn init_file_sync(filename: &std::path::Path) -> slog::Logger {
+    let drain = locked_file_drain::LockedFileDrain::new(filename);
+    slog::Logger::root(drain.fuse(), o!())
+}
+
 pub fn init_term(binary_name: &'static str) -> (slog::Logger, slog_async::AsyncGuard) {
     let decorator = slog_term::TermDecorator::new().build();
 

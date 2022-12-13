@@ -12,8 +12,6 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 hh24_types = { path = "../../../utils/hh24_types" }
-ocamlrep = { path = "../../../ocamlrep" }
-ocamlrep_caml_builtins = { path = "../../../utils/ocamlrep_caml_builtins" }
+hh_slog = { path = "../../../utils/hh_slog/cargo/hh_slog" }
 ocamlrep_custom = { path = "../../../ocamlrep_custom" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
-rpds = "0.11.0"

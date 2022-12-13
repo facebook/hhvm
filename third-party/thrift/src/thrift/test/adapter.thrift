@@ -56,6 +56,7 @@ typedef binary (cpp.type = "::folly::IOBuf") CustomProtocolType
 }
 typedef string IndirectionString
 
+@cpp.UseOpEncode
 struct AdaptTestStruct {
   1: DurationMs delay;
   2: CustomProtocolType custom;

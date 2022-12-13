@@ -11457,10 +11457,10 @@ class struct_with_indirections final  {
   using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                          void,
                                                          ::apache::thrift::type::i32_t,
-                                                         ::apache::thrift::type::cpp_type<::test_cpp2::cpp_reflection::FakeI32, ::apache::thrift::type::i32_t>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<::test_cpp2::cpp_reflection::HasANumber>, ::apache::thrift::type::i32_t>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<::test_cpp2::cpp_reflection::HasAResult>, ::apache::thrift::type::i32_t>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<::test_cpp2::cpp_reflection::HasAPhrase>, ::apache::thrift::type::string_t>>;
+                                                         ::apache::thrift::type::cpp_type<CppFakeI32, ::apache::thrift::type::i32_t>,
+                                                         ::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<CppHasANumber>, ::apache::thrift::type::i32_t>,
+                                                         ::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<CppHasAResult>, ::apache::thrift::type::i32_t>,
+                                                         ::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<CppHasAPhrase>, ::apache::thrift::type::string_t>>;
 
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -11503,10 +11503,10 @@ class struct_with_indirections final  {
   struct __fbthrift_ordinal_impl_for_non_unique_type {
     template<class, class, class> struct Impl { static constexpr int value = 0; };
     template<class T> struct Impl<::apache::thrift::type::i32_t, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
-    template<class T> struct Impl<::apache::thrift::type::cpp_type<::test_cpp2::cpp_reflection::FakeI32, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -2>> { static constexpr int value = 2; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<::test_cpp2::cpp_reflection::HasANumber>, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -3>> { static constexpr int value = 3; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<::test_cpp2::cpp_reflection::HasAResult>, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -4>> { static constexpr int value = 4; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<::test_cpp2::cpp_reflection::HasAPhrase>, ::apache::thrift::type::string_t>, T, std::enable_if_t<sizeof(T) != -5>> { static constexpr int value = 5; };
+    template<class T> struct Impl<::apache::thrift::type::cpp_type<CppFakeI32, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -2>> { static constexpr int value = 2; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<CppHasANumber>, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -3>> { static constexpr int value = 3; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<CppHasAResult>, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -4>> { static constexpr int value = 4; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<CppHasAPhrase>, ::apache::thrift::type::string_t>, T, std::enable_if_t<sizeof(T) != -5>> { static constexpr int value = 5; };
 
     template<class T> static constexpr int value = Impl<T, T, void>::value;
   };

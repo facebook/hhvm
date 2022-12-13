@@ -257,7 +257,7 @@ impl DeclTy {
             // a couple special cases first
             DeclTy::Ptr(_, box DeclTy::Void(_)) => (quote!(textual::Ty::VoidPtr), false),
             DeclTy::Ptr(_, box DeclTy::Type(id)) if id == "HackMixed" => {
-                (quote!(textual::Ty::HackMixedPtr), false)
+                (quote!(textual::Ty::mixed()), false)
             }
 
             DeclTy::Ellipsis(_) => (quote!(textual::Ty::Ellipsis), true),

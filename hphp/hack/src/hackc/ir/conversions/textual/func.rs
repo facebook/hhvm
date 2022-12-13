@@ -130,7 +130,7 @@ pub(crate) fn write_func(
 
     // Always add a temp var for use by member_ops.
     let base = crate::member_op::base_var(&unit_state.strings);
-    let base_ty = textual::Ty::HackMixedPtr;
+    let base_ty = textual::Ty::mixed();
     locals.push((base, &base_ty));
 
     let name_str = if let Some(method_info) = method_info.as_ref() {
@@ -778,7 +778,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
     }
 
     pub(crate) fn load_mixed(&mut self, src: impl Into<textual::Expr>) -> Result<Sid> {
-        self.fb.load(&textual::Ty::HackMixedPtr, src)
+        self.fb.load(&textual::Ty::mixed(), src)
     }
 
     fn load_this(&mut self) -> Result<textual::Sid> {
@@ -874,7 +874,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
         dst: impl Into<textual::Expr>,
         src: impl Into<textual::Expr>,
     ) -> Result {
-        self.fb.store(dst, src, &textual::Ty::HackMixedPtr)
+        self.fb.store(dst, src, &textual::Ty::mixed())
     }
 
     pub(crate) fn update_loc(&mut self, loc: LocId) -> Result {

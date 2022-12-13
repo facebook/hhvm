@@ -14,6 +14,22 @@ use crate::textual::TextualFile;
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
 
+// TODO: Where should we define the builtin type hierarchy?
+//
+// class HackMixed { }
+//
+// class HackArray extends HackMixed { }
+// class HackBool extends HackMixed { }
+// class HackDict extends HackArray { }
+// class HackFloat extends HackMixed { }
+// class HackInt extends HackMixed { }
+// class HackKeyset extends HackArray { }
+// class HackString extends HackMixed { }
+// class HackVec extends HackArray { }
+//
+// type HackArraykey = HackInt | HackString;
+// type HackNum = HackInt | HackFloat;
+
 /// These represent builtins for handling HHVM bytecode instructions. In general
 /// the names should match the HHBC name except when they are compound bytecodes
 /// (like Cmp with a parameter of Eq becoming CmpEq). Documentation can be found

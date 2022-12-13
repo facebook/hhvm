@@ -38,7 +38,7 @@ class C {
   }
 
   // TEST-CHECK-BAL: define C.cons_static
-  // CHECK: define C.cons_static($this: *C) : *HackMixed {
+  // CHECK: define C.cons_static($this: *C) : *void {
   // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void, base: *HackMixed
   // CHECK: #b0:
   // CHECK:   jmp b1
@@ -147,7 +147,7 @@ class C {
   }
 
   // TEST-CHECK-BAL: define C.cons_self
-  // CHECK: define C.cons_self($this: *C) : *HackMixed {
+  // CHECK: define C.cons_self($this: *C) : *void {
   // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void, base: *HackMixed
   // CHECK: #b0:
   // CHECK:   jmp b1
@@ -209,7 +209,7 @@ class C {
   }
 
   // TEST-CHECK-BAL: define C.cons_inst
-  // CHECK: define C.cons_inst($this: *C) : *HackMixed {
+  // CHECK: define C.cons_inst($this: *C) : *void {
   // CHECK: local $a: *void, $0: *void, $1: *void, $2: *void, base: *HackMixed
   // CHECK: #b0:
   // CHECK:   jmp b1
@@ -271,7 +271,7 @@ class C {
   }
 
   // TEST-CHECK-BAL: define C$static.static_signature
-  // CHECK: define C$static.static_signature($this: *C$static, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
+  // CHECK: define C$static.static_signature($this: *C$static, $a: *HackMixed, $b: *HackMixed) : *void {
   // CHECK: local base: *HackMixed
   // CHECK: #b0:
   // CHECK:   n0 = $builtins.hack_string("equal")
@@ -293,7 +293,7 @@ class C {
   // CHECK: }
 
   // TEST-CHECK-BAL: define C.static_signature
-  // CHECK: define C.static_signature($this: *C, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
+  // CHECK: define C.static_signature($this: *C, $a: *HackMixed, $b: *HackMixed) : *void {
   // CHECK: #b0:
   // CHECK: // forward to the static method
   // CHECK:   n0: *C = load &$this
@@ -312,7 +312,7 @@ class C {
   }
 
   // TEST-CHECK-BAL: define C.test_const
-  // CHECK: define C.test_const($this: *C) : *HackMixed {
+  // CHECK: define C.test_const($this: *C) : *void {
   // CHECK: local $x: *void, base: *HackMixed
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &C$static::MY_CONSTANT

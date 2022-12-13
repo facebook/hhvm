@@ -5,7 +5,6 @@
 
 use ir::StringInterner;
 use ir::TypeConstraintFlags;
-use log::trace;
 
 use crate::class::IsStatic;
 use crate::mangle::MangleClass as _;
@@ -17,16 +16,15 @@ pub(crate) fn convert_ty(ty: &ir::EnforceableType, strings: &StringInterner) -> 
     let mut modifiers = ty.modifiers;
 
     // ExtendedHint does nothing interesting.
-    if modifiers.contains(TypeConstraintFlags::ExtendedHint) {
-        modifiers = modifiers & !TypeConstraintFlags::ExtendedHint;
-    }
-    if modifiers.contains(TypeConstraintFlags::Nullable) {
-        // All textual boxed types are nullable.
-        //base = textual::Ty::Nullable(Box::new(base));
-        modifiers = modifiers & !TypeConstraintFlags::Nullable;
-    }
+    modifiers = modifiers & !TypeConstraintFlags::ExtendedHint;
+    // DisplayNullable does nothing interesting.
+    modifiers = modifiers & !TypeConstraintFlags::DisplayNullable;
+
+    // All textual boxed types are nullable.
+    modifiers = modifiers & !TypeConstraintFlags::Nullable;
 
     if modifiers != TypeConstraintFlags::NoFlags {
+        log::trace!("MODIFIERS: {modifiers:?}");
         textual_todo! {
             base = textual::Ty::Type("TODO_NoFlags".to_string());
         }
@@ -38,14 +36,37 @@ pub(crate) fn convert_ty(ty: &ir::EnforceableType, strings: &StringInterner) -> 
 fn convert_base(ty: &ir::BaseType, strings: &StringInterner) -> textual::Ty {
     use ir::BaseType;
     match ty {
-        BaseType::Void => textual::Ty::Void,
-        BaseType::Class(cid) => textual::Ty::Type(cid.mangle_class(IsStatic::NonStatic, strings)),
-        BaseType::RawPtr(box base) => textual::Ty::Ptr(Box::new(convert_base(base, strings))),
-        _ => {
-            trace!("BaseType: {ty:?}");
-            textual_todo! {
-                textual::Ty::Int
-            }
+        BaseType::Arraykey => textual::Ty::SpecialPtr(textual::SpecialTy::Arraykey),
+        BaseType::Bool => textual::Ty::SpecialPtr(textual::SpecialTy::Bool),
+        BaseType::Class(cid) => {
+            textual::Ty::named_type_ptr(cid.mangle_class(IsStatic::NonStatic, strings))
         }
+        BaseType::Classname => textual::Ty::named_type_ptr("Classname".to_owned()),
+        BaseType::Dict => textual::Ty::SpecialPtr(textual::SpecialTy::Dict),
+        BaseType::Float => textual::Ty::SpecialPtr(textual::SpecialTy::Float),
+        BaseType::Int => textual::Ty::SpecialPtr(textual::SpecialTy::Int),
+        BaseType::Keyset => textual::Ty::SpecialPtr(textual::SpecialTy::Keyset),
+        BaseType::Null => textual::Ty::VoidPtr,
+        BaseType::Num => textual::Ty::SpecialPtr(textual::SpecialTy::Num),
+        BaseType::Resource => textual::Ty::named_type_ptr("HackResource".to_owned()),
+        BaseType::String => textual::Ty::SpecialPtr(textual::SpecialTy::String),
+        BaseType::Vec => textual::Ty::SpecialPtr(textual::SpecialTy::Vec),
+        // Why VoidPtr? Because in Hack something returning `void` implicitly
+        // returns a null.
+        BaseType::Void => textual::Ty::VoidPtr,
+
+        BaseType::AnyArray
+        | BaseType::Darray
+        | BaseType::Varray
+        | BaseType::VarrayOrDarray
+        | BaseType::VecOrDict => textual::Ty::named_type_ptr("HackArray".to_owned()),
+
+        BaseType::Noreturn | BaseType::Nothing => textual::Ty::Noreturn,
+
+        BaseType::Mixed
+        | BaseType::None
+        | BaseType::Nonnull
+        | BaseType::This
+        | BaseType::Typename => textual::Ty::SpecialPtr(textual::SpecialTy::Mixed),
     }
 }

@@ -64,7 +64,7 @@ pub(crate) fn write_class(
         let name = constant
             .name
             .mangle_with_class(class.name, IsStatic::Static, &state.strings);
-        txf.declare_global(name, textual::Ty::HackMixedPtr);
+        txf.declare_global(name, textual::Ty::mixed());
     }
 
     write_init_static(txf, state, &class)?;
@@ -230,7 +230,7 @@ fn write_init_static(
                     );
                     let var = textual::Var::named(name);
                     let value = typed_value::typed_value_expr(value, &state.strings);
-                    fb.store(textual::Expr::deref(var), value, &textual::Ty::HackMixedPtr)?;
+                    fb.store(textual::Expr::deref(var), value, &textual::Ty::mixed())?;
                 }
             }
 

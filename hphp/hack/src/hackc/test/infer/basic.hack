@@ -4,7 +4,7 @@
 // CHECK: .source_language = "hack"
 
 // TEST-CHECK-BAL: define $root.main
-// CHECK: define $root.main($this: *void) : *HackMixed {
+// CHECK: define $root.main($this: *void) : *void {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("Hello, World!\n")
@@ -16,7 +16,7 @@ function main(): void {
 }
 
 // TEST-CHECK-BAL: define $root.escaped_string
-// CHECK: define $root.escaped_string($this: *void) : *HackMixed {
+// CHECK: define $root.escaped_string($this: *void) : *void {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("This string has \042 a quote")
@@ -28,7 +28,7 @@ function escaped_string(): void {
 }
 
 // TEST-CHECK-BAL: define $root.cmp
-// CHECK: define $root.cmp($this: *void, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
+// CHECK: define $root.cmp($this: *void, $a: *HackMixed, $b: *HackMixed) : *void {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("equal")
@@ -57,7 +57,7 @@ function cmp(mixed $a, mixed $b): void {
 }
 
 // TEST-CHECK-BAL: define $root.cmp2
-// CHECK: define $root.cmp2($this: *void, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
+// CHECK: define $root.cmp2($this: *void, $a: *HackInt, $b: *HackInt) : *void {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("equal")
@@ -86,7 +86,7 @@ function cmp2(int $a, int $b): void {
 }
 
 // TEST-CHECK-BAL: define $root.ret_str
-// CHECK: define $root.ret_str($this: *void) : *HackMixed {
+// CHECK: define $root.ret_str($this: *void) : *HackString {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("hello, world\n")
@@ -99,7 +99,7 @@ function ret_str(): string {
 }
 
 // TEST-CHECK-BAL: define $root.bool_call
-// CHECK: define $root.bool_call($this: *void) : *HackMixed {
+// CHECK: define $root.bool_call($this: *void) : *void {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $root.f_bool(null, $builtins.hack_bool(false))
@@ -112,7 +112,7 @@ function bool_call(): void {
 }
 
 // TEST-CHECK-BAL: define $root.test_const
-// CHECK: define $root.test_const($this: *void) : *HackMixed {
+// CHECK: define $root.test_const($this: *void) : *void {
 // CHECK: local $a: *void, $b: *void, $c: *void, base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_new_vec($builtins.hack_string("x"), $builtins.hack_float(2.0), $builtins.hack_int(3), $builtins.hack_bool(true))
@@ -130,7 +130,7 @@ function test_const(): void {
 }
 
 // TEST-CHECK-BAL: define $root.float_arg
-// CHECK: define $root.float_arg($this: *void) : *HackMixed {
+// CHECK: define $root.float_arg($this: *void) : *void {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $root.f_float(null, $builtins.hack_float(3.14))
@@ -140,4 +140,13 @@ function test_const(): void {
 function float_arg(): void {
   f_float(3.14);
   f_float(3.0);
+}
+
+// TEST-CHECK-BAL: define $root.check_param_types
+// CHECK: define $root.check_param_types($this: *void, $a: *HackInt, $b: *HackFloat, $c: *HackString) : *void {
+// CHECK: local base: *HackMixed
+// CHECK: #b0:
+// CHECK:   ret null
+// CHECK: }
+function check_param_types(int $a, float $b, string $c): void {
 }

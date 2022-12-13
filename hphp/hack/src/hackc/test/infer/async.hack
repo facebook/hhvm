@@ -1,7 +1,7 @@
 // RUN: %hackc compile-infer %s | FileCheck %s
 
 // TEST-CHECK-BAL: define $root.test_async
-// CHECK: define $root.test_async($this: *void) : *HackMixed {
+// CHECK: define $root.test_async($this: *void) : *HackInt {
 // CHECK: local $a: *void, $b: *void, base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $root.bar(null)

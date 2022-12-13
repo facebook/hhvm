@@ -3,7 +3,7 @@
 // Random instruction tests.
 
 // TEST-CHECK-1: define $root.binops
-// CHECK: define $root.binops($this: *void, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
+// CHECK: define $root.binops($this: *void, $a: *HackInt, $b: *HackInt) : *void {
 function binops(int $a, int $b): void {
   // TEST-CHECK-1*: $builtins.hhbc_add
   // CHECK:   n2 = $builtins.hhbc_add(n1, n0)
@@ -50,7 +50,7 @@ function binops(int $a, int $b): void {
 }
 
 // TEST-CHECK-1: define $root.unops
-// CHECK: define $root.unops($this: *void, $a: *HackMixed) : *HackMixed {
+// CHECK: define $root.unops($this: *void, $a: *HackInt) : *void {
 function unops(int $a): void {
   // TEST-CHECK-1*: $builtins.hhbc_not
   // CHECK:   n1 = $builtins.hhbc_not(n0)
@@ -58,7 +58,7 @@ function unops(int $a): void {
 }
 
 // TEST-CHECK-BAL: define $root.check_shape
-// CHECK: define $root.check_shape($this: *void) : *HackMixed {
+// CHECK: define $root.check_shape($this: *void) : *void {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("a")

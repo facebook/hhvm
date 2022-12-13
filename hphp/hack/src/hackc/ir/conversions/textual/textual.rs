@@ -20,6 +20,8 @@ use ir::LocalId;
 use ir::StringInterner;
 use itertools::Itertools;
 use newtype::newtype_int;
+use strum::EnumProperty;
+use strum_macros::EnumProperty;
 
 pub(crate) const INDENT: &str = "  ";
 
@@ -246,18 +248,54 @@ impl fmt::Display for FmtSid {
     }
 }
 
+/// These are special types that could be expressed as Ptr(Box(String)) but are
+/// really common.
+#[derive(Debug, Clone, Hash, Eq, PartialEq, EnumProperty)]
+pub(crate) enum SpecialTy {
+    #[strum(props(UserType = "HackArraykey"))]
+    Arraykey,
+    #[strum(props(UserType = "HackBool"))]
+    Bool,
+    #[strum(props(UserType = "HackDict"))]
+    Dict,
+    #[strum(props(UserType = "HackFloat"))]
+    Float,
+    #[strum(props(UserType = "HackInt"))]
+    Int,
+    #[strum(props(UserType = "HackKeyset"))]
+    Keyset,
+    #[strum(props(UserType = "HackMixed"))]
+    Mixed,
+    #[strum(props(UserType = "HackNum"))]
+    Num,
+    #[strum(props(UserType = "HackString"))]
+    String,
+    #[strum(props(UserType = "HackVec"))]
+    Vec,
+}
+
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub(crate) enum Ty {
     Ellipsis,
     Float,
-    HackMixedPtr,
     Int,
     Noreturn,
     Ptr(Box<Ty>),
-    Type(String),
+    SpecialPtr(SpecialTy),
     String,
+    Type(String),
     Void,
     VoidPtr,
+}
+
+impl Ty {
+    pub(crate) fn mixed() -> Ty {
+        Ty::SpecialPtr(SpecialTy::Mixed)
+    }
+
+    pub(crate) fn named_type_ptr(name: String) -> Ty {
+        Ty::Ptr(Box::new(Ty::Type(name)))
+    }
 }
 
 impl From<Ty> for std::borrow::Cow<'_, Ty> {
@@ -279,10 +317,14 @@ impl fmt::Display for FmtTy<'_> {
         match self.0 {
             Ty::Ellipsis => write!(f, "..."),
             Ty::Float => write!(f, "float"),
-            Ty::HackMixedPtr => f.write_str("*HackMixed"),
             Ty::Int => write!(f, "int"),
             Ty::Noreturn => f.write_str("noreturn"),
             Ty::Ptr(sub) => write!(f, "*{}", FmtTy(sub)),
+            Ty::SpecialPtr(special) => {
+                let name = special.get_str("UserType").unwrap();
+                f.write_str("*")?;
+                f.write_str(name)
+            }
             Ty::String => write!(f, "*string"),
             Ty::Type(s) => write!(f, "{s}"),
             Ty::Void => f.write_str("void"),

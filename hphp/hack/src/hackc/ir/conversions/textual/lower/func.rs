@@ -11,7 +11,6 @@ use ir::StringInterner;
 use log::trace;
 
 use crate::func::MethodInfo;
-use crate::lower::types::ty_hack_mixed;
 
 pub(crate) fn lower_func<'a>(
     mut func: Func<'a>,
@@ -43,14 +42,6 @@ pub(crate) fn lower_func<'a>(
     ir::passes::split_critical_edges(&mut func, true);
 
     ir::passes::clean::run(&mut func);
-
-    // Lower param types after instrs so that if the instrs refer to the param
-    // types it can see the unmolested ones.
-    for param in &mut func.params {
-        param.ty.enforced = ty_hack_mixed(&strings);
-    }
-
-    func.return_type.enforced = ty_hack_mixed(&strings);
 
     trace!(
         "After Lower: {}",

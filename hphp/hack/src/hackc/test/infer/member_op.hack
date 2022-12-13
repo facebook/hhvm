@@ -6,7 +6,7 @@ class D {
   public static D $bar;
 
   // TEST-CHECK-BAL: define D.mop_baseh_querym_pt
-  // CHECK: define D.mop_baseh_querym_pt($this: *D) : *HackMixed {
+  // CHECK: define D.mop_baseh_querym_pt($this: *D) : *HackInt {
   // CHECK: local base: *HackMixed
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &$this
@@ -24,7 +24,7 @@ class D {
   }
 
   // TEST-CHECK-BAL: define D.mop_basesc_querym_pt
-  // CHECK: define D.mop_basesc_querym_pt($this: *D) : *HackMixed {
+  // CHECK: define D.mop_basesc_querym_pt($this: *D) : *HackInt {
   // CHECK: local base: *HackMixed
   // CHECK: #b0:
   // CHECK:   n0 = $builtins.hack_string("bar")
@@ -45,7 +45,7 @@ class D {
 }
 
 // TEST-CHECK-BAL: define $root.mop_basec_querym_pc
-// CHECK: define $root.mop_basec_querym_pc($this: *void) : *HackMixed {
+// CHECK: define $root.mop_basec_querym_pc($this: *void) : *HackInt {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $root.ret_c(null)
@@ -63,7 +63,7 @@ function mop_basec_querym_pc(): int {
 }
 
 // TEST-CHECK-BAL: define $root.mop_basegc_querym_ec
-// CHECK: define $root.mop_basegc_querym_ec($this: *void) : *HackMixed {
+// CHECK: define $root.mop_basegc_querym_ec($this: *void) : *HackInt {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("_SERVER")
@@ -81,7 +81,7 @@ function mop_basegc_querym_ec(): int {
 }
 
 // TEST-CHECK-BAL: define $root.mop_basel_querym_ei
-// CHECK: define $root.mop_basel_querym_ei($this: *void, $a: *HackMixed) : *HackMixed {
+// CHECK: define $root.mop_basel_querym_ei($this: *void, $a: *HackVec) : *HackInt {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(20), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1))))
@@ -100,7 +100,7 @@ function mop_basel_querym_ei(vec<int> $a): int {
 }
 
 // TEST-CHECK-BAL: define $root.mop_basel_querym_pc
-// CHECK: define $root.mop_basel_querym_pc($this: *void, $a: *HackMixed) : *HackMixed {
+// CHECK: define $root.mop_basel_querym_pc($this: *void, $a: *C) : *HackInt {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $root.ret_str(null)
@@ -116,7 +116,7 @@ function mop_basel_querym_pc(C $a): int {
 }
 
 // TEST-CHECK-BAL: define $root.mop_basel_querym_pl
-// CHECK: define $root.mop_basel_querym_pl($this: *void, $a: *HackMixed) : *HackMixed {
+// CHECK: define $root.mop_basel_querym_pl($this: *void, $a: *C) : *HackInt {
 // CHECK: local $b: *void, base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("hello")
@@ -136,7 +136,7 @@ function mop_basel_querym_pl(C $a): int {
 }
 
 // TEST-CHECK-BAL: define $root.mop_basel_querym_el
-// CHECK: define $root.mop_basel_querym_el($this: *void, $a: *HackMixed, $b: *HackMixed) : *HackMixed {
+// CHECK: define $root.mop_basel_querym_el($this: *void, $a: *HackVec, $b: *HackInt) : *HackInt {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(20), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1))))
@@ -155,7 +155,7 @@ function mop_basel_querym_el(vec<int> $a, int $b): int {
 }
 
 // TEST-CHECK-BAL: define $root.mop_basel_querym_et
-// CHECK: define $root.mop_basel_querym_et($this: *void, $a: *HackMixed) : *HackMixed {
+// CHECK: define $root.mop_basel_querym_et($this: *void, $a: *HackDict) : *HackInt {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(19), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(4)), $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1))))
@@ -174,7 +174,7 @@ function mop_basel_querym_et(dict<string, int> $a): int {
 }
 
 // TEST-CHECK-BAL: define $root.mop_basel_querym_pt
-// CHECK: define $root.mop_basel_querym_pt($this: *void, $a: *HackMixed) : *HackMixed {
+// CHECK: define $root.mop_basel_querym_pt($this: *void, $a: *C) : *HackInt {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = &$a
@@ -190,7 +190,7 @@ function mop_basel_querym_pt(C $a): int {
 }
 
 // TEST-CHECK-BAL: define $root.mop_basel_querym_qt
-// CHECK: define $root.mop_basel_querym_qt($this: *void, $a: *HackMixed) : *HackMixed {
+// CHECK: define $root.mop_basel_querym_qt($this: *void, $a: *C) : *HackInt {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_string("Unhandled modifiers: TypeConstraintFlags(261)")
@@ -207,7 +207,7 @@ function mop_basel_querym_qt(?C $a): ?int {
 }
 
 // TEST-CHECK-BAL: define $root.mop_basel_setm_w
-// CHECK: define $root.mop_basel_setm_w($this: *void, $a: *HackMixed) : *HackMixed {
+// CHECK: define $root.mop_basel_setm_w($this: *void, $a: *HackVec) : *void {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(20), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1))))
@@ -224,7 +224,7 @@ function mop_basel_setm_w(vec<int> $a): void {
 }
 
 // TEST-CHECK-BAL: define $root.mop_basel_incdec_ei
-// CHECK: define $root.mop_basel_incdec_ei($this: *void, $a: *HackMixed) : *HackMixed {
+// CHECK: define $root.mop_basel_incdec_ei($this: *void, $a: *HackVec) : *HackInt {
 // CHECK: local base: *HackMixed
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(20), $builtins.hack_string("generic_types"), $builtins.hhbc_new_vec($builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(1))))

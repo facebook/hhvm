@@ -131,10 +131,10 @@ class PatchTest : public testing::Test {
     EXPECT_EQ(41, unpacker(apply(PatchType{} - 1, value)));
 
     // Wrong patch provided
-    EXPECT_THROW(apply(op::BoolPatch{}, value), std::runtime_error);
+    EXPECT_THROW(apply(!op::BoolPatch{}, value), std::runtime_error);
 
     // Wrong object to patch
-    EXPECT_THROW(apply(PatchType{}, true), std::runtime_error);
+    EXPECT_THROW(apply(PatchType{} = 42, true), std::runtime_error);
 
     // Test getting mask from patch
     EXPECT_TRUE(isMaskNoop(convertPatchToObject(PatchType{})));
@@ -149,7 +149,7 @@ class PatchTest : public testing::Test {
 
   static Object patchAddOperation(Object&& patch, auto operation, auto value) {
     auto opId = static_cast<int16_t>(operation);
-    patch.members().ensure()[opId] = value;
+    patch.members()[opId] = value;
     return std::move(patch);
   }
 
@@ -192,7 +192,7 @@ TEST_F(PatchTest, Bool) {
 
   // Wrong object to patch
   EXPECT_THROW(
-      apply(op::BoolPatch{}, asValueStruct<type::i16_t>(42)),
+      apply(!op::BoolPatch{}, asValueStruct<type::i16_t>(42)),
       std::runtime_error);
 
   // Test getting mask from patch
@@ -297,7 +297,7 @@ TEST_F(PatchTest, Binary) {
   }
 
   // Wrong patch provided
-  EXPECT_THROW(apply(op::I16Patch{}, binaryData), std::runtime_error);
+  EXPECT_THROW(apply(op::I16Patch{} = 42, binaryData), std::runtime_error);
 
   // Wrong object to patch
   EXPECT_THROW(
@@ -370,7 +370,7 @@ TEST_F(PatchTest, String) {
   }
 
   // Wrong patch provided
-  EXPECT_THROW(apply(op::I16Patch{}, stringData), std::runtime_error);
+  EXPECT_THROW(apply(op::I16Patch{} = 42, stringData), std::runtime_error);
 
   // Wrong object to patch
   EXPECT_THROW(

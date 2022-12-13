@@ -1953,14 +1953,14 @@ all_structs.append(BoolPatch)
 BoolPatch.thrift_spec = (
   None, # 0
   (1, TType.BOOL, 'assign', None, None, 1, ), # 1
-  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
+  (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   None, # 3
   None, # 4
   None, # 5
   None, # 6
   None, # 7
   None, # 8
-  (9, TType.BOOL, 'invert', None, None, 2, ), # 9
+  (9, TType.BOOL, 'invert', None, None, 3, ), # 9
 )
 
 BoolPatch.thrift_struct_annotations = {
@@ -1988,13 +1988,13 @@ all_structs.append(BytePatch)
 BytePatch.thrift_spec = (
   None, # 0
   (1, TType.BYTE, 'assign', None, None, 1, ), # 1
-  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
+  (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   None, # 3
   None, # 4
   None, # 5
   None, # 6
   None, # 7
-  (8, TType.BYTE, 'add', None, None, 2, ), # 8
+  (8, TType.BYTE, 'add', None, None, 3, ), # 8
 )
 
 BytePatch.thrift_struct_annotations = {
@@ -2022,13 +2022,13 @@ all_structs.append(I16Patch)
 I16Patch.thrift_spec = (
   None, # 0
   (1, TType.I16, 'assign', None, None, 1, ), # 1
-  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
+  (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   None, # 3
   None, # 4
   None, # 5
   None, # 6
   None, # 7
-  (8, TType.I16, 'add', None, None, 2, ), # 8
+  (8, TType.I16, 'add', None, None, 3, ), # 8
 )
 
 I16Patch.thrift_struct_annotations = {
@@ -2056,13 +2056,13 @@ all_structs.append(I32Patch)
 I32Patch.thrift_spec = (
   None, # 0
   (1, TType.I32, 'assign', None, None, 1, ), # 1
-  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
+  (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   None, # 3
   None, # 4
   None, # 5
   None, # 6
   None, # 7
-  (8, TType.I32, 'add', None, None, 2, ), # 8
+  (8, TType.I32, 'add', None, None, 3, ), # 8
 )
 
 I32Patch.thrift_struct_annotations = {
@@ -2090,13 +2090,13 @@ all_structs.append(I64Patch)
 I64Patch.thrift_spec = (
   None, # 0
   (1, TType.I64, 'assign', None, None, 1, ), # 1
-  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
+  (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   None, # 3
   None, # 4
   None, # 5
   None, # 6
   None, # 7
-  (8, TType.I64, 'add', None, None, 2, ), # 8
+  (8, TType.I64, 'add', None, None, 3, ), # 8
 )
 
 I64Patch.thrift_struct_annotations = {
@@ -2124,13 +2124,13 @@ all_structs.append(FloatPatch)
 FloatPatch.thrift_spec = (
   None, # 0
   (1, TType.FLOAT, 'assign', None, None, 1, ), # 1
-  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
+  (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   None, # 3
   None, # 4
   None, # 5
   None, # 6
   None, # 7
-  (8, TType.FLOAT, 'add', None, None, 2, ), # 8
+  (8, TType.FLOAT, 'add', None, None, 3, ), # 8
 )
 
 FloatPatch.thrift_struct_annotations = {
@@ -2158,13 +2158,13 @@ all_structs.append(DoublePatch)
 DoublePatch.thrift_spec = (
   None, # 0
   (1, TType.DOUBLE, 'assign', None, None, 1, ), # 1
-  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
+  (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   None, # 3
   None, # 4
   None, # 5
   None, # 6
   None, # 7
-  (8, TType.DOUBLE, 'add', None, None, 2, ), # 8
+  (8, TType.DOUBLE, 'add', None, None, 3, ), # 8
 )
 
 DoublePatch.thrift_struct_annotations = {
@@ -2192,14 +2192,14 @@ all_structs.append(StringPatch)
 StringPatch.thrift_spec = (
   None, # 0
   (1, TType.STRING, 'assign', True, None, 1, ), # 1
-  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
+  (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   None, # 3
   None, # 4
   None, # 5
   None, # 6
   None, # 7
-  (8, TType.STRING, 'prepend', True, None, 2, ), # 8
-  (9, TType.STRING, 'append', True, None, 2, ), # 9
+  (8, TType.STRING, 'prepend', True, None, 3, ), # 8
+  (9, TType.STRING, 'append', True, None, 3, ), # 9
 )
 
 StringPatch.thrift_struct_annotations = {
@@ -2229,14 +2229,14 @@ all_structs.append(BinaryPatch)
 BinaryPatch.thrift_spec = (
   None, # 0
   (1, TType.STRING, 'assign', False, None, 1, ), # 1
-  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
+  (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   None, # 3
   None, # 4
   None, # 5
   None, # 6
   None, # 7
-  (8, TType.STRING, 'prepend', False, None, 2, ), # 8
-  (9, TType.STRING, 'append', False, None, 2, ), # 9
+  (8, TType.STRING, 'prepend', False, None, 3, ), # 8
+  (9, TType.STRING, 'append', False, None, 3, ), # 9
 )
 
 BinaryPatch.thrift_struct_annotations = {
@@ -2266,13 +2266,13 @@ all_structs.append(DurationPatch)
 DurationPatch.thrift_spec = (
   None, # 0
   (1, TType.STRUCT, 'assign', [thrift.lib.thrift.standard.ttypes.DurationStruct, thrift.lib.thrift.standard.ttypes.DurationStruct.thrift_spec, False], None, 1, ), # 1
-  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
+  (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   None, # 3
   None, # 4
   None, # 5
   None, # 6
   None, # 7
-  (8, TType.STRUCT, 'add', [thrift.lib.thrift.standard.ttypes.DurationStruct, thrift.lib.thrift.standard.ttypes.DurationStruct.thrift_spec, False], None, 2, ), # 8
+  (8, TType.STRUCT, 'add', [thrift.lib.thrift.standard.ttypes.DurationStruct, thrift.lib.thrift.standard.ttypes.DurationStruct.thrift_spec, False], None, 3, ), # 8
 )
 
 DurationPatch.thrift_struct_annotations = {
@@ -2301,13 +2301,13 @@ all_structs.append(TimePatch)
 TimePatch.thrift_spec = (
   None, # 0
   (1, TType.STRUCT, 'assign', [thrift.lib.thrift.standard.ttypes.TimeStruct, thrift.lib.thrift.standard.ttypes.TimeStruct.thrift_spec, False], None, 1, ), # 1
-  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
+  (2, TType.BOOL, 'clear', None, None, 3, ), # 2
   None, # 3
   None, # 4
   None, # 5
   None, # 6
   None, # 7
-  (8, TType.STRUCT, 'add', [thrift.lib.thrift.standard.ttypes.DurationStruct, thrift.lib.thrift.standard.ttypes.DurationStruct.thrift_spec, False], None, 2, ), # 8
+  (8, TType.STRUCT, 'add', [thrift.lib.thrift.standard.ttypes.DurationStruct, thrift.lib.thrift.standard.ttypes.DurationStruct.thrift_spec, False], None, 3, ), # 8
 )
 
 TimePatch.thrift_struct_annotations = {

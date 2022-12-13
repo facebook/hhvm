@@ -324,10 +324,12 @@ class BoolPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
     ),
     2 => shape(
       'var' => 'clear',
+      'is_terse' => true,
       'type' => \TType::BOOL,
     ),
     9 => shape(
       'var' => 'invert',
+      'is_terse' => true,
       'type' => \TType::BOOL,
     ),
   ];
@@ -349,7 +351,7 @@ class BoolPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
     'invert' => bool,
     ...
   );
-  const int STRUCTURAL_ID = 2251787647339945166;
+  const int STRUCTURAL_ID = 6587786969423386652;
   /**
    * Assigns to a (set) value.
    * 
@@ -399,6 +401,8 @@ class BoolPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
   }
 
   public function clearTerseFields()[write_props]: void {
+    $this->clear = false;
+    $this->invert = false;
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -517,10 +521,12 @@ class BytePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
     ),
     2 => shape(
       'var' => 'clear',
+      'is_terse' => true,
       'type' => \TType::BOOL,
     ),
     8 => shape(
       'var' => 'add',
+      'is_terse' => true,
       'type' => \TType::BYTE,
     ),
   ];
@@ -542,7 +548,7 @@ class BytePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
     'add' => int,
     ...
   );
-  const int STRUCTURAL_ID = 4505194819966548722;
+  const int STRUCTURAL_ID = 353839682464366106;
   /**
    * Assigns to a (set) value.
    * 
@@ -592,6 +598,8 @@ class BytePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
   }
 
   public function clearTerseFields()[write_props]: void {
+    $this->clear = false;
+    $this->add = 0;
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -720,10 +728,12 @@ class I16Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     ),
     2 => shape(
       'var' => 'clear',
+      'is_terse' => true,
       'type' => \TType::BOOL,
     ),
     8 => shape(
       'var' => 'add',
+      'is_terse' => true,
       'type' => \TType::I16,
     ),
   ];
@@ -745,7 +755,7 @@ class I16Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     'add' => int,
     ...
   );
-  const int STRUCTURAL_ID = 5082368378070508743;
+  const int STRUCTURAL_ID = 218422147056489009;
   /**
    * Assigns to a (set) value.
    * 
@@ -795,6 +805,8 @@ class I16Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   }
 
   public function clearTerseFields()[write_props]: void {
+    $this->clear = false;
+    $this->add = 0;
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -923,10 +935,12 @@ class I32Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     ),
     2 => shape(
       'var' => 'clear',
+      'is_terse' => true,
       'type' => \TType::BOOL,
     ),
     8 => shape(
       'var' => 'add',
+      'is_terse' => true,
       'type' => \TType::I32,
     ),
   ];
@@ -948,7 +962,7 @@ class I32Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     'add' => int,
     ...
   );
-  const int STRUCTURAL_ID = 5651774406360207497;
+  const int STRUCTURAL_ID = 8147514463397038431;
   /**
    * Assigns to a (set) value.
    * 
@@ -998,6 +1012,8 @@ class I32Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   }
 
   public function clearTerseFields()[write_props]: void {
+    $this->clear = false;
+    $this->add = 0;
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1126,10 +1142,12 @@ class I64Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     ),
     2 => shape(
       'var' => 'clear',
+      'is_terse' => true,
       'type' => \TType::BOOL,
     ),
     8 => shape(
       'var' => 'add',
+      'is_terse' => true,
       'type' => \TType::I64,
     ),
   ];
@@ -1151,7 +1169,7 @@ class I64Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
     'add' => int,
     ...
   );
-  const int STRUCTURAL_ID = 772578002356738682;
+  const int STRUCTURAL_ID = 3463481380739863248;
   /**
    * Assigns to a (set) value.
    * 
@@ -1201,6 +1219,8 @@ class I64Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   }
 
   public function clearTerseFields()[write_props]: void {
+    $this->clear = false;
+    $this->add = 0;
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1319,10 +1339,12 @@ class FloatPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     ),
     2 => shape(
       'var' => 'clear',
+      'is_terse' => true,
       'type' => \TType::BOOL,
     ),
     8 => shape(
       'var' => 'add',
+      'is_terse' => true,
       'type' => \TType::FLOAT,
     ),
   ];
@@ -1344,7 +1366,7 @@ class FloatPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
     'add' => float,
     ...
   );
-  const int STRUCTURAL_ID = 6430265023131058648;
+  const int STRUCTURAL_ID = 2148458437976210697;
   /**
    * Assigns to a (set) value.
    * 
@@ -1394,6 +1416,8 @@ class FloatPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
   }
 
   public function clearTerseFields()[write_props]: void {
+    $this->clear = false;
+    $this->add = 0.0;
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1512,10 +1536,12 @@ class DoublePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
     ),
     2 => shape(
       'var' => 'clear',
+      'is_terse' => true,
       'type' => \TType::BOOL,
     ),
     8 => shape(
       'var' => 'add',
+      'is_terse' => true,
       'type' => \TType::DOUBLE,
     ),
   ];
@@ -1537,7 +1563,7 @@ class DoublePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
     'add' => float,
     ...
   );
-  const int STRUCTURAL_ID = 8893328759161386606;
+  const int STRUCTURAL_ID = 5393538735552286670;
   /**
    * Assigns to a (set) value.
    * 
@@ -1587,6 +1613,8 @@ class DoublePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
   }
 
   public function clearTerseFields()[write_props]: void {
+    $this->clear = false;
+    $this->add = 0.0;
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1705,14 +1733,17 @@ class StringPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
     ),
     2 => shape(
       'var' => 'clear',
+      'is_terse' => true,
       'type' => \TType::BOOL,
     ),
     8 => shape(
       'var' => 'prepend',
+      'is_terse' => true,
       'type' => \TType::STRING,
     ),
     9 => shape(
       'var' => 'append',
+      'is_terse' => true,
       'type' => \TType::STRING,
     ),
   ];
@@ -1737,7 +1768,7 @@ class StringPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
     'append' => string,
     ...
   );
-  const int STRUCTURAL_ID = 5212135444748250232;
+  const int STRUCTURAL_ID = 4803569377705535564;
   /**
    * Assigns to a (set) value.
    * 
@@ -1796,6 +1827,9 @@ class StringPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
   }
 
   public function clearTerseFields()[write_props]: void {
+    $this->clear = false;
+    $this->prepend = '';
+    $this->append = '';
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1931,15 +1965,18 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
     ),
     2 => shape(
       'var' => 'clear',
+      'is_terse' => true,
       'type' => \TType::BOOL,
     ),
     8 => shape(
       'var' => 'prepend',
+      'is_terse' => true,
       'type' => \TType::STRING,
       'is_binary' => true,
     ),
     9 => shape(
       'var' => 'append',
+      'is_terse' => true,
       'type' => \TType::STRING,
       'is_binary' => true,
     ),
@@ -1965,7 +2002,7 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
     'append' => string,
     ...
   );
-  const int STRUCTURAL_ID = 3272396238315663852;
+  const int STRUCTURAL_ID = 3833420858319564148;
   /**
    * Assigns to a (set) value.
    * 
@@ -2024,6 +2061,9 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
   }
 
   public function clearTerseFields()[write_props]: void {
+    $this->clear = false;
+    $this->prepend = '';
+    $this->append = '';
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -2219,10 +2259,12 @@ class DurationPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
     ),
     2 => shape(
       'var' => 'clear',
+      'is_terse' => true,
       'type' => \TType::BOOL,
     ),
     8 => shape(
       'var' => 'add',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \apache_thrift_type_standard_DurationStruct::class,
     ),
@@ -2245,7 +2287,7 @@ class DurationPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
     ?'add' => ?\apache_thrift_type_standard_DurationStruct::TShape,
     ...
   );
-  const int STRUCTURAL_ID = 566871531090175355;
+  const int STRUCTURAL_ID = 8663056498467424130;
   /**
    * Assigns to a (set) value.
    * 
@@ -2295,6 +2337,8 @@ class DurationPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
   }
 
   public function clearTerseFields()[write_props]: void {
+    $this->clear = false;
+    $this->add = null;
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -2437,10 +2481,12 @@ class TimePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
     ),
     2 => shape(
       'var' => 'clear',
+      'is_terse' => true,
       'type' => \TType::BOOL,
     ),
     8 => shape(
       'var' => 'add',
+      'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \apache_thrift_type_standard_DurationStruct::class,
     ),
@@ -2463,7 +2509,7 @@ class TimePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
     ?'add' => ?\apache_thrift_type_standard_DurationStruct::TShape,
     ...
   );
-  const int STRUCTURAL_ID = 2651075519081273310;
+  const int STRUCTURAL_ID = 6169242305798450897;
   /**
    * Assigns to a (set) value.
    * 
@@ -2513,6 +2559,8 @@ class TimePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
   }
 
   public function clearTerseFields()[write_props]: void {
+    $this->clear = false;
+    $this->add = null;
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

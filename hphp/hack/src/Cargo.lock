@@ -180,6 +180,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "assemble_ir"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "bstr 1.0.1",
+ "bumpalo",
+ "ffi",
+ "hash",
+ "ir_core",
+ "itertools 0.10.3",
+ "log",
+ "naming_special_names_rust",
+ "once_cell",
+ "parse_macro_ir",
+]
+
+[[package]]
 name = "assemble_opcode_macro"
 version = "0.0.0"
 dependencies = [
@@ -2440,6 +2457,7 @@ name = "ir"
 version = "0.0.0"
 dependencies = [
  "analysis",
+ "assemble_ir",
  "ir_core",
  "passes",
  "print",
@@ -3374,6 +3392,16 @@ dependencies = [
 name = "parse_macro"
 version = "0.0.0"
 dependencies = [
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
+name = "parse_macro_ir"
+version = "0.0.0"
+dependencies = [
+ "macro_test_util",
  "proc-macro-error",
  "proc-macro2",
  "quote",

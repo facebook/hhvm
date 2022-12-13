@@ -968,6 +968,7 @@ pub mod coeffects {
     pub fn ctx_str_to_enum(s: &str) -> Option<Ctx> {
         match s {
             DEFAULTS => Some(Ctx::Defaults),
+            PURE => Some(Ctx::Pure),
             RX_LOCAL => Some(Ctx::RxLocal),
             RX_SHALLOW => Some(Ctx::RxShallow),
             RX => Some(Ctx::Rx),

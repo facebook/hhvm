@@ -9,6 +9,7 @@ path = "lib.rs"
 
 [dependencies]
 analysis = { path = "analysis" }
+assemble_ir = { path = "assemble" }
 ir_core = { path = "ir_core" }
 passes = { path = "passes" }
 print = { path = "print" }

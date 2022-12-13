@@ -63,9 +63,7 @@ class MultiplexAsyncProcessorFactory final : public AsyncProcessorFactory {
  public:
   explicit MultiplexAsyncProcessorFactory(
       std::vector<std::shared_ptr<AsyncProcessorFactory>> processorFactories);
-#if defined(THRIFT_SCHEMA_AVAILABLE)
-  folly::Optional<std::vector<SchemaV1>> getServiceMetadataV1() override;
-#endif
+
   std::unique_ptr<AsyncProcessor> getProcessor() override;
   CreateMethodMetadataResult createMethodMetadata() override;
 

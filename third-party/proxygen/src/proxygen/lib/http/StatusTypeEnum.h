@@ -41,11 +41,11 @@ namespace proxygen {
       x(proxy_adaptive_rate_limit), x(sc_channel_invalid_argument),            \
       x(sc_channel_unknown_error), x(sc_eom_before_headers),                   \
       x(sc_upstream_timeout), x(sc_runtime_exception),                         \
-      x(sc_content_integrity_error), x(redirect_connect_error),                \
-      x(redirect_limit_exceeded), x(redirect_pool_error),                      \
-      x(redirect_request_too_large), x(server_connection_error),               \
-      x(server_timeout), x(server_write_error), x(telephoto_error),            \
-      x(wasm_invocation_error), x(transcode_server_error),                     \
+      x(sc_content_integrity_error), x(live_head_error),                       \
+      x(redirect_connect_error), x(redirect_limit_exceeded),                   \
+      x(redirect_pool_error), x(redirect_request_too_large),                   \
+      x(server_connection_error), x(server_timeout), x(server_write_error),    \
+      x(telephoto_error), x(wasm_invocation_error), x(transcode_server_error), \
       x(fbvp_channel_error), x(server_internal_error), x(invalid_pool),        \
       x(qoe_error), x(sc_downstream_error), x(content_integrity),              \
       x(bad_request),                                                          \

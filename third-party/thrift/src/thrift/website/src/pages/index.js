@@ -27,7 +27,7 @@ import styles from './styles.module.css';
 const features = [
   {
     title: 'Easy to Use',
-    imageUrl: 'img/undraw_docusaurus_mountain.svg',
+    imageUrl: 'img/undraw_proud_coder.svg',
     description: (
       <>
         Thrift takes care of the boilerplate of serialization and RPC and
@@ -38,7 +38,7 @@ const features = [
   },
   {
     title: 'Cross-Language',
-    imageUrl: 'img/undraw_docusaurus_tree.svg',
+    imageUrl: 'img/undraw_solution_mindset.svg',
     description: (
       <>
         Thrift enables intercommunication between different languages. For
@@ -48,7 +48,7 @@ const features = [
   },
   {
     title: 'Performant',
-    imageUrl: 'img/undraw_docusaurus_react.svg',
+    imageUrl: 'img/undraw_to_the_stars.svg',
     description: (
       <>
         Thrift structures and services enable fast serialization and

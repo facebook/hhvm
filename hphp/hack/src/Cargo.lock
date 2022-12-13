@@ -67,7 +67,7 @@ name = "analysis"
 version = "0.0.0"
 dependencies = [
  "ir_core",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "newtype",
  "print",
 ]
@@ -189,7 +189,7 @@ dependencies = [
  "ffi",
  "hash",
  "ir_core",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "log",
  "naming_special_names_rust",
  "once_cell",
@@ -201,7 +201,7 @@ name = "assemble_opcode_macro"
 version = "0.0.0"
 dependencies = [
  "hhbc-gen",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "proc-macro2",
  "quote",
  "syn",
@@ -329,7 +329,7 @@ dependencies = [
  "hash",
  "hhbc",
  "ir",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "log",
  "maplit",
  "newtype",
@@ -449,7 +449,7 @@ dependencies = [
  "hhbc_string_utils",
  "hhvm_hhbc_defs_ffi",
  "hhvm_types_ffi",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "oxidized",
  "print_opcode",
  "relative_path",
@@ -648,7 +648,7 @@ dependencies = [
  "hash",
  "hhbc",
  "hhbc_string_utils",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "naming_special_names_rust",
  "ocamlrep",
  "options",
@@ -715,7 +715,7 @@ dependencies = [
  "facts_rust",
  "hash",
  "hhbc",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "libc",
  "no_pos_hash",
  "ocamlrep",
@@ -779,7 +779,7 @@ dependencies = [
  "hhbc",
  "hhbc_string_utils",
  "indexmap",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "naming_special_names_rust",
  "oxidized",
  "stack_limit",
@@ -920,9 +920,9 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-deque"
-version = "0.8.0"
+version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94af6efb46fef72616855b036a624cf27ba656ffc9be1b9a3c931cfc7749a9a9"
+checksum = "715e8152b692bba2d374b53d4875445368fdf21a94751410af607a5ac677d1fc"
 dependencies = [
  "cfg-if 1.0.0",
  "crossbeam-epoch",
@@ -1352,9 +1352,9 @@ dependencies = [
 
 [[package]]
 name = "either"
-version = "1.6.1"
+version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
+checksum = "90e5c1c8368803113bf0c9584fc495a58b86dc8a29edbf8fe877d21d9507e797"
 
 [[package]]
 name = "elaborate_namespaces_visitor"
@@ -1445,7 +1445,7 @@ dependencies = [
  "hhvm_types_ffi",
  "indexmap",
  "instruction_sequence",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "label_rewriter",
  "lazy_static",
  "naming_special_names_rust",
@@ -1746,7 +1746,7 @@ dependencies = [
  "eq_modulo_pos",
  "hash",
  "indexmap",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "oxidized",
  "pos",
  "shallow_decl_provider",
@@ -1967,7 +1967,7 @@ dependencies = [
  "hhvm_types_ffi",
  "ir",
  "ir_to_bc",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "jwalk",
  "log",
  "multifile_rust",
@@ -2495,7 +2495,7 @@ dependencies = [
  "hhbc",
  "instruction_sequence",
  "ir",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "log",
  "smallvec",
  "stack_depth",
@@ -2521,9 +2521,9 @@ dependencies = [
 
 [[package]]
 name = "itertools"
-version = "0.10.3"
+version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a9a9d19fa1e79b6215ff29b9d6880b706147f16e9b1dbb1e4e5947b5b02bc5e3"
+checksum = "b0fd2260e829bddf4cb6ea802289de2f86d6a7a690192fbe91b3f46e0f2c8473"
 dependencies = [
  "either",
 ]
@@ -2676,7 +2676,7 @@ dependencies = [
  "escaper",
  "hash",
  "html_entities",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "lazy_static",
  "lint_rust",
  "naming_special_names_rust",
@@ -3274,7 +3274,7 @@ dependencies = [
  "eq_modulo_pos",
  "file_info",
  "hh_autoimport_rust",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "naming_types",
  "no_pos_hash",
  "ocamlrep",
@@ -3425,7 +3425,7 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "bumpalo",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "line_break_map",
  "ocaml_helper",
  "ocamlrep",
@@ -3455,7 +3455,7 @@ dependencies = [
  "ffi",
  "hash",
  "ir_core",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "log",
  "newtype",
  "print",
@@ -3838,9 +3838,9 @@ dependencies = [
 
 [[package]]
 name = "rayon"
-version = "1.5.1"
+version = "1.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c06aca804d41dbc8ba42dfd964f0d01334eceb64314b9ecf7c5fad5188a06d90"
+checksum = "bd99e5772ead8baa5215278c9b15bf92087709e9c1b2d1f97cdb5a183c933a7d"
 dependencies = [
  "autocfg",
  "crossbeam-deque",
@@ -3850,14 +3850,13 @@ dependencies = [
 
 [[package]]
 name = "rayon-core"
-version = "1.9.1"
+version = "1.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d78120e2c850279833f1dd3582f730c4ab53ed95aeaaaa862a2a5c71b1656d8e"
+checksum = "cac410af5d00ab6884528b4ab69d1e8e146e8d471201800fa1b4524126de6ad3"
 dependencies = [
  "crossbeam-channel 0.5.6",
  "crossbeam-deque",
  "crossbeam-utils 0.8.14",
- "lazy_static",
  "num_cpus",
 ]
 
@@ -4084,7 +4083,7 @@ dependencies = [
  "escaper",
  "hash",
  "hh_autoimport_rust",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "naming_special_names_rust",
  "oxidized",
  "parser_core_types",
@@ -4154,7 +4153,7 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bfa0f585226d2e68097d4f95d113b15b83a82e819ab25717ec0590d9584ef366"
 dependencies = [
- "semver 1.0.7",
+ "semver 1.0.14",
 ]
 
 [[package]]
@@ -4218,7 +4217,7 @@ dependencies = [
  "hash",
  "hhbc",
  "hhbc-gen",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "log",
  "newtype",
 ]
@@ -4244,9 +4243,9 @@ dependencies = [
 
 [[package]]
 name = "semver"
-version = "1.0.7"
+version = "1.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d65bd28f48be7196d222d95b9243287f48d27aca604e08497513019ff0502cc4"
+checksum = "e25dfac463d778e353db5be2449d1cce89bd6fd23c9f1ea21310ce6e5a1b29c4"
 
 [[package]]
 name = "semver-parser"
@@ -4321,7 +4320,7 @@ dependencies = [
  "anyhow",
  "datastore",
  "decl_parser",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "naming_provider",
  "oxidized",
  "pos",
@@ -4483,9 +4482,9 @@ dependencies = [
 
 [[package]]
 name = "smallvec"
-version = "1.9.0"
+version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2fd0db749597d91ff862fd1d55ea87f7855a744a8425a64695b6fca237d1dad1"
+checksum = "a507befe795404456341dfab10cef66ead4c041f62b8b11bbb92bffe5d0953e0"
 dependencies = [
  "serde",
 ]
@@ -4779,7 +4778,7 @@ dependencies = [
  "ffi",
  "hash",
  "ir",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "log",
  "newtype",
  "strum",
@@ -4791,7 +4790,7 @@ dependencies = [
 name = "textual_macros"
 version = "0.0.0"
 dependencies = [
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "proc-macro-error",
  "proc-macro2",
  "quote",
@@ -4958,7 +4957,7 @@ dependencies = [
  "decl_provider",
  "hash",
  "hh_autoimport_rust",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "lazy_static",
  "naming_special_names_rust",
  "oxidized",
@@ -5126,7 +5125,7 @@ dependencies = [
  "analysis",
  "anyhow",
  "ir_core",
- "itertools 0.10.3",
+ "itertools 0.10.5",
  "print",
 ]
 

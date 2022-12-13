@@ -19,8 +19,7 @@ use ty::reason::Reason;
 #[derive(Debug, Clone)]
 pub struct DeclParser<R: Reason> {
     file_provider: Arc<dyn FileProvider>,
-    // TODO: this should not be pub
-    pub opts: ParserOptions,
+    opts: ParserOptions,
     decl_parser_opts: DeclParserOptions,
     // We could make our parse methods generic over `R` instead, but it's
     // usually more convenient for callers (especially tests) to pin the decl
@@ -46,6 +45,10 @@ impl<R: Reason> DeclParser<R> {
             opts,
             _phantom: PhantomData,
         }
+    }
+
+    pub fn opts(&self) -> &ParserOptions {
+        &self.opts
     }
 
     pub fn parse(&self, path: RelativePath) -> anyhow::Result<Vec<shallow::NamedDecl<R>>> {

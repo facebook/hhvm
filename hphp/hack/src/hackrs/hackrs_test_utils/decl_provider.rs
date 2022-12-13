@@ -27,7 +27,7 @@ pub fn make_folded_decl_provider<R: Reason>(
     shallow_decl_store: ShallowDeclStore<R>,
     decl_parser: DeclParser<R>,
 ) -> impl FoldedDeclProvider<R> {
-    let opts = Arc::new(decl_parser.opts.clone());
+    let opts = Arc::new(decl_parser.opts().clone());
     let shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>> =
         if let Some(naming_table_path) = naming_table {
             Arc::new(LazyShallowDeclProvider::new(

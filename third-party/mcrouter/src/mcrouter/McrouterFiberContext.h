@@ -65,6 +65,7 @@ struct AxonContext {
   bool allDelete{false};
   AxonProxyWriteFn writeProxyFn;
   std::string defaultRegionFilter;
+  std::string poolFilter;
 };
 
 template <class RouterInfo>

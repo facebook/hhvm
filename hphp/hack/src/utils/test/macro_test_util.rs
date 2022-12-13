@@ -3,11 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::fmt::Display;
+
 use proc_macro2::TokenStream;
 use proc_macro2::TokenTree;
-use syn::Error;
-
-type Result<T> = std::result::Result<T, Error>;
 
 fn mismatch(ta: Option<TokenTree>, tb: Option<TokenTree>, ax: &TokenStream, bx: &TokenStream) -> ! {
     panic!(
@@ -19,7 +18,7 @@ fn mismatch(ta: Option<TokenTree>, tb: Option<TokenTree>, ax: &TokenStream, bx: 
     );
 }
 
-pub fn assert_pat_eq(a: Result<TokenStream>, b: TokenStream) {
+pub fn assert_pat_eq<E: Display>(a: Result<TokenStream, E>, b: TokenStream) {
     let a = match a {
         Err(err) => {
             panic!("Unexpected error '{}'", err);
@@ -64,8 +63,7 @@ pub fn assert_pat_eq(a: Result<TokenStream>, b: TokenStream) {
     inner_cmp(a.clone(), b.clone(), &a, &b);
 }
 
-#[allow(dead_code)]
-pub(crate) fn assert_error(a: Result<TokenStream>, b: &str) {
+pub fn assert_error<E: Display>(a: Result<TokenStream, E>, b: &str) {
     match a {
         Ok(a) => panic!("Expected error but got:\n{}", a),
         Err(e) => {

@@ -514,7 +514,7 @@ mod tests {
                     d: String,
                 }
         };
-        assert_pat_eq(
+        assert_pat_eq::<anyhow::Error>(
             Ok(derive_to_ocamlrep(Structure::new(&syn::parse2(input)?))),
             quote! {
                 #[allow(non_upper_case_globals)]
@@ -558,7 +558,7 @@ mod tests {
                   d: String,
               }
         };
-        assert_pat_eq(
+        assert_pat_eq::<anyhow::Error>(
             Ok(derive_from_ocamlrep(Structure::new(&syn::parse2(input)?))),
             quote! {
                 #[allow(non_upper_case_globals)]

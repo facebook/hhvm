@@ -13,6 +13,7 @@ use ocamlrep::FromOcamlRep;
 use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
 pub use relative_path::Prefix;
+pub use relative_path::RelativePathCtx;
 
 use crate::Bytes;
 use crate::ToOxidized;
@@ -62,13 +63,7 @@ impl RelativePath {
     }
 
     pub fn to_absolute(&self, ctx: &RelativePathCtx) -> PathBuf {
-        let mut buf = match self.prefix {
-            Prefix::Root => &ctx.root,
-            Prefix::Hhi => &ctx.hhi,
-            Prefix::Tmp => &ctx.tmp,
-            Prefix::Dummy => &ctx.dummy,
-        }
-        .to_owned();
+        let mut buf = ctx.prefix_path(self.prefix).to_owned();
         buf.push(&OsStr::from_bytes(self.suffix.as_bytes()));
         buf
     }
@@ -127,13 +122,4 @@ impl fmt::Debug for RelativePath {
             Path::new(OsStr::from_bytes(self.suffix.as_bytes())).display()
         )
     }
-}
-
-#[derive(Debug, Default, Clone)]
-#[derive(serde::Serialize, serde::Deserialize)]
-pub struct RelativePathCtx {
-    pub root: PathBuf,
-    pub hhi: PathBuf,
-    pub tmp: PathBuf,
-    pub dummy: PathBuf,
 }

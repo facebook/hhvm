@@ -255,3 +255,38 @@ impl NastCheck {
         )
     }
 }
+
+#[derive(Debug)]
+pub struct ParseFormatError;
+
+impl std::str::FromStr for Format {
+    type Err = ParseFormatError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "context" => Ok(Self::Context),
+            "raw" => Ok(Self::Raw),
+            "highlighted" => Ok(Self::Highlighted),
+            "plain" => Ok(Self::Plain),
+            _ => Err(ParseFormatError),
+        }
+    }
+}
+
+impl std::fmt::Display for Format {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Context => "context".fmt(f),
+            Self::Raw => "raw".fmt(f),
+            Self::Highlighted => "highlighted".fmt(f),
+            Self::Plain => "plain".fmt(f),
+        }
+    }
+}
+
+impl std::error::Error for ParseFormatError {}
+
+impl std::fmt::Display for ParseFormatError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        "Unrecognized error format".fmt(f)
+    }
+}

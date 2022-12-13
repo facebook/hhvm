@@ -86,6 +86,10 @@ impl RelativePath {
     pub fn prefix(&self) -> Prefix {
         self.prefix
     }
+
+    pub fn to_absolute(&self, ctx: &RelativePathCtx) -> PathBuf {
+        ctx.prefix_path(self.prefix).join(&self.path)
+    }
 }
 
 impl Display for RelativePath {
@@ -184,6 +188,26 @@ pub type Map<T> = std::collections::BTreeMap<RelativePath, T>;
 
 pub mod map {
     pub use super::Map;
+}
+
+#[derive(Debug, Default, Clone)]
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct RelativePathCtx {
+    pub root: PathBuf,
+    pub hhi: PathBuf,
+    pub tmp: PathBuf,
+    pub dummy: PathBuf,
+}
+
+impl RelativePathCtx {
+    pub fn prefix_path(&self, prefix: Prefix) -> &Path {
+        match prefix {
+            Prefix::Root => &self.root,
+            Prefix::Hhi => &self.hhi,
+            Prefix::Tmp => &self.tmp,
+            Prefix::Dummy => &self.dummy,
+        }
+    }
 }
 
 #[cfg(test)]

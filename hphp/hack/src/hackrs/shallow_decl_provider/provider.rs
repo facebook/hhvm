@@ -64,6 +64,9 @@ impl<R: Reason> LazyShallowDeclProvider<R> {
         Ok(())
     }
 
+    // NB: Must be manually kept in sync with
+    // `hackrs_provider_backend::HhServerProviderBackend::dedup_and_add_decls` and
+    // OCaml function `Direct_decl_utils.dedup_decls`.
     pub fn dedup_and_add_decls(
         &self,
         path: RelativePath,
@@ -82,6 +85,10 @@ impl<R: Reason> LazyShallowDeclProvider<R> {
     /// If a symbol was also declared in another file, and that file
     /// was determined to be the winner in the naming table, remove
     /// its decl from the list.
+    //
+    // NB: Must be manually kept in sync with
+    // `hackrs_provider_backend::HhServerProviderBackend::remove_naming_conflict_losers`
+    // and OCaml function `Direct_decl_utils.remove_naming_conflict_losers`.
     fn remove_naming_conflict_losers(
         &self,
         path: RelativePath,

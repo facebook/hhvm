@@ -88,6 +88,8 @@ let pp_hash_type fmt hash =
   | None -> Format.fprintf fmt "None"
   | Some hash -> Format.fprintf fmt "Some (%s)" (Int64.to_string hash)
 
+(* NB: Type [t] must be manually kept in sync with Rust type [hackrs_provider_backend::FileInfo] *)
+
 (** The record produced by the parsing phase. *)
 type t = {
   hash: hash_type;

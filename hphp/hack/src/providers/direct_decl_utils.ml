@@ -16,6 +16,9 @@ type parsed_file_with_hashes = Direct_decl_parser.parsed_file_with_hashes = {
 
 (* If any decls in the list have the same name, retain only the first
    declaration of each symbol in the sequence. *)
+(* NB: Must be manually kept in sync with hackrs functions
+   [shallow_decl_provider::LazyShallowDeclProvider::dedup_and_add_decls] and
+   [hackrs_provider_backend::HhServerProviderBackend::dedup_and_add_decls]. *)
 let dedup_decls decls =
   let open Shallow_decl_defs in
   let seen_types = String.Table.create () in
@@ -59,6 +62,9 @@ let dedup_decls decls =
    conflict, which might be confusing. But the user will be obligated to fix the
    naming conflict, and this behavior is limited to full inits, so maybe we can
    live with it. *)
+(* NB: Must be manually kept in sync with hackrs functions
+   [shallow_decl_provider::LazyShallowDeclProvider::remove_naming_conflict_losers] and
+   [hackrs_provider_backend::HhServerProviderBackend::remove_naming_conflict_losers]. *)
 let remove_naming_conflict_losers ctx file decls =
   let open Shallow_decl_defs in
   Sequence.filter decls ~f:(fun decl ->

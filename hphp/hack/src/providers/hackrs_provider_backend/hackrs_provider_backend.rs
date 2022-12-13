@@ -240,6 +240,7 @@ pub type Id = (naming_table::Pos, String, Option<Int64>);
 pub type HashType = Option<Int64>;
 
 /// The record produced by the parsing phase.
+// NB: Must be manually kept in sync with OCaml type `FileInfo.t`
 #[derive(Clone, Debug, FromOcamlRep, ToOcamlRep)]
 #[repr(C)]
 pub struct FileInfo {
@@ -255,7 +256,8 @@ pub struct FileInfo {
 }
 
 impl<'a> From<ParsedFileWithHashes<'a>> for FileInfo {
-    /// c.f. OCaml Direct_decl_parser.decls_to_fileinfo
+    // NB: Must be manually kept in sync with OCaml function
+    // `Direct_decl_parser.decls_to_fileinfo`
     fn from(file: ParsedFileWithHashes<'a>) -> FileInfo {
         let mut info = FileInfo {
             hash: Some(Int64::from(file.file_decls_hash.as_u64() as i64)),
@@ -324,8 +326,12 @@ mod parallel_decl_parse {
                 .collect()
         }
 
-        /// Behaves the same as LazyShallowDeclProvider::dedup_and_add_decls, but
-        /// operates over oxidized_by_ref decls.
+        /// Behaves the same as `LazyShallowDeclProvider::dedup_and_add_decls`,
+        /// but operates over oxidized_by_ref decls.
+        //
+        // NB: Must be manually kept in sync with
+        // `LazyShallowDeclProvider::dedup_and_add_decls` and OCaml function
+        // `Direct_decl_utils.dedup_decls`.
         fn dedup_and_add_decls<'a>(
             &self,
             path: RelativePath,
@@ -358,6 +364,10 @@ mod parallel_decl_parse {
         /// If a symbol was also declared in another file, and that file
         /// was determined to be the winner in the naming table, remove
         /// its decl from the list.
+        //
+        // NB: Must be manually kept in sync with
+        // `LazyShallowDeclProvider::remove_naming_conflict_losers` and OCaml function
+        // `Direct_decl_utils.dedup_decls`.
         fn remove_naming_conflict_losers<'a>(
             &self,
             path: RelativePath,

@@ -64,7 +64,12 @@ pub(crate) fn write_class(
         let name = constant
             .name
             .mangle_with_class(class.name, IsStatic::Static, &state.strings);
-        txf.declare_global(name, textual::Ty::mixed());
+        let ty = if let Some(et) = class.enum_type.as_ref() {
+            convert_enum_ty(et, &state.strings)
+        } else {
+            textual::Ty::mixed()
+        };
+        txf.declare_global(name, ty);
     }
 
     write_init_static(txf, state, &class)?;
@@ -75,6 +80,31 @@ pub(crate) fn write_class(
     }
 
     Ok(())
+}
+
+fn convert_enum_ty(ti: &ir::TypeInfo, strings: &ir::StringInterner) -> textual::Ty {
+    // Enum types are unenforced - and yet the constants ARE real type. So scan
+    // the text of the type and do the best we can.
+    //
+    // If we recognize the type then use it.  Unless it's an "enum class" it can
+    // only be an arraykey.
+    //
+    if ti
+        .user_type
+        .map_or(false, |id| strings.eq_str(id, "HH\\int"))
+    {
+        return textual::Ty::SpecialPtr(textual::SpecialTy::Int);
+    }
+    if ti
+        .user_type
+        .map_or(false, |id| strings.eq_str(id, "HH\\string"))
+    {
+        return textual::Ty::SpecialPtr(textual::SpecialTy::String);
+    }
+
+    // But it can be an alias - so we might just not recognize it - so default
+    // to mixed.
+    textual::Ty::mixed()
 }
 
 /// For a given class return the Ty for its non-static (instance) type.

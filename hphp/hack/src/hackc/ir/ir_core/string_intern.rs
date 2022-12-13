@@ -102,6 +102,11 @@ impl StringInterner {
         MappedRwLockReadGuard::map(self.lookup_bytes(id), |v: &[u8]| -> &BStr { v.into() })
     }
 
+    pub fn eq_str(&self, id: UnitBytesId, rhs: &str) -> bool {
+        let lhs = self.lookup_bytes(id);
+        lhs.as_ref() as &[u8] == rhs.as_bytes()
+    }
+
     /// This is meant for debugging ONLY.
     pub fn debug_for_each<F>(&self, mut f: F)
     where

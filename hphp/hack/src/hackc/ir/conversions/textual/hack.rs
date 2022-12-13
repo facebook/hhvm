@@ -72,6 +72,8 @@ pub(crate) enum Hhbc {
     Div,
     #[decl(fn hhbc_exit(*HackMixed) -> noreturn)]
     Exit,
+    #[decl(fn hhbc_fatal(*HackMixed) -> noreturn)]
+    Fatal,
     #[decl(fn hhbc_get_cls_rg_prop(*HackMixed) -> *HackMixed)]
     GetClsRGProp,
     #[decl(fn hhbc_has_reified_parent(*HackMixed) -> *HackMixed)]

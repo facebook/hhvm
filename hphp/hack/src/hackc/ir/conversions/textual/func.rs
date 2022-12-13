@@ -278,7 +278,7 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             let vid = write_get_class_const(state, cid, const_id)?;
             state.set_iid(iid, vid);
         }
-        Instr::Hhbc(Hhbc::CGetL(lid, _) | Hhbc::ConsumeL(lid, _)) => {
+        Instr::Hhbc(Hhbc::CGetL(lid, _) | Hhbc::CUGetL(lid, _) | Hhbc::ConsumeL(lid, _)) => {
             write_load_var(state, iid, lid)?
         }
         Instr::Hhbc(Hhbc::IncDecL(lid, op, _)) => write_inc_dec_l(state, iid, lid, op)?,
@@ -443,6 +443,16 @@ fn write_terminator(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
         Terminator::Enter(bid, _) | Terminator::Jmp(bid, _) => {
             state.fb.jmp(&[bid], ())?;
         }
+        Terminator::Exit(msg, _) => {
+            let msg = state.lookup_vid(msg);
+            state.call_builtin(hack::Builtin::Hhbc(hack::Hhbc::Exit), [msg])?;
+            state.fb.unreachable()?;
+        }
+        Terminator::Fatal(msg, _, _) => {
+            let msg = state.lookup_vid(msg);
+            state.call_builtin(hack::Builtin::Hhbc(hack::Hhbc::Fatal), [msg])?;
+            state.fb.unreachable()?;
+        }
         Terminator::JmpArgs(bid, ref params, _) => {
             let params = params.iter().map(|v| state.lookup_vid(*v)).collect_vec();
             state.fb.jmp(&[bid], params)?;
@@ -466,8 +476,6 @@ fn write_terminator(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
         }
 
         Terminator::CallAsync(..)
-        | Terminator::Exit(..)
-        | Terminator::Fatal(..)
         | Terminator::IterInit(..)
         | Terminator::IterNext(..)
         | Terminator::MemoGet(..)

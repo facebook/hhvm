@@ -384,9 +384,9 @@ let get_module
   | Provider_backend.Analysis -> Decl_store.((get ()).get_module module_name)
   | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
-    Option.first_some
-      Decl_store.((get ()).get_module module_name)
-      (fetch_from_backing_store ())
+    (match Decl_store.((get ()).get_module module_name) with
+    | Some m -> Some m
+    | None -> fetch_from_backing_store ())
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     Provider_backend.Decl_cache.find_or_add
       decl_cache

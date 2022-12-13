@@ -83,9 +83,14 @@ let check_attrs pos env sid attrs =
             (match Env.get_class env origin_sid with
             | None -> []
             | Some ty ->
+              let pos =
+                match Cls.get_prop ty attr with
+                | Some attr_decl -> Lazy.force attr_decl.ce_pos
+                | None -> Cls.pos ty
+              in
               Reason.to_string
-                ("The attribute " ^ attr ^ " is declared in this class.")
-                (Reason.Rwitness_from_decl (Cls.pos ty)))
+                ("The attribute `" ^ attr ^ "` is declared here.")
+                (Reason.Rwitness_from_decl pos))
         in
         Errors.add_typing_error
           Typing_error.(

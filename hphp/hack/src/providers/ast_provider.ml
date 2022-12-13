@@ -225,7 +225,7 @@ let get_ast_with_error ?(full = false) ctx path =
        some time, so we might as well get it now. *)
     compute_ast_with_error ~popt:(Provider_context.get_popt ctx) ~entry
   | ( _,
-      ( Provider_backend.Analysis | Provider_backend.Rust_provider_backend _
+      ( Provider_backend.Rust_provider_backend _
       | Provider_backend.Shared_memory
       | Provider_backend.Pessimised_shared_memory _ ) ) ->
     (* Note that we might be looking up the shared ParserHeap directly, *)
@@ -246,6 +246,9 @@ let get_ast_with_error ?(full = false) ctx path =
         (* It's in the parser-heap! hurrah! *)
         (Errors.empty, ast)
     end
+  | (_, Provider_backend.Analysis) ->
+    (* Zoncolan has its own caching layers and does not make use of Hack's *)
+    parse_from_disk_no_caching ~apply_file_filter:false
   | (_, Provider_backend.Local_memory _) ->
     (* We never cache ASTs for this provider. There'd be no use. *)
     (* The only valuable caching is to cache decls. *)
@@ -342,7 +345,7 @@ let provide_ast_hint
     (path : Relative_path.t) (program : Nast.program) (parse_type : parse_type)
     : unit =
   match Provider_backend.get () with
-  | Provider_backend.Analysis
+  | Provider_backend.Analysis -> failwith "Should not write into parser heap"
   | Provider_backend.Rust_provider_backend _
   | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->

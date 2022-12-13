@@ -249,7 +249,7 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
   | Some (path, _pos) -> compute_symbol_canon_name path
   | None ->
     (match Provider_context.get_backend ctx with
-    | Provider_backend.Analysis
+    | Provider_backend.Analysis -> failwith "invalid"
     | Provider_backend.Pessimised_shared_memory _
     | Provider_backend.Shared_memory ->
       (* NB: as written, this code may return a canon name even when the
@@ -310,7 +310,7 @@ let add_fun (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos)
 let remove_fun_batch (backend : Provider_backend.t) (names : string list) : unit
     =
   match backend with
-  | Provider_backend.Analysis
+  | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
     Naming_heap.Funs.remove_batch
@@ -486,7 +486,7 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
     compute_symbol_canon_name path (name_type_to_kind name_type)
   | None ->
     (match Provider_context.get_backend ctx with
-    | Provider_backend.Analysis
+    | Provider_backend.Analysis -> failwith "invalid"
     | Provider_backend.Pessimised_shared_memory _
     | Provider_backend.Shared_memory ->
       (* NB: as written, this code may return a canon name even when the

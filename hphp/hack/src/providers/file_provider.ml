@@ -78,7 +78,7 @@ let get_unsafe fn =
 
 let get_contents ?(force_read_disk = false) fn =
   match Provider_backend.get () with
-  | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Analysis
   | Provider_backend.Pessimised_shared_memory _
   | Provider_backend.Shared_memory ->
     let from_cache =

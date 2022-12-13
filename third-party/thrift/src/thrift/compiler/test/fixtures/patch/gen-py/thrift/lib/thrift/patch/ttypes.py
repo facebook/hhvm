@@ -37,7 +37,7 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'PatchOp', 'GeneratePatch', 'AssignOnlyPatch', 'BoolPatch', 'BytePatch', 'I16Patch', 'I32Patch', 'I64Patch', 'FloatPatch', 'DoublePatch', 'StringPatch', 'BinaryPatch', 'DurationPatch', 'TimePatch']
+__all__ = ['UTF8STRINGS', 'PatchOp', 'GeneratePatch', 'AssignOnlyPatch', 'BoolPatch', 'BytePatch', 'I16Patch', 'I32Patch', 'I64Patch', 'FloatPatch', 'DoublePatch', 'StringPatch', 'BinaryPatch', 'DurationPatch']
 
 class PatchOp:
   """
@@ -1780,157 +1780,6 @@ class DurationPatch:
   def _to_py_deprecated(self):
     return self
 
-class TimePatch:
-  """
-  A patch for a Time value.
-  
-  Attributes:
-   - assign: Assigns to a (set) value.
-  
-  If set, all other patch operations are ignored.
-  
-  Note: Only modifies set field values.
-   - clear: Clear any set value.
-   - add: Add to a given value.
-  """
-
-  thrift_spec = None
-  thrift_field_annotations = None
-  thrift_struct_annotations = None
-  __init__ = None
-  @staticmethod
-  def isUnion():
-    return False
-
-  def read(self, iprot):
-    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
-      return
-    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
-      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
-        if ftype == TType.STRUCT:
-          self.assign = thrift.lib.thrift.standard.ttypes.TimeStruct()
-          self.assign.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.BOOL:
-          self.clear = iprot.readBool()
-        else:
-          iprot.skip(ftype)
-      elif fid == 8:
-        if ftype == TType.STRUCT:
-          self.add = thrift.lib.thrift.standard.ttypes.DurationStruct()
-          self.add.read(iprot)
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
-      return
-    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
-      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
-      return
-    oprot.writeStructBegin('TimePatch')
-    if self.assign != None:
-      oprot.writeFieldBegin('assign', TType.STRUCT, 1)
-      self.assign.write(oprot)
-      oprot.writeFieldEnd()
-    if self.clear != None:
-      oprot.writeFieldBegin('clear', TType.BOOL, 2)
-      oprot.writeBool(self.clear)
-      oprot.writeFieldEnd()
-    if self.add != None:
-      oprot.writeFieldBegin('add', TType.STRUCT, 8)
-      self.add.write(oprot)
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def readFromJson(self, json, is_text=True, **kwargs):
-    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
-    set_cls = kwargs.pop('custom_set_cls', set)
-    dict_cls = kwargs.pop('custom_dict_cls', dict)
-    if kwargs:
-        extra_kwargs = ', '.join(kwargs.keys())
-        raise ValueError(
-            'Unexpected keyword arguments: ' + extra_kwargs
-        )
-    json_obj = json
-    if is_text:
-      json_obj = loads(json)
-    if 'assign' in json_obj and json_obj['assign'] is not None:
-      self.assign = thrift.lib.thrift.standard.ttypes.TimeStruct()
-      self.assign.readFromJson(json_obj['assign'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-    if 'clear' in json_obj and json_obj['clear'] is not None:
-      self.clear = json_obj['clear']
-    if 'add' in json_obj and json_obj['add'] is not None:
-      self.add = thrift.lib.thrift.standard.ttypes.DurationStruct()
-      self.add.readFromJson(json_obj['add'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-
-  def __repr__(self):
-    L = []
-    padding = ' ' * 4
-    if self.assign is not None:
-      value = pprint.pformat(self.assign, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    assign=%s' % (value))
-    if self.clear is not None:
-      value = pprint.pformat(self.clear, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    clear=%s' % (value))
-    if self.add is not None:
-      value = pprint.pformat(self.add, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    add=%s' % (value))
-    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
-
-  def __eq__(self, other):
-    if not isinstance(other, self.__class__):
-      return False
-
-    return self.__dict__ == other.__dict__ 
-
-  def __ne__(self, other):
-    return not (self == other)
-
-  def __dir__(self):
-    return (
-      'assign',
-      'clear',
-      'add',
-    )
-
-  # Override the __hash__ function for Python3 - t10434117
-  __hash__ = object.__hash__
-
-  def _to_python(self):
-    import importlib
-    import thrift.python.converter
-    python_types = importlib.import_module("apache.thrift.op.patch.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.TimePatch, self)
-
-  def _to_py3(self):
-    import importlib
-    import thrift.py3.converter
-    py3_types = importlib.import_module("apache.thrift.op.patch.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.TimePatch, self)
-
-  def _to_py_deprecated(self):
-    return self
-
 all_structs.append(GeneratePatch)
 GeneratePatch.thrift_spec = (
 )
@@ -2296,41 +2145,6 @@ def DurationPatch__setstate__(self, state):
 
 DurationPatch.__getstate__ = lambda self: self.__dict__.copy()
 DurationPatch.__setstate__ = DurationPatch__setstate__
-
-all_structs.append(TimePatch)
-TimePatch.thrift_spec = (
-  None, # 0
-  (1, TType.STRUCT, 'assign', [thrift.lib.thrift.standard.ttypes.TimeStruct, thrift.lib.thrift.standard.ttypes.TimeStruct.thrift_spec, False], None, 1, ), # 1
-  (2, TType.BOOL, 'clear', None, None, 3, ), # 2
-  None, # 3
-  None, # 4
-  None, # 5
-  None, # 6
-  None, # 7
-  (8, TType.STRUCT, 'add', [thrift.lib.thrift.standard.ttypes.DurationStruct, thrift.lib.thrift.standard.ttypes.DurationStruct.thrift_spec, False], None, 3, ), # 8
-)
-
-TimePatch.thrift_struct_annotations = {
-  "thrift.uri": "facebook.com/thrift/type/TimePatch",
-}
-TimePatch.thrift_field_annotations = {
-}
-
-def TimePatch__init__(self, assign=None, clear=None, add=None,):
-  self.assign = assign
-  self.clear = clear
-  self.add = add
-
-TimePatch.__init__ = TimePatch__init__
-
-def TimePatch__setstate__(self, state):
-  state.setdefault('assign', None)
-  state.setdefault('clear', None)
-  state.setdefault('add', None)
-  self.__dict__ = state
-
-TimePatch.__getstate__ = lambda self: self.__dict__.copy()
-TimePatch.__setstate__ = TimePatch__setstate__
 
 fix_spec(all_structs)
 del all_structs

@@ -22,16 +22,6 @@ cdef class DurationStruct_Builder(thrift.py3.builder.StructBuilder):
     cdef public pint nanos
 
 
-cdef class TimeStruct_Builder(thrift.py3.builder.StructBuilder):
-    cdef public pint seconds
-    cdef public pint nanos
-
-
-cdef class FractionStruct_Builder(thrift.py3.builder.StructBuilder):
-    cdef public pint numerator
-    cdef public pint denominator
-
-
 cdef class UriStruct_Builder(thrift.py3.builder.StructBuilder):
     cdef public str scheme
     cdef public list domain

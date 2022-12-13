@@ -21,5 +21,5 @@ import thrift.lib.thrift.patch.ttypes
 import thrift.lib.thrift.standard.ttypes
 
 
-from .ttypes import UTF8STRINGS, MyEnum, MyData, InnerUnion, MyUnion, MyStruct, LateDefStruct, Recursive, Bar, Loop, MyDataFieldPatch, MyDataPatch, InnerUnionFieldPatch, InnerUnionPatch, MyUnionFieldPatch, MyUnionPatch, MyStructField10Patch, MyStructField25Patch, MyStructField28Patch, MyStructField29Patch, MyStructField30Patch, MyStructField31Patch, MyStructField31Patch1, MyStructField32Patch, MyStructField32Patch1, MyStructFieldPatch, MyStructPatch, LateDefStructFieldPatch, LateDefStructPatch, RecursiveField1Patch, RecursiveFieldPatch, RecursivePatch, BarFieldPatch, BarPatch, LoopFieldPatch, LoopPatch
+from .ttypes import UTF8STRINGS, MyEnum, MyData, InnerUnion, MyUnion, MyStruct, LateDefStruct, Recursive, Bar, Loop, MyDataFieldPatch, MyDataPatch, InnerUnionFieldPatch, InnerUnionPatch, MyUnionFieldPatch, MyUnionPatch, MyStructField10Patch, MyStructField24Patch, MyStructField27Patch, MyStructField28Patch, MyStructField29Patch, MyStructField30Patch, MyStructField30Patch1, MyStructField31Patch, MyStructField31Patch1, MyStructFieldPatch, MyStructPatch, LateDefStructFieldPatch, LateDefStructPatch, RecursiveField1Patch, RecursiveFieldPatch, RecursivePatch, BarFieldPatch, BarPatch, LoopFieldPatch, LoopPatch
 

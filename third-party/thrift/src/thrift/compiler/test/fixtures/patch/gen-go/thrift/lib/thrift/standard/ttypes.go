@@ -63,69 +63,6 @@ func VoidFromString(s string) (Void, error) {
 
 func VoidPtr(v Void) *Void { return &v }
 
-//The types availible in JSON, as defined by https://www.json.org.
-type JsonType int64
-const (
-  JsonType_Null JsonType = 0
-  JsonType_Boolean JsonType = 1
-  JsonType_Number JsonType = 2
-  JsonType_String JsonType = 4
-  JsonType_Array JsonType = 5
-  JsonType_Object JsonType = 6
-)
-
-var JsonTypeToName = map[JsonType]string {
-  JsonType_Null: "Null",
-  JsonType_Boolean: "Boolean",
-  JsonType_Number: "Number",
-  JsonType_String: "String",
-  JsonType_Array: "Array",
-  JsonType_Object: "Object",
-}
-
-var JsonTypeToValue = map[string]JsonType {
-  "Null": JsonType_Null,
-  "Boolean": JsonType_Boolean,
-  "Number": JsonType_Number,
-  "String": JsonType_String,
-  "Array": JsonType_Array,
-  "Object": JsonType_Object,
-}
-
-var JsonTypeNames = []string {
-  "Null",
-  "Boolean",
-  "Number",
-  "String",
-  "Array",
-  "Object",
-}
-
-var JsonTypeValues = []JsonType {
-  JsonType_Null,
-  JsonType_Boolean,
-  JsonType_Number,
-  JsonType_String,
-  JsonType_Array,
-  JsonType_Object,
-}
-
-func (p JsonType) String() string {
-  if v, ok := JsonTypeToName[p]; ok {
-    return v
-  }
-  return "<UNSET>"
-}
-
-func JsonTypeFromString(s string) (JsonType, error) {
-  if v, ok := JsonTypeToValue[s]; ok {
-    return v, nil
-  }
-  return JsonType(0), fmt.Errorf("not a valid JsonType string")
-}
-
-func JsonTypePtr(v JsonType) *JsonType { return &v }
-
 //The standard Thrift protocols.
 type StandardProtocol int64
 const (
@@ -199,34 +136,6 @@ type ByteBuffer = []byte
 
 func ByteBufferPtr(v ByteBuffer) *ByteBuffer { return &v }
 
-//A 'normal' Fraction.
-//
-//This representation is always safe to 'normalize'.
-type Fraction = FractionStruct
-
-func FractionPtr(v Fraction) *Fraction { return &v }
-
-func NewFraction() *Fraction { return NewFractionStruct() }
-
-//A 'simple' Fraction.
-//
-//This representation is always safe to 'simplify'.
-type SimpleFraction = FractionStruct
-
-func SimpleFractionPtr(v SimpleFraction) *SimpleFraction { return &v }
-
-func NewSimpleFraction() *SimpleFraction { return NewFractionStruct() }
-
-//The binary form of a universally unique identifier (UUID).
-//
-//Considered 'valid' if contains exactly 0 or 16 bytes.
-//Considered 'normal' if not all zeros.
-//
-//See rfc4122
-type Uuid = []byte
-
-func UuidPtr(v Uuid) *Uuid { return &v }
-
 //The string form of a universally unique identifier (UUID).
 //
 //For example: "6ba7b810-9dad-11d1-80b4-00c04fd430c8". Use `standard.Uuid` for
@@ -245,44 +154,6 @@ type Path = string
 
 func PathPtr(v Path) *Path { return &v }
 
-//Parsed path segments.
-//
-//Considered 'simple' if no segment contains a slash('/').
-type PathSegments = []string
-
-func PathSegmentsPtr(v PathSegments) *PathSegments { return &v }
-
-//A dot('.')-delimitated domain name.
-//
-//See rfc1034.
-type Domain = string
-
-func DomainPtr(v Domain) *Domain { return &v }
-
-//Parsed domain labels.
-//
-//Considered 'simple' if no label contains a dot('.').
-type DomainLabels = []string
-
-func DomainLabelsPtr(v DomainLabels) *DomainLabels { return &v }
-
-//A URI Query string.
-//
-//Of the form {name}={value}&...
-//
-//See rfc3986.
-type QueryString = string
-
-func QueryStringPtr(v QueryString) *QueryString { return &v }
-
-//A decoded QueryString.
-//
-//Considered 'simple' if no key or value contains a equal('=') or
-//ampersand('&').
-type QueryArgs_ = map[string]string
-
-func QueryArgs_Ptr(v QueryArgs_) *QueryArgs_ { return &v }
-
 //A (scheme-less) URI.
 //
 //Of the form described in RFC 3986, but with every component optional.
@@ -291,11 +162,6 @@ func QueryArgs_Ptr(v QueryArgs_) *QueryArgs_ { return &v }
 type Uri = string
 
 func UriPtr(v Uri) *Uri { return &v }
-
-//An encoded JSON definition, as defined by https://www.json.org.
-type JsonString = string
-
-func JsonStringPtr(v JsonString) *JsonString { return &v }
 
 // A fixed-length span of time, represented as a signed count of seconds and
 // nanoseconds (nanos).
@@ -457,325 +323,6 @@ func (p *DurationStruct) String() string {
   return fmt.Sprintf("DurationStruct({Seconds:%s Nanos:%s})", secondsVal, nanosVal)
 }
 
-// An instant in time encoded as a count of seconds and nanoseconds (nanos)
-// since midnight on January 1, 1970 UTC (i.e. Unix epoch).
-// 
-// Considered 'normal', when `nanos` is in the range 0 to 999'999'999 inclusive.
-// 
-// Attributes:
-//  - Seconds: The count of seconds.
-//  - Nanos: The count of nanoseconds.
-type TimeStruct struct {
-  Seconds int64 `thrift:"seconds,1" db:"seconds" json:"seconds"`
-  Nanos int32 `thrift:"nanos,2" db:"nanos" json:"nanos"`
-}
-
-func NewTimeStruct() *TimeStruct {
-  return &TimeStruct{}
-}
-
-
-func (p *TimeStruct) GetSeconds() int64 {
-  return p.Seconds
-}
-
-func (p *TimeStruct) GetNanos() int32 {
-  return p.Nanos
-}
-type TimeStructBuilder struct {
-  obj *TimeStruct
-}
-
-func NewTimeStructBuilder() *TimeStructBuilder{
-  return &TimeStructBuilder{
-    obj: NewTimeStruct(),
-  }
-}
-
-func (p TimeStructBuilder) Emit() *TimeStruct{
-  return &TimeStruct{
-    Seconds: p.obj.Seconds,
-    Nanos: p.obj.Nanos,
-  }
-}
-
-func (t *TimeStructBuilder) Seconds(seconds int64) *TimeStructBuilder {
-  t.obj.Seconds = seconds
-  return t
-}
-
-func (t *TimeStructBuilder) Nanos(nanos int32) *TimeStructBuilder {
-  t.obj.Nanos = nanos
-  return t
-}
-
-func (t *TimeStruct) SetSeconds(seconds int64) *TimeStruct {
-  t.Seconds = seconds
-  return t
-}
-
-func (t *TimeStruct) SetNanos(nanos int32) *TimeStruct {
-  t.Nanos = nanos
-  return t
-}
-
-func (p *TimeStruct) Read(iprot thrift.Protocol) error {
-  if _, err := iprot.ReadStructBegin(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
-  }
-
-
-  for {
-    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
-    if err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
-    }
-    if fieldTypeId == thrift.STOP { break; }
-    switch fieldId {
-    case 1:
-      if err := p.ReadField1(iprot); err != nil {
-        return err
-      }
-    case 2:
-      if err := p.ReadField2(iprot); err != nil {
-        return err
-      }
-    default:
-      if err := iprot.Skip(fieldTypeId); err != nil {
-        return err
-      }
-    }
-    if err := iprot.ReadFieldEnd(); err != nil {
-      return err
-    }
-  }
-  if err := iprot.ReadStructEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
-  }
-  return nil
-}
-
-func (p *TimeStruct)  ReadField1(iprot thrift.Protocol) error {
-  if v, err := iprot.ReadI64(); err != nil {
-    return thrift.PrependError("error reading field 1: ", err)
-  } else {
-    p.Seconds = v
-  }
-  return nil
-}
-
-func (p *TimeStruct)  ReadField2(iprot thrift.Protocol) error {
-  if v, err := iprot.ReadI32(); err != nil {
-    return thrift.PrependError("error reading field 2: ", err)
-  } else {
-    p.Nanos = v
-  }
-  return nil
-}
-
-func (p *TimeStruct) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("TimeStruct"); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
-  if err := p.writeField1(oprot); err != nil { return err }
-  if err := p.writeField2(oprot); err != nil { return err }
-  if err := oprot.WriteFieldStop(); err != nil {
-    return thrift.PrependError("write field stop error: ", err) }
-  if err := oprot.WriteStructEnd(); err != nil {
-    return thrift.PrependError("write struct stop error: ", err) }
-  return nil
-}
-
-func (p *TimeStruct) writeField1(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("seconds", thrift.I64, 1); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:seconds: ", p), err) }
-  if err := oprot.WriteI64(int64(p.Seconds)); err != nil {
-  return thrift.PrependError(fmt.Sprintf("%T.seconds (1) field write error: ", p), err) }
-  if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:seconds: ", p), err) }
-  return err
-}
-
-func (p *TimeStruct) writeField2(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("nanos", thrift.I32, 2); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:nanos: ", p), err) }
-  if err := oprot.WriteI32(int32(p.Nanos)); err != nil {
-  return thrift.PrependError(fmt.Sprintf("%T.nanos (2) field write error: ", p), err) }
-  if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:nanos: ", p), err) }
-  return err
-}
-
-func (p *TimeStruct) String() string {
-  if p == nil {
-    return "<nil>"
-  }
-
-  secondsVal := fmt.Sprintf("%v", p.Seconds)
-  nanosVal := fmt.Sprintf("%v", p.Nanos)
-  return fmt.Sprintf("TimeStruct({Seconds:%s Nanos:%s})", secondsVal, nanosVal)
-}
-
-// A integer fraction of the form {numerator} / {denominator}
-// 
-// Useful for representing ratios, rates, and metric accumulators.
-// 
-// Considered 'normal' when the denominator is positive.
-// Considered 'simple' when `normal` and the greatest common divisor of the
-// and `numerator` and `denominator`, is 1.
-// 
-// Attributes:
-//  - Numerator: The numerator/dividend/antecedent/upper integer.
-//  - Denominator: The denominator/divisor/consequent/lower integer.
-type FractionStruct struct {
-  Numerator int64 `thrift:"numerator,1" db:"numerator" json:"numerator"`
-  Denominator int64 `thrift:"denominator,2" db:"denominator" json:"denominator"`
-}
-
-func NewFractionStruct() *FractionStruct {
-  return &FractionStruct{}
-}
-
-
-func (p *FractionStruct) GetNumerator() int64 {
-  return p.Numerator
-}
-
-func (p *FractionStruct) GetDenominator() int64 {
-  return p.Denominator
-}
-type FractionStructBuilder struct {
-  obj *FractionStruct
-}
-
-func NewFractionStructBuilder() *FractionStructBuilder{
-  return &FractionStructBuilder{
-    obj: NewFractionStruct(),
-  }
-}
-
-func (p FractionStructBuilder) Emit() *FractionStruct{
-  return &FractionStruct{
-    Numerator: p.obj.Numerator,
-    Denominator: p.obj.Denominator,
-  }
-}
-
-func (f *FractionStructBuilder) Numerator(numerator int64) *FractionStructBuilder {
-  f.obj.Numerator = numerator
-  return f
-}
-
-func (f *FractionStructBuilder) Denominator(denominator int64) *FractionStructBuilder {
-  f.obj.Denominator = denominator
-  return f
-}
-
-func (f *FractionStruct) SetNumerator(numerator int64) *FractionStruct {
-  f.Numerator = numerator
-  return f
-}
-
-func (f *FractionStruct) SetDenominator(denominator int64) *FractionStruct {
-  f.Denominator = denominator
-  return f
-}
-
-func (p *FractionStruct) Read(iprot thrift.Protocol) error {
-  if _, err := iprot.ReadStructBegin(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
-  }
-
-
-  for {
-    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
-    if err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
-    }
-    if fieldTypeId == thrift.STOP { break; }
-    switch fieldId {
-    case 1:
-      if err := p.ReadField1(iprot); err != nil {
-        return err
-      }
-    case 2:
-      if err := p.ReadField2(iprot); err != nil {
-        return err
-      }
-    default:
-      if err := iprot.Skip(fieldTypeId); err != nil {
-        return err
-      }
-    }
-    if err := iprot.ReadFieldEnd(); err != nil {
-      return err
-    }
-  }
-  if err := iprot.ReadStructEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
-  }
-  return nil
-}
-
-func (p *FractionStruct)  ReadField1(iprot thrift.Protocol) error {
-  if v, err := iprot.ReadI64(); err != nil {
-    return thrift.PrependError("error reading field 1: ", err)
-  } else {
-    p.Numerator = v
-  }
-  return nil
-}
-
-func (p *FractionStruct)  ReadField2(iprot thrift.Protocol) error {
-  if v, err := iprot.ReadI64(); err != nil {
-    return thrift.PrependError("error reading field 2: ", err)
-  } else {
-    p.Denominator = v
-  }
-  return nil
-}
-
-func (p *FractionStruct) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("FractionStruct"); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
-  if err := p.writeField1(oprot); err != nil { return err }
-  if err := p.writeField2(oprot); err != nil { return err }
-  if err := oprot.WriteFieldStop(); err != nil {
-    return thrift.PrependError("write field stop error: ", err) }
-  if err := oprot.WriteStructEnd(); err != nil {
-    return thrift.PrependError("write struct stop error: ", err) }
-  return nil
-}
-
-func (p *FractionStruct) writeField1(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("numerator", thrift.I64, 1); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:numerator: ", p), err) }
-  if err := oprot.WriteI64(int64(p.Numerator)); err != nil {
-  return thrift.PrependError(fmt.Sprintf("%T.numerator (1) field write error: ", p), err) }
-  if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:numerator: ", p), err) }
-  return err
-}
-
-func (p *FractionStruct) writeField2(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("denominator", thrift.I64, 2); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:denominator: ", p), err) }
-  if err := oprot.WriteI64(int64(p.Denominator)); err != nil {
-  return thrift.PrependError(fmt.Sprintf("%T.denominator (2) field write error: ", p), err) }
-  if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:denominator: ", p), err) }
-  return err
-}
-
-func (p *FractionStruct) String() string {
-  if p == nil {
-    return "<nil>"
-  }
-
-  numeratorVal := fmt.Sprintf("%v", p.Numerator)
-  denominatorVal := fmt.Sprintf("%v", p.Denominator)
-  return fmt.Sprintf("FractionStruct({Numerator:%s Denominator:%s})", numeratorVal, denominatorVal)
-}
-
 // A decoded URI.
 // 
 //   {scheme}://{domain}/{path}?{query}#{fragment}
@@ -790,10 +337,10 @@ func (p *FractionStruct) String() string {
 //  - Fragment: The fragment, if present.
 type UriStruct struct {
   Scheme string `thrift:"scheme,1" db:"scheme" json:"scheme"`
-  Domain DomainLabels `thrift:"domain,2" db:"domain" json:"domain"`
+  Domain []string `thrift:"domain,2" db:"domain" json:"domain"`
   // unused field # 3
-  Path PathSegments `thrift:"path,4" db:"path" json:"path"`
-  Query QueryArgs_ `thrift:"query,5" db:"query" json:"query"`
+  Path []string `thrift:"path,4" db:"path" json:"path"`
+  Query map[string]string `thrift:"query,5" db:"query" json:"query"`
   Fragment string `thrift:"fragment,6" db:"fragment" json:"fragment"`
 }
 
@@ -806,15 +353,15 @@ func (p *UriStruct) GetScheme() string {
   return p.Scheme
 }
 
-func (p *UriStruct) GetDomain() DomainLabels {
+func (p *UriStruct) GetDomain() []string {
   return p.Domain
 }
 
-func (p *UriStruct) GetPath() PathSegments {
+func (p *UriStruct) GetPath() []string {
   return p.Path
 }
 
-func (p *UriStruct) GetQuery() QueryArgs_ {
+func (p *UriStruct) GetQuery() map[string]string {
   return p.Query
 }
 
@@ -846,17 +393,17 @@ func (u *UriStructBuilder) Scheme(scheme string) *UriStructBuilder {
   return u
 }
 
-func (u *UriStructBuilder) Domain(domain DomainLabels) *UriStructBuilder {
+func (u *UriStructBuilder) Domain(domain []string) *UriStructBuilder {
   u.obj.Domain = domain
   return u
 }
 
-func (u *UriStructBuilder) Path(path PathSegments) *UriStructBuilder {
+func (u *UriStructBuilder) Path(path []string) *UriStructBuilder {
   u.obj.Path = path
   return u
 }
 
-func (u *UriStructBuilder) Query(query QueryArgs_) *UriStructBuilder {
+func (u *UriStructBuilder) Query(query map[string]string) *UriStructBuilder {
   u.obj.Query = query
   return u
 }
@@ -871,17 +418,17 @@ func (u *UriStruct) SetScheme(scheme string) *UriStruct {
   return u
 }
 
-func (u *UriStruct) SetDomain(domain DomainLabels) *UriStruct {
+func (u *UriStruct) SetDomain(domain []string) *UriStruct {
   u.Domain = domain
   return u
 }
 
-func (u *UriStruct) SetPath(path PathSegments) *UriStruct {
+func (u *UriStruct) SetPath(path []string) *UriStruct {
   u.Path = path
   return u
 }
 
-func (u *UriStruct) SetQuery(query QueryArgs_) *UriStruct {
+func (u *UriStruct) SetQuery(query map[string]string) *UriStruct {
   u.Query = query
   return u
 }
@@ -953,7 +500,7 @@ func (p *UriStruct)  ReadField2(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
   }
-  tSlice := make(DomainLabels, 0, size)
+  tSlice := make([]string, 0, size)
   p.Domain =  tSlice
   for i := 0; i < size; i ++ {
     var _elem2 string
@@ -975,7 +522,7 @@ func (p *UriStruct)  ReadField4(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
   }
-  tSlice := make(PathSegments, 0, size)
+  tSlice := make([]string, 0, size)
   p.Path =  tSlice
   for i := 0; i < size; i ++ {
     var _elem3 string
@@ -997,7 +544,7 @@ func (p *UriStruct)  ReadField5(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
   }
-  tMap := make(QueryArgs_, size)
+  tMap := make(map[string]string, size)
   p.Query =  tMap
   for i := 0; i < size; i ++ {
     var _key4 string

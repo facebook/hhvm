@@ -40,24 +40,23 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
   private static final TField UNION_VAL_FIELD_DESC = new TField("unionVal", TType.STRUCT, (short)-12);
   private static final TField LATE_STRUCT_VAL_FIELD_DESC = new TField("lateStructVal", TType.STRUCT, (short)-13);
   private static final TField DURATION_VAL_FIELD_DESC = new TField("durationVal", TType.STRUCT, (short)-14);
-  private static final TField TIME_VAL_FIELD_DESC = new TField("timeVal", TType.STRUCT, (short)-15);
-  private static final TField OPT_BOOL_VAL_FIELD_DESC = new TField("optBoolVal", TType.BOOL, (short)-16);
-  private static final TField OPT_BYTE_VAL_FIELD_DESC = new TField("optByteVal", TType.BYTE, (short)-17);
-  private static final TField OPT_I16_VAL_FIELD_DESC = new TField("optI16Val", TType.I16, (short)-18);
-  private static final TField OPT_I32_VAL_FIELD_DESC = new TField("optI32Val", TType.I32, (short)-19);
-  private static final TField OPT_I64_VAL_FIELD_DESC = new TField("optI64Val", TType.I64, (short)-20);
-  private static final TField OPT_FLOAT_VAL_FIELD_DESC = new TField("optFloatVal", TType.FLOAT, (short)-21);
-  private static final TField OPT_DOUBLE_VAL_FIELD_DESC = new TField("optDoubleVal", TType.DOUBLE, (short)-22);
-  private static final TField OPT_STRING_VAL_FIELD_DESC = new TField("optStringVal", TType.STRING, (short)-23);
-  private static final TField OPT_BINARY_VAL_FIELD_DESC = new TField("optBinaryVal", TType.STRING, (short)-24);
-  private static final TField OPT_ENUM_VAL_FIELD_DESC = new TField("optEnumVal", TType.I32, (short)-25);
-  private static final TField OPT_STRUCT_VAL_FIELD_DESC = new TField("optStructVal", TType.STRUCT, (short)-26);
-  private static final TField OPT_LATE_STRUCT_VAL_FIELD_DESC = new TField("optLateStructVal", TType.STRUCT, (short)-27);
-  private static final TField OPT_LIST_VAL_FIELD_DESC = new TField("optListVal", TType.LIST, (short)-28);
-  private static final TField OPT_SET_VAL_FIELD_DESC = new TField("optSetVal", TType.SET, (short)-29);
-  private static final TField OPT_MAP_VAL_FIELD_DESC = new TField("optMapVal", TType.MAP, (short)-30);
-  private static final TField LIST_MAP_FIELD_DESC = new TField("listMap", TType.LIST, (short)-31);
-  private static final TField MAP_MAP_FIELD_DESC = new TField("mapMap", TType.MAP, (short)-32);
+  private static final TField OPT_BOOL_VAL_FIELD_DESC = new TField("optBoolVal", TType.BOOL, (short)-15);
+  private static final TField OPT_BYTE_VAL_FIELD_DESC = new TField("optByteVal", TType.BYTE, (short)-16);
+  private static final TField OPT_I16_VAL_FIELD_DESC = new TField("optI16Val", TType.I16, (short)-17);
+  private static final TField OPT_I32_VAL_FIELD_DESC = new TField("optI32Val", TType.I32, (short)-18);
+  private static final TField OPT_I64_VAL_FIELD_DESC = new TField("optI64Val", TType.I64, (short)-19);
+  private static final TField OPT_FLOAT_VAL_FIELD_DESC = new TField("optFloatVal", TType.FLOAT, (short)-20);
+  private static final TField OPT_DOUBLE_VAL_FIELD_DESC = new TField("optDoubleVal", TType.DOUBLE, (short)-21);
+  private static final TField OPT_STRING_VAL_FIELD_DESC = new TField("optStringVal", TType.STRING, (short)-22);
+  private static final TField OPT_BINARY_VAL_FIELD_DESC = new TField("optBinaryVal", TType.STRING, (short)-23);
+  private static final TField OPT_ENUM_VAL_FIELD_DESC = new TField("optEnumVal", TType.I32, (short)-24);
+  private static final TField OPT_STRUCT_VAL_FIELD_DESC = new TField("optStructVal", TType.STRUCT, (short)-25);
+  private static final TField OPT_LATE_STRUCT_VAL_FIELD_DESC = new TField("optLateStructVal", TType.STRUCT, (short)-26);
+  private static final TField OPT_LIST_VAL_FIELD_DESC = new TField("optListVal", TType.LIST, (short)-27);
+  private static final TField OPT_SET_VAL_FIELD_DESC = new TField("optSetVal", TType.SET, (short)-28);
+  private static final TField OPT_MAP_VAL_FIELD_DESC = new TField("optMapVal", TType.MAP, (short)-29);
+  private static final TField LIST_MAP_FIELD_DESC = new TField("listMap", TType.LIST, (short)-30);
+  private static final TField MAP_MAP_FIELD_DESC = new TField("mapMap", TType.MAP, (short)-31);
 
   public boolean boolVal;
   public byte byteVal;
@@ -77,7 +76,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
   public MyUnion unionVal;
   public LateDefStruct lateStructVal;
   public com.facebook.thrift.type.DurationStruct durationVal;
-  public com.facebook.thrift.type.TimeStruct timeVal;
   public boolean optBoolVal;
   public byte optByteVal;
   public short optI16Val;
@@ -113,24 +111,23 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
   public static final int UNIONVAL = -12;
   public static final int LATESTRUCTVAL = -13;
   public static final int DURATIONVAL = -14;
-  public static final int TIMEVAL = -15;
-  public static final int OPTBOOLVAL = -16;
-  public static final int OPTBYTEVAL = -17;
-  public static final int OPTI16VAL = -18;
-  public static final int OPTI32VAL = -19;
-  public static final int OPTI64VAL = -20;
-  public static final int OPTFLOATVAL = -21;
-  public static final int OPTDOUBLEVAL = -22;
-  public static final int OPTSTRINGVAL = -23;
-  public static final int OPTBINARYVAL = -24;
-  public static final int OPTENUMVAL = -25;
-  public static final int OPTSTRUCTVAL = -26;
-  public static final int OPTLATESTRUCTVAL = -27;
-  public static final int OPTLISTVAL = -28;
-  public static final int OPTSETVAL = -29;
-  public static final int OPTMAPVAL = -30;
-  public static final int LISTMAP = -31;
-  public static final int MAPMAP = -32;
+  public static final int OPTBOOLVAL = -15;
+  public static final int OPTBYTEVAL = -16;
+  public static final int OPTI16VAL = -17;
+  public static final int OPTI32VAL = -18;
+  public static final int OPTI64VAL = -19;
+  public static final int OPTFLOATVAL = -20;
+  public static final int OPTDOUBLEVAL = -21;
+  public static final int OPTSTRINGVAL = -22;
+  public static final int OPTBINARYVAL = -23;
+  public static final int OPTENUMVAL = -24;
+  public static final int OPTSTRUCTVAL = -25;
+  public static final int OPTLATESTRUCTVAL = -26;
+  public static final int OPTLISTVAL = -27;
+  public static final int OPTSETVAL = -28;
+  public static final int OPTMAPVAL = -29;
+  public static final int LISTMAP = -30;
+  public static final int MAPMAP = -31;
 
   // isset id assignments
   private static final int __BOOLVAL_ISSET_ID = 0;
@@ -181,8 +178,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
         new StructMetaData(TType.STRUCT, LateDefStruct.class)));
     tmpMetaDataMap.put(DURATIONVAL, new FieldMetaData("durationVal", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, com.facebook.thrift.type.DurationStruct.class)));
-    tmpMetaDataMap.put(TIMEVAL, new FieldMetaData("timeVal", TFieldRequirementType.DEFAULT, 
-        new StructMetaData(TType.STRUCT, com.facebook.thrift.type.TimeStruct.class)));
     tmpMetaDataMap.put(OPTBOOLVAL, new FieldMetaData("optBoolVal", TFieldRequirementType.OPTIONAL, 
         new FieldValueMetaData(TType.BOOL)));
     tmpMetaDataMap.put(OPTBYTEVAL, new FieldMetaData("optByteVal", TFieldRequirementType.OPTIONAL, 
@@ -253,7 +248,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
       MyUnion unionVal,
       LateDefStruct lateStructVal,
       com.facebook.thrift.type.DurationStruct durationVal,
-      com.facebook.thrift.type.TimeStruct timeVal,
       List<Map<String,Integer>> listMap,
       Map<String,Map<String,Integer>> mapMap) {
     this();
@@ -278,7 +272,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     this.unionVal = unionVal;
     this.lateStructVal = lateStructVal;
     this.durationVal = durationVal;
-    this.timeVal = timeVal;
     this.listMap = listMap;
     this.mapMap = mapMap;
   }
@@ -298,7 +291,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
       MyUnion unionVal,
       LateDefStruct lateStructVal,
       com.facebook.thrift.type.DurationStruct durationVal,
-      com.facebook.thrift.type.TimeStruct timeVal,
       boolean optBoolVal,
       byte optByteVal,
       short optI16Val,
@@ -338,7 +330,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     this.unionVal = unionVal;
     this.lateStructVal = lateStructVal;
     this.durationVal = durationVal;
-    this.timeVal = timeVal;
     this.optBoolVal = optBoolVal;
     setOptBoolValIsSet(true);
     this.optByteVal = optByteVal;
@@ -380,7 +371,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     private MyUnion unionVal;
     private LateDefStruct lateStructVal;
     private com.facebook.thrift.type.DurationStruct durationVal;
-    private com.facebook.thrift.type.TimeStruct timeVal;
     private boolean optBoolVal;
     private byte optByteVal;
     private short optI16Val;
@@ -478,11 +468,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
 
     public Builder setDurationVal(final com.facebook.thrift.type.DurationStruct durationVal) {
       this.durationVal = durationVal;
-      return this;
-    }
-
-    public Builder setTimeVal(final com.facebook.thrift.type.TimeStruct timeVal) {
-      this.timeVal = timeVal;
       return this;
     }
 
@@ -608,7 +593,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
       result.setUnionVal(this.unionVal);
       result.setLateStructVal(this.lateStructVal);
       result.setDurationVal(this.durationVal);
-      result.setTimeVal(this.timeVal);
       if (__optional_isset.get(__OPTBOOLVAL_ISSET_ID)) {
         result.setOptBoolVal(this.optBoolVal);
       }
@@ -681,9 +665,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     }
     if (other.isSetDurationVal()) {
       this.durationVal = TBaseHelper.deepCopy(other.durationVal);
-    }
-    if (other.isSetTimeVal()) {
-      this.timeVal = TBaseHelper.deepCopy(other.timeVal);
     }
     this.optBoolVal = TBaseHelper.deepCopy(other.optBoolVal);
     this.optByteVal = TBaseHelper.deepCopy(other.optByteVal);
@@ -1062,30 +1043,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
   public void setDurationValIsSet(boolean __value) {
     if (!__value) {
       this.durationVal = null;
-    }
-  }
-
-  public com.facebook.thrift.type.TimeStruct getTimeVal() {
-    return this.timeVal;
-  }
-
-  public MyStruct setTimeVal(com.facebook.thrift.type.TimeStruct timeVal) {
-    this.timeVal = timeVal;
-    return this;
-  }
-
-  public void unsetTimeVal() {
-    this.timeVal = null;
-  }
-
-  // Returns true if field timeVal is set (has been assigned a value) and false otherwise
-  public boolean isSetTimeVal() {
-    return this.timeVal != null;
-  }
-
-  public void setTimeValIsSet(boolean __value) {
-    if (!__value) {
-      this.timeVal = null;
     }
   }
 
@@ -1613,14 +1570,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
       }
       break;
 
-    case TIMEVAL:
-      if (__value == null) {
-        unsetTimeVal();
-      } else {
-        setTimeVal((com.facebook.thrift.type.TimeStruct)__value);
-      }
-      break;
-
     case OPTBOOLVAL:
       if (__value == null) {
         unsetOptBoolVal();
@@ -1806,9 +1755,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
     case DURATIONVAL:
       return getDurationVal();
 
-    case TIMEVAL:
-      return getTimeVal();
-
     case OPTBOOLVAL:
       return new Boolean(isOptBoolVal());
 
@@ -1903,8 +1849,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
 
     if (!TBaseHelper.equalsNobinary(this.isSetDurationVal(), that.isSetDurationVal(), this.durationVal, that.durationVal)) { return false; }
 
-    if (!TBaseHelper.equalsNobinary(this.isSetTimeVal(), that.isSetTimeVal(), this.timeVal, that.timeVal)) { return false; }
-
     if (!TBaseHelper.equalsNobinary(this.isSetOptBoolVal(), that.isSetOptBoolVal(), this.optBoolVal, that.optBoolVal)) { return false; }
 
     if (!TBaseHelper.equalsNobinary(this.isSetOptByteVal(), that.isSetOptByteVal(), this.optByteVal, that.optByteVal)) { return false; }
@@ -1944,7 +1888,7 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {boolVal, byteVal, i16Val, i32Val, i64Val, floatVal, doubleVal, stringVal, binaryVal, enumVal, structVal, unionVal, lateStructVal, durationVal, timeVal, optBoolVal, optByteVal, optI16Val, optI32Val, optI64Val, optFloatVal, optDoubleVal, optStringVal, optBinaryVal, optEnumVal, optStructVal, optLateStructVal, optListVal, optSetVal, optMapVal, listMap, mapMap});
+    return Arrays.deepHashCode(new Object[] {boolVal, byteVal, i16Val, i32Val, i64Val, floatVal, doubleVal, stringVal, binaryVal, enumVal, structVal, unionVal, lateStructVal, durationVal, optBoolVal, optByteVal, optI16Val, optI32Val, optI64Val, optFloatVal, optDoubleVal, optStringVal, optBinaryVal, optEnumVal, optStructVal, optLateStructVal, optListVal, optSetVal, optMapVal, listMap, mapMap});
   }
 
   @Override
@@ -2068,14 +2012,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
       return lastComparison;
     }
     lastComparison = TBaseHelper.compareTo(durationVal, other.durationVal);
-    if (lastComparison != 0) { 
-      return lastComparison;
-    }
-    lastComparison = Boolean.valueOf(isSetTimeVal()).compareTo(other.isSetTimeVal());
-    if (lastComparison != 0) {
-      return lastComparison;
-    }
-    lastComparison = TBaseHelper.compareTo(timeVal, other.timeVal);
     if (lastComparison != 0) { 
       return lastComparison;
     }
@@ -2334,14 +2270,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
           if (__field.type == TType.STRUCT) {
             this.durationVal = new com.facebook.thrift.type.DurationStruct();
             this.durationVal.read(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case TIMEVAL:
-          if (__field.type == TType.STRUCT) {
-            this.timeVal = new com.facebook.thrift.type.TimeStruct();
-            this.timeVal.read(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -2730,11 +2658,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
       oprot.writeBool(this.optBoolVal);
       oprot.writeFieldEnd();
     }
-    if (this.timeVal != null) {
-      oprot.writeFieldBegin(TIME_VAL_FIELD_DESC);
-      this.timeVal.write(oprot);
-      oprot.writeFieldEnd();
-    }
     if (this.durationVal != null) {
       oprot.writeFieldBegin(DURATION_VAL_FIELD_DESC);
       this.durationVal.write(oprot);
@@ -2947,17 +2870,6 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable, Compara
       sb.append("null");
     } else {
       sb.append(TBaseHelper.toString(this.getDurationVal(), indent + 1, prettyPrint));
-    }
-    first = false;
-    if (!first) sb.append("," + newLine);
-    sb.append(indentStr);
-    sb.append("timeVal");
-    sb.append(space);
-    sb.append(":").append(space);
-    if (this.getTimeVal() == null) {
-      sb.append("null");
-    } else {
-      sb.append(TBaseHelper.toString(this.getTimeVal(), indent + 1, prettyPrint));
     }
     first = false;
     if (isSetOptBoolVal())

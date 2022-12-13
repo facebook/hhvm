@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-package com.facebook.thrift.op;
+package test.fixtures.patch;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -23,35 +23,29 @@ import com.facebook.thrift.server.*;
 import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
-/**
- * A patch for a Time value.
- */
 @SuppressWarnings({ "unused", "serial" })
-public class TimePatch implements TBase, java.io.Serializable, Cloneable, Comparable<TimePatch> {
-  private static final TStruct STRUCT_DESC = new TStruct("TimePatch");
-  private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.STRUCT, (short)1);
+public class MyStructField24Patch implements TBase, java.io.Serializable, Cloneable, Comparable<MyStructField24Patch> {
+  private static final TStruct STRUCT_DESC = new TStruct("MyStructField24Patch");
+  private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.I32, (short)1);
   private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
-  private static final TField ADD_FIELD_DESC = new TField("add", TType.STRUCT, (short)8);
 
   /**
    * Assigns to a (set) value.
    * 
-   * If set, all other patch operations are ignored.
+   * If set, all other operations are ignored.
    * 
-   * Note: Only modifies set field values.
+   * Note: Optional and union fields must be set before assigned.
+   * 
+   * 
+   * @see MyEnum
    */
-  public com.facebook.thrift.type.TimeStruct assign;
+  public MyEnum assign;
   /**
-   * Clear any set value.
+   * Clears a value. Applies first.
    */
   public boolean clear;
-  /**
-   * Add to a given value.
-   */
-  public com.facebook.thrift.type.DurationStruct add;
   public static final int ASSIGN = 1;
   public static final int CLEAR = 2;
-  public static final int ADD = 8;
 
   // isset id assignments
   private static final int __CLEAR_ISSET_ID = 0;
@@ -62,52 +56,45 @@ public class TimePatch implements TBase, java.io.Serializable, Cloneable, Compar
   static {
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
     tmpMetaDataMap.put(ASSIGN, new FieldMetaData("assign", TFieldRequirementType.OPTIONAL, 
-        new StructMetaData(TType.STRUCT, com.facebook.thrift.type.TimeStruct.class)));
+        new FieldValueMetaData(TType.I32)));
     tmpMetaDataMap.put(CLEAR, new FieldMetaData("clear", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.BOOL)));
-    tmpMetaDataMap.put(ADD, new FieldMetaData("add", TFieldRequirementType.DEFAULT, 
-        new StructMetaData(TType.STRUCT, com.facebook.thrift.type.DurationStruct.class)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
 
   static {
-    FieldMetaData.addStructMetaDataMap(TimePatch.class, metaDataMap);
+    FieldMetaData.addStructMetaDataMap(MyStructField24Patch.class, metaDataMap);
   }
 
-  public TimePatch() {
+  public MyStructField24Patch() {
   }
 
-  public TimePatch(
-      boolean clear,
-      com.facebook.thrift.type.DurationStruct add) {
+  public MyStructField24Patch(
+      boolean clear) {
     this();
     this.clear = clear;
     setClearIsSet(true);
-    this.add = add;
   }
 
-  public TimePatch(
-      com.facebook.thrift.type.TimeStruct assign,
-      boolean clear,
-      com.facebook.thrift.type.DurationStruct add) {
+  public MyStructField24Patch(
+      MyEnum assign,
+      boolean clear) {
     this();
     this.assign = assign;
     this.clear = clear;
     setClearIsSet(true);
-    this.add = add;
   }
 
   public static class Builder {
-    private com.facebook.thrift.type.TimeStruct assign;
+    private MyEnum assign;
     private boolean clear;
-    private com.facebook.thrift.type.DurationStruct add;
 
     BitSet __optional_isset = new BitSet(1);
 
     public Builder() {
     }
 
-    public Builder setAssign(final com.facebook.thrift.type.TimeStruct assign) {
+    public Builder setAssign(final MyEnum assign) {
       this.assign = assign;
       return this;
     }
@@ -118,18 +105,12 @@ public class TimePatch implements TBase, java.io.Serializable, Cloneable, Compar
       return this;
     }
 
-    public Builder setAdd(final com.facebook.thrift.type.DurationStruct add) {
-      this.add = add;
-      return this;
-    }
-
-    public TimePatch build() {
-      TimePatch result = new TimePatch();
+    public MyStructField24Patch build() {
+      MyStructField24Patch result = new MyStructField24Patch();
       result.setAssign(this.assign);
       if (__optional_isset.get(__CLEAR_ISSET_ID)) {
         result.setClear(this.clear);
       }
-      result.setAdd(this.add);
       return result;
     }
   }
@@ -141,41 +122,44 @@ public class TimePatch implements TBase, java.io.Serializable, Cloneable, Compar
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public TimePatch(TimePatch other) {
+  public MyStructField24Patch(MyStructField24Patch other) {
     __isset_bit_vector.clear();
     __isset_bit_vector.or(other.__isset_bit_vector);
     if (other.isSetAssign()) {
       this.assign = TBaseHelper.deepCopy(other.assign);
     }
     this.clear = TBaseHelper.deepCopy(other.clear);
-    if (other.isSetAdd()) {
-      this.add = TBaseHelper.deepCopy(other.add);
-    }
   }
 
-  public TimePatch deepCopy() {
-    return new TimePatch(this);
+  public MyStructField24Patch deepCopy() {
+    return new MyStructField24Patch(this);
   }
 
   /**
    * Assigns to a (set) value.
    * 
-   * If set, all other patch operations are ignored.
+   * If set, all other operations are ignored.
    * 
-   * Note: Only modifies set field values.
+   * Note: Optional and union fields must be set before assigned.
+   * 
+   * 
+   * @see MyEnum
    */
-  public com.facebook.thrift.type.TimeStruct getAssign() {
+  public MyEnum getAssign() {
     return this.assign;
   }
 
   /**
    * Assigns to a (set) value.
    * 
-   * If set, all other patch operations are ignored.
+   * If set, all other operations are ignored.
    * 
-   * Note: Only modifies set field values.
+   * Note: Optional and union fields must be set before assigned.
+   * 
+   * 
+   * @see MyEnum
    */
-  public TimePatch setAssign(com.facebook.thrift.type.TimeStruct assign) {
+  public MyStructField24Patch setAssign(MyEnum assign) {
     this.assign = assign;
     return this;
   }
@@ -196,16 +180,16 @@ public class TimePatch implements TBase, java.io.Serializable, Cloneable, Compar
   }
 
   /**
-   * Clear any set value.
+   * Clears a value. Applies first.
    */
   public boolean isClear() {
     return this.clear;
   }
 
   /**
-   * Clear any set value.
+   * Clears a value. Applies first.
    */
-  public TimePatch setClear(boolean clear) {
+  public MyStructField24Patch setClear(boolean clear) {
     this.clear = clear;
     setClearIsSet(true);
     return this;
@@ -224,43 +208,13 @@ public class TimePatch implements TBase, java.io.Serializable, Cloneable, Compar
     __isset_bit_vector.set(__CLEAR_ISSET_ID, __value);
   }
 
-  /**
-   * Add to a given value.
-   */
-  public com.facebook.thrift.type.DurationStruct getAdd() {
-    return this.add;
-  }
-
-  /**
-   * Add to a given value.
-   */
-  public TimePatch setAdd(com.facebook.thrift.type.DurationStruct add) {
-    this.add = add;
-    return this;
-  }
-
-  public void unsetAdd() {
-    this.add = null;
-  }
-
-  // Returns true if field add is set (has been assigned a value) and false otherwise
-  public boolean isSetAdd() {
-    return this.add != null;
-  }
-
-  public void setAddIsSet(boolean __value) {
-    if (!__value) {
-      this.add = null;
-    }
-  }
-
   public void setFieldValue(int fieldID, Object __value) {
     switch (fieldID) {
     case ASSIGN:
       if (__value == null) {
         unsetAssign();
       } else {
-        setAssign((com.facebook.thrift.type.TimeStruct)__value);
+        setAssign((MyEnum)__value);
       }
       break;
 
@@ -269,14 +223,6 @@ public class TimePatch implements TBase, java.io.Serializable, Cloneable, Compar
         unsetClear();
       } else {
         setClear((Boolean)__value);
-      }
-      break;
-
-    case ADD:
-      if (__value == null) {
-        unsetAdd();
-      } else {
-        setAdd((com.facebook.thrift.type.DurationStruct)__value);
       }
       break;
 
@@ -293,9 +239,6 @@ public class TimePatch implements TBase, java.io.Serializable, Cloneable, Compar
     case CLEAR:
       return new Boolean(isClear());
 
-    case ADD:
-      return getAdd();
-
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
     }
@@ -307,26 +250,24 @@ public class TimePatch implements TBase, java.io.Serializable, Cloneable, Compar
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof TimePatch))
+    if (!(_that instanceof MyStructField24Patch))
       return false;
-    TimePatch that = (TimePatch)_that;
+    MyStructField24Patch that = (MyStructField24Patch)_that;
 
     if (!TBaseHelper.equalsNobinary(this.isSetAssign(), that.isSetAssign(), this.assign, that.assign)) { return false; }
 
     if (!TBaseHelper.equalsNobinary(this.clear, that.clear)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetAdd(), that.isSetAdd(), this.add, that.add)) { return false; }
 
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {assign, clear, add});
+    return Arrays.deepHashCode(new Object[] {assign, clear});
   }
 
   @Override
-  public int compareTo(TimePatch other) {
+  public int compareTo(MyStructField24Patch other) {
     if (other == null) {
       // See java.lang.Comparable docs
       throw new NullPointerException();
@@ -353,14 +294,6 @@ public class TimePatch implements TBase, java.io.Serializable, Cloneable, Compar
     if (lastComparison != 0) { 
       return lastComparison;
     }
-    lastComparison = Boolean.valueOf(isSetAdd()).compareTo(other.isSetAdd());
-    if (lastComparison != 0) {
-      return lastComparison;
-    }
-    lastComparison = TBaseHelper.compareTo(add, other.add);
-    if (lastComparison != 0) { 
-      return lastComparison;
-    }
     return 0;
   }
 
@@ -376,9 +309,8 @@ public class TimePatch implements TBase, java.io.Serializable, Cloneable, Compar
       switch (__field.id)
       {
         case ASSIGN:
-          if (__field.type == TType.STRUCT) {
-            this.assign = new com.facebook.thrift.type.TimeStruct();
-            this.assign.read(iprot);
+          if (__field.type == TType.I32) {
+            this.assign = MyEnum.findByValue(iprot.readI32());
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -387,14 +319,6 @@ public class TimePatch implements TBase, java.io.Serializable, Cloneable, Compar
           if (__field.type == TType.BOOL) {
             this.clear = iprot.readBool();
             setClearIsSet(true);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case ADD:
-          if (__field.type == TType.STRUCT) {
-            this.add = new com.facebook.thrift.type.DurationStruct();
-            this.add.read(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -419,18 +343,13 @@ public class TimePatch implements TBase, java.io.Serializable, Cloneable, Compar
     if (this.assign != null) {
       if (isSetAssign()) {
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
-        this.assign.write(oprot);
+        oprot.writeI32(this.assign == null ? 0 : this.assign.getValue());
         oprot.writeFieldEnd();
       }
     }
     oprot.writeFieldBegin(CLEAR_FIELD_DESC);
     oprot.writeBool(this.clear);
     oprot.writeFieldEnd();
-    if (this.add != null) {
-      oprot.writeFieldBegin(ADD_FIELD_DESC);
-      this.add.write(oprot);
-      oprot.writeFieldEnd();
-    }
     oprot.writeFieldStop();
     oprot.writeStructEnd();
   }
@@ -445,7 +364,7 @@ public class TimePatch implements TBase, java.io.Serializable, Cloneable, Compar
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("TimePatch");
+    StringBuilder sb = new StringBuilder("MyStructField24Patch");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);
@@ -460,7 +379,15 @@ public class TimePatch implements TBase, java.io.Serializable, Cloneable, Compar
       if (this.getAssign() == null) {
         sb.append("null");
       } else {
-        sb.append(TBaseHelper.toString(this.getAssign(), indent + 1, prettyPrint));
+        String assign_name = this.getAssign() == null ? "null" : this.getAssign().name();
+        if (assign_name != null) {
+          sb.append(assign_name);
+          sb.append(" (");
+        }
+        sb.append(this.getAssign());
+        if (assign_name != null) {
+          sb.append(")");
+        }
       }
       first = false;
     }
@@ -470,17 +397,6 @@ public class TimePatch implements TBase, java.io.Serializable, Cloneable, Compar
     sb.append(space);
     sb.append(":").append(space);
     sb.append(TBaseHelper.toString(this.isClear(), indent + 1, prettyPrint));
-    first = false;
-    if (!first) sb.append("," + newLine);
-    sb.append(indentStr);
-    sb.append("add");
-    sb.append(space);
-    sb.append(":").append(space);
-    if (this.getAdd() == null) {
-      sb.append("null");
-    } else {
-      sb.append(TBaseHelper.toString(this.getAdd(), indent + 1, prettyPrint));
-    }
     first = false;
     sb.append(newLine + TBaseHelper.reduceIndent(indentStr));
     sb.append(")");

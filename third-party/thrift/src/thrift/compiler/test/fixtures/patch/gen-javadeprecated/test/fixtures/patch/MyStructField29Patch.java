@@ -26,10 +26,13 @@ import com.facebook.thrift.protocol.*;
 @SuppressWarnings({ "unused", "serial" })
 public class MyStructField29Patch implements TBase, java.io.Serializable, Cloneable, Comparable<MyStructField29Patch> {
   private static final TStruct STRUCT_DESC = new TStruct("MyStructField29Patch");
-  private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.SET, (short)1);
+  private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.MAP, (short)1);
   private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
+  private static final TField PATCH_PRIOR_FIELD_DESC = new TField("patchPrior", TType.MAP, (short)3);
+  private static final TField ADD_FIELD_DESC = new TField("add", TType.MAP, (short)5);
+  private static final TField PATCH_FIELD_DESC = new TField("patch", TType.MAP, (short)6);
   private static final TField REMOVE_FIELD_DESC = new TField("remove", TType.SET, (short)7);
-  private static final TField ADD_FIELD_DESC = new TField("add", TType.SET, (short)8);
+  private static final TField PUT_FIELD_DESC = new TField("put", TType.MAP, (short)9);
 
   /**
    * Assigns to a (set) value.
@@ -39,23 +42,38 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
    * Note: Optional and union fields must be set before assigned.
    * 
    */
-  public Set<String> assign;
+  public Map<String,String> assign;
   /**
    * Clears a value. Applies first.
    */
   public boolean clear;
   /**
+   * Patches any previously set values. Applies second.
+   */
+  public Map<String,com.facebook.thrift.op.StringPatch> patchPrior;
+  /**
+   * Add the given values, if the keys are not already present. Applies forth.
+   */
+  public Map<String,String> add;
+  /**
+   * Patches any set value, including newly set values. Applies last.
+   */
+  public Map<String,com.facebook.thrift.op.StringPatch> patch;
+  /**
    * Removes entries, if present. Applies third.
    */
   public Set<String> remove;
   /**
-   * Adds entries, if not already present. Applies fourth.
+   * Adds or replaces the given key/value pairs. Applies fifth.
    */
-  public Set<String> add;
+  public Map<String,String> put;
   public static final int ASSIGN = 1;
   public static final int CLEAR = 2;
+  public static final int PATCHPRIOR = 3;
+  public static final int ADD = 5;
+  public static final int PATCH = 6;
   public static final int REMOVE = 7;
-  public static final int ADD = 8;
+  public static final int PUT = 9;
 
   // isset id assignments
   private static final int __CLEAR_ISSET_ID = 0;
@@ -66,15 +84,29 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
   static {
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
     tmpMetaDataMap.put(ASSIGN, new FieldMetaData("assign", TFieldRequirementType.OPTIONAL, 
-        new SetMetaData(TType.SET, 
+        new MapMetaData(TType.MAP, 
+            new FieldValueMetaData(TType.STRING), 
             new FieldValueMetaData(TType.STRING))));
     tmpMetaDataMap.put(CLEAR, new FieldMetaData("clear", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.BOOL)));
+    tmpMetaDataMap.put(PATCHPRIOR, new FieldMetaData("patchPrior", TFieldRequirementType.DEFAULT, 
+        new MapMetaData(TType.MAP, 
+            new FieldValueMetaData(TType.STRING), 
+            new StructMetaData(TType.STRUCT, com.facebook.thrift.op.StringPatch.class))));
+    tmpMetaDataMap.put(ADD, new FieldMetaData("add", TFieldRequirementType.DEFAULT, 
+        new MapMetaData(TType.MAP, 
+            new FieldValueMetaData(TType.STRING), 
+            new FieldValueMetaData(TType.STRING))));
+    tmpMetaDataMap.put(PATCH, new FieldMetaData("patch", TFieldRequirementType.DEFAULT, 
+        new MapMetaData(TType.MAP, 
+            new FieldValueMetaData(TType.STRING), 
+            new StructMetaData(TType.STRUCT, com.facebook.thrift.op.StringPatch.class))));
     tmpMetaDataMap.put(REMOVE, new FieldMetaData("remove", TFieldRequirementType.DEFAULT, 
         new SetMetaData(TType.SET, 
             new FieldValueMetaData(TType.STRING))));
-    tmpMetaDataMap.put(ADD, new FieldMetaData("add", TFieldRequirementType.DEFAULT, 
-        new SetMetaData(TType.SET, 
+    tmpMetaDataMap.put(PUT, new FieldMetaData("put", TFieldRequirementType.DEFAULT, 
+        new MapMetaData(TType.MAP, 
+            new FieldValueMetaData(TType.STRING), 
             new FieldValueMetaData(TType.STRING))));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
@@ -88,40 +120,55 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
 
   public MyStructField29Patch(
       boolean clear,
+      Map<String,com.facebook.thrift.op.StringPatch> patchPrior,
+      Map<String,String> add,
+      Map<String,com.facebook.thrift.op.StringPatch> patch,
       Set<String> remove,
-      Set<String> add) {
+      Map<String,String> put) {
     this();
     this.clear = clear;
     setClearIsSet(true);
-    this.remove = remove;
+    this.patchPrior = patchPrior;
     this.add = add;
+    this.patch = patch;
+    this.remove = remove;
+    this.put = put;
   }
 
   public MyStructField29Patch(
-      Set<String> assign,
+      Map<String,String> assign,
       boolean clear,
+      Map<String,com.facebook.thrift.op.StringPatch> patchPrior,
+      Map<String,String> add,
+      Map<String,com.facebook.thrift.op.StringPatch> patch,
       Set<String> remove,
-      Set<String> add) {
+      Map<String,String> put) {
     this();
     this.assign = assign;
     this.clear = clear;
     setClearIsSet(true);
-    this.remove = remove;
+    this.patchPrior = patchPrior;
     this.add = add;
+    this.patch = patch;
+    this.remove = remove;
+    this.put = put;
   }
 
   public static class Builder {
-    private Set<String> assign;
+    private Map<String,String> assign;
     private boolean clear;
+    private Map<String,com.facebook.thrift.op.StringPatch> patchPrior;
+    private Map<String,String> add;
+    private Map<String,com.facebook.thrift.op.StringPatch> patch;
     private Set<String> remove;
-    private Set<String> add;
+    private Map<String,String> put;
 
     BitSet __optional_isset = new BitSet(1);
 
     public Builder() {
     }
 
-    public Builder setAssign(final Set<String> assign) {
+    public Builder setAssign(final Map<String,String> assign) {
       this.assign = assign;
       return this;
     }
@@ -132,13 +179,28 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
       return this;
     }
 
+    public Builder setPatchPrior(final Map<String,com.facebook.thrift.op.StringPatch> patchPrior) {
+      this.patchPrior = patchPrior;
+      return this;
+    }
+
+    public Builder setAdd(final Map<String,String> add) {
+      this.add = add;
+      return this;
+    }
+
+    public Builder setPatch(final Map<String,com.facebook.thrift.op.StringPatch> patch) {
+      this.patch = patch;
+      return this;
+    }
+
     public Builder setRemove(final Set<String> remove) {
       this.remove = remove;
       return this;
     }
 
-    public Builder setAdd(final Set<String> add) {
-      this.add = add;
+    public Builder setPut(final Map<String,String> put) {
+      this.put = put;
       return this;
     }
 
@@ -148,8 +210,11 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
       if (__optional_isset.get(__CLEAR_ISSET_ID)) {
         result.setClear(this.clear);
       }
-      result.setRemove(this.remove);
+      result.setPatchPrior(this.patchPrior);
       result.setAdd(this.add);
+      result.setPatch(this.patch);
+      result.setRemove(this.remove);
+      result.setPut(this.put);
       return result;
     }
   }
@@ -168,11 +233,20 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
       this.assign = TBaseHelper.deepCopy(other.assign);
     }
     this.clear = TBaseHelper.deepCopy(other.clear);
-    if (other.isSetRemove()) {
-      this.remove = TBaseHelper.deepCopy(other.remove);
+    if (other.isSetPatchPrior()) {
+      this.patchPrior = TBaseHelper.deepCopy(other.patchPrior);
     }
     if (other.isSetAdd()) {
       this.add = TBaseHelper.deepCopy(other.add);
+    }
+    if (other.isSetPatch()) {
+      this.patch = TBaseHelper.deepCopy(other.patch);
+    }
+    if (other.isSetRemove()) {
+      this.remove = TBaseHelper.deepCopy(other.remove);
+    }
+    if (other.isSetPut()) {
+      this.put = TBaseHelper.deepCopy(other.put);
     }
   }
 
@@ -188,7 +262,7 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
    * Note: Optional and union fields must be set before assigned.
    * 
    */
-  public Set<String> getAssign() {
+  public Map<String,String> getAssign() {
     return this.assign;
   }
 
@@ -200,7 +274,7 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
    * Note: Optional and union fields must be set before assigned.
    * 
    */
-  public MyStructField29Patch setAssign(Set<String> assign) {
+  public MyStructField29Patch setAssign(Map<String,String> assign) {
     this.assign = assign;
     return this;
   }
@@ -250,6 +324,96 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
   }
 
   /**
+   * Patches any previously set values. Applies second.
+   */
+  public Map<String,com.facebook.thrift.op.StringPatch> getPatchPrior() {
+    return this.patchPrior;
+  }
+
+  /**
+   * Patches any previously set values. Applies second.
+   */
+  public MyStructField29Patch setPatchPrior(Map<String,com.facebook.thrift.op.StringPatch> patchPrior) {
+    this.patchPrior = patchPrior;
+    return this;
+  }
+
+  public void unsetPatchPrior() {
+    this.patchPrior = null;
+  }
+
+  // Returns true if field patchPrior is set (has been assigned a value) and false otherwise
+  public boolean isSetPatchPrior() {
+    return this.patchPrior != null;
+  }
+
+  public void setPatchPriorIsSet(boolean __value) {
+    if (!__value) {
+      this.patchPrior = null;
+    }
+  }
+
+  /**
+   * Add the given values, if the keys are not already present. Applies forth.
+   */
+  public Map<String,String> getAdd() {
+    return this.add;
+  }
+
+  /**
+   * Add the given values, if the keys are not already present. Applies forth.
+   */
+  public MyStructField29Patch setAdd(Map<String,String> add) {
+    this.add = add;
+    return this;
+  }
+
+  public void unsetAdd() {
+    this.add = null;
+  }
+
+  // Returns true if field add is set (has been assigned a value) and false otherwise
+  public boolean isSetAdd() {
+    return this.add != null;
+  }
+
+  public void setAddIsSet(boolean __value) {
+    if (!__value) {
+      this.add = null;
+    }
+  }
+
+  /**
+   * Patches any set value, including newly set values. Applies last.
+   */
+  public Map<String,com.facebook.thrift.op.StringPatch> getPatch() {
+    return this.patch;
+  }
+
+  /**
+   * Patches any set value, including newly set values. Applies last.
+   */
+  public MyStructField29Patch setPatch(Map<String,com.facebook.thrift.op.StringPatch> patch) {
+    this.patch = patch;
+    return this;
+  }
+
+  public void unsetPatch() {
+    this.patch = null;
+  }
+
+  // Returns true if field patch is set (has been assigned a value) and false otherwise
+  public boolean isSetPatch() {
+    return this.patch != null;
+  }
+
+  public void setPatchIsSet(boolean __value) {
+    if (!__value) {
+      this.patch = null;
+    }
+  }
+
+  /**
    * Removes entries, if present. Applies third.
    */
   public Set<String> getRemove() {
@@ -280,32 +444,32 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
   }
 
   /**
-   * Adds entries, if not already present. Applies fourth.
+   * Adds or replaces the given key/value pairs. Applies fifth.
    */
-  public Set<String> getAdd() {
-    return this.add;
+  public Map<String,String> getPut() {
+    return this.put;
   }
 
   /**
-   * Adds entries, if not already present. Applies fourth.
+   * Adds or replaces the given key/value pairs. Applies fifth.
    */
-  public MyStructField29Patch setAdd(Set<String> add) {
-    this.add = add;
+  public MyStructField29Patch setPut(Map<String,String> put) {
+    this.put = put;
     return this;
   }
 
-  public void unsetAdd() {
-    this.add = null;
+  public void unsetPut() {
+    this.put = null;
   }
 
-  // Returns true if field add is set (has been assigned a value) and false otherwise
-  public boolean isSetAdd() {
-    return this.add != null;
+  // Returns true if field put is set (has been assigned a value) and false otherwise
+  public boolean isSetPut() {
+    return this.put != null;
   }
 
-  public void setAddIsSet(boolean __value) {
+  public void setPutIsSet(boolean __value) {
     if (!__value) {
-      this.add = null;
+      this.put = null;
     }
   }
 
@@ -316,7 +480,7 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
       if (__value == null) {
         unsetAssign();
       } else {
-        setAssign((Set<String>)__value);
+        setAssign((Map<String,String>)__value);
       }
       break;
 
@@ -328,6 +492,30 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
       }
       break;
 
+    case PATCHPRIOR:
+      if (__value == null) {
+        unsetPatchPrior();
+      } else {
+        setPatchPrior((Map<String,com.facebook.thrift.op.StringPatch>)__value);
+      }
+      break;
+
+    case ADD:
+      if (__value == null) {
+        unsetAdd();
+      } else {
+        setAdd((Map<String,String>)__value);
+      }
+      break;
+
+    case PATCH:
+      if (__value == null) {
+        unsetPatch();
+      } else {
+        setPatch((Map<String,com.facebook.thrift.op.StringPatch>)__value);
+      }
+      break;
+
     case REMOVE:
       if (__value == null) {
         unsetRemove();
@@ -336,11 +524,11 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
       }
       break;
 
-    case ADD:
+    case PUT:
       if (__value == null) {
-        unsetAdd();
+        unsetPut();
       } else {
-        setAdd((Set<String>)__value);
+        setPut((Map<String,String>)__value);
       }
       break;
 
@@ -357,11 +545,20 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
     case CLEAR:
       return new Boolean(isClear());
 
-    case REMOVE:
-      return getRemove();
+    case PATCHPRIOR:
+      return getPatchPrior();
 
     case ADD:
       return getAdd();
+
+    case PATCH:
+      return getPatch();
+
+    case REMOVE:
+      return getRemove();
+
+    case PUT:
+      return getPut();
 
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
@@ -382,16 +579,22 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
 
     if (!TBaseHelper.equalsNobinary(this.clear, that.clear)) { return false; }
 
-    if (!TBaseHelper.equalsNobinary(this.isSetRemove(), that.isSetRemove(), this.remove, that.remove)) { return false; }
+    if (!TBaseHelper.equalsNobinary(this.isSetPatchPrior(), that.isSetPatchPrior(), this.patchPrior, that.patchPrior)) { return false; }
 
     if (!TBaseHelper.equalsNobinary(this.isSetAdd(), that.isSetAdd(), this.add, that.add)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetPatch(), that.isSetPatch(), this.patch, that.patch)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetRemove(), that.isSetRemove(), this.remove, that.remove)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetPut(), that.isSetPut(), this.put, that.put)) { return false; }
 
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {assign, clear, remove, add});
+    return Arrays.deepHashCode(new Object[] {assign, clear, patchPrior, add, patch, remove, put});
   }
 
   @Override
@@ -422,11 +625,11 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
     if (lastComparison != 0) { 
       return lastComparison;
     }
-    lastComparison = Boolean.valueOf(isSetRemove()).compareTo(other.isSetRemove());
+    lastComparison = Boolean.valueOf(isSetPatchPrior()).compareTo(other.isSetPatchPrior());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    lastComparison = TBaseHelper.compareTo(remove, other.remove);
+    lastComparison = TBaseHelper.compareTo(patchPrior, other.patchPrior);
     if (lastComparison != 0) { 
       return lastComparison;
     }
@@ -435,6 +638,30 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
       return lastComparison;
     }
     lastComparison = TBaseHelper.compareTo(add, other.add);
+    if (lastComparison != 0) { 
+      return lastComparison;
+    }
+    lastComparison = Boolean.valueOf(isSetPatch()).compareTo(other.isSetPatch());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    lastComparison = TBaseHelper.compareTo(patch, other.patch);
+    if (lastComparison != 0) { 
+      return lastComparison;
+    }
+    lastComparison = Boolean.valueOf(isSetRemove()).compareTo(other.isSetRemove());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    lastComparison = TBaseHelper.compareTo(remove, other.remove);
+    if (lastComparison != 0) { 
+      return lastComparison;
+    }
+    lastComparison = Boolean.valueOf(isSetPut()).compareTo(other.isSetPut());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    lastComparison = TBaseHelper.compareTo(put, other.put);
     if (lastComparison != 0) { 
       return lastComparison;
     }
@@ -453,19 +680,21 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
       switch (__field.id)
       {
         case ASSIGN:
-          if (__field.type == TType.SET) {
+          if (__field.type == TType.MAP) {
             {
-              TSet _set58 = iprot.readSetBegin();
-              this.assign = new HashSet<String>(Math.max(0, 2*_set58.size));
-              for (int _i59 = 0; 
-                   (_set58.size < 0) ? iprot.peekSet() : (_i59 < _set58.size); 
-                   ++_i59)
+              TMap _map70 = iprot.readMapBegin();
+              this.assign = new HashMap<String,String>(Math.max(0, 2*_map70.size));
+              for (int _i71 = 0; 
+                   (_map70.size < 0) ? iprot.peekMap() : (_i71 < _map70.size); 
+                   ++_i71)
               {
-                String _elem60;
-                _elem60 = iprot.readString();
-                this.assign.add(_elem60);
+                String _key72;
+                String _val73;
+                _key72 = iprot.readString();
+                _val73 = iprot.readString();
+                this.assign.put(_key72, _val73);
               }
-              iprot.readSetEnd();
+              iprot.readMapEnd();
             }
           } else {
             TProtocolUtil.skip(iprot, __field.type);
@@ -479,18 +708,83 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
+        case PATCHPRIOR:
+          if (__field.type == TType.MAP) {
+            {
+              TMap _map74 = iprot.readMapBegin();
+              this.patchPrior = new HashMap<String,com.facebook.thrift.op.StringPatch>(Math.max(0, 2*_map74.size));
+              for (int _i75 = 0; 
+                   (_map74.size < 0) ? iprot.peekMap() : (_i75 < _map74.size); 
+                   ++_i75)
+              {
+                String _key76;
+                com.facebook.thrift.op.StringPatch _val77;
+                _key76 = iprot.readString();
+                _val77 = new com.facebook.thrift.op.StringPatch();
+                _val77.read(iprot);
+                this.patchPrior.put(_key76, _val77);
+              }
+              iprot.readMapEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case ADD:
+          if (__field.type == TType.MAP) {
+            {
+              TMap _map78 = iprot.readMapBegin();
+              this.add = new HashMap<String,String>(Math.max(0, 2*_map78.size));
+              for (int _i79 = 0; 
+                   (_map78.size < 0) ? iprot.peekMap() : (_i79 < _map78.size); 
+                   ++_i79)
+              {
+                String _key80;
+                String _val81;
+                _key80 = iprot.readString();
+                _val81 = iprot.readString();
+                this.add.put(_key80, _val81);
+              }
+              iprot.readMapEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case PATCH:
+          if (__field.type == TType.MAP) {
+            {
+              TMap _map82 = iprot.readMapBegin();
+              this.patch = new HashMap<String,com.facebook.thrift.op.StringPatch>(Math.max(0, 2*_map82.size));
+              for (int _i83 = 0; 
+                   (_map82.size < 0) ? iprot.peekMap() : (_i83 < _map82.size); 
+                   ++_i83)
+              {
+                String _key84;
+                com.facebook.thrift.op.StringPatch _val85;
+                _key84 = iprot.readString();
+                _val85 = new com.facebook.thrift.op.StringPatch();
+                _val85.read(iprot);
+                this.patch.put(_key84, _val85);
+              }
+              iprot.readMapEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
         case REMOVE:
           if (__field.type == TType.SET) {
             {
-              TSet _set61 = iprot.readSetBegin();
-              this.remove = new HashSet<String>(Math.max(0, 2*_set61.size));
-              for (int _i62 = 0; 
-                   (_set61.size < 0) ? iprot.peekSet() : (_i62 < _set61.size); 
-                   ++_i62)
+              TSet _set86 = iprot.readSetBegin();
+              this.remove = new HashSet<String>(Math.max(0, 2*_set86.size));
+              for (int _i87 = 0; 
+                   (_set86.size < 0) ? iprot.peekSet() : (_i87 < _set86.size); 
+                   ++_i87)
               {
-                String _elem63;
-                _elem63 = iprot.readString();
-                this.remove.add(_elem63);
+                String _elem88;
+                _elem88 = iprot.readString();
+                this.remove.add(_elem88);
               }
               iprot.readSetEnd();
             }
@@ -498,20 +792,22 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
-        case ADD:
-          if (__field.type == TType.SET) {
+        case PUT:
+          if (__field.type == TType.MAP) {
             {
-              TSet _set64 = iprot.readSetBegin();
-              this.add = new HashSet<String>(Math.max(0, 2*_set64.size));
-              for (int _i65 = 0; 
-                   (_set64.size < 0) ? iprot.peekSet() : (_i65 < _set64.size); 
-                   ++_i65)
+              TMap _map89 = iprot.readMapBegin();
+              this.put = new HashMap<String,String>(Math.max(0, 2*_map89.size));
+              for (int _i90 = 0; 
+                   (_map89.size < 0) ? iprot.peekMap() : (_i90 < _map89.size); 
+                   ++_i90)
               {
-                String _elem66;
-                _elem66 = iprot.readString();
-                this.add.add(_elem66);
+                String _key91;
+                String _val92;
+                _key91 = iprot.readString();
+                _val92 = iprot.readString();
+                this.put.put(_key91, _val92);
               }
-              iprot.readSetEnd();
+              iprot.readMapEnd();
             }
           } else {
             TProtocolUtil.skip(iprot, __field.type);
@@ -538,11 +834,12 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
       if (isSetAssign()) {
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
         {
-          oprot.writeSetBegin(new TSet(TType.STRING, this.assign.size()));
-          for (String _iter67 : this.assign)          {
-            oprot.writeString(_iter67);
+          oprot.writeMapBegin(new TMap(TType.STRING, TType.STRING, this.assign.size()));
+          for (Map.Entry<String, String> _iter93 : this.assign.entrySet())          {
+            oprot.writeString(_iter93.getKey());
+            oprot.writeString(_iter93.getValue());
           }
-          oprot.writeSetEnd();
+          oprot.writeMapEnd();
         }
         oprot.writeFieldEnd();
       }
@@ -550,25 +847,62 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
     oprot.writeFieldBegin(CLEAR_FIELD_DESC);
     oprot.writeBool(this.clear);
     oprot.writeFieldEnd();
-    if (this.remove != null) {
-      oprot.writeFieldBegin(REMOVE_FIELD_DESC);
+    if (this.patchPrior != null) {
+      oprot.writeFieldBegin(PATCH_PRIOR_FIELD_DESC);
       {
-        oprot.writeSetBegin(new TSet(TType.STRING, this.remove.size()));
-        for (String _iter68 : this.remove)        {
-          oprot.writeString(_iter68);
+        oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, this.patchPrior.size()));
+        for (Map.Entry<String, com.facebook.thrift.op.StringPatch> _iter94 : this.patchPrior.entrySet())        {
+          oprot.writeString(_iter94.getKey());
+          _iter94.getValue().write(oprot);
         }
-        oprot.writeSetEnd();
+        oprot.writeMapEnd();
       }
       oprot.writeFieldEnd();
     }
     if (this.add != null) {
       oprot.writeFieldBegin(ADD_FIELD_DESC);
       {
-        oprot.writeSetBegin(new TSet(TType.STRING, this.add.size()));
-        for (String _iter69 : this.add)        {
-          oprot.writeString(_iter69);
+        oprot.writeMapBegin(new TMap(TType.STRING, TType.STRING, this.add.size()));
+        for (Map.Entry<String, String> _iter95 : this.add.entrySet())        {
+          oprot.writeString(_iter95.getKey());
+          oprot.writeString(_iter95.getValue());
+        }
+        oprot.writeMapEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.patch != null) {
+      oprot.writeFieldBegin(PATCH_FIELD_DESC);
+      {
+        oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, this.patch.size()));
+        for (Map.Entry<String, com.facebook.thrift.op.StringPatch> _iter96 : this.patch.entrySet())        {
+          oprot.writeString(_iter96.getKey());
+          _iter96.getValue().write(oprot);
+        }
+        oprot.writeMapEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.remove != null) {
+      oprot.writeFieldBegin(REMOVE_FIELD_DESC);
+      {
+        oprot.writeSetBegin(new TSet(TType.STRING, this.remove.size()));
+        for (String _iter97 : this.remove)        {
+          oprot.writeString(_iter97);
         }
         oprot.writeSetEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.put != null) {
+      oprot.writeFieldBegin(PUT_FIELD_DESC);
+      {
+        oprot.writeMapBegin(new TMap(TType.STRING, TType.STRING, this.put.size()));
+        for (Map.Entry<String, String> _iter98 : this.put.entrySet())        {
+          oprot.writeString(_iter98.getKey());
+          oprot.writeString(_iter98.getValue());
+        }
+        oprot.writeMapEnd();
       }
       oprot.writeFieldEnd();
     }
@@ -614,13 +948,13 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
     first = false;
     if (!first) sb.append("," + newLine);
     sb.append(indentStr);
-    sb.append("remove");
+    sb.append("patchPrior");
     sb.append(space);
     sb.append(":").append(space);
-    if (this.getRemove() == null) {
+    if (this.getPatchPrior() == null) {
       sb.append("null");
     } else {
-      sb.append(TBaseHelper.toString(this.getRemove(), indent + 1, prettyPrint));
+      sb.append(TBaseHelper.toString(this.getPatchPrior(), indent + 1, prettyPrint));
     }
     first = false;
     if (!first) sb.append("," + newLine);
@@ -632,6 +966,39 @@ public class MyStructField29Patch implements TBase, java.io.Serializable, Clonea
       sb.append("null");
     } else {
       sb.append(TBaseHelper.toString(this.getAdd(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("patch");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getPatch() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getPatch(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("remove");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getRemove() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getRemove(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("put");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getPut() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getPut(), indent + 1, prettyPrint));
     }
     first = false;
     sb.append(newLine + TBaseHelper.reduceIndent(indentStr));

@@ -61,7 +61,6 @@ struct MyStruct {
   MyUnion unionVal;
   LateDefStruct lateStructVal;
   standard.DurationStruct durationVal;
-  standard.TimeStruct timeVal;
 
   optional bool optBoolVal;
   optional byte optByteVal;

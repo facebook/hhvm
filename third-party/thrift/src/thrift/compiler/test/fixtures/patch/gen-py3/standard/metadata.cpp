@@ -14,11 +14,8 @@ namespace type {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
   ::apache::thrift::detail::md::EnumMetadata<Void>::gen(metadata);
-  ::apache::thrift::detail::md::EnumMetadata<JsonType>::gen(metadata);
   ::apache::thrift::detail::md::EnumMetadata<StandardProtocol>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<DurationStruct>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<TimeStruct>::gen(metadata);
-  ::apache::thrift::detail::md::StructMetadata<FractionStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<UriStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<TypeUri>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<TypeName>::gen(metadata);

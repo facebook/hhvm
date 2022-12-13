@@ -56,7 +56,6 @@ class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     unionVal: _typing.Any
     lateStructVal: _typing.Any
     durationVal: _typing.Any
-    timeVal: _typing.Any
     optBoolVal: _typing.Optional[bool]
     optByteVal: _typing.Optional[int]
     optI16Val: _typing.Optional[int]

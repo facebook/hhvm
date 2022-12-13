@@ -37,48 +37,6 @@ class apache_thrift_type_standard_Void_TEnumStaticMetadata implements \IThriftEn
 }
 
 /**
- * The types availible in JSON, as defined by https://www.json.org.
- * 
- * Original thrift enum:-
- * JsonType
- */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/JsonType'))>>
-enum apache_thrift_type_standard_JsonType: int {
-  Null = 0;
-  Boolean = 1;
-  Number = 2;
-  String = 4;
-  Array = 5;
-  Object = 6;
-}
-
-class apache_thrift_type_standard_JsonType_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
-  public static function getEnumMetadata()[]: \tmeta_ThriftEnum {
-    return tmeta_ThriftEnum::fromShape(
-      shape(
-        "name" => "standard.JsonType",
-        "elements" => dict[
-          0 => "Null",
-          1 => "Boolean",
-          2 => "Number",
-          4 => "String",
-          5 => "Array",
-          6 => "Object",
-        ],
-      )
-    );
-  }
-
-  public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
-    return shape(
-      'enum' => dict[],
-      'constants' => dict[
-      ],
-    );
-  }
-}
-
-/**
  * The standard Thrift protocols.
  * 
  * Original thrift enum:-
@@ -278,318 +236,6 @@ class apache_thrift_type_standard_DurationStruct implements \IThriftSyncStruct, 
 }
 
 /**
- * An instant in time encoded as a count of seconds and nanoseconds (nanos)
- * since midnight on January 1, 1970 UTC (i.e. Unix epoch).
- * 
- * Considered 'normal', when `nanos` is in the range 0 to 999'999'999 inclusive.
- *
- * Original thrift struct:-
- * TimeStruct
- */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/Time'))>>
-class apache_thrift_type_standard_TimeStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
-  use \ThriftSerializationTrait;
-
-  const \ThriftStructTypes::TSpec SPEC = dict[
-    1 => shape(
-      'var' => 'seconds',
-      'type' => \TType::I64,
-    ),
-    2 => shape(
-      'var' => 'nanos',
-      'type' => \TType::I32,
-    ),
-  ];
-  const dict<string, int> FIELDMAP = dict[
-    'seconds' => 1,
-    'nanos' => 2,
-  ];
-
-  const type TConstructorShape = shape(
-    ?'seconds' => ?int,
-    ?'nanos' => ?int,
-  );
-
-  const type TShape = shape(
-    'seconds' => int,
-    'nanos' => int,
-    ...
-  );
-  const int STRUCTURAL_ID = 6068468838865178106;
-  /**
-   * The count of seconds.
-   * 
-   * Original thrift field:-
-   * 1: i64 seconds
-   */
-  public int $seconds;
-  /**
-   * The count of nanoseconds.
-   * 
-   * Original thrift field:-
-   * 2: i32 nanos
-   */
-  public int $nanos;
-
-  public function __construct(?int $seconds = null, ?int $nanos = null)[] {
-    $this->seconds = $seconds ?? 0;
-    $this->nanos = $nanos ?? 0;
-  }
-
-  public static function withDefaultValues()[]: this {
-    return new static();
-  }
-
-  public static function fromShape(self::TConstructorShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'seconds'),
-      Shapes::idx($shape, 'nanos'),
-    );
-  }
-
-  public function getName()[]: string {
-    return 'TimeStruct';
-  }
-
-  public function clearTerseFields()[write_props]: void {
-  }
-
-  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
-      shape(
-        "name" => "standard.TimeStruct",
-        "fields" => vec[
-          tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
-                )
-              ),
-              "name" => "seconds",
-            )
-          ),
-          tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 2,
-              "type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
-                )
-              ),
-              "name" => "nanos",
-            )
-          ),
-        ],
-        "is_union" => false,
-      )
-    );
-  }
-
-  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
-    return shape(
-      'struct' => dict[],
-      'fields' => dict[
-      ],
-    );
-  }
-
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      $shape['seconds'],
-      $shape['nanos'],
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'seconds' => $this->seconds,
-      'nanos' => $this->nanos,
-    );
-  }
-  public function getInstanceKey()[write_props]: string {
-    return \TCompactSerializer::serialize($this);
-  }
-
-  public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
-
-    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
-      throw new \TProtocolException("Cannot parse the given json string.");
-    }
-
-    if (idx($parsed, 'seconds') !== null) {
-      $this->seconds = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['seconds']);
-    }
-    if (idx($parsed, 'nanos') !== null) {
-      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['nanos']);
-      if ($_tmp0 > 0x7fffffff) {
-        throw new \TProtocolException("number exceeds limit in field");
-      } else {
-        $this->nanos = (int)$_tmp0;
-      }
-    }
-  }
-
-}
-
-/**
- * A integer fraction of the form {numerator} / {denominator}
- * 
- * Useful for representing ratios, rates, and metric accumulators.
- * 
- * Considered 'normal' when the denominator is positive.
- * Considered 'simple' when `normal` and the greatest common divisor of the
- * and `numerator` and `denominator`, is 1.
- *
- * Original thrift struct:-
- * FractionStruct
- */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/Fraction'))>>
-class apache_thrift_type_standard_FractionStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
-  use \ThriftSerializationTrait;
-
-  const \ThriftStructTypes::TSpec SPEC = dict[
-    1 => shape(
-      'var' => 'numerator',
-      'type' => \TType::I64,
-    ),
-    2 => shape(
-      'var' => 'denominator',
-      'type' => \TType::I64,
-    ),
-  ];
-  const dict<string, int> FIELDMAP = dict[
-    'numerator' => 1,
-    'denominator' => 2,
-  ];
-
-  const type TConstructorShape = shape(
-    ?'numerator' => ?int,
-    ?'denominator' => ?int,
-  );
-
-  const type TShape = shape(
-    'numerator' => int,
-    'denominator' => int,
-    ...
-  );
-  const int STRUCTURAL_ID = 5321021846126388061;
-  /**
-   * The numerator/dividend/antecedent/upper integer.
-   * 
-   * Original thrift field:-
-   * 1: i64 numerator
-   */
-  public int $numerator;
-  /**
-   * The denominator/divisor/consequent/lower integer.
-   * 
-   * Original thrift field:-
-   * 2: i64 denominator
-   */
-  public int $denominator;
-
-  public function __construct(?int $numerator = null, ?int $denominator = null)[] {
-    $this->numerator = $numerator ?? 0;
-    $this->denominator = $denominator ?? 0;
-  }
-
-  public static function withDefaultValues()[]: this {
-    return new static();
-  }
-
-  public static function fromShape(self::TConstructorShape $shape)[]: this {
-    return new static(
-      Shapes::idx($shape, 'numerator'),
-      Shapes::idx($shape, 'denominator'),
-    );
-  }
-
-  public function getName()[]: string {
-    return 'FractionStruct';
-  }
-
-  public function clearTerseFields()[write_props]: void {
-  }
-
-  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
-    return tmeta_ThriftStruct::fromShape(
-      shape(
-        "name" => "standard.FractionStruct",
-        "fields" => vec[
-          tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 1,
-              "type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
-                )
-              ),
-              "name" => "numerator",
-            )
-          ),
-          tmeta_ThriftField::fromShape(
-            shape(
-              "id" => 2,
-              "type" => tmeta_ThriftType::fromShape(
-                shape(
-                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
-                )
-              ),
-              "name" => "denominator",
-            )
-          ),
-        ],
-        "is_union" => false,
-      )
-    );
-  }
-
-  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
-    return shape(
-      'struct' => dict[],
-      'fields' => dict[
-      ],
-    );
-  }
-
-  public static function __fromShape(self::TShape $shape)[]: this {
-    return new static(
-      $shape['numerator'],
-      $shape['denominator'],
-    );
-  }
-
-  public function __toShape()[]: self::TShape {
-    return shape(
-      'numerator' => $this->numerator,
-      'denominator' => $this->denominator,
-    );
-  }
-  public function getInstanceKey()[write_props]: string {
-    return \TCompactSerializer::serialize($this);
-  }
-
-  public function readFromJson(string $jsonText): void {
-    $parsed = json_decode($jsonText, true);
-
-    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
-      throw new \TProtocolException("Cannot parse the given json string.");
-    }
-
-    if (idx($parsed, 'numerator') !== null) {
-      $this->numerator = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['numerator']);
-    }
-    if (idx($parsed, 'denominator') !== null) {
-      $this->denominator = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['denominator']);
-    }
-  }
-
-}
-
-/**
  * A decoded URI.
  * 
  *   {scheme}://{domain}/{path}?{query}#{fragment}
@@ -668,7 +314,7 @@ class apache_thrift_type_standard_UriStruct implements \IThriftSyncStruct, \IThr
     'fragment' => string,
     ...
   );
-  const int STRUCTURAL_ID = 4148606449436320454;
+  const int STRUCTURAL_ID = 3751334788572394126;
   /**
    * The scheme, if present.
    * 
@@ -755,20 +401,11 @@ class apache_thrift_type_standard_UriStruct implements \IThriftSyncStruct, \IThr
               "id" => 2,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_list" => tmeta_ThriftListType::fromShape(
                     shape(
-                      "name" => "standard.DomainLabels",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
+                      "valueType" => tmeta_ThriftType::fromShape(
                         shape(
-                          "t_list" => tmeta_ThriftListType::fromShape(
-                            shape(
-                              "valueType" => tmeta_ThriftType::fromShape(
-                                shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
-                                )
-                              ),
-                            )
-                          ),
+                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                         )
                       ),
                     )
@@ -783,20 +420,11 @@ class apache_thrift_type_standard_UriStruct implements \IThriftSyncStruct, \IThr
               "id" => 4,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_list" => tmeta_ThriftListType::fromShape(
                     shape(
-                      "name" => "standard.PathSegments",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
+                      "valueType" => tmeta_ThriftType::fromShape(
                         shape(
-                          "t_list" => tmeta_ThriftListType::fromShape(
-                            shape(
-                              "valueType" => tmeta_ThriftType::fromShape(
-                                shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
-                                )
-                              ),
-                            )
-                          ),
+                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                         )
                       ),
                     )
@@ -811,25 +439,16 @@ class apache_thrift_type_standard_UriStruct implements \IThriftSyncStruct, \IThr
               "id" => 5,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
-                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                  "t_map" => tmeta_ThriftMapType::fromShape(
                     shape(
-                      "name" => "standard.QueryArgs",
-                      "underlyingType" => tmeta_ThriftType::fromShape(
+                      "keyType" => tmeta_ThriftType::fromShape(
                         shape(
-                          "t_map" => tmeta_ThriftMapType::fromShape(
-                            shape(
-                              "keyType" => tmeta_ThriftType::fromShape(
-                                shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
-                                )
-                              ),
-                              "valueType" => tmeta_ThriftType::fromShape(
-                                shape(
-                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
-                                )
-                              ),
-                            )
-                          ),
+                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                        )
+                      ),
+                      "valueType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
                         )
                       ),
                     )
@@ -865,33 +484,6 @@ class apache_thrift_type_standard_UriStruct implements \IThriftSyncStruct, \IThr
         ),
       ],
       'fields' => dict[
-        'domain' => shape(
-          'field' => dict[],
-          'type' => dict[
-            '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
-              shape(
-              )
-            ),
-          ],
-        ),
-        'path' => shape(
-          'field' => dict[],
-          'type' => dict[
-            '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
-              shape(
-              )
-            ),
-          ],
-        ),
-        'query' => shape(
-          'field' => dict[],
-          'type' => dict[
-            '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
-              shape(
-              )
-            ),
-          ],
-        ),
       ],
     );
   }

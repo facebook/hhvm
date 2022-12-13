@@ -36,7 +36,7 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'MyEnum', 'MyData', 'InnerUnion', 'MyUnion', 'MyStruct', 'LateDefStruct', 'Recursive', 'Bar', 'Loop', 'MyDataFieldPatch', 'MyDataPatch', 'InnerUnionFieldPatch', 'InnerUnionPatch', 'MyUnionFieldPatch', 'MyUnionPatch', 'MyStructField10Patch', 'MyStructField25Patch', 'MyStructField28Patch', 'MyStructField29Patch', 'MyStructField30Patch', 'MyStructField31Patch', 'MyStructField31Patch1', 'MyStructField32Patch', 'MyStructField32Patch1', 'MyStructFieldPatch', 'MyStructPatch', 'LateDefStructFieldPatch', 'LateDefStructPatch', 'RecursiveField1Patch', 'RecursiveFieldPatch', 'RecursivePatch', 'BarFieldPatch', 'BarPatch', 'LoopFieldPatch', 'LoopPatch']
+__all__ = ['UTF8STRINGS', 'MyEnum', 'MyData', 'InnerUnion', 'MyUnion', 'MyStruct', 'LateDefStruct', 'Recursive', 'Bar', 'Loop', 'MyDataFieldPatch', 'MyDataPatch', 'InnerUnionFieldPatch', 'InnerUnionPatch', 'MyUnionFieldPatch', 'MyUnionPatch', 'MyStructField10Patch', 'MyStructField24Patch', 'MyStructField27Patch', 'MyStructField28Patch', 'MyStructField29Patch', 'MyStructField30Patch', 'MyStructField30Patch1', 'MyStructField31Patch', 'MyStructField31Patch1', 'MyStructFieldPatch', 'MyStructPatch', 'LateDefStructFieldPatch', 'LateDefStructPatch', 'RecursiveField1Patch', 'RecursiveFieldPatch', 'RecursivePatch', 'BarFieldPatch', 'BarPatch', 'LoopFieldPatch', 'LoopPatch']
 
 class MyEnum:
   MyValue0 = 0
@@ -502,7 +502,6 @@ class MyStruct:
    - unionVal
    - lateStructVal
    - durationVal
-   - timeVal
    - optBoolVal
    - optByteVal
    - optI16Val
@@ -617,74 +616,68 @@ class MyStruct:
         else:
           iprot.skip(ftype)
       elif fid == -15:
-        if ftype == TType.STRUCT:
-          self.timeVal = thrift.lib.thrift.standard.ttypes.TimeStruct()
-          self.timeVal.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == -16:
         if ftype == TType.BOOL:
           self.optBoolVal = iprot.readBool()
         else:
           iprot.skip(ftype)
-      elif fid == -17:
+      elif fid == -16:
         if ftype == TType.BYTE:
           self.optByteVal = iprot.readByte()
         else:
           iprot.skip(ftype)
-      elif fid == -18:
+      elif fid == -17:
         if ftype == TType.I16:
           self.optI16Val = iprot.readI16()
         else:
           iprot.skip(ftype)
-      elif fid == -19:
+      elif fid == -18:
         if ftype == TType.I32:
           self.optI32Val = iprot.readI32()
         else:
           iprot.skip(ftype)
-      elif fid == -20:
+      elif fid == -19:
         if ftype == TType.I64:
           self.optI64Val = iprot.readI64()
         else:
           iprot.skip(ftype)
-      elif fid == -21:
+      elif fid == -20:
         if ftype == TType.FLOAT:
           self.optFloatVal = iprot.readFloat()
         else:
           iprot.skip(ftype)
-      elif fid == -22:
+      elif fid == -21:
         if ftype == TType.DOUBLE:
           self.optDoubleVal = iprot.readDouble()
         else:
           iprot.skip(ftype)
-      elif fid == -23:
+      elif fid == -22:
         if ftype == TType.STRING:
           self.optStringVal = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
         else:
           iprot.skip(ftype)
-      elif fid == -24:
+      elif fid == -23:
         if ftype == TType.STRING:
           self.optBinaryVal = iprot.readString()
         else:
           iprot.skip(ftype)
-      elif fid == -25:
+      elif fid == -24:
         if ftype == TType.I32:
           self.optEnumVal = iprot.readI32()
         else:
           iprot.skip(ftype)
-      elif fid == -26:
+      elif fid == -25:
         if ftype == TType.STRUCT:
           self.optStructVal = MyData()
           self.optStructVal.read(iprot)
         else:
           iprot.skip(ftype)
-      elif fid == -27:
+      elif fid == -26:
         if ftype == TType.STRUCT:
           self.optLateStructVal = LateDefStruct()
           self.optLateStructVal.read(iprot)
         else:
           iprot.skip(ftype)
-      elif fid == -28:
+      elif fid == -27:
         if ftype == TType.LIST:
           self.optListVal = []
           (_etype3, _size0) = iprot.readListBegin()
@@ -699,7 +692,7 @@ class MyStruct:
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
-      elif fid == -29:
+      elif fid == -28:
         if ftype == TType.SET:
           self.optSetVal = set()
           (_etype10, _size7) = iprot.readSetBegin()
@@ -714,7 +707,7 @@ class MyStruct:
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
-      elif fid == -30:
+      elif fid == -29:
         if ftype == TType.MAP:
           self.optMapVal = {}
           (_ktype15, _vtype16, _size14 ) = iprot.readMapBegin() 
@@ -731,7 +724,7 @@ class MyStruct:
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
-      elif fid == -31:
+      elif fid == -30:
         if ftype == TType.LIST:
           self.listMap = []
           (_etype26, _size23) = iprot.readListBegin()
@@ -770,7 +763,7 @@ class MyStruct:
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
-      elif fid == -32:
+      elif fid == -31:
         if ftype == TType.MAP:
           self.mapMap = {}
           (_ktype49, _vtype50, _size48 ) = iprot.readMapBegin() 
@@ -825,7 +818,7 @@ class MyStruct:
       return
     oprot.writeStructBegin('MyStruct')
     if self.mapMap != None:
-      oprot.writeFieldBegin('mapMap', TType.MAP, -32)
+      oprot.writeFieldBegin('mapMap', TType.MAP, -31)
       oprot.writeMapBegin(TType.STRING, TType.MAP, len(self.mapMap))
       for kiter75,viter76 in self.mapMap.items():
         oprot.writeString(kiter75.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter75, bytes) else oprot.writeString(kiter75)
@@ -837,7 +830,7 @@ class MyStruct:
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.listMap != None:
-      oprot.writeFieldBegin('listMap', TType.LIST, -31)
+      oprot.writeFieldBegin('listMap', TType.LIST, -30)
       oprot.writeListBegin(TType.MAP, len(self.listMap))
       for iter79 in self.listMap:
         oprot.writeMapBegin(TType.STRING, TType.I32, len(iter79))
@@ -848,7 +841,7 @@ class MyStruct:
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.optMapVal != None:
-      oprot.writeFieldBegin('optMapVal', TType.MAP, -30)
+      oprot.writeFieldBegin('optMapVal', TType.MAP, -29)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.optMapVal))
       for kiter82,viter83 in self.optMapVal.items():
         oprot.writeString(kiter82.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter82, bytes) else oprot.writeString(kiter82)
@@ -856,70 +849,66 @@ class MyStruct:
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.optSetVal != None:
-      oprot.writeFieldBegin('optSetVal', TType.SET, -29)
+      oprot.writeFieldBegin('optSetVal', TType.SET, -28)
       oprot.writeSetBegin(TType.STRING, len(self.optSetVal))
       for iter84 in self.optSetVal:
         oprot.writeString(iter84.encode('utf-8')) if UTF8STRINGS and not isinstance(iter84, bytes) else oprot.writeString(iter84)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.optListVal != None:
-      oprot.writeFieldBegin('optListVal', TType.LIST, -28)
+      oprot.writeFieldBegin('optListVal', TType.LIST, -27)
       oprot.writeListBegin(TType.I16, len(self.optListVal))
       for iter85 in self.optListVal:
         oprot.writeI16(iter85)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.optLateStructVal != None:
-      oprot.writeFieldBegin('optLateStructVal', TType.STRUCT, -27)
+      oprot.writeFieldBegin('optLateStructVal', TType.STRUCT, -26)
       self.optLateStructVal.write(oprot)
       oprot.writeFieldEnd()
     if self.optStructVal != None:
-      oprot.writeFieldBegin('optStructVal', TType.STRUCT, -26)
+      oprot.writeFieldBegin('optStructVal', TType.STRUCT, -25)
       self.optStructVal.write(oprot)
       oprot.writeFieldEnd()
     if self.optEnumVal != None:
-      oprot.writeFieldBegin('optEnumVal', TType.I32, -25)
+      oprot.writeFieldBegin('optEnumVal', TType.I32, -24)
       oprot.writeI32(self.optEnumVal)
       oprot.writeFieldEnd()
     if self.optBinaryVal != None:
-      oprot.writeFieldBegin('optBinaryVal', TType.STRING, -24)
+      oprot.writeFieldBegin('optBinaryVal', TType.STRING, -23)
       oprot.writeString(self.optBinaryVal)
       oprot.writeFieldEnd()
     if self.optStringVal != None:
-      oprot.writeFieldBegin('optStringVal', TType.STRING, -23)
+      oprot.writeFieldBegin('optStringVal', TType.STRING, -22)
       oprot.writeString(self.optStringVal.encode('utf-8')) if UTF8STRINGS and not isinstance(self.optStringVal, bytes) else oprot.writeString(self.optStringVal)
       oprot.writeFieldEnd()
     if self.optDoubleVal != None:
-      oprot.writeFieldBegin('optDoubleVal', TType.DOUBLE, -22)
+      oprot.writeFieldBegin('optDoubleVal', TType.DOUBLE, -21)
       oprot.writeDouble(self.optDoubleVal)
       oprot.writeFieldEnd()
     if self.optFloatVal != None:
-      oprot.writeFieldBegin('optFloatVal', TType.FLOAT, -21)
+      oprot.writeFieldBegin('optFloatVal', TType.FLOAT, -20)
       oprot.writeFloat(self.optFloatVal)
       oprot.writeFieldEnd()
     if self.optI64Val != None:
-      oprot.writeFieldBegin('optI64Val', TType.I64, -20)
+      oprot.writeFieldBegin('optI64Val', TType.I64, -19)
       oprot.writeI64(self.optI64Val)
       oprot.writeFieldEnd()
     if self.optI32Val != None:
-      oprot.writeFieldBegin('optI32Val', TType.I32, -19)
+      oprot.writeFieldBegin('optI32Val', TType.I32, -18)
       oprot.writeI32(self.optI32Val)
       oprot.writeFieldEnd()
     if self.optI16Val != None:
-      oprot.writeFieldBegin('optI16Val', TType.I16, -18)
+      oprot.writeFieldBegin('optI16Val', TType.I16, -17)
       oprot.writeI16(self.optI16Val)
       oprot.writeFieldEnd()
     if self.optByteVal != None:
-      oprot.writeFieldBegin('optByteVal', TType.BYTE, -17)
+      oprot.writeFieldBegin('optByteVal', TType.BYTE, -16)
       oprot.writeByte(self.optByteVal)
       oprot.writeFieldEnd()
     if self.optBoolVal != None:
-      oprot.writeFieldBegin('optBoolVal', TType.BOOL, -16)
+      oprot.writeFieldBegin('optBoolVal', TType.BOOL, -15)
       oprot.writeBool(self.optBoolVal)
-      oprot.writeFieldEnd()
-    if self.timeVal != None:
-      oprot.writeFieldBegin('timeVal', TType.STRUCT, -15)
-      self.timeVal.write(oprot)
       oprot.writeFieldEnd()
     if self.durationVal != None:
       oprot.writeFieldBegin('durationVal', TType.STRUCT, -14)
@@ -1036,9 +1025,6 @@ class MyStruct:
     if 'durationVal' in json_obj and json_obj['durationVal'] is not None:
       self.durationVal = thrift.lib.thrift.standard.ttypes.DurationStruct()
       self.durationVal.readFromJson(json_obj['durationVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-    if 'timeVal' in json_obj and json_obj['timeVal'] is not None:
-      self.timeVal = thrift.lib.thrift.standard.ttypes.TimeStruct()
-      self.timeVal.readFromJson(json_obj['timeVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'optBoolVal' in json_obj and json_obj['optBoolVal'] is not None:
       self.optBoolVal = json_obj['optBoolVal']
     if 'optByteVal' in json_obj and json_obj['optByteVal'] is not None:
@@ -1173,10 +1159,6 @@ class MyStruct:
       value = pprint.pformat(self.durationVal, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    durationVal=%s' % (value))
-    if self.timeVal is not None:
-      value = pprint.pformat(self.timeVal, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    timeVal=%s' % (value))
     if self.optBoolVal is not None:
       value = pprint.pformat(self.optBoolVal, indent=0)
       value = padding.join(value.splitlines(True))
@@ -1275,7 +1257,6 @@ class MyStruct:
       'optI16Val',
       'optByteVal',
       'optBoolVal',
-      'timeVal',
       'durationVal',
       'lateStructVal',
       'unionVal',
@@ -2827,7 +2808,7 @@ class MyStructField10Patch:
   def _to_py_deprecated(self):
     return self
 
-class MyStructField25Patch:
+class MyStructField24Patch:
   """
   Attributes:
    - assign: Assigns to a (set) value.
@@ -2881,7 +2862,7 @@ class MyStructField25Patch:
     if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
       oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
       return
-    oprot.writeStructBegin('MyStructField25Patch')
+    oprot.writeStructBegin('MyStructField24Patch')
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.I32, 1)
       oprot.writeI32(self.assign)
@@ -2951,18 +2932,18 @@ class MyStructField25Patch:
     import importlib
     import thrift.python.converter
     python_types = importlib.import_module("test.fixtures.patch.module.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.MyStructField25Patch, self)
+    return thrift.python.converter.to_python_struct(python_types.MyStructField24Patch, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
     py3_types = importlib.import_module("test.fixtures.patch.module.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.MyStructField25Patch, self)
+    return thrift.py3.converter.to_py3_struct(py3_types.MyStructField24Patch, self)
 
   def _to_py_deprecated(self):
     return self
 
-class MyStructField28Patch:
+class MyStructField27Patch:
   """
   Attributes:
    - assign: Assigns to a (set) value.
@@ -3094,7 +3075,7 @@ class MyStructField28Patch:
     if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
       oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
       return
-    oprot.writeStructBegin('MyStructField28Patch')
+    oprot.writeStructBegin('MyStructField27Patch')
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.LIST, 1)
       oprot.writeListBegin(TType.I16, len(self.assign))
@@ -3241,18 +3222,18 @@ class MyStructField28Patch:
     import importlib
     import thrift.python.converter
     python_types = importlib.import_module("test.fixtures.patch.module.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.MyStructField28Patch, self)
+    return thrift.python.converter.to_python_struct(python_types.MyStructField27Patch, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
     py3_types = importlib.import_module("test.fixtures.patch.module.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.MyStructField28Patch, self)
+    return thrift.py3.converter.to_py3_struct(py3_types.MyStructField27Patch, self)
 
   def _to_py_deprecated(self):
     return self
 
-class MyStructField29Patch:
+class MyStructField28Patch:
   """
   Attributes:
    - assign: Assigns to a (set) value.
@@ -3348,7 +3329,7 @@ class MyStructField29Patch:
     if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
       oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
       return
-    oprot.writeStructBegin('MyStructField29Patch')
+    oprot.writeStructBegin('MyStructField28Patch')
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.SET, 1)
       oprot.writeSetBegin(TType.STRING, len(self.assign))
@@ -3449,18 +3430,18 @@ class MyStructField29Patch:
     import importlib
     import thrift.python.converter
     python_types = importlib.import_module("test.fixtures.patch.module.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.MyStructField29Patch, self)
+    return thrift.python.converter.to_python_struct(python_types.MyStructField28Patch, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
     py3_types = importlib.import_module("test.fixtures.patch.module.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.MyStructField29Patch, self)
+    return thrift.py3.converter.to_py3_struct(py3_types.MyStructField28Patch, self)
 
   def _to_py_deprecated(self):
     return self
 
-class MyStructField30Patch:
+class MyStructField29Patch:
   """
   Attributes:
    - assign: Assigns to a (set) value.
@@ -3618,7 +3599,7 @@ class MyStructField30Patch:
     if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
       oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
       return
-    oprot.writeStructBegin('MyStructField30Patch')
+    oprot.writeStructBegin('MyStructField29Patch')
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.MAP, 1)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.assign))
@@ -3781,18 +3762,18 @@ class MyStructField30Patch:
     import importlib
     import thrift.python.converter
     python_types = importlib.import_module("test.fixtures.patch.module.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.MyStructField30Patch, self)
+    return thrift.python.converter.to_python_struct(python_types.MyStructField29Patch, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
     py3_types = importlib.import_module("test.fixtures.patch.module.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.MyStructField30Patch, self)
+    return thrift.py3.converter.to_py3_struct(py3_types.MyStructField29Patch, self)
 
   def _to_py_deprecated(self):
     return self
 
-class MyStructField31Patch:
+class MyStructField30Patch:
   """
   Attributes:
    - assign: Assigns to a (set) value.
@@ -3879,13 +3860,13 @@ class MyStructField31Patch:
           if _size302 >= 0:
             for _i306 in range(_size302):
               _key307 = iprot.readI32()
-              _val308 = MyStructField31Patch1()
+              _val308 = MyStructField30Patch1()
               _val308.read(iprot)
               self.patch[_key307] = _val308
           else: 
             while iprot.peekMap():
               _key309 = iprot.readI32()
-              _val310 = MyStructField31Patch1()
+              _val310 = MyStructField30Patch1()
               _val310.read(iprot)
               self.patch[_key309] = _val310
           iprot.readMapEnd()
@@ -4020,7 +4001,7 @@ class MyStructField31Patch:
     if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
       oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
       return
-    oprot.writeStructBegin('MyStructField31Patch')
+    oprot.writeStructBegin('MyStructField30Patch')
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.LIST, 1)
       oprot.writeListBegin(TType.MAP, len(self.assign))
@@ -4110,7 +4091,7 @@ class MyStructField31Patch:
         _tmp_kp407 = int(_tmp_k405)
         if _tmp_kp407 > 0x7fffffff or _tmp_kp407 < -0x80000000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds the limit in key ' + _tmp_k405)
-        _struct408 = MyStructField31Patch1()
+        _struct408 = MyStructField30Patch1()
         _struct408.readFromJson(_tmp_v406, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
         self.patch[_tmp_kp407] = _struct408
     if 'remove' in json_obj and json_obj['remove'] is not None:
@@ -4199,18 +4180,18 @@ class MyStructField31Patch:
     import importlib
     import thrift.python.converter
     python_types = importlib.import_module("test.fixtures.patch.module.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.MyStructField31Patch, self)
+    return thrift.python.converter.to_python_struct(python_types.MyStructField30Patch, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
     py3_types = importlib.import_module("test.fixtures.patch.module.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.MyStructField31Patch, self)
+    return thrift.py3.converter.to_py3_struct(py3_types.MyStructField30Patch, self)
 
   def _to_py_deprecated(self):
     return self
 
-class MyStructField31Patch1:
+class MyStructField30Patch1:
   """
   Attributes:
    - assign: Assigns to a (set) value.
@@ -4368,7 +4349,7 @@ class MyStructField31Patch1:
     if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
       oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
       return
-    oprot.writeStructBegin('MyStructField31Patch1')
+    oprot.writeStructBegin('MyStructField30Patch1')
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.MAP, 1)
       oprot.writeMapBegin(TType.STRING, TType.I32, len(self.assign))
@@ -4537,18 +4518,18 @@ class MyStructField31Patch1:
     import importlib
     import thrift.python.converter
     python_types = importlib.import_module("test.fixtures.patch.module.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.MyStructField31Patch1, self)
+    return thrift.python.converter.to_python_struct(python_types.MyStructField30Patch1, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
     py3_types = importlib.import_module("test.fixtures.patch.module.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.MyStructField31Patch1, self)
+    return thrift.py3.converter.to_py3_struct(py3_types.MyStructField30Patch1, self)
 
   def _to_py_deprecated(self):
     return self
 
-class MyStructField32Patch:
+class MyStructField31Patch:
   """
   Attributes:
    - assign: Assigns to a (set) value.
@@ -4638,13 +4619,13 @@ class MyStructField32Patch:
           if _size532 >= 0:
             for _i536 in range(_size532):
               _key537 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val538 = MyStructField32Patch1()
+              _val538 = MyStructField31Patch1()
               _val538.read(iprot)
               self.patchPrior[_key537] = _val538
           else: 
             while iprot.peekMap():
               _key539 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val540 = MyStructField32Patch1()
+              _val540 = MyStructField31Patch1()
               _val540.read(iprot)
               self.patchPrior[_key539] = _val540
           iprot.readMapEnd()
@@ -4698,13 +4679,13 @@ class MyStructField32Patch:
           if _size568 >= 0:
             for _i572 in range(_size568):
               _key573 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val574 = MyStructField32Patch1()
+              _val574 = MyStructField31Patch1()
               _val574.read(iprot)
               self.patch[_key573] = _val574
           else: 
             while iprot.peekMap():
               _key575 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val576 = MyStructField32Patch1()
+              _val576 = MyStructField31Patch1()
               _val576.read(iprot)
               self.patch[_key575] = _val576
           iprot.readMapEnd()
@@ -4778,7 +4759,7 @@ class MyStructField32Patch:
     if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
       oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
       return
-    oprot.writeStructBegin('MyStructField32Patch')
+    oprot.writeStructBegin('MyStructField31Patch')
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.MAP, 1)
       oprot.writeMapBegin(TType.STRING, TType.MAP, len(self.assign))
@@ -4874,7 +4855,7 @@ class MyStructField32Patch:
       self.patchPrior = dict_cls()
       for _tmp_k635, _tmp_v636 in json_obj['patchPrior'].items():
         _tmp_kp637 = _tmp_k635
-        _struct638 = MyStructField32Patch1()
+        _struct638 = MyStructField31Patch1()
         _struct638.readFromJson(_tmp_v636, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
         self.patchPrior[_tmp_kp637] = _struct638
     if 'add' in json_obj and json_obj['add'] is not None:
@@ -4892,7 +4873,7 @@ class MyStructField32Patch:
       self.patch = dict_cls()
       for _tmp_k646, _tmp_v647 in json_obj['patch'].items():
         _tmp_kp648 = _tmp_k646
-        _struct649 = MyStructField32Patch1()
+        _struct649 = MyStructField31Patch1()
         _struct649.readFromJson(_tmp_v647, is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
         self.patch[_tmp_kp648] = _struct649
     if 'remove' in json_obj and json_obj['remove'] is not None:
@@ -4971,18 +4952,18 @@ class MyStructField32Patch:
     import importlib
     import thrift.python.converter
     python_types = importlib.import_module("test.fixtures.patch.module.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.MyStructField32Patch, self)
+    return thrift.python.converter.to_python_struct(python_types.MyStructField31Patch, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
     py3_types = importlib.import_module("test.fixtures.patch.module.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.MyStructField32Patch, self)
+    return thrift.py3.converter.to_py3_struct(py3_types.MyStructField31Patch, self)
 
   def _to_py_deprecated(self):
     return self
 
-class MyStructField32Patch1:
+class MyStructField31Patch1:
   """
   Attributes:
    - assign: Assigns to a (set) value.
@@ -5140,7 +5121,7 @@ class MyStructField32Patch1:
     if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
       oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
       return
-    oprot.writeStructBegin('MyStructField32Patch1')
+    oprot.writeStructBegin('MyStructField31Patch1')
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.MAP, 1)
       oprot.writeMapBegin(TType.STRING, TType.I32, len(self.assign))
@@ -5309,13 +5290,13 @@ class MyStructField32Patch1:
     import importlib
     import thrift.python.converter
     python_types = importlib.import_module("test.fixtures.patch.module.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.MyStructField32Patch1, self)
+    return thrift.python.converter.to_python_struct(python_types.MyStructField31Patch1, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
     py3_types = importlib.import_module("test.fixtures.patch.module.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.MyStructField32Patch1, self)
+    return thrift.py3.converter.to_py3_struct(py3_types.MyStructField31Patch1, self)
 
   def _to_py_deprecated(self):
     return self
@@ -5340,7 +5321,6 @@ class MyStructFieldPatch:
    - optI16Val
    - optByteVal
    - optBoolVal
-   - timeVal
    - durationVal
    - lateStructVal
    - unionVal
@@ -5377,112 +5357,106 @@ class MyStructFieldPatch:
       (fname, ftype, fid) = iprot.readFieldBegin()
       if ftype == TType.STOP:
         break
-      if fid == -32:
+      if fid == -31:
         if ftype == TType.STRUCT:
-          self.mapMap = MyStructField32Patch()
+          self.mapMap = MyStructField31Patch()
           self.mapMap.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == -31:
-        if ftype == TType.STRUCT:
-          self.listMap = MyStructField31Patch()
-          self.listMap.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == -30:
         if ftype == TType.STRUCT:
-          self.optMapVal = MyStructField30Patch()
-          self.optMapVal.read(iprot)
+          self.listMap = MyStructField30Patch()
+          self.listMap.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == -29:
         if ftype == TType.STRUCT:
-          self.optSetVal = MyStructField29Patch()
-          self.optSetVal.read(iprot)
+          self.optMapVal = MyStructField29Patch()
+          self.optMapVal.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == -28:
         if ftype == TType.STRUCT:
-          self.optListVal = MyStructField28Patch()
-          self.optListVal.read(iprot)
+          self.optSetVal = MyStructField28Patch()
+          self.optSetVal.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == -27:
+        if ftype == TType.STRUCT:
+          self.optListVal = MyStructField27Patch()
+          self.optListVal.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == -26:
         if ftype == TType.STRUCT:
           self.optLateStructVal = LateDefStructPatch()
           self.optLateStructVal.read(iprot)
         else:
           iprot.skip(ftype)
-      elif fid == -26:
+      elif fid == -25:
         if ftype == TType.STRUCT:
           self.optStructVal = MyDataPatch()
           self.optStructVal.read(iprot)
         else:
           iprot.skip(ftype)
-      elif fid == -25:
+      elif fid == -24:
         if ftype == TType.STRUCT:
-          self.optEnumVal = MyStructField25Patch()
+          self.optEnumVal = MyStructField24Patch()
           self.optEnumVal.read(iprot)
         else:
           iprot.skip(ftype)
-      elif fid == -24:
+      elif fid == -23:
         if ftype == TType.STRUCT:
           self.optBinaryVal = thrift.lib.thrift.patch.ttypes.BinaryPatch()
           self.optBinaryVal.read(iprot)
         else:
           iprot.skip(ftype)
-      elif fid == -23:
+      elif fid == -22:
         if ftype == TType.STRUCT:
           self.optStringVal = thrift.lib.thrift.patch.ttypes.StringPatch()
           self.optStringVal.read(iprot)
         else:
           iprot.skip(ftype)
-      elif fid == -22:
+      elif fid == -21:
         if ftype == TType.STRUCT:
           self.optDoubleVal = thrift.lib.thrift.patch.ttypes.DoublePatch()
           self.optDoubleVal.read(iprot)
         else:
           iprot.skip(ftype)
-      elif fid == -21:
+      elif fid == -20:
         if ftype == TType.STRUCT:
           self.optFloatVal = thrift.lib.thrift.patch.ttypes.FloatPatch()
           self.optFloatVal.read(iprot)
         else:
           iprot.skip(ftype)
-      elif fid == -20:
+      elif fid == -19:
         if ftype == TType.STRUCT:
           self.optI64Val = thrift.lib.thrift.patch.ttypes.I64Patch()
           self.optI64Val.read(iprot)
         else:
           iprot.skip(ftype)
-      elif fid == -19:
+      elif fid == -18:
         if ftype == TType.STRUCT:
           self.optI32Val = thrift.lib.thrift.patch.ttypes.I32Patch()
           self.optI32Val.read(iprot)
         else:
           iprot.skip(ftype)
-      elif fid == -18:
+      elif fid == -17:
         if ftype == TType.STRUCT:
           self.optI16Val = thrift.lib.thrift.patch.ttypes.I16Patch()
           self.optI16Val.read(iprot)
         else:
           iprot.skip(ftype)
-      elif fid == -17:
+      elif fid == -16:
         if ftype == TType.STRUCT:
           self.optByteVal = thrift.lib.thrift.patch.ttypes.BytePatch()
           self.optByteVal.read(iprot)
         else:
           iprot.skip(ftype)
-      elif fid == -16:
+      elif fid == -15:
         if ftype == TType.STRUCT:
           self.optBoolVal = thrift.lib.thrift.patch.ttypes.BoolPatch()
           self.optBoolVal.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == -15:
-        if ftype == TType.STRUCT:
-          self.timeVal = thrift.lib.thrift.patch.ttypes.TimePatch()
-          self.timeVal.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == -14:
@@ -5583,76 +5557,72 @@ class MyStructFieldPatch:
       return
     oprot.writeStructBegin('MyStructFieldPatch')
     if self.mapMap != None:
-      oprot.writeFieldBegin('mapMap', TType.STRUCT, -32)
+      oprot.writeFieldBegin('mapMap', TType.STRUCT, -31)
       self.mapMap.write(oprot)
       oprot.writeFieldEnd()
     if self.listMap != None:
-      oprot.writeFieldBegin('listMap', TType.STRUCT, -31)
+      oprot.writeFieldBegin('listMap', TType.STRUCT, -30)
       self.listMap.write(oprot)
       oprot.writeFieldEnd()
     if self.optMapVal != None:
-      oprot.writeFieldBegin('optMapVal', TType.STRUCT, -30)
+      oprot.writeFieldBegin('optMapVal', TType.STRUCT, -29)
       self.optMapVal.write(oprot)
       oprot.writeFieldEnd()
     if self.optSetVal != None:
-      oprot.writeFieldBegin('optSetVal', TType.STRUCT, -29)
+      oprot.writeFieldBegin('optSetVal', TType.STRUCT, -28)
       self.optSetVal.write(oprot)
       oprot.writeFieldEnd()
     if self.optListVal != None:
-      oprot.writeFieldBegin('optListVal', TType.STRUCT, -28)
+      oprot.writeFieldBegin('optListVal', TType.STRUCT, -27)
       self.optListVal.write(oprot)
       oprot.writeFieldEnd()
     if self.optLateStructVal != None:
-      oprot.writeFieldBegin('optLateStructVal', TType.STRUCT, -27)
+      oprot.writeFieldBegin('optLateStructVal', TType.STRUCT, -26)
       self.optLateStructVal.write(oprot)
       oprot.writeFieldEnd()
     if self.optStructVal != None:
-      oprot.writeFieldBegin('optStructVal', TType.STRUCT, -26)
+      oprot.writeFieldBegin('optStructVal', TType.STRUCT, -25)
       self.optStructVal.write(oprot)
       oprot.writeFieldEnd()
     if self.optEnumVal != None:
-      oprot.writeFieldBegin('optEnumVal', TType.STRUCT, -25)
+      oprot.writeFieldBegin('optEnumVal', TType.STRUCT, -24)
       self.optEnumVal.write(oprot)
       oprot.writeFieldEnd()
     if self.optBinaryVal != None:
-      oprot.writeFieldBegin('optBinaryVal', TType.STRUCT, -24)
+      oprot.writeFieldBegin('optBinaryVal', TType.STRUCT, -23)
       self.optBinaryVal.write(oprot)
       oprot.writeFieldEnd()
     if self.optStringVal != None:
-      oprot.writeFieldBegin('optStringVal', TType.STRUCT, -23)
+      oprot.writeFieldBegin('optStringVal', TType.STRUCT, -22)
       self.optStringVal.write(oprot)
       oprot.writeFieldEnd()
     if self.optDoubleVal != None:
-      oprot.writeFieldBegin('optDoubleVal', TType.STRUCT, -22)
+      oprot.writeFieldBegin('optDoubleVal', TType.STRUCT, -21)
       self.optDoubleVal.write(oprot)
       oprot.writeFieldEnd()
     if self.optFloatVal != None:
-      oprot.writeFieldBegin('optFloatVal', TType.STRUCT, -21)
+      oprot.writeFieldBegin('optFloatVal', TType.STRUCT, -20)
       self.optFloatVal.write(oprot)
       oprot.writeFieldEnd()
     if self.optI64Val != None:
-      oprot.writeFieldBegin('optI64Val', TType.STRUCT, -20)
+      oprot.writeFieldBegin('optI64Val', TType.STRUCT, -19)
       self.optI64Val.write(oprot)
       oprot.writeFieldEnd()
     if self.optI32Val != None:
-      oprot.writeFieldBegin('optI32Val', TType.STRUCT, -19)
+      oprot.writeFieldBegin('optI32Val', TType.STRUCT, -18)
       self.optI32Val.write(oprot)
       oprot.writeFieldEnd()
     if self.optI16Val != None:
-      oprot.writeFieldBegin('optI16Val', TType.STRUCT, -18)
+      oprot.writeFieldBegin('optI16Val', TType.STRUCT, -17)
       self.optI16Val.write(oprot)
       oprot.writeFieldEnd()
     if self.optByteVal != None:
-      oprot.writeFieldBegin('optByteVal', TType.STRUCT, -17)
+      oprot.writeFieldBegin('optByteVal', TType.STRUCT, -16)
       self.optByteVal.write(oprot)
       oprot.writeFieldEnd()
     if self.optBoolVal != None:
-      oprot.writeFieldBegin('optBoolVal', TType.STRUCT, -16)
+      oprot.writeFieldBegin('optBoolVal', TType.STRUCT, -15)
       self.optBoolVal.write(oprot)
-      oprot.writeFieldEnd()
-    if self.timeVal != None:
-      oprot.writeFieldBegin('timeVal', TType.STRUCT, -15)
-      self.timeVal.write(oprot)
       oprot.writeFieldEnd()
     if self.durationVal != None:
       oprot.writeFieldBegin('durationVal', TType.STRUCT, -14)
@@ -5726,19 +5696,19 @@ class MyStructFieldPatch:
     if is_text:
       json_obj = loads(json)
     if 'mapMap' in json_obj and json_obj['mapMap'] is not None:
-      self.mapMap = MyStructField32Patch()
+      self.mapMap = MyStructField31Patch()
       self.mapMap.readFromJson(json_obj['mapMap'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'listMap' in json_obj and json_obj['listMap'] is not None:
-      self.listMap = MyStructField31Patch()
+      self.listMap = MyStructField30Patch()
       self.listMap.readFromJson(json_obj['listMap'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'optMapVal' in json_obj and json_obj['optMapVal'] is not None:
-      self.optMapVal = MyStructField30Patch()
+      self.optMapVal = MyStructField29Patch()
       self.optMapVal.readFromJson(json_obj['optMapVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'optSetVal' in json_obj and json_obj['optSetVal'] is not None:
-      self.optSetVal = MyStructField29Patch()
+      self.optSetVal = MyStructField28Patch()
       self.optSetVal.readFromJson(json_obj['optSetVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'optListVal' in json_obj and json_obj['optListVal'] is not None:
-      self.optListVal = MyStructField28Patch()
+      self.optListVal = MyStructField27Patch()
       self.optListVal.readFromJson(json_obj['optListVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'optLateStructVal' in json_obj and json_obj['optLateStructVal'] is not None:
       self.optLateStructVal = LateDefStructPatch()
@@ -5747,7 +5717,7 @@ class MyStructFieldPatch:
       self.optStructVal = MyDataPatch()
       self.optStructVal.readFromJson(json_obj['optStructVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'optEnumVal' in json_obj and json_obj['optEnumVal'] is not None:
-      self.optEnumVal = MyStructField25Patch()
+      self.optEnumVal = MyStructField24Patch()
       self.optEnumVal.readFromJson(json_obj['optEnumVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'optBinaryVal' in json_obj and json_obj['optBinaryVal'] is not None:
       self.optBinaryVal = thrift.lib.thrift.patch.ttypes.BinaryPatch()
@@ -5776,9 +5746,6 @@ class MyStructFieldPatch:
     if 'optBoolVal' in json_obj and json_obj['optBoolVal'] is not None:
       self.optBoolVal = thrift.lib.thrift.patch.ttypes.BoolPatch()
       self.optBoolVal.readFromJson(json_obj['optBoolVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-    if 'timeVal' in json_obj and json_obj['timeVal'] is not None:
-      self.timeVal = thrift.lib.thrift.patch.ttypes.TimePatch()
-      self.timeVal.readFromJson(json_obj['timeVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
     if 'durationVal' in json_obj and json_obj['durationVal'] is not None:
       self.durationVal = thrift.lib.thrift.patch.ttypes.DurationPatch()
       self.durationVal.readFromJson(json_obj['durationVal'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
@@ -5893,10 +5860,6 @@ class MyStructFieldPatch:
       value = pprint.pformat(self.optBoolVal, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    optBoolVal=%s' % (value))
-    if self.timeVal is not None:
-      value = pprint.pformat(self.timeVal, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    timeVal=%s' % (value))
     if self.durationVal is not None:
       value = pprint.pformat(self.durationVal, indent=0)
       value = padding.join(value.splitlines(True))
@@ -5983,7 +5946,6 @@ class MyStructFieldPatch:
       'optI16Val',
       'optByteVal',
       'optBoolVal',
-      'timeVal',
       'durationVal',
       'lateStructVal',
       'unionVal',
@@ -7546,24 +7508,23 @@ MyUnion.__init__ = MyUnion__init__
 
 all_structs.append(MyStruct)
 MyStruct.thrift_spec = (
-  (-32, TType.MAP, 'mapMap', (TType.STRING,True,TType.MAP,(TType.STRING,True,TType.I32,None)), None, 3, ), # -32
-  (-31, TType.LIST, 'listMap', (TType.MAP,(TType.STRING,True,TType.I32,None)), None, 3, ), # -31
-  (-30, TType.MAP, 'optMapVal', (TType.STRING,True,TType.STRING,True), None, 1, ), # -30
-  (-29, TType.SET, 'optSetVal', (TType.STRING,True), None, 1, ), # -29
-  (-28, TType.LIST, 'optListVal', (TType.I16,None), None, 1, ), # -28
-  (-27, TType.STRUCT, 'optLateStructVal', [LateDefStruct, LateDefStruct.thrift_spec, False], None, 1, ), # -27
-  (-26, TType.STRUCT, 'optStructVal', [MyData, MyData.thrift_spec, False], None, 1, ), # -26
-  (-25, TType.I32, 'optEnumVal', MyEnum, None, 1, ), # -25
-  (-24, TType.STRING, 'optBinaryVal', False, None, 1, ), # -24
-  (-23, TType.STRING, 'optStringVal', True, None, 1, ), # -23
-  (-22, TType.DOUBLE, 'optDoubleVal', None, None, 1, ), # -22
-  (-21, TType.FLOAT, 'optFloatVal', None, None, 1, ), # -21
-  (-20, TType.I64, 'optI64Val', None, None, 1, ), # -20
-  (-19, TType.I32, 'optI32Val', None, None, 1, ), # -19
-  (-18, TType.I16, 'optI16Val', None, None, 1, ), # -18
-  (-17, TType.BYTE, 'optByteVal', None, None, 1, ), # -17
-  (-16, TType.BOOL, 'optBoolVal', None, None, 1, ), # -16
-  (-15, TType.STRUCT, 'timeVal', [thrift.lib.thrift.standard.ttypes.TimeStruct, thrift.lib.thrift.standard.ttypes.TimeStruct.thrift_spec, False], None, 3, ), # -15
+  (-31, TType.MAP, 'mapMap', (TType.STRING,True,TType.MAP,(TType.STRING,True,TType.I32,None)), None, 3, ), # -31
+  (-30, TType.LIST, 'listMap', (TType.MAP,(TType.STRING,True,TType.I32,None)), None, 3, ), # -30
+  (-29, TType.MAP, 'optMapVal', (TType.STRING,True,TType.STRING,True), None, 1, ), # -29
+  (-28, TType.SET, 'optSetVal', (TType.STRING,True), None, 1, ), # -28
+  (-27, TType.LIST, 'optListVal', (TType.I16,None), None, 1, ), # -27
+  (-26, TType.STRUCT, 'optLateStructVal', [LateDefStruct, LateDefStruct.thrift_spec, False], None, 1, ), # -26
+  (-25, TType.STRUCT, 'optStructVal', [MyData, MyData.thrift_spec, False], None, 1, ), # -25
+  (-24, TType.I32, 'optEnumVal', MyEnum, None, 1, ), # -24
+  (-23, TType.STRING, 'optBinaryVal', False, None, 1, ), # -23
+  (-22, TType.STRING, 'optStringVal', True, None, 1, ), # -22
+  (-21, TType.DOUBLE, 'optDoubleVal', None, None, 1, ), # -21
+  (-20, TType.FLOAT, 'optFloatVal', None, None, 1, ), # -20
+  (-19, TType.I64, 'optI64Val', None, None, 1, ), # -19
+  (-18, TType.I32, 'optI32Val', None, None, 1, ), # -18
+  (-17, TType.I16, 'optI16Val', None, None, 1, ), # -17
+  (-16, TType.BYTE, 'optByteVal', None, None, 1, ), # -16
+  (-15, TType.BOOL, 'optBoolVal', None, None, 1, ), # -15
   (-14, TType.STRUCT, 'durationVal', [thrift.lib.thrift.standard.ttypes.DurationStruct, thrift.lib.thrift.standard.ttypes.DurationStruct.thrift_spec, False], None, 3, ), # -14
   (-13, TType.STRUCT, 'lateStructVal', [LateDefStruct, LateDefStruct.thrift_spec, False], None, 3, ), # -13
   (-12, TType.STRUCT, 'unionVal', [MyUnion, MyUnion.thrift_spec, True], None, 3, ), # -12
@@ -7585,7 +7546,7 @@ MyStruct.thrift_struct_annotations = {
 MyStruct.thrift_field_annotations = {
 }
 
-def MyStruct__init__(self, boolVal=None, byteVal=None, i16Val=None, i32Val=None, i64Val=None, floatVal=None, doubleVal=None, stringVal=None, binaryVal=None, enumVal=None, structVal=None, unionVal=None, lateStructVal=None, durationVal=None, timeVal=None, optBoolVal=None, optByteVal=None, optI16Val=None, optI32Val=None, optI64Val=None, optFloatVal=None, optDoubleVal=None, optStringVal=None, optBinaryVal=None, optEnumVal=None, optStructVal=None, optLateStructVal=None, optListVal=None, optSetVal=None, optMapVal=None, listMap=None, mapMap=None,):
+def MyStruct__init__(self, boolVal=None, byteVal=None, i16Val=None, i32Val=None, i64Val=None, floatVal=None, doubleVal=None, stringVal=None, binaryVal=None, enumVal=None, structVal=None, unionVal=None, lateStructVal=None, durationVal=None, optBoolVal=None, optByteVal=None, optI16Val=None, optI32Val=None, optI64Val=None, optFloatVal=None, optDoubleVal=None, optStringVal=None, optBinaryVal=None, optEnumVal=None, optStructVal=None, optLateStructVal=None, optListVal=None, optSetVal=None, optMapVal=None, listMap=None, mapMap=None,):
   self.boolVal = boolVal
   self.byteVal = byteVal
   self.i16Val = i16Val
@@ -7600,7 +7561,6 @@ def MyStruct__init__(self, boolVal=None, byteVal=None, i16Val=None, i32Val=None,
   self.unionVal = unionVal
   self.lateStructVal = lateStructVal
   self.durationVal = durationVal
-  self.timeVal = timeVal
   self.optBoolVal = optBoolVal
   self.optByteVal = optByteVal
   self.optI16Val = optI16Val
@@ -7636,7 +7596,6 @@ def MyStruct__setstate__(self, state):
   state.setdefault('unionVal', None)
   state.setdefault('lateStructVal', None)
   state.setdefault('durationVal', None)
-  state.setdefault('timeVal', None)
   state.setdefault('optBoolVal', None)
   state.setdefault('optByteVal', None)
   state.setdefault('optI16Val', None)
@@ -7958,34 +7917,34 @@ def MyStructField10Patch__setstate__(self, state):
 MyStructField10Patch.__getstate__ = lambda self: self.__dict__.copy()
 MyStructField10Patch.__setstate__ = MyStructField10Patch__setstate__
 
-all_structs.append(MyStructField25Patch)
-MyStructField25Patch.thrift_spec = (
+all_structs.append(MyStructField24Patch)
+MyStructField24Patch.thrift_spec = (
   None, # 0
   (1, TType.I32, 'assign', MyEnum, None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 2, ), # 2
 )
 
-MyStructField25Patch.thrift_struct_annotations = {
+MyStructField24Patch.thrift_struct_annotations = {
 }
-MyStructField25Patch.thrift_field_annotations = {
+MyStructField24Patch.thrift_field_annotations = {
 }
 
-def MyStructField25Patch__init__(self, assign=None, clear=None,):
+def MyStructField24Patch__init__(self, assign=None, clear=None,):
   self.assign = assign
   self.clear = clear
 
-MyStructField25Patch.__init__ = MyStructField25Patch__init__
+MyStructField24Patch.__init__ = MyStructField24Patch__init__
 
-def MyStructField25Patch__setstate__(self, state):
+def MyStructField24Patch__setstate__(self, state):
   state.setdefault('assign', None)
   state.setdefault('clear', None)
   self.__dict__ = state
 
-MyStructField25Patch.__getstate__ = lambda self: self.__dict__.copy()
-MyStructField25Patch.__setstate__ = MyStructField25Patch__setstate__
+MyStructField24Patch.__getstate__ = lambda self: self.__dict__.copy()
+MyStructField24Patch.__setstate__ = MyStructField24Patch__setstate__
 
-all_structs.append(MyStructField28Patch)
-MyStructField28Patch.thrift_spec = (
+all_structs.append(MyStructField27Patch)
+MyStructField27Patch.thrift_spec = (
   None, # 0
   (1, TType.LIST, 'assign', (TType.I16,None), None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 2, ), # 2
@@ -7998,12 +7957,12 @@ MyStructField28Patch.thrift_spec = (
   (9, TType.LIST, 'append', (TType.I16,None), None, 2, ), # 9
 )
 
-MyStructField28Patch.thrift_struct_annotations = {
+MyStructField27Patch.thrift_struct_annotations = {
 }
-MyStructField28Patch.thrift_field_annotations = {
+MyStructField27Patch.thrift_field_annotations = {
 }
 
-def MyStructField28Patch__init__(self, assign=None, clear=None, patch=None, remove=None, prepend=None, append=None,):
+def MyStructField27Patch__init__(self, assign=None, clear=None, patch=None, remove=None, prepend=None, append=None,):
   self.assign = assign
   self.clear = clear
   self.patch = patch
@@ -8011,9 +7970,9 @@ def MyStructField28Patch__init__(self, assign=None, clear=None, patch=None, remo
   self.prepend = prepend
   self.append = append
 
-MyStructField28Patch.__init__ = MyStructField28Patch__init__
+MyStructField27Patch.__init__ = MyStructField27Patch__init__
 
-def MyStructField28Patch__setstate__(self, state):
+def MyStructField27Patch__setstate__(self, state):
   state.setdefault('assign', None)
   state.setdefault('clear', None)
   state.setdefault('patch', None)
@@ -8022,11 +7981,11 @@ def MyStructField28Patch__setstate__(self, state):
   state.setdefault('append', None)
   self.__dict__ = state
 
-MyStructField28Patch.__getstate__ = lambda self: self.__dict__.copy()
-MyStructField28Patch.__setstate__ = MyStructField28Patch__setstate__
+MyStructField27Patch.__getstate__ = lambda self: self.__dict__.copy()
+MyStructField27Patch.__setstate__ = MyStructField27Patch__setstate__
 
-all_structs.append(MyStructField29Patch)
-MyStructField29Patch.thrift_spec = (
+all_structs.append(MyStructField28Patch)
+MyStructField28Patch.thrift_spec = (
   None, # 0
   (1, TType.SET, 'assign', (TType.STRING,True), None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 2, ), # 2
@@ -8038,31 +7997,31 @@ MyStructField29Patch.thrift_spec = (
   (8, TType.SET, 'add', (TType.STRING,True), None, 2, ), # 8
 )
 
-MyStructField29Patch.thrift_struct_annotations = {
+MyStructField28Patch.thrift_struct_annotations = {
 }
-MyStructField29Patch.thrift_field_annotations = {
+MyStructField28Patch.thrift_field_annotations = {
 }
 
-def MyStructField29Patch__init__(self, assign=None, clear=None, remove=None, add=None,):
+def MyStructField28Patch__init__(self, assign=None, clear=None, remove=None, add=None,):
   self.assign = assign
   self.clear = clear
   self.remove = remove
   self.add = add
 
-MyStructField29Patch.__init__ = MyStructField29Patch__init__
+MyStructField28Patch.__init__ = MyStructField28Patch__init__
 
-def MyStructField29Patch__setstate__(self, state):
+def MyStructField28Patch__setstate__(self, state):
   state.setdefault('assign', None)
   state.setdefault('clear', None)
   state.setdefault('remove', None)
   state.setdefault('add', None)
   self.__dict__ = state
 
-MyStructField29Patch.__getstate__ = lambda self: self.__dict__.copy()
-MyStructField29Patch.__setstate__ = MyStructField29Patch__setstate__
+MyStructField28Patch.__getstate__ = lambda self: self.__dict__.copy()
+MyStructField28Patch.__setstate__ = MyStructField28Patch__setstate__
 
-all_structs.append(MyStructField30Patch)
-MyStructField30Patch.thrift_spec = (
+all_structs.append(MyStructField29Patch)
+MyStructField29Patch.thrift_spec = (
   None, # 0
   (1, TType.MAP, 'assign', (TType.STRING,True,TType.STRING,True), None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 2, ), # 2
@@ -8075,12 +8034,12 @@ MyStructField30Patch.thrift_spec = (
   (9, TType.MAP, 'put', (TType.STRING,True,TType.STRING,True), None, 2, ), # 9
 )
 
-MyStructField30Patch.thrift_struct_annotations = {
+MyStructField29Patch.thrift_struct_annotations = {
 }
-MyStructField30Patch.thrift_field_annotations = {
+MyStructField29Patch.thrift_field_annotations = {
 }
 
-def MyStructField30Patch__init__(self, assign=None, clear=None, patchPrior=None, add=None, patch=None, remove=None, put=None,):
+def MyStructField29Patch__init__(self, assign=None, clear=None, patchPrior=None, add=None, patch=None, remove=None, put=None,):
   self.assign = assign
   self.clear = clear
   self.patchPrior = patchPrior
@@ -8089,9 +8048,9 @@ def MyStructField30Patch__init__(self, assign=None, clear=None, patchPrior=None,
   self.remove = remove
   self.put = put
 
-MyStructField30Patch.__init__ = MyStructField30Patch__init__
+MyStructField29Patch.__init__ = MyStructField29Patch__init__
 
-def MyStructField30Patch__setstate__(self, state):
+def MyStructField29Patch__setstate__(self, state):
   state.setdefault('assign', None)
   state.setdefault('clear', None)
   state.setdefault('patchPrior', None)
@@ -8101,15 +8060,15 @@ def MyStructField30Patch__setstate__(self, state):
   state.setdefault('put', None)
   self.__dict__ = state
 
-MyStructField30Patch.__getstate__ = lambda self: self.__dict__.copy()
-MyStructField30Patch.__setstate__ = MyStructField30Patch__setstate__
+MyStructField29Patch.__getstate__ = lambda self: self.__dict__.copy()
+MyStructField29Patch.__setstate__ = MyStructField29Patch__setstate__
 
-all_structs.append(MyStructField31Patch)
-MyStructField31Patch.thrift_spec = (
+all_structs.append(MyStructField30Patch)
+MyStructField30Patch.thrift_spec = (
   None, # 0
   (1, TType.LIST, 'assign', (TType.MAP,(TType.STRING,True,TType.I32,None)), None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 2, ), # 2
-  (3, TType.MAP, 'patch', (TType.I32,None,TType.STRUCT,[MyStructField31Patch1, MyStructField31Patch1.thrift_spec, False]), None, 2, ), # 3
+  (3, TType.MAP, 'patch', (TType.I32,None,TType.STRUCT,[MyStructField30Patch1, MyStructField30Patch1.thrift_spec, False]), None, 2, ), # 3
   None, # 4
   None, # 5
   None, # 6
@@ -8118,12 +8077,12 @@ MyStructField31Patch.thrift_spec = (
   (9, TType.LIST, 'append', (TType.MAP,(TType.STRING,True,TType.I32,None)), None, 2, ), # 9
 )
 
-MyStructField31Patch.thrift_struct_annotations = {
+MyStructField30Patch.thrift_struct_annotations = {
 }
-MyStructField31Patch.thrift_field_annotations = {
+MyStructField30Patch.thrift_field_annotations = {
 }
 
-def MyStructField31Patch__init__(self, assign=None, clear=None, patch=None, remove=None, prepend=None, append=None,):
+def MyStructField30Patch__init__(self, assign=None, clear=None, patch=None, remove=None, prepend=None, append=None,):
   self.assign = assign
   self.clear = clear
   self.patch = patch
@@ -8131,15 +8090,101 @@ def MyStructField31Patch__init__(self, assign=None, clear=None, patch=None, remo
   self.prepend = prepend
   self.append = append
 
-MyStructField31Patch.__init__ = MyStructField31Patch__init__
+MyStructField30Patch.__init__ = MyStructField30Patch__init__
 
-def MyStructField31Patch__setstate__(self, state):
+def MyStructField30Patch__setstate__(self, state):
   state.setdefault('assign', None)
   state.setdefault('clear', None)
   state.setdefault('patch', None)
   state.setdefault('remove', None)
   state.setdefault('prepend', None)
   state.setdefault('append', None)
+  self.__dict__ = state
+
+MyStructField30Patch.__getstate__ = lambda self: self.__dict__.copy()
+MyStructField30Patch.__setstate__ = MyStructField30Patch__setstate__
+
+all_structs.append(MyStructField30Patch1)
+MyStructField30Patch1.thrift_spec = (
+  None, # 0
+  (1, TType.MAP, 'assign', (TType.STRING,True,TType.I32,None), None, 1, ), # 1
+  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
+  (3, TType.MAP, 'patchPrior', (TType.STRING,True,TType.STRUCT,[thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False]), None, 2, ), # 3
+  None, # 4
+  (5, TType.MAP, 'add', (TType.STRING,True,TType.I32,None), None, 2, ), # 5
+  (6, TType.MAP, 'patch', (TType.STRING,True,TType.STRUCT,[thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False]), None, 2, ), # 6
+  (7, TType.SET, 'remove', (TType.STRING,True), None, 2, ), # 7
+  None, # 8
+  (9, TType.MAP, 'put', (TType.STRING,True,TType.I32,None), None, 2, ), # 9
+)
+
+MyStructField30Patch1.thrift_struct_annotations = {
+}
+MyStructField30Patch1.thrift_field_annotations = {
+}
+
+def MyStructField30Patch1__init__(self, assign=None, clear=None, patchPrior=None, add=None, patch=None, remove=None, put=None,):
+  self.assign = assign
+  self.clear = clear
+  self.patchPrior = patchPrior
+  self.add = add
+  self.patch = patch
+  self.remove = remove
+  self.put = put
+
+MyStructField30Patch1.__init__ = MyStructField30Patch1__init__
+
+def MyStructField30Patch1__setstate__(self, state):
+  state.setdefault('assign', None)
+  state.setdefault('clear', None)
+  state.setdefault('patchPrior', None)
+  state.setdefault('add', None)
+  state.setdefault('patch', None)
+  state.setdefault('remove', None)
+  state.setdefault('put', None)
+  self.__dict__ = state
+
+MyStructField30Patch1.__getstate__ = lambda self: self.__dict__.copy()
+MyStructField30Patch1.__setstate__ = MyStructField30Patch1__setstate__
+
+all_structs.append(MyStructField31Patch)
+MyStructField31Patch.thrift_spec = (
+  None, # 0
+  (1, TType.MAP, 'assign', (TType.STRING,True,TType.MAP,(TType.STRING,True,TType.I32,None)), None, 1, ), # 1
+  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
+  (3, TType.MAP, 'patchPrior', (TType.STRING,True,TType.STRUCT,[MyStructField31Patch1, MyStructField31Patch1.thrift_spec, False]), None, 2, ), # 3
+  None, # 4
+  (5, TType.MAP, 'add', (TType.STRING,True,TType.MAP,(TType.STRING,True,TType.I32,None)), None, 2, ), # 5
+  (6, TType.MAP, 'patch', (TType.STRING,True,TType.STRUCT,[MyStructField31Patch1, MyStructField31Patch1.thrift_spec, False]), None, 2, ), # 6
+  (7, TType.SET, 'remove', (TType.STRING,True), None, 2, ), # 7
+  None, # 8
+  (9, TType.MAP, 'put', (TType.STRING,True,TType.MAP,(TType.STRING,True,TType.I32,None)), None, 2, ), # 9
+)
+
+MyStructField31Patch.thrift_struct_annotations = {
+}
+MyStructField31Patch.thrift_field_annotations = {
+}
+
+def MyStructField31Patch__init__(self, assign=None, clear=None, patchPrior=None, add=None, patch=None, remove=None, put=None,):
+  self.assign = assign
+  self.clear = clear
+  self.patchPrior = patchPrior
+  self.add = add
+  self.patch = patch
+  self.remove = remove
+  self.put = put
+
+MyStructField31Patch.__init__ = MyStructField31Patch__init__
+
+def MyStructField31Patch__setstate__(self, state):
+  state.setdefault('assign', None)
+  state.setdefault('clear', None)
+  state.setdefault('patchPrior', None)
+  state.setdefault('add', None)
+  state.setdefault('patch', None)
+  state.setdefault('remove', None)
+  state.setdefault('put', None)
   self.__dict__ = state
 
 MyStructField31Patch.__getstate__ = lambda self: self.__dict__.copy()
@@ -8188,112 +8233,25 @@ def MyStructField31Patch1__setstate__(self, state):
 MyStructField31Patch1.__getstate__ = lambda self: self.__dict__.copy()
 MyStructField31Patch1.__setstate__ = MyStructField31Patch1__setstate__
 
-all_structs.append(MyStructField32Patch)
-MyStructField32Patch.thrift_spec = (
-  None, # 0
-  (1, TType.MAP, 'assign', (TType.STRING,True,TType.MAP,(TType.STRING,True,TType.I32,None)), None, 1, ), # 1
-  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
-  (3, TType.MAP, 'patchPrior', (TType.STRING,True,TType.STRUCT,[MyStructField32Patch1, MyStructField32Patch1.thrift_spec, False]), None, 2, ), # 3
-  None, # 4
-  (5, TType.MAP, 'add', (TType.STRING,True,TType.MAP,(TType.STRING,True,TType.I32,None)), None, 2, ), # 5
-  (6, TType.MAP, 'patch', (TType.STRING,True,TType.STRUCT,[MyStructField32Patch1, MyStructField32Patch1.thrift_spec, False]), None, 2, ), # 6
-  (7, TType.SET, 'remove', (TType.STRING,True), None, 2, ), # 7
-  None, # 8
-  (9, TType.MAP, 'put', (TType.STRING,True,TType.MAP,(TType.STRING,True,TType.I32,None)), None, 2, ), # 9
-)
-
-MyStructField32Patch.thrift_struct_annotations = {
-}
-MyStructField32Patch.thrift_field_annotations = {
-}
-
-def MyStructField32Patch__init__(self, assign=None, clear=None, patchPrior=None, add=None, patch=None, remove=None, put=None,):
-  self.assign = assign
-  self.clear = clear
-  self.patchPrior = patchPrior
-  self.add = add
-  self.patch = patch
-  self.remove = remove
-  self.put = put
-
-MyStructField32Patch.__init__ = MyStructField32Patch__init__
-
-def MyStructField32Patch__setstate__(self, state):
-  state.setdefault('assign', None)
-  state.setdefault('clear', None)
-  state.setdefault('patchPrior', None)
-  state.setdefault('add', None)
-  state.setdefault('patch', None)
-  state.setdefault('remove', None)
-  state.setdefault('put', None)
-  self.__dict__ = state
-
-MyStructField32Patch.__getstate__ = lambda self: self.__dict__.copy()
-MyStructField32Patch.__setstate__ = MyStructField32Patch__setstate__
-
-all_structs.append(MyStructField32Patch1)
-MyStructField32Patch1.thrift_spec = (
-  None, # 0
-  (1, TType.MAP, 'assign', (TType.STRING,True,TType.I32,None), None, 1, ), # 1
-  (2, TType.BOOL, 'clear', None, None, 2, ), # 2
-  (3, TType.MAP, 'patchPrior', (TType.STRING,True,TType.STRUCT,[thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False]), None, 2, ), # 3
-  None, # 4
-  (5, TType.MAP, 'add', (TType.STRING,True,TType.I32,None), None, 2, ), # 5
-  (6, TType.MAP, 'patch', (TType.STRING,True,TType.STRUCT,[thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False]), None, 2, ), # 6
-  (7, TType.SET, 'remove', (TType.STRING,True), None, 2, ), # 7
-  None, # 8
-  (9, TType.MAP, 'put', (TType.STRING,True,TType.I32,None), None, 2, ), # 9
-)
-
-MyStructField32Patch1.thrift_struct_annotations = {
-}
-MyStructField32Patch1.thrift_field_annotations = {
-}
-
-def MyStructField32Patch1__init__(self, assign=None, clear=None, patchPrior=None, add=None, patch=None, remove=None, put=None,):
-  self.assign = assign
-  self.clear = clear
-  self.patchPrior = patchPrior
-  self.add = add
-  self.patch = patch
-  self.remove = remove
-  self.put = put
-
-MyStructField32Patch1.__init__ = MyStructField32Patch1__init__
-
-def MyStructField32Patch1__setstate__(self, state):
-  state.setdefault('assign', None)
-  state.setdefault('clear', None)
-  state.setdefault('patchPrior', None)
-  state.setdefault('add', None)
-  state.setdefault('patch', None)
-  state.setdefault('remove', None)
-  state.setdefault('put', None)
-  self.__dict__ = state
-
-MyStructField32Patch1.__getstate__ = lambda self: self.__dict__.copy()
-MyStructField32Patch1.__setstate__ = MyStructField32Patch1__setstate__
-
 all_structs.append(MyStructFieldPatch)
 MyStructFieldPatch.thrift_spec = (
-  (-32, TType.STRUCT, 'mapMap', [MyStructField32Patch, MyStructField32Patch.thrift_spec, False], None, 2, ), # -32
-  (-31, TType.STRUCT, 'listMap', [MyStructField31Patch, MyStructField31Patch.thrift_spec, False], None, 2, ), # -31
-  (-30, TType.STRUCT, 'optMapVal', [MyStructField30Patch, MyStructField30Patch.thrift_spec, False], None, 2, ), # -30
-  (-29, TType.STRUCT, 'optSetVal', [MyStructField29Patch, MyStructField29Patch.thrift_spec, False], None, 2, ), # -29
-  (-28, TType.STRUCT, 'optListVal', [MyStructField28Patch, MyStructField28Patch.thrift_spec, False], None, 2, ), # -28
-  (-27, TType.STRUCT, 'optLateStructVal', [LateDefStructPatch, LateDefStructPatch.thrift_spec, False], None, 2, ), # -27
-  (-26, TType.STRUCT, 'optStructVal', [MyDataPatch, MyDataPatch.thrift_spec, False], None, 2, ), # -26
-  (-25, TType.STRUCT, 'optEnumVal', [MyStructField25Patch, MyStructField25Patch.thrift_spec, False], None, 2, ), # -25
-  (-24, TType.STRUCT, 'optBinaryVal', [thrift.lib.thrift.patch.ttypes.BinaryPatch, thrift.lib.thrift.patch.ttypes.BinaryPatch.thrift_spec, False], None, 2, ), # -24
-  (-23, TType.STRUCT, 'optStringVal', [thrift.lib.thrift.patch.ttypes.StringPatch, thrift.lib.thrift.patch.ttypes.StringPatch.thrift_spec, False], None, 2, ), # -23
-  (-22, TType.STRUCT, 'optDoubleVal', [thrift.lib.thrift.patch.ttypes.DoublePatch, thrift.lib.thrift.patch.ttypes.DoublePatch.thrift_spec, False], None, 2, ), # -22
-  (-21, TType.STRUCT, 'optFloatVal', [thrift.lib.thrift.patch.ttypes.FloatPatch, thrift.lib.thrift.patch.ttypes.FloatPatch.thrift_spec, False], None, 2, ), # -21
-  (-20, TType.STRUCT, 'optI64Val', [thrift.lib.thrift.patch.ttypes.I64Patch, thrift.lib.thrift.patch.ttypes.I64Patch.thrift_spec, False], None, 2, ), # -20
-  (-19, TType.STRUCT, 'optI32Val', [thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False], None, 2, ), # -19
-  (-18, TType.STRUCT, 'optI16Val', [thrift.lib.thrift.patch.ttypes.I16Patch, thrift.lib.thrift.patch.ttypes.I16Patch.thrift_spec, False], None, 2, ), # -18
-  (-17, TType.STRUCT, 'optByteVal', [thrift.lib.thrift.patch.ttypes.BytePatch, thrift.lib.thrift.patch.ttypes.BytePatch.thrift_spec, False], None, 2, ), # -17
-  (-16, TType.STRUCT, 'optBoolVal', [thrift.lib.thrift.patch.ttypes.BoolPatch, thrift.lib.thrift.patch.ttypes.BoolPatch.thrift_spec, False], None, 2, ), # -16
-  (-15, TType.STRUCT, 'timeVal', [thrift.lib.thrift.patch.ttypes.TimePatch, thrift.lib.thrift.patch.ttypes.TimePatch.thrift_spec, False], None, 2, ), # -15
+  (-31, TType.STRUCT, 'mapMap', [MyStructField31Patch, MyStructField31Patch.thrift_spec, False], None, 2, ), # -31
+  (-30, TType.STRUCT, 'listMap', [MyStructField30Patch, MyStructField30Patch.thrift_spec, False], None, 2, ), # -30
+  (-29, TType.STRUCT, 'optMapVal', [MyStructField29Patch, MyStructField29Patch.thrift_spec, False], None, 2, ), # -29
+  (-28, TType.STRUCT, 'optSetVal', [MyStructField28Patch, MyStructField28Patch.thrift_spec, False], None, 2, ), # -28
+  (-27, TType.STRUCT, 'optListVal', [MyStructField27Patch, MyStructField27Patch.thrift_spec, False], None, 2, ), # -27
+  (-26, TType.STRUCT, 'optLateStructVal', [LateDefStructPatch, LateDefStructPatch.thrift_spec, False], None, 2, ), # -26
+  (-25, TType.STRUCT, 'optStructVal', [MyDataPatch, MyDataPatch.thrift_spec, False], None, 2, ), # -25
+  (-24, TType.STRUCT, 'optEnumVal', [MyStructField24Patch, MyStructField24Patch.thrift_spec, False], None, 2, ), # -24
+  (-23, TType.STRUCT, 'optBinaryVal', [thrift.lib.thrift.patch.ttypes.BinaryPatch, thrift.lib.thrift.patch.ttypes.BinaryPatch.thrift_spec, False], None, 2, ), # -23
+  (-22, TType.STRUCT, 'optStringVal', [thrift.lib.thrift.patch.ttypes.StringPatch, thrift.lib.thrift.patch.ttypes.StringPatch.thrift_spec, False], None, 2, ), # -22
+  (-21, TType.STRUCT, 'optDoubleVal', [thrift.lib.thrift.patch.ttypes.DoublePatch, thrift.lib.thrift.patch.ttypes.DoublePatch.thrift_spec, False], None, 2, ), # -21
+  (-20, TType.STRUCT, 'optFloatVal', [thrift.lib.thrift.patch.ttypes.FloatPatch, thrift.lib.thrift.patch.ttypes.FloatPatch.thrift_spec, False], None, 2, ), # -20
+  (-19, TType.STRUCT, 'optI64Val', [thrift.lib.thrift.patch.ttypes.I64Patch, thrift.lib.thrift.patch.ttypes.I64Patch.thrift_spec, False], None, 2, ), # -19
+  (-18, TType.STRUCT, 'optI32Val', [thrift.lib.thrift.patch.ttypes.I32Patch, thrift.lib.thrift.patch.ttypes.I32Patch.thrift_spec, False], None, 2, ), # -18
+  (-17, TType.STRUCT, 'optI16Val', [thrift.lib.thrift.patch.ttypes.I16Patch, thrift.lib.thrift.patch.ttypes.I16Patch.thrift_spec, False], None, 2, ), # -17
+  (-16, TType.STRUCT, 'optByteVal', [thrift.lib.thrift.patch.ttypes.BytePatch, thrift.lib.thrift.patch.ttypes.BytePatch.thrift_spec, False], None, 2, ), # -16
+  (-15, TType.STRUCT, 'optBoolVal', [thrift.lib.thrift.patch.ttypes.BoolPatch, thrift.lib.thrift.patch.ttypes.BoolPatch.thrift_spec, False], None, 2, ), # -15
   (-14, TType.STRUCT, 'durationVal', [thrift.lib.thrift.patch.ttypes.DurationPatch, thrift.lib.thrift.patch.ttypes.DurationPatch.thrift_spec, False], None, 2, ), # -14
   (-13, TType.STRUCT, 'lateStructVal', [LateDefStructPatch, LateDefStructPatch.thrift_spec, False], None, 2, ), # -13
   (-12, TType.STRUCT, 'unionVal', [MyUnionPatch, MyUnionPatch.thrift_spec, False], None, 2, ), # -12
@@ -8315,7 +8273,7 @@ MyStructFieldPatch.thrift_struct_annotations = {
 MyStructFieldPatch.thrift_field_annotations = {
 }
 
-def MyStructFieldPatch__init__(self, mapMap=None, listMap=None, optMapVal=None, optSetVal=None, optListVal=None, optLateStructVal=None, optStructVal=None, optEnumVal=None, optBinaryVal=None, optStringVal=None, optDoubleVal=None, optFloatVal=None, optI64Val=None, optI32Val=None, optI16Val=None, optByteVal=None, optBoolVal=None, timeVal=None, durationVal=None, lateStructVal=None, unionVal=None, structVal=None, enumVal=None, binaryVal=None, stringVal=None, doubleVal=None, floatVal=None, i64Val=None, i32Val=None, i16Val=None, byteVal=None, boolVal=None,):
+def MyStructFieldPatch__init__(self, mapMap=None, listMap=None, optMapVal=None, optSetVal=None, optListVal=None, optLateStructVal=None, optStructVal=None, optEnumVal=None, optBinaryVal=None, optStringVal=None, optDoubleVal=None, optFloatVal=None, optI64Val=None, optI32Val=None, optI16Val=None, optByteVal=None, optBoolVal=None, durationVal=None, lateStructVal=None, unionVal=None, structVal=None, enumVal=None, binaryVal=None, stringVal=None, doubleVal=None, floatVal=None, i64Val=None, i32Val=None, i16Val=None, byteVal=None, boolVal=None,):
   self.mapMap = mapMap
   self.listMap = listMap
   self.optMapVal = optMapVal
@@ -8333,7 +8291,6 @@ def MyStructFieldPatch__init__(self, mapMap=None, listMap=None, optMapVal=None, 
   self.optI16Val = optI16Val
   self.optByteVal = optByteVal
   self.optBoolVal = optBoolVal
-  self.timeVal = timeVal
   self.durationVal = durationVal
   self.lateStructVal = lateStructVal
   self.unionVal = unionVal
@@ -8369,7 +8326,6 @@ def MyStructFieldPatch__setstate__(self, state):
   state.setdefault('optI16Val', None)
   state.setdefault('optByteVal', None)
   state.setdefault('optBoolVal', None)
-  state.setdefault('timeVal', None)
   state.setdefault('durationVal', None)
   state.setdefault('lateStructVal', None)
   state.setdefault('unionVal', None)

@@ -64,9 +64,6 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/standard_types.h" namespace "::apac
     cdef cppclass cVoid "::apache::thrift::type::Void":
         pass
 
-    cdef cppclass cJsonType "::apache::thrift::type::JsonType":
-        pass
-
     cdef cppclass cStandardProtocol "::apache::thrift::type::StandardProtocol":
         pass
 
@@ -75,10 +72,6 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/standard_types.h" namespace "::apac
 
 
 cdef class Void(thrift.py3.types.CompiledEnum):
-    pass
-
-
-cdef class JsonType(thrift.py3.types.CompiledEnum):
     pass
 
 
@@ -106,32 +99,6 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/standard_types_custom_protocol.h" n
         bint operator>=(cDurationStruct&)
         __field_ref[cint64_t] seconds_ref "seconds_ref" ()
         __field_ref[cint32_t] nanos_ref "nanos_ref" ()
-
-
-    cdef cppclass cTimeStruct "::apache::thrift::type::TimeStruct":
-        cTimeStruct() except +
-        cTimeStruct(const cTimeStruct&) except +
-        bint operator==(cTimeStruct&)
-        bint operator!=(cTimeStruct&)
-        bint operator<(cTimeStruct&)
-        bint operator>(cTimeStruct&)
-        bint operator<=(cTimeStruct&)
-        bint operator>=(cTimeStruct&)
-        __field_ref[cint64_t] seconds_ref "seconds_ref" ()
-        __field_ref[cint32_t] nanos_ref "nanos_ref" ()
-
-
-    cdef cppclass cFractionStruct "::apache::thrift::type::FractionStruct":
-        cFractionStruct() except +
-        cFractionStruct(const cFractionStruct&) except +
-        bint operator==(cFractionStruct&)
-        bint operator!=(cFractionStruct&)
-        bint operator<(cFractionStruct&)
-        bint operator>(cFractionStruct&)
-        bint operator<=(cFractionStruct&)
-        bint operator>=(cFractionStruct&)
-        __field_ref[cint64_t] numerator_ref "numerator_ref" ()
-        __field_ref[cint64_t] denominator_ref "denominator_ref" ()
 
 
     cdef cppclass cUriStruct "::apache::thrift::type::UriStruct":
@@ -245,28 +212,6 @@ cdef class DurationStruct(thrift.py3.types.Struct):
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cDurationStruct])
-
-
-
-cdef class TimeStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cTimeStruct] _cpp_obj
-    cdef _fbthrift_types_fields.__TimeStruct_FieldsSetter _fields_setter
-    cdef inline object seconds_impl(self)
-    cdef inline object nanos_impl(self)
-
-    @staticmethod
-    cdef _fbthrift_create(shared_ptr[cTimeStruct])
-
-
-
-cdef class FractionStruct(thrift.py3.types.Struct):
-    cdef shared_ptr[cFractionStruct] _cpp_obj
-    cdef _fbthrift_types_fields.__FractionStruct_FieldsSetter _fields_setter
-    cdef inline object numerator_impl(self)
-    cdef inline object denominator_impl(self)
-
-    @staticmethod
-    cdef _fbthrift_create(shared_ptr[cFractionStruct])
 
 
 

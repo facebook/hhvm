@@ -48,7 +48,7 @@ enum Void {
   adapterClassName = "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
   typeClassName = "io.netty.buffer.ByteBuf",
 }
-typedef binary (cpp2.type = "folly::fbstring") ByteString
+typedef binary (cpp.type = "folly::fbstring") ByteString
 
 /**
  * Typedef for binary data
@@ -81,64 +81,6 @@ struct DurationStruct {
 } (thrift.uri = "facebook.com/thrift/type/Duration")
 
 /**
- * An instant in time encoded as a count of seconds and nanoseconds (nanos)
- * since midnight on January 1, 1970 UTC (i.e. Unix epoch).
- *
- * Considered 'normal', when `nanos` is in the range 0 to 999'999'999 inclusive.
- */
-// TODO(afuller): Consider making this a 'strong' typedef of `Duration`, which
-// would ensure both a separate URI and native type in all languages.
-struct TimeStruct {
-  /** The count of seconds. */
-  1: i64 seconds;
-  /** The count of nanoseconds. */
-  2: i32 nanos;
-} (thrift.uri = "facebook.com/thrift/type/Time")
-
-/**
- * A integer fraction of the form {numerator} / {denominator}
- *
- * Useful for representing ratios, rates, and metric accumulators.
- *
- * Considered 'normal' when the denominator is positive.
- * Considered 'simple' when `normal` and the greatest common divisor of the
- * and `numerator` and `denominator`, is 1.
- */
-struct FractionStruct {
-  /** The numerator/dividend/antecedent/upper integer. */
-  1: i64 numerator;
-  /** The denominator/divisor/consequent/lower integer. */
-  2: i64 denominator;
-} (thrift.uri = "facebook.com/thrift/type/Fraction")
-
-/**
- * A 'normal' Fraction.
- *
- * This representation is always safe to 'normalize'.
- */
-@thrift.Experimental // TODO(afuller): Adapt!
-typedef FractionStruct Fraction (thrift.uri = "")
-
-/**
- * A 'simple' Fraction.
- *
- * This representation is always safe to 'simplify'.
- */
-@thrift.Experimental // TODO(afuller): Adapt!
-typedef FractionStruct SimpleFraction
-
-/**
- * The binary form of a universally unique identifier (UUID).
- *
- * Considered 'valid' if contains exactly 0 or 16 bytes.
- * Considered 'normal' if not all zeros.
- *
- * See rfc4122
- */
-@thrift.Experimental // TODO(afuller): Adapt.
-typedef binary Uuid
-
-/**
  * The string form of a universally unique identifier (UUID).
  *
  * For example: "6ba7b810-9dad-11d1-80b4-00c04fd430c8". Use `standard.Uuid` for
@@ -157,49 +99,6 @@ typedef string UuidString
  */
 @thrift.Experimental // TODO(afuller): Adapt.
 typedef string Path
-
-/**
- * Parsed path segments.
- *
- * Considered 'simple' if no segment contains a slash('/').
- */
-@thrift.Experimental // TODO(afuller): Adapt.
-typedef list<string> PathSegments
-
-/**
- * A dot('.')-delimitated domain name.
- *
- * See rfc1034.
- */
-@thrift.Experimental // TODO(afuller): Adapt.
-typedef string Domain
-
-/**
- * Parsed domain labels.
- *
- * Considered 'simple' if no label contains a dot('.').
- */
-@thrift.Experimental // TODO(afuller): Adapt.
-typedef list<string> DomainLabels
-
-/**
- * A URI Query string.
- *
- * Of the form {name}={value}&...
- *
- * See rfc3986.
- */
-@thrift.Experimental // TODO(afuller): Adapt.
-typedef string QueryString
-
-/**
- * A decoded QueryString.
- *
- * Considered 'simple' if no key or value contains a equal('=') or
- * ampersand('&').
- */
-@thrift.Experimental // TODO(afuller): Adapt.
-typedef map<string, string> QueryArgs
 
 /**
  * A (scheme-less) URI.
@@ -228,31 +127,17 @@ struct UriStruct {
   1: string scheme;
 
   /** The domain, for example "meta.com" -> ["meta", "com"] */
-  2: DomainLabels domain;
+  2: list<string> domain;
 
   /** The path, for example "path/to/file" -> ["path", "to", "file"] */
-  4: PathSegments path;
+  4: list<string> path;
 
   /** The query args. */
-  5: QueryArgs query;
+  5: map<string, string> query;
 
   /** The fragment, if present. */
   6: string fragment;
 } (thrift.uri = "facebook.com/thrift/type/Uri")
-
-/** An encoded JSON definition, as defined by https://www.json.org. */
-@thrift.Experimental // TODO(afuller): Adapt!
-typedef string JsonString
-
-/** The types availible in JSON, as defined by https://www.json.org. */
-enum JsonType {
-  Null = 0,
-  Boolean = 1,
-  Number = 2,
-  String = 4,
-  Array = 5,
-  Object = 6,
-}
 
 /** The uri of an IDL defined type. */
 union TypeUri {

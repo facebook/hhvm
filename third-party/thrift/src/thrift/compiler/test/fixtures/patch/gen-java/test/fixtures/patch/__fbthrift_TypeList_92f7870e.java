@@ -11,7 +11,7 @@ import com.facebook.thrift.type.TypeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class __fbthrift_TypeList_97e9d5d1 implements TypeList {
+public class __fbthrift_TypeList_92f7870e implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
@@ -31,14 +31,14 @@ public class __fbthrift_TypeList_97e9d5d1 implements TypeList {
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyUnionFieldPatch", "test.fixtures.patch.MyUnionFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyUnionPatch", "test.fixtures.patch.MyUnionPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructField10Patch", "test.fixtures.patch.MyStructField10Patch"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructField25Patch", "test.fixtures.patch.MyStructField25Patch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructField24Patch", "test.fixtures.patch.MyStructField24Patch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructField27Patch", "test.fixtures.patch.MyStructField27Patch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructField28Patch", "test.fixtures.patch.MyStructField28Patch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructField29Patch", "test.fixtures.patch.MyStructField29Patch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructField30Patch", "test.fixtures.patch.MyStructField30Patch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructField30Patch1", "test.fixtures.patch.MyStructField30Patch1"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructField31Patch", "test.fixtures.patch.MyStructField31Patch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructField31Patch1", "test.fixtures.patch.MyStructField31Patch1"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructField32Patch", "test.fixtures.patch.MyStructField32Patch"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructField32Patch1", "test.fixtures.patch.MyStructField32Patch1"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldPatch", "test.fixtures.patch.MyStructFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructPatch", "test.fixtures.patch.MyStructPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/LateDefStructFieldPatch", "test.fixtures.patch.LateDefStructFieldPatch"));

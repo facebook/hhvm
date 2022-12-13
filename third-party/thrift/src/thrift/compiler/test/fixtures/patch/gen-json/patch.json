@@ -17,7 +17,7 @@
   },
   "enumerations" : {
     "PatchOp" : {
-      "lineno" : 307,
+      "lineno" : 284,
       "constants" : {
         "Assign" : 1,
         "Clear" : 2,
@@ -32,11 +32,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 307,
+          "line" : 284,
           "column" : 1
         },
         "end" : {
-          "line" : 378,
+          "line" : 355,
           "column" : 2
         }
       }
@@ -726,68 +726,6 @@
         "end" : {
           "line" : 275,
           "column" : 58
-        }
-      }
-    },
-    "TimePatch" : {
-      "lineno" : 278,
-      "is_exception" : false,
-      "is_union" : false,
-      "fields" : {
-        "assign" : {
-          "type_enum" : "STRUCT",
-          "spec_args" : "standard.TimeStruct",
-          "required" : false,
-          "source_range" : {
-            "begin" : {
-              "line" : 290,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 290,
-              "column" : 42
-            }
-          }
-        },
-        "clear" : {
-          "type_enum" : "BOOL",
-          "spec_args" : null,
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 293,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 293,
-              "column" : 17
-            }
-          }
-        },
-        "add" : {
-          "type_enum" : "STRUCT",
-          "spec_args" : "standard.DurationStruct",
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 296,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 297,
-              "column" : 34
-            }
-          }
-        }
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 278,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 298,
-          "column" : 54
         }
       }
     }

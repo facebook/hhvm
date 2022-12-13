@@ -94,3 +94,32 @@ pub(crate) fn convert<'a>(ty: &ir::TypeInfo, strings: &StringCache<'a>) -> Maybe
         Maybe::Just(convert_type(ty, strings))
     }
 }
+
+pub(crate) fn convert_typedef<'a>(td: ir::Typedef, strings: &StringCache<'a>) -> hhbc::Typedef<'a> {
+    let ir::Typedef {
+        name,
+        attributes,
+        type_info,
+        type_structure,
+        loc,
+        attrs,
+    } = td;
+
+    let name = strings.lookup_class_name(name);
+    let span = hhbc::Span {
+        line_begin: loc.line_begin,
+        line_end: loc.line_end,
+    };
+    let attributes = crate::convert::convert_attributes(attributes, strings);
+    let type_info = convert_type(&type_info, strings);
+    let type_structure = crate::convert::convert_typed_value(&type_structure, strings);
+
+    hhbc::Typedef {
+        name,
+        attributes,
+        type_info,
+        type_structure,
+        span,
+        attrs,
+    }
+}

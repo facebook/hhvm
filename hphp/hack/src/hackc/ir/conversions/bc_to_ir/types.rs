@@ -8,8 +8,12 @@ use ffi::Str;
 use ir::BaseType;
 use ir::ClassId;
 use ir::StringInterner;
+use itertools::Itertools;
 use maplit::hashmap;
 use once_cell::sync::OnceCell;
+
+use crate::convert;
+use crate::types;
 
 pub(crate) fn convert_type<'a>(ty: &hhbc::TypeInfo<'a>, strings: &StringInterner) -> ir::TypeInfo {
     let user_type = ty.user_type.into_option();
@@ -88,4 +92,37 @@ fn cvt_constraint_type<'a>(name: Str<'a>, strings: &StringInterner) -> BaseType 
         let name = ClassId::new(strings.intern_bytes(name.as_ref()));
         BaseType::Class(name)
     })
+}
+
+pub(crate) fn convert_typedef<'a>(
+    td: &hhbc::Typedef<'a>,
+    filename: ir::Filename,
+    strings: &StringInterner,
+) -> ir::Typedef {
+    let hhbc::Typedef {
+        name,
+        attributes,
+        type_info,
+        type_structure,
+        span,
+        attrs,
+    } = td;
+
+    let loc = ir::SrcLoc::from_span(filename, span);
+    let name = ClassId::from_hhbc(*name, strings);
+    let attributes = attributes
+        .iter()
+        .map(|a| convert::convert_attribute(a, strings))
+        .collect_vec();
+    let type_info = types::convert_type(type_info, strings);
+    let type_structure = convert::convert_typed_value(type_structure, strings);
+
+    ir::Typedef {
+        name,
+        attributes,
+        type_info,
+        type_structure,
+        loc,
+        attrs: *attrs,
+    }
 }

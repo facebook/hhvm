@@ -17,12 +17,13 @@ use crate::TraitReqKind;
 use crate::TypeConstant;
 use crate::TypeInfo;
 use crate::TypedValue;
+use crate::Visibility;
 
 /// This represents a Hack class or enum in IR.
 #[derive(Debug)]
 pub struct Class<'a> {
     /// Class attributes.
-    pub attributes: Vec<Attribute<'a>>,
+    pub attributes: Vec<Attribute>,
 
     /// Base class.
     pub base: Option<ClassId>,
@@ -65,14 +66,14 @@ pub struct Class<'a> {
 }
 
 #[derive(Clone, Debug)]
-pub struct Property<'arena> {
+pub struct Property<'a> {
     pub name: PropId,
     pub flags: Attr,
-    pub attributes: Vec<Attribute<'arena>>,
-    pub visibility: hhbc::Visibility,
+    pub attributes: Vec<Attribute>,
+    pub visibility: Visibility,
     pub initial_value: Option<TypedValue>,
     pub type_info: TypeInfo,
-    pub doc_comment: ffi::Maybe<Str<'arena>>,
+    pub doc_comment: ffi::Maybe<Str<'a>>,
 }
 
 #[derive(Debug)]

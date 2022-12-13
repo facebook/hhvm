@@ -73,14 +73,7 @@ pub(crate) fn convert_method<'a>(
         .attributes
         .as_ref()
         .iter()
-        .map(|attr| ir::Attribute {
-            name: attr.name,
-            arguments: attr
-                .arguments
-                .iter()
-                .map(|tv| convert::convert_typed_value(tv, &unit.strings))
-                .collect(),
-        })
+        .map(|attr| crate::convert::convert_attribute(attr, &unit.strings))
         .collect();
 
     let method = ir::Method {

@@ -1734,7 +1734,7 @@ fn print_property(w: &mut dyn Write, property: &Property<'_>, strings: &StringIn
             write!(
                 w,
                 "{}({})",
-                FmtIdentifier(attr.name.as_ref()),
+                FmtIdentifierId(attr.name.id, strings),
                 FmtSep::comma(attr.arguments.iter(), |w, arg| {
                     FmtTypedValue(arg, strings).fmt(w)
                 })
@@ -1953,7 +1953,7 @@ pub fn print_unit(w: &mut dyn Write, unit: &Unit<'_>, verbose: bool) -> Result {
         writeln!(
             w,
             ".typedef {} = (TBD) {:?}",
-            FmtIdentifier(typedef.name.as_bytes()),
+            FmtIdentifierId(typedef.name.id, &unit.strings),
             typedef
         )?;
     }

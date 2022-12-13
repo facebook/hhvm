@@ -67,7 +67,11 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
 
     let symbol_refs = convert_symbol_refs(&unit.symbol_refs);
 
-    let typedefs: Vec<_> = unit.typedefs.iter().cloned().collect();
+    let typedefs: Vec<_> = unit
+        .typedefs
+        .iter()
+        .map(|td| crate::types::convert_typedef(td, filename, &strings))
+        .collect();
 
     let mut ir_unit = ir::Unit {
         classes: Default::default(),
@@ -116,14 +120,14 @@ pub(crate) struct UnitState<'a> {
 pub(crate) fn convert_attribute<'a>(
     attr: &hhbc::Attribute<'a>,
     strings: &StringInterner,
-) -> ir::Attribute<'a> {
+) -> ir::Attribute {
     let arguments = attr
         .arguments
         .iter()
         .map(|tv| convert_typed_value(tv, strings))
         .collect();
     ir::Attribute {
-        name: attr.name,
+        name: ir::ClassId::from_hhbc(hhbc::ClassName::new(attr.name), strings),
         arguments,
     }
 }
@@ -156,7 +160,7 @@ pub(crate) fn convert_typed_value<'a>(
         hhbc::TypedValue::Float(v) => ir::TypedValue::Float(v),
         hhbc::TypedValue::String(v) => ir::TypedValue::String(strings.intern_bytes(v.as_ref())),
         hhbc::TypedValue::LazyClass(v) => {
-            ir::TypedValue::LazyClass(strings.intern_bytes(v.as_ref()))
+            ir::TypedValue::LazyClass(ir::ClassId::from_hhbc(hhbc::ClassName::new(v), strings))
         }
         hhbc::TypedValue::Null => ir::TypedValue::Null,
         hhbc::TypedValue::Vec(vs) => ir::TypedValue::Vec(
@@ -185,7 +189,9 @@ pub(crate) fn convert_array_key<'a>(
 ) -> ir::ArrayKey {
     match *tv {
         hhbc::TypedValue::Int(v) => ir::ArrayKey::Int(v),
-        hhbc::TypedValue::LazyClass(v) => ir::ArrayKey::LazyClass(strings.intern_bytes(v.as_ref())),
+        hhbc::TypedValue::LazyClass(v) => {
+            ir::ArrayKey::LazyClass(ir::ClassId::from_hhbc(hhbc::ClassName::new(v), strings))
+        }
         hhbc::TypedValue::String(v) => ir::ArrayKey::String(strings.intern_bytes(v.as_ref())),
         _ => panic!("Unable to convert {tv:?} to ArrayKey"),
     }

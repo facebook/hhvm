@@ -6,6 +6,7 @@
 use hack::Builtin;
 use hack::Hhbc;
 use ir::ArrayKey;
+use ir::ClassId;
 use ir::StringInterner;
 use ir::TypedValue;
 use itertools::Itertools;
@@ -25,7 +26,7 @@ pub(crate) fn typed_value_expr(tv: &TypedValue, strings: &StringInterner) -> Exp
         TypedValue::Float(f) => {
             hack::expr_builtin(Builtin::Float, [Expr::Const(Const::Float(f.to_f64()))])
         }
-        TypedValue::String(s) | TypedValue::LazyClass(s) => {
+        TypedValue::String(s) | TypedValue::LazyClass(ClassId { id: s }) => {
             let s = util::escaped_string(&strings.lookup_bytes(s));
             hack::expr_builtin(Builtin::String, [Expr::Const(Const::String(s))])
         }
@@ -61,7 +62,7 @@ pub(crate) fn typed_value_expr(tv: &TypedValue, strings: &StringInterner) -> Exp
 pub(crate) fn array_key_expr(ak: &ArrayKey, strings: &StringInterner) -> Expr {
     match *ak {
         ArrayKey::Int(n) => hack::expr_builtin(Builtin::Int, [Expr::Const(Const::Int(n))]),
-        ArrayKey::String(s) | ArrayKey::LazyClass(s) => {
+        ArrayKey::String(s) | ArrayKey::LazyClass(ClassId { id: s }) => {
             let s = util::escaped_string(&strings.lookup_bytes(s));
             hack::expr_builtin(Builtin::String, [Expr::Const(Const::String(s))])
         }

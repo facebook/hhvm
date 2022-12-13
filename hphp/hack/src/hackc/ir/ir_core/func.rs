@@ -37,6 +37,10 @@ use crate::Visibility;
 #[derive(Copy, Clone, Debug, Default, Hash, Eq, PartialEq)]
 pub struct Filename(pub UnitBytesId);
 
+impl Filename {
+    pub const NONE: Filename = Filename(UnitBytesId::NONE);
+}
+
 #[derive(Clone, Debug, Default, Hash, Eq, PartialEq)]
 pub struct SrcLoc {
     pub filename: Filename,
@@ -91,7 +95,7 @@ pub struct Param<'a> {
     pub is_variadic: bool,
     pub is_inout: bool,
     pub is_readonly: bool,
-    pub user_attributes: Vec<Attribute<'a>>,
+    pub user_attributes: Vec<Attribute>,
     pub ty: TypeInfo,
     /// This is the BlockId which is the entrypoint for where initialization of
     /// this param begins.  The string is the code string which was used to
@@ -445,7 +449,7 @@ impl<'a> Func<'a> {
 /// A top-level Hack function.
 #[derive(Debug)]
 pub struct Function<'a> {
-    pub attributes: Vec<Attribute<'a>>,
+    pub attributes: Vec<Attribute>,
     pub attrs: Attr,
     pub coeffects: Coeffects<'a>,
     pub flags: FunctionFlags,
@@ -456,7 +460,7 @@ pub struct Function<'a> {
 /// A Hack method contained within a Class.
 #[derive(Debug)]
 pub struct Method<'a> {
-    pub attributes: Vec<Attribute<'a>>,
+    pub attributes: Vec<Attribute>,
     pub attrs: Attr,
     pub coeffects: Coeffects<'a>,
     pub flags: MethodFlags,
@@ -465,7 +469,7 @@ pub struct Method<'a> {
     pub visibility: Visibility,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct TParamBounds {
     pub bounds: Vec<TypeInfo>,
 }

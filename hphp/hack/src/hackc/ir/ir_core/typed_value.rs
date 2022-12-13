@@ -6,6 +6,7 @@
 use hash::IndexMap;
 use hash::IndexSet;
 
+use crate::ClassId;
 use crate::FloatBits;
 use crate::UnitBytesId;
 
@@ -16,7 +17,7 @@ pub enum TypedValue {
     Bool(bool),
     Float(FloatBits),
     String(UnitBytesId),
-    LazyClass(UnitBytesId),
+    LazyClass(ClassId),
     Null,
     Vec(Vec<TypedValue>),
     Keyset(KeysetValue),
@@ -27,7 +28,7 @@ pub enum TypedValue {
 pub enum ArrayKey {
     Int(i64),
     String(UnitBytesId),
-    LazyClass(UnitBytesId),
+    LazyClass(ClassId),
 }
 
 /// A wrapper around IndexSet<ArrayKey> which includes key ordering for

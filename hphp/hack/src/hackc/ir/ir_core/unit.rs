@@ -62,7 +62,7 @@ pub struct Unit<'a> {
     /// ```
     /// <<file:__EnableUnstableFeatures('readonly')>>
     /// ```
-    pub file_attributes: Vec<Attribute<'a>>,
+    pub file_attributes: Vec<Attribute>,
 
     /// The list of top-level functions defined in this Unit. This include both
     /// user-defined functions and "special" compiler-defined functions (like
@@ -97,5 +97,5 @@ pub struct Unit<'a> {
     /// ```
     /// type A = B;
     /// ```
-    pub typedefs: Vec<Typedef<'a>>,
+    pub typedefs: Vec<Typedef>,
 }

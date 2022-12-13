@@ -80,12 +80,12 @@ impl Display for FmtAttr {
     }
 }
 
-pub(crate) struct FmtAttribute<'a>(pub &'a Attribute<'a>, pub &'a StringInterner);
+pub(crate) struct FmtAttribute<'a>(pub &'a Attribute, pub &'a StringInterner);
 
 impl Display for FmtAttribute<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let FmtAttribute(attr, strings) = *self;
-        FmtIdentifier(attr.name.as_ref()).fmt(f)?;
+        FmtIdentifierId(attr.name.id, strings).fmt(f)?;
         if !attr.arguments.is_empty() {
             write!(
                 f,
@@ -616,7 +616,7 @@ impl Display for FmtTypedValue<'_> {
             TypedValue::LazyClass(lit) => write!(
                 f,
                 "lazy_class {}",
-                FmtEscapedString(&strings.lookup_bytes(*lit))
+                FmtEscapedString(&strings.lookup_bytes(lit.id))
             ),
             TypedValue::Null => f.write_str("null"),
             TypedValue::Vec(values) => {
@@ -661,7 +661,7 @@ impl Display for FmtArrayKey<'_> {
                 write!(f, "{}", v)
             }
             ArrayKey::String(v) => FmtEscapedString(&strings.lookup_bytes(*v)).fmt(f),
-            ArrayKey::LazyClass(v) => FmtEscapedString(&strings.lookup_bytes(*v)).fmt(f),
+            ArrayKey::LazyClass(v) => FmtEscapedString(&strings.lookup_bytes(v.id)).fmt(f),
         }
     }
 }

@@ -9,8 +9,12 @@ use ffi::Str;
 use naming_special_names_rust as naming_special_names;
 
 use crate::newtype::ClassId;
+use crate::Attr;
+use crate::Attribute;
+use crate::SrcLoc;
 use crate::StringInterner;
 use crate::TypeConstraintFlags;
+use crate::TypedValue;
 use crate::UnitBytesId;
 
 // As a const fn, given a string removes the leading backslash.
@@ -246,4 +250,14 @@ impl TypeInfo {
             self_: self,
         }
     }
+}
+
+#[derive(Clone, Debug)]
+pub struct Typedef {
+    pub name: ClassId,
+    pub attributes: Vec<Attribute>,
+    pub type_info: TypeInfo,
+    pub type_structure: TypedValue,
+    pub loc: SrcLoc,
+    pub attrs: Attr,
 }

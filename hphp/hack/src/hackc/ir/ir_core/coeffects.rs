@@ -16,7 +16,7 @@ pub struct CtxConstant<'a> {
     pub is_abstract: bool,
 }
 
-#[derive(Debug)]
+#[derive(Default, Debug)]
 pub struct Coeffects<'a> {
     pub static_coeffects: Vec<Ctx>,
     pub unenforced_static_coeffects: Vec<Str<'a>>,

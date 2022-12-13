@@ -34,7 +34,13 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
     let mut unit = unit.finish();
 
     unit.file_attributes = convert_attributes(ir_unit.file_attributes, &strings);
-    unit.typedefs = Slice::fill_iter(alloc, ir_unit.typedefs.into_iter());
+    unit.typedefs = Slice::fill_iter(
+        alloc,
+        ir_unit
+            .typedefs
+            .into_iter()
+            .map(|td| crate::types::convert_typedef(td, &strings)),
+    );
     unit.constants = Slice::fill_iter(
         alloc,
         ir_unit
@@ -122,7 +128,7 @@ fn convert_symbol_refs<'a>(
 }
 
 pub(crate) fn convert_attributes<'a>(
-    attrs: Vec<ir::Attribute<'a>>,
+    attrs: Vec<ir::Attribute>,
     strings: &StringCache<'a>,
 ) -> Slice<'a, hhbc::Attribute<'a>> {
     Slice::fill_iter(
@@ -135,7 +141,7 @@ pub(crate) fn convert_attributes<'a>(
                     .map(|arg| convert_typed_value(&arg, strings)),
             );
             hhbc::Attribute {
-                name: attr.name,
+                name: strings.lookup_class_name(attr.name).as_ffi_str(),
                 arguments,
             }
         }),
@@ -152,7 +158,9 @@ pub(crate) fn convert_typed_value<'a>(
         ir::TypedValue::Bool(v) => hhbc::TypedValue::Bool(v),
         ir::TypedValue::Float(v) => hhbc::TypedValue::Float(v),
         ir::TypedValue::String(v) => hhbc::TypedValue::String(strings.lookup_ffi_str(v)),
-        ir::TypedValue::LazyClass(v) => hhbc::TypedValue::LazyClass(strings.lookup_ffi_str(v)),
+        ir::TypedValue::LazyClass(v) => {
+            hhbc::TypedValue::LazyClass(strings.lookup_class_name(v).as_ffi_str())
+        }
         ir::TypedValue::Null => hhbc::TypedValue::Null,
         ir::TypedValue::Vec(ref vs) => hhbc::TypedValue::Vec(Slice::fill_iter(
             strings.alloc,
@@ -179,7 +187,9 @@ pub(crate) fn convert_array_key<'a>(
 ) -> hhbc::TypedValue<'a> {
     match *tv {
         ir::ArrayKey::Int(v) => hhbc::TypedValue::Int(v),
-        ir::ArrayKey::LazyClass(v) => hhbc::TypedValue::LazyClass(strings.lookup_ffi_str(v)),
+        ir::ArrayKey::LazyClass(v) => {
+            hhbc::TypedValue::LazyClass(strings.lookup_class_name(v).as_ffi_str())
+        }
         ir::ArrayKey::String(v) => hhbc::TypedValue::String(strings.lookup_ffi_str(v)),
     }
 }

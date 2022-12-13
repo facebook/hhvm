@@ -9,8 +9,9 @@ use crate::func::SrcLoc;
 use crate::Attribute;
 use crate::ClassId;
 
+#[derive(Debug)]
 pub struct Module<'a> {
-    pub attributes: Vec<Attribute<'a>>,
+    pub attributes: Vec<Attribute>,
     pub name: ClassId,
     pub src_loc: SrcLoc,
     pub doc_comment: Option<Str<'a>>,

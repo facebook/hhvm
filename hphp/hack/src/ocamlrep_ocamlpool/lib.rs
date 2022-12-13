@@ -22,7 +22,6 @@ extern "C" {
     fn caml_failwith(msg: *const i8);
     fn caml_initialize(addr: *mut usize, value: usize);
     static ocamlpool_generation: usize;
-    static ocamlpool_color: usize;
 }
 
 pub struct Pool {
@@ -180,39 +179,6 @@ pub unsafe fn add_to_ambient_pool<T: ToOcamlRep>(value: &T) -> usize {
     let result = value.to_ocamlrep(&fake_pool).to_bits();
     std::mem::forget(fake_pool);
     result
-}
-
-/// # Safety
-///
-/// The OCaml runtime is not thread-safe, and this function will interact with
-/// it. If any other thread interacts with the OCaml runtime or ocamlpool
-/// library during the execution of this function, undefined behavior will
-/// result.
-pub unsafe fn copy_slab_into_ocaml_heap(slab: ocamlrep_slab::SlabReader<'_>) -> usize {
-    // Enter an ocamlpool region. Use `Pool` instead of `ocamlpool_enter`
-    // directly so that `Pool` will invoke `ocamlpool_leave` in the event of a
-    // panic (it does so in its `Drop` implementation).
-    let _pool = Pool::new();
-
-    // Allocate a block large enough for the entire slab contents and copy the
-    // slab into it. Use `size - 1`, since we intend to overwrite the header.
-    let size = slab.value_size_in_words();
-    let block = ocamlpool_reserve_block(0, size - 1) as *mut usize;
-    let block = block.sub(1);
-    let block_words = std::slice::from_raw_parts_mut(block, size);
-    let value = ocamlrep_slab::copy_and_rebase_value(slab, block_words);
-    let value = value.to_bits();
-
-    // Write the correct GC color to every header in the slab (else values will
-    // be collected prematurely).
-    let mut idx = 0;
-    while idx < block_words.len() {
-        let size = block_words[idx] >> 10;
-        block_words[idx] |= ocamlpool_color;
-        idx += size + 1;
-    }
-
-    value
 }
 
 #[macro_export]

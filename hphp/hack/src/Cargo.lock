@@ -474,9 +474,6 @@ name = "bytes"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4872d67bab6358e59559027aa3b9157c53d9358c51423c17554809a8858e0f8"
-dependencies = [
- "serde",
-]
 
 [[package]]
 name = "cache-padded"
@@ -3189,17 +3186,6 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "ocamlrep",
- "ocamlrep_slab",
-]
-
-[[package]]
-name = "ocamlrep_slab"
-version = "0.0.0"
-dependencies = [
- "bytes",
- "hash",
- "ocamlrep",
- "serde",
 ]
 
 [[package]]
@@ -3301,7 +3287,6 @@ dependencies = [
  "hh_hash",
  "no_pos_hash",
  "ocamlrep",
- "ocamlrep_slab",
  "oxidized",
  "pretty_assertions",
  "relative_path",

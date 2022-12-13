@@ -19,7 +19,6 @@ hh24_types = { path = "../utils/hh24_types" }
 hh_hash = { path = "../utils/hh_hash" }
 no_pos_hash = { path = "../utils/no_pos_hash" }
 ocamlrep = { path = "../ocamlrep" }
-ocamlrep_slab = { path = "../utils/ocamlrep_slab" }
 oxidized = { path = "../oxidized" }
 relative_path = { path = "../utils/rust/relative_path" }
 rust_to_ocaml_attr = { path = "../rust_to_ocaml/rust_to_ocaml_attr" }

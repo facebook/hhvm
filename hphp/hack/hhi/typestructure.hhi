@@ -59,22 +59,19 @@ namespace HH {
     'classname' => ?classname<T>,
   /* HH_FIXME[2071] */
   'elem_types' => ?varray,
-  /* HH_FIXME[2071] */
-  'return_type' => ?darray,
+    'return_type' => mixed,
   /* HH_FIXME[2071] */
   'param_types' => ?varray,
   /* HH_FIXME[2071] */
   'generic_types' => ?varray,
     'root_name' => ?string,
-  /* HH_FIXME[2071] */
-  'access_list' => ?varray,
+    'access_list' => ?varray<string>,
   /* HH_FIXME[2071] */
   'fields' => ?darray,
     'allows_unknown_fields' => ?bool,
     'is_cls_cns' => ?bool,
     'optional_shape_field' => ?bool,
-  /* HH_FIXME[2071] */
-  'value' => ?darray,
+    'value' => mixed,
     'typevars' => ?string,
     'alias' => ?string,
     ?'exact' => bool,
@@ -89,8 +86,7 @@ namespace HH {
     // for tuples
   /* HH_FIXME[2071] */
   'elem_types' => ?varray,
-  /* HH_FIXME[2071] */
-  'return_type' => ?darray,
+    'return_type' => mixed,
     // for functions
   /* HH_FIXME[2071] */
   'param_types' => ?varray,
@@ -98,16 +94,14 @@ namespace HH {
   /* HH_FIXME[2071] */
   'generic_types' => ?varray,
     'root_name' => ?string,
-  /* HH_FIXME[2071] */
-  'access_list' => ?varray,
+    'access_list' => ?varray<string>,
     // for shapes
   /* HH_FIXME[2071] */
   'fields' => ?darray,
     'allows_unknown_fields' => ?bool,
     'is_cls_cns' => ?bool,
     'optional_shape_field' => ?bool,
-  /* HH_FIXME[2071] */
-  'value' => ?darray,
+    'value' => mixed,
     // Comma-separated string
     'typevars' => ?string,
     // for type aliases

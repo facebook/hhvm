@@ -9,7 +9,7 @@ File "as_generic.php", line 8, characters 3-40:
 File "as_generic.php", line 9, characters 3-42:
   ?vec<_>
 File "as_generic.php", line 10, characters 3-42:
-  ?dict<_, _>
+  mixed
 File "as_generic.php", line 11, characters 3-39:
   ?bool
 File "as_generic.php", line 12, characters 3-41:

@@ -372,7 +372,7 @@ mod parallel_decl_parse {
                     }
                     Decl::Fun(_) => self.naming_table.get_fun_path(pos::FunName(name))?,
                     Decl::Const(_) => self.naming_table.get_const_path(pos::ConstName(name))?,
-                    Decl::Module(..) => Some(path), // TODO: look this up from naming provider
+                    Decl::Module(..) => self.naming_table.get_module_path(pos::ModuleName(name))?,
                 };
                 if path_opt.map_or(true, |p| p == path) {
                     winners.push((name, decl))

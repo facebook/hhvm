@@ -95,7 +95,7 @@ impl<R: Reason> LazyShallowDeclProvider<R> {
                 }
                 NamedDecl::Fun(name, _) => self.naming_provider.get_fun_path(name)?,
                 NamedDecl::Const(name, _) => self.naming_provider.get_const_path(name)?,
-                NamedDecl::Module(..) => Some(path), // TODO: look this up from naming provider
+                NamedDecl::Module(name, _) => self.naming_provider.get_module_path(name)?,
             };
             if path_opt.map_or(true, |p| p == path) {
                 winners.push(decl)

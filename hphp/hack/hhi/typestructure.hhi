@@ -60,8 +60,7 @@ namespace HH {
   /* HH_FIXME[2071] */
   'elem_types' => ?varray,
     'return_type' => mixed,
-  /* HH_FIXME[2071] */
-  'param_types' => ?varray,
+    'param_types' => ?varray<mixed>,
   /* HH_FIXME[2071] */
   'generic_types' => ?varray,
     'root_name' => ?string,
@@ -88,8 +87,7 @@ namespace HH {
   'elem_types' => ?varray,
     'return_type' => mixed,
     // for functions
-  /* HH_FIXME[2071] */
-  'param_types' => ?varray,
+    'param_types' => ?varray<mixed>,
     // for arrays, classes
   /* HH_FIXME[2071] */
   'generic_types' => ?varray,

@@ -7,7 +7,7 @@ File "as_generic.php", line 7, characters 3-35:
 File "as_generic.php", line 8, characters 3-40:
   ?classname<T>
 File "as_generic.php", line 9, characters 3-42:
-  ?vec<_>
+  ?vec<mixed>
 File "as_generic.php", line 10, characters 3-42:
   mixed
 File "as_generic.php", line 11, characters 3-39:

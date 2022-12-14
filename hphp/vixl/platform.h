@@ -43,7 +43,7 @@ inline void HostBreakpoint() {
   __debugbreak();
 #elif defined(__AARCH64EL__)
   // TODO: Implement HostBreakpoint on a64.
-  not_implemented();
+  asm("brk #0xCC")
 #else
 # error How do you set a host breakpoint on your architecture?
 #endif

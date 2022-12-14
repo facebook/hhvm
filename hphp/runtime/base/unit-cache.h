@@ -109,6 +109,7 @@ Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
   R(EvalFoldLazyClassKeys)                      \
   R(EvalEnableAbstractContextConstants)         \
   R(EvalTraitConstantInterfaceBehavior)         \
+  R(EvalTranslateHackC)                         \
   R(EvalUnitCacheBreaker)                       \
   R(EvalDiamondTraitMethods)                    \
   R(EvalClassPassesClassname)                   \

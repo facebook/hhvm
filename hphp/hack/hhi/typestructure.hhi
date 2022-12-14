@@ -57,8 +57,7 @@ namespace HH {
     'kind' => TypeStructureKind,
     'name' => ?string,
     'classname' => ?classname<T>,
-  /* HH_FIXME[2071] */
-  'elem_types' => ?varray,
+    'elem_types' => ?varray<mixed>,
     'return_type' => mixed,
     'param_types' => ?varray<mixed>,
   /* HH_FIXME[2071] */
@@ -83,8 +82,7 @@ namespace HH {
     // classname for classes, interfaces, enums, or traits
     'classname' => ?classname<T>,
     // for tuples
-  /* HH_FIXME[2071] */
-  'elem_types' => ?varray,
+    'elem_types' => ?varray<mixed>,
     'return_type' => mixed,
     // for functions
     'param_types' => ?varray<mixed>,

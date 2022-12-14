@@ -3452,7 +3452,7 @@ template <class Protocol_>
 uint32_t AdaptedFields::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("AdaptedFields");
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<1>, AdaptedFields>>(this->__fbthrift_field_field1))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::my::Adapter, ::apache::thrift::type::i32_t>>(this->__fbthrift_field_field1))) {
     xfer += prot_->serializedFieldSize("field1", apache::thrift::protocol::T_I32, 1);
     xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::my::Adapter>(*prot_, this->__fbthrift_field_field1, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, ::my::Adapter::toThrift(this->__fbthrift_field_field1));});
   }
@@ -3472,7 +3472,7 @@ template <class Protocol_>
 uint32_t AdaptedFields::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("AdaptedFields");
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<1>, AdaptedFields>>(this->__fbthrift_field_field1))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::my::Adapter, ::apache::thrift::type::i32_t>>(this->__fbthrift_field_field1))) {
     xfer += prot_->serializedFieldSize("field1", apache::thrift::protocol::T_I32, 1);
     xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::my::Adapter>(*prot_, this->__fbthrift_field_field1, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::serializedSize<false>(*prot_, ::my::Adapter::toThrift(this->__fbthrift_field_field1));});
   }
@@ -3493,7 +3493,7 @@ uint32_t AdaptedFields::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("AdaptedFields");
   bool previousFieldHasValue = true;
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<1>, AdaptedFields>>(this->__fbthrift_field_field1))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::my::Adapter, ::apache::thrift::type::i32_t>>(this->__fbthrift_field_field1))) {
     constexpr int16_t kPrevFieldId = 0;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 1, kPrevFieldId>(*prot_, "field1", previousFieldHasValue);
     previousFieldHasValue = true;

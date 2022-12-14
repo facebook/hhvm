@@ -1506,7 +1506,7 @@ void AdaptedFields::__fbthrift_clear_terse_fields() {
 }
 
 bool AdaptedFields::__fbthrift_is_empty() const {
-  return ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<1>, AdaptedFields>>(this->__fbthrift_field_field1) &&
+  return ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::my::Adapter, ::apache::thrift::type::i32_t>>(this->__fbthrift_field_field1) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<2>, AdaptedFields>>(this->__fbthrift_field_field2) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<3>, AdaptedFields>>(this->__fbthrift_field_field3);
 }

@@ -935,6 +935,18 @@ TYPED_TEST(optional_field_ref_typed_test, rvalue_ref_method) {
   EXPECT_FALSE(*ref);
 }
 
+TEST(optional_boxed_field_ref_test, release) {
+  TestStructBoxedValuePtr s;
+  s.opt_name().emplace();
+  EXPECT_TRUE(s.opt_name().has_value());
+
+  const std::string* addr = &s.opt_name().value();
+  std::unique_ptr<std::string> ptr =
+      apache::thrift::move_to_unique_ptr(s.opt_name());
+  EXPECT_EQ(addr, ptr.get());
+  EXPECT_FALSE(s.opt_name().has_value());
+}
+
 TEST(terse_field_ref_test, access_default_value) {
   auto s = TestStruct();
   EXPECT_EQ(s.terse_name(), "default");

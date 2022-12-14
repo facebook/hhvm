@@ -65,6 +65,10 @@ class boxed_value_ptr {
 
   FOLLY_ERASE constexpr void reset(T* p = nullptr) noexcept { ptr_.reset(p); }
 
+  FOLLY_ERASE constexpr std::unique_ptr<T> release() noexcept {
+    return std::move(ptr_);
+  }
+
  private:
   friend void swap(boxed_value_ptr& lhs, boxed_value_ptr& rhs) noexcept {
     using std::swap;

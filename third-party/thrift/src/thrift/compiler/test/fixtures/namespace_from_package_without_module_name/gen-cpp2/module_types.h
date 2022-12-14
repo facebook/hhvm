@@ -50,6 +50,10 @@ class Foo final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::MyInt
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   template<class T>
@@ -63,9 +67,7 @@ class Foo final  {
                                                          ::apache::thrift::type::i64_t>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::MyInt>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)

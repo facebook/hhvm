@@ -429,6 +429,13 @@ class SomeStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::reasonable,
+    ::apache::thrift::ident::fine,
+    ::apache::thrift::ident::questionable,
+    ::apache::thrift::ident::tags
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 4;
 
   template<class T>
@@ -448,12 +455,7 @@ class SomeStruct final  {
                                                          ::apache::thrift::type::set<::apache::thrift::type::i32_t>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::reasonable,
-                                                      ::apache::thrift::ident::fine,
-                                                      ::apache::thrift::ident::questionable,
-                                                      ::apache::thrift::ident::tags>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -774,6 +776,13 @@ class MyStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::me2_3,
+    ::apache::thrift::ident::me3_n3,
+    ::apache::thrift::ident::me1_t1,
+    ::apache::thrift::ident::me1_t2
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 4;
 
   template<class T>
@@ -793,12 +802,7 @@ class MyStruct final  {
                                                          ::apache::thrift::type::enum_t<::test::fixtures::enums::MyEnum1>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::me2_3,
-                                                      ::apache::thrift::ident::me3_n3,
-                                                      ::apache::thrift::ident::me1_t1,
-                                                      ::apache::thrift::ident::me1_t2>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)

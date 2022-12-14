@@ -1157,6 +1157,9 @@ class Empty final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1223,6 +1226,10 @@ class ASimpleStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::boolField
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1344,6 +1351,10 @@ class ASimpleStructNoexcept final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::boolField
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1465,6 +1476,20 @@ class MyStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::MyBoolField,
+    ::apache::thrift::ident::MyIntField,
+    ::apache::thrift::ident::MyStringField,
+    ::apache::thrift::ident::MyStringField2,
+    ::apache::thrift::ident::MyBinaryField,
+    ::apache::thrift::ident::MyBinaryField2,
+    ::apache::thrift::ident::MyBinaryField3,
+    ::apache::thrift::ident::MyBinaryListField4,
+    ::apache::thrift::ident::MyMapEnumAndInt,
+    ::apache::thrift::ident::MyCustomField,
+    ::apache::thrift::ident::MyOptCustomField
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -2110,6 +2135,11 @@ class SimpleUnion  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::intValue,
+    ::apache::thrift::ident::stringValue
+  >;
+
 
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
@@ -2396,6 +2426,37 @@ class ComplexUnion final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::intValue,
+    ::apache::thrift::ident::opt_intValue,
+    ::apache::thrift::ident::stringValue,
+    ::apache::thrift::ident::opt_stringValue,
+    ::apache::thrift::ident::intValue2,
+    ::apache::thrift::ident::intValue3,
+    ::apache::thrift::ident::doubelValue,
+    ::apache::thrift::ident::boolValue,
+    ::apache::thrift::ident::union_list,
+    ::apache::thrift::ident::union_set,
+    ::apache::thrift::ident::union_map,
+    ::apache::thrift::ident::opt_union_map,
+    ::apache::thrift::ident::enum_field,
+    ::apache::thrift::ident::enum_container,
+    ::apache::thrift::ident::a_struct,
+    ::apache::thrift::ident::a_set_struct,
+    ::apache::thrift::ident::a_union,
+    ::apache::thrift::ident::opt_a_union,
+    ::apache::thrift::ident::a_union_list,
+    ::apache::thrift::ident::a_union_typedef,
+    ::apache::thrift::ident::a_union_typedef_list,
+    ::apache::thrift::ident::MyBinaryField,
+    ::apache::thrift::ident::MyBinaryField2,
+    ::apache::thrift::ident::MyBinaryListField4,
+    ::apache::thrift::ident::ref_field,
+    ::apache::thrift::ident::ref_field2,
+    ::apache::thrift::ident::excp_field,
+    ::apache::thrift::ident::MyCustomField
+  >;
+
 
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
@@ -4632,6 +4693,26 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::code,
+    ::apache::thrift::ident::req_code,
+    ::apache::thrift::ident::message2,
+    ::apache::thrift::ident::req_message,
+    ::apache::thrift::ident::exception_list,
+    ::apache::thrift::ident::exception_set,
+    ::apache::thrift::ident::exception_map,
+    ::apache::thrift::ident::req_exception_map,
+    ::apache::thrift::ident::enum_field,
+    ::apache::thrift::ident::enum_container,
+    ::apache::thrift::ident::a_struct,
+    ::apache::thrift::ident::a_set_struct,
+    ::apache::thrift::ident::a_union_list,
+    ::apache::thrift::ident::union_typedef,
+    ::apache::thrift::ident::a_union_typedef_list,
+    ::apache::thrift::ident::MyCustomField,
+    ::apache::thrift::ident::MyOptCustomField
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -5576,6 +5657,12 @@ class FOLLY_EXPORT AnotherException : public virtual apache::thrift::TException 
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::code,
+    ::apache::thrift::ident::req_code,
+    ::apache::thrift::ident::message
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -5817,6 +5904,55 @@ class containerStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::fieldA,
+    ::apache::thrift::ident::req_fieldA,
+    ::apache::thrift::ident::opt_fieldA,
+    ::apache::thrift::ident::fieldB,
+    ::apache::thrift::ident::req_fieldB,
+    ::apache::thrift::ident::opt_fieldB,
+    ::apache::thrift::ident::fieldC,
+    ::apache::thrift::ident::req_fieldC,
+    ::apache::thrift::ident::opt_fieldC,
+    ::apache::thrift::ident::fieldD,
+    ::apache::thrift::ident::fieldE,
+    ::apache::thrift::ident::req_fieldE,
+    ::apache::thrift::ident::opt_fieldE,
+    ::apache::thrift::ident::fieldF,
+    ::apache::thrift::ident::fieldG,
+    ::apache::thrift::ident::fieldH,
+    ::apache::thrift::ident::fieldI,
+    ::apache::thrift::ident::fieldJ,
+    ::apache::thrift::ident::fieldK,
+    ::apache::thrift::ident::fieldL,
+    ::apache::thrift::ident::fieldM,
+    ::apache::thrift::ident::fieldN,
+    ::apache::thrift::ident::fieldO,
+    ::apache::thrift::ident::fieldP,
+    ::apache::thrift::ident::fieldQ,
+    ::apache::thrift::ident::fieldR,
+    ::apache::thrift::ident::req_fieldR,
+    ::apache::thrift::ident::opt_fieldR,
+    ::apache::thrift::ident::fieldS,
+    ::apache::thrift::ident::fieldT,
+    ::apache::thrift::ident::fieldU,
+    ::apache::thrift::ident::fieldV,
+    ::apache::thrift::ident::req_fieldV,
+    ::apache::thrift::ident::opt_fieldV,
+    ::apache::thrift::ident::fieldW,
+    ::apache::thrift::ident::fieldX,
+    ::apache::thrift::ident::req_fieldX,
+    ::apache::thrift::ident::opt_fieldX,
+    ::apache::thrift::ident::fieldY,
+    ::apache::thrift::ident::fieldZ,
+    ::apache::thrift::ident::fieldAA,
+    ::apache::thrift::ident::fieldAB,
+    ::apache::thrift::ident::fieldAC,
+    ::apache::thrift::ident::fieldAD,
+    ::apache::thrift::ident::fieldAE,
+    ::apache::thrift::ident::fieldSD
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -7369,6 +7505,13 @@ class MyIncludedStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::MyIncludedInt,
+    ::apache::thrift::ident::MyIncludedStruct,
+    ::apache::thrift::ident::ARefField,
+    ::apache::thrift::ident::ARequiredField
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -7632,6 +7775,49 @@ class AnnotatedStruct  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::no_annotation,
+    ::apache::thrift::ident::cpp_unique_ref,
+    ::apache::thrift::ident::cpp2_unique_ref,
+    ::apache::thrift::ident::container_with_ref,
+    ::apache::thrift::ident::req_cpp_unique_ref,
+    ::apache::thrift::ident::req_cpp2_unique_ref,
+    ::apache::thrift::ident::req_container_with_ref,
+    ::apache::thrift::ident::opt_cpp_unique_ref,
+    ::apache::thrift::ident::opt_cpp2_unique_ref,
+    ::apache::thrift::ident::opt_container_with_ref,
+    ::apache::thrift::ident::ref_type_unique,
+    ::apache::thrift::ident::ref_type_shared,
+    ::apache::thrift::ident::ref_type_const,
+    ::apache::thrift::ident::req_ref_type_shared,
+    ::apache::thrift::ident::req_ref_type_const,
+    ::apache::thrift::ident::req_ref_type_unique,
+    ::apache::thrift::ident::opt_ref_type_const,
+    ::apache::thrift::ident::opt_ref_type_unique,
+    ::apache::thrift::ident::opt_ref_type_shared,
+    ::apache::thrift::ident::base_type,
+    ::apache::thrift::ident::list_type,
+    ::apache::thrift::ident::set_type,
+    ::apache::thrift::ident::map_type,
+    ::apache::thrift::ident::map_struct_type,
+    ::apache::thrift::ident::iobuf_type,
+    ::apache::thrift::ident::iobuf_ptr,
+    ::apache::thrift::ident::list_i32_template,
+    ::apache::thrift::ident::list_string_template,
+    ::apache::thrift::ident::set_template,
+    ::apache::thrift::ident::map_template,
+    ::apache::thrift::ident::typedef_list_template,
+    ::apache::thrift::ident::typedef_deque_template,
+    ::apache::thrift::ident::typedef_set_template,
+    ::apache::thrift::ident::typedef_map_template,
+    ::apache::thrift::ident::indirection_a,
+    ::apache::thrift::ident::indirection_b,
+    ::apache::thrift::ident::indirection_c,
+    ::apache::thrift::ident::iobuf_type_val,
+    ::apache::thrift::ident::iobuf_ptr_val,
+    ::apache::thrift::ident::struct_struct
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -8787,6 +8973,11 @@ class ComplexContainerStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::map_of_iobufs,
+    ::apache::thrift::ident::map_of_iobuf_ptrs
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -8955,6 +9146,11 @@ class FloatStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::floatField,
+    ::apache::thrift::ident::doubleField
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -9129,6 +9325,11 @@ class FloatUnion final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::floatSide,
+    ::apache::thrift::ident::doubleSide
+  >;
+
 
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
@@ -9401,6 +9602,10 @@ class AllRequiredNoExceptMoveCtrStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::intField
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();

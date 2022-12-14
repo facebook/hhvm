@@ -280,6 +280,10 @@ class SomeStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::fieldA
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();

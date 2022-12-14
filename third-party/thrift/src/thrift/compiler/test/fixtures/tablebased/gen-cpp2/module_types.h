@@ -181,6 +181,14 @@ class TrivialTypesStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::fieldA,
+    ::apache::thrift::ident::fieldB,
+    ::apache::thrift::ident::fieldC,
+    ::apache::thrift::ident::fieldD,
+    ::apache::thrift::ident::fieldE
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -535,6 +543,17 @@ class ContainerStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::fieldA,
+    ::apache::thrift::ident::fieldB,
+    ::apache::thrift::ident::fieldC,
+    ::apache::thrift::ident::fieldD,
+    ::apache::thrift::ident::fieldE,
+    ::apache::thrift::ident::fieldF,
+    ::apache::thrift::ident::fieldG,
+    ::apache::thrift::ident::fieldH
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1015,6 +1034,11 @@ class ExampleUnion final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::fieldA,
+    ::apache::thrift::ident::fieldB
+  >;
+
 
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;

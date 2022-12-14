@@ -181,6 +181,10 @@ class MyStructNestedAnnotation final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::name
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -306,6 +310,9 @@ class YourUnion final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+  >;
+
 
   void __fbthrift_clear();
   bool __fbthrift_is_empty() const;
@@ -452,6 +459,9 @@ class FOLLY_EXPORT YourException : public virtual apache::thrift::TException {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -535,6 +545,19 @@ class YourStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::majorVer,
+    ::apache::thrift::ident::package,
+    ::apache::thrift::ident::annotation_with_quote,
+    ::apache::thrift::ident::class_,
+    ::apache::thrift::ident::annotation_with_trailing_comma,
+    ::apache::thrift::ident::empty_annotations,
+    ::apache::thrift::ident::my_enum,
+    ::apache::thrift::ident::cpp_type_annotation,
+    ::apache::thrift::ident::my_union,
+    ::apache::thrift::ident::my_id
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 10;
 
   template<class T>
@@ -566,18 +589,7 @@ class YourStruct final  {
                                                          ::apache::thrift::type::cpp_type<::cpp2::MyId, ::apache::thrift::type::i16_t>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::majorVer,
-                                                      ::apache::thrift::ident::package,
-                                                      ::apache::thrift::ident::annotation_with_quote,
-                                                      ::apache::thrift::ident::class_,
-                                                      ::apache::thrift::ident::annotation_with_trailing_comma,
-                                                      ::apache::thrift::ident::empty_annotations,
-                                                      ::apache::thrift::ident::my_enum,
-                                                      ::apache::thrift::ident::cpp_type_annotation,
-                                                      ::apache::thrift::ident::my_union,
-                                                      ::apache::thrift::ident::my_id>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -1262,6 +1274,11 @@ class SecretStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::id,
+    ::apache::thrift::ident::password
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();

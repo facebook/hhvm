@@ -669,6 +669,20 @@ class Foo final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::intField,
+    ::apache::thrift::ident::optionalIntField,
+    ::apache::thrift::ident::intFieldWithDefault,
+    ::apache::thrift::ident::setField,
+    ::apache::thrift::ident::optionalSetField,
+    ::apache::thrift::ident::mapField,
+    ::apache::thrift::ident::optionalMapField,
+    ::apache::thrift::ident::binaryField,
+    ::apache::thrift::ident::longField,
+    ::apache::thrift::ident::adaptedLongField,
+    ::apache::thrift::ident::doubleAdaptedField
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 11;
 
   template<class T>
@@ -702,19 +716,7 @@ class Foo final  {
                                                          ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i64_t>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::intField,
-                                                      ::apache::thrift::ident::optionalIntField,
-                                                      ::apache::thrift::ident::intFieldWithDefault,
-                                                      ::apache::thrift::ident::setField,
-                                                      ::apache::thrift::ident::optionalSetField,
-                                                      ::apache::thrift::ident::mapField,
-                                                      ::apache::thrift::ident::optionalMapField,
-                                                      ::apache::thrift::ident::binaryField,
-                                                      ::apache::thrift::ident::longField,
-                                                      ::apache::thrift::ident::adaptedLongField,
-                                                      ::apache::thrift::ident::doubleAdaptedField>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -1325,6 +1327,14 @@ class Baz final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::intField,
+    ::apache::thrift::ident::setField,
+    ::apache::thrift::ident::mapField,
+    ::apache::thrift::ident::binaryField,
+    ::apache::thrift::ident::longField
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 5;
 
   template<class T>
@@ -1346,13 +1356,7 @@ class Baz final  {
                                                          ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i64_t>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::intField,
-                                                      ::apache::thrift::ident::setField,
-                                                      ::apache::thrift::ident::mapField,
-                                                      ::apache::thrift::ident::binaryField,
-                                                      ::apache::thrift::ident::longField>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -1911,6 +1915,10 @@ class DirectlyAdapted final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::field
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   template<class T>
@@ -1924,9 +1932,7 @@ class DirectlyAdapted final  {
                                                          ::apache::thrift::type::i32_t>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::field>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -2079,6 +2085,16 @@ class Bar final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::structField,
+    ::apache::thrift::ident::optionalStructField,
+    ::apache::thrift::ident::structListField,
+    ::apache::thrift::ident::optionalStructListField,
+    ::apache::thrift::ident::unionField,
+    ::apache::thrift::ident::optionalUnionField,
+    ::apache::thrift::ident::adaptedStructField
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 7;
 
   template<class T>
@@ -2104,15 +2120,7 @@ class Bar final  {
                                                          ::apache::thrift::type::adapted<::my::Adapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::detail::DirectlyAdapted>>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::structField,
-                                                      ::apache::thrift::ident::optionalStructField,
-                                                      ::apache::thrift::ident::structListField,
-                                                      ::apache::thrift::ident::optionalStructListField,
-                                                      ::apache::thrift::ident::unionField,
-                                                      ::apache::thrift::ident::optionalUnionField,
-                                                      ::apache::thrift::ident::adaptedStructField>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -2555,6 +2563,9 @@ class A final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 0;
 
   template<class T>
@@ -2566,8 +2577,7 @@ class A final  {
                                                          void>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -2670,6 +2680,10 @@ class ThriftAdaptedStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::data
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   template<class T>
@@ -2683,9 +2697,7 @@ class ThriftAdaptedStruct final  {
                                                          ::apache::thrift::type::i64_t>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::data>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -2837,6 +2849,10 @@ class DirectlyAdaptedStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::data
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   template<class T>
@@ -2850,9 +2866,7 @@ class DirectlyAdaptedStruct final  {
                                                          ::apache::thrift::type::i64_t>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::data>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -3008,6 +3022,11 @@ class MyAnnotation final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::signature,
+    ::apache::thrift::ident::color
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 2;
 
   template<class T>
@@ -3023,10 +3042,7 @@ class MyAnnotation final  {
                                                          ::apache::thrift::type::enum_t<::facebook::thrift::test::Color>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::signature,
-                                                      ::apache::thrift::ident::color>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -3238,6 +3254,10 @@ class IndependentDirectlyAdapted final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::field
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   template<class T>
@@ -3251,9 +3271,7 @@ class IndependentDirectlyAdapted final  {
                                                          ::apache::thrift::type::i32_t>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::field>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -3404,6 +3422,14 @@ class StructWithFieldAdapter final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::field,
+    ::apache::thrift::ident::shared_field,
+    ::apache::thrift::ident::opt_shared_field,
+    ::apache::thrift::ident::opt_boxed_field,
+    ::apache::thrift::ident::boxed_field
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 5;
 
   template<class T>
@@ -3425,13 +3451,7 @@ class StructWithFieldAdapter final  {
                                                          ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::field,
-                                                      ::apache::thrift::ident::shared_field,
-                                                      ::apache::thrift::ident::opt_shared_field,
-                                                      ::apache::thrift::ident::opt_boxed_field,
-                                                      ::apache::thrift::ident::boxed_field>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -3757,6 +3777,12 @@ class TerseAdaptedFields final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::int_field,
+    ::apache::thrift::ident::string_field,
+    ::apache::thrift::ident::set_field
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 3;
 
   template<class T>
@@ -3774,11 +3800,7 @@ class TerseAdaptedFields final  {
                                                          ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::int_field,
-                                                      ::apache::thrift::ident::string_field,
-                                                      ::apache::thrift::ident::set_field>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -4011,6 +4033,10 @@ class B final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::a
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   template<class T>
@@ -4024,9 +4050,7 @@ class B final  {
                                                          ::apache::thrift::type::adapted<::my::Adapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::A>>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::a>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -4164,6 +4188,10 @@ class Config final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::path
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   template<class T>
@@ -4177,9 +4205,7 @@ class Config final  {
                                                          ::apache::thrift::type::string_t>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::path>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -4332,6 +4358,11 @@ class MyStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::field,
+    ::apache::thrift::ident::set_string
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 2;
 
   template<class T>
@@ -4347,10 +4378,7 @@ class MyStruct final  {
                                                          ::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::field,
-                                                      ::apache::thrift::ident::set_string>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -4546,6 +4574,19 @@ class AdaptTestStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::delay,
+    ::apache::thrift::ident::custom,
+    ::apache::thrift::ident::timeout,
+    ::apache::thrift::ident::data,
+    ::apache::thrift::ident::meta,
+    ::apache::thrift::ident::indirectionString,
+    ::apache::thrift::ident::string_data,
+    ::apache::thrift::ident::double_wrapped_bool,
+    ::apache::thrift::ident::double_wrapped_integer,
+    ::apache::thrift::ident::binary_data
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 10;
 
   template<class T>
@@ -4577,18 +4618,7 @@ class AdaptTestStruct final  {
                                                          ::apache::thrift::type::adapted<::apache::thrift::test::AdapterWithContext, ::apache::thrift::type::binary_t>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::delay,
-                                                      ::apache::thrift::ident::custom,
-                                                      ::apache::thrift::ident::timeout,
-                                                      ::apache::thrift::ident::data,
-                                                      ::apache::thrift::ident::meta,
-                                                      ::apache::thrift::ident::indirectionString,
-                                                      ::apache::thrift::ident::string_data,
-                                                      ::apache::thrift::ident::double_wrapped_bool,
-                                                      ::apache::thrift::ident::double_wrapped_integer,
-                                                      ::apache::thrift::ident::binary_data>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -5166,6 +5196,31 @@ class AdaptTemplatedTestStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::adaptedBool,
+    ::apache::thrift::ident::adaptedByte,
+    ::apache::thrift::ident::adaptedShort,
+    ::apache::thrift::ident::adaptedInteger,
+    ::apache::thrift::ident::adaptedLong,
+    ::apache::thrift::ident::adaptedDouble,
+    ::apache::thrift::ident::adaptedString,
+    ::apache::thrift::ident::adaptedList,
+    ::apache::thrift::ident::adaptedSet,
+    ::apache::thrift::ident::adaptedMap,
+    ::apache::thrift::ident::adaptedBoolDefault,
+    ::apache::thrift::ident::adaptedByteDefault,
+    ::apache::thrift::ident::adaptedShortDefault,
+    ::apache::thrift::ident::adaptedIntegerDefault,
+    ::apache::thrift::ident::adaptedLongDefault,
+    ::apache::thrift::ident::adaptedDoubleDefault,
+    ::apache::thrift::ident::adaptedStringDefault,
+    ::apache::thrift::ident::adaptedEnum,
+    ::apache::thrift::ident::adaptedListDefault,
+    ::apache::thrift::ident::adaptedSetDefault,
+    ::apache::thrift::ident::adaptedMapDefault,
+    ::apache::thrift::ident::doubleTypedefBool
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 22;
 
   template<class T>
@@ -5221,30 +5276,7 @@ class AdaptTemplatedTestStruct final  {
                                                          ::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::bool_t>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::adaptedBool,
-                                                      ::apache::thrift::ident::adaptedByte,
-                                                      ::apache::thrift::ident::adaptedShort,
-                                                      ::apache::thrift::ident::adaptedInteger,
-                                                      ::apache::thrift::ident::adaptedLong,
-                                                      ::apache::thrift::ident::adaptedDouble,
-                                                      ::apache::thrift::ident::adaptedString,
-                                                      ::apache::thrift::ident::adaptedList,
-                                                      ::apache::thrift::ident::adaptedSet,
-                                                      ::apache::thrift::ident::adaptedMap,
-                                                      ::apache::thrift::ident::adaptedBoolDefault,
-                                                      ::apache::thrift::ident::adaptedByteDefault,
-                                                      ::apache::thrift::ident::adaptedShortDefault,
-                                                      ::apache::thrift::ident::adaptedIntegerDefault,
-                                                      ::apache::thrift::ident::adaptedLongDefault,
-                                                      ::apache::thrift::ident::adaptedDoubleDefault,
-                                                      ::apache::thrift::ident::adaptedStringDefault,
-                                                      ::apache::thrift::ident::adaptedEnum,
-                                                      ::apache::thrift::ident::adaptedListDefault,
-                                                      ::apache::thrift::ident::adaptedSetDefault,
-                                                      ::apache::thrift::ident::adaptedMapDefault,
-                                                      ::apache::thrift::ident::doubleTypedefBool>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -6371,6 +6403,10 @@ class AdaptTemplatedNestedTestStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::adaptedStruct
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   template<class T>
@@ -6384,9 +6420,7 @@ class AdaptTemplatedNestedTestStruct final  {
                                                          ::apache::thrift::type::struct_t<::facebook::thrift::test::AdaptTemplatedTestStruct>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::adaptedStruct>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -6533,6 +6567,11 @@ class ThriftAdaptTestUnion final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::delay,
+    ::apache::thrift::ident::custom
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 2;
 
   template<class T>
@@ -6548,10 +6587,7 @@ class ThriftAdaptTestUnion final  {
                                                          ::apache::thrift::type::adapted<::apache::thrift::test::CustomProtocolAdapter, ::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::delay,
-                                                      ::apache::thrift::ident::custom>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -6871,6 +6907,13 @@ class StructFieldAdaptedStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::adaptedStruct,
+    ::apache::thrift::ident::adaptedTypedef,
+    ::apache::thrift::ident::directlyAdapted,
+    ::apache::thrift::ident::typedefOfAdapted
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 4;
 
   template<class T>
@@ -6890,12 +6933,7 @@ class StructFieldAdaptedStruct final  {
                                                          ::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::detail::DirectlyAdaptedStruct>>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::adaptedStruct,
-                                                      ::apache::thrift::ident::adaptedTypedef,
-                                                      ::apache::thrift::ident::directlyAdapted,
-                                                      ::apache::thrift::ident::typedefOfAdapted>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -7177,6 +7215,10 @@ class CircularStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::field
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   template<class T>
@@ -7190,9 +7232,7 @@ class CircularStruct final  {
                                                          ::apache::thrift::type::adapted<::apache::thrift::test::MemberAccessAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::CircularAdaptee>>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::field>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -7326,6 +7366,10 @@ class CircularAdaptee final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::field
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   template<class T>
@@ -7339,9 +7383,7 @@ class CircularAdaptee final  {
                                                          ::apache::thrift::type::struct_t<::facebook::thrift::test::CircularStruct>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::field>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -7489,6 +7531,9 @@ class DeclaredAfterStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 0;
 
   template<class T>
@@ -7500,8 +7545,7 @@ class DeclaredAfterStruct final  {
                                                          void>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -7594,6 +7638,10 @@ class ReorderedStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::reordered_dependent_adapted
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   template<class T>
@@ -7607,9 +7655,7 @@ class ReorderedStruct final  {
                                                          ::apache::thrift::type::adapted<::apache::thrift::test::IdentityAdapter<detail::DeclaredAfterStruct>, ::apache::thrift::type::struct_t<::facebook::thrift::test::detail::DeclaredAfterStruct>>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::reordered_dependent_adapted>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -7745,6 +7791,10 @@ class UnderlyingRenamedStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::data
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   template<class T>
@@ -7758,9 +7808,7 @@ class UnderlyingRenamedStruct final  {
                                                          ::apache::thrift::type::i64_t>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::data>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -7912,6 +7960,10 @@ class UnderlyingSameNamespaceStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::data
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   template<class T>
@@ -7925,9 +7977,7 @@ class UnderlyingSameNamespaceStruct final  {
                                                          ::apache::thrift::type::i64_t>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::data>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -8080,6 +8130,9 @@ class HeapAllocated final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 0;
 
   template<class T>
@@ -8091,8 +8144,7 @@ class HeapAllocated final  {
                                                          void>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -8185,6 +8237,10 @@ class MoveOnly final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::ptr
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   template<class T>
@@ -8198,9 +8254,7 @@ class MoveOnly final  {
                                                          ::apache::thrift::type::adapted<::apache::thrift::test::MoveOnlyAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::detail::HeapAllocated>>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::ptr>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -8336,6 +8390,10 @@ class AlsoMoveOnly final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::ptr
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   template<class T>
@@ -8349,9 +8407,7 @@ class AlsoMoveOnly final  {
                                                          ::apache::thrift::type::adapted<::apache::thrift::test::MoveOnlyAdapter, ::apache::thrift::type::i64_t>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::ptr>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -8488,6 +8544,9 @@ class ApplyAdapter final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 0;
 
   template<class T>
@@ -8499,8 +8558,7 @@ class ApplyAdapter final  {
                                                          void>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -8591,6 +8649,9 @@ class TransitiveAdapted final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 0;
 
   template<class T>
@@ -8602,8 +8663,7 @@ class TransitiveAdapted final  {
                                                          void>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -8696,6 +8756,12 @@ class CountingStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::regularInt,
+    ::apache::thrift::ident::countingInt,
+    ::apache::thrift::ident::regularString
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 3;
 
   template<class T>
@@ -8713,11 +8779,7 @@ class CountingStruct final  {
                                                          ::apache::thrift::type::adapted<::apache::thrift::test::CountingAdapter<false, std::string>, ::apache::thrift::type::string_t>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::regularInt,
-                                                      ::apache::thrift::ident::countingInt,
-                                                      ::apache::thrift::ident::regularString>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -8953,6 +9015,10 @@ class Person final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::name
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   template<class T>
@@ -8966,9 +9032,7 @@ class Person final  {
                                                          ::apache::thrift::type::string_t>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::name>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -9121,6 +9185,10 @@ class Person2 final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::name
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 1;
 
   template<class T>
@@ -9134,9 +9202,7 @@ class Person2 final  {
                                                          ::apache::thrift::type::string_t>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::name>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)

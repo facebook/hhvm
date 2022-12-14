@@ -110,6 +110,22 @@ class containerStruct2 final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = true;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::fieldA,
+    ::apache::thrift::ident::req_fieldA,
+    ::apache::thrift::ident::opt_fieldA,
+    ::apache::thrift::ident::fieldB,
+    ::apache::thrift::ident::req_fieldB,
+    ::apache::thrift::ident::opt_fieldB,
+    ::apache::thrift::ident::fieldC,
+    ::apache::thrift::ident::req_fieldC,
+    ::apache::thrift::ident::opt_fieldC,
+    ::apache::thrift::ident::fieldD,
+    ::apache::thrift::ident::fieldE,
+    ::apache::thrift::ident::req_fieldE,
+    ::apache::thrift::ident::opt_fieldE
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();

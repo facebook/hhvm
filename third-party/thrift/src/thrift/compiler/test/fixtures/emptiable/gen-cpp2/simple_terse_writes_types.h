@@ -245,6 +245,9 @@ class MyStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -311,6 +314,23 @@ class EmptiableStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::bool_field,
+    ::apache::thrift::ident::byte_field,
+    ::apache::thrift::ident::short_field,
+    ::apache::thrift::ident::int_field,
+    ::apache::thrift::ident::long_field,
+    ::apache::thrift::ident::float_field,
+    ::apache::thrift::ident::double_field,
+    ::apache::thrift::ident::string_field,
+    ::apache::thrift::ident::binary_field,
+    ::apache::thrift::ident::enum_field,
+    ::apache::thrift::ident::list_field,
+    ::apache::thrift::ident::set_field,
+    ::apache::thrift::ident::map_field,
+    ::apache::thrift::ident::struct_field
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -1116,6 +1136,23 @@ class NotEmptiableStruct final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::bool_field,
+    ::apache::thrift::ident::byte_field,
+    ::apache::thrift::ident::short_field,
+    ::apache::thrift::ident::int_field,
+    ::apache::thrift::ident::long_field,
+    ::apache::thrift::ident::float_field,
+    ::apache::thrift::ident::double_field,
+    ::apache::thrift::ident::string_field,
+    ::apache::thrift::ident::binary_field,
+    ::apache::thrift::ident::enum_field,
+    ::apache::thrift::ident::list_field,
+    ::apache::thrift::ident::set_field,
+    ::apache::thrift::ident::map_field,
+    ::apache::thrift::ident::struct_field
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();

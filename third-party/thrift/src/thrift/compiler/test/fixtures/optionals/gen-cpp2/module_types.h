@@ -202,6 +202,13 @@ class Color final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::red,
+    ::apache::thrift::ident::green,
+    ::apache::thrift::ident::blue,
+    ::apache::thrift::ident::alpha
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -482,6 +489,14 @@ class Vehicle final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::color,
+    ::apache::thrift::ident::licensePlate,
+    ::apache::thrift::ident::description,
+    ::apache::thrift::ident::name,
+    ::apache::thrift::ident::hasAC
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();
@@ -834,6 +849,19 @@ class Person final  {
   //  used by a static_assert in the corresponding source
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::id,
+    ::apache::thrift::ident::name,
+    ::apache::thrift::ident::age,
+    ::apache::thrift::ident::address,
+    ::apache::thrift::ident::favoriteColor,
+    ::apache::thrift::ident::friends,
+    ::apache::thrift::ident::bestFriend,
+    ::apache::thrift::ident::petNames,
+    ::apache::thrift::ident::afraidOfAnimal,
+    ::apache::thrift::ident::vehicles
+  >;
+
 
   void __fbthrift_clear();
   void __fbthrift_clear_terse_fields();

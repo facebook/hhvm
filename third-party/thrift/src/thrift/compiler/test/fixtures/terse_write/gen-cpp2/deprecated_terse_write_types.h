@@ -317,6 +317,9 @@ class MyStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 0;
 
   template<class T>
@@ -328,8 +331,7 @@ class MyStruct final  {
                                                          void>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -419,6 +421,23 @@ class StructLevelTerseStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::bool_field,
+    ::apache::thrift::ident::byte_field,
+    ::apache::thrift::ident::short_field,
+    ::apache::thrift::ident::int_field,
+    ::apache::thrift::ident::long_field,
+    ::apache::thrift::ident::float_field,
+    ::apache::thrift::ident::double_field,
+    ::apache::thrift::ident::string_field,
+    ::apache::thrift::ident::binary_field,
+    ::apache::thrift::ident::enum_field,
+    ::apache::thrift::ident::list_field,
+    ::apache::thrift::ident::set_field,
+    ::apache::thrift::ident::map_field,
+    ::apache::thrift::ident::struct_field
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 14;
 
   template<class T>
@@ -458,22 +477,7 @@ class StructLevelTerseStruct final  {
                                                          ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::bool_field,
-                                                      ::apache::thrift::ident::byte_field,
-                                                      ::apache::thrift::ident::short_field,
-                                                      ::apache::thrift::ident::int_field,
-                                                      ::apache::thrift::ident::long_field,
-                                                      ::apache::thrift::ident::float_field,
-                                                      ::apache::thrift::ident::double_field,
-                                                      ::apache::thrift::ident::string_field,
-                                                      ::apache::thrift::ident::binary_field,
-                                                      ::apache::thrift::ident::enum_field,
-                                                      ::apache::thrift::ident::list_field,
-                                                      ::apache::thrift::ident::set_field,
-                                                      ::apache::thrift::ident::map_field,
-                                                      ::apache::thrift::ident::struct_field>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)
@@ -1369,6 +1373,37 @@ class FieldLevelTerseStruct final  {
   static constexpr bool __fbthrift_cpp2_gen_json = false;
   static const char* __fbthrift_thrift_uri();
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::terse_bool_field,
+    ::apache::thrift::ident::terse_byte_field,
+    ::apache::thrift::ident::terse_short_field,
+    ::apache::thrift::ident::terse_int_field,
+    ::apache::thrift::ident::terse_long_field,
+    ::apache::thrift::ident::terse_float_field,
+    ::apache::thrift::ident::terse_double_field,
+    ::apache::thrift::ident::terse_string_field,
+    ::apache::thrift::ident::terse_binary_field,
+    ::apache::thrift::ident::terse_enum_field,
+    ::apache::thrift::ident::terse_list_field,
+    ::apache::thrift::ident::terse_set_field,
+    ::apache::thrift::ident::terse_map_field,
+    ::apache::thrift::ident::terse_struct_field,
+    ::apache::thrift::ident::bool_field,
+    ::apache::thrift::ident::byte_field,
+    ::apache::thrift::ident::short_field,
+    ::apache::thrift::ident::int_field,
+    ::apache::thrift::ident::long_field,
+    ::apache::thrift::ident::float_field,
+    ::apache::thrift::ident::double_field,
+    ::apache::thrift::ident::string_field,
+    ::apache::thrift::ident::binary_field,
+    ::apache::thrift::ident::enum_field,
+    ::apache::thrift::ident::list_field,
+    ::apache::thrift::ident::set_field,
+    ::apache::thrift::ident::map_field,
+    ::apache::thrift::ident::struct_field
+  >;
+
   static constexpr std::size_t __fbthrift_field_size_v = 28;
 
   template<class T>
@@ -1436,36 +1471,7 @@ class FieldLevelTerseStruct final  {
                                                          ::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated::MyStruct>>;
 
   template<class T>
-  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
-                                                      void,
-                                                      ::apache::thrift::ident::terse_bool_field,
-                                                      ::apache::thrift::ident::terse_byte_field,
-                                                      ::apache::thrift::ident::terse_short_field,
-                                                      ::apache::thrift::ident::terse_int_field,
-                                                      ::apache::thrift::ident::terse_long_field,
-                                                      ::apache::thrift::ident::terse_float_field,
-                                                      ::apache::thrift::ident::terse_double_field,
-                                                      ::apache::thrift::ident::terse_string_field,
-                                                      ::apache::thrift::ident::terse_binary_field,
-                                                      ::apache::thrift::ident::terse_enum_field,
-                                                      ::apache::thrift::ident::terse_list_field,
-                                                      ::apache::thrift::ident::terse_set_field,
-                                                      ::apache::thrift::ident::terse_map_field,
-                                                      ::apache::thrift::ident::terse_struct_field,
-                                                      ::apache::thrift::ident::bool_field,
-                                                      ::apache::thrift::ident::byte_field,
-                                                      ::apache::thrift::ident::short_field,
-                                                      ::apache::thrift::ident::int_field,
-                                                      ::apache::thrift::ident::long_field,
-                                                      ::apache::thrift::ident::float_field,
-                                                      ::apache::thrift::ident::double_field,
-                                                      ::apache::thrift::ident::string_field,
-                                                      ::apache::thrift::ident::binary_field,
-                                                      ::apache::thrift::ident::enum_field,
-                                                      ::apache::thrift::ident::list_field,
-                                                      ::apache::thrift::ident::set_field,
-                                                      ::apache::thrift::ident::map_field,
-                                                      ::apache::thrift::ident::struct_field>;
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
 
   struct __fbthrift_ordinal_impl {
 #if (defined(_MSC_VER) && _MSC_VER >= 1920) || defined(__clang__)

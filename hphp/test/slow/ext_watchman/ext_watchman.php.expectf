@@ -19,7 +19,7 @@ PASS
 Test delete subscription callback
 Got expected exception: Problem(s) on subscription named 'X'. Connection IS alive.
 First error:
-%s: Unit '/tmp/%s' no longer exists.
+%s: Unit '%s' no longer exists.
 PASS
 Stress test
 ..............................

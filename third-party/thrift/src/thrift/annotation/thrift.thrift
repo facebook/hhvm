@@ -298,6 +298,7 @@ struct GenEnumSet {
 @scope.Transitive
 struct v1 {}
 
+// TODO(dokwon): Re-enable v1 features.
 /**
  * Enables all beta v1 features.
  *
@@ -306,13 +307,14 @@ struct v1 {}
  * released Thrift features.
  */
 @v1 // All v1 features.
-@GenDefaultEnumValue
-@NoLegacy // Disables features that will be removed.
-@Beta // All uses of v1beta inherit `@Beta`.
-@TerseWrite
+// @GenDefaultEnumValue
+// @NoLegacy // Disables features that will be removed.
+// @Beta // All uses of v1beta inherit `@Beta`.
+// @TerseWrite
 @scope.Transitive
 struct v1beta {}
 
+// TODO(dokwon): Re-enable v1 features.
 /**
  * Enables all experimental v1 features.
  *
@@ -321,11 +323,12 @@ struct v1beta {}
  * in all contexts.
  */
 @v1beta // All v1beta features.
-@SerializeInFieldIdOrder
-@Experimental // All uses of v1alpha inherit `@Experimental`.
+// @SerializeInFieldIdOrder
+// @Experimental // All uses of v1alpha inherit `@Experimental`.
 @scope.Transitive
 struct v1alpha {}
 
+// TODO(dokwon): Re-enable v1 features.
 /**
  * Enables experimental features, even those that are known to break common
  * use cases.

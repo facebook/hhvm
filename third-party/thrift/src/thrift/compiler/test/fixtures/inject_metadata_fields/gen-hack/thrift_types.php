@@ -1966,22 +1966,6 @@ class v1beta implements \IThriftSyncStruct, \IThriftStructMetadata {
           shape(
           )
         ),
-        '\thrift\annotation\GenDefaultEnumValue' => \thrift\annotation\GenDefaultEnumValue::fromShape(
-          shape(
-          )
-        ),
-        '\thrift\annotation\NoLegacy' => \thrift\annotation\NoLegacy::fromShape(
-          shape(
-          )
-        ),
-        '\thrift\annotation\Beta' => \thrift\annotation\Beta::fromShape(
-          shape(
-          )
-        ),
-        '\thrift\annotation\TerseWrite' => \thrift\annotation\TerseWrite::fromShape(
-          shape(
-          )
-        ),
         '\thrift\annotation\Transitive' => \thrift\annotation\Transitive::fromShape(
           shape(
           )
@@ -2054,14 +2038,6 @@ class v1alpha implements \IThriftSyncStruct, \IThriftStructMetadata {
     return shape(
       'struct' => dict[
         '\thrift\annotation\v1beta' => \thrift\annotation\v1beta::fromShape(
-          shape(
-          )
-        ),
-        '\thrift\annotation\SerializeInFieldIdOrder' => \thrift\annotation\SerializeInFieldIdOrder::fromShape(
-          shape(
-          )
-        ),
-        '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
           shape(
           )
         ),

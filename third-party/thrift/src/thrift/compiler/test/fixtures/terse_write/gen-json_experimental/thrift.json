@@ -700,34 +700,6 @@
 },
         "value" : {}
       },
-          "thrift.GenDefaultEnumValue" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "GenDefaultEnumValue"
-},
-        "value" : {}
-      },
-          "thrift.NoLegacy" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "NoLegacy"
-},
-        "value" : {}
-      },
-          "thrift.Beta" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Beta"
-},
-        "value" : {}
-      },
-          "thrift.TerseWrite" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite"
-},
-        "value" : {}
-      },
           "scope.Transitive" : {
         "type" : {
   "type" : "struct",
@@ -740,7 +712,7 @@
         "docstring" : "Enables all beta v1 features.\n\nBeta features are guaranteed to *not* break unrelated Thrift features\nso they should be relatively safe to test alongside other beta or\nreleased Thrift features.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 308
+        "lineno" : 309
       },
       "v1alpha" : {
         "name" : "v1alpha",
@@ -749,20 +721,6 @@
         "type" : {
   "type" : "struct",
   "name" : "v1beta"
-},
-        "value" : {}
-      },
-          "thrift.SerializeInFieldIdOrder" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "SerializeInFieldIdOrder"
-},
-        "value" : {}
-      },
-          "thrift.Experimental" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Experimental"
 },
         "value" : {}
       },
@@ -778,7 +736,7 @@
         "docstring" : "Enables all experimental v1 features.\n\nUse with *caution* and only with explicit permission. This may enable\nfeatures may change significantly without notice or not work correctly\nin all contexts.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 323
+        "lineno" : 325
       },
       "v1test" : {
         "name" : "v1test",
@@ -816,7 +774,7 @@
         "docstring" : "Enables experimental features, even those that are known to break common\nuse cases.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 333
+        "lineno" : 336
       },
       "ExceptionMessage" : {
         "name" : "ExceptionMessage",
@@ -842,14 +800,14 @@
           "field" : {
             "name" : "field",
             "key" : 1,
-            "lineno" : 349,
+            "lineno" : 352,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 346
+        "lineno" : 349
       },
       "GenerateRuntimeSchema" : {
         "name" : "GenerateRuntimeSchema",
@@ -907,14 +865,14 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 364,
+            "lineno" : 367,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 357
+        "lineno" : 360
       },
       "InternBox" : {
         "name" : "InternBox",
@@ -938,7 +896,7 @@
         "docstring" : "Indicates that a field's value should never be stored on the stack, and that\nidentical values can be shared in immutable contexts.\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 371
+        "lineno" : 374
       }
       },
   "source_path" : "thrift/annotation/thrift",

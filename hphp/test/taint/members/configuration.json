@@ -1,9 +1,0 @@
-{
-  "sources": [
-    {"name": "__source"}
-  ],
-  "sinks": [
-    {"name": "__sink", "index": 0 },
-    {"name": "__sink_with_shape", "index": 0 }
-  ]
-}

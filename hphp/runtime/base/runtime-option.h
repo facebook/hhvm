@@ -1432,10 +1432,6 @@ struct RuntimeOption {
   F(bool, TraitConstantInterfaceBehavior, false)                        \
   /* 0 nothing, 1 notice, 2 error */                                    \
   F(uint32_t, ThrowOnIterationOverObjects, 0)                           \
-  F(string, TaintConfigurationPath, std::string(""))                    \
-  F(string, TaintConfigurationJson, std::string(""))                    \
-  F(string, TaintOutputDirectory, std::string(""))                      \
-  F(bool, TaintLogRequestURLs, false)                                   \
   F(bool, DiamondTraitMethods, false)                                   \
   F(uint32_t, HHIRSpecializedDestructorThreshold, 80)                   \
   F(bool, FastRepoOptionCache, true)                                    \

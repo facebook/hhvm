@@ -101,7 +101,6 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/super-inlining-bros.h"
-#include "hphp/runtime/vm/taint/interpreter.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/workload-stats.h"
@@ -5450,21 +5449,12 @@ struct litstr_id {
 #define PASS_FIVE(...) , imm1, imm2, imm3, imm4, imm5
 #define PASS_SIX(...) , imm1, imm2, imm3, imm4, imm5, imm6
 
-#ifdef HHVM_TAINT
-#define TAINT(name, imm, in, out, flags)                             \
-  iopWrapReturn(                                                     \
-    taint::iop##name, breakOnCtlFlow, origpc FLAG_##flags PASS_##imm);
-#else
-#define TAINT(name, imm, in, out, flags) ;
-#endif
-
 #define O(name, imm, in, out, flags)                                 \
   template<bool breakOnCtlFlow>                                      \
   OPTBLD_INLINE JitResumeAddr iopWrap##name(PC& pc) {                \
     UNUSED auto constexpr op = Op::name;                             \
     UNUSED auto const origpc = pc - encoded_op_size(op);             \
     DECODE_##imm                                                     \
-    TAINT(name, imm, in, out, flags);                                \
     return iopWrapReturn(                                            \
       iop##name, breakOnCtlFlow, origpc FLAG_##flags PASS_##imm);    \
   }

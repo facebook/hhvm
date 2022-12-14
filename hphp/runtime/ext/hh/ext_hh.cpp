@@ -85,6 +85,19 @@ bool HHVM_FUNCTION(autoload_set_paths,
     return false;
   }
 
+  if (!RuntimeOption::AutoloadUserlandEnabled) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Attempted to call HH\\autoload_set_paths() when "
+      "Autoload.UserlandEnabled is false. HH\\autoload_set_paths() will soon "
+      "be deleted so HHVM internals can start depending on native "
+      "autoloading.");
+  } else if (HHVM_FN(autoload_is_native)()) {
+    raise_notice(
+      "Attempted to call HH\\autoload_set_paths() while the native autoloader "
+      "is enabled. HH\\autoload_set_paths() disables the native autoloader, "
+      "putting us on a deprecated code path that will soon stop working.");
+  }
+
   if (map.isArray()) {
     return AutoloadHandler::s_instance->setMap(map.asCArrRef(), root);
   }

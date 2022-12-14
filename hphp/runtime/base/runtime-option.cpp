@@ -844,6 +844,7 @@ std::string RuntimeOption::SourceRoot = Process::GetCurrentDirectory() + '/';
 std::vector<std::string> RuntimeOption::IncludeSearchPaths;
 std::map<std::string, std::string> RuntimeOption::IncludeRoots;
 bool RuntimeOption::AutoloadEnabled;
+bool RuntimeOption::AutoloadUserlandEnabled;
 bool RuntimeOption::AutoloadEnableExternFactExtractor;
 std::string RuntimeOption::AutoloadDBPath;
 bool RuntimeOption::AutoloadDBCanCreate;
@@ -2440,6 +2441,7 @@ void RuntimeOption::Load(
     IncludeSearchPaths.insert(IncludeSearchPaths.begin(), ".");
 
     Config::Bind(AutoloadEnabled, ini, config, "Autoload.Enabled", false);
+    Config::Bind(AutoloadUserlandEnabled, ini, config, "Autoload.UserlandEnabled", true);
     Config::Bind(AutoloadDBPath, ini, config, "Autoload.DB.Path");
     Config::Bind(AutoloadEnableExternFactExtractor, ini, config, "Autoload.EnableExternFactExtractor", true);
 

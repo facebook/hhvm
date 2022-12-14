@@ -38,6 +38,8 @@ Paths:
     Constants:
     Modules:
     TypeAliases:
+
+Notice: Attempted to call HH\autoload_set_paths() while the native autoloader is enabled. HH\autoload_set_paths() disables the native autoloader, putting us on a deprecated code path that will soon stop working.%s
 Overriding: 1
 Native Autoload: false
 Test passed successfully
@@ -80,5 +82,7 @@ Paths:
     Constants:
     Modules:
     TypeAliases:
+
+Notice: Attempted to call HH\autoload_set_paths() while the native autoloader is enabled. HH\autoload_set_paths() disables the native autoloader, putting us on a deprecated code path that will soon stop working.%s
 Overriding: 1
 Native Autoload: false

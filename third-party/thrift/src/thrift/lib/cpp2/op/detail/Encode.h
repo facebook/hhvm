@@ -725,14 +725,23 @@ struct Decode<type::cpp_type<T, Tag>> : Decode<Tag> {
   }
 };
 
-// TODO: Use inplace adapter deserialization as optimization.
 template <typename Adapter, typename Tag>
 struct Decode<type::adapted<Adapter, Tag>> {
   template <typename Protocol, typename U>
   void operator()(Protocol& prot, U& m) const {
-    type::native_type<Tag> orig;
-    Decode<Tag>{}(prot, orig);
-    m = Adapter::fromThrift(std::move(orig));
+    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::
+        has_inplace_toThrift<Adapter, folly::remove_cvref_t<U>>::value;
+    folly::if_constexpr<hasInplaceToThrift>(
+        [&](auto tag) {
+          using T = decltype(tag);
+          Decode<T>{}(prot, Adapter::toThrift(m));
+        },
+        [&](auto tag) {
+          using T = decltype(tag);
+          type::native_type<T> orig;
+          Decode<T>{}(prot, orig);
+          m = Adapter::fromThrift(std::move(orig));
+        })(Tag{});
   }
 
   template <typename FieldId, class Struct, class Protocol, class U>

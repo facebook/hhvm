@@ -59,6 +59,11 @@ struct OpEncodeStruct {
   @cpp.Adapter{name = "::apache::thrift::test::AdapterWithContext"}
   14: list<AdaptedFoo> adapted_list_field;
   15: string meta;
+
+  16: binary (
+    cpp.type = "::apache::thrift::test::IndirectionIOBuf",
+    cpp.indirection,
+  ) buf;
 }
 
 struct Baz {

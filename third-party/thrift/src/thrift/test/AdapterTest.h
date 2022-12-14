@@ -83,10 +83,14 @@ struct String {
   std::string val;
 };
 
-struct IndirectionString {
+template <class T>
+struct Indirection {
   FBTHRIFT_CPP_DEFINE_MEMBER_INDIRECTION_FN(val);
-  std::string val;
+  T val;
 };
+
+using IndirectionString = Indirection<std::string>;
+using IndirectionIOBuf = Indirection<folly::IOBuf>;
 
 struct OverloadedAdapter {
   static Num fromThrift(int64_t val) { return Num{val}; }

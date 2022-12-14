@@ -24,6 +24,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/thrift/adapter.h"
 #include "hphp/runtime/ext/thrift/field_wrapper.h"
+#include "hphp/runtime/ext/thrift/type_wrapper.h"
 #include "hphp/runtime/ext/thrift/util.h"
 #include "hphp/util/hash-map.h"
 
@@ -48,6 +49,7 @@ const StaticString
   s_format("format"),
   s_SPEC("SPEC"),
   s_isWrapped("is_wrapped"),
+  s_isTypeWrapped("is_type_wrapped"),
   s_isTerse("is_terse");
 
 Array get_tspec(const Class* cls) {
@@ -272,6 +274,8 @@ FieldSpec FieldSpec::compile(const Array& fieldSpec, bool topLevel) {
   field.adapter = getAdapter(fieldSpec);
   field.isWrapped = tvCastToBoolean(
       fieldSpec.lookup(s_isWrapped, AccessFlags::Key));
+  field.isTypeWrapped = tvCastToBoolean(
+      fieldSpec.lookup(s_isTypeWrapped, AccessFlags::Key));
   field.isTerse = tvCastToBoolean(
       fieldSpec.lookup(s_isTerse, AccessFlags::Key));
   return field;

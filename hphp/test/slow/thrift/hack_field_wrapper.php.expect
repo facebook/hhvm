@@ -1,28 +1,44 @@
 --- binary ---
 ----OuterStructWithWrapper----
 		 value = 42
-		 struct_value = null
-string(32) "26cc06895b4bb7b431b2580f9443bb12"
+		 struct_value = ----InnerStruct----
+				 value = 100
+string(32) "1acea58b16cd99b30dbe5254d151b321"
 ----OuterStructWithWrapper----
 		 value = 42
-		 struct_value = null
+		 struct_value = ----InnerStruct----
+				 value = 100
 ----OuterStructNoWrappedFields----
 		 value = 42
-		 struct_value = null
+		 struct_value = ----InnerStruct----
+				 value = 100
 ----OuterStructWithWrapperAndAdapter----
 		 value = Int value is 42
-		 struct_value = null
+		 struct_value = ----InnerStruct----
+				 value = 100
+----StructWithTypeWrapper----
+		 value = 42
+		 struct_value = ----InnerStruct----
+				 value = 100
 --- compact ---
 ----OuterStructWithWrapper----
 		 value = 42
-		 struct_value = null
-string(32) "633119f2b60fec192ff10759cf557234"
+		 struct_value = ----InnerStruct----
+				 value = 100
+string(32) "b84edd39e84920abb3d3187e1cc0f6ea"
 ----OuterStructWithWrapper----
 		 value = 42
-		 struct_value = null
+		 struct_value = ----InnerStruct----
+				 value = 100
 ----OuterStructNoWrappedFields----
 		 value = 42
-		 struct_value = null
+		 struct_value = ----InnerStruct----
+				 value = 100
 ----OuterStructWithWrapperAndAdapter----
 		 value = Int value is 42
-		 struct_value = null
+		 struct_value = ----InnerStruct----
+				 value = 100
+----StructWithTypeWrapper----
+		 value = 42
+		 struct_value = ----InnerStruct----
+				 value = 100

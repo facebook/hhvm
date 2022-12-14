@@ -6,6 +6,7 @@ HHVM_DEFINE_EXTENSION("thrift"
     compact.cpp
     ext_thrift.cpp
     spec-holder.cpp
+    type_wrapper.cpp
   HEADERS
     adapter.h
     field_wrapper.h
@@ -13,6 +14,7 @@ HHVM_DEFINE_EXTENSION("thrift"
     ext_thrift.h
     spec-holder.h
     transport.h
+    type_wrapper.h
   DEPENDS
     libThrift
   SYSTEMLIB

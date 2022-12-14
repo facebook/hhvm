@@ -119,3 +119,9 @@ impl StringInterner {
             .for_each(|(idx, s)| f(UnitBytesId::from_usize(idx), s))
     }
 }
+
+impl std::fmt::Debug for StringInterner {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("{intern}")
+    }
+}

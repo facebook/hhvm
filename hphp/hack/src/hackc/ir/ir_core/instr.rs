@@ -83,7 +83,7 @@ pub trait CanThrow {
 /// should be. Q: Should the type be on the Instr itself or embedded in the
 /// Func::instrs table?
 ///
-#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands, PartialEq, Eq)]
 pub enum Instr {
     Call(Box<Call>),
     Hhbc(Hhbc),
@@ -134,7 +134,7 @@ impl CanThrow for Instr {
     }
 }
 
-#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands, Display)]
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands, Display, PartialEq, Eq)]
 pub enum Terminator {
     // This is an async call - it's a terminator with one edge for the async
     // return and one edge for the eager return. The async edge takes a single
@@ -314,7 +314,7 @@ impl CanThrow for Terminator {
     }
 }
 
-#[derive(Clone, Debug, HasLocals, HasLoc)]
+#[derive(Clone, Debug, HasLocals, HasLoc, PartialEq, Eq)]
 pub struct MemoGet {
     pub edges: [BlockId; 2],
     pub locals: Box<[LocalId]>,
@@ -353,7 +353,7 @@ impl HasEdges for MemoGet {
     }
 }
 
-#[derive(Clone, Debug, HasLoc, HasLocals)]
+#[derive(Clone, Debug, HasLoc, HasLocals, PartialEq, Eq)]
 pub struct MemoGetEager {
     pub edges: [BlockId; 3],
     pub locals: Box<[LocalId]>,
@@ -396,7 +396,7 @@ impl HasEdges for MemoGetEager {
     }
 }
 
-#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands, Display)]
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands, Display, PartialEq, Eq)]
 pub enum Hhbc {
     AKExists([ValueId; 2], LocId),
     Add([ValueId; 2], LocId),
@@ -556,7 +556,7 @@ impl CanThrow for Hhbc {
     }
 }
 
-#[derive(Debug, HasLoc, Clone)]
+#[derive(Debug, HasLoc, Clone, PartialEq, Eq)]
 pub enum BaseOp {
     // Get base from value. Has output of base value.
     BaseC {
@@ -586,7 +586,7 @@ pub enum BaseOp {
     },
 }
 
-#[derive(Debug, HasLoc, Clone)]
+#[derive(Debug, HasLoc, Clone, PartialEq, Eq)]
 pub struct IntermediateOp {
     pub key: MemberKey,
     pub mode: MOpMode,
@@ -594,7 +594,7 @@ pub struct IntermediateOp {
     pub loc: LocId,
 }
 
-#[derive(Debug, HasLoc, Clone)]
+#[derive(Debug, HasLoc, Clone, PartialEq, Eq)]
 pub enum FinalOp {
     IncDecM {
         key: MemberKey,
@@ -655,7 +655,7 @@ impl FinalOp {
     }
 }
 
-#[derive(Debug, HasLoc, HasLocals, HasOperands, Clone)]
+#[derive(Debug, HasLoc, HasLocals, HasOperands, Clone, PartialEq, Eq)]
 #[has_loc("base_op")]
 pub struct MemberOp {
     pub operands: Box<[ValueId]>,
@@ -702,7 +702,7 @@ impl CanThrow for MemberOp {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum CallDetail {
     // A::$b(42);
     // $a::$b(42);
@@ -838,7 +838,7 @@ impl CallDetail {
     }
 }
 
-#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands, PartialEq, Eq)]
 #[has_locals(none)]
 pub struct Call {
     pub operands: Box<[ValueId]>,
@@ -873,7 +873,7 @@ impl CanThrow for Call {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum IncludeKind {
     Eval,
     Include,
@@ -883,7 +883,7 @@ pub enum IncludeKind {
     RequireOnceDoc,
 }
 
-#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands, PartialEq, Eq)]
 #[has_locals(none)]
 pub struct IncludeEval {
     pub kind: IncludeKind,
@@ -899,7 +899,7 @@ impl CanThrow for IncludeEval {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MemberKey {
     // cell from stack as index
     //   $a[foo()]
@@ -1008,13 +1008,13 @@ impl CanThrow for MemberArgs {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Predicate {
     NonZero,
     Zero,
 }
 
-#[derive(Clone, Debug, HasLoc)]
+#[derive(Clone, Debug, HasLoc, PartialEq, Eq)]
 pub struct IteratorArgs {
     pub iter_id: IterId,
     // Stored as [ValueLid, KeyLid]
@@ -1068,7 +1068,7 @@ impl HasLocals for IteratorArgs {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum CmpOp {
     Eq,
     Gt,
@@ -1081,14 +1081,14 @@ pub enum CmpOp {
 }
 
 /// Instructions used by the SSA pass.
-#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands, PartialEq, Eq)]
 pub enum Tmp {
     SetVar(VarId, ValueId), // var, value
     GetVar(VarId),          // var
 }
 
 /// Instructions used during ir_to_bc.
-#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands, PartialEq, Eq)]
 pub enum IrToBc {
     PopC,
     PopL(LocalId),
@@ -1099,7 +1099,7 @@ pub enum IrToBc {
 }
 
 /// Instructions used during conversions/textual.
-#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands, PartialEq, Eq)]
 #[has_locals(none)]
 pub enum Textual {
     /// If the expression is not true then halt execution along this path.
@@ -1131,7 +1131,7 @@ impl Textual {
     }
 }
 
-#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands, PartialEq, Eq)]
 pub enum Special {
     Copy(ValueId),
     IrToBc(IrToBc),

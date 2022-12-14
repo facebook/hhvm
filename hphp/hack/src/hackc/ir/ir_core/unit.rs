@@ -22,7 +22,7 @@ use crate::IncludePath;
 use crate::Module;
 use crate::Typedef;
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct SymbolRefs<'a> {
     pub classes: Vec<ClassName<'a>>,
     pub constants: Vec<ConstName<'a>>,
@@ -40,7 +40,7 @@ pub struct Fatal {
 }
 
 /// Unit represents a single parsed file.
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Unit<'a> {
     /// The list of classes defined in this Unit. This also includes enums which
     /// are transformed into classes internally.

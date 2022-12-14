@@ -36,7 +36,7 @@ pub(crate) struct CmpError {
 }
 
 impl CmpError {
-    fn error(what: String) -> Self {
+    pub fn error(what: String) -> Self {
         CmpError { what, loc: None }
     }
 }
@@ -60,7 +60,7 @@ macro_rules! bail {
     };
 }
 
-trait CmpContext {
+pub(crate) trait CmpContext {
     fn with_indexed<F: FnOnce() -> String>(self, f: F) -> Self;
     fn indexed(self, idx: &str) -> Self;
     fn qualified(self, name: &str) -> Self;
@@ -104,105 +104,116 @@ impl<T> CmpContext for Result<T, CmpError> {
     }
 }
 
-type Result<T, E = CmpError> = std::result::Result<T, E>;
+pub(crate) type Result<T = (), E = CmpError> = std::result::Result<T, E>;
 
-trait MapName {
-    fn get_name(&self) -> &str;
+pub(crate) trait MapName {
+    fn get_name(&self) -> String;
+}
+
+impl<T: MapName> MapName for &T {
+    fn get_name(&self) -> String {
+        T::get_name(self)
+    }
 }
 
 impl MapName for hhbc::Adata<'_> {
-    fn get_name(&self) -> &str {
-        self.id.unsafe_as_str()
+    fn get_name(&self) -> String {
+        self.id.unsafe_as_str().to_string()
     }
 }
 
 impl MapName for hhbc::Class<'_> {
-    fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+    fn get_name(&self) -> String {
+        self.name.unsafe_as_str().to_string()
     }
 }
 
 impl MapName for hhbc::Constant<'_> {
-    fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+    fn get_name(&self) -> String {
+        self.name.unsafe_as_str().to_string()
     }
 }
 
 impl MapName for hhbc::CtxConstant<'_> {
-    fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+    fn get_name(&self) -> String {
+        self.name.unsafe_as_str().to_string()
     }
 }
 
 impl MapName for hhbc::Function<'_> {
-    fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+    fn get_name(&self) -> String {
+        self.name.unsafe_as_str().to_string()
     }
 }
 
 impl MapName for hhbc::Method<'_> {
-    fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+    fn get_name(&self) -> String {
+        self.name.unsafe_as_str().to_string()
     }
 }
 
 impl MapName for hhbc::Module<'_> {
-    fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+    fn get_name(&self) -> String {
+        self.name.unsafe_as_str().to_string()
     }
 }
 
 impl MapName for hhbc::Property<'_> {
-    fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+    fn get_name(&self) -> String {
+        self.name.unsafe_as_str().to_string()
     }
 }
 
 impl MapName for hhbc::Typedef<'_> {
-    fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+    fn get_name(&self) -> String {
+        self.name.unsafe_as_str().to_string()
     }
 }
 
 impl MapName for hhbc::TypeConstant<'_> {
-    fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+    fn get_name(&self) -> String {
+        self.name.unsafe_as_str().to_string()
     }
 }
 
 impl MapName for hhbc::Requirement<'_> {
-    fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+    fn get_name(&self) -> String {
+        self.name.unsafe_as_str().to_string()
     }
 }
 
 impl MapName for hhbc::UpperBound<'_> {
-    fn get_name(&self) -> &str {
-        self.name.unsafe_as_str()
+    fn get_name(&self) -> String {
+        self.name.unsafe_as_str().to_string()
     }
 }
 
-fn cmp_eq<Ta, Tb>(a: &Ta, b: &Tb) -> Result<()>
+pub(crate) fn cmp_eq<Ta, Tb>(a: Ta, b: Tb) -> Result
 where
-    Ta: ?Sized + PartialEq<Tb> + fmt::Debug,
-    Tb: ?Sized + fmt::Debug,
+    Ta: PartialEq<Tb> + fmt::Debug,
+    Tb: fmt::Debug,
 {
     if a != b {
         bail!("Mismatch {:?} vs {:?}", a, b);
+        //panic!("Mismatch {:?} vs {:?}", a, b);
     }
     Ok(())
 }
 
-fn cmp_map_t<'a, 'b, Ta: 'a, Tb: 'b, F>(a: &'a [Ta], b: &'b [Tb], f_eq: F) -> Result<()>
+pub(crate) fn cmp_map_t<'a, 'b, Ta: 'a, Tb: 'b, F>(
+    a: impl IntoIterator<Item = Ta>,
+    b: impl IntoIterator<Item = Tb>,
+    f_eq: F,
+) -> Result
 where
-    Ta: MapName,
-    Tb: MapName,
-    F: Fn(&'a Ta, &'b Tb) -> Result<()>,
+    Ta: MapName + 'a + Copy,
+    Tb: MapName + 'b + Copy,
+    F: Fn(Ta, Tb) -> Result,
 {
-    let a_hash: HashMap<&str, &Ta> = a.iter().map(|t| (t.get_name(), t)).collect();
-    let b_hash: HashMap<&str, &Tb> = b.iter().map(|t| (t.get_name(), t)).collect();
-    let a_keys: HashSet<&str> = a_hash.keys().copied().collect();
-    let b_keys: HashSet<&str> = b_hash.keys().copied().collect();
+    let a_hash: HashMap<String, Ta> = a.into_iter().map(|t| (t.get_name(), t)).collect();
+    let b_hash: HashMap<String, Tb> = b.into_iter().map(|t| (t.get_name(), t)).collect();
+    let a_keys: HashSet<&String> = a_hash.keys().collect();
+    let b_keys: HashSet<&String> = b_hash.keys().collect();
     for k in &a_keys & &b_keys {
         f_eq(a_hash[k], b_hash[k]).with_indexed(|| k.to_string())?;
     }
@@ -218,7 +229,7 @@ where
     Ok(())
 }
 
-fn cmp_set_t<'a, T>(a: &'a [T], b: &'a [T]) -> Result<()>
+fn cmp_set_t<'a, T>(a: &'a [T], b: &'a [T]) -> Result
 where
     T: std::hash::Hash + Eq + std::fmt::Debug,
 {
@@ -236,29 +247,51 @@ where
     Ok(())
 }
 
-fn cmp_option<T, F>(a: Option<&T>, b: Option<&T>, f_eq: F) -> Result<()>
+pub(crate) fn cmp_option<T, F>(a: Option<T>, b: Option<T>, f_eq: F) -> Result
 where
-    T: fmt::Debug,
-    F: FnOnce(&T, &T) -> Result<()>,
+    T: std::fmt::Debug + Copy,
+    F: FnOnce(T, T) -> Result,
 {
     match (a, b) {
         (None, None) => Ok(()),
-        (Some(inner), None) => bail!("Some({inner:?})\nNone"),
-        (None, Some(inner)) => bail!("None\nSome({inner:?})"),
+        (Some(a), None) => bail!("Some({a:?})\nNone"),
+        (None, Some(b)) => bail!("None\nSome({b:?})"),
         (Some(lhs), Some(rhs)) => f_eq(lhs, rhs),
     }
 }
 
-fn cmp_slice<'a, V, F>(a: &'a [V], b: &'a [V], f_eq: F) -> Result<()>
+pub(crate) fn cmp_slice<'a, 'b, Ta, Tb, F>(
+    a: impl IntoIterator<Item = Ta>,
+    b: impl IntoIterator<Item = Tb>,
+    f_eq: F,
+) -> Result
 where
-    F: Fn(&V, &V) -> Result<()>,
+    Ta: 'a + Copy,
+    Tb: 'b + Copy,
+    F: Fn(Ta, Tb) -> Result,
 {
-    if a.len() != b.len() {
-        bail!("Length mismatch: {} vs {}", a.len(), b.len());
+    let mut a = a.into_iter();
+    let mut b = b.into_iter();
+
+    let mut idx = 0;
+    loop {
+        match (a.next(), b.next()) {
+            (None, None) => break,
+            (Some(_), None) => {
+                let rest = 1 + a.count();
+                bail!("Length mismatch: lhs is longer ({} vs {})", idx + rest, idx);
+            }
+            (None, Some(_)) => {
+                let rest = 1 + b.count();
+                bail!("Length mismatch: rhs is longer ({} vs {})", idx, idx + rest);
+            }
+            (Some(av), Some(bv)) => {
+                f_eq(av, bv).with_indexed(|| idx.to_string())?;
+            }
+        }
+        idx += 1;
     }
-    for (i, (av, bv)) in a.iter().zip(b.iter()).enumerate() {
-        f_eq(av, bv).with_indexed(|| i.to_string())?;
-    }
+
     Ok(())
 }
 
@@ -268,7 +301,7 @@ where
 fn cmp_includes(
     a: &Slice<'_, hhbc::IncludePath<'_>>,
     b: &Slice<'_, hhbc::IncludePath<'_>>,
-) -> Result<()> {
+) -> Result {
     for bv in b.iter() {
         if !a.iter().any(|av| cmp_include(av, bv).is_ok()) {
             bail!("{:?} has no matching includes", bv);
@@ -277,11 +310,11 @@ fn cmp_includes(
     Ok(())
 }
 
-fn cmp_attributes(a: &[Attribute<'_>], b: &[Attribute<'_>]) -> Result<()> {
+fn cmp_attributes(a: &[Attribute<'_>], b: &[Attribute<'_>]) -> Result {
     cmp_set_t(a, b)
 }
 
-fn cmp_body(a: &Body<'_>, b: &Body<'_>) -> Result<()> {
+fn cmp_body(a: &Body<'_>, b: &Body<'_>) -> Result {
     let Body {
         body_instrs: a_body_instrs,
         decl_vars: a_decl_vars,
@@ -342,7 +375,7 @@ fn cmp_body(a: &Body<'_>, b: &Body<'_>) -> Result<()> {
 /// This is unique because only a few FCAFlags are printed -- those specified in
 /// as-base-hhas.h.
 /// T126391106 -- BCP drops information
-fn cmp_fcallargflags(a: &hhbc::FCallArgsFlags, b: &hhbc::FCallArgsFlags) -> Result<()> {
+fn cmp_fcallargflags(a: &hhbc::FCallArgsFlags, b: &hhbc::FCallArgsFlags) -> Result {
     use hhbc::FCallArgsFlags;
     let mut not_printed = FCallArgsFlags::SkipRepack;
     not_printed.add(FCallArgsFlags::SkipCoeffectsCheck);
@@ -360,7 +393,7 @@ fn cmp_fcallargflags(a: &hhbc::FCallArgsFlags, b: &hhbc::FCallArgsFlags) -> Resu
     Ok(())
 }
 
-fn cmp_fcallargs(a: &hhbc::FCallArgs<'_>, b: &hhbc::FCallArgs<'_>) -> Result<()> {
+fn cmp_fcallargs(a: &hhbc::FCallArgs<'_>, b: &hhbc::FCallArgs<'_>) -> Result {
     let hhbc::FCallArgs {
         flags: a_flags,
         async_eager_target: a_aet,
@@ -389,7 +422,7 @@ fn cmp_fcallargs(a: &hhbc::FCallArgs<'_>, b: &hhbc::FCallArgs<'_>) -> Result<()>
     Ok(())
 }
 
-fn cmp_fcall_instr(a: &Opcode<'_>, b: &Opcode<'_>) -> Result<()> {
+fn cmp_fcall_instr(a: &Opcode<'_>, b: &Opcode<'_>) -> Result {
     match (a, b) {
         (hhbc::Opcode::FCallClsMethod(fa, a1, a2), hhbc::Opcode::FCallClsMethod(fb, b1, b2)) => {
             cmp_fcallargs(fa, fb)?;
@@ -459,7 +492,7 @@ fn cmp_fcall_instr(a: &Opcode<'_>, b: &Opcode<'_>) -> Result<()> {
     Ok(())
 }
 
-fn cmp_instr(a: &Instruct<'_>, b: &Instruct<'_>) -> Result<()> {
+fn cmp_instr(a: &Instruct<'_>, b: &Instruct<'_>) -> Result {
     if a == b {
         return Ok(());
     }
@@ -491,7 +524,7 @@ fn cmp_instr(a: &Instruct<'_>, b: &Instruct<'_>) -> Result<()> {
     )
 }
 
-fn cmp_param(a: &Param<'_>, b: &Param<'_>) -> Result<()> {
+fn cmp_param(a: &Param<'_>, b: &Param<'_>) -> Result {
     let Param {
         name: a_name,
         is_variadic: a_is_variadic,
@@ -527,7 +560,7 @@ fn cmp_param(a: &Param<'_>, b: &Param<'_>) -> Result<()> {
     Ok(())
 }
 
-fn cmp_class(a: &Class<'_>, b: &Class<'_>) -> Result<()> {
+fn cmp_class(a: &Class<'_>, b: &Class<'_>) -> Result {
     let Class {
         attributes: a_attributes,
         base: a_base,
@@ -601,7 +634,7 @@ fn cmp_class(a: &Class<'_>, b: &Class<'_>) -> Result<()> {
     Ok(())
 }
 
-fn cmp_properties(a: &Property<'_>, b: &Property<'_>) -> Result<()> {
+fn cmp_properties(a: &Property<'_>, b: &Property<'_>) -> Result {
     let Property {
         name: a_name,
         flags: a_flags,
@@ -632,7 +665,7 @@ fn cmp_properties(a: &Property<'_>, b: &Property<'_>) -> Result<()> {
 
 // T126391106: BCP/HCU is not consistent -- if there is no initial value the underlying
 // HCU may have Just(Null) or Nothing in that slot.
-fn cmp_initial_value(a: &Maybe<TypedValue<'_>>, b: &Maybe<TypedValue<'_>>) -> Result<()> {
+fn cmp_initial_value(a: &Maybe<TypedValue<'_>>, b: &Maybe<TypedValue<'_>>) -> Result {
     match (a, b) {
         (Maybe::Nothing, Maybe::Just(TypedValue::Null))
         | (Maybe::Just(TypedValue::Null), Maybe::Nothing) => Ok(()),
@@ -640,7 +673,7 @@ fn cmp_initial_value(a: &Maybe<TypedValue<'_>>, b: &Maybe<TypedValue<'_>>) -> Re
     }
 }
 
-fn cmp_constant(a: &Constant<'_>, b: &Constant<'_>) -> Result<()> {
+fn cmp_constant(a: &Constant<'_>, b: &Constant<'_>) -> Result {
     let Constant {
         name: a_name,
         value: a_value,
@@ -662,7 +695,7 @@ fn cmp_constant(a: &Constant<'_>, b: &Constant<'_>) -> Result<()> {
     Ok(())
 }
 
-fn cmp_fatal(a: &Fatal<'_>, b: &Fatal<'_>) -> Result<()> {
+fn cmp_fatal(a: &Fatal<'_>, b: &Fatal<'_>) -> Result {
     cmp_eq(&a.op, &b.op).qualified("op")?;
     cmp_eq(&a.loc, &b.loc).qualified("loc")?;
     cmp_eq(&a.message, &b.message).qualified("message")?;
@@ -681,7 +714,7 @@ fn cmp_static_coeffects(
     a_usc: &[Str<'_>],
     b_sc: &[naming_special_names_rust::coeffects::Ctx],
     b_usc: &[Str<'_>],
-) -> Result<()> {
+) -> Result {
     // T126548142 -- odd "pure" behavior
     if is_pure(a_sc, a_usc) && is_pure(b_sc, b_usc) {
         Ok(())
@@ -692,7 +725,7 @@ fn cmp_static_coeffects(
     }
 }
 
-fn cmp_coeffects(a: &hhbc::Coeffects<'_>, b: &hhbc::Coeffects<'_>) -> Result<()> {
+pub(crate) fn cmp_coeffects(a: &hhbc::Coeffects<'_>, b: &hhbc::Coeffects<'_>) -> Result {
     let hhbc::Coeffects {
         static_coeffects: a_sc,
         unenforced_static_coeffects: a_usc,
@@ -728,7 +761,7 @@ fn cmp_coeffects(a: &hhbc::Coeffects<'_>, b: &hhbc::Coeffects<'_>) -> Result<()>
     Ok(())
 }
 
-fn cmp_function(a: &Function<'_>, b: &Function<'_>) -> Result<()> {
+fn cmp_function(a: &Function<'_>, b: &Function<'_>) -> Result {
     let Function {
         attributes: a_attributes,
         name: a_name,
@@ -759,7 +792,7 @@ fn cmp_function(a: &Function<'_>, b: &Function<'_>) -> Result<()> {
     Ok(())
 }
 
-fn cmp_method(a: &Method<'_>, b: &Method<'_>) -> Result<()> {
+fn cmp_method(a: &Method<'_>, b: &Method<'_>) -> Result {
     let Method {
         attributes: a_attributes,
         visibility: a_visibility,
@@ -791,7 +824,7 @@ fn cmp_method(a: &Method<'_>, b: &Method<'_>) -> Result<()> {
     Ok(())
 }
 
-fn cmp_rule(a: &Rule<'_>, b: &Rule<'_>) -> Result<()> {
+fn cmp_rule(a: &Rule<'_>, b: &Rule<'_>) -> Result {
     let Rule {
         kind: a_kind,
         name: a_name,
@@ -806,7 +839,7 @@ fn cmp_rule(a: &Rule<'_>, b: &Rule<'_>) -> Result<()> {
     Ok(())
 }
 
-fn cmp_module(a: &Module<'_>, b: &Module<'_>) -> Result<()> {
+fn cmp_module(a: &Module<'_>, b: &Module<'_>) -> Result {
     let Module {
         attributes: a_attributes,
         name: a_name,
@@ -845,7 +878,7 @@ fn cmp_module(a: &Module<'_>, b: &Module<'_>) -> Result<()> {
 
 /// Compares two include paths. a can be a relative path and b an aboslute path as long as
 /// a is the end of b
-fn cmp_include(a: &hhbc::IncludePath<'_>, b: &hhbc::IncludePath<'_>) -> Result<()> {
+fn cmp_include(a: &hhbc::IncludePath<'_>, b: &hhbc::IncludePath<'_>) -> Result {
     if a != b {
         match (a, b) {
             (hhbc::IncludePath::SearchPathRelative(a_bs), hhbc::IncludePath::Absolute(b_bs)) => {
@@ -867,7 +900,7 @@ fn cmp_include(a: &hhbc::IncludePath<'_>, b: &hhbc::IncludePath<'_>) -> Result<(
     }
 }
 
-fn cmp_symbol_refs(a: &SymbolRefs<'_>, b: &SymbolRefs<'_>) -> Result<()> {
+fn cmp_symbol_refs(a: &SymbolRefs<'_>, b: &SymbolRefs<'_>) -> Result {
     let SymbolRefs {
         includes: a_includes,
         constants: a_constants,
@@ -892,7 +925,7 @@ fn cmp_symbol_refs(a: &SymbolRefs<'_>, b: &SymbolRefs<'_>) -> Result<()> {
 fn cmp_type_constraint_flags(
     a: &hhvm_types_ffi::ffi::TypeConstraintFlags,
     b: &hhvm_types_ffi::ffi::TypeConstraintFlags,
-) -> Result<()> {
+) -> Result {
     use hhvm_types_ffi::ffi::TypeConstraintFlags;
     let a_flags = *a & TypeConstraintFlags::Nullable;
     let b_flags = *b & TypeConstraintFlags::Nullable;
@@ -901,7 +934,7 @@ fn cmp_type_constraint_flags(
 }
 
 // T126391106: BCP doesn't disambiguate a constraint name of Just("") and Nothing
-fn cmp_type_constraint_name(a: &Maybe<Str<'_>>, b: &Maybe<Str<'_>>) -> Result<()> {
+fn cmp_type_constraint_name(a: &Maybe<Str<'_>>, b: &Maybe<Str<'_>>) -> Result {
     match (a, b) {
         (Maybe::Nothing, Maybe::Just(s)) | (Maybe::Just(s), Maybe::Nothing) => {
             if s.as_bstr() == "" {
@@ -914,7 +947,7 @@ fn cmp_type_constraint_name(a: &Maybe<Str<'_>>, b: &Maybe<Str<'_>>) -> Result<()
     }
 }
 
-fn cmp_type_constraint(a: &hhbc::Constraint<'_>, b: &hhbc::Constraint<'_>) -> Result<()> {
+fn cmp_type_constraint(a: &hhbc::Constraint<'_>, b: &hhbc::Constraint<'_>) -> Result {
     let hhbc::Constraint {
         name: a_name,
         flags: a_flags,
@@ -929,7 +962,7 @@ fn cmp_type_constraint(a: &hhbc::Constraint<'_>, b: &hhbc::Constraint<'_>) -> Re
 }
 
 /// User_type isn't printed in typedef's typeinfo.
-fn cmp_typedef_typeinfo(a: &TypeInfo<'_>, b: &TypeInfo<'_>) -> Result<()> {
+fn cmp_typedef_typeinfo(a: &TypeInfo<'_>, b: &TypeInfo<'_>) -> Result {
     let TypeInfo {
         user_type: _a_user_type,
         type_constraint: a_constraint,
@@ -942,7 +975,7 @@ fn cmp_typedef_typeinfo(a: &TypeInfo<'_>, b: &TypeInfo<'_>) -> Result<()> {
     Ok(())
 }
 
-fn cmp_typedef(a: &Typedef<'_>, b: &Typedef<'_>) -> Result<()> {
+fn cmp_typedef(a: &Typedef<'_>, b: &Typedef<'_>) -> Result {
     let Typedef {
         name: a_name,
         attributes: a_attributes,
@@ -969,7 +1002,7 @@ fn cmp_typedef(a: &Typedef<'_>, b: &Typedef<'_>) -> Result<()> {
     Ok(())
 }
 
-fn cmp_unit(a_unit: &Unit<'_>, b_unit: &Unit<'_>) -> Result<()> {
+fn cmp_unit(a_unit: &Unit<'_>, b_unit: &Unit<'_>) -> Result {
     let Unit {
         adata: a_adata,
         functions: a_functions,
@@ -1040,6 +1073,6 @@ fn cmp_unit(a_unit: &Unit<'_>, b_unit: &Unit<'_>) -> Result<()> {
 
 /// Fancy version of `PartialEq::eq(a, b)` which also tries to report exactly
 /// where the mismatch occurred.
-pub(crate) fn cmp_hack_c_unit(a: &Unit<'_>, b: &Unit<'_>) -> Result<()> {
+pub(crate) fn cmp_hack_c_unit(a: &Unit<'_>, b: &Unit<'_>) -> Result {
     cmp_unit(a, b).with_raw(|| "unit".to_string())
 }

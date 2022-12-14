@@ -8,6 +8,7 @@ use std::fs;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
+use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::ensure;
@@ -42,6 +43,8 @@ enum VerifyError {
     CompileError(String),
     #[error("i/o error: {0}")]
     IoError(String),
+    #[error("units mismatch: {0}")]
+    IrUnitMismatchError(String),
     #[error("multifile error: {0}")]
     MultifileError(String),
     #[error("panic {0}")]
@@ -120,8 +123,9 @@ impl AssembleOpts {
         let post_alloc = bumpalo::Bump::default();
         let (asm_result, assemble_t) =
             Timing::time(path, || assemble::assemble_from_bytes(&post_alloc, &output));
-        let (post_unit, _) = asm_result
-            .map_err(|err| VerifyError::AssembleError(truncate_pos_err(err.to_string())))?;
+        let (post_unit, _) = asm_result.map_err(|err| {
+            VerifyError::AssembleError(truncate_pos_err(err.root_cause().to_string()))
+        })?;
 
         let (result, verify_t) = Timing::time(path, || {
             crate::cmp_unit::cmp_hack_c_unit(&pre_unit, &post_unit)
@@ -175,6 +179,8 @@ impl IrOpts {
             }
         });
 
+        self.verify_print_roundtrip(&ir)?;
+
         let (post_unit, ir_to_bc_t) = Timing::time(path, || ir_to_bc::ir_to_bc(&post_alloc, ir));
 
         let (result, verify_t) =
@@ -197,7 +203,27 @@ impl IrOpts {
             ..Default::default()
         });
 
-        result.map_err(|err| VerifyError::SemanticUnitMismatchError(format!("{err:?}")))
+        result.map_err(|err| VerifyError::SemanticUnitMismatchError(err.root_cause().to_string()))
+    }
+
+    fn verify_print_roundtrip(&self, ir: &ir::Unit<'_>) -> Result<()> {
+        let mut as_string = String::new();
+        ir::print::print_unit(&mut as_string, ir, false)
+            .map_err(|err| VerifyError::PrintError(err.to_string()))?;
+        let alloc2 = bumpalo::Bump::default();
+        let strings2 = Arc::new(ir::StringInterner::default());
+        let ir2 = ir::assemble::unit_from_string(&as_string, Arc::clone(&strings2), &alloc2)
+            .map_err(|err| {
+                let mut err = err.root_cause().to_string();
+                let err = if let Some(idx) = err.find(':') {
+                    err.split_off(idx)
+                } else {
+                    err
+                };
+                VerifyError::AssembleError(err)
+            })?;
+        crate::cmp_ir::cmp_ir(ir, &ir2)
+            .map_err(|err| VerifyError::IrUnitMismatchError(err.to_string()))
     }
 }
 

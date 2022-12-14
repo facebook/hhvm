@@ -47,7 +47,7 @@ pub(crate) fn collect_files(
             use jwalk::WalkDir;
             fn on_read_dir(
                 _: Option<usize>,
-                _: &Path,
+                path: &Path,
                 _: &mut (),
                 children: &mut Vec<Result<DirEntry<((), ())>>>,
             ) {
@@ -57,7 +57,13 @@ pub(crate) fn collect_files(
                         if file_type.is_file() {
                             is_php_file_name(dir_entry.file_name())
                         } else {
-                            true
+                            // The HHVM server files contain some weird
+                            // multi-file-in-one tests that confuse the
+                            // comparator (because you end up with two classes
+                            // of the same name, etc) so skip them unless
+                            // they're explicitly given. Hopefully this doesn't
+                            // exclude something from outside HHVM somehow.
+                            !(dir_entry.file_name() == "server" && path.ends_with("test"))
                         }
                     })
                 });

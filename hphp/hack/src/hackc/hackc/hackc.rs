@@ -3,6 +3,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 mod asm;
+mod asm_ir;
+mod cmp_ir;
 mod cmp_unit;
 mod compile;
 mod crc;
@@ -104,6 +106,9 @@ struct FileOpts {
 enum Command {
     /// Assemble HHAS file(s) into Unit. Prints those HCUs' HHAS representation.
     Assemble(asm::Opts),
+
+    /// Assemble IR assembly file(s) into Unit and print it.
+    AssembleIr(asm_ir::Opts),
 
     /// Compute bincode-serialized decls for a set of Hack source files.
     BinaryDecls(decls::Opts),
@@ -265,6 +270,7 @@ fn main() -> Result<()> {
 
     match opts.command.take() {
         Some(Command::Assemble(opts)) => asm::run(opts),
+        Some(Command::AssembleIr(opts)) => asm_ir::run(opts),
         Some(Command::BinaryDecls(decls_opts)) => decls::binary_decls(opts, decls_opts),
         Some(Command::JsonDecls(decls_opts)) => decls::json_decls(opts, decls_opts),
         Some(Command::CompileInfer(opts)) => infer::run(opts),

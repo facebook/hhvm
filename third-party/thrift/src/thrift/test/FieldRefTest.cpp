@@ -935,7 +935,7 @@ TYPED_TEST(optional_field_ref_typed_test, rvalue_ref_method) {
   EXPECT_FALSE(*ref);
 }
 
-TEST(optional_boxed_field_ref_test, release) {
+TEST(optional_boxed_field_ref_test, move_to_unique_ptr) {
   TestStructBoxedValuePtr s;
   s.opt_name().emplace();
   EXPECT_TRUE(s.opt_name().has_value());
@@ -945,6 +945,18 @@ TEST(optional_boxed_field_ref_test, release) {
       apache::thrift::move_to_unique_ptr(s.opt_name());
   EXPECT_EQ(addr, ptr.get());
   EXPECT_FALSE(s.opt_name().has_value());
+}
+
+TEST(optional_boxed_field_ref_test, assign_from_unique_ptr) {
+  TestStructBoxedValuePtr s;
+
+  auto p = std::make_unique<std::string>("42");
+  const std::string* addr = &*p;
+
+  apache::thrift::assign_from_unique_ptr(s.opt_name(), std::move(p));
+
+  EXPECT_TRUE(s.opt_name().has_value());
+  EXPECT_EQ(&s.opt_name().value(), addr);
 }
 
 TEST(terse_field_ref_test, access_default_value) {

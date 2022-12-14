@@ -56,6 +56,7 @@ struct ensure_isset_unsafe_fn;
 struct unset_unsafe_fn;
 struct alias_isset_fn;
 struct move_to_unique_ptr_fn;
+struct assign_from_unique_ptr_fn;
 
 // IntWrapper is a wrapper of integer that's always copy/move assignable
 // even if integer is atomic
@@ -844,6 +845,7 @@ class optional_boxed_field_ref {
   template <typename U>
   friend class optional_boxed_field_ref;
   friend struct apache::thrift::detail::move_to_unique_ptr_fn;
+  friend struct apache::thrift::detail::assign_from_unique_ptr_fn;
 
  public:
   using value_type = detail::copy_const_t<T, element_type>;
@@ -1004,6 +1006,10 @@ class optional_boxed_field_ref {
 
   FOLLY_ERASE std::unique_ptr<element_type> release() noexcept {
     return value_.release();
+  }
+
+  FOLLY_ERASE void reset(std::unique_ptr<element_type> ptr) noexcept {
+    value_.reset(ptr.release());
   }
 
   std::remove_reference_t<T>& value_;
@@ -1850,6 +1856,16 @@ struct move_to_unique_ptr_fn {
   }
 };
 
+struct assign_from_unique_ptr_fn {
+  template <typename T>
+  FOLLY_ERASE void operator()(
+      optional_boxed_field_ref<T> ref,
+      std::unique_ptr<typename folly::remove_cvref_t<T>::element_type> ptr)
+      const noexcept {
+    ref.reset(std::move(ptr));
+  }
+};
+
 } // namespace detail
 
 //  get_pointer
@@ -1880,6 +1896,17 @@ constexpr apache::thrift::detail::can_throw_fn can_throw;
 //
 //    auto ptr = apache::thrift::move_to_unique_ptr(obj.field_ref());
 constexpr apache::thrift::detail::move_to_unique_ptr_fn move_to_unique_ptr;
+
+//  assign_from_unique_ptr
+//
+//  Transfer ownership of std::unique_ptr to underlying boxed field.
+//
+//  Example:
+//
+//    apache::thrift::assign_from_unique_ptr(obj.field_ref(),
+//                                           std::make_unique<int>(42));
+constexpr apache::thrift::detail::assign_from_unique_ptr_fn
+    assign_from_unique_ptr;
 
 [[deprecated("Use `emplace` or `operator=` to set Thrift fields.")]] //
 constexpr apache::thrift::detail::ensure_isset_unsafe_fn ensure_isset_unsafe;

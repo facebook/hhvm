@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <atomic>
+#include <chrono>
 #include <filesystem>
 #include <memory>
 #include <sstream>
@@ -45,6 +47,7 @@
 #include "hphp/runtime/ext/facts/symbol-map.h"
 #include "hphp/runtime/ext/facts/symbol-types.h"
 #include "hphp/runtime/ext/facts/thread-factory.h"
+#include "hphp/util/assertions.h"
 #include "hphp/util/hash-set.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/optional.h"
@@ -946,23 +949,67 @@ struct FactsStoreImpl final
       }
     }
     auto updateFuture = m_updateFuture.wlock();
-    *updateFuture = folly::splitFuture(
-        updateFuture->getFuture()
-            .via(&m_updateExec)
-            .thenTry([this](const folly::Try<folly::Unit>&) {
-              return m_watcher->getChanges(getClock());
-            })
-            .thenTry([this](folly::Try<Watcher::Results>&& results) {
-              if (results.hasException()) {
-                auto msg = folly::sformat(
-                    "Exception while querying watcher: {}",
-                    results.exception().what());
-                XLOG(ERR) << msg;
-                throw UpdateExc{msg};
-              }
-              return update(std::move(results.value()));
-            }));
-    return updateFuture->getFuture().semi();
+    auto updateStart = std::chrono::steady_clock::now();
+    // We need at least one Watchman query to start and complete after
+    // `update()` is called. We model our updater and Watchman querier as a
+    // chain of futures, which can be thought of as a queue. If we have
+    // multiple simultaneous updates, then there is already a Watchman query
+    // which hasn't started yet. In that case, we don't need to schedule
+    // another Watchman query. One of the pending queries will start and
+    // finish after this call to update().
+    if (!m_queryingWatchman) {
+      m_queryingWatchman = true;
+      *updateFuture = folly::splitFuture(
+          updateFuture->getFuture()
+              .via(&m_updateExec)
+              .thenTry([this](const folly::Try<folly::Unit>&) {
+                m_queryingWatchman = false;
+                m_lastWatchmanQueryStart = std::chrono::steady_clock::now();
+                return m_watcher->getChanges(getClock());
+              })
+              .thenTry([this](folly::Try<Watcher::Results>&& results) {
+                if (results.hasException()) {
+                  auto msg = folly::sformat(
+                      "Exception while querying watcher: {}",
+                      results.exception().what());
+                  XLOG(ERR) << msg;
+                  throw UpdateExc{msg};
+                }
+                return update(std::move(results.value()));
+              }));
+    }
+    return updateFuture->getFuture()
+        .thenTry([this, updateStart](folly::Try<folly::Unit> res) {
+          // Verify that we have kicked off at least one Watchman query between
+          // this call to update() and the future chain's completion. We always
+          // log if this invariant is violated, and we also assert when we're in
+          // debug mode.
+          auto lastWatchmanQueryStart = m_lastWatchmanQueryStart.load();
+          if (UNLIKELY(lastWatchmanQueryStart < updateStart)) {
+            auto currentTime = std::chrono::steady_clock::now();
+            XLOGF(
+                ERR,
+                "Stale update. Last Watchman query was {}ms ago, but update was only {}ms ago.",
+                std::chrono::duration_cast<
+                    std::chrono::duration<double, std::milli>>(
+                    currentTime - lastWatchmanQueryStart)
+                    .count(),
+                std::chrono::duration_cast<
+                    std::chrono::duration<double, std::milli>>(
+                    currentTime - updateStart)
+                    .count());
+          }
+          assertx(updateStart < lastWatchmanQueryStart);
+          XLOGF(
+              INFO,
+              "update waited {}ms for a Watchman query to return.",
+              std::chrono::duration_cast<
+                  std::chrono::duration<double, std::milli>>(
+                  lastWatchmanQueryStart - updateStart)
+                  .count());
+          return res;
+        })
+        .semi();
   }
 
   folly::SemiFuture<folly::Unit> update(Watcher::Results&& results) {
@@ -1228,6 +1275,9 @@ struct FactsStoreImpl final
     return derivedTypeVec.toArray();
   }
 
+  std::atomic<std::chrono::steady_clock::time_point> m_lastWatchmanQueryStart{
+      std::chrono::steady_clock::now()};
+  std::atomic<bool> m_queryingWatchman{false};
   folly::CPUThreadPoolExecutor m_updateExec;
 
   folly::Synchronized<folly::FutureSplitter<folly::Unit>> m_updateFuture{

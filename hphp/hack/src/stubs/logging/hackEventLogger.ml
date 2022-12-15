@@ -46,7 +46,6 @@ type rollout_flags = {
   force_shallow_decl_fanout: bool;
   log_from_client_when_slow_monitor_connections: bool;
   log_saved_state_age_and_distance: bool;
-  naming_sqlite_in_hack_64: bool;
   fetch_remote_old_decls: bool;
   only_fetch_remote_old_decl_during_init: bool;
   ide_max_num_decls: int;

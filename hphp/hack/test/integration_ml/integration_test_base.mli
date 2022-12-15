@@ -29,7 +29,6 @@ val change_files :
 
 val save_state :
   ?load_hhi_files:bool ->
-  ?store_decls_in_saved_state:bool ->
   ?enable_naming_table_fallback:bool ->
   ?custom_config:ServerConfig.t ->
   disk_changes_type ->
@@ -38,7 +37,6 @@ val save_state :
 
 val save_state_incremental :
   ServerEnv.env ->
-  ?store_decls_in_saved_state:bool ->
   old_state_dir:string ->
   string ->
   SaveStateServiceTypes.save_state_result option

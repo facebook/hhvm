@@ -387,9 +387,6 @@ type t = {
   hg_aware_recheck_restart_threshold: int;
   force_remote_type_check: bool;  (** forces Hulk *)
   ide_parser_cache: bool;
-  store_decls_in_saved_state: bool;
-      (** When enabled, save hot class declarations (for now, specified in a special
-      file in the repository) when generating a saved state. *)
   idle_gc_slice: int;
       (** Size of Gc.major_slice to be performed when server is idle. 0 to disable *)
   shallow_class_decl: bool;
@@ -561,7 +558,6 @@ let default =
     hg_aware_redecl_restart_threshold = 0;
     hg_aware_recheck_restart_threshold = 0;
     ide_parser_cache = false;
-    store_decls_in_saved_state = false;
     idle_gc_slice = 0;
     shallow_class_decl = false;
     force_shallow_decl_fanout = false;
@@ -986,13 +982,6 @@ let load_ fn ~silent ~current_version overrides =
     bool_if_min_version
       "hg_aware"
       ~default:default.hg_aware
-      ~current_version
-      config
-  in
-  let store_decls_in_saved_state =
-    bool_if_min_version
-      "store_decls_in_saved_state"
-      ~default:default.store_decls_in_saved_state
       ~current_version
       config
   in
@@ -1463,7 +1452,6 @@ let load_ fn ~silent ~current_version overrides =
     hg_aware_redecl_restart_threshold;
     hg_aware_recheck_restart_threshold;
     ide_parser_cache;
-    store_decls_in_saved_state;
     idle_gc_slice;
     shallow_class_decl;
     force_shallow_decl_fanout;

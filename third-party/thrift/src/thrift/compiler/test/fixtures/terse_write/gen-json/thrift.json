@@ -523,7 +523,7 @@
       }
     },
     "v1alpha" : {
-      "lineno" : 325,
+      "lineno" : 324,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -531,17 +531,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 325,
+          "line" : 324,
           "column" : 1
         },
         "end" : {
-          "line" : 329,
+          "line" : 328,
           "column" : 18
         }
       }
     },
     "v1test" : {
-      "lineno" : 336,
+      "lineno" : 334,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -549,17 +549,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 336,
+          "line" : 334,
           "column" : 1
         },
         "end" : {
-          "line" : 340,
+          "line" : 338,
           "column" : 17
         }
       }
     },
     "ExceptionMessage" : {
-      "lineno" : 349,
+      "lineno" : 347,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -569,11 +569,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 352,
+              "line" : 350,
               "column" : 3
             },
             "end" : {
-              "line" : 352,
+              "line" : 350,
               "column" : 19
             }
           }
@@ -581,17 +581,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 349,
+          "line" : 347,
           "column" : 1
         },
         "end" : {
-          "line" : 353,
+          "line" : 351,
           "column" : 2
         }
       }
     },
     "GenerateRuntimeSchema" : {
-      "lineno" : 360,
+      "lineno" : 358,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -601,11 +601,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 367,
+              "line" : 365,
               "column" : 3
             },
             "end" : {
-              "line" : 367,
+              "line" : 365,
               "column" : 18
             }
           }
@@ -613,17 +613,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 360,
+          "line" : 358,
           "column" : 1
         },
         "end" : {
-          "line" : 368,
+          "line" : 366,
           "column" : 2
         }
       }
     },
     "InternBox" : {
-      "lineno" : 374,
+      "lineno" : 372,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -631,11 +631,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 374,
+          "line" : 372,
           "column" : 1
         },
         "end" : {
-          "line" : 376,
+          "line" : 374,
           "column" : 20
         }
       }

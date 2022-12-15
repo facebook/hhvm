@@ -314,7 +314,6 @@ struct v1 {}
 @scope.Transitive
 struct v1beta {}
 
-// TODO(dokwon): Re-enable v1 features.
 /**
  * Enables all experimental v1 features.
  *
@@ -323,12 +322,11 @@ struct v1beta {}
  * in all contexts.
  */
 @v1beta // All v1beta features.
-// @SerializeInFieldIdOrder
-// @Experimental // All uses of v1alpha inherit `@Experimental`.
+@SerializeInFieldIdOrder
+@Experimental // All uses of v1alpha inherit `@Experimental`.
 @scope.Transitive
 struct v1alpha {}
 
-// TODO(dokwon): Re-enable v1 features.
 /**
  * Enables experimental features, even those that are known to break common
  * use cases.

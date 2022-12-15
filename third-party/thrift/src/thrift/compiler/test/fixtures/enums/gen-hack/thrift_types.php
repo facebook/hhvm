@@ -2593,6 +2593,14 @@ class v1alpha implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
           shape(
           )
         ),
+        '\thrift\annotation\SerializeInFieldIdOrder' => \thrift\annotation\SerializeInFieldIdOrder::fromShape(
+          shape(
+          )
+        ),
+        '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
+          shape(
+          )
+        ),
         '\thrift\annotation\Transitive' => \thrift\annotation\Transitive::fromShape(
           shape(
           )

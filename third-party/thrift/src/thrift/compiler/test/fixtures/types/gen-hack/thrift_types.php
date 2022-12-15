@@ -2209,6 +2209,14 @@ class v1beta implements \IThriftSyncStruct, \IThriftStructMetadata {
           shape(
           )
         ),
+        '\thrift\annotation\GenDefaultEnumValue' => \thrift\annotation\GenDefaultEnumValue::fromShape(
+          shape(
+          )
+        ),
+        '\thrift\annotation\Beta' => \thrift\annotation\Beta::fromShape(
+          shape(
+          )
+        ),
         '\thrift\annotation\Transitive' => \thrift\annotation\Transitive::fromShape(
           shape(
           )

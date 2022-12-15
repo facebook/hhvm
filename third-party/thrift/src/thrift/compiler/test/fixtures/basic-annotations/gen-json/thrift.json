@@ -607,6 +607,8 @@
       "is_union" : false,
       "structured_annotations" : {
         "v1" : {  },
+        "GenDefaultEnumValue" : {  },
+        "Beta" : {  },
         "scope.Transitive" : {  }
       },
       "fields" : {

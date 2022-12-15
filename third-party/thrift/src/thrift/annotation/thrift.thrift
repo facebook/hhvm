@@ -307,9 +307,9 @@ struct v1 {}
  * released Thrift features.
  */
 @v1 // All v1 features.
-// @GenDefaultEnumValue
+@GenDefaultEnumValue
 // @NoLegacy // Disables features that will be removed.
-// @Beta // All uses of v1beta inherit `@Beta`.
+@Beta // All uses of v1beta inherit `@Beta`.
 // @TerseWrite
 @scope.Transitive
 struct v1beta {}

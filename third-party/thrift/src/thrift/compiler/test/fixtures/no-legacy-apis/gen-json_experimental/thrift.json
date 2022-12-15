@@ -700,6 +700,20 @@
 },
         "value" : {}
       },
+          "thrift.GenDefaultEnumValue" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "GenDefaultEnumValue"
+},
+        "value" : {}
+      },
+          "thrift.Beta" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Beta"
+},
+        "value" : {}
+      },
           "scope.Transitive" : {
         "type" : {
   "type" : "struct",

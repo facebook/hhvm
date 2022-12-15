@@ -167,6 +167,14 @@ module Find_refs = struct
 
   type ide_result_or_retry = ide_result Done_or_retry.t
 
+  let dep_member_of member : Typing_deps.Dep.Member.t list =
+    let open Typing_deps.Dep.Member in
+    match member with
+    | Method n -> [method_ n; smethod n]
+    | Property n -> [prop n; sprop n]
+    | Class_const n -> [const n]
+    | Typeconst n -> [const n]
+
   let member_to_string member =
     match member with
     | Method s -> "Method " ^ s

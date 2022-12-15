@@ -1,13 +1,20 @@
 C::foo
 File "method.php", line 5, characters 12-14:
 File "method.php", line 11, characters 12-14:
-File "method.php", line 18, characters 7-9:
-File "method.php", line 19, characters 7-9:
-File "method.php", line 20, characters 7-9:
-File "method.php", line 22, characters 18-20:
-File "method.php", line 23, characters 18-20:
-File "method.php", line 24, characters 18-20:
-File "method.php", line 26, characters 21-23:
-File "method.php", line 27, characters 21-23:
+File "method.php", line 28, characters 7-9:
+File "method.php", line 29, characters 7-9:
+File "method.php", line 30, characters 7-9:
+File "method.php", line 31, characters 7-9:
+File "method.php", line 32, characters 7-9:
+File "method.php", line 35, characters 18-20:
+File "method.php", line 36, characters 18-20:
+File "method.php", line 37, characters 18-20:
+File "method.php", line 38, characters 18-20:
+File "method.php", line 39, characters 18-20:
+File "method.php", line 42, characters 21-23:
+File "method.php", line 43, characters 21-23:
+File "method.php", line 45, characters 21-23:
+File "method.php", line 46, characters 21-23:
+File "method.php", line 16, characters 19-21:
 File "method.php", line 4, characters 19-21:
-11 total results
+18 total results

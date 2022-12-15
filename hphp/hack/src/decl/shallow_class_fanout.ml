@@ -70,7 +70,8 @@ let get_minor_change_fanout
           acc
           (Typing_deps.Dep.make_member_dep_from_type_dep dep member))
   in
-  let add_member_fanout ~is_const member change acc =
+  let add_member_fanout
+      ~is_const (member : Dep.Member.t) (change : member_change) acc =
     (* Consts and typeconsts have their types copied into descendant classes in
        folded decl (rather than being stored in a separate heap as methods and
        properties are). As a result, when using a const, we register a

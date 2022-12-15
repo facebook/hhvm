@@ -217,6 +217,7 @@
   search_utils
   symbol
   typing_defs
+  typing_deps
   utils_lint
   version)
  (preprocess

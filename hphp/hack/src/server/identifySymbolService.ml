@@ -1147,7 +1147,7 @@ let keywords tree : Result_set.elt list =
 
   aux None [] tree
 
-let all_symbols ctx tast =
+let all_symbols ctx tast : Result_set.elt list =
   Errors.ignore_ (fun () -> visitor#go ctx tast |> Result_set.elements)
 
 let all_symbols_ctx

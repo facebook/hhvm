@@ -84,26 +84,44 @@ let search_function ctx function_name include_defs genv env =
   in
   search ctx (FindRefsService.IFunction function_name) include_defs files genv
 
-let search_member ctx class_name member include_defs genv env =
+let search_member
+    ctx
+    (class_name : string)
+    (member : member)
+    ~(include_defs : bool)
+    (genv : genv)
+    (env : env) : env * (string * Pos.t) list t =
   let class_name = add_ns class_name in
-  let class_name =
+  let origin_class_name =
     FindRefsService.get_origin_class_name ctx class_name member
   in
-  handle_prechecked_files genv env Typing_deps.(Dep.(make (Type class_name)))
+  handle_prechecked_files
+    genv
+    env
+    Typing_deps.(Dep.(make (Type origin_class_name)))
   @@ fun () ->
-  (* Find all the classes that extend this one *)
-  let files = FindRefsService.get_child_classes_files ctx class_name in
-  let all_classes =
-    FindRefsService.find_child_classes ctx class_name env.naming_table files
+  let (descendant_class_files, member_use_files) =
+    FindRefsService
+    .get_files_for_descendants_and_dependents_of_members_in_descendants
+      ctx
+      ~class_name
+      (dep_member_of member)
   in
-  let all_classes = SSet.add all_classes class_name in
-  (* Get all the files that reference those classes *)
+  let descendant_classes =
+    FindRefsService.find_child_classes
+      ctx
+      origin_class_name
+      env.naming_table
+      descendant_class_files
+  in
+  let class_and_descendants = SSet.add descendant_classes origin_class_name in
   let files =
-    FindRefsService.get_dependent_files ctx genv.ServerEnv.workers all_classes
+    Relative_path.Set.union descendant_class_files member_use_files
     |> Relative_path.Set.elements
   in
   let target =
-    FindRefsService.IMember (FindRefsService.Class_set all_classes, member)
+    FindRefsService.IMember
+      (FindRefsService.Class_set class_and_descendants, member)
   in
   search ctx target include_defs files genv
 
@@ -151,7 +169,7 @@ let search_localvar ~ctx ~entry ~line ~char =
 let go ctx action include_defs genv env =
   match action with
   | Member (class_name, member) ->
-    search_member ctx class_name member include_defs genv env
+    search_member ctx class_name member ~include_defs genv env
   | Function function_name ->
     search_function ctx function_name include_defs genv env
   | Class class_name ->

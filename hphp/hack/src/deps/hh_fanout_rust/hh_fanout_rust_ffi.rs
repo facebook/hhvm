@@ -34,6 +34,19 @@ ocamlrep_ocamlpool::ocaml_ffi! {
         Custom::from(HhFanoutRustFfi(Box::new(hh_fanout)))
     }
 
+    fn hh_fanout_ffi_make_hhdg_builder(builder_state_dir: PathBuf) -> Custom<HhFanoutRustFfi> {
+        // TODO(toyang): we should replace this log with a real scuba logger and
+        // a file log in the state dir or in a configured location. See
+        // hh_decl_ffi.rs for another location we need to pass a better log
+        // object.
+        let log = hh_slog::Log {
+            file: hh_slog::init_file_sync(Path::new("/tmp/hh_fanout_log")),
+            scuba: hh_slog::init_file_sync(Path::new("/tmp/hh_fanout_log_scuba")),
+        };
+        let hhdg_builder = hhdg_builder::HhdgBuilder::new(log, builder_state_dir);
+        Custom::from(HhFanoutRustFfi(Box::new(hhdg_builder)))
+    }
+
     // Each edge is a tuple of (dependency, dependent).
     fn hh_fanout_ffi_add_idep_batch(hh_fanout: Custom<HhFanoutRustFfi>, edges: Vec<(u64, u64)>) {
         use hh24_types::DepGraphEdge;
@@ -51,6 +64,9 @@ ocamlrep_ocamlpool::ocaml_ffi! {
 // dune working with cargo and not playing well with some dependencies.
 ocamlrep_ocamlpool::ocaml_ffi! {
     fn hh_fanout_ffi_make(_fanout_state_dir: PathBuf, _decl_state_dir: PathBuf) -> Custom<HhFanoutRustFfi> {
+        unimplemented!()
+    }
+    fn hh_fanout_ffi_make_hhdg_builder(builder_state_dir: PathBuf) -> Custom<HhFanoutRustFfi> {
         unimplemented!()
     }
     fn hh_fanout_ffi_add_idep_batch(_hh_fanout: Custom<HhFanoutRustFfi>, _edges: Vec<(u64, u64)>) {

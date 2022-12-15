@@ -737,6 +737,13 @@ pub mod server {
             };
             self.handle_create_interaction(idx)
         }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from TestService
+                "init",
+            ]
+        }
     }
 
     /// Construct a new instance of a TestService service.

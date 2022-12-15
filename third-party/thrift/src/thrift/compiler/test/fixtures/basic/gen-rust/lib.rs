@@ -4404,6 +4404,13 @@ pub mod server {
             };
             self.handle_create_interaction(idx)
         }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from FooService
+                "simple_rpc",
+            ]
+        }
     }
 
     /// Construct a new instance of a FooService service.
@@ -4726,6 +4733,13 @@ pub mod server {
                 }
             };
             self.handle_create_interaction(idx)
+        }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from FB303Service
+                "simple_rpc",
+            ]
         }
     }
 
@@ -6121,6 +6135,22 @@ pub mod server {
             };
             self.handle_create_interaction(idx)
         }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from MyService
+                "ping",
+                "getRandomData",
+                "sink",
+                "putDataById",
+                "hasDataById",
+                "getDataById",
+                "deleteDataById",
+                "lobDataById",
+                "invalid_return_for_hack",
+                "rpc_skipped_codegen",
+            ]
+        }
     }
 
     /// Construct a new instance of a MyService service.
@@ -6564,6 +6594,14 @@ pub mod server {
                 }
             };
             self.handle_create_interaction(idx)
+        }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from DbMixedStackArguments
+                "getDataByKey0",
+                "getDataByKey1",
+            ]
         }
     }
 

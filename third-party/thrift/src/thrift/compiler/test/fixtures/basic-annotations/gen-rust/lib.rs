@@ -4856,6 +4856,19 @@ pub mod server {
             };
             self.handle_create_interaction(idx)
         }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from MyService
+                "ping",
+                "getRandomData",
+                "hasDataById",
+                "getDataById",
+                "putDataById",
+                "lobDataById",
+                "doNothing",
+            ]
+        }
     }
 
     /// Construct a new instance of a MyService service.
@@ -5282,6 +5295,14 @@ pub mod server {
             };
             self.handle_create_interaction(idx)
         }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from MyServicePrioParent
+                "ping",
+                "pong",
+            ]
+        }
     }
 
     /// Construct a new instance of a MyServicePrioParent service.
@@ -5603,6 +5624,16 @@ pub mod server {
             };
             self.handle_create_interaction(idx)
         }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from MyServicePrioParent
+                "ping",
+                "pong",
+                // from MyServicePrioChild
+                "pang",
+            ]
+        }
     }
 
     /// Construct a new instance of a MyServicePrioChild service.
@@ -5923,6 +5954,13 @@ pub mod server {
             };
             self.handle_create_interaction(idx)
         }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // interaction's method names are never queried directly.
+                // they are always queried from the "main" processor.
+            ]
+        }
     }
 
 
@@ -6229,6 +6267,14 @@ pub mod server {
                 }
             };
             self.handle_create_interaction(idx)
+        }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from BadService
+                "bar",
+                "BadInteraction.foo",
+            ]
         }
     }
 

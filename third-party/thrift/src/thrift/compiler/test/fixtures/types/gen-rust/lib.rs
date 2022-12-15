@@ -1110,6 +1110,14 @@ pub mod server {
             };
             self.handle_create_interaction(idx)
         }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from SomeService
+                "bounce_map",
+                "binary_keyed_map",
+            ]
+        }
     }
 
     /// Construct a new instance of a SomeService service.

@@ -6228,6 +6228,21 @@ pub mod server {
             };
             self.handle_create_interaction(idx)
         }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from PubSubStreamingService
+                "returnstream",
+                "streamthrows",
+                "servicethrows",
+                "servicethrows2",
+                "boththrows",
+                "responseandstreamstreamthrows",
+                "responseandstreamservicethrows",
+                "responseandstreamboththrows",
+                "returnstreamFast",
+            ]
+        }
     }
 
     /// Construct a new instance of a PubSubStreamingService service.

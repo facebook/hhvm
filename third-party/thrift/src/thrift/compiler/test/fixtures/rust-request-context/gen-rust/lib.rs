@@ -3972,6 +3972,13 @@ pub mod server {
             };
             self.handle_create_interaction(idx)
         }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // interaction's method names are never queried directly.
+                // they are always queried from the "main" processor.
+            ]
+        }
     }
 
 
@@ -5546,6 +5553,23 @@ pub mod server {
                 }
             };
             self.handle_create_interaction(idx)
+        }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from MyService
+                "ping",
+                "getRandomData",
+                "hasDataById",
+                "getDataById",
+                "putDataById",
+                "lobDataById",
+                "streamById",
+                "streamByIdWithException",
+                "streamByIdWithResponse",
+                "startPingInteraction",
+                "MyInteraction.ping",
+            ]
         }
     }
 

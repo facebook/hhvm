@@ -2184,6 +2184,17 @@ pub mod server {
             };
             self.handle_create_interaction(idx)
         }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from NestedContainers
+                "mapList",
+                "mapSet",
+                "listMap",
+                "listSet",
+                "turtles",
+            ]
+        }
     }
 
     /// Construct a new instance of a NestedContainers service.

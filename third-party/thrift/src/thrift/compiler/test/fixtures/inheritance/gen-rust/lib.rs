@@ -1602,6 +1602,13 @@ pub mod server {
             };
             self.handle_create_interaction(idx)
         }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from MyRoot
+                "do_root",
+            ]
+        }
     }
 
     /// Construct a new instance of a MyRoot service.
@@ -1922,6 +1929,15 @@ pub mod server {
                 }
             };
             self.handle_create_interaction(idx)
+        }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from MyRoot
+                "do_root",
+                // from MyNode
+                "do_mid",
+            ]
         }
     }
 
@@ -2247,6 +2263,19 @@ pub mod server {
                 }
             };
             self.handle_create_interaction(idx)
+        }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from MyRoot
+                "do_root",
+                // from MyNode
+                "do_mid",
+                // from MyRoot
+                "do_root",
+                // from MyLeaf
+                "do_leaf",
+            ]
         }
     }
 

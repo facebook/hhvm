@@ -533,6 +533,12 @@
             };
             self.handle_create_interaction(idx)
         }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+{{>lib/method_names}}
+            ]
+        }
     }
 
     {{^service:interaction?}}

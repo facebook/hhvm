@@ -1517,6 +1517,13 @@ pub mod server {
             };
             self.handle_create_interaction(idx)
         }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from Service
+                "func",
+            ]
+        }
     }
 
     /// Construct a new instance of a Service service.
@@ -1951,6 +1958,14 @@ pub mod server {
                 }
             };
             self.handle_create_interaction(idx)
+        }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from AdapterService
+                "count",
+                "adaptedTypes",
+            ]
         }
     }
 

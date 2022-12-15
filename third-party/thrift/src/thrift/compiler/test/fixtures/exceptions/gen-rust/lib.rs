@@ -1892,6 +1892,16 @@ pub mod server {
             };
             self.handle_create_interaction(idx)
         }
+
+        fn get_method_names(&self) -> &'static [&'static str] {
+            &[
+                // from Raiser
+                "doBland",
+                "doRaise",
+                "get200",
+                "get500",
+            ]
+        }
     }
 
     /// Construct a new instance of a Raiser service.

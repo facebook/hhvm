@@ -114,6 +114,13 @@ where
     > {
         bail!("Thrift server does not support interactions");
     }
+
+    /// Returns function names this thrift service is able to handle, similar
+    /// to the keys of C++'s createMethodMetadata().
+    ///
+    /// Return value includes inherited functions from parent thrift services,
+    /// and interactions' functions.
+    fn get_method_names(&self) -> &'static [&'static str];
 }
 
 #[async_trait]
@@ -153,6 +160,10 @@ where
     > {
         (**self).create_interaction(name)
     }
+
+    fn get_method_names(&self) -> &'static [&'static str] {
+        (**self).get_method_names()
+    }
 }
 
 #[async_trait]
@@ -191,6 +202,10 @@ where
         >,
     > {
         (**self).create_interaction(name)
+    }
+
+    fn get_method_names(&self) -> &'static [&'static str] {
+        (**self).get_method_names()
     }
 }
 
@@ -376,5 +391,9 @@ where
         >,
     > {
         bail!("Unimplemented interaction {}", name);
+    }
+
+    fn get_method_names(&self) -> &'static [&'static str] {
+        &[]
     }
 }

@@ -22,7 +22,7 @@
 namespace apache::thrift::conformance {
 using type::validateUniversalName;
 
-Protocol::Protocol(ProtocolStruct protocolStruct) noexcept
+Protocol::Protocol(ProtocolStruct protocolStruct)
     : standard_(*protocolStruct.standard()) {
   if (standard_ == StandardProtocol::Custom &&
       protocolStruct.custom().has_value()) {

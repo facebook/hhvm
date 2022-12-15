@@ -11,6 +11,7 @@ open Hh_prelude
 open SymbolOccurrence
 open Typing_defs
 module SN = Naming_special_names
+module FFP = Full_fidelity_positioned_syntax
 
 module Result_set = Caml.Set.Make (struct
   type t = Relative_path.t SymbolOccurrence.t
@@ -867,30 +868,233 @@ let fixmes (tree : Full_fidelity_positioned_syntax.t) : Result_set.elt list =
 
   aux [] tree
 
+let token_pos (t : FFP.Token.t) : Pos.t =
+  let offset = t.FFP.Token.offset + t.FFP.Token.leading_width in
+  Full_fidelity_source_text.relative_pos
+    t.FFP.Token.source_text.Full_fidelity_source_text.file_path
+    t.FFP.Token.source_text
+    offset
+    (offset + t.FFP.Token.width)
+
+let syntax_pos (s : FFP.t) : Pos.t =
+  let open Full_fidelity_positioned_syntax in
+  let offset = start_offset s + leading_width s in
+  let source = source_text s in
+  Full_fidelity_source_text.relative_pos
+    source.Full_fidelity_source_text.file_path
+    source
+    offset
+    (offset + width s)
+
 (** Get keyword positions from the FFP for every keyword that has hover
     documentation. **)
-let keywords tree : Result_set.elt list =
+let keywords (tree : FFP.t) : Result_set.elt list =
   let open Full_fidelity_positioned_syntax in
-  let token_pos (t : Token.t) =
-    let offset = t.Token.offset + t.Token.leading_width in
-    Full_fidelity_source_text.relative_pos
-      t.Token.source_text.Full_fidelity_source_text.file_path
-      t.Token.source_text
-      offset
-      (offset + t.Token.width)
+  let elt_of_token (ctx : keyword_context option) (t : FFP.Token.t) :
+      Result_set.elt option =
+    match t.Token.kind with
+    | Token.TokenKind.Class ->
+      (match ctx with
+      | Some (ClassishDecl DKenumclass) ->
+        Some
+          {
+            name = "enum class";
+            type_ = Keyword EnumClass;
+            is_declaration = false;
+            pos = token_pos t;
+          }
+      | _ ->
+        Some
+          {
+            name = "class";
+            type_ = Keyword Class;
+            is_declaration = false;
+            pos = token_pos t;
+          })
+    | Token.TokenKind.Interface ->
+      Some
+        {
+          name = "interface";
+          type_ = Keyword Interface;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Trait ->
+      Some
+        {
+          name = "trait";
+          type_ = Keyword Trait;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Enum ->
+      (match ctx with
+      | Some (ClassishDecl DKenumclass) ->
+        Some
+          {
+            name = "enum class";
+            type_ = Keyword EnumClass;
+            is_declaration = false;
+            pos = token_pos t;
+          }
+      | _ ->
+        Some
+          {
+            name = "enum";
+            type_ = Keyword Enum;
+            is_declaration = false;
+            pos = token_pos t;
+          })
+    | Token.TokenKind.Type ->
+      Some
+        {
+          name = "type";
+          type_ = Keyword Type;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Newtype ->
+      Some
+        {
+          name = "newtype";
+          type_ = Keyword Newtype;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Extends ->
+      Some
+        {
+          name = "extends";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some (ClassishDecl DKclass) -> ExtendsOnClass
+              | Some (ClassishDecl DKinterface) -> ExtendsOnInterface
+              | _ -> ExtendsOnClass);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Abstract ->
+      Some
+        {
+          name = "abstract";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some Method -> AbstractOnMethod
+              | _ -> AbstractOnClass);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Final ->
+      Some
+        {
+          name = "final";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some Method -> FinalOnMethod
+              | _ -> FinalOnClass);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Public ->
+      Some
+        {
+          name = "public";
+          type_ = Keyword Public;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Protected ->
+      Some
+        {
+          name = "protected";
+          type_ = Keyword Protected;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Private ->
+      Some
+        {
+          name = "private";
+          type_ = Keyword Private;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Async ->
+      Some
+        {
+          name = "async";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some AsyncBlockHeader -> AsyncBlock
+              | _ -> Async);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Await ->
+      Some
+        {
+          name = "await";
+          type_ = Keyword Await;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Concurrent ->
+      Some
+        {
+          name = "concurrent";
+          type_ = Keyword Concurrent;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Readonly ->
+      Some
+        {
+          name = "readonly";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some Method -> ReadonlyOnMethod
+              | Some Parameter -> ReadonlyOnParameter
+              | Some ReturnType -> ReadonlyOnReturnType
+              | _ -> ReadonlyOnExpression);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Internal ->
+      Some
+        {
+          name = "internal";
+          type_ = Keyword Internal;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Module ->
+      Some
+        {
+          name = "module";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some (ModuleDecl DKModuleDeclaration) ->
+                ModuleInModuleDeclaration
+              | Some (ModuleDecl DKModuleMembershipDeclaration) ->
+                ModuleInModuleMembershipDeclaration
+              | _ -> ModuleInModuleDeclaration);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | _ -> None
   in
 
-  let syntax_pos s =
-    let offset = start_offset s + leading_width s in
-    let source = source_text s in
-    Full_fidelity_source_text.relative_pos
-      source.Full_fidelity_source_text.file_path
-      source
-      offset
-      (offset + width s)
-  in
-
-  let rec aux ctx acc s =
+  (* Walk FFP syntax node [s], tracking the current context [ctx]
+     (e.g. are we in an interface?) and accumulate hover items. *)
+  let rec aux
+      (ctx : keyword_context option) (acc : Result_set.elt list) (s : FFP.t) :
+      Result_set.elt list =
     match s.syntax with
     | ClassishDeclaration cd ->
       let classish_decl_kind =
@@ -911,27 +1115,57 @@ let keywords tree : Result_set.elt list =
         ~f:(aux (Some (ClassishDecl DKenumclass)))
     | MethodishDeclaration _ ->
       List.fold (children s) ~init:acc ~f:(aux (Some Method))
-    | FunctionDeclarationHeader fdh ->
-      let acc = aux ctx acc fdh.function_modifiers in
-      let acc = aux ctx acc fdh.function_parameter_list in
-      let acc = aux ctx acc fdh.function_contexts in
-      aux (Some ReturnType) acc fdh.function_readonly_return
-    | ParameterDeclaration pd -> aux (Some Parameter) acc pd.parameter_readonly
-    | AwaitableCreationExpression ace ->
-      let acc = aux ctx acc ace.awaitable_attribute_spec in
-      let acc = aux (Some AsyncBlockHeader) acc ace.awaitable_async in
-      aux ctx acc ace.awaitable_compound_statement
-    | ModuleDeclaration md ->
-      aux
-        (Some (ModuleDecl DKModuleDeclaration))
-        acc
-        md.module_declaration_module_keyword
-    | ModuleMembershipDeclaration mmd ->
-      aux
-        (Some (ModuleDecl DKModuleMembershipDeclaration))
-        acc
-        mmd.module_membership_declaration_module_keyword
+    | FunctionDeclarationHeader
+        {
+          function_modifiers;
+          function_keyword;
+          function_name;
+          function_type_parameter_list;
+          function_left_paren;
+          function_parameter_list;
+          function_right_paren;
+          function_contexts;
+          function_colon;
+          function_readonly_return;
+          function_type;
+          function_where_clause;
+        } ->
+      let acc = aux ctx acc function_modifiers in
+      let acc = aux ctx acc function_keyword in
+      let acc = aux ctx acc function_name in
+      let acc = aux ctx acc function_type_parameter_list in
+      let acc = aux ctx acc function_left_paren in
+      let acc = aux ctx acc function_parameter_list in
+      let acc = aux ctx acc function_right_paren in
+      let acc = aux ctx acc function_contexts in
+      let acc = aux ctx acc function_colon in
+      let acc = aux (Some ReturnType) acc function_readonly_return in
+      let acc = aux ctx acc function_type in
+      let acc = aux ctx acc function_where_clause in
+      acc
+    | ParameterDeclaration _ ->
+      List.fold (children s) ~init:acc ~f:(aux (Some Parameter))
+    | AwaitableCreationExpression
+        {
+          awaitable_attribute_spec;
+          awaitable_async;
+          awaitable_compound_statement;
+        } ->
+      let acc = aux ctx acc awaitable_attribute_spec in
+      let acc = aux (Some AsyncBlockHeader) acc awaitable_async in
+      aux ctx acc awaitable_compound_statement
+    | ModuleDeclaration _ ->
+      List.fold
+        (children s)
+        ~init:acc
+        ~f:(aux (Some (ModuleDecl DKModuleDeclaration)))
+    | ModuleMembershipDeclaration _ ->
+      List.fold
+        (children s)
+        ~init:acc
+        ~f:(aux (Some (ModuleDecl DKModuleMembershipDeclaration)))
     | Contexts c ->
+      let acc = List.fold (children s) ~init:acc ~f:(aux ctx) in
       let is_empty =
         match c.contexts_types.syntax with
         | Missing -> true
@@ -948,200 +1182,9 @@ let keywords tree : Result_set.elt list =
       else
         acc
     | Token t ->
-      (match t.Token.kind with
-      | Token.TokenKind.Class ->
-        (match ctx with
-        | Some (ClassishDecl DKenumclass) ->
-          {
-            name = "enum class";
-            type_ = Keyword EnumClass;
-            is_declaration = false;
-            pos = token_pos t;
-          }
-        | _ ->
-          {
-            name = "class";
-            type_ = Keyword Class;
-            is_declaration = false;
-            pos = token_pos t;
-          })
-        :: acc
-      | Token.TokenKind.Interface ->
-        {
-          name = "interface";
-          type_ = Keyword Interface;
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Trait ->
-        {
-          name = "trait";
-          type_ = Keyword Trait;
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Enum ->
-        (match ctx with
-        | Some (ClassishDecl DKenumclass) ->
-          {
-            name = "enum class";
-            type_ = Keyword EnumClass;
-            is_declaration = false;
-            pos = token_pos t;
-          }
-        | _ ->
-          {
-            name = "enum";
-            type_ = Keyword Enum;
-            is_declaration = false;
-            pos = token_pos t;
-          })
-        :: acc
-      | Token.TokenKind.Type ->
-        {
-          name = "type";
-          type_ = Keyword Type;
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Newtype ->
-        {
-          name = "newtype";
-          type_ = Keyword Newtype;
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Extends ->
-        {
-          name = "extends";
-          type_ =
-            Keyword
-              (match ctx with
-              | Some (ClassishDecl DKclass) -> ExtendsOnClass
-              | Some (ClassishDecl DKinterface) -> ExtendsOnInterface
-              | _ -> ExtendsOnClass);
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Abstract ->
-        {
-          name = "abstract";
-          type_ =
-            Keyword
-              (match ctx with
-              | Some Method -> AbstractOnMethod
-              | _ -> AbstractOnClass);
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Final ->
-        {
-          name = "final";
-          type_ =
-            Keyword
-              (match ctx with
-              | Some Method -> FinalOnMethod
-              | _ -> FinalOnClass);
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Public ->
-        {
-          name = "public";
-          type_ = Keyword Public;
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Protected ->
-        {
-          name = "protected";
-          type_ = Keyword Protected;
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Private ->
-        {
-          name = "private";
-          type_ = Keyword Private;
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Async ->
-        {
-          name = "async";
-          type_ =
-            Keyword
-              (match ctx with
-              | Some AsyncBlockHeader -> AsyncBlock
-              | _ -> Async);
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Await ->
-        {
-          name = "await";
-          type_ = Keyword Await;
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Concurrent ->
-        {
-          name = "concurrent";
-          type_ = Keyword Concurrent;
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Readonly ->
-        {
-          name = "readonly";
-          type_ =
-            Keyword
-              (match ctx with
-              | Some Method -> ReadonlyOnMethod
-              | Some Parameter -> ReadonlyOnParameter
-              | Some ReturnType -> ReadonlyOnReturnType
-              | _ -> ReadonlyOnExpression);
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Internal ->
-        {
-          name = "internal";
-          type_ = Keyword Internal;
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | Token.TokenKind.Module ->
-        {
-          name = "module";
-          type_ =
-            Keyword
-              (match ctx with
-              | Some (ModuleDecl DKModuleDeclaration) ->
-                ModuleInModuleDeclaration
-              | Some (ModuleDecl DKModuleMembershipDeclaration) ->
-                ModuleInModuleMembershipDeclaration
-              | _ -> ModuleInModuleDeclaration);
-          is_declaration = false;
-          pos = token_pos t;
-        }
-        :: acc
-      | _ -> acc)
+      (match elt_of_token ctx t with
+      | Some elt -> elt :: acc
+      | None -> acc)
     | _ -> List.fold (children s) ~init:acc ~f:(aux ctx)
   in
 

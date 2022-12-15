@@ -240,8 +240,7 @@ void HQStreamCodec::onHeadersComplete(HTTPHeaderSize decodedSize,
   msg->setAdvancedProtocolString(getCodecProtocolString(CodecProtocol::HQ));
 
   if (curHeader_.type == hq::FrameType::HEADERS) {
-    if (!finalIngressHeadersSeen_ &&
-        (msg->isRequest() || !msg->is1xxResponse())) {
+    if (!finalIngressHeadersSeen_ && msg->isFinal()) {
       finalIngressHeadersSeen_ = true;
     }
   }

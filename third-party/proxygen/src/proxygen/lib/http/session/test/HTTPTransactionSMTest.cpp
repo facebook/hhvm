@@ -172,7 +172,7 @@ TEST_F(EgressStateMachineFixture, BadDatagramTransitionAfterEOM) {
 // Ingress tests
 
 TEST_F(IngressStateMachineFixture, BadIngressTransitions1) {
-  follow(HTTPTransactionIngressSM::Event::onHeaders);
+  follow(HTTPTransactionIngressSM::Event::onFinalHeaders);
   follow(HTTPTransactionIngressSM::Event::onChunkHeader);
   follow(HTTPTransactionIngressSM::Event::onBody);
   fail(HTTPTransactionIngressSM::Event::onEOM);
@@ -183,7 +183,7 @@ TEST_F(IngressStateMachineFixture, BadIngressTransitions2) {
 }
 
 TEST_F(IngressStateMachineFixture, BadIngressTransitions3) {
-  follow(HTTPTransactionIngressSM::Event::onHeaders);
+  follow(HTTPTransactionIngressSM::Event::onFinalHeaders);
   follow(HTTPTransactionIngressSM::Event::onBody);
   follow(HTTPTransactionIngressSM::Event::onBody);
   follow(HTTPTransactionIngressSM::Event::onEOM);
@@ -191,7 +191,7 @@ TEST_F(IngressStateMachineFixture, BadIngressTransitions3) {
 }
 
 TEST_F(IngressStateMachineFixture, BadIngressTransitions4) {
-  follow(HTTPTransactionIngressSM::Event::onHeaders);
+  follow(HTTPTransactionIngressSM::Event::onFinalHeaders);
   follow(HTTPTransactionIngressSM::Event::onChunkHeader);
   follow(HTTPTransactionIngressSM::Event::onBody);
   follow(HTTPTransactionIngressSM::Event::onChunkComplete);
@@ -200,7 +200,7 @@ TEST_F(IngressStateMachineFixture, BadIngressTransitions4) {
 }
 
 TEST_F(IngressStateMachineFixture, IngressChunkedTransitions) {
-  follow(HTTPTransactionIngressSM::Event::onHeaders);
+  follow(HTTPTransactionIngressSM::Event::onFinalHeaders);
 
   follow(HTTPTransactionIngressSM::Event::onChunkHeader);
   follow(HTTPTransactionIngressSM::Event::onBody);
@@ -219,7 +219,7 @@ TEST_F(IngressStateMachineFixture, IngressChunkedTransitions) {
 }
 
 TEST_F(IngressStateMachineFixture, NormalIngressTransitions) {
-  follow(HTTPTransactionIngressSM::Event::onHeaders);
+  follow(HTTPTransactionIngressSM::Event::onFinalHeaders);
   follow(HTTPTransactionIngressSM::Event::onBody);
   follow(HTTPTransactionIngressSM::Event::onBody);
   follow(HTTPTransactionIngressSM::Event::onBody);
@@ -228,38 +228,57 @@ TEST_F(IngressStateMachineFixture, NormalIngressTransitions) {
 }
 
 TEST_F(IngressStateMachineFixture, WeirdIngressTransitions) {
-  follow(HTTPTransactionIngressSM::Event::onHeaders);
+  follow(HTTPTransactionIngressSM::Event::onNonFinalHeaders);
+  follow(HTTPTransactionIngressSM::Event::onNonFinalHeaders);
+  follow(HTTPTransactionIngressSM::Event::onNonFinalHeaders);
+  follow(HTTPTransactionIngressSM::Event::onFinalHeaders);
   follow(HTTPTransactionIngressSM::Event::onTrailers);
   follow(HTTPTransactionIngressSM::Event::onEOM);
 }
 
 TEST_F(IngressStateMachineFixture, NormalDatagramTransitions) {
-  follow(HTTPTransactionIngressSM::Event::onHeaders);
+  follow(HTTPTransactionIngressSM::Event::onFinalHeaders);
   follow(HTTPTransactionIngressSM::Event::onDatagram);
+  follow(HTTPTransactionIngressSM::Event::onDatagram);
+  follow(HTTPTransactionIngressSM::Event::onBody);
   follow(HTTPTransactionIngressSM::Event::onDatagram);
   follow(HTTPTransactionIngressSM::Event::onEOM);
 }
 
 TEST_F(IngressStateMachineFixture, NormalDatagramTransitionsWithTrailers) {
-  follow(HTTPTransactionIngressSM::Event::onHeaders);
+  follow(HTTPTransactionIngressSM::Event::onFinalHeaders);
   follow(HTTPTransactionIngressSM::Event::onDatagram);
   follow(HTTPTransactionIngressSM::Event::onDatagram);
   follow(HTTPTransactionIngressSM::Event::onTrailers);
   follow(HTTPTransactionIngressSM::Event::onEOM);
+}
+
+TEST_F(IngressStateMachineFixture, BadDatagramTransitionBodyBeforeFinal) {
+  follow(HTTPTransactionIngressSM::Event::onNonFinalHeaders);
+  fail(HTTPTransactionIngressSM::Event::onBody);
+}
+
+TEST_F(IngressStateMachineFixture, BadDatagramTransitionTrailersBeforeFinal) {
+  follow(HTTPTransactionIngressSM::Event::onNonFinalHeaders);
+  fail(HTTPTransactionIngressSM::Event::onTrailers);
+}
+
+TEST_F(IngressStateMachineFixture, BadDatagramTransitionEOMBeforeFinal) {
+  follow(HTTPTransactionIngressSM::Event::onNonFinalHeaders);
+  fail(HTTPTransactionIngressSM::Event::onEOM);
 }
 
 TEST_F(IngressStateMachineFixture, BadDatagramTransitionBeforeHeaders) {
   fail(HTTPTransactionIngressSM::Event::onDatagram);
 }
 
-TEST_F(IngressStateMachineFixture, BadDatagramTransitionAfterBody) {
-  follow(HTTPTransactionIngressSM::Event::onHeaders);
-  follow(HTTPTransactionIngressSM::Event::onBody);
+TEST_F(IngressStateMachineFixture, BadDatagramTransitionBeforeFinalHeaders) {
+  follow(HTTPTransactionIngressSM::Event::onNonFinalHeaders);
   fail(HTTPTransactionIngressSM::Event::onDatagram);
 }
 
 TEST_F(IngressStateMachineFixture, BadDatagramTransitionAfterTrailers) {
-  follow(HTTPTransactionIngressSM::Event::onHeaders);
+  follow(HTTPTransactionIngressSM::Event::onFinalHeaders);
   follow(HTTPTransactionIngressSM::Event::onDatagram);
   follow(HTTPTransactionIngressSM::Event::onDatagram);
   follow(HTTPTransactionIngressSM::Event::onTrailers);
@@ -267,7 +286,7 @@ TEST_F(IngressStateMachineFixture, BadDatagramTransitionAfterTrailers) {
 }
 
 TEST_F(IngressStateMachineFixture, BadDatagramTransitionAfterEOM) {
-  follow(HTTPTransactionIngressSM::Event::onHeaders);
+  follow(HTTPTransactionIngressSM::Event::onFinalHeaders);
   follow(HTTPTransactionIngressSM::Event::onDatagram);
   follow(HTTPTransactionIngressSM::Event::onEOM);
   fail(HTTPTransactionIngressSM::Event::onDatagram);

@@ -33,22 +33,33 @@ HTTPTransactionIngressSMData::find(HTTPTransactionIngressSMData::State s,
       TransitionTable<State, Event>{
           static_cast<uint64_t>(State::NumStates),
           static_cast<uint64_t>(Event::NumEvents),
-          {{{State::Start, Event::onHeaders}, State::HeadersReceived},
+          {{{State::Start, Event::onFinalHeaders}, State::FinalHeadersReceived},
 
-           // For HTTP receiving 100 response, then a regular response
-           {{State::HeadersReceived, Event::onHeaders}, State::HeadersReceived},
+           {{State::Start, Event::onNonFinalHeaders},
+            State::NonFinalHeadersReceived},
+           {{State::NonFinalHeadersReceived, Event::onNonFinalHeaders},
+            State::NonFinalHeadersReceived},
+           {{State::NonFinalHeadersReceived, Event::onFinalHeaders},
+            State::FinalHeadersReceived},
+           {{State::NonFinalHeadersReceived, Event::onUpgrade},
+            State::UpgradeComplete},
 
-           {{State::HeadersReceived, Event::onBody},
+           {{State::FinalHeadersReceived, Event::onBody},
             State::RegularBodyReceived},
-           {{State::HeadersReceived, Event::onChunkHeader},
+           {{State::FinalHeadersReceived, Event::onDatagram},
+            State::FinalHeadersReceived},
+           {{State::FinalHeadersReceived, Event::onChunkHeader},
             State::ChunkHeaderReceived},
            // special case - 0 byte body with trailers
-           {{State::HeadersReceived, Event::onTrailers},
+           {{State::FinalHeadersReceived, Event::onTrailers},
             State::TrailersReceived},
-           {{State::HeadersReceived, Event::onUpgrade}, State::UpgradeComplete},
-           {{State::HeadersReceived, Event::onEOM}, State::EOMQueued},
+           {{State::FinalHeadersReceived, Event::onUpgrade},
+            State::UpgradeComplete},
+           {{State::FinalHeadersReceived, Event::onEOM}, State::EOMQueued},
 
            {{State::RegularBodyReceived, Event::onBody},
+            State::RegularBodyReceived},
+           {{State::RegularBodyReceived, Event::onDatagram},
             State::RegularBodyReceived},
            // HTTP2 supports trailers and doesn't handle body as chunked events
            {{State::RegularBodyReceived, Event::onTrailers},
@@ -65,10 +76,6 @@ HTTPTransactionIngressSMData::find(HTTPTransactionIngressSMData::State s,
 
            {{State::ChunkCompleted, Event::onChunkHeader},
             State::ChunkHeaderReceived},
-           // TODO: "trailers" may be received at any time due to the SPDY
-           // HEADERS frame coming at any time. We might want to have a
-           // TransactionStateMachineFactory that takes a codec and generates
-           // the appropriate transaction state machine from that.
            {{State::ChunkCompleted, Event::onTrailers},
             State::TrailersReceived},
            {{State::ChunkCompleted, Event::onEOM}, State::EOMQueued},
@@ -77,14 +84,6 @@ HTTPTransactionIngressSMData::find(HTTPTransactionIngressSMData::State s,
 
            {{State::UpgradeComplete, Event::onBody}, State::UpgradeComplete},
            {{State::UpgradeComplete, Event::onEOM}, State::EOMQueued},
-
-           {{State::HeadersReceived, Event::onDatagram},
-            State::DatagramReceived},
-           {{State::DatagramReceived, Event::onDatagram},
-            State::DatagramReceived},
-           {{State::DatagramReceived, Event::onTrailers},
-            State::TrailersReceived},
-           {{State::DatagramReceived, Event::onEOM}, State::EOMQueued},
 
            {{State::EOMQueued, Event::eomFlushed}, State::ReceivingDone}}}};
 
@@ -97,11 +96,11 @@ std::ostream& operator<<(std::ostream& os,
     case HTTPTransactionIngressSMData::State::Start:
       os << "Start";
       break;
-    case HTTPTransactionIngressSMData::State::HeadersReceived:
-      os << "HeadersReceived";
+    case HTTPTransactionIngressSMData::State::NonFinalHeadersReceived:
+      os << "NonFinalHeadersReceived";
       break;
-    case HTTPTransactionIngressSMData::State::DatagramReceived:
-      os << "DatagramReceived";
+    case HTTPTransactionIngressSMData::State::FinalHeadersReceived:
+      os << "FinalHeadersReceived";
       break;
     case HTTPTransactionIngressSMData::State::RegularBodyReceived:
       os << "RegularBodyReceived";
@@ -138,8 +137,11 @@ std::ostream& operator<<(std::ostream& os,
 std::ostream& operator<<(std::ostream& os,
                          HTTPTransactionIngressSMData::Event e) {
   switch (e) {
-    case HTTPTransactionIngressSMData::Event::onHeaders:
-      os << "onHeaders";
+    case HTTPTransactionIngressSMData::Event::onNonFinalHeaders:
+      os << "onNonFinalHeaders";
+      break;
+    case HTTPTransactionIngressSMData::Event::onFinalHeaders:
+      os << "onFinalHeaders";
       break;
     case HTTPTransactionIngressSMData::Event::onDatagram:
       os << "onDatagram";

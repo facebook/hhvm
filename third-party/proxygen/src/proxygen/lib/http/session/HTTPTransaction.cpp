@@ -198,8 +198,11 @@ void HTTPTransaction::onIngressHeadersComplete(
   if (isUpstream() && !isPushed() && msg->isResponse()) {
     lastResponseStatus_ = msg->getStatusCode();
   }
+  bool nonFinalPushHeaders = isPushed() && msg->isRequest();
   if (!validateIngressStateTransition(
-          HTTPTransactionIngressSM::Event::onHeaders)) {
+          msg->isFinal() && !nonFinalPushHeaders
+              ? HTTPTransactionIngressSM::Event::onFinalHeaders
+              : HTTPTransactionIngressSM::Event::onNonFinalHeaders)) {
     return;
   }
   if (msg->isRequest()) {

@@ -410,6 +410,13 @@ class HTTPMessage {
   bool isHTTP1_1() const;
 
   /**
+   * Returns true if these are final headers.
+   */
+  bool isFinal() const {
+    return (isRequest() || !is1xxResponse() || getStatusCode() == 101);
+  }
+
+  /**
    * Returns true if this is a 1xx response.
    */
   bool is1xxResponse() const {

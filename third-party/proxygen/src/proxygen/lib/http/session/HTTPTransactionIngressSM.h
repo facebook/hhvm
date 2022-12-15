@@ -18,8 +18,8 @@ class HTTPTransactionIngressSMData {
  public:
   enum class State : uint8_t {
     Start,
-    HeadersReceived,
-    DatagramReceived,
+    NonFinalHeadersReceived,
+    FinalHeadersReceived,
     RegularBodyReceived,
     ChunkHeaderReceived,
     ChunkBodyReceived,
@@ -35,7 +35,8 @@ class HTTPTransactionIngressSMData {
 
   enum class Event : uint8_t {
     // API accessible transitions
-    onHeaders,
+    onNonFinalHeaders,
+    onFinalHeaders,
     onDatagram,
     onBody,
     onChunkHeader,

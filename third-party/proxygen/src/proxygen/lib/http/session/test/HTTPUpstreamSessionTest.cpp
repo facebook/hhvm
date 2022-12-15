@@ -1192,7 +1192,7 @@ TEST_F(HTTP2UpstreamSessionTest, HeadersThenBodyThenHeaders) {
     EXPECT_EQ(err.getProxygenError(), kErrorIngressStateTransition);
     ASSERT_EQ(
         "Invalid ingress state transition, state=RegularBodyReceived, "
-        "event=onHeaders, streamID=1",
+        "event=onFinalHeaders, streamID=1",
         std::string(err.what()));
   });
   handler->expectDetachTransaction();
@@ -2719,7 +2719,7 @@ TEST_F(MockHTTPUpstreamTest, HeadersThenBodyThenHeaders) {
     EXPECT_EQ(err.getProxygenError(), kErrorIngressStateTransition);
     ASSERT_EQ(
         "Invalid ingress state transition, state=RegularBodyReceived, "
-        "event=onHeaders, streamID=1",
+        "event=onFinalHeaders, streamID=1",
         std::string(err.what()));
   });
   handler->expectDetachTransaction();

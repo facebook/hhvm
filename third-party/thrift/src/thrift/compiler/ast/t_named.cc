@@ -42,7 +42,10 @@ const t_const* t_named::find_structured_annotation_or_null(
       return annotation;
     }
     if (is_transitive_annotation(annotation_type)) {
-      return annotation_type.find_structured_annotation_or_null(uri);
+      if (const t_const* annot =
+              annotation_type.find_structured_annotation_or_null(uri)) {
+        return annot;
+      }
     }
   }
   return nullptr;

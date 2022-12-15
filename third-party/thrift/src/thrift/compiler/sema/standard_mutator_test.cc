@@ -191,5 +191,48 @@ TEST_F(StandardMutatorTest, InjectMetadataFields) {
       nullptr);
 }
 
+TEST_F(StandardMutatorTest, Transitive) {
+  t_program* program = root_program();
+  auto terse_field =
+      std::make_unique<t_field>(t_base_type::t_i64(), "terse_field", 1);
+  auto strct = std::make_unique<t_struct>(program, "struct");
+
+  // Store pointer for testing purpose.
+  const auto* terse_field_ptr = terse_field.get();
+
+  // IDL Representation:
+  //
+  //     @scope.Transitive
+  //     struct TransitiveAnnot {}
+  //
+  //     @TransitiveAnnot
+  //     @thrift.TerseWrite
+  //     @scope.Transitive
+  //     struct TransitiveTerse {}
+  auto transitive_annot =
+      std::make_unique<t_struct>(program, "TransitiveAnnot");
+  auto transitive_terse =
+      std::make_unique<t_struct>(program, "TransitiveTerse");
+  transitive_annot->add_structured_annotation(
+      gen::thrift_annotation_builder::transitive(*program).make());
+  transitive_terse->add_structured_annotation(std::make_unique<t_const>(
+      program, *transitive_annot, "", std::make_unique<t_const_value>()));
+  transitive_terse->add_structured_annotation(
+      gen::thrift_annotation_builder::terse(*program).make());
+  transitive_terse->add_structured_annotation(
+      gen::thrift_annotation_builder::transitive(*program).make());
+
+  strct->append_field(std::move(terse_field));
+  program->add_struct(std::move(strct));
+  program->add_structured_annotation(std::make_unique<t_const>(
+      program, *transitive_terse, "", std::make_unique<t_const_value>()));
+
+  EXPECT_EQ(terse_field_ptr->qualifier(), t_field_qualifier::none);
+
+  mutate();
+
+  EXPECT_EQ(terse_field_ptr->qualifier(), t_field_qualifier::terse);
+}
+
 } // namespace
 } // namespace apache::thrift::compiler

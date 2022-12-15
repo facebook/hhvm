@@ -114,6 +114,10 @@ struct thrift_annotation_builder : base_thrift_annotation_builder {
   static thrift_annotation_builder terse(t_program& p) {
     return {p, "TerseWrite"};
   }
+  static thrift_annotation_builder transitive(t_program& p) {
+    return {p, "Transitive"};
+  }
+  static thrift_annotation_builder dummy(t_program& p) { return {p, "Dummy"}; }
 
   std::unique_ptr<t_const> make() {
     return make_inst(std::make_unique<t_const_value>());

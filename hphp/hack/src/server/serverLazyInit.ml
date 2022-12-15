@@ -164,10 +164,7 @@ let merge_saved_state_futures
         ~deptable
         ~ignore_hh_version;
       let naming_table_fallback_path =
-        if
-          genv.local_config.SLC.use_hack_64_naming_table
-          && Sys.file_exists (Path.to_string naming_sqlite_table_path)
-        then (
+        if Sys.file_exists (Path.to_string naming_sqlite_table_path) then (
           Hh_logger.log "Using sqlite naming table from hack/64 saved state";
           Some (Path.to_string naming_sqlite_table_path)
         ) else (
@@ -359,11 +356,7 @@ let download_and_load_state_exn
           Saved_state_loader.Watchman_options.{ root; sockname = None }
         ~ignore_hh_version
         ~saved_state_type:
-          (Saved_state_loader.Naming_and_dep_table
-             {
-               naming_sqlite =
-                 genv.local_config.ServerLocalConfig.use_hack_64_naming_table;
-             })
+          (Saved_state_loader.Naming_and_dep_table { naming_sqlite = true })
       |> Future.with_timeout
            ~timeout:genv.local_config.SLC.load_state_natively_download_timeout
     in
@@ -446,10 +439,7 @@ let use_precomputed_state_exn
     ServerArgs.naming_sqlite_path_for_target_info info
   in
   let naming_table_fallback_path =
-    if
-      genv.local_config.SLC.use_hack_64_naming_table
-      && Sys.file_exists naming_sqlite_table_path
-    then (
+    if Sys.file_exists naming_sqlite_table_path then (
       Hh_logger.log "Using sqlite naming table from hack/64 saved state";
       Some naming_sqlite_table_path
     ) else

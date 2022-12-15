@@ -165,7 +165,6 @@ class json_experimental_function : public mstch_function {
             {"function:lineno", &json_experimental_function::get_lineno},
             {"function:docstring?", &json_experimental_function::has_docstring},
             {"function:docstring", &json_experimental_function::get_docstring},
-            {"function:args?", &json_experimental_function::has_args},
         });
   }
   mstch::node get_lineno() {
@@ -173,9 +172,6 @@ class json_experimental_function : public mstch_function {
   }
   mstch::node has_docstring() { return function_->has_doc(); }
   mstch::node get_docstring() { return json_quote_ascii(function_->get_doc()); }
-  mstch::node has_args() {
-    return !function_->get_paramlist()->get_members().empty();
-  }
 
  private:
   source_manager& source_mgr_;

@@ -506,7 +506,6 @@ class python_mstch_function : public mstch_function {
     register_methods(
         this,
         {
-            {"function:args?", &python_mstch_function::has_args},
             {"function:created_interaction",
              &python_mstch_function::created_interaction},
             {"function:returns_tuple?", &python_mstch_function::returns_tuple},
@@ -518,10 +517,6 @@ class python_mstch_function : public mstch_function {
              &python_mstch_function::return_stream_elem_type},
             {"function:async_only?", &python_mstch_function::async_only},
         });
-  }
-
-  mstch::node has_args() {
-    return !function_->get_paramlist()->get_members().empty();
   }
 
   mstch::node created_interaction() {
@@ -1062,7 +1057,7 @@ class python_mstch_const_value : public mstch_const_value {
     if (const_value_->is_enum() && const_value_->get_enum_value() != nullptr) {
       return py3::get_py3_name(*const_value_->get_enum_value());
     }
-    return mstch_const_value::enum_value_name();
+    return mstch::node();
   }
 
   mstch::node string_value() {

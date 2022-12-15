@@ -271,6 +271,14 @@ mstch::node mstch_const_value::bool_value() {
   return type_ == cv::CV_BOOL ? const_value_->get_bool() : mstch::node();
 }
 
+mstch::node mstch_const_value::enum_value() {
+  if (const_value_->get_enum_value() != nullptr) {
+    return context_.enum_value_factory->make_mstch_object(
+        const_value_->get_enum_value(), context_, pos_);
+  }
+  return mstch::node();
+}
+
 mstch::node mstch_const_value::is_non_zero() {
   switch (type_) {
     case cv::CV_DOUBLE:
@@ -287,14 +295,6 @@ mstch::node mstch_const_value::is_non_zero() {
 mstch::node mstch_const_value::enum_name() {
   if (type_ == cv::CV_INTEGER && const_value_->is_enum()) {
     return const_value_->get_enum()->get_name();
-  }
-  return mstch::node();
-}
-
-mstch::node mstch_const_value::enum_value_name() {
-  if (type_ == cv::CV_INTEGER && const_value_->is_enum() &&
-      const_value_->get_enum_value() != nullptr) {
-    return const_value_->get_enum_value()->get_name();
   }
   return mstch::node();
 }

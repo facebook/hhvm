@@ -614,7 +614,8 @@ class mstch_function : public mstch_base {
             {"function:sink_final_response_exceptions?",
              &mstch_function::has_sink_final_response_exceptions},
             {"function:args", &mstch_function::arg_list},
-            {"function:comma", &mstch_function::has_args},
+            {"function:args?", &mstch_function::has_args},
+            {"function:comma", &mstch_function::arg_comma},
             {"function:priority", &mstch_function::priority},
             {"function:returns_sink?", &mstch_function::returns_sink},
             {"function:returns_streams?", &mstch_function::returns_stream},
@@ -658,11 +659,9 @@ class mstch_function : public mstch_base {
     auto stream = dynamic_cast<const t_stream_response*>(&rettype);
     return stream && !stream->first_response_type().empty();
   }
-  mstch::node has_args() {
-    if (function_->get_paramlist()->has_fields()) {
-      return std::string(", ");
-    }
-    return std::string();
+  mstch::node has_args() { return has_args_(); }
+  mstch::node arg_comma() {
+    return has_args_() ? std::string(", ") : std::string();
   }
   mstch::node priority() {
     return function_->get_annotation("priority", "NORMAL");
@@ -715,6 +714,8 @@ class mstch_function : public mstch_base {
 
  protected:
   const t_function* function_;
+
+  bool has_args_() { return function_->get_paramlist()->has_fields(); }
 };
 
 class mstch_type : public mstch_base {
@@ -1029,9 +1030,7 @@ class mstch_field : public mstch_base {
   mstch::node is_required() {
     return field_->get_req() == t_field::e_req::required;
   }
-  mstch::node is_optional() {
-    return field_->get_req() == t_field::e_req::optional;
-  }
+  mstch::node is_optional() { return is_optional_(); }
   mstch::node is_optInReqOut() {
     return field_->get_req() == t_field::e_req::opt_in_req_out;
   }
@@ -1128,6 +1127,10 @@ class mstch_field : public mstch_base {
  protected:
   const t_field* field_;
   const field_generator_context* field_context_;
+
+  bool is_optional_() const {
+    return field_->get_req() == t_field::e_req::optional;
+  }
 };
 
 class mstch_enum : public mstch_base {
@@ -1310,9 +1313,9 @@ class mstch_const_value : public mstch_base {
             {"value:integer_value", &mstch_const_value::integer_value},
             {"value:double_value", &mstch_const_value::double_value},
             {"value:bool_value", &mstch_const_value::bool_value},
+            {"value:enum_value", &mstch_const_value::enum_value},
             {"value:nonzero?", &mstch_const_value::is_non_zero},
             {"value:enum_name", &mstch_const_value::enum_name},
-            {"value:enum_value_name", &mstch_const_value::enum_value_name},
             {"value:string_value", &mstch_const_value::string_value},
             {"value:list_elements", &mstch_const_value::list_elems},
             {"value:map_elements", &mstch_const_value::map_elems},
@@ -1359,9 +1362,9 @@ class mstch_const_value : public mstch_base {
   mstch::node integer_value();
   mstch::node double_value();
   mstch::node bool_value();
+  mstch::node enum_value();
   mstch::node is_non_zero();
   mstch::node enum_name();
-  mstch::node enum_value_name();
   mstch::node string_value();
   mstch::node list_elems();
   mstch::node map_elems();

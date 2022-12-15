@@ -897,7 +897,7 @@ class py3_mstch_field : public mstch_field {
   mstch::node hasPyName() { return pyName_ != field_->get_name(); }
 
   bool has_default_value() {
-    return !is_ref() && (field_->get_value() != nullptr || !is_optional());
+    return !is_ref() && (field_->get_value() != nullptr || !is_optional_());
   }
 
   mstch::node boxed_ref() {
@@ -948,10 +948,6 @@ class py3_mstch_field : public mstch_field {
     }
     // Suppress "control reaches end of non-void function" warning
     throw std::logic_error{"Unhandled ref_type"};
-  }
-
-  bool is_optional() const {
-    return field_->get_req() == t_field::e_req::optional;
   }
 
   bool is_ref() { return get_ref_type() != RefType::NotRef; }

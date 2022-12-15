@@ -390,9 +390,6 @@ type t = {
   store_decls_in_saved_state: bool;
       (** When enabled, save hot class declarations (for now, specified in a special
       file in the repository) when generating a saved state. *)
-  load_decls_from_saved_state: bool;
-      (** When enabled, load class declarations stored in the saved state, if any, on
-      server init. *)
   idle_gc_slice: int;
       (** Size of Gc.major_slice to be performed when server is idle. 0 to disable *)
   shallow_class_decl: bool;
@@ -565,7 +562,6 @@ let default =
     hg_aware_recheck_restart_threshold = 0;
     ide_parser_cache = false;
     store_decls_in_saved_state = false;
-    load_decls_from_saved_state = false;
     idle_gc_slice = 0;
     shallow_class_decl = false;
     force_shallow_decl_fanout = false;
@@ -997,13 +993,6 @@ let load_ fn ~silent ~current_version overrides =
     bool_if_min_version
       "store_decls_in_saved_state"
       ~default:default.store_decls_in_saved_state
-      ~current_version
-      config
-  in
-  let load_decls_from_saved_state =
-    bool_if_min_version
-      "load_decls_from_saved_state"
-      ~default:default.load_decls_from_saved_state
       ~current_version
       config
   in
@@ -1475,7 +1464,6 @@ let load_ fn ~silent ~current_version overrides =
     hg_aware_recheck_restart_threshold;
     ide_parser_cache;
     store_decls_in_saved_state;
-    load_decls_from_saved_state;
     idle_gc_slice;
     shallow_class_decl;
     force_shallow_decl_fanout;

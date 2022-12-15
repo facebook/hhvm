@@ -64,17 +64,38 @@ let empty_config =
     compression = 0;
   }
 
-(* Allocated in C only. *)
-type handle = private {
+(* Allocated in C only.
+  NOTE: If you change the order, update hh_shared.c!  *)
+type internal_handle = private {
   h_fd: Unix.file_descr;
   h_global_size: int;
   h_heap_size: int;
-  h_hash_table_pow_val: int;
-  h_num_workers_val: int;
+  _h_hash_table_pow_val: int;
+  _h_num_workers_val: int;
   h_shm_use_sharded_hashtbl: bool;
-  h_shm_cache_size: int;
+  _h_shm_cache_size: int;
   h_sharded_hashtbl_fd: Unix.file_descr;
 }
+
+type handle = internal_handle * internal_handle option
+
+let get_heap_size ({ h_heap_size; _ }, _) = h_heap_size
+
+let get_global_size ({ h_global_size; _ }, _) = h_global_size
+
+let apply_on_pair
+    ~f ({ h_fd; h_shm_use_sharded_hashtbl; h_sharded_hashtbl_fd; _ }, h2) =
+  f h_fd;
+  if h_shm_use_sharded_hashtbl then f h_sharded_hashtbl_fd;
+  match h2 with
+  (* We don't support 2 shared hashtables, so ignore it in the second part *)
+  | Some { h_fd; _ } -> f h_fd
+  | None -> ()
+
+let set_close_on_exec handle = apply_on_pair ~f:Unix.set_close_on_exec handle
+
+let clear_close_on_exec handle =
+  apply_on_pair ~f:Unix.clear_close_on_exec handle
 
 exception Out_of_shared_memory
 
@@ -114,8 +135,14 @@ let () =
     (C_assertion_failure "dummy string")
 
 external hh_shared_init :
-  config:config -> shm_dir:string option -> num_workers:int -> handle
+  config:config -> shm_dir:string option -> num_workers:int -> internal_handle
   = "hh_shared_init"
+
+let ref_shared_mem_callbacks = ref None
+
+let register_callbacks init_flash connect_flash get_handle_flash =
+  ref_shared_mem_callbacks := Some (init_flash, connect_flash, get_handle_flash);
+  ()
 
 let anonymous_init config ~num_workers =
   hh_shared_init ~config ~shm_dir:None ~num_workers
@@ -172,16 +199,42 @@ let rec shm_dir_init config ~num_workers = function
 
 let init config ~num_workers =
   ref_has_done_init := true;
-  try anonymous_init config ~num_workers with
-  | Failed_anonymous_memfd_init ->
-    EventLogger.(
-      log_if_initialized (fun () -> sharedmem_failed_anonymous_memfd_init ()));
-    Hh_logger.log "Failed to use anonymous memfd init";
-    shm_dir_init config ~num_workers config.shm_dirs
+  let fst =
+    try anonymous_init config ~num_workers with
+    | Failed_anonymous_memfd_init ->
+      EventLogger.(
+        log_if_initialized (fun () -> sharedmem_failed_anonymous_memfd_init ()));
+      Hh_logger.log "Failed to use anonymous memfd init";
+      shm_dir_init config ~num_workers config.shm_dirs
+  in
+  let snd =
+    match !ref_shared_mem_callbacks with
+    | Some (init, _connect, _get) -> init config ~num_workers
+    | None -> None
+  in
+  (fst, snd)
 
-external connect : handle -> worker_id:int -> unit = "hh_connect"
+external connect_internal_handle : internal_handle -> worker_id:int -> unit
+  = "hh_connect"
 
-external get_handle : unit -> handle = "hh_get_handle"
+let connect (handle, maybe_handle) ~worker_id =
+  let () = connect_internal_handle handle ~worker_id in
+  let () =
+    match !ref_shared_mem_callbacks with
+    | Some (_init, connect, _get) -> connect maybe_handle ~worker_id
+    | _ -> ()
+  in
+  ()
+
+external get_handle_internal_handle : unit -> internal_handle = "hh_get_handle"
+
+let get_handle () =
+  let snd =
+    match !ref_shared_mem_callbacks with
+    | Some (_init, _connect, get) -> get ()
+    | None -> None
+  in
+  (get_handle_internal_handle (), snd)
 
 external set_allow_removes : bool -> unit = "hh_set_allow_removes"
 

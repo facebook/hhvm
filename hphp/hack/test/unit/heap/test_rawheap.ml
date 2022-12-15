@@ -42,8 +42,8 @@ let expect_equals ~name value expected =
 
 let test_heap_handle () =
   let handle = SharedMem.get_handle () in
-  expect ~msg:"" SharedMem.(handle.h_heap_size = 409600);
-  expect ~msg:"" SharedMem.(handle.h_global_size = 16);
+  expect ~msg:"" SharedMem.(get_heap_size handle = 409600);
+  expect ~msg:"" SharedMem.(get_global_size handle = 16);
   (* no-op *)
   SharedMem.connect handle ~worker_id:0
 

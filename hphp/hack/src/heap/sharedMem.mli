@@ -51,19 +51,27 @@ val default_config : config
 val empty_config : config
 
 (** A handle to initialized shared memory. Used to connect other workers to
-    shared memory.
+    shared memory. *)
+type handle
 
-    NOTE: If you change the order, update hh_shared.c! *)
-type handle = private {
-  h_fd: Unix.file_descr;
-  h_global_size: int;
-  h_heap_size: int;
-  h_hash_table_pow_val: int;
-  h_num_workers_val: int;
-  h_shm_use_sharded_hashtbl: bool;
-  h_shm_cache_size: int;
-  h_sharded_hashtbl_fd: Unix.file_descr;
-}
+(** Internal type for a handle, to enable additional low-level heaps attachments **)
+type internal_handle
+
+(** Exposed for testing **)
+val get_heap_size : handle -> int
+
+(** Exposed for testing **)
+val get_global_size : handle -> int
+
+val clear_close_on_exec : handle -> unit
+
+val set_close_on_exec : handle -> unit
+
+val register_callbacks :
+  (config -> num_workers:int -> internal_handle option) ->
+  (internal_handle option -> worker_id:int -> unit) ->
+  (unit -> internal_handle option) ->
+  unit
 
 (** Initialize shared memory.
 
@@ -208,7 +216,9 @@ module type Value = sig
 end
 
 (** Whether or not a backend is evictable. *)
-module type Evictability
+module type Evictability = sig
+  val evictable : bool
+end
 
 (** Used to indicate that values can be evicted at all times. *)
 module Evictable : Evictability

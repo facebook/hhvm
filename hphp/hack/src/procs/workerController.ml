@@ -256,7 +256,7 @@ let make
       (None, None)
   in
   let spawn worker_id name child_fd () =
-    Unix.clear_close_on_exec heap_handle.SharedMem.h_fd;
+    SharedMem.clear_close_on_exec heap_handle;
 
     (* Daemon.spawn runs exec after forking. We explicitly *do* want to "leak"
      * child_fd to this one spawned process because it will be using that FD to
@@ -271,7 +271,7 @@ let make
         entry
         { longlived_workers; entry_state = state; controller_fd = child_fd }
     in
-    Unix.set_close_on_exec heap_handle.SharedMem.h_fd;
+    SharedMem.set_close_on_exec heap_handle;
 
     (* This process no longer needs child_fd after its spawned the child.
      * Messages are read using controller_fd. *)

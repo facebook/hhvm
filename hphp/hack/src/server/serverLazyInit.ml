@@ -307,10 +307,7 @@ let download_and_load_state_exn
   (* TODO(hverr): Support the ignore_hhconfig flag, how to do this with Watchman? *)
   let _ignore_hhconfig = ServerArgs.saved_state_ignore_hhconfig genv.options in
   let naming_table_saved_state_future =
-    if
-      genv.local_config.ServerLocalConfig.enable_naming_table_fallback
-      && not genv.local_config.ServerLocalConfig.no_load_two_saved_states
-    then begin
+    if genv.local_config.ServerLocalConfig.enable_naming_table_fallback then begin
       Hh_logger.log "Starting naming table download.";
 
       let loader_future =

@@ -349,9 +349,6 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(
 }
 
 std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
-  auto schema = val();
-  schema->set_map();
-
   auto dfns_schema = val();
   dfns_schema->set_list();
 
@@ -432,10 +429,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
   svc_schema->add_map(val("functions"), std::move(functions_schema));
 
   // TODO: add inheritedService
-
-  add_as_definition(*dfns_schema, "serviceDef", std::move(svc_schema));
-  schema->add_map(val("definitions"), std::move(dfns_schema));
-  return schema;
+  return svc_schema;
 }
 
 std::unique_ptr<t_const_value> schematizer::gen_schema(const t_const& node) {

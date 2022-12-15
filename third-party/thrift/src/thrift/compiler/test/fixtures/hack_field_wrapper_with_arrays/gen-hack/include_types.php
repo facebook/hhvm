@@ -387,6 +387,12 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
     return $this->wrapped_type_int as nonnull;
   }
 
+
+  public function set_wrapped_type_int_DO_NOT_USE_THRIFT_INTERNAL(int $wrapped_type_int)[write_props]: void {
+    $wrapped_type_int = \MyTypeIntWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<\detail\i64WithWrapper>($wrapped_type_int);
+    $this->get_wrapped_type_int()->setValue_DO_NOT_USE_THRIFT_INTERNAL($wrapped_type_int);
+  }
+
   /**
    * Original thrift field:-
    * 8: struct include.StructWithWrapper double_wrapped_struct
@@ -398,7 +404,7 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
   }
 
 
-  public function set_double_wrapped_struct_DO_NOT_USE_THRIFT_INTERNAL(\thrift_adapted_types\StructWithWrapper $double_wrapped_struct)[]: void {
+  public function set_double_wrapped_struct_DO_NOT_USE_THRIFT_INTERNAL(\thrift_adapted_types\StructWithWrapper $double_wrapped_struct)[write_props]: void {
     $double_wrapped_struct = \MyStructWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<\thrift_adapted_types\StructWithWrapper>($double_wrapped_struct);
     $this->get_double_wrapped_struct()->setValue_DO_NOT_USE_THRIFT_INTERNAL($double_wrapped_struct);
   }
@@ -418,7 +424,7 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
     return new static();
   }
 
-  public static async function genFromShape(self::TConstructorShape $shape)[zoned_local]: Awaitable<this> {
+  public static async function genFromShape(self::TConstructorShape $shape)[zoned]: Awaitable<this> {
     $obj = new static();
     $wrapped_field = Shapes::idx($shape, 'wrapped_field');
     if ($wrapped_field !== null) {
@@ -1025,7 +1031,7 @@ class MyComplexStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \I
    */
   public vec<dict<string, StructWithWrapper>> $list_of_map_of_string_to_StructWithWrapper;
 
-  public function set_list_of_map_of_string_to_StructWithWrapper_DO_NOT_USE_THRIFT_INTERNAL(vec<dict<string, \thrift_adapted_types\StructWithWrapper>> $list_of_map_of_string_to_StructWithWrapper)[]: void {
+  public function set_list_of_map_of_string_to_StructWithWrapper_DO_NOT_USE_THRIFT_INTERNAL(vec<dict<string, \thrift_adapted_types\StructWithWrapper>> $list_of_map_of_string_to_StructWithWrapper)[write_props]: void {
     $this->list_of_map_of_string_to_StructWithWrapper = Vec\map(
       $list_of_map_of_string_to_StructWithWrapper,
       $val0 ==> 
@@ -1052,7 +1058,7 @@ class MyComplexStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \I
     return new static();
   }
 
-  public static async function genFromShape(self::TConstructorShape $shape)[zoned_local]: Awaitable<this> {
+  public static async function genFromShape(self::TConstructorShape $shape)[zoned]: Awaitable<this> {
     $obj = new static();
     $map_of_string_to_MyStruct = Shapes::idx($shape, 'map_of_string_to_MyStruct');
     if ($map_of_string_to_MyStruct !== null) {

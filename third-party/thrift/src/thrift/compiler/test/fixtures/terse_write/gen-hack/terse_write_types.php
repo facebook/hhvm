@@ -4335,7 +4335,7 @@ class WrappedFields implements \IThriftAsyncStruct, \IThriftStructMetadata, \ITh
     return new static();
   }
 
-  public static async function genFromShape(self::TConstructorShape $shape)[zoned_local]: Awaitable<this> {
+  public static async function genFromShape(self::TConstructorShape $shape)[zoned]: Awaitable<this> {
     $obj = new static();
     $field1 = Shapes::idx($shape, 'field1');
     if ($field1 !== null) {

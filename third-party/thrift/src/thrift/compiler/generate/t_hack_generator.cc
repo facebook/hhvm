@@ -1903,14 +1903,14 @@ std::string t_hack_generator::render_const_value_helper(
       out << hack_name(tenum) << "::coerce(" << value->get_integer() << ")";
     }
   } else if (const auto* tstruct = dynamic_cast<const t_struct*>(type)) {
-    std::string struct_name;
+    std::string struct_name = hack_name(type);
     auto [wrapper, name, ns] = find_hack_wrapper(type);
-    if (!ignore_wrapper && wrapper) {
-      out << *wrapper << "::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<";
+    if (wrapper) {
       struct_name = hack_wrapped_type_name(name, ns);
-      out << struct_name << ">(";
-    } else {
-      struct_name = hack_name(type);
+      if (!ignore_wrapper) {
+        out << *wrapper << "::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<";
+        out << struct_name << ">(";
+      }
     }
     if (is_async_struct(tstruct)) {
       auto temp_val = namer(("$" + hack_name(type, true)).c_str());
@@ -2005,7 +2005,7 @@ std::string t_hack_generator::render_const_value_helper(
       indent_down();
       indent(out) << ")";
     }
-    if (wrapper) {
+    if (wrapper && !ignore_wrapper) {
       out << ")";
     }
   } else if (const auto* tmap = dynamic_cast<const t_map*>(type)) {
@@ -3069,7 +3069,9 @@ void t_hack_generator::generate_php_struct_shape_spec(
 
     if (dynamic_cast<const t_result_struct*>(tstruct) &&
         field.name() == "success") {
-      typehint = "this::TResult";
+      if (!is_async_field(field, false)) {
+        typehint = "this::TResult";
+      }
     }
 
     indent(out) << "  " << prefix << "'" << field.name() << "' => " << prefix
@@ -4193,6 +4195,7 @@ void t_hack_generator::generate_php_struct_fields(
     }
 
     const t_type* t = field.get_type();
+    bool is_async_typ = is_async_type(t, false);
 
     t = t->get_true_type();
 
@@ -4272,7 +4275,7 @@ void t_hack_generator::generate_php_struct_fields(
       generate_php_field_wrapper_methods(
           out, field, tstruct->is_union(), nullable, struct_hack_name_with_ns);
     }
-    if (!tstruct->is_union() && is_async_type(t, false)) {
+    if (!tstruct->is_union() && is_async_typ) {
       out << "\n";
 
       // set_<fieldName>_DO_NOT_USE_THRIFT_INTERNAL()
@@ -4282,7 +4285,7 @@ void t_hack_generator::generate_php_struct_fields(
                          t,
                          {{TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER,
                            true}})
-                  << " $" << fieldName << ")[]: void {\n";
+                  << " $" << fieldName << ")[write_props]: void {\n";
       indent_up();
 
       t_name_generator namer;
@@ -4651,14 +4654,8 @@ void t_hack_generator::generate_php_struct_default_constructor(
         if (find_hack_wrapper(field)) {
           wrapped_fields_or_types.push_back(&field);
         } else {
-          auto [type_wrapper, underlying_name, ns] =
-              find_hack_wrapper(field.get_type());
-          if (type_wrapper) {
-            wrapped_fields_or_types.push_back(&field);
-          } else {
-            generate_php_struct_constructor_field_assignment(
-                out, field, tstruct, type, struct_hack_name_with_ns, true);
-          }
+          generate_php_struct_constructor_field_assignment(
+              out, field, tstruct, type, struct_hack_name_with_ns, true);
         }
       }
       for (const auto& field : wrapped_fields_or_types) {
@@ -4935,8 +4932,14 @@ std::string t_hack_generator::render_service_metadata_response(
   indent_up();
 
   for (const auto* tstruct : structs) {
-    out << indent() << "'" << tstruct->get_scoped_name() << "' => "
-        << hack_name(tstruct) << "::getStructMetadata(),\n";
+    out << indent() << "'" << tstruct->get_scoped_name() << "' => ";
+    auto [wrapper, name, ns] = find_hack_wrapper(tstruct);
+    if (wrapper) {
+      out << hack_wrapped_type_name(name, ns);
+    } else {
+      out << hack_name(tstruct);
+    }
+    out << "::getStructMetadata(),\n";
   }
 
   indent_down();
@@ -5287,7 +5290,20 @@ void t_hack_generator::_generate_args(
       // Loop through the fields and assign to the args struct
       for (auto&& field : fields) {
         std::string name = field.name();
-        out << indent() << "$args->" << name << " = $" << name << ";\n";
+        const t_type* ftype = field.type()->get_true_type();
+        bool nullable = nullable_everything_ || !no_nullables_ ||
+            (ftype->is_enum() &&
+             (field.default_value() == nullptr ||
+              field.get_req() != t_field::e_req::required));
+        if (nullable) {
+          out << indent() << "if ($" << name << " !== null) {\n";
+          indent_up();
+          out << indent() << "$args->" << name << " = $" << name << ";\n";
+          indent_down();
+          out << indent() << "}\n";
+        } else {
+          out << indent() << "$args->" << name << " = $" << name << ";\n";
+        }
       }
     }
   } else if (!fields.empty()) {
@@ -5330,7 +5346,7 @@ void t_hack_generator::generate_php_struct_async_struct_creation_method_header(
       }
       break;
     case ThriftAsyncStructCreationMethod::FROM_CONSTRUCTOR_SHAPE:
-      out << "genFromShape(self::TConstructorShape $shape)[zoned_local]";
+      out << "genFromShape(self::TConstructorShape $shape)[zoned]";
       break;
     case ThriftAsyncStructCreationMethod::FROM_SHAPE:
       out << "__genFromShape(self::TShape $shape)";

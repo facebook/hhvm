@@ -188,7 +188,7 @@ class MyUnion implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftUn
     return new static();
   }
 
-  public static async function genFromShape(self::TConstructorShape $shape)[zoned_local]: Awaitable<this> {
+  public static async function genFromShape(self::TConstructorShape $shape)[zoned]: Awaitable<this> {
     $obj = new static();
     $union_annotated_field = Shapes::idx($shape, 'union_annotated_field');
     if ($union_annotated_field !== null) {
@@ -464,7 +464,7 @@ class MyException extends \TException implements \IThriftAsyncStruct, \IThriftEx
     return new static();
   }
 
-  public static async function genFromShape(self::TConstructorShape $shape)[zoned_local]: Awaitable<this> {
+  public static async function genFromShape(self::TConstructorShape $shape)[zoned]: Awaitable<this> {
     $obj = new static();
     $code = Shapes::idx($shape, 'code');
     if ($code !== null) {

@@ -147,18 +147,23 @@ class Internship implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThrif
    */
   public i64WithWrapper $intern_id;
 
+  public function set_intern_id_DO_NOT_USE_THRIFT_INTERNAL(int $intern_id)[write_props]: void {
+    $this->intern_id = \MyTypeIntWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<\detail\i64WithWrapper>($intern_id);
+  }
+
+
   public function __construct()[] {
     $this->weeks = 0;
     $this->title = '';
-    $this->compensation = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<?float, Internship>(null, 4, $this);
     $this->intern_id = \MyTypeIntWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<\detail\i64WithWrapper>(0);
+    $this->compensation = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<?float, Internship>(null, 4, $this);
   }
 
   public static function withDefaultValues()[]: this {
     return new static();
   }
 
-  public static async function genFromShape(self::TConstructorShape $shape)[zoned_local]: Awaitable<this> {
+  public static async function genFromShape(self::TConstructorShape $shape)[zoned]: Awaitable<this> {
     $obj = new static();
     $weeks = Shapes::idx($shape, 'weeks');
     if ($weeks !== null) {

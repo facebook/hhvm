@@ -301,18 +301,23 @@ class structured_annotation_recursive implements \IThriftAsyncStruct, \IThriftSt
    */
   public i64WithWrapper $int_field;
 
+  public function set_int_field_DO_NOT_USE_THRIFT_INTERNAL(int $int_field)[write_props]: void {
+    $this->int_field = \MyTypeIntWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<\thrift_adapted_types\i64WithWrapper>($int_field);
+  }
+
+
   public function __construct()[] {
     $this->name = '';
     $this->recurse_map = dict[];
-    $this->recurse = MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<?structured_annotation_recursive, structured_annotation_recursive>(null, 2, $this);
     $this->int_field = \MyTypeIntWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<\thrift_adapted_types\i64WithWrapper>(0);
+    $this->recurse = MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<?structured_annotation_recursive, structured_annotation_recursive>(null, 2, $this);
   }
 
   public static function withDefaultValues()[]: this {
     return new static();
   }
 
-  public static async function genFromShape(self::TConstructorShape $shape)[zoned_local]: Awaitable<this> {
+  public static async function genFromShape(self::TConstructorShape $shape)[zoned]: Awaitable<this> {
     $obj = new static();
     $name = Shapes::idx($shape, 'name');
     if ($name !== null) {
@@ -805,11 +810,11 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
         ),
         'annotated_struct_wrapper' => shape(
           'field' => dict[
-            'StructWithWrapper' => StructWithWrapper::fromShape(
+            'StructWithWrapper' => \thrift_adapted_types\StructWithWrapper::fromShape(
               shape(
                 "int_field" => 11,
               )
-            )),
+            ),
           ],
           'type' => dict[],
         ),

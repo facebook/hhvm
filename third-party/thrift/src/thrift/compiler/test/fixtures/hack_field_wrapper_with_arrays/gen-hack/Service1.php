@@ -170,8 +170,12 @@ class Service1AsyncClient extends \ThriftClientBase implements Service1AsyncClie
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Service1_func2_args::withDefaultValues();
-    $args->arg1 = $arg1;
-    $args->arg2 = $arg2;
+    if ($arg1 !== null) {
+      $args->arg1 = $arg1;
+    }
+    if ($arg2 !== null) {
+      $args->arg2 = $arg2;
+    }
     await $this->asyncHandler_->genBefore("Service1", "func2", $args);
     $currentseqid = $this->sendImplHelper($args, "func2", false);
     return await $this->genAwaitResponse(Service1_func2_result::class, "func2", false, $currentseqid, $rpc_options);
@@ -237,8 +241,12 @@ class Service1Client extends \ThriftClientBase implements Service1ClientIf {
     }
     $rpc_options = $this->getAndResetOptions() ?? \ThriftClientBase::defaultOptions();
     $args = Service1_func2_args::withDefaultValues();
-    $args->arg1 = $arg1;
-    $args->arg2 = $arg2;
+    if ($arg1 !== null) {
+      $args->arg1 = $arg1;
+    }
+    if ($arg2 !== null) {
+      $args->arg2 = $arg2;
+    }
     await $this->asyncHandler_->genBefore("Service1", "func2", $args);
     $currentseqid = $this->sendImplHelper($args, "func2", false);
     return await $this->genAwaitResponse(Service1_func2_result::class, "func2", false, $currentseqid, $rpc_options);
@@ -267,8 +275,12 @@ class Service1Client extends \ThriftClientBase implements Service1ClientIf {
   }
   public function send_func2(?StructWithWrapper $arg1, ?i64WithWrapper $arg2): int {
     $args = Service1_func2_args::withDefaultValues();
-    $args->arg1 = $arg1;
-    $args->arg2 = $arg2;
+    if ($arg1 !== null) {
+      $args->arg1 = $arg1;
+    }
+    if ($arg2 !== null) {
+      $args->arg2 = $arg2;
+    }
     return $this->sendImplHelper($args, "func2", false);
   }
   public function recv_func2(?int $expectedsequenceid = null): i64WithWrapper {
@@ -1187,11 +1199,16 @@ class Service1_func2_args implements \IThriftAsyncStruct, \IThriftStructMetadata
   const int STRUCTURAL_ID = 7334474533984828341;
   public ?StructWithWrapper $arg1;
 
-  public function set_arg1_DO_NOT_USE_THRIFT_INTERNAL(\thrift_adapted_types\StructWithWrapper $arg1)[]: void {
+  public function set_arg1_DO_NOT_USE_THRIFT_INTERNAL(\thrift_adapted_types\StructWithWrapper $arg1)[write_props]: void {
     $this->arg1 = \MyStructWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<\thrift_adapted_types\StructWithWrapper>($arg1);
   }
 
   public i64WithWrapper $arg2;
+
+  public function set_arg2_DO_NOT_USE_THRIFT_INTERNAL(int $arg2)[write_props]: void {
+    $this->arg2 = \MyTypeIntWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<\detail\i64WithWrapper>($arg2);
+  }
+
 
   public function __construct()[] {
     $this->arg2 = \MyTypeIntWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<\detail\i64WithWrapper>(0);
@@ -1201,7 +1218,7 @@ class Service1_func2_args implements \IThriftAsyncStruct, \IThriftStructMetadata
     return new static();
   }
 
-  public static async function genFromShape(self::TConstructorShape $shape)[zoned_local]: Awaitable<this> {
+  public static async function genFromShape(self::TConstructorShape $shape)[zoned]: Awaitable<this> {
     $obj = new static();
     $arg1 = Shapes::idx($shape, 'arg1');
     if ($arg1 !== null) {
@@ -1386,11 +1403,16 @@ class Service1_func2_result extends \ThriftAsyncStructWithResult implements \ITh
   ];
 
   const type TConstructorShape = shape(
-    ?'success' => ?this::TResult,
+    ?'success' => ?\detail\i64WithWrapper,
   );
 
   const int STRUCTURAL_ID = 338438324750488489;
   public ?this::TResult $success;
+
+  public function set_success_DO_NOT_USE_THRIFT_INTERNAL(int $success)[write_props]: void {
+    $this->success = \MyTypeIntWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<\detail\i64WithWrapper>($success);
+  }
+
 
   public function __construct()[] {
   }
@@ -1399,7 +1421,7 @@ class Service1_func2_result extends \ThriftAsyncStructWithResult implements \ITh
     return new static();
   }
 
-  public static async function genFromShape(self::TConstructorShape $shape)[zoned_local]: Awaitable<this> {
+  public static async function genFromShape(self::TConstructorShape $shape)[zoned]: Awaitable<this> {
     $obj = new static();
     $success = Shapes::idx($shape, 'success');
     if ($success !== null) {
@@ -1672,8 +1694,8 @@ class Service1StaticMetadata implements \IThriftServiceStaticMetadata {
             'structs' => dict[
               'include.MyStruct' => MyStruct::getStructMetadata(),
               'include.MyNestedStruct' => MyNestedStruct::getStructMetadata(),
-              'include.StructWithWrapper' => StructWithWrapper::getStructMetadata(),
-              'include.StructWithWrapper' => StructWithWrapper::getStructMetadata(),
+              'include.StructWithWrapper' => \thrift_adapted_types\StructWithWrapper::getStructMetadata(),
+              'include.StructWithWrapper' => \thrift_adapted_types\StructWithWrapper::getStructMetadata(),
             ],
             'exceptions' => dict[
             ],

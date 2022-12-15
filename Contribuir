@@ -1,0 +1,23 @@
+Contribuyendo a HHVM
+Nos encantaría contar con su ayuda para mejorar HHVM. Antes de saltar al código, familiarícese con nuestras convenciones de codificación . También estamos trabajando en una Guía para hackers de HHVM . Todavía está muy incompleto, pero si hay un tema específico que le gustaría ver abordado más temprano que tarde, háganoslo saber. Para la documentación y cualquier otro problema, abra un problema o, mejor aún, envíenos una bifurcación y envíe una solicitud de extracción . Únase a nosotros en Freenode en #hhvm para una discusión general o #hhvm-dev para una discusión orientada al desarrollo.
+
+Si desea ayudar pero no sabe por dónde empezar, intente solucionar algunos de los problemas "probablemente fáciles" ; agregue una prueba a hphp/test/slow/something_apropiado y ejecútela con hphp/test/run.
+
+Todos los problemas abiertos etiquetados como incompatibilidad con PHP5 son problemas reales informados por la comunidad en el código y los marcos PHP existentes que podrían necesitar atención.
+
+Código de conducta
+El código de conducta se describe enCODE_OF_CONDUCT.md
+
+Envío de solicitudes de extracción
+Antes de que se puedan aceptar los cambios, se debe completar un Acuerdo de licencia de colaborador . Se le pedirá que acepte el CLA cuando envíe su primera solicitud de extracción. Si prefiere una copia impresa, puede imprimir el pdf , firmarlo, escanearlo y enviarlo a cla@fb.com .
+
+Agregue casos de prueba apropiados a medida que realiza cambios y asegúrese de que se aprueben localmente antes de enviar su solicitud de extracción; ver aquí para más información. Todas las pruebas se ejecutan a través de Phabricator; sin embargo, las pruebas locales aceleran en gran medida el proceso de aceptación de los cambios.
+
+Actualizaciones de versión estable
+Mantenemos hasta tres sucursales estables a la vez (la versión actual más dos sucursales LTS ). Para obtener una solución en una de esas ramas, primero sea aceptado en el maestro, como se describe anteriormente. Las correcciones se fusionan en el maestro y luego se fusionan hacia atrás en versiones estables, según corresponda.
+
+Luego, envíe otro PR contra la(s) rama(s) estable(s) relevante(s) seleccionando su cambio en esa rama, con cualquier cambio necesario para respaldar adecuadamente. Asegúrese de explicar en el resumen de relaciones públicas por qué se debe considerar el cambio para su inclusión en la rama estable; básicamente, explique por qué el problema que soluciona el cambio es peor que el posible riesgo de que el cambio pueda romper (y por lo tanto lo que seremos responsables de depurar, reparar y mantener).
+
+enlaces rápidos
+Flojo
+Rastreador de problemas

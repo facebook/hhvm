@@ -37,14 +37,9 @@ ocamlrep_ocamlpool::ocaml_ffi! {
     // Each edge is a tuple of (dependency, dependent).
     fn hh_fanout_ffi_add_idep_batch(hh_fanout: Custom<HhFanoutRustFfi>, edges: Vec<(u64, u64)>) {
         use hh_fanout_lib::HhFanout;
+        use hh24_types::DepGraphEdge;
         if let Err(err) = hh_fanout.0.commit_edges(
-            edges.into_iter().map(
-                |(dependency, dependent)|
-                hh24_types::DepGraphEdge {
-                    dependency: hh24_types::DependencyHash(dependency),
-                    dependent: hh24_types::ToplevelSymbolHash::from_u64(dependent),
-                }
-            ).collect()
+            edges.into_iter().map(|(dependency, dependent)| DepGraphEdge::from_u64(dependency, dependent)).collect()
         ) {
             eprintln!("Error: {err}");
             todo!("deal with hh errors like checksum mismatch");

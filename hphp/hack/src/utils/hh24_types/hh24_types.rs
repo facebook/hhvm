@@ -454,6 +454,15 @@ pub struct DepGraphEdge {
     pub dependent: ToplevelSymbolHash,
 }
 
+impl DepGraphEdge {
+    pub fn from_u64(dependency: u64, dependent: u64) -> Self {
+        Self {
+            dependency: DependencyHash(dependency),
+            dependent: ToplevelSymbolHash::from_u64(dependent),
+        }
+    }
+}
+
 impl std::str::FromStr for DepGraphEdge {
     type Err = ParseDepGraphEdgeError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {

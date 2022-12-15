@@ -1,8 +1,19 @@
 <?hh
 
+class SocketCloseGuard implements IDisposable {
+  public function __construct(private resource $sock) {
+  }
+
+  public function __dispose(): void {
+    socket_close($this->sock);
+  }
+}
+
 async function doTest(string $path): Awaitable<void> {
   $port = 0; // junk, but mandatory
   $server = socket_create(AF_UNIX, SOCK_DGRAM, 0);
+  using new SocketCloseGuard($server);
+
   print("- Bind result: ");
   $bound = socket_bind($server, $path);
   \var_dump($bound);

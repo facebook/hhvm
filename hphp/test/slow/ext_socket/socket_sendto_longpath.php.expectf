@@ -1,6 +1,6 @@
 Definitely too-long path
 - Bind result: 
-Warning: Unix socket path length (%d) is larger than system limit (%d) in %s/socket_sendto_longpath.php on line 7
+Warning: Unix socket path length (%d) is larger than system limit (%d) in %s/socket_sendto_longpath.php on line 18
 bool(false)
 Safe path
 - Bind result: bool(true)
@@ -18,5 +18,5 @@ Exactly max len
 - read data: hello
 Just too big
 - Bind result: 
-Warning: Unix socket path length (%d) is larger than system limit (%d) in %s/socket_sendto_longpath.php on line 7
+Warning: Unix socket path length (%d) is larger than system limit (%d) in %s/socket_sendto_longpath.php on line 18
 bool(false)

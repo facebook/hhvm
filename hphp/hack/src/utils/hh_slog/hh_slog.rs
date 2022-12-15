@@ -41,7 +41,8 @@ pub fn init_file_sync(filename: &std::path::Path) -> slog::Logger {
     slog::Logger::root(drain.fuse(), o!())
 }
 
-pub fn init_term(binary_name: &'static str) -> (slog::Logger, slog_async::AsyncGuard) {
+/// Logs to terminal via `slog_envlogger`. Set `RUST_LOG` to control logging.
+pub fn init_term_envlogger(binary_name: &'static str) -> (slog::Logger, slog_async::AsyncGuard) {
     let decorator = slog_term::TermDecorator::new().build();
 
     let drain = slog_term::FullFormat::new(decorator)

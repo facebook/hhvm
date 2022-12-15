@@ -155,6 +155,10 @@ impl CMapValue for HeapValue {
     fn points_to_evictable_data(&self) -> bool {
         self.header.is_evictable()
     }
+
+    fn points_to_flushable_data(&self) -> bool {
+        false
+    }
 }
 
 /// An OCaml serialized value, in all its forms.

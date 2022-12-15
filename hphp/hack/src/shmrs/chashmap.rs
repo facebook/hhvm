@@ -73,6 +73,12 @@ pub trait CMapValue {
     /// whether or not the value points to evictable data, and thus whether or not
     /// it should be evicted.
     fn points_to_evictable_data(&self) -> bool;
+
+    /// An evictable heap can contain data which, in addition to being evictable
+    /// upon memory pressure, can be removed via invalidation. We call this type
+    /// of data "flushable". This function tells us whether a value in the hash map
+    /// points to flushable data in the evitcable heap, so that they can be removed.
+    fn points_to_flushable_data(&self) -> bool;
 }
 
 /// A reference to a value.
@@ -467,6 +473,10 @@ mod integration_tests {
 
     impl CMapValue for U64Value {
         fn points_to_evictable_data(&self) -> bool {
+            false
+        }
+
+        fn points_to_flushable_data(&self) -> bool {
             false
         }
     }

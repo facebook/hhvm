@@ -4579,17 +4579,6 @@ class TestLsp(TestCase[LspTestDriver]):
             )
             .request(
                 line=line(),
-                comment="hover over a keyword",
-                method="textDocument/hover",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 2, "character": 1},
-                },
-                result=None,
-                powered_by="serverless_ide",
-            )
-            .request(
-                line=line(),
                 comment="hover over a comment",
                 method="textDocument/hover",
                 params={

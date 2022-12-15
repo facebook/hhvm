@@ -1,0 +1,18 @@
+type
+A `const type` declares a type constant inside a class. You can refer to type constants in signatures with `this::TMyConstType`.
+
+Type constants are also a form of generics.
+
+```
+abstract class Pet {
+  abstract const type TFood;
+}
+
+class Cat extends Pet {
+  const type TFood = Fish;
+}
+```
+
+Type constants are static, not per-instance. All instances of `Cat` have the same value for `TFood`, whereas `MyObject<T>` generics can differ between instances.
+
+This enables type constants to be used outside the class, e.g. `Cat::TFood`.

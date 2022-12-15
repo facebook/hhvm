@@ -309,6 +309,41 @@ person_get($a_person, #email); // string
     "A `readonly` value is a reference that cannot modify the underlying value."
   | SymbolOccurrence.ReadonlyOnReturnType ->
     "This function/method may return a `readonly` value."
+  | SymbolOccurrence.XhpAttribute ->
+    "`attribute` declares which attributes are permitted on the current XHP class."
+    ^ "\n\nAttributes are optional unless marked with `@required`."
+  | SymbolOccurrence.XhpChildren ->
+    "`children` declares which XHP types may be used as children when creating instances of this class."
+    ^ "\n\nFor example, `children (:p)+` means that users may write `<my-class><p>hello</p><p>world</p></my_class>`."
+    ^ "\n\n**`children` is not enforced by the type checker**, but an XHP framework can choose to validate it at runtime."
+  | SymbolOccurrence.ConstGlobal -> "A `const` is a global constant."
+  | SymbolOccurrence.ConstOnClass ->
+    "A class constant."
+    ^ "\n\nClass constants have public visibility, so you can access `MyClass::MY_CONST` anywhere."
+  | SymbolOccurrence.ConstType ->
+    "A `const type` declares a type constant inside a class. You can refer to type constants in signatures with `this::TMyConstType`."
+    ^ "\n\nType constants are also a form of generics."
+    ^ "\n\n```"
+    ^ "\nabstract class Pet {"
+    ^ "\n  abstract const type TFood;"
+    ^ "\n}"
+    ^ "\n"
+    ^ "\nclass Cat extends Pet {"
+    ^ "\n  const type TFood = Fish;"
+    ^ "\n}"
+    ^ "\n```"
+    ^ "\n\nType constants are static, not per-instance. All instances of `Cat` have the same value for `TFood`, whereas `MyObject<T>` generics can differ between instances."
+    ^ "\n\nThis enables type constants to be used outside the class, e.g. `Cat::TFood`."
+  | SymbolOccurrence.StaticOnMethod ->
+    "A static method can be called without an instance, e.g. `MyClass::my_method()`."
+  | SymbolOccurrence.StaticOnProperty ->
+    "A static property is shared between all instances of a class. It can be accessed with `MyClass::$myProperty`."
+  | SymbolOccurrence.Use ->
+    "Include all the items (methods, properties etc) from a trait in this class/trait."
+    ^ "\n\nIf this class/trait already has an item of the same name, the trait item is not copied."
+  | SymbolOccurrence.FunctionOnMethod ->
+    "A `function` inside a class declares a method."
+  | SymbolOccurrence.FunctionGlobal -> "A standalone global function."
   | SymbolOccurrence.Async ->
     "An `async` function can use `await` to get results from other `async` functions. You may still return plain values, e.g. `return 1;` is permitted in an `Awaitable<int>` function."
     ^ await_explanation

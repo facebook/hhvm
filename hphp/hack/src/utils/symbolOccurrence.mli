@@ -48,6 +48,16 @@ type keyword_with_hover_docs =
   | ReadonlyOnParameter
   | ReadonlyOnReturnType
   | ReadonlyOnExpression
+  | XhpAttribute
+  | XhpChildren
+  | ConstGlobal
+  | ConstOnClass
+  | ConstType
+  | StaticOnMethod
+  | StaticOnProperty
+  | Use
+  | FunctionGlobal
+  | FunctionOnMethod
   | Async
   | AsyncBlock
   | Await

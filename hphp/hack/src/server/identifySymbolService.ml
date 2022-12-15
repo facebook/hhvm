@@ -839,6 +839,7 @@ type keyword_context =
   | Method
   | Parameter
   | ReturnType
+  | TypeConst
   | AsyncBlockHeader
   | ModuleDecl of module_decl_kind
 
@@ -949,7 +950,11 @@ let keywords (tree : FFP.t) : Result_set.elt list =
       Some
         {
           name = "type";
-          type_ = Keyword Type;
+          type_ =
+            Keyword
+              (match ctx with
+              | Some TypeConst -> ConstType
+              | _ -> Type);
           is_declaration = false;
           pos = token_pos t;
         }
@@ -958,6 +963,67 @@ let keywords (tree : FFP.t) : Result_set.elt list =
         {
           name = "newtype";
           type_ = Keyword Newtype;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Attribute ->
+      Some
+        {
+          name = "attribute";
+          type_ = Keyword XhpAttribute;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Children ->
+      Some
+        {
+          name = "children";
+          type_ = Keyword XhpChildren;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Const ->
+      Some
+        {
+          name = "const";
+          type_ =
+            Keyword
+              (match ctx with
+              | None -> ConstGlobal
+              | Some TypeConst -> ConstType
+              | _ -> ConstOnClass);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Static ->
+      Some
+        {
+          name = "static";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some Method -> StaticOnMethod
+              | _ -> StaticOnProperty);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Use ->
+      Some
+        {
+          name = "use";
+          type_ = Keyword Use;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+    | Token.TokenKind.Function ->
+      Some
+        {
+          name = "function";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some Method -> FunctionOnMethod
+              | _ -> FunctionGlobal);
           is_declaration = false;
           pos = token_pos t;
         }
@@ -1164,6 +1230,8 @@ let keywords (tree : FFP.t) : Result_set.elt list =
         (children s)
         ~init:acc
         ~f:(aux (Some (ModuleDecl DKModuleMembershipDeclaration)))
+    | TypeConstDeclaration _ ->
+      List.fold (children s) ~init:acc ~f:(aux (Some TypeConst))
     | Contexts c ->
       let acc = List.fold (children s) ~init:acc ~f:(aux ctx) in
       let is_empty =

@@ -225,12 +225,12 @@ impl<'a> HashListsIndices<'a> {
     }
 
     /// Assign deterministic offsets to every key in HashListIndicesBucket::hash_list_indices.
-    /// The contents of each bucket are determinstic because keys were assigned to buckets
-    /// using a determistic hash. But the order of keys in each bucket is nondeterministic because
+    /// The contents of each bucket are deterministic because keys were assigned to buckets
+    /// using a deterministic hash. But the order of keys in each bucket is nondeterministic because
     /// they were inserted in parallel.
     ///
     /// for each bucket in parallel:
-    ///   * sort the &[u64] keys (sorted_dependents) of each bucket lexographically.
+    ///   * sort the &[u64] keys (sorted_dependents) of each bucket lexicographically.
     ///   * assign each key a relative offset (starting from 0) within this bucket
     ///   * compute the total size of the bucket
     ///   * while we're here, sort the dependents list for each key
@@ -241,10 +241,14 @@ impl<'a> HashListsIndices<'a> {
     ///
     /// Now every bucket and every (sorted_dependents, dependencies) pair
     /// has a deterministic offset and is in deterministic order.
-    fn make_absolute(&self, mut cur_offset: u32) -> (Vec<u32>, u32) {
-        let bucket_sizes: Vec<u32> = (self.buckets.par_iter())
+    fn make_absolute(&mut self, mut cur_offset: u32) -> (Vec<u32>, u32) {
+        let bucket_sizes: Vec<u32> = self
+            .buckets
+            .par_iter_mut()
+            .with_min_len(1)
+            .with_max_len(1)
             .map(|m| {
-                let mut bucket = m.lock();
+                let bucket = m.get_mut();
                 let mut size = 0;
                 bucket.sort_unstable_keys();
                 for (sorted_dependents, (offset, dependencies)) in bucket.iter_mut() {
@@ -368,7 +372,7 @@ pub fn build(
     let w = DepGraphWriter::new(sorted_hashes)?;
 
     info!("Calculating relative hash list offsets");
-    let hash_list_indices = HashListsIndices::new();
+    let mut hash_list_indices = HashListsIndices::new();
     (structured_edges.par_iter()).for_each(|(dependency, sorted_dependents)| {
         hash_list_indices.allocate_hash_list(*dependency, sorted_dependents);
     });

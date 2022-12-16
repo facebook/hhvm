@@ -33,9 +33,14 @@ namespace memcache {
 namespace {
 
 std::string getSessionKey(const ConnectionOptions& opts) {
-  const auto& svcIdentity = opts.securityOpts.sslServiceIdentity;
-  auto service =
-      svcIdentity.empty() ? opts.accessPoint->toHostPortString() : svcIdentity;
+  std::string service;
+  if (opts.accessPoint->getServiceIdOverride().has_value()) {
+    service = opts.accessPoint->getServiceIdOverride().value();
+  } else {
+    const auto& svcIdentity = opts.securityOpts.sslServiceIdentity;
+    service = svcIdentity.empty() ? opts.accessPoint->toHostPortString()
+                                  : svcIdentity;
+  }
   return fmt::format(
       "{}:{}:{}",
       service,

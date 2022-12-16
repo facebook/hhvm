@@ -55,6 +55,7 @@ struct CommonAccessPointAttributes {
   folly::Optional<SecurityMech> crossDcMech;
   folly::Optional<uint16_t> crossDcPort;
   folly::Optional<uint16_t> withinDcPort;
+  std::optional<folly::StringPiece> serviceIdOverride;
   uint16_t port;
   bool enableCompression;
 
@@ -64,7 +65,8 @@ struct CommonAccessPointAttributes {
         withinDcMech == other.withinDcMech &&
         crossDcMech == other.crossDcMech && crossDcPort == other.crossDcPort &&
         withinDcPort == other.withinDcPort && port == other.port &&
-        enableCompression == other.enableCompression;
+        enableCompression == other.enableCompression &&
+        serviceIdOverride == other.serviceIdOverride;
   }
 };
 

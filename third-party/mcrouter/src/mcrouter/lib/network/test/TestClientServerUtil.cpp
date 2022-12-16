@@ -244,12 +244,13 @@ TestClient::TestClient(
     const CompressionCodecMap* compressionCodecMap,
     bool enableTfo,
     bool offloadHandshakes,
-    bool sessionCachingEnabled)
+    bool sessionCachingEnabled,
+    std::optional<std::string> serviceIdOverride)
     : fm_(std::make_unique<folly::fibers::EventBaseLoopController>()) {
   dynamic_cast<folly::fibers::EventBaseLoopController&>(fm_.loopController())
       .attachEventBase(eventBase_);
   auto mech = ssl ? ssl->mech : SecurityMech::NONE;
-  ConnectionOptions opts(host, port, protocol, mech);
+  ConnectionOptions opts(host, port, protocol, mech, serviceIdOverride);
   opts.connectTimeout = std::chrono::milliseconds(timeoutMs);
   opts.writeTimeout = std::chrono::milliseconds(timeoutMs);
   opts.compressionCodecMap = compressionCodecMap;

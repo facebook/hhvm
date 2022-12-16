@@ -54,14 +54,16 @@ struct AccessPoint {
       bool compressed = false,
       bool unixDomainSocket = false,
       uint32_t failureDomain = 0,
-      std::optional<uint16_t> taskId = std::nullopt);
+      std::optional<uint16_t> taskId = std::nullopt,
+      std::optional<std::string> serviceIdOverride = std::nullopt);
 
   AccessPoint(
       const folly::IPAddress& addr,
       uint16_t port,
       uint32_t failureDomain = 0,
       mc_protocol_t protocol = mc_unknown_protocol,
-      std::optional<uint16_t> taskId = std::nullopt);
+      std::optional<uint16_t> taskId = std::nullopt,
+      std::optional<std::string> serviceIdOverride = std::nullopt);
 
   /**
    * @param apString accepts host:port, host:port:protocol and
@@ -73,6 +75,9 @@ struct AccessPoint {
    *                     hostPortProtocol used
    * @param defaultCompressed The is the compression config to use if it's not
    *                          specified in the string.
+   * @param failureDomain  Failover id
+   * @param taskId Job associated with the access point
+   * @param serviceIdOverride Override ID used to identify cached session keys
    *
    * @return shared_ptr to an AccessPoint object
    */
@@ -83,7 +88,8 @@ struct AccessPoint {
       uint16_t portOverride = 0,
       bool defaultCompressed = false,
       uint32_t failureDomain = 0,
-      std::optional<uint16_t> taskId = std::nullopt);
+      std::optional<uint16_t> taskId = std::nullopt,
+      std::optional<std::string> serviceIdOverride = std::nullopt);
 
   const std::string& getHost() const {
     return host_;
@@ -145,6 +151,14 @@ struct AccessPoint {
     port_ = port;
   }
 
+  void serviceIdOverride(folly::StringPiece id) {
+    serviceId_ = id;
+  }
+
+  std::optional<std::string> getServiceIdOverride() const {
+    return serviceId_;
+  }
+
  private:
   std::string host_;
   uint64_t hash_{0};
@@ -156,6 +170,7 @@ struct AccessPoint {
   bool unixDomainSocket_{false};
   uint32_t failureDomain_{0};
   std::optional<uint16_t> taskId_{std::nullopt};
+  std::optional<std::string> serviceId_{std::nullopt};
 };
 
 } // namespace memcache

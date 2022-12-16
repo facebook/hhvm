@@ -65,6 +65,9 @@ std::shared_ptr<CommonAccessPointAttributes> getCommonAccessPointAttributes(
   if (auto jName = json.get_ptr("name")) {
     apAttr.poolName = jName->stringPiece();
   }
+  if (auto jPoolServiceId = json.get_ptr("service_id_override")) {
+    apAttr.serviceIdOverride = jPoolServiceId->stringPiece();
+  }
   auto& protocol = apAttr.protocol;
   protocol = mc_ascii_protocol;
   if (auto jProtocol = json.get_ptr("protocol")) {
@@ -165,6 +168,7 @@ std::shared_ptr<AccessPoint> createAccessPoint(
   auto& withinDcPort = apAttr.withinDcPort;
   auto& port = apAttr.port;
   auto& enableCompression = apAttr.enableCompression;
+  auto& serviceIdOverride = apAttr.serviceIdOverride;
 
   auto ap = AccessPoint::create(
       apString, protocol, mech, port, enableCompression, failureDomain);
@@ -172,6 +176,10 @@ std::shared_ptr<AccessPoint> createAccessPoint(
 
   if (mechOverride.has_value()) {
     ap->setSecurityMech(mechOverride.value());
+  }
+
+  if (serviceIdOverride.has_value()) {
+    ap->serviceIdOverride(serviceIdOverride.value());
   }
 
   if (withinDcMech.has_value() || crossDcMech.has_value() ||

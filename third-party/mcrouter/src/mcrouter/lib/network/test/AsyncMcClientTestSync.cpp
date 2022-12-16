@@ -799,6 +799,28 @@ TEST_P(AsyncMcClientSessionTest, SessionResumption) {
     sendAndCheckRequest(client, i);
   }
 
+  // do the same test w/service identity and ap service
+  // override. We should expect the first to not resume
+  auto serviceIdOverride =
+      folly::to<std::string>("override_service_id", (int)GetParam());
+  for (int i = 0; i < nConnAttempts; i++) {
+    TestClient client(
+        "::1",
+        server->getListenPort(),
+        200,
+        mc_caret_protocol,
+        ssl,
+        0,
+        0,
+        folly::to<std::string>("test_", (int)GetParam()),
+        nullptr,
+        false,
+        false,
+        true,
+        std::optional<std::string>(serviceIdOverride));
+    sendAndCheckRequest(client, i);
+  }
+
   // shutdown the server
   TestClient client(
       "::1", server->getListenPort(), 200, mc_caret_protocol, ssl);

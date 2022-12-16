@@ -73,14 +73,16 @@ AccessPoint::AccessPoint(
     bool compressed,
     bool unixDomainSocket,
     uint32_t failureDomain,
-    std::optional<uint16_t> taskId)
+    std::optional<uint16_t> taskId,
+    std::optional<std::string> serviceIdOverride)
     : port_(port),
       protocol_(protocol),
       securityMech_(mech),
       compressed_(compressed),
       unixDomainSocket_(unixDomainSocket),
       failureDomain_(failureDomain),
-      taskId_(taskId) {
+      taskId_(taskId),
+      serviceId_(serviceIdOverride) {
   auto const maybe_ip = folly::IPAddress::tryFromString(host);
   if (maybe_ip.hasError()) {
     // host is not an IP address (e.g. 'localhost')
@@ -99,11 +101,13 @@ AccessPoint::AccessPoint(
     uint16_t port,
     uint32_t failureDomain,
     mc_protocol_t protocol,
-    std::optional<uint16_t> taskId)
+    std::optional<uint16_t> taskId,
+    std::optional<std::string> serviceIdOverride)
     : port_(port),
       protocol_(protocol),
       failureDomain_(failureDomain),
-      taskId_(taskId) {
+      taskId_(taskId),
+      serviceId_(serviceIdOverride) {
   host_ = ip.toFullyQualified();
   hash_ = folly::hash_value(ip);
   isV6_ = ip.isV6();
@@ -116,7 +120,8 @@ std::shared_ptr<AccessPoint> AccessPoint::create(
     uint16_t portOverride,
     bool defaultCompressed,
     uint32_t failureDomain,
-    std::optional<uint16_t> taskId) {
+    std::optional<uint16_t> taskId,
+    std::optional<std::string> serviceIdOverride) {
   if (apString.empty()) {
     return nullptr;
   }
@@ -172,7 +177,8 @@ std::shared_ptr<AccessPoint> AccessPoint::create(
         comp.empty() ? defaultCompressed : parseCompressed(comp),
         unixDomainSocket,
         failureDomain,
-        taskId);
+        taskId,
+        serviceIdOverride);
   } catch (const std::exception&) {
     return nullptr;
   }

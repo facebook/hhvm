@@ -9,6 +9,7 @@
 
 #include <chrono>
 #include <memory>
+#include <optional>
 
 #include <folly/io/SocketOptionMap.h>
 #include <folly/io/async/AsyncSocket.h>
@@ -31,9 +32,18 @@ struct ConnectionOptions {
       folly::StringPiece host_,
       uint16_t port_,
       mc_protocol_t protocol_,
-      SecurityMech mech_ = SecurityMech::NONE)
-      : accessPoint(
-            std::make_shared<AccessPoint>(host_, port_, protocol_, mech_)) {}
+      SecurityMech mech_ = SecurityMech::NONE,
+      const std::optional<std::string>& serviceIdOverride_ = std::nullopt)
+      : accessPoint(std::make_shared<AccessPoint>(
+            host_,
+            port_,
+            protocol_,
+            mech_,
+            false,
+            false,
+            0,
+            std::nullopt,
+            serviceIdOverride_)) {}
 
   explicit ConnectionOptions(std::shared_ptr<const AccessPoint> ap)
       : accessPoint(std::move(ap)) {}

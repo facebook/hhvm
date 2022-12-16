@@ -92,7 +92,7 @@ class parser_actions {
 
   virtual void on_definition(
       source_range range,
-      t_named& def,
+      std::unique_ptr<t_named> defn,
       std::unique_ptr<stmt_attrs> attrs,
       std::unique_ptr<t_annotations> annotations) = 0;
 
@@ -108,8 +108,6 @@ class parser_actions {
       source_range range, fmt::string_view name) = 0;
   virtual std::unique_ptr<t_const> on_structured_annotation(
       source_range range, std::unique_ptr<t_const_value> value) = 0;
-
-  virtual void on_statement(std::unique_ptr<t_named> stmt) = 0;
 
   virtual std::unique_ptr<t_service> on_service(
       source_range range,

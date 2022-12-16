@@ -545,43 +545,6 @@ void parsing_driver::set_functions(
   }
 }
 
-void parsing_driver::add_def(std::unique_ptr<t_named> node) {
-  if (mode != parsing_mode::PROGRAM) {
-    return;
-  }
-
-  // Add to scope.
-  // TODO(afuller): Move program level scope management to t_program.
-  if (auto* tnode = dynamic_cast<t_interaction*>(node.get())) {
-    scope_cache->add_interaction(program->scope_name(*node), tnode);
-  } else if (auto* tnode = dynamic_cast<t_service*>(node.get())) {
-    scope_cache->add_service(program->scope_name(*node), tnode);
-  } else if (auto* tnode = dynamic_cast<t_const*>(node.get())) {
-    scope_cache->add_constant(program->scope_name(*node), tnode);
-  } else if (auto* tnode = dynamic_cast<t_enum*>(node.get())) {
-    scope_cache->add_type(program->scope_name(*node), tnode);
-    // Register enum value names in scope.
-    for (const auto& value : tnode->consts()) {
-      // TODO(afuller): Remove ability to access unscoped enum values.
-      scope_cache->add_constant(program->scope_name(value), &value);
-      scope_cache->add_constant(program->scope_name(*node, value), &value);
-    }
-  } else if (auto* tnode = dynamic_cast<t_type*>(node.get())) {
-    auto* tnode_true_type = tnode->get_true_type();
-    if (tnode_true_type && tnode_true_type->is_enum()) {
-      for (const auto& value :
-           static_cast<const t_enum*>(tnode_true_type)->consts()) {
-        scope_cache->add_constant(program->scope_name(*node, value), &value);
-      }
-    }
-    scope_cache->add_type(program->scope_name(*node), tnode);
-  } else {
-    throw std::logic_error("Unsupported declaration.");
-  }
-  // Add to program.
-  program->add_definition(std::move(node));
-}
-
 void parsing_driver::add_include(std::string name, const source_range& range) {
   if (mode != parsing_mode::INCLUDES) {
     return;
@@ -712,12 +675,6 @@ std::string parsing_driver::strip_doctext(fmt::string_view text) {
   return clean_up_doctext(str);
 }
 
-void parsing_driver::set_parsed_definition() {
-  if (mode == parsing_mode::PROGRAM) {
-    programs_that_parsed_definition_.insert(program->path());
-  }
-}
-
 parsing_driver::parsing_driver(
     source_manager& sm,
     diagnostics_engine& diags,
@@ -766,6 +723,52 @@ void parsing_driver::on_package(source_range range, fmt::string_view name) {
   } catch (const std::exception& e) {
     diags_.error(range.begin, "{}", e.what());
   }
+}
+
+void parsing_driver::on_definition(
+    source_range range,
+    std::unique_ptr<t_named> defn,
+    std::unique_ptr<stmt_attrs> attrs,
+    std::unique_ptr<t_annotations> annotations) {
+  if (mode == parsing_mode::PROGRAM) {
+    programs_that_parsed_definition_.insert(program->path());
+  }
+  set_attributes(*defn, std::move(attrs), std::move(annotations), range);
+
+  if (mode != parsing_mode::PROGRAM) {
+    return;
+  }
+
+  // Add to scope.
+  // TODO: Consider moving program-level scope management to t_program.
+  if (auto* tnode = dynamic_cast<t_interaction*>(defn.get())) {
+    scope_cache->add_interaction(program->scope_name(*defn), tnode);
+  } else if (auto* tnode = dynamic_cast<t_service*>(defn.get())) {
+    scope_cache->add_service(program->scope_name(*defn), tnode);
+  } else if (auto* tnode = dynamic_cast<t_const*>(defn.get())) {
+    scope_cache->add_constant(program->scope_name(*defn), tnode);
+  } else if (auto* tnode = dynamic_cast<t_enum*>(defn.get())) {
+    scope_cache->add_type(program->scope_name(*defn), tnode);
+    // Register enum value names in scope.
+    for (const auto& value : tnode->consts()) {
+      // TODO: Remove the ability to access unscoped enum values.
+      scope_cache->add_constant(program->scope_name(value), &value);
+      scope_cache->add_constant(program->scope_name(*defn, value), &value);
+    }
+  } else if (auto* tnode = dynamic_cast<t_type*>(defn.get())) {
+    auto* tnode_true_type = tnode->get_true_type();
+    if (tnode_true_type && tnode_true_type->is_enum()) {
+      for (const auto& value :
+           static_cast<const t_enum*>(tnode_true_type)->consts()) {
+        scope_cache->add_constant(program->scope_name(*defn, value), &value);
+      }
+    }
+    scope_cache->add_type(program->scope_name(*defn), tnode);
+  } else {
+    throw std::logic_error("Unsupported declaration.");
+  }
+  // Add to program.
+  program->add_definition(std::move(defn));
 }
 
 std::unique_ptr<t_service> parsing_driver::on_service(

@@ -141,12 +141,9 @@ class parsing_driver : public parser_actions {
 
   void on_definition(
       source_range range,
-      t_named& def,
+      std::unique_ptr<t_named> defn,
       std::unique_ptr<stmt_attrs> attrs,
-      std::unique_ptr<t_annotations> annotations) override {
-    set_parsed_definition();
-    set_attributes(def, std::move(attrs), std::move(annotations), range);
-  }
+      std::unique_ptr<t_annotations> annotations) override;
 
   boost::optional<comment> on_doctext() override { return pop_doctext(); }
 
@@ -179,10 +176,6 @@ class parsing_driver : public parser_actions {
   std::unique_ptr<t_const> on_structured_annotation(
       source_range range, std::unique_ptr<t_const_value> value) override {
     return new_struct_annotation(std::move(value), range);
-  }
-
-  void on_statement(std::unique_ptr<t_named> stmt) override {
-    add_def(std::move(stmt));
   }
 
   std::unique_ptr<t_service> on_service(
@@ -423,12 +416,7 @@ class parsing_driver : public parser_actions {
   void set_functions(
       t_interface& node, std::unique_ptr<t_function_list> functions);
 
-  // Adds a definition to the program.
-  void add_def(std::unique_ptr<t_named> node);
-
   void add_include(std::string name, const source_range& range);
-
-  void set_parsed_definition();
 
  private:
   source_manager& source_mgr_;

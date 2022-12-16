@@ -107,10 +107,7 @@ class parser {
     consume_token();
     try {
       while (token_.kind != tok::eof) {
-        auto stmt = parse_statement();
-        if (stmt) {
-          actions_.on_statement(std::move(stmt));
-        }
+        parse_statement();
       }
       actions_.on_program();
     } catch (const parse_error&) {
@@ -121,7 +118,7 @@ class parser {
 
   // statement:
   //   statement_attrs (header | definition) annotations comma_or_semicolon?
-  std::unique_ptr<t_named> parse_statement() {
+  void parse_statement() {
     auto range = track_range();
     auto attrs = parse_statement_attrs();
     auto stmt = parse_header_or_definition();
@@ -138,20 +135,22 @@ class parser {
         break;
       case t_statement_type::definition:
         actions_.on_definition(
-            range, *stmt.def, std::move(attrs), std::move(annotations));
+            range,
+            std::move(stmt.defn),
+            std::move(attrs),
+            std::move(annotations));
         break;
     }
-    return std::move(stmt.def);
   }
 
   struct statement {
     t_statement_type type = t_statement_type::definition;
-    std::unique_ptr<t_named> def;
+    std::unique_ptr<t_named> defn;
 
     statement(t_statement_type t = t_statement_type::definition) : type(t) {}
 
     template <typename Named>
-    /* implicit */ statement(std::unique_ptr<Named> n) : def(std::move(n)) {}
+    /* implicit */ statement(std::unique_ptr<Named> n) : defn(std::move(n)) {}
   };
 
   // header: program_doctext? (include_or_package | namespace)

@@ -642,18 +642,29 @@ template <typename Tag>
 struct Decode<type::list<Tag>> {
   template <typename Protocol, typename ListType>
   void operator()(Protocol& prot, ListType& list) const {
+    auto consumeElem = [&] {
+      auto&& elem = apache::thrift::detail::pm::emplace_back_default(list);
+      Decode<Tag>{}(prot, elem);
+    };
     TType t;
     uint32_t s;
     prot.readListBegin(t, s);
-    apache::thrift::detail::pm::reserve_if_possible(&list, s);
-    if (typeTagToTType<Tag> == t) {
-      while (s--) {
-        auto&& elem = apache::thrift::detail::pm::emplace_back_default(list);
-        Decode<Tag>{}(prot, elem);
+    if (prot.kOmitsContainerSizes()) {
+      // list size unknown, SimpleJSON protocol won't know type, either
+      // so let's just hope that it spits out something that makes sense
+      while (prot.peekList()) {
+        consumeElem();
       }
     } else {
-      while (s--) {
-        prot.skip(t);
+      apache::thrift::detail::pm::reserve_if_possible(&list, s);
+      if (typeTagToTType<Tag> == t) {
+        while (s--) {
+          consumeElem();
+        }
+      } else {
+        while (s--) {
+          prot.skip(t);
+        }
       }
     }
     prot.readListEnd();
@@ -664,19 +675,28 @@ template <typename Tag>
 struct Decode<type::set<Tag>> {
   template <typename Protocol, typename SetType>
   void operator()(Protocol& prot, SetType& set) const {
+    auto consumeElem = [&] {
+      typename SetType::value_type value;
+      Decode<Tag>{}(prot, value);
+      set.emplace_hint(set.end(), std::move(value));
+    };
     TType t;
     uint32_t s;
     prot.readSetBegin(t, s);
-    apache::thrift::detail::pm::reserve_if_possible(&set, s);
-    if (typeTagToTType<Tag> == t) {
-      while (s--) {
-        typename SetType::value_type value;
-        Decode<Tag>{}(prot, value);
-        set.emplace_hint(set.end(), std::move(value));
+    if (prot.kOmitsContainerSizes()) {
+      while (prot.peekSet()) {
+        consumeElem();
       }
     } else {
-      while (s--) {
-        prot.skip(t);
+      apache::thrift::detail::pm::reserve_if_possible(&set, s);
+      if (typeTagToTType<Tag> == t) {
+        while (s--) {
+          consumeElem();
+        }
+      } else {
+        while (s--) {
+          prot.skip(t);
+        }
       }
     }
     prot.readSetEnd();
@@ -687,22 +707,33 @@ template <typename Key, typename Value>
 struct Decode<type::map<Key, Value>> {
   template <typename Protocol, typename MapType>
   void operator()(Protocol& prot, MapType& map) const {
+    auto consumeElem = [&] {
+      typename MapType::key_type key;
+      Decode<Key>{}(prot, key);
+      auto iter = map.emplace_hint(
+          map.end(), std::move(key), typename MapType::mapped_type{});
+      Decode<Value>{}(prot, iter->second);
+    };
+
     TType keyType, valueType;
     uint32_t s;
     prot.readMapBegin(keyType, valueType, s);
-    apache::thrift::detail::pm::reserve_if_possible(&map, s);
-    if (typeTagToTType<Key> == keyType && typeTagToTType<Value> == valueType) {
-      while (s--) {
-        typename MapType::key_type key;
-        Decode<Key>{}(prot, key);
-        auto iter = map.emplace_hint(
-            map.end(), std::move(key), typename MapType::mapped_type{});
-        Decode<Value>{}(prot, iter->second);
+    if (prot.kOmitsContainerSizes()) {
+      while (prot.peekMap()) {
+        consumeElem();
       }
     } else {
-      while (s--) {
-        prot.skip(keyType);
-        prot.skip(valueType);
+      apache::thrift::detail::pm::reserve_if_possible(&map, s);
+      if (typeTagToTType<Key> == keyType &&
+          typeTagToTType<Value> == valueType) {
+        while (s--) {
+          consumeElem();
+        }
+      } else {
+        while (s--) {
+          prot.skip(keyType);
+          prot.skip(valueType);
+        }
       }
     }
     prot.readMapEnd();

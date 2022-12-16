@@ -78,6 +78,7 @@ void testUseOpEncode() {
 TEST(UseOpEncodeTest, UseOpEncode) {
   testUseOpEncode<StandardProtocol::Binary>();
   testUseOpEncode<StandardProtocol::Compact>();
+  testUseOpEncode<StandardProtocol::SimpleJson>();
 }
 
 template <StandardProtocol Protocol>
@@ -115,6 +116,7 @@ void testSerializedSize() {
 TEST(UseOpEncodeTest, SerializedSize) {
   testSerializedSize<StandardProtocol::Binary>();
   testSerializedSize<StandardProtocol::Compact>();
+  testSerializedSize<StandardProtocol::SimpleJson>();
 }
 TEST(UseOpEncodeTest, ProgramScopeAnnotation) {
   FooList a;

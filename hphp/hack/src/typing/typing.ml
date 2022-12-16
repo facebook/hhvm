@@ -3178,6 +3178,16 @@ and expr_
     ~check_defined
     env
     ((_, p, e) as outer) =
+  let (e, outer) =
+    match e with
+    | Call ((_, _, Id (_, s)), [_targ_from; (_, targ_to)], (_, arg) :: _, _)
+      when String.equal s SN.PseudoFunctions.unsafe_cast
+           && TypecheckerOptions.everything_sdt (Env.get_tcopt env) ->
+      (* Under implicit pessimisation, treat UNSAFE case as an upcast to a like type *)
+      let new_e = Upcast (arg, (p, Hlike targ_to)) in
+      (new_e, ((), p, new_e))
+    | _ -> (e, outer)
+  in
   let env = Env.open_tyvars env p in
   (fun (env, te, ty) ->
     let (env, ty_err_opt) = Typing_solver.close_tyvars_and_solve env in

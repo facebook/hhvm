@@ -219,7 +219,12 @@ module Enforce (ContextAccess : ContextAccess) :
       enf =
     let tcopt = ContextAccess.get_tcopt ctx in
     let enable_sound_dynamic = TypecheckerOptions.enable_sound_dynamic tcopt in
-    let everything_sdt = TypecheckerOptions.everything_sdt tcopt in
+    let tc_enforced =
+      TypecheckerOptions.(
+        experimental_feature_enabled
+          tcopt
+          experimental_consider_type_const_enforceable)
+    in
     (* is_dynamic_enforceable controls whether the type dynamic is considered enforceable.
        It isn't at the top-level of a type, but is as an argument to a reified generic. *)
     let rec enforcement
@@ -313,7 +318,7 @@ module Enforce (ContextAccess : ContextAccess) :
          *)
         Unenforced None
       | Trefinement _ -> Unenforced None
-      | Taccess (ty, (_, id)) when enable_sound_dynamic && everything_sdt ->
+      | Taccess (ty, (_, id)) when tc_enforced ->
         (match resolve_access ~this_class ctx ty id with
         | None -> Unenforced None
         | Some ty -> enforcement ~is_dynamic_enforceable ctx visited ty)

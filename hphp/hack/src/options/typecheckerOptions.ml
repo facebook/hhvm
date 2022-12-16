@@ -85,6 +85,9 @@ let experimental_supportdynamic_type_hint = "supportdynamic_type_hint"
 
 let experimental_always_pessimise_return = "always_pessimise_return"
 
+let experimental_consider_type_const_enforceable =
+  "experimental_consider_type_const_enforceable"
+
 let experimental_all =
   List.fold_right
     ~f:SSet.add
@@ -97,6 +100,7 @@ let experimental_all =
       experimental_infer_flows;
       experimental_supportdynamic_type_hint;
       experimental_always_pessimise_return;
+      experimental_consider_type_const_enforceable;
     ]
 
 let experimental_from_flags ~disallow_static_memoized =

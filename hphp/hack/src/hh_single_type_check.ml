@@ -295,6 +295,7 @@ let parse_options () =
   let report_pos_from_reason = ref false in
   let enable_sound_dynamic = ref false in
   let always_pessimise_return = ref false in
+  let consider_type_const_enforceable = ref false in
   let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
   let disallow_inst_meth = ref false in
   let disable_enum_classes = ref false in
@@ -612,6 +613,7 @@ let parse_options () =
             set_bool_ everything_sdt ();
             set_bool_ like_type_hints ();
             set_bool_ always_pessimise_return ();
+            set_bool_ consider_type_const_enforceable ();
             set_bool_ enable_supportdyn_hint ();
             set_bool_ pessimise_builtins ()),
         " Enables naive implicit pessimisation" );
@@ -740,6 +742,9 @@ let parse_options () =
       ( "--always-pessimise-return",
         Arg.Set always_pessimise_return,
         " Consider all return types unenforceable." );
+      ( "--consider-type-const-enforceable",
+        Arg.Set consider_type_const_enforceable,
+        " Consider type constants to potentially be enforceable." );
       ( "--disallow-fun-and-cls-meth-pseudo-funcs",
         Arg.Set disallow_fun_and_cls_meth_pseudo_funcs,
         " Disable parsing of fun() and class_meth()." );
@@ -1094,6 +1099,14 @@ let parse_options () =
     if !always_pessimise_return then
       SSet.add
         TypecheckerOptions.experimental_always_pessimise_return
+        tco_experimental_features
+    else
+      tco_experimental_features
+  in
+  let tco_experimental_features =
+    if !consider_type_const_enforceable then
+      SSet.add
+        TypecheckerOptions.experimental_consider_type_const_enforceable
         tco_experimental_features
     else
       tco_experimental_features

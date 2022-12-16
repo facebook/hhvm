@@ -155,35 +155,41 @@ impl EdgesDir {
 }
 
 /// Structure used to read in all edges in parallel.
-///
-/// Basically a shared HashMap+HashSet
 #[derive(Default)]
 struct Edges {
     /// Map<dependency, Set<dependent>>
     edges: DashMap<u64, HashSet<u64>>,
-
-    /// The u64 values stored here are used by DepGraphWriter to build a
-    /// hash-cons table so unique u64 values can be referred to using
-    /// an arbitrary u32 index.
-    hashes: DashSet<u64>,
 }
 
 impl Edges {
     fn register(&self, dependent: u64, dependency: u64) {
-        self.hashes.insert(dependent);
         self.edges.entry(dependency).or_default().insert(dependent);
     }
 
     fn finish(self) -> (Vec<(u64, Vec<u64>)>, Vec<u64>) {
+        // All hashes in use as dependents or dependencies.
+        //
+        // It's easy to collect this without a DashSet, using fold() and reduce() below, but it
+        // would create a very large HashSet in use in each thread at the same time, before they
+        // get merged, and consume way too much memory.
+        let hashes = DashSet::with_capacity_and_hasher(self.edges.len(), Default::default());
+
+        // Collect up all hashes and sorted edge lists.
         let edges = (self.edges.into_par_iter())
             .map(|(dependency, dependents)| {
-                self.hashes.insert(dependency);
                 let mut dependents: Vec<_> = dependents.into_iter().collect();
                 dependents.sort_unstable();
+
+                hashes.insert(dependency);
+                for &d in dependents.iter() {
+                    hashes.insert(d);
+                }
+
                 (dependency, dependents)
             })
             .collect();
-        let mut hashes: Vec<u64> = self.hashes.into_iter().collect();
+
+        let mut hashes: Vec<u64> = hashes.into_iter().collect();
         hashes.par_sort_unstable();
         (edges, hashes)
     }

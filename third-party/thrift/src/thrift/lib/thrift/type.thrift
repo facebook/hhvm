@@ -17,7 +17,6 @@
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/hack.thrift"
 include "thrift/annotation/thrift.thrift"
-include "thrift/lib/thrift/standard.thrift"
 include "thrift/lib/thrift/type_rep.thrift"
 
 cpp_include "<thrift/lib/cpp2/type/BaseType.h>"
@@ -82,16 +81,6 @@ enum BaseTypeEnum {
   Set = 15,
   Map = 16,
 }
-
-/**
- * A 'normal' Duration.
- *
- * This representation is always safe to 'normalize' or 'saturate' at
- * +/-infinite time, instead of overflowing.
- */
-// TODO(afuller): Provide const definitions for +/-infinite time.
-@thrift.Experimental // TODO(afuller): Adapt!
-typedef standard.DurationStruct Duration (thrift.uri = "")
 
 @cpp.Adapter{
   name = "::apache::thrift::InlineAdapter<::apache::thrift::type::Protocol>",

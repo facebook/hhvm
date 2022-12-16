@@ -339,6 +339,14 @@ MCROUTER_OPTION_STRING(
     no_short,
     "The service identity of the destination service when SSL is used")
 
+MCROUTER_OPTION_OTHER(
+    std::vector<std::string>,
+    additional_ssl_service_identities,
+    ,
+    "additional-ssl-service-identities",
+    no_short,
+    "Additional service identities of the destination service when SSL is used (comma separated)")
+
 MCROUTER_OPTION_TOGGLE(
     ssl_service_identity_authorization_log,
     false,

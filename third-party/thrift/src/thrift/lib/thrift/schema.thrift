@@ -146,7 +146,6 @@ struct DefinitionAttrs {
    *  - Protocols deprecated in v1+, e.g. JSON and SimpleJson.
    */
   // TODO(afuller): Support aliases to help with renaming.
-  @api.Immutable
   @api.Unique
   1: string name;
 
@@ -255,7 +254,6 @@ struct Field {
    *
    * Changing the field ID is always backward *incompatible*.
    */
-  @api.Immutable
   @api.Unique
   1: id.FieldId id;
 

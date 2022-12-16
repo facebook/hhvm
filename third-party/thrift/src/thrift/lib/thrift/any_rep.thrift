@@ -48,7 +48,6 @@ struct AnyStruct {
    *
    * Must not be empty.
    */
-  @api.Immutable
   1: type.Type type;
 
   /**
@@ -56,7 +55,6 @@ struct AnyStruct {
    *
    * Must not be empty.
    */
-  @api.Immutable
   2: type.Protocol protocol;
 
   /** The encoded data. */

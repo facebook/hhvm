@@ -235,9 +235,7 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
     hqParams.protocol = FLAGS_protocol;
     hqParams.supportedAlpns = {hqParams.protocol};
   } else {
-    hqParams.supportedAlpns = {"h1q-fb",
-                               "h1q-fb-v2",
-                               proxygen::kH3,
+    hqParams.supportedAlpns = {proxygen::kH3,
                                proxygen::kHQ,
                                proxygen::kH3FBCurrentDraft,
                                proxygen::kH3CurrentDraft,

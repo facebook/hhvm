@@ -345,3 +345,12 @@ impl From<PathBuf> for NameOnly {
         }
     }
 }
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct NoField {}
+
+impl QueryFieldList for NoField {
+    fn field_list() -> Vec<&'static str> {
+        vec![]
+    }
+}

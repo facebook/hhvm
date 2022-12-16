@@ -31,14 +31,18 @@ std::vector<double> WeightedChHashFuncBase::parseWeights(
       << "WeightedChHashFunc: CONFIG IS BROKEN!!! number of weights ("
       << jWeights.size() << ") is smaller than number of servers (" << n
       << "). Missing weights are set to 0.5";
-  for (size_t i = 0; i < std::min(n, jWeights.size()); ++i) {
-    const auto& weight = jWeights[i];
+  size_t i = 0;
+  for (const auto& weight : jWeights) {
+    if (i == n) {
+      break;
+    }
     checkLogic(weight.isNumber(), "WeightedChHashFunc: weight is not number");
     const auto weightNum = weight.asDouble();
     checkLogic(
         0 <= weightNum && weightNum <= 1.0,
         "WeightedChHashFunc: weight must be in range [0, 1.0]");
     weights.push_back(weightNum);
+    ++i;
   }
   weights.resize(n, 0.5);
   return weights;

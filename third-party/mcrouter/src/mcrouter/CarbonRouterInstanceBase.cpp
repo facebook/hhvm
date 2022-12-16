@@ -215,15 +215,15 @@ int32_t CarbonRouterInstanceBase::getStatsEnabledPoolIndex(
   // Do sequential search for longest matching name. Since this is done
   // only once during the initialization and the size of the array is
   // expected to be small, linear search should be OK.
-  for (size_t i = 0; i < statsEnabledPools_.size(); i++) {
-    if (poolName.subpiece(0, statsEnabledPools_[i].length())
-            .compare(statsEnabledPools_[i]) == 0) {
+  size_t i = 0;
+  for (const auto& s : statsEnabledPools_) {
+    if (poolName.subpiece(0, s.length()).compare(s) == 0) {
       if ((longestPrefixMatchIndex == -1) ||
-          (statsEnabledPools_[longestPrefixMatchIndex].length() <
-           statsEnabledPools_[i].length())) {
+          (statsEnabledPools_[longestPrefixMatchIndex].length() < s.length())) {
         longestPrefixMatchIndex = i;
       }
     }
+    ++i;
   }
 
   return longestPrefixMatchIndex;

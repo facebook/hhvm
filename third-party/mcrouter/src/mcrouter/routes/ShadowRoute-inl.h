@@ -103,7 +103,8 @@ makeShadowRoutes(
           e.what());
     }
   }
-  for (size_t i = 0; i < children.size(); ++i) {
+  size_t i = 0;
+  for (auto& child : children) {
     ShadowData<RouterInfo> childrenShadows;
     for (const auto& shadowData : data) {
       if ((shadowData.second->startIndex() <= i &&
@@ -114,12 +115,10 @@ makeShadowRoutes(
     }
     if (!childrenShadows.empty()) {
       childrenShadows.shrink_to_fit();
-      children[i] = extraProvider.makeShadow(
-          proxy,
-          std::move(children[i]),
-          std::move(childrenShadows),
-          shadowPolicy);
+      child = extraProvider.makeShadow(
+          proxy, std::move(child), std::move(childrenShadows), shadowPolicy);
     }
+    ++i;
   }
   return children;
 }

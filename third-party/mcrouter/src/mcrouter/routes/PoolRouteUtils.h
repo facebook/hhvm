@@ -85,9 +85,9 @@ std::vector<typename RouterInfo::RouteHandlePtr> wrapPoolDestinations(
           slowWarmUpSettings = std::make_shared<SlowWarmUpRouteSettings>();
         }
 
-        for (size_t i = 0; i < destinations.size(); ++i) {
-          destinations[i] = makeSlowWarmUpRoute<RouterInfo>(
-              std::move(destinations[i]), failoverTarget, slowWarmUpSettings);
+        for (auto& destination : destinations) {
+          destination = makeSlowWarmUpRoute<RouterInfo>(
+              std::move(destination), failoverTarget, slowWarmUpSettings);
         }
       }
 

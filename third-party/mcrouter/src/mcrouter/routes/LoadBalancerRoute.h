@@ -134,7 +134,8 @@ class LoadBalancerRoute {
     // Reset expried loads.
     const int64_t now = nowUs();
     auto loadMedian = getLoadComplementsMedian();
-    for (size_t i = 0; i < children_.size(); i++) {
+    size_t i = 0;
+    for (FOLLY_MAYBE_UNUSED const auto& v : children_) {
       if (expTimes_[i].count() != 0 && expTimes_[i].count() <= now) {
         expTimes_[i] = std::chrono::microseconds(0);
         loadComplements_[i] = loadMedian;
@@ -142,6 +143,7 @@ class LoadBalancerRoute {
           ctx->proxy().stats().increment(load_balancer_load_reset_count_stat);
         }
       }
+      ++i;
     }
 
     return reply;

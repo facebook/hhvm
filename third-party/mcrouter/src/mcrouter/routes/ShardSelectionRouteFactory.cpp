@@ -27,8 +27,7 @@ std::vector<size_t> parseShardsJsonArray(const folly::dynamic& shardsJson) {
   std::vector<size_t> shards;
   shards.reserve(shardsJson.size());
 
-  for (size_t j = 0; j < shardsJson.size(); ++j) {
-    const auto& shardIdJson = shardsJson[j];
+  for (const auto& shardIdJson : shardsJson) {
     checkLogic(
         shardIdJson.isInt(),
         "ShardSelectionRoute: 'shards' property expected to be an "
@@ -72,8 +71,8 @@ std::vector<std::vector<size_t>> parseAllShardsJson(
   std::vector<std::vector<size_t>> allShards;
   allShards.reserve(allShardsJson.size());
 
-  for (size_t i = 0; i < allShardsJson.size(); ++i) {
-    const auto& shardsJson = allShardsJson[i];
+  size_t i = 0;
+  for (const auto& shardsJson : allShardsJson) {
     if (shardsJson.isArray()) {
       allShards.push_back(parseShardsJsonArray(shardsJson));
     } else if (shardsJson.isString()) {
@@ -84,6 +83,7 @@ std::vector<std::vector<size_t>> parseAllShardsJson(
           "string of comma-separated shard ids.",
           i);
     }
+    ++i;
   }
 
   return allShards;

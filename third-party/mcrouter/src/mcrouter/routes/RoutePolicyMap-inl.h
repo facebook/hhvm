@@ -57,8 +57,8 @@ RoutePolicyMap<RouteHandleIf>::RoutePolicyMap(
   // Trie with aggregated policies from all clusters
   Trie<std::vector<std::pair<size_t, std::shared_ptr<RouteHandleIf>>>> t;
 
-  for (size_t clusterId = 0; clusterId < clusters.size(); ++clusterId) {
-    auto& policy = clusters[clusterId];
+  size_t clusterId = 0;
+  for (auto& policy : clusters) {
     wildcards.push_back(policy->wildcard);
 
     for (auto& it : policy->policies) {
@@ -70,6 +70,7 @@ RoutePolicyMap<RouteHandleIf>::RoutePolicyMap(
         t.emplace(it.first, {clusterHandlePair});
       }
     }
+    ++clusterId;
   }
 
   ut_.emplace("", std::move(wildcards));

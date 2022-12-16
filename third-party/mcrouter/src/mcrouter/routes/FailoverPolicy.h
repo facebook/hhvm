@@ -915,8 +915,9 @@ class FailoverLeastFailuresPolicy {
  private:
   std::vector<size_t> getLeastFailureRouteIndices() const {
     std::vector<size_t> indices;
-    indices.reserve(recentErrorCount_.size());
-    for (size_t i = 0; i < recentErrorCount_.size(); ++i) {
+    size_t sz = recentErrorCount_.size();
+    indices.reserve(sz);
+    for (size_t i = 0; i < sz; i++) {
       indices.push_back(i);
     }
     // 0th index always goes first.

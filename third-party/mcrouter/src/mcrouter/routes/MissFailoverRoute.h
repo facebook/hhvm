@@ -95,7 +95,7 @@ class MissFailoverRoute {
     return fiber_local<RouterInfo>::runWithLocals(
         [this, &req, bestReply = std::move(reply)]() mutable {
           fiber_local<RouterInfo>::addRequestClass(RequestClass::kFailover);
-          for (size_t i = 1; i < targets_.size(); ++i) {
+          for (size_t i = 1, s = targets_.size(); i < s; ++i) {
             auto failoverReply = targets_[i]->route(req);
             if (!shouldFailover(*failoverReply.result_ref())) {
               return failoverReply;

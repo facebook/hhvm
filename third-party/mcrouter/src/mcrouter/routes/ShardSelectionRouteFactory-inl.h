@@ -155,9 +155,9 @@ MapType getShardsMap(const folly::dynamic& json, size_t numDestinations) {
       prepareMap<MapType>(allShards.size(), getMaxShardId(allShards));
 
   // We don't need to validate here, as it was validated before.
-  for (size_t i = 0; i < allShards.size(); ++i) {
-    for (size_t j = 0; j < allShards[i].size(); ++j) {
-      size_t shard = allShards[i][j];
+  size_t i = 0;
+  for (const auto& vecShard : allShards) {
+    for (const auto& shard : vecShard) {
       if (!containsShard(shardsMap, shard)) {
         shardsMap[shard] = i;
       } else {
@@ -167,6 +167,7 @@ MapType getShardsMap(const folly::dynamic& json, size_t numDestinations) {
         }
       }
     }
+    ++i;
   }
 
   return shardsMap;
@@ -210,8 +211,9 @@ ShardDestinationsMap<RouterInfo> getShardDestinationsMap(
       continue;
     }
 
-    for (size_t j = 0; j < shardsJson.size(); j++) {
-      for (auto shard : parseShardsPerServerJson(shardsJson[j])) {
+    size_t j = 0;
+    for (const auto& v : shardsJson) {
+      for (const auto& shard : parseShardsPerServerJson(v)) {
         auto rh = destinations[j];
         auto it = shardMap.find(shard);
         if (it == shardMap.end()) {
@@ -223,6 +225,7 @@ ShardDestinationsMap<RouterInfo> getShardDestinationsMap(
         }
         it->second.push_back(std::move(rh));
       }
+      ++j;
     }
   }
   for (auto& it : shardMap) {

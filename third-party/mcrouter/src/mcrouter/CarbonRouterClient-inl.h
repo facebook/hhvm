@@ -122,11 +122,13 @@ bool CarbonRouterClient<RouterInfo>::sendMultiImpl(
       proxies_[proxyIdx_]->messageQueue_->notifyRelaxed();
     } else {
       assert(mode_ == ThreadMode::AffinitizedRemoteThread);
-      for (size_t i = 0; i < proxies_.size(); ++i) {
+      size_t i = 0;
+      for (const auto& p : proxies_) {
         if (proxiesToNotify_[i]) {
-          proxies_[i]->messageQueue_->notifyRelaxed();
+          p->messageQueue_->notifyRelaxed();
           proxiesToNotify_[i] = false;
         }
+        ++i;
       }
     }
   };

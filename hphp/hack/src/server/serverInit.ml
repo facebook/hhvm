@@ -51,11 +51,11 @@ let save_state
     ) else
       true
   in
-  if not do_save_state then
-    None
-  else
+  if do_save_state then
     let result = SaveStateService.save_state genv env output_filename in
     Some result
+  else
+    None
 
 let post_init genv (env, t) =
   let (env, _t) = ServerAiInit.ai_check genv env.naming_table env t in

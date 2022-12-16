@@ -66,7 +66,7 @@ ocamlrep_ocamlpool::ocaml_ffi! {
     fn hh_fanout_ffi_make(_fanout_state_dir: PathBuf, _decl_state_dir: PathBuf) -> Custom<HhFanoutRustFfi> {
         unimplemented!()
     }
-    fn hh_fanout_ffi_make_hhdg_builder(builder_state_dir: PathBuf) -> Custom<HhFanoutRustFfi> {
+    fn hh_fanout_ffi_make_hhdg_builder(_builder_state_dir: PathBuf) -> Custom<HhFanoutRustFfi> {
         unimplemented!()
     }
     fn hh_fanout_ffi_add_idep_batch(_hh_fanout: Custom<HhFanoutRustFfi>, _edges: Vec<(u64, u64)>) {

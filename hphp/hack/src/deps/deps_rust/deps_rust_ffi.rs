@@ -247,7 +247,7 @@ ocaml_ffi! {
     }
 
     fn hh_custom_dep_graph_dep_graph_delta_num_edges() -> usize {
-        dep_graph_delta_with(|s| s.num_edges())
+        dep_graph_delta_with(|s| s.len())
     }
 
     fn hh_custom_dep_graph_save_delta(dest: OsString, reset_state_after_saving: bool) -> usize {

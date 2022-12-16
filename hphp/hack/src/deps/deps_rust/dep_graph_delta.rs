@@ -64,8 +64,12 @@ impl DepGraphDelta {
     }
 
     /// Return the number of edges in the dep graph delta.
-    pub fn num_edges(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.num_edges
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.num_edges == 0
     }
 
     /// Write all edges in the delta to the writer in a custom format.

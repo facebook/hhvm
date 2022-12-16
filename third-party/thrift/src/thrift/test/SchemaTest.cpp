@@ -172,9 +172,12 @@ static void verify_void_return(
 
 TEST(SchemaTest, EmptyService) {
   auto schema = schema_constants::schemaEmptyService();
-  EXPECT_EQ(*schema.name(), "EmptyService");
-  EXPECT_EQ(*schema.uri(), "facebook.com/thrift/test/schema/EmptyService");
-  EXPECT_TRUE(schema.functions()->empty());
+  EXPECT_EQ(schema.definitions()->size(), 1);
+
+  auto svc_schema = schema.definitions()->at(0).get_serviceDef();
+  EXPECT_EQ(*svc_schema.name(), "EmptyService");
+  EXPECT_EQ(*svc_schema.uri(), "facebook.com/thrift/test/schema/EmptyService");
+  EXPECT_TRUE(svc_schema.functions()->empty());
 }
 
 TEST(SchemaTest, IntConst) {
@@ -215,19 +218,32 @@ TEST(SchemaTest, ListConst) {
 
 TEST(SchemaTest, TestService) {
   auto schema = schema_constants::schemaTestService();
-  EXPECT_EQ(*schema.name(), "TestService");
-  EXPECT_EQ(*schema.uri(), "facebook.com/thrift/test/schema/TestService");
-  EXPECT_EQ(schema.functions()->size(), 4);
+  EXPECT_EQ(schema.definitions()->size(), 4);
+
+  auto ex_schema = schema.definitions()->at(0).get_exceptionDef();
+  EXPECT_EQ(*ex_schema.name(), "NonSchematizedException");
+
+  auto struct_schema = schema.definitions()->at(1).get_structDef();
+  EXPECT_EQ(*struct_schema.name(), "NonSchematizedStruct");
+
+  auto union_schema = schema.definitions()->at(2).get_unionDef();
+  EXPECT_EQ(*union_schema.name(), "NonSchematizedUnion");
+
+  auto svc_schema = schema.definitions()->at(3).get_serviceDef();
+
+  EXPECT_EQ(*svc_schema.name(), "TestService");
+  EXPECT_EQ(*svc_schema.uri(), "facebook.com/thrift/test/schema/TestService");
+  EXPECT_EQ(svc_schema.functions()->size(), 4);
 
   verify_function(
-      schema.functions()->at(0),
+      svc_schema.functions()->at(0),
       "noParamsNoReturnNoEx",
       nullptr,
       nullptr,
       &verify_void_return);
 
   verify_function(
-      schema.functions()->at(1),
+      svc_schema.functions()->at(1),
       "noParamsPrimitiveReturnNoEx",
       nullptr,
       nullptr,
@@ -243,7 +259,7 @@ TEST(SchemaTest, TestService) {
       });
 
   verify_function(
-      schema.functions()->at(2),
+      svc_schema.functions()->at(2),
       "primitiveParamsNoReturnEx",
       [](facebook::thrift::type::Paramlist& params) {
         auto fields = params.fields();
@@ -273,7 +289,7 @@ TEST(SchemaTest, TestService) {
       &verify_void_return);
 
   verify_function(
-      schema.functions()->at(3),
+      svc_schema.functions()->at(3),
       "unionParamStructReturnNoEx",
       [](facebook::thrift::type::Paramlist& params) {
         auto fields = params.fields();

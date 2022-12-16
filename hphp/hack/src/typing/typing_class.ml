@@ -328,11 +328,10 @@ let method_def ~is_disposable env cls m =
   let (env, e2) = Typing_solver.solve_all_unsolved_tyvars env in
 
   (* if the enclosing class method is annotated with
-   * <<__SupportDynamicType>>, check that the method is dynamically callable *)
+   * <<__SupportDynamicType>>, check that the method is dynamically callable.
+   * TODO: consider making private methods non-SDT. *)
   let check_support_dynamic_type =
-    (not env.inside_constructor)
-    && Env.get_support_dynamic_type env
-    && not (Aast.equal_visibility m.m_visibility Private)
+    (not env.inside_constructor) && Env.get_support_dynamic_type env
   in
   if
     TypecheckerOptions.enable_sound_dynamic

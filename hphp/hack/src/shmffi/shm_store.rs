@@ -9,11 +9,11 @@ use std::alloc::Layout;
 use std::borrow::Borrow;
 use std::borrow::Cow;
 use std::hash::Hash;
-use std::hash::Hasher;
 use std::io::Read;
 use std::io::Write;
 
 use anyhow::Result;
+use md5::Digest;
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
@@ -68,10 +68,11 @@ where
     }
 
     fn hash_key(&self, key: K) -> u64 {
-        let mut hasher = hash::Hasher::default();
-        self.prefix.hash(&mut hasher);
+        let mut hasher = md5::Md5::new();
+        hasher.update(self.prefix);
         key.hash_key(&mut hasher);
-        hasher.finish()
+        // hh_shared just takes the first 64 bits of the 128-bit MD5 digest.
+        u64::from_ne_bytes((&hasher.finalize()[0..8]).try_into().unwrap())
     }
 
     #[rustfmt::skip]
@@ -288,60 +289,60 @@ impl<K, V> std::fmt::Debug for ShmStore<K, V> {
 /// `hash_key` must behave the same as `impl Key for [u8]` (which just invokes
 /// `state.write(self)`).
 pub trait Key {
-    fn hash_key<H: Hasher>(&self, state: &mut H);
+    fn hash_key<H: Digest>(&self, state: &mut H);
 }
 
 impl Key for [u8] {
-    fn hash_key<H: Hasher>(&self, state: &mut H) {
-        state.write(self);
+    fn hash_key<H: Digest>(&self, state: &mut H) {
+        state.update(self);
     }
 }
 impl Key for pos::TypeName {
-    fn hash_key<H: Hasher>(&self, state: &mut H) {
-        state.write(self.as_bytes());
+    fn hash_key<H: Digest>(&self, state: &mut H) {
+        state.update(self.as_bytes());
     }
 }
 impl Key for pos::ModuleName {
-    fn hash_key<H: Hasher>(&self, state: &mut H) {
-        state.write(self.as_bytes());
+    fn hash_key<H: Digest>(&self, state: &mut H) {
+        state.update(self.as_bytes());
     }
 }
 impl Key for pos::FunName {
-    fn hash_key<H: Hasher>(&self, state: &mut H) {
-        state.write(self.as_bytes());
+    fn hash_key<H: Digest>(&self, state: &mut H) {
+        state.update(self.as_bytes());
     }
 }
 impl Key for pos::ConstName {
-    fn hash_key<H: Hasher>(&self, state: &mut H) {
-        state.write(self.as_bytes());
+    fn hash_key<H: Digest>(&self, state: &mut H) {
+        state.update(self.as_bytes());
     }
 }
 
 impl<T: AsRef<str>> Key for (pos::TypeName, T) {
-    fn hash_key<H: Hasher>(&self, state: &mut H) {
+    fn hash_key<H: Digest>(&self, state: &mut H) {
         let type_name: &str = self.0.as_ref();
-        type_name.hash(state);
+        state.update(type_name);
         let member_name: &str = self.1.as_ref();
-        member_name.hash(state);
+        state.update(member_name);
     }
 }
 
 impl Key for pos::RelativePath {
-    fn hash_key<H: Hasher>(&self, state: &mut H) {
-        self.prefix().hash(state);
-        self.suffix().as_bytes().hash(state);
+    fn hash_key<H: Digest>(&self, state: &mut H) {
+        state.update([self.prefix() as u8]);
+        state.update(self.suffix());
     }
 }
 
 impl Key for hh24_types::ToplevelSymbolHash {
-    fn hash_key<H: Hasher>(&self, state: &mut H) {
-        self.hash(state);
+    fn hash_key<H: Digest>(&self, state: &mut H) {
+        state.update(self.as_u64().to_ne_bytes())
     }
 }
 
 impl Key for hh24_types::ToplevelCanonSymbolHash {
-    fn hash_key<H: Hasher>(&self, state: &mut H) {
-        self.hash(state);
+    fn hash_key<H: Digest>(&self, state: &mut H) {
+        state.update(self.as_u64().to_ne_bytes())
     }
 }
 
@@ -485,10 +486,11 @@ where
     where
         K: Borrow<Q>,
     {
-        let mut hasher = hash::Hasher::default();
-        self.prefix.hash(&mut hasher);
+        let mut hasher = md5::Md5::new();
+        hasher.update(self.prefix);
         key.hash_key(&mut hasher);
-        hasher.finish()
+        // hh_shared just takes the first 64 bits of the 128-bit MD5 digest.
+        u64::from_ne_bytes((&hasher.finalize()[0..8]).try_into().unwrap())
     }
 
     #[rustfmt::skip]

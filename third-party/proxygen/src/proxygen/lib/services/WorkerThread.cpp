@@ -77,6 +77,8 @@ WorkerThread::WorkerThread(folly::EventBaseManager* eventBaseManager,
   if (!evbName.empty()) {
     eventBase_->setName(evbName);
   }
+
+  LOG(INFO) << "Created WorkerThread " << this << ", evb =  " << evbName;
 }
 
 WorkerThread::~WorkerThread() {

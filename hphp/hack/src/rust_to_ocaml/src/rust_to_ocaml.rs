@@ -69,11 +69,16 @@ fn main() -> Result<()> {
     if !opts.no_header {
         ocaml_src = attach_header(opts.regen_cmd.as_deref(), &ocaml_src);
     }
+    let absolute_filename = opts.filename.canonicalize()?;
     let mut ocaml_src = ocamlformat(
         opts.formatter.as_deref(),
-        opts.out_path.as_deref().and_then(Path::parent),
+        opts.out_path
+            .as_deref()
+            .and_then(Path::parent)
+            .or_else(|| absolute_filename.parent()),
         ocaml_src.into_bytes(),
-    )?;
+    )
+    .context("failed to run ocamlformat")?;
     if !opts.no_header {
         ocaml_src = signed_source::sign_file(&ocaml_src)?;
     }
@@ -130,6 +135,9 @@ fn ocamlformat(
         .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
+        // In the event that an .ocamlformat file is still not available, tell
+        // ocamlformat to please format it anyway.
+        .arg("--enable-outside-detected-project")
         .arg("--impl")
         .arg("-")
         .spawn()?;

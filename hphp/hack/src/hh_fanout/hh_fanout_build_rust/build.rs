@@ -279,7 +279,7 @@ fn extend_edges_from_dep_graph(all_edges: &Edges, graph: &DepGraph<'_>) {
 }
 
 /// Reads all the edges from the edges files in `edges_dir` and collects them in
-/// a list of hashmaps of dependency to its dependents.
+/// a list of (dependency, list of dependents).
 pub fn edges_from_dir(edges_dir: &Path) -> io::Result<Vec<(u64, Vec<u64>)>> {
     let mut edges_dir = EdgesDir::open(edges_dir)?;
     let edges = edges_dir.read_all_edges()?;

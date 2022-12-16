@@ -235,7 +235,7 @@ CmdLineOptions parseCmdLineOptions(int argc, char** argv, std::string pkgName) {
   if (pkgName.empty()) {
     res.packageName = argv[0];
   } else {
-    res.packageName = std::move(pkgName);
+    res.packageName = pkgName;
   }
 
   res.commandArgs = constructArgString(argc, argv);

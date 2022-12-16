@@ -33,26 +33,28 @@ class RequestAclChecker<MemcacheRouterInfo> : public std::true_type {
       ExternalStatsHandler& statsHandler,
       bool requestAclCheckerEnable);
 
-  /*
-   * If the status is REPLIED, the caller in ServerOnRequest.h will stop further
-   * processing of the request.
-   */
-  enum Status { REPLIED = true, NOT_REPLIED = false };
-
   /* Do not apply ACL checks on DELETE */
   template <class Request, class Callback>
-  typename std::
-      enable_if_t<folly::IsOneOf<Request, McDeleteRequest>::value, bool>
-      operator()(Callback&&, Request&&) const {
-    return Status::NOT_REPLIED;
+  bool shouldReply(const Callback& ctx, const Request& req) const {
+    static_assert(
+        !folly::IsOneOf<Request, McDeleteRequest>::value,
+        "RequestAclChecker should not be used for McDeleteRequest");
+    if constexpr (folly::IsOneOf<Request, McExecRequest>::value) {
+      return requestAclCheckerEnable_ &&
+          isRefreshCommand(req.key_ref()->routingKey());
+    } else {
+      return requestAclCheckerEnable_ &&
+          !requestAclCheckCb_(
+                 ctx.getThriftRequestContext(), req.key_ref()->routingKey());
+    }
   }
 
-  /* An exec command to refresh ACL checker */
   template <class Request, class Callback>
-  typename std::enable_if_t<folly::IsOneOf<Request, McExecRequest>::value, bool>
-  operator()(Callback&& ctx, Request&& req) const {
-    if (requestAclCheckerEnable_ &&
-        isRefreshCommand(req.key_ref()->routingKey())) {
+  void reply(Callback&& ctx) const {
+    static_assert(
+        !folly::IsOneOf<Request, McDeleteRequest>::value,
+        "RequestAclChecker should not be used for McDeleteRequest");
+    if constexpr (folly::IsOneOf<Request, McExecRequest>::value) {
       McExecReply reply(carbon::Result::BAD_COMMAND);
       /* Only allow requests from localhost */
       if (isLocalRequest(ctx.getPeerSocketAddress())) {
@@ -64,27 +66,12 @@ class RequestAclChecker<MemcacheRouterInfo> : public std::true_type {
             "Prefix ACL refresh can only be called from localhost";
       }
       Callback::reply(std::forward<Callback>(ctx), std::move(reply));
-      return Status::REPLIED;
-    }
-    return Status::NOT_REPLIED;
-  }
-
-  /* Anything but DELETE and EXEC, apply ACL checks on the key */
-  template <class Request, class Callback>
-  typename std::enable_if_t<
-      !folly::IsOneOf<Request, McDeleteRequest, McExecRequest>::value,
-      bool>
-  operator()(Callback&& ctx, Request&& req) const {
-    if (requestAclCheckerEnable_ &&
-        !requestAclCheckCb_(
-            ctx.getThriftRequestContext(), req.key_ref()->routingKey())) {
+    } else {
       // TODO: Change this error code when T67679592 is done
       auto reply = ReplyT<Request>{carbon::Result::BAD_FLAGS};
       reply.message_ref() = "Permission Denied";
-      Callback::reply(std::move(ctx), std::move(reply));
-      return Status::REPLIED;
+      Callback::reply(std::forward<Callback>(ctx), std::move(reply));
     }
-    return Status::NOT_REPLIED;
   }
 
  private:

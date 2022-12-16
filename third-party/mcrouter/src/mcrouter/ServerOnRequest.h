@@ -140,8 +140,11 @@ class ServerOnRequest {
      * If we don't have an AclChecker specialized
      * for this router, don't bother running Acl checks
      */
-    if constexpr (decltype(aclChecker_)::value) {
-      if (aclChecker_(std::move(ctx), std::move(req))) {
+    if constexpr (
+        decltype(aclChecker_)::value &&
+        !folly::IsOneOf<Request, McDeleteRequest>::value) {
+      if (aclChecker_.shouldReply(ctx, req)) {
+        aclChecker_.template reply<Request>(std::forward<Callback>(ctx));
         return;
       }
     }
